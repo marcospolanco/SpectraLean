@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Lean
+      uses: leanprover/lean-action@v1
+      with:
+        lake: true
+
+    - name: Cache mathlib
+      run: lake exe cache get
+
+    - name: Build project
+      run: lake build
+
+    - name: Check for sorry in public API
+      run: |
+        ! grep -r "sorry" Scaffold/Mathlib/ || \
+          (echo "Error: 'sorry' found in public API (Scaffold/Mathlib/)" && exit 1)
+
+    - name: Check for axioms in wrong location
+      run: |
+        ! grep -r "^axiom" Scaffold/Trusted/ || \
+          (echo "Warning: 'axiom' found in Trusted directory (should use theorem := by sorry)" && exit 1)
+
+  lint:
+    name: Lint Axiom Citations
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Check new axioms have citations
+      run: |
+        # Check that all axioms have proper doc comments with Source: information
+        ./scripts/check_citations.py || true
+
+    - name: Check index files are updated
+      run: |
+        # Warn if index files haven't been updated for axiom additions
+        ./scripts/lint_axioms.py || true

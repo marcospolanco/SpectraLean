@@ -84,6 +84,19 @@ All statements proved (2026-08-17), no axioms:
 | `walkTransitionMatrix_row_sum` | row-stochasticity on irregular graphs (positive degrees) |
 | `degreeSqrt_mul_walkLaplacian_mul_degreeInvSqrt` | similarity `√D · L_walk · (1/√D) = L_sym` |
 
+### `Scaffold.Mathlib.GraphTheory.Stationary` (first walk/normalized consumer)
+
+All statements proved (2026-08-17), no axioms; consumes the `RandomWalk`
+and `Normalized` interfaces — demonstrated downstream reuse:
+
+| Declaration | Content |
+|-------------|---------|
+| `mulVec_one_eq_deg` | `A *ᵥ 1 = deg A` (row sums in vector form) |
+| `normalizedLaplacian_mulVec_sqrtDeg_eq_zero` | kernel of `L_sym` is `√deg` — normalized counterpart of `laplacian_ones_in_kernel` |
+| `walkTransitionMatrix_transpose_mulVec_deg` | degree measure stationary for the adjoint walk (`π ∝ deg`; Markov-mixing consumer interface) |
+| `randomWalkLaplacian_mulVec_one_eq_zero` | conservation of mass, regular case (consumes `RandomWalk.transitionMatrix_row_sum`) |
+| `walkLaplacian_mulVec_one_eq_zero` | conservation of mass, irregular case (consumes `Normalized.walkTransitionMatrix_row_sum`) |
+
 ### `Scaffold.Mathlib.GraphTheory.Dynamics` (dynamic frontier)
 
 Real definitions: `TimeVaryingGraph`, `laplacianSequence`,

@@ -93,8 +93,27 @@ roadmap driver.
 Dirichlet/functional inequalities, dissipation. No admission before the
 Markov prerequisites are stable.
 
+### 7. Combinatorial and electrical structure (radar-driven candidate)
+
+*Radar finding (2026-08-17, [SGT Radar](7_SGT_RADAR.md)):* this axis
+scores 0.5 — entirely absent (effective resistance, spanning-tree
+enumeration, Kirchhoff identities). Candidate first slice: the
+transfer-impedance/Multiplicity-Tree statement shape, which consumes the
+already-proved Laplacian adjugate-adjacent infrastructure. **Gated:**
+admit or define nothing here until a named consumer states which
+identity it needs (per the center-out policy, adjacency alone does not
+justify admission).
+
 ## Standing decisions
 
+- Coverage is assessed on the [SGT Radar](7_SGT_RADAR.md); scores move
+  only with usable, verified coverage and are recorded with the causing
+  milestone. Downstream reuse reached 3.5 on 2026-08-17
+  (`GraphTheory.Stationary` consumes both `Normalized` and `RandomWalk`);
+  the constraint is now breadth of reuse. Named future consumer
+  candidate: spectral transfer `evals (c • M) = c • evals M` (requires
+  excavation through Mathlib's `irreducible_def` eigenspace
+  decomposition).
 - The per-step `spectral_persistence` axiom was **deprecated
   2026-08-17** (decision closed): zero non-QA consumers, motivating use
   covered by the derived two-endpoint chain. Retained through the

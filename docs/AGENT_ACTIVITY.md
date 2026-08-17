@@ -736,3 +736,184 @@ algorithm consumers.
 
 **Next handoff:** remaining backlog item 3 variants with named
 consumers, or the backlog item 4 gating review (spectral algorithms).
+
+## 2026-08-17T21:09:41Z — SGT coverage radar (operator direction)
+
+**Run:** `20260817T210736Z-run-1`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** in-progress  
+**Milestone:** Deliver the operator-directed coverage assessment from
+`cdx-sgt-radar-axes.md`: two radars — eight subject axes and a separate
+assurance-quality radar — scored by usable, verified coverage rather
+than declaration count, each score justified by named declarations with
+their proved/admitted/absent status.
+
+Method: evidence-first scoring against the current tree (18 explicit
+axioms, 107 QA declarations, proved/admitted status per module); the
+weakest axes feed the backlog (subject axis 6 — combinatorial and
+electrical structure — is entirely absent; assurance-side downstream
+reuse is weakest since RandomWalk/Normalized lack consumers). Deliverable
+`docs/7_SGT_RADAR.md` plus backlog/README integration; no Lean changes,
+verification via the doc-hygiene suite.
+
+## 2026-08-17T21:11:09Z — SGT coverage radar delivered
+
+**Run:** `20260817T210736Z-run-1`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** completed  
+**Milestone:** Deliver the operator-directed coverage assessment
+(`cdx-sgt-radar-axes.md`): two radars — eight subject axes and a
+separate assurance-quality radar — scored by usable, verified coverage,
+each score justified by named declarations with proved/admitted/absent
+status.
+
+**Changes:** new `docs/7_SGT_RADAR.md` (linked from the README
+canonical-docs list): subject scores — models 2.5, spectral algebra 3.5,
+variational 2.5, cuts/expansion 2.5, walks 2.5, electrical 0.5,
+perturbation/randomness 3.0, adjacent systems 1.0; assurance scores —
+proved depth 3.5, axiom minimization 3.5 (26 → 19 → 18 trend),
+Mathlib interop 3.5, QA 3.0 (skews degenerate-case), citation fidelity
+3.5, downstream reuse 2.5 (RandomWalk/Normalized unconsumed). Includes
+weakest-axis findings and a re-scoring protocol (scores move only with
+usable, verified coverage, recorded with the causing milestone).
+Backlog: new gated candidate item 7 (combinatorial/electrical structure
+— axis entirely absent, admission deferred until a named consumer
+states the identity it needs) and a downstream-reuse standing decision.
+No Lean changes.
+
+**Decisive commands and outcomes:** axiom inventory re-verified by grep
+(18 explicit, including the deprecated one) before scoring;
+`generate_qa_scoreboard.py`, `lint_axioms.py`, `check_citations.py`,
+`check_markdown_links.py` all pass; scoreboard metrics unchanged (107
+QA declarations, 0 `sorry`/`admit`).
+
+**Verification:** doc-only change; every score's cited declarations
+exist in the current tree.
+
+**Trust boundary:** unchanged; the radar explicitly labels which
+neighborhoods rest on admitted statements.
+
+**Remaining risk:** scores are judgment calls over cited evidence; the
+re-scoring protocol constrains drift, and milestone entries must record
+future changes.
+
+**Next handoff:** radar-driven next milestone — the first downstream
+consumer for the walk/normalized interfaces (weakest assurance axis),
+or remaining backlog item 3 variants with named consumers.
+
+## 2026-08-17T21:13:57Z — Stationary structure (first walk/normalized consumer)
+
+**Run:** `20260817T211135Z-run-2`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** in-progress  
+**Milestone:** Close the radar's weakest assurance axis (downstream
+reuse): the first module consuming the `RandomWalk`/`Normalized`
+interfaces — the stationary-structure theorems, proved from the bridge
+lemmas. No new axioms.
+
+Content: `L_sym *ᵥ √deg = 0` (kernel of the general normalized
+Laplacian) and `Pᵀ *ᵥ deg = deg` (the degree measure is stationary for
+the walk — `π ∝ deg` is the stationary distribution, the Markov-mixing
+consumer interface). Both reduce to the diagonal algebra plus
+`A *ᵥ 1 = deg`.
+
+## 2026-08-17T21:16:50Z — Stationary structure delivered (reuse gap closing)
+
+**Run:** `20260817T211135Z-run-2`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** completed  
+**Milestone:** Close the radar's weakest assurance axis (downstream
+reuse): `Scaffold.Mathlib.GraphTheory.Stationary`, the first module
+consuming the walk/normalized interfaces. Pure hard crust, no new
+axioms.
+
+**Changes:** new `GraphTheory.Stationary` (imports `Normalized`):
+`mulVec_one_eq_deg` (`A *ᵥ 1 = deg`, row sums in vector form),
+`normalizedLaplacian_mulVec_sqrtDeg_eq_zero` (kernel of the general
+normalized Laplacian is `√deg` — the normalized counterpart of the
+combinatorial `laplacian_ones_in_kernel`, proved through the
+`degreeInvSqrt` diagonal algebra), and
+`walkTransitionMatrix_transpose_mulVec_deg` (`Pᵀ *ᵥ deg = deg`: the
+degree measure is stationary for the walk, i.e. `π ∝ deg` — the named
+Markov-mixing consumer interface). New QA
+`SpectralGraph/Stationary_QA.lean` (6 declarations) at the 3-vertex
+path, including a fully computed center kernel entry. Umbrella, SGT
+index map, scoreboard, and README updated. SGT radar downstream-reuse
+score re-scored 2.5 → 3.0 with the causing milestone recorded per the
+radar's protocol; backlog standing decision updated (remaining reuse
+gap: `RandomWalk`'s regular-case bridges).
+
+**Decisive commands and outcomes:** direct builds of
+`Scaffold.Mathlib.GraphTheory.Stationary` and
+`Scaffold.QA.SpectralGraph.Stationary_QA` pass; full `lake build`
+passes; all four hygiene scripts pass.
+
+**Verification:** 116 QA declarations (up from 107), zero `sorry`/`admit`
+under `Scaffold/`, 18 explicit cited axioms (unchanged).
+
+**Trust boundary:** unchanged; hard crust only.
+
+**Remaining risk:** none new; `RandomWalk`'s regular bridges remain
+unconsumed outside QA (noted in backlog standing decisions).
+
+**Next handoff:** a consumer for `RandomWalk`'s regular bridges (e.g. a
+regular-graph Cheeger consequence restated through the walk view), or
+remaining backlog item 3 variants with named consumers.
+
+## 2026-08-17T21:19:52Z — Walk-Laplacian kernel (RandomWalk consumer)
+
+**Run:** `20260817T211717Z-run-3`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** in-progress  
+**Milestone:** Close the remaining reuse gap: make `Stationary` the
+demonstrated consumer of `RandomWalk` as well as `Normalized`, via the
+walk-Laplacian kernel facts `(I − P) *ᵥ 1 = 0` (regular and irregular
+variants) — conservation of mass, the base statement of diffusion and
+mixing arguments.
+
+Scoping evidence: the heavier spectral-transfer consumer
+(`evals (c • M) = c • evals M`) requires excavation through Mathlib's
+`irreducible_def` eigenspace decomposition; recorded as a named backlog
+candidate rather than attempted speculatively.
+
+## 2026-08-17T21:22:27Z — RandomWalk consumer delivered; reuse axis closed
+
+**Run:** `20260817T211717Z-run-3`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** completed  
+**Milestone:** Close the remaining downstream-reuse gap:
+`GraphTheory.Stationary` extended to consume `RandomWalk` in addition
+to `Normalized`, via the walk-Laplacian kernel (conservation-of-mass)
+facts. Pure hard crust, no new axioms.
+
+**Changes:** `Stationary` now imports `RandomWalk` and proves
+`randomWalkLaplacian_mulVec_one_eq_zero` (regular case; consumes
+`RandomWalk.transitionMatrix_row_sum`) and
+`walkLaplacian_mulVec_one_eq_zero` (irregular case; consumes
+`Normalized.walkTransitionMatrix_row_sum`) — both the statement
+`(I − P) *ᵥ 1 = 0`, total probability preserved by each walk step.
+QA extended (119 declarations total): the irregular path and the
+regular edge instantiate the two variants. Radar: downstream reuse
+re-scored 3.0 → 3.5 (recorded per protocol); the weakest assurance
+axis is now QA depth (3.0, degenerate-case skew). Backlog records the
+named future consumer candidate (`evals (c • M) = c • evals M`,
+gated on Mathlib's `irreducible_def` eigenspace excavation). SGT index
+map, scoreboard, and README updated.
+
+**Decisive commands and outcomes:** direct builds of
+`Scaffold.Mathlib.GraphTheory.Stationary` and
+`Scaffold.QA.SpectralGraph.Stationary_QA` pass; full `lake build`
+passes; all four hygiene scripts pass.
+
+**Verification:** 119 QA declarations (up from 116), zero `sorry`/`admit`
+under `Scaffold/`, 18 explicit cited axioms (unchanged).
+
+**Trust boundary:** unchanged; hard crust only.
+
+**Remaining risk:** `Stationary` is the sole consumer of both interface
+modules — breadth of reuse is the new constraint, not existence.
+
+**Next handoff:** breadth consumers (second consuming module, e.g.
+variational Rayleigh bounds through the congruence bridge), the QA
+assurance lever (property-based/falsification QA), or backlog item 3
+variants with named consumers.

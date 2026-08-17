@@ -14,7 +14,7 @@ _Generated from Lean source on 2026-08-17._
 
 | Metric | Count |
 | --- | ---: |
-| QA theorem/lemma declarations | 107 |
+| QA theorem/lemma declarations | 119 |
 | `sorry`/`admit` tokens in QA code | 0 |
 | Explicit axioms in `Scaffold/Mathlib` | 18 |
 | `sorry`/`admit` tokens in `Scaffold/Mathlib` code | 0 |
@@ -26,7 +26,7 @@ _Generated from Lean source on 2026-08-17._
 | Concentration | 12 |
 | Derived | 11 |
 | Perturbation | 5 |
-| SpectralGraph | 79 |
+| SpectralGraph | 91 |
 
 ### QA files
 
@@ -47,6 +47,7 @@ _Generated from Lean source on 2026-08-17._
 | `Scaffold/QA/SpectralGraph/Normalized_QA.lean` | 14 | 0 |
 | `Scaffold/QA/SpectralGraph/Projector_QA.lean` | 5 | 0 |
 | `Scaffold/QA/SpectralGraph/RandomWalk_QA.lean` | 7 | 0 |
+| `Scaffold/QA/SpectralGraph/Stationary_QA.lean` | 12 | 0 |
 | `Scaffold/QA/SpectralGraph/Variational_QA.lean` | 5 | 0 |
 <!-- END GENERATED SOURCE METRICS -->
 
@@ -55,8 +56,8 @@ _Generated from Lean source on 2026-08-17._
 | Check | Result | Date | Scope and limitation |
 | --- | --- | --- | --- |
 | `lake build` | Pass | 2026-08-17 | Default target is the library root `Scaffold.lean`; its umbrella certifies `Core.{RandomVariable,Norms,MatrixUpdates}`, `GraphTheory.{Spectral,Cheeger,RandomWalk,Normalized,Dynamics}`, `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan}`, `Probability.Concentration.{Scalar.*,Matrix.*}`, and the derived layer `Derived.{EventStream,ProjectorDrift}`. |
-| Direct QA module targets | Pass | 2026-08-17 | All sixteen QA modules compiled individually (`lake build Scaffold.QA.…`) with no `sorry`/`admit`, including `SpectralGraph/{Normalized,Cuts}_QA.lean`. |
-| Direct public module targets | Pass | 2026-08-17 | All nineteen public modules (the prior eighteen plus `Scaffold.Mathlib.GraphTheory.Normalized`) compile individually. |
+| Direct QA module targets | Pass | 2026-08-17 | All seventeen QA modules compiled individually (`lake build Scaffold.QA.…`) with no `sorry`/`admit`, including `SpectralGraph/{Normalized,Cuts,Stationary}_QA.lean`. |
+| Direct public module targets | Pass | 2026-08-17 | All twenty public modules (the prior nineteen plus `Scaffold.Mathlib.GraphTheory.Stationary`) compile individually. |
 | Mathlib cache provenance | Note | 2026-08-17 | The local `lake exe cache` binary crashes under the current macOS dyld (`__DATA_CONST segment missing SG_READ_ONLY flag`); the cache was fetched by running the same Cache tool logic interpreted via `lake env lean --run`, unpacking 5685 Mathlib oleans. |
 | `scripts/lint_axioms.py` | Pass | 2026-08-17 | All 18 explicit axioms are covered by `index/sources/` and `index/map/`. |
 | `scripts/check_citations.py` | Pass | 2026-08-17 | Every axiom carries a `Source:` citation in its doc comment. |
@@ -66,8 +67,9 @@ _Generated from Lean source on 2026-08-17._
 
 - **Explicit axiom:** an intentional trust boundary declared with Lean's `axiom` command. QA lemmas and derived theorems using these axioms are conditional on them.
 - **Admitted proof:** a `sorry` or `admit` accepted by Lean; this is different from an explicit axiom and remains technical debt in public modules. As of this scoreboard there are no `sorry`/`admit` tokens anywhere under `Scaffold/`.
-- **QA declaration:** a theorem or lemma under `Scaffold/QA`; all 107 declarations have compiled against the current public API.
+- **QA declaration:** a theorem or lemma under `Scaffold/QA`; all 119 declarations have compiled against the current public API.
 - **Default build:** the umbrella reaches every public module listed above; no public module is excluded from `lake build`.
+- **Stationary structure (2026-08-17):** the downstream consumer of both walk/normalized interface modules — `GraphTheory.Stationary` proves `L_sym *ᵥ √deg = 0` (kernel of the general normalized Laplacian, counterpart of `laplacian_ones_in_kernel`), `Pᵀ *ᵥ deg = deg` (the degree measure is stationary for the walk — `π ∝ deg`, the Markov-mixing consumer interface), and conservation of mass in both the regular (`randomWalkLaplacian *ᵥ 1 = 0`, consuming `RandomWalk.transitionMatrix_row_sum`) and irregular (`walkLaplacian *ᵥ 1 = 0`, consuming `Normalized.walkTransitionMatrix_row_sum`) cases. No axioms; downstream reuse on the SGT radar re-scored 2.5 → 3.0 → 3.5 with these milestones.
 - **Cut duality (2026-08-17):** the first expansion/cut slice delivered in the center — `vol_compl`, `boundary_compl`, `conductance_compl` (cuts are partition-valued: boundary and conductance invariant under complementation for symmetric weights, via volume complementarity and `Finset.sum_comm`), and the degenerate-cut guards `boundary_empty`/`boundary_univ`. These are the structural facts sweep-cut and sparsest-cut consumers assume; no axioms admitted.
 - **Random-walk and normalized-Laplacian interfaces (2026-08-17):** the first two broad-SGT backlog items delivered — `GraphTheory.RandomWalk` (transition matrix, row-stochasticity for `d`-regular graphs, walk-Laplacian bridges to both existing worlds) and `GraphTheory.Normalized` (the *irregular* symmetric normalized Laplacian through a diagonal `Real.sqrt` square root — no matrix square root needed — with the congruence `√D L_sym √D = laplacian`, regular-cone agreement, the general walk form `D⁻¹A` with irregular row-stochasticity, and the similarity identity `√D · L_walk · (1/√D) = L_sym`; the eigenvalue-list transfer is the named residual gap — the walk form is not symmetric, so `evals` does not apply, and the pinned Mathlib has no charpoly-roots interface for non-symmetric matrices). No axioms admitted in either module.
 - **Citation and assumption review (2026-08-17):** `spectral_gap_stability` was converted from an admitted axiom into a theorem proved from `weyl_inequality` (four Weyl facts plus arithmetic), reducing the explicit axiom count from 19 to 18 at no trust cost; `weyl_inequality`'s doc now records that its Lean form is the spectral-norm corollary of the cited general theorem; `davis_kahan_sin_theta`'s separation hypothesis was tightened from a pairwise quantification to the binding single-pair two-cluster form `λ_{k+1}(A+E) − λ_k(A) ≥ δ` (the form used by the cited Yu–Wang–Samworth Theorem 2), with the derived wrapper simplified accordingly (Weyl at the gap index only). The Chung index's provenance note was corrected: git history shows no earlier page-level locators ever recorded (the initial commit cited "Theorem 2.2" without a page); theorem and page numbering remain explicitly unconfirmed rather than invented.

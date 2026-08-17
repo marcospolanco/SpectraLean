@@ -5,6 +5,7 @@ import Scaffold.Mathlib.GraphTheory.Spectral
 import Scaffold.Mathlib.GraphTheory.Cheeger
 import Scaffold.Mathlib.GraphTheory.RandomWalk
 import Scaffold.Mathlib.GraphTheory.Normalized
+import Scaffold.Mathlib.GraphTheory.Stationary
 import Scaffold.Mathlib.GraphTheory.Dynamics
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan
@@ -25,7 +26,8 @@ The default `lake build` target. The umbrella imports every public
 module that the current milestone certifies: the SGT center
 (`GraphTheory.Spectral`), its Cheeger bridge (`GraphTheory.Cheeger`),
 the random-walk interfaces (`GraphTheory.RandomWalk`), the general
-normalized Laplacian (`GraphTheory.Normalized`), the event-driven
+normalized Laplacian (`GraphTheory.Normalized`), the stationary
+structure consuming both (`GraphTheory.Stationary`), the event-driven
 frontier (`GraphTheory.Dynamics`), the perturbation bridge
 (`Analysis.OperatorTheory.Perturbation.*`), the probability concentration
 bridge (`Probability.Concentration.*`), the derived layer

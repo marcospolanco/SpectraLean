@@ -27,10 +27,11 @@ scripts/opencode-pursue --runs 5 \
   "restore the next concentration module and its closest QA consumer"
 ```
 
-The first invocation creates an OpenCode session. Later invocations resume the
-exact locally recorded session, rather than whichever session happens to be
-most recent. `--runs N` is the explicit budget: a successful run may continue
-into the next one until N runs complete; a failed run stops immediately.
+Each invocation creates a fresh OpenCode session by default. Pass `--resume`
+to continue the exact locally recorded session, rather than whichever session
+happens to be most recent. `--runs N` is the explicit budget: within that one
+invocation, a successful run may continue into the next one until N runs
+complete; a failed run stops immediately.
 
 ### Quota gate
 
@@ -74,8 +75,9 @@ tail -f docs/AGENT_ACTIVITY.md
 ```
 
 Raw stdout/stderr transcripts are written under ignored `.opencode/runs/`, and
-the locally stored session ID is `.opencode/pursue-session`. They are useful
-for diagnosis but must not be committed.
+the locally stored session ID for an optional future `--resume` is
+`.opencode/pursue-session`. They are useful for diagnosis but must not be
+committed.
 
 The wrapper enables OpenCode's `--auto` mode. Explicit project denials still block external-directory access, destructive Git operations, commits, pushes, pull-request publication, `sudo`, and direct `rm -rf` commands. These rules are guardrails, not an operating-system sandbox; run autonomous agents only in a reviewed worktree.
 

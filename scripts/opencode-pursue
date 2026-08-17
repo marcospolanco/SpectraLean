@@ -6,21 +6,24 @@ project_dir=$(dirname -- "$script_dir")
 cd "$project_dir"
 
 runs=1
+resume=false
 
 usage() {
   cat <<'EOF'
-Usage: scripts/opencode-pursue [--runs N] [--quota-threshold PERCENT] [--] [operator direction...]
+Usage: scripts/opencode-pursue [--runs N] [--resume] [--quota-threshold PERCENT] [--] [operator direction...]
 
-Run the autonomous Scaffold agent up to N times. Later runs resume the exact
-session recorded locally in .opencode/pursue-session. Before each new run, it
-uses scripts/zquota as a quota gate (default threshold: 80%). A closed gate
-exits 75 without starting an agent; use the launchd helper for periodic wakeup.
-Raw transcripts are written to ignored .opencode/runs/; follow
+Run the autonomous Scaffold agent up to N times. Each invocation starts a
+fresh OpenCode session by default. Pass --resume to use the exact session
+recorded locally in .opencode/pursue-session. Within one --runs N invocation,
+successful later runs continue the session created or resumed by its first run.
+Before each new run, scripts/zquota applies the default 90% quota gate. A
+closed gate exits 75 without starting an agent; use the launchd helper for
+periodic wakeup. Raw transcripts are written to ignored .opencode/runs; follow
 docs/AGENT_ACTIVITY.md for the durable operator-facing account.
 EOF
 }
 
-quota_threshold=${ZQUOTA_THRESHOLD:-80}
+quota_threshold=${ZQUOTA_THRESHOLD:-90}
 
 while (($#)); do
   case "$1" in
@@ -33,6 +36,10 @@ while (($#)); do
       (($# >= 2)) || { echo "--quota-threshold requires an integer percentage" >&2; exit 2; }
       quota_threshold="$2"
       shift 2
+      ;;
+    --resume)
+      resume=true
+      shift
       ;;
     --help|-h)
       usage
@@ -61,8 +68,12 @@ session_file="$project_dir/.opencode/pursue-session"
 mkdir -p "$run_dir"
 
 session_id=""
-if [[ -f "$session_file" ]]; then
+if "$resume" && [[ -f "$session_file" ]]; then
   session_id=$(tr -d '[:space:]' < "$session_file")
+fi
+if "$resume" && [[ -z "$session_id" ]]; then
+  echo "--resume requires a session recorded in .opencode/pursue-session" >&2
+  exit 2
 fi
 
 current_log=""

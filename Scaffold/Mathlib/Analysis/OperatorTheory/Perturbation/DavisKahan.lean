@@ -33,10 +33,11 @@ open Matrix SpectralGraphTheory
 
 variable {V : Type} [Fintype V] [DecidableEq V]
 
-/-- Davis–Kahan sin Θ bound for spectral projectors: if every eigenvalue
-of `A + E` above the cut index `k` is separated by at least `δ` from
-every eigenvalue of `A` at or below the cut, then the projector onto the
-span of the `k+1` smallest eigenvectors moves by at most `‖E‖ / δ`.
+/-- Davis–Kahan sin Θ bound for spectral projectors: if the top of the
+lower cluster of `A` (its `k`-th sorted eigenvalue) is separated by at
+least `δ` from the bottom of the upper cluster of `A + E` (its `k+1`-st
+sorted eigenvalue), then the projector onto the span of the `k+1`
+smallest eigenvectors moves by at most `‖E‖ / δ`.
 
 Source:
 - Davis, C. & Kahan, W. M., "The rotation of eigenvectors by a
@@ -47,9 +48,14 @@ Source:
 
 Statement differences: the invariant subspaces are the
 `SpectralGraphTheory.initialProjector` spectral projectors of the sorted
-spectrum; separation is a pairwise inequality on sorted eigenvalue
-indices; the distance is the ℓ² operator norm of the projector
-difference (the sin Θ metric).
+spectrum; the distance is the ℓ² operator norm of the projector
+difference (the sin Θ metric). The separation hypothesis is the
+two-cluster gap `λ_{k+1}(A + E) - λ_k(A) ≥ δ`, which is the form used by
+Yu–Wang–Samworth and is the binding instance of the pairwise condition
+`∀ i ≤ k < j, δ ≤ λ_j(A + E) - λ_i(A)` (the two are equivalent because
+`evals` is sorted; see `SpectralGraphTheory.evals_sorted`). An earlier
+revision of this axiom quantified pairwise; it was tightened to the
+single-pair form on 2026-08-17 during citation review.
 
 QA: exercised by `davis_kahan_zero_perturbation_QA` in
 `Scaffold/QA/Perturbation/DavisKahan_QA.lean` (zero-perturbation
@@ -59,8 +65,7 @@ axiom davis_kahan_sin_theta
     (A E : Matrix V V ℝ) (hA : A.IsSymm) (hAE : (A + E).IsSymm)
     (k : Fin (Fintype.card V)) (hk : (k : ℕ) + 1 < Fintype.card V)
     (δ : ℝ) (hδ : 0 < δ)
-    (hsep : ∀ i j : Fin (Fintype.card V), (i : ℕ) ≤ (k : ℕ) → (k : ℕ) < (j : ℕ) →
-      δ ≤ evals hAE j - evals hA i) :
+    (hsep : δ ≤ evals hAE ⟨(k : ℕ) + 1, hk⟩ - evals hA ⟨(k : ℕ), k.isLt⟩) :
     ‖initialProjector (A + E) hAE k - initialProjector A hA k‖ ≤ ‖E‖ / δ
 
 end Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation

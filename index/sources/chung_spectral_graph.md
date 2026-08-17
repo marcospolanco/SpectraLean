@@ -29,13 +29,18 @@ variational characterization of the algebraic connectivity.
   normalized Laplacian reduces to `1 - d⁻¹ • A`; the general irregular
   statement requires a matrix square root not available in the pinned
   Mathlib and is future work.
-- **Conventions**: `cheegerConstant` is the infimum of the volume-based
-  conductance `boundary / min (vol S, vol Sᶜ)` over nonempty proper
-  vertex subsets; for a `d`-regular graph of positive degree this is
-  the standard conductance.
-- Earlier revisions of the repository recorded page-level locators
-  (Theorem 2.1 p. 42, Theorem 2.2 p. 44) against a different statement
-  shape; they were dropped pending citation review.
+- **Conventions**: `cheegerConstant` is the infimum of the
+  volume-based conductance `boundary / min (vol S, vol Sᶜ)` over
+  nonempty proper vertex subsets; for a `d`-regular graph of positive
+  degree this is the standard conductance.
+- **Locator status**: the Cheeger bounds are cited at chapter level
+  (Chapter 2). The initial commit of this repository cited
+  "Theorem 2.2" without a page; the SGT-center rebuild moved to the
+  chapter-level locator because the Lean statement shape changed
+  (restriction to `d`-regular graphs, volume-based conductance).
+  Theorem-level and page-level numbering remain unconfirmed against the
+  printed text and will not be recorded until verified from a physical
+  or publisher copy.
 
 ## See Also
 

@@ -2,7 +2,12 @@
 
 Scaffold lets researchers formalize new applied mathematics today by treating selected published results as explicit, cited assumptions. Lean checks every downstream deduction, while those assumptions remain visible, reviewable, and replaceable as formal proofs become available.
 
-The project’s center is **spectral graph theory (SGT)**. Its current research objective is spectral persistence in time-varying networks: combining graph Laplacians, variational methods, matrix perturbation, and concentration bounds to support rigorously specified coordination-detection algorithms.
+The project’s center is **spectral graph theory (SGT)**. Its goal is a broad,
+reusable formal neighborhood around SGT: graph and Laplacian theory,
+spectral and variational methods, matrix/operator tools, probability, and
+bridges that future research can compose. Spectral persistence is an existing
+formalization, retained as a compatibility/example package, not the project’s
+research objective.
 
 Scaffold is both a Lean library and a research substrate. It is currently **pre-release and not yet build-clean**; see [Current maturity](#current-maturity) before trying to consume it as a dependency.
 
@@ -36,8 +41,8 @@ Ongoing work radiates outward from SGT. We strengthen the center first, add adja
 flowchart LR
     C["Center: spectral graph theory<br/>Laplacians · spectra · Rayleigh · Cheeger"]
     B["Bridge mathematics<br/>perturbation · concentration · matrix updates"]
-    F["Research frontier<br/>dynamic graphs · subspace persistence"]
-    A["Applications<br/>x90 coordination detection"]
+    F["Reusable SGT extensions<br/>general interfaces · shared tools"]
+    A["Research applications<br/>named observables and experiments"]
 
     C --> B --> F --> A
     B --> C
@@ -58,33 +63,19 @@ A proposed task receives priority when it:
 
 Build health, real definitions, and sound theorem shapes take precedence over adding new surface area. The complete policy lives in [Strategy](docs/1_STRATEGY.md).
 
-## What we are trying to prove
+## Where the neighborhood expands
 
-The motivating “oil and water” hypothesis asks when a coherent spectral subspace retains its identity under a stream of graph updates. Schematically:
+The near-term center is general SGT: weighted and normalized Laplacians,
+quadratic/Rayleigh forms, spectra and projectors, cuts and expansion,
+interlacing, and reusable matrix interfaces. Outward work must improve one of
+those interfaces or make a concrete, broadly reusable connection.
 
-```text
-‖Σₖ Eₖ‖ / γ < C
-```
+The existing persistence modules do not set this agenda. Broader adjacent
+research directions are documented separately and enter only with a named
+SGT obligation and a small, Mathlib-compatible API.
 
-Here `Eₖ` represents event-induced perturbations and `γ` is a relevant spectral gap. This is a research mnemonic, not yet a theorem: the norm, update model, invariant subspace, probability assumptions, and constant all need precise definitions.
-
-The intended dependency chain is:
-
-```text
-spectral graph definitions
-        ↓
-Laplacian update identities
-        ↓
-Weyl / Davis–Kahan perturbation control
-        ↓
-matrix concentration for event streams
-        ↓
-dynamic subspace-persistence result
-        ↓
-calibrated x90 observable
-```
-
-See [Spectral Theory and Algorithmic Pipeline](docs/3_SPECTRAL_THEORY.md) for the formalization boundary and validation program.
+See [Spectral Theory and Algorithmic Pipeline](docs/3_SPECTRAL_THEORY.md)
+for the status of the retained persistence example.
 
 ## Trust model
 
@@ -117,11 +108,10 @@ scripts/            documentation and policy checks
 
 `Scaffold/Derived/` holds derived theorems: Lean-checked deductions whose
 conclusions remain conditional on the axioms they consume. Its first two
-modules assemble the persistence chain: `EventStream.lean` derives an
-Azuma tail bound on the cumulative Laplacian perturbation of a random
-event-driven graph stream, and `ProjectorDrift.lean` derives a
-high-probability bound on the endpoint rotation of the invariant spectral
-subspace.
+modules are a retained persistence example: `EventStream.lean` derives an
+Azuma tail bound on a random event-driven graph stream, and
+`ProjectorDrift.lean` derives a high-probability endpoint projector-drift
+bound. They are not a standing expansion target.
 
 The remaining root files are repository entry points or tool configuration: `Scaffold.lean` is the Lake library root; `lakefile.lean`, `lake-manifest.json`, and `lean-toolchain` pin the build; and `opencode.json` configures project-local agent tooling. Lean modules otherwise belong under `Scaffold/`.
 
@@ -129,11 +119,11 @@ The remaining root files are repository entry points or tool configuration: `Sca
 
 As of August 17, 2026:
 
-- the default `lake build` passes: its umbrella certifies the SGT center (`GraphTheory.Spectral`), the Cheeger bridge, the event-driven frontier, the Weyl/Davis–Kahan perturbation modules, the probability concentration bridge (`Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*`), the derived layer (`Derived.EventStream`, `Derived.ProjectorDrift`), and the Core utilities;
-- all QA modules compile directly with 70 QA theorem/lemma declarations and no `sorry` or `admit` anywhere under `Scaffold/`;
-- the public axiom boundary is 19 explicit, cited axioms; the remaining classical Laplacian facts (symmetry, kernel, Dirichlet form, PSD, symmetry preservation under events) are proved, not admitted, and the scalar `hoeffding_iid`/`bernstein_iid` specializations are proved derived theorems;
+- the default `lake build` passes: its umbrella certifies the SGT center (`GraphTheory.Spectral`), the Cheeger bridge, the random-walk interfaces (`GraphTheory.RandomWalk`), the general normalized Laplacian (`GraphTheory.Normalized`), the event-driven frontier, the Weyl/Davis–Kahan perturbation modules, the probability concentration bridge (`Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*`), the derived layer (`Derived.EventStream`, `Derived.ProjectorDrift`), and the Core utilities;
+- all QA modules compile directly with 96 QA theorem/lemma declarations and no `sorry` or `admit` anywhere under `Scaffold/`;
+- the public axiom boundary is 18 explicit, cited axioms; the remaining classical Laplacian facts (symmetry, kernel, Dirichlet form, PSD, symmetry preservation under events) are proved, not admitted, the scalar `hoeffding_iid`/`bernstein_iid` specializations are proved derived theorems, `spectral_gap_stability` is proved from the admitted Weyl inequality, and the spectral-projector algebra (eigenbasis orthonormality and completeness, projector idempotence, extreme thresholds) is proved from the Mathlib spectral-theorem API;
 - the subgaussian norm is a real definition (`subgaussianNorm`), not an axiom; matrix concentration is stated over the spectral norm (`Matrix.L2OpNorm`), the semidefinite order (`Matrix.PosSemidef`), and Mathlib's `ProbabilityTheory.IndepFun`;
-- the derived layer assembles the persistence chain end-to-end: `eventStreamTail` bounds the tail of the cumulative Laplacian perturbation `‖L_m − L_0‖`, and `eventStreamProjectorDrift` bounds the endpoint rotation of the invariant spectral subspace by `s/(γ−s)` with failure probability at most `2 d exp(−s²/(8 m R²))`. Both are proved from the admitted Matrix Azuma, Weyl, and Davis–Kahan axioms and are conditional on them.
+- the derived layer retains an end-to-end persistence example: `eventStreamTail` bounds the tail of the cumulative Laplacian perturbation `‖L_m − L_0‖`, and `eventStreamProjectorDrift` bounds endpoint rotation of the invariant spectral subspace by `s/(γ−s)` with failure probability at most `2 d exp(−s²/(8 m R²))`. Both are checked deductions from admitted Matrix Azuma, Weyl, and Davis–Kahan axioms; neither drives the roadmap.
 
 The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for current counts and verification results.
 
@@ -198,9 +188,10 @@ and publishing or destructive Git commands. See
 
 - [Strategy](docs/1_STRATEGY.md) — mission and center-out prioritization.
 - [Architecture](docs/2_ARCHITECTURE.md) — axiom admission, QA, citations, and upstream replacement.
-- [Spectral Theory](docs/3_SPECTRAL_THEORY.md) — persistence hypothesis and x90 pipeline.
+- [Spectral Theory](docs/3_SPECTRAL_THEORY.md) — retained persistence example.
 - [Partnerships](docs/4_PARTNERSHIPS.md) — dated, time-sensitive research landscape.
 - [QA Scoreboard](docs/5_QA_SCOREBOARD.md) — generated metrics and recorded verification.
+- [SGT Backlog](docs/6_SGT_BACKLOG.md) — ranked, center-first work queue for the broad SGT program.
 - [Contributing](governance/CONTRIBUTING.md) — contribution and review workflow.
 
 ## License

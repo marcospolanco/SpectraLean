@@ -14,7 +14,8 @@ The project optimizes for transparent assumptions and replaceable APIs. It does 
 - Applied researchers who want Lean to check new deductions while treating established literature as an explicit trust boundary.
 - Lean developers who need stable interfaces for concentration, perturbation, and spectral graph theory.
 - Formalizers looking for a structured backlog of useful results that may later be proved upstream.
-- Research collaborators evaluating dynamic-network hypotheses and executable detection pipelines.
+- Research collaborators evaluating SGT questions and executable research
+  pipelines.
 
 ## Ecosystem pacing
 
@@ -31,7 +32,11 @@ Scaffold should therefore stay subordinate and interoperable:
 
 The intended applications cross several formal domains: finite graph combinatorics, matrices and operator norms, probability and concentration, and perturbation theory. A usable result often depends on all four. That intersection makes API alignment as important as theorem availability.
 
-Scaffold’s current research frontier concerns time-varying networks, spectral persistence, and coordination detection. These are research directions, not evidence that the repository is mathematically ahead of Mathlib in a general sense.
+Spectral persistence is already developed elsewhere and is retained here only
+as an existing compatibility/example package. It is not Scaffold's research
+goal or the criterion for choosing new work. Scaffold's agenda is to grow a
+broad, reusable neighborhood around SGT, so future research can start from
+well-specified graph, spectral, probabilistic, and operator-theoretic APIs.
 
 ## Center-out prioritization
 
@@ -41,10 +46,15 @@ The working rings are:
 
 1. **SGT center:** graph and Laplacian definitions, quadratic and Rayleigh forms, spectra, variational characterizations, Cheeger theory, and buildable QA.
 2. **Mathematical bridges:** perturbation theory, matrix concentration, probability, and update identities needed by a center obligation.
-3. **Dynamic frontier:** time-varying graphs, cumulative perturbations, and invariant-subspace persistence.
-4. **Applications:** x90 and other detectors whose observables can be traced through the inner rings.
+3. **Reusable SGT extensions:** general interfaces and tools with more than
+   one plausible SGT consumer.
+4. **Research applications:** domain observables and experiments that name
+   their needed SGT interfaces.
 
-Work may proceed outward only when the inward dependency path is explicit. When frontier or application work reveals an ambiguous definition, missing assumption, placeholder, or broken interface, the priority moves inward to the nearest load-bearing defect.
+Work may proceed outward only when the inward dependency path is explicit.
+When adjacent or application work reveals an ambiguous definition, missing
+assumption, placeholder, or broken interface, the priority moves inward to
+the nearest load-bearing defect.
 
 ### Leverage test
 

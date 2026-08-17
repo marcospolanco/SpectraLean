@@ -23,19 +23,19 @@ form used by the event-driven persistence frontier.
 | Theorem | Lean Axiom | Module |
 |---------|------------|--------|
 | §3 (sin Θ theorem) via Yu–Wang–Samworth Thm 2 | `davis_kahan_sin_theta` | `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan` |
-| Consequence applied per step | `spectral_persistence` | `Scaffold.Mathlib.GraphTheory.Dynamics` |
+| Consequence applied per step | `spectral_persistence` (**deprecated** 2026-08-17; see migration note) | `Scaffold.Mathlib.GraphTheory.Dynamics` |
 
 ## Notes
 
 - The Scaffold statement is for the projector onto the `k+1` smallest
-  eigenvalues, with a pairwise separation hypothesis on sorted
-  eigenvalue indices, distance measured by the ℓ² operator norm
+  eigenvalues, with the two-cluster separation hypothesis on sorted
+  eigenvalues, distance measured by the ℓ² operator norm
   (`Matrix.L2OpNorm`).
-- `spectral_persistence` composes the per-step Davis–Kahan bound with
-  Weyl gap stability (see [Weyl/Bhatia](weyl_1912_bhatia.md)) along an
-  event stream; it is Scaffold's dynamic-frontier admission and carries
-  the research content, while Davis–Kahan itself is the classical
-  engine.
+- `spectral_persistence` composed the per-step Davis–Kahan bound with
+  Weyl gap stability along an event stream. Deprecated 2026-08-17 with
+  zero non-QA consumers: the derived layer's two-endpoint chain
+  (`davisKahanTwoPoint`, `eventStreamProjectorDrift`) covers the
+  motivating use; retained through the compatibility window.
 
 ## See Also
 

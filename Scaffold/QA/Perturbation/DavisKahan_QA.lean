@@ -37,7 +37,8 @@ variable {V : Type} [Fintype V] [DecidableEq V]
 /-- Zero perturbation: with an explicitly separated spectrum, the
 projector bound collapses to `‖P_{A+0} - P_A‖ ≤ 0 / δ = 0`. Exercises
 the axiom's projector indexing, separation direction, and ℓ² operator
-norm at `E = 0`. -/
+norm at `E = 0`; the pairwise separation hypothesis is reduced to the
+axiom's binding single-pair form through `evals_sorted`. -/
 theorem davis_kahan_zero_perturbation_QA (A : Matrix V V ℝ) (hA : A.IsSymm)
     (k : Fin (Fintype.card V)) (hk : (k : ℕ) + 1 < Fintype.card V)
     (δ : ℝ) (hδ : 0 < δ)
@@ -51,9 +52,8 @@ theorem davis_kahan_zero_perturbation_QA (A : Matrix V V ℝ) (hA : A.IsSymm)
     have h := weyl_inequality A 0 hA zero_isSymm_QA i
     rw [norm_zero] at h
     exact sub_eq_zero.mp (abs_eq_zero.mp (le_antisymm h (abs_nonneg _)))
-  have hsep' : ∀ i j : Fin (Fintype.card V), (i : ℕ) ≤ (k : ℕ) → (k : ℕ) < (j : ℕ) →
-      δ ≤ evals hAE j - evals hA i :=
-    fun i j hi kj => by rw [hevals j]; exact hsep i j hi kj
-  exact davis_kahan_sin_theta A 0 hA hAE k hk δ hδ hsep'
+  refine davis_kahan_sin_theta A 0 hA hAE k hk δ hδ ?_
+  rw [hevals ⟨(k : ℕ) + 1, hk⟩]
+  exact hsep ⟨(k : ℕ), k.isLt⟩ ⟨(k : ℕ) + 1, hk⟩ (le_refl _) (Nat.lt_succ_self _)
 
 end Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.QA

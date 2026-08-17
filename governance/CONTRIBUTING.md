@@ -8,7 +8,10 @@ We welcome several types of contributions:
 
 ## Center-Out Scope Policy
 
-Spectral graph theory is the repository's organizing center. New work must identify the concrete SGT theorem, dependency, experiment, or downstream consumer it unlocks. Adjacent topics such as probability, perturbation theory, dynamics, or numerical methods are in scope when they form the shortest credible path to that objective.
+Spectral graph theory is the repository's organizing center. New work must
+identify the concrete, broadly reusable SGT theorem, definition, dependency,
+or experiment it unlocks. Adjacent topics are in scope when they form the
+shortest credible path to that objective.
 
 Before implementation, compare the proposal with existing load-bearing work:
 
@@ -16,7 +19,7 @@ Before implementation, compare the proposal with existing load-bearing work:
 - placeholder definitions or statement shapes;
 - missing citations and index coverage;
 - reusable SGT definitions and bridge theorems;
-- dynamic persistence obligations and validated applications.
+- validated applications.
 
 Prefer the change that unlocks the most reusable SGT progress, improves assurance, and has the lowest justified complexity. If outer-layer work exposes a defect closer to the SGT center, repair that inner dependency first.
 

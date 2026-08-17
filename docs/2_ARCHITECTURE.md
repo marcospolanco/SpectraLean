@@ -28,10 +28,10 @@ Location: `Scaffold/QA/**`
 
 QA files contain fully elaborated proofs of small properties, special cases, or cross-interface consequences. They must contain no `sorry` or `admit`. A QA lemma is useful when failure would reveal an API-shape, assumption, or composability problem.
 
-### Layer 3: derived research
+### Layer 3: derived research and retained examples
 
 Location: `Scaffold/Derived/**`. The first two modules assemble the
-persistence hypothesis chain end-to-end. `Scaffold/Derived/EventStream.lean`
+persistence example end-to-end. `Scaffold/Derived/EventStream.lean`
 contains the proved telescoping identity, the boundedness/event-driven
 interface lemma, and the axiom-backed derived theorem `eventStreamTail`:
 an Azuma tail bound on the cumulative Laplacian perturbation of a random
@@ -46,7 +46,9 @@ Both are proved from admitted axioms (`matrix_azuma_hoeffding`,
 `davis_kahan_sin_theta`, `weyl_inequality`) plus proved steps and are
 conditional on those axioms; they must not be described as foundationally
 proved. Novel work may also live in a downstream repository. Derived
-claims must distinguish proved Lean theorems from axiom-backed results.
+claims must distinguish proved Lean theorems from axiom-backed results. The
+persistence package is not a roadmap goal: new derived work is selected for
+its broad SGT leverage.
 
 `Scaffold/Trusted/` currently contains explanatory material; it is not the public axiom location.
 
@@ -165,14 +167,28 @@ Community process is defined by `governance/CONTRIBUTING.md`, `MAINTAINERS.md`, 
   filtration/conditional-expectation API. If a later Mathlib provides one,
   restating `MatrixMDS` through `Filtration`/`Adapted` is the intended
   upstream alignment.
-- Spectral-projector idempotence and eigenbasis orthonormality behind `spectralProjector` are consumed through the admitted perturbation interfaces rather than proved locally.
-- The persistence chain is assembled end-to-end in the derived layer
+- Spectral-projector idempotence and eigenbasis orthonormality/completeness
+  behind `spectralProjector` are proved locally
+  (`eigvecOf_inner`, `eigvecOf_complete`, `spectralProjector_idempotent`,
+  `spectralProjector_eq_zero`, `spectralProjector_eq_one`), from the
+  Mathlib spectral-theorem API; the admitted perturbation interfaces
+  remain the trust boundary for the perturbation inequalities themselves.
+- The retained persistence example is assembled end-to-end in the derived layer
   (`eventStreamTail`, `davisKahanTwoPoint`, `eventStreamProjectorDrift`),
   all conditional on three admitted axioms. The per-step
-  `spectral_persistence` axiom remains unconsumed; folding it in (or
-  deprecating it in favor of the two-endpoint chain) is an open interface
-  decision.
-- Page-level locators for Horn–Johnson and Chung chapter-level citations are pending review.
+  `spectral_persistence` axiom was deprecated on 2026-08-17 with a
+  migration note (zero non-QA consumers; the derived chain covers the
+  motivating use); it is retained through the compatibility window, and
+  removal is a later release decision.
+- Page-level locators remain pending for Horn–Johnson (section-level
+  recorded) and Chung (chapter-level recorded); the 2026-08-17 citation
+  audit corrected an inaccurate provenance note in the Chung index and
+  confirmed no in-repository page numbers were ever recorded. Locator
+  numbers are to be confirmed against physical or publisher copies, not
+  invented. `spectral_gap_stability` is proved from `weyl_inequality`
+  rather than admitted; `davis_kahan_sin_theta` states its separation
+  hypothesis in the single-pair two-cluster form of the cited
+  Yu–Wang–Samworth Theorem 2.
 - There is no executable target; the former `scaffold` executable referenced a missing `Main.lean` and was removed from the default build until a real driver exists.
 
 These are tracked as facts, not hidden by the target architecture.

@@ -291,3 +291,408 @@ reordering, and the orthonormality relation; extreme-threshold theorems
 are hypothesis-gated (empty/full filter sets). QA composes the extreme
 cases with idempotence; thin-QA rationale documented since these are
 theorems rather than axioms.
+
+## 2026-08-17T19:59:41Z — Projector algebra proved in the SGT center
+
+**Run:** `20260817T193702Z-run-4`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** completed  
+**Milestone:** Prove the spectral-projector algebra behind
+`spectralProjector` in the SGT center, replacing structural facts
+previously consumed implicitly through the admitted perturbation
+interfaces. No new axioms; hard crust only.
+
+**Changes:** in `GraphTheory.Spectral`, proved `eigvecOf_inner`
+(eigenbasis orthonormality from `OrthonormalBasis.orthonormal` with
+`PiLp.inner_apply`), `eigvecOf_complete` (completeness from
+`OrthonormalBasis.sum_repr'` at `EuclideanSpace.single`,
+`EuclideanSpace.inner_single_right` for the coefficients),
+`spectralProjector_idempotent` (entrywise expansion: `Finset.sum_mul_sum`,
+sum reorder, orthonormality collapse via `Finset.sum_eq_single`),
+`spectralProjector_eq_zero` / `spectralProjector_eq_one` (hypothesis-gated
+extreme thresholds), and `initialProjector_idempotent`. The
+`WithLp`/`EuclideanSpace` type-synonym coercions required explicit
+Pi-typed ascriptions (`(∑ … : V → ℝ) b`) since the pruned snapshot lacks
+direct sum-application lemmas; the delicate proofs were validated in a
+scratch elaboration probe before being transplanted. New QA file
+`SpectralGraph/Projector_QA.lean` (5 declarations): unit-norm diagonals of
+the two basis relations and extreme-threshold compositions with
+idempotence. Scoreboard, architecture debt list, README, and the SGT
+index map updated. An operator checkpoint (`4181d07`) landed mid-run and
+absorbed the earlier uncommitted work; my scratch probe file swept into
+it was deleted as intended hygiene.
+
+**Decisive commands and outcomes:** `lake build` on
+`Scaffold.Mathlib.GraphTheory.Spectral` and
+`Scaffold.QA.SpectralGraph.Projector_QA` pass; every QA module target
+(thirteen) rebuilt individually; full `lake build` passes;
+`generate_qa_scoreboard.py`, `lint_axioms.py`, `check_citations.py`,
+`check_markdown_links.py` all pass.
+
+**Verification:** 75 QA declarations (up from 70), zero `sorry`/`admit`
+anywhere under `Scaffold/`, 19 explicit cited axioms (unchanged).
+
+**Trust boundary:** unchanged — the perturbation inequalities
+themselves (`weyl_inequality`, `davis_kahan_sin_theta`,
+`spectral_persistence`, Cheeger/interlacing/variational axioms) remain
+admitted; only the projector algebra around them became hard crust.
+
+**Remaining risk:** the two basis relations are stated through the
+repo's `eigvecOf` coercion; if `eigvecOf`'s definition is ever restated
+through a different `WithLp` conversion, the `rfl`-steps need revisiting.
+Citation page-level locators remain pending.
+
+**Next handoff:** citation hygiene (Horn–Johnson/Chung page locators,
+assumption tightening review), then the `spectral_persistence`
+fold-or-deprecate decision, then the x90 observable specification.
+
+## 2026-08-17T20:03:37Z — Citation honesty audit + perturbation tightening
+
+**Run:** `20260817T200010Z-run-5`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** in-progress  
+**Milestone:** Citation hygiene with two interface tightenings: fix the
+citation-audit findings on the perturbation/SGT axiom surface, and convert
+`spectral_gap_stability` from an admitted axiom into a theorem proved from
+`weyl_inequality` (axiom count 19 → 18 at zero trust cost).
+
+Audit findings so far: the Chung index's provenance note ("earlier
+revisions recorded Theorem 2.1 p. 42, Theorem 2.2 p. 44") is contradicted
+by git history — the initial commit cited only "Theorem 2.2" without a
+page and no pre-rebuild index file exists; the Weyl axiom lacks a
+statement-differences note explaining that its Lean form is the
+spectral-norm corollary of the cited general theorem; the Davis–Kahan
+separation hypothesis is stated in a pairwise form whose binding instance
+(by `evals_sorted`) is the single-pair cluster separation the cited
+Yu–Wang–Samworth Theorem 2 actually uses. Plan: replace the false note
+with accurate history (no invented page numbers), add the Weyl note,
+tighten the DK hypothesis to the single-pair form (updating the derived
+wrapper and QA), and prove `spectral_gap_stability` from Weyl.
+
+## 2026-08-17T20:09:50Z — Citation hygiene completed; axioms 19 → 18
+
+**Run:** `20260817T200010Z-run-5`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** completed  
+**Milestone:** Citation honesty fixes on the perturbation/SGT axiom
+surface, Davis–Kahan hypothesis tightening, and conversion of
+`spectral_gap_stability` from an admitted axiom into a theorem proved
+from `weyl_inequality`.
+
+**Changes:** (1) Chung index provenance note corrected — git history
+shows the claimed earlier page-level locators ("Theorem 2.1 p. 42,
+Theorem 2.2 p. 44") were never recorded (initial commit cited
+"Theorem 2.2" without a page); theorem/page numbering now explicitly
+unconfirmed, no numbers invented. (2) `weyl_inequality` doc now records
+that its Lean form is the spectral-norm corollary of the cited general
+Weyl inequality. (3) `davis_kahan_sin_theta` separation tightened to the
+single-pair two-cluster form `λ_{k+1}(A+E) − λ_k(A) ≥ δ` (the form of
+the cited Yu–Wang–Samworth Theorem 2); `davisKahanTwoPoint` simplified
+to one Weyl fact at the gap index (sortedness no longer needed);
+DavisKahan QA reduces the pairwise hypothesis via `evals_sorted`.
+(4) `spectral_gap_stability` proved from `weyl_inequality` (Weyl at both
+gap endpoints plus `linarith`) — identical statement shape, explicit
+axioms 19 → 18. Perturbation index map updated to distinguish axiom vs
+proved declarations.
+
+**Decisive commands and outcomes:** direct builds of
+`Perturbation.Weyl`, `Perturbation.DavisKahan`,
+`Derived.ProjectorDrift`, and QA modules `Weyl_QA`, `DavisKahan_QA`,
+`Derived.{ProjectorDrift,EventStream}_QA` all pass; full `lake build`
+passes; all four hygiene scripts pass; scoreboard confirms 18 explicit
+axioms.
+
+**Verification:** 75 QA declarations, zero `sorry`/`admit` under
+`Scaffold/`; every axiom cited and indexed.
+
+**Trust boundary:** unchanged in substance for the inequalities
+themselves — `weyl_inequality` and `davis_kahan_sin_theta` remain the
+admitted perturbation boundary; `spectral_gap_stability` is now a
+checked consequence of it rather than a parallel admission.
+
+**Remaining risk:** Horn–Johnson/Chung locator confirmation still needs a
+physical or publisher copy. Note: the operator reoriented the execution
+plan mid-run toward a broad-SGT backlog (persistence retained only as a
+compatibility example); this run's edits preserved that concurrent
+reorganization and closed the citation-hygiene item within it.
+
+**Next handoff:** first broad-SGT backlog (weighted/normalized Laplacian
+interoperability, random-walk/Markov interfaces, expansion/cut
+interfaces, spectral algorithms), ranked by concrete reuse.
+
+## 2026-08-17T20:12:04Z — Broad-SGT backlog + random-walk interfaces
+
+**Run:** `20260817T200846Z-run-6`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** in-progress  
+**Milestone:** Deliver the first broad-SGT backlog (ranked by concrete
+reuse, center-first) together with its top-ranked item implemented:
+random-walk/transition-matrix interfaces for `d`-regular graphs, bridging
+the combinatorial Laplacian center to the normalized/Cheeger world and to
+future Markov-chain consumers. Pure hard crust, no new axioms.
+
+Design: `transitionMatrix A d := d⁻¹ • A` (real definition); proved
+symmetry, row-stochasticity `∑ j P i j = 1` under `deg A i = d` and
+`0 < d`; `randomWalkLaplacian A d := 1 - transitionMatrix A d`; proved
+identity with `regularNormalizedLaplacian` (interop by theorem, not by
+definition-sharing) and the scaling bridge
+`randomWalkLaplacian = d⁻¹ • laplacian` for `d`-regular graphs. QA
+instantiates everything at a concrete two-vertex graph.
+
+## 2026-08-17T20:17:06Z — Broad-SGT backlog published; random-walk interfaces delivered
+
+**Run:** `20260817T200846Z-run-6`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** completed  
+**Milestone:** Deliver the first broad-SGT backlog (ranked by concrete
+reuse, center-first) and implement its top-ranked item: random-walk /
+Markov interfaces for `d`-regular graphs, bridging the combinatorial
+Laplacian center to the normalized/Cheeger world. Pure hard crust, no
+new axioms.
+
+**Changes:** new `docs/6_SGT_BACKLOG.md` (six ranked items, each naming
+consumers, dependency paths, and gates; standing decisions on
+`spectral_persistence` and re-admissions; linked from the README
+canonical-docs list). New `Scaffold/Mathlib/GraphTheory/RandomWalk.lean`
+(all proved): `transitionMatrix` (`d⁻¹ • A`), `transitionMatrix_symmetric`,
+`transitionMatrix_row_sum` (row-stochasticity for `d`-regular graphs —
+the interface Markov-chain consumers need),
+`randomWalkLaplacian`, `randomWalkLaplacian_symmetric`,
+`randomWalkLaplacian_eq_regularNormalizedLaplacian` (interop with the
+Cheeger bridge by theorem, not definition-sharing),
+`randomWalkLaplacian_eq_smul_laplacian` (bridge to the combinatorial
+center: `L_rw = d⁻¹ • L`). New QA
+`SpectralGraph/RandomWalk_QA.lean` (7 declarations): a concrete
+two-vertex edge graph with fully computed symmetry, degree,
+row-stochasticity, transition entries, both bridge identities, and the
+Laplacian entries. Umbrella, SGT index map, README maturity list, and
+scoreboard updated.
+
+**Decisive commands and outcomes:** `lake build` on
+`Scaffold.Mathlib.GraphTheory.RandomWalk` and
+`Scaffold.QA.SpectralGraph.RandomWalk_QA` pass; full `lake build`
+(including the new umbrella import) passes; all four hygiene scripts
+pass.
+
+**Verification:** 82 QA declarations (up from 75), zero `sorry`/`admit`
+under `Scaffold/`, 18 explicit cited axioms (unchanged).
+
+**Trust boundary:** unchanged; the increment adds only proved
+statements. The Cheeger axioms remain the admitted boundary for the
+normalized world.
+
+**Remaining risk:** the bridges are restricted to the `d`-regular cone;
+the irregular adapters (backlog item 2) are gated on representing
+`D^{-1/2}` without a pinned-Mathlib square root.
+
+**Next handoff:** backlog item 2 — irregular normalized-Laplacian
+adapters (walk-form statements plus spectral similarity transfer), then
+expansion/cut interfaces as consumers emerge.
+
+## 2026-08-17T20:19:58Z — Irregular normalized-Laplacian adapters
+
+**Run:** `20260817T201730Z-run-7`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** in-progress  
+**Milestone:** Backlog item 2: the general (irregular) symmetric
+normalized Laplacian as a real definition, removing the `d`-regular
+restriction of the current normalized surface without any matrix square
+root.
+
+Key design decision: only a *diagonal* square root is needed
+(`√deg A i` per vertex), which `Real.sqrt` supplies directly — the
+pinned-Mathlib matrix-square-root gap never applies. New module
+`GraphTheory.Normalized`: `degreeSqrt`/`degreeInvSqrt` diagonal matrices,
+`normalizedLaplacian A = 1 - S⁻¹ A S⁻¹`, proved symmetry, the congruence
+`S * L_sym * S = laplacian A` (square roots cancel), and agreement with
+`regularNormalizedLaplacian` on the regular cone. QA at a 3-vertex path
+(genuinely irregular, `√2` entries) and the regular edge. Spectral
+similarity transfer to the walk view deferred to the next slice.
+
+## 2026-08-17T20:31:08Z — Irregular normalized Laplacian delivered
+
+**Run:** `20260817T201730Z-run-7`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** completed  
+**Milestone:** Backlog item 2 (core): the general (irregular) symmetric
+normalized Laplacian as a real definition, removing the `d`-regular
+restriction of the normalized surface without any matrix square root.
+Pure hard crust, no new axioms.
+
+**Changes:** new `Scaffold/Mathlib/GraphTheory/Normalized.lean` (all
+proved): `degreeSqrt`/`degreeInvSqrt` — the observation that only a
+diagonal square root is needed (`Real.sqrt` per vertex), bypassing the
+recorded pinned-Mathlib gap; `normalizedLaplacian A = 1 - (1/√D) A (1/√D)`;
+`degreeSqrt_mul_degreeSqrt` (`√D √D = degreeMatrix`); inverse-factor
+theorems; `normalizedLaplacian_symmetric` (transpose algebra through
+`diagonal_transpose`); the congruence
+`degreeSqrt_mul_normalizedLaplacian_mul_degreeSqrt`
+(`√D L_sym √D = laplacian A`, square roots cancel — the
+square-root-free-shaped bridge to the combinatorial center); and
+`normalizedLaplacian_eq_regularNormalizedLaplacian` (regular-cone
+agreement). New QA `SpectralGraph/Normalized_QA.lean` (11 declarations)
+at a concrete 3-vertex path (genuinely irregular: degrees 1, 2, 1; the
+`-1/√2` adjacent entries computed symbolically) and the regular
+two-vertex edge. Umbrella, backlog item 2 status, SGT index map,
+scoreboard, and README updated.
+
+**Decisive commands and outcomes:** direct builds of
+`Scaffold.Mathlib.GraphTheory.Normalized` and
+`Scaffold.QA.SpectralGraph.Normalized_QA` pass (the diagonal-algebra
+proofs were probe-validated before transplantation); full `lake build`
+passes; all four hygiene scripts pass.
+
+**Verification:** 93 QA declarations (up from 82), zero `sorry`/`admit`
+under `Scaffold/`, 18 explicit cited axioms (unchanged).
+
+**Trust boundary:** unchanged; the increment adds only proved
+statements. The Cheeger axioms remain the admitted boundary for the
+normalized world.
+
+**Remaining risk:** spectral similarity transfer to the walk form and
+irregular row-stochasticity are still open (recorded in backlog item 2);
+QA entry computations rely on the pinned snapshot's `!!`-notation
+evaluation behavior.
+
+**Next handoff:** finish backlog item 2 (walk-form similarity:
+`evals`-invariance interface plus irregular row-stochasticity), then
+expansion/cut interfaces as consumers emerge.
+
+## 2026-08-17T20:34:12Z — Irregular walk form: row-stochasticity + similarity
+
+**Run:** `20260817T203130Z-run-8`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** in-progress  
+**Milestone:** Finish backlog item 2's walk half: the general
+(irregular) walk transition matrix with proved row-stochasticity (the
+named Markov consumer) and the similarity identity
+`√D · L_walk · (1/√D) = L_sym` as proved hard crust.
+
+Evidence check recorded before editing: the walk Laplacian `I − D⁻¹A`
+is not symmetric for irregular graphs, so Scaffold's `evals` (defined
+only for `IsSymm`) does not apply to it; the deferred eigenvalue
+transfer needs charpoly-roots machinery for non-symmetric matrices,
+absent from the pinned Mathlib. The similarity *identity* is therefore
+the honest stopping point, with the transfer documented as a precisely
+named gap rather than a vague TODO.
+
+## 2026-08-17T20:43:20Z — Irregular walk form completed (backlog item 2 closed)
+
+**Run:** `20260817T203130Z-run-8`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** completed  
+**Milestone:** Close the walk half of backlog item 2: the general
+(irregular) walk transition matrix with proved row-stochasticity and the
+similarity identity to the symmetric normalized Laplacian. Pure hard
+crust, no new axioms.
+
+**Changes:** in `GraphTheory.Normalized`: `walkTransitionMatrix`
+(`D⁻¹A`, positive degrees), `walkTransitionMatrix_row_sum`
+(row-stochasticity on irregular graphs — removing the `d`-regularity
+restriction of the RandomWalk module's version; the named Markov
+consumer), `walkLaplacian` (`I − D⁻¹A`, documented as non-symmetric in
+general), and `degreeSqrt_mul_walkLaplacian_mul_degreeInvSqrt`
+(`√D · L_walk · (1/√D) = L_sym`, proved via the diagonal-algebra lemma
+`√D · D⁻¹ = 1/√D`). QA extended (96 declarations total): row sums on
+the 3-vertex path, computed walk entries (`P 1 0 = 1/2`, `P 0 1 = 1`),
+and the similarity identity instantiated entrywise. Backlog item 2
+marked closed with the eigenvalue-list transfer recorded as the
+precisely named residual gap.
+
+**Decisive commands and outcomes:** direct builds of
+`Scaffold.Mathlib.GraphTheory.Normalized` and
+`Scaffold.QA.SpectralGraph.Normalized_QA` pass; full `lake build`
+passes; all four hygiene scripts pass.
+
+**Verification:** 96 QA declarations (up from 93), zero `sorry`/`admit`
+under `Scaffold/`, 18 explicit cited axioms (unchanged).
+
+**Trust boundary:** unchanged; hard crust only.
+
+**Remaining risk:** the eigenvalue-list transfer needs a charpoly-roots
+interface for non-symmetric matrices (absent in the pinned Mathlib);
+until then, spectral statements about the walk form route through the
+similarity identity plus the symmetric `L_sym`.
+
+**Next handoff:** backlog item 3 (expansion/cut interfaces with named
+consumers) or the `spectral_persistence` retain-or-deprecate decision.
+
+## 2026-08-17T20:46:15Z — spectral_persistence deprecation decision
+
+**Run:** `20260817T204342Z-run-9`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** in-progress  
+**Milestone:** Close the standing `spectral_persistence`
+retain-or-deprecate decision (ready-queue item) from consumer evidence,
+per the architecture's upstream-replacement lifecycle.
+
+Evidence: grep shows zero non-QA consumers — the derived layer references
+it only in a comment, its only use is the QA deliberately exercising the
+compatibility surface, and the derived two-endpoint chain covers the
+motivating use. Decision: deprecate with a migration note (axiom retained
+through the compatibility window; removal is a later release decision,
+not a breaking change now). `@[deprecated]` probe-verified to apply to
+`axiom` declarations in this toolchain. Plan: annotate + migration note,
+linter-silence the deliberate QA use, update indexes/docs (davis_kahan
+source, SGT and perturbation maps, backlog standing decision,
+architecture debt, scoreboard).
+
+## 2026-08-17T20:49:57Z — spectral_persistence deprecated (decision closed)
+
+**Run:** `20260817T204342Z-run-9`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** completed  
+**Milestone:** Close the standing `spectral_persistence`
+retain-or-deprecate decision from consumer evidence, per the
+architecture's deprecation lifecycle; no new mathematics.
+
+**Changes:** `spectral_persistence` annotated `@[deprecated (since :=
+"2026-08-17")]` with a migration note in its doc (zero non-QA consumers;
+derived two-endpoint chain covers the motivating use; migration path:
+sum the two-endpoint bound over consecutive times or consume
+`davisKahanTwoPoint` directly). The attribute's applicability to `axiom`
+declarations was probe-verified first. `Dynamics_QA.lean` continues to
+exercise the deprecated compatibility surface with
+`set_option linter.deprecated false in` scoped to that one lemma (doc
+records why). Updated: davis_kahan source index, SGT and perturbation
+map entries, backlog standing decision, architecture §12 debt item,
+scoreboard interpretation (axiom count stays 18 until the compatibility
+window closes). Bonus hygiene: the derived module's use of Mathlib's
+deprecated `div_lt_div_iff` upgraded to `div_lt_div_iff₀`.
+
+**Decisive commands and outcomes:** `lake build` on
+`Scaffold.Mathlib.GraphTheory.Dynamics`,
+`Scaffold.QA.SpectralGraph.Dynamics_QA`, and
+`Scaffold.Derived.ProjectorDrift` pass; full `lake build` passes with
+zero deprecation warnings; all four hygiene scripts pass.
+
+**Verification:** 96 QA declarations, zero `sorry`/`admit` under
+`Scaffold/`; 18 explicit cited axioms (unchanged — deprecation, not
+removal).
+
+**Trust boundary:** effectively reduced by one admitted-but-unconsumed
+statement; formally unchanged until the compatibility window closes and
+the axiom is removed in a permitted release.
+
+**Remaining risk:** none new; the migration note must be revisited at
+the removal release.
+
+**Next handoff:** backlog item 3 — expansion and cut interfaces
+(edge-boundary and uniform-weight conductance variants), each admitted
+only with a named algorithm consumer.
+
+## 2026-08-17T20:53:04Z — Cut duality (hard crust)
+
+**Run:** `20260817T205021Z-run-10`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** in-progress  
+**Milestone:** Backlog item 3, first slice: the cut-duality structural
+facts (volume complementarity, boundary and conductance invariance under
+complementation, degenerate-cut guards) as proved statements in the SGT
+center. No axioms — the Cheeger inequalities remain the admitted
+boundary.
+
+Named consumers: spectral-partitioning sweep cuts and sparsest-cut
+statement shapes (backlog items 3–4) both assume cuts are
+partition-valued (invariant under choosing the other side); the Cheeger
+minimizer canonicalization consumes conductance invariance.

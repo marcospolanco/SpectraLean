@@ -1,0 +1,108 @@
+# SGT Backlog
+
+**Status:** Canonical backlog for the broad spectral-graph-theory program  
+**Last reviewed:** August 17, 2026
+
+This is the bounded, center-first backlog required by the strategy's
+center-out policy. Items are ranked by concrete reuse: each names the
+existing declarations it composes with, the consumers it unlocks, and
+its dependency path back to the SGT center. New bridge or application
+work is accepted only against an item listed here (or a revision of this
+document that argues the leverage case).
+
+The center today: `GraphTheory.Spectral` (Laplacians, sorted spectra,
+Rayleigh forms, projectors, projector algebra — all proved where stated),
+`GraphTheory.Cheeger` (normalized Laplacian, admitted Cheeger bounds),
+`GraphTheory.Dynamics` + `Derived.{EventStream,ProjectorDrift}`
+(retained compatibility/example package), the perturbation and
+concentration bridges.
+
+## Ranked items
+
+### 1. Random-walk / Markov interfaces (regular case) — **delivered**
+
+*Status:* implemented 2026-08-17 in `GraphTheory.RandomWalk` (all proved,
+no axioms): `transitionMatrix`, row-stochasticity for `d`-regular graphs,
+`randomWalkLaplacian`, and the two interoperability theorems
+(`randomWalkLaplacian_eq_regularNormalizedLaplacian`,
+`randomWalkLaplacian_eq_smul_laplacian`), QA'd at a concrete two-vertex
+graph.
+
+*Unlocks:* Markov-chain consumers of the Cheeger bounds; transfer of
+combinatorial-Laplacian statements to the walk view by homogeneity; the
+grounding for item 2's irregular adapters.
+
+### 2. Weighted/normalized Laplacian interoperability (irregular case) — **delivered (core)**
+
+*Status:* the core delivered 2026-08-17 in `GraphTheory.Normalized` (all
+proved, no axioms). The recorded obstruction — no matrix square root in
+the pinned Mathlib — was bypassed by the observation that only a
+*diagonal* square root is needed (`Real.sqrt` per vertex):
+`degreeSqrt`/`degreeInvSqrt`, the general symmetric
+`normalizedLaplacian A = 1 - (1/√D) A (1/√D)`, proved symmetry, the
+congruence `√D L_sym √D = laplacian A` (square roots cancel), and
+agreement with `regularNormalizedLaplacian` on the regular cone. QA at a
+3-vertex path (degrees 1, 2, 1) and the regular edge.
+
+*Remaining in this item:* ~~spectral similarity transfer to the walk form~~
+delivered 2026-08-17 as the proved similarity identity
+`√D · L_walk · (1/√D) = L_sym` plus irregular row-stochasticity
+(`walkTransitionMatrix_row_sum`); the *eigenvalue-list* transfer is the
+precisely named residual gap — `L_walk` is not symmetric for irregular
+graphs, so `evals` does not apply to it, and a
+characteristic-polynomial-roots interface for non-symmetric matrices is
+absent from the pinned Mathlib.
+
+### 3. Expansion and cut interfaces
+
+*Have:* `vol`, `boundary`, `conductance`, `cheegerConstant`
+(volume-based), admitted Cheeger bounds for regular graphs.
+
+*Plan:* edge-boundary and uniform-weight variants of conductance;
+sparsest-cut statement shapes; cut/measure duality interfaces used by
+local algorithms. Each variant must name the algorithm consumer that
+needs it before admission.
+
+*Unlocks:* cut-based algorithm interfaces; localization results that
+consume random-walk returns.
+
+### 4. Spectral algorithms (application ring)
+
+*Gate:* items 1–3 must make the inner interfaces credible first. No new
+algorithm statement is admitted until its dependency path is explicit
+and its inner ring is certified.
+
+*Candidate shapes:* spectral partitioning through `lambda2`/Fiedler
+vectors (needs a Fiedler-vector interface — currently absent); walk
+mixing through the transition spectrum.
+
+### 5. Graph-dynamical systems (conditional)
+
+*Only when a named SGT consumer needs them* (per strategy): diffusion /
+heat flow `e^{-tL}`, consensus maps, synchronization, graph semigroups.
+The retained persistence package is a compatibility example, not a
+roadmap driver.
+
+### 6. Thermodynamics / statistical mechanics (conditional)
+
+*Gated on item 1–2 stability:* entropy and reversibility interfaces,
+Dirichlet/functional inequalities, dissipation. No admission before the
+Markov prerequisites are stable.
+
+## Standing decisions
+
+- The per-step `spectral_persistence` axiom was **deprecated
+  2026-08-17** (decision closed): zero non-QA consumers, motivating use
+  covered by the derived two-endpoint chain. Retained through the
+  compatibility window with a migration note; removal is a later release
+  decision. Do not extend its theorem family.
+- Removed subgaussian statements (moment growth, linear combinations,
+  centering, sums) are re-admitted only when a consumer names them.
+- Horn–Johnson/Chung locator confirmation awaits a physical or publisher
+  copy; numbers are not invented.
+
+## Source provenance
+
+Backlog ranking follows [Strategy](1_STRATEGY.md) (center-out, leverage
+test) and the operator's 2026-08-17 broad-SGT reorientation recorded in
+[AGENT_ACTIVITY.md](AGENT_ACTIVITY.md).

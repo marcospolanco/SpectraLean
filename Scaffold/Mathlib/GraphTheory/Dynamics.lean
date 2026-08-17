@@ -85,11 +85,23 @@ phrased through the one-step gap lower bound; the per-step engine is the
 projector form of Davis–Kahan. The `1 ≤` version omits the sharper
 constants available in the two papers.
 
+Deprecated 2026-08-17: this axiom has no non-QA consumers, and the
+derived layer now covers the motivating persistence use through the
+two-endpoint chain — `SpectralGraphTheory.Derived.davisKahanTwoPoint`
+(Davis–Kahan + Weyl, proved steps only) and
+`SpectralGraphTheory.Derived.eventStreamProjectorDrift` (with the Azuma
+event-stream tail). Migration: for per-step bounds, sum the two-endpoint
+bound over consecutive times (cruder constant, no admission), or consume
+`davisKahanTwoPoint` directly at the times of interest. Retained through
+the compatibility window per the deprecation policy; removal is a later
+release decision.
+
 QA: exercised by
 `SpectralGraphTheory.QA.persistence_zero_perturbation_QA` in
 `Scaffold/QA/SpectralGraph/Dynamics_QA.lean`, which checks the zero-event
-degenerate case against the axiom's interface.
+degenerate case against the (deprecated) compatibility surface.
 -/
+@[deprecated (since := "2026-08-17")]
 axiom spectral_persistence
     (A : TimeVaryingGraph V) (k : Fin (Fintype.card V))
     (hk : (k : ℕ) + 1 < Fintype.card V)

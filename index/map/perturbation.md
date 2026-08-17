@@ -14,18 +14,18 @@ spectral stability.
 
 **Module**: `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl`
 
-| Axiom | Description | Source |
-|-------|-------------|--------|
-| `weyl_inequality` | Each sorted eigenvalue moves by at most `‖E‖` under a symmetric perturbation | [Weyl 1912 / Bhatia 1997](../sources/weyl_1912_bhatia.md) |
-| `spectral_gap_stability` | A gap shrinks by at most `2‖E‖` | [Weyl 1912 / Bhatia 1997](../sources/weyl_1912_bhatia.md) |
+| Declaration | Kind | Description | Source |
+|-------------|------|-------------|--------|
+| `weyl_inequality` | axiom | Each sorted eigenvalue moves by at most `‖E‖` under a symmetric perturbation | [Weyl 1912 / Bhatia 1997](../sources/weyl_1912_bhatia.md) |
+| `spectral_gap_stability` | proved (from `weyl_inequality`) | A gap shrinks by at most `2‖E‖` | corollary; see [Weyl 1912 / Bhatia 1997](../sources/weyl_1912_bhatia.md) |
 
 ### Davis–Kahan
 
 **Module**: `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan`
 
-| Axiom | Description | Source |
-|-------|-------------|--------|
-| `davis_kahan_sin_theta` | Projector rotation `≤ ‖E‖/δ` under two-sided spectral separation | [Davis & Kahan 1970](../sources/davis_kahan_1970.md) |
+| Declaration | Kind | Description | Source |
+|-------------|------|-------------|--------|
+| `davis_kahan_sin_theta` | axiom | Projector rotation `≤ ‖E‖/δ` under the two-cluster separation `λ_{k+1}(A+E) - λ_k(A) ≥ δ` (single-pair form, matching Yu–Wang–Samworth Thm 2) | [Davis & Kahan 1970](../sources/davis_kahan_1970.md) |
 
 ### Matrix Update Identities (bridge utilities)
 
@@ -47,8 +47,10 @@ definitions live in `Scaffold.Mathlib.GraphTheory.Spectral`).
 
 - `weyl_inequality` / `spectral_gap_stability` control how far event
   streams can move Laplacian spectra ([Spectral Graph Theory map](spectral_graph.md)).
-- `davis_kahan_sin_theta` is the per-step engine of the admitted
-  `spectral_persistence` principle.
+- `davis_kahan_sin_theta` is the engine of the derived projector-drift
+  chain (`Derived.davisKahanTwoPoint`, `Derived.eventStreamProjectorDrift`)
+  and was the engine of the now-deprecated (2026-08-17)
+  `spectral_persistence` compatibility axiom.
 
 ## See Also
 

@@ -60,13 +60,12 @@ spectral-gap hypothesis: if `B` has spectral gap at least
 `B` to `C` by at most `‖C − B‖ / δ`.
 
 Dependency status: derived from the admitted `davis_kahan_sin_theta`
-(Davis–Kahan sin Θ) and `weyl_inequality` (Weyl), plus the proved
-`evals_sorted` monotonicity and `initialProjector_congr` transport.
-Conditional on those two axioms.
+(Davis–Kahan sin Θ, single-pair cluster separation) and `weyl_inequality`
+(Weyl, at the gap index only). Conditional on those two axioms.
 
-The gap hypothesis is honest: by Weyl, each eigenvalue of `C = B + E`
-stays within `‖E‖` of `B`'s, so `evals_C j − evals_B i ≥ gap_B − ‖E‖` for
-`i ≤ k < j`, which is at least `δ` under the hypothesis.
+The gap hypothesis is honest: by Weyl at index `k + 1`, the bottom of the
+upper cluster of `C = B + E` stays above the bottom of the upper cluster
+of `B` minus `‖E‖`, so `λ_{k+1}(C) - λ_k(B) ≥ gap_B - ‖E‖ ≥ δ`.
 
 QA: exercised by `davisKahanTwoPoint_self_QA` in
 `Scaffold/QA/Derived/ProjectorDrift_QA.lean` (instantiation at `C = B`).
@@ -77,18 +76,11 @@ theorem davisKahanTwoPoint (B C : Matrix V V ℝ) (hB : B.IsSymm)
     (hδle : δ ≤ spectralGap B hB k hk - ‖C - B‖) :
     ‖initialProjector C hC k - initialProjector B hB k‖ ≤ ‖C - B‖ / δ := by
   have hE : (C - B).IsSymm := hC.sub hB
+  have hw := abs_le.mp (weyl_inequality B (C - B) hB hE ⟨(k : ℕ) + 1, hk⟩)
+  have hgapB : spectralGap B hB k hk
+      = evals hB ⟨(k : ℕ) + 1, hk⟩ - evals hB ⟨(k : ℕ), k.isLt⟩ := rfl
   have hdk := davis_kahan_sin_theta B (C - B) hB (hB.add hE) k hk δ hδ
-    (by
-      intro i j hi hj
-      have hweyl := weyl_inequality B (C - B) hB hE j
-      have hmono_i : evals hB i ≤ evals hB ⟨(k : ℕ), k.isLt⟩ :=
-        evals_sorted hB (Fin.le_def.2 hi)
-      have hmono_j : evals hB ⟨(k : ℕ) + 1, hk⟩ ≤ evals hB j :=
-        evals_sorted hB (Fin.le_def.2 hj)
-      have hgapdef : spectralGap B hB k hk
-          = evals hB ⟨(k : ℕ) + 1, hk⟩ - evals hB ⟨(k : ℕ), k.isLt⟩ := rfl
-      have habs := abs_le.mp hweyl
-      linarith)
+    (by rw [hgapB] at hδle; linarith)
   rw [initialProjector_congr (by abel : B + (C - B) = C) (hB.add hE) hC k] at hdk
   exact hdk
 
@@ -159,7 +151,7 @@ theorem eventStreamProjectorDrift {Ω : Type*} {mΩ : MeasurableSpace Ω}
         linarith)
     have hkey : ‖laplacianSequence (A ω) m - laplacianSequence (A ω) 0‖
         / (γ - s) < s / (γ - s) := by
-      rw [div_lt_div_iff hδpos hδpos]
+      rw [div_lt_div_iff₀ hδpos hδpos]
       exact mul_lt_mul_of_pos_right hnorm hδpos
     exact absurd hω (by linarith)
   exact le_trans (measure_mono hincl)

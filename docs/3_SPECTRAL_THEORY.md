@@ -1,9 +1,12 @@
-# Spectral Theory and Algorithmic Pipeline
+# Spectral Theory: Retained Example
 
 **Status:** Canonical research overview  
 **Last reviewed:** August 17, 2026
 
-This pillar separates the mathematical hypothesis, its formal dependencies, and the proposed software pipeline. Nothing labeled “hypothesis” below should be read as a proved result.
+This document records the existing spectral-persistence example. Persistence
+is not Scaffold's research goal: it is retained as a compatibility/example
+package because its theorems already exist. Nothing labeled “hypothesis”
+below should be read as a foundationally proved result.
 
 ## 1. Dynamic-network model
 
@@ -46,9 +49,10 @@ Steps 1 and 2 have cited axiom-level interfaces in Scaffold. The full chain, par
 
 The implementation must avoid constant placeholder definitions for mathematical objects. It must also state symmetry, positivity, independence, boundedness, and nonzero-gap assumptions rather than relying on prose.
 
-## 4. x90 coordination-detection pipeline
+## 4. Status of the persistence example
 
-x90 is a proposed detector based on the evolution of a graph’s spectrum. Its core flow is:
+The x90 detector and its persistence-oriented pipeline are retained research
+material, not an active implementation agenda. Its core flow was:
 
 ```text
 events or snapshots
@@ -86,7 +90,13 @@ normalized score and regime classification
 - Spectral similarity is not semantic identity. Evaluation must include false positives, adversarial structures, and temporal confounders.
 - The detector should expose uncertainty or quality flags when the eigensolver, truncation bound, or input window is inadequate.
 
-## 5. Validation program
+## 5. Scope boundary
+
+This retained example does not prescribe Scaffold's next research milestone.
+New work follows the center-out strategy and the existing adjacent-research
+documentation.
+
+## 6. Validation program
 
 The research pipeline should advance through four gates:
 
@@ -97,14 +107,11 @@ The research pipeline should advance through four gates:
 
 A result must report which gate it has passed. Lean compilation alone does not establish numerical stability or empirical validity.
 
-## 6. Immediate proof obligations
+## 7. Immediate scope rule
 
-- Define the precise cumulative perturbation and norm used in the persistence ratio.
-- Relate adjacency events to Laplacian perturbations with degree effects included.
-- Choose projector-based or angle-based subspace distance and align it with the Davis–Kahan API.
-- State the event independence or martingale assumptions needed by the selected concentration bound.
-- Prove or axiomatize an end-to-end bound only after its constants and gap conditions are explicit.
-- Connect the bound to x90 observables without equating a proxy with the target phenomenon.
+Do not extend persistence or x90 merely because their existing interfaces are
+available. Choose the smallest center-first SGT milestone with multiple
+plausible consumers.
 
 ## Source provenance
 

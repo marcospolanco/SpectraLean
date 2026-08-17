@@ -19,8 +19,9 @@ import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl
 # QA for the Weyl perturbation interface
 
 Zero-perturbation instances of `weyl_inequality` and
-`spectral_gap_stability`. These are real Lean proofs deriving
-consequences from the admitted axioms; they do not prove the axioms.
+`spectral_gap_stability`. The former is an admitted axiom; the latter is
+a theorem proved from it. These are real Lean proofs deriving
+consequences from the admitted axiom; they do not prove it.
 -/
 
 open scoped Matrix Matrix.L2OpNorm

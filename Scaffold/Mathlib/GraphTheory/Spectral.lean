@@ -45,6 +45,7 @@ import Mathlib.LinearAlgebra.Matrix.Symmetric
 import Mathlib.LinearAlgebra.Matrix.Spectrum
 
 open scoped BigOperators Matrix
+open InnerProductSpace
 
 namespace SpectralGraphTheory
 
@@ -275,9 +276,11 @@ the coordinate inner product of the `i`-th and `j`-th eigenvectors is
 product reduces to the coordinate sum by `PiLp.inner_apply`. -/
 theorem eigvecOf_inner (M : Matrix V V ℝ) (hM : M.IsSymm) (i j : V) :
     ∑ k, eigvecOf M hM i k * eigvecOf M hM j k = if i = j then 1 else 0 := by
-  have h := (isHermitian_of_isSymm hM).eigenvectorBasis.orthonormal i j
-  rw [PiLp.inner_apply] at h
-  simpa using h
+  have h := (isHermitian_of_isSymm hM).eigenvectorBasis.orthonormal
+  rw [orthonormal_iff_ite] at h
+  have hij := h i j
+  rw [PiLp.inner_apply] at hij
+  simpa [RCLike.inner_apply] using hij
 
 /-- Completeness of the eigenbasis: the synthesis
 `∑ i, v i a * v i b` recovers the identity matrix. Proved from
@@ -287,14 +290,26 @@ theorem eigvecOf_complete (M : Matrix V V ℝ) (hM : M.IsSymm) (a b : V) :
     ∑ i, eigvecOf M hM i a * eigvecOf M hM i b = if a = b then 1 else 0 := by
   have h := (isHermitian_of_isSymm hM).eigenvectorBasis.sum_repr'
     (EuclideanSpace.single a (1 : ℝ))
-  funext b
-  have hcoeff : ∀ i : V, ⟪(isHermitian_of_isSymm hM).eigenvectorBasis i,
-      EuclideanSpace.single a (1 : ℝ)⟫_ℝ = eigvecOf M hM i a := by
+  have hcoeff : ∀ i : V,
+      ⟪(isHermitian_of_isSymm hM).eigenvectorBasis i,
+        EuclideanSpace.single a (1 : ℝ)⟫_ℝ = eigvecOf M hM i a := by
     intro i
-    rw [PiLp.inner_apply]
-    simp [EuclideanSpace.single_apply]
-  simp only [hcoeff, smul_eq_mul]
-  simpa using congrFun h b
+    rw [EuclideanSpace.inner_single_right]
+    simp only [smul_eq_mul, one_mul, starRingEnd_apply]
+    rfl
+  have hb := congrFun h b
+  simp only [hcoeff] at hb
+  have hsum : ((∑ i : V, eigvecOf M hM i a •
+      (isHermitian_of_isSymm hM).eigenvectorBasis i : V → ℝ)) b
+      = ∑ i : V, eigvecOf M hM i a * eigvecOf M hM i b := by
+    rw [Finset.sum_apply]
+    exact Finset.sum_congr rfl fun i _ => rfl
+  rw [← hsum]
+  refine hb.trans ?_
+  by_cases hab : a = b
+  · subst hab; simp
+  · rw [if_neg hab, EuclideanSpace.single_apply,
+      if_neg (fun h => hab h.symm)]
 
 /-- Spectral projectors are idempotent: `P_c * P_c = P_c`. Entrywise, the
 product expands into outer products of eigenvectors whose cross terms
@@ -331,7 +346,7 @@ theorem spectralProjector_idempotent (M : Matrix V V ℝ) (hM : M.IsSymm)
     rw [Finset.sum_comm]
     exact Finset.sum_congr rfl fun i _ => Finset.sum_comm
   rw [hreorder]
-  refine Finset.sum_congr rfl fun i _ => ?_
+  refine Finset.sum_congr rfl fun i hi => ?_
   have hinner : ∀ j : V,
       (∑ k : V, (eigvecOf M hM i a * eigvecOf M hM i k) *
           (eigvecOf M hM j k * eigvecOf M hM j b)) =
@@ -343,17 +358,18 @@ theorem spectralProjector_idempotent (M : Matrix V V ℝ) (hM : M.IsSymm)
             (eigvecOf M hM j k * eigvecOf M hM j b) =
         eigvecOf M hM i a * eigvecOf M hM j b *
           (eigvecOf M hM i k * eigvecOf M hM j k) := fun k => by ring
-    rw [Finset.sum_congr rfl (fun k _ => hterm k), Finset.sum_mul,
+    rw [Finset.sum_congr rfl (fun k _ => hterm k), ← Finset.mul_sum,
       eigvecOf_inner]
   rw [Finset.sum_congr rfl (fun j _ => hinner j)]
-  by_cases hij : i = j
-  · subst hij
+  have hsingle : ∑ x ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+      eigvecOf M hM i a * eigvecOf M hM x b * (if i = x then 1 else 0)
+      = eigvecOf M hM i a * eigvecOf M hM i b := by
+    rw [Finset.sum_eq_single i
+      (fun x _ hx => by
+        rw [if_neg (fun h => hx h.symm), mul_zero])
+      (fun hcon => absurd hi hcon)]
     simp
-  · have hzero : ∀ j ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
-      eigvecOf M hM i a * eigvecOf M hM j b * (if i = j then 1 else 0) = 0 := by
-    intro j _
-    rw [if_neg hij, mul_zero]
-  rw [Finset.sum_congr rfl hzero, Finset.sum_const_zero]
+  rw [hsingle]
 
 /-- Below the whole spectrum the spectral projector vanishes: the
 threshold filter is empty. -/
@@ -373,12 +389,13 @@ theorem spectralProjector_eq_one (M : Matrix V V ℝ) (hM : M.IsSymm)
     (c : ℝ) (h : ∀ i, eigvalOf M hM i ≤ c) :
     spectralProjector M hM c = 1 := by
   have hS : (Finset.univ : Finset V).filter (fun i => eigvalOf M hM i ≤ c)
-      = Finset.univ :=
-    Finset.filter_eq_univ_iff.2 (fun x _ => h x)
+      = Finset.univ := by
+    ext x
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    exact iff_of_true (h x) trivial
   ext a b
-  simp only [spectralProjector, hS, Finset.sum_univ]
-  simp [eigvecOf_complete]
-  rw [Matrix.one_apply]
+  simp only [spectralProjector, Matrix.of_apply, hS]
+  rw [eigvecOf_complete, Matrix.one_apply]
 
 /-- The invariant-subspace projectors of the SGT center are idempotent. -/
 theorem initialProjector_idempotent (M : Matrix V V ℝ) (hM : M.IsSymm)
@@ -451,6 +468,55 @@ theorem conductance_ge_cheegerConstant (A : WAdj (V := V))
       exact conductance_nonneg A hnonneg T⟩
   have hglb := Real.isGLB_sInf ⟨conductance A S, hmem⟩ hbd
   exact hglb.1 hmem
+
+/-!
+### Cut duality (proved)
+
+A cut is a property of the *partition* `{S, Sᶜ}`, not of the chosen
+side. These duality facts are what cut-consuming algorithms (sweep
+cuts in spectral partitioning, sparsest-cut statement shapes) assume;
+they also let the Cheeger minimizer be canonicalized up to
+complementation.
+-/
+
+/-- Volume complementarity: the volumes of a set and its complement sum
+to the total volume `vol A univ`. -/
+theorem vol_compl (A : WAdj (V := V)) (S : Finset V) :
+    vol A S + vol A Sᶜ = vol A (Finset.univ : Finset V) :=
+  Finset.sum_add_sum_compl S (fun i => deg A i)
+
+/-- The edge boundary is a property of the partition, not the chosen
+side: `boundary A S = boundary A Sᶜ` for symmetric weights. Proof: the
+complement's boundary sums `A i j` over `(Sᶜ) × S`, which is the
+original's index set `(S × Sᶜ)` after `Finset.sum_comm`, with the
+summand equal by symmetry. -/
+theorem boundary_compl (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (S : Finset V) :
+    boundary A S = boundary A Sᶜ := by
+  simp only [boundary, compl_compl]
+  rw [Finset.sum_comm]
+  exact Finset.sum_congr rfl fun i _ =>
+    Finset.sum_congr rfl fun j _ => (hA.apply j i).symm
+
+/-- Conductance is invariant under complementation: both the boundary
+(duality) and the two volumes entering the denominator (complementarity
+and symmetry of `min`) agree. Consequence for the Cheeger minimizer:
+the minimizing cut may be canonicalized to either side, as sweep-cut
+consumers require. -/
+theorem conductance_compl (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (S : Finset V) :
+    conductance A S = conductance A Sᶜ := by
+  rw [conductance, conductance, boundary_compl A hA, compl_compl, min_comm]
+
+/-- Degenerate-cut guard: the boundary of the empty set vanishes. -/
+theorem boundary_empty (A : WAdj (V := V)) : boundary A ∅ = 0 := by
+  simp [boundary]
+
+/-- Degenerate-cut guard: the boundary of the full vertex set vanishes
+(its complement is empty). -/
+theorem boundary_univ (A : WAdj (V := V)) :
+    boundary A (Finset.univ : Finset V) = 0 := by
+  simp [boundary]
 
 /-!
 ## 4. Laplacian quadratic form (proved)

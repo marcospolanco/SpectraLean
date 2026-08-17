@@ -47,7 +47,11 @@ Source:
 
 Statement differences: eigenvalues are the sorted `evals` of
 `SpectralGraphTheory` and the norm is the ℓ² operator norm, matching the
-matrix-first representation convention of the SGT center.
+matrix-first representation convention of the SGT center. The cited
+theorem is the general additive Weyl inequality; the Lean statement is
+its spectral-norm corollary for a symmetric perturbation, obtained by
+combining the additive bound with `λ₁(E) ≤ ‖E‖` and
+`λₙ(E) ≥ -‖E‖`.
 
 QA: exercised by `zero_perturbation_QA` in
 `Scaffold/QA/Perturbation/Weyl_QA.lean`, which instantiates `E = 0` and
@@ -61,17 +65,31 @@ axiom weyl_inequality (A E : Matrix V V ℝ) (hA : A.IsSymm) (hE : E.IsSymm)
 matrix by at most `ε` in operator norm, the gap at index `k` shrinks by
 at most `2ε` (each endpoint of the gap moves by at most `ε`).
 
+Dependency status: proved from the admitted `weyl_inequality` (Weyl at
+both gap endpoints plus arithmetic); it is conditional on that axiom but
+not itself admitted.
+
 Source:
-- Corollary of Weyl's inequality as stated above; see Bhatia, "Matrix
+- Corollary of `weyl_inequality` as stated above; see Bhatia, "Matrix
   Analysis", Springer, 1997, Chapter III.2.
 
 QA: exercised by `spectral_gap_zero_perturbation_QA` in
 `Scaffold/QA/Perturbation/Weyl_QA.lean` (zero-perturbation instance).
 -/
-axiom spectral_gap_stability (A E : Matrix V V ℝ) (hA : A.IsSymm)
+theorem spectral_gap_stability (A E : Matrix V V ℝ) (hA : A.IsSymm)
     (hE : E.IsSymm) (k : Fin (Fintype.card V))
     (hk : (k : ℕ) + 1 < Fintype.card V) (ε : ℝ) (hnorm : ‖E‖ ≤ ε)
     (γ : ℝ) (hγ : spectralGap A hA k hk ≥ γ) :
-    spectralGap (A + E) (hA.add hE) k hk ≥ γ - 2 * ε
+    spectralGap (A + E) (hA.add hE) k hk ≥ γ - 2 * ε := by
+  have hw1 := abs_le.mp (weyl_inequality A E hA hE ⟨(k : ℕ) + 1, hk⟩)
+  have hw2 := abs_le.mp (weyl_inequality A E hA hE ⟨(k : ℕ), k.isLt⟩)
+  have hgapA : spectralGap A hA k hk
+      = evals hA ⟨(k : ℕ) + 1, hk⟩ - evals hA ⟨(k : ℕ), k.isLt⟩ := rfl
+  have hgapAE : spectralGap (A + E) (hA.add hE) k hk
+      = evals (hA.add hE) ⟨(k : ℕ) + 1, hk⟩
+        - evals (hA.add hE) ⟨(k : ℕ), k.isLt⟩ := rfl
+  rw [hgapA] at hγ
+  rw [hgapAE]
+  linarith
 
 end Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation

@@ -1,18 +1,65 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "ollama/qwen2.5-coder:32b",
-  "small_model": "ollama/llama3:latest",
+  "model": "zhipuai-coding-plan/glm-5.3",
+  "small_model": "zhipuai-coding-plan/glm-5.3",
+  "default_agent": "scaffold",
+  "enabled_providers": ["zhipuai-coding-plan"],
+  "share": "disabled",
+  "subagent_depth": 1,
+  "instructions": [
+    "docs/1_STRATEGY.md",
+    "docs/2_ARCHITECTURE.md",
+    "governance/CONTRIBUTING.md"
+  ],
   "agent": {
     "build": {
-      "model": "ollama/qwen2.5-coder:32b"
+      "model": "zhipuai-coding-plan/glm-5.3",
+      "variant": "high"
     },
     "plan": {
-      "model": "ollama/qwen2.5-coder:32b"
+      "model": "zhipuai-coding-plan/glm-5.3",
+      "variant": "high"
+    },
+    "scaffold": {
+      "description": "Autonomously advances the highest-leverage safe Scaffold milestone from the spectral graph theory center outward.",
+      "mode": "primary",
+      "model": "zhipuai-coding-plan/glm-5.3",
+      "variant": "high",
+      "steps": 200,
+      "prompt": "{file:./.opencode/prompts/scaffold.txt}",
+      "permission": {
+        "*": "allow",
+        "external_directory": "deny",
+        "question": "deny",
+        "bash": {
+          "*": "allow",
+          "rm -rf *": "deny",
+          "sudo *": "deny",
+          "git reset --hard*": "deny",
+          "git clean*": "deny",
+          "git checkout --*": "deny",
+          "git restore*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "gh pr create*": "deny",
+          "gh pr merge*": "deny"
+        }
+      }
     },
     "prover": {
-      "description": "Specialized formal theorem prover for Lean 4 tactic prediction, proof search, and discharging sorries",
+      "description": "Reviews Lean theorem shapes and proof obligations without owning the main task.",
       "mode": "subagent",
-      "model": "ollama/deep-prover:latest"
+      "model": "zhipuai-coding-plan/glm-5.3",
+      "variant": "high"
+    }
+  },
+  "command": {
+    "pursue": {
+      "template": "Autonomously advance Scaffold by completing the highest-leverage safe increment available. Start from current repository evidence, follow the center-out SGT policy, implement a coherent milestone, verify it proportionately, and update canonical status documentation when facts change. Do not stop after analysis or a plan. Optional operator direction: $ARGUMENTS",
+      "description": "Complete the next high-leverage Scaffold milestone",
+      "agent": "scaffold",
+      "model": "zhipuai-coding-plan/glm-5.3",
+      "variant": "high"
     }
   }
 }

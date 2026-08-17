@@ -147,7 +147,6 @@ Community process is defined by `governance/CONTRIBUTING.md`, `MAINTAINERS.md`, 
 - The planned derived layer is not present.
 - Some citation mappings are incomplete.
 - The default executable target refers to a missing `Main.lean` file.
-- The root `spectral.lean` duplicates `Scaffold/Mathlib/GraphTheory/Spectral.lean` and needs a separate source-layout decision.
 
 These are tracked as facts, not hidden by the target architecture.
 

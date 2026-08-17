@@ -11,7 +11,7 @@
 
   Compilation Status: 📋 TODO
   -------------------------------
-  Import fixed to use `spectral.lean`.
+  Imports the canonical `Scaffold.Mathlib.GraphTheory.Spectral` module.
   Next: Verify compilation with `lake build` (waiting for mathlib download).
 
   Notes

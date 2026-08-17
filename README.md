@@ -97,10 +97,15 @@ Scaffold/QA/        fully proved interface checks
 Scaffold/Internal/  internal utilities
 index/              source mappings and domain maps
 docs/               canonical strategy, architecture, theory, partnerships, and QA
+governance/         contribution, maintenance, conduct, and release process
+research/papers/    reference papers and research artifacts
 research/archive/   provenance and superseded reports—not current policy
+scripts/            documentation and policy checks
 ```
 
 `Scaffold/Derived/` is a planned layer and is not currently implemented.
+
+The remaining root files are repository entry points or tool configuration: `Scaffold.lean` is the Lake library root; `lakefile.lean`, `lake-manifest.json`, and `lean-toolchain` pin the build; and `opencode.json` configures project-local agent tooling. Lean modules otherwise belong under `Scaffold/`.
 
 ## Current maturity
 
@@ -154,6 +159,16 @@ python3 scripts/check_markdown_links.py
 ```
 
 `lake build` is currently a diagnostic command and is expected to fail until the build-target issue is repaired.
+
+### Autonomous OpenCode pursuit
+
+The repository includes a non-interactive OpenCode workflow using `zhipuai-coding-plan/glm-5.3` with the `high` reasoning variant:
+
+```sh
+scripts/opencode-pursue
+```
+
+Pass an optional priority as an argument. The project agent follows `AGENTS.md`, selects a bounded high-leverage milestone, implements and verifies it, and is denied external-directory access and publishing or destructive Git commands. See [`scripts/README.md`](scripts/README.md) for the exact safety boundary.
 
 ## Canonical documentation
 

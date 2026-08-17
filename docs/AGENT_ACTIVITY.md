@@ -696,3 +696,43 @@ Named consumers: spectral-partitioning sweep cuts and sparsest-cut
 statement shapes (backlog items 3–4) both assume cuts are
 partition-valued (invariant under choosing the other side); the Cheeger
 minimizer canonicalization consumes conductance invariance.
+
+## 2026-08-17T21:01:11Z — Cut duality delivered (backlog item 3, first slice)
+
+**Run:** `20260817T205021Z-run-10`  
+**Session:** `ses_feef5b005ffeSm12pxYFaQuzoE`  
+**Status:** completed  
+**Milestone:** Backlog item 3, first slice: the cut-duality structural
+facts in the SGT center — a cut is a property of the partition, not the
+chosen side. Pure hard crust, no new axioms; the Cheeger inequalities
+remain the admitted boundary.
+
+**Changes:** in `GraphTheory.Spectral`: `vol_compl` (volume
+complementarity via `Finset.sum_add_sum_compl`),
+`boundary_compl` (boundary invariance under complementation for
+symmetric weights, via `Finset.sum_comm` + `IsSymm`),
+`conductance_compl` (conductance invariance — the Cheeger minimizer can
+be canonicalized to either side, the interface sweep-cut consumers
+require), `boundary_empty` / `boundary_univ` (degenerate-cut guards).
+New QA `SpectralGraph/Cuts_QA.lean` (11 declarations) at the 3-vertex
+path: degrees (1,2,1), the singleton cut's boundary computing to `1`
+via row-sum-minus-diagonal, duality and conductance invariance
+instantiated, total volume `4`, guards evaluated. SGT index map,
+backlog item 3 "Have" list, scoreboard, and README updated.
+
+**Decisive commands and outcomes:** direct builds of
+`Scaffold.Mathlib.GraphTheory.Spectral` and
+`Scaffold.QA.SpectralGraph.Cuts_QA` pass; full `lake build` passes with
+zero deprecation warnings; all four hygiene scripts pass.
+
+**Verification:** 107 QA declarations (up from 96), zero `sorry`/`admit`
+under `Scaffold/`, 18 explicit cited axioms (unchanged).
+
+**Trust boundary:** unchanged; hard crust only.
+
+**Remaining risk:** none new. Backlog item 3's further variants
+(edge-boundary and uniform-weight conductance) remain gated on named
+algorithm consumers.
+
+**Next handoff:** remaining backlog item 3 variants with named
+consumers, or the backlog item 4 gating review (spectral algorithms).

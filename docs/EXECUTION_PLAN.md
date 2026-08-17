@@ -72,23 +72,24 @@ similarity identity instantiated entrywise).
 (edge-boundary and uniform-weight conductance variants), each admitted
 only with a named algorithm consumer.
 
-**Active slice (run 10, 2026-08-17, in progress): cut duality (hard
-crust, no axioms).** The existing cut surface (`vol`, `boundary`,
-`conductance`, `cheegerConstant`) has nonnegativity but not the duality
-facts that every cut-consuming algorithm implicitly assumes: a cut is a
-property of the *partition*, not the chosen side. Delivering in
-`GraphTheory.Spectral` (all proved): `vol_compl`
-(`vol S + vol Sᶜ = vol univ` — total-volume bookkeeping),
-`boundary_compl` (`boundary S = boundary Sᶜ` for symmetric `A`, via
-`Finset.sum_comm` + symmetry), `conductance_compl`
-(`conductance S = conductance Sᶜ` — the Cheeger minimizer can be
-canonicalized up to complement; feeds the sweep-cut consumer),
-`boundary_empty`/`boundary_univ` (degenerate-cut guards). Named
-consumers: spectral-partitioning sweep cuts and sparsest-cut statement
-shapes (backlog items 3–4); no admission — the Cheeger axioms remain the
-boundary for the inequalities themselves. QA at the 3-vertex path
-(boundary of `{0}` and of its complement `{1,2}` both compute to `1`,
-and conductance invariance instantiates).
+**Active slice (run 10, 2026-08-17): cut duality — delivered.** The
+existing cut surface (`vol`, `boundary`, `conductance`,
+`cheegerConstant`) had nonnegativity but not the duality facts that
+every cut-consuming algorithm assumes. Delivered in
+`GraphTheory.Spectral` (all proved, no axioms): `vol_compl`
+(`vol S + vol Sᶜ = vol univ`), `boundary_compl` (`boundary S =
+boundary Sᶜ` for symmetric `A`, via `Finset.sum_comm` + symmetry),
+`conductance_compl` (`conductance S = conductance Sᶜ` — Cheeger
+minimizer canonicalization; the sweep-cut consumer interface),
+`boundary_empty`/`boundary_univ` (degenerate-cut guards). QA at the
+3-vertex path (`SpectralGraph/Cuts_QA.lean`, 11 declarations):
+singleton boundary computes to `1`, duality and conductance invariance
+instantiate, volume complementarity totals `4`, guards evaluate.
+Backlog item 3's "Have" list updated.
+
+**Next slice (open):** remaining backlog item 3 variants — edge-boundary
+and uniform-weight conductance — each to be admitted only with a named
+algorithm consumer; or backlog item 4 gating review.
 
 **Decision milestone (run 9, 2026-08-17): `spectral_persistence`
 deprecated — decision closed.** Consumer inventory (grep evidence): the
@@ -129,6 +130,11 @@ carries zero deprecation warnings.
 
 ## Last verified state
 
+- 2026-08-17 (cut duality): `lake build` passes; 107 QA declarations
+  (new `SpectralGraph/Cuts_QA.lean`), no `sorry`/`admit`; 18 explicit
+  cited axioms (unchanged); cut duality proved in the center
+  (`vol_compl`, `boundary_compl`, `conductance_compl`,
+  `boundary_empty`, `boundary_univ`); all hygiene scripts pass.
 - 2026-08-17 (irregular walk form): `lake build` passes; 96 QA
   declarations, no `sorry`/`admit`; 18 explicit cited axioms (unchanged);
   general `walkTransitionMatrix` with row-stochasticity, `walkLaplacian`,

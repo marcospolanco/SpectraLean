@@ -37,28 +37,30 @@ theorem pathAdj_isSymm : pathAdj.IsSymm := by
 
 /-- Row sums of the path: degrees (1, 2, 1). -/
 theorem pathAdj_deg_zero : deg pathAdj 0 = 1 := by
-  simp only [deg, pathAdj, Matrix.of_apply, Fin.sum_univ_two]
+  simp only [deg, pathAdj, Matrix.of_apply, Fin.sum_univ_three]
   norm_num
 
 theorem pathAdj_deg_one : deg pathAdj 1 = 2 := by
-  simp only [deg, pathAdj, Matrix.of_apply, Fin.sum_univ_two]
+  simp only [deg, pathAdj, Matrix.of_apply, Fin.sum_univ_three]
   norm_num
 
 theorem pathAdj_deg_two : deg pathAdj 2 = 1 := by
-  simp only [deg, pathAdj, Matrix.of_apply, Fin.sum_univ_two]
+  simp only [deg, pathAdj, Matrix.of_apply, Fin.sum_univ_three]
   norm_num
 
-/-- The sum of the off-diagonal entries of row `0` over `{0}ᶜ = {1, 2}`
-computes to the single edge to the center. -/
+/-- The diagonal entry `pathAdj 0 0` vanishes (no self-loops). -/
+theorem pathAdj_zero_zero : pathAdj 0 0 = 0 := by norm_num [pathAdj]
+
+/-- The sum of row `0` over `{0}ᶜ` computes to the single edge to the
+center, via total-row-sum minus the (vanishing) diagonal entry. -/
 theorem path_row0_compl_sum :
     ∑ j in ({0} : Finset (Fin 3))ᶜ, pathAdj 0 j = 1 := by
-  have h0 : pathAdj 0 1 = 1 := by norm_num [pathAdj]
-  have h1 : pathAdj 0 2 = 0 := by norm_num [pathAdj]
-  rw [Finset.compl_singleton, Finset.sum_insert (by decide),
-    Finset.sum_insert (by decide)]
-  simp only [Finset.sum_empty]
-  rw [h0, h1]
-  norm_num
+  have hsplit := Finset.sum_add_sum_compl
+    ({0} : Finset (Fin 3)) (fun j => pathAdj 0 j)
+  have hsingle : ∑ j in ({0} : Finset (Fin 3)), pathAdj 0 j
+      = pathAdj 0 0 := Finset.sum_singleton _ _
+  rw [hsingle, pathAdj_zero_zero, zero_add] at hsplit
+  exact hsplit.trans pathAdj_deg_zero
 
 /-- The singleton cut `{0}`: its boundary is the single edge to the
 center. -/
@@ -90,15 +92,9 @@ theorem path_vol_compl_QA :
       = 4 := by
   have h := vol_compl pathAdj ({0} : Finset (Fin 3))
   have hvol : vol pathAdj (Finset.univ : Finset (Fin 3)) = 4 := by
-    simp only [vol, Finset.sum_congr rfl
-      (show ∀ i ∈ (Finset.univ : Finset (Fin 3)),
-        deg pathAdj i = if i = 0 then 1 else if i = 1 then 2 else 1 from
-        by intro i _
-         fin_cases i
-         · rw [if_pos rfl, pathAdj_deg_zero]
-         · rw [if_neg (by decide), if_pos rfl, pathAdj_deg_one]
-         · rw [if_neg (by decide), if_neg (by decide), pathAdj_deg_two])]
-    rw [Finset.sum_ite_eq', Finset.sum_ite_eq']
+    simp only [vol]
+    rw [Fin.sum_univ_three, pathAdj_deg_zero, pathAdj_deg_one,
+      pathAdj_deg_two]
     norm_num
   rw [hvol] at h
   exact h

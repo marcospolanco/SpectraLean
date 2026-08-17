@@ -23,7 +23,11 @@ Proved theorems (no admission): `degreeMatrix_*`, `laplacian_symmetric`,
 (Dirichlet form), `laplacian_psd`, `eventUpdate_preserves_symmetry`,
 `principalSubmatrix_symmetric`, `spectralProjector_symmetric`,
 `conductance_nonneg`, `cheegerConstant_nonneg`,
-`conductance_ge_cheegerConstant`; projector algebra from the Mathlib
+`conductance_ge_cheegerConstant`; cut duality (2026-08-17):
+`vol_compl` (volume complementarity), `boundary_compl` / `conductance_compl`
+(invariance of cuts under complementation — the sweep-cut consumer
+interface), `boundary_empty` / `boundary_univ` (degenerate-cut guards);
+projector algebra from the Mathlib
 spectral theorem (2026-08-17): `initialProjector_congr`,
 `eigvecOf_inner` (eigenbasis orthonormality), `eigvecOf_complete`
 (eigenbasis completeness), `spectralProjector_idempotent`,

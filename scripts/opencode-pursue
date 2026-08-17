@@ -9,20 +9,29 @@ runs=1
 
 usage() {
   cat <<'EOF'
-Usage: scripts/opencode-pursue [--runs N] [--] [operator direction...]
+Usage: scripts/opencode-pursue [--runs N] [--quota-threshold PERCENT] [--] [operator direction...]
 
 Run the autonomous Scaffold agent up to N times. Later runs resume the exact
-session recorded locally in .opencode/pursue-session. Raw transcripts are
-written to ignored .opencode/runs/; follow docs/AGENT_ACTIVITY.md for the
-durable operator-facing account.
+session recorded locally in .opencode/pursue-session. Before each new run, it
+uses scripts/zquota as a quota gate (default threshold: 80%). A closed gate
+exits 75 without starting an agent; use the launchd helper for periodic wakeup.
+Raw transcripts are written to ignored .opencode/runs/; follow
+docs/AGENT_ACTIVITY.md for the durable operator-facing account.
 EOF
 }
+
+quota_threshold=${ZQUOTA_THRESHOLD:-80}
 
 while (($#)); do
   case "$1" in
     --runs)
       (($# >= 2)) || { echo "--runs requires a positive integer" >&2; exit 2; }
       runs="$2"
+      shift 2
+      ;;
+    --quota-threshold)
+      (($# >= 2)) || { echo "--quota-threshold requires an integer percentage" >&2; exit 2; }
+      quota_threshold="$2"
       shift 2
       ;;
     --help|-h)
@@ -43,7 +52,10 @@ done
   echo "--runs must be a positive integer" >&2
   exit 2
 }
-
+[[ "$quota_threshold" =~ ^[0-9]+$ ]] && ((quota_threshold <= 100)) || {
+  echo "--quota-threshold must be an integer from 0 through 100" >&2
+  exit 2
+}
 run_dir="$project_dir/.opencode/runs"
 session_file="$project_dir/.opencode/pursue-session"
 mkdir -p "$run_dir"
@@ -62,6 +74,19 @@ on_interrupt() {
 trap on_interrupt INT TERM
 
 for ((run_number = 1; run_number <= runs; run_number++)); do
+  echo "==> Checking quota before pursuit run $run_number/$runs"
+  set +e
+  "$script_dir/zquota" --threshold "$quota_threshold"
+  quota_status=$?
+  set -e
+  if ((quota_status == 10)); then
+    echo "Quota gate is closed; no pursuit run was started. Resume after the reported reset time." >&2
+    exit 75
+  elif ((quota_status != 0)); then
+    echo "Quota check failed; refusing to start a pursuit run." >&2
+    exit "$quota_status"
+  fi
+
   timestamp=$(date -u +%Y%m%dT%H%M%SZ)
   current_log="$run_dir/${timestamp}-run-${run_number}.log"
 

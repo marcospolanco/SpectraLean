@@ -105,6 +105,7 @@ Project documentation uses these labels distinctly. Citation review, compilation
 ```text
 Scaffold/Mathlib/   public definitions and explicit axiom APIs
 Scaffold/QA/        fully proved interface checks
+Scaffold/Derived/   axiom-backed derived theorems (checked deductions)
 Scaffold/Internal/  internal utilities
 index/              source mappings and domain maps
 docs/               canonical strategy, architecture, theory, partnerships, and QA
@@ -114,7 +115,13 @@ research/archive/   provenance and superseded reports—not current policy
 scripts/            documentation and policy checks
 ```
 
-`Scaffold/Derived/` is a planned layer and is not currently implemented.
+`Scaffold/Derived/` holds derived theorems: Lean-checked deductions whose
+conclusions remain conditional on the axioms they consume. Its first two
+modules assemble the persistence chain: `EventStream.lean` derives an
+Azuma tail bound on the cumulative Laplacian perturbation of a random
+event-driven graph stream, and `ProjectorDrift.lean` derives a
+high-probability bound on the endpoint rotation of the invariant spectral
+subspace.
 
 The remaining root files are repository entry points or tool configuration: `Scaffold.lean` is the Lake library root; `lakefile.lean`, `lake-manifest.json`, and `lean-toolchain` pin the build; and `opencode.json` configures project-local agent tooling. Lean modules otherwise belong under `Scaffold/`.
 
@@ -122,12 +129,13 @@ The remaining root files are repository entry points or tool configuration: `Sca
 
 As of August 17, 2026:
 
-- the default `lake build` passes: its umbrella certifies the SGT center (`GraphTheory.Spectral`), the Cheeger bridge, the event-driven frontier, the Weyl/Davis–Kahan perturbation modules, and the Core utilities;
-- all SpectralGraph and Perturbation QA modules compile directly with 47 QA theorem/lemma declarations and no `sorry` or `admit` anywhere under `Scaffold/`;
-- the public axiom boundary of the certified modules is 10 explicit, cited axioms; the remaining classical Laplacian facts (symmetry, kernel, Dirichlet form, PSD, symmetry preservation under events) are proved, not admitted;
-- the probability concentration subtree (`Scaffold.Mathlib.Probability.Concentration.*`, six modules) does not elaborate and is excluded from the umbrella pending repair; its QA file is not certified.
+- the default `lake build` passes: its umbrella certifies the SGT center (`GraphTheory.Spectral`), the Cheeger bridge, the event-driven frontier, the Weyl/Davis–Kahan perturbation modules, the probability concentration bridge (`Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*`), the derived layer (`Derived.EventStream`, `Derived.ProjectorDrift`), and the Core utilities;
+- all QA modules compile directly with 70 QA theorem/lemma declarations and no `sorry` or `admit` anywhere under `Scaffold/`;
+- the public axiom boundary is 19 explicit, cited axioms; the remaining classical Laplacian facts (symmetry, kernel, Dirichlet form, PSD, symmetry preservation under events) are proved, not admitted, and the scalar `hoeffding_iid`/`bernstein_iid` specializations are proved derived theorems;
+- the subgaussian norm is a real definition (`subgaussianNorm`), not an axiom; matrix concentration is stated over the spectral norm (`Matrix.L2OpNorm`), the semidefinite order (`Matrix.PosSemidef`), and Mathlib's `ProbabilityTheory.IndepFun`;
+- the derived layer assembles the persistence chain end-to-end: `eventStreamTail` bounds the tail of the cumulative Laplacian perturbation `‖L_m − L_0‖`, and `eventStreamProjectorDrift` bounds the endpoint rotation of the invariant spectral subspace by `s/(γ−s)` with failure probability at most `2 d exp(−s²/(8 m R²))`. Both are proved from the admitted Matrix Azuma, Weyl, and Davis–Kahan axioms and are conditional on them.
 
-The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for current counts and verification results. Do not infer readiness of the concentration subtree from the passing default build.
+The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for current counts and verification results.
 
 ## Intended consumption
 
@@ -168,7 +176,7 @@ python3 scripts/check_citations.py
 python3 scripts/check_markdown_links.py
 ```
 
-`lake build` builds the library root `Scaffold.lean`. Its umbrella covers the certified modules; the concentration subtree is not reachable through it (see the [QA Scoreboard](docs/5_QA_SCOREBOARD.md) for scope and limitations).
+`lake build` builds the library root `Scaffold.lean`. Its umbrella covers all public modules, including the concentration subtree (see the [QA Scoreboard](docs/5_QA_SCOREBOARD.md) for scope and limitations).
 
 ### Autonomous OpenCode pursuit
 

@@ -1,82 +1,46 @@
 # Scalar Concentration Inequalities
 
-This directory contains axioms for concentration inequalities of scalar (real-valued) random variables.
+Definitions and cited axioms for concentration inequalities of scalar
+(real-valued) random variables, stated over an explicit probability
+measure with Mathlib's `ProbabilityTheory.IndepFun`.
 
 ## Modules
 
 ### `Subgaussian.lean`
 
-Subgaussian random variables and their properties.
+The subgaussian (ψ₂) norm and its admitted consequences.
+
+**Definitions**:
+- `subgaussianNorm` - Ψ₂ norm via the MGF characterization
+- `subgaussianNorm_nonneg` - proved nonnegativity
 
 **Axioms**:
-- `subgaussian_norm` - Orlicz norm definition
+- `hoeffding_lemma` - bounded and centered ⇒ subgaussian
 - `subgaussian_tail_bound` - P(|X| ≥ t) ≤ 2exp(-t²/(2K²))
-- `subgaussian_moment_growth` - E[|X|^p]^(1/p) ≤ CK√p
-- `subgaussian_linear_combination` - Closure under linear combinations
-- `subgaussian_centering` - Centering preserves subgaussian property
-- `hoeffding_lemma` - Bounded ⇒ subgaussian
-- `subgaussian_sum_bound` - Sum of independent subgaussian
 
 **Source**: Vershynin, High-Dimensional Probability, Chapter 2
 
 ### `Hoeffding.lean`
 
-Hoeffding's inequality for bounded independent variables.
-
 **Axioms**:
-- `hoeffding_inequality` - General Hoeffding with varying bounds
-- `hoeffding_iid` - IID version with common bound
-- `hoeffding_empirical` - Empirical averages
+- `hoeffding_inequality` - sums of bounded independent variables
+- `hoeffding_empirical` - empirical averages of [0,1] variables
 
-**Sources**:
-- Vershynin, High-Dimensional Probability, Theorem 2.2.2
-- Boucheron-Lugosi-Massart, Concentration Inequalities, Theorem 2.8
+**Proved** (not axioms):
+- `hoeffding_iid` - uniform-bound specialization of `hoeffding_inequality`
+
+**Sources**: Vershynin Thm 2.2.2 / Cor 2.2.3; Boucheron–Lugosi–Massart Thm 2.8
 
 ### `Bernstein.lean`
 
-Bernstein's inequality incorporating variance information.
-
 **Axioms**:
-- `bernstein_inequality` - General Bernstein with variance term
-- `bernstein_bounded_variance` - Bounded variance form
-- `bernstein_iid` - IID version
+- `bernstein_inequality` - variance-dependent tail bound
+- `bernstein_bounded_variance` - explicit variance budget form
 
-**Sources**:
-- Vershynin, High-Dimensional Probability, Theorem 2.8.1
-- Wainwright, High-Dimensional Statistics, Theorem 2.15
+**Proved** (not axioms):
+- `bernstein_iid` - common-variance specialization of `bernstein_inequality`
 
-## Usage Patterns
+**Sources**: Vershynin Thm 2.8.1 / Cor 2.8.3; Wainwright Thm 2.15
 
-### For Bounded Variables
-
-```lean
--- Variables bounded by [a_i, b_i]
-have h_sub := hoeffding_lemma (X i) (max |a_i| |b_i|)
--- Apply subgaussian concentration
-```
-
-### When Variance is Known
-
-```lean
--- Small variance relative to bounds
-apply bernstein_inequality
--- Provides tighter bound than Hoeffding
-```
-
-### For Linear Combinations
-
-```lean
--- Weighted sums of subgaussian variables
-have := subgaussian_linear_combination X a K
-```
-
-## Planned Additions
-
-- `Subexponential.lean` - Subexponential random variables
-- `Azuma.lean` - Martingale concentration (Azuma-Hoeffding)
-- `Freedman.lean` - Martingale concentration with variance
-
-## See Also
-
-- [Index: Probability Concentration](../../../../../index/map/probability_concentration.md)
-- [Sources](../../../../../index/sources/)
+See `index/map/probability_concentration.md` for the full
+declaration-to-source mapping.

@@ -250,6 +250,143 @@ theorem initialProjector_symmetric (M : Matrix V V ℝ) (hM : M.IsSymm)
     (initialProjector M hM k).IsSymm :=
   spectralProjector_symmetric M hM _
 
+/-- `initialProjector` transports along matrix equalities: the symmetry
+proof enters only through propositions, so projectors of equal matrices
+are equal by proof irrelevance. This is the interface needed to restate
+perturbation conclusions (stated at `A + E`) at a rewritten matrix. -/
+theorem initialProjector_congr {M N : Matrix V V ℝ} (hMN : M = N)
+    (hM : M.IsSymm) (hN : N.IsSymm) (k : Fin (Fintype.card V)) :
+    initialProjector M hM k = initialProjector N hN k := by
+  subst hMN
+  rfl
+
+/-!
+### Eigenbasis orthonormality and completeness (proved)
+
+The structural facts behind `spectralProjector`, from the orthonormal
+eigenbasis of Mathlib's spectral theorem. Together they say the
+eigenvector coordinate matrix is orthogonal; `spectralProjector` algebra
+below consumes exactly these two relations.
+-/
+
+/-- Pairwise orthonormality of the eigenbasis behind `spectralProjector`:
+the coordinate inner product of the `i`-th and `j`-th eigenvectors is
+`δᵢⱼ`. Proved from `OrthonormalBasis.orthonormal`; the Euclidean inner
+product reduces to the coordinate sum by `PiLp.inner_apply`. -/
+theorem eigvecOf_inner (M : Matrix V V ℝ) (hM : M.IsSymm) (i j : V) :
+    ∑ k, eigvecOf M hM i k * eigvecOf M hM j k = if i = j then 1 else 0 := by
+  have h := (isHermitian_of_isSymm hM).eigenvectorBasis.orthonormal i j
+  rw [PiLp.inner_apply] at h
+  simpa using h
+
+/-- Completeness of the eigenbasis: the synthesis
+`∑ i, v i a * v i b` recovers the identity matrix. Proved from
+`OrthonormalBasis.sum_repr'` at `EuclideanSpace.single a 1`: the basis
+resolves every unit vector. -/
+theorem eigvecOf_complete (M : Matrix V V ℝ) (hM : M.IsSymm) (a b : V) :
+    ∑ i, eigvecOf M hM i a * eigvecOf M hM i b = if a = b then 1 else 0 := by
+  have h := (isHermitian_of_isSymm hM).eigenvectorBasis.sum_repr'
+    (EuclideanSpace.single a (1 : ℝ))
+  funext b
+  have hcoeff : ∀ i : V, ⟪(isHermitian_of_isSymm hM).eigenvectorBasis i,
+      EuclideanSpace.single a (1 : ℝ)⟫_ℝ = eigvecOf M hM i a := by
+    intro i
+    rw [PiLp.inner_apply]
+    simp [EuclideanSpace.single_apply]
+  simp only [hcoeff, smul_eq_mul]
+  simpa using congrFun h b
+
+/-- Spectral projectors are idempotent: `P_c * P_c = P_c`. Entrywise, the
+product expands into outer products of eigenvectors whose cross terms
+vanish by pairwise orthonormality, leaving the original sum. This is the
+structural fact consumed (previously implicitly) by every projector-based
+statement in the Cheeger, persistence, and drift interfaces. -/
+theorem spectralProjector_idempotent (M : Matrix V V ℝ) (hM : M.IsSymm)
+    (c : ℝ) :
+    spectralProjector M hM c * spectralProjector M hM c
+      = spectralProjector M hM c := by
+  ext a b
+  simp only [Matrix.mul_apply, spectralProjector, Matrix.of_apply]
+  have hexp : ∀ k : V,
+      (∑ i ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+          eigvecOf M hM i a * eigvecOf M hM i k) *
+        (∑ j ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+            eigvecOf M hM j k * eigvecOf M hM j b) =
+      ∑ i ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+        ∑ j ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+          (eigvecOf M hM i a * eigvecOf M hM i k) *
+            (eigvecOf M hM j k * eigvecOf M hM j b) :=
+    fun k => Finset.sum_mul_sum _ _ _ _
+  simp only [hexp]
+  have hreorder : ∑ k : V,
+      ∑ i ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+        ∑ j ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+          (eigvecOf M hM i a * eigvecOf M hM i k) *
+            (eigvecOf M hM j k * eigvecOf M hM j b) =
+    ∑ i ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+      ∑ j ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+        ∑ k : V,
+          (eigvecOf M hM i a * eigvecOf M hM i k) *
+            (eigvecOf M hM j k * eigvecOf M hM j b) := by
+    rw [Finset.sum_comm]
+    exact Finset.sum_congr rfl fun i _ => Finset.sum_comm
+  rw [hreorder]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  have hinner : ∀ j : V,
+      (∑ k : V, (eigvecOf M hM i a * eigvecOf M hM i k) *
+          (eigvecOf M hM j k * eigvecOf M hM j b)) =
+      eigvecOf M hM i a * eigvecOf M hM j b *
+        (if i = j then 1 else 0) := by
+    intro j
+    have hterm : ∀ k : V,
+        (eigvecOf M hM i a * eigvecOf M hM i k) *
+            (eigvecOf M hM j k * eigvecOf M hM j b) =
+        eigvecOf M hM i a * eigvecOf M hM j b *
+          (eigvecOf M hM i k * eigvecOf M hM j k) := fun k => by ring
+    rw [Finset.sum_congr rfl (fun k _ => hterm k), Finset.sum_mul,
+      eigvecOf_inner]
+  rw [Finset.sum_congr rfl (fun j _ => hinner j)]
+  by_cases hij : i = j
+  · subst hij
+    simp
+  · have hzero : ∀ j ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+      eigvecOf M hM i a * eigvecOf M hM j b * (if i = j then 1 else 0) = 0 := by
+    intro j _
+    rw [if_neg hij, mul_zero]
+  rw [Finset.sum_congr rfl hzero, Finset.sum_const_zero]
+
+/-- Below the whole spectrum the spectral projector vanishes: the
+threshold filter is empty. -/
+theorem spectralProjector_eq_zero (M : Matrix V V ℝ) (hM : M.IsSymm)
+    (c : ℝ) (h : ∀ i, c < eigvalOf M hM i) :
+    spectralProjector M hM c = 0 := by
+  have hS : (Finset.univ : Finset V).filter (fun i => eigvalOf M hM i ≤ c)
+      = ∅ :=
+    Finset.filter_eq_empty_iff.2 (fun x _ => (h x).not_le)
+  ext a b
+  simp [spectralProjector, hS]
+
+/-- Above the whole spectrum the spectral projector is the identity: the
+threshold filter is everything and the eigenbasis resolves the identity
+(`eigvecOf_complete`). -/
+theorem spectralProjector_eq_one (M : Matrix V V ℝ) (hM : M.IsSymm)
+    (c : ℝ) (h : ∀ i, eigvalOf M hM i ≤ c) :
+    spectralProjector M hM c = 1 := by
+  have hS : (Finset.univ : Finset V).filter (fun i => eigvalOf M hM i ≤ c)
+      = Finset.univ :=
+    Finset.filter_eq_univ_iff.2 (fun x _ => h x)
+  ext a b
+  simp only [spectralProjector, hS, Finset.sum_univ]
+  simp [eigvecOf_complete]
+  rw [Matrix.one_apply]
+
+/-- The invariant-subspace projectors of the SGT center are idempotent. -/
+theorem initialProjector_idempotent (M : Matrix V V ℝ) (hM : M.IsSymm)
+    (k : Fin (Fintype.card V)) :
+    initialProjector M hM k * initialProjector M hM k
+      = initialProjector M hM k :=
+  spectralProjector_idempotent M hM _
+
 end Spectrum
 
 /-!

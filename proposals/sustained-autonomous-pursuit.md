@@ -32,7 +32,8 @@ Add two durable, versioned reporting artifacts:
 It would let an operator follow a live or unattended run without reading a
 model transcript. Each entry records:
 
-- UTC timestamp, run/session identifier, and milestone identifier;
+- exact UTC timestamp, wrapper run identifier, OpenCode session identifier,
+  and milestone identifier;
 - the intent and its SGT-leverage rationale;
 - files or subsystems being investigated or changed;
 - commands run, with a concise outcome and links to fuller captured output

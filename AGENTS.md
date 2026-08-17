@@ -43,7 +43,9 @@ operator-facing records:
 
 - Before editing, update `docs/EXECUTION_PLAN.md` with the active milestone,
   its SGT-leverage rationale, and next action; append an `in-progress` entry
-  to `docs/AGENT_ACTIVITY.md` with the same information.
+  to `docs/AGENT_ACTIVITY.md` with the same information. Every new activity
+  entry must begin with an exact UTC timestamp, wrapper run identifier, and
+  OpenCode session ID, using the required format at the top of that file.
 - After every coherent milestone, update the execution plan and append a
   compact activity entry: UTC date/time, status, changes or investigated
   area, decisive commands and outcomes, verification, remaining risk, and
@@ -51,6 +53,11 @@ operator-facing records:
 - Before a normal exit, append a terminal `completed`, `blocked`, or
   `superseded` entry. Do not expose chain-of-thought, credentials, or raw
   unbounded command output; the wrapper retains raw local transcripts.
+
+Use `date -u +%Y-%m-%dT%H:%M:%SZ` for the timestamp. Before the terminal
+entry, inspect `opencode session list --max-count 1 --format json` to obtain
+the session ID. If the command is inconclusive, report `unavailable`; never
+invent an identifier.
 
 If the same failure repeats or no meaningful source/documentation progress is
 possible after 12 tool steps, record exact evidence as a blocker, pivot to a

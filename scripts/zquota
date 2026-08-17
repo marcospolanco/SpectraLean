@@ -1,0 +1,171 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Query Z.ai quota and provide a stable gate for scripts such as
+# `opencode-pursue`. Exit 10 means quota is at or above the requested threshold.
+
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+project_dir=$(dirname -- "$script_dir")
+env_file="$project_dir/.env"
+
+threshold=80
+format=human
+scope=all
+
+usage() {
+  cat <<'EOF'
+Usage: scripts/zquota [options]
+
+Query Z.ai quota usage and decide whether it is safe to start work.
+
+Options:
+  --threshold PERCENT   Block at PERCENT usage (0--100; default: 80).
+  --scope SCOPE         Check `all` limits or only `tokens` limits (default: all).
+  --json                Emit one stable JSON result.
+  --quiet               Emit no result; use the exit status only.
+  -h, --help            Show this help.
+
+Exit status:
+  0   Every selected limit is below the threshold.
+  10  At least one selected limit is at or above the threshold.
+  1   Configuration, network, or API-response error.
+
+This command deliberately does not wait or retry. Schedule a later pursuit
+after `nextResetTime` instead of holding an autonomous agent open.
+EOF
+}
+
+while (($#)); do
+  case "$1" in
+    --threshold)
+      (($# >= 2)) || { echo "zquota: --threshold requires an integer" >&2; exit 1; }
+      threshold=$2
+      shift 2
+      ;;
+    --scope)
+      (($# >= 2)) || { echo "zquota: --scope requires all or tokens" >&2; exit 1; }
+      scope=$2
+      shift 2
+      ;;
+    --json)
+      format=json
+      shift
+      ;;
+    --quiet)
+      format=quiet
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "zquota: unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+[[ "$threshold" =~ ^[0-9]+$ ]] && ((threshold <= 100)) || {
+  echo "zquota: --threshold must be an integer from 0 through 100" >&2
+  exit 1
+}
+[[ "$scope" == all || "$scope" == tokens ]] || {
+  echo "zquota: --scope must be all or tokens" >&2
+  exit 1
+}
+
+if [[ -f "$env_file" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$env_file"
+  set +a
+fi
+
+if [[ -z "${ZAI_API_KEY:-}" ]]; then
+  echo "zquota: ZAI_API_KEY is not set. Add it to ${env_file} or export it." >&2
+  exit 1
+fi
+
+response=$(curl --fail --silent --show-error \
+  -H "Authorization: Bearer ${ZAI_API_KEY}" \
+  "https://api.z.ai/api/monitor/usage/quota/limit") || {
+  echo "zquota: quota request failed" >&2
+  exit 1
+}
+
+python3 -c '
+import datetime as dt
+import json
+import sys
+
+def as_utc(reset_ms):
+    if not isinstance(reset_ms, (int, float)):
+        return None
+    return dt.datetime.fromtimestamp(reset_ms / 1000, tz=dt.timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
+threshold = int(sys.argv[1])
+output_format = sys.argv[2]
+scope = sys.argv[3]
+
+try:
+    payload = json.load(sys.stdin)
+    if payload.get("success") is not True:
+        raise ValueError(payload.get("msg", "API did not report success"))
+    limits = payload["data"]["limits"]
+except (KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
+    print(f"zquota: invalid quota response: {error}", file=sys.stderr)
+    sys.exit(1)
+
+if scope == "tokens":
+    limits = [limit for limit in limits if "TOKEN" in str(limit.get("type", "")).upper()]
+    if not limits:
+        print("zquota: API response contains no token quota limits", file=sys.stderr)
+        sys.exit(1)
+
+normalized = []
+for limit in limits:
+    try:
+        percentage = float(limit["percentage"])
+    except (KeyError, TypeError, ValueError):
+        continue
+    reset_ms = limit.get("nextResetTime")
+    reset_at = as_utc(reset_ms)
+    normalized.append({
+        "type": str(limit.get("type", "unknown")),
+        "percentage": percentage,
+        "remaining": limit.get("remaining"),
+        "nextResetTime": reset_ms,
+        "nextResetAt": reset_at,
+    })
+
+if not normalized:
+    print("zquota: API response contains no selected limits with a percentage", file=sys.stderr)
+    sys.exit(1)
+
+blocked = [limit for limit in normalized if limit["percentage"] >= threshold]
+next_resets = [limit["nextResetTime"] for limit in blocked if isinstance(limit["nextResetTime"], (int, float))]
+result = {
+    "ready": not blocked,
+    "threshold": threshold,
+    "scope": scope,
+    "limits": normalized,
+    "blockedLimits": blocked,
+    "nextResetTime": min(next_resets) if next_resets else None,
+    "nextResetAt": as_utc(min(next_resets)) if next_resets else None,
+}
+
+if output_format == "json":
+    print(json.dumps(result, separators=(",", ":"), sort_keys=True))
+elif output_format == "human":
+    print("zquota: ready" if result["ready"] else "zquota: blocked")
+    print(f"threshold: {threshold}% ({scope})")
+    for limit in normalized:
+        reset = limit["nextResetAt"] or "unknown"
+        print(f"{limit['"'"'type'"'"']}: {limit['"'"'percentage'"'"']:g}% used; reset {reset}")
+    if not result["ready"]:
+        print(f"resume after: {result['"'"'nextResetAt'"'"'] or '"'"'an unknown reset time'"'"'}")
+
+sys.exit(10 if blocked else 0)
+' "$threshold" "$format" "$scope" <<<"$response"

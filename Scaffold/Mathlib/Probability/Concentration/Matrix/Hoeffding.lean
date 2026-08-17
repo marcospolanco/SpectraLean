@@ -13,46 +13,66 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -/
-import Mathlib.MeasureTheory.Measure.MeasureSpace
-import Scaffold.Mathlib.Core.RandomVariable
+import Mathlib.Probability.Independence.Basic
+import Mathlib.Analysis.CStarAlgebra.Matrix
+import Mathlib.LinearAlgebra.Matrix.PosDef
+import Mathlib.MeasureTheory.Integral.Bochner
+import Scaffold.Mathlib.Probability.Concentration.Matrix.Basic
+
+/-!
+# Matrix Hoeffding inequality
+
+Tail bound for sums of independent, Hermitian random matrices whose squares
+are dominated in the semidefinite order, in the spectral norm
+(`Matrix.L2OpNorm`).
+
+This is the matrix concentration statement consumed by Scaffold's
+event-stream frontier: bounded per-event Laplacian perturbations with
+independent events.
+-/
+
+open MeasureTheory ProbabilityTheory Real
+open scoped Matrix.L2OpNorm
 
 namespace Scaffold.Mathlib.Probability.Concentration.Matrix
 
-/-
-Matrix Hoeffding inequality for bounded independent self-adjoint random matrices.
-
-This module provides axioms for the Matrix Hoeffding concentration inequality.
--/
-
-open Mathlib MeasureTheory ENNReal Real Matrix
-
-variable {Ω : Type*} [MeasureSpace Ω]
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
 variable {V : Type*} [Fintype V] [DecidableEq V]
 
-/-
-Matrix Hoeffding inequality: tail bound for the spectral norm of sums of bounded matrices.
+/-- Matrix Hoeffding inequality: for independent Hermitian matrix-valued
+variables `X i` with `X i ω ^ 2 ⪯ A i ^ 2` in the semidefinite order
+(written `Matrix.PosSemidef (A i * A i - X i ω * X i ω)`), the spectral
+norm of the sum obeys
+`P {‖∑ X i‖ ≥ t} ≤ 2 d exp (-t² / (2 ‖∑ A i²‖))`, where
+`d = card V`.
 
 Source:
-- Tropp, "An Introduction to Matrix Concentration Inequalities", 2015
-  Theorem 1.4, Section 1.2, p. 2
+- Tropp, J. A., "User-friendly tail bounds for sums of random matrices",
+  Foundations of Computational Mathematics 12(4):389–434, 2012,
+  Theorem 1.4 (Matrix Hoeffding), p. 398.
 
-Intended meaning:
-Let X_1, ..., X_n be independent, self-adjoint matrix random variables of size d x d.
-Assume E[X_i] = 0 and X_i² ≤ A_i² almost surely for some fixed matrices A_i.
-Then P(λ_max(∑ X_i) ≥ t) ≤ d * exp(-t² / (2 σ²)) where σ² = ‖∑ A_i²‖.
+Statement differences: the source states the one-sided extreme-eigenvalue
+tail `P {λ_max (∑ X i) ≥ t} ≤ d exp (-σ² ...)` with the variance statistic
+`σ² = ‖∑ A i²‖`; we state the two-sided spectral-norm form, applying the
+source bound to `∑ X i` and `∑ -X i` and using the union bound, which
+introduces the factor `2`. The semidefinite order is Mathlib's
+`Matrix.PosSemidef` and the norm is the operator ℓ² ("spectral") norm
+`Matrix.L2OpNorm`. The source needs no centering hypothesis, and none is
+imposed.
 
-QA: Exercised by `matrix_hoeffding_zero_sum_QA` in
-`Scaffold/QA/Concentration/Matrix_QA.lean`.
+QA: exercised by `matrix_hoeffding_zero_QA` in
+`Scaffold/QA/Concentration/Matrix_QA.lean`, which instantiates the axiom at
+the zero sequence and checks the resulting empty-event bound.
 -/
-axiom matrix_hoeffding {n : ℕ} {X : Fin n → MRV Ω V} {A : Fin n → Matrix V V ℝ}
-  (h_indep : ∀ i j, i ≠ j → Independent (X i) (X j))
-  (h_symm : ∀ i ω, (X i ω).IsSymm)
-  (h_mean : ∀ i, ∫ ω, X i ω ∂(volume : Measure Ω) = 0)
-  (h_bound : ∀ i ω, (X i ω) * (X i ω) ≤ A i * A i)
-  (t : ℝ) (ht : 0 ≤ t) :
-  let σ2 := ‖∑ i, A i * A i‖ in
-  let d := Fintype.card V in
-  (ω : Ω) ↦ Matrix.spectral_norm (∑ i, X i ω) ≥ t ≤
-    d * Real.exp (-t^2 / (2 * σ2))
+axiom matrix_hoeffding {n : ℕ} {X : Fin n → Ω → Matrix V V ℝ}
+    {A : Fin n → Matrix V V ℝ}
+    (h_meas : ∀ i, StronglyMeasurable (X i))
+    (h_indep : ∀ i j, i ≠ j → IndepFun (X i) (X j) μ)
+    (h_herm : ∀ i ω, (X i ω).IsHermitian)
+    (h_bound : ∀ i ω, Matrix.PosSemidef (A i * A i - X i ω * X i ω))
+    (t : ℝ) (ht : 0 ≤ t) :
+    μ {ω | ‖∑ i, X i ω‖ ≥ t} ≤
+      ENNReal.ofReal (2 * (Fintype.card V : ℝ) *
+        Real.exp (-t ^ 2 / (2 * ‖∑ i, A i * A i‖)))
 
 end Scaffold.Mathlib.Probability.Concentration.Matrix

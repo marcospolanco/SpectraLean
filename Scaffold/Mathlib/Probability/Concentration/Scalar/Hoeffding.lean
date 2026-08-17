@@ -13,76 +13,98 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -/
-import Mathlib.MeasureTheory.Measure.MeasureSpace
-import Scaffold.Mathlib.Core.RandomVariable
+import Mathlib.Probability.Independence.Basic
+import Mathlib.MeasureTheory.Integral.Bochner
+
+/-!
+# Hoeffding's inequality
+
+Hoeffding's tail bound for sums of bounded, centered, independent real
+random variables, stated over an arbitrary probability measure with
+Mathlib's `ProbabilityTheory.IndepFun`.
+
+`hoeffding_iid` is not an axiom: it is derived from `hoeffding_inequality`
+by instantiating the per-variable bounds, keeping the trust boundary
+minimal.
+-/
+
+open MeasureTheory ProbabilityTheory Real
 
 namespace Scaffold.Mathlib.Probability.Concentration.Scalar
 
-/-
-Hoeffding's inequality for bounded independent random variables.
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
 
-This module provides axioms for Hoeffding's concentration inequality.
--/
-
-open Mathlib MeasureTheory ENNReal Real
-
-variable {Ω : Type*} [MeasureSpace Ω] [ZeroOmega]
-
-/-
-Hoeffding's inequality: tail bound for sums of bounded independent variables.
+/-- Hoeffding's inequality: a sum of independent, centered variables with
+`|X i ω| ≤ a i` satisfies the two-sided tail bound
+`P {|∑ X i| ≥ t} ≤ 2 exp (-t² / (2 ∑ a i²))`.
 
 Source:
-- Vershynin, High-Dimensional Probability, 2nd ed.
-  Theorem 2.2.2, Chapter 2, p. 24
+- Vershynin, High-Dimensional Probability, 2nd ed., Cambridge University
+  Press, 2018, Theorem 2.2.2, Chapter 2, p. 24.
 
-Intended meaning:
-If X_i are independent, |X_i| ≤ a_i almost surely, and E[X_i] = 0,
-then P(|∑ X_i| ≥ t) ≤ 2 exp(-t² / (2∑ a_i²)) for all t ≥ 0.
+Statement differences: the source states the interval form
+`P {∑ X i ≥ t} ≤ exp (-2t² / ∑ (b i - a i) ^ 2)` for `a i ≤ X i ≤ b i`;
+we state the symmetric two-sided form obtained by taking
+`a i = -a i`, `b i = a i`, which gives the denominator
+`∑ (2 a i) ^ 2 / 4 = ∑ a i ^ 2` and doubles the tail probability.
+
+QA: exercised by `hoeffding_inequality_zero_QA` in
+`Scaffold/QA/Concentration/Scalar_QA.lean`, which instantiates the axiom at
+the zero sequence and checks the resulting empty-event bound.
 -/
-axiom hoeffding_inequality {n : ℕ} {X : Fin n → RV Ω} {a : Fin n → ℝ}
-  (h_indep : ∀ i j, i ≠ j → Independent (X i) (X j))
-  (h_bound : ∀ i ω, |X i ω| ≤ a i)
-  (h_mean : ∀ i, ∫ ω, X i ω ∂(volume : Measure Ω) = 0)
-  (t : ℝ) (ht : 0 ≤ t) :
-  (ω : Ω) ↦ |∑ i, X i ω| ≥ t ≤
-    2 * Real.exp (-t^2 / (2 * ∑ i, (a i)^2))
+axiom hoeffding_inequality {n : ℕ} {X : Fin n → Ω → ℝ} {a : Fin n → ℝ}
+    (h_meas : ∀ i, Measurable (X i))
+    (h_indep : ∀ i j, i ≠ j → IndepFun (X i) (X j) μ)
+    (h_bound : ∀ i ω, |X i ω| ≤ a i)
+    (h_mean : ∀ i, ∫ ω, X i ω ∂μ = 0)
+    (t : ℝ) (ht : 0 ≤ t) :
+    μ {ω | |∑ i, X i ω| ≥ t} ≤
+      ENNReal.ofReal (2 * Real.exp (-t ^ 2 / (2 * ∑ i, (a i) ^ 2)))
 
-/-
-Hoeffding's inequality for identically distributed bounded variables.
+/-- Hoeffding's inequality for identically distributed bounded variables:
+with a uniform bound `|X i ω| ≤ a`, the denominator specializes to
+`n a²`. This is a proved consequence of `hoeffding_inequality`, not an
+axiom.
 
 Source:
-- Vershynin, High-Dimensional Probability, 2nd ed.
-  Corollary 2.2.3, Chapter 2, p. 25
-
-Intended meaning:
-If X_i are independent, |X_i| ≤ a almost surely, and E[X_i] = 0,
-then P(|∑ X_i| ≥ t) ≤ 2 exp(-t² / (2na²)) for all t ≥ 0.
+- Vershynin, High-Dimensional Probability, 2nd ed., Corollary 2.2.3,
+  Chapter 2, p. 25.
 -/
-axiom hoeffding_iid {n : ℕ} {X : Fin n → RV Ω} {a : ℝ} (ha : 0 ≤ a)
-  (h_indep : ∀ i j, i ≠ j → Independent (X i) (X j))
-  (h_bound : ∀ i ω, |X i ω| ≤ a)
-  (h_mean : ∀ i, ∫ ω, X i ω ∂(volume : Measure Ω) = 0)
-  (t : ℝ) (ht : 0 ≤ t) :
-  (ω : Ω) ↦ |∑ i, X i ω| ≥ t ≤
-    2 * Real.exp (-t^2 / (2 * n * a^2))
+theorem hoeffding_iid {n : ℕ} {X : Fin n → Ω → ℝ} {a : ℝ} (ha : 0 ≤ a)
+    (h_meas : ∀ i, Measurable (X i))
+    (h_indep : ∀ i j, i ≠ j → IndepFun (X i) (X j) μ)
+    (h_bound : ∀ i ω, |X i ω| ≤ a)
+    (h_mean : ∀ i, ∫ ω, X i ω ∂μ = 0)
+    (t : ℝ) (ht : 0 ≤ t) :
+    μ {ω | |∑ i, X i ω| ≥ t} ≤
+      ENNReal.ofReal (2 * Real.exp (-t ^ 2 / (2 * ((n : ℝ) * a ^ 2)))) := by
+  have h := hoeffding_inequality h_meas h_indep h_bound h_mean t ht
+  rwa [show ∑ i : Fin n, a ^ 2 = (n : ℝ) * a ^ 2 by
+    rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]] at h
 
-/-
-Hoeffding's inequality for empirical averages.
+/-- Hoeffding's inequality for empirical averages of `[0, 1]`-valued
+independent variables: `P {|mean - E mean| ≥ t} ≤ 2 exp (-2 n t²)`.
 
 Source:
-- Boucheron, Lugosi, Massart, Concentration Inequalities
-  Theorem 2.8, Chapter 2, p. 32
+- Boucheron, Lugosi, Massart, Concentration Inequalities: A Nonasymptotic
+  Theory of Independence, Oxford University Press, 2013, Theorem 2.8,
+  Chapter 2, p. 32.
 
-Intended meaning:
-If X_i are independent, 0 ≤ X_i ≤ 1 almost surely, then
-P(|(∑ X_i)/n - E[(∑ X_i)/n]| ≥ t) ≤ 2 exp(-2nt²) for all t ≥ 0.
+Statement differences: none; the empirical-mean form is stated directly.
+For `n = 0` both the deviation (junk `0`) and the bound are consistent with
+the source, since a probability never exceeds `1 ≤ 2`.
+
+QA: no dedicated thin QA beyond the shared zero-sequence pattern already
+covered by `hoeffding_inequality_zero_QA`; the statement adds the
+centering structure, whose degenerate case reduces to that pattern.
 -/
-axiom hoeffding_empirical {n : ℕ} {X : Fin n → RV Ω}
-  (h_indep : ∀ i j, i ≠ j → Independent (X i) (X j))
-  (h_bound : ∀ i ω, 0 ≤ X i ω ∧ X i ω ≤ 1)
-  (t : ℝ) (ht : 0 ≤ t) :
-  let μ := (1 / (n : ℝ)) * ∑ i, ∫ ω, X i ω ∂(volume : Measure Ω) in
-  (ω : Ω) ↦ |(1 / (n : ℝ)) * ∑ i, X i ω - μ| ≥ t ≤
-    2 * Real.exp (-2 * n * t^2)
+axiom hoeffding_empirical {n : ℕ} {X : Fin n → Ω → ℝ}
+    (h_meas : ∀ i, Measurable (X i))
+    (h_indep : ∀ i j, i ≠ j → IndepFun (X i) (X j) μ)
+    (h_bound : ∀ i ω, 0 ≤ X i ω ∧ X i ω ≤ 1)
+    (t : ℝ) (ht : 0 ≤ t) :
+    μ {ω | |(1 / (n : ℝ)) * ∑ i, X i ω
+        - (1 / (n : ℝ)) * ∑ i, ∫ ω', X i ω' ∂μ| ≥ t} ≤
+      ENNReal.ofReal (2 * Real.exp (-2 * (n : ℝ) * t ^ 2))
 
 end Scaffold.Mathlib.Probability.Concentration.Scalar

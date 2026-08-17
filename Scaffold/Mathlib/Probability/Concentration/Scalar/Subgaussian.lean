@@ -13,132 +13,88 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -/
-import Mathlib.MeasureTheory.Measure.MeasureSpace
-import Mathlib.Probability.Notation
-import Scaffold.Mathlib.Core.RandomVariable
+import Mathlib.Probability.Independence.Basic
+import Mathlib.MeasureTheory.Integral.Bochner
+
+/-!
+# Subgaussian random variables
+
+The ψ₂ (subgaussian) size of a real random variable, defined for the
+Bochner integral on an arbitrary measure, together with the admitted
+(cited) consequences of that definition that Scaffold currently consumes.
+
+`subgaussianNorm` is a real definition, not an axiom: it is the infimum of
+the admissible MGF bounds. The inequalities *about* it are explicit axioms
+with citations.
+
+Only the statements with a named downstream consumer are admitted;
+Vershynin's moment-growth and centering estimates are left out of the trust
+boundary until a consumer needs them.
+-/
+
+open MeasureTheory ProbabilityTheory Real
 
 namespace Scaffold.Mathlib.Probability.Concentration.Scalar
 
-/-
-Subgaussian random variables and their properties.
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 
-This module provides axioms for subgaussian concentration inequalities.
-All axioms are cited from Vershynin, "High-Dimensional Probability",
-unless otherwise noted.
--/
+/-- The ψ₂ (subgaussian) norm of a real random variable `X` under the
+measure `μ`: the infimum of all `K > 0` with
+`∫ ω, exp (X ω ^ 2 / K ^ 2) ∂μ ≤ 2`.
 
-open Mathlib MeasureTheory ENNReal Real
+This is the Orlicz/MGF characterization of the subgaussian norm (Vershynin,
+*High-Dimensional Probability*, 2nd ed., Proposition 2.5.2); the official
+definition (Definition 2.5.1) is the equivalent moment-supremum
+`sup_{p ≥ 1} (E |X| ^ p) ^ (1 / p) / √p`, and the two agree up to universal
+constant factors. We adopt the MGF form because it composes directly with
+integral statements.
 
-variable {Ω : Type*} [MeasureSpace Ω] [ZeroOmega]
+If no admissible `K` exists (unbounded tails), the index set is empty and
+the `sInf` is the junk value `0`; consumers must establish finiteness from
+hypotheses such as `hoeffding_lemma`. -/
+noncomputable def subgaussianNorm (X : Ω → ℝ) (μ : Measure Ω) : ℝ :=
+  sInf {K : ℝ | 0 < K ∧ ∫ ω, Real.exp (X ω ^ 2 / K ^ 2) ∂μ ≤ 2}
 
-/-
-The subgaussian norm (Orlicz norm) of a random variable.
+/-- The subgaussian norm is nonnegative: the defining set only contains
+positive `K`, so `0` is a lower bound. -/
+theorem subgaussianNorm_nonneg (X : Ω → ℝ) (μ : Measure Ω) :
+    0 ≤ subgaussianNorm X μ :=
+  Real.sInf_nonneg fun K hK => le_of_lt hK.1
 
-This is defined as the smallest K such that E[exp(X²/K²)] ≤ 2.
-
-Source:
-- Vershynin, High-Dimensional Probability, 2nd ed.
-  Definition 2.5.1, Chapter 2, p. 27
-
-Intended meaning:
-The subgaussian norm measures the "tail behavior" of a random variable.
-A random variable X is K-subgaussian iff E[exp(λX)] ≤ exp(λ²K²/2) for all λ.
--/
-axiom subgaussian_norm (X : RV Ω) : ℝ
-
-/-
-Tail bound for a subgaussian random variable.
+/-- Hoeffding's lemma: a random variable bounded by `a` with mean zero is
+`a`-subgaussian.
 
 Source:
-- Vershynin, High-Dimensional Probability, 2nd ed.
-  Theorem 2.1.1, Chapter 2, p. 21
+- Vershynin, High-Dimensional Probability, 2nd ed., Cambridge University
+  Press, 2018, Lemma 2.6.2, Chapter 2, p. 32.
 
-Intended meaning:
-If X is K-subgaussian, then P(|X| ≥ t) ≤ 2 exp(-t²/(2K²)) for all t ≥ 0.
-This is the fundamental tail inequality for subgaussian random variables.
+Statement differences: the source states the MGF form
+`E exp(λX) ≤ exp(λ²a²/2)`; we state it through `subgaussianNorm`, whose MGF
+characterization is equivalent up to universal constants
+(Proposition 2.5.2), so the conclusion may lose an absolute constant
+relative to the source.
+
+QA: exercised, together with `subgaussianNorm_nonneg` and
+`subgaussian_tail_bound`, by `hoeffding_lemma_zero_QA` and
+`subgaussian_tail_bound_zero_QA` in `Scaffold/QA/Concentration/Scalar_QA.lean`.
 -/
-axiom subgaussian_tail_bound {X : RV Ω} (K : ℝ) (hK : 0 ≤ K)
-  (h_sub : subgaussian_norm X ≤ K) (t : ℝ) (ht : 0 ≤ t) :
-  (ω : Ω) ↦ |X ω| ≥ t ≤ 2 * Real.exp (-t^2 / (2 * K^2))
+axiom hoeffding_lemma {X : Ω → ℝ} {a : ℝ} (ha : 0 ≤ a)
+    (h_bound : ∀ ω, |X ω| ≤ a) (h_mean : ∫ ω, X ω ∂μ = 0) :
+    subgaussianNorm X μ ≤ a
 
-/-
-Moment growth of subgaussian random variables.
+/-- Tail bound for a subgaussian random variable: if `X` has subgaussian
+norm at most `K`, then the two-sided tail obeys
+`P {|X| ≥ t} ≤ 2 exp (-t² / (2K²))`.
 
 Source:
-- Vershynin, High-Dimensional Probability, 2nd ed.
-  Exercise 2.1.5, Chapter 2, p. 24
+- Vershynin, High-Dimensional Probability, 2nd ed., Cambridge University
+  Press, 2018, Proposition 2.5.2 (ii), Chapter 2, p. 29.
 
-Intended meaning:
-If X is K-subgaussian, then (E[|X|^p])^(1/p) ≤ C * K * sqrt(p) for all p ≥ 1,
-where C is a universal constant.
+QA: exercised by `subgaussian_tail_bound_zero_QA` in
+`Scaffold/QA/Concentration/Scalar_QA.lean`.
 -/
-axiom subgaussian_moment_growth {X : RV Ω} {K : ℝ} (hK : 0 ≤ K)
-  (h_sub : subgaussian_norm X ≤ K) (p : ℝ) (hp : 1 ≤ p) :
-  ∃ C : ℝ, 0 < C ∧ (∫ ω, |X ω|^p ∂(volume : Measure Ω))^(1/p) ≤ C * K * Real.sqrt p
-
-/-
-Linear combinations preserve subgaussian property.
-
-Source:
-- Vershynin, High-Dimensional Probability, 2nd ed.
-  Lemma 2.5.2, Chapter 2, p. 28
-
-Intended meaning:
-If X_i are independent with subgaussian_norm X_i ≤ K_i, then
-subgaussian_norm (∑ a_i X_i) ≤ sqrt(∑ a_i² K_i²).
--/
-axiom subgaussian_linear_combination {n : ℕ} {X : Fin n → RV Ω}
-  {a : Fin n → ℝ} {K : Fin n → ℝ}
-  (h_indep : ∀ i j, i ≠ j → Independent (X i) (X j))
-  (h_sub : ∀ i, subgaussian_norm (X i) ≤ K i) :
-  subgaussian_norm (fun ω => ∑ i, a i * X i ω) ≤
-    Real.sqrt (∑ i, (a i)^2 * (K i)^2)
-
-/-
-Centering preserves subgaussian norm.
-
-Source:
-- Vershynin, High-Dimensional Probability, 2nd ed.
-  Exercise 2.5.5, Chapter 2, p. 30
-
-Intended meaning:
-If X is K-subgaussian, then X - E[X] is also K-subgaussian
-(up to a small constant factor).
--/
-axiom subgaussian_centering {X : RV Ω} {K : ℝ} (hK : 0 ≤ K)
-  (h_sub : subgaussian_norm X ≤ K) :
-  ∃ C : ℝ, 0 < C ∧ subgaussian_norm (fun ω => X ω - ∫ ω', X ω' ∂(volume : Measure Ω)) ≤ C * K
-
-/-
-Hoeffding's lemma: bounded random variables are subgaussian.
-
-Source:
-- Vershynin, High-Dimensional Probability, 2nd ed.
-  Lemma 2.6.2, Chapter 2, p. 32
-
-Intended meaning:
-If X is a random variable with |X| ≤ a almost surely and E[X] = 0,
-then X is a-subgaussian.
--/
-axiom hoeffding_lemma {X : RV Ω} {a : ℝ} (ha : 0 ≤ a)
-  (h_bound : ∀ ω, |X ω| ≤ a)
-  (h_mean : ∫ ω, X ω ∂(volume : Measure Ω) = 0) :
-  subgaussian_norm X ≤ a
-
-/-
-Sum of independent subgaussian random variables.
-
-Source:
-- Vershynin, High-Dimensional Probability, 2nd ed.
-  Theorem 2.6.3, Chapter 2, p. 33
-
-Intended meaning:
-If X_i are independent K-subgaussian, then
-subgaussian_norm (∑ X_i) ≤ C * sqrt(n) * K for some universal constant C.
--/
-axiom subgaussian_sum_bound {n : ℕ} {X : Fin n → RV Ω} {K : ℝ} (hK : 0 ≤ K)
-  (h_indep : ∀ i j, i ≠ j → Independent (X i) (X j))
-  (h_sub : ∀ i, subgaussian_norm (X i) ≤ K) :
-  ∃ C : ℝ, 0 < C ∧ subgaussian_norm (fun ω => ∑ i, X i ω) ≤ C * Real.sqrt n * K
+axiom subgaussian_tail_bound {X : Ω → ℝ} {K : ℝ} (hK : 0 ≤ K)
+    (h_sub : subgaussianNorm X μ ≤ K) (t : ℝ) (ht : 0 ≤ t) :
+    μ {ω | |X ω| ≥ t} ≤ ENNReal.ofReal (2 * Real.exp (-t ^ 2 / (2 * K ^ 2)))
 
 end Scaffold.Mathlib.Probability.Concentration.Scalar

@@ -30,7 +30,23 @@ QA files contain fully elaborated proofs of small properties, special cases, or 
 
 ### Layer 3: derived research
 
-`Scaffold/Derived/**` is reserved but not currently implemented. Novel work may also live in a downstream repository. Derived claims must distinguish proved Lean theorems from axiom-backed results.
+Location: `Scaffold/Derived/**`. The first two modules assemble the
+persistence hypothesis chain end-to-end. `Scaffold/Derived/EventStream.lean`
+contains the proved telescoping identity, the boundedness/event-driven
+interface lemma, and the axiom-backed derived theorem `eventStreamTail`:
+an Azuma tail bound on the cumulative Laplacian perturbation of a random
+event-driven graph stream. `Scaffold/Derived/ProjectorDrift.lean` contains
+`davisKahanTwoPoint` (Davis–Kahan in two-point form with the separation
+discharged from Weyl and a spectral gap) and the axiom-backed derived
+theorem `eventStreamProjectorDrift`: a high-probability bound on the
+endpoint rotation of the invariant spectral subspace,
+`μ{‖P_{L_m} − P_{L_0}‖ ≥ s/(γ−s)} ≤ 2 d exp(−s²/(8 m R²))`.
+
+Both are proved from admitted axioms (`matrix_azuma_hoeffding`,
+`davis_kahan_sin_theta`, `weyl_inequality`) plus proved steps and are
+conditional on those axioms; they must not be described as foundationally
+proved. Novel work may also live in a downstream repository. Derived
+claims must distinguish proved Lean theorems from axiom-backed results.
 
 `Scaffold/Trusted/` currently contains explanatory material; it is not the public axiom location.
 
@@ -142,10 +158,21 @@ Community process is defined by `governance/CONTRIBUTING.md`, `MAINTAINERS.md`, 
 
 ## 12. Known architectural debt
 
-- The probability concentration subtree (`Scaffold.Mathlib.Probability.Concentration.*`) does not elaborate (malformed syntax, invalid binder annotations, undefined interfaces) and is excluded from the umbrella; its QA file is uncertified.
+- The probability concentration subtree was repaired on 2026-08-17 and is
+  certified through the umbrella; matrix Azuma is expressed through the
+  elementary `MatrixMDS` structure (comap past σ-algebras plus set-integral
+  conditional means) because the pinned Mathlib snapshot has no
+  filtration/conditional-expectation API. If a later Mathlib provides one,
+  restating `MatrixMDS` through `Filtration`/`Adapted` is the intended
+  upstream alignment.
 - Spectral-projector idempotence and eigenbasis orthonormality behind `spectralProjector` are consumed through the admitted perturbation interfaces rather than proved locally.
-- The planned derived layer is not present.
-- Citation mappings for the uncertified concentration subtree are incomplete (for example, `matrix_azuma_hoeffding` lacks a `Source:` marker); page-level locators for Horn–Johnson and Chung chapter-level citations are pending review.
+- The persistence chain is assembled end-to-end in the derived layer
+  (`eventStreamTail`, `davisKahanTwoPoint`, `eventStreamProjectorDrift`),
+  all conditional on three admitted axioms. The per-step
+  `spectral_persistence` axiom remains unconsumed; folding it in (or
+  deprecating it in favor of the two-endpoint chain) is an open interface
+  decision.
+- Page-level locators for Horn–Johnson and Chung chapter-level citations are pending review.
 - There is no executable target; the former `scaffold` executable referenced a missing `Main.lean` and was removed from the default build until a real driver exists.
 
 These are tracked as facts, not hidden by the target architecture.

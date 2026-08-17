@@ -21,32 +21,28 @@ This textbook is a primary source for modern concentration inequalities. Scaffol
 
 ### Chapter 2: Concentration
 
-| Theorem | Page | Lean Axiom | Module |
-|---------|------|------------|--------|
-| Definition 2.5.1 (Subgaussian norm) | 27 | `subgaussian_norm` | `Subgaussian.lean` |
-| Theorem 2.1.1 (Tail bound) | 21 | `subgaussian_tail_bound` | `Subgaussian.lean` |
-| Exercise 2.1.5 (Moment growth) | 24 | `subgaussian_moment_growth` | `Subgaussian.lean` |
-| Lemma 2.5.2 (Linear combinations) | 28 | `subgaussian_linear_combination` | `Subgaussian.lean` |
-| Exercise 2.5.5 (Centering) | 30 | `subgaussian_centering` | `Subgaussian.lean` |
-| Lemma 2.6.2 (Hoeffding's lemma) | 32 | `hoeffding_lemma` | `Subgaussian.lean` |
-| Theorem 2.6.3 (Sum bound) | 33 | `subgaussian_sum_bound` | `Subgaussian.lean` |
-| Theorem 2.2.2 (Hoeffding's inequality) | 24 | `hoeffding_inequality` | `Hoeffding.lean` |
-| Corollary 2.2.3 (IID Hoeffding) | 25 | `hoeffding_iid` | `Hoeffding.lean` |
-| Theorem 2.8.1 (Bernstein's inequality) | 43 | `bernstein_inequality` | `Bernstein.lean` |
-| Corollary 2.8.3 (IID Bernstein) | 45 | `bernstein_iid` | `Bernstein.lean` |
+| Theorem | Page | Lean Declaration | Module |
+|---------|------|------------|---------|
+| Definition 2.5.1 / Prop. 2.5.2 (Subgaussian norm) | 27/29 | `subgaussianNorm` (real definition) | `Scalar/Subgaussian.lean` |
+| Proposition 2.5.2 (ii) (Tail bound) | 29 | `subgaussian_tail_bound` (axiom) | `Scalar/Subgaussian.lean` |
+| Lemma 2.6.2 (Hoeffding's lemma) | 32 | `hoeffding_lemma` (axiom) | `Scalar/Subgaussian.lean` |
+| Theorem 2.2.2 (Hoeffding's inequality) | 24 | `hoeffding_inequality` (axiom) | `Scalar/Hoeffding.lean` |
+| Corollary 2.2.3 (IID Hoeffding) | 25 | `hoeffding_iid` (proved from `hoeffding_inequality`) | `Scalar/Hoeffding.lean` |
+| Theorem 2.8.1 (Bernstein's inequality) | 43 | `bernstein_inequality` (axiom) | `Scalar/Bernstein.lean` |
+| Corollary 2.8.3 (IID Bernstein) | 45 | `bernstein_iid` (proved from `bernstein_inequality`) | `Scalar/Bernstein.lean` |
 
-### Chapter 3: Random Vectors
-
-| Theorem | Page | Lean Axiom | Module |
-|---------|------|------------|--------|
-| Theorem 3.1.1 (Gaussian concentration) | 60 | `gaussian_lipschitz_concentration` | TODO |
+Statements from Chapter 2 that were previously admitted but have no named
+downstream consumer (`subgaussian_moment_growth` from Exercise 2.1.5,
+`subgaussian_linear_combination` from Lemma 2.5.2,
+`subgaussian_centering` from Exercise 2.5.5, and `subgaussian_sum_bound`
+from Theorem 2.6.3) were removed from the axiom boundary in the 2026-08-17
+concentration repair; they can be re-admitted when a consumer needs them.
 
 ### Chapter 5: Random Matrices
 
-| Theorem | Page | Lean Axiom | Module |
-|---------|------|------------|--------|
-| Theorem 5.1.1 (Matrix Hoeffding) | 180 | `matrix_hoeffding` | TODO |
-| Theorem 5.2.2 (Matrix Bernstein) | 190 | `matrix_bernstein` | TODO |
+Matrix concentration from this chapter is covered through the Tropp 2012
+source (see `tropp_tail_bounds.md`); the Chapter 5 matrix statements are
+not separately admitted.
 
 ## Notes
 

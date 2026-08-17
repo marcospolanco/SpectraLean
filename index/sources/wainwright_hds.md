@@ -21,8 +21,8 @@ This textbook provides alternative formulations and proofs of concentration ineq
 ### Chapter 2: Concentration
 
 | Theorem | Page | Lean Axiom | Module |
-|---------|------|------------|--------|
-| Theorem 2.15 (Bernstein's inequality) | 52 | `bernstein_bounded_variance` | `Bernstein.lean` |
+|---------|------|------------|---------|
+| Theorem 2.15 (Bernstein's inequality) | 52 | `bernstein_bounded_variance` | `Scalar/Bernstein.lean` |
 | Proposition 2.2 (Chernoff bound) | 35 | `chernoff_bound_generic` | TODO |
 
 ### Chapter 6: Subgaussian and Subexponential

@@ -23,11 +23,14 @@ This paper is the primary source for matrix concentration inequalities in Scaffo
 
 ### Main Results
 
-| Theorem | Page | Lean Axiom | Module |
-|---------|------|------------|--------|
-| Theorem 1.1 (Matrix Bernstein) | 393 | `matrix_bernstein` | TODO |
-| Theorem 1.4 (Matrix Hoeffding) | 398 | `matrix_hoeffding` | TODO |
-| Corollary 1.5 (Simplified Bernstein) | 399 | `matrix_bernstein_simplified` | TODO |
+| Theorem | Page | Lean Declaration | Module |
+|---------|------|------------|---------|
+| Theorem 1.1 (Matrix Bernstein) | 393 | `matrix_bernstein` (axiom) | `Matrix/Bernstein.lean` |
+| Theorem 1.4 (Matrix Hoeffding) | 398 | `matrix_hoeffding` (axiom) | `Matrix/Hoeffding.lean` |
+| Theorem 7.1 (Matrix Azuma) | 421 | `matrix_azuma_hoeffding` (axiom) | `Matrix/Azuma.lean` |
+
+Corollary 1.5 (simplified Bernstein) is not admitted; it has no current
+consumer and can be derived from Theorem 1.1 when needed.
 
 ## Notes
 

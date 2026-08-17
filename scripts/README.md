@@ -8,7 +8,9 @@ These scripts maintain documentation and policy metadata; they do not replace Le
 | `check_markdown_links.py` | Check repository-local links in active Markdown documentation. |
 | `lint_axioms.py` | Report axiom placement and index-coverage issues. |
 | `check_citations.py` | Check public axioms for the required citation-comment form. |
+| `zquota` | Query Z.ai quota and provide an automation-safe start gate. |
 | `opencode-pursue` | Run or resume bounded non-interactive pursuit sessions with GLM-5.3 at high reasoning effort. |
+| `io.github.marcospolanco.scaffold-pursue.plist` | Per-user macOS LaunchAgent template for hourly quota-aware pursuit. |
 
 ## Autonomous OpenCode run
 
@@ -29,6 +31,40 @@ The first invocation creates an OpenCode session. Later invocations resume the
 exact locally recorded session, rather than whichever session happens to be
 most recent. `--runs N` is the explicit budget: a successful run may continue
 into the next one until N runs complete; a failed run stops immediately.
+
+### Quota gate
+
+`opencode-pursue` runs `zquota` before every new pursuit run. If any reported
+quota is at least 80% used, it reports the reset time, starts no agent, and
+exits 75. The wrapper never sleeps or retries in place.
+
+Use `zquota` by itself for a readable status, `zquota --json` for a stable
+machine-readable result, or `zquota --quiet` when only its status matters.
+Its statuses are `0` (ready), `10` (threshold reached), and `1` (configuration,
+network, or response error). Scope a diagnostic to token limits with
+`zquota --scope tokens`; set a different gate with either
+`scripts/opencode-pursue --quota-threshold 70` or `ZQUOTA_THRESHOLD=70`.
+
+### Hourly macOS wake-up
+
+The checked-in [LaunchAgent template](io.github.marcospolanco.scaffold-pursue.plist)
+runs one quota-aware pursuit at load and then hourly. If the quota gate is
+closed, that invocation exits 75; `launchd` makes the next attempt. It avoids
+an idle terminal process and survives terminal closure, crashes, and reboots.
+
+Install it explicitly for the current user:
+
+```sh
+mkdir -p "$HOME/Library/LaunchAgents"
+cp scripts/io.github.marcospolanco.scaffold-pursue.plist \
+  "$HOME/Library/LaunchAgents/io.github.marcospolanco.scaffold-pursue.plist"
+launchctl bootstrap "gui/$(id -u)" \
+  "$HOME/Library/LaunchAgents/io.github.marcospolanco.scaffold-pursue.plist"
+```
+
+Inspect it with `launchctl print "gui/$(id -u)/io.github.marcospolanco.scaffold-pursue"`.
+To stop it, run `launchctl bootout "gui/$(id -u)" \
+"$HOME/Library/LaunchAgents/io.github.marcospolanco.scaffold-pursue.plist"`.
 
 Follow the durable, versioned progress reports with:
 

@@ -10,6 +10,8 @@ Advance Scaffold as a disciplined, axiom-transparent Lean research substrate cen
 - `docs/1_STRATEGY.md` for prioritization.
 - `docs/2_ARCHITECTURE.md` for the trust model and contribution contract.
 - `docs/5_QA_SCOREBOARD.md` for the last recorded verification state.
+- `docs/EXECUTION_PLAN.md` for the active autonomous-work queue and handoff.
+- `docs/AGENT_ACTIVITY.md` for recent operator-facing progress reports.
 - `governance/CONTRIBUTING.md` before changing public APIs.
 
 ## Priority order
@@ -34,9 +36,31 @@ Choose the smallest coherent milestone that unlocks the most downstream SGT prog
 - Do not commit, push, publish, rewrite history, or perform broad deletion.
 - Never access or modify files outside this worktree.
 
+## Autonomous reporting
+
+When running under `scripts/opencode-pursue`, maintain the two versioned
+operator-facing records:
+
+- Before editing, update `docs/EXECUTION_PLAN.md` with the active milestone,
+  its SGT-leverage rationale, and next action; append an `in-progress` entry
+  to `docs/AGENT_ACTIVITY.md` with the same information.
+- After every coherent milestone, update the execution plan and append a
+  compact activity entry: UTC date/time, status, changes or investigated
+  area, decisive commands and outcomes, verification, remaining risk, and
+  next handoff.
+- Before a normal exit, append a terminal `completed`, `blocked`, or
+  `superseded` entry. Do not expose chain-of-thought, credentials, or raw
+  unbounded command output; the wrapper retains raw local transcripts.
+
+If the same failure repeats or no meaningful source/documentation progress is
+possible after 12 tool steps, record exact evidence as a blocker, pivot to a
+ready safe milestone, or end the run. Do not wait indefinitely for a provider
+response.
+
 ## Verification
 
-Run checks proportionate to the change. The current default build is known to fail, so distinguish baseline failures from regressions.
+Run checks proportionate to the change. The default build currently succeeds;
+distinguish a regression from excluded or uncertified modules.
 
 ```sh
 python3 scripts/generate_qa_scoreboard.py

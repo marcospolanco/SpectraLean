@@ -35,6 +35,8 @@ htmlcov/
 *_output.txt
 *_error.log
 build_summary.txt
+.opencode/runs/
+.opencode/pursue-session
 
 # OS
 .DS_Store

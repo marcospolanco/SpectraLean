@@ -175,10 +175,16 @@ python3 scripts/check_markdown_links.py
 The repository includes a non-interactive OpenCode workflow using `zhipuai-coding-plan/glm-5.3` with the `high` reasoning variant:
 
 ```sh
-scripts/opencode-pursue
+scripts/opencode-pursue --runs 1
 ```
 
-Pass an optional priority as an argument. The project agent follows `AGENTS.md`, selects a bounded high-leverage milestone, implements and verifies it, and is denied external-directory access and publishing or destructive Git commands. See [`scripts/README.md`](scripts/README.md) for the exact safety boundary.
+Use `--runs N` for a bounded sequence of resumptions and pass an optional
+priority as an argument. The project agent follows `AGENTS.md`, maintains the
+current [execution plan](docs/EXECUTION_PLAN.md) and append-only
+[activity log](docs/AGENT_ACTIVITY.md), selects a bounded high-leverage
+milestone, implements and verifies it, and is denied external-directory access
+and publishing or destructive Git commands. See
+[`scripts/README.md`](scripts/README.md) for the exact safety boundary.
 
 ## Canonical documentation
 

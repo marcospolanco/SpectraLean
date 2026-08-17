@@ -1,6 +1,8 @@
 # Proposal: Sustained Autonomous Scaffold Pursuit
 
-**Status:** Proposed; no configuration or agent-behavior changes applied by this document.
+**Status:** Implemented on 2026-08-17. This document records the adopted
+design; the executable workflow and operator instructions live in
+`scripts/opencode-pursue`, `AGENTS.md`, and `scripts/README.md`.
 
 ## Goal
 

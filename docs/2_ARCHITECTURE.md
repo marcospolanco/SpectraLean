@@ -142,11 +142,11 @@ Community process is defined by `governance/CONTRIBUTING.md`, `MAINTAINERS.md`, 
 
 ## 12. Known architectural debt
 
-- Some legacy spectral declarations use `sorry` and placeholder definitions.
-- The default `Scaffold.lean` umbrella currently imports only `Scaffold.Mathlib.Core`, so `lake build` is not equivalent to compiling every source file.
+- The probability concentration subtree (`Scaffold.Mathlib.Probability.Concentration.*`) does not elaborate (malformed syntax, invalid binder annotations, undefined interfaces) and is excluded from the umbrella; its QA file is uncertified.
+- Spectral-projector idempotence and eigenbasis orthonormality behind `spectralProjector` are consumed through the admitted perturbation interfaces rather than proved locally.
 - The planned derived layer is not present.
-- Some citation mappings are incomplete.
-- The default executable target refers to a missing `Main.lean` file.
+- Citation mappings for the uncertified concentration subtree are incomplete (for example, `matrix_azuma_hoeffding` lacks a `Source:` marker); page-level locators for Horn–Johnson and Chung chapter-level citations are pending review.
+- There is no executable target; the former `scaffold` executable referenced a missing `Main.lean` and was removed from the default build until a real driver exists.
 
 These are tracked as facts, not hidden by the target architecture.
 

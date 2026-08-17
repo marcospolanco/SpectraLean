@@ -13,6 +13,7 @@ Each file in this directory:
 
 ## Available Maps
 
+- [Spectral Graph Theory](spectral_graph.md) - Laplacians, spectra, Cheeger, and event dynamics (the SGT center)
 - [Probability Concentration](probability_concentration.md) - Scalar concentration inequalities
 - [Random Matrix Theory](random_matrix.md) - Matrix concentration inequalities
 - [Perturbation Theory](perturbation.md) - Spectral stability and perturbation bounds

@@ -3,16 +3,10 @@
 
   Purpose
   -------
-  Additional QA lemmas for basic spectral graph theory properties
-  not covered in Basic_QA.lean.
+  Additional QA lemmas for the SGT center: Laplacian trace, Dirichlet
+  form, PSD, isolated vertices, and the kernel eigenvector statement.
 
-  These include PSD properties, eigenvalue relationships, and
-  fundamental invariants.
-
-  Compilation Status: 📋 TODO
-  -------------------------------
-  Imports the canonical `Scaffold.Mathlib.GraphTheory.Spectral` module.
-  Next: Verify compilation with `lake build` (waiting for mathlib download).
+  All proofs are real Lean proofs (no `sorry`/`admit`).
 
   Scoreboard: ../QA_SCOREBOARD.md
 -/
@@ -23,130 +17,73 @@ open scoped BigOperators Matrix
 
 namespace SpectralGraphTheory.QA
 
-/-!
-## QA 1: Laplacian PSD implies nonnegative eigenvalues
-
-Verify that if Laplacian is PSD, all eigenvalues are nonnegative.
--/
-
+variable {V : Type} [Fintype V] [DecidableEq V]
 
 /-!
-## QA 2: Laplacian trace equals total degree
-
-Verify that the trace of the Laplacian equals twice the number of edges
-(or sum of all edge weights).
+## Laplacian trace
 -/
 
-theorem laplacian_trace_equals_total_degree_QA
-  {V : Type} [Fintype V] [DecidableEq V]
-  (A : WAdj (V:=V)) :
-  Matrix.trace (laplacian A) = ∑ i, deg A i := by
-  -- trace(L) = trace(D - A) = trace(D) - trace(A)
-  -- For diagonal D, trace(D) = sum of diagonal entries = sum of degrees
-  simp [laplacian, Matrix.trace_sub, Matrix.trace]
-  rw [degreeMatrix]
-  apply Finset.sum_congr rfl
-  intro i _
-  split_ifs with h
-  · rfl
-  · rfl
+/-- Trace of the Laplacian equals the total degree, provided the
+adjacency has no self-loops. (Without the no-self-loop hypothesis the
+identity fails: `trace L = ∑ deg A i - ∑ A i i`. The hypothesis was
+missing from an earlier draft of this QA and its absence is exactly the
+kind of interface defect this file exists to catch.) -/
+theorem laplacian_trace_equals_total_degree_QA (A : WAdj (V := V))
+    (hnoLoop : ∀ i, A i i = 0) :
+    Matrix.trace (laplacian A) = ∑ i, deg A i := by
+  have hdiag : ∀ i, laplacian A i i = deg A i - A i i := by
+    intro i
+    rw [laplacian, Matrix.sub_apply, degreeMatrix_diagonal]
+  simp only [Matrix.trace, Matrix.diag, Matrix.diag_apply, hdiag,
+    Finset.sum_sub_distrib]
+  rw [Finset.sum_eq_zero fun i _ => hnoLoop i, sub_zero]
 
 /-!
-## QA 3: Zero sum of Laplacian rows
-
-Verify that each row of the Laplacian sums to zero.
+## Dirichlet form and PSD
 -/
 
-theorem laplacian_row_sum_zero_QA
-  {V : Type} [Fintype V] [DecidableEq V]
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A)
-  (i : V) :
-  ∑ j, laplacian A i j = 0 := by
-  -- Row i of L: L_ij = deg(i) if i=j, else -A_ij
-  -- Sum: deg(i) - sum_j A_ij = deg(i) - deg(i) = 0
-  rw [laplacian, degreeMatrix]
-  split_ifs with h
-  · simp [deg]
-    apply Finset.sum_eq_zero
-    intro j _\n    have : A i j = A j i := hA i j
-    rw [this]
-  · simp [deg]
-    apply Finset.sum_eq_zero
-    intro j _\n    have : A i j = A j i := hA i j
-    rw [this]
+/-- The Dirichlet form identity: the Laplacian quadratic form is half the
+weighted sum of squared vertex differences (public theorem). -/
+theorem laplacian_quadForm_QA (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (x : V → ℝ) :
+    quadForm (laplacian A) x = (∑ i, ∑ j, A i j * (x i - x j) ^ 2) / 2 :=
+  laplacian_quadForm A hA x
+
+/-- Positive semidefiniteness, derived through the Dirichlet form: every
+summand of the Dirichlet sum is nonnegative for nonnegative weights. -/
+theorem laplacian_psd_QA (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnonneg : ∀ i j, 0 ≤ A i j) (x : V → ℝ) :
+    0 ≤ quadForm (laplacian A) x := by
+  rw [laplacian_quadForm A hA x]
+  exact div_nonneg
+    (Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ =>
+      mul_nonneg (hnonneg i j) (sq_nonneg (x i - x j)))
+    zero_le_two
 
 /-!
-## QA 4: Laplacian is positive semidefinite for nonnegative weights
-
-Verify a simple case of PSD: for any vector, x^T L x ≥ 0.
+## Kernel structure
 -/
 
-theorem laplacian_psd_simple_case_QA
-  {V : Type} [Fintype V] [DecidableEq V]
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A)
-  (hnonneg : ∀ i j, 0 ≤ A i j) :
-  ∀ x : V → ℝ, 0 ≤ ∑ i j, A i j * (x i - x j) ^ 2 := by
-  -- x^T L x = ∑_ij A_ij (x_i - x_j)^2 ≥ 0 since A_ij ≥ 0 and squares ≥ 0
-  intro x
-  apply Finset.sum_nonneg
-  intro i _\n  apply Finset.sum_nonneg
-  intro j _\n  apply mul_nonneg
-  · apply hnonneg
-  · apply sq_nonneg
+/-- The all-ones vector is an eigenvector of the Laplacian with
+eigenvalue `0`. -/
+theorem ones_vec_eigenvalue_zero_QA (A : WAdj (V := V)) :
+    (laplacian A).mulVec onesVec = (0 : ℝ) • onesVec := by
+  rw [zero_smul]
+  exact laplacian_ones_in_kernel A
 
-/-!
-## QA 5: Degree sum equals twice edge count (unweighted)
-
-Verify that sum of degrees equals twice the number of edges for
-unweighted graphs.
--/
-
-
-/-!
-## QA 6: Regular graph Laplacian eigenvalues
-
-Verify that for d-regular graphs, the Laplacian eigenvalues are
-d - μ_i where μ_i are the adjacency matrix eigenvalues.
--/
-
-
-/-!
-## QA 7: Ones vector is eigenvector with eigenvalue 0
-
-Verify that the ones vector is an eigenvector of the Laplacian
-with eigenvalue 0.
--/
-
-theorem ones_vec_eigenvalue_zero_QA
-  {V : Type} [Fintype V] [DecidableEq V]
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  (laplacian A).mulVec onesVec = 0 * onesVec := by
-  -- This is equivalent to L * 1 = 0, which follows from laplacian_ones_in_kernel
-  rw [mul_zero]
-  exact SpectralGraphTheory.QA.laplacian_ones_in_kernel A hA
-
-/-!
-## QA 8: Laplacian of isolated vertex
-
-Verify the Laplacian structure when a vertex has no edges.
--/
-
-theorem laplacian_isolated_vertex_QA
-  {V : Type} [Fintype V] [DecidableEq V]
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A)
-  (i₀ : V)
-  (hisolated : ∀ j, A i₀ j = 0) :
-  ∀ j, laplacian A i₀ j = 0 := by
-  -- If vertex i₀ has no edges, then deg(i₀) = 0, so the i₀-th row of L is all zeros
+/-- A vertex with no incident weight has an all-zero Laplacian row. -/
+theorem laplacian_isolated_vertex_QA (A : WAdj (V := V)) (i₀ : V)
+    (hisolated : ∀ j, A i₀ j = 0) :
+    ∀ j, laplacian A i₀ j = 0 := by
   intro j
-  rw [laplacian, degreeMatrix]
-  split_ifs with h
-  · rw [deg, hisolated]
-    simp only [Finset.sum_const_zero, nsmul_eq_mul, mul_zero]
-  · rw [hisolated]
+  have hdeg : deg A i₀ = 0 := by
+    rw [deg]
+    exact Finset.sum_eq_zero fun j _ => hisolated j
+  simp only [laplacian, Matrix.sub_apply, degreeMatrix, hisolated j,
+    sub_self]
+  by_cases h : i₀ = j
+  · subst h
+    simp [hdeg]
+  · simp [h]
 
 end SpectralGraphTheory.QA

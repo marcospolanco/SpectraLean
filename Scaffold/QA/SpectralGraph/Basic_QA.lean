@@ -3,22 +3,13 @@
 
   Purpose
   -------
-  QA lemmas for basic spectral graph theory definitions and properties.
+  QA lemmas for the basic spectral graph theory definitions of
+  `Scaffold.Mathlib.GraphTheory.Spectral`: degree matrix, Laplacian,
+  quadratic form, cuts and volumes, and event updates.
 
-  These are simple sanity checks that verify our axioms were stated correctly.
-  Each lemma proves a well-known consequence that should follow immediately
-  from the definitions and axioms.
-
-  Compilation Status: 📋 TODO
-  -------------------------------
-  Imports the canonical `Scaffold.Mathlib.GraphTheory.Spectral` module.
-  Next: Verify compilation with `lake build` (waiting for mathlib download).
-
-  Notes
-  -----
-  - All proofs here are real Lean proofs (not `sorry`)
-  - If any of these fail, it indicates a problem with the axiom formulation
-  - These document the intended meaning of the basic spectral graph theory API
+  All proofs are real Lean proofs (no `sorry`/`admit`). They check the
+  public interface by deriving elementary consequences directly from the
+  definitions; a failure indicates an API-shape defect.
 
   Scoreboard: ../QA_SCOREBOARD.md
 -/
@@ -29,250 +20,125 @@ open scoped BigOperators Matrix
 
 namespace SpectralGraphTheory.QA
 
-/-!
-## QA 1: Degree matrix is diagonal
-
-Verify that the degree matrix definition actually produces a diagonal matrix.
--/
-
-theorem degreeMatrix_is_diagonal
-  {V : Type} [Fintype V] [DecidableEq V]
-  (A : WAdj (V:=V)) (i j : V) :
-  i ≠ j → degreeMatrix A i j = 0 := by
-  -- Real proof from definition
-  rw [degreeMatrix]
-  split_ifs
-  · contradiction
-  · rfl
+variable {V : Type} [Fintype V] [DecidableEq V]
 
 /-!
-## QA 2: Degree matrix diagonal entries are nonnegative
-
-Verify that diagonal entries (degrees) are nonnegative for nonnegative weights.
+## Degree matrix
 -/
 
-theorem degreeMatrix_diagonal_nonneg
-  {V : Type} [Fintype V] [DecidableEq V]
-  (A : WAdj (V:=V))
-  (hnonneg : ∀ i j, 0 ≤ A i j)
-  (i : V) :
-  0 ≤ degreeMatrix A i i := by
-  -- Real proof from definition
-  rw [degreeMatrix]
-  split_ifs
-  · simp only [deg, hnonneg]
-    apply Finset.sum_nonneg
-    intro j _
-    apply hnonneg
-  · rfl
+/-- Off-diagonal entries of the degree matrix vanish. -/
+theorem degreeMatrix_is_diagonal_QA (A : WAdj (V := V)) {i j : V} (h : i ≠ j) :
+    degreeMatrix A i j = 0 := by
+  simp [degreeMatrix, h]
+
+/-- Diagonal entries of the degree matrix are the row sums. -/
+theorem degreeMatrix_diagonal_QA (A : WAdj (V := V)) (i : V) :
+    degreeMatrix A i i = ∑ j, A i j := by
+  simp [degreeMatrix, deg]
 
 /-!
-## QA 3: Laplacian preserves symmetry
-
-Verify that Laplacian of a symmetric adjacency matrix is symmetric.
+## Laplacian
 -/
 
-theorem laplacian_preserves_symmetry
-  {V : Type} [Fintype V] [DecidableEq V]
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  Matrix.IsSymm (laplacian A) := by
-  -- Real proof: D is diagonal (hence symmetric), A is symmetric
-  have hD : Matrix.IsSymm (degreeMatrix A) := by
-    constructor
-    intro i j
-    by_cases h : i = j
-    · simp [h, degreeMatrix]
-    · simp [degreeMatrix, h]
-  simpa [laplacian] using hD.sub hA
+/-- The Laplacian of a symmetric adjacency matrix is symmetric: exercises
+the public `laplacian_symmetric` through the `IsSymm.sub` interface. -/
+theorem laplacian_preserves_symmetry_QA (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) :
+    Matrix.IsSymm (laplacian A) :=
+  laplacian_symmetric A hA
 
-/-!
-## QA 4: Ones vector in Laplacian kernel
-
-Verify that the all-ones vector is in the kernel of the Laplacian.
-This is a fundamental property that must hold.
--/
-
-theorem laplacian_ones_in_kernel
-  {V : Type} [Fintype V] [DecidableEq V]
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  (laplacian A).mulVec onesVec = 0 := by
-  ext i
-  simp only [laplacian, onesVec, Matrix.mulVec, Matrix.sub_mul,
-    degreeMatrix, Pi.mul_apply, Pi.sub_apply, deg]
-  split_ifs with h
-  · simp only [Pi.one_apply, mul_one, nsmul_eq_mul, Finset.sum_const,
-      Finset.card_univ, nsmul_eq_mul]
-    have : (∑ j, A i j) = (∑ j, A j i) := by
-      apply Finset.sum_congr rfl
-      intro j _
-      exact hA i j
-    simp [this]
-  · rfl
-
-/-!
-## QA 5: Event update preserves symmetry
-
-Verify that event updates preserve the symmetry of adjacency matrices.
-This is critical for event-driven dynamics.
--/
-
-theorem eventUpdate_preserves_symmetry
-  {V : Type} [Fintype V] [DecidableEq V]
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A)
-  (u v : V) (w : ℝ) :
-  Matrix.IsSymm (eventUpdate A u v w) := by
-  intro i j
-  rw [Matrix.IsSymm, eventUpdate]
-  by_cases h1 : i = u ∧ j = v
-  · simp [h1, hA]
-  by_cases h2 : i = v ∧ j = u
-  · simp [h2, hA]
-  by_cases h3 : i = u ∧ j = u
-  · simp [h3, hA]
-  by_cases h4 : i = v ∧ j = v
-  · simp [h4, hA]
-  by_cases h5 : i = u
-  · simp [h5]
-  by_cases h6 : i = v
-  · simp [h6]
-  by_cases h7 : j = u
-  · simp [h7]
-  by_cases h8 : j = v
-  · simp [h8]
-  simp [hA]
-
-/-!
-## QA 6: Volume is additive for disjoint sets
-
-Verify that volume behaves additively on disjoint finite sets.
--/
-
-theorem vol_add_disjoint
-  {V : Type} [Fintype V] [DecidableEq V]
-  (A : WAdj (V:=V))
-  (S T : Finset V)
-  (hdisj : Disjoint S T) :
-  vol A (S ∪ T) = vol A S + vol A T := by
-  -- Real proof from definition of vol and Finset properties
-  rw [vol, vol, vol]
-  apply Finset.sum_union
-  exact hdisj
-
-/-!
-## QA 7: Boundary is symmetric
-
-Verify that boundary(S) = boundary(Sᶜ).
--/
-
-theorem boundary_complement_symmetry
-  {V : Type} [Fintype V] [DecidableEq V]
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A)
-  (S : Finset V) :
-  boundary A S = boundary A Sᶜ := by
-  -- Real proof using symmetry of adjacency matrix
-  rw [boundary, boundary]
-  apply Finset.sum_congr rfl
-  intro i _
-  apply Finset.sum_congr rfl
-  intro j _
-  exact hA i j
-
-/-!
-## QA 8: Cheeger constant is nonnegative
-
-Verify that Cheeger constant is always nonnegative for any graph.
--/
-
-theorem cheegerConstant_nonneg
-  {V : Type} [Fintype V] [DecidableEq V]
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A)
-  (hnonneg : ∀ i j, 0 ≤ A i j) :
-  0 ≤ cheegerConstant A := by
-  -- Cheeger constant is inf of conductance values, which are all nonnegative
-  unfold cheegerConstant
-  apply le_inf_i18n
-  intro S
-  rw [conductance]
-  apply div_nonneg
-  · exact boundary_nonneg A hnonneg S
-  · apply Real.max_nonneg
-    · exact vol_nonneg A hnonneg S
-    · exact vol_nonneg A hnonneg Sᶜ
-
-/-!
-## QA 9: Volume is nonnegative
-
-Verify that volume of any vertex set is nonnegative for nonnegative weights.
--/
-
-theorem vol_nonneg
-  {V : Type} [Fintype V] [DecidableEq V]
-  (A : WAdj (V:=V))
-  (hnonneg : ∀ i j, 0 ≤ A i j)
-  (S : Finset V) :
-  0 ≤ vol A S := by
-  -- Real proof from definition of vol and nonnegativity
-  rw [vol]
-  apply Finset.sum_nonneg
-  intro i _
-  apply hnonneg
-
-/-!
-## QA 10: Boundary is nonnegative
-
-Verify that edge boundary is nonnegative for nonnegative weights.
--/
-
-theorem boundary_nonneg
-  {V : Type} [Fintype V] [DecidableEq V]
-  (A : WAdj (V:=V))
-  (hnonneg : ∀ i j, 0 ≤ A i j)
-  (S : Finset V) :
-  0 ≤ boundary A S := by
-  -- Real proof from definition of boundary and nonnegativity
-  rw [boundary]
-  apply Finset.sum_nonneg
-  intro i _
-  apply Finset.sum_nonneg
-  intro j _
-  apply hnonneg
-
-/-!
-## QA 11: Conductance is nonnegative
-
-Verify that conductance is always nonnegative.
--/
-
-theorem conductance_nonneg
-  {V : Type} [Fintype V] [DecidableEq V]
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A)
-  (hnonneg : ∀ i j, 0 ≤ A i j)
-  (S : Finset V) :
-  0 ≤ conductance A S := by
-  rw [conductance]
-  apply div_nonneg
-  · exact boundary_nonneg A hnonneg S
-  · apply Real.max_nonneg
-    · exact vol_nonneg A hnonneg S
-    · exact vol_nonneg A hnonneg Sᶜ
-
-/-!
-## QA 12: quadForm of zero vector is zero
-
-Verify that quadForm M 0 = 0.
--/
-
-theorem quadForm_zero_vector
-  {V : Type} [Fintype V] [DecidableEq V]
-  (M : Matrix V V ℝ) :
-  quadForm M 0 = 0 := by
-  rw [quadForm]
+/-- The all-ones vector is in the Laplacian kernel: direct row-sum
+computation from the definitions. -/
+theorem laplacian_ones_in_kernel_QA (A : WAdj (V := V)) :
+    (laplacian A).mulVec onesVec = 0 := by
+  funext i
+  have hrow : ∑ j, degreeMatrix A i j = deg A i := by
+    simp only [degreeMatrix, eq_comm]
+    simp
+  simp only [laplacian, Matrix.sub_apply, Matrix.mulVec, Matrix.dotProduct,
+    onesVec, mul_one, Finset.sum_sub_distrib]
+  rw [hrow, deg]
   simp
+
+/-- Each Laplacian row sums to zero. -/
+theorem laplacian_row_sum_zero_QA (A : WAdj (V := V)) (i : V) :
+    ∑ j, laplacian A i j = 0 := by
+  have hrow : ∑ j, degreeMatrix A i j = deg A i := by
+    refine (Finset.sum_eq_single i ?_ ?_).trans ?_
+    · intro j _ hj
+      exact degreeMatrix_off_diagonal A (Ne.symm hj)
+    · intro hi
+      exact absurd (Finset.mem_univ i) hi
+    · rw [degreeMatrix_diagonal]
+  simp only [laplacian, Matrix.sub_apply, Finset.sum_sub_distrib, sub_eq_zero]
+  rw [hrow, deg]
+
+/-!
+## Cuts, volumes, conductance
+-/
+
+/-- Volume is additive on disjoint vertex sets. -/
+theorem vol_add_disjoint_QA (A : WAdj (V := V)) (S T : Finset V)
+    (hdisj : Disjoint S T) :
+    vol A (S ∪ T) = vol A S + vol A T := by
+  simp only [vol]
+  exact Finset.sum_union hdisj
+
+/-- A set and its complement carry the total volume. -/
+theorem vol_complement_QA (A : WAdj (V := V)) (S : Finset V) :
+    vol A S + vol A Sᶜ = ∑ i, deg A i :=
+  Finset.sum_add_sum_compl S (deg A)
+
+/-- Conductance is nonnegative for nonnegative weights. -/
+theorem conductance_nonneg_QA (A : WAdj (V := V))
+    (hnonneg : ∀ i j, 0 ≤ A i j) (S : Finset V) :
+    0 ≤ conductance A S :=
+  conductance_nonneg A hnonneg S
+
+/-- The Cheeger constant is a lower bound for every nonempty proper
+subset's conductance. -/
+theorem cheegerConstant_le_conductance_QA (A : WAdj (V := V))
+    (hnonneg : ∀ i j, 0 ≤ A i j) (S : Finset V)
+    (hS : S.Nonempty) (hSc : Sᶜ.Nonempty) :
+    cheegerConstant A ≤ conductance A S :=
+  conductance_ge_cheegerConstant A hnonneg S hS hSc
+
+/-!
+## Quadratic form
+-/
+
+/-- The quadratic form at the zero vector vanishes. -/
+theorem quadForm_zero_QA (M : Matrix V V ℝ) :
+    quadForm M 0 = 0 := by
+  simp [quadForm, Matrix.dotProduct]
+
+/-- The Rayleigh quotient has the documented junk value at zero. -/
+theorem rayleigh_zero_QA (M : Matrix V V ℝ) :
+    rayleigh M 0 = 0 := by
+  simp [rayleigh]
+
+/-!
+## Event updates
+-/
+
+/-- An event update writes the new weight into the `(u, v)` entry. -/
+theorem eventUpdate_entry_QA (A : WAdj (V := V)) (u v : V) (w : ℝ) :
+    eventUpdate A u v w u v = w := by
+  simp [eventUpdate]
+
+/-- Event updates preserve symmetry. -/
+theorem eventUpdate_preserves_symmetry_QA (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (u v : V) (w : ℝ) :
+    Matrix.IsSymm (eventUpdate A u v w) :=
+  eventUpdate_preserves_symmetry A hA u v w
+
+/-- Repeating the same event is idempotent. -/
+theorem eventUpdate_idempotent_QA (A : WAdj (V := V)) (u v : V) (w : ℝ) :
+    eventUpdate (eventUpdate A u v w) u v w = eventUpdate A u v w := by
+  ext i j
+  simp only [eventUpdate]
+  by_cases h : (i = u ∧ j = v) ∨ (i = v ∧ j = u)
+  · rw [if_pos h, if_pos h]
+  · rw [if_neg h, if_neg h]
 
 end SpectralGraphTheory.QA

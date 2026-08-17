@@ -14,18 +14,18 @@ _Generated from Lean source on 2026-08-17._
 
 | Metric | Count |
 | --- | ---: |
-| QA theorem/lemma declarations | 33 |
+| QA theorem/lemma declarations | 48 |
 | `sorry`/`admit` tokens in QA code | 0 |
-| Explicit axioms in `Scaffold/Mathlib` | 28 |
-| `sorry`/`admit` tokens in `Scaffold/Mathlib` code | 33 |
+| Explicit axioms in `Scaffold/Mathlib` | 26 |
+| `sorry`/`admit` tokens in `Scaffold/Mathlib` code | 0 |
 
 ### QA declarations by domain
 
 | Domain | Declarations |
 | --- | ---: |
 | Concentration | 1 |
-| Perturbation | 2 |
-| SpectralGraph | 30 |
+| Perturbation | 5 |
+| SpectralGraph | 42 |
 
 ### QA files
 
@@ -33,38 +33,39 @@ _Generated from Lean source on 2026-08-17._
 | --- | ---: | ---: |
 | `Scaffold/QA/Concentration/Matrix_QA.lean` | 1 | 0 |
 | `Scaffold/QA/Perturbation/DavisKahan_QA.lean` | 1 | 0 |
-| `Scaffold/QA/Perturbation/Weyl_QA.lean` | 1 | 0 |
+| `Scaffold/QA/Perturbation/Weyl_QA.lean` | 4 | 0 |
 | `Scaffold/QA/SpectralGraph/BasicProperties_QA.lean` | 5 | 0 |
-| `Scaffold/QA/SpectralGraph/Basic_QA.lean` | 12 | 0 |
-| `Scaffold/QA/SpectralGraph/Cheeger_QA.lean` | 3 | 0 |
-| `Scaffold/QA/SpectralGraph/Dynamics_QA.lean` | 3 | 0 |
-| `Scaffold/QA/SpectralGraph/Interlacing_QA.lean` | 4 | 0 |
-| `Scaffold/QA/SpectralGraph/Variational_QA.lean` | 3 | 0 |
+| `Scaffold/QA/SpectralGraph/Basic_QA.lean` | 14 | 0 |
+| `Scaffold/QA/SpectralGraph/Cheeger_QA.lean` | 7 | 0 |
+| `Scaffold/QA/SpectralGraph/Dynamics_QA.lean` | 6 | 0 |
+| `Scaffold/QA/SpectralGraph/Interlacing_QA.lean` | 5 | 0 |
+| `Scaffold/QA/SpectralGraph/Variational_QA.lean` | 5 | 0 |
 <!-- END GENERATED SOURCE METRICS -->
 
 ## Verification record
 
 | Check | Result | Date | Scope and limitation |
 | --- | --- | --- | --- |
-| `lake build` | Fail | 2026-08-17 | The configured executable target references missing `Main.lean`; the library umbrella also reaches only `Scaffold.Mathlib.Core`. |
-| Direct QA module targets | Fail | 2026-08-17 | Spectral and perturbation targets encounter obsolete or misplaced imports before QA can be certified. |
-| Public Mathlib-mirror module targets | Fail | 2026-08-17 | Examples include missing Mathlib 4.14 import paths in `Spectral.lean`/`DavisKahan.lean` and imports after declarations in `Weyl.lean`. |
-| `scripts/lint_axioms.py` | Pass with 12 warnings | 2026-08-17 | Twelve public axioms are absent from the index. The script treats coverage findings as warnings. |
-| `scripts/check_citations.py` | Fail: 28 issues | 2026-08-17 | Every source-detected public axiom lacks the checker’s required doc-comment or `Source:` form. |
-| `scripts/check_markdown_links.py` | Pass | 2026-08-17 | No broken repository-relative targets in active docs; excludes the historical archive and dependency checkout. |
+| `lake build` | Pass | 2026-08-17 | Default target is the library root `Scaffold.lean`; its umbrella certifies `Core.{RandomVariable,Norms,MatrixUpdates}`, `GraphTheory.{Spectral,Cheeger,Dynamics}`, and `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan}`. The probability concentration subtree is not reachable through the umbrella. |
+| Direct QA module targets | Pass | 2026-08-17 | All SpectralGraph and Perturbation QA modules compiled individually (`lake build Scaffold.QA.…`) with no `sorry`/`admit`. `Scaffold/QA/Concentration/Matrix_QA.lean` is **not** certified: its imports (`Probability.Concentration.Matrix.*`) do not elaborate. |
+| Public Mathlib-mirror module targets | Pass | 2026-08-17 | All eight umbrella modules compile directly. `Scaffold.Mathlib.Probability.Concentration.*` (six modules) still fails to elaborate: invalid binder annotations, `expected token` parse errors, and undefined `RV`/`Independent` references. |
+| Mathlib cache provenance | Note | 2026-08-17 | The local `lake exe cache` binary crashes under the current macOS dyld (`__DATA_CONST segment missing SG_READ_ONLY flag`); the cache was fetched by running the same Cache tool logic interpreted via `lake env lean --run`, unpacking 5685 Mathlib oleans. |
+| `scripts/lint_axioms.py` | Pass with 1 warning | 2026-08-17 | `matrix_azuma_hoeffding` (uncertified concentration module) is absent from the index. The ten axioms of the certified modules are covered by `index/sources/` and `index/map/`. |
+| `scripts/check_citations.py` | Fail: 1 issue | 2026-08-17 | `matrix_azuma_hoeffding` lacks a `Source:` citation in its doc comment (uncertified concentration module). Down from 28 issues; the checker's `Source:` matcher was also repaired to accept citations anywhere in the doc comment rather than only at its start. |
+| `scripts/check_markdown_links.py` | Pass | 2026-08-17 | No broken repository-relative targets in active docs; excludes the historical archive, the dependency checkout, and the local `.opencode/` tooling directory (including its vendored `node_modules`). |
 
 ## Interpretation
 
-- **Explicit axiom:** an intentional trust boundary declared with Lean’s `axiom` command.
-- **Admitted proof:** a `sorry` or `admit` accepted by Lean; this is different from an explicit axiom and remains technical debt in public modules.
-- **QA declaration:** a theorem or lemma under `Scaffold/QA`; source counting alone does not show that every module was compiled in the latest run.
-- **Default build:** whatever the current Lake targets reach; it must not be described as a full repository verification unless all modules are reachable.
+- **Explicit axiom:** an intentional trust boundary declared with Lean's `axiom` command. QA lemmas and derived theorems using these axioms are conditional on them.
+- **Admitted proof:** a `sorry` or `admit` accepted by Lean; this is different from an explicit axiom and remains technical debt in public modules. As of this scoreboard there are no `sorry`/`admit` tokens anywhere under `Scaffold/`.
+- **QA declaration:** a theorem or lemma under `Scaffold/QA`; the 47 declarations in the certified modules have compiled against the current public API, while the one concentration declaration has not.
+- **Default build:** whatever the current Lake targets reach; the umbrella does not reach the concentration subtree, so `lake build` passing must not be read as certifying that subtree.
 
 ## Active priorities
 
-1. Make the umbrella library or CI compile every intended public and QA module.
-2. Remove admitted proofs and constant placeholder definitions from public APIs, or quarantine them with explicit status.
-3. Complete citation mappings for every admitted axiom.
+1. Repair or quarantine the six `Probability.Concentration` modules (malformed syntax and undefined interfaces) and then certify `Concentration/Matrix_QA.lean`.
+2. Replace admitted Cheeger/Weyl/Davis–Kahan statements by proved versions where feasible, or refine their citations (page-level locators pending review).
+3. Prove projector idempotence and eigenbasis properties behind `spectralProjector`, which are currently consumed through the admitted perturbation interfaces.
 4. Add QA based on risk and composability rather than targeting a cosmetic one-to-one ratio.
 
 ## Historical reports

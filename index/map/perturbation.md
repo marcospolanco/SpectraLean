@@ -1,51 +1,55 @@
 # Perturbation Theory
 
-This index maps Lean modules and axioms for perturbation theory and spectral stability.
+This index maps Lean modules and axioms for perturbation theory and
+spectral stability.
 
 ## Status
 
-**Currently implemented**: None (planned for v0.3.0)
+**Implemented and build-certified** (see the QA scoreboard):
+`Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan}`.
 
-## Planned Modules
+## Implemented Modules
 
-### Davis-Kahan Theorems
+### Weyl Bounds
+
+**Module**: `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl`
+
+| Axiom | Description | Source |
+|-------|-------------|--------|
+| `weyl_inequality` | Each sorted eigenvalue moves by at most `‖E‖` under a symmetric perturbation | [Weyl 1912 / Bhatia 1997](../sources/weyl_1912_bhatia.md) |
+| `spectral_gap_stability` | A gap shrinks by at most `2‖E‖` | [Weyl 1912 / Bhatia 1997](../sources/weyl_1912_bhatia.md) |
+
+### Davis–Kahan
 
 **Module**: `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan`
 
 | Axiom | Description | Source |
 |-------|-------------|--------|
-| `davis_kahan_sin_theta` | Sin Θ theorem for eigenvector perturbation | Stewart (1974) |
-| `davis_kahan_tan_theta` | Tan Θ variant | Stewart (1974) |
-| `davis_kahan_delta` | Δ theorem | Davis & Kahan (1970) |
+| `davis_kahan_sin_theta` | Projector rotation `≤ ‖E‖/δ` under two-sided spectral separation | [Davis & Kahan 1970](../sources/davis_kahan_1970.md) |
 
-### Resolvent Bounds
+### Matrix Update Identities (bridge utilities)
 
-**Module**: `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.ResolventBounds`
+**Module**: `Scaffold.Mathlib.Core.MatrixUpdates`
 
 | Axiom | Description | Source |
 |-------|-------------|--------|
-| `resolvent_perturbation_bound` | Bound on resolvent difference | Bhatia (1997) |
-| `resolvent_norm_bound` | General resolvent inequality | Kato (1966) |
+| `woodbury_identity` | Woodbury identity for low-rank event updates | [Higham 2002](../sources/higham_matrix_updates.md) |
+| `sherman_morrison` | Rank-one Sherman–Morrison formula | [Higham 2002](../sources/higham_matrix_updates.md) |
 
-### Spectral Projectors
+## Deferred Work
 
-**Module**: `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.SpectralProjectors`
-
-| Axiom | Description | Source |
-|-------|-------------|--------|
-| `spectral_projector_stability` | Perturbation of spectral projectors | Bhatia (1997) |
-| `spectral_gap_perturbation` | Gap-dependent bounds | Kato (1966) |
+The following entries from an earlier plan remain unimplemented and are
+not promised: `davis_kahan_tan_theta`, `davis_kahan_delta`, resolvent
+bounds, and a separate spectral-projector module (the real projector
+definitions live in `Scaffold.Mathlib.GraphTheory.Spectral`).
 
 ## Applications
 
-These results are used in:
-
-- Random matrix theory (eigenvalue separation)
-- Spectral clustering (stability of clustering)
-- Dimensionality reduction (perturbation of principal components)
-- Graph theory (eigenvalue interlacing)
+- `weyl_inequality` / `spectral_gap_stability` control how far event
+  streams can move Laplacian spectra ([Spectral Graph Theory map](spectral_graph.md)).
+- `davis_kahan_sin_theta` is the per-step engine of the admitted
+  `spectral_persistence` principle.
 
 ## See Also
 
-- [Random Matrix Theory](random_matrix.md) for matrix concentration
 - [Sources Index](../sources/) for detailed bibliographic information

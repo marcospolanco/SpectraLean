@@ -10,7 +10,9 @@ from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[1]
 LINK = re.compile(r"\[[^]]*\]\(([^)]+)\)")
-EXCLUDED_PARTS = {".git", ".lake"}
+# `.opencode` holds local agent tooling (including a vendored `node_modules`
+# whose READMEs point at web resources), not project documentation.
+EXCLUDED_PARTS = {".git", ".lake", ".opencode", "node_modules"}
 
 
 def main() -> None:

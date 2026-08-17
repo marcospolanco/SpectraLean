@@ -3,15 +3,13 @@
 
   Purpose
   -------
-  QA lemmas for variational characterizations of eigenvalues.
+  QA lemmas for the Rayleigh quotient interface of
+  `Scaffold.Mathlib.GraphTheory.Spectral`: nonnegativity on PSD
+  operators, kernel vectors, and homogeneity — the pieces composed by
+  the admitted `lambda2_variational` characterization.
 
-  These verify basic properties of Rayleigh quotients and
-  minimization principles for eigenvalues.
-
-  Compilation Status: ⏳ NOT YET VERIFIED
-  ----------------------------------------
-  Created: 2025-02-10
-  Next: Verify compilation with `lake build` (waiting for mathlib download).
+  All proofs are real Lean proofs (no `sorry`/`admit`). QA does not
+  prove the variational axiom.
 
   Scoreboard: ../QA_SCOREBOARD.md
 -/
@@ -22,87 +20,51 @@ open scoped BigOperators Matrix
 
 namespace SpectralGraphTheory.QA
 
-/-!
-## QA 1: Rayleigh quotient is nonnegative for PSD matrices
+variable {V : Type} [Fintype V] [DecidableEq V]
 
-Verify that for a PSD matrix, the Rayleigh quotient is always
-nonnegative. This is a basic sanity check for variational principles.
--/
+/-- The Rayleigh quotient has the documented junk value at the zero
+vector. -/
+theorem rayleigh_zero_QA (M : Matrix V V ℝ) : rayleigh M 0 = 0 := by
+  simp [rayleigh]
 
-theorem rayleigh_quotient_nonneg_psd_QA
-  {V : Type} [Fintype V] [DecidableEq V]
-  (M : Matrix V V ℝ)
-  (hM : Matrix.IsSymm M)
-  (hpsd : ∀ x : V → ℝ, 0 ≤ Matrix.dotProduct x (M.mulVec x))
-  (x : V → ℝ)
-  (hx : x ≠ 0) :
-  0 ≤ (Matrix.dotProduct x (M.mulVec x)) / (∑ i, x i ^ 2) := by
-  -- Real proof: For PSD matrices, x^T M x ≥ 0, and x^T x > 0 for nonzero x
-  apply div_nonneg
-  · exact hpsd x
-  · apply Finset.sum_nonneg
-    intro i _
-    apply sq_nonneg
+/-- For a nonzero vector the Rayleigh denominator (a sum of squares) is
+strictly positive. -/
+theorem rayleigh_denominator_pos_QA {x : V → ℝ} (hx : x ≠ 0) :
+    0 < Matrix.dotProduct x x := by
+  obtain ⟨i, hi⟩ : ∃ i, x i ≠ 0 := by
+    by_contra hcon
+    push_neg at hcon
+    exact hx (funext hcon)
+  exact Finset.sum_pos' (fun j _ => mul_self_nonneg _)
+    ⟨i, Finset.mem_univ _, mul_self_pos.mpr hi⟩
 
-/-!
-## QA 2: Rayleigh quotient is zero for kernel vectors
+/-- For a PSD operator the Rayleigh quotient of any nonzero vector is
+nonnegative. -/
+theorem rayleigh_nonneg_psd_QA (M : Matrix V V ℝ)
+    (hpsd : ∀ x : V → ℝ, 0 ≤ quadForm M x) (x : V → ℝ) (hx : x ≠ 0) :
+    0 ≤ rayleigh M x := by
+  rw [rayleigh, if_neg hx]
+  exact div_nonneg (hpsd x) (rayleigh_denominator_pos_QA hx).le
 
-Verify that for vectors in the kernel of a PSD matrix,
-the Rayleigh quotient is zero.
--/
+/-- Kernel vectors have Rayleigh quotient zero. -/
+theorem rayleigh_zero_in_kernel_QA (M : Matrix V V ℝ) (x : V → ℝ)
+    (hx : x ≠ 0) (hker : M.mulVec x = 0) :
+    rayleigh M x = 0 := by
+  rw [rayleigh, if_neg hx, quadForm, hker, Matrix.dotProduct_zero, zero_div]
 
-theorem rayleigh_quotient_zero_in_kernel_QA
-  {V : Type} [Fintype V] [DecidableEq V]
-  (M : Matrix V V ℝ)
-  (hM : Matrix.IsSymm M)
-  (x : V → ℝ)
-  (hx : M.mulVec x = 0)
-  (hx' : x ≠ 0) :
-  (Matrix.dotProduct x (M.mulVec x)) / (∑ i, x i ^ 2) = 0 := by
-  -- Real proof: If Mx = 0, then x^T M x = 0
-  rw [hx]
-  simp only [Pi.zero_apply, Matrix.dotProduct_zero, div_zero]
-
-/-!
-## QA 3: Rayleigh quotient is homogeneous
-
-Verify that scaling the input vector doesn't change the
-Rayleigh quotient. This is a basic invariance property.
--/
-
-theorem rayleigh_quotient_homogeneous_QA
-  {V : Type} [Fintype V] [DecidableEq V]
-  (M : Matrix V V ℝ)
-  (hM : Matrix.IsSymm M)
-  (x : V → ℝ)
-  (c : ℝ)
-  (hx : x ≠ 0)
-  (hc : c ≠ 0) :
-  (Matrix.dotProduct (c • x) (M.mulVec (c • x))) /
-    (∑ i, (c • x) i ^ 2) =
-  (Matrix.dotProduct x (M.mulVec x)) / (∑ i, x i ^ 2) := by
-  -- Real proof: The factor c^2 cancels from numerator and denominator
-  -- R(cx) = (cx)^T M (cx) / (cx)^T (cx) = c^2(x^T M x) / c^2(x^T x) = R(x)
-  simp only [Pi.smul_apply, Matrix.mulVec_smul, Matrix.dotProduct_smul]
-  have h_csq : c ^ 2 ≠ 0 := by
-    apply sq_ne_zero.mpr hc
-  field_simp [h_csq, hx]
-
-/-!
-## QA 4: Ones vector has Rayleigh quotient zero for Laplacian
-
-Verify that the all-ones vector gives Rayleigh quotient zero
-for the Laplacian. This is because it's in the kernel.
--/
-
-
-/-!
-## QA 5: Rayleigh quotient is bounded by extremal eigenvalues
-
-Verify that for any symmetric matrix, the Rayleigh quotient
-is between the minimum and maximum eigenvalues. This is a
-basic sanity check for variational characterizations.
--/
-
+/-- The Rayleigh quotient is homogeneous of degree zero: rescaling the
+vector by a nonzero constant leaves it unchanged. -/
+theorem rayleigh_homogeneous_QA (M : Matrix V V ℝ) (x : V → ℝ) (c : ℝ)
+    (hx : x ≠ 0) (hc : c ≠ 0) :
+    rayleigh M (c • x) = rayleigh M x := by
+  have hcx : c • x ≠ 0 := smul_ne_zero_iff.mpr ⟨hc, hx⟩
+  have hc2 : c * c ≠ 0 := mul_ne_zero hc hc
+  have hd : Matrix.dotProduct x x ≠ 0 :=
+    ne_of_gt (rayleigh_denominator_pos_QA hx)
+  rw [rayleigh, if_neg hcx, rayleigh, if_neg hx, quadForm, quadForm]
+  simp only [Matrix.mulVec_smul, Matrix.smul_dotProduct,
+    Matrix.dotProduct_smul, smul_eq_mul, mul_assoc]
+  field_simp
+  ring
 
 end SpectralGraphTheory.QA

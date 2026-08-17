@@ -24,10 +24,14 @@ When adding a new axiom:
 
 ### Primary Sources
 
+- [Chung - Spectral Graph Theory](chung_spectral_graph.md)
+- [Davis & Kahan 1970 - Eigenvector Rotation](davis_kahan_1970.md)
+- [Horn & Johnson - Matrix Analysis](horn_johnson_matrix_analysis.md)
 - [Vershynin - High-Dimensional Probability](vershynin_hdp.md)
 - [Tropp - User-Friendly Tail Bounds](tropp_tail_bounds.md)
 - [Wainwright - High-Dimensional Statistics](wainwright_hds.md)
+- [Weyl 1912 / Bhatia 1997 - Eigenvalue Perturbation](weyl_1912_bhatia.md)
 
 ### Additional Sources
 
-To be added as the library expands.
+- [Higham 2002 / Henderson & Searle 1981 - Matrix Update Identities](higham_matrix_updates.md)

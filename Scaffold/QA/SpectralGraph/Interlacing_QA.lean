@@ -3,103 +3,66 @@
 
   Purpose
   -------
-  QA lemmas for eigenvalue interlacing and perturbation theorems.
+  QA lemmas for the interlacing interface of
+  `Scaffold.Mathlib.GraphTheory.Spectral`: principal submatrix
+  extraction and symmetry, and perturbation-matrix structure in the
+  ℓ² operator norm.
 
-  These verify basic structural properties that should hold for
-  eigenvalue perturbations and interlacing inequalities.
-
-  Compilation Status: ⏳ NOT YET VERIFIED
-  ----------------------------------------
-  Created: 2025-02-10
-  Next: Verify compilation with `lake build` (waiting for mathlib download).
+  All proofs are real Lean proofs (no `sorry`/`admit`).
 
   Scoreboard: ../QA_SCOREBOARD.md
 -/
 
 import Scaffold.Mathlib.GraphTheory.Spectral
+import Mathlib.Analysis.CStarAlgebra.Matrix
 
-open scoped BigOperators Matrix
+open scoped BigOperators Matrix Matrix.L2OpNorm
 
 namespace SpectralGraphTheory.QA
 
-/-!
-## QA 1: Principal submatrix preserves symmetry
-
-Verify that taking a principal submatrix of a symmetric matrix
-produces a symmetric matrix. This is a basic sanity check for
-interlacing theorems.
--/
-
-theorem principal_submatrix_preserves_symmetry_QA
-  {V : Type} [Fintype V] [DecidableEq V]
-  (M : Matrix V V ℝ)
-  (hM : Matrix.IsSymm M)
-  (S : Finset V) :
-  Matrix.IsSymm (fun (i j : ↥S) => M i j) := by
-  -- Real proof: Symmetry is preserved when restricting to any subset
-  intro i j
-  simp only [Matrix.IsSymm, Subtype.coe_mk]
-  exact hM i j
+variable {V : Type} [Fintype V] [DecidableEq V]
 
 /-!
-## QA 2: Principal submatrix preserves PSD
-
-Verify that taking a principal submatrix of a PSD matrix
-produces a PSD matrix. This is a basic sanity check for
-interlacing theorems applied to Laplacians.
+## Principal submatrices
 -/
 
+/-- Entries of the principal submatrix are entries of the ambient
+matrix. -/
+theorem principal_submatrix_entries_QA (M : Matrix V V ℝ)
+    (S : Finset V) (a b : ↥S) :
+    M.submatrix (fun i : ↥S => (i : V)) (fun i : ↥S => (i : V)) a b
+      = M (a : V) (b : V) := by
+  rfl
+
+/-- The principal submatrix of a symmetric matrix is symmetric. -/
+theorem principal_submatrix_preserves_symmetry_QA (M : Matrix V V ℝ)
+    (hM : M.IsSymm) (S : Finset V) :
+    (M.submatrix (fun i : ↥S => (i : V)) (fun i : ↥S => (i : V))).IsSymm :=
+  principalSubmatrix_symmetric M hM S
 
 /-!
-## QA 2: Perturbation matrix is symmetric for symmetric perturbations
-
-Verify that if two symmetric matrices are perturbed, their
-difference is also symmetric. This is basic for perturbation bounds.
+## Perturbation structure
 -/
 
-theorem symmetric_difference_is_symmetric_QA
-  {V : Type} [Fintype V] [DecidableEq V]
-  (M N : Matrix V V ℝ)
-  (hM : Matrix.IsSymm M)
-  (hN : Matrix.IsSymm N) :
-  Matrix.IsSymm (M - N) := by
-  -- Real proof: Difference of symmetric matrices is symmetric
-  intro i j
-  simp only [Matrix.IsSymm, Matrix.sub_apply]
-  rw [hM, hN]
+/-- The difference of symmetric matrices is symmetric. -/
+theorem symmetric_difference_is_symmetric_QA (M N : Matrix V V ℝ)
+    (hM : M.IsSymm) (hN : N.IsSymm) :
+    (M - N).IsSymm :=
+  hM.sub hN
 
-/-!
-## QA 3: Zero perturbation has zero norm
+/-- Zero perturbation has zero operator norm. -/
+theorem zero_perturbation_zero_norm_QA (M : Matrix V V ℝ) :
+    ‖M - M‖ = 0 := by
+  rw [sub_self, norm_zero]
 
-Verify that if the perturbation is zero, its operator norm is zero.
-This is a basic sanity check for perturbation theorems.
--/
-
-theorem zero_perturbation_zero_norm_QA
-  {V : Type} [Fintype V] [DecidableEq V]
-  (M : Matrix V V ℝ) :
-  ‖M - M‖ = 0 := by
-  -- Real proof: Any norm satisfies ‖x - x‖ = 0
-  simp only [Matrix.sub_self, norm_zero]
-
-/-!
-## QA 4: Norm satisfies triangle inequality
-
-Verify that the operator norm satisfies the triangle inequality.
-This is a basic sanity check for perturbation bounds.
--/
-
-theorem norm_triangle_inequality_QA
-  {V : Type} [Fintype V] [DecidableEq V]
-  (M N P : Matrix V V ℝ) :
-  ‖M - P‖ ≤ ‖M - N‖ + ‖N - P‖ := by
-  -- Real proof: This follows from the triangle inequality for the operator norm
-  -- ‖M - P‖ = ‖(M - N) + (N - P)‖ ≤ ‖M - N‖ + ‖N - P‖
+/-- The operator norm satisfies the triangle inequality. -/
+theorem norm_triangle_QA (M N P : Matrix V V ℝ) :
+    ‖M - P‖ ≤ ‖M - N‖ + ‖N - P‖ := by
   have h : M - P = (M - N) + (N - P) := by
-    ext i j
+    ext a b
     simp only [Matrix.add_apply, Matrix.sub_apply]
-    abel
+    ring
   rw [h]
-  exact norm_add_le (M - N) (N - P)
+  exact norm_add_le _ _
 
 end SpectralGraphTheory.QA

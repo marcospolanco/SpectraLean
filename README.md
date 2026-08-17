@@ -19,6 +19,15 @@ Scaffold makes the tradeoff explicit:
 
 This is stronger than informal derivation because Lean checks the downstream reasoning. It is weaker than foundational formalization because the admitted mathematics remains part of the trust base.
 
+### The mushy center and hard crust
+
+Scaffold deliberately keeps two kinds of work separate:
+
+- The **mushy center** is the smallest possible set of research-frontier results that we need before their full proofs exist in Lean. Each such result must be a named, explicit axiom with a precise statement, a source citation, and a clear account of its intended upstream replacement. It is never concealed behind `sorry`.
+- The **hard crust** is everything that follows mechanically from that center: definitions, interfaces, derived theorems, and QA lemmas proved by Lean. This work must contain no `sorry` or `admit`, and should make the assumptions on which it depends apparent.
+
+Ongoing work should shrink and strengthen the mushy center while expanding the hard crust. Prefer proving or upstreaming an existing axiom, tightening an axiom's statement, or deriving a reusable checked consequence over adding a new assumption. An axiom may be added only when it is cited, necessary for a concrete SGT milestone, and surrounded by enough hard-crust checks to expose its intended use.
+
 ## The center-out research policy
 
 Ongoing work radiates outward from SGT. We strengthen the center first, add adjacent mathematics only when it unlocks important SGT obligations, and advance to applications only when the intervening interfaces are credible.
@@ -79,6 +88,8 @@ See [Spectral Theory and Algorithmic Pipeline](docs/3_SPECTRAL_THEORY.md) for th
 
 ## Trust model
 
+The trust model is therefore operational, not merely descriptive: citations and explicit axioms belong in the mushy center; checked Lean proofs belong in the hard crust. Do not describe an axiom-backed result as fully formalized, and do not use `sorry` to move a result across that boundary.
+
 | Artifact | What it establishes | What it does not establish |
 | --- | --- | --- |
 | Real Lean definition | A precise, typechecked object | That it is the best model of the application |
@@ -111,13 +122,12 @@ The remaining root files are repository entry points or tool configuration: `Sca
 
 As of August 17, 2026:
 
-- the source contains 33 QA theorem/lemma declarations and no `sorry` or `admit` tokens under `Scaffold/QA`;
-- those QA modules are **not yet certified by a clean direct build**;
-- the default `lake build` fails because the executable target references a missing `Main.lean`;
-- several public modules have obsolete or misplaced imports;
-- public source still contains admitted proofs, placeholder statement shapes, incomplete citations, and incomplete index coverage.
+- the default `lake build` passes: its umbrella certifies the SGT center (`GraphTheory.Spectral`), the Cheeger bridge, the event-driven frontier, the Weyl/Davis–Kahan perturbation modules, and the Core utilities;
+- all SpectralGraph and Perturbation QA modules compile directly with 47 QA theorem/lemma declarations and no `sorry` or `admit` anywhere under `Scaffold/`;
+- the public axiom boundary of the certified modules is 10 explicit, cited axioms; the remaining classical Laplacian facts (symmetry, kernel, Dirichlet form, PSD, symmetry preservation under events) are proved, not admitted;
+- the probability concentration subtree (`Scaffold.Mathlib.Probability.Concentration.*`, six modules) does not elaborate and is excluded from the umbrella pending repair; its QA file is not certified.
 
-The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for current counts and verification results. Do not infer readiness from declaration counts alone.
+The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for current counts and verification results. Do not infer readiness of the concentration subtree from the passing default build.
 
 ## Intended consumption
 
@@ -158,7 +168,7 @@ python3 scripts/check_citations.py
 python3 scripts/check_markdown_links.py
 ```
 
-`lake build` is currently a diagnostic command and is expected to fail until the build-target issue is repaired.
+`lake build` builds the library root `Scaffold.lean`. Its umbrella covers the certified modules; the concentration subtree is not reachable through it (see the [QA Scoreboard](docs/5_QA_SCOREBOARD.md) for scope and limitations).
 
 ### Autonomous OpenCode pursuit
 

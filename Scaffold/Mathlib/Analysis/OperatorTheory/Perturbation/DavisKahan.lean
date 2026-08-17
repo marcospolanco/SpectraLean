@@ -13,62 +13,54 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -/
-import Mathlib.Data.Matrix.Basic
-import Mathlib.Analysis.NormedSpace.OperatorNorm
+import Scaffold.Mathlib.GraphTheory.Spectral
+import Mathlib.Analysis.CStarAlgebra.Matrix
+
+/-!
+# Davis–Kahan subspace stability
+
+The Davis–Kahan sin Θ theorem bounds the rotation of an invariant
+spectral subspace of a symmetric matrix under symmetric perturbation,
+inversely to the eigenvalue separation. Stated here for the spectral
+projectors of the SGT center, with the ℓ² operator norm.
+-/
+
+open scoped Matrix Matrix.L2OpNorm
 
 namespace Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation
 
-/-
-Davis-Kahan sin Θ theorem for eigenvector perturbation.
+open Matrix SpectralGraphTheory
 
-This module provides axioms for the Davis-Kahan theorem, which bounds the
-rotation of an invariant subspace under a symmetric perturbation.
--/
+variable {V : Type} [Fintype V] [DecidableEq V]
 
-open Matrix
-
-variable {V : Type*} [Fintype V] [DecidableEq V]
-
-/-
-Davis-Kahan Sin Θ theorem.
+/-- Davis–Kahan sin Θ bound for spectral projectors: if every eigenvalue
+of `A + E` above the cut index `k` is separated by at least `δ` from
+every eigenvalue of `A` at or below the cut, then the projector onto the
+span of the `k+1` smallest eigenvectors moves by at most `‖E‖ / δ`.
 
 Source:
-- Davis & Kahan, "The rotation of eigenvectors by a perturbation",
-  SIAM Journal on Numerical Analysis, Vol. 7, No. 1, pp. 1-46, 1970
-  Theorem 3.1, p. 10
+- Davis, C. & Kahan, W. M., "The rotation of eigenvectors by a
+  perturbation", SIAM Journal on Numerical Analysis 7(1):1–46, 1970.
+- Yu, Y., Wang, T., Samworth, R. J., "A useful variant of the Davis–Kahan
+  theorem for statisticians", Annals of Statistics 43(3):2028–2061, 2015,
+  Theorem 2 (two-sided separation, projector form, constant 1).
 
-Intended meaning:
-Let A and A' = A + E be symmetric matrices.
-Let S be a set of eigenvalues of A, and let δ be the distance between S and
-the spectrum of A outside of S.
-Let P and P' be the orthogonal projectors onto the invariant subspaces of A
-and A' corresponding to S and the perturbation of S respectively.
-Then ‖P - P'‖_op ≤ ‖E‖_op / δ.
+Statement differences: the invariant subspaces are the
+`SpectralGraphTheory.initialProjector` spectral projectors of the sorted
+spectrum; separation is a pairwise inequality on sorted eigenvalue
+indices; the distance is the ℓ² operator norm of the projector
+difference (the sin Θ metric).
 
-QA: Exercised by `davis_kahan_zero_perturbation` in
-`Scaffold/QA/Perturbation/DavisKahan_QA.lean`.
+QA: exercised by `davis_kahan_zero_perturbation_QA` in
+`Scaffold/QA/Perturbation/DavisKahan_QA.lean` (zero-perturbation
+instance, where both sides vanish).
 -/
-axiom davis_kahan_sin_theta (A E : Matrix V V ℝ) (P P' : Matrix V V ℝ) (δ : ℝ)
-  (h_symm_A : A.IsSymm)
-  (h_symm_E : E.IsSymm)
-  (h_proj_P : IsOrthogonalProjector P)
-  (h_proj_P' : IsOrthogonalProjector P')
-  (h_gap : 0 < δ)
-  (h_invariant_P : A * P = P * A)
-  (h_invariant_P' : (A + E) * P' = P' * (A + E))
-  (h_sep : ∀ λ ∈ spectrum_outside A P, ∀ μ ∈ spectrum_inside (A + E) P', |λ - μ| ≥ δ) :
-  ‖P - P'‖ ≤ ‖E‖ / δ
-
-/-
-A simplified version of Davis-Kahan for the spectral gap of a Laplacian.
-Often used in spectral clustering stability and graph perturbation theory.
--/
-axiom davis_kahan_spectral_gap (A E : Matrix V V ℝ) (r : ℕ) (gap : ℝ)
-  (h_symm_A : A.IsSymm)
-  (h_symm_E : E.IsSymm)
-  (h_gap : 0 < gap) :
-  let P := spectral_projector A r in
-  let P' := spectral_projector (A + E) r in
-  ‖P - P'‖ ≤ ‖E‖ / gap
+axiom davis_kahan_sin_theta
+    (A E : Matrix V V ℝ) (hA : A.IsSymm) (hAE : (A + E).IsSymm)
+    (k : Fin (Fintype.card V)) (hk : (k : ℕ) + 1 < Fintype.card V)
+    (δ : ℝ) (hδ : 0 < δ)
+    (hsep : ∀ i j : Fin (Fintype.card V), (i : ℕ) ≤ (k : ℕ) → (k : ℕ) < (j : ℕ) →
+      δ ≤ evals hAE j - evals hA i) :
+    ‖initialProjector (A + E) hAE k - initialProjector A hA k‖ ≤ ‖E‖ / δ
 
 end Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation

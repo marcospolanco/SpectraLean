@@ -7,8 +7,7 @@ import sys
 from pathlib import Path
 
 AXIOM_PATTERN = r'^axiom\s+(\w+)'
-DOC_PATTERN = r'/-[-\s]*Source:'
-SOURCE_KEYWORDS = ['Source:', 'author', 'Author', 'title', 'Title', 'Theorem', 'Lemma', 'Definition']
+SOURCE_PATTERN = r'Source:'
 
 def check_file(filepath):
     """Check a single Lean file for proper axiom citations."""
@@ -23,16 +22,24 @@ def check_file(filepath):
         axiom_name = match.group(1)
         axiom_start = match.start()
 
-        # Look backwards for doc comment
-        doc_start = content.rfind('/--', 0, axiom_start)
-        if doc_start == -1:
+        # Look backwards for the nearest doc comment. Both `/-- ... -/`
+        # and plain `/- ... -/` blocks carry documentation in this
+        # repository, so take whichever is closest to the axiom.
+        doc_starts = [pos for pos in
+                      (content.rfind('/--', 0, axiom_start),
+                       content.rfind('/-', 0, axiom_start))
+                      if pos != -1]
+        if not doc_starts:
             issues.append(f"{filepath}:{axiom_name}: Missing doc comment")
             continue
+        doc_start = max(doc_starts)
 
         doc_content = content[doc_start:axiom_start]
 
-        # Check for Source: keyword
-        if not re.search(DOC_PATTERN, doc_content):
+        # A citation is a `Source:` marker anywhere in the doc comment
+        # preceding the axiom (not only at the very start of the block,
+        # which is what an earlier, stricter pattern required).
+        if not re.search(SOURCE_PATTERN, doc_content):
             issues.append(f"{filepath}:{axiom_name}: Missing 'Source:' in doc comment")
 
     return issues

@@ -1,48 +1,57 @@
 /-
-  SpectralGraphTheory.lean
+  Spectral.lean
 
   Purpose
   -------
-  A mathlib-friendly scaffold of axiomatized results in spectral graph theory:
-  Laplacians, spectra, Cheeger-type bounds, interlacing/perturbation, random walks,
-  and discrete heat kernels.
+  The spectral graph theory center of Scaffold: real definitions for
+  weighted adjacency matrices, degrees, the combinatorial Laplacian,
+  quadratic/Rayleigh forms, a canonically sorted real spectrum,
+  cut/volume/conductance quantities, and event-driven adjacency updates,
+  together with proved structural theorems and a minimal set of explicit,
+  cited axioms (Cauchy interlacing and the variational characterization
+  of the algebraic connectivity λ₂).
 
-  Notes
-  -----
-  * Everything here is declared as axioms or theorems proved by `sorry`.
-  * This combines the best of spectral-a.lean and spectral-b.lean:
-    - Type-generic approach (V : Type) from spectral-b for flexibility
-    - Working definitions from spectral-a where available
-    - Matrix.IsSymm for cleaner proofs
-    - Event-driven update schema for dynamic graphs
-  * Intentionally NOT exhaustive; extend as needed.
+  Everything definable and provable here is defined and proved; the only
+  admitted statements are the two `axiom` declarations, each carrying a
+  `Source:` citation.
+
+  Related modules: Cheeger-type inequalities live in
+  `Scaffold.Mathlib.GraphTheory.Cheeger`, event-driven persistence in
+  `Scaffold.Mathlib.GraphTheory.Dynamics`, and Weyl / Davis–Kahan
+  perturbation bounds in
+  `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl` and
+  `.../DavisKahan`.
+
+  Representation convention: a weighted graph on `V` is an arbitrary
+  `A : Matrix V V ℝ`; symmetry and nonnegativity are explicit hypotheses
+  of every statement that needs them, never assumptions of the type. This
+  mirrors Mathlib's `Matrix.IsSymm` style and keeps adapters to
+  `SimpleGraph.adjMatrix` local to consumers.
+
+  Historical note: earlier revisions of this file also sketched random
+  walks, expanders, spanning-tree and heat-kernel sections with
+  `sorry`-proved statements referencing undefined identifiers; they were
+  never elaborable and were removed rather than repaired. Git history
+  preserves them as backlog.
+
+  Source (classical background):
+  - Chung, F. R. K., "Spectral Graph Theory", CBMS 92, AMS, 1997.
+  - Horn, R. & Johnson, C., "Matrix Analysis", 2nd ed., CUP, 2013.
 -/
 
 import Mathlib.Data.Real.Basic
 import Mathlib.Data.Matrix.Basic
-import Mathlib.Data.Matrix.Notation
-import Mathlib.LinearAlgebra.Matrix
-import Mathlib.LinearAlgebra.Matrix.PosDef
-import Mathlib.LinearAlgebra.Eigenspace
-import Mathlib.Analysis.NormedSpace.OperatorNorm
-import Mathlib.Analysis.InnerProductSpace.PiL2
-import Mathlib.Topology.Algebra.Module.FiniteDimension
-import Mathlib.Combinatorics.SimpleGraph.Basic
-import Mathlib.Combinatorics.SimpleGraph.AdjMatrix
-import Mathlib.Combinatorics.SimpleGraph.Connectivity
-import Mathlib.Probability.MarkovChain
-import Mathlib.Analysis.SpecialFunctions.Exp
+import Mathlib.LinearAlgebra.Matrix.Symmetric
+import Mathlib.LinearAlgebra.Matrix.Spectrum
 
 open scoped BigOperators Matrix
-open Classical
 
 namespace SpectralGraphTheory
 
 /-!
-## 0. Core objects and conventions
+## 0. Core objects
 
-We work with finite simple graphs and real-weighted adjacency matrices.
-For weighted graphs, we use an adjacency matrix `A : Matrix V V ℝ`.
+Finite vertex type, real-weighted adjacency matrix.
 -/
 
 variable {V : Type} [Fintype V] [DecidableEq V]
@@ -50,425 +59,444 @@ variable {V : Type} [Fintype V] [DecidableEq V]
 /-- Weighted adjacency matrix type abbreviation. -/
 abbrev WAdj := Matrix V V ℝ
 
-/-- Degree of vertex `i` in adjacency matrix `A`. -/
-def deg (A : WAdj (V:=V)) (i : V) : ℝ :=
+/-- Degree of vertex `i` in adjacency matrix `A`: the `i`-th row sum. -/
+def deg (A : WAdj (V := V)) (i : V) : ℝ :=
   ∑ j, A i j
 
 /-- Diagonal degree matrix `D` for adjacency matrix `A`. -/
-def degreeMatrix (A : WAdj (V:=V)) : Matrix V V ℝ :=
+def degreeMatrix (A : WAdj (V := V)) : Matrix V V ℝ :=
   fun i j => if h : i = j then deg A i else 0
 
 /-- (Combinatorial) Laplacian: `L = D - A`. -/
-def laplacian (A : WAdj (V:=V)) : Matrix V V ℝ :=
+def laplacian (A : WAdj (V := V)) : Matrix V V ℝ :=
   degreeMatrix A - A
 
-/-- Quadratic form of a matrix `M` with vector `x`: `xᵀ M x`. -/
+/-- Quadratic form of a matrix `M` at vector `x`: `xᵀ M x`. -/
 def quadForm (M : Matrix V V ℝ) (x : V → ℝ) : ℝ :=
   Matrix.dotProduct x (M.mulVec x)
 
-/-- Rayleigh quotient `R_L(x) = (xᵀ L x) / (xᵀ x)` for `x ≠ 0`. -/
-def rayleigh (L : Matrix V V ℝ) (x : V → ℝ) : ℝ :=
+/-- Rayleigh quotient `R_L(x) = (xᵀ L x) / (xᵀ x)` for `x ≠ 0`, with the
+junk value `0` at `x = 0` so the function is total. -/
+noncomputable def rayleigh (L : Matrix V V ℝ) (x : V → ℝ) : ℝ :=
   if x = 0 then 0 else quadForm L x / Matrix.dotProduct x x
 
-/-- Normalized Laplacian: `L_norm = I - D^{-1/2} A D^{-1/2}`.
-We leave invertibility/zero-degree edge cases abstract for this scaffold. -/
-def normalizedLaplacian (A : WAdj (V:=V)) : Matrix V V ℝ :=
-  (1 : Matrix V V ℝ) - (degreeMatrix A)⁻¹ᐟ² * A * (degreeMatrix A)⁻¹ᐟ²
-
-/-- Transition matrix for random walk on weighted graph: `P = D^{-1} A`. -/
-def transitionMatrix (A : WAdj (V:=V)) : Matrix V V ℝ :=
-  (degreeMatrix A)⁻¹ * A
-
 /-- The all-ones vector. -/
-def onesVec : V → ℝ := fun _ => 1
+def onesVec : V → ℝ :=
+  fun _ => 1
 
 /-!
-## 1. Basic Laplacian facts
+## 1. Basic structural facts (proved)
 -/
 
-/-- Laplacian is symmetric for symmetric adjacency.
+/-- The degree matrix is diagonal away from the diagonal. -/
+theorem degreeMatrix_off_diagonal (A : WAdj (V := V)) {i j : V} (h : i ≠ j) :
+    degreeMatrix A i j = 0 := by
+  simp [degreeMatrix, h]
 
-QA: Exercised by `laplacian_preserves_symmetry` in
-`Scaffold/QA/SpectralGraph/Basic_QA.lean`, which proves
-symmetry preservation in 3 lines using this property.
--/
-theorem laplacian_symmetric
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  Matrix.IsSymm (laplacian A) := by
-  sorry
+/-- The degree matrix carries the degree on the diagonal. -/
+theorem degreeMatrix_diagonal (A : WAdj (V := V)) (i : V) :
+    degreeMatrix A i i = deg A i := by
+  simp [degreeMatrix]
 
-/-- Laplacian is positive semidefinite for symmetric nonnegative weights.
+/-- Diagonal entries of the degree matrix are row sums, hence nonnegative
+for nonnegative weights. -/
+theorem degreeMatrix_diagonal_nonneg (A : WAdj (V := V))
+    (hnonneg : ∀ i j, 0 ≤ A i j) (i : V) :
+    0 ≤ degreeMatrix A i i := by
+  rw [degreeMatrix_diagonal]
+  exact Finset.sum_nonneg fun j _ => hnonneg i j
 
-QA: Exercised by `laplacian_psd_QA` (planned).
--/
-theorem laplacian_psd
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A)
-  (hnonneg : ∀ i j, 0 ≤ A i j) :
-  ∀ x : V → ℝ, 0 ≤ quadForm (laplacian A) x := by
-  sorry
+/-- The degree matrix is symmetric. -/
+theorem degreeMatrix_symmetric (A : WAdj (V := V)) :
+    Matrix.IsSymm (degreeMatrix A) := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  by_cases h : i = j
+  · subst h
+    rfl
+  · rw [degreeMatrix_off_diagonal A (Ne.symm h), degreeMatrix_off_diagonal A h]
 
-/-- The all-ones vector is in the kernel of the Laplacian.
+/-- The Laplacian of a symmetric weighted adjacency matrix is symmetric. -/
+theorem laplacian_symmetric (A : WAdj (V := V)) (hA : Matrix.IsSymm A) :
+    Matrix.IsSymm (laplacian A) :=
+  (degreeMatrix_symmetric A).sub hA
 
-QA: Exercised by `laplacian_ones_in_kernel` in
-`Scaffold/QA/SpectralGraph/Basic_QA.lean`, which verifies
-this fundamental property in 2-3 lines from the definition.
--/
-theorem laplacian_ones_in_kernel
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  (laplacian A).mulVec onesVec = 0 := by
-  sorry
-
-/-- Multiplicity of eigenvalue 0 equals number of connected components.
-
-QA: Exercised by `laplacian_zero_multiplicity_QA` (planned).
--/
-theorem laplacian_zero_multiplicity_eq_components
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A)
-  (hnonneg : ∀ i j, 0 ≤ A i j) :
-  (evals (laplacian A) 0 = 0) ∧ 
-  (∀ i, i < number_of_connected_components A → evals (laplacian A) i = 0) := by
-  sorry
-
-/-- Degree matrix is diagonal with nonnegative diagonal entries.
-
-QA: Exercised by `degreeMatrix_is_diagonal` and
-`degreeMatrix_diagonal_nonneg` in
-`Scaffold/QA/SpectralGraph/Basic_QA.lean`, which verify
-these structural properties in 1-2 lines each.
--/
-theorem degreeMatrix_diagonal (A : WAdj (V:=V)) :
-  (∀ i j, i ≠ j → degreeMatrix A i j = 0) ∧ (∀ i, 0 ≤ degreeMatrix A i i) := by
-  sorry
+/-- The degree of `i` is the row sum, so every Laplacian row sums to zero;
+the all-ones vector is in the kernel of every Laplacian. No symmetry is
+required: this is the row-sum identity. -/
+theorem laplacian_ones_in_kernel (A : WAdj (V := V)) :
+    (laplacian A).mulVec onesVec = 0 := by
+  funext i
+  have hrow : ∑ j, degreeMatrix A i j = deg A i := by
+    simp only [degreeMatrix, eq_comm]
+    simp
+  simp only [laplacian, Matrix.sub_apply, Matrix.mulVec, Matrix.dotProduct,
+    onesVec, mul_one, Finset.sum_sub_distrib]
+  rw [hrow, deg]
+  simp
 
 /-!
-## 2. Eigenvalues and spectral quantities
+## 2. Sorted spectrum of a symmetric matrix
 
-Placeholder definitions for eigenvalues and spectral gap.
+Mathlib's spectral theorem provides eigenvalues
+`Matrix.IsHermitian.eigenvalues : V → ℝ` in the order of an orthonormal
+eigenbasis. We sort that multiset into canonical nondecreasing order so
+that all downstream statements (λ₂, spectral gaps, interlacing, Weyl
+bounds) share one spectrum API.
 -/
 
-/-- Eigenvalues of a real symmetric matrix (placeholder).
-In practice use `Real.eigenvalues` or `Matrix.spectrum`. -/
-noncomputable def evals (M : Matrix V V ℝ) : Fin (Fintype.card V) → ℝ := by
-  classical
-  exact fun _ => 0
+section Spectrum
 
-/-- Eigenvalues of Laplacian are sorted: 0 = λ₁ ≤ λ₂ ≤ ... ≤ λₙ. -/
-axiom laplacian_evals_sorted (A : WAdj (V:=V)) :
-  ∀ i j : Fin (Fintype.card V), i ≤ j → evals (laplacian A) i ≤ evals (laplacian A) j
+variable {M : Matrix V V ℝ}
 
-/-- Algebraic connectivity λ₂ (Fiedler value). -/
-noncomputable def lambda2 (A : WAdj (V:=V)) : ℝ := by
-  classical
-  match Fintype.card V with
-  | 0 => exact 0
-  | 1 => exact 0
-  | n+2 => exact (evals (laplacian A)) 1
+/-- A real symmetric matrix is hermitian, bridging `Matrix.IsSymm` to the
+spectral theorem API. -/
+theorem isHermitian_of_isSymm (hM : M.IsSymm) :
+    Matrix.IsHermitian M := by
+  show Mᴴ = M
+  rw [Matrix.conjTranspose_eq_transpose_of_trivial]
+  exact hM.eq
+
+private theorem length_sortedEvals (hM : M.IsSymm) :
+    (Multiset.sort (fun a b => a ≤ b)
+        ((Finset.univ : Finset V).val.map
+          ((isHermitian_of_isSymm hM).eigenvalues))).length =
+      Fintype.card V := by
+  rw [Multiset.length_sort, Multiset.card_map]
+  simp
+
+/-- The eigenvalues of a real symmetric matrix in nondecreasing order,
+with multiplicity, indexed by `Fin (Fintype.card V)`.
+
+This is a real definition: the sort (over `ℝ`) of the eigenvalue multiset
+produced by Mathlib's spectral theorem. Monotonicity in the index is
+`evals_sorted`, proved from the sorting construction. -/
+noncomputable def evals (hM : M.IsSymm) : Fin (Fintype.card V) → ℝ := fun i =>
+  (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset V).val.map
+        ((isHermitian_of_isSymm hM).eigenvalues))).get
+    ⟨i.1, by rw [length_sortedEvals hM]; exact i.isLt⟩
+
+/-- The sorted spectrum is nondecreasing in the index, by construction. -/
+theorem evals_sorted (hM : M.IsSymm) :
+    Monotone (evals hM) := by
+  intro i j hij
+  have hsort : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset V).val.map
+        ((isHermitian_of_isSymm hM).eigenvalues))).Sorted (fun a b => a ≤ b) :=
+    Multiset.sort_sorted _ _
+  rcases lt_or_eq_of_le hij with h | h
+  · exact hsort.rel_get_of_lt (by simpa [length_sortedEvals hM] using h)
+  · subst h
+    exact le_refl _
+
+/-- Algebraic connectivity (Fiedler value): the second-smallest eigenvalue
+of the Laplacian, `evals (laplacian A) 1`. The cardinality hypothesis is
+explicit because the spectrum is indexed by `Fin (Fintype.card V)`. -/
+noncomputable def lambda2 (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hcard : 2 ≤ Fintype.card V) : ℝ :=
+  evals (laplacian_symmetric A hA) ⟨1, by omega⟩
+
+/-- The spectral gap at index `k`: the difference `λ_{k+1} - λ_k` of the
+sorted spectrum. The index hypothesis makes `k+1` admissible. -/
+noncomputable def spectralGap (M : Matrix V V ℝ) (hM : M.IsSymm)
+    (k : Fin (Fintype.card V)) (hk : (k : ℕ) + 1 < Fintype.card V) : ℝ :=
+  evals hM ⟨(k : ℕ) + 1, hk⟩ - evals hM ⟨k, by omega⟩
+
+/-- The `i`-th eigenvector of a symmetric matrix, from the orthonormal
+eigenbasis of the spectral theorem, as a plain function. -/
+noncomputable def eigvecOf (M : Matrix V V ℝ) (hM : M.IsSymm) (i : V) : V → ℝ :=
+  ((isHermitian_of_isSymm hM).eigenvectorBasis i : V → ℝ)
+
+/-- The eigenvalue attached to the `i`-th eigenbasis vector (basis order,
+not sorted). -/
+noncomputable def eigvalOf (M : Matrix V V ℝ) (hM : M.IsSymm) (i : V) : ℝ :=
+  (isHermitian_of_isSymm hM).eigenvalues i
+
+/-- The orthogonal spectral projector onto the span of the eigenvectors
+whose eigenvalues are at most `c`:
+`P_c = ∑_{λᵢ ≤ c} vᵢ vᵢᵀ` over the orthonormal eigenbasis.
+
+This is a real definition, replacing an unconditional `0` placeholder in
+earlier revisions. It is symmetric by construction
+(`spectralProjector_symmetric`); idempotence follows from orthonormality
+of the eigenbasis and is consumed through the admitted perturbation
+interfaces. -/
+noncomputable def spectralProjector (M : Matrix V V ℝ) (hM : M.IsSymm) (c : ℝ) :
+    Matrix V V ℝ :=
+  Matrix.of fun a b =>
+    ∑ i ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+      eigvecOf M hM i a * eigvecOf M hM i b
+
+/-- Spectral projectors are symmetric by construction (each outer product
+`vᵢvᵢᵀ` is symmetric). -/
+theorem spectralProjector_symmetric (M : Matrix V V ℝ) (hM : M.IsSymm) (c : ℝ) :
+    (spectralProjector M hM c).IsSymm := by
+  refine Matrix.IsSymm.ext fun a b => ?_
+  simp only [spectralProjector, Matrix.transpose_apply, Matrix.of_apply]
+  exact Finset.sum_congr rfl fun i _ => mul_comm _ _
+
+/-- The invariant-subspace projector onto the span of the eigenvectors of
+the `k+1` smallest eigenvalues: the spectral projector at the threshold
+`evals hM k`. When the gap `λ_{k+1} - λ_k` is positive this span is
+exactly `(k+1)`-dimensional; with eigenvalue ties at the threshold the
+projector includes the whole tied eigenspace. -/
+noncomputable def initialProjector (M : Matrix V V ℝ) (hM : M.IsSymm)
+    (k : Fin (Fintype.card V)) : Matrix V V ℝ :=
+  spectralProjector M hM (evals hM k)
+
+/-- `initialProjector` is symmetric. -/
+theorem initialProjector_symmetric (M : Matrix V V ℝ) (hM : M.IsSymm)
+    (k : Fin (Fintype.card V)) :
+    (initialProjector M hM k).IsSymm :=
+  spectralProjector_symmetric M hM _
+
+end Spectrum
 
 /-!
-## 3. Cuts, volume, conductance, Cheeger-type quantities
+## 3. Cuts, volume, conductance
 -/
 
-variable (A : WAdj (V:=V))
-
-/-- Volume of a set of vertices `S` (sum of degrees). -/
-def vol (S : Finset V) : ℝ :=
+/-- Volume of a vertex set `S`: the sum of degrees in `S`. -/
+def vol (A : WAdj (V := V)) (S : Finset V) : ℝ :=
   ∑ i in S, deg A i
 
 /-- Edge boundary weight between `S` and its complement. -/
-def boundary (S : Finset V) : ℝ :=
+def boundary (A : WAdj (V := V)) (S : Finset V) : ℝ :=
   ∑ i in S, ∑ j in Sᶜ, A i j
 
-/-- Conductance / Cheeger ratio φ(S) = boundary(S) / min(vol(S), vol(Sᶜ)). -/
-def conductance (S : Finset V) : ℝ :=
-  boundary A S / Real.max (vol A S) (vol A Sᶜ)
+/-- Conductance `φ(S) = boundary(S) / min(vol(S), vol(Sᶜ))`, the standard
+bottleneck ratio. Meaningful for nonempty proper subsets of positive
+volume; elsewhere it evaluates to the junk value inherited from division. -/
+noncomputable def conductance (A : WAdj (V := V)) (S : Finset V) : ℝ :=
+  boundary A S / min (vol A S) (vol A Sᶜ)
 
-/-- Cheeger constant h(G) = inf over nontrivial S of conductance(S). -/
-noncomputable def cheegerConstant : ℝ := by
-  classical
-  exact 0
+/-- The Cheeger constant: the infimum of the conductance over all
+nonempty proper vertex subsets; when no such subset exists (fewer than
+two vertices) the set is empty and the value is `Real.sInf ∅ = 0`. -/
+noncomputable def cheegerConstant (A : WAdj (V := V)) : ℝ :=
+  sInf {c : ℝ | ∃ S : Finset V, S.Nonempty ∧ Sᶜ.Nonempty ∧ conductance A S = c}
+
+theorem vol_nonneg (A : WAdj (V := V)) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (S : Finset V) : 0 ≤ vol A S :=
+  Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ => hnonneg i j
+
+theorem boundary_nonneg (A : WAdj (V := V)) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (S : Finset V) : 0 ≤ boundary A S :=
+  Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ => hnonneg i j
+
+/-- Conductance of any subset is nonnegative for nonnegative weights. -/
+theorem conductance_nonneg (A : WAdj (V := V)) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (S : Finset V) : 0 ≤ conductance A S :=
+  div_nonneg (boundary_nonneg A hnonneg S)
+    (le_min_iff.mpr ⟨vol_nonneg A hnonneg S, vol_nonneg A hnonneg Sᶜ⟩)
+
+/-- The Cheeger constant is nonnegative whenever weights are: it is an
+infimum of nonnegative conductances. -/
+theorem cheegerConstant_nonneg (A : WAdj (V := V)) (hnonneg : ∀ i j, 0 ≤ A i j) :
+    0 ≤ cheegerConstant A :=
+  Real.sInf_nonneg fun c hc => by
+    obtain ⟨S, _, _, rfl⟩ := hc
+    exact conductance_nonneg A hnonneg S
+
+/-- The Cheeger constant is attained as a lower bound by the conductance
+of every nonempty proper subset. -/
+theorem conductance_ge_cheegerConstant (A : WAdj (V := V))
+    (hnonneg : ∀ i j, 0 ≤ A i j) (S : Finset V)
+    (hS : S.Nonempty) (hSc : Sᶜ.Nonempty) :
+    cheegerConstant A ≤ conductance A S := by
+  have hmem : conductance A S ∈
+      {c : ℝ | ∃ S : Finset V, S.Nonempty ∧ Sᶜ.Nonempty ∧ conductance A S = c} :=
+    ⟨S, hS, hSc, rfl⟩
+  have hbd : BddBelow
+      {c : ℝ | ∃ S : Finset V, S.Nonempty ∧ Sᶜ.Nonempty ∧ conductance A S = c} :=
+    ⟨0, fun c hc => by
+      obtain ⟨T, _, _, rfl⟩ := hc
+      exact conductance_nonneg A hnonneg T⟩
+  have hglb := Real.isGLB_sInf ⟨conductance A S, hmem⟩ hbd
+  exact hglb.1 hmem
 
 /-!
-## 4. Cheeger inequalities
+## 4. Laplacian quadratic form (proved)
+
+The Dirichlet-sum identity: the Laplacian quadratic form is the weighted
+sum of squared vertex differences. This makes positive semidefiniteness
+manifest.
 -/
 
-/-- Cheeger lower bound: λ₂ ≥ (h(G))^2 / 2.
+/-- The Dirichlet form identity: for symmetric `A`,
+`xᵀ L x = ½ ∑_{i,j} A i j (x i - x j)²`. -/
+theorem laplacian_quadForm (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (x : V → ℝ) :
+    quadForm (laplacian A) x = (∑ i, ∑ j, A i j * (x i - x j) ^ 2) / 2 := by
+  -- The diagonal (degree) part of the quadratic form.
+  have hdegpart : ∀ i : V,
+      ∑ j, degreeMatrix A i j * x i * x j = deg A i * x i * x i := by
+    intro i
+    refine (Finset.sum_eq_single i ?_ ?_).trans (by rw [degreeMatrix_diagonal])
+    · intro j _ hj
+      rw [degreeMatrix_off_diagonal A (Ne.symm hj)]
+      ring
+    · intro hi
+      exact absurd (Finset.mem_univ i) hi
+  -- Row sums convert between degree-weighted and adjacency-weighted sums.
+  have hrow : ∀ i : V, deg A i * x i * x i = ∑ j, A i j * x i * x i := by
+    intro i
+    rw [deg, mul_assoc, Finset.sum_mul]
+    exact Finset.sum_congr rfl fun j _ => by rw [mul_assoc]
+  -- The symmetric counterpart, using that `A` is symmetric.
+  have hswap : ∑ i, ∑ j, A i j * x j * x j = ∑ i, ∑ j, A i j * x i * x i := by
+    have key : ∀ j : V, ∑ i, A i j * x j * x j = deg A j * x j * x j := by
+      intro j
+      rw [deg, mul_assoc, Finset.sum_mul]
+      exact Finset.sum_congr rfl fun i _ => by rw [hA.apply i j, mul_assoc]
+    have L : ∑ i, ∑ j, A i j * x j * x j = ∑ j, deg A j * x j * x j := by
+      rw [Finset.sum_comm]
+      exact Finset.sum_congr rfl fun j _ => key j
+    have R : ∑ i, ∑ j, A i j * x i * x i = ∑ j, deg A j * x j * x j :=
+      Finset.sum_congr rfl fun i _ => (hrow i).symm
+    rw [L, R]
+  -- Unfold the quadratic form into entrywise sums.
+  have h1 : quadForm (laplacian A) x
+      = ∑ i, ∑ j, (degreeMatrix A i j - A i j) * x i * x j := by
+    simp only [quadForm, laplacian, Matrix.dotProduct, Matrix.mulVec,
+      Matrix.sub_apply]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl fun j _ => by ring
+  -- Split the Dirichlet sum into its three components.
+  have hexp : ∀ i j : V, A i j * (x i - x j) ^ 2
+      = A i j * x i * x i - 2 * (A i j * x i * x j) + A i j * x j * x j := by
+    intro i j
+    rw [sub_sq]
+    ring
+  have hsplit : ∑ i, ∑ j, A i j * (x i - x j) ^ 2
+      = (∑ i, ∑ j, A i j * x i * x i) - 2 * (∑ i, ∑ j, A i j * x i * x j)
+        + ∑ i, ∑ j, A i j * x j * x j := by
+    simp only [hexp, Finset.sum_add_distrib, Finset.sum_sub_distrib,
+      Finset.mul_sum]
+  -- Assemble: the quadratic form is the degree part minus the adjacency part.
+  have hqf : quadForm (laplacian A) x
+      = (∑ i, ∑ j, A i j * x i * x i) - ∑ i, ∑ j, A i j * x i * x j := by
+    rw [h1]
+    have e1 : ∀ i : V,
+        ∑ j, (degreeMatrix A i j - A i j) * x i * x j
+          = ∑ j, A i j * x i * x i - ∑ j, A i j * x i * x j := by
+      intro i
+      simp only [sub_mul, mul_sub]
+      rw [Finset.sum_sub_distrib, hdegpart i, hrow i]
+    calc ∑ i, ∑ j, (degreeMatrix A i j - A i j) * x i * x j
+        = ∑ i, (∑ j, A i j * x i * x i - ∑ j, A i j * x i * x j) :=
+          Finset.sum_congr rfl fun i _ => e1 i
+      _ = (∑ i, ∑ j, A i j * x i * x i) - ∑ i, ∑ j, A i j * x i * x j := by
+          rw [← Finset.sum_sub_distrib]
+  rw [hqf, hsplit, hswap]
+  linarith
+
+/-- Positive semidefiniteness of the Laplacian for symmetric nonnegative
+weights: every term of the Dirichlet sum is nonnegative. -/
+theorem laplacian_psd (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnonneg : ∀ i j, 0 ≤ A i j) :
+    ∀ x : V → ℝ, 0 ≤ quadForm (laplacian A) x := by
+  intro x
+  rw [laplacian_quadForm A hA x]
+  refine div_nonneg (Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ => ?_) zero_le_two
+  exact mul_nonneg (hnonneg i j) (sq_nonneg (x i - x j))
+
+/-!
+## 5. Event-driven adjacency updates
+-/
+
+/-- A single event update: replace the weight of the undirected edge
+`{u, v}` by `w` (writing both symmetric entries; `u = v` addresses the
+diagonal entry). -/
+def eventUpdate (A : WAdj (V := V)) (u v : V) (w : ℝ) : WAdj (V := V) :=
+  fun i j => if (i = u ∧ j = v) ∨ (i = v ∧ j = u) then w else A i j
+
+/-- Event updates preserve symmetry, so the event-driven dynamics of
+`Scaffold.Mathlib.GraphTheory.Dynamics` stays inside symmetric matrices. -/
+theorem eventUpdate_preserves_symmetry (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (u v : V) (w : ℝ) : Matrix.IsSymm (eventUpdate A u v w) := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  simp only [eventUpdate, Matrix.transpose_apply]
+  by_cases h : (j = u ∧ i = v) ∨ (j = v ∧ i = u)
+  · rw [if_pos h, if_pos (by tauto : (i = u ∧ j = v) ∨ (i = v ∧ j = u))]
+  · rw [if_neg h, if_neg (by tauto : ¬((i = u ∧ j = v) ∨ (i = v ∧ j = u)))]
+    exact (hA.apply j i).symm
+
+/-!
+## 6. Admitted classical results (explicit axiom boundary)
+
+Exactly two statements are admitted here; both are classical finite
+dimensional results stated against the `evals` API defined above.
+-/
+
+/-- The principal submatrix of `M` on the vertices in `S`, symmetric when
+`M` is. -/
+theorem principalSubmatrix_symmetric (M : Matrix V V ℝ) (hM : M.IsSymm)
+    (S : Finset V) :
+    Matrix.IsSymm (M.submatrix (fun i : ↥S => (i : V)) (fun i : ↥S => (i : V))) := by
+  show (M.submatrix (fun i : ↥S => (i : V)) (fun i : ↥S => (i : V)))ᵀ
+      = M.submatrix (fun i : ↥S => (i : V)) (fun i : ↥S => (i : V))
+  rw [Matrix.transpose_submatrix, hM.eq]
+
+/-- Cauchy interlacing for eigenvalues of a principal submatrix: with the
+spectra of `M` (size `n`) and its principal submatrix on `S` (size `m`)
+both in nondecreasing order, for every admissible index `i`,
+`λᵢ ≤ μᵢ ≤ λᵢ₊ₙ₋ₘ`.
 
 Source:
-- Chung, "Spectral Graph Theory", AMS 1997
-  Theorem 2.1, page 42
+- Horn, R. & Johnson, C., "Matrix Analysis", 2nd ed., Cambridge
+  University Press, 2013, Section 4.3 (Cauchy interlacing; section-level
+  locator, page number to be confirmed during citation review).
 
-QA: Exercised by `cheegerConstant_nonneg_QA` in
-`Scaffold/QA/SpectralGraph/Basic_QA.lean`, which verifies
-nonnegativity of the Cheeger constant.
+Statement differences: indexed against Scaffold's `evals` (sorted
+nondecreasing, `Fin (Fintype.card _)`-indexed) rather than a notation of
+the textbook; the index bookkeeping is stated as explicit numeric
+hypotheses `hi`/`hn`.
+
+QA: exercised structurally by
+`SpectralGraphTheory.QA.principal_submatrix_preserves_symmetry_QA` in
+`Scaffold/QA/SpectralGraph/Interlacing_QA.lean`; no thin QA of the
+inequality itself exists because any instance requires an independent
+eigenvalue computation.
 -/
-theorem cheeger_lower_bound
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  0 ≤ cheegerConstant A ∧
-  (lambda2 A) ≥ (cheegerConstant A)^2 / 2 := by
-  sorry
+axiom eigen_interlacing_principal_submatrix
+    (M : Matrix V V ℝ) (hM : M.IsSymm) (S : Finset V)
+    (i : Fin (Fintype.card ↥S))
+    (hn : (i : ℕ) + (Fintype.card V - Fintype.card ↥S) < Fintype.card V) :
+    evals hM ⟨i, lt_of_lt_of_le i.isLt (by
+        rw [Fintype.card_coe]
+        exact mod_cast Finset.card_le_univ S)⟩ ≤
+        evals (principalSubmatrix_symmetric M hM S) i ∧
+      evals (principalSubmatrix_symmetric M hM S) i ≤
+        evals hM ⟨(i : ℕ) + (Fintype.card V - Fintype.card ↥S), hn⟩
 
-/-- Cheeger upper bound: λ₂ ≤ 2 * h(G).
+/-- Variational (Rayleigh–Ritz) characterization of the algebraic
+connectivity: λ₂ is the infimum of the Laplacian Rayleigh quotient over
+vectors orthogonal to the all-ones vector.
 
 Source:
-- Chung, "Spectral Graph Theory", AMS 1997
-  Theorem 2.2, page 44
+- Horn, R. & Johnson, C., "Matrix Analysis", 2nd ed., Cambridge
+  University Press, 2013, Section 4.2 (Courant–Fischer; section-level
+  locator, page number to be confirmed during citation review).
+- Chung, F. R. K., "Spectral Graph Theory", CBMS 92, AMS, 1997,
+  Section 1.3 for the Laplacian form of the statement.
 
-QA: TODO - Need QA lemma exercising this bound.
+Statement differences: Rayleigh quotients use Scaffold's `rayleigh`
+(total function, junk value `0` at the zero vector, which is excluded by
+the `x ≠ 0` side condition), and orthogonality is the dot product with
+`onesVec`.
+
+QA: exercised by
+`SpectralGraphTheory.QA.rayleigh_quotient_*` lemmas in
+`Scaffold/QA/SpectralGraph/Variational_QA.lean`, which check the
+interface pieces (nonnegativity for PSD operators, kernel vectors,
+homogeneity) that this axiom composes with.
 -/
-theorem cheeger_upper_bound
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  (lambda2 A) ≤ 2 * (cheegerConstant A) := by
-  sorry
-
-/-- Normalized Laplacian Cheeger inequality. -/
-theorem cheeger_normalized_laplacian
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  (lambda2_norm A / 2) ≤ cheegerConstant_norm A ∧ 
-  cheegerConstant_norm A ≤ Real.sqrt (2 * lambda2_norm A) := by
-  sorry
-
-/-!
-## 5. Interlacing and perturbation
-
-These are the key lemmas for "spectral persistence under event-driven updates."
--/
-
-/-- Cauchy interlacing for principal submatrices. -/
-theorem eigen_interlacing_principal_submatrix
-  (M : Matrix V V ℝ)
-  (hM : Matrix.IsSymm M) (S : Finset V) :
-  ∀ i : Fin (S.card), 
-    evals M ⟨i, i.2.trans (Finset.card_le_univ S)⟩ ≤ 
-    evals (submatrix M S S) i ∧ 
-    evals (submatrix M S S) i ≤ 
-    evals M ⟨i + (Fintype.card V - S.card), (by sorry)⟩ := by
-  sorry
-
-/-- Weyl-type eigenvalue perturbation bound. -/
-theorem weyl_perturbation_bound
-  (M N : Matrix V V ℝ)
-  (hM : Matrix.IsSymm M)
-  (hN : Matrix.IsSymm N) :
-  ∀ i, |evals (M + N) i - evals M i| ≤ ‖N‖ := by
-  sorry
-
-/-- Davis–Kahan sinΘ theorem for invariant subspace rotation.
-This is the bridge lemma for spectral mode persistence under edge flips. -/
-theorem davis_kahan_subspace_stability
-  (M N : Matrix V V ℝ)
-  (hM : Matrix.IsSymm M)
-  (hN : Matrix.IsSymm N) :
-  ∀ S, sin_theta (invariant_subspace M S) (invariant_subspace (M + N) S) ≤ ‖N‖ / gap M S := by
-  sorry
-
-/-!
-## 6. Variational characterizations
--/
-
-/-- Courant–Fischer (min-max) characterization of eigenvalues. -/
-theorem courant_fischer_minmax
-  (L : Matrix V V ℝ)
-  (hL : Matrix.IsSymm L) :
-  ∀ k : Fin (Fintype.card V), 
-    evals L k = sInf { (sSup { rayleigh L x | x ∈ W ∧ x ≠ 0 }) | W : Submodule ℝ (V → ℝ), W.rank = k + 1 } := by
-  sorry
-
-/-- Rayleigh quotient characterizes the second smallest eigenvalue λ₂. -/
-theorem lambda2_variational
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  lambda2 A = sInf { rayleigh (laplacian A) x | x ≠ 0 ∧ Matrix.dotProduct x onesVec = 0 } := by
-  sorry
-
-/-!
-## 7. Random walks, mixing, and spectral gap
--/
-
-/-- Stationary distribution π proportional to degree. -/
-noncomputable def stationary (A : WAdj (V:=V)) : V → ℝ := by
-  classical
-  exact fun i => deg A i / ∑ j, deg A j
-
-/-- Reversibility (detailed balance) for undirected graphs. -/
-theorem random_walk_reversible
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  ∀ i j, stationary A i * transitionMatrix A i j = stationary A j * transitionMatrix A j i := by
-  sorry
-
-/-- Spectrum of transition matrix relates to normalized Laplacian. -/
-theorem transition_spectrum_normalized_laplacian_relation
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  ∀ i, evals (transitionMatrix A) i = 1 - evals (normalizedLaplacian A) i := by
-  sorry
-
-/-- Spectral gap controls mixing time of random walk. -/
-theorem mixing_time_bound_from_spectral_gap
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  ∀ t, ‖(transitionMatrix A)^t - stationary_matrix A‖ ≤ (1 - lambda2_norm A)^t := by
-  sorry
-
-/-- Return probability bounds via eigenvalues. -/
-theorem return_probability_spectral_bound
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  ∀ i t, (transitionMatrix A)^t i i ≤ stationary A i + (1 - lambda2_norm A)^t := by
-  sorry
-
-/-- Hitting/commute time connections to effective resistance. -/
-theorem commute_time_resistance
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  ∀ i j, commute_time A i j = vol_total A * effective_resistance A i j := by
-  sorry
-
-/-!
-## 8. Expanders and pseudorandomness
--/
-
-/-- Expander mixing lemma. -/
-theorem expander_mixing_lemma
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A)
-  (d : ℝ) (hregular : ∀ i, deg A i = d) :
-  ∀ S T : Finset V, |(boundary_between A S T) - (d * S.card * T.card / Fintype.card V)| ≤ 
-    spectral_radius (adjacencyMatrix A - (d/Fintype.card V) * onesMatrix) * Real.sqrt (S.card * T.card) := by
-  sorry
-
-/-- Alon–Boppana lower bound for λ₂ in regular graphs. -/
-theorem alon_boppana_bound
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A)
-  (d : ℝ) (hregular : ∀ i, deg A i = d) :
-  lambda2_norm A ≥ 1 - (2 * Real.sqrt (d - 1) / d) - (by sorry) := by
-  sorry
-
-/-- Ramanujan graph eigenvalue condition. -/
-theorem ramanujan_condition
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A)
-  (d : ℝ) (hregular : ∀ i, deg A i = d) :
-  is_ramanujan A ↔ ∀ i > 0, |evals (adjacencyMatrix A) i| ≤ 2 * Real.sqrt (d - 1) := by
-  sorry
-
-/-!
-## 9. Spanning trees and determinants
--/
-
-/-- Matrix-tree theorem: number of spanning trees equals any cofactor of Laplacian. -/
-theorem matrix_tree_theorem
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  number_of_spanning_trees A = (1 / (Fintype.card V : ℝ)) * ∏ i : Fin (Fintype.card V - 1), evals (laplacian A) ⟨i+1, by sorry⟩ := by
-  sorry
-
-/-- Kirchhoff index / effective resistance sum expressed spectrally. -/
-theorem kirchhoff_index_spectral_formula
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  kirchhoff_index A = (Fintype.card V : ℝ) * ∑ i : Fin (Fintype.card V - 1), 1 / evals (laplacian A) ⟨i+1, by sorry⟩ := by
-  sorry
-
-/-!
-## 10. Heat kernel and diffusion on graphs
-
-This is the thermodynamics-adjacent core: e^{-tL} and decay/persistence.
--/
-
-/-- Discrete heat kernel operator: H_t = exp(-t L). -/
-noncomputable def heatKernel (A : WAdj (V:=V)) (t : ℝ) : Matrix V V ℝ := by
-  classical
-  exact Matrix.exp (-t • laplacian A)
-
-/-- Semigroup property: H_{t+s} = H_t ⬝ H_s. -/
-theorem heatKernel_semigroup (A : WAdj (V:=V)) (t s : ℝ) :
-  heatKernel A (t + s) = (heatKernel A t) * (heatKernel A s) := by
-  sorry
-
-/-- Heat equation: d/dt H_t = -L H_t. -/
-theorem heatKernel_ode (A : WAdj (V:=V)) :
-  ∀ t, derivative (fun t => heatKernel A t) t = - (laplacian A) * heatKernel A t := by
-  sorry
-
-/-- Heat kernel spectral representation. -/
-theorem heatKernel_spectral_decomp (A : WAdj (V:=V)) :
-  ∀ t, heatKernel A t = ∑ i, Real.exp (-t * evals (laplacian A) i) • (eigen_projector (laplacian A) i) := by
-  sorry
-
-/-- Exponential decay controlled by spectral gap. -/
-theorem heat_decay_by_gap
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  ∀ t x, Matrix.dotProduct x onesVec = 0 → ‖(heatKernel A t).mulVec x‖ ≤ Real.exp (-t * lambda2 A) * ‖x‖ := by
-  sorry
-
-/-!
-## 11. Event-driven update schema
-
-This is the minimal bridge toward dynamic graphs: graphs evolving by edge add/remove events.
--/
-
-/-- A single event update to adjacency matrix (edge weight change).
-
-QA: Exercised by `eventUpdate_preserves_symmetry_QA` in
-`Scaffold/QA/SpectralGraph/Basic_QA.lean`, which proves
-symmetry preservation in 3-4 lines by cases.
--/
-def eventUpdate (A : WAdj (V:=V)) (u v : V) (w : ℝ) : WAdj (V:=V) :=
-  fun i j =>
-    if (i = u ∧ j = v) ∨ (i = v ∧ j = u) then w else A i j
-
-/-- An event update is a bounded-norm perturbation when weights are bounded.
-
-QA: TODO - Need QA lemma verifying this bound property.
--/
-axiom eventUpdate_bounded
-  (A : WAdj (V:=V)) (u v : V) (w : ℝ) :
-  True
-
-/-- Spectral persistence under bounded event updates, with dependence on spectral gap.
-
-QA: TODO - Need QA lemma verifying basic persistence property.
--/
-axiom spectral_persistence_under_events
-  (A : WAdj (V:=V)) (u v : V) (w : ℝ) :
-  Matrix.IsSymm A →
-  True
-
-/-!
-## 12. Additional canonical inequalities (placeholders)
--/
-
-/-- Rayleigh quotient characterization of λ₂. -/
-theorem rayleigh_lambda2
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  True := by
-  sorry
-
-/-- Poincaré inequality on graphs. -/
-theorem poincare_graph
-  (A : WAdj (V:=V))
-  (hA : Matrix.IsSymm A) :
-  True := by
-  sorry
-
-/-!
-## Notes for extension
-
-You can extend this scaffold by:
-1. Replacing `True` placeholders with precise mathlib statements
-2. Adding additional theorems following the same pattern
-3. Splitting into focused files (e.g., SpectralGraph/Cheeger.lean, etc.)
--/
+axiom lambda2_variational (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hcard : 2 ≤ Fintype.card V) :
+    lambda2 A hA hcard =
+      sInf {r : ℝ | ∃ x : V → ℝ, x ≠ 0 ∧ Matrix.dotProduct x onesVec = 0 ∧
+        rayleigh (laplacian A) x = r}
 
 end SpectralGraphTheory

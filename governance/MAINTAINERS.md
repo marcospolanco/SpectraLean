@@ -30,7 +30,7 @@ We welcome new maintainers! The process:
 
 - Technical decisions: consensus among maintainers
 - Breaking changes: require explicit approval announcement
-- Axiom additions: follow review checklist in AXIOM_POLICY.md
+- Axiom additions: follow the review contract in [`docs/2_ARCHITECTURE.md`](../docs/2_ARCHITECTURE.md)
 - Emergency decisions: majority vote with documentation
 
 ## Contact

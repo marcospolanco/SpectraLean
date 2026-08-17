@@ -6,6 +6,20 @@ Thank you for your interest in contributing to Scaffold!
 
 We welcome several types of contributions:
 
+## Center-Out Scope Policy
+
+Spectral graph theory is the repository's organizing center. New work must identify the concrete SGT theorem, dependency, experiment, or downstream consumer it unlocks. Adjacent topics such as probability, perturbation theory, dynamics, or numerical methods are in scope when they form the shortest credible path to that objective.
+
+Before implementation, compare the proposal with existing load-bearing work:
+
+- build and import failures;
+- placeholder definitions or statement shapes;
+- missing citations and index coverage;
+- reusable SGT definitions and bridge theorems;
+- dynamic persistence obligations and validated applications.
+
+Prefer the change that unlocks the most reusable SGT progress, improves assurance, and has the lowest justified complexity. If outer-layer work exposes a defect closer to the SGT center, repair that inner dependency first.
+
 ### 1. Axiom Addition
 
 Adding new textbook results as axioms with proper citations.
@@ -15,20 +29,20 @@ Adding new textbook results as axioms with proper citations.
 - Update `index/sources/<source>.md`
 - Update `index/map/<area>.md`
 - Follow naming conventions
-- **At least one QA lemma** (see QA Policy below)
+- QA coverage or a review note explaining why thin QA is not applicable
 
 **QA Requirement:**
-For every new axiom file, you must provide at least one QA lemma in `Scaffold/QA/` that:
+For every new axiom file, normally provide at least one QA lemma in `Scaffold/QA/` that:
 - Uses the axiom in a nontrivial way
 - Has a real Lean proof (not `sorry`)
 - Proves a well-known consequence that domain experts expect
-- Would fail if the axiom was mis-stated
-- Is trivially derivable (1-5 lines from the axiom)
+- Exercises a relevant part of the axiom's interface
+- Is small enough to diagnose when the interface changes
 
 **QA Documentation Required:**
-Every axiom must include a `QA:` comment documenting which QA lemmas exercise it. See `governance/QA_POLICY.md` for the format and examples.
+Every axiom should include a `QA:` comment documenting which QA lemmas exercise it or why thin QA is not applicable. See the [architecture and QA contract](../docs/2_ARCHITECTURE.md) for the current policy.
 
-See `governance/QA_POLICY.md` for full details.
+QA checks usability and selected consequences relative to axioms; it does not prove those axioms.
 
 ### 2. Index Improvement
 
@@ -72,26 +86,27 @@ Replacing an axiom with a mathlib re-export.
 - [ ] Doc comments with citations for each axiom
 - [ ] `index/sources/<source>.md` updated
 - [ ] `index/map/<area>.md` updated
-- [ ] Code compiles with `lake build`
+- [ ] Changed modules compile directly; `lake build` alone may not reach every module
 - [ ] No `sorry` in `Scaffold/Mathlib/**`
 - [ ] Names follow mathlib conventions
-- [ ] **At least one QA lemma** with real proof in `Scaffold/QA/`
+- [ ] QA coverage or a documented not-applicable rationale
 - [ ] QA lemma compiles and uses the new axiom
 - [ ] **Each axiom has `QA:` documentation** referencing QA lemmas
-- [ ] Referenced QA lemmas exist and are trivially derivable
+- [ ] Referenced QA lemmas exist and are appropriately scoped
 
 ### For QA Lemmas
 
 - [ ] Real Lean proof (no `sorry` or `admit`)
-- [ ] Uses the axiom it's QA-ing in a nontrivial way
+- [ ] Exercises the relevant definition or axiom interface
 - [ ] Proves a well-known consequence
 - [ ] File named appropriately: `<Domain>_<Topic>_QA.lean`
 
 ### For Other Changes
 
-- [ ] Code compiles with `lake build`
+- [ ] Changed modules compile directly; record unrelated baseline build failures
 - [ ] Documentation updated if needed
 - [ ] Follows existing patterns and conventions
+- [ ] New scope includes its SGT dependency and leverage rationale
 
 ## Code Style
 
@@ -99,16 +114,15 @@ Replacing an axiom with a mathlib re-export.
 - Use mathlib types and definitions when possible
 - Keep axioms minimal and focused
 - Add doc comments for all public declarations
-- Follow `governance/QUALITY_CRITERIA.md` for quality standards
-- Follow `governance/QA_POLICY.md` for QA requirements
+- Follow the [canonical architecture](../docs/2_ARCHITECTURE.md) for quality and QA requirements
 
 ## Three-Layer Architecture
 
 This project uses a three-layer architecture:
 
-1. **Trusted Axioms** (`Scaffold/Trusted/`) - Textbook results with no proofs
+1. **Public Axiom APIs** (`Scaffold/Mathlib/`) - Textbook-anchored definitions and explicit axioms
 2. **QA Lemmas** (`Scaffold/QA/`) - Simple sanity checks with real proofs
-3. **Derived Work** (`Scaffold/Derived/`) - Novel mathematics built on 1 and 2
+3. **Derived Work** (`Scaffold/Derived/`, planned, or downstream) - Novel mathematics built on 1 and 2
 
 When contributing, identify which layer you're working in and follow the standards for that layer.
 

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "ollama/qwen2.5-coder:32b",
+  "small_model": "ollama/llama3:latest",
+  "agent": {
+    "build": {
+      "model": "ollama/qwen2.5-coder:32b"
+    },
+    "plan": {
+      "model": "ollama/qwen2.5-coder:32b"
+    },
+    "prover": {
+      "description": "Specialized formal theorem prover for Lean 4 tactic prediction, proof search, and discharging sorries",
+      "mode": "subagent",
+      "model": "ollama/deep-prover:latest"
+    }
+  }
+}

@@ -1,4 +1,16 @@
-# **Strategic Identification of Principal Investigator Partners for Spectral and Nonequilibrium Network Research**
+# Partnership Landscape
+
+**Status:** Time-sensitive research, not a verified contact list  
+**Research snapshot:** February 3, 2026  
+**Last reorganized:** August 17, 2026
+
+This document records hypotheses about technical alignment and possible partnership routes. Affiliations, funding, availability, and program rules change; verify every candidate against primary institutional and funding sources before outreach. Rankings indicate research fit inferred by the original assessment, not endorsement, interest, or confirmed collaboration viability. Entries supported only by aggregators or ResearchGate require stronger sourcing before operational use.
+
+## Intended use
+
+Use this landscape to form a short list, then validate it through a dated research pass. A partnership brief should identify a specific shared technical problem, the contribution Scaffold can actually demonstrate, and the relevant program’s current eligibility rules. Do not present speculative grant routes as committed funding.
+
+## Strategic Identification of Principal Investigator Partners for Spectral and Nonequilibrium Network Research
 
 The identification of elite academic partners capable of leading multi-disciplinary research programs necessitates a rigorous assessment of technical intersectionality, institutional gravity, and collaborative readiness. In the pursuit of developing programs adjacent to the concept of the spectral self—specifically those involving self-organizing, self-referential, or autonomous dynamical structures emergent from network topologies—a potential Principal Investigator (PI) must demonstrate mastery over five core technical pillars. These pillars encompass spectral methods on graphs, dynamical systems, nonequilibrium thermodynamics, functional analysis, and mathematical physics. The following report provides a curated hierarchy of PI-caliber researchers who possess the requisite rigor and leadership signals to serve as primary investigators on large-scale grant proposals, where specialized system design and implementation function as the critical subcontracting components.
 

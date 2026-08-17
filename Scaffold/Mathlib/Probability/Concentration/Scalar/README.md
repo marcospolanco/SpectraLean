@@ -78,5 +78,5 @@ have := subgaussian_linear_combination X a K
 
 ## See Also
 
-- [Index: Probability Concentration](../../../../index/map/probability_concentration.md)
-- [Sources](../../../../index/sources/)
+- [Index: Probability Concentration](../../../../../index/map/probability_concentration.md)
+- [Sources](../../../../../index/sources/)

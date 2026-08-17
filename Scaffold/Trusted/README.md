@@ -1,6 +1,6 @@
-# Trusted Layer
+# Experimental Quarantine
 
-This directory contains the trusted layer of Scaffold.
+This directory is reserved for experimental, non-public work. Public axiom APIs live under `Scaffold/Mathlib/`.
 
 ## Policy
 
@@ -56,5 +56,5 @@ axiom public_theorem (X : RV Ω) : P(X > 0) ≤ 1
 
 ## See Also
 
-- [Axiom Policy](../../../../governance/AXIOM_POLICY.md)
-- [Contributing Guidelines](../../../../governance/CONTRIBUTING.md)
+- [Architecture and Axiom Policy](../../docs/2_ARCHITECTURE.md)
+- [Contributing Guidelines](../../governance/CONTRIBUTING.md)

@@ -74,5 +74,4 @@ This list will be updated as new axioms are added. Maintainers should review thi
 
 ## See Also
 
-- [Axiom Policy](../../governance/AXIOM_POLICY.md) for axiom guidelines
-- [Deprecation Policy](../../governance/DEPRECATION_POLICY.md) for migration process
+- [Architecture and axiom policy](../docs/2_ARCHITECTURE.md) for admission and migration rules

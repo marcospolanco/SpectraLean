@@ -49,4 +49,4 @@ Do NOT add here:
 ## See Also
 
 - [Core Definitions](../Mathlib/Core/README.md) for public shared definitions
-- [Contributing Guidelines](../../../../governance/CONTRIBUTING.md)
+- [Contributing Guidelines](../../governance/CONTRIBUTING.md)

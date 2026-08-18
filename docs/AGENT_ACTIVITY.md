@@ -1163,3 +1163,114 @@ the new trace/membership tools lower its cost).
 **Next handoff:** the `evals (c • M) = c • evals M` excavation; an
 irregular Cheeger statement shape with a named consumer; or backlog
 item 3 variants with named algorithm consumers.
+
+## 2026-08-18T03:18:31Z — Electrical-crust step 1: connectivity/kernel characterization (in progress)
+
+**Run:** `20260818T031831Z-run-1`  
+**Session:** `ses_fed249ea1ffeNPR0xYcQVtoj2z`  
+**Status:** in-progress  
+**Milestone:** Operator-directed: `proposals/electrical-structure-crust.md`
+step 1 ONLY — prove the converse of `laplacian_ones_in_kernel`: for a
+connected weighted graph, `ker (laplacian A)` is exactly the constants.
+Pure hard crust, no new axioms; obstruction goes to
+`docs/6_SGT_BACKLOG.md` if unprovable. Proposal steps 2–5 (effective
+resistance, Rayleigh monotonicity, Foster) out of scope.
+
+**Pre-edit decision (recorded in the execution plan):** connectivity is
+adopted as Mathlib `SimpleGraph.Connected` via a `WAdj → SimpleGraph`
+adapter `supportGraph A hA` (`Adj i j ↔ i ≠ j ∧ 0 < A i j`; looplessness
+forces the conjunct, and positive diagonal self-loops cancel in `D − A`).
+Rationale: reuses Mathlib's walk induction for propagation, the
+`Connected` field `Nonempty` discharges the empty-type case, avoids
+duplicating `Walk`/`Reachable`, and creates the first WAdj→SimpleGraph
+bridge (the radar's standing interop deviation). Cost: two new Mathlib
+imports in `Spectral.lean`, mitigated by the `supportGraph_adj`
+interface lemma.
+
+**Planned proof path:** kernel vector ⇒ zero quadratic form ⇒ termwise
+`(f i − f j)² = 0` on positive weights (via `laplacian_quadForm` +
+nonneg weights) ⇒ `f` constant along support-graph walks ⇒ constant on
+`V` by connectivity; then assemble
+`ker (mulVecLin (laplacian A)) = span ℝ {onesVec}`. QA with connected
+positive witness (3-path) and disconnected negative witness
+(two-component `Fin 4` graph: component indicator in kernel, not
+constant).
+
+## 2026-08-18T03:38:08Z — Electrical-crust step 1 delivered: kernel = constants on connected graphs (completed)
+
+**Run:** `20260818T031831Z-run-1`  
+**Session:** `ses_fed249ea1ffeNPR0xYcQVtoj2z`  
+**Status:** completed  
+**Milestone:** `proposals/electrical-structure-crust.md` step 1 ONLY —
+the converse of `laplacian_ones_in_kernel`: for symmetric nonnegative
+weights whose support graph is connected, `ker (laplacian A)` is
+exactly the constants. Delivered as pure hard crust; **no new axioms**
+(explicit axiom count unchanged at 18). Proposal steps 2–5 untouched.
+
+**Changes:** `GraphTheory.Spectral` (new section 5; sections 5–6
+renumbered to 6–7; two Mathlib imports added:
+`Combinatorics.SimpleGraph.Path`, `LinearAlgebra.Matrix.ToLin`): the
+`supportGraph` adapter (`WAdj → SimpleGraph`, `Adj i j ↔ i ≠ j ∧
+0 < A i j`; the `i ≠ j` conjunct is forced by looplessness — positive
+diagonal self-loops cancel in `D − A`) with interface lemma
+`supportGraph_adj`; `eq_of_laplacian_mulVec_eq_zero_of_pos_weight`
+(zero Dirichlet energy ⇒ `(f i − f j)² = 0` termwise on positive
+weights, via `laplacian_quadForm` + `Finset.sum_eq_zero_iff_of_nonneg`);
+`eq_of_supportGraph_walk` (propagation by induction on
+`SimpleGraph.Walk`); `exists_const_of_laplacian_mulVec_eq_zero` (anchor
+vertex from `Connected`'s bundled `Nonempty`; value propagated along
+walks); `laplacian_mulVec_const`; iff form
+`laplacian_mulVec_eq_zero_iff_exists_const`; headline span form
+`laplacian_kernel_eq_span_onesVec`
+(`ker (mulVecLin (laplacian A)) = span ℝ {onesVec}` — the shape
+effective-resistance uniqueness will consume). New QA
+`SpectralGraph/Connectivity_QA.lean` (15 declarations): connected
+witness at the 3-vertex path (connectivity by explicit walks through
+the center; both iff directions; constant recovered and pinned to `5`;
+non-constant `![1,0,0]` computed out of the kernel entrywise) and
+disconnected negative witness at two disjoint `Fin 4` edges (component
+indicator `![1,1,0,0]` computed into the kernel yet not constant;
+support graph proved not connected via a walk block invariant) — the
+connectivity hypothesis is load-bearing. Docs: backlog item 7 records
+step 1 delivered with named step-2 consumers; SGT index map, scoreboard
+(static counts + verification record + interpretation bullet) updated;
+radar re-scored per protocol (see below).
+
+**Decisive commands and outcomes:** `lake env lean` on
+`GraphTheory.Spectral` — zero errors, zero new warnings (six
+pre-existing linter notes in untouched code); `lake env lean` on
+`QA.SpectralGraph.Connectivity_QA` — zero output; `lake build Scaffold
+.QA.SpectralGraph.Connectivity_QA` ✔ (2009 targets); full `lake build`
+✔ (2171 targets); `lint_axioms`, `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated: 255 QA
+declarations (+15), 0 placeholders, 18 axioms unchanged.
+
+**Verification:** every new declaration is a Lean-checked theorem
+conditional on no Scaffold axiom; QA includes both the connected
+positive witness and the disconnected negative witness the direction
+required. Radar re-scored only after proof + QA landed, per protocol:
+subject axis 6 (electrical) 0.5 → 1.0 (connectivity hinge proved; no
+electrical quantity defined yet), subject axis 1 (models) 2.5 → 3.0
+(first `SimpleGraph` adapter), assurance Mathlib interop 3.5 → 4.0
+(the matrix-first deviation is bridged one direction and genuinely
+consumed by the center theorem). The README coverage snapshot's two
+affected cells were synced to the radar (the snapshot was added
+concurrently during this run; its other content untouched).
+
+**Trust boundary:** unchanged in size (18 explicit cited axioms); this
+slice added no axioms and consumes none.
+
+**Remaining risk:** `supportGraph` is one-directional (`toWAdj` still
+open); the span theorem's `hconn` hypothesis is phrased through the
+adapter, so future refactors of that definition touch consumers (the
+`supportGraph_adj` lemma is the stable interface). Concurrent operator
+edits during this run (README snapshot, proposal re-sequencing,
+`cdx-sgt-radar-axes.md` deletion) were preserved untouched except the
+two README score cells synced above.
+
+**Next handoff:** proposal step 2 — effective resistance by the
+potential equation (`IsEffectiveResistance A u v r ↔ ∃ f,
+laplacian A *ᵥ f = e u − e v ∧ f u − f v = r`), whose
+well-definedness consumes `laplacian_kernel_eq_span_onesVec`; or the
+open earlier candidates (`evals (c • M)` excavation; irregular Cheeger
+shape; backlog item 3 variants).

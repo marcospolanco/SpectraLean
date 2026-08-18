@@ -78,6 +78,21 @@ Rationale:
    quotient. Proving the easy direction in the general normalized setting
    retires the regular-graph restriction the radar flags as axis 4's ceiling.
 
+**Correction (2026-08-18): this plan is under-specified as written.** After
+the Cheeger statement-shape repair of the same date, the axioms are stated at
+`secondEval (regularNormalizedLaplacian A d)` — the second sorted eigenvalue
+of the **normalized** Laplacian. But `lambda2_variational`
+(`Spectral.lean:785`) characterizes `lambda2`, which is
+`evals (laplacian ·)` — the **combinatorial** Laplacian.
+`lambda2_eq_secondEval` is `rfl` and bridges the two names for one operator;
+it does not bridge combinatorial to normalized. So deriving the Cheeger bound
+from `lambda2_variational` requires an intermediate that does not exist: a
+variational characterization of `secondEval L_sym`. The degree-weighted
+Rayleigh transfer in `GraphTheory.VariationalTransfer` is the natural route.
+Scope the missing intermediate before adopting this proposal; it is strictly
+harder than originally stated, which strengthens the case for running
+[the electrical proposal](electrical-structure-crust.md) first.
+
 This is a hard slice — likely several sessions of real Lean work rather than
 one run. That is the point. Recent milestones have each landed within a
 single run, which suggests work selected for tractability rather than for

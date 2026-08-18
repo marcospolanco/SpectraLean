@@ -262,6 +262,70 @@ tools reduce its cost); an irregular Cheeger statement shape through
 `rayleigh_normalizedLaplacian_degreeSqrt` (needs a precise source and
 consumer); or backlog item 3 variants with named consumers.
 
+**Active slice (run 1, 2026-08-18): electrical-crust step 1 —
+connectivity and the kernel characterization — DELIVERED.** Operator
+direction pinned `proposals/electrical-structure-crust.md` **step 1
+only**: for a connected weighted graph, `ker (laplacian A)` is exactly
+the constants — the converse of `laplacian_ones_in_kernel`
+(`Spectral.lean`). Pure hard crust; **no new axioms** (count unchanged
+at 18). Proposal steps 2–5 (effective resistance, Rayleigh
+monotonicity, Foster) were NOT started — stopping here with a clean
+proof is the successful outcome.
+
+**Connectivity predicate decision (recorded before stating anything):**
+adopted Mathlib's `SimpleGraph.Connected` through a `WAdj → SimpleGraph`
+adapter `supportGraph A hA` with `Adj i j ↔ i ≠ j ∧ 0 < A i j`. The
+`i ≠ j` conjunct is forced by `SimpleGraph` looplessness — positive
+diagonal weights (self-loops) cancel in `D − A` and so must not create
+adjacency. Tradeoff vs a native reachability inductive over `WAdj`: a
+native predicate would duplicate Mathlib's `Walk`/`Reachable` machinery
+with no consumer of the duplicate, and later proposal steps (component
+structure, spanning trees) would need a bridge to Mathlib anyway. The
+adapter reuses Mathlib's walk induction for the propagation argument,
+takes the anchor vertex from `Connected`'s bundled `Nonempty` field
+(discharging the empty-vertex-type case for free), and is the first
+`WAdj → SimpleGraph` bridge — movement on the radar's standing
+matrix-first interop deviation and the prerequisite shape for the
+proposal's second recommendation (`SimpleGraph.toWAdj`). Cost: two new
+Mathlib imports in `Spectral.lean` (`Combinatorics.SimpleGraph.Path`
+for `Walk`/`Reachable`/`Connected`, `LinearAlgebra.Matrix.ToLin` for
+`mulVecLin`), mitigated by the `supportGraph_adj` interface lemma
+(`Iff.rfl`).
+
+**Delivered statements** (all proved, in `GraphTheory.Spectral`):
+`supportGraph` + `supportGraph_adj`; edge constancy
+`eq_of_laplacian_mulVec_eq_zero_of_pos_weight` (zero Dirichlet energy
+kills `(f i − f j)²` termwise on positive weights, via
+`laplacian_quadForm` + nonneg weights); walk propagation
+`eq_of_supportGraph_walk` (induction on `SimpleGraph.Walk`);
+connected ⇒ kernel ⊆ constants
+`exists_const_of_laplacian_mulVec_eq_zero`; `laplacian_mulVec_const`;
+the iff `laplacian_mulVec_eq_zero_iff_exists_const`; the algebraic
+headline `laplacian_kernel_eq_span_onesVec`
+(`LinearMap.ker (Matrix.mulVecLin (laplacian A)) = span ℝ {onesVec}`).
+QA `SpectralGraph/Connectivity_QA.lean` (15 declarations): connected
+positive witness (3-vertex path — support graph connected by explicit
+walks through the center, both iff directions, constant recovered and
+pinned to its value, non-constant `![1,0,0]` computed out of the
+kernel) plus a disconnected negative witness (two disjoint `Fin 4`
+edges — component indicator `![1,1,0,0]` computed into the kernel yet
+not constant, support graph proved not connected via a block invariant
+over walks), showing the connectivity hypothesis is load-bearing.
+Radar re-scored per protocol with this milestone (proof + QA landed):
+subject axis 6 (electrical) 0.5 → 1.0, subject axis 1 (models)
+2.5 → 3.0, assurance Mathlib interop 3.5 → 4.0; QA axis text updated
+to 255 declarations / 20 modules. Backlog item 7 records step 1
+delivered with named consumers for step 2.
+
+**Next milestone (open):** proposal step 2 — effective resistance by
+the potential equation (`IsEffectiveResistance A u v r ↔ ∃ f,
+laplacian A *ᵥ f = e u − e v ∧ f u − f v = r`), whose
+well-definedness consumes `laplacian_kernel_eq_span_onesVec`; or the
+still-open earlier candidates: the `evals (c • M) = c • evals M`
+Mathlib-excavation, an irregular Cheeger statement shape through
+`rayleigh_normalizedLaplacian_degreeSqrt` (needs a precise source and
+consumer), or backlog item 3 variants with named consumers.
+
 ## Ready queue
 
 1. Citation hygiene — completed 2026-08-17 (see Active milestone and Last
@@ -284,6 +348,19 @@ consumer); or backlog item 3 variants with named consumers.
 
 ## Last verified state
 
+- 2026-08-18 (electrical-crust step 1: connectivity/kernel): `lake env
+  lean` on `GraphTheory.Spectral` (zero errors; zero *new* warnings —
+  the six pre-existing linter notes are untouched code) and on
+  `QA.SpectralGraph.Connectivity_QA` (zero errors, zero warnings);
+  `lake build Scaffold.Mathlib.GraphTheory.Spectral` and
+  `lake build Scaffold.QA.SpectralGraph.Connectivity_QA` ✔; full
+  `lake build` ✔ (2171 targets); 255 QA declarations (15 new), no
+  `sorry`/`admit` anywhere under `Scaffold/`; 18 explicit cited axioms
+  (unchanged — pure hard crust); all hygiene scripts pass
+  (`lint_axioms`, `check_citations`, `check_markdown_links`);
+  scoreboard regenerated; SGT index map, backlog item 7, and radar
+  updated with recorded re-scores (subject axis 6: 0.5 → 1.0, subject
+  axis 1: 2.5 → 3.0, assurance Mathlib interop: 3.5 → 4.0).
 - 2026-08-18 (Cheeger statement-shape repair): `lake env lean` on
   `GraphTheory.Spectral`, `GraphTheory.Cheeger`, and
   `QA.SpectralGraph.Cheeger_QA` pass with zero errors and zero

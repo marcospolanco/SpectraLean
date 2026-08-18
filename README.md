@@ -77,6 +77,25 @@ SGT obligation and a small, Mathlib-compatible API.
 See [Spectral Theory and Algorithmic Pipeline](docs/3_SPECTRAL_THEORY.md)
 for the status of the retained persistence example.
 
+### SGT coverage snapshot
+
+Last assessed: August 18, 2026. Scores reflect usable, verified coverage on a
+0–5 scale; see the [full radar and evidence](docs/7_SGT_RADAR.md).
+
+| Area | Coverage |
+| --- | ---: |
+| Graph and Laplacian models | 3.0 / 5 |
+| Spectral linear algebra | 3.5 / 5 |
+| Variational and functional methods | 3.0 / 5 |
+| Cuts, expansion, and clustering | 2.5 / 5 |
+| Random walks and diffusion | 2.5 / 5 |
+| Combinatorial and electrical structure | 1.0 / 5 |
+| Perturbation, randomness, and algorithms | 3.0 / 5 |
+| Adjacent systems interfaces | 1.0 / 5 |
+
+Assurance quality is assessed separately in the full radar; subject coverage
+and trust level are not combined into one score.
+
 ## Trust model
 
 The trust model is therefore operational, not merely descriptive: citations and explicit axioms belong in the mushy center; checked Lean proofs belong in the hard crust. Do not describe an axiom-backed result as fully formalized, and do not use `sorry` to move a result across that boundary.

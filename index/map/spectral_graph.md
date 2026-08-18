@@ -18,7 +18,10 @@ Real definitions: `WAdj`, `deg`, `degreeMatrix`, `laplacian`,
 `laplacian` wrap; added in the 2026-08-18 Cheeger shape repair),
 `spectralGap`, `spectralProjector`, `initialProjector`,
 `eigvecOf`, `eigvalOf`, `vol`, `boundary`, `conductance`,
-`cheegerConstant`, `eventUpdate`.
+`cheegerConstant`, `eventUpdate`, and `supportGraph` (2026-08-18: the
+`WAdj → SimpleGraph` adapter, `Adj i j ↔ i ≠ j ∧ 0 < A i j` — the first
+bridge from the matrix-first representation to Mathlib's connectivity
+API).
 
 Proved theorems (no admission): `degreeMatrix_*`, `laplacian_symmetric`,
 `laplacian_ones_in_kernel`, `evals_sorted`, `laplacian_quadForm`
@@ -39,7 +42,19 @@ spectral theorem (2026-08-17): `initialProjector_congr`,
 matrix-facing λ₂ APIs), `evals_mem_eigvalOf` (sorted-spectrum ↔
 eigenbasis connection), `eigvalOf_sum_eq_trace` (trace from the unitary
 diagonalization), `eigvalOf_le_of_quadForm_nonpos` (one-sided Rayleigh
-eigenvalue bound — the refutation engine of `Cheeger_QA`).
+eigenvalue bound — the refutation engine of `Cheeger_QA`);
+connectivity and the kernel characterization (2026-08-18):
+`supportGraph_adj` (adapter interface lemma),
+`eq_of_laplacian_mulVec_eq_zero_of_pos_weight` (zero Dirichlet energy
+forces constancy across positive-weight edges),
+`eq_of_supportGraph_walk` (walk propagation),
+`exists_const_of_laplacian_mulVec_eq_zero` and
+`laplacian_mulVec_eq_zero_iff_exists_const` (on a connected graph the
+Laplacian kernel is exactly the constants — the converse of
+`laplacian_ones_in_kernel`; proposal
+`electrical-structure-crust.md` step 1), `laplacian_mulVec_const`, and
+`laplacian_kernel_eq_span_onesVec`
+(`ker (mulVecLin (laplacian A)) = span ℝ {onesVec}`).
 
 Admitted axioms:
 

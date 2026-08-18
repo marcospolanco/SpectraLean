@@ -9,7 +9,10 @@
   cut/volume/conductance quantities, and event-driven adjacency updates,
   together with proved structural theorems and a minimal set of explicit,
   cited axioms (Cauchy interlacing and the variational characterization
-  of the algebraic connectivity λ₂).
+  of the algebraic connectivity λ₂). It also provides the
+  `supportGraph` adapter from weighted adjacency matrices to Mathlib's
+  `SimpleGraph`, through which the Laplacian kernel is characterized on
+  connected graphs: the kernel is exactly the constants.
 
   Everything definable and provable here is defined and proved; the only
   admitted statements are the two `axiom` declarations, each carrying a
@@ -44,6 +47,8 @@ import Mathlib.Data.Matrix.Basic
 import Mathlib.LinearAlgebra.Matrix.Symmetric
 import Mathlib.LinearAlgebra.Matrix.Spectrum
 import Mathlib.LinearAlgebra.Matrix.Trace
+import Mathlib.LinearAlgebra.Matrix.ToLin
+import Mathlib.Combinatorics.SimpleGraph.Path
 
 open scoped BigOperators Matrix
 open InnerProductSpace
@@ -692,7 +697,144 @@ theorem laplacian_psd (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
   exact mul_nonneg (hnonneg i j) (sq_nonneg (x i - x j))
 
 /-!
-## 5. Event-driven adjacency updates
+## 5. Connectivity and the Laplacian kernel (proved)
+
+The support-graph adapter to Mathlib's `SimpleGraph`, and the kernel
+characterization: on a connected graph (symmetric, nonnegative weights),
+the constants are the *only* Laplacian-kernel vectors. This is the
+converse of `laplacian_ones_in_kernel` and the hinge on which
+effective-resistance well-definedness, positivity of `λ₂`, Fiedler
+interfaces, and mixing statements hang (backlog item 7; proposal
+`proposals/electrical-structure-crust.md`, step 1). The proof path is
+the classical one: a kernel vector has zero Dirichlet energy, hence is
+constant across every positive-weight edge, and connectivity propagates
+the value along walks.
+-/
+
+/-- The loopless support graph of a symmetric weighted adjacency matrix:
+`i` and `j` are adjacent exactly when `i ≠ j` and the weight `A i j` is
+positive. The `i ≠ j` conjunct is forced by `SimpleGraph`
+looplessness — positive diagonal weights (self-loops) cancel in `D - A`
+and so must not create adjacency. This is the `WAdj → SimpleGraph`
+direction of the Mathlib adapter surface: it makes Mathlib's `Walk`,
+`Reachable`, and `Connected` API applicable to the matrix-first
+representation, with symmetry discharged once, here. -/
+def supportGraph (A : WAdj (V := V)) (hA : A.IsSymm) : SimpleGraph V where
+  Adj i j := i ≠ j ∧ 0 < A i j
+  symm := fun i j h => ⟨Ne.symm h.1, by rw [hA.apply i j]; exact h.2⟩
+  loopless := fun _ h => h.1 rfl
+
+omit [Fintype V] [DecidableEq V] in
+/-- Adjacency in the support graph is exactly a positive off-diagonal
+weight: the interface lemma for consumers that should not unfold the
+adapter. -/
+theorem supportGraph_adj {A : WAdj (V := V)} {hA : A.IsSymm} {i j : V} :
+    (supportGraph A hA).Adj i j ↔ i ≠ j ∧ 0 < A i j :=
+  Iff.rfl
+
+/-- A Laplacian-kernel vector is constant across every edge of positive
+weight: the quadratic form vanishes on the kernel, and by the Dirichlet
+identity it is a sum of nonnegative terms `A i j (f i - f j)²` that must
+vanish termwise. -/
+theorem eq_of_laplacian_mulVec_eq_zero_of_pos_weight (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j) {f : V → ℝ}
+    (hf : (laplacian A).mulVec f = 0) {i j : V} (hpos : 0 < A i j) :
+    f i = f j := by
+  have hqf : quadForm (laplacian A) f = 0 := by
+    rw [quadForm, hf]
+    simp
+  rw [laplacian_quadForm A hA f] at hqf
+  rcases (div_eq_zero_iff (b := (2 : ℝ))).1 hqf with hsum | h2
+  · have hinner := (Finset.sum_eq_zero_iff_of_nonneg
+      (fun i' _ => Finset.sum_nonneg fun j' _ =>
+        mul_nonneg (hnonneg i' j') (sq_nonneg _))).1 hsum i
+      (Finset.mem_univ i)
+    have hterm := (Finset.sum_eq_zero_iff_of_nonneg
+      (fun j' _ => mul_nonneg (hnonneg i j') (sq_nonneg _))).1 hinner j
+      (Finset.mem_univ j)
+    rcases mul_eq_zero.1 hterm with hA0 | hsq
+    · exact absurd hA0 hpos.ne'
+    · exact sub_eq_zero.1 (sq_eq_zero_iff.1 hsq)
+  · exact absurd h2 (by norm_num)
+
+/-- A Laplacian-kernel vector is constant along support-graph walks:
+each walk step crosses a positive-weight edge, and the previous theorem
+forces equality across it. Induction over `SimpleGraph.Walk`. -/
+theorem eq_of_supportGraph_walk (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hnonneg : ∀ i j, 0 ≤ A i j) {f : V → ℝ}
+    (hf : (laplacian A).mulVec f = 0) {i j : V}
+    (w : (supportGraph A hA).Walk i j) : f i = f j := by
+  induction w with
+  | nil => rfl
+  | cons hadj _ ih =>
+    exact (eq_of_laplacian_mulVec_eq_zero_of_pos_weight A hA hnonneg hf
+      ((supportGraph_adj.1 hadj).2)).trans ih
+
+/-- **Connectivity ⇒ the Laplacian kernel is the constants** (the
+converse of `laplacian_ones_in_kernel`): for symmetric nonnegative
+weights whose support graph is connected, every kernel vector is
+constant. The anchor vertex comes from the `Nonempty` field bundled in
+`SimpleGraph.Connected`; the value then propagates along walks to every
+vertex. -/
+theorem exists_const_of_laplacian_mulVec_eq_zero (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (hconn : (supportGraph A hA).Connected) {f : V → ℝ}
+    (hf : (laplacian A).mulVec f = 0) : ∃ c : ℝ, f = fun _ => c := by
+  obtain ⟨i₀⟩ := hconn.nonempty
+  refine ⟨f i₀, funext fun i => ?_⟩
+  obtain ⟨w⟩ := hconn i₀ i
+  exact (eq_of_supportGraph_walk A hA hnonneg hf w).symm
+
+/-- Every constant vector is killed by the Laplacian: the scalar
+multiple of `laplacian_ones_in_kernel`, routed through the linear map
+`Matrix.mulVecLin`. -/
+theorem laplacian_mulVec_const (A : WAdj (V := V)) (c : ℝ) :
+    (laplacian A).mulVec (fun _ => c) = 0 := by
+  have hvec : (fun _ => c : V → ℝ) = c • onesVec := by
+    funext i; simp [onesVec]
+  rw [hvec, ← Matrix.mulVecLin_apply, map_smul,
+    show Matrix.mulVecLin (laplacian A) onesVec = 0 by
+      rw [Matrix.mulVecLin_apply]; exact laplacian_ones_in_kernel A,
+    smul_zero]
+
+/-- **The kernel characterization, iff form:** for a connected graph
+with symmetric nonnegative weights, `L *ᵥ f = 0` if and only if `f` is
+constant. -/
+theorem laplacian_mulVec_eq_zero_iff_exists_const (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (hconn : (supportGraph A hA).Connected) (f : V → ℝ) :
+    (laplacian A).mulVec f = 0 ↔ ∃ c : ℝ, f = fun _ => c :=
+  ⟨fun hf => exists_const_of_laplacian_mulVec_eq_zero A hA hnonneg hconn hf,
+    by rintro ⟨c, rfl⟩; exact laplacian_mulVec_const A c⟩
+
+/-- **The kernel characterization, span form:** for a connected graph
+with symmetric nonnegative weights, the kernel of the Laplacian as a
+linear map is exactly the line spanned by the all-ones vector. This is
+the statement shape consumed by uniqueness arguments — e.g. the
+well-definedness of effective resistance via "two solutions differ by a
+kernel element, which is constant" (proposal step 2). -/
+theorem laplacian_kernel_eq_span_onesVec (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hnonneg : ∀ i j, 0 ≤ A i j) (hconn : (supportGraph A hA).Connected) :
+    LinearMap.ker (Matrix.mulVecLin (laplacian A))
+      = Submodule.span ℝ ({onesVec} : Set (V → ℝ)) := by
+  refine le_antisymm ?_ ?_
+  · intro f hf
+    rw [LinearMap.mem_ker, Matrix.mulVecLin_apply] at hf
+    obtain ⟨c, hc⟩ := exists_const_of_laplacian_mulVec_eq_zero A hA hnonneg
+      hconn hf
+    rw [Submodule.mem_span_singleton]
+    refine ⟨c, ?_⟩
+    rw [hc]
+    funext i
+    simp [onesVec]
+  · rw [Submodule.span_le]
+    rintro f (rfl : f = onesVec)
+    show Matrix.mulVecLin (laplacian A) onesVec = 0
+    rw [Matrix.mulVecLin_apply]
+    exact laplacian_ones_in_kernel A
+
+/-!
+## 6. Event-driven adjacency updates
 -/
 
 /-- A single event update: replace the weight of the undirected edge
@@ -713,7 +855,7 @@ theorem eventUpdate_preserves_symmetry (A : WAdj (V := V)) (hA : Matrix.IsSymm A
     exact (hA.apply j i).symm
 
 /-!
-## 6. Admitted classical results (explicit axiom boundary)
+## 7. Admitted classical results (explicit axiom boundary)
 
 Exactly two statements are admitted here; both are classical finite
 dimensional results stated against the `evals` API defined above.

@@ -104,6 +104,24 @@ admit or define nothing here until a named consumer states which
 identity it needs (per the center-out policy, adjacency alone does not
 justify admission).
 
+**Step 1 delivered (2026-08-18), gate satisfied by named consumers:**
+following `proposals/electrical-structure-crust.md`, the
+connectivity/kernel hinge is proved in `GraphTheory.Spectral` — the
+`supportGraph` adapter (`WAdj → SimpleGraph`) plus, for connected
+symmetric nonnegative weights, `ker (laplacian A) = span ℝ {onesVec}`
+(`exists_const_of_laplacian_mulVec_eq_zero`,
+`laplacian_mulVec_eq_zero_iff_exists_const`,
+`laplacian_kernel_eq_span_onesVec`; QA in
+`SpectralGraph/Connectivity_QA.lean` with connected and disconnected
+witnesses). No axioms. The named consumers this unlocks:
+effective-resistance well-definedness (two potential-equation solutions
+differ by a kernel element, constant — proposal step 2), positivity of
+`λ₂` / Fiedler interfaces (item 4), and any mixing statement (item 5).
+Next candidate in this family: proposal step 2 — effective resistance
+by the potential equation `IsEffectiveResistance A u v r ↔ ∃ f,
+laplacian A *ᵥ f = e u − e v ∧ f u − f v = r`, whose
+well-definedness proof consumes `laplacian_kernel_eq_span_onesVec`.
+
 ## Standing decisions
 
 - Coverage is assessed on the [SGT Radar](7_SGT_RADAR.md); scores move

@@ -1,31 +1,45 @@
 # Proposal: Grow the Crust Through Electrical Structure
 
 **Status:** Proposed. Assistant's assessment of project direction, requested
-2026-08-17. Authorizes no Lean changes, axiom admissions, document rewrites,
-or external publication.
+2026-08-17; substantially re-sequenced 2026-08-18 after review (see
+[Corrections](#corrections)). Authorizes no Lean changes, axiom admissions,
+document rewrites, or external publication.
 
 Companion to [Prove One Named Inequality](prove-cheeger-easy-direction.md).
 That proposal argues for *shrinking the mushy center*; this one takes the
 opposite premise — the center stays fixed — and asks where the hard crust
 should grow. The two are independent and either may be adopted alone.
 
-Assessed from the repository as of this date: `Scaffold/Mathlib/GraphTheory/Spectral.lean`,
-`docs/6_SGT_BACKLOG.md` (items 3, 4, 7), `docs/7_SGT_RADAR.md`, and the
-Mathlib pin in `lakefile.lean` (v4.14.0).
+**This document is the complete brief for an autonomous run.** It carries its
+own scope fence, constraints, and stop conditions in
+[Operating instructions](#operating-instructions-for-an-autonomous-run); an
+operator directing a run against it should not need to restate them.
+
+**Clean-room note.** This document is not exportable. Per the inclusion test
+in [Clean-Room SGT Export](clean-room-sgt-export.md), it is dense with radar
+scores, axiom counts, run history, and internal planning rationale. If the
+program here is carried into the new repository, restate it from public
+mathematical requirements; do not copy this file.
+
+Assessed from `Scaffold/Mathlib/GraphTheory/Spectral.lean`,
+`docs/6_SGT_BACKLOG.md` (items 3, 4, 7), `docs/7_SGT_RADAR.md`, the Mathlib pin
+in `lakefile.lean` (v4.14.0), and that pin's
+`Mathlib/Combinatorics/SimpleGraph/LapMatrix.lean`.
 
 ## Recommendation
 
 Grow the crust into **combinatorial and electrical structure** — the radar's
-axis 6, currently scored 0.5 and described as entirely absent.
+axis 6, currently scored 0.5 and described as entirely absent — beginning with
+the interoperability adapter that the rest of the program needs anyway.
 
 ## Why this axis
 
 It is the one major SGT neighborhood whose core theorems are provable with
 **no axioms at all**. This is structural, not accidental: Cheeger, Weyl,
 Davis–Kahan, and interlacing are hard to formalize because they are
-inequalities requiring real analysis. Electrical network theory is largely
-algebra — linear solves, energy identities, completing the square. It is the
-largest theorem-dense region reachable without touching the mushy center.
+inequalities requiring real analysis. Electrical network theory is linear
+algebra — solvability, energy identities, orthogonality. It is the largest
+theorem-dense region reachable without touching the mushy center.
 
 It also composes with the repository's strongest existing asset. The proved
 Dirichlet identity `laplacian_quadForm` (`Spectral.lean:531`),
@@ -36,75 +50,239 @@ quadForm (laplacian A) x = (∑ i, ∑ j, A i j * (x i - x j)^2) / 2
 
 *is* the electrical energy. Every resistance theorem below is a consumer of
 that single identity. This satisfies the center-out policy in
-[Strategy](../docs/1_STRATEGY.md) on its merits — it builds on the most
-load-bearing proved statement in the repository rather than beside it — and
-it answers backlog item 7's gate by naming the consumers up front.
+[Strategy](../docs/1_STRATEGY.md) on its merits, and answers backlog item 7's
+gate by naming the consumers up front.
+
+**Calibration.** "No axioms required" is not "cheap." Earlier drafts of this
+document described the variational steps as completing-the-square exercises.
+The repository's own evidence contradicts that: `lambda2_variational`
+(`Spectral.lean:785`) is an **admitted axiom** — a variational characterization
+of exactly this shape was not proved here because it was not easy. Effective
+resistance below is a coherent mini-project of four or five slices, not a
+handful of near-free lemmas.
+
+## Corrections
+
+**2026-08-18 (first) — step 1 was scoped wrong.** The original text directed a
+from-scratch walk-propagation proof of the kernel characterization; the sketch
+it gave was verbatim the induction Mathlib already runs at
+`LapMatrix.lean:115-118`. On closer costing, transport turned out to be
+roughly a wash for the *weighted* statement (see
+[step 2](#2-the-weighted-kernel-characterization)), but the survey changed the
+plan elsewhere and settled the connectivity-predicate question.
+
+**2026-08-18 (second) — the existence error.** The original step on effective
+resistance asserted that well-definedness "is a corollary of step 1." That is
+false. The kernel characterization gives **uniqueness modulo constants**; it
+says nothing about whether a potential solving `L f = e u - e v` exists at all.
+Existence is a separate solvability result and is the real hinge of the
+electrical program. It now has its own step
+([step 4](#4-potential-solvability-the-hinge)) placed before any definition of
+resistance. Without it, every downstream theorem would be conditional on a
+hypothesis that might be unsatisfiable, and could be proved vacuously.
+
+**2026-08-18 (third) — sequencing.** The `SimpleGraph` adapter was described as
+the "highest compounding multiplier available" and then sequenced last. It is
+now step 1. Rayleigh monotonicity and Foster's theorem were over-promised as a
+"gated stretch"; Foster is removed from the program and monotonicity is
+deferred, with only its cheap one-sided fragment retained.
+
+## What the pinned Mathlib already provides
+
+`Mathlib/Combinatorics/SimpleGraph/LapMatrix.lean`, at the v4.14.0 pin, on
+`G.lapMatrix R = G.degMatrix R - G.adjMatrix R`:
+
+| Mathlib declaration | Line | Scaffold's counterpart |
+| --- | ---: | --- |
+| `lapMatrix_toLin'_apply_eq_zero_iff_forall_reachable` | 120 | absent — target of step 2 |
+| `card_ConnectedComponent_eq_rank_ker_lapMatrix` | 191 | absent — inherited at step 3 |
+| `lapMatrix_ker_basis` | 184 | absent — inherited at step 3 |
+| `lapMatrix_toLinearMap₂'` (Dirichlet form) | 77 | `laplacian_quadForm` |
+| `posSemidef_lapMatrix` | 92 | `laplacian_psd` |
+| `isSymm_lapMatrix` | 52 | `laplacian_symmetric` |
+| `lapMatrix_mulVec_const_eq_zero` | 63 | `laplacian_ones_in_kernel` |
+
+**The gap is weight.** Mathlib's `degMatrix` is built from `G.degree`, a `ℕ`
+count, and `adjMatrix` is `0`/`1`. Scaffold's `WAdj` carries real weights, so
+Mathlib does not discharge Scaffold's statements in general.
+
+**Duplication finding (for the radar).** The bottom four rows are Scaffold
+independently reproving Mathlib. `docs/7_SGT_RADAR.md` scores Mathlib
+interoperability 3.5 and describes the matrix-first representation as a
+documented deviation; it does not record that the deviation costs duplicated
+proofs. That belongs in the interoperability evidence, and it is part of why
+the adapter is now step 1.
+
+## Two adapters, not one
+
+These are different objects and the program needs both. Conflating them was
+part of the original sequencing error.
+
+| | Direction | Purpose | Step |
+| --- | --- | --- | ---: |
+| `toWAdj` | `SimpleGraph → WAdj` | Lets an outside user bring their graph in; lets Scaffold's theorems apply to Mathlib's objects | 1 |
+| `supportGraph` | `WAdj → SimpleGraph` | Lets a *weighted* graph have a connectivity predicate at all | 2 |
 
 ## Build order
 
-### 1. Connectivity and the kernel characterization (the hinge)
+### 1. The `SimpleGraph → WAdj` interoperability adapter
 
-`laplacian_ones_in_kernel` (`Spectral.lean:127`) gives one direction; the
-converse is absent, and `Spectral.lean` has no notion of connectivity at all.
-The needed statement: for a connected graph, `ker (laplacian A)` is *exactly*
-the constants.
+Deliver `SimpleGraph.toWAdj` with proved agreement on the objects Scaffold
+already defines: `deg = G.degree`, symmetry, `laplacian (toWAdj G) =
+G.lapMatrix ℝ`, and `boundary S` equal to the edge count across the cut.
 
-Proof path: from the Dirichlet identity, `quadForm L f = 0` forces
-`f i = f j` across every edge of positive weight; propagate along walks.
+This is first because it is the highest-leverage item in the document and
+because everything after it is easier once Mathlib's graphs are addressable.
+It converts every theorem already in the repository into something an outside
+user can call, and it is the prerequisite that makes
+[the traction plan](../docs/traction-plan.md) executable at all. Folding in
+the neutral re-export of Mathlib's unweighted kernel and component results
+belongs here rather than in a slice of its own.
 
-Build this first regardless of what follows. It is load-bearing well beyond
-this proposal — effective-resistance well-definedness, `λ₂ > 0`, any Fiedler
-interface (backlog item 4), and any mixing-time statement (item 5) all
-depend on it.
+### 2. The weighted kernel characterization
 
-### 2. Effective resistance by the potential equation
+`laplacian_ones_in_kernel` (`Spectral.lean:127`) gives one direction. The
+converse — kernel elements are constant on connected components, hence
+constant when the graph is connected — is absent from Scaffold.
 
-The Mathlib pin (v4.14.0) has no Moore–Penrose pseudoinverse, so define
-resistance by the equation it solves rather than by `L⁺`:
+**Connectivity predicate: decided, not open.** Adopt Mathlib's
+`SimpleGraph.Connected` (`Path.lean:762`, a structure over `Preconnected` +
+`Nonempty V`, with `Reachable u v` defined as `Nonempty (G.Walk u v)` at
+`Path.lean:643`) through a `supportGraph A` with
+`Adj i j ↔ i ≠ j ∧ 0 < A i j`. A native predicate over `WAdj` was the
+alternative and is rejected. Requires `0 ≤ A i j` throughout, matching
+`laplacian_psd`'s existing `hnonneg` hypothesis (`Spectral.lean:687`);
+negative weights would contribute to the quadratic form while staying
+invisible to the support graph.
+
+**Prove it directly; do not transport.** Mathlib's theorem is about
+`G.lapMatrix ℝ`, a *different* (unweighted) matrix, so there is no transport
+by equality. Bridging would first require
+`laplacian A *ᵥ f = 0 ↔ (supportGraph A).lapMatrix ℝ *ᵥ f = 0`, whose route
+runs through exactly the termwise argument the direct proof needs anyway —
+`quadForm = 0` forces `A i j * (f i - f j)^2 = 0`, hence `f i = f j` wherever
+`0 < A i j`. Transport would save Mathlib's four-line walk induction while
+adding positive-semidefinite zero-iff plumbing. Read `LapMatrix.lean:110-127`
+for the pattern; do not import from it.
+
+**This step yields uniqueness only.** It characterizes the kernel. It does not
+establish that any particular equation has a solution. See
+[step 4](#4-potential-solvability-the-hinge).
+
+### 3. The kernel-equality bridge
+
+Prove
+
+```
+ker (laplacian A) = ker ((supportGraph A).lapMatrix ℝ)
+```
+
+and inherit `lapMatrix_ker_basis` and
+`card_ConnectedComponent_eq_rank_ker_lapMatrix` for the weighted Laplacian in
+one step. These are genuinely absent from Scaffold and not cheap to re-derive:
+they give a basis for the kernel and identify its dimension with the number of
+connected components. After step 2 both sides are known to equal "constant on
+components," so the bridge itself is short.
+
+### 4. Potential solvability (the hinge)
+
+Prove that for a connected graph and any **zero-sum demand** `b` (that is,
+`∑ i, b i = 0`), there exists `f` with `laplacian A *ᵥ f = b`. Then specialize
+to `b = e u - e v`, which is zero-sum by inspection.
+
+This is the step the original document omitted. Two routes:
+
+1. **Orthogonality.** For symmetric `L`, `range L = (ker L)ᗮ`, so zero-sum
+   demand is exactly the solvability condition once step 2 identifies
+   `ker L` with the constants. A search of the pin did not surface a
+   ready-made `range = (ker)ᗮ` lemma, so this route carries real plumbing
+   cost.
+2. **Constructive, via Scaffold's own spectral tools.** The eigenbasis
+   orthonormality/completeness and projector algebra in `Spectral.lean` are
+   already proved. Build `f` explicitly as `∑_{λᵢ ≠ 0} (⟨vᵢ, b⟩ / λᵢ) • vᵢ`
+   and verify `L f = b` using zero-sum to kill the kernel component.
+
+Route 2 reuses the center and is likely cheaper. Decide and record which
+before writing the statement.
+
+### 5. Effective resistance, uniqueness, and energy
+
+With step 4 in hand, define resistance by the equation it solves rather than
+by a pseudoinverse — the Mathlib pin has **no** Moore–Penrose pseudoinverse
+(verified 2026-08-18: a repository-wide search finds one hit, a comment at
+`LinearAlgebra/Matrix/NonsingularInverse.lean:17` stating pseudoinverses are
+not considered):
 
 ```
 IsEffectiveResistance A u v r  ↔  ∃ f, laplacian A *ᵥ f = e u - e v ∧ f u - f v = r
 ```
 
-Well-definedness is a corollary of step 1: two solutions differ by a kernel
-element, which is constant, so `f u - f v` is unique. This introduces no new
-Mathlib dependency and sidesteps the pseudoinverse gap rather than waiting on
-it.
+- **Existence** of a witness: step 4.
+- **Uniqueness** of `r`: step 2 — two solutions differ by a kernel element,
+  which is constant, so `f u - f v` agrees.
+- Together these justify a total function `effectiveResistance A u v : ℝ`.
+- **Energy identity** `R u v = quadForm (laplacian A) f`, one step from
+  `laplacian_quadForm` and the defining equation; then symmetry
+  `R u v = R v u`, nonnegativity, and `R u u = 0`.
 
-### 3. The energy identity
+Split across two runs if the definitional plumbing and the energy identity do
+not land together.
 
-`R u v = quadForm (laplacian A) f` — one step from `laplacian_quadForm` and
-the defining equation. Near-free corollaries: symmetry `R u v = R v u`,
-nonnegativity, and `R u u = 0`.
+### 6. The one-sided Dirichlet bound
 
-### 4. Rayleigh monotonicity and the Dirichlet principle
+For any test potential `f`, `R u v ≥ (f u - f v)^2 / quadForm (laplacian A) f`.
+This is Cauchy–Schwarz over the energy identity and needs no attained
+supremum, so it survives the deferral below and is worth having: it is the
+direction every application actually uses to lower-bound resistance.
 
-Adding conductance never increases effective resistance; `1/R` is the
-minimum energy over potentials normalized by `f u - f v = 1`. Both are
-completing-the-square arguments over the energy identity.
+## Deferred and removed
 
-### 5. Foster's theorem (gated stretch)
+- **Full Rayleigh monotonicity — deferred.** It needs the Dirichlet principle
+  as an attained variational characterization, which is the shape this
+  repository already found hard enough to admit as an axiom
+  (`lambda2_variational`). Step 6 keeps the cheap half.
+- **Foster's theorem — removed from the program.** `∑ over edges,
+  A i j * R i j = n - 1` needs a rank/trace identity of pseudoinverse
+  character. Earlier text called it a "gated stretch," which understated it by
+  a wide margin. Re-admit only as its own proposal, with a dependency path.
 
-`∑ over edges, A i j * R i j = n - 1` for connected graphs. Requires a
-rank/trace fact not currently present; admit as a slice only after steps 1–4
-land, and do not admit it as an axiom.
+**Net effect if the program lands:** the adapter, the kernel characterization
+and its basis/rank family, solvability, a total `effectiveResistance` with the
+energy identity, and the one-sided Dirichlet bound. Axiom count unchanged at
+18. Axis 6 moves off 0.5 on genuine usable coverage, and axis 1 and the
+interoperability score move with step 1.
 
-**Net effect:** five to six proved theorems, axiom count unchanged at 18,
-axis 6 moving off 0.5 on genuine usable coverage.
+## Operating instructions for an autonomous run
 
-## Second recommendation: `SimpleGraph` adapters
+Applies to any run directed at this document.
 
-Cheaper, and it is the crust that makes the rest of the crust *importable*.
-The radar already records this as the standing interoperability deviation:
-the representation is matrix-first, and no Mathlib user holds a `WAdj` — they
-hold a `SimpleGraph V`.
-
-Deliver `SimpleGraph.toWAdj` with proved `deg = G.degree`, symmetry, and
-`boundary S` equal to the edge count across the cut. Unglamorous, but it
-converts every theorem already in the repository into something an outside
-user can call, and it is the prerequisite that makes
-[the traction plan](../docs/traction-plan.md) executable at all. Highest
-compounding multiplier available.
+- **One step per run.** Steps are numbered above; a run advances exactly one
+  and stops. Landing a single step cleanly is a success, not a partial result.
+  Do not continue into the next step because time remains. Steps 4 and 5 may
+  each need more than one run.
+- **No new axioms.** Every step here is hard crust. If a step cannot be
+  proved, record the precise obstruction in `docs/6_SGT_BACKLOG.md` and stop
+  rather than admitting anything.
+- **Do not define resistance before step 4 lands.** Existence is not implied
+  by the kernel characterization; see [Corrections](#corrections). A
+  definition resting on an unsatisfiable hypothesis admits vacuous proofs that
+  still typecheck.
+- **Survey Mathlib before proving.** Search the pin under
+  `.lake/packages/mathlib/` for an existing result before writing a proof.
+  Record what the survey finds either way — but judge transport on cost, not
+  reflex: an upstream theorem about a *different* matrix may cost more to
+  bridge than to reprove, as step 2 illustrates.
+- **QA is part of the step.** Add QA under `Scaffold/QA/SpectralGraph/`
+  exercising a positive witness and a negative witness that shows the
+  hypothesis is load-bearing (for step 2: a connected graph, and a
+  disconnected one where a non-constant kernel element exists; for step 4: a
+  non-zero-sum demand with no solution).
+- **Do not re-score `docs/7_SGT_RADAR.md`** unless the step's proof lands and
+  its QA passes. The duplication finding above is the exception: record it
+  against the interoperability axis whenever it is read, since it is an
+  evidence correction rather than a score increase.
+- Standard repository rules in `AGENTS.md` continue to apply, including the
+  execution-plan and activity-log obligations.
 
 ## What not to grow
 
@@ -113,9 +291,3 @@ compounding multiplier available.
   assurance.
 - **Axis 8 (adjacent systems).** Deliberately gated, and the gate is
   correct.
-
-## Open next step
-
-Scope step 1 — the connectivity/kernel characterization — in detail: the
-connectivity predicate to adopt (native or `SimpleGraph.Connected` via the
-adapter), and the walk-propagation argument's Lean shape.

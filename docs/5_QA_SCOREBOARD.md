@@ -14,7 +14,7 @@ _Generated from Lean source on 2026-08-17._
 
 | Metric | Count |
 | --- | ---: |
-| QA theorem/lemma declarations | 240 |
+| QA theorem/lemma declarations | 255 |
 | `sorry`/`admit` tokens in QA code | 0 |
 | Explicit axioms in `Scaffold/Mathlib` | 18 |
 | `sorry`/`admit` tokens in `Scaffold/Mathlib` code | 0 |
@@ -26,7 +26,7 @@ _Generated from Lean source on 2026-08-17._
 | Concentration | 12 |
 | Derived | 11 |
 | Perturbation | 5 |
-| SpectralGraph | 212 |
+| SpectralGraph | 227 |
 
 ### QA files
 
@@ -41,6 +41,7 @@ _Generated from Lean source on 2026-08-17._
 | `Scaffold/QA/SpectralGraph/BasicProperties_QA.lean` | 5 | 0 |
 | `Scaffold/QA/SpectralGraph/Basic_QA.lean` | 14 | 0 |
 | `Scaffold/QA/SpectralGraph/Cheeger_QA.lean` | 26 | 0 |
+| `Scaffold/QA/SpectralGraph/Connectivity_QA.lean` | 15 | 0 |
 | `Scaffold/QA/SpectralGraph/Cuts_QA.lean` | 11 | 0 |
 | `Scaffold/QA/SpectralGraph/Dynamics_QA.lean` | 6 | 0 |
 | `Scaffold/QA/SpectralGraph/Exhaustive_QA.lean` | 87 | 0 |
@@ -57,9 +58,9 @@ _Generated from Lean source on 2026-08-17._
 
 | Check | Result | Date | Scope and limitation |
 | --- | --- | --- | --- |
-| `lake build` | Pass | 2026-08-18 | Default target is the library root `Scaffold.lean`; its umbrella certifies `Core.{RandomVariable,Norms,MatrixUpdates}`, `GraphTheory.{Spectral,Cheeger,RandomWalk,Normalized,Dynamics}`, `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan}`, `Probability.Concentration.{Scalar.*,Matrix.*}`, and the derived layer `Derived.{EventStream,ProjectorDrift}`. |
-| Direct QA module targets | Pass | 2026-08-18 | All nineteen QA modules compiled individually (`lake build Scaffold.QA.…`) with no `sorry`/`admit`, including the repaired `SpectralGraph/Cheeger_QA.lean` (axiom-shape refutation + eigenvalue value-pinning). |
-| Direct public module targets | Pass | 2026-08-18 | All public modules compile individually; the modules changed in the 2026-08-18 Cheeger repair (`GraphTheory.Spectral`, `GraphTheory.Cheeger`) were recompiled directly alongside the umbrella build. |
+| `lake build` | Pass | 2026-08-18 | Default target is the library root `Scaffold.lean`; its umbrella certifies `Core.{RandomVariable,Norms,MatrixUpdates}`, `GraphTheory.{Spectral,Cheeger,RandomWalk,Normalized,Stationary,VariationalTransfer,Dynamics}`, `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan}`, `Probability.Concentration.{Scalar.*,Matrix.*}`, and the derived layer `Derived.{EventStream,ProjectorDrift}`. |
+| Direct QA module targets | Pass | 2026-08-18 | All twenty QA modules compiled individually (`lake build Scaffold.QA.…`) with no `sorry`/`admit`, including the repaired `SpectralGraph/Cheeger_QA.lean` (axiom-shape refutation + eigenvalue value-pinning) and the new `SpectralGraph/Connectivity_QA.lean` (connected positive witness + disconnected negative witness for the kernel characterization). |
+| Direct public module targets | Pass | 2026-08-18 | All public modules compile individually; the modules changed in the 2026-08-18 connectivity slice (`GraphTheory.Spectral`) were recompiled directly alongside the umbrella build. |
 | Mathlib cache provenance | Note | 2026-08-17 | The local `lake exe cache` binary crashes under the current macOS dyld (`__DATA_CONST segment missing SG_READ_ONLY flag`); the cache was fetched by running the same Cache tool logic interpreted via `lake env lean --run`, unpacking 5685 Mathlib oleans. |
 | `scripts/lint_axioms.py` | Pass | 2026-08-18 | All 18 explicit axioms are covered by `index/sources/` and `index/map/`. |
 | `scripts/check_citations.py` | Pass | 2026-08-18 | Every axiom carries a `Source:` citation in its doc comment. |
@@ -69,8 +70,9 @@ _Generated from Lean source on 2026-08-17._
 
 - **Explicit axiom:** an intentional trust boundary declared with Lean's `axiom` command. QA lemmas and derived theorems using these axioms are conditional on them.
 - **Admitted proof:** a `sorry` or `admit` accepted by Lean; this is different from an explicit axiom and remains technical debt in public modules. As of this scoreboard there are no `sorry`/`admit` tokens anywhere under `Scaffold/`.
-- **QA declaration:** a theorem or lemma under `Scaffold/QA`; all 240 declarations have compiled against the current public API.
+- **QA declaration:** a theorem or lemma under `Scaffold/QA`; all 255 declarations have compiled against the current public API.
 - **Default build:** the umbrella reaches every public module listed above; no public module is excluded from `lake build`.
+- **Connectivity and the Laplacian kernel (2026-08-18):** the converse of `laplacian_ones_in_kernel` is proved (no axioms): for symmetric nonnegative weights whose support graph is connected, `ker (laplacian A)` is exactly the constants. New center hard crust: the `supportGraph` adapter (`WAdj → SimpleGraph`, `Adj i j ↔ i ≠ j ∧ 0 < A i j` — the first bridge from the matrix-first representation to Mathlib's `SimpleGraph` connectivity API), `eq_of_laplacian_mulVec_eq_zero_of_pos_weight` (zero Dirichlet energy forces constancy across positive-weight edges), `eq_of_supportGraph_walk` (walk propagation by induction on `SimpleGraph.Walk`), `exists_const_of_laplacian_mulVec_eq_zero`, `laplacian_mulVec_const`, the iff `laplacian_mulVec_eq_zero_iff_exists_const`, and the span form `laplacian_kernel_eq_span_onesVec` (`ker (mulVecLin (laplacian A)) = span ℝ {onesVec}` — the statement shape consumed by future effective-resistance uniqueness arguments). QA `SpectralGraph/Connectivity_QA.lean` exercises both a connected witness (3-vertex path: explicit-walk connectivity, both iff directions, constant recovered and pinned) and a disconnected negative witness (two disjoint `Fin 4` edges: the component indicator is in the kernel but not constant, and the support graph is proved not connected), showing the connectivity hypothesis is load-bearing. This is step 1 of `proposals/electrical-structure-crust.md`; proposal steps 2–5 remain unstarted.
 - **Cheeger statement-shape repair (2026-08-18):** both admitted Cheeger axioms were restated at the corrected spectral side `secondEval (regularNormalizedLaplacian A d) …` after QA refuted the old shape in proved form: `lambda2` reads the spectrum of the combinatorial Laplacian *of* its argument, so the old side read `λ₂(L(L_sym)) = λ₂(-L_sym)`, whose two-vertex-edge instance asserts `1/2 ≤ 0` (`old_cheeger_lower_bound_refuted_QA`). The corrected side is independently pinned on the same fixture to the classical value `λ₂(L_sym) = 2` (`edge_normLap_secondEval_eq_two_QA`, computed from trace + determinant + sortedness — the tree's first computational eigenvalue check, conditional on no axiom). Supporting center hard crust added in `GraphTheory.Spectral`: `secondEval`, `lambda2_eq_secondEval`, `evals_mem_eigvalOf`, `eigvalOf_le_of_quadForm_nonpos`, `eigvalOf_sum_eq_trace`. Axiom count unchanged (18); axiom names and hypotheses unchanged. This is an emergency repair of a materially false statement shape (architecture §9), not a mathematical strengthening; downstream consumers of the corrected interface remain conditional on the axioms.
 - **Stationary structure (2026-08-17):** the downstream consumer of both walk/normalized interface modules — `GraphTheory.Stationary` proves `L_sym *ᵥ √deg = 0` (kernel of the general normalized Laplacian, counterpart of `laplacian_ones_in_kernel`), `Pᵀ *ᵥ deg = deg` (the degree measure is stationary for the walk — `π ∝ deg`, the Markov-mixing consumer interface), and conservation of mass in both the regular (`randomWalkLaplacian *ᵥ 1 = 0`, consuming `RandomWalk.transitionMatrix_row_sum`) and irregular (`walkLaplacian *ᵥ 1 = 0`, consuming `Normalized.walkTransitionMatrix_row_sum`) cases. No axioms; downstream reuse on the SGT radar re-scored 2.5 → 3.0 → 3.5 with these milestones.
 - **Cut duality (2026-08-17):** the first expansion/cut slice delivered in the center — `vol_compl`, `boundary_compl`, `conductance_compl` (cuts are partition-valued: boundary and conductance invariant under complementation for symmetric weights, via volume complementarity and `Finset.sum_comm`), and the degenerate-cut guards `boundary_empty`/`boundary_univ`. These are the structural facts sweep-cut and sparsest-cut consumers assume; no axioms admitted.

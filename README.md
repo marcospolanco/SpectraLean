@@ -87,7 +87,7 @@ Last assessed: August 18, 2026. Scores reflect usable, verified coverage on a
 | Graph and Laplacian models | 3.5 / 5 |
 | Spectral linear algebra | 3.5 / 5 |
 | Variational and functional methods | 3.5 / 5 |
-| Cuts, expansion, and clustering | 3.0 / 5 |
+| Cuts, expansion, and clustering | 3.5 / 5 |
 | Random walks and diffusion | 2.5 / 5 |
 | Combinatorial and electrical structure | 3.0 / 5 |
 | Perturbation, randomness, and algorithms | 3.0 / 5 |

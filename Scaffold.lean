@@ -5,6 +5,7 @@ import Scaffold.Mathlib.GraphTheory.Spectral
 import Scaffold.Mathlib.GraphTheory.SimpleGraphAdapter
 import Scaffold.Mathlib.GraphTheory.Electrical
 import Scaffold.Mathlib.GraphTheory.Cheeger
+import Scaffold.Mathlib.GraphTheory.Fiedler
 import Scaffold.Mathlib.GraphTheory.RandomWalk
 import Scaffold.Mathlib.GraphTheory.Normalized
 import Scaffold.Mathlib.GraphTheory.Stationary
@@ -31,7 +32,9 @@ module that the current milestone certifies: the SGT center
 (`GraphTheory.SimpleGraphAdapter`, completing the two-directional
 bridge with `supportGraph`), the electrical crust
 (`GraphTheory.Electrical`, defining effective resistance by the
-potential equation), its Cheeger bridge (`GraphTheory.Cheeger`),
+potential equation), its Cheeger bridge (`GraphTheory.Cheeger`), the
+Fiedler-vector interface (`GraphTheory.Fiedler`, Phase A: the vector,
+the sign partition, and the algebraic-connectivity certificate),
 the random-walk interfaces (`GraphTheory.RandomWalk`), the general
 normalized Laplacian (`GraphTheory.Normalized`), the stationary
 structure consuming both (`GraphTheory.Stationary`), the variational

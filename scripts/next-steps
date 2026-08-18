@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+
+exec "$script_dir/opencode-pursue" -- \
+  "Finish the current uncommitted Fiedler Phase A milestone only: audit the existing Fiedler module and QA changes, preserve unrelated work including the Woodbury proposal, directly build the changed Lean modules and closest QA consumer, run the standard hygiene checks and full lake build, update only the corresponding records, then end with a completed or blocked status. Do not start a new proposal and do not commit."

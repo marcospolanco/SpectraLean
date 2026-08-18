@@ -1,9 +1,14 @@
 # Proposal: The Fiedler Vector and a Certified Spectral Partition
 
-**Status:** Proposed. Assistant's assessment of project direction, requested
+**Status:** Phase A (A1/A2) delivered 2026-08-18; Phase B open —
+decision pending on running it against the currently admitted Cheeger
+hard direction or deferring until that direction is proved. The
+delivery record is at the end of this file. Authorizes no further Lean
+changes, axiom admissions, document rewrites, or external publication.
+
+Assistant's assessment of project direction, requested
 2026-08-18 (surface-area follow-up for the formal-methods/high-assurance
-audience). Authorizes no Lean changes, axiom admissions, document
-rewrites, or external publication.
+audience).
 
 Companion to [Prove λ₂'s Variational
 Characterization](prove-lambda2-variational.md) — this proposal's Phase B
@@ -130,3 +135,63 @@ landing first, and there is no reason to wait for it. Decide separately,
 once A1/A2 exist, whether Phase B is worth running against the currently
 admitted Cheeger bound or worth deferring until
 `prove-cheeger-easy-direction.md` gives it a proved foundation instead.
+
+## Delivery record (Phase A, 2026-08-18)
+
+Delivered as `Scaffold.Mathlib.GraphTheory.Fiedler` plus
+`Scaffold/QA/SpectralGraph/Fiedler_QA.lean` (57 declarations), all
+proved, **no new axioms** (count stays 16). One run, per the operating
+instructions; Phase B was not started.
+
+**A1 (`fiedlerVector`):** statement-shape deviation from the build-order
+sketch, recorded before stating: the sketch wrote
+`eigvecOf (laplacian A) hL ⟨1, by omega⟩`, but `eigvecOf` is indexed by
+`V` (the eigenbasis listing), not by sorted-spectrum positions, so the
+second-smallest eigenvalue is first located in the listing
+(`evals_mem_eigvalOf`) and the index fixed by classical choice
+(`fiedlerIndex`, with the interface lemma `fiedlerIndex_eigvalOf`).
+Delivered: the eigenvector equation `fiedlerVector_eigen`, unit norm
+(`fiedlerVector_norm`), nonvanishing, the energy identity
+`fiedlerVector_quadForm` (`quadForm L f = lambda2`), and orthogonality
+to `onesVec` under `0 < lambda2` (`fiedlerVector_ortho_onesVec`,
+`fiedlerVector_sum_eq_zero`).
+
+**A2 (`fiedlerPartition`):** the sign half-space, with the sanity facts
+at two strengths — interface form under `0 < lambda2`
+(`fiedlerPartition_nonempty_of_pos`, `fiedlerPartition_ne_univ_of_pos`)
+and the connectivity corollaries. The load-bearing dependency the
+proposal named landed as its own theorem:
+`lambda2_pos_of_connected` (connected + symmetric nonnegative weights ⇒
+`0 < lambda2`) — the algebraic-connectivity certificate, consuming
+`laplacian_kernel_eq_span_onesVec` (electrical step 2), PSD, and both
+multiplicity pins; its contrapositive is what makes `lambda2 > 0` the
+right hypothesis (disconnected ⇒ kernel ≥ 2-dimensional ⇒ `λ₂ = 0`).
+
+**QA (per the spec's own witness requirements):** positive witness —
+the `P₄` barbell (two `K₂` near-cliques joined by one bridge edge, the
+proposal's example shape): `λ₂ ≤ 1` through the proved Rayleigh engine
+at the cut indicator, `λ₂ ≠ 1` from the eigen equations, and the sign
+pattern *derived* from the eigen equations plus the zero sum forces
+`fiedlerPartition` to be exactly the known good cut `{0, 1}` or its
+complement, with boundary `1`, volume `3`, and conductance `1/3` — all
+computed, not assumed; plus the `K₂` witness (partition pinned to a
+singleton half through antisymmetry + unit norm, boundary `1`).
+Negative witness — the disconnected two-edge fixture: the support graph
+is proved not connected, `λ₂ = 0` (the hypothesis fails), and
+`onesVec` is a nonzero eigenvector at that same eigenvalue (satisfying
+exactly the eigen-equation A1 states) whose sign filter is all of
+`univ` — so the sanity conclusions cannot follow from the eigen-property
+alone; the hypothesis is load-bearing.
+
+**Radar:** subject axis 4 re-scored 3.0 → 3.5 per the proposal's own
+protocol (Phase A scored as its own milestone, hard crust; Phase B will
+be scored separately at its axiom-backed trust level).
+
+**Phase B (open):** a certified conductance bound
+`conductance (fiedlerPartition …) ≤ [bound in terms of lambda2]`,
+composing the proved `cheeger_upper_bound` and the *admitted*
+`cheeger_lower_bound`. Note for the decision: the easy direction has
+since been proved (`prove-cheeger-easy-direction.md` delivered), so a
+Phase B run today would rest its lower-bound half on exactly one
+admitted Cheeger statement (the hard direction); the easy-direction
+half would be fully proved.

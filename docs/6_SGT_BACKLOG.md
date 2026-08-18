@@ -79,8 +79,16 @@ algorithm statement is admitted until its dependency path is explicit
 and its inner ring is certified.
 
 *Candidate shapes:* spectral partitioning through `lambda2`/Fiedler
-vectors (needs a Fiedler-vector interface — currently absent); walk
-mixing through the transition spectrum.
+vectors — **Phase A delivered 2026-08-18** (`GraphTheory.Fiedler`:
+the Fiedler-vector interface `fiedlerVector`/`fiedlerVector_eigen`,
+the algebraic-connectivity certificate `lambda2_pos_of_connected`, and
+the sign partition `fiedlerPartition` proved nonempty and proper on
+connected graphs, all hard crust; QA computes the partition on the
+`P₄` barbell to be exactly the known good cut. See
+`proposals/fiedler-partitioning.md`); the open remainder is **Phase B**
+— a certified conductance bound on `fiedlerPartition`, whose trust
+level is exactly the Cheeger hard direction's (admitted until proved);
+walk mixing through the transition spectrum.
 
 ### 5. Graph-dynamical systems (conditional)
 

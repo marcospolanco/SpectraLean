@@ -2057,3 +2057,138 @@ remains admitted; QA consequences resting on it stay conditional.
 `proposals/README.md`; or the named residuals (irregular Cheeger via
 congruence transfer, the electrical definiteness residual); or the
 `evals (c • M)` Mathlib excavation.
+
+## 2026-08-18T18:26:12Z — Fiedler Phase A: vector and sign partition
+
+**Run:** `20260818T182612Z-run-1`
+**Session:** `ses_fe9e0c143ffexTpz2rHUkp92Bm`
+**Status:** in-progress
+**Milestone:** Deliver `fiedler-partitioning.md` Phase A (A1/A2) — the
+remaining High item in `proposals/README.md` and the plan's open next
+milestone: the Fiedler-vector interface (existence + the induced
+sign-pattern partition with nonempty/proper sanity), hard crust, no new
+axioms. Leverage: backlog item 4's named first application-ring
+candidate, and a load-bearing consumer of the electrical program's
+kernel characterization.
+- *2026-08-18T18:26:12Z entry continues (Fiedler Phase A).* Status
+  update: **completed** as of 2026-08-18T19:07:28Z (same run, same
+  session).
+
+**Changes:** new `Scaffold/Mathlib/GraphTheory/Fiedler.lean` (18
+declarations, all proved, no new axioms — axiom count stays 16):
+`fiedlerIndex`/`fiedlerIndex_eigvalOf` (the eigenbasis index carrying
+`lambda2`, fixed by classical choice — the proposal's build-order
+sketch indexed `eigvecOf` by a sorted-spectrum position, which is not
+that function's type; deviation recorded in the module docstring),
+`fiedlerVector` with the eigenvector equation `fiedlerVector_eigen`,
+unit norm, nonvanishing, `fiedlerVector_quadForm`,
+`fiedlerVector_ortho_onesVec`/`_sum_eq_zero`; the algebraic-connectivity
+certificate `lambda2_pos_of_connected` (connected ⇒ `0 < lambda2`,
+consuming `laplacian_kernel_eq_span_onesVec`, PSD, and both
+multiplicity pins — load-bearing on all three); and `fiedlerPartition`
+with sanity facts at interface strength (`_nonempty_of_pos`,
+`_ne_univ_of_pos`, through the zero-sum identity) and connectivity
+corollaries. New QA `Scaffold/QA/SpectralGraph/Fiedler_QA.lean` (57
+declarations): `K₂` partition pinned to a singleton half; the `P₄`
+barbell (two `K₂` near-cliques joined by a bridge) with `lambda2 ≤ 1`
+via the proved Rayleigh engine, `lambda2 ≠ 1` via the eigen equations,
+and the partition *derived* to be exactly the known good cut `{0,1}`
+(or complement): boundary `1`, volume `3`, conductance `1/3`; the
+disconnected negative witness (`lambda2 = 0`; `onesVec` a nonzero
+eigenvector there whose sign filter is `univ` — hypothesis
+load-bearing). Records updated: umbrella, scoreboard (435/16/0),
+radar (subject axis 4 re-scored 3.0 → 3.5 per the proposal's protocol;
+QA count 435/25), SGT index map, backlog item 4, README snapshot cell,
+proposal delivery record, `proposals/README.md` (Fiedler → Medium).
+
+**Verification:** `lake env lean` on `GraphTheory.Fiedler` and
+`QA.SpectralGraph.Fiedler_QA` — zero errors, zero warnings (build
+diagnostics filtered to the two new files: none; the remaining build
+notes are the documented pre-existing linter notes in untouched
+modules, verified present unchanged in HEAD); `lake build` of both
+targets ✔; full `lake build` ✔ (2179 targets); all twenty-five QA
+modules elaborated directly in one batch (zero failures); 435 QA
+declarations, no `sorry`/`admit` anywhere under `Scaffold/` (textual
+matches are prose); 16 explicit cited axioms (unchanged); `lint_axioms`,
+`check_citations`, `check_markdown_links` all pass; scoreboard
+regenerated (435/16/0).
+
+**Remaining risk:** Phase A is existence and sanity, not quality — the
+Fiedler partition exists and is a genuine bipartition on connected
+graphs, but no conductance guarantee is claimed (Phase B, deliberately
+not started; it would be axiom-backed on the still-admitted Cheeger
+hard direction). The `fiedlerIndex` choice is classical, so
+`fiedlerVector` is fixed only up to the eigenbasis; every theorem is
+choice-independent (stated through `fiedlerIndex_eigvalOf`-style
+interfaces). Phase B needs the operator decision the proposal names.
+
+**Next handoff:** the new High item
+(`proposals/repair-and-retire-woodbury.md`, appeared mid-run from the
+operator; preserved untouched) — the admitted Woodbury axiom is
+verified false and Mathlib carries the correct proof, so this is a
+correctness repair with axiom-count reduction. Then Fiedler Phase B
+(Medium, decision-gated), the electrical definiteness residual, or the
+`evals (c • M)` excavation.
+
+## 2026-08-18T19:19:06Z — Fiedler Phase A milestone audit and finish
+
+**Run:** `20260818T191906Z-run-1`
+**Session:** `ses_fe9b0cceeffev1a5nLrF4bDxcy`
+**Status:** in-progress
+**Milestone:** Finish the uncommitted Fiedler Phase A milestone only
+(operator direction): audit the delivered `GraphTheory.Fiedler` and
+`Fiedler_QA.lean` changes, verify them proportionately (direct module
+builds, hygiene suite, scoreboard drift check, full `lake build`),
+update only the corresponding records, and close the milestone — no
+new mathematics, no new proposal, no commit. Unrelated work (the
+untracked Woodbury proposal, `scripts/next-steps`, and all other
+working-tree changes) preserved untouched.
+
+## 2026-08-18T19:22:00Z — Fiedler Phase A milestone audit and finish
+
+**Run:** `20260818T191906Z-run-1`
+**Session:** `ses_fe9b0cceeffev1a5nLrF4bDxcy`
+**Status:** completed
+**Milestone:** The uncommitted Fiedler Phase A milestone (the new
+`GraphTheory.Fiedler` module, `Fiedler_QA.lean`, and their record
+updates) audited, verified, and closed per operator direction — no new
+mathematics, no new proposal, no commit.
+
+**Changes:** `docs/7_SGT_RADAR.md` only, one cell: the subject-axis-4
+score, stale at `3.0`, synced to `3.5` — the value every other record
+of the re-score already carried (the radar's own trailing prose, the
+README snapshot, the execution plan, the proposal delivery record, the
+activity log). Plus this run's own entries in
+`docs/AGENT_ACTIVITY.md` and `docs/EXECUTION_PLAN.md`. No Lean, index,
+scoreboard, README, or proposal content changed — the audit found them
+already mutually consistent (57 Fiedler QA declarations, 16 explicit
+axioms, 25 QA modules, re-derived from source).
+
+**Verification:** `lake env lean` on `GraphTheory.Fiedler` and on
+`QA.SpectralGraph.Fiedler_QA` — zero errors, zero warnings; `lake
+build` of both targets ✔; full `lake build` ✔ ("Build completed
+successfully" — the 22 Scaffold-side linter notes are the documented
+pre-existing ones in untouched committed modules, none in the two new
+Fiedler files; the ~2980 further notes are Mathlib-package `docPrime`
+warnings over recompiled Mathlib residue, the recorded pruned-cache
+environment debt, not Scaffold code); scoreboard regeneration
+byte-identical (435/16/0 re-derived, no drift); `lint_axioms` (16
+covered), `check_citations`, `check_markdown_links` all pass.
+Unrelated working-tree changes (untracked
+`proposals/repair-and-retire-woodbury.md`, `scripts/next-steps`, and
+all pre-existing modifications) preserved untouched; nothing
+committed.
+
+**Remaining risk:** none new — one stale documentation cell repaired,
+no source changed. The standing risks are unchanged: the Cheeger hard
+direction (`cheeger_lower_bound`) remains admitted (Phase B of the
+Fiedler proposal would rest its lower-bound half on it), and the
+Fiedler vector is fixed only up to the classical eigenbasis/index
+choice (every theorem is stated through choice-independent
+interfaces).
+
+**Next handoff:** the High item — repair and retire the Woodbury
+identity axiom (`repair-and-retire-woodbury.md`: the admitted axiom is
+verified false; Mathlib's `Matrix.invOf_add_mul_mul` carries the
+correct proof). Then Fiedler Phase B (Medium, decision-gated), the
+electrical definiteness residual, or the `evals (c • M)` excavation.

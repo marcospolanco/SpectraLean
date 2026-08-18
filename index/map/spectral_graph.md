@@ -160,6 +160,38 @@ two-vertex edge (`1/2 ≤ 0`; refuted by
 `λ₂(L_sym)`, pinned to its classical value `2` on `K₂` by
 `QA.edge_normLap_secondEval_eq_two_QA`.
 
+### `Scaffold.Mathlib.GraphTheory.Fiedler` (Fiedler vector, Phase A)
+
+The Fiedler-vector interface — proposal `fiedler-partitioning.md`
+Phase A (2026-08-18), all proved, no axioms. Real definitions:
+`fiedlerIndex` (an eigenbasis index carrying `lambda2`, fixed by
+classical choice through `evals_mem_eigvalOf` — the proposal's sketch
+indexed `eigvecOf` by a sorted-spectrum position, which is not that
+function's type; deviation recorded in the module docstring) and
+`fiedlerVector` (the unit eigenvector there), plus the sign-pattern
+partition `fiedlerPartition`.
+
+| Declaration | Content |
+|-------------|---------|
+| `fiedlerIndex_eigvalOf` | the chosen index's eigenvalue is `lambda2` |
+| `fiedlerVector_eigen` | the eigenvector equation `L *ᵥ f = lambda2 • f` |
+| `fiedlerVector_norm`, `fiedlerVector_ne_zero` | unit norm (orthonormal eigenbasis), nonvanishing |
+| `fiedlerVector_quadForm` | the Fiedler energy is exactly `lambda2` |
+| `fiedlerVector_ortho_onesVec`, `fiedlerVector_sum_eq_zero` | orthogonality to the constants under `0 < lambda2` |
+| `lambda2_pos_of_connected` | **algebraic-connectivity certificate:** connected + symmetric nonnegative weights ⇒ `0 < lambda2` (consumes `laplacian_kernel_eq_span_onesVec`, PSD, and both multiplicity pins) |
+| `fiedlerPartition_mem` | membership interface (`0 ≤ f i`) |
+| `fiedlerPartition_nonempty_of_pos`, `fiedlerPartition_ne_univ_of_pos` | interface-form sanity under `0 < lambda2` |
+| `fiedlerPartition_nonempty`, `fiedlerPartition_ne_univ` | connectivity corollaries: a genuine bipartition |
+
+QA: `SpectralGraph/Fiedler_QA.lean` — `K₂` (partition pinned to a
+singleton half, boundary `1`), the `P₄` barbell (two `K₂` near-cliques
+joined by a bridge: `lambda2 ≤ 1` via the proved Rayleigh engine,
+`lambda2 ≠ 1` via the eigen equations, partition computed to be exactly
+the known good cut `{0,1}` or its complement — boundary `1`, volume
+`3`, conductance `1/3`), and the disconnected negative witness
+(`lambda2 = 0`; `onesVec` is a nonzero eigenvector there whose sign
+filter is all of `univ`).
+
 ### `Scaffold.Mathlib.GraphTheory.RandomWalk` (random-walk interfaces)
 
 Real definitions: `transitionMatrix` (`d⁻¹ • A`), `randomWalkLaplacian`

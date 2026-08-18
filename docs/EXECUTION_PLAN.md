@@ -656,6 +656,106 @@ Umbrella unchanged, scoreboard, both source indexes (Chung §1.3,
 Horn–Johnson §4.2 rows marked theorem), SGT index map, README
 snapshot, and both proposals' status notes updated.
 
+**Active slice (run 1, 2026-08-18): retire `cheeger_upper_bound` —
+prove the Cheeger easy direction from a generalized Courant–Fischer —
+DELIVERED.** Selected from `proposals/README.md`'s Active priority
+table (top High item; Fiedler Phase A, the other High item, stays
+queued and is the natural next run). Explicit axiom count **17 → 16**;
+all new code proved, no new axioms, no consumer changes (the theorem
+keeps the axiom's exact name, hypotheses, and statement).
+
+**Route decision (recorded before proving, per the proposal):** the
+named missing intermediate was built as a *generalization*, not a
+transfer — the `lambda2_variational` Courant–Fischer argument was
+lifted from `laplacian A` to any symmetric PSD matrix with
+`M *ᵥ onesVec = 0` (`secondEval_variational`), so the normalized
+instance needs **no eigenvalue-scaling lemma** (the
+`evals (c • M)` excavation stays unnecessary): under `d`-regularity,
+PSD of `L_sym` scales from `laplacian_psd` through the entrywise
+identity `d • L_sym = laplacian A`, and the kernel fact is the row-sum
+identity under `deg = d`.
+
+**Delivered in `GraphTheory.Spectral`:** the generic
+`eigvecOf_ortho_onesVec_of_mulVec_eq_zero` (the Laplacian instance
+re-derives the existing `eigvecOf_ortho_onesVec` at unchanged shape);
+`secondEval_variational` (full generalized body of the former
+monolithic proof); `lambda2_variational` re-proved as a two-line
+corollary at unchanged name/statement; the consumer form
+`secondEval_le_rayleigh` (`secondEval ≤ R(x)` for every admissible
+test vector — the interface test-vector arguments actually call).
+
+**Delivered in `GraphTheory.Cheeger` (all proved):** the scaling
+bridges (`quadForm_smul`, `smul_regularNormalizedLaplacian`,
+`quadForm_regularNormalizedLaplacian`, `regularNormalizedLaplacian_psd`,
+`regularNormalizedLaplacian_mulVec_onesVec`,
+`vol_eq_of_regular`/`vol_pos_of_regular`); the volume-centered cut
+indicator `cutTestVector` with its interface —
+`cutTestVector_dotProduct_onesVec` (orthogonality under regularity),
+`cutTestVector_ne_zero`,
+`quadForm_laplacian_cutTestVector` (the general weighted-graph cut
+energy identity `xᵀLx = boundary S · (vol V)²`, **no regularity
+needed** — consumes `vol_compl`/`boundary_compl` cut duality),
+`dotProduct_cutTestVector_self`, and
+`rayleigh_regularNormalizedLaplacian_cutTestVector`
+(`R(x) = boundary · vol V / (vol S · vol Sᶜ)`); the headline
+`cheeger_upper_bound` as a theorem: per-cut bound
+`λ₂ ≤ 2 · conductance S` (min ≤ both volumes), then `le_csInf` over
+nonempty proper cuts. Load-bearing chain: the bound consumes the
+variational engine, PSD scaling, the kernel fact, and cut duality — an
+error in any breaks the proof.
+
+**QA** `SpectralGraph/Cheeger_QA.lean` (+7 declarations, 378 total,
+now importing `Exhaustive_QA` for the `C₄` tables): the test vector
+pinned to `![1,-1]` on `K₂`; its Rayleigh value computed to `2` —
+exactly the independently pinned `λ₂(L_sym)`
+(`edge_normLap_secondEval_eq_two_QA`), so the test-vector bound is
+*attained*; `cheeger_upper_bound_edge_eq_QA` proves the theorem's
+bound attained on `K₂` as `λ₂ = 2φ` from independently computed
+values; on `C₄`, `cutTestVector_cycle_rayleigh_QA` computes the
+adjacent-pair test-vector Rayleigh value to exactly `1` and
+`cheeger_upper_bound_cycle_le_QA` instantiates the theorem to
+`λ₂ ≤ 1` through the exhaustively computed conductance `1/2`.
+
+Docs updated: scoreboard (16/378/0, verification rows, milestone note),
+radar (subject axis 4 re-scored 2.5 → 3.0 per protocol — the axis's
+first inequality engine proved; axiom-minimization trend
+26 → 19 → 18 → 17 → 16; QA count synced; proved-depth and reuse text),
+both Cheeger indexes, backlog item 3, README snapshot, and
+`proposals/README.md` (the proposal moved to Delivered with residuals
+named: the irregular generalization — which *does* need the
+congruence-transfer route since the engine's constraint is `onesVec`,
+not `√deg` — and the proposal's two supporting moves).
+
+**Next milestone (open):** the Fiedler proposal's Phase A (A1/A2) —
+the remaining High item, scoped as close to free, and now composable
+with the proved easy direction; or the residuals above; or the
+`evals (c • M)` excavation.
+
+**Active slice (run 1, 2026-08-18): audit and finish the uncommitted
+normalized-Cheeger milestone — DELIVERED.** Operator direction (via
+`scripts/finish-cheeger-milestone`): audit only the current uncommitted
+Cheeger work — the `cheeger_upper_bound` retirement on the normalized
+Laplacian (`secondEval (L_sym)`), whose hard-direction twin
+(`cheeger_lower_bound`) correctly remains the sole admitted Cheeger
+axiom — and finish it: no new mathematics, no new proposal, no commit.
+Audit findings: (a) the Lean changes and record updates are present and
+mutually consistent (16 axioms, 378 QA declarations, Cheeger QA 33,
+README/scoreboard/radar/index/proposal rows all synced); (b) the
+activity log's uncommitted diff had introduced exactly 6
+trailing-whitespace lines — the Run/Session/Status metadata of its own
+two newest entries (17:01/17:32Z) — now stripped; older committed
+entries and the template's illustrative hard breaks are unrelated
+records and were left untouched. Re-verification, all green: direct
+elaboration (`lake env lean`) of `GraphTheory.Spectral`,
+`GraphTheory.Cheeger`, and `QA.SpectralGraph.Cheeger_QA` — zero errors
+(Cheeger QA zero warnings; the handful of linter notes elsewhere sit
+in declarations verified present unchanged in HEAD, outside the diff
+hunks); explicit `lake build` of the three targets ✔; `lint_axioms`,
+`check_citations`, `check_markdown_links` pass; scoreboard
+regeneration is byte-identical (no drift — 16/378/0 re-derived from
+source); full `lake build` ✔ (2178 targets). Unrelated working-tree
+changes preserved; nothing committed.
+
 ## Ready queue
 
 1. ~~Proposal step 6 — the one-sided Dirichlet bound~~ — delivered
@@ -683,6 +783,52 @@ snapshot, and both proposals' status notes updated.
    combinations, centering, sums) only when a consumer names them.
 
 ## Last verified state
+
+- 2026-08-18 (audit-and-finish of the uncommitted normalized-Cheeger
+  milestone): no source changes — re-verification of the delivered
+  `cheeger_upper_bound` retirement and closure of the milestone's
+  records. Direct elaboration (`lake env lean`) of
+  `GraphTheory.Spectral`, `GraphTheory.Cheeger`, and
+  `QA.SpectralGraph.Cheeger_QA` — zero errors (Cheeger QA zero
+  warnings; remaining linter notes verified pre-existing in HEAD,
+  outside the diff hunks); explicit `lake build` of the three targets
+  ✔; full `lake build` ✔ (2178 targets); `lint_axioms` (16 covered),
+  `check_citations`, `check_markdown_links` pass; scoreboard
+  regeneration byte-identical (16/378/0 re-derived from source;
+  Cheeger QA 33); activity log's 6 self-introduced
+  trailing-whitespace metadata lines stripped (older entries'
+  illustrative hard breaks untouched); unrelated working-tree changes
+  preserved; no commit.
+
+- 2026-08-18 (`cheeger_upper_bound` retirement: Cheeger easy direction
+  proved, axiom 17 → 16): `lake env lean` on `GraphTheory.Spectral`
+  and `GraphTheory.Cheeger` (zero errors; only pre-existing linter
+  notes in untouched code) and on `QA.SpectralGraph.Cheeger_QA`
+  (zero errors, zero warnings); `lake build
+  Scaffold.Mathlib.GraphTheory.Spectral` and
+  `lake build Scaffold.Mathlib.GraphTheory.Cheeger` ✔; full `lake
+  build` ✔ (2178 targets); all
+  twenty-four QA modules elaborated directly in one batch (exit 0,
+  zero failures); 378 QA declarations (+7), no `sorry`/`admit`
+  anywhere under `Scaffold/` (textual matches are prose in comments);
+  16 explicit cited axioms (−1: `cheeger_upper_bound` retired to a
+  proved theorem at identical name/hypotheses/statement, proved from
+  the new general-operator `secondEval_variational` with
+  `lambda2_variational` re-proved as a corollary at unchanged shape);
+  all hygiene scripts pass (`lint_axioms`, `check_citations`,
+  `check_markdown_links`); scoreboard regenerated (16/378/0) with
+  verification rows and a milestone note; radar re-scored per protocol
+  (subject axis 4: 2.5 → 3.0; axiom-minimization trend recorded; QA
+  count synced 378/24; proved-depth and reuse text updated); README
+  snapshot (16 axioms, 378 QA, axis-4 cell); both Cheeger indexes;
+  backlog item 3; `proposals/README.md` (proposal → Delivered with
+  residuals) and the proposal's delivery record updated. Unrelated
+  concurrent working-tree changes (`.opencode/`, `AGENTS.md`,
+  `scripts/opencode-pursue`, `scripts/README.md`,
+  `proposals/sell-the-methodology.md`,
+  `proposals/retire-the-mushy-center.md`,
+  `scripts/test_opencode_pursue.sh`, untracked `proposals/README.md`)
+  were preserved untouched.
 
 - 2026-08-18 (`lambda2_variational` retirement: proved Courant–Fischer,
   axiom 18 → 17): `lake env lean` on `GraphTheory.Spectral` (zero

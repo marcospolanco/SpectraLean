@@ -144,12 +144,12 @@ value exists — the fallback's firing is QA-witnessed, not hidden).
 
 ### `Scaffold.Mathlib.GraphTheory.Cheeger`
 
-Real definition: `regularNormalizedLaplacian`.
+Real definitions: `regularNormalizedLaplacian`, `cutTestVector`.
 
-| Axiom | Description | Source |
-|-------|-------------|--------|
-| `cheeger_lower_bound` | `φ(G)²/2 ≤ λ₂(L_sym)` for `d`-regular graphs | [Chung](../sources/chung_spectral_graph.md) |
-| `cheeger_upper_bound` | `λ₂(L_sym) ≤ 2 φ(G)` for `d`-regular graphs | [Chung](../sources/chung_spectral_graph.md) |
+| Declaration | Kind | Description | Source |
+|-------|------|-------------|--------|
+| `cheeger_lower_bound` | axiom | `φ(G)²/2 ≤ λ₂(L_sym)` for `d`-regular graphs (the hard direction) | [Chung](../sources/chung_spectral_graph.md) |
+| `cheeger_upper_bound` | **theorem (proved 2026-08-18; axiom before, retired)** | `λ₂(L_sym) ≤ 2 φ(G)` for `d`-regular graphs — proved from `secondEval_variational` at the volume-centered cut indicator | [Chung](../sources/chung_spectral_graph.md) |
 
 Statement-shape correction (2026-08-18): through 2026-08-17 both axioms
 stated the spectral side as `lambda2 (regularNormalizedLaplacian A d)`,

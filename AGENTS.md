@@ -13,12 +13,19 @@ Advance Scaffold as a disciplined, axiom-transparent Lean research substrate cen
 - `docs/8_MATHLIB_COVERAGE_MAP.md` before claiming Mathlib lacks (or has)
   something — check it first, correct it if a targeted search finds it
   stale, rather than re-surveying from scratch in a proposal.
+- `proposals/README.md` for the active priority list — check before
+  selecting a milestone, per Priority order item 0 below.
 - `docs/EXECUTION_PLAN.md` for the active autonomous-work queue and handoff.
 - `docs/AGENT_ACTIVITY.md` for recent operator-facing progress reports.
 - `governance/CONTRIBUTING.md` before changing public APIs.
 
 ## Priority order
 
+0. Check `proposals/README.md`'s Active priority table. If anything is
+   marked High, pursue the highest-leverage High item first — skip any
+   marked "Low — human decision required" regardless of how they'd
+   otherwise rank, since those need a decision this run cannot make.
+   Otherwise fall through to the ranking below.
 1. Restore honest, comprehensive build reachability.
 2. Repair invalid imports and source-layout defects.
 3. Replace `True`, constant, and admitted placeholders with meaningful SGT definitions or theorem shapes.

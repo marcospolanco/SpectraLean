@@ -7,7 +7,7 @@ read `docs/EXECUTION_PLAN.md` and the latest entries in
 For each run:
 
 1. Inspect the worktree and preserve unrelated user changes.
-2. Select one bounded milestone with the highest leverage under the center-out SGT policy, or continue the active milestone in `docs/EXECUTION_PLAN.md`.
+2. Check `proposals/README.md`'s Active priority table first. If anything is marked High, pursue the highest-leverage High item (proposals marked "Low — human decision required" are blocked on a decision this run cannot make; skip them regardless of how they'd otherwise rank). Otherwise, or if continuing an active milestone in `docs/EXECUTION_PLAN.md`, select one bounded milestone with the highest leverage under the center-out SGT policy.
 3. Prefer fixing build reachability, invalid imports, placeholder definitions or statement shapes, citation gaps, and load-bearing SGT interfaces before expanding scope.
 4. Before editing, record the milestone, leverage rationale, and next action in `docs/EXECUTION_PLAN.md`; append a compact `in-progress` entry to `docs/AGENT_ACTIVITY.md` using its required format: exact UTC timestamp, wrapper run identifier, OpenCode session ID, status, and milestone.
 5. Implement the milestone rather than returning only a plan.

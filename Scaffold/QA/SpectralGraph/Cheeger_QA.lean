@@ -6,15 +6,19 @@
   QA lemmas for the Cheeger inequality interface of
   `Scaffold.Mathlib.GraphTheory.Cheeger`: structural conductance facts
   proved from the definitions, and coherence checks that derive
-  consequences from the two admitted bounds.
+  consequences from the bounds — since 2026-08-18 the *upper* bound
+  (easy direction) is a proved theorem; the *lower* bound (hard
+  direction) remains admitted.
 
   All proofs are real Lean proofs (no `sorry`/`admit`). QA does not
-  prove the Cheeger axioms; it checks that their interfaces compose.
+  prove the admitted lower-bound axiom; it checks that the interfaces
+  compose.
 
   Scoreboard: ../QA_SCOREBOARD.md
 -/
 
 import Scaffold.Mathlib.GraphTheory.Cheeger
+import Scaffold.QA.SpectralGraph.Exhaustive_QA
 
 open scoped BigOperators Matrix
 
@@ -102,9 +106,10 @@ theorem cheeger_positive_implies_secondEval_pos_QA (A : WAdj (V := V))
     _ ≤ secondEval (regularNormalizedLaplacian A d)
         (regularNormalizedLaplacian_symmetric A hA d) hcard := h
 
-/-- The two admitted Cheeger bounds are mutually coherent: the squared
-constant is controlled by `λ₂` and `λ₂` by twice the constant, for the
-same matrix, regularity data, and Cheeger constant. -/
+/-- The two Cheeger bounds are mutually coherent: the squared constant
+is controlled by `λ₂` (admitted lower bound) and `λ₂` by twice the
+constant (proved upper bound, retired from an axiom on 2026-08-18),
+for the same matrix, regularity data, and Cheeger constant. -/
 theorem cheeger_bounds_coherent_QA (A : WAdj (V := V))
     (hA : Matrix.IsSymm A) (hnonneg : ∀ i j, 0 ≤ A i j)
     (d : ℝ) (hd : ∀ i, deg A i = d) (hdpos : 0 < d)
@@ -421,5 +426,110 @@ theorem cheeger_bounds_edge_QA :
       edgeAdj_regular (by norm_num) edgeAdj_card]
 
 end NewShape
+
+/-!
+## The easy direction, proved: computed test-vector witnesses
+
+  `cheeger_upper_bound` was retired from axiom to theorem on
+  2026-08-18, proved from `secondEval_variational` through the cut test
+  vector `cutTestVector`. These witnesses exercise the new machinery
+  numerically: the test vector's values and Rayleigh quotient are
+  computed from the definitions on two regular fixtures (`K₂` from this
+  file, `C₄` from `Exhaustive_QA`), and the proved bound is instantiated
+  and cross-checked against independently pinned values.
+-/
+
+section ProvedEasyDirection
+
+/-- The cut test vector of the singleton cut on `K₂` computes to
+`![1, -1]` — the values `vol Sᶜ = 1` on `S` and `- vol S = -1` off it,
+from the definitions. -/
+theorem cutTestVector_edge_QA :
+    cutTestVector edgeAdj ({0} : Finset (Fin 2)) = ![1, -1] := by
+  obtain ⟨hv1, hv2⟩ := edge_vol_singleton 0
+  funext i
+  fin_cases i
+  · simp [cutTestVector_apply, hv2]
+  · simp [cutTestVector_apply, hv1]
+
+/-- The test-vector Rayleigh value on `K₂`'s singleton cut is `2`,
+computed through the proved cut identity
+`boundary · vol V / (vol S · vol Sᶜ) = 1 · 2 / (1 · 1)`. This is
+exactly the independently pinned value `λ₂(L_sym) = 2`
+(`edge_normLap_secondEval_eq_two_QA`): the test-vector bound is
+*attained* on `K₂`, at the vector whose values are pinned by
+`cutTestVector_edge_QA`. -/
+theorem cutTestVector_edge_rayleigh_QA :
+    rayleigh (regularNormalizedLaplacian edgeAdj 1)
+        (cutTestVector edgeAdj ({0} : Finset (Fin 2))) = 2 := by
+  obtain ⟨hv1, hv2⟩ := edge_vol_singleton 0
+  have hvV : vol edgeAdj (Finset.univ : Finset (Fin 2)) = 2 := by
+    rw [← vol_compl edgeAdj ({0} : Finset (Fin 2)), hv1, hv2]
+    norm_num
+  rw [rayleigh_regularNormalizedLaplacian_cutTestVector edgeAdj
+    edgeAdj_symmetric 1 edgeAdj_regular (by norm_num) (by decide)
+    (by decide), edge_boundary_singleton 0, hv1, hv2, hvV]
+  norm_num
+
+/-- **The proved bound is attained on `K₂`:** `λ₂(L_sym) = 2 = 2φ`.
+Both the spectral value (`edge_normLap_secondEval_eq_two_QA`) and the
+conductance (`edge_cheegerConstant`) are computed independently of the
+theorem, so the equality is a genuine cross-check of the proved bound
+rather than an axiom instantiation. -/
+theorem cheeger_upper_bound_edge_eq_QA :
+    secondEval (regularNormalizedLaplacian edgeAdj 1)
+        (regularNormalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric 1)
+        (le_refl 2) = 2 * cheegerConstant edgeAdj := by
+  rw [edge_normLap_secondEval_eq_two_QA, edge_cheegerConstant]
+  norm_num
+
+/-- `C₄` has nonnegative weights (needed as the theorem's `hnonneg`). -/
+theorem cycleAdj4_nonneg : ∀ i j, 0 ≤ cycleAdj4 i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [cycleAdj4]
+
+/-- Total volume of `C₄`: four vertices of degree `2`. -/
+theorem cyc_vol_univ :
+    vol cycleAdj4 (Finset.univ : Finset (Fin 4)) = 8 := by
+  rw [← vol_compl cycleAdj4 ({0, 1} : Finset (Fin 4)), cyc_vol_01,
+    complc_01, cyc_vol_23]
+  norm_num
+
+/-- The test-vector Rayleigh value on `C₄`'s adjacent-pair cut `{0,1}`
+is `1` — the classical value of `λ₂` of the normalized cycle Laplacian,
+obtained here purely from the cut identity
+`boundary · vol V / (vol S · vol Sᶜ) = 2 · 8 / (4 · 4)` with the
+exhaustively computed boundary and volumes. -/
+theorem cutTestVector_cycle_rayleigh_QA :
+    rayleigh (regularNormalizedLaplacian cycleAdj4 2)
+        (cutTestVector cycleAdj4 ({0, 1} : Finset (Fin 4))) = 1 := by
+  rw [rayleigh_regularNormalizedLaplacian_cutTestVector cycleAdj4
+    cycleAdj4_isSymm 2 cycleAdj4_deg (by norm_num) (by decide)
+    (by decide), cyc_boundary_01, cyc_vol_01, complc_01, cyc_vol_23,
+    cyc_vol_univ]
+  norm_num
+
+/-- The proved easy direction instantiated on `C₄`:
+`λ₂(L_sym) ≤ 2φ ≤ 2 · (1/2) = 1`, using the exhaustively computed
+conductance `1/2` of the adjacent-pair cut. Together with
+`cutTestVector_cycle_rayleigh_QA` (the test-vector bound evaluates to
+exactly `1`), the instantiated bound is tight at this cut. -/
+theorem cheeger_upper_bound_cycle_le_QA :
+    secondEval (regularNormalizedLaplacian cycleAdj4 2)
+        (regularNormalizedLaplacian_symmetric cycleAdj4 cycleAdj4_isSymm 2)
+        (by norm_num) ≤ 1 := by
+  have h1 := cheeger_upper_bound cycleAdj4 cycleAdj4_isSymm
+    cycleAdj4_nonneg 2 cycleAdj4_deg (by norm_num) (by norm_num)
+  calc secondEval (regularNormalizedLaplacian cycleAdj4 2)
+        (regularNormalizedLaplacian_symmetric cycleAdj4 cycleAdj4_isSymm 2)
+        (by norm_num)
+      ≤ 2 * cheegerConstant cycleAdj4 := h1
+    _ ≤ 2 * conductance cycleAdj4 {0, 1} := by
+        refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
+        exact conductance_ge_cheegerConstant cycleAdj4 cycleAdj4_nonneg
+          {0, 1} (by decide) (by decide)
+    _ = 1 := by rw [cyc_conductance_01]; norm_num
+
+end ProvedEasyDirection
 
 end SpectralGraphTheory.QA

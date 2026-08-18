@@ -19,10 +19,18 @@ variational characterization of the algebraic connectivity.
 | Theorem | Lean Declaration | Kind | Module |
 |---------|-------------------|------|--------|
 | Chapter 2 (Cheeger lower bound) | `cheeger_lower_bound` | axiom | `Scaffold.Mathlib.GraphTheory.Cheeger` |
-| Chapter 2 (Cheeger upper bound) | `cheeger_upper_bound` | axiom | `Scaffold.Mathlib.GraphTheory.Cheeger` |
+| Chapter 2 (Cheeger upper bound) | `cheeger_upper_bound` | **theorem (proved 2026-08-18; axiom before, retired)** | `Scaffold.Mathlib.GraphTheory.Cheeger` |
 | Section 1.3 (variational λ₂, Laplacian form) | `lambda2_variational` | **theorem (proved 2026-08-18; axiom before, retired)** | `Scaffold.Mathlib.GraphTheory.Spectral` |
 
 ## Notes
+
+- **Retirement (2026-08-18):** the upper bound (`cheeger_upper_bound`,
+  the easy direction `λ₂ ≤ 2φ`) is now *proved* from the
+  general-operator Courant–Fischer (`secondEval_variational` in
+  `Spectral.lean`, whose Laplacian instance is the retired
+  `lambda2_variational`) via the volume-centered cut indicator — no
+  admitted dependencies. The remaining Cheeger axiom
+  (`cheeger_lower_bound`, `φ²/2 ≤ λ₂`) is the hard direction only.
 
 - **Restriction**: the Lean statements are restricted to `d`-regular
   weighted graphs with positive degree `d`, where the symmetric

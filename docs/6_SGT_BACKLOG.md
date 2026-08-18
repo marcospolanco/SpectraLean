@@ -56,11 +56,13 @@ absent from the pinned Mathlib.
 ### 3. Expansion and cut interfaces
 
 *Have:* `vol`, `boundary`, `conductance`, `cheegerConstant`
-(volume-based), admitted Cheeger bounds for regular graphs; cut duality
-delivered 2026-08-17 (`vol_compl`, `boundary_compl`,
-`conductance_compl`, degenerate-cut guards — proved; cuts are
-partition-valued, the interface sweep cuts and sparsest-cut shapes
-assume).
+(volume-based), the **proved** Cheeger upper bound (easy direction,
+`cheeger_upper_bound`, retired from axiom 2026-08-18 with the
+`cutTestVector` interface), the admitted Cheeger lower bound (hard
+direction) for regular graphs; cut duality delivered 2026-08-17
+(`vol_compl`, `boundary_compl`, `conductance_compl`, degenerate-cut
+guards — proved; cuts are partition-valued, the interface sweep cuts
+and sparsest-cut shapes assume).
 
 *Plan:* edge-boundary and uniform-weight variants of conductance;
 sparsest-cut statement shapes; cut/measure duality interfaces used by

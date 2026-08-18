@@ -7,10 +7,11 @@ cd "$project_dir"
 
 runs=1
 resume=false
+commit_after_run=false
 
 usage() {
   cat <<'EOF'
-Usage: scripts/opencode-pursue [--runs N] [--resume] [--quota-threshold PERCENT] [--] [operator direction...]
+Usage: scripts/opencode-pursue [--runs N] [--resume] [--commit] [--quota-threshold PERCENT] [--] [operator direction...]
 
 Run the autonomous Scaffold agent up to N times. Each invocation starts a
 fresh OpenCode session by default. Pass --resume to use the exact session
@@ -31,6 +32,11 @@ Before each new run, scripts/zquota applies the default 90% quota gate. A
 closed gate exits 75 without starting an agent; use the launchd helper for
 periodic wakeup. Raw transcripts are written to ignored .opencode/runs; follow
 docs/AGENT_ACTIVITY.md for the durable operator-facing account.
+
+Pass --commit to use a separate, read-only Codex review after all successful
+runs. The wrapper verifies the worktree, asks Codex for a Conventional Commit
+subject, then stages and commits the verified changes itself. --commit refuses
+to start from a dirty worktree and never commits a non-completed run.
 EOF
 }
 
@@ -50,6 +56,10 @@ while (($#)); do
       ;;
     --resume)
       resume=true
+      shift
+      ;;
+    --commit)
+      commit_after_run=true
       shift
       ;;
     --help|-h)
@@ -82,6 +92,11 @@ if (($# > 0)) && ((runs > 1)); then
   exit 2
 fi
 
+if "$commit_after_run" && [[ -n "$(git status --porcelain)" ]]; then
+  echo "--commit requires a clean worktree before pursuit starts." >&2
+  exit 2
+fi
+
 run_dir="$project_dir/.opencode/runs"
 session_file="$project_dir/.opencode/pursue-session"
 mkdir -p "$run_dir"
@@ -102,6 +117,60 @@ on_interrupt() {
   exit 130
 }
 trap on_interrupt INT TERM
+
+latest_activity_status() {
+  sed -n 's/^\*\*Status:\*\*[[:space:]]*\([^[:space:]]*\).*/\1/p' \
+    "$project_dir/docs/AGENT_ACTIVITY.md" | tail -n 1
+}
+
+verify_for_commit() {
+  git diff --check
+  python3 scripts/generate_qa_scoreboard.py
+  python3 scripts/lint_axioms.py
+  python3 scripts/check_citations.py
+  python3 scripts/check_markdown_links.py
+  lake build
+  git diff --check
+}
+
+commit_verified_pursuit() {
+  local activity_status commit_message_file commit_subject codex_prompt
+
+  if [[ -z "$(git status --porcelain)" ]]; then
+    echo "No worktree changes to commit after successful pursuit."
+    return
+  fi
+
+  activity_status=$(latest_activity_status)
+  if [[ "$activity_status" != "completed" ]]; then
+    echo "Refusing to commit: latest activity status is '${activity_status:-missing}', not completed." >&2
+    exit 1
+  fi
+
+  verify_for_commit
+
+  command -v codex >/dev/null 2>&1 || {
+    echo "--commit requires the Codex CLI to be installed and available on PATH." >&2
+    exit 1
+  }
+  commit_message_file=$(mktemp "$run_dir/codex-commit-message.XXXXXX")
+  codex_prompt='You are the independent commit steward for this repository. Inspect the current git diff and the latest completed entry in docs/AGENT_ACTIVITY.md. Do not modify files or run write commands. Return exactly one Conventional Commit subject line (for example: feat(sgt): add spectral bridge). It must be at most 72 characters, begin with feat, fix, docs, chore, refactor, or test, and contain no explanation.'
+  codex exec --ephemeral --sandbox read-only --ask-for-approval never \
+    --cd "$project_dir" --output-last-message "$commit_message_file" "$codex_prompt"
+  commit_subject=$(tr -d '\r' < "$commit_message_file")
+  rm -f "$commit_message_file"
+
+  if [[ -z "$commit_subject" || "$commit_subject" == *$'\n'* ||
+    ${#commit_subject} -gt 72 ||
+    ! "$commit_subject" =~ ^(feat|fix|docs|chore|refactor|test)(\([a-z0-9][a-z0-9_-]*\))?:\ .+ ]]; then
+    echo "Codex returned an invalid Conventional Commit subject; refusing to commit." >&2
+    exit 1
+  fi
+
+  git add -A
+  git diff --cached --check
+  git commit -m "$commit_subject"
+}
 
 for ((run_number = 1; run_number <= runs; run_number++)); do
   echo "==> Checking quota before pursuit run $run_number/$runs"
@@ -167,6 +236,10 @@ for ((run_number = 1; run_number <= runs; run_number++)); do
     exit "$status"
   fi
 done
+
+if "$commit_after_run"; then
+  commit_verified_pursuit
+fi
 
 echo "Pursuit budget exhausted after $runs run(s)."
 echo "Review docs/EXECUTION_PLAN.md and docs/AGENT_ACTIVITY.md before resuming."

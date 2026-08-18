@@ -52,6 +52,25 @@ scripts/opencode-pursue -- "advance proposals/<name>.md, step 1 only"
 scripts/opencode-pursue --runs 4 --resume
 ```
 
+### Verified automatic commit
+
+Pass `--commit` to have the wrapper commit a completed, verified pursuit
+without a manual handoff. It requires the worktree to be clean before the
+pursuit begins. After its final successful run, the wrapper confirms the
+latest activity status is `completed`, runs the standard scoreboard, hygiene,
+and Lean-build checks, and asks a separate read-only Codex CLI session to
+produce one validated Conventional Commit subject. The shell wrapper—not the
+model—then stages and commits the resulting changes.
+
+```sh
+scripts/opencode-pursue --runs 1 --commit
+```
+
+The commit phase fails closed and leaves the worktree uncommitted if the agent
+does not report `completed`, validation fails, Codex is unavailable, or Codex
+returns an invalid commit subject. Existing OpenCode permission denies for
+`git commit`, `git push`, and publication remain unchanged.
+
 ### Quota gate
 
 `opencode-pursue` runs `zquota` before every new pursuit run. If any reported

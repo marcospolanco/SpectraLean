@@ -1,8 +1,9 @@
 # Proposal: Prove One Named Inequality
 
-**Status:** Proposed. Assistant's assessment of project direction, requested
-2026-08-17. Authorizes no Lean changes, axiom removals, document rewrites, or
-external publication.
+**Status:** Delivered 2026-08-18 (see the delivery record at the end).
+Assistant's assessment of project direction, requested 2026-08-17.
+Authorized no Lean changes on its own; the retirement was executed by
+an autonomous run following `proposals/README.md`'s priority table.
 
 Companion to [Grow the Crust Through Electrical Structure](electrical-structure-crust.md),
 which takes the opposite premise — the center stays fixed — and asks where
@@ -135,6 +136,54 @@ a while, and let the radar sit still while it happens.
 
 ## Open next step
 
-Scope the Lean proof path for `cheeger_lower_bound` in detail — which
-existing lemmas compose, and where the gaps are — before committing to the
-slice.
+~~Scope the Lean proof path for `cheeger_lower_bound` in detail — which
+existing lemmas compose, and where the gaps are — before committing to
+the slice.~~
+
+## Delivery record (2026-08-18)
+
+**Delivered.** The easy direction — the repo's `cheeger_upper_bound`,
+`λ₂(L_sym) ≤ 2φ`, the inequality this proposal's test-vector argument
+describes — is proved and the axiom retired (explicit axiom count
+17 → 16). Route, exactly as the proposal's correction section scoped:
+
+1. **The missing intermediate exists and is proved:** the
+   `lambda2_variational` Courant–Fischer argument was generalized to
+   any symmetric PSD matrix with `onesVec` in its kernel
+   (`secondEval_variational`, `GraphTheory.Spectral`; the Laplacian
+   instance re-proves `lambda2_variational` as a two-line corollary at
+   unchanged shape). Its consumer form `secondEval_le_rayleigh`
+   (`secondEval ≤ R(x)` for every admissible test vector) is what a
+   test-vector argument actually calls.
+2. **The normalized instance is not the congruence transfer:** under
+   `d`-regularity the two hypotheses are discharged directly — PSD
+   scales from `laplacian_psd` through `d • L_sym = laplacian A`, and
+   the kernel fact is the row-sum identity under `deg = d` — so the
+   variational characterization applies to `L_sym` without any
+   eigenvalue-scaling lemma (the `evals (c • M)` excavation stays
+   unnecessary).
+3. **The test vector:** `cutTestVector` (`vol Sᶜ` on `S`, `- vol S`
+   off it) with its orthogonality, the general weighted-graph cut
+   energy identity `xᵀLx = boundary S · (vol V)²` (no regularity),
+   the norm identity, and the Rayleigh value
+   `boundary · vol V / (vol S · vol Sᶜ) ≤ 2 · conductance S` (min ≤
+   both volumes), then the infimum over nonempty proper cuts.
+
+QA (`Cheeger_QA.lean`): the test vector pinned to `![1,-1]` on `K₂`,
+its Rayleigh value computed to `2` — exactly the independently pinned
+`λ₂(L_sym)` (bound attained); the theorem instantiated on `K₂` as
+`λ₂ = 2φ` from independently computed values, and on `C₄` as
+`λ₂ ≤ 1` through the exhaustively computed adjacent-pair conductance
+`1/2`.
+
+**Residuals (not delivered by this retirement, named for the queue):**
+the irregular-graph generalization (the proposal's "forces the
+irregular generalization" item — the volume-centered test vector and
+the cut energy identity are regularity-free, but the variational
+engine's kernel constraint is `onesVec`, not `√deg`, so the irregular
+statement needs the congruence-transfer route after all); the two
+supporting moves (freeze radar re-scoring to milestone boundaries; one
+small Mathlib PR) remain live recommendations outside this slice's
+scope. The hard direction (`cheeger_lower_bound`, `φ²/2 ≤ λ₂`) remains
+admitted and is now the honest full extent of what is unformalized in
+Cheeger.

@@ -46,6 +46,58 @@ a falsification test
 None of that is a spectral-graph-theory result. It is a rigor practice for
 agent-driven formalization that happens to have been demonstrated on SGT.
 
+**The mechanism, stated precisely.** Mathlib and Scaffold put trust-review
+at opposite ends of the same process, and that inversion — not the axiom
+count, not the QA count — is the actual pitch. Mathlib is careful at the
+edge: a human expert has to vouch for a change, Zulip discussion has to
+happen, style and generality have to conform, before anything enters the
+trunk — the cost is paid once, upfront, by a gatekeeper, and everything
+inside is trusted by default afterward. That discipline is why Mathlib
+grows slowly and why it is trusted. Scaffold runs the same trade in
+reverse: the center is allowed to be mushy — an axiom enters cheap, cited
+but not community-vetted — and the actual test of whether it holds is
+deferred downstream, to whether later load-bearing work can be built on
+top of it without breaking. The Cheeger-refutation incident is this
+mechanism caught in the act: the axiom sat admitted and wrong until later
+work happened to stress it, and a QA witness engineered to knock it over
+caught the break — nobody reviewed it into correctness at the door. Each
+individual step stays conservative (one step per run, no new axioms, a
+QA witness required), but because trust-review is deferred rather than
+paid upfront by a gatekeeper, the aggregate pace is not bounded by expert
+review bandwidth the way Mathlib's is.
+
+This is structurally close to blockchain confirmation, and worth naming as
+such to an audience that will recognize the shape immediately: a block
+isn't trusted because a committee vetted it before inclusion, it is
+trusted because of what gets built on top of it afterward — depth of
+subsequent confirmation is the actual signal, and a bad block gets found
+out because the chain built on it eventually breaks or gets abandoned. The
+mechanisms differ in kind, not just detail, and the difference matters:
+blockchain finality is a probabilistic, economic argument (reversing a
+deep chain is expensive), while Scaffold's version is deductive (a proof
+that is load-bearing on a false axiom's exact statement either fails to
+typecheck or fails a QA witness, mechanically, not probabilistically). But
+the structural claim is the same shape — trust accrues from the depth and
+density of what has been built on top without failure, not from a single
+upfront gate — and it is the fastest way to make the pitch legible to a
+reader who has never opened a Lean file but has thought about confirmation
+depth.
+
+**Two honest limits on this pitch, both real.** First, "adversarial"
+overstates current maturity: there is no systematic, continuously-running
+harness trying to break every axiom; the Cheeger catch was one instance
+where later work happened to cross-check a shape, not a running
+adversarial pipeline. The mechanism is real and demonstrated; the coverage
+is not yet comprehensive, and the writeup should claim the former without
+implying the latter. Second, the inversion only pays for itself if
+load-bearing consumption keeps pace with admission — an axiom that gets
+admitted and then never gets built on top of gets none of this benefit, it
+just sits as unverified risk with no compensating check, exactly as
+exposed as it would be under any other model. The speed this approach buys
+is real only as long as growth stays load-bearing rather than merely
+adjacent, which is the entire reason that distinction earned its own named
+principle in `docs/1_STRATEGY.md` rather than staying implicit.
+
 ## Why this, why now
 
 There is a live, small, growing research genre built around exactly this

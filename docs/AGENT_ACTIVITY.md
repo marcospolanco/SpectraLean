@@ -1920,3 +1920,140 @@ characterization of `secondEval L_sym`), which is exactly the remaining
 intermediate for `proposals/prove-cheeger-easy-direction.md`; the cheap
 electrical residual `R u v = 0 ↔ u = v` (reachable pair); or the still
 open `evals (c • M) = c • evals M` Mathlib excavation.
+
+## 2026-08-18T17:01:01Z — Retire cheeger_upper_bound (Cheeger easy direction)
+
+**Run:** `20260818T170101Z-run-1`
+**Session:** `ses_fea3405d0ffeBFONeKeIHb6OtE`
+**Status:** in-progress
+**Milestone:** Prove the Cheeger easy direction (`λ₂(L_sym) ≤ 2φ`,
+repo name `cheeger_upper_bound`) from a generalized Courant–Fischer
+(`secondEval_variational` for any symmetric PSD `M` with
+`M *ᵥ onesVec = 0`), retiring the axiom 17 → 16. Top High item in
+`proposals/README.md`; the proposal's named missing intermediate is
+exactly the normalized-Laplacian variational instance.
+
+**Changes (planned):** `GraphTheory/Spectral.lean` (generic
+`secondEval_variational` + generic orthogonality twin;
+`lambda2_variational` becomes a corollary at unchanged shape),
+`GraphTheory/Cheeger.lean` (axiom → theorem at identical
+name/hypotheses), QA extension, then scoreboard/index/proposal updates.
+
+## 2026-08-18T17:32:07Z — cheeger_upper_bound retired: easy direction proved
+
+**Run:** `20260818T170101Z-run-1`
+**Session:** `ses_fea3405d0ffeBFONeKeIHb6OtE`
+**Status:** completed
+**Milestone:** The Cheeger easy direction (`λ₂(L_sym) ≤ 2φ`, repo name
+`cheeger_upper_bound`) proved and retired from axiom (17 → 16) — the
+top High item in `proposals/README.md`, executed per
+`prove-cheeger-easy-direction.md`.
+
+**Changes:** `GraphTheory.Spectral`: the `lambda2_variational`
+Courant–Fischer argument generalized to any symmetric PSD matrix with
+`onesVec` in its kernel (`secondEval_variational`; generic
+`eigvecOf_ortho_onesVec_of_mulVec_eq_zero`; `lambda2_variational`
+re-proved as a corollary at unchanged shape; new consumer form
+`secondEval_le_rayleigh`). `GraphTheory.Cheeger`: regularity scaling
+bridges (`d • L_sym = laplacian A`, PSD transfer, row-sum kernel,
+vol = d·card), the volume-centered `cutTestVector` interface
+(orthogonality; the regularity-free cut energy identity
+`xᵀLx = boundary · (vol V)²`; norm and Rayleigh values), and
+`cheeger_upper_bound` as a theorem at the axiom's exact
+name/hypotheses. QA `Cheeger_QA.lean` +7 (378 total; imports
+`Exhaustive_QA` for the `C₄` tables): test vector pinned to `![1,-1]`
+on `K₂`, Rayleigh value computed to `2` (= the pinned `λ₂(L_sym)`:
+bound attained), theorem instantiated on `K₂` (`λ₂ = 2φ`) and on `C₄`
+(`λ₂ ≤ 1` at conductance `1/2`). Docs: scoreboard (16/378/0 + note),
+radar (axis 4 re-scored 2.5 → 3.0 per protocol; trend
+26 → 19 → 18 → 17 → 16), Cheeger indexes, backlog item 3, README
+snapshot, proposal moved to Delivered with named residuals (irregular
+generalization needs the congruence-transfer route after all; the two
+supporting moves stay live).
+
+**Verification:** `lake env lean` on `Spectral`, `Cheeger`, and
+`Cheeger_QA` — zero errors (only pre-existing linter notes in
+untouched code); `lake build Scaffold.Mathlib.GraphTheory.Spectral`
+and `Scaffold.Mathlib.GraphTheory.Cheeger` ✔; full `lake build` ✔
+(2178 targets); all 24 QA modules elaborated directly in one batch
+(zero failures); `lint_axioms`, `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated. No `sorry`/`admit`
+under `Scaffold/` (textual matches are prose).
+
+**Remaining risk:** the hard direction (`cheeger_lower_bound`,
+`φ²/2 ≤ λ₂`) remains admitted — the retirement is the easy direction
+only, and QA consequences of the lower bound stay conditional on it.
+The irregular-graph Cheeger statement remains future work (named
+residual: the generalized engine's constraint set is `x ⊥ onesVec`,
+not `x ⊥ √deg`).
+
+**Next handoff:** Fiedler Phase A (A1/A2) — the remaining High item in
+`proposals/README.md`, scoped as close to free, now composable with
+the proved easy direction; or the named residuals; or the
+`evals (c • M)` Mathlib-excavation candidate.
+
+## 2026-08-18T18:14:05Z — Audit and finish the uncommitted normalized-Cheeger milestone
+
+**Run:** `20260818T181405Z-run-1`
+**Session:** `ses_fe9ed19c5ffedEJXC38yttHzNl`
+**Status:** in-progress
+**Milestone:** Operator direction (`scripts/finish-cheeger-milestone`):
+audit and finish the current uncommitted Cheeger work only — the
+`cheeger_upper_bound` retirement on the normalized Laplacian, whose
+hard-direction twin `cheeger_lower_bound` correctly remains the sole
+admitted Cheeger axiom — preserving unrelated working-tree changes, no
+new proposal, no commit. Planned changes: strip the 6
+trailing-whitespace metadata lines this milestone's own two newest
+entries introduced into this log, then re-verify directly (changed
+public modules + Cheeger QA elaboration and target builds, hygiene
+scripts, scoreboard drift check, full `lake build`) and record the
+outcome.
+
+## 2026-08-18T18:16:54Z — Normalized-Cheeger milestone audited and finished
+
+**Run:** `20260818T181405Z-run-1`
+**Session:** `ses_fe9ed19c5ffedEJXC38yttHzNl`
+**Status:** completed
+**Milestone:** The uncommitted normalized-Cheeger milestone (the
+`cheeger_upper_bound` retirement; `cheeger_lower_bound` correctly
+remains the sole admitted Cheeger axiom) audited and finished per
+operator direction — no new mathematics, no new proposal, no commit.
+
+**Changes:** `docs/AGENT_ACTIVITY.md` only, in two kinds: (a) stripped
+the 6 trailing-whitespace metadata lines this milestone's own two
+newest entries (17:01/17:32Z) had introduced — the recent-convention
+region of the log is now whitespace-free end to end, while older
+committed entries and the template's illustrative hard breaks were
+left untouched as unrelated records; (b) this run's own entries.
+`docs/EXECUTION_PLAN.md` records the audit and its outcome. No Lean,
+index, scoreboard, README, or proposal files changed — the audit found
+them already consistent.
+
+**Verification:** audit — the uncommitted Lean changes, scoreboard
+(16/378/0), README snapshot, radar, indexes, and the proposal's
+Delivered row are mutually consistent, and the recorded claims were
+re-derived: direct elaboration (`lake env lean`) of
+`GraphTheory.Spectral`, `GraphTheory.Cheeger`, and
+`QA.SpectralGraph.Cheeger_QA` with zero errors (Cheeger QA zero
+warnings; the remaining linter notes were checked to sit in
+declarations present unchanged in HEAD, outside the diff hunks);
+explicit `lake build` of those three targets ✔; `lint_axioms` (16
+axioms covered), `check_citations`, `check_markdown_links` all pass;
+scoreboard regeneration byte-identical to the recorded file (no
+drift); `grep` confirms the 16 `axiom` declarations and that
+`sorry`/`admit` textual matches are prose only; full `lake build` ✔
+(2178 targets). Unrelated working-tree changes (`.opencode/`,
+`AGENTS.md`, `scripts/opencode-pursue`, `scripts/README.md`,
+`scripts/test_opencode_pursue.sh`, `scripts/finish-cheeger-milestone`,
+`proposals/sell-the-methodology.md`,
+`proposals/retire-the-mushy-center.md`, untracked
+`proposals/README.md`) preserved untouched; nothing committed.
+
+**Remaining risk:** none new — no source changed. The standing risk is
+unchanged: the hard direction (`cheeger_lower_bound`, `φ²/2 ≤ λ₂`)
+remains admitted; QA consequences resting on it stay conditional.
+
+**Next handoff:** Fiedler Phase A (A1/A2) — the remaining High item in
+`proposals/README.md`; or the named residuals (irregular Cheeger via
+congruence transfer, the electrical definiteness residual); or the
+`evals (c • M)` Mathlib excavation.

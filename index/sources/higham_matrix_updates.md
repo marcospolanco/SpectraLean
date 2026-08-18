@@ -24,7 +24,7 @@ event updates of graph matrices.
 | Theorem | Lean declaration | Status | Module |
 |---------|------------------|--------|--------|
 | Woodbury identity | `woodbury_identity` | proved theorem (from Mathlib's `Matrix.invOf_add_mul_mul`, 2026-08-18) | `Scaffold.Mathlib.Core.MatrixUpdates` |
-| Sherman–Morrison formula | `sherman_morrison` | axiom | `Scaffold.Mathlib.Core.MatrixUpdates` |
+| Sherman–Morrison formula | `sherman_morrison` | proved theorem (the `k = Fin 1` specialization of the proved Woodbury identity, 2026-08-18) | `Scaffold.Mathlib.Core.MatrixUpdates` |
 
 ## Notes
 
@@ -46,6 +46,14 @@ event updates of graph matrices.
   `proposals/repair-and-retire-woodbury.md` for the repair record.
 - Sherman–Morrison is written with entrywise outer products
   `fun i j => u i * v j` and a scalar denominator
-  `1 + v ⬝ᵥ (A⁻¹ *ᵥ u)` required to be nonzero. It remains admitted,
-  pending its own statement-fidelity review (out of scope of the 2026-08-18
-  Woodbury repair).
+  `1 + v ⬝ᵥ (A⁻¹ *ᵥ u)` required to be nonzero. **Retirement
+  (2026-08-18):** the formerly admitted axiom is now a proved theorem at
+  the same name, hypotheses, and statement — the `k = Fin 1`
+  specialization of the proved `woodbury_identity` (packing plumbing plus
+  the pin's 1×1 determinant/inverse and `mul_smul`/`smul_mul` algebra).
+  Unlike the Woodbury retirement this was a pure proof task, not a
+  correctness repair: the statement had been verified against the
+  corrected Woodbury shape first (at `C = [1]` the rank-one middle
+  factor is exactly the scalar denominator, so the axiom's statement was
+  already the correct specialization). See
+  `proposals/retire-sherman-morrison.md` for the delivery record.

@@ -8,7 +8,8 @@ import Scaffold.Mathlib.Core.Norms
 
 The Woodbury matrix identity, *proved* from Mathlib
 (`Matrix.invOf_add_mul_mul`), and its rank-one special case, the
-Sherman–Morrison formula, still admitted. These describe how "events"
+Sherman–Morrison formula — also *proved*, as a specialization of the
+Woodbury theorem at `k = Fin 1`. These describe how "events"
 (low-rank updates) move spectral quantities without recomputing a full
 inverse, which is the algebraic mechanism behind event-driven Laplacian
 updates in `Scaffold.Mathlib.GraphTheory.Dynamics`.
@@ -104,17 +105,84 @@ matching Mathlib's convention of representing vectors as plain functions.
 The scalar denominator hypothesis `v ⬝ᵥ (A⁻¹ *ᵥ u) ≠ -1` makes the rank-one
 update invertible.
 
+Retirement record (2026-08-18): this was previously an admitted axiom; it
+is now a proved theorem at the same name, hypotheses, and statement, as
+the `k = Fin 1` specialization of `woodbury_identity` (per
+`proposals/retire-sherman-morrison.md`). Unlike the Woodbury retirement,
+this was a **pure proof task, not a correctness repair**: the statement
+was verified against the corrected Woodbury shape first — at `C = 1` the
+rank-one middle factor `(1 + v ⬝ᵥ (A⁻¹ *ᵥ u))` is exactly
+`C⁻¹ + V A⁻¹ U` as a 1×1 matrix, so the former axiom's statement was
+already the correct specialization. The proof is the packing plumbing:
+`u`, `v` into `Fin 1` column/row matrices, the 1×1 middle factor's
+determinant (a unit exactly when the denominator is nonzero, i.e. when
+`hv` holds), and its inverse (the 1×1 scalar inverse).
+
 Source:
 - Higham, "Accuracy and Stability of Numerical Algorithms", 2nd ed., SIAM, 2002.
 - Henderson & Searle, SIAM Review 23(1):53–60, 1981.
 
-QA: no thin QA lemma yet; see the note above on `woodbury_identity` for
-the pattern such an instance check would follow.
+QA: `Scaffold.QA.Core.MatrixUpdates_QA` — a rank-one positive instance
+whose value is checked independently of the theorem, and a negative
+witness at the excluded denominator (where the update is singular).
 -/
-axiom sherman_morrison (A : Matrix n n 𝕜) (u v : n → 𝕜)
+theorem sherman_morrison (A : Matrix n n 𝕜) (u v : n → 𝕜)
     (hA : IsUnit A.det)
     (hv : v ⬝ᵥ (A⁻¹ *ᵥ u) ≠ -1) :
     (A + Matrix.of (fun i j => u i * v j))⁻¹
-      = A⁻¹ - (1 + v ⬝ᵥ (A⁻¹ *ᵥ u))⁻¹ • (A⁻¹ * Matrix.of (fun i j => u i * v j) * A⁻¹)
+      = A⁻¹ - (1 + v ⬝ᵥ (A⁻¹ *ᵥ u))⁻¹ • (A⁻¹ * Matrix.of (fun i j => u i * v j) * A⁻¹) := by
+  classical
+  -- the scalar denominator is a unit exactly by `hv`
+  have hs : (1 + v ⬝ᵥ (A⁻¹ *ᵥ u)) ≠ 0 := by
+    intro h
+    exact hv (by linear_combination h)
+  set U : Matrix n (Fin 1) 𝕜 := Matrix.of fun i _ => u i with hU
+  set V : Matrix (Fin 1) n 𝕜 := Matrix.of fun _ j => v j with hV
+  -- the rank-one outer product is the single-term matrix product
+  have hUV : U * V = Matrix.of fun i j => u i * v j := by
+    ext i j
+    simp [Matrix.mul_apply, Fin.sum_univ_one, hU, hV]
+  -- the Woodbury hypotheses at `C = 1`
+  have hC : IsUnit ((1 : Matrix (Fin 1) (Fin 1) 𝕜).det) := by
+    rw [Matrix.det_one]
+    exact isUnit_one
+  have hOne : ((1 : Matrix (Fin 1) (Fin 1) 𝕜)⁻¹) = 1 :=
+    Matrix.inv_eq_left_inv (B := 1) (by simp)
+  -- the middle factor is the 1×1 matrix with the scalar denominator entry
+  have hmid : ((1 : Matrix (Fin 1) (Fin 1) 𝕜)⁻¹ + V * A⁻¹ * U)
+      = Matrix.of fun _ _ : Fin 1 => 1 + v ⬝ᵥ (A⁻¹ *ᵥ u) := by
+    rw [hOne, Matrix.dotProduct_mulVec]
+    ext i j
+    fin_cases i
+    fin_cases j
+    simp [Matrix.mul_apply, Matrix.vecMul, Matrix.dotProduct, Fin.sum_univ_one, hU, hV]
+  have hM : IsUnit (((1 : Matrix (Fin 1) (Fin 1) 𝕜)⁻¹ + V * A⁻¹ * U).det) := by
+    rw [hmid, Matrix.det_fin_one]
+    simpa using hs.isUnit
+  -- its inverse is the 1×1 matrix with the scalar inverse entry
+  have hminv : ((1 : Matrix (Fin 1) (Fin 1) 𝕜)⁻¹ + V * A⁻¹ * U)⁻¹
+      = Matrix.of fun _ _ : Fin 1 => (1 + v ⬝ᵥ (A⁻¹ *ᵥ u))⁻¹ := by
+    rw [hmid]
+    refine Matrix.inv_eq_left_inv
+      (B := Matrix.of fun _ _ : Fin 1 => (1 + v ⬝ᵥ (A⁻¹ *ᵥ u))⁻¹) ?_
+    ext i j
+    fin_cases i
+    fin_cases j
+    simp [Matrix.mul_apply, Fin.sum_univ_one, inv_mul_cancel₀ hs]
+  -- the Woodbury instance, then pure matrix-algebra reshaping
+  have key := woodbury_identity A U (1 : Matrix (Fin 1) (Fin 1) 𝕜) V hA hC hM
+  have hsum : A + Matrix.of (fun i j => u i * v j)
+      = A + U * (1 : Matrix (Fin 1) (Fin 1) 𝕜) * V := by
+    rw [Matrix.mul_one, hUV]
+  have hS : Matrix.of (fun _ _ : Fin 1 => (1 + v ⬝ᵥ (A⁻¹ *ᵥ u))⁻¹)
+      = (1 + v ⬝ᵥ (A⁻¹ *ᵥ u))⁻¹ • (1 : Matrix (Fin 1) (Fin 1) 𝕜) := by
+    ext i j
+    fin_cases i
+    fin_cases j
+    simp
+  have hAUV : (A⁻¹ * U) * V = A⁻¹ * Matrix.of (fun i j => u i * v j) := by
+    rw [Matrix.mul_assoc, hUV]
+  rw [hsum, key, hminv, hS, Matrix.mul_smul, Matrix.mul_one, Matrix.smul_mul,
+    Matrix.smul_mul, hAUV]
 
 end Scaffold.Mathlib.Core

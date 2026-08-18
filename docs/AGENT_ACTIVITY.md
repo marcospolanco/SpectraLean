@@ -2387,3 +2387,91 @@ Fiedler Phase B (Medium, decision-gated). Unrelated working-tree changes
 (the operator's `scripts/opencode-pursue` and
 `scripts/test_opencode_pursue.sh` modifications) preserved untouched;
 nothing committed.
+
+## 2026-08-18T22:33:14Z — Sherman–Morrison axiom retirement (proof)
+
+**Run:** `20260818T223314Z-run-1`
+**Session:** `ses_fe900e85affegpNCBrauKLr1L5`
+**Status:** in-progress
+**Milestone:** Retire the `sherman_morrison` axiom (the Medium item
+`proposals/retire-sherman-morrison.md`, named the cheapest remaining axiom
+retirement and unblocked by the Woodbury repair) by specializing the proved
+`woodbury_identity` at `k = Fin 1`, at the axiom's current name and
+hypotheses — explicit axiom count 15 → 14, pure trust-surface reduction.
+Per the proposal's verified finding, this is a proof task, not a
+correctness repair: the statement was already checked correct against the
+corrected Woodbury shape.
+
+**Plan (recorded before editing):** Mathlib survey done — the pin has
+`Matrix.mul_smul`/`Matrix.smul_mul`, `Matrix.det_fin_one`,
+`Matrix.inv_eq_left_inv` (`B * A = 1 → A⁻¹ = B`), `Matrix.dotProduct`;
+`Matrix.inv_one` does not exist (derived instead). Route: rank-one
+packing `u`/`v` into `Fin 1` column/row matrices, 1×1 middle factor with
+entry `1 + v ⬝ᵥ (A⁻¹ *ᵥ u)` (`Fin.sum_univ_one` computation), unit
+determinant from `hv`, scalar-inverse 1×1 inverse, matrix-level
+`mul_smul`/`smul_mul` reshaping to the entrywise statement. QA: positive
+instance at the existing `A2 = diag 2 2` rank-one fixture (value
+computed independently via the adjugate), negative witness at the
+excluded denominator (`v ⬝ᵥ (A⁻¹ *ᵥ u) = -1`, where the update is
+singular). Records to follow: module docstring, both indexes, scoreboard,
+radar, README, `proposals/README.md`, proposal delivery record. The
+operator's concurrent changes (`.gitignore`, clean-room proposals,
+`cdx-clean-assess.md`, mushy-center priority row) preserved untouched.
+
+## 2026-08-18T22:44:25Z — Sherman–Morrison axiom retired (proved)
+
+**Run:** `20260818T223314Z-run-1`
+**Session:** `ses_fe900e85affegpNCBrauKLr1L5`
+**Status:** completed
+**Milestone:** `proposals/retire-sherman-morrison.md` delivered — the
+`sherman_morrison` axiom retired to a proved theorem at unchanged name,
+hypotheses, and statement (explicit axiom count 15 → 14), as the
+`k = Fin 1` specialization of the proved `woodbury_identity`. Pure
+trust-surface reduction; per the proposal's verified pre-check, a proof
+task, not a correctness repair.
+
+**Changes:** `Core.MatrixUpdates` — the axiom replaced by a theorem
+proved from the repository's own Woodbury theorem: `Fin 1` column/row
+packing (`U * V` equals the entrywise outer product, a
+`Fin.sum_univ_one` computation as calibrated), the 1×1 middle factor
+identified with the scalar denominator `1 + v ⬝ᵥ (A⁻¹ *ᵥ u)` (via
+`Matrix.dotProduct_mulVec`), its unit determinant from `hv` through
+`Matrix.det_fin_one`, its inverse as the 1×1 scalar inverse
+(`Matrix.inv_eq_left_inv`; `Matrix.inv_one` absent from the pin,
+derived instead), and the shape matched by `Matrix.mul_smul` /
+`Matrix.smul_mul` algebra. The specialization is load-bearing on the
+Woodbury repair. QA `Core/MatrixUpdates_QA.lean` +4 (480 total):
+adjugate-independent positive instance at `diag 2 2` + all-ones
+(`!![3/8,-1/8;-1/8,3/8]`, denominator computed to `1`), and the
+excluded-denominator negative witness (`v ⬝ᵥ (A⁻¹ *ᵥ u) = -1` attained
+at a `Fin 1` fixture where the update is the singular zero matrix).
+Docs: module docstring, both indexes, scoreboard (14/480/0 + milestone
+bullet + verification rows), radar (trend extended to 26 → … → 14; QA
+count 480/27), README (14/480), `proposals/README.md` (→ Delivered),
+proposal delivery record.
+
+**Verification:** `lake env lean` on both changed modules — zero
+errors, zero warnings; targeted `lake build` of both targets ✔ (the QA
+file is the module's only direct consumer, verified by import search);
+full `lake build` ✔ (2179 targets); 480 QA declarations, no
+`sorry`/`admit` anywhere under `Scaffold/`; `lint_axioms` (14 covered)
+and `check_citations` pass; `check_markdown_links` reports only the
+operator's untracked `cdx-clean-assess.md` links (pre-existing at run
+start, outside this milestone); scoreboard regeneration idempotent
+after the prose edits.
+
+**Remaining risk:** none identified — the retired statement is
+unchanged (it was verified correct before the proof), the theorem is
+kernel-checked with no new axioms, and zero consumers existed to
+migrate. The singular-witness QA pins that the excluded denominator is
+exactly where the update loses invertibility.
+
+**Next handoff:** no High item remains in `proposals/README.md`.
+Candidates: Fiedler Phase B (Medium, needs its named operator
+decision), the mixing-time program (Medium), the min–max theorem's
+named consumers as separately scoped runs (interlacing retirement;
+Rayleigh/Dirichlet monotonicity), the electrical definiteness residual,
+or the `evals (c • M)` excavation. Unrelated working-tree changes (the
+operator's `.gitignore`, clean-room proposal files,
+`cdx-clean-assess.md`, and the mushy-center priority row) preserved
+untouched; nothing committed.

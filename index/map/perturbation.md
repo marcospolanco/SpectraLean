@@ -34,7 +34,7 @@ spectral stability.
 | Declaration | Kind | Description | Source |
 |-------------|------|-------------|--------|
 | `woodbury_identity` | proved (from Mathlib's `Matrix.invOf_add_mul_mul`) | Woodbury identity for low-rank event updates, at the standard middle factor `C⁻¹ + V A⁻¹ U`; retired from a verified-false axiom on 2026-08-18 (see the source file's repair record) | [Higham 2002](../sources/higham_matrix_updates.md) |
-| `sherman_morrison` | axiom | Rank-one Sherman–Morrison formula | [Higham 2002](../sources/higham_matrix_updates.md) |
+| `sherman_morrison` | proved (the `k = Fin 1` specialization of the proved `woodbury_identity`) | Rank-one Sherman–Morrison formula; retired from axiom on 2026-08-18 as a pure proof task (statement already correct — no repair) | [Higham 2002](../sources/higham_matrix_updates.md) |
 
 ## Deferred Work
 

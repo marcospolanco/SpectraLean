@@ -987,6 +987,68 @@ subspaces; full Rayleigh/Dirichlet monotonicity through the now-proved
 attained characterization); Fiedler Phase B (Medium, decision-gated);
 the electrical definiteness residual; the `evals (c • M)` excavation.
 
+**Active slice (run 1, 2026-08-18): retire the Sherman–Morrison axiom —
+DELIVERED.** The Medium item `proposals/retire-sherman-morrison.md`
+(the named cheapest remaining axiom retirement, unblocked by the
+Woodbury repair), scope items 1–6 only. Explicit axiom count **15 →
+14**; no new axioms, no `sorry`.
+
+**Finding recorded before any edit, per the proposal's acceptance
+criteria:** this was a **proof task, not a correctness repair** — the
+statement was verified correct against the corrected Woodbury shape
+first (at `C = [1]` the rank-one middle factor is exactly the scalar
+denominator `1 + v ⬝ᵥ (A⁻¹ *ᵥ u)`; the Woodbury `C`/`C⁻¹` defect is
+invisible at rank one). The theorem keeps the axiom's exact name,
+hypotheses, and statement; zero consumers existed, so no migration
+surface.
+
+**Route (as proposed, through Scaffold's own proved Woodbury theorem):**
+`woodbury_identity` at `k = Fin 1` with `C = 1`; the packing lemma
+`U * V = Matrix.of fun i j => u i * v j` (`Fin.sum_univ_one`, not
+`rfl`, exactly as the proposal calibrated); the middle factor
+identified with the 1×1 matrix of the scalar denominator (through
+`Matrix.dotProduct_mulVec`); `hM` from `hv` via `Matrix.det_fin_one`;
+the middle inverse via `Matrix.inv_eq_left_inv` + `inv_mul_cancel₀`;
+the final entrywise↔matrix shape matched by the pin's
+`Matrix.mul_smul`/`Matrix.smul_mul` algebra. Mathlib survey recorded:
+`Matrix.inv_one` does *not* exist in the pin — `(1)⁻¹ = 1` derived via
+`inv_eq_left_inv`. **Load-bearing:** the specialization consumes the
+repaired Woodbury theorem, so a residual defect in that repair would
+surface here rather than pass beside it.
+
+**QA** `QA/Core/MatrixUpdates_QA.lean` (+4 declarations, 12 in file,
+480 total): positive instance at the existing `A2 = diag 2 2` fixture
+with `u = v = ![1,1]` — the update `!![3,1;1,3]`'s true inverse
+`!![3/8,-1/8;-1/8,3/8]` computed independently by the adjugate formula
+(`sherman_morrison_sum_inv_QA`), and the theorem-consumed right side
+pinned to the same value with the denominator computed to `1` from the
+definitions (`sherman_morrison_rhs_QA`); negative witness at the
+excluded denominator — `A = !![1]`, `u = ![2]`, `v = ![-1/2]` attains
+`v ⬝ᵥ (A⁻¹ *ᵥ u) = -1` exactly
+(`sherman_morrison_excluded_denominator_QA`) and the update is the
+singular zero matrix there (`sherman_morrison_singular_witness_QA`).
+
+**Docs:** module docstring and theorem documentation, both indexes
+(`higham_matrix_updates` retirement note + status; `perturbation` map
+row marked proved), scoreboard (14/480/0, milestone bullet,
+verification rows, QA-file count 8 → 12), radar (axiom-minimization
+trend extended to 26 → … → 14 with the Core update-identity bridge now
+axiom-free; QA-axis count synced 480/27 with the new QA kind
+described), README (14 axioms, 480 QA), `proposals/README.md` (moved
+to Delivered), and the proposal's delivery record. The operator's
+concurrent working-tree changes (`.gitignore`, the two clean-room
+proposal files, untracked `cdx-clean-assess.md` and
+`proposals/clean-room-sgt-lemma-science-map.md`, the mushy-center
+priority row) preserved untouched.
+
+**Next milestone (open):** no High item remains. Candidates: the
+remaining Medium items (Fiedler Phase B — needs its named operator
+decision; the mixing-time program); the min–max theorem's named
+consumers as separately scoped runs (interlacing retirement via
+min–max over shared test subspaces; full Rayleigh/Dirichlet
+monotonicity); the electrical definiteness residual; the
+`evals (c • M)` excavation.
+
 ## Ready queue
 
 1. ~~Proposal step 6 — the one-sided Dirichlet bound~~ — delivered
@@ -1014,6 +1076,36 @@ the electrical definiteness residual; the `evals (c • M)` excavation.
    combinations, centering, sums) only when a consumer names them.
 
 ## Last verified state
+
+- 2026-08-18 (Sherman–Morrison retirement, axiom 15 → 14): `lake env
+  lean` on `Core.MatrixUpdates` and on `QA.Core.MatrixUpdates_QA` —
+  both zero errors, zero warnings; `lake build
+  Scaffold.Mathlib.Core.MatrixUpdates` and `lake build
+  Scaffold.QA.Core.MatrixUpdates_QA` ✔ (the QA file is the module's
+  only direct consumer, verified by import search); full `lake build` ✔
+  (2179 targets; the Scaffold-side linter notes are the documented
+  pre-existing ones in untouched modules); 480 QA declarations (+4, the
+  four new public Sherman–Morrison QA lemmas; the file's private
+  helpers and defs are not counted), no `sorry`/`admit` anywhere under
+  `Scaffold/` (textual matches are prose in comments/docstrings); 14
+  explicit cited axioms (−1: `sherman_morrison` retired to a proved
+  theorem at unchanged name/hypotheses/statement — the `k = Fin 1`
+  specialization of the proved `woodbury_identity`, a pure proof task,
+  not a correctness repair, per the proposal's pre-check); all hygiene
+  scripts pass (`lint_axioms` 14 covered, `check_citations`;
+  `check_markdown_links` reports only 4 broken links in the operator's
+  untracked `cdx-clean-assess.md`, present before this run and outside
+  this milestone's scope); scoreboard regenerated (14/480/0, QA file
+  count 8 → 12) and idempotent after the manual prose edits; radar
+  (axiom-minimization trend 26 → 19 → 18 → 17 → 16 → 15 → 14; QA-axis
+  count 480/27), README (14 axioms, 480 QA), both indexes, proposal
+  delivery record, and `proposals/README.md` updated (item moved to
+  Delivered). Unrelated working-tree changes (the operator's
+  `.gitignore`, `proposals/clean-room-sgt-export.md`,
+  untracked `cdx-clean-assess.md` and
+  `proposals/clean-room-sgt-lemma-science-map.md`, and the
+  mushy-center priority row in `proposals/README.md`) preserved
+  untouched; nothing committed.
 
 - 2026-08-18 (general Courant–Fischer min–max proved, no axiom
   change): `lake env lean` on `GraphTheory.Spectral` — zero errors,

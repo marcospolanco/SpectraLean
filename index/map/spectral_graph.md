@@ -55,7 +55,16 @@ Laplacian kernel is exactly the constants — the converse of
 `electrical-structure-crust.md` step 2 after the 2026-08-18
 re-sequencing), `laplacian_mulVec_const`, and
 `laplacian_kernel_eq_span_onesVec`
-(`ker (mulVecLin (laplacian A)) = span ℝ {onesVec}`).
+(`ker (mulVecLin (laplacian A)) = span ℝ {onesVec}`); the component
+form (2026-08-18, proposal step 3's weighted dependency):
+`laplacian_mulVec_apply` (diffusion-form entrywise action
+`(L *ᵥ f) i = ∑ j, A i j * (f i - f j)` — self-loops cancel),
+`laplacian_mulVec_eq_zero_of_forall_reachable`
+(component-constant ⇒ kernel, entrywise; needs no connectivity), and
+`laplacian_mulVec_eq_zero_iff_forall_reachable` (`L *ᵥ f = 0` iff `f`
+constant on each support-graph component — the weighted counterpart
+of Mathlib's unweighted iff, and the load-bearing statement behind
+the kernel-equality bridge).
 
 ### `Scaffold.Mathlib.GraphTheory.SimpleGraphAdapter` (Mathlib interop adapter)
 
@@ -77,6 +86,10 @@ parallel construction can drift out of agreement).
 | `finrank_ker_laplacian_toWAdj` | kernel dimension = number of connected components (Mathlib's component-count result transferred) |
 | `supportGraph_toWAdj_eq_self` | **adapter roundtrip** `supportGraph (toWAdj G) = G` — the two adapter directions are mutually consistent |
 | `laplacian_toWAdj_kernel_eq_span_ones` | for connected `G`, the kernel is the constants line — the weighted span theorem applies to Mathlib graphs through the roundtrip |
+| `supportGraphAdjDecidable` | `DecidableRel (supportGraph A hA).Adj` via `Real.decidableLT` — discharges Mathlib's `DecidableRel G.Adj` hypotheses for weighted support graphs |
+| `ker_laplacian_eq_ker_supportGraph_lapMatrix` | **kernel-equality bridge (2026-08-18, proposal step 3):** `ker (laplacian A) = ker ((supportGraph A).lapMatrix ℝ)` — weights do not change the kernel; both sides are the component-constant vectors |
+| `finrank_ker_laplacian_eq_card_supportGraph_components` | kernel dimension = number of support-graph components, for *weighted* graphs (Mathlib's component-count result transferred through the bridge; generalizes the connected case) |
+| `laplacian_ker_basis`, `laplacian_ker_basis_apply` | component-indicator basis of the weighted kernel (Mathlib's `lapMatrix_ker_basis` transported); apply lemma: the `c`-th vector is the indicator of `c` |
 
 
 Admitted axioms:

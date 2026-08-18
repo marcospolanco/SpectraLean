@@ -89,7 +89,7 @@ Last assessed: August 18, 2026. Scores reflect usable, verified coverage on a
 | Variational and functional methods | 3.0 / 5 |
 | Cuts, expansion, and clustering | 2.5 / 5 |
 | Random walks and diffusion | 2.5 / 5 |
-| Combinatorial and electrical structure | 1.0 / 5 |
+| Combinatorial and electrical structure | 1.5 / 5 |
 | Perturbation, randomness, and algorithms | 3.0 / 5 |
 | Adjacent systems interfaces | 1.0 / 5 |
 
@@ -136,10 +136,10 @@ The remaining root files are repository entry points or tool configuration: `Sca
 
 ## Current maturity
 
-As of August 17, 2026:
+As of August 18, 2026:
 
-- the default `lake build` passes: its umbrella certifies the SGT center (`GraphTheory.Spectral`), the `SimpleGraph` interop adapter (`GraphTheory.SimpleGraphAdapter`, the `SimpleGraph → WAdj` direction with proved agreement against Mathlib's `lapMatrix`), the Cheeger bridge, the random-walk interfaces (`GraphTheory.RandomWalk`), the general normalized Laplacian (`GraphTheory.Normalized`), the event-driven frontier, the Weyl/Davis–Kahan perturbation modules, the probability concentration bridge (`Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*`), the derived layer (`Derived.EventStream`, `Derived.ProjectorDrift`), and the Core utilities;
-- all QA modules compile directly with 119 QA theorem/lemma declarations and no `sorry` or `admit` anywhere under `Scaffold/`;
+- the default `lake build` passes: its umbrella certifies the SGT center (`GraphTheory.Spectral`), the `SimpleGraph` interop adapter (`GraphTheory.SimpleGraphAdapter`, both `SimpleGraph → WAdj` and the `WAdj → SimpleGraph` `supportGraph` direction, with the proved kernel-equality bridge to Mathlib's `lapMatrix` kernel), the Cheeger bridge, the random-walk interfaces (`GraphTheory.RandomWalk`), the general normalized Laplacian (`GraphTheory.Normalized`), the event-driven frontier, the Weyl/Davis–Kahan perturbation modules, the probability concentration bridge (`Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*`), the derived layer (`Derived.EventStream`, `Derived.ProjectorDrift`), and the Core utilities;
+- all QA modules compile directly with 307 QA theorem/lemma declarations and no `sorry` or `admit` anywhere under `Scaffold/`;
 - the public axiom boundary is 18 explicit, cited axioms; the remaining classical Laplacian facts (symmetry, kernel, Dirichlet form, PSD, symmetry preservation under events) are proved, not admitted, the scalar `hoeffding_iid`/`bernstein_iid` specializations are proved derived theorems, `spectral_gap_stability` is proved from the admitted Weyl inequality, and the spectral-projector algebra (eigenbasis orthonormality and completeness, projector idempotence, extreme thresholds) is proved from the Mathlib spectral-theorem API;
 - the subgaussian norm is a real definition (`subgaussianNorm`), not an axiom; matrix concentration is stated over the spectral norm (`Matrix.L2OpNorm`), the semidefinite order (`Matrix.PosSemidef`), and Mathlib's `ProbabilityTheory.IndepFun`;
 - the derived layer retains an end-to-end persistence example: `eventStreamTail` bounds the tail of the cumulative Laplacian perturbation `‖L_m − L_0‖`, and `eventStreamProjectorDrift` bounds endpoint rotation of the invariant spectral subspace by `s/(γ−s)` with failure probability at most `2 d exp(−s²/(8 m R²))`. Both are checked deductions from admitted Matrix Azuma, Weyl, and Davis–Kahan axioms; neither drives the roadmap.

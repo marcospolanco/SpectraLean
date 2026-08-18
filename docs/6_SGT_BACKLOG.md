@@ -132,14 +132,29 @@ witnesses). No axioms. The named consumers this unlocks:
 effective-resistance well-definedness (two potential-equation solutions
 differ by a kernel element, constant — proposal step 5), positivity of
 `λ₂` / Fiedler interfaces (item 4), and any mixing statement (item 5).
-**Next candidate in this family:** proposal step 3 — the
-kernel-equality bridge `ker (laplacian A) = ker ((supportGraph
-A).lapMatrix ℝ)`, inheriting Mathlib's `lapMatrix_ker_basis` and
-`card_ConnectedComponent_eq_rank_ker_lapMatrix` for the weighted
-Laplacian (the component-count transfer for *weighted* graphs — the
-delivered `finrank_ker_laplacian_toWAdj` covers only 0/1 weights);
-then step 4 (potential solvability, the hinge) before any definition
-of effective resistance.
+**Step 3 delivered (2026-08-18): the kernel-equality bridge** —
+`ker (laplacian A) = ker ((supportGraph A).lapMatrix ℝ)` for symmetric
+nonnegative weights, through the new component-form center
+characterization (`laplacian_mulVec_eq_zero_iff_forall_reachable`, no
+connectivity hypothesis) on the weighted side and Mathlib's
+`lapMatrix_toLin'_apply_eq_zero_iff_forall_reachable` on the other. In
+the same step, Mathlib's component-indexed kernel facts are inherited
+for the *weighted* Laplacian: kernel dimension = number of
+support-graph components (`finrank_ker_laplacian_eq_card_
+supportGraph_components`) and the component-indicator basis
+(`laplacian_ker_basis` + value interface `laplacian_ker_basis_apply`).
+QA `SpectralGraph/KernelBridge_QA.lean` (14 declarations, reusing the
+`Connectivity_QA` fixtures): connected path — bridge + dimension `1` +
+single basis vector constantly `1`, coherent with the connected span
+theorem; disconnected two-edge fixture — component count computed to
+`2` independently of the transferred theorem (block classification +
+`Nat.card_eq_two_iff`), dimension `2`, basis vectors computed to
+`![1,1,0,0]`/`![0,0,1,1]`, kernel strictly larger than the constants.
+No axioms. **Next candidate in this family:** proposal step 4 —
+potential solvability for zero-sum demand (the hinge; the proposal
+forbids defining effective resistance before it lands; route decision
+orthogonality vs constructive eigenbasis to be recorded before
+stating).
 
 ## Standing decisions
 

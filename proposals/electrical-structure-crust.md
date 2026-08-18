@@ -1,10 +1,10 @@
 # Proposal: Grow the Crust Through Electrical Structure
 
-**Status:** Proposed; steps 1–2 of 6 delivered (2026-08-18, see checklist
-below). Assistant's assessment of project direction, requested 2026-08-17;
-substantially re-sequenced 2026-08-18 after review (see
-[Corrections](#corrections)). Authorizes no Lean changes, axiom admissions,
-document rewrites, or external publication.
+**Status:** Proposed; steps 1–3 of 6 delivered (2026-08-18, see
+checklist below). Assistant's assessment of project direction,
+requested 2026-08-17; substantially re-sequenced 2026-08-18 after
+review (see [Corrections](#corrections)). Authorizes no Lean changes,
+axiom admissions, document rewrites, or external publication.
 
 Companion to [Prove One Named Inequality](prove-cheeger-easy-direction.md).
 That proposal argues for *shrinking the mushy center*; this one takes the
@@ -137,7 +137,15 @@ part of the original sequencing error.
   per [Corrections](#corrections), not by transport; QA in
   `SpectralGraph/Connectivity_QA.lean` with connected and disconnected
   witnesses.
-- [ ] **3. The kernel-equality bridge** — not started.
+- [x] **3. The kernel-equality bridge** — delivered 2026-08-18: the
+  center gained the component-form characterization
+  `laplacian_mulVec_eq_zero_iff_forall_reachable` (`Spectral.lean`,
+  no connectivity hypothesis); the bridge
+  `ker_laplacian_eq_ker_supportGraph_lapMatrix` plus the inherited
+  `finrank_ker_laplacian_eq_card_supportGraph_components` and the
+  transported `laplacian_ker_basis` live in `SimpleGraphAdapter.lean`;
+  QA in `SpectralGraph/KernelBridge_QA.lean` (connected coherence +
+  disconnected count/basis computed).
 - [ ] **4. Potential solvability (the hinge)** — not started.
 - [ ] **5. Effective resistance, uniqueness, and energy** — not started.
 - [ ] **6. The one-sided Dirichlet bound** — not started.
@@ -186,7 +194,7 @@ for the pattern; do not import from it.
 establish that any particular equation has a solution. See
 [step 4](#4-potential-solvability-the-hinge).
 
-### 3. The kernel-equality bridge — not started
+### 3. The kernel-equality bridge — ✅ delivered
 
 Prove
 
@@ -200,6 +208,22 @@ one step. These are genuinely absent from Scaffold and not cheap to re-derive:
 they give a basis for the kernel and identify its dimension with the number of
 connected components. After step 2 both sides are known to equal "constant on
 components," so the bridge itself is short.
+
+**Delivered 2026-08-18.** The "constant on components" weighted side needed
+one more center fact than step 2's *connected* statement:
+`laplacian_mulVec_eq_zero_iff_forall_reachable` (no connectivity
+hypothesis), whose new direction — component-constant ⇒ kernel — goes
+entrywise through the diffusion-form identity `laplacian_mulVec_apply`
+(`(L *ᵥ f) i = ∑ j, A i j * (f i − f j)`). With it, the bridge is the
+predicted one-rewrite composition with Mathlib's iff; the dimension
+count and basis transfer exactly as scoped (`Basis.map` over
+`LinearEquiv.ofEq`). One unforeseen prerequisite, recorded here for
+reuse: Mathlib's `lapMatrix` API requires `DecidableRel G.Adj`, which
+instance search cannot see through the `supportGraph` projection —
+provided once as `supportGraphAdjDecidable` (via `Real.decidableLT`).
+QA computes the disconnected fixture's component count to `2`
+independently of the transferred theorem and pins both basis vectors
+to the component indicators.
 
 ### 4. Potential solvability (the hinge) — not started
 

@@ -1393,3 +1393,97 @@ weighted graphs, inheriting Mathlib's `lapMatrix_ker_basis` and
 lands). Or the open earlier candidates: `evals (c • M)` excavation;
 irregular Cheeger shape with a named consumer; backlog item 3
 variants.
+
+## 2026-08-18T06:23:17Z — Electrical-crust step 3: kernel-equality bridge (in progress)
+
+**Run:** `20260818T061620Z-run-1`
+**Session:** `ses_fec7cb0f5ffe66xyhhSJgVZ1IY`
+**Status:** in-progress
+**Milestone:** Operator direction: advance
+`proposals/electrical-structure-crust.md` **step 3 only** — prove the
+kernel-equality bridge `ker (laplacian A) = ker ((supportGraph
+A).lapMatrix ℝ)` and inherit Mathlib's component-indexed kernel facts
+(`lapMatrix_ker_basis`, `card_ConnectedComponent_eq_rank_ker_lapMatrix`)
+for the weighted Laplacian; one step per run, no new axioms, step 4 out
+of scope.
+
+**Pre-implementation survey (recorded):** pinned Mathlib
+`LapMatrix.lean` provides the unweighted kernel/rank/basis family;
+`Matrix.toLin'_apply'` (ToLin.lean:310) identifies `toLin' M` with
+`mulVecLin M`; `Real.decidableLT` (noncomputable, Real/Basic.lean:539)
+makes `DecidableRel (supportGraph A hA).Adj` elaborable for free;
+`SimpleGraph.Adj.reachable` (Path.lean:664) converts adjacency to
+reachability. The bridge's weighted side needs one new center fact —
+the no-connectivity characterization `L *ᵥ f = 0 ↔ f constant on
+support-graph components` (step 2 delivered only the connected case);
+direction "component-constant ⇒ kernel" is new and goes entrywise
+through a diffusion-form identity for `(L *ᵥ f) i`.
+
+**Next action:** implement (a) center lemmas in `Spectral.lean`, (b)
+bridge + transfers in `SimpleGraphAdapter.lean`, (c) QA
+`SpectralGraph/KernelBridge_QA.lean` on the `Connectivity_QA`
+fixtures, then verify by direct elaboration and full build.
+
+## 2026-08-18T06:45:01Z — Electrical-crust step 3 delivered: kernel-equality bridge (completed)
+
+**Run:** `20260818T061620Z-run-1`
+**Session:** `ses_fec7cb0f5ffe66xyhhSJgVZ1IY`
+**Status:** completed
+**Milestone:** Operator direction "advance
+`proposals/electrical-structure-crust.md`, step 3 only" — the
+kernel-equality bridge and the inherited Mathlib component facts for
+the weighted Laplacian. One step per run; step 4 (potential
+solvability) was not started, per the proposal's scope fence.
+
+**Changes.** Center (`Scaffold/Mathlib/GraphTheory/Spectral.lean`):
+`laplacian_mulVec_apply` (diffusion-form entrywise action; self-loops
+cancel), `laplacian_mulVec_eq_zero_of_forall_reachable`
+(component-constant ⇒ kernel, entrywise, no connectivity hypothesis),
+`laplacian_mulVec_eq_zero_iff_forall_reachable` (component-form
+characterization — the weighted counterpart of Mathlib's unweighted
+iff). Bridge (`GraphTheory/SimpleGraphAdapter.lean`):
+`supportGraphAdjDecidable` (decidability prerequisite for Mathlib's
+`lapMatrix` API, invisible through the `supportGraph` projection;
+`Real.decidableLT`), the headline `ker_laplacian_eq_ker_
+supportGraph_lapMatrix` (`ker (laplacian A) = ker ((supportGraph
+A).lapMatrix ℝ)`), `finrank_ker_laplacian_eq_card_supportGraph_
+components` (kernel dimension = component count for weighted graphs),
+and the transported component-indicator basis `laplacian_ker_basis` /
+`laplacian_ker_basis_apply`. New QA
+`Scaffold/QA/SpectralGraph/KernelBridge_QA.lean` (14 declarations)
+reusing the `Connectivity_QA` fixtures. Docs: execution plan, this
+journal, backlog item 7, radar (subject axis 6 re-scored 1.0 → 1.5
+per protocol; QA-axis counts updated to 307/22), proposal checklist
+marked step 3 delivered with a delivery note (including the recorded
+decidability prerequisite), scoreboard (regenerated + verification
+rows and a dated provenance note), SGT index map.
+
+**Verification.** `lake env lean` zero errors/zero warnings on
+`SimpleGraphAdapter` and `KernelBridge_QA`; zero errors on `Spectral`
+(no new warnings — the six pre-existing linter notes untouched);
+`lake build Scaffold.Mathlib.GraphTheory.SimpleGraphAdapter` ✔; full
+`lake build` ✔ (2177 targets); all twenty-two QA modules elaborated
+directly in one batch (zero failures); no `sorry`/`admit` under
+`Scaffold/`; `lint_axioms`, `check_citations`, `check_markdown_links`
+pass; scoreboard regenerated (307 QA declarations, 18 explicit
+axioms — unchanged; the slice is pure hard crust).
+
+**Trust boundary:** unchanged (18 explicit cited axioms); this slice
+added no axioms and consumes none. The inherited basis/count facts are
+Mathlib theorems transferred through a proved bridge, not new trust.
+
+**Remaining risk.** The transported `laplacian_ker_basis` requires a
+`DecidableEq ConnectedComponent` instance at use sites (classical
+suffices; QA uses it without incident). The QA fixtures are small
+graphs only — no parametric property QA (standing QA-axis gap). The
+bridge inherits Mathlib's component *count/basis* but not any
+electrical quantity: solvability (step 4) is still open, and the
+proposal forbids defining effective resistance before it lands.
+
+**Next handoff:** proposal step 4 — potential solvability for
+zero-sum demand (`∃ f, L *ᵥ f = b` when `∑ b = 0`; specialize to
+`b = e u − e v`), recording the route decision (orthogonality vs
+constructive eigenbasis) before stating; then step 5 (resistance
+uniqueness, consuming `laplacian_kernel_eq_span_onesVec`). Or the
+open earlier candidates: `evals (c • M)` excavation; irregular
+Cheeger shape with a named consumer; backlog item 3 variants.

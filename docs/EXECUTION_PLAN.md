@@ -378,6 +378,65 @@ Mathlib-excavation, an irregular Cheeger statement shape through
 `rayleigh_normalizedLaplacian_degreeSqrt` (needs a precise source and
 consumer), or backlog item 3 variants with named consumers.
 
+**Active slice (run 1, 2026-08-18): electrical-crust step 3 — the
+kernel-equality bridge — DELIVERED.** Operator direction: proposal
+step 3 only; one step per run; step 4 not started. All proved, **no
+new axioms** (count unchanged at 18).
+
+**Delivered center facts** (`GraphTheory.Spectral`): the diffusion-form
+identity `laplacian_mulVec_apply` (`(L *ᵥ f) i = ∑ j, A i j (f i − f
+j)`; self-loop weights cancel — honest w.r.t. `supportGraph`'s
+looplessness), `laplacian_mulVec_eq_zero_of_forall_reachable`
+(component-constant ⇒ kernel, entrywise; **no connectivity
+hypothesis**), and the component-form characterization
+`laplacian_mulVec_eq_zero_iff_forall_reachable` — the weighted
+counterpart of Mathlib's unweighted iff, generalizing step 2's
+connected statement to disconnected graphs.
+
+**Delivered bridge + inheritances**
+(`GraphTheory.SimpleGraphAdapter`): the headline
+`ker_laplacian_eq_ker_supportGraph_lapMatrix` (`ker (laplacian A) =
+ker ((supportGraph A).lapMatrix ℝ)` — weights do not change the
+kernel; both sides are the component-constant vectors, so the proof is
+the two iff's composed),
+`finrank_ker_laplacian_eq_card_supportGraph_components` (kernel
+dimension = component count for *weighted* graphs — Mathlib's rank
+theorem inherited; the delivered `finrank_ker_laplacian_toWAdj`
+covered only 0/1 weights), and the transported component-indicator
+basis `laplacian_ker_basis` + value interface
+`laplacian_ker_basis_apply` (Mathlib's `lapMatrix_ker_basis` via
+`Basis.map`/`LinearEquiv.ofEq`). One unforeseen prerequisite,
+recorded in the proposal: Mathlib's `lapMatrix` API needs
+`DecidableRel G.Adj`, invisible through the `supportGraph` projection
+— discharged once as `supportGraphAdjDecidable` (`Real.decidableLT`).
+
+**QA** `SpectralGraph/KernelBridge_QA.lean` (14 declarations, reusing
+the `Connectivity_QA` fixtures): connected 3-path — bridge
+instantiates, component count `1`, dimension `1`, basis vector
+constantly `1`, all simultaneous with the connected span theorem (a
+mis-stated bridge would contradict it); disconnected two-edge fixture
+— component count computed to `2` **independently of the transferred
+theorem** (block classification + `Nat.card_eq_two_iff`), dimension
+`2`, basis vectors computed to `![1,1,0,0]`/`![0,0,1,1]`, kernel
+strictly larger than the constants (connectivity load-bearing).
+Radar re-scored per protocol (proof + QA landed): subject axis 6
+(electrical) 1.0 → 1.5 — weighted component structure complete; the
+score stays below 2.0 because no electrical quantity (resistance,
+Matrix–Tree, Kirchhoff) is defined yet. Umbrella, scoreboard (307 QA
+declarations, 22 modules), SGT index map, backlog item 7, and
+proposal checklist updated.
+
+**Next milestone (open):** proposal step 4 — potential solvability
+for zero-sum demand (`∃ f, laplacian A *ᵥ f = b` when `∑ b = 0`; the
+hinge: the proposal forbids defining effective resistance before it
+lands). The proposal requires recording the route decision
+(orthogonality `range L = (ker L)ᗮ` vs constructive eigenbasis
+`f = ∑_{λ≠0} (⟨v,b⟩/λ) v`) before stating. Or the still-open earlier
+candidates: the `evals (c • M) = c • evals M` Mathlib-excavation, an
+irregular Cheeger statement shape through
+`rayleigh_normalizedLaplacian_degreeSqrt` (needs a precise source and
+consumer), or backlog item 3 variants with named consumers.
+
 ## Ready queue
 
 1. Citation hygiene — completed 2026-08-17 (see Active milestone and Last
@@ -399,6 +458,21 @@ consumer), or backlog item 3 variants with named consumers.
    combinations, centering, sums) only when a consumer names them.
 
 ## Last verified state
+
+- 2026-08-18 (electrical-crust step 3: kernel-equality bridge):
+  `lake env lean` on `GraphTheory.Spectral` (zero errors; zero *new*
+  warnings — the pre-existing linter notes are untouched code) and on
+  `GraphTheory.SimpleGraphAdapter` and
+  `QA.SpectralGraph.KernelBridge_QA` (both zero errors, zero
+  warnings); `lake build Scaffold.Mathlib.GraphTheory.SimpleGraphAdapter`
+  ✔; full `lake build` ✔ (2177 targets); all twenty-two QA modules
+  elaborated directly in one batch (exit 0, zero failures); 307 QA
+  declarations (+14), no `sorry`/`admit` anywhere under `Scaffold/`;
+  18 explicit cited axioms (unchanged — pure hard crust); all hygiene
+  scripts pass (`lint_axioms`, `check_citations`,
+  `check_markdown_links`); scoreboard regenerated; SGT index map,
+  backlog item 7, radar (subject axis 6: 1.0 → 1.5, recorded), and
+  proposal checklist updated.
 
 - 2026-08-18 (SimpleGraph→WAdj adapter): `lake env lean` on
   `GraphTheory.SimpleGraphAdapter` and on

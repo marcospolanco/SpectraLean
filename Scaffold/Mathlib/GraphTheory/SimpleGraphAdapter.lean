@@ -246,4 +246,96 @@ theorem laplacian_toWAdj_kernel_eq_span_ones (hconn : G.Connected) :
     (SimpleGraph.toWAdj_nonneg G)
     (by rw [supportGraph_toWAdj_eq_self]; exact hconn)
 
+/-!
+## Step 3: the kernel-equality bridge — Mathlib component facts for the
+weighted Laplacian
+
+Mathlib's `lapMatrix` kernel results are unweighted-only; Scaffold's
+delivered kernel characterization is connected-only. The bridge below
+joins them: the kernel of the *weighted* Laplacian equals the kernel of
+Mathlib's unweighted Laplacian of the support graph, because both are
+exactly the vectors constant on the connected components of the support
+graph (`laplacian_mulVec_eq_zero_iff_forall_reachable` on the weighted
+side, `lapMatrix_toLin'_apply_eq_zero_iff_forall_reachable` on the
+Mathlib side). Through this one equality, Mathlib's component-indexed
+kernel facts — the dimension count and the component-indicator basis —
+transfer onto every symmetric nonnegative weighted graph
+(`proposals/electrical-structure-crust.md`, step 3).
+-/
+
+section Bridge
+
+/-- Support-graph adjacency is decidable — off-diagonal strict
+positivity of real weights. Instance search cannot see through the
+`supportGraph` projection to find this, so it is provided here once;
+it discharges the `DecidableRel G.Adj` hypothesis of Mathlib's
+`lapMatrix` API (and, through it, the `Fintype G.ConnectedComponent`
+machinery) for every weighted support graph. -/
+noncomputable instance supportGraphAdjDecidable (A : WAdj (V := V))
+    (hA : A.IsSymm) : DecidableRel (supportGraph A hA).Adj := by
+  intro i j
+  exact inferInstanceAs (Decidable (i ≠ j ∧ 0 < A i j))
+
+/-- **The kernel-equality bridge:** the kernel of the weighted
+Laplacian equals the kernel of Mathlib's unweighted Laplacian of the
+support graph. Weights do not change the kernel — only the support
+pattern matters. This is the rewrite through which Mathlib's
+`lapMatrix` kernel API (and, conversely, the weighted center's
+structure theorems) crosses representations. -/
+theorem ker_laplacian_eq_ker_supportGraph_lapMatrix (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j) :
+    LinearMap.ker (Matrix.mulVecLin (laplacian A))
+      = LinearMap.ker (Matrix.toLin' ((supportGraph A hA).lapMatrix ℝ)) := by
+  ext f
+  simp only [LinearMap.mem_ker, Matrix.mulVecLin_apply]
+  rw [laplacian_mulVec_eq_zero_iff_forall_reachable A hA hnonneg f]
+  exact (SimpleGraph.lapMatrix_toLin'_apply_eq_zero_iff_forall_reachable
+    (supportGraph A hA) f).symm
+
+/-- **Component count = kernel dimension, weighted form:** the
+dimension of the kernel of the *weighted* Laplacian is the number of
+connected components of the support graph — Mathlib's
+`card_ConnectedComponent_eq_rank_ker_lapMatrix` transferred through the
+kernel-equality bridge. This generalizes the connected case (kernel =
+line of constants, i.e. dimension one) to every symmetric nonnegative
+weighted graph, disconnected ones included. -/
+theorem finrank_ker_laplacian_eq_card_supportGraph_components (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j) :
+    Module.finrank ℝ (LinearMap.ker (Matrix.mulVecLin (laplacian A)))
+      = Fintype.card (supportGraph A hA).ConnectedComponent := by
+  rw [ker_laplacian_eq_ker_supportGraph_lapMatrix A hA hnonneg,
+    ← (supportGraph A hA).card_ConnectedComponent_eq_rank_ker_lapMatrix]
+
+/-- **The component-indicator basis of the weighted kernel:** Mathlib's
+`lapMatrix_ker_basis` transported through the kernel-equality bridge.
+The kernel of the weighted Laplacian of any symmetric nonnegative
+weighted graph has a basis indexed by the connected components of the
+support graph, consisting of the component indicator functions
+(`laplacian_ker_basis_apply`). -/
+noncomputable def laplacian_ker_basis (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hnonneg : ∀ i j, 0 ≤ A i j)
+    [DecidableEq (supportGraph A hA).ConnectedComponent] :
+    Basis ((supportGraph A hA).ConnectedComponent) ℝ
+      (LinearMap.ker (Matrix.mulVecLin (laplacian A))) :=
+  ((supportGraph A hA).lapMatrix_ker_basis).map
+    (LinearEquiv.ofEq _ _
+      (ker_laplacian_eq_ker_supportGraph_lapMatrix A hA hnonneg).symm)
+
+/-- Interface: the `c`-th vector of `laplacian_ker_basis` is the
+indicator of the component `c` — `1` on the vertices of `c`, `0`
+elsewhere. -/
+theorem laplacian_ker_basis_apply (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hnonneg : ∀ i j, 0 ≤ A i j)
+    [DecidableEq (supportGraph A hA).ConnectedComponent]
+    (c : (supportGraph A hA).ConnectedComponent) (i : V) :
+    (laplacian_ker_basis A hA hnonneg c : V → ℝ) i =
+      if (supportGraph A hA).connectedComponentMk i = c then 1 else 0 := by
+  have h : (laplacian_ker_basis A hA hnonneg c : V → ℝ)
+      = ((supportGraph A hA).lapMatrix_ker_basis c : V → ℝ) := rfl
+  rw [h]
+  simp only [SimpleGraph.lapMatrix_ker_basis, Basis.mk_apply]
+  rfl
+
+end Bridge
+
 end SpectralGraphTheory

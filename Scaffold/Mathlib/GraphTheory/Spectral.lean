@@ -834,6 +834,75 @@ theorem laplacian_kernel_eq_span_onesVec (A : WAdj (V := V)) (hA : A.IsSymm)
     exact laplacian_ones_in_kernel A
 
 /-!
+### The kernel on a disconnected graph (component form)
+
+The connected statement above identifies the kernel with the constants.
+The component form below drops the connectivity hypothesis entirely:
+`L *ᵥ f = 0` exactly when `f` is constant on each connected component
+of the support graph. This is the weighted counterpart of Mathlib's
+`SimpleGraph.lapMatrix_toLin'_apply_eq_zero_iff_forall_reachable` and
+the load-bearing statement behind the kernel-equality bridge to
+Mathlib's `lapMatrix` kernel in
+`Scaffold.Mathlib.GraphTheory.SimpleGraphAdapter` (proposal
+`proposals/electrical-structure-crust.md`, step 3).
+-/
+
+/-- Entrywise action of the Laplacian in diffusion form:
+`(L *ᵥ f) i = ∑ j, A i j * (f i - f j)`. The degree part of the matrix
+cancels the `j = i` term, so self-loop weights do not appear — the
+same cancellation that keeps `supportGraph` loopless honest. -/
+theorem laplacian_mulVec_apply (A : WAdj (V := V)) (f : V → ℝ) (i : V) :
+    (laplacian A).mulVec f i = ∑ j, A i j * (f i - f j) := by
+  have hdeg : ∑ j, degreeMatrix A i j * f j = deg A i * f i := by
+    refine (Finset.sum_eq_single i ?_ ?_).trans ?_
+    · intro j _ hj
+      rw [degreeMatrix_off_diagonal A (Ne.symm hj), zero_mul]
+    · intro hi
+      exact absurd (Finset.mem_univ i) hi
+    rw [degreeMatrix_diagonal]
+  have hrow : deg A i * f i = ∑ j, A i j * f i := by
+    rw [deg, Finset.sum_mul]
+  simp only [laplacian, Matrix.sub_apply, Matrix.mulVec, Matrix.dotProduct,
+    sub_mul]
+  rw [Finset.sum_sub_distrib, hdeg, hrow, ← Finset.sum_sub_distrib]
+  exact Finset.sum_congr rfl fun j _ => by rw [mul_sub]
+
+/-- A vector that is constant on each connected component of the
+support graph is killed by the Laplacian — the kernel-characterization
+direction that needs **no** connectivity hypothesis. Entrywise, every
+term `A i j * (f i - f j)` of the diffusion form vanishes: a positive
+off-diagonal weight is a support-graph edge, along which `f` is
+constant by hypothesis. -/
+theorem laplacian_mulVec_eq_zero_of_forall_reachable (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j) {f : V → ℝ}
+    (hf : ∀ i j : V, (supportGraph A hA).Reachable i j → f i = f j) :
+    (laplacian A).mulVec f = 0 := by
+  funext i
+  rw [laplacian_mulVec_apply]
+  refine Finset.sum_eq_zero fun j _ => ?_
+  rcases eq_or_lt_of_le (hnonneg i j) with h0 | hpos
+  · rw [← h0, zero_mul]
+  · by_cases hij : i = j
+    · subst hij
+      rw [sub_self, mul_zero]
+    · rw [hf i j ((supportGraph_adj.2 ⟨hij, hpos⟩).reachable),
+        sub_self, mul_zero]
+
+/-- **The kernel characterization, component form** (no connectivity
+hypothesis): for symmetric nonnegative weights, `L *ᵥ f = 0` if and
+only if `f` is constant along reachability in the support graph, i.e.
+constant on each connected component. One direction is the walk
+propagation behind `laplacian_kernel_eq_span_onesVec`; the converse is
+`laplacian_mulVec_eq_zero_of_forall_reachable`. -/
+theorem laplacian_mulVec_eq_zero_iff_forall_reachable (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j) (f : V → ℝ) :
+    (laplacian A).mulVec f = 0 ↔
+      ∀ i j : V, (supportGraph A hA).Reachable i j → f i = f j :=
+  ⟨fun hf i j h =>
+      Nonempty.elim h fun w => eq_of_supportGraph_walk A hA hnonneg hf w,
+    fun hf => laplacian_mulVec_eq_zero_of_forall_reachable A hA hnonneg hf⟩
+
+/-!
 ## 6. Event-driven adjacency updates
 -/
 

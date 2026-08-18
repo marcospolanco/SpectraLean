@@ -895,12 +895,208 @@ constant on each connected component. One direction is the walk
 propagation behind `laplacian_kernel_eq_span_onesVec`; the converse is
 `laplacian_mulVec_eq_zero_of_forall_reachable`. -/
 theorem laplacian_mulVec_eq_zero_iff_forall_reachable (A : WAdj (V := V))
-    (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j) (f : V → ℝ) :
+    (hA : Matrix.IsSymm A) (hnonneg : ∀ i j, 0 ≤ A i j) (f : V → ℝ) :
     (laplacian A).mulVec f = 0 ↔
       ∀ i j : V, (supportGraph A hA).Reachable i j → f i = f j :=
   ⟨fun hf i j h =>
       Nonempty.elim h fun w => eq_of_supportGraph_walk A hA hnonneg hf w,
     fun hf => laplacian_mulVec_eq_zero_of_forall_reachable A hA hnonneg hf⟩
+
+/-!
+### Potential solvability (the electrical hinge)
+
+The solvability half of the potential equation: on a connected graph
+(symmetric, nonnegative weights), every zero-sum demand `b` admits a
+potential `f` with `laplacian A *ᵥ f = b`. Existence is *not* implied by
+the kernel characterization — it is the hinge on which the electrical
+program turns, and `proposals/electrical-structure-crust.md` gates any
+definition of effective resistance behind it (step 4 there).
+
+Route decision, recorded before stating: the **constructive eigenbasis**
+route (witness `f = ∑_{λᵢ ≠ 0} (vᵢ ⬝ᵥ b / λᵢ) • vᵢ`), not the
+orthogonality route (`range L = (ker L)ᗮ`, for which the pin has no
+ready-made lemma over these function types). The constructive route
+consumes the center's own proved spectral tools — orthonormality
+(`eigvecOf_inner`), completeness (`eigvecOf_complete`), the eigenvector
+equation (`mulVec_eigenvectorBasis`) — and the step-2 kernel theorem
+`laplacian_kernel_eq_span_onesVec`, so an error in any of them would
+break this proof rather than pass beside it.
+-/
+
+/-- Reciprocity: the Laplacian is self-adjoint in coordinates,
+`w ⬝ᵥ (L *ᵥ f) = (L *ᵥ w) ⬝ᵥ f` (a discrete Green identity). This is
+`Matrix.dotProduct_mulVec` plus symmetry of `L`. Consumers: the kernel
+certificate below, the negative solvability witnesses in
+`Scaffold/QA/SpectralGraph/PotentialSolvability_QA.lean`, and the energy
+identities of the electrical program (proposal step 5). -/
+theorem laplacian_dotProduct_mulVec (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (w f : V → ℝ) :
+    Matrix.dotProduct w (laplacian A *ᵥ f)
+      = Matrix.dotProduct (laplacian A *ᵥ w) f := by
+  rw [Matrix.dotProduct_mulVec, ← Matrix.vecMul_transpose,
+    (laplacian_symmetric A hA).eq]
+
+/-- Kernel vectors certify unsolvability: if `L *ᵥ w = 0`, then every
+image `L *ᵥ f` is `⬝ᵥ`-orthogonal to `w`. Contrapositive: a demand `b`
+with `w ⬝ᵥ b ≠ 0` for some kernel vector `w` admits no potential — the
+shape of every unsolvability witness. -/
+theorem dotProduct_eq_zero_of_laplacian_mulVec_eq_zero
+    (A : WAdj (V := V)) (hA : Matrix.IsSymm A) {w f : V → ℝ}
+    (hw : (laplacian A).mulVec w = 0) :
+    Matrix.dotProduct w (laplacian A *ᵥ f) = 0 := by
+  rw [laplacian_dotProduct_mulVec A hA w f, hw, Matrix.zero_dotProduct]
+
+/-- Entrywise action of a symmetric matrix on a finite combination of
+its eigenbasis vectors: multiplying distributes over the combination and
+each eigenvector returns its eigenvalue. A general coefficient `c` keeps
+the statement instantiation-friendly; the coefficient never needs to be
+unfolded at use sites. -/
+theorem mulVec_eigvecOf_sum_apply {M : Matrix V V ℝ} (hM : M.IsSymm)
+    (c : V → ℝ) (a : V) :
+    (M *ᵥ (fun a => ∑ i, c i * eigvecOf M hM i a)) a
+      = ∑ i, c i * (eigvalOf M hM i * eigvecOf M hM i a) := by
+  have hev : ∀ i : V, M *ᵥ eigvecOf M hM i
+      = eigvalOf M hM i • eigvecOf M hM i :=
+    fun i => (isHermitian_of_isSymm hM).mulVec_eigenvectorBasis i
+  have h1 : (M *ᵥ (fun a => ∑ i, c i * eigvecOf M hM i a)) a
+      = ∑ k, M a k * ∑ i, c i * eigvecOf M hM i k := by
+    simp only [Matrix.mulVec, Matrix.dotProduct]
+  have h2 : ∀ i : V, ∑ k, M a k * eigvecOf M hM i k
+      = eigvalOf M hM i * eigvecOf M hM i a := by
+    intro i
+    exact congrFun (hev i) a
+  have hfold : ∀ i : V, c i * ∑ k, M a k * eigvecOf M hM i k
+      = ∑ k, c i * (M a k * eigvecOf M hM i k) := by
+    intro i
+    simp only [Finset.mul_sum]
+  rw [h1]
+  simp only [Finset.mul_sum]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  have hr : ∀ k : V, M a k * (c i * eigvecOf M hM i k)
+      = c i * (M a k * eigvecOf M hM i k) := fun k => by ring
+  calc ∑ k, M a k * (c i * eigvecOf M hM i k)
+      = ∑ k, c i * (M a k * eigvecOf M hM i k) :=
+        Finset.sum_congr rfl fun k _ => hr k
+    _ = c i * ∑ k, M a k * eigvecOf M hM i k := (hfold i).symm
+    _ = c i * (eigvalOf M hM i * eigvecOf M hM i a) := by rw [h2 i]
+
+/-- **Constructive spectral inversion.** For a symmetric matrix `M`, a
+demand `b` whose components along the zero-eigenvalue eigenvectors all
+vanish is in the range of `mulVec`: the witness is the pseudo-inverse
+combination `f = ∑_{λᵢ ≠ 0} (vᵢ ⬝ᵥ b / λᵢ) • vᵢ` over the orthonormal
+eigenbasis, and `M *ᵥ f = b` follows from the eigenvector equation plus
+completeness of the basis. This is the load-bearing consumer of the
+eigenbasis algebra (`eigvecOf_inner`, `eigvecOf_complete`,
+`mulVec_eigenvectorBasis`): a defect in any of them breaks this proof. -/
+theorem exists_mulVec_eq_of_zero_comp {M : Matrix V V ℝ} (hM : M.IsSymm)
+    {b : V → ℝ}
+    (hz : ∀ i : V, eigvalOf M hM i = 0 →
+      Matrix.dotProduct (eigvecOf M hM i) b = 0) :
+    ∃ f : V → ℝ, M *ᵥ f = b := by
+  -- The eigenbasis resolves every demand: `b = ∑ i, (v i ⬝ᵥ b) • v i`.
+  have hexp : ∀ a : V, ∑ i, Matrix.dotProduct (eigvecOf M hM i) b
+      * eigvecOf M hM i a = b a := by
+    intro a
+    calc ∑ i, Matrix.dotProduct (eigvecOf M hM i) b
+          * eigvecOf M hM i a
+        = ∑ i, ∑ k, (eigvecOf M hM i k * b k)
+            * eigvecOf M hM i a := by
+          exact Finset.sum_congr rfl fun i _ => by
+            simp only [Matrix.dotProduct, Finset.sum_mul]
+      _ = ∑ k, ∑ i, (eigvecOf M hM i k * b k)
+          * eigvecOf M hM i a := Finset.sum_comm
+      _ = ∑ k, b k * ∑ i, eigvecOf M hM i k
+          * eigvecOf M hM i a := by
+          refine Finset.sum_congr rfl fun k _ => ?_
+          rw [Finset.mul_sum]
+          exact Finset.sum_congr rfl fun i _ => by ring
+      _ = ∑ k, b k * (if k = a then 1 else 0) := by
+          refine Finset.sum_congr rfl fun k _ => ?_
+          rw [eigvecOf_complete M hM k a]
+      _ = b a := by simp
+  -- Per eigenvector, the divided coefficient remultiplies to the demand
+  -- component; the zero-eigenvalue terms vanish by `hz`.
+  have hterm : ∀ i a : V, (if eigvalOf M hM i = 0 then (0 : ℝ)
+      else Matrix.dotProduct (eigvecOf M hM i) b / eigvalOf M hM i)
+      * (eigvalOf M hM i * eigvecOf M hM i a)
+      = Matrix.dotProduct (eigvecOf M hM i) b * eigvecOf M hM i a := by
+    intro i a
+    by_cases h0 : eigvalOf M hM i = 0
+    · rw [if_pos h0, zero_mul, hz i h0, zero_mul]
+    · rw [if_neg h0, ← mul_assoc, div_mul_cancel₀ _ h0]
+  -- The witness: divide each eigencomponent by its eigenvalue, dropping
+  -- the (vanishing) kernel components.
+  refine ⟨fun a => ∑ i, (if eigvalOf M hM i = 0 then (0 : ℝ)
+      else Matrix.dotProduct (eigvecOf M hM i) b / eigvalOf M hM i)
+      * eigvecOf M hM i a, ?_⟩
+  funext a
+  calc (M *ᵥ (fun a => ∑ i, (if eigvalOf M hM i = 0 then (0 : ℝ)
+          else Matrix.dotProduct (eigvecOf M hM i) b / eigvalOf M hM i)
+          * eigvecOf M hM i a)) a
+      = ∑ i, (if eigvalOf M hM i = 0 then (0 : ℝ)
+          else Matrix.dotProduct (eigvecOf M hM i) b / eigvalOf M hM i)
+          * (eigvalOf M hM i * eigvecOf M hM i a) :=
+        mulVec_eigvecOf_sum_apply hM
+          (fun i => if eigvalOf M hM i = 0 then (0 : ℝ)
+            else Matrix.dotProduct (eigvecOf M hM i) b / eigvalOf M hM i) a
+    _ = ∑ i, Matrix.dotProduct (eigvecOf M hM i) b
+          * eigvecOf M hM i a :=
+          Finset.sum_congr rfl fun i _ => hterm i a
+    _ = b a := hexp a
+
+/-- **Potential solvability (the electrical hinge).** For a connected
+graph with symmetric nonnegative weights, every zero-sum demand `b`
+(`∑ i, b i = 0`) admits a potential `f` with `laplacian A *ᵥ f = b`.
+
+The zero-sum hypothesis discharges exactly the kernel components of the
+demand: by `laplacian_kernel_eq_span_onesVec` the kernel is the line
+spanned by `onesVec` (proposal step 2), and `onesVec ⬝ᵥ b = ∑ i, b i`.
+Existence and this uniqueness-with-constants together are what justify a
+total `effectiveResistance` in proposal step 5; defining it before this
+theorem would admit vacuous proofs. -/
+theorem exists_laplacian_mulVec_eq_of_sum_eq_zero (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (hconn : (supportGraph A hA).Connected) {b : V → ℝ}
+    (hb : ∑ i, b i = 0) :
+    ∃ f : V → ℝ, (laplacian A).mulVec f = b := by
+  have hL : (laplacian A).IsSymm := laplacian_symmetric A hA
+  have hevL : ∀ i : V, laplacian A *ᵥ eigvecOf (laplacian A) hL i
+      = eigvalOf (laplacian A) hL i • eigvecOf (laplacian A) hL i :=
+    fun i => (isHermitian_of_isSymm hL).mulVec_eigenvectorBasis i
+  refine exists_mulVec_eq_of_zero_comp hL fun i hi => ?_
+  have hmem : eigvecOf (laplacian A) hL i
+      ∈ LinearMap.ker (Matrix.mulVecLin (laplacian A)) := by
+    rw [LinearMap.mem_ker, Matrix.mulVecLin_apply, hevL i, hi, zero_smul]
+  have hspan : eigvecOf (laplacian A) hL i
+      ∈ Submodule.span ℝ ({onesVec} : Set (V → ℝ)) := by
+    rw [← laplacian_kernel_eq_span_onesVec A hA hnonneg hconn]
+    exact hmem
+  obtain ⟨c, hc⟩ := Submodule.mem_span_singleton.1 hspan
+  calc Matrix.dotProduct (eigvecOf (laplacian A) hL i) b
+      = Matrix.dotProduct (c • onesVec) b := by rw [hc]
+    _ = c * (∑ k, b k) := by
+        simp only [Matrix.dotProduct, onesVec, Pi.smul_apply, smul_eq_mul,
+          mul_one, Finset.mul_sum]
+    _ = 0 := by rw [hb, mul_zero]
+
+/-- **The unit demand is solvable:** on a connected graph with symmetric
+nonnegative weights, the demand `e u − e v` (unit injection at `u`, unit
+extraction at `v`; `e u = Pi.single u 1`) admits a potential. This is the
+equation that defines effective resistance in proposal step 5: `r` is
+`f u − f v` for a solution `f`, whose uniqueness modulo constants comes
+from `laplacian_mulVec_eq_zero_iff_exists_const`. -/
+theorem exists_laplacian_mulVec_eq_single_sub_single (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (hconn : (supportGraph A hA).Connected) (u v : V) :
+    ∃ f : V → ℝ, (laplacian A).mulVec f
+      = Pi.single u (1 : ℝ) - Pi.single v (1 : ℝ) := by
+  refine exists_laplacian_mulVec_eq_of_sum_eq_zero A hA hnonneg hconn ?_
+  simp only [Pi.sub_apply, Finset.sum_sub_distrib]
+  have h1 : ∀ w : V, ∑ i, Pi.single w (1 : ℝ) i = 1 := by
+    intro w
+    simp
+  rw [h1 u, h1 v, sub_self]
 
 /-!
 ## 6. Event-driven adjacency updates

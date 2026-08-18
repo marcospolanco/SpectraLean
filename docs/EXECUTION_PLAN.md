@@ -426,18 +426,58 @@ Matrix–Tree, Kirchhoff) is defined yet. Umbrella, scoreboard (307 QA
 declarations, 22 modules), SGT index map, backlog item 7, and
 proposal checklist updated.
 
-**Next milestone (open):** proposal step 4 — potential solvability
-for zero-sum demand (`∃ f, laplacian A *ᵥ f = b` when `∑ b = 0`; the
-hinge: the proposal forbids defining effective resistance before it
-lands). The proposal requires recording the route decision
-(orthogonality `range L = (ker L)ᗮ` vs constructive eigenbasis
-`f = ∑_{λ≠0} (⟨v,b⟩/λ) v`) before stating. Or the still-open earlier
-candidates: the `evals (c • M) = c • evals M` Mathlib-excavation, an
-irregular Cheeger statement shape through
-`rayleigh_normalizedLaplacian_degreeSqrt` (needs a precise source and
-consumer), or backlog item 3 variants with named consumers.
+**Active slice (run 1, 2026-08-18): electrical-crust step 4 — potential
+solvability, the hinge — DELIVERED.** Operator direction pinned
+`proposals/electrical-structure-crust.md` **step 4 only**; steps 5–6
+were NOT started — landing the hinge cleanly is the successful
+outcome. All proved, **no new axioms** (count unchanged at 18).
+
+**Route decision (recorded before stating, per the proposal):** the
+**constructive eigenbasis** route was taken. Survey (this run): the pin
+still has no ready-made `range L = (ker L)ᗮ` lemma over these function
+types; the center's proved eigenbasis tools are exactly sufficient.
+
+**Delivered center declarations** (`GraphTheory.Spectral`):
+`laplacian_dotProduct_mulVec` (reciprocity `w ⬝ᵥ (L *ᵥ f) = (L *ᵥ w) ⬝ᵥ
+f`, from `Matrix.dotProduct_mulVec` + symmetry), the kernel certificate
+`dotProduct_eq_zero_of_laplacian_mulVec_eq_zero` (unsolvability
+witnesses), `mulVec_eigvecOf_sum_apply` (entrywise action on
+eigenbasis combinations) and `exists_mulVec_eq_of_zero_comp`
+(constructive spectral inversion `f = ∑_{λᵢ ≠ 0} (vᵢ ⬝ᵥ b/λᵢ) • vᵢ` —
+the load-bearing consumer of the eigenbasis algebra), the headline
+`exists_laplacian_mulVec_eq_of_sum_eq_zero` (zero-sum ⇒ solvable on
+connected graphs; the zero-eigenvalue components of `b` die through
+`laplacian_kernel_eq_span_onesVec`, step 2's theorem), and the
+specialization `exists_laplacian_mulVec_eq_single_sub_single` (unit
+demand `e u − e v` solvable — step 5's defining equation).
+
+**QA** `SpectralGraph/PotentialSolvability_QA.lean` (12 declarations,
+reusing `Connectivity_QA` fixtures + a new two-vertex edge fixture):
+computed potentials on the edge (`L *ᵥ ![1,0] = e₀ − e₁`) and the
+3-path (`L *ᵥ ![1,0,−1] = e₀ − e₂`, the vector is fixed by its own
+Laplacian); theorem instantiations (unit-demand and a general
+alternating zero-sum demand); and **proved unsolvability** witnesses —
+demand `e₀` (sum `1`) has no solution on the connected edge (via the
+all-ones kernel certificate), and the zero-sum cross-component demand
+`e₀ − e₂` has no solution on the disconnected fixture (via the
+component-indicator kernel certificate) — both hypotheses shown
+load-bearing, exactly per the proposal's step-4 witness spec. Radar
+re-scored per protocol (proof + QA landed): subject axis 6 (electrical)
+1.5 → 2.0 — the potential equation is now *completely characterized*
+on connected graphs; the axis stays modest because no electrical
+quantity is defined yet. Umbrella, scoreboard (319 QA declarations, 23
+modules), SGT index map, backlog item 7, README snapshot, and proposal
+checklist updated.
 
 ## Ready queue
+
+1. Proposal step 5 — effective resistance by the potential equation
+   (`IsEffectiveResistance A u v r ↔ ∃ f, laplacian A *ᵥ f = e u − e v
+   ∧ f u − f v = r`), now unlocked: existence from step 4's
+   `exists_laplacian_mulVec_eq_single_sub_single`, uniqueness of `r`
+   from step 2's kernel theorem. Split across two runs if the
+   definition and the energy identity do not land together (proposal's
+   own guidance).
 
 1. Citation hygiene — completed 2026-08-17 (see Active milestone and Last
    verified state); Chung provenance corrected, Weyl/Davis–Kahan fidelity
@@ -458,6 +498,25 @@ consumer), or backlog item 3 variants with named consumers.
    combinations, centering, sums) only when a consumer names them.
 
 ## Last verified state
+
+- 2026-08-18 (electrical-crust step 4: potential solvability): `lake
+  env lean` on `GraphTheory.Spectral` (zero errors, zero new warnings —
+  the eight pre-existing linter notes are untouched code) and on
+  `QA.SpectralGraph.PotentialSolvability_QA` (zero errors, zero
+  warnings); `lake build Scaffold.QA.SpectralGraph.PotentialSolvability_QA`
+  and `lake build Scaffold.Mathlib.GraphTheory.SimpleGraphAdapter` (a
+  downstream consumer of the changed module) ✔; full `lake build` ✔
+  (2177 targets); all twenty-three QA modules elaborated directly in
+  one batch (exit 0, zero failures); 319 QA declarations (+12), no
+  `sorry`/`admit` anywhere under `Scaffold/`; 18 explicit cited axioms
+  (unchanged — pure hard crust); all hygiene scripts pass
+  (`lint_axioms`, `check_citations`, `check_markdown_links`);
+  scoreboard regenerated; SGT index map, backlog item 7, radar (subject
+  axis 6: 1.5 → 2.0, recorded), README snapshot, and proposal
+  checklist updated. Environment note: ~300 Mathlib oleans were found
+  pruned at run start (recorded environment debt); the modules needed
+  by the changed files, their consumers, and the full default build
+  were all present and used — no cache fetch was required this run.
 
 - 2026-08-18 (electrical-crust step 3: kernel-equality bridge):
   `lake env lean` on `GraphTheory.Spectral` (zero errors; zero *new*

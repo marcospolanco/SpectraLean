@@ -1,6 +1,6 @@
 # Proposal: Grow the Crust Through Electrical Structure
 
-**Status:** Proposed; steps 1–3 of 6 delivered (2026-08-18, see
+**Status:** Proposed; steps 1–4 of 6 delivered (2026-08-18, see
 checklist below). Assistant's assessment of project direction,
 requested 2026-08-17; substantially re-sequenced 2026-08-18 after
 review (see [Corrections](#corrections)). Authorizes no Lean changes,
@@ -146,7 +146,12 @@ part of the original sequencing error.
   transported `laplacian_ker_basis` live in `SimpleGraphAdapter.lean`;
   QA in `SpectralGraph/KernelBridge_QA.lean` (connected coherence +
   disconnected count/basis computed).
-- [ ] **4. Potential solvability (the hinge)** — not started.
+- [x] **4. Potential solvability (the hinge)** — delivered 2026-08-18:
+  `exists_laplacian_mulVec_eq_of_sum_eq_zero` and
+  `exists_laplacian_mulVec_eq_single_sub_single` in `Spectral.lean`,
+  by the constructive eigenbasis route (decision recorded below); QA
+  in `SpectralGraph/PotentialSolvability_QA.lean` with positive,
+  non-zero-sum negative, and disconnected zero-sum negative witnesses.
 - [ ] **5. Effective resistance, uniqueness, and energy** — not started.
 - [ ] **6. The one-sided Dirichlet bound** — not started.
 
@@ -225,11 +230,31 @@ QA computes the disconnected fixture's component count to `2`
 independently of the transferred theorem and pins both basis vectors
 to the component indicators.
 
-### 4. Potential solvability (the hinge) — not started
+### 4. Potential solvability (the hinge) — ✅ delivered
 
 Prove that for a connected graph and any **zero-sum demand** `b` (that is,
 `∑ i, b i = 0`), there exists `f` with `laplacian A *ᵥ f = b`. Then specialize
 to `b = e u - e v`, which is zero-sum by inspection.
+
+**Delivered 2026-08-18.** Route decision recorded before stating (as
+required): the **constructive eigenbasis** route. The pin still has no
+ready-made `range = (ker)ᗮ` lemma over these function types
+(re-surveyed this run), while the center's proved eigenbasis algebra
+(`eigvecOf_inner`, `eigvecOf_complete`, `mulVec_eigenvectorBasis`) and
+the step-2 kernel theorem are exactly the needed tools, so the witness
+`f = ∑_{λᵢ ≠ 0} (vᵢ ⬝ᵥ b / λᵢ) • vᵢ` is load-bearing on both. New
+center declarations: `exists_mulVec_eq_of_zero_comp` (general spectral
+inversion, with the helper `mulVec_eigvecOf_sum_apply`),
+`exists_laplacian_mulVec_eq_of_sum_eq_zero`,
+`exists_laplacian_mulVec_eq_single_sub_single`, plus the reciprocity
+identity `laplacian_dotProduct_mulVec` and its kernel certificate
+`dotProduct_eq_zero_of_laplacian_mulVec_eq_zero` — the latter two power
+the QA's proved unsolvability witnesses (non-zero-sum demand on the
+connected edge; zero-sum cross-component demand on the disconnected
+fixture via the component indicator), so both hypotheses are shown
+load-bearing, not assumed. No axioms. One implementation note: `rw
+[Finset.mul_sum]` fails to fire on some instance-heavy goals where
+`simp only [Finset.mul_sum]` succeeds; the proofs use the latter.
 
 This is the step the original document omitted. Two routes:
 

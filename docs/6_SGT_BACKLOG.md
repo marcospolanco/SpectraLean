@@ -150,11 +150,29 @@ theorem; disconnected two-edge fixture — component count computed to
 `2` independently of the transferred theorem (block classification +
 `Nat.card_eq_two_iff`), dimension `2`, basis vectors computed to
 `![1,1,0,0]`/`![0,0,1,1]`, kernel strictly larger than the constants.
-No axioms. **Next candidate in this family:** proposal step 4 —
-potential solvability for zero-sum demand (the hinge; the proposal
-forbids defining effective resistance before it lands; route decision
-orthogonality vs constructive eigenbasis to be recorded before
-stating).
+No axioms. **Step 4 delivered (2026-08-18): potential solvability, the
+hinge** — for connected symmetric nonnegative weights, every zero-sum
+demand is solvable (`exists_laplacian_mulVec_eq_of_sum_eq_zero`) and
+the unit demand `e u − e v` in particular
+(`exists_laplacian_mulVec_eq_single_sub_single`). Route decision
+recorded before stating (constructive eigenbasis over orthogonality;
+no ready-made `range = (ker)ᗮ` lemma in the pin, and the witness
+consumes the proved eigenbasis algebra plus the step-2 kernel theorem,
+making it load-bearing on both). Supporting crust:
+`laplacian_dotProduct_mulVec` (reciprocity),
+`dotProduct_eq_zero_of_laplacian_mulVec_eq_zero` (unsolvability
+certificates), `exists_mulVec_eq_of_zero_comp` /
+`mulVec_eigvecOf_sum_apply` (spectral inversion). QA
+`SpectralGraph/PotentialSolvability_QA.lean` (12 declarations):
+computed potentials on the edge and 3-path, plus *proved unsolvability*
+witnesses for the zero-sum hypothesis (demand `e 0` on the connected
+edge) and for connectivity (zero-sum cross-component demand on the
+disconnected fixture, via the indicator kernel certificate). No
+axioms. **Next candidate in this family:** proposal step 5 — define
+`effectiveResistance` by the potential equation
+(`IsEffectiveResistance A u v r ↔ ∃ f, L *ᵥ f = e u − e v ∧ f u − f v
+= r`), consuming step 4 for existence and step 2 for uniqueness of
+`r`; then the energy identity, symmetry, nonnegativity, `R u u = 0`.
 
 ## Standing decisions
 

@@ -1487,3 +1487,111 @@ constructive eigenbasis) before stating; then step 5 (resistance
 uniqueness, consuming `laplacian_kernel_eq_span_onesVec`). Or the
 open earlier candidates: `evals (c • M)` excavation; irregular
 Cheeger shape with a named consumer; backlog item 3 variants.
+
+## 2026-08-18T07:01:06Z — Electrical-crust step 4 started: potential solvability
+
+**Run:** `20260818T070106Z-run-1`
+**Session:** `ses_fec5a1003ffeuJmMzrd6DtYfoa`
+**Status:** in-progress
+**Milestone:** Operator direction "advance
+`proposals/electrical-structure-crust.md`, step 4 only" — the potential
+solvability hinge (`∃ f, laplacian A *ᵥ f = b` for zero-sum `b` on a
+connected graph), which the proposal gates ahead of any definition of
+effective resistance.
+
+**Pre-implementation survey and route decision (recorded before
+stating):** constructive eigenbasis route chosen over the orthogonality
+route. The pin has no ready-made `range = (ker)ᗮ` lemma for the
+function-type spaces the center uses (targeted search over
+`Analysis/InnerProductSpace/` this run; same finding as the proposal's
+own survey), while the center already proves orthonormality
+(`eigvecOf_inner`), completeness (`eigvecOf_complete`), the eigenvector
+equation (`mulVec_eigenvectorBasis`), and the kernel span theorem
+(`laplacian_kernel_eq_span_onesVec`, proposal step 2). The witness
+`f = ∑_{λᵢ ≠ 0} (vᵢ ⬝ᵥ b / λᵢ) • vᵢ` consumes all of them, making the
+solvability theorem load-bearing on the step-2 kernel shape exactly as
+the strategy's falsifiability principle asks. Supporting lemma: the
+reciprocity identity `w ⬝ᵥ (L *ᵥ f) = (L *ᵥ w) ⬝ᵥ f`
+(`Matrix.dotProduct_mulVec` + Laplacian symmetry).
+
+**Next action:** center block in `GraphTheory.Spectral` (reciprocity,
+kernel corollary, main existence theorem, unit-demand specialization),
+QA `SpectralGraph/PotentialSolvability_QA.lean` with positive and both
+negative witnesses (non-zero-sum unsolvable on a connected fixture;
+zero-sum unsolvable on the disconnected fixture), then direct
+elaboration, target builds, full build, hygiene scripts, scoreboard.
+
+## 2026-08-18T07:27:05Z — Electrical-crust step 4 delivered: potential solvability (completed)
+
+**Run:** `20260818T070106Z-run-1`
+**Session:** `ses_fec5a1003ffeuJmMzrd6DtYfoa`
+**Status:** completed
+**Milestone:** Operator direction "advance
+`proposals/electrical-structure-crust.md`, step 4 only" — the potential
+solvability hinge: on a connected graph (symmetric, nonnegative
+weights), every zero-sum demand `b` admits a potential `f` with
+`laplacian A *ᵥ f = b`, specialized to the unit demand `e u − e v`.
+One step per run; step 5 (effective resistance) was not started, per
+the proposal's scope fence — the proposal forbids defining resistance
+before this hinge lands, and it now has.
+
+**Route decision (executed as recorded before stating).** Constructive
+eigenbasis: witness `f = ∑_{λᵢ ≠ 0} (vᵢ ⬝ᵥ b / λᵢ) • vᵢ`. The pin
+(re-surveyed) still lacks a ready-made `range = (ker)ᗮ` lemma for the
+center's function-type spaces, while the route consumes the proved
+eigenbasis algebra and the step-2 kernel theorem — load-bearing on
+both, per the strategy's falsifiability principle.
+
+**Changes.** Center (`Scaffold/Mathlib/GraphTheory/Spectral.lean`):
+`laplacian_dotProduct_mulVec` (reciprocity / discrete Green identity),
+`dotProduct_eq_zero_of_laplacian_mulVec_eq_zero` (kernel vectors
+certify unsolvability), `mulVec_eigvecOf_sum_apply` (entrywise action
+on eigenbasis combinations), `exists_mulVec_eq_of_zero_comp`
+(constructive spectral inversion), `exists_laplacian_mulVec_eq_of_sum_
+eq_zero` (the hinge), `exists_laplacian_mulVec_eq_single_sub_single`
+(unit demand; step 5's defining equation). New QA
+`Scaffold/QA/SpectralGraph/PotentialSolvability_QA.lean` (12
+declarations): edge fixture + `Connectivity_QA` fixtures; computed
+potentials `![1,0]` and `![1,0,−1]`; theorem instantiations; proved
+*unsolvability* witnesses for both hypotheses (non-zero-sum `e₀` on
+the connected edge via the all-ones certificate; zero-sum
+cross-component `e₀ − e₂` on the disconnected fixture via the
+component-indicator certificate). Docs: execution plan, this journal,
+backlog item 7, radar (subject axis 6 re-scored 1.5 → 2.0 per
+protocol — the potential equation is now completely characterized on
+connected graphs; QA-axis counts updated to 319/23), scoreboard
+(regenerated; verification rows and a solvability interpretation
+bullet), SGT index map, README snapshot, proposal checklist marked
+step 4 delivered with the route decision and one implementation note
+(`rw [Finset.mul_sum]` instance-matching quirk; `simp only` used).
+
+**Verification.** `lake env lean` zero errors/zero new warnings on
+`GraphTheory.Spectral` (eight pre-existing linter notes untouched);
+zero errors/zero warnings on `PotentialSolvability_QA`; `lake build`
+of the QA target and of `SimpleGraphAdapter` (downstream consumer) ✔;
+full `lake build` ✔ (2177 targets); all twenty-three QA modules
+elaborated directly in one batch (zero failures); no `sorry`/`admit`
+under `Scaffold/`; `lint_axioms`, `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (319 QA
+declarations, 18 explicit axioms — unchanged; pure hard crust).
+
+**Trust boundary:** unchanged (18 explicit cited axioms); this slice
+added no axioms and consumes none. The solvability theorems are
+unconditional proved hard crust.
+
+**Remaining risk.** The unsolvability direction is QA-witnessed, not
+yet a center theorem (`∃ kernel-certificate ⇔ unsolvable` is the
+natural next center statement; reciprocity makes it short). No
+parametric property QA (standing QA-axis gap). Environment: ~300
+Mathlib oleans pruned at run start (recorded debt); everything this
+slice needed was present, so no cache fetch was required — but the
+pruning may recur and cost a later run the recorded interpreter fetch.
+
+**Next handoff:** proposal step 5 — define `effectiveResistance` by
+the potential equation (`IsEffectiveResistance A u v r ↔ ∃ f, L *ᵥ f
+= e u − e v ∧ f u − f v = r`): existence from step 4, uniqueness of
+`r` from `laplacian_kernel_eq_span_onesVec`; then symmetry,
+nonnegativity, `R u u = 0`, and the energy identity (proposal
+authorizes splitting step 5 across two runs if needed). Or the open
+earlier candidates: `evals (c • M)` excavation; irregular Cheeger
+shape with a named consumer.

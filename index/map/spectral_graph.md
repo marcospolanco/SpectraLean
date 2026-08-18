@@ -64,7 +64,19 @@ form (2026-08-18, proposal step 3's weighted dependency):
 `laplacian_mulVec_eq_zero_iff_forall_reachable` (`L *ᵥ f = 0` iff `f`
 constant on each support-graph component — the weighted counterpart
 of Mathlib's unweighted iff, and the load-bearing statement behind
-the kernel-equality bridge).
+the kernel-equality bridge); potential solvability, the electrical
+hinge (2026-08-18, proposal step 4, constructive eigenbasis route —
+decision recorded in the proposal): `laplacian_dotProduct_mulVec`
+(reciprocity `w ⬝ᵥ (L *ᵥ f) = (L *ᵥ w) ⬝ᵥ f`),
+`dotProduct_eq_zero_of_laplacian_mulVec_eq_zero` (kernel vectors
+certify unsolvability), `mulVec_eigvecOf_sum_apply` (entrywise action
+on eigenbasis combinations) and `exists_mulVec_eq_of_zero_comp`
+(constructive spectral inversion — the load-bearing consumer of the
+eigenbasis algebra), `exists_laplacian_mulVec_eq_of_sum_eq_zero`
+(zero-sum demands are solvable on connected graphs — existence hinge
+gating effective resistance), and
+`exists_laplacian_mulVec_eq_single_sub_single` (the unit demand
+`e u − e v` is solvable; step 5's defining equation).
 
 ### `Scaffold.Mathlib.GraphTheory.SimpleGraphAdapter` (Mathlib interop adapter)
 

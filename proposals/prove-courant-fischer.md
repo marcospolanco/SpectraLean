@@ -1,6 +1,36 @@
 # Proposal: Prove General Courant–Fischer Min-Max (Not Admit It)
 
-**Status:** Proposed. Assistant's assessment of project direction, requested
+**Status:** Delivered 2026-08-18. All three planned theorem forms landed
+in `Scaffold/Mathlib/GraphTheory/Spectral.lean` (new `CourantFischer`
+section) as pure hard crust — no axioms (general min–max was never
+admitted; count stays 15): the two witness directions
+(`exists_submodule_forall_rayleigh_le`,
+`exists_ne_mem_rayleigh_ge_of_finrank_eq`) and the packaged infimum
+equation `evals_min_max`, plus public center API (general-`k`
+multiplicity pins `card_filter_eigvalOf_lt_evals_le` /
+`succ_le_card_filter_eigvalOf_le`, component-form Rayleigh bounds,
+`eigvecOf_dotProduct`, `linearIndependent_eigvecOf_finset`,
+`finrank_span_eigvecOf_finset`,
+`dotProduct_eigvecOf_eq_zero_of_mem_span`). The open next step below was
+resolved first: the dimension-intersection lemma is present in the pin
+(`Submodule.finrank_sup_add_finrank_inf_eq`), together with
+`Finset.exists_subset_card_eq`, `finrank_span_eq_card`,
+`Fintype.linearIndependent_iff`, `Module.finrank_pi`, and
+`Submodule.ne_bot_iff`. QA: `Scaffold/QA/SpectralGraph/
+CourantFischer_QA.lean` (33 declarations) — spectrum pinned from
+trace/determinant/sortedness on a `!![2,1;1,2]` fixture, both directions
+instantiated (including the derived top-eigenvalue-domination universal
+through `Submodule.eq_top_of_finrank_eq` and exact attainment of
+`evals 1`), negative witnesses (wrong subspace refuted; the dimension
+hypothesis load-bearing at index `1`; interior-index wrong
+two-dimensional subspace refuted on the path Laplacian with a
+cross-check against the older `secondEval_le_rayleigh` engine).
+**The four named follow-ons below are NOT delivered by this proposal**
+(interlacing retirement, full Rayleigh/Dirichlet monotonicity, the
+Cheeger hard direction, Fiedler Phase B) — each remains separate
+follow-on work exactly as the proposal states.
+
+Assistant's assessment of project direction, requested
 2026-08-18 — companion to [Admit Perron–Frobenius for Irreducible
 Nonnegative Matrices](admit-perron-frobenius.md), generated from the same
 "biggest single unlock" question, but reaching a **different kind of

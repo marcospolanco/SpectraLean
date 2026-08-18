@@ -76,7 +76,27 @@ eigenbasis algebra), `exists_laplacian_mulVec_eq_of_sum_eq_zero`
 (zero-sum demands are solvable on connected graphs — existence hinge
 gating effective resistance), and
 `exists_laplacian_mulVec_eq_single_sub_single` (the unit demand
-`e u − e v` is solvable; step 5's defining equation).
+`e u − e v` is solvable; step 5's defining equation); the general
+Courant–Fischer min–max (2026-08-18, proposal
+`prove-courant-fischer.md`, proved — never admitted, no axioms):
+`card_filter_eigvalOf_lt_evals_le` / `succ_le_card_filter_eigvalOf_le`
+(general-`k` multiplicity pins — count-form generalizations of the
+`k = 1` pins behind `lambda2_variational`), `eigvecOf_dotProduct`
+(orthonormality in dot-product form), `linearIndependent_eigvecOf_finset`,
+`finrank_span_eigvecOf_finset` (dimension of an eigenbasis subfamily
+span = index count), `rayleigh_le_evals_of_forall_dotProduct_eq_zero` /
+`evals_le_rayleigh_of_forall_dotProduct_eq_zero` (component-form
+Rayleigh bounds through the proved spectral resolution),
+`dotProduct_eigvecOf_eq_zero_of_mem_span` (members of an eigenbasis
+span have vanishing components outside it),
+`exists_submodule_forall_rayleigh_le` (existence direction: a
+`(k+1)`-dimensional subspace all of whose Rayleigh quotients are at
+most `evals k`), `exists_ne_mem_rayleigh_ge_of_finrank_eq` (competitor
+direction: every `(k+1)`-dimensional subspace contains a nonzero test
+vector with quotient at least `evals k`), and `evals_min_max` (the
+packaged infimum equation — `evals k` as the min over subspaces of the
+dominating Rayleigh value), all at every index with *only symmetry*
+assumed.
 
 ### `Scaffold.Mathlib.GraphTheory.SimpleGraphAdapter` (Mathlib interop adapter)
 

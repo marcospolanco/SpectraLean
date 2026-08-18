@@ -36,6 +36,10 @@ cat > "$fixture_dir/bin/codex" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 while (($#)); do
+  if [[ "$1" == "--ask-for-approval" ]]; then
+    echo 'unsupported --ask-for-approval passed to codex exec' >&2
+    exit 64
+  fi
   if [[ "$1" == "--output-last-message" || "$1" == "-o" ]]; then
     printf 'feat(sgt): automate pursuit commits\n' > "$2"
     exit 0

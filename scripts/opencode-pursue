@@ -155,7 +155,7 @@ commit_verified_pursuit() {
   }
   commit_message_file=$(mktemp "$run_dir/codex-commit-message.XXXXXX")
   codex_prompt='You are the independent commit steward for this repository. Inspect the current git diff and the latest completed entry in docs/AGENT_ACTIVITY.md. Do not modify files or run write commands. Return exactly one Conventional Commit subject line (for example: feat(sgt): add spectral bridge). It must be at most 72 characters, begin with feat, fix, docs, chore, refactor, or test, and contain no explanation.'
-  codex exec --ephemeral --sandbox read-only --ask-for-approval never \
+  codex exec --ephemeral --sandbox read-only \
     --cd "$project_dir" --output-last-message "$commit_message_file" "$codex_prompt"
   commit_subject=$(tr -d '\r' < "$commit_message_file")
   rm -f "$commit_message_file"

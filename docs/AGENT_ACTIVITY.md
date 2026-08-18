@@ -2284,3 +2284,106 @@ and the `evals (c • M)` excavation remain open. Concurrent
 working-tree changes preserved untouched (the operator's
 `proposals/{prove-courant-fischer,retire-sherman-morrison,admit-perron-frobenius}.md`
 additions and the `scripts/next-steps` deletion).
+
+## 2026-08-18T21:03:46Z — General Courant–Fischer min–max (proof)
+
+**Run:** `20260818T210346Z-run-1`
+**Session:** `ses_fe9562e17ffe4hhby1PpujPSnj`
+**Status:** in-progress
+**Milestone:** Prove the general Courant–Fischer min–max theorem for the
+sorted spectrum of any real symmetric matrix (the High item in
+`proposals/README.md`, `proposals/prove-courant-fischer.md`), generalizing
+the fixed-k=2 `secondEval_variational` engine to every index. Pure hard
+crust — no axiom is retired (general min–max was never admitted), axiom
+count stays 15 — but it is the proof substrate the proposal names for four
+downstream consumers (interlacing retirement, Rayleigh monotonicity, the
+Cheeger hard direction, Fiedler Phase B).
+
+**Plan (recorded before editing):** the proposal's open next step — survey
+the pin for the dimension-intersection lemma — is resolved affirmatively
+this run: `Submodule.finrank_sup_add_finrank_inf_eq`,
+`Finset.exists_smaller_set`, `finrank_span_eq_card` (Fintype-family form),
+`Fintype.linearIndependent_iff`, `Module.finrank_pi`, and
+`Submodule.ne_bot_iff` are all present in the v4.14.0 pin. Route: two
+witness-form theorems (existence of an optimal `(k+1)`-dimensional
+subspace; every `(k+1)`-dimensional competitor contains a test vector with
+Rayleigh quotient ≥ `evals k`), proved through the existing eigenbasis
+algebra (`quadForm_eigvalOf`, `dotProduct_eigvecOf`,
+`eigvecOf_inner`), plus the packaged `sInf` equality. New general-k
+multiplicity pins (index-filter cardinalities vs `k`) as public center
+API. QA: computable fixture `!![2,1;1,2]` (spectrum `[1,3]` pinned by
+trace/determinant/sortedness, mirroring `edge_normLap_secondEval_eq_two_QA`),
+both directions instantiated, attainment and non-attainment negative
+witnesses (wrong subspace refuted; dimension hypothesis witnessed
+load-bearing), and a `Fin 3` path-Laplacian instantiation.
+
+## 2026-08-18T21:52:24Z — General Courant–Fischer min–max proved
+
+**Run:** `20260818T210346Z-run-1`
+**Session:** `ses_fe9562e17ffe4hhby1PpujPSnj`
+**Status:** completed
+**Milestone:** The High item `proposals/prove-courant-fischer.md` delivered:
+the `k`-th sorted eigenvalue of any real symmetric matrix characterized at
+every index — pure hard crust, axiom count unchanged at 15 (general
+min–max was never admitted), so this is load-bearing proof growth rather
+than trust-surface reduction; it is the named proof substrate for four
+follow-ons (interlacing retirement, Rayleigh monotonicity, the Cheeger
+hard direction, Fiedler Phase B), none claimed here.
+
+**Changes:** `GraphTheory.Spectral` gained a `CourantFischer` section
+(~450 lines): public center API — general-`k` multiplicity pins
+(`card_filter_eigvalOf_lt_evals_le`, `succ_le_card_filter_eigvalOf_le`),
+orthonormal-family tools (`eigvecOf_dotProduct`,
+`linearIndependent_eigvecOf_finset`, `finrank_span_eigvecOf_finset`),
+component-form Rayleigh bounds
+(`rayleigh_le_evals_of_forall_dotProduct_eq_zero`,
+`evals_le_rayleigh_of_forall_dotProduct_eq_zero`), and span-orthogonality
+(`dotProduct_eigvecOf_eq_zero_of_mem_span`); plus the three headline
+forms — `exists_submodule_forall_rayleigh_le`,
+`exists_ne_mem_rayleigh_ge_of_finrank_eq`, `evals_min_max` —
+symmetry-only, reusing the proved eigenbasis algebra plus the pin's
+`Submodule.finrank_sup_add_finrank_inf_eq` (the proposal's open survey
+step, resolved affirmatively before committing). New QA file
+`SpectralGraph/CourantFischer_QA.lean` (33 declarations): spectrum `[1,3]`
+pinned from trace/determinant/sortedness on `!![2,1;1,2]`; both
+directions instantiated, including the derived top-eigenvalue-domination
+universal (existence direction + `eq_top_of_finrank_eq`) and exact
+attainment of `evals 1` through both directions; negative witnesses —
+wrong line refuted (`3 ≤ 1`), dimension hypothesis load-bearing
+(conclusion false on a one-dimensional subspace at index `1`), interior
+index `k = 1 < n−1` exercised on the path Laplacian (wrong
+two-dimensional subspace refuted at `4/3`; cross-check against the older
+`secondEval_le_rayleigh` engine). Records: scoreboard (15/476/0,
+milestone bullet), radar (subject axis 3 re-scored 3.5 → 4.0 per
+protocol; QA count 476/27; proved-depth text), README (axis cell, counts,
+maturity), SGT index map, proposal delivery record,
+`proposals/README.md` (High item → Delivered; no High remains).
+
+**Verification:** `lake env lean` on `GraphTheory.Spectral` (zero errors;
+no new warnings after silencing the one new-code section-variable note
+with `omit`) and on `QA.SpectralGraph.CourantFischer_QA` (zero errors,
+zero warnings); targeted `lake build` of both targets ✔; full
+`lake build` ✔ (2179 targets); all twenty-seven QA modules elaborated
+directly in one batch (zero failures); 476 QA declarations (+33), no
+`sorry`/`admit` anywhere under `Scaffold/` (textual matches are prose);
+15 explicit cited axioms (unchanged); `lint_axioms`, `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (15/476/0) and
+re-checked idempotent after the manual prose edits.
+
+**Remaining risk:** none identified in the delivered proof — it is
+kernel-checked with no new axioms or admissions, and the QA falsifies
+nearby wrong statements rather than merely instantiating the theorem.
+The four named consumers are open follow-ons needing their own scoping
+(the proposal explicitly forbids claiming them); the packaged
+`evals_min_max` expresses the within-subspace maximum as the infimum of
+dominating values, an honest but non-standard packaging documented in
+its docstring.
+
+**Next handoff:** no High item remains in `proposals/README.md`.
+Candidates for the next run: the Sherman–Morrison retirement (Medium,
+cheapest remaining); the interlacing retirement through the new min–max
+theorem (its first named consumer); full Rayleigh/Dirichlet monotonicity;
+Fiedler Phase B (Medium, decision-gated). Unrelated working-tree changes
+(the operator's `scripts/opencode-pursue` and
+`scripts/test_opencode_pursue.sh` modifications) preserved untouched;
+nothing committed.

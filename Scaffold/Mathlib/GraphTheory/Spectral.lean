@@ -1848,6 +1848,432 @@ theorem lambda2_variational (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
 
 end Lambda2Variational
 
+section CourantFischer
+
+/-!
+### General Courant–Fischer min–max
+
+The `k`-th sorted eigenvalue of *any* real symmetric matrix, at every
+index `k`, as a subspace-constrained optimization. This generalizes the
+fixed-index-1 engine of `secondEval_variational` (which additionally
+assumes PSD and a known kernel vector): no positivity, kernel, or
+graph-side hypothesis is needed here, only symmetry.
+
+The min–max theorem is delivered in three forms:
+`exists_submodule_forall_rayleigh_le` (an optimal `(k+1)`-dimensional
+subspace exists), `exists_ne_mem_rayleigh_ge_of_finrank_eq` (every
+`(k+1)`-dimensional competitor contains a test vector whose Rayleigh
+quotient is at least `evals k`), and the packaged infimum equation
+`evals_min_max`.
+-/
+
+/-- Empty-filter helper (private): a list containing no entry strictly
+below the threshold filters to the empty list. -/
+private theorem filter_nil_of_forall_lt {t : ℝ} {l : List ℝ}
+    (h : ∀ x ∈ l, ¬ x < t) :
+    l.filter (fun x => decide (x < t)) = [] := by
+  induction l with
+  | nil => rfl
+  | cons b l' ih =>
+    rw [List.filter_cons_of_neg (p := fun x => decide (x < t))
+      (by simpa using h b (by simp))]
+    exact ih (fun x hx => h x (by simp [hx]))
+
+/-- Head-threshold workhorse (private): in a nondecreasing list, the
+first `k+1` entries are all at most the `k`-th entry, so at least `k+1`
+entries pass the filter `· ≤ l.get k`. -/
+private theorem sorted_filter_ge_length_of_le_get {l : List ℝ}
+    (hs : l.Sorted (fun a b => a ≤ b)) {k : ℕ} (hk : k < l.length) :
+    k + 1 ≤ (l.filter (fun x => decide (x ≤ l.get ⟨k, hk⟩))).length := by
+  induction l generalizing k with
+  | nil => simp at hk
+  | cons a l' ih =>
+    obtain ⟨hle, hs'⟩ := List.sorted_cons.1 hs
+    match k with
+    | 0 =>
+      have hth : (a :: l').get ⟨0, hk⟩ = a := rfl
+      simp only [hth]
+      rw [List.filter_cons_of_pos (p := fun x => decide (x ≤ a)) (by simp)]
+      simp only [List.length_cons]
+      omega
+    | k'+1 =>
+      have hk' : k' < l'.length := by
+        simp only [List.length_cons] at hk
+        omega
+      have hgetsucc : (a :: l').get ⟨k' + 1, hk⟩
+          = l'.get ⟨k', hk'⟩ := rfl
+      have hale : a ≤ l'.get ⟨k', hk'⟩ := hle _ (List.get_mem l' k' hk')
+      simp only [hgetsucc]
+      rw [List.filter_cons_of_pos (p := fun x => decide (x ≤ l'.get ⟨k', hk'⟩))
+        (by simp only [hgetsucc]; exact decide_eq_true hale)]
+      have hrec := ih hs' hk'
+      simp only [List.length_cons] at hrec ⊢
+      omega
+
+/-- Strict-threshold workhorse (private): in a nondecreasing list, at
+most `k` entries are strictly below the `k`-th entry. -/
+private theorem sorted_filter_lt_length_of_eq_get {l : List ℝ}
+    (hs : l.Sorted (fun a b => a ≤ b)) {k : ℕ} (hk : k < l.length) :
+    (l.filter (fun x => decide (x < l.get ⟨k, hk⟩))).length ≤ k := by
+  induction l generalizing k with
+  | nil => simp at hk
+  | cons a l' ih =>
+    obtain ⟨hle, hs'⟩ := List.sorted_cons.1 hs
+    match k with
+    | 0 =>
+      have hth : (a :: l').get ⟨0, hk⟩ = a := rfl
+      simp only [hth]
+      rw [List.filter_cons_of_neg (p := fun x => decide (x < a)) (by simp),
+        filter_nil_of_forall_lt (t := a) (fun x hx => by
+          have hax : a ≤ x := hle x hx
+          intro hxt
+          exact absurd hxt (by linarith))]
+      simp
+    | k'+1 =>
+      have hk' : k' < l'.length := by
+        simp only [List.length_cons] at hk
+        omega
+      have hgetsucc : (a :: l').get ⟨k' + 1, hk⟩
+          = l'.get ⟨k', hk'⟩ := rfl
+      simp only [hgetsucc]
+      have hrec := ih hs' hk'
+      by_cases hdec : (fun x => decide (x < l'.get ⟨k', hk'⟩)) a = true
+      · rw [List.filter_cons_of_pos
+          (p := fun x => decide (x < l'.get ⟨k', hk'⟩)) hdec]
+        simp only [List.length_cons]
+        omega
+      · rw [List.filter_cons_of_neg
+          (p := fun x => decide (x < l'.get ⟨k', hk'⟩)) hdec]
+        omega
+
+/-- Multiset-transfer bridge (private): filtering the eigenvalue
+multiset and counting equals filtering the eigenbasis index set. -/
+private theorem card_filter_eigvalOf_eq {M : Matrix V V ℝ} {hM : M.IsSymm}
+    {p : ℝ → Prop} [DecidablePred p] :
+    (Finset.univ.filter fun i => p (eigvalOf M hM i)).card =
+      Multiset.card (Multiset.filter p
+        ((Finset.univ : Finset V).val.map (eigvalOf M hM))) := by
+  show Multiset.card
+      ((Finset.univ.filter fun i => p (eigvalOf M hM i) : Finset V)).val = _
+  rw [Finset.filter_val, Multiset.filter_map, Multiset.card_map]
+  rfl
+
+/-- **Multiplicity pin at a general index, upper form.** Fewer than `k+1`
+eigenbasis indices carry eigenvalues strictly below the `k`-th sorted
+entry: the strict sub-level set of the index map has at most `k`
+elements. Generalizes `evals_one_le_max_of_ne` (the `k = 1` two-index
+form) to every index. -/
+theorem card_filter_eigvalOf_lt_evals_le {M : Matrix V V ℝ} (hM : M.IsSymm)
+    (k : Fin (Fintype.card V)) :
+    (Finset.univ.filter fun i => eigvalOf M hM i < evals hM k).card ≤ (k : ℕ) := by
+  rw [card_filter_eigvalOf_eq (p := fun t => t < evals hM k),
+    ← filter_length_eq_card_filter (p := fun t => t < evals hM k)]
+  exact sorted_filter_lt_length_of_eq_get
+    (Multiset.sort_sorted (fun a b => a ≤ b) _)
+    (by rw [length_sortedEvals hM]; exact k.isLt)
+
+/-- **Multiplicity pin at a general index, lower form.** At least `k+1`
+eigenbasis indices carry eigenvalues at most the `k`-th sorted entry. -/
+theorem succ_le_card_filter_eigvalOf_le {M : Matrix V V ℝ} (hM : M.IsSymm)
+    (k : Fin (Fintype.card V)) :
+    (k : ℕ) + 1 ≤
+      (Finset.univ.filter fun i => eigvalOf M hM i ≤ evals hM k).card := by
+  rw [card_filter_eigvalOf_eq (p := fun t => t ≤ evals hM k),
+    ← filter_length_eq_card_filter (p := fun t => t ≤ evals hM k)]
+  exact sorted_filter_ge_length_of_le_get
+    (Multiset.sort_sorted (fun a b => a ≤ b) _)
+    (by rw [length_sortedEvals hM]; exact k.isLt)
+
+/-- Pairwise orthonormality in dot-product form: the coordinate dot
+product of the `i`-th and `j`-th eigenvectors is `δᵢⱼ`. This is
+`eigvecOf_inner` read through `Matrix.dotProduct`. -/
+theorem eigvecOf_dotProduct {M : Matrix V V ℝ} (hM : M.IsSymm) (i j : V) :
+    Matrix.dotProduct (eigvecOf M hM i) (eigvecOf M hM j)
+      = if i = j then 1 else 0 := by
+  simpa [Matrix.dotProduct] using eigvecOf_inner M hM i j
+
+/-- Any subfamily of the orthonormal eigenbasis, indexed by the coercions
+of a finset, is linearly independent. -/
+theorem linearIndependent_eigvecOf_finset {M : Matrix V V ℝ} (hM : M.IsSymm)
+    (t : Finset V) :
+    LinearIndependent ℝ (fun i : {x // x ∈ t} => eigvecOf M hM i.1) := by
+  rw [Fintype.linearIndependent_iff]
+  intro g hg j
+  have hdot : Matrix.dotProduct (eigvecOf M hM j.1)
+      (∑ i, g i • eigvecOf M hM i.1) = 0 := by
+    rw [hg, Matrix.dotProduct_zero]
+  have hexpand : Matrix.dotProduct (eigvecOf M hM j.1)
+      (∑ i, g i • eigvecOf M hM i.1)
+      = ∑ i, g i * Matrix.dotProduct (eigvecOf M hM j.1)
+          (eigvecOf M hM i.1) := by
+    calc Matrix.dotProduct (eigvecOf M hM j.1) (∑ i, g i • eigvecOf M hM i.1)
+        = ∑ a, eigvecOf M hM j.1 a * ∑ i, g i * eigvecOf M hM i.1 a := by
+          simp only [Matrix.dotProduct, Finset.sum_apply, Pi.smul_apply,
+            smul_eq_mul]
+      _ = ∑ a, ∑ i, eigvecOf M hM j.1 a * (g i * eigvecOf M hM i.1 a) := by
+          simp only [Finset.mul_sum]
+      _ = ∑ i, ∑ a, eigvecOf M hM j.1 a * (g i * eigvecOf M hM i.1 a) :=
+          Finset.sum_comm
+      _ = ∑ i, g i * ∑ a, eigvecOf M hM j.1 a * eigvecOf M hM i.1 a := by
+          refine Finset.sum_congr rfl fun i _ => ?_
+          rw [Finset.mul_sum]
+          exact Finset.sum_congr rfl fun a _ => by ring
+      _ = ∑ i, g i * Matrix.dotProduct (eigvecOf M hM j.1)
+            (eigvecOf M hM i.1) := rfl
+  rw [hexpand] at hdot
+  simp only [eigvecOf_dotProduct hM] at hdot
+  rw [Finset.sum_eq_single j (fun i _ hij => by
+      have hne : j.1 ≠ i.1 := fun h => hij (Subtype.ext h.symm)
+      simp only [mul_ite, mul_one, mul_zero, if_neg hne])
+    (fun hni => absurd (Finset.mem_univ j) hni)] at hdot
+  simpa using hdot
+
+/-- The span of any subfamily of the orthonormal eigenbasis has dimension
+exactly the size of the index finset. -/
+theorem finrank_span_eigvecOf_finset {M : Matrix V V ℝ} (hM : M.IsSymm)
+    (t : Finset V) :
+    Module.finrank ℝ (Submodule.span ℝ
+      (Set.range fun i : {x // x ∈ t} => eigvecOf M hM i.1)) = t.card := by
+  rw [finrank_span_eq_card (linearIndependent_eigvecOf_finset hM t)]
+  simp
+
+omit [DecidableEq V] in
+/-- Positivity idiom (private): the dot product of a nonzero real vector
+with itself is positive. -/
+private theorem dotProduct_self_pos {x : V → ℝ} (hx : x ≠ 0) :
+    0 < Matrix.dotProduct x x := by
+  obtain ⟨i, hi⟩ : ∃ i, x i ≠ 0 := by
+    by_contra hcon
+    push_neg at hcon
+    exact hx (funext hcon)
+  exact Finset.sum_pos' (fun j _ => mul_self_nonneg _)
+    ⟨i, Finset.mem_univ _, mul_self_pos.2 hi⟩
+
+/-- **Component-form Rayleigh upper bound.** If every eigencomponent of
+`x` attached to an eigenvalue strictly above `evals hM k` vanishes, then
+`R(x) ≤ evals hM k`: the Rayleigh quotient is an eigenvalue-weighted
+average of the squared eigencomponents
+(`quadForm_eigvalOf`, `dotProduct_eigvecOf`), and every surviving term
+is weighted by an eigenvalue at most `evals hM k`. -/
+theorem rayleigh_le_evals_of_forall_dotProduct_eq_zero {M : Matrix V V ℝ}
+    (hM : M.IsSymm) (k : Fin (Fintype.card V)) {x : V → ℝ} (hx0 : x ≠ 0)
+    (hx : ∀ i : V, evals hM k < eigvalOf M hM i →
+      Matrix.dotProduct (eigvecOf M hM i) x = 0) :
+    rayleigh M x ≤ evals hM k := by
+  have hDpos : 0 < Matrix.dotProduct x x := dotProduct_self_pos hx0
+  rw [rayleigh, if_neg hx0, div_le_iff₀ hDpos]
+  have hq : quadForm M x
+      = ∑ i, eigvalOf M hM i
+        * (Matrix.dotProduct (eigvecOf M hM i) x) ^ 2 :=
+    quadForm_eigvalOf hM x
+  have hD : Matrix.dotProduct x x
+      = ∑ i, (Matrix.dotProduct (eigvecOf M hM i) x) ^ 2 := by
+    rw [dotProduct_eigvecOf hM x x]
+    exact Finset.sum_congr rfl fun i _ => (pow_two _).symm
+  rw [hq, hD, Finset.mul_sum]
+  refine Finset.sum_le_sum fun i _ => ?_
+  by_cases hμ : eigvalOf M hM i ≤ evals hM k
+  · exact mul_le_mul_of_nonneg_right hμ (sq_nonneg _)
+  · push_neg at hμ
+    rw [hx i hμ]
+    simp
+
+/-- **Component-form Rayleigh lower bound.** If every eigencomponent of
+`x` attached to an eigenvalue strictly below `evals hM k` vanishes, then
+`evals hM k ≤ R(x)`: the weighted average only mixes eigenvalues at
+least `evals hM k`. -/
+theorem evals_le_rayleigh_of_forall_dotProduct_eq_zero {M : Matrix V V ℝ}
+    (hM : M.IsSymm) (k : Fin (Fintype.card V)) {x : V → ℝ} (hx0 : x ≠ 0)
+    (hx : ∀ i : V, eigvalOf M hM i < evals hM k →
+      Matrix.dotProduct (eigvecOf M hM i) x = 0) :
+    evals hM k ≤ rayleigh M x := by
+  have hDpos : 0 < Matrix.dotProduct x x := dotProduct_self_pos hx0
+  rw [rayleigh, if_neg hx0, le_div_iff₀ hDpos]
+  have hq : quadForm M x
+      = ∑ i, eigvalOf M hM i
+        * (Matrix.dotProduct (eigvecOf M hM i) x) ^ 2 :=
+    quadForm_eigvalOf hM x
+  have hD : Matrix.dotProduct x x
+      = ∑ i, (Matrix.dotProduct (eigvecOf M hM i) x) ^ 2 := by
+    rw [dotProduct_eigvecOf hM x x]
+    exact Finset.sum_congr rfl fun i _ => (pow_two _).symm
+  rw [hq, hD, Finset.mul_sum]
+  refine Finset.sum_le_sum fun i _ => ?_
+  by_cases hμ : evals hM k ≤ eigvalOf M hM i
+  · exact mul_le_mul_of_nonneg_right hμ (sq_nonneg _)
+  · push_neg at hμ
+    rw [hx i hμ]
+    simp
+
+/-- Orthogonality to a span of eigenbasis vectors: a vector in the span
+of the eigenbasis vectors indexed by `t` has vanishing eigencomponents
+outside `t`. The dot product with a fixed eigenvector is a linear
+functional, so its kernel contains the span whenever it contains the
+generators. -/
+theorem dotProduct_eigvecOf_eq_zero_of_mem_span {M : Matrix V V ℝ}
+    (hM : M.IsSymm) (t : Finset V) {j : V} (hj : j ∉ t) {x : V → ℝ}
+    (hx : x ∈ Submodule.span ℝ
+      (Set.range fun i : {y // y ∈ t} => eigvecOf M hM i.1)) :
+    Matrix.dotProduct (eigvecOf M hM j) x = 0 := by
+  classical
+  have hspan_le : Submodule.span ℝ
+      (Set.range fun i : {y // y ∈ t} => eigvecOf M hM i.1)
+      ≤ LinearMap.ker
+        ({ toFun := fun y => Matrix.dotProduct (eigvecOf M hM j) y
+           map_add' := fun y z => Matrix.dotProduct_add _ _ _
+           map_smul' := fun c y => Matrix.dotProduct_smul _ _ _ } :
+          (V → ℝ) →ₗ[ℝ] ℝ) := by
+    rw [Submodule.span_le]
+    rintro _ ⟨i, rfl⟩
+    refine LinearMap.mem_ker.2 ?_
+    simp only [LinearMap.coe_mk, AddHom.coe_mk]
+    rw [eigvecOf_dotProduct hM j i.1, if_neg (fun h => hj (by rw [h]; exact i.2))]
+  have hxker := hspan_le hx
+  rwa [LinearMap.mem_ker, LinearMap.coe_mk, AddHom.coe_mk] at hxker
+
+/-- **Courant–Fischer, existence direction.** There exists a subspace of
+dimension exactly `k + 1` on which every Rayleigh quotient is at most
+`evals hM k`: the span of any `k + 1` eigenbasis vectors drawn from the
+at-most-threshold set `succ_le_card_filter_eigvalOf_le` (extracted with
+`Finset.exists_smaller_set`), whose dimension is the index count by
+orthonormality (`finrank_span_eigvecOf_finset`) and whose members have
+no eigencomponents strictly above the threshold
+(`dotProduct_eigvecOf_eq_zero_of_mem_span`), forcing the eigenvalue
+weighted average `R(x)` down to `evals hM k`. -/
+theorem exists_submodule_forall_rayleigh_le {M : Matrix V V ℝ} (hM : M.IsSymm)
+    (k : Fin (Fintype.card V)) :
+    ∃ W : Submodule ℝ (V → ℝ), Module.finrank ℝ W = (k : ℕ) + 1 ∧
+      ∀ x ∈ W, x ≠ 0 → rayleigh M x ≤ evals hM k := by
+  obtain ⟨t, hts, htc⟩ := Finset.exists_subset_card_eq
+    (n := (k : ℕ) + 1) (succ_le_card_filter_eigvalOf_le hM k)
+  refine ⟨Submodule.span ℝ
+      (Set.range fun i : {y // y ∈ t} => eigvecOf M hM i.1),
+    ?_, ?_⟩
+  · rw [finrank_span_eigvecOf_finset hM t]
+    exact htc
+  · intro x hx hx0
+    refine rayleigh_le_evals_of_forall_dotProduct_eq_zero hM k hx0 ?_
+    intro i hi
+    exact dotProduct_eigvecOf_eq_zero_of_mem_span hM t
+      (fun hmem => absurd hi
+        (not_lt.2 (Finset.mem_filter.1 (hts hmem)).2)) hx
+
+/-- **Courant–Fischer, competitor direction.** Every subspace `W` of
+dimension `k + 1` contains a nonzero test vector whose Rayleigh quotient
+is at least `evals hM k`. The tail eigenspace — the span of the
+eigenbasis vectors with eigenvalue at least `evals hM k` — has dimension
+`n - (at most k)` by the strict multiplicity pin, so
+`dim W + dim T ≥ (k + 1) + (n - k) > n`, and the dimension formula
+forces `W ∩ T` to contain a nonzero vector: a member of `W` with no
+eigencomponents strictly below the threshold, whose Rayleigh quotient is
+therefore an average of eigenvalues at least `evals hM k`. -/
+theorem exists_ne_mem_rayleigh_ge_of_finrank_eq {M : Matrix V V ℝ}
+    (hM : M.IsSymm) (k : Fin (Fintype.card V))
+    (W : Submodule ℝ (V → ℝ)) (hW : Module.finrank ℝ W = (k : ℕ) + 1) :
+    ∃ x ∈ W, x ≠ 0 ∧ evals hM k ≤ rayleigh M x := by
+  classical
+  have hkltn : (k : ℕ) < Fintype.card V := k.isLt
+  have hltcard : (Finset.univ.filter
+      fun i => eigvalOf M hM i < evals hM k).card ≤ (k : ℕ) :=
+    card_filter_eigvalOf_lt_evals_le hM k
+  -- the tail filter (eigenvalues at or above evals k) carries all but
+  -- at most k of the eigenbasis indices
+  have htailcard : Fintype.card V - (k : ℕ) ≤
+      (Finset.univ.filter fun i => evals hM k ≤ eigvalOf M hM i).card := by
+    have hunion : (Finset.univ : Finset V) ⊆
+        (Finset.univ.filter fun i => eigvalOf M hM i < evals hM k) ∪
+        (Finset.univ.filter fun i => evals hM k ≤ eigvalOf M hM i) := by
+      intro i _
+      by_cases h : eigvalOf M hM i < evals hM k
+      · exact Finset.mem_union.2 (Or.inl (Finset.mem_filter.2 ⟨Finset.mem_univ _, h⟩))
+      · exact Finset.mem_union.2
+          (Or.inr (Finset.mem_filter.2 ⟨Finset.mem_univ _, le_of_not_gt h⟩))
+    have hcard := Finset.card_le_card hunion
+    rw [Finset.card_univ] at hcard
+    have hunioncard := Finset.card_union_le
+      (Finset.univ.filter fun i => eigvalOf M hM i < evals hM k)
+      (Finset.univ.filter fun i => evals hM k ≤ eigvalOf M hM i)
+    omega
+  set Ttail : Finset V :=
+    Finset.univ.filter fun i => evals hM k ≤ eigvalOf M hM i with hTtail
+  -- dimension counting: W ⊓ T is nonzero
+  have hTdim : Module.finrank ℝ (Submodule.span ℝ
+      (Set.range fun i : {y // y ∈ Ttail} => eigvecOf M hM i.1)) = Ttail.card :=
+    finrank_span_eigvecOf_finset hM Ttail
+  have hdfin := Submodule.finrank_sup_add_finrank_inf_eq W (Submodule.span ℝ
+      (Set.range fun i : {y // y ∈ Ttail} => eigvecOf M hM i.1))
+  have htop : Module.finrank ℝ ↥(W ⊔ Submodule.span ℝ
+      (Set.range fun i : {y // y ∈ Ttail} => eigvecOf M hM i.1))
+      ≤ Module.finrank ℝ (V → ℝ) := Submodule.finrank_le _
+  have hpi : Module.finrank ℝ (V → ℝ) = Fintype.card V :=
+    Module.finrank_pi ℝ
+  have hpos : 0 < Module.finrank ℝ ↥(W ⊓ Submodule.span ℝ
+      (Set.range fun i : {y // y ∈ Ttail} => eigvecOf M hM i.1)) := by
+    omega
+  have hne : W ⊓ Submodule.span ℝ
+      (Set.range fun i : {y // y ∈ Ttail} => eigvecOf M hM i.1) ≠ ⊥ := by
+    intro hbot
+    rw [hbot, finrank_bot] at hpos
+    simp at hpos
+  obtain ⟨x, hxmem, hx0⟩ := (Submodule.ne_bot_iff _).1 hne
+  refine ⟨x, hxmem.1, hx0, ?_⟩
+  refine evals_le_rayleigh_of_forall_dotProduct_eq_zero hM k hx0 ?_
+  intro i hi
+  refine dotProduct_eigvecOf_eq_zero_of_mem_span hM Ttail ?_ hxmem.2
+  intro hmem
+  rw [hTtail] at hmem
+  exact absurd hi (not_lt.2 (Finset.mem_filter.1 hmem).2)
+
+/-- **General Courant–Fischer min–max (proved, no axioms).** The `k`-th
+sorted eigenvalue of a real symmetric matrix is the infimum, over
+`(k+1)`-dimensional subspaces `W`, of the values dominating the Rayleigh
+quotients on `W` — the subspace-form min–max. Both inequalities come from
+the two witness forms: the competitor direction bounds every dominated
+value below by `evals hM k`, and the existence direction exhibits a `W`
+on which `evals hM k` itself is a dominating value.
+
+Source (classical background; this is a proof, not an admission):
+- Horn, R. & Johnson, C., "Matrix Analysis", 2nd ed., Cambridge
+  University Press, 2013, Section 4.2 (Courant–Fischer), Theorem 4.2.6.
+
+Statement differences: Rayleigh quotients use Scaffold's total `rayleigh`
+(junk value `0` at the zero vector, excluded by `x ≠ 0`), the spectrum is
+`Fin`-indexed from `0` so the `k`-th entry pairs with subspaces of
+dimension `k + 1`, and the within-subspace maximum is expressed as the
+set of dominating values rather than a `sup` on a sphere. Only symmetry
+is assumed — no positivity, kernel, or graph structure (compare
+`secondEval_variational`, the index-1 PSD-plus-kernel instance).
+
+QA: `Scaffold/QA/SpectralGraph/CourantFischer_QA.lean` pins both
+directions on a two-vertex fixture with spectrum `[1, 3]`, refutes wrong
+and under-dimensional competitor subspaces, and instantiates the
+competitor direction on the three-vertex path Laplacian. -/
+theorem evals_min_max {M : Matrix V V ℝ} (hM : M.IsSymm)
+    (k : Fin (Fintype.card V)) :
+    evals hM k = sInf {r : ℝ | ∃ W : Submodule ℝ (V → ℝ),
+      Module.finrank ℝ W = (k : ℕ) + 1 ∧
+      ∀ x ∈ W, x ≠ 0 → rayleigh M x ≤ r} := by
+  have hdom : ∀ r ∈ {r : ℝ | ∃ W : Submodule ℝ (V → ℝ),
+      Module.finrank ℝ W = (k : ℕ) + 1 ∧
+      ∀ x ∈ W, x ≠ 0 → rayleigh M x ≤ r}, evals hM k ≤ r := by
+    rintro r ⟨W, hWr, hWb⟩
+    obtain ⟨x, hxW, hx0, hge⟩ :=
+      exists_ne_mem_rayleigh_ge_of_finrank_eq hM k W hWr
+    exact hge.trans (hWb x hxW hx0)
+  obtain ⟨W₁, hW₁r, hW₁b⟩ := exists_submodule_forall_rayleigh_le hM k
+  have hbdd : BddBelow {r : ℝ | ∃ W : Submodule ℝ (V → ℝ),
+      Module.finrank ℝ W = (k : ℕ) + 1 ∧
+      ∀ x ∈ W, x ≠ 0 → rayleigh M x ≤ r} :=
+    ⟨evals hM k, fun r hr => hdom r hr⟩
+  have hmem : (evals hM k) ∈ {r : ℝ | ∃ W : Submodule ℝ (V → ℝ),
+      Module.finrank ℝ W = (k : ℕ) + 1 ∧
+      ∀ x ∈ W, x ≠ 0 → rayleigh M x ≤ r} :=
+    ⟨W₁, hW₁r, hW₁b⟩
+  refine le_antisymm (le_csInf ⟨evals hM k, hmem⟩ fun r hr => hdom r hr)
+    (csInf_le hbdd hmem)
+
+end CourantFischer
+
 /-!
 ## 6. Event-driven adjacency updates
 -/

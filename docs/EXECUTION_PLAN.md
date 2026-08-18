@@ -917,6 +917,76 @@ four named downstream consumers); or the Sherman–Morrison retirement
 (Medium, now unblocked and the cheapest retirement in the backlog);
 Fiedler Phase B stays Medium and decision-gated.
 
+**Active slice (run 1, 2026-08-18): prove the general Courant–Fischer
+min–max — DELIVERED.** Selected from `proposals/README.md`'s Active
+priority table (top High item). The proposal's open next step — survey
+the pin for the dimension-intersection lemma — resolved affirmatively
+before committing: `Submodule.finrank_sup_add_finrank_inf_eq`,
+`Finset.exists_subset_card_eq`, `finrank_span_eq_card` (Fintype-family
+form), `Fintype.linearIndependent_iff`, `Module.finrank_pi`,
+`Submodule.ne_bot_iff` all present in v4.14.0. Pure hard crust — **no
+axiom changes (count stays 15**; general min–max was never admitted).
+
+**Delivered in `GraphTheory.Spectral`** (new `CourantFischer` section):
+the general-`k` multiplicity pins as public center API
+(`card_filter_eigvalOf_lt_evals_le`: at most `k` eigenbasis indices
+strictly below `evals k`; `succ_le_card_filter_eigvalOf_le`: at least
+`k+1` at or below — the count-form generalizations of the `k = 1` pins
+behind `lambda2_variational`, via new private sorted-list workhorses
+plus a multiset-transfer bridge); the orthonormal-family tools
+(`eigvecOf_dotProduct`, `linearIndependent_eigvecOf_finset`,
+`finrank_span_eigvecOf_finset`); the component-form Rayleigh bounds
+(`rayleigh_le_evals_of_forall_dotProduct_eq_zero`,
+`evals_le_rayleigh_of_forall_dotProduct_eq_zero` — the Rayleigh
+quotient as an eigenvalue-weighted average through the proved spectral
+resolution `quadForm_eigvalOf` + Parseval); span-orthogonality
+(`dotProduct_eigvecOf_eq_zero_of_mem_span`, via the dot-product linear
+functional's kernel); and the three headline forms —
+`exists_submodule_forall_rayleigh_le` (existence direction:
+`Finset.exists_subset_card_eq` extraction of `k+1` below-threshold
+eigenbasis vectors, dimension by orthonormality, Rayleigh bound by
+components), `exists_ne_mem_rayleigh_ge_of_finrank_eq` (competitor
+direction: every `(k+1)`-dimensional `W` meets the tail eigenspace
+nontrivially by `finrank_sup_add_finrank_inf_eq` + `Module.finrank_pi`
+dimension counting, and the intersection vector's below-threshold
+components vanish), and `evals_min_max` (the packaged infimum equation,
+both inequalities from the two witness forms — no compactness needed).
+Only symmetry is assumed throughout — no positivity, kernel, or graph
+structure (contrast `secondEval_variational`, the index-1
+PSD-plus-kernel instance). The four named consumers remain separate
+follow-ons, per the proposal.
+
+**QA** `SpectralGraph/CourantFischer_QA.lean` (33 declarations, 476
+total): the `!![2,1;1,2]` fixture's spectrum `[1,3]` pinned from
+trace/determinant/sortedness independent of the theorem; the competitor
+direction instantiated on a hand-checked line; the existence direction
+at `k = 1` yielding — through `Submodule.eq_top_of_finrank_eq` — the
+derived universal "every Rayleigh quotient ≤ top eigenvalue", with the
+competitor witness then pinned to attain `evals 1 = 3` exactly through
+both directions; negative witnesses: the existence-direction property
+refuted on the wrong line (`3 ≤ 1`), the dimension hypothesis proved
+load-bearing (conclusion false on a one-dimensional subspace at index
+`1`), and at the interior index `k = 1 < n−1` on the three-vertex path
+Laplacian a wrong two-dimensional subspace refuted (`4/3 ≤ evals 1`
+vs. the theorem-derived `evals 1 ≤ 1`) with the older
+`secondEval_le_rayleigh` engine cross-checking the same bound.
+
+Docs updated: scoreboard (15/476/0, milestone bullet, count sync),
+radar (subject axis 3 re-scored 3.5 → 4.0 per protocol with the
+milestone recorded; QA-axis count synced 476/27 with the new QA kind
+described; proved-depth text extended), README (axis-3 cell, 476 QA,
+maturity prose), SGT index map (new `Spectral` rows), proposal
+delivery record, and `proposals/README.md` (moved to Delivered; no
+High items remain — note added for the next run's selection).
+
+**Next milestone (open):** no High item remains in the priority table.
+Candidates: the Sherman–Morrison retirement (Medium, cheapest remaining
+axiom retirement); the min–max theorem's named consumers as separately
+scoped runs (interlacing retirement via min–max over shared test
+subspaces; full Rayleigh/Dirichlet monotonicity through the now-proved
+attained characterization); Fiedler Phase B (Medium, decision-gated);
+the electrical definiteness residual; the `evals (c • M)` excavation.
+
 ## Ready queue
 
 1. ~~Proposal step 6 — the one-sided Dirichlet bound~~ — delivered
@@ -944,6 +1014,31 @@ Fiedler Phase B stays Medium and decision-gated.
    combinations, centering, sums) only when a consumer names them.
 
 ## Last verified state
+
+- 2026-08-18 (general Courant–Fischer min–max proved, no axiom
+  change): `lake env lean` on `GraphTheory.Spectral` — zero errors,
+  zero new warnings (the one new-code linter note was silenced with an
+  `omit` clause; the remaining notes are the documented pre-existing
+  ones in untouched code) — and on
+  `QA.SpectralGraph.CourantFischer_QA` — zero errors, zero warnings;
+  `lake build Scaffold.Mathlib.GraphTheory.Spectral` and `lake build
+  Scaffold.QA.SpectralGraph.CourantFischer_QA` ✔; full `lake build` ✔
+  (2179 targets); all twenty-seven QA modules elaborated directly in
+  one batch (zero failures); 476 QA declarations (+33, the new
+  `CourantFischer_QA`), no `sorry`/`admit` anywhere under `Scaffold/`
+  (textual matches are prose in comments/docstrings); 15 explicit
+  cited axioms (unchanged — pure hard crust; general min–max was never
+  admitted); all hygiene scripts pass (`lint_axioms` 15 covered,
+  `check_citations`, `check_markdown_links`); scoreboard regenerated
+  (15/476/0) with the milestone bullet and count sync; radar re-scored
+  per protocol (subject axis 3: 3.5 → 4.0 recorded; QA-axis count
+  synced 476/27; proved-depth text extended); README snapshot (axis-3
+  cell 4.0, 476 QA); SGT index map (new `Spectral` rows); proposal
+  delivery record; `proposals/README.md` (moved to Delivered with the
+  four named consumers explicitly open; note added that no High item
+  remains). Unrelated working-tree changes (the operator's
+  `scripts/opencode-pursue` and `scripts/test_opencode_pursue.sh`
+  modifications) preserved untouched.
 
 - 2026-08-18 (Woodbury repair and retirement, axiom 16 → 15): `lake
   env lean` on `Core.MatrixUpdates` and on

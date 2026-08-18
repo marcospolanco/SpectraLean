@@ -1274,3 +1274,122 @@ laplacian A *ᵥ f = e u − e v ∧ f u − f v = r`), whose
 well-definedness consumes `laplacian_kernel_eq_span_onesVec`; or the
 open earlier candidates (`evals (c • M)` excavation; irregular Cheeger
 shape; backlog item 3 variants).
+
+## 2026-08-18T04:27:41Z — SimpleGraph→WAdj interoperability adapter (in progress)
+
+**Run:** `20260818T042204Z-run-1`  
+**Session:** `ses_fece519a1ffeRIOcnxA00ZWV1f`  
+**Status:** in-progress  
+**Milestone:** `proposals/electrical-structure-crust.md` step 1 under the
+2026-08-18 re-sequenced numbering — deliver `SimpleGraph.toWAdj`, the
+`SimpleGraph → WAdj` adapter the proposal calls "the highest compounding
+multiplier available". SGT leverage: converts every proved Scaffold
+theorem into something callable on Mathlib `SimpleGraph` objects,
+completes the two-directional adapter surface begun with `supportGraph`,
+and folds in the neutral re-export of Mathlib's unweighted
+kernel/component results. Pure hard crust, no new axioms; one step per
+run (steps 2–6 untouched).
+
+**Scope note:** the previous run's operator direction predated the
+proposal re-sequencing; effective resistance is now step 5 and gated
+behind step 4 (solvability), so the plan's earlier "next: effective
+resistance" handoff is superseded by this step-1 delivery.
+
+**Planned:** new module `GraphTheory/SimpleGraphAdapter` with
+`toWAdj G = G.adjMatrix ℝ`, proved agreement (`toWAdj_symm`,
+`toWAdj_nonneg`, `deg_toWAdj`, `vol_toWAdj` + handshake,
+`laplacian G.toWAdj = G.lapMatrix ℝ`, boundary as crossing-edge count),
+roundtrip `supportGraph (toWAdj G) = G`, connected-`G` kernel corollary,
+and the two Mathlib re-exports (kernel/reachable iff, component-count
+finrank). QA at the 3-vertex path plus the two-edge `Fin 4` negative
+witness (component indicator in kernel but outside `span {onesVec}`).
+
+## 2026-08-18T06:13:31Z — SimpleGraph→WAdj interoperability adapter delivered (completed)
+
+**Run:** `20260818T042204Z-run-1`  
+**Session:** `ses_fece519a1ffeRIOcnxA00ZWV1f`  
+**Status:** completed  
+**Milestone:** `proposals/electrical-structure-crust.md` step 1 under
+the 2026-08-18 re-sequenced numbering — `SimpleGraph.toWAdj`, the
+`SimpleGraph → WAdj` adapter, completing the two-directional Mathlib
+bridge begun with `supportGraph`. Pure hard crust; **no new axioms**
+(explicit count unchanged at 18). One step per the proposal's operating
+instructions; steps 3–6 untouched.
+
+**Changes:** new `Scaffold/Mathlib/GraphTheory/SimpleGraphAdapter.lean`
+(16 declarations, all proved): `SimpleGraph.toWAdj` (deliberately
+defined as Mathlib's `adjMatrix ℝ` so no parallel matrix construction
+can drift out of agreement) with interface lemma `toWAdj_apply`;
+`toWAdj_symm`, `toWAdj_nonneg` (0/1 weights discharge every `hnonneg`
+hypothesis of the center); agreement family `deg_toWAdj` (via
+`degree_eq_sum_if_adj`), `vol_toWAdj_eq_sum_degrees`, handshake
+`vol_toWAdj_univ_eq_two_mul_card_edges` (Mathlib's
+`sum_degrees_eq_twice_card_edges` transferred), headline
+`laplacian G.toWAdj = G.lapMatrix ℝ`, boundary as the crossing-edge
+count (`boundary_toWAdj_eq_sum_neighbors`,
+`boundary_toWAdj_eq_sum_card_neighbors` — each crossing edge counted
+exactly once); neutral re-exports `laplacian_toWAdj_mulVec_eq_zero_iff_reachable`
+and `finrank_ker_laplacian_toWAdj` (Mathlib's unweighted kernel and
+component-count results transferred by one-two rewrites); roundtrip
+`supportGraph_toWAdj_eq_self`; connected-`G` corollary
+`laplacian_toWAdj_kernel_eq_span_ones` (the delivered span theorem
+applied to Mathlib graphs through the roundtrip). New QA
+`SpectralGraph/SimpleGraphAdapter_QA.lean` (38 declarations): 3-vertex
+path `SimpleGraph` fixture with weights, degrees (1,2,1), Laplacian
+entries, *both* Laplacian sides, boundary `{1} = 2`, volume `4`,
+handshake `4 = 2·2`, kernel span/iff instances, constant-in-kernel
+pinned to `5`, and `![1,0,0]` computed out of the kernel entrywise;
+disconnected `Fin 4` negative witness with the component indicator
+computed into the kernel, not constant, outside `span {onesVec}`, and
+the kernel proved ≠ `span {onesVec}` — connectivity load-bearing
+through the adapter. Umbrella, SGT index map, scoreboard, backlog
+item 7, radar, README updated.
+
+**Decisive commands and outcomes:** environment repair first — the
+local `.lake/build` was found pruned (Mathlib oleans 1795/5685, all
+modules this slice needs missing); re-ran the recorded interpreter
+cache fetch (`lake env lean --run Cache/Main.lean get` from the
+mathlib package root: 5685 files, 100% success), then `lake build
+Scaffold.Mathlib.GraphTheory.Spectral` recompiled the 2008-target
+residue to completion. `lake env lean` on the new public module —
+zero errors/warnings after fixes (named-argument forms for
+`isSymm_adjMatrix`/`degree_eq_sum_if_adj`, cast bookkeeping in the
+card-form boundary, `omit`s for unused section variables); `lake env
+lean` on the new QA module — zero output; `lake build` of both targets
+✔; full `lake build` ✔ (2177 targets); all 21 QA modules built
+directly in one batch (exit 0); `lint_axioms`, `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated: 293 QA
+declarations (+38), 0 placeholders, 18 axioms unchanged.
+
+**Verification:** every new declaration is a Lean-checked theorem
+conditional on no Scaffold axiom; the QA computes adapter values from
+the definitions (not by rewriting with the agreement theorems), per
+the falsification-QA standard, and includes both the connected
+positive witness and the disconnected negative witness the step
+required. Radar re-scored only after proof + QA landed, per protocol:
+Mathlib interop 4.0 → 4.5 (both directions tied by a proved roundtrip;
+Mathlib kernel/component results transferred; remaining deviation only
+`MatrixMDS`/filtration), subject axis 1 (models) 3.0 → 3.5; QA axis
+text updated to 293 declarations / 21 modules (score unchanged). README
+coverage-snapshot cell and maturity bullet synced.
+
+**Trust boundary:** unchanged in size (18 explicit cited axioms); this
+slice added no axioms and consumes none.
+
+**Remaining risk:** the component-count transfer covers only 0/1
+weights (`finrank_ker_laplacian_toWAdj` is about `toWAdj G`) — the
+weighted generalization is exactly proposal step 3
+(`ker (laplacian A) = ker ((supportGraph A).lapMatrix ℝ)`); `toWAdj`
+QA fixtures are small graphs only (no parametric QA — standing QA-axis
+gap). Concurrent operator edits in the tree (AGENTS.md, strategy
+revision, new proposals `get-outside-signal.md`,
+`prove-lambda2-variational.md`, `sell-the-methodology.md`, untracked
+coverage map) were preserved untouched.
+
+**Next handoff:** proposal step 3 — the kernel-equality bridge for
+weighted graphs, inheriting Mathlib's `lapMatrix_ker_basis` and
+`card_ConnectedComponent_eq_rank_ker_lapMatrix`; then step 4
+(potential solvability — the hinge; resistance is forbidden before it
+lands). Or the open earlier candidates: `evals (c • M)` excavation;
+irregular Cheeger shape with a named consumer; backlog item 3
+variants.

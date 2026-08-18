@@ -30,7 +30,7 @@ Scaffold should therefore stay subordinate and interoperable:
 
 ## Why spectral graph theory is a useful focus
 
-The intended applications cross several formal domains: finite graph combinatorics, matrices and operator norms, probability and concentration, and perturbation theory. A usable result often depends on all four. That intersection makes API alignment as important as theorem availability.
+The intended applications cross several formal domains: finite graph combinatorics, matrices and operator norms, probability and concentration, and perturbation theory. A usable result often depends on all four. That intersection makes API alignment as important as theorem availability. See the [Mathlib Coverage Map](8_MATHLIB_COVERAGE_MAP.md) for a dated survey of how well the pinned Mathlib itself covers each of these tendrils — the admitted-axiom surface below traces that map closely.
 
 Spectral persistence is already developed elsewhere and is retained here only
 as an existing compatibility/example package. It is not Scaffold's research
@@ -62,12 +62,75 @@ Compare proposed work using these questions:
 
 - How many concrete SGT proof obligations or consumers does it unlock?
 - Does it repair a load-bearing definition or reduce the axiom/admission surface?
+- Is it load-bearing on something not yet stress-tested — would an error in
+  an earlier definition make this fail to typecheck or fail a
+  negative-witness QA, rather than sit beside it unaffected? (See
+  [Load-bearing growth](#load-bearing-growth-the-path-to-falsifiability).)
 - Will the interface be reused across multiple SGT results?
 - Does it improve alignment with Mathlib and make upstream replacement easier?
 - Can progress be verified through a focused proof, build, citation review, or experiment?
 - Is the expected gain worth its implementation and maintenance cost?
 
 Build health, meaningful statement shapes, real definitions, and source fidelity outrank new breadth. Adjacency to SGT is not sufficient by itself; the dependency and leverage case must be documented in the issue or pull request.
+
+## Load-bearing growth: the path to falsifiability
+
+*Added 2026-08-18.* Scaffold's growth strategy does not treat outside
+review — Mathlib merges, external users — as the primary mechanism for
+trusting the substrate (see `proposals/get-outside-signal.md` for the
+external-review track, which stays live but is not this section's
+subject). Lean's kernel is already a genuine adversary: a proof either
+type-checks against its exact stated type or it does not, independent of
+social consensus. Growth should be chosen to exploit that adversary, not
+merely to avoid tripping it.
+
+**Height is not evidence.** A declaration that compiles and sits beside
+existing work, without depending on the precise correctness of any
+specific earlier definition, adds surface area but tests nothing. Scaffold
+has direct evidence of this failure mode: the original `cheeger_lower_bound`
+axiom shape typechecked, was admitted, and sat in the tower undisturbed —
+and was false (`old_cheeger_lower_bound_refuted_QA`, recorded in
+`docs/AGENT_ACTIVITY.md`, 2026-08-18: the pre-repair shape evaluated to
+`1/2 ≤ 0` on `K₂`). What caught it was not the tower staying balanced; it
+was a QA witness engineered specifically to try to knock that block over.
+
+**The principle.** Prefer work whose success is *contingent* on an earlier
+definition or proof being exactly right — where getting the substrate
+wrong would make the new proof fail to typecheck, or a paired
+negative-witness QA lemma fail to hold, loudly and immediately. Each new
+load-bearing layer is a falsification attempt against the layer below it;
+a layer that stays standing after real weight is placed on it is evidence
+about that layer, not merely about itself.
+
+**What this looks like in practice:**
+
+- A theorem whose statement or proof would have to change if an earlier
+  definition's *exact shape* — not just its existence — were wrong. Example:
+  `laplacian_kernel_eq_span_onesVec`'s exact one-dimensionality claim is
+  load-bearing for effective-resistance well-definedness
+  (`proposals/electrical-structure-crust.md` step 5): if the kernel
+  characterization were off by even "at most one dimension" instead of
+  "exactly one," resistance uniqueness would fail to prove.
+- A derivation that consumes an axiom to produce a proved corollary whose
+  statement is independently checkable against a concrete example, not
+  merely a restatement of the axiom in different notation.
+- Negative-witness QA: a fixture built specifically to fail if a hypothesis
+  is dropped (see `Connectivity_QA.lean`'s disconnected witness), not only
+  positive examples a wrong theorem might pass by accident.
+
+**What this rules out as a growth priority.** New declarations chosen
+because they are reachable in one run and do not conflict with anything,
+without naming which existing definition's correctness they would falsify
+if wrong. That work is not useless — it is connective tissue, per
+`proposals/prove-cheeger-easy-direction.md`'s finding — but it should not
+be scored as evidence of substrate trustworthiness, because it has not
+tested any.
+
+**Relation to the leverage test.** This sharpens, rather than replaces, the
+leverage test's existing "repair a load-bearing definition" question:
+prioritize not only repairing known-broken load-bearing definitions but
+*creating new load-bearing consumers* of definitions not yet stress-tested,
+so that being wrong would surface on its own.
 
 ## Conjecture pathfinding
 
@@ -92,7 +155,10 @@ Scaffold is succeeding when:
 - QA exercises meaningful consequences without `sorry` or `admit`;
 - current build and coverage status can be reproduced;
 - upstream replacements reduce, rather than expand, the axiom surface;
-- research hypotheses are connected to measurable experiments and formal proof obligations.
+- research hypotheses are connected to measurable experiments and formal proof obligations;
+- new work is load-bearing on the substrate it builds on — see
+  [Load-bearing growth](#load-bearing-growth-the-path-to-falsifiability) —
+  rather than merely coexisting with it.
 
 ## Source provenance
 

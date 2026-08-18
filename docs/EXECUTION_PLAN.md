@@ -326,6 +326,58 @@ Mathlib-excavation, an irregular Cheeger statement shape through
 `rayleigh_normalizedLaplacian_degreeSqrt` (needs a precise source and
 consumer), or backlog item 3 variants with named consumers.
 
+**Active slice (run 1, 2026-08-18): the `SimpleGraph → WAdj`
+interoperability adapter — DELIVERED.** The proposal's re-sequenced
+step 1 (its "highest compounding multiplier"), completing the
+two-directional adapter surface begun with `supportGraph`. Delivered
+`GraphTheory/SimpleGraphAdapter` (all proved, **no new axioms**, count
+unchanged at 18): `SimpleGraph.toWAdj` (defined as Mathlib
+`adjMatrix ℝ` — no parallel matrix to drift), `toWAdj_apply`,
+`toWAdj_symm`, `toWAdj_nonneg`; agreement family `deg_toWAdj`,
+`vol_toWAdj_eq_sum_degrees`, handshake
+`vol_toWAdj_univ_eq_two_mul_card_edges` (from Mathlib's degree-sum
+formula), headline `laplacian G.toWAdj = G.lapMatrix ℝ`,
+`boundary_toWAdj_eq_sum_neighbors` /
+`boundary_toWAdj_eq_sum_card_neighbors` (crossing-edge count, each
+crossing edge counted once); neutral re-exports
+`laplacian_toWAdj_mulVec_eq_zero_iff_reachable` and
+`finrank_ker_laplacian_toWAdj`; roundtrip
+`supportGraph_toWAdj_eq_self` and connected-`G` corollary
+`laplacian_toWAdj_kernel_eq_span_ones` (the delivered span theorem
+applied to Mathlib graphs). QA
+`SpectralGraph/SimpleGraphAdapter_QA.lean` (38 declarations): at the
+3-vertex path, weights/degrees/Laplacian entries/both Laplacian
+sides/boundary/handshake/kernel membership computed against
+hand-expected numbers; disconnected `Fin 4` negative witness with the
+component indicator computed *into* the kernel yet the kernel proved ≠
+`span {onesVec}` (`twoEdge_kernel_ne_span_QA`) — connectivity is
+load-bearing through the adapter. Umbrella, scoreboard (293 QA
+declarations, 21 modules), SGT index map, backlog item 7, and radar
+updated; radar re-scored per protocol after proof + QA landed: Mathlib
+interop 4.0 → 4.5 (both directions, proved roundtrip, Mathlib
+kernel/component results transferred), subject axis 1 (models)
+3.0 → 3.5; README snapshot cell synced.
+
+**Environment note (recorded):** the local `.lake/build` state was
+found pruned at run start (Mathlib oleans down to 1795/5685, including
+the modules this slice needs). The recorded interpreter-based cache
+fetch (`lake env lean --run Cache/Main.lean get` from the mathlib
+package) restored all 5685; `lake build` then recompiled the 2008
+-target residue (~35 min) before the normal checks. Scoreboard
+provenance note updated.
+
+**Next milestone (open):** proposal step 3 — the kernel-equality
+bridge `ker (laplacian A) = ker ((supportGraph A).lapMatrix ℝ)`,
+inheriting Mathlib's `lapMatrix_ker_basis` and
+`card_ConnectedComponent_eq_rank_ker_lapMatrix` for the *weighted*
+Laplacian (the delivered `finrank_ker_laplacian_toWAdj` covers only
+0/1 weights); then step 4 (potential solvability, the hinge — the
+proposal forbids defining effective resistance before it). Or the
+still-open earlier candidates: the `evals (c • M) = c • evals M`
+Mathlib-excavation, an irregular Cheeger statement shape through
+`rayleigh_normalizedLaplacian_degreeSqrt` (needs a precise source and
+consumer), or backlog item 3 variants with named consumers.
+
 ## Ready queue
 
 1. Citation hygiene — completed 2026-08-17 (see Active milestone and Last
@@ -348,6 +400,19 @@ consumer), or backlog item 3 variants with named consumers.
 
 ## Last verified state
 
+- 2026-08-18 (SimpleGraph→WAdj adapter): `lake env lean` on
+  `GraphTheory.SimpleGraphAdapter` and on
+  `QA.SpectralGraph.SimpleGraphAdapter_QA` — both zero errors, zero
+  warnings; `lake build` of both targets ✔; full `lake build` ✔
+  (2177 targets); all twenty-one QA modules built directly in one
+  batch (exit 0); 293 QA declarations (+38), no `sorry`/`admit`
+  anywhere under `Scaffold/`; 18 explicit cited axioms (unchanged —
+  pure hard crust); `lint_axioms`, `check_citations`,
+  `check_markdown_links` pass; scoreboard regenerated; SGT index map,
+  backlog item 7, radar (interop 4.0 → 4.5, models 3.0 → 3.5,
+  recorded), and README snapshot/maturity synced. Environment: pruned
+  `.lake/build` restored via the recorded interpreter cache fetch +
+  2008-target residue recompile before checks.
 - 2026-08-18 (electrical-crust step 1: connectivity/kernel): `lake env
   lean` on `GraphTheory.Spectral` (zero errors; zero *new* warnings —
   the six pre-existing linter notes are untouched code) and on

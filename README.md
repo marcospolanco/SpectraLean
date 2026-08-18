@@ -84,7 +84,7 @@ Last assessed: August 18, 2026. Scores reflect usable, verified coverage on a
 
 | Area | Coverage |
 | --- | ---: |
-| Graph and Laplacian models | 3.0 / 5 |
+| Graph and Laplacian models | 3.5 / 5 |
 | Spectral linear algebra | 3.5 / 5 |
 | Variational and functional methods | 3.0 / 5 |
 | Cuts, expansion, and clustering | 2.5 / 5 |
@@ -138,7 +138,7 @@ The remaining root files are repository entry points or tool configuration: `Sca
 
 As of August 17, 2026:
 
-- the default `lake build` passes: its umbrella certifies the SGT center (`GraphTheory.Spectral`), the Cheeger bridge, the random-walk interfaces (`GraphTheory.RandomWalk`), the general normalized Laplacian (`GraphTheory.Normalized`), the event-driven frontier, the Weyl/Davis–Kahan perturbation modules, the probability concentration bridge (`Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*`), the derived layer (`Derived.EventStream`, `Derived.ProjectorDrift`), and the Core utilities;
+- the default `lake build` passes: its umbrella certifies the SGT center (`GraphTheory.Spectral`), the `SimpleGraph` interop adapter (`GraphTheory.SimpleGraphAdapter`, the `SimpleGraph → WAdj` direction with proved agreement against Mathlib's `lapMatrix`), the Cheeger bridge, the random-walk interfaces (`GraphTheory.RandomWalk`), the general normalized Laplacian (`GraphTheory.Normalized`), the event-driven frontier, the Weyl/Davis–Kahan perturbation modules, the probability concentration bridge (`Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*`), the derived layer (`Derived.EventStream`, `Derived.ProjectorDrift`), and the Core utilities;
 - all QA modules compile directly with 119 QA theorem/lemma declarations and no `sorry` or `admit` anywhere under `Scaffold/`;
 - the public axiom boundary is 18 explicit, cited axioms; the remaining classical Laplacian facts (symmetry, kernel, Dirichlet form, PSD, symmetry preservation under events) are proved, not admitted, the scalar `hoeffding_iid`/`bernstein_iid` specializations are proved derived theorems, `spectral_gap_stability` is proved from the admitted Weyl inequality, and the spectral-projector algebra (eigenbasis orthonormality and completeness, projector idempotence, extreme thresholds) is proved from the Mathlib spectral-theorem API;
 - the subgaussian norm is a real definition (`subgaussianNorm`), not an axiom; matrix concentration is stated over the spectral norm (`Matrix.L2OpNorm`), the semidefinite order (`Matrix.PosSemidef`), and Mathlib's `ProbabilityTheory.IndepFun`;
@@ -220,6 +220,8 @@ and publishing or destructive Git commands. See
 - [QA Scoreboard](docs/5_QA_SCOREBOARD.md) — generated metrics and recorded verification.
 - [SGT Backlog](docs/6_SGT_BACKLOG.md) — ranked, center-first work queue for the broad SGT program.
 - [SGT Radar](docs/7_SGT_RADAR.md) — evidence-scored coverage of the SGT neighborhood and assurance quality.
+- [Mathlib Coverage Map](docs/8_MATHLIB_COVERAGE_MAP.md) — dated survey of what the pinned Mathlib itself provides per SGT-adjacent discipline, distinct from the radar's scoring of Scaffold's own coverage.
+- [Traction Plan](docs/traction-plan.md) — promotion plan for the future clean-room repository's release; applies only there, not to this repository.
 - [Contributing](governance/CONTRIBUTING.md) — contribution and review workflow.
 
 ## License

@@ -10,6 +10,9 @@ Advance Scaffold as a disciplined, axiom-transparent Lean research substrate cen
 - `docs/1_STRATEGY.md` for prioritization.
 - `docs/2_ARCHITECTURE.md` for the trust model and contribution contract.
 - `docs/5_QA_SCOREBOARD.md` for the last recorded verification state.
+- `docs/8_MATHLIB_COVERAGE_MAP.md` before claiming Mathlib lacks (or has)
+  something — check it first, correct it if a targeted search finds it
+  stale, rather than re-surveying from scratch in a proposal.
 - `docs/EXECUTION_PLAN.md` for the active autonomous-work queue and handoff.
 - `docs/AGENT_ACTIVITY.md` for recent operator-facing progress reports.
 - `governance/CONTRIBUTING.md` before changing public APIs.
@@ -33,6 +36,10 @@ Choose the smallest coherent milestone that unlocks the most downstream SGT prog
 - Public assumptions must be explicit axioms with precise citations; do not hide them behind `sorry`.
 - QA may contain no `sorry` or `admit`, and must not be presented as validation of an axiom's truth.
 - Do not add breadth without naming the SGT obligation or consumer it unlocks.
+- Prefer load-bearing work — a proof or QA witness that would fail if an
+  existing definition were wrong, not one that merely compiles beside it —
+  over reachable-but-inert breadth. See `docs/1_STRATEGY.md` § Load-bearing
+  growth: the path to falsifiability.
 - Do not commit, push, publish, rewrite history, or perform broad deletion.
 - Never access or modify files outside this worktree.
 

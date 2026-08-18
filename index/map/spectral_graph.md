@@ -52,9 +52,32 @@ forces constancy across positive-weight edges),
 `laplacian_mulVec_eq_zero_iff_exists_const` (on a connected graph the
 Laplacian kernel is exactly the constants — the converse of
 `laplacian_ones_in_kernel`; proposal
-`electrical-structure-crust.md` step 1), `laplacian_mulVec_const`, and
+`electrical-structure-crust.md` step 2 after the 2026-08-18
+re-sequencing), `laplacian_mulVec_const`, and
 `laplacian_kernel_eq_span_onesVec`
 (`ker (mulVecLin (laplacian A)) = span ℝ {onesVec}`).
+
+### `Scaffold.Mathlib.GraphTheory.SimpleGraphAdapter` (Mathlib interop adapter)
+
+The `SimpleGraph → WAdj` direction of the bridge (2026-08-18; the
+complement of `Spectral.supportGraph`), all proved, no axioms. Real
+definition: `SimpleGraph.toWAdj` (a `SimpleGraph` enters the center as
+its 0/1 adjacency matrix — defined as Mathlib's `adjMatrix ℝ`, so no
+parallel construction can drift out of agreement).
+
+| Declaration | Content |
+|-------------|---------|
+| `SimpleGraph.toWAdj_apply` | interface lemma: `G.toWAdj i j = if G.Adj i j then 1 else 0` |
+| `SimpleGraph.toWAdj_symm`, `SimpleGraph.toWAdj_nonneg` | symmetry; 0/1 weights are nonnegative (unlocks every `hnonneg`-hypothesized center theorem for Mathlib graphs) |
+| `deg_toWAdj` | degree agreement with Mathlib: `deg G.toWAdj i = ↑(G.degree i)` |
+| `vol_toWAdj_eq_sum_degrees`, `vol_toWAdj_univ_eq_two_mul_card_edges` | volume agreement; handshake `vol univ = 2 * #edgeFinset` (Mathlib's degree-sum formula transferred) |
+| `laplacian_toWAdj_eq_lapMatrix` | **headline agreement** `laplacian G.toWAdj = G.lapMatrix ℝ` — transfers every Mathlib `lapMatrix` theorem to the Scaffold side and back |
+| `boundary_toWAdj_eq_sum_neighbors`, `boundary_toWAdj_eq_sum_card_neighbors` | boundary as the crossing-edge count (each crossing edge counted once, from its endpoint in `S`) |
+| `laplacian_toWAdj_mulVec_eq_zero_iff_reachable` | kernel ↔ constant along Mathlib reachability (Mathlib's unweighted kernel result transferred) |
+| `finrank_ker_laplacian_toWAdj` | kernel dimension = number of connected components (Mathlib's component-count result transferred) |
+| `supportGraph_toWAdj_eq_self` | **adapter roundtrip** `supportGraph (toWAdj G) = G` — the two adapter directions are mutually consistent |
+| `laplacian_toWAdj_kernel_eq_span_ones` | for connected `G`, the kernel is the constants line — the weighted span theorem applies to Mathlib graphs through the roundtrip |
+
 
 Admitted axioms:
 

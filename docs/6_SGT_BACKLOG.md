@@ -104,23 +104,42 @@ admit or define nothing here until a named consumer states which
 identity it needs (per the center-out policy, adjacency alone does not
 justify admission).
 
-**Step 1 delivered (2026-08-18), gate satisfied by named consumers:**
-following `proposals/electrical-structure-crust.md`, the
-connectivity/kernel hinge is proved in `GraphTheory.Spectral` — the
-`supportGraph` adapter (`WAdj → SimpleGraph`) plus, for connected
-symmetric nonnegative weights, `ker (laplacian A) = span ℝ {onesVec}`
-(`exists_const_of_laplacian_mulVec_eq_zero`,
+**Step 1 delivered (2026-08-18, under the proposal's 2026-08-18
+re-sequenced numbering): the `SimpleGraph → WAdj` interop adapter.**
+`GraphTheory.SimpleGraphAdapter` (all proved, no axioms):
+`SimpleGraph.toWAdj` (defined as Mathlib's `adjMatrix ℝ`), symmetry
+and nonnegativity (unlocking every `hnonneg`-hypothesized center
+theorem for Mathlib graphs), degree/volume agreement plus the handshake
+corollary (`vol univ = 2 * #edgeFinset`), the headline
+`laplacian G.toWAdj = G.lapMatrix ℝ`, the boundary as the
+crossing-edge count, the neutral re-exports of Mathlib's unweighted
+kernel/reachable and component-count results, and the adapter
+roundtrip `supportGraph (toWAdj G) = G` with the connected-`G` kernel
+corollary. QA `SpectralGraph/SimpleGraphAdapter_QA.lean` (38
+declarations): numeric agreement at the 3-vertex path and a
+disconnected `Fin 4` witness where the kernel is proved ≠
+`span {onesVec}` (connectivity load-bearing through the adapter).
+
+**Step 2 delivered (2026-08-18): connectivity/kernel characterization**
+(the run recorded below as "step 1" used the proposal's original
+numbering): the `supportGraph` adapter (`WAdj → SimpleGraph`) plus, for
+connected symmetric nonnegative weights, `ker (laplacian A) = span ℝ
+{onesVec}` (`exists_const_of_laplacian_mulVec_eq_zero`,
 `laplacian_mulVec_eq_zero_iff_exists_const`,
 `laplacian_kernel_eq_span_onesVec`; QA in
 `SpectralGraph/Connectivity_QA.lean` with connected and disconnected
 witnesses). No axioms. The named consumers this unlocks:
 effective-resistance well-definedness (two potential-equation solutions
-differ by a kernel element, constant — proposal step 2), positivity of
+differ by a kernel element, constant — proposal step 5), positivity of
 `λ₂` / Fiedler interfaces (item 4), and any mixing statement (item 5).
-Next candidate in this family: proposal step 2 — effective resistance
-by the potential equation `IsEffectiveResistance A u v r ↔ ∃ f,
-laplacian A *ᵥ f = e u − e v ∧ f u − f v = r`, whose
-well-definedness proof consumes `laplacian_kernel_eq_span_onesVec`.
+**Next candidate in this family:** proposal step 3 — the
+kernel-equality bridge `ker (laplacian A) = ker ((supportGraph
+A).lapMatrix ℝ)`, inheriting Mathlib's `lapMatrix_ker_basis` and
+`card_ConnectedComponent_eq_rank_ker_lapMatrix` for the weighted
+Laplacian (the component-count transfer for *weighted* graphs — the
+delivered `finrank_ker_laplacian_toWAdj` covers only 0/1 weights);
+then step 4 (potential solvability, the hinge) before any definition
+of effective resistance.
 
 ## Standing decisions
 

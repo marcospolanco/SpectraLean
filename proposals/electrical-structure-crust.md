@@ -1,7 +1,8 @@
 # Proposal: Grow the Crust Through Electrical Structure
 
-**Status:** Proposed. Assistant's assessment of project direction, requested
-2026-08-17; substantially re-sequenced 2026-08-18 after review (see
+**Status:** Proposed; steps 1–2 of 6 delivered (2026-08-18, see checklist
+below). Assistant's assessment of project direction, requested 2026-08-17;
+substantially re-sequenced 2026-08-18 after review (see
 [Corrections](#corrections)). Authorizes no Lean changes, axiom admissions,
 document rewrites, or external publication.
 
@@ -118,14 +119,30 @@ the adapter is now step 1.
 These are different objects and the program needs both. Conflating them was
 part of the original sequencing error.
 
-| | Direction | Purpose | Step |
-| --- | --- | --- | ---: |
-| `toWAdj` | `SimpleGraph → WAdj` | Lets an outside user bring their graph in; lets Scaffold's theorems apply to Mathlib's objects | 1 |
-| `supportGraph` | `WAdj → SimpleGraph` | Lets a *weighted* graph have a connectivity predicate at all | 2 |
+| | Direction | Purpose | Step | Status |
+| --- | --- | --- | ---: | --- |
+| `toWAdj` | `SimpleGraph → WAdj` | Lets an outside user bring their graph in; lets Scaffold's theorems apply to Mathlib's objects | 1 | ✅ delivered |
+| `supportGraph` | `WAdj → SimpleGraph` | Lets a *weighted* graph have a connectivity predicate at all | 2 | ✅ delivered |
 
 ## Build order
 
-### 1. The `SimpleGraph → WAdj` interoperability adapter
+- [x] **1. The `SimpleGraph → WAdj` interoperability adapter** — delivered
+  2026-08-18: `Scaffold/Mathlib/GraphTheory/SimpleGraphAdapter.lean`
+  (`toWAdj`, `toWAdj_symm`, `toWAdj_nonneg`, degree/volume/handshake
+  agreement, `laplacian_toWAdj_eq_lapMatrix`, boundary agreement, the two
+  Mathlib re-exports, and the `supportGraph_toWAdj_eq_self` roundtrip).
+- [x] **2. The weighted kernel characterization** — delivered 2026-08-18:
+  `supportGraph`, `supportGraph_adj`, `eq_of_supportGraph_walk`,
+  `laplacian_kernel_eq_span_onesVec` in `Spectral.lean`, proved directly
+  per [Corrections](#corrections), not by transport; QA in
+  `SpectralGraph/Connectivity_QA.lean` with connected and disconnected
+  witnesses.
+- [ ] **3. The kernel-equality bridge** — not started.
+- [ ] **4. Potential solvability (the hinge)** — not started.
+- [ ] **5. Effective resistance, uniqueness, and energy** — not started.
+- [ ] **6. The one-sided Dirichlet bound** — not started.
+
+### 1. The `SimpleGraph → WAdj` interoperability adapter — ✅ delivered
 
 Deliver `SimpleGraph.toWAdj` with proved agreement on the objects Scaffold
 already defines: `deg = G.degree`, symmetry, `laplacian (toWAdj G) =
@@ -139,7 +156,7 @@ user can call, and it is the prerequisite that makes
 the neutral re-export of Mathlib's unweighted kernel and component results
 belongs here rather than in a slice of its own.
 
-### 2. The weighted kernel characterization
+### 2. The weighted kernel characterization — ✅ delivered
 
 `laplacian_ones_in_kernel` (`Spectral.lean:127`) gives one direction. The
 converse — kernel elements are constant on connected components, hence
@@ -169,7 +186,7 @@ for the pattern; do not import from it.
 establish that any particular equation has a solution. See
 [step 4](#4-potential-solvability-the-hinge).
 
-### 3. The kernel-equality bridge
+### 3. The kernel-equality bridge — not started
 
 Prove
 
@@ -184,7 +201,7 @@ they give a basis for the kernel and identify its dimension with the number of
 connected components. After step 2 both sides are known to equal "constant on
 components," so the bridge itself is short.
 
-### 4. Potential solvability (the hinge)
+### 4. Potential solvability (the hinge) — not started
 
 Prove that for a connected graph and any **zero-sum demand** `b` (that is,
 `∑ i, b i = 0`), there exists `f` with `laplacian A *ᵥ f = b`. Then specialize
@@ -205,7 +222,7 @@ This is the step the original document omitted. Two routes:
 Route 2 reuses the center and is likely cheaper. Decide and record which
 before writing the statement.
 
-### 5. Effective resistance, uniqueness, and energy
+### 5. Effective resistance, uniqueness, and energy — not started
 
 With step 4 in hand, define resistance by the equation it solves rather than
 by a pseudoinverse — the Mathlib pin has **no** Moore–Penrose pseudoinverse
@@ -228,7 +245,7 @@ IsEffectiveResistance A u v r  ↔  ∃ f, laplacian A *ᵥ f = e u - e v ∧ f 
 Split across two runs if the definitional plumbing and the energy identity do
 not land together.
 
-### 6. The one-sided Dirichlet bound
+### 6. The one-sided Dirichlet bound — not started
 
 For any test potential `f`, `R u v ≥ (f u - f v)^2 / quadForm (laplacian A) f`.
 This is Cauchy–Schwarz over the energy identity and needs no attained

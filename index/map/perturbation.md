@@ -31,10 +31,10 @@ spectral stability.
 
 **Module**: `Scaffold.Mathlib.Core.MatrixUpdates`
 
-| Axiom | Description | Source |
-|-------|-------------|--------|
-| `woodbury_identity` | Woodbury identity for low-rank event updates | [Higham 2002](../sources/higham_matrix_updates.md) |
-| `sherman_morrison` | Rank-one Sherman–Morrison formula | [Higham 2002](../sources/higham_matrix_updates.md) |
+| Declaration | Kind | Description | Source |
+|-------------|------|-------------|--------|
+| `woodbury_identity` | proved (from Mathlib's `Matrix.invOf_add_mul_mul`) | Woodbury identity for low-rank event updates, at the standard middle factor `C⁻¹ + V A⁻¹ U`; retired from a verified-false axiom on 2026-08-18 (see the source file's repair record) | [Higham 2002](../sources/higham_matrix_updates.md) |
+| `sherman_morrison` | axiom | Rank-one Sherman–Morrison formula | [Higham 2002](../sources/higham_matrix_updates.md) |
 
 ## Deferred Work
 

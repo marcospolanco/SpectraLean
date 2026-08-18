@@ -1,11 +1,10 @@
 # Proposal: Repair and Retire the Woodbury Identity Axiom
 
-**Status:** Proposed; **priority:** High — reconsidered 2026-08-18 (see
-[Priority reconsidered](#priority-reconsidered) below; the original
-consumer-driven case for Low, made in [Why it is low
-priority](#why-it-is-low-priority), stands unedited for the record). This
-document authorizes no Lean changes, axiom removals, API migration, commits,
-or external publication on its own.
+**Status:** Delivered 2026-08-18 (see
+[Delivery record](#delivery-record) below; the original proposal text
+follows unedited for the record). This document authorizes no Lean
+changes, axiom removals, API migration, commits, or external
+publication on its own.
 
 ## Summary
 
@@ -132,3 +131,67 @@ principle exists to catch.
   checks and `lake build` pass.
 - Documentation distinguishes the false retired statement from the corrected
   proved theorem and records the axiom-count change from generated evidence.
+
+## Delivery record (2026-08-18)
+
+All acceptance criteria met; run `20260818T193004Z-run-1`.
+
+1. **Refutation QA** (`Scaffold.QA.Core.MatrixUpdates_QA`, the first
+   Core-domain QA file): `old_woodbury_identity_refuted_QA` negates the
+   retired axiom's own statement at `n = k = Fin 1`, `𝕜 = ℚ`, consuming
+   no axiom; `old_woodbury_middle_hyp_holds_QA` and
+   `old_woodbury_sum_hyp_holds_QA` separately prove the retired middle
+   and sum determinant hypotheses *satisfied* at the counterexample
+   (`A = U = V = !![1]`, `C = !![0]`), so the refutation is of a
+   genuinely applicable statement, not a vacuous shape.
+2. **Repair and proof:** `woodbury_identity` is now a theorem at the
+   same name with the standard middle factor `(C⁻¹ + V * A⁻¹ * U)⁻¹`
+   and exactly the three hypotheses `IsUnit A.det`, `IsUnit C.det`,
+   `IsUnit (C⁻¹ + V * A⁻¹ * U).det`. The former
+   `IsUnit (A + U * C * V).det` hypothesis was dropped as derivable —
+   a deliberate strengthening beyond the proposal's sketch, taking
+   advantage of Mathlib's `Matrix.invertibleAddMulMul`, which
+   constructs the sum's `Invertible` instance from the middle one.
+   Proof: `Matrix.invOf_add_mul_mul` plus
+   `Matrix.invertibleOfIsUnitDet`/`Matrix.invOf_eq_nonsing_inv`, all
+   reachable through the module's existing imports; no new axioms, no
+   `sorry`, no wrapper.
+3. **Hypothesis exclusion witness:**
+   `corrected_C_hyp_excludes_counterexample_QA` proves `¬IsUnit
+   (!![0]).det` — the new `IsUnit C.det` hypothesis excludes exactly
+   the counterexample where the retired statement was false.
+4. **Positive QA:** scalar instance `A = 2, U = V = 1, C = 3` — the
+   updated matrix `5` inverts to `1/5` computed directly, and the
+   theorem's right side is pinned to the same `1/5` by *consuming* the
+   theorem; non-scalar rank-one instance `A = diag 2 2`, all-ones
+   `U`, `V`, `C = 1` — the sum `!![3,1;1,3]` inverts to
+   `!![3/8,-1/8;-1/8,3/8]` by the adjugate formula, the middle factor
+   computes to `(1 + 1)⁻¹ = 1/2`, and the theorem's right side is
+   pinned to the same inverse through the theorem. Computation route:
+   1×1 inverses via `Matrix.inv_eq_left_inv` cancellation and 2×2 via
+   the adjugate formula (`Ring.inverse` discharged through
+   `Ring.inverse_eq_inv`) — `decide` alone cannot evaluate
+   `Matrix.inv` (kernel reduction sticks on `Ring.inverse`), recorded
+   here for future QA in this domain.
+5. **Records:** both indexes (`index/sources/higham_matrix_updates.md`
+   with the repair note, `index/map/perturbation.md` — the row now
+   reads "proved (from Mathlib)"), scoreboard (15/443/0 with the
+   milestone bullet and verification rows), radar (axiom-minimization
+   re-scored 4.0 → 4.5 per its protocol; QA count synced 443/26),
+   README (15 axioms, 443 QA declarations), and this record.
+   `sherman_morrison` remains admitted, out of scope here.
+6. **Verification:** `lake env lean` on `Core.MatrixUpdates` and
+   `QA.Core.MatrixUpdates_QA` — zero errors, zero warnings; all
+   twenty-six QA modules elaborated directly (zero errors; only the
+   documented pre-existing linter notes in untouched modules); full
+   `lake build` ✔ (2179 targets); `lint_axioms` (15 covered),
+   `check_citations`, `check_markdown_links` pass; scoreboard
+   regenerated from source.
+
+**Migration note (public API):** the corrected theorem is an
+intentional breaking change at the same name — middle factor and
+hypothesis set both changed. No deprecated compatibility declaration
+was retained: the retired statement is false, and a compatibility alias
+would have to restate a falsehood (per this proposal's own scope and
+architecture §9's emergency-removal provision). Zero consumers existed
+at retirement time.

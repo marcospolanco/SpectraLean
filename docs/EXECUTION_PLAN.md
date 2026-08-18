@@ -863,12 +863,59 @@ the known pruned-cache environment debt). Unrelated working-tree
 changes preserved; nothing committed. The Fiedler Phase A milestone is
 closed as delivered.
 
-**Next milestone (open):** the new High item — repair and retire the
-Woodbury identity axiom (`repair-and-retire-woodbury.md`: the admitted
-axiom is verified false; Mathlib's `Matrix.invOf_add_mul_mul` carries
-the correct proof). Then: Fiedler Phase B (Medium, needs the operator
-decision the proposal names); the electrical definiteness residual; or
-the `evals (c • M)` excavation.
+**Active slice (run 1, 2026-08-18): repair and retire the Woodbury
+identity axiom — the High item — DELIVERED.** Selected from
+`proposals/README.md`'s Active priority table (its High entry at run
+start). The admitted `woodbury_identity` was verified false
+(`A=1, U=V=1, C=0` in the scalar case: every stated determinant
+hypothesis holds while the two sides evaluate to `1` and `0`), so this
+was a correctness repair of the trust base, not a leverage bet:
+`GraphTheory/Dynamics.lean` names this exact identity as its intended
+future consumer, and a false axiom inherited there would fail exactly
+the way `cheeger_lower_bound`'s old shape did — after something was
+built on it. Explicit axiom count **16 → 15**.
+
+**Delivered** (all per the proposal's scope; `sherman_morrison` stays
+admitted, out of scope): (1) the axiom replaced by a theorem at the
+same name with the standard middle factor `C⁻¹ + V A⁻¹ U` and exactly
+the three `IsUnit …det` hypotheses — the old `IsUnit (A + U C V).det`
+was *dropped as derivable* (a deliberate strengthening beyond the
+proposal's sketch: Mathlib's `invertibleAddMulMul` constructs the
+sum's `Invertible` instance from the middle one); (2) the proof is
+pure upstream reuse — `Matrix.invOf_add_mul_mul` plus the
+`NonsingularInverse` bridges `invertibleOfIsUnitDet` /
+`invOf_eq_nonsing_inv`, all reachable through the module's existing
+imports (zero new axioms, zero `sorry`, no wrapper, no deprecated
+compatibility declaration — it would restate a falsehood; zero
+consumers existed); (3) QA `Scaffold/QA/Core/MatrixUpdates_QA.lean`
+(the first Core-domain QA file, 8 declarations): the retired shape
+negated at its own `Fin 1`/`ℚ` statement and refuted *without consuming
+any axiom* (`old_woodbury_identity_refuted_QA`), the old middle and sum
+hypotheses separately proved *satisfied* at the counterexample (the
+refutation is of a genuinely applicable statement), the corrected
+`IsUnit C.det` hypothesis proved to exclude that counterexample, and
+positive instances at scalars (`(2+3)⁻¹ = 1/5`) and at a non-scalar
+rank-one update (`diag 2 2` + all-ones rank one = `!![3,1;1,3]`, both
+sides computed to `!![3/8,-1/8;-1/8,3/8]` through the computed middle
+`(1+1)⁻¹ = 1/2`), the theorem-consumed right sides pinned against
+independently computed left sides. Computational route recorded in the
+proposal: `Matrix.inv` is not `decide`-evaluable (kernel reduction
+sticks on `Ring.inverse`); 1×1 inverses go through
+`Matrix.inv_eq_left_inv` cancellation, 2×2 through the adjugate
+formula. (4) Records: both indexes, scoreboard (15/443/0, milestone
+bullet, verification rows), radar (axiom-minimization re-scored
+4.0 → 4.5 per protocol — the first retirement motivated by verified
+falsity rather than unprovedness; QA count 443/26; proved-depth text
+extended), README (15 axioms, 443 QA), proposal delivery record, and
+`proposals/README.md` (moved to Delivered; the operator's mid-run
+additions — Courant–Fischer High, Sherman–Morrison/Perron–Frobenius
+rows — preserved).
+
+**Next milestone (open):** the operator's new High item —
+`proposals/prove-courant-fischer.md` (general Courant–Fischer min–max;
+four named downstream consumers); or the Sherman–Morrison retirement
+(Medium, now unblocked and the cheapest retirement in the backlog);
+Fiedler Phase B stays Medium and decision-gated.
 
 ## Ready queue
 
@@ -897,6 +944,33 @@ the `evals (c • M)` excavation.
    combinations, centering, sums) only when a consumer names them.
 
 ## Last verified state
+
+- 2026-08-18 (Woodbury repair and retirement, axiom 16 → 15): `lake
+  env lean` on `Core.MatrixUpdates` and on
+  `QA.Core.MatrixUpdates_QA` — both zero errors, zero warnings; `lake
+  build Scaffold.Mathlib.Core.MatrixUpdates` ✔; full `lake build` ✔
+  (2179 targets); all twenty-six QA modules elaborated directly (zero
+  errors — the only outputs are the documented pre-existing linter
+  notes in untouched modules); 443 QA declarations (+8, the new
+  Core-domain QA file), no `sorry`/`admit` anywhere under `Scaffold/`
+  (textual matches are prose in comments/docstrings); 15 explicit
+  cited axioms (−1: the verified-false `woodbury_identity` retired to a
+  proved theorem at the standard middle factor `C⁻¹ + V A⁻¹ U` with the
+  three `IsUnit` determinant hypotheses, the sum hypothesis dropped as
+  derivable, proved from Mathlib's `Matrix.invOf_add_mul_mul` plus the
+  `NonsingularInverse` bridges; the old scalar shape refuted in QA with
+  its hypotheses proved satisfied at the counterexample); all hygiene
+  scripts pass (`lint_axioms` 15 covered, `check_citations`,
+  `check_markdown_links`); scoreboard regenerated (15/443/0) with the
+  milestone bullet and verification rows; radar re-scored per protocol
+  (axiom-minimization 4.0 → 4.5; QA count synced 443/26; proved-depth
+  text extended); README snapshot (15 axioms, 443 QA); both indexes
+  (`higham_matrix_updates` repair note; `perturbation` map row marked
+  proved); proposal delivery record; `proposals/README.md` moved the
+  item to Delivered while preserving the operator's concurrent
+  additions (Courant–Fischer High row, Sherman–Morrison and
+  Perron–Frobenius rows; the operator's `scripts/next-steps` deletion
+  preserved untouched).
 
 - 2026-08-18 (audit-and-finish of the uncommitted Fiedler Phase A
   milestone): the delivered Phase A records audited and closed. One

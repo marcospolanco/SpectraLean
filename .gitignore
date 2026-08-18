@@ -58,6 +58,3 @@ Desktop.ini
 *.bak
 *.orig
 *.sw?
-
-# Local / excluded trees
-spectral-proof/

@@ -66,6 +66,16 @@ Favor a small foundation over breadth: graph and Laplacian definitions,
 neutral spectral/variational interfaces, and only QA needed to establish their
 public shape. Add broader material only after a fresh inclusion review.
 
+The provisional declaration-level review for that foundation is recorded in
+[Clean-Room SGT Lemma-to-Science Map](clean-room-sgt-lemma-science-map.md). It
+maps every theorem, axiom, and private proof helper in the current
+`GraphTheory/Spectral.lean` candidate to classical mathematics and well-known
+scientific uses, and separately audited all repository pointers to the
+untracked, gitignored `spectral-proof/` directory that formerly sat in this
+working tree (found none; see `cdx-clean-assess.md` for the full comparison).
+That directory has since been permanently removed (`rm -rf`, 2026-08-18) —
+the map is an inventory, not export approval.
+
 No compatibility promise is owed to this repository. If a declaration is
 useful but its provenance or framing is uncertain, rederive and reimplement
 it independently or leave it out.

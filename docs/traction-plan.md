@@ -16,16 +16,34 @@ Before announcing the first release, provide:
 - a one-sentence purpose;
 - a Lake installation snippet pinned to a release tag;
 - three narrow imports;
-- one short, useful proof example;
+- one short, useful proof example — the current best candidate is the
+  electrical-structure module (effective resistance, existence,
+  uniqueness, the energy identity, and the one-sided Dirichlet bound),
+  proved with zero admitted axioms;
 - generated API documentation; and
-- an explicit table separating proved declarations from assumptions.
+- an explicit table separating proved declarations from assumptions,
+  generated per module (axiom count via `scripts/lint_axioms.py`), not
+  asserted narratively — a module is "proved" only if that count is zero.
 
 ## Initial audience
 
 Start with Lean and Mathlib contributors who need reusable interfaces for
 graph Laplacians, random walks, normalized Laplacians, cuts, or stationary
 distributions. Lead with a concrete integration problem rather than a general
-claim about formalizing spectral graph theory.
+claim about formalizing spectral graph theory — effective-resistance-based
+routing or load-balancing analysis is the current strongest candidate,
+since it is backed by a zero-axiom module end to end.
+
+This audience is a deliberate narrowing, not an oversight: it is people who
+already work inside a proof assistant and already accept an axiom-backed,
+citable component as valuable — the same currency Mathlib itself trades in.
+A broader "helps engineers generally" pitch (ML engineers wanting GNN
+robustness bounds, distributed-systems engineers wanting mixing-time
+guarantees, agent-tooling engineers wanting a training benchmark) was
+assessed and set aside as premature, not merely unconsidered: every proved
+result here is `noncomputable` Lean with no extraction path to a runnable
+artifact, so an engineer outside a proof assistant has nothing to consume
+yet. Revisit only if that extraction gap closes.
 
 ## Launch sequence
 

@@ -6,7 +6,10 @@
   Effective resistance for weighted graphs, defined by the potential
   equation it solves rather than by a pseudoinverse, per
   `proposals/electrical-structure-crust.md` step 5 (delivered
-  2026-08-18, after the step-4 solvability hinge landed).
+  2026-08-18, after the step-4 solvability hinge landed), and the
+  one-sided Dirichlet bound of step 6 (delivered 2026-08-18): every
+  test potential of positive energy lower-bounds the resistance,
+  `(f u − f v)² / quadForm (laplacian A) f ≤ effectiveResistance A u v`.
 
   The definition is the classical electrical one: `r` is the effective
   resistance between `u` and `v` when one unit of current injected at
@@ -238,5 +241,127 @@ theorem effectiveResistance_self (A : WAdj (V := V)) (u : V) :
     ⟨0, (isEffectiveResistance_self_iff A u 0).2 rfl⟩
   simp only [effectiveResistance, dif_pos hex]
   exact (isEffectiveResistance_self_iff A u _).1 (Classical.choose_spec hex)
+
+/-!
+## The one-sided Dirichlet bound (proposal `electrical-structure-crust.md`, step 6)
+
+Mathlib survey (recorded 2026-08-18, before proving): the pin's only
+Cauchy–Schwarz is the inner-product-space one
+(`Analysis/InnerProductSpace/Basic.lean`), which requires a *definite*
+inner product; the Laplacian energy is merely semidefinite (constants
+have zero energy), so using it would first require quotienting out the
+kernel. No `QuadraticForm` Cauchy–Schwarz exists at these function
+types. The polarization route below is self-contained and is
+load-bearing on `laplacian_psd` (every perturbed energy is nonnegative)
+and on the reciprocity identity `laplacian_dotProduct_mulVec` (the
+cross term collapses) — errors in either would break these proofs.
+-/
+
+/-- **Algebraic core: a real quadratic that is nonnegative everywhere
+has a nonpositive discriminant.** If `Q - 2 * t * c + t * t * E ≥ 0`
+for every `t` and `E ≥ 0`, then `c * c ≤ Q * E`. At `t = c / E` the
+quadratic sits at its minimum `Q - c ^ 2 / E` (cleared by multiplying
+through by `E > 0`); when `E = 0` the hypothesis at
+`t = (Q + 1) / (2 * c)` forces `c = 0`, making the bound trivial. -/
+theorem sq_le_mul_of_forall_zero_le_sub {Q c E : ℝ} (hE : 0 ≤ E)
+    (h : ∀ t : ℝ, 0 ≤ Q - 2 * t * c + t * t * E) :
+    c * c ≤ Q * E := by
+  rcases hE.eq_or_lt with rfl | hE
+  · have hc : c = 0 := by
+      by_contra h0
+      have hne : c ≠ 0 := h0
+      have h1 := h ((Q + 1) / (2 * c))
+      have h2 : 2 * ((Q + 1) / (2 * c)) * c = Q + 1 := by
+        field_simp
+        ring
+      rw [h2, mul_zero, add_zero] at h1
+      linarith
+    rw [hc]
+    simp
+  · have hEne : E ≠ 0 := ne_of_gt hE
+    have h1 := h (c / E)
+    have key : 0 ≤ (Q - 2 * (c / E) * c + (c / E) * (c / E) * E) * E :=
+      mul_nonneg h1 hE.le
+    have key' : (Q - 2 * (c / E) * c + (c / E) * (c / E) * E) * E
+        = Q * E - c * c := by
+      field_simp
+      ring
+    rw [key'] at key
+    linarith
+
+/-- **Polarization of the energy.** For symmetric weights, the energy of
+a perturbed potential `f - t • g` expands as a quadratic in `t` whose
+cross term is `f ⬝ᵥ (L *ᵥ g)` — by the reciprocity identity
+`laplacian_dotProduct_mulVec`, the two mixed terms agree. This is the
+algebraic substrate of the one-sided Dirichlet bound: positive
+semidefiniteness makes this quadratic nonnegative for every `t`, and
+`sq_le_mul_of_forall_zero_le_sub` then forces the discriminant bound. -/
+theorem quadForm_laplacian_sub_smul (A : WAdj (V := V)) (hA : A.IsSymm)
+    (f g : V → ℝ) (t : ℝ) :
+    quadForm (laplacian A) (f - t • g)
+      = quadForm (laplacian A) f
+        - 2 * t * Matrix.dotProduct f (laplacian A *ᵥ g)
+        + t * t * quadForm (laplacian A) g := by
+  have hrec : Matrix.dotProduct g (laplacian A *ᵥ f)
+      = Matrix.dotProduct f (laplacian A *ᵥ g) := by
+    rw [laplacian_dotProduct_mulVec A hA g f, Matrix.dotProduct_comm]
+  simp only [quadForm, Matrix.mulVec_sub, Matrix.mulVec_smul,
+    Matrix.sub_dotProduct, Matrix.dotProduct_sub,
+    Matrix.smul_dotProduct, Matrix.dotProduct_smul,
+    smul_smul, smul_eq_mul]
+  rw [hrec]
+  ring
+
+/-- **Cauchy–Schwarz for the (semidefinite) Laplacian energy.** For
+symmetric nonnegative weights,
+`(f ⬝ᵥ L *ᵥ g) ^ 2 ≤ quadForm L f * quadForm L g`. The Laplacian's
+bilinear form is only semidefinite — constants have zero energy — so
+Mathlib's inner-product Cauchy–Schwarz does not apply directly (see the
+survey note above); this is proved instead by polarizing the PSD energy
+along `f - t • g` and extracting the discriminant bound. No
+connectivity hypothesis is needed. -/
+theorem laplacian_cauchy_schwarz (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hnonneg : ∀ i j, 0 ≤ A i j) (f g : V → ℝ) :
+    Matrix.dotProduct f (laplacian A *ᵥ g) ^ 2
+      ≤ quadForm (laplacian A) f * quadForm (laplacian A) g := by
+  have key := sq_le_mul_of_forall_zero_le_sub
+    (laplacian_psd A hA hnonneg g)
+    (fun t => by
+      have h := laplacian_psd A hA hnonneg (f - t • g)
+      rwa [quadForm_laplacian_sub_smul A hA f g t] at h)
+  rwa [pow_two]
+
+/-- **The one-sided Dirichlet bound** (proposal
+`electrical-structure-crust.md`, step 6): every test potential `f` with
+positive energy lower-bounds the effective resistance,
+`(f u − f v) ^ 2 / quadForm (laplacian A) f ≤ effectiveResistance A u v`.
+This is the direction applications use to bound resistance from below.
+The proof evaluates the Cauchy–Schwarz cross term through the step-4
+unit-demand potential `g`: its cross term `f ⬝ᵥ (L *ᵥ g)` is exactly
+the voltage difference `f u − f v`, and its energy is exactly the
+resistance (the step-5 energy identity). Equality is attained at
+multiples of `g` (up to constants), but the statement needs no attained
+supremum — the reverse (upper-bound) direction is the deferred Dirichlet
+principle. The `0 <` hypothesis guards the division: on a connected
+graph, zero energy forces `f u = f v` (PSD and the kernel
+characterization), so the bound would degenerate to `0 / 0` junk
+without it. -/
+theorem effectiveResistance_ge_sq_div_quadForm (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (hconn : (supportGraph A hA).Connected)
+    (u v : V) (f : V → ℝ) (hpos : 0 < quadForm (laplacian A) f) :
+    (f u - f v) ^ 2 / quadForm (laplacian A) f
+      ≤ effectiveResistance A u v := by
+  obtain ⟨g, hg⟩ :=
+    exists_laplacian_mulVec_eq_single_sub_single A hA hnonneg hconn u v
+  have hc : Matrix.dotProduct f (laplacian A *ᵥ g) = f u - f v := by
+    rw [hg, Matrix.dotProduct_sub, Matrix.dotProduct_single,
+      Matrix.dotProduct_single, mul_one, mul_one]
+  have hE : quadForm (laplacian A) g = effectiveResistance A u v := by
+    rw [quadForm_laplacian_eq_sub_of_mulVec_eq_single_sub_single A hg,
+      effectiveResistance_eq A hA hnonneg hconn ⟨g, hg, rfl⟩]
+  have hcs := laplacian_cauchy_schwarz A hA hnonneg f g
+  rw [hc, hE] at hcs
+  rwa [div_le_iff₀' hpos]
 
 end SpectralGraphTheory

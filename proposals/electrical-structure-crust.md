@@ -1,6 +1,6 @@
 # Proposal: Grow the Crust Through Electrical Structure
 
-**Status:** Proposed; steps 1–5 of 6 delivered (2026-08-18, see
+**Status:** Proposed; all six steps delivered (2026-08-18, see
 checklist below). Assistant's assessment of project direction,
 requested 2026-08-17; substantially re-sequenced 2026-08-18 after
 review (see [Corrections](#corrections)). Authorizes no Lean changes,
@@ -161,7 +161,14 @@ part of the original sequencing error.
   `SpectralGraph/EffectiveResistance_QA.lean` (values computed on the
   edge and path, energy cross-check, fallback and same-component
   witnesses). Delivery note below.
-- [ ] **6. The one-sided Dirichlet bound** — not started.
+- [x] **6. The one-sided Dirichlet bound** — delivered 2026-08-18:
+  `effectiveResistance_ge_sq_div_quadForm` in `GraphTheory.Electrical`
+  (polarization + semidefinite Cauchy–Schwarz
+  `laplacian_cauchy_schwarz`, no attained supremum); QA in
+  `SpectralGraph/EffectiveResistance_QA.lean` (attainment at both
+  harmonic potentials, strictness, reverse-inequality refutation,
+  zero-energy guard witness). Delivery note below. The program is
+  complete: axiom count unchanged at 18 throughout.
 
 ### 1. The `SimpleGraph → WAdj` interoperability adapter — ✅ delivered
 
@@ -326,12 +333,41 @@ Named residual, cheap and deferred: definiteness (`R u v = 0 ↔ u = v`
 on a reachable pair) — the natural completion of nonnegativity, kept
 out of this run by the one-step scope fence.
 
-### 6. The one-sided Dirichlet bound — not started
+### 6. The one-sided Dirichlet bound — ✅ delivered
 
 For any test potential `f`, `R u v ≥ (f u - f v)^2 / quadForm (laplacian A) f`.
 This is Cauchy–Schwarz over the energy identity and needs no attained
 supremum, so it survives the deferral below and is worth having: it is the
 direction every application actually uses to lower-bound resistance.
+
+**Delivered 2026-08-18** as `effectiveResistance_ge_sq_div_quadForm`,
+stated with the division guarded by `0 < quadForm (laplacian A) f` (on a
+connected graph zero energy forces `f u = f v`, so the guard excludes
+exactly the degenerate test potentials — the QA pins this on the
+disconnected fixture). Mathlib survey recorded before proving (as
+required): the pin's only Cauchy–Schwarz is the *definite*
+inner-product-space one; the Laplacian form is merely semidefinite
+(constants have zero energy), so it is unusable without first
+quotienting out the kernel, and no `QuadraticForm` Cauchy–Schwarz
+exists at these function types. Route taken: three proved layers —
+`sq_le_mul_of_forall_zero_le_sub` (a real quadratic nonnegative
+everywhere has nonpositive discriminant; minimum at `t = c / E`, and
+the degenerate `E = 0` case forces `c = 0`),
+`quadForm_laplacian_sub_smul` (polarization; the two mixed terms agree
+by the proved reciprocity `laplacian_dotProduct_mulVec`), and
+`laplacian_cauchy_schwarz` (`(f ⬝ᵥ L g)² ≤ quadForm L f * quadForm L g`,
+no connectivity hypothesis — reusable beyond resistance). The headline
+then evaluates the cross term through the step-4 demand potential
+(`f ⬝ᵥ L g = f u − f v`) and the step-5 energy identity
+(`quadForm L g = R u v`), so the proof is load-bearing on the whole
+chain, not merely adjacent to it. QA: equality *attained* at the
+harmonic potentials on both connected fixtures (edge `1/1 = 1`, path
+`4/2 = 2` — energies computed independently from the raw definitions),
+strict at a non-harmonic potential (`1 < 2`), the reverse inequality
+*refuted numerically* (`2 ≤ 1` false — the upper direction genuinely
+needs the deferred attained-supremum principle), and the energy guard's
+load-bearingness witnessed. No axioms; the program is complete with the
+axiom count unchanged at 18 throughout.
 
 ## Deferred and removed
 

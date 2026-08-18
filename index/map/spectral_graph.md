@@ -136,6 +136,10 @@ value exists — the fallback's firing is QA-witnessed, not hidden).
 | `effectiveResistance_nonneg` | nonnegativity, from `laplacian_psd` through the energy identity |
 | `effectiveResistance_symm` | `R u v = R v u` on connected graphs |
 | `effectiveResistance_self` | `R u u = 0` unconditionally |
+| `sq_le_mul_of_forall_zero_le_sub` | algebra core: a real quadratic nonnegative everywhere has nonpositive discriminant (`c² ≤ Q·E`) |
+| `quadForm_laplacian_sub_smul` | polarization: `quadForm L (f − t • g)` expands with cross term `f ⬝ᵥ L *ᵥ g` (reciprocity collapses the mixed terms) |
+| `laplacian_cauchy_schwarz` | **semidefinite Cauchy–Schwarz:** `(f ⬝ᵥ L g)² ≤ quadForm L f * quadForm L g`, no connectivity hypothesis (proposal step 6, 2026-08-18) |
+| `effectiveResistance_ge_sq_div_quadForm` | **one-sided Dirichlet bound:** `(f u − f v)² / quadForm L f ≤ R u v` for any test potential of positive energy (proposal step 6, 2026-08-18) |
 
 
 ### `Scaffold.Mathlib.GraphTheory.Cheeger`

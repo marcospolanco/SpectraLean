@@ -1717,3 +1717,100 @@ lower-bound resistance), plus the cheap definiteness residual
 `R u v = 0 ↔ u = v` (reachable pair). Or the still-open earlier
 candidates: `evals (c • M)` excavation; irregular Cheeger shape with
 a named consumer.
+
+## 2026-08-18T14:06:54Z — Electrical-crust step 6 started: one-sided Dirichlet bound
+
+**Run:** `20260818T140654Z-run-1`
+**Session:** `ses_fead1b54bffecXkdKzAHJaWoVS`
+**Status:** in-progress
+**Milestone:** Operator direction "advance
+`proposals/electrical-structure-crust.md`, step 6 only" — the one-sided
+Dirichlet bound `(f u − f v)² / quadForm (laplacian A) f ≤
+effectiveResistance A u v` for any test potential `f` with positive
+energy. Leverage: it is the direction every application uses to
+lower-bound resistance, and its proof is load-bearing on `laplacian_psd`
+(polarization of the PSD quadratic form) and on the step-4/step-5
+solvability-and-energy chain — per the falsifiability principle, an
+error in those would break this proof rather than pass beside it.
+
+**Route (recorded before stating):** expand `quadForm L (f − t • g)`
+via the proved reciprocity `laplacian_dotProduct_mulVec`; nonnegativity
+for all `t` (from `laplacian_psd`) forces the discriminant bound at
+`t = c/E` (degenerate `E = 0` case separately); the cross term is
+`f u − f v` through the step-4 potential and the solution-level energy
+identity. No attained supremum — the full Dirichlet principle stays
+deferred per the proposal.
+
+**Next action:** survey the Mathlib pin for a usable PSD Cauchy–Schwarz
+(record either way), implement in `GraphTheory.Electrical`, QA in
+`EffectiveResistance_QA.lean` (equality/strict positive witnesses,
+reverse-inequality refutation, zero-energy disconnected guard witness),
+direct elaboration + target builds + full build + hygiene scripts, then
+proposal checklist, backlog item 7, radar, index map, scoreboard, README
+snapshot.
+
+## 2026-08-18T14:21:59Z — Electrical-crust step 6 delivered: one-sided Dirichlet bound; program complete (completed)
+
+**Run:** `20260818T140654Z-run-1`
+**Session:** `ses_fead1b54bffecXkdKzAHJaWoVS`
+**Status:** completed
+**Milestone:** Operator direction "advance
+`proposals/electrical-structure-crust.md`, step 6 only" — the one-sided
+Dirichlet bound `(f u − f v)² / quadForm (laplacian A) f ≤
+effectiveResistance A u v`, delivered as the proposal's final step;
+steps 1–6 are now all proved hard crust, axiom count 18 throughout.
+
+**Mathlib survey (recorded before proving):** the pin's only
+Cauchy–Schwarz is the definite inner-product-space one; the Laplacian
+form is semidefinite, unusable without quotienting the kernel; no
+`QuadraticForm` C–S at these function types — polarization route taken.
+
+**Changes.** `Scaffold/Mathlib/GraphTheory/Electrical.lean` +4 proved
+declarations: `sq_le_mul_of_forall_zero_le_sub` (nonnegative-everywhere
+quadratics have nonpositive discriminants), `quadForm_laplacian_sub_smul`
+(polarization; mixed terms collapse via the proved reciprocity),
+`laplacian_cauchy_schwarz` (`(f ⬝ᵥ L g)² ≤ quadForm L f · quadForm L g`,
+no connectivity hypothesis — reusable), and the headline
+`effectiveResistance_ge_sq_div_quadForm` (division guarded by
+`0 < quadForm`). Load-bearing chain: cross term = `f u − f v` through
+the step-4 demand potential, energy = `R u v` through the step-5 energy
+identity, C–S through `laplacian_psd`. QA
+`SpectralGraph/EffectiveResistance_QA.lean` +9 (345 total): attainment
+at both harmonic potentials (edge `1/1 = 1`, path `4/2 = 2`, energies
+computed from raw definitions), strictness at a non-harmonic potential
+(`1 < 2`), the reverse inequality refuted numerically (`2 ≤ 1` false —
+one-sidedness forced), and the `0 <` energy guard witnessed on the
+disconnected fixture (zero-energy indicator with voltage difference
+`1`). Docs: scoreboard, radar (subject axis 6 re-scored 2.5 → 3.0 per
+protocol after proof + QA landed; QA count synced 345/24), backlog item
+7 (program complete, definiteness residual named), SGT index map,
+README snapshot, proposal checklist (all six steps ✅ with delivery
+note).
+
+**Verification.** `lake env lean` on `GraphTheory.Electrical` and
+`EffectiveResistance_QA` — zero errors, zero warnings; `lake build` of
+the QA target ✔ (2012) and full `lake build` ✔ (2178 targets); all 24
+QA modules elaborated directly (zero errors; remaining outputs are
+pre-existing `unusedSectionVars` warnings in untouched modules);
+345 QA declarations, no `sorry`/`admit` under `Scaffold/` (prose-only
+matches); 18 cited axioms unchanged; `lint_axioms`, `check_citations`,
+`check_markdown_links`, scoreboard regeneration all pass.
+
+**Concurrent-change note:** `docs/traction-plan.md` was modified
+outside this run at 14:21Z (references this milestone's module as the
+release-example candidate) and an untracked
+`proposals/eng-use-cases.md` present at run start was removed; both
+left exactly as found, not authored or reverted by this run.
+
+**Remaining risk.** None new in the delivered slice; the axis-6
+residuals stay as recorded (full Rayleigh monotonicity needs the
+attained-supremum Dirichlet principle; resistance metric /
+definiteness residual `R u v = 0 ↔ u = v`; Matrix–Tree/Kirchhoff
+absent).
+
+**Next handoff.** Cheap electrical residual `R u v = 0 ↔ u = v`
+(reachable pair, reusing the step-2 zero-energy ⇒ constant argument);
+or the standing earlier candidates: `evals (c • M) = c • evals M`
+Mathlib excavation, an irregular Cheeger statement shape through
+`rayleigh_normalizedLaplacian_degreeSqrt` (needs source + consumer), or
+backlog item 3 variants with named consumers.

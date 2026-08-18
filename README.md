@@ -89,7 +89,7 @@ Last assessed: August 18, 2026. Scores reflect usable, verified coverage on a
 | Variational and functional methods | 3.0 / 5 |
 | Cuts, expansion, and clustering | 2.5 / 5 |
 | Random walks and diffusion | 2.5 / 5 |
-| Combinatorial and electrical structure | 2.5 / 5 |
+| Combinatorial and electrical structure | 3.0 / 5 |
 | Perturbation, randomness, and algorithms | 3.0 / 5 |
 | Adjacent systems interfaces | 1.0 / 5 |
 

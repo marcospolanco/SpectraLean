@@ -533,14 +533,70 @@ Matrix–Tree/Kirchhoff remain absent. Umbrella, scoreboard (336 QA
 declarations, 24 modules), SGT index map, backlog item 7, README
 snapshot, and proposal checklist updated.
 
+**Active slice (run 1, 2026-08-18): electrical-crust step 6 — the
+one-sided Dirichlet bound — DELIVERED.** Operator direction pinned
+`proposals/electrical-structure-crust.md` **step 6 only**; the named
+cheap residual (`R u v = 0 ↔ u = v`) was NOT started — one step per
+run; with this step the proposal's program is **complete** (steps 1–6,
+axiom count 18 throughout).
+
+**Mathlib survey (recorded before proving, per the proposal):** the
+pin's only Cauchy–Schwarz is the *definite* inner-product-space one
+(`Analysis/InnerProductSpace/Basic.lean`); the Laplacian energy form is
+merely semidefinite (constants have zero energy), so it is unusable
+without first quotienting out the kernel; no `QuadraticForm` C–S exists
+at these function types. **Route taken (recorded before stating):**
+polarization of the PSD energy, in three proved layers.
+
+**Delivered** in `GraphTheory.Electrical` (4 new declarations, all
+proved, no axioms): `sq_le_mul_of_forall_zero_le_sub` (algebra core: a
+real quadratic nonnegative everywhere has nonpositive discriminant
+`c² ≤ Q·E`; minimum at `t = c/E`, degenerate `E = 0` forces `c = 0`);
+`quadForm_laplacian_sub_smul` (polarization `quadForm L (f − t • g) =
+quadForm L f − 2t·(f ⬝ᵥ L g) + t²·quadForm L g`; the mixed terms agree
+through the proved reciprocity `laplacian_dotProduct_mulVec`);
+`laplacian_cauchy_schwarz` (`(f ⬝ᵥ L g)² ≤ quadForm L f · quadForm L
+g`, **no connectivity hypothesis** — reusable beyond resistance); and
+the headline `effectiveResistance_ge_sq_div_quadForm`
+(`(f u − f v)² / quadForm L f ≤ effectiveResistance A u v` for any test
+potential of positive energy, division guarded per architecture §4).
+The headline is load-bearing on the whole chain: its cross term is
+`f u − f v` *through the step-4 demand potential*, its energy is `R u
+v` *through the step-5 energy identity*, and its C–S is `laplacian_psd`
+— an error in any of those breaks this proof rather than passing beside
+it. No attained supremum is used (the reverse direction is the deferred
+Dirichlet principle).
+
+**QA** `SpectralGraph/EffectiveResistance_QA.lean` (+9 declarations,
+345 total): equality *attained* at the harmonic potentials on both
+connected fixtures (edge `1²/1 = 1`, path `4/2 = 2`; energies computed
+independently from the raw definitions — `edge_energy_e0_QA`,
+`path_energy_e00_QA` reuse `path_energy_value_QA`); *strictness* at the
+non-harmonic `![1,0,0]` (`1 < 2`); a **negative witness** refuting the
+reverse inequality numerically (`2 ≤ 1` false — the one-sided form is
+forced; the upper direction genuinely needs the attained-supremum
+principle the proposal keeps deferred); and the **`0 <` energy guard
+witnessed load-bearing** on the disconnected fixture (component
+indicator: zero energy — kernel membership — with voltage difference
+`1`, so an unguarded bound would read junk `1/0 = 0 ≤ 0` on both
+sides).
+
+Radar re-scored per protocol (proof + QA landed): subject axis 6
+(electrical) 2.5 → 3.0 — the first variational/electrical inequality
+on the axis; below 3.5 because full Rayleigh monotonicity, the
+resistance metric, and Matrix–Tree/Kirchhoff remain absent (recorded
+with the milestone). Radar QA-axis count synced to 345/24. Umbrella
+unchanged (module already in it), scoreboard, SGT index map (4 new
+`Electrical` rows), backlog item 7 (program complete; residual named),
+README snapshot, and proposal checklist (all six steps ✅) updated.
+
 ## Ready queue
 
-1. Proposal step 6 — the one-sided Dirichlet bound
-   (`R u v ≥ (f u − f v)² / quadForm (laplacian A) f` for any test
-   potential `f`; Cauchy–Schwarz over the energy identity, no attained
-   supremum) — now unlocked by step 5; plus the named cheap residual
-   `R u v = 0 ↔ u = v` (reachable pair; the natural completion of
-   nonnegativity, reusing the step-2 zero-energy ⇒ constant argument).
+1. ~~Proposal step 6 — the one-sided Dirichlet bound~~ — delivered
+   above (program complete). Still open, cheap: the definiteness
+   residual `R u v = 0 ↔ u = v` (reachable pair; the natural completion
+   of nonnegativity, reusing the step-2 zero-energy ⇒ constant
+   argument).
 
 1. Citation hygiene — completed 2026-08-17 (see Active milestone and Last
    verified state); Chung provenance corrected, Weyl/Davis–Kahan fidelity
@@ -561,6 +617,23 @@ snapshot, and proposal checklist updated.
    combinations, centering, sums) only when a consumer names them.
 
 ## Last verified state
+
+- 2026-08-18 (electrical-crust step 6: one-sided Dirichlet bound,
+  program complete): `lake env lean` on `GraphTheory.Electrical` and on
+  `QA.SpectralGraph.EffectiveResistance_QA` — both zero errors, zero
+  warnings; `lake build Scaffold.QA.SpectralGraph.EffectiveResistance_QA`
+  ✔ (2012 targets); full `lake build` ✔ (2178 targets); all twenty-four
+  QA modules elaborated directly in one batch (zero errors — the only
+  outputs are pre-existing `unusedSectionVars` warnings in untouched
+  modules); 345 QA declarations (+9), no `sorry`/`admit` anywhere under
+  `Scaffold/` (the only textual matches are prose in comments); 18
+  explicit cited axioms (unchanged — pure hard crust); all hygiene
+  scripts pass (`lint_axioms`, `check_citations`,
+  `check_markdown_links`); scoreboard regenerated and its prose synced;
+  SGT index map (4 new `Electrical` rows), backlog item 7, radar
+  (subject axis 6: 2.5 → 3.0 recorded per protocol; QA-axis count
+  synced to 345/24), README snapshot, and proposal checklist (all six
+  steps ✅) updated.
 
 - 2026-08-18 (electrical-crust step 5: effective resistance): `lake
   env lean` on `GraphTheory.Electrical` and on

@@ -35,6 +35,19 @@
     connected-graph agreement theorem's hypothesis fails — the kernel
     being two-dimensional does not break the value.
 
+  - **One-sided Dirichlet bound (step 6):** equality is *attained* at
+    the harmonic potential on both connected fixtures (edge: `1/1 = 1`;
+    path: `4/2 = 2` — values computed from the raw definitions); a
+    non-harmonic test potential on the path gives a *strict* bound
+    (`1 < 2`); the reverse (upper-bound) inequality is **refuted
+    numerically** on the same fixture (`2 ≤ 1` is false), witnessing
+    that the one-sided form is forced — the other direction genuinely
+    needs the attained-supremum Dirichlet principle, which stays
+    deferred; and on the disconnected fixture a component indicator has
+    zero energy but nonzero voltage difference, so the `0 <` energy
+    guard excludes exactly the vectors for which the bound would
+    degenerate (`1 / 0 = 0` junk on both sides).
+
   All proofs are real Lean proofs (no `sorry`/`admit`). These are
   theorems, not axioms; QA checks interfaces where the arithmetic is
   fully evaluated.
@@ -235,5 +248,117 @@ theorem disc_same_component_uniqueness_QA {r s : ℝ}
     (h2 : IsEffectiveResistance connDiscAdj 0 1 s) : r = s :=
   isEffectiveResistance_unique_of_reachable connDiscAdj connDiscAdj_isSymm
     connDiscAdj_nonneg disc_same_component_reachable h1 h2
+
+/-!
+## The one-sided Dirichlet bound (proposal step 6)
+
+`effectiveResistance_ge_sq_div_quadForm`:
+`(f u − f v)² / quadForm (laplacian A) f ≤ R u v` for any test
+potential `f` of positive energy. Witnesses: equality attained at the
+harmonic potentials (both connected fixtures), strictness at a
+non-harmonic potential, a numerical refutation of the reverse
+inequality (one-sidedness is forced), and the disconnected guard
+witness for the `0 <` energy hypothesis.
+-/
+
+/-- **Independent energy computation (edge):** the energy of `![1, 0]`
+— computed from the raw definitions, not through any theorem — is `1`
+(the voltage difference it realizes). -/
+theorem edge_energy_e0_QA : quadForm (laplacian edgeAdj) ![1, 0] = 1 := by
+  simp [quadForm, Matrix.mulVec, Matrix.dotProduct, laplacian,
+    degreeMatrix, deg, edgeAdj, Fin.sum_univ_two]
+
+/-- **Independent energy computation (path):** the energy of the
+non-harmonic test potential `![1, 0, 0]`, computed from the raw
+definitions, is `1`. -/
+theorem path_energy_e00_QA :
+    quadForm (laplacian connPathAdj) ![1, 0, 0] = 1 := by
+  simp [quadForm, Matrix.mulVec, Matrix.dotProduct, laplacian,
+    degreeMatrix, deg, connPathAdj, Fin.sum_univ_three]
+
+/-- **The bound is attained at the harmonic potential (edge):** the test
+potential `![1, 0]` — itself a solution of the unit-demand equation —
+gives `1 ^ 2 / 1 = 1 = R 0 1`, computed from the independent energy
+(`edge_energy_e0_QA`) and the pinned resistance value. Equality, not
+just the inequality. -/
+theorem edge_bound_attained_QA :
+    (![1, 0] 0 - ![1, 0] 1) ^ 2 / quadForm (laplacian edgeAdj) ![1, 0]
+      = effectiveResistance edgeAdj 0 1 := by
+  rw [edge_energy_e0_QA, edge_effectiveResistance_eq_one_QA]
+  norm_num [Matrix.cons_val']
+
+/-- **Interface instantiation (edge):** the theorem applies at
+`f = ![1, 0]` with the positivity hypothesis discharged by the
+independent energy computation. -/
+theorem edge_bound_QA :
+    (![1, 0] 0 - ![1, 0] 1) ^ 2 / quadForm (laplacian edgeAdj) ![1, 0]
+      ≤ effectiveResistance edgeAdj 0 1 :=
+  effectiveResistance_ge_sq_div_quadForm edgeAdj edgeAdj_isSymm
+    edgeAdj_nonneg edge_supportGraph_connected 0 1 ![1, 0]
+    (by rw [edge_energy_e0_QA]; norm_num)
+
+/-- **The bound is attained at the harmonic potential (path):** the
+witness `![1, 0, −1]` of `path_resistance_two_QA` gives
+`(1 − (−1))² / 2 = 4 / 2 = 2 = R 0 2`. -/
+theorem path_bound_attained_QA :
+    (![1, 0, -1] 0 - ![1, 0, -1] 2) ^ 2
+      / quadForm (laplacian connPathAdj) ![1, 0, -1]
+      = effectiveResistance connPathAdj 0 2 := by
+  rw [path_energy_value_QA, path_effectiveResistance_eq_two_QA]
+  norm_num [Matrix.cons_val']
+
+/-- **Strictness at a non-harmonic potential:** the test potential
+`![1, 0, 0]` (not a multiple of the harmonic one) gives `1 ^ 2 / 1 = 1`,
+strictly below `R 0 2 = 2` — the bound is not vacuous and not always
+tight. -/
+theorem path_bound_strict_QA :
+    (![1, 0, 0] 0 - ![1, 0, 0] 2) ^ 2
+      / quadForm (laplacian connPathAdj) ![1, 0, 0]
+      < effectiveResistance connPathAdj 0 2 := by
+  rw [path_energy_e00_QA, path_effectiveResistance_eq_two_QA]
+  norm_num [Matrix.cons_val']
+
+/-- **Interface instantiation (path, non-harmonic):** the theorem
+applies at `f = ![1, 0, 0]`. -/
+theorem path_bound_nonharmonic_QA :
+    (![1, 0, 0] 0 - ![1, 0, 0] 2) ^ 2
+      / quadForm (laplacian connPathAdj) ![1, 0, 0]
+      ≤ effectiveResistance connPathAdj 0 2 :=
+  effectiveResistance_ge_sq_div_quadForm connPathAdj connPathAdj_isSymm
+    connPathAdj_nonneg connPath_supportGraph_connected 0 2 ![1, 0, 0]
+    (by rw [path_energy_e00_QA]; norm_num)
+
+/-- **Negative witness — the reverse inequality is false:** the
+upper-bound reading `R 0 2 ≤ (f 0 − f 2)² / energy f` at the same
+non-harmonic potential evaluates to `2 ≤ 1`, refuted numerically. The
+one-sided form is forced: the other direction genuinely requires the
+attained-supremum Dirichlet principle, which the proposal keeps
+deferred. -/
+theorem path_bound_reverse_refuted_QA :
+    ¬ (effectiveResistance connPathAdj 0 2
+        ≤ (![1, 0, 0] 0 - ![1, 0, 0] 2) ^ 2
+          / quadForm (laplacian connPathAdj) ![1, 0, 0]) := by
+  rw [path_effectiveResistance_eq_two_QA, path_energy_e00_QA]
+  norm_num [Matrix.cons_val']
+
+/-- **The `0 <` energy guard is load-bearing (disconnected witness).**
+The component indicator `![1, 1, 0, 0]` has *zero* energy (it is in the
+Laplacian kernel, `connDisc_indicator_in_kernel_QA`) yet nonzero
+voltage difference across components, `f 0 − f 2 = 1`. The unguarded
+ratio degenerates to `1 / 0 = 0` while the resistance function reads
+its junk fallback `0` — both sides junk, the bound vacuous. On a
+connected graph, zero energy forces `f u = f v` (PSD and the kernel
+characterization), so the hypothesis `0 < quadForm … f` excludes
+exactly the degenerate test potentials; disconnected, that exclusion
+fails. -/
+theorem disc_zero_energy_guard_QA :
+    quadForm (laplacian connDiscAdj) ![1, 1, 0, 0] = 0
+      ∧ (![1, 1, 0, 0] 0 - ![1, 1, 0, 0] 2) ^ 2
+          / quadForm (laplacian connDiscAdj) ![1, 1, 0, 0] = 0
+      ∧ effectiveResistance connDiscAdj 0 2 = 0 := by
+  refine ⟨?_, ?_, disc_fallback_zero_QA⟩
+  · rw [quadForm, connDisc_indicator_in_kernel_QA, Matrix.dotProduct_zero]
+  · rw [quadForm, connDisc_indicator_in_kernel_QA,
+      Matrix.dotProduct_zero, div_zero]
 
 end SpectralGraphTheory.QA

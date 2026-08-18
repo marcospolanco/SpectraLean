@@ -187,10 +187,26 @@ symmetry; `R u u = 0` unconditional. QA
 computed on the unit edge (`1`) and 3-path (`2`, series edges add),
 energy identity cross-checked against an independently computed
 energy, junk fallback pinned, and two-distinct-potentials/one-value
-same-component witnesses. **Remaining in this family:** proposal step
-6 — the one-sided Dirichlet bound `R u v ≥ (f u − f v)² / energy f`
-(Cauchy–Schwarz over the energy identity; no attained supremum), plus
-the cheap definiteness residual `R u v = 0 ↔ u = v` (reachable pair).
+same-component witnesses. **Step 6 delivered (2026-08-18): the
+one-sided Dirichlet bound, completing the program** —
+`effectiveResistance_ge_sq_div_quadForm` (`(f u − f v)² / energy f ≤
+R u v` for any test potential of positive energy; no axioms), proved by
+polarization of the PSD energy through three reusable layers:
+`sq_le_mul_of_forall_zero_le_sub` (nonnegative-everywhere quadratics
+have nonpositive discriminant), `quadForm_laplacian_sub_smul`
+(polarization; mixed terms agree by the proved reciprocity), and
+`laplacian_cauchy_schwarz` (semidefinite Cauchy–Schwarz
+`(f ⬝ᵥ L g)² ≤ quadForm L f * quadForm L g`, no connectivity
+hypothesis — Mathlib surveyed: the pin's only C–S is the definite
+inner-product one). QA: attainment at both harmonic potentials
+(edge `1/1 = 1`, path `4/2 = 2`), strictness at a non-harmonic
+potential, the reverse inequality numerically refuted, and the
+`0 <` energy guard witnessed on the disconnected fixture. **Remaining
+in this family:** the cheap definiteness residual `R u v = 0 ↔ u = v`
+(reachable pair; natural completion of nonnegativity) and, at proposal
+level, the deferred full Rayleigh monotonicity (needs the
+attained-supremum Dirichlet principle) — re-admission requires its own
+dependency path per the proposal's deferral record.
 
 ## Standing decisions
 

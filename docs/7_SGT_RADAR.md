@@ -1,7 +1,7 @@
 # SGT Coverage Radar
 
 **Status:** Canonical coverage assessment  
-**Last reviewed:** August 17, 2026
+**Last reviewed:** August 18, 2026
 
 Two radars, per the operator's axes definition
 ([`cdx-sgt-radar-axes.md`](../cdx-sgt-radar-axes.md)): a *subject*
@@ -17,9 +17,9 @@ boundaries against the [QA scoreboard](5_QA_SCOREBOARD.md).
 | # | Axis | Score | Evidence |
 |---|------|------:|----------|
 | 1 | Graph and Laplacian models | 2.5 | Weighted arbitrary graphs (`WAdj`), combinatorial Laplacian with symmetry/kernel/Dirichlet/PSD **proved**; normalized Laplacian both regular (`Cheeger.regularNormalizedLaplacian`) and general/irregular (`Normalized.normalizedLaplacian`, congruence + similarity **proved**). Absent: directed graphs, signed-graph theory, `SimpleGraph` adapters. |
-| 2 | Spectral linear algebra | 3.5 | Sorted spectrum `evals` + monotonicity **proved**; eigenbasis orthonormality/completeness and projector algebra (idempotence, extremes, transport) **proved**; interlacing **admitted** (`eigen_interlacing_principal_submatrix`); Weyl **admitted** with gap stability **proved from it**; Davis–Kahan **admitted** with a **derived** two-point wrapper. |
-| 3 | Variational and functional methods | 2.5 | `quadForm`/Dirichlet identity and PSD **proved**; `rayleigh` defined; λ₂ variational characterization **admitted** (`lambda2_variational`). Absent: Poincaré, log-Sobolev, generic min–max. |
-| 4 | Cuts, expansion, clustering | 2.5 | `vol`/`boundary`/`conductance`/`cheegerConstant` with nonnegativity, GLB, and full cut duality (**proved**, run 10); Cheeger bounds **admitted**, regular graphs only. Absent: multiway expansion, spectral partitioning driver. |
+| 2 | Spectral linear algebra | 3.5 | Sorted spectrum `evals` + monotonicity + `evals_mem_eigvalOf` (**proved**); `secondEval` (matrix-facing λ₂ API) and the trace/Rayleigh pinning tools `eigvalOf_sum_eq_trace`, `eigvalOf_le_of_quadForm_nonpos` **proved** (2026-08-18); eigenbasis orthonormality/completeness and projector algebra **proved**; interlacing **admitted** (`eigen_interlacing_principal_submatrix`); Weyl **admitted** with gap stability **proved from it**; Davis–Kahan **admitted** with a **derived** two-point wrapper. |
+| 3 | Variational and functional methods | 3.0 | `quadForm`/Dirichlet identity and PSD **proved**; `rayleigh` defined; normalized↔combinatorial transfer **proved** (2026-08-17, `VariationalTransfer`: congruence lemma, degree-weighted Rayleigh quotient `rayleigh L_sym (√D y) = (yᵀ L y)/∑ deg·y²`, `normalizedLaplacian_psd`); λ₂ variational characterization **admitted** (`lambda2_variational`). Absent: Poincaré, log-Sobolev, generic min–max. |
+| 4 | Cuts, expansion, clustering | 2.5 | `vol`/`boundary`/`conductance`/`cheegerConstant` with nonnegativity, GLB, and full cut duality (**proved**, run 10); Cheeger bounds **admitted** (regular graphs; spectral side restated 2026-08-18 at the source-faithful `secondEval (L_sym)` shape after QA refuted the previous `lambda2`-composed side, and pinned to the classical value `2` on `K₂`). Absent: multiway expansion, spectral partitioning driver, the irregular Cheeger statement shape. |
 | 5 | Random walks and diffusion | 2.5 | Regular and irregular transition matrices with row-stochasticity **proved**; walk↔normalized similarity and both Laplacian bridges **proved**. Absent: mixing-time statements, heat kernels, reversibility; walk-spectrum transfer is the named Mathlib gap. |
 | 6 | Combinatorial and electrical structure | 0.5 | Only Laplacian basics touch this axis. Absent: effective resistance, spanning-tree enumeration (Matrix–Tree), Kirchhoff identities. |
 | 7 | Perturbation, randomness, algorithms | 3.0 | Weyl/Davis–Kahan **admitted** with the **derived** two-endpoint drift chain; scalar + matrix concentration **admitted** with the **derived** event-stream tail. Absent: random-graph models, numerical/spectral algorithm drivers. |
@@ -36,14 +36,21 @@ boundaries against the [QA scoreboard](5_QA_SCOREBOARD.md).
 | Proved depth | 3.5 | Interfaces and algebra are hard crust (projector algebra, cut duality, all Laplacian/normalized/walk bridges, gap stability); the inequality *engines* (interlacing, variational, Cheeger, Weyl, DK, concentration) remain admitted with documented statement differences. |
 | Axiom minimization | 3.5 | 18 explicit axioms, all cited and indexed; `spectral_gap_stability`, `hoeffding_iid`, `bernstein_iid` converted from admitted to proved; `spectral_persistence` deprecated with migration note (count drops at its removal release). Net trend 26 → 19 → 18. |
 | Mathlib interoperability | 3.5 | Native `Matrix`, `IsSymm`, `Matrix.L2OpNorm`, `Matrix.PosSemidef`, `ProbabilityTheory.IndepFun`, `OrthonormalBasis`; documented deviations: matrix-first graph representation (no `SimpleGraph` adapters yet) and `MatrixMDS` pending a Mathlib filtration API. |
-| QA | 3.0 | 107 declarations across 16 modules, zero `sorry`/`admit`, all modules individually compiled; coverage skews to degenerate/zero instantiations — no property-based or negative (falsification) QA yet. |
-| Citation fidelity | 3.5 | Every axiom carries author/title/locator + statement-differences; false Chung provenance corrected against git history; Horn–Johnson/Chung page-level locators explicitly unconfirmed rather than invented. |
-| Downstream reuse | 3.5 | The derived layer consumes the concentration and perturbation bridges end-to-end; `GraphTheory.Stationary` (2026-08-17, runs 2–3) consumes both interface modules: `Normalized` (kernel `L_sym √deg = 0`, stationary degree measure) and `RandomWalk` (conservation of mass `L_rw 1 = 0`, regular case). Scores raised 2.5 → 3.0 → 3.5 with those milestones; remaining gap: `Stationary` is the sole consumer — breadth of reuse, not existence, is now the constraint. |
+| QA | 4.0 | 240 declarations across 19 modules, zero `sorry`/`admit`, all modules individually compiled; coverage no longer degenerate-skewed (2026-08-17, `Exhaustive_QA`): exhaustive kernel-checked sweeps over **all** cuts of the 3-vertex path and the 4-cycle, negative witnesses, and walk row sums computed independently of their theorem. **Computational eigenvalue checks now exist (2026-08-18, `Cheeger_QA`)**: the corrected Cheeger spectral side is pinned to its classical value on the two-vertex edge (`edge_normLap_secondEval_eq_two_QA`: trace + determinant + sortedness, no axiom), and the pre-repair axiom shape is **refuted in proved form** (`old_cheeger_lower_bound_refuted_QA`: the old side evaluated to `1/2 ≤ 0` on `K₂`) — the QA program caught a materially false admitted statement. Remaining gap: no parametric (randomized) property QA; eigenvalue pinning is so far limited to two-point fixtures. |
+| Citation fidelity | 3.5 | Every axiom carries author/title/locator + statement-differences; false Chung provenance corrected against git history; Horn–Johnson/Chung page-level locators explicitly unconfirmed rather than invented; the Cheeger axioms' Lean statements now match their cited source after the 2026-08-18 shape repair. |
+| Downstream reuse | 4.0 | The derived layer consumes the concentration and perturbation bridges end-to-end; the walk/normalized interfaces now have **two** consuming modules: `GraphTheory.Stationary` (2026-08-17, runs 2–3: kernel `L_sym √deg = 0`, stationary degree measure, conservation of mass) and `GraphTheory.VariationalTransfer` (2026-08-17, run 2: quadratic-form/Rayleigh transfer through the congruence, `normalizedLaplacian_psd`). Scores raised 2.5 → 3.0 → 3.5 → 4.0 with those milestones; remaining gap: no consumption yet by an admitted-axiom consumer (the Cheeger bounds are still regular-only). |
 
-**Weakest assurance axis:** QA (3.0) — coverage skews to degenerate-case
-instantiations; property-based or falsification QA is the next
-assurance lever. Downstream reuse improved to 3.5 on 2026-08-17
-(`Stationary` now consumes both walk/normalized interface modules).
+**Weakest assurance axes:** four axes sit at 3.5 (proved depth, axiom
+minimization, Mathlib interoperability, citation fidelity) — the
+inequality engines remain admitted by design. QA was re-scored
+3.0 → 3.5 on 2026-08-17 (`Exhaustive_QA`) and 3.5 → 4.0 on
+2026-08-18 (`Cheeger_QA`: the tree's first computational eigenvalue
+checks plus a proved refutation of the pre-repair Cheeger axiom shape —
+the QA program caught a materially false admitted statement);
+its remaining gap is parametric property QA and eigenvalue pinning
+beyond two-point fixtures. Downstream reuse was re-scored 3.5 → 4.0 on
+2026-08-17 (`VariationalTransfer`, the second consuming module); the
+remaining gap is consumption by an admitted-axiom consumer.
 
 ## Re-scoring protocol
 

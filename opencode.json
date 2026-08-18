@@ -55,7 +55,7 @@
   },
   "command": {
     "pursue": {
-      "template": "Autonomously advance Scaffold by completing the highest-leverage safe increment available. Start from current repository evidence, follow the center-out SGT policy, continue the execution plan or select a coherent milestone, implement it, verify it proportionately, and maintain docs/EXECUTION_PLAN.md plus the append-only docs/AGENT_ACTIVITY.md. Record intent before editing and terminal status before a normal exit. Do not stop after analysis or a plan. Optional operator direction: $ARGUMENTS",
+      "template": "Autonomously advance Scaffold by completing the highest-leverage safe increment available. Start from current repository evidence, follow the center-out SGT policy, continue the execution plan or select a coherent milestone, implement it, verify it proportionately, and maintain docs/EXECUTION_PLAN.md plus the append-only docs/AGENT_ACTIVITY.md. Record intent before editing and terminal status before a normal exit. Do not stop after analysis or a plan. Optional operator direction, which may be empty; when it is empty, continue the execution plan and select the milestone yourself: $ARGUMENTS",
       "description": "Complete the next high-leverage Scaffold milestone",
       "agent": "scaffold",
       "model": "zhipuai-coding-plan/glm-5.3",

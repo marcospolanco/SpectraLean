@@ -917,3 +917,249 @@ modules — breadth of reuse is the new constraint, not existence.
 variational Rayleigh bounds through the congruence bridge), the QA
 assurance lever (property-based/falsification QA), or backlog item 3
 variants with named consumers.
+
+## 2026-08-17T21:29:30Z — Exhaustive/falsification QA for the SGT center
+
+**Run:** `20260817T212523Z-run-1`  
+**Session:** `ses_fee6294b2ffembnC8DMWLp0fQN`  
+**Status:** in-progress  
+**Milestone:** Raise the weakest assurance axis (QA 3.0 — degenerate-case
+skew, no property-based/negative QA) by delivering exhaustive,
+kernel-checked-coverage sweeps over *all* cuts of two fixtures plus
+negative witnesses, in a new QA module. Pure hard crust, no axiom
+changes.
+
+Scoping evidence: existing QA instantiates theorems at one or two cuts
+and mostly applies the general theorem being tested (e.g.
+`path_boundary_compl_QA` rewrites with `boundary_compl`), so a
+self-consistent mis-definition would pass. Backlog item 3 variants are
+gated on named consumers; reuse just re-scored to 3.5 — QA depth is the
+named next assurance lever.
+
+## 2026-08-17T21:48:42Z — Exhaustive/falsification QA delivered (QA axis 3.0 → 3.5)
+
+**Run:** `20260817T212523Z-run-1`  
+**Session:** `ses_fee6294b2ffembnC8DMWLp0fQN`  
+**Status:** completed  
+**Milestone:** Raise the weakest assurance axis (QA, 3.0 — degenerate-case
+skew) by delivering `Scaffold/QA/SpectralGraph/Exhaustive_QA.lean`:
+exhaustive, kernel-checked sweeps over all cuts of two fixtures, computed
+from the definitions rather than by applying the general theorems, plus
+negative witnesses. Pure hard crust, no axiom changes.
+
+**Changes:** 87 new QA declarations (206 total across 18 modules).
+(a) Coverage certificates `cuts3_eq`/`cuts4_eq`: the listed cuts are
+exactly `Finset.univ.powerset` on `Fin 3`/`Fin 4`, decided by the kernel —
+"exhaustive" is verified, not asserted. (b) Boundary and volume tables
+for every cut of the 3-vertex path and the 4-cycle, each entry evaluated
+from `boundary`/`vol`/`conductance` on concrete data (`norm_num` on the
+unfolded sums; no use of `boundary_compl`/`vol_compl` on the path from
+definition to value). (c) Duality recomposed from the independently
+computed tables (`exh_boundary_duality_QA`, `cyc_boundary_duality_QA`,
+`exh_vol_complementarity_QA`). (d) Negative witnesses: conductance
+separates adjacent-pair (`1/2`) from opposite-pair (`1`) cuts on the
+cycle; Rayleigh separates `8/3` from `0` on the path; an asymmetric
+two-vertex weight (`A 01 = 2`, `A 10 = 1`) shows `boundary_compl`'s
+symmetry hypothesis is load-bearing (`2 ≠ 1`). (e) Walk row sums
+computed per row, independently of `walkTransitionMatrix_row_sum`.
+Radar QA axis re-scored 3.0 → 3.5 per protocol (stale 107/16 evidence
+count refreshed to the current tree); execution plan and scoreboard
+updated.
+
+**Decisive commands and outcomes:** `lake env lean` on the module
+(zero output — clean elaboration); `lake build
+Scaffold.QA.SpectralGraph.Exhaustive_QA` ✔; full `lake build` ✔;
+`lint_axioms`, `check_citations`, `check_markdown_links` all pass;
+`generate_qa_scoreboard` regenerated (206 declarations, 0 placeholders).
+
+**Verification:** all 87 new declarations compile with no
+`sorry`/`admit`; 18 explicit cited axioms unchanged; umbrella build
+unaffected (QA modules are leaf builds, built directly).
+
+**Trust boundary:** unchanged; hard crust only. Implementation note
+recorded: `degreeMatrix`'s diagonal conditional elaborates with a
+classical `Decidable` instance (defined at generic `V`), so the Rayleigh
+checks compose the proved Dirichlet identity and kernel theorem; the
+checked values are still fully computed.
+
+**Remaining risk:** no parametric (randomized) property QA and no
+computational eigenvalue checks (Mathlib's spectral-theorem API is not
+computable) — both named as the residual QA-depth gap on the radar.
+
+**Next handoff:** breadth consumers (second consuming module for
+walk/normalized, e.g. Rayleigh bounds through the congruence bridge),
+the gated `evals (c • M) = c • evals M` excavation candidate, or
+backlog item 3 variants once an algorithm consumer is named.
+
+## 2026-08-17T21:51:19Z — Variational transfer (second interface consumer)
+
+**Run:** `20260817T214929Z-run-2`  
+**Session:** `ses_fee6294b2ffembnC8DMWLp0fQN`  
+**Status:** in-progress  
+**Milestone:** Deliver the open milestone's named breadth consumer:
+`GraphTheory.VariationalTransfer`, the second consuming module for the
+`Normalized`/`Spectral` interfaces — quadratic-form and Rayleigh-quotient
+transfer through the proved congruence `√D L_sym √D = L`, plus PSD
+transfer. Addresses the downstream-reuse axis's stated constraint
+(`Stationary` is the sole consumer). Pure hard crust, no new axioms.
+
+Scoping evidence: all required Mathlib pieces exist in the pinned
+snapshot (`dotProduct_mulVec`, `mulVec_transpose`, `mulVec_diagonal`,
+`mulVec_mulVec`, `one_mulVec`, `diagonal_transpose`); no name
+collisions for the planned declarations.
+
+## 2026-08-17T21:56:15Z — Variational transfer delivered (reuse axis 3.5 → 4.0)
+
+**Run:** `20260817T214929Z-run-2`  
+**Session:** `ses_fee6294b2ffembnC8DMWLp0fQN`  
+**Status:** completed  
+**Milestone:** Deliver the open milestone's named breadth consumer:
+`Scaffold.Mathlib.GraphTheory.VariationalTransfer` — quadratic-form and
+Rayleigh-quotient transfer between the combinatorial and normalized
+Laplacians through the proved congruence `√D L_sym √D = L`, plus PSD
+transfer. The second consuming module of the `Normalized`/`Spectral`
+interfaces, addressing the reuse axis's stated constraint
+("`Stationary` is the sole consumer"). Pure hard crust, no new axioms.
+
+**Changes:** public module (7 proved declarations): `quadForm_congr`
+(generic symmetric-congruence invariance of quadratic forms),
+`degreeSqrt_isSymm`/`degreeSqrt_mulVec` (entrywise stretch),
+`quadForm_laplacian_eq_quadForm_normalizedLaplacian` (Dirichlet-form
+transfer), `dotProduct_degreeSqrt_mulVec` (degree-weighted
+denominator), `degreeSqrt_mulVec_ne_zero`,
+`rayleigh_normalizedLaplacian_degreeSqrt` — the headline
+irregular-graph normalized Rayleigh quotient
+`rayleigh L_sym (√D y) = (yᵀ L y) / ∑ deg i · y i²`, which the
+regular-only Cheeger axioms cannot express — and
+`normalizedLaplacian_psd` (PSD transferred from `laplacian_psd` by
+un-stretching through `1/√D`). QA
+`SpectralGraph/VariationalTransfer_QA.lean` (15 declarations at the
+3-vertex path): entrywise stretch computes to `-√2`; the denominator
+computes to `4` both through the lemma and as a bare sum; the headline
+instantiates to the classical value `rayleigh L_sym (√D (1,-1,1)) =
+8/4 = 2` — the largest eigenvalue of the normalized path Laplacian,
+obtained without any spectral theorem (a defect in the congruence
+bridge, stretch, or denominator lemma would move this value). Umbrella
+import added; SGT index map gains the module section; radar re-scored
+per protocol: downstream reuse 3.5 → 4.0 (two consuming modules),
+subject axis 3 (variational) 2.5 → 3.0.
+
+**Decisive commands and outcomes:** `lake env lean` on both files
+(zero output after fixes — clean elaboration, zero warnings);
+`lake build` of module and QA ✔; full `lake build` ✔ (1997 targets);
+`lint_axioms`, `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated: 221 QA declarations, 0 placeholders, 18 axioms
+unchanged.
+
+**Verification:** all 7 public declarations proved from the center
+(consumes `degreeSqrt_mul_normalizedLaplacian_mul_degreeSqrt`,
+`degreeSqrt_mul_degreeInvSqrt`, `laplacian_psd`); Mathlib pieces used
+(`dotProduct_mulVec`, `mulVec_transpose`, `mulVec_diagonal`,
+`mulVec_mulVec`, `one_mulVec`, `diagonal_transpose`) all exist in the
+pinned v4.14.0 snapshot.
+
+**Trust boundary:** unchanged; hard crust only.
+
+**Remaining risk:** no admitted-axiom consumer yet (Cheeger bounds
+still regular-only); the transfer statement shapes are available for a
+future irregular Cheeger family. `evals (c • M)` excavation still
+gated.
+
+**Next handoff:** the `evals (c • M) = c • evals M` Mathlib-excavation
+candidate; an irregular Cheeger statement shape through
+`rayleigh_normalizedLaplacian_degreeSqrt` (needs a precise source and
+consumer); or backlog item 3 variants once an algorithm consumer is
+named.
+
+## 2026-08-18T02:10:53Z — Cheeger axiom statement-shape repair (in progress)
+
+**Run:** `20260818T020953Z-run-1`  
+**Session:** `ses_fed696611ffe0yiCxJU9cqgq3S`  
+**Status:** in-progress  
+**Milestone:** Repair a materially false statement shape at the admitted
+boundary: both Cheeger axioms pass `regularNormalizedLaplacian A d` to
+`lambda2`, which is `evals (laplacian ·) 1` — so the asserted spectral
+quantity is `λ₂(L(L_sym)) = λ₂(-L_sym)`, not `λ₂(L_sym)`. On the
+two-vertex edge the lower-bound instance reads `1/2 ≤ 0`, false; the
+documented and cited intent is Chung Ch. 2's `φ²/2 ≤ λ₂(L_sym)`. Leverage:
+the admitted Cheeger interface is the core of radar axis 4's admitted
+half; a false admitted statement is an emergency-repair case
+(architecture §9) and the top center-out priority.
+
+Scoping evidence: `lambda2` consumers grep-verified (only `Cheeger.lean`
+misuses it; `lambda2_variational` uses it correctly); Mathlib v4.14
+provides the repair kit (`Matrix.IsHermitian.eigenvalues_eq` Rayleigh
+form for the refutation bound; `det_eq_prod_eigenvalues`,
+`Matrix.trace_mul_cycle`, `unitary.coe_star_mul_self`,
+`Multiset.sort_eq`, `Finset.sum_eq_multiset_sum` for value pinning).
+Plan: `secondEval` + `lambda2_eq_secondEval` + `eigvalOf_sum_eq_trace`
+proved in the center; axioms restated at unchanged names/hypotheses with
+corrected RHS; QA refutes the old shape, pins the corrected value
+`λ₂(L_sym) = 2` on the edge, and re-instantiates coherence; dangling QA
+reference `cheegerConstant_le_two_QA` in the upper-bound docstring fixed.
+
+## 2026-08-18T02:54:12Z — Cheeger statement-shape repair delivered (QA 3.5 → 4.0)
+
+**Run:** `20260818T020953Z-run-1`  
+**Session:** `ses_fed696611ffe0yiCxJU9cqgq3S`  
+**Status:** completed  
+**Milestone:** Repair a materially false statement shape at the
+admitted boundary: both Cheeger axioms passed
+`regularNormalizedLaplacian A d` to `lambda2`, which is
+`evals (laplacian ·) 1` — so the asserted spectral quantity was
+`λ₂(L(L_sym)) = λ₂(-L_sym)`, not `λ₂(L_sym)`. On the two-vertex edge
+the lower-bound instance reads `1/2 ≤ 0`, false; the documented and
+cited intent is Chung Ch. 2's `φ²/2 ≤ λ₂(L_sym) ≤ 2φ`. Delivered as an
+emergency repair (architecture §9) at unchanged names and hypotheses.
+
+**Changes:** `GraphTheory.Spectral` gains five proved declarations:
+`secondEval` (matrix-facing second sorted eigenvalue — the correct
+spectral side for operators that are not adjacency matrices),
+`lambda2_eq_secondEval` (adjacency-facing bridge),
+`evals_mem_eigvalOf` (sorted-spectrum ↔ eigenbasis connection),
+`eigvalOf_sum_eq_trace` (trace from the unitary diagonalization), and
+`eigvalOf_le_of_quadForm_nonpos` (one-sided Rayleigh eigenvalue
+bound). `GraphTheory.Cheeger` restates both axioms at
+`secondEval (regularNormalizedLaplacian A d) …` with the correction
+recorded in the docstrings. `Cheeger_QA.lean` (26 declarations, +19)
+adds the `Fin 2` edge fixture (`edgeAdj`), the **proved refutation**
+`old_cheeger_lower_bound_refuted_QA` (old instance on `K₂` implies
+`1/2 ≤ 0` via the Rayleigh bound on `L(L_sym) = -L_sym` and
+`cheegerConstant = 1`), the **value pinning**
+`edge_normLap_secondEval_eq_two_QA` (`λ₂(L_sym) = 2`, computed from
+trace + determinant + sortedness through `Multiset.sort_eq` — no
+axiom, no spectral-theorem computation), `cheeger_bounds_edge_QA`
+(the corrected sandwich on the fixture: `1/2 ≤ 2 ≤ 2`), and the
+coherence lemmas at the corrected shape. Scoreboard, radar, SGT index
+map, and Chung source index updated with the correction record.
+
+**Decisive commands and outcomes:** `lake env lean` on Spectral,
+Cheeger, and Cheeger_QA (zero output — clean elaboration, zero
+warnings); `lake build Scaffold.Mathlib.GraphTheory.{Spectral,Cheeger}`
+✔; all nineteen QA modules + the changed public modules built directly
+✔; full `lake build` ✔ (2161 targets); `lint_axioms`,
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+(240 QA declarations, 0 placeholders, 18 axioms unchanged).
+
+**Verification:** the refutation and the value pinning are both proved
+statements, conditional on no axiom; the corrected axioms' conclusions
+are exercised on a fixture where the old and new shapes separate
+numerically (`0` vs `2`). Consumers were grep-audited before the change:
+only `Cheeger_QA.lean` used the axioms; `lambda2_variational` and all
+other `lambda2` uses are correct and untouched.
+
+**Trust boundary:** unchanged in size (18 explicit cited axioms); both
+Cheeger axioms remain admitted and downstream use stays conditional on
+them. The repair changes *what* is asserted, aligning the Lean
+statement with the cited source; it is not a proof of the axioms.
+
+**Remaining risk:** the corrected axioms are regular-graph statements;
+the irregular Cheeger shape (through
+`rayleigh_normalizedLaplacian_degreeSqrt`) remains open and needs a
+precise source and consumer. Eigenvalue pinning is so far limited to
+two-point fixtures; `evals (c • M)` excavation remains gated (though
+the new trace/membership tools lower its cost).
+
+**Next handoff:** the `evals (c • M) = c • evals M` excavation; an
+irregular Cheeger statement shape with a named consumer; or backlog
+item 3 variants with named algorithm consumers.

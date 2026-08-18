@@ -1,7 +1,7 @@
 # QA Scoreboard and Repository Health
 
 **Status:** Canonical verification record  
-**Last reviewed:** August 17, 2026
+**Last reviewed:** August 18, 2026
 
 This document separates source-derived counts from commands that have actually been run. A QA declaration is counted syntactically; it is considered verified only when its module check passes. QA proves selected consequences relative to Scaffold’s axioms and does not prove those axioms.
 
@@ -14,7 +14,7 @@ _Generated from Lean source on 2026-08-17._
 
 | Metric | Count |
 | --- | ---: |
-| QA theorem/lemma declarations | 119 |
+| QA theorem/lemma declarations | 240 |
 | `sorry`/`admit` tokens in QA code | 0 |
 | Explicit axioms in `Scaffold/Mathlib` | 18 |
 | `sorry`/`admit` tokens in `Scaffold/Mathlib` code | 0 |
@@ -26,7 +26,7 @@ _Generated from Lean source on 2026-08-17._
 | Concentration | 12 |
 | Derived | 11 |
 | Perturbation | 5 |
-| SpectralGraph | 91 |
+| SpectralGraph | 212 |
 
 ### QA files
 
@@ -40,14 +40,16 @@ _Generated from Lean source on 2026-08-17._
 | `Scaffold/QA/Perturbation/Weyl_QA.lean` | 4 | 0 |
 | `Scaffold/QA/SpectralGraph/BasicProperties_QA.lean` | 5 | 0 |
 | `Scaffold/QA/SpectralGraph/Basic_QA.lean` | 14 | 0 |
-| `Scaffold/QA/SpectralGraph/Cheeger_QA.lean` | 7 | 0 |
+| `Scaffold/QA/SpectralGraph/Cheeger_QA.lean` | 26 | 0 |
 | `Scaffold/QA/SpectralGraph/Cuts_QA.lean` | 11 | 0 |
 | `Scaffold/QA/SpectralGraph/Dynamics_QA.lean` | 6 | 0 |
+| `Scaffold/QA/SpectralGraph/Exhaustive_QA.lean` | 87 | 0 |
 | `Scaffold/QA/SpectralGraph/Interlacing_QA.lean` | 5 | 0 |
 | `Scaffold/QA/SpectralGraph/Normalized_QA.lean` | 14 | 0 |
 | `Scaffold/QA/SpectralGraph/Projector_QA.lean` | 5 | 0 |
 | `Scaffold/QA/SpectralGraph/RandomWalk_QA.lean` | 7 | 0 |
 | `Scaffold/QA/SpectralGraph/Stationary_QA.lean` | 12 | 0 |
+| `Scaffold/QA/SpectralGraph/VariationalTransfer_QA.lean` | 15 | 0 |
 | `Scaffold/QA/SpectralGraph/Variational_QA.lean` | 5 | 0 |
 <!-- END GENERATED SOURCE METRICS -->
 
@@ -55,20 +57,21 @@ _Generated from Lean source on 2026-08-17._
 
 | Check | Result | Date | Scope and limitation |
 | --- | --- | --- | --- |
-| `lake build` | Pass | 2026-08-17 | Default target is the library root `Scaffold.lean`; its umbrella certifies `Core.{RandomVariable,Norms,MatrixUpdates}`, `GraphTheory.{Spectral,Cheeger,RandomWalk,Normalized,Dynamics}`, `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan}`, `Probability.Concentration.{Scalar.*,Matrix.*}`, and the derived layer `Derived.{EventStream,ProjectorDrift}`. |
-| Direct QA module targets | Pass | 2026-08-17 | All seventeen QA modules compiled individually (`lake build Scaffold.QA.…`) with no `sorry`/`admit`, including `SpectralGraph/{Normalized,Cuts,Stationary}_QA.lean`. |
-| Direct public module targets | Pass | 2026-08-17 | All twenty public modules (the prior nineteen plus `Scaffold.Mathlib.GraphTheory.Stationary`) compile individually. |
+| `lake build` | Pass | 2026-08-18 | Default target is the library root `Scaffold.lean`; its umbrella certifies `Core.{RandomVariable,Norms,MatrixUpdates}`, `GraphTheory.{Spectral,Cheeger,RandomWalk,Normalized,Dynamics}`, `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan}`, `Probability.Concentration.{Scalar.*,Matrix.*}`, and the derived layer `Derived.{EventStream,ProjectorDrift}`. |
+| Direct QA module targets | Pass | 2026-08-18 | All nineteen QA modules compiled individually (`lake build Scaffold.QA.…`) with no `sorry`/`admit`, including the repaired `SpectralGraph/Cheeger_QA.lean` (axiom-shape refutation + eigenvalue value-pinning). |
+| Direct public module targets | Pass | 2026-08-18 | All public modules compile individually; the modules changed in the 2026-08-18 Cheeger repair (`GraphTheory.Spectral`, `GraphTheory.Cheeger`) were recompiled directly alongside the umbrella build. |
 | Mathlib cache provenance | Note | 2026-08-17 | The local `lake exe cache` binary crashes under the current macOS dyld (`__DATA_CONST segment missing SG_READ_ONLY flag`); the cache was fetched by running the same Cache tool logic interpreted via `lake env lean --run`, unpacking 5685 Mathlib oleans. |
-| `scripts/lint_axioms.py` | Pass | 2026-08-17 | All 18 explicit axioms are covered by `index/sources/` and `index/map/`. |
-| `scripts/check_citations.py` | Pass | 2026-08-17 | Every axiom carries a `Source:` citation in its doc comment. |
-| `scripts/check_markdown_links.py` | Pass | 2026-08-17 | No broken repository-relative targets in active docs; excludes the historical archive, the dependency checkout, and the local `.opencode/` tooling directory (including its vendored `node_modules`). |
+| `scripts/lint_axioms.py` | Pass | 2026-08-18 | All 18 explicit axioms are covered by `index/sources/` and `index/map/`. |
+| `scripts/check_citations.py` | Pass | 2026-08-18 | Every axiom carries a `Source:` citation in its doc comment. |
+| `scripts/check_markdown_links.py` | Pass | 2026-08-18 | No broken repository-relative targets in active docs; excludes the historical archive, the dependency checkout, and the local `.opencode/` tooling directory (including its vendored `node_modules`). |
 
 ## Interpretation
 
 - **Explicit axiom:** an intentional trust boundary declared with Lean's `axiom` command. QA lemmas and derived theorems using these axioms are conditional on them.
 - **Admitted proof:** a `sorry` or `admit` accepted by Lean; this is different from an explicit axiom and remains technical debt in public modules. As of this scoreboard there are no `sorry`/`admit` tokens anywhere under `Scaffold/`.
-- **QA declaration:** a theorem or lemma under `Scaffold/QA`; all 119 declarations have compiled against the current public API.
+- **QA declaration:** a theorem or lemma under `Scaffold/QA`; all 240 declarations have compiled against the current public API.
 - **Default build:** the umbrella reaches every public module listed above; no public module is excluded from `lake build`.
+- **Cheeger statement-shape repair (2026-08-18):** both admitted Cheeger axioms were restated at the corrected spectral side `secondEval (regularNormalizedLaplacian A d) …` after QA refuted the old shape in proved form: `lambda2` reads the spectrum of the combinatorial Laplacian *of* its argument, so the old side read `λ₂(L(L_sym)) = λ₂(-L_sym)`, whose two-vertex-edge instance asserts `1/2 ≤ 0` (`old_cheeger_lower_bound_refuted_QA`). The corrected side is independently pinned on the same fixture to the classical value `λ₂(L_sym) = 2` (`edge_normLap_secondEval_eq_two_QA`, computed from trace + determinant + sortedness — the tree's first computational eigenvalue check, conditional on no axiom). Supporting center hard crust added in `GraphTheory.Spectral`: `secondEval`, `lambda2_eq_secondEval`, `evals_mem_eigvalOf`, `eigvalOf_le_of_quadForm_nonpos`, `eigvalOf_sum_eq_trace`. Axiom count unchanged (18); axiom names and hypotheses unchanged. This is an emergency repair of a materially false statement shape (architecture §9), not a mathematical strengthening; downstream consumers of the corrected interface remain conditional on the axioms.
 - **Stationary structure (2026-08-17):** the downstream consumer of both walk/normalized interface modules — `GraphTheory.Stationary` proves `L_sym *ᵥ √deg = 0` (kernel of the general normalized Laplacian, counterpart of `laplacian_ones_in_kernel`), `Pᵀ *ᵥ deg = deg` (the degree measure is stationary for the walk — `π ∝ deg`, the Markov-mixing consumer interface), and conservation of mass in both the regular (`randomWalkLaplacian *ᵥ 1 = 0`, consuming `RandomWalk.transitionMatrix_row_sum`) and irregular (`walkLaplacian *ᵥ 1 = 0`, consuming `Normalized.walkTransitionMatrix_row_sum`) cases. No axioms; downstream reuse on the SGT radar re-scored 2.5 → 3.0 → 3.5 with these milestones.
 - **Cut duality (2026-08-17):** the first expansion/cut slice delivered in the center — `vol_compl`, `boundary_compl`, `conductance_compl` (cuts are partition-valued: boundary and conductance invariant under complementation for symmetric weights, via volume complementarity and `Finset.sum_comm`), and the degenerate-cut guards `boundary_empty`/`boundary_univ`. These are the structural facts sweep-cut and sparsest-cut consumers assume; no axioms admitted.
 - **Random-walk and normalized-Laplacian interfaces (2026-08-17):** the first two broad-SGT backlog items delivered — `GraphTheory.RandomWalk` (transition matrix, row-stochasticity for `d`-regular graphs, walk-Laplacian bridges to both existing worlds) and `GraphTheory.Normalized` (the *irregular* symmetric normalized Laplacian through a diagonal `Real.sqrt` square root — no matrix square root needed — with the congruence `√D L_sym √D = laplacian`, regular-cone agreement, the general walk form `D⁻¹A` with irregular row-stochasticity, and the similarity identity `√D · L_walk · (1/√D) = L_sym`; the eigenvalue-list transfer is the named residual gap — the walk form is not symmetric, so `evals` does not apply, and the pinned Mathlib has no charpoly-roots interface for non-symmetric matrices). No axioms admitted in either module.

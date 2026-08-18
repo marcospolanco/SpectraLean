@@ -176,8 +176,16 @@ The repository includes a non-interactive OpenCode workflow using `zhipuai-codin
 scripts/opencode-pursue --runs 1
 ```
 
-Use `--runs N` for a bounded sequence of resumptions and pass an optional
-priority as an argument. The project agent follows `AGENTS.md`, maintains the
+Use `--runs N` for a bounded sequence of resumptions, or pass an optional
+direction as a quoted trailing argument:
+
+```sh
+scripts/opencode-pursue -- "advance proposals/<name>.md, step 1 only"
+```
+
+A direction pins the invocation to a single run; continue it with
+`scripts/opencode-pursue --runs N --resume`, which keeps the direction in the
+session history rather than restating it every run. The project agent follows `AGENTS.md`, maintains the
 current [execution plan](docs/EXECUTION_PLAN.md) and append-only
 [activity log](docs/AGENT_ACTIVITY.md), selects a bounded high-leverage
 milestone, implements and verifies it, and is denied external-directory access

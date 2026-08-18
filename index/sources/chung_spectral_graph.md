@@ -33,6 +33,16 @@ variational characterization of the algebraic connectivity.
   volume-based conductance `boundary / min (vol S, vol Sᶜ)` over
   nonempty proper vertex subsets; for a `d`-regular graph of positive
   degree this is the standard conductance.
+- **Statement-shape correction (2026-08-18)**: through 2026-08-17 the
+  two Cheeger axioms stated their spectral side by composing `lambda2`
+  with `regularNormalizedLaplacian A d`; since `lambda2` reads the
+  spectrum of the combinatorial Laplacian *of* its argument, the
+  asserted quantity was `λ₂(L(L_sym)) = λ₂(-L_sym)`, not `λ₂(L_sym)` —
+  materially false on the two-vertex edge (`1/2 ≤ 0`, refuted in proved
+  form by `QA.old_cheeger_lower_bound_refuted_QA`). Both axioms are now
+  stated through `secondEval (regularNormalizedLaplacian A d)`, the
+  second-smallest eigenvalue of the normalized Laplacian itself, which
+  is the reading the citation above always intended.
 - **Locator status**: the Cheeger bounds are cited at chapter level
   (Chapter 2). The initial commit of this repository cited
   "Theorem 2.2" without a page; the SGT-center rebuild moved to the

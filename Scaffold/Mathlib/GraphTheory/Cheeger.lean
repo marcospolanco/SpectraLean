@@ -64,15 +64,32 @@ degree `d` (so that `regularNormalizedLaplacian A d` is the symmetric
 normalized Laplacian); `cheegerConstant` is the infimum of the
 volume-based conductance over nonempty proper vertex subsets.
 
-QA: exercised by `SpectralGraphTheory.QA.cheeger_positive_implies_lambda2_pos_QA`
-in `Scaffold/QA/SpectralGraph/Cheeger_QA.lean`, which derives a
-connectivity-flavored consequence from this axiom.
+Statement-shape correction (2026-08-18): earlier revisions stated the
+spectral side as `lambda2 (regularNormalizedLaplacian A d) …`. That was
+a defective shape, not a strengthening: `lambda2` reads the spectrum of
+the *combinatorial Laplacian of* its argument, and every row of a
+normalized Laplacian sums to zero, so the asserted quantity was
+`λ₂(L(L_sym)) = λ₂(-L_sym)` — on the two-vertex edge the instance reads
+`1/2 ≤ 0`, which is false (refuted in proved form by
+`SpectralGraphTheory.QA.old_cheeger_lower_bound_refuted_QA`). The
+corrected side `secondEval (regularNormalizedLaplacian A d) …` reads
+`λ₂(L_sym)` itself, matching the cited source; hypotheses and name are
+otherwise unchanged.
+
+QA: exercised by
+`SpectralGraphTheory.QA.cheeger_positive_implies_secondEval_pos_QA` and
+`SpectralGraphTheory.QA.cheeger_bounds_coherent_QA` in
+`Scaffold/QA/SpectralGraph/Cheeger_QA.lean`, which derives consequences
+from this axiom, and by
+`SpectralGraphTheory.QA.edge_normLap_secondEval_eq_two_QA`, which pins
+the corrected right-hand side on the two-vertex edge to its classical
+value `2`.
 -/
 axiom cheeger_lower_bound (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
     (hnonneg : ∀ i j, 0 ≤ A i j) (d : ℝ) (hd : ∀ i, deg A i = d)
     (hdpos : 0 < d) (hcard : 2 ≤ Fintype.card V) :
     (cheegerConstant A) ^ 2 / 2 ≤
-      lambda2 (regularNormalizedLaplacian A d)
+      secondEval (regularNormalizedLaplacian A d)
         (regularNormalizedLaplacian_symmetric A hA d) hcard
 
 /-- Cheeger upper bound for `d`-regular graphs: the second-smallest
@@ -83,16 +100,23 @@ Source:
 - Chung, F. R. K., "Spectral Graph Theory", CBMS 92, AMS, 1997,
   Chapter 2.
 
-Statement differences: as for `cheeger_lower_bound`.
+Statement differences: as for `cheeger_lower_bound`, including the
+2026-08-18 statement-shape correction of the spectral side from
+`lambda2 (regularNormalizedLaplacian A d) …` (which read
+`λ₂(L(L_sym)) = λ₂(-L_sym)`) to `secondEval (regularNormalizedLaplacian A d) …`
+(the second-smallest eigenvalue of the normalized Laplacian itself).
 
-QA: exercised by `SpectralGraphTheory.QA.cheegerConstant_le_two_QA` in
+QA: exercised by `SpectralGraphTheory.QA.cheeger_bounds_coherent_QA` in
 `Scaffold/QA/SpectralGraph/Cheeger_QA.lean`, which combines the two
-Cheeger bounds into a sandwich on `cheegerConstant`.
+Cheeger bounds into a sandwich on `cheegerConstant`, and by
+`SpectralGraphTheory.QA.cheeger_bounds_edge_QA`, which instantiates the
+sandwich on the two-vertex edge against the independently computed values
+`φ = 1` and `λ₂(L_sym) = 2`.
 -/
 axiom cheeger_upper_bound (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
     (hnonneg : ∀ i j, 0 ≤ A i j) (d : ℝ) (hd : ∀ i, deg A i = d)
     (hdpos : 0 < d) (hcard : 2 ≤ Fintype.card V) :
-    lambda2 (regularNormalizedLaplacian A d)
+    secondEval (regularNormalizedLaplacian A d)
         (regularNormalizedLaplacian_symmetric A hA d) hcard ≤
       2 * cheegerConstant A
 

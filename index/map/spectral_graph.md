@@ -14,7 +14,9 @@ conductance, Cheeger theory, interlacing, and event-driven dynamics.
 
 Real definitions: `WAdj`, `deg`, `degreeMatrix`, `laplacian`,
 `quadForm`, `rayleigh`, `onesVec`, `evals` (sorted spectrum),
-`lambda2`, `spectralGap`, `spectralProjector`, `initialProjector`,
+`lambda2`, `secondEval` (matrix-facing λ₂, without the combinatorial
+`laplacian` wrap; added in the 2026-08-18 Cheeger shape repair),
+`spectralGap`, `spectralProjector`, `initialProjector`,
 `eigvecOf`, `eigvalOf`, `vol`, `boundary`, `conductance`,
 `cheegerConstant`, `eventUpdate`.
 
@@ -32,7 +34,12 @@ spectral theorem (2026-08-17): `initialProjector_congr`,
 `eigvecOf_inner` (eigenbasis orthonormality), `eigvecOf_complete`
 (eigenbasis completeness), `spectralProjector_idempotent`,
 `spectralProjector_eq_zero`, `spectralProjector_eq_one`,
-`initialProjector_idempotent`.
+`initialProjector_idempotent`; spectrum pinning tools (2026-08-18):
+`lambda2_eq_secondEval` (bridge between the adjacency-facing and
+matrix-facing λ₂ APIs), `evals_mem_eigvalOf` (sorted-spectrum ↔
+eigenbasis connection), `eigvalOf_sum_eq_trace` (trace from the unitary
+diagonalization), `eigvalOf_le_of_quadForm_nonpos` (one-sided Rayleigh
+eigenvalue bound — the refutation engine of `Cheeger_QA`).
 
 Admitted axioms:
 
@@ -49,6 +56,15 @@ Real definition: `regularNormalizedLaplacian`.
 |-------|-------------|--------|
 | `cheeger_lower_bound` | `φ(G)²/2 ≤ λ₂(L_sym)` for `d`-regular graphs | [Chung](../sources/chung_spectral_graph.md) |
 | `cheeger_upper_bound` | `λ₂(L_sym) ≤ 2 φ(G)` for `d`-regular graphs | [Chung](../sources/chung_spectral_graph.md) |
+
+Statement-shape correction (2026-08-18): through 2026-08-17 both axioms
+stated the spectral side as `lambda2 (regularNormalizedLaplacian A d)`,
+which reads `λ₂(L(L_sym)) = λ₂(-L_sym)` — materially false on the
+two-vertex edge (`1/2 ≤ 0`; refuted by
+`QA.old_cheeger_lower_bound_refuted_QA`). Both are restated at
+`secondEval (regularNormalizedLaplacian A d) …` — the source-faithful
+`λ₂(L_sym)`, pinned to its classical value `2` on `K₂` by
+`QA.edge_normLap_secondEval_eq_two_QA`.
 
 ### `Scaffold.Mathlib.GraphTheory.RandomWalk` (random-walk interfaces)
 
@@ -96,6 +112,21 @@ and `Normalized` interfaces — demonstrated downstream reuse:
 | `walkTransitionMatrix_transpose_mulVec_deg` | degree measure stationary for the adjoint walk (`π ∝ deg`; Markov-mixing consumer interface) |
 | `randomWalkLaplacian_mulVec_one_eq_zero` | conservation of mass, regular case (consumes `RandomWalk.transitionMatrix_row_sum`) |
 | `walkLaplacian_mulVec_one_eq_zero` | conservation of mass, irregular case (consumes `Normalized.walkTransitionMatrix_row_sum`) |
+
+### `Scaffold.Mathlib.GraphTheory.VariationalTransfer` (variational consumer of the congruence bridge)
+
+All statements proved (2026-08-17), no axioms; the second consuming
+module of the `Normalized`/`Spectral` interfaces (after `Stationary`):
+
+| Declaration | Content |
+|-------------|---------|
+| `quadForm_congr` | generic congruence lemma: `quadForm (P M P) y = quadForm M (P *ᵥ y)` for symmetric `P` |
+| `degreeSqrt_isSymm`, `degreeSqrt_mulVec` | symmetry of `√D`; entrywise action `√D *ᵥ y = √deg ∘ y` |
+| `quadForm_laplacian_eq_quadForm_normalizedLaplacian` | Dirichlet-form transfer `yᵀ L y = (√D y)ᵀ L_sym (√D y)` through the proved congruence |
+| `dotProduct_degreeSqrt_mulVec` | degree-weighted denominator `⬝(√D y, √D y) = ∑ deg i · y i²` |
+| `degreeSqrt_mulVec_ne_zero` | the stretch preserves nonzero vectors (positive degrees) |
+| `rayleigh_normalizedLaplacian_degreeSqrt` | normalized Rayleigh quotient `rayleigh L_sym (√D y) = (yᵀ L y) / ∑ deg i · y i²` — the irregular-graph variational interface |
+| `normalizedLaplacian_psd` | PSD transfers from `laplacian_psd` by un-stretching through `1/√D` |
 
 ### `Scaffold.Mathlib.GraphTheory.Dynamics` (dynamic frontier)
 

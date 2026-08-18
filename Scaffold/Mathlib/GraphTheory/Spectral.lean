@@ -43,6 +43,7 @@ import Mathlib.Data.Real.Basic
 import Mathlib.Data.Matrix.Basic
 import Mathlib.LinearAlgebra.Matrix.Symmetric
 import Mathlib.LinearAlgebra.Matrix.Spectrum
+import Mathlib.LinearAlgebra.Matrix.Trace
 
 open scoped BigOperators Matrix
 open InnerProductSpace
@@ -197,6 +198,24 @@ noncomputable def lambda2 (A : WAdj (V := V)) (hA : A.IsSymm)
     (hcard : 2 ≤ Fintype.card V) : ℝ :=
   evals (laplacian_symmetric A hA) ⟨1, by omega⟩
 
+/-- The second entry of the sorted spectrum of a symmetric matrix: the
+"second-smallest eigenvalue" of the matrix *itself*, without wrapping it
+in the combinatorial Laplacian. `lambda2` is this quantity for
+`laplacian A` (`lambda2_eq_secondEval`); spectral statements about other
+symmetric operators — normalized Laplacians in particular — must use
+`secondEval` on the operator directly. -/
+noncomputable def secondEval (M : Matrix V V ℝ) (hM : M.IsSymm)
+    (hcard : 2 ≤ Fintype.card V) : ℝ :=
+  evals hM ⟨1, by omega⟩
+
+/-- `lambda2` is the second sorted eigenvalue of the combinatorial
+Laplacian: the adjacency-facing `lambda2` API interoperates with the
+matrix-facing `secondEval` API. -/
+theorem lambda2_eq_secondEval (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hcard : 2 ≤ Fintype.card V) :
+    lambda2 A hA hcard =
+      secondEval (laplacian A) (laplacian_symmetric A hA) hcard := rfl
+
 /-- The spectral gap at index `k`: the difference `λ_{k+1} - λ_k` of the
 sorted spectrum. The index hypothesis makes `k+1` admissible. -/
 noncomputable def spectralGap (M : Matrix V V ℝ) (hM : M.IsSymm)
@@ -212,6 +231,25 @@ noncomputable def eigvecOf (M : Matrix V V ℝ) (hM : M.IsSymm) (i : V) : V → 
 not sorted). -/
 noncomputable def eigvalOf (M : Matrix V V ℝ) (hM : M.IsSymm) (i : V) : ℝ :=
   (isHermitian_of_isSymm hM).eigenvalues i
+
+/-- Every entry of the sorted spectrum is an eigenvalue of the
+underlying eigenbasis listing: sorting a multiset permutes it, and each
+`get` lands in it. This connects the sorted-spectrum API (`evals`) to
+the eigenbasis API (`eigvalOf`). -/
+theorem evals_mem_eigvalOf (hM : M.IsSymm) (k : Fin (Fintype.card V)) :
+    ∃ i : V, evals hM k = eigvalOf M hM i := by
+  have hlen : (k : ℕ) < (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset V).val.map
+        ((isHermitian_of_isSymm hM).eigenvalues))).length := by
+    rw [Multiset.length_sort, Multiset.card_map]
+    simpa using k.isLt
+  have hmem : evals hM k ∈ Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset V).val.map
+        ((isHermitian_of_isSymm hM).eigenvalues)) :=
+    List.get_mem _ (k : ℕ) hlen
+  rw [Multiset.mem_sort] at hmem
+  rcases Multiset.mem_map.1 hmem with ⟨i, _, hi⟩
+  exact ⟨i, hi.symm⟩
 
 /-- The orthogonal spectral projector onto the span of the eigenvectors
 whose eigenvalues are at most `c`:
@@ -310,6 +348,54 @@ theorem eigvecOf_complete (M : Matrix V V ℝ) (hM : M.IsSymm) (a b : V) :
   · subst hab; simp
   · rw [if_neg hab, EuclideanSpace.single_apply,
       if_neg (fun h => hab h.symm)]
+
+/-- All eigenvalues of a symmetric matrix with everywhere-nonpositive
+quadratic form are nonpositive: at each eigenbasis vector `v`, the
+eigenvector equation gives `λ (v ⬝ v) = vᵀ M v ≤ 0` with `v ⬝ v = 1` by
+orthonormality. A one-sided Rayleigh-quotient bound; the same pattern
+bounds eigenvalues of PSD-type operators and is consumed by the
+computational eigenvalue QA in `Scaffold/QA/SpectralGraph/Cheeger_QA.lean`. -/
+theorem eigvalOf_le_of_quadForm_nonpos (M : Matrix V V ℝ) (hM : M.IsSymm)
+    (hq : ∀ x : V → ℝ, Matrix.dotProduct x (M.mulVec x) ≤ 0) (i : V) :
+    eigvalOf M hM i ≤ 0 := by
+  have hev : M *ᵥ eigvecOf M hM i
+      = eigvalOf M hM i • eigvecOf M hM i :=
+    (isHermitian_of_isSymm hM).mulVec_eigenvectorBasis i
+  have hvv : Matrix.dotProduct (eigvecOf M hM i) (eigvecOf M hM i) = 1 := by
+    have h := (isHermitian_of_isSymm hM).eigenvectorBasis.orthonormal
+    rw [orthonormal_iff_ite] at h
+    have hii := h i i
+    rw [PiLp.inner_apply] at hii
+    simpa [eigvecOf, RCLike.inner_apply, Matrix.dotProduct] using hii
+  have hq' := hq (eigvecOf M hM i)
+  rw [hev, Matrix.dotProduct_smul, smul_eq_mul, hvv] at hq'
+  simpa using hq'
+
+/-- The trace of a real symmetric matrix is the sum of its eigenvalues.
+Proved from Mathlib's unitary diagonalization (`spectral_theorem`):
+conjugation `U D U*` preserves the trace. Together with Mathlib's
+`Matrix.IsHermitian.det_eq_prod_eigenvalues` this pins small spectra from
+trace, determinant, and per-eigenvalue bounds — the technique used by the
+computational eigenvalue QA in `Scaffold/QA/SpectralGraph/Cheeger_QA.lean`. -/
+theorem eigvalOf_sum_eq_trace (M : Matrix V V ℝ) (hM : M.IsSymm) :
+    ∑ i, eigvalOf M hM i = M.trace := by
+  have hst := (isHermitian_of_isSymm hM).spectral_theorem (A := M) (n := V)
+  have hd : ∑ i, eigvalOf M hM i
+      = (Matrix.diagonal (RCLike.ofReal ∘
+          (isHermitian_of_isSymm hM).eigenvalues)).trace := by
+    simp [Matrix.trace_diagonal, eigvalOf, Function.comp_apply,
+      RCLike.ofReal_real_eq_id]
+  calc ∑ i, eigvalOf M hM i
+      = (Matrix.diagonal (RCLike.ofReal ∘
+          (isHermitian_of_isSymm hM).eigenvalues)).trace := hd
+    _ = (((isHermitian_of_isSymm hM).eigenvectorUnitary : Matrix V V ℝ) *
+          Matrix.diagonal (RCLike.ofReal ∘
+            (isHermitian_of_isSymm hM).eigenvalues) *
+          star ((isHermitian_of_isSymm hM).eigenvectorUnitary :
+            Matrix V V ℝ)).trace := by
+        rw [Matrix.trace_mul_cycle, unitary.coe_star_mul_self,
+          Matrix.one_mul]
+    _ = M.trace := by congr 1; exact hst.symm
 
 /-- Spectral projectors are idempotent: `P_c * P_c = P_c`. Entrywise, the
 product expands into outer products of eigenvectors whose cross terms

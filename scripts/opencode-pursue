@@ -16,6 +16,17 @@ Run the autonomous Scaffold agent up to N times. Each invocation starts a
 fresh OpenCode session by default. Pass --resume to use the exact session
 recorded locally in .opencode/pursue-session. Within one --runs N invocation,
 successful later runs continue the session created or resumed by its first run.
+
+Trailing arguments are the operator direction; they reach the agent as
+$ARGUMENTS in the pursue command template. A direction pins the invocation to a
+single run, so --runs may not exceed 1 alongside one: the same direction
+re-injected into a resumed session restates an instruction the agent has
+already carried out. Continue a directed pursuit undirected instead, which
+leaves the direction where it belongs, in the session history:
+
+  scripts/opencode-pursue -- "advance proposals/<name>.md, step 1 only"
+  scripts/opencode-pursue --runs 4 --resume
+
 Before each new run, scripts/zquota applies the default 90% quota gate. A
 closed gate exits 75 without starting an agent; use the launchd helper for
 periodic wakeup. Raw transcripts are written to ignored .opencode/runs; follow
@@ -63,6 +74,14 @@ done
   echo "--quota-threshold must be an integer from 0 through 100" >&2
   exit 2
 }
+if (($# > 0)) && ((runs > 1)); then
+  echo "An operator direction pins the pursuit to a single run; --runs must be 1 alongside one." >&2
+  echo "Continue a directed pursuit undirected, which keeps the direction in the session history:" >&2
+  echo "  scripts/opencode-pursue -- \"<direction>\"" >&2
+  echo "  scripts/opencode-pursue --runs $runs --resume" >&2
+  exit 2
+fi
+
 run_dir="$project_dir/.opencode/runs"
 session_file="$project_dir/.opencode/pursue-session"
 mkdir -p "$run_dir"

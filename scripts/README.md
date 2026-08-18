@@ -20,11 +20,13 @@ The project configuration defines a `scaffold` primary agent and a `pursue` comm
 scripts/opencode-pursue --runs 1
 ```
 
-Add optional direction as arguments:
+Add optional direction as trailing arguments. Quote the whole direction as one
+argument; it reaches the agent as `$ARGUMENTS` in the `pursue` command
+template defined in `opencode.json`:
 
 ```sh
-scripts/opencode-pursue --runs 5 \
-  "restore the next concentration module and its closest QA consumer"
+scripts/opencode-pursue \
+  -- "restore the next concentration module and its closest QA consumer"
 ```
 
 Each invocation creates a fresh OpenCode session by default. Pass `--resume`
@@ -32,6 +34,23 @@ to continue the exact locally recorded session, rather than whichever session
 happens to be most recent. `--runs N` is the explicit budget: within that one
 invocation, a successful run may continue into the next one until N runs
 complete; a failed run stops immediately.
+
+### A direction pins the invocation to one run
+
+`--runs` may not exceed 1 alongside an operator direction; the wrapper exits 2
+rather than clamping silently. Every run in a `--runs N` loop receives the same
+trailing arguments, and runs 2..N resume the session created by run 1 — so a
+repeated direction restates an instruction the agent has already carried out,
+inviting redundant work or a completed instruction read as newly issued.
+
+Continue a directed pursuit undirected. Run 1 records its session ID, so the
+direction stays in the session history instead of being restamped onto each
+prompt, and you see run 1's result before committing budget to the rest:
+
+```sh
+scripts/opencode-pursue -- "advance proposals/<name>.md, step 1 only"
+scripts/opencode-pursue --runs 4 --resume
+```
 
 ### Quota gate
 

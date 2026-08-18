@@ -1,6 +1,6 @@
 # Proposal: Grow the Crust Through Electrical Structure
 
-**Status:** Proposed; steps 1–4 of 6 delivered (2026-08-18, see
+**Status:** Proposed; steps 1–5 of 6 delivered (2026-08-18, see
 checklist below). Assistant's assessment of project direction,
 requested 2026-08-17; substantially re-sequenced 2026-08-18 after
 review (see [Corrections](#corrections)). Authorizes no Lean changes,
@@ -152,7 +152,15 @@ part of the original sequencing error.
   by the constructive eigenbasis route (decision recorded below); QA
   in `SpectralGraph/PotentialSolvability_QA.lean` with positive,
   non-zero-sum negative, and disconnected zero-sum negative witnesses.
-- [ ] **5. Effective resistance, uniqueness, and energy** — not started.
+- [x] **5. Effective resistance, uniqueness, and energy** — delivered
+  2026-08-18: `Scaffold/Mathlib/GraphTheory/Electrical.lean`
+  (`IsEffectiveResistance` by the potential equation, the total
+  `effectiveResistance` with agreement theorems and a QA-witnessed
+  junk fallback, reachability-strength uniqueness, both energy
+  identities, symmetry, nonnegativity, `R u u = 0`); QA in
+  `SpectralGraph/EffectiveResistance_QA.lean` (values computed on the
+  edge and path, energy cross-check, fallback and same-component
+  witnesses). Delivery note below.
 - [ ] **6. The one-sided Dirichlet bound** — not started.
 
 ### 1. The `SimpleGraph → WAdj` interoperability adapter — ✅ delivered
@@ -271,7 +279,7 @@ This is the step the original document omitted. Two routes:
 Route 2 reuses the center and is likely cheaper. Decide and record which
 before writing the statement.
 
-### 5. Effective resistance, uniqueness, and energy — not started
+### 5. Effective resistance, uniqueness, and energy — ✅ delivered
 
 With step 4 in hand, define resistance by the equation it solves rather than
 by a pseudoinverse — the Mathlib pin has **no** Moore–Penrose pseudoinverse
@@ -293,6 +301,30 @@ IsEffectiveResistance A u v r  ↔  ∃ f, laplacian A *ᵥ f = e u - e v ∧ f 
 
 Split across two runs if the definitional plumbing and the energy identity do
 not land together.
+
+**Delivered 2026-08-18, both halves in one run.** Mathlib survey recorded
+before stating (per the operating instructions): no effective-resistance
+or "resistance" declaration anywhere in the pin, confirming the
+potential-equation route. Two strengthening deviations from the sketch,
+both cheaper than the sketch itself: uniqueness is stated at
+**reachability-pair** strength (via step 3's component-form
+characterization rather than the connected form), so it holds within a
+component of a disconnected graph — QA pins `effectiveResistance 0 1 = 1`
+on the disconnected fixture, beyond the connected theorems' reach; and
+the energy identity is stated at the **solution level**
+(`quadForm (laplacian A) f = f u − f v` for *any* solution, no
+hypotheses — the definitional unfolding of `quadForm` plus
+`Matrix.dotProduct_single`), with the function-level `R u v = energy`
+form as its corollary. The total function is defined by classical
+choice with junk value `0` when the relation is unsatisfiable; the
+fallback is not hidden — `effectiveResistance_eq_zero_of_not_exists`
+states it, and the QA proves on the disconnected fixture that no
+cross-component value exists while the function reads `0` (fallback,
+not measurement). The diagonal is characterized exactly
+(`IsEffectiveResistance A u u r ↔ r = 0`) with no hypotheses at all.
+Named residual, cheap and deferred: definiteness (`R u v = 0 ↔ u = v`
+on a reachable pair) — the natural completion of nonnegativity, kept
+out of this run by the one-step scope fence.
 
 ### 6. The one-sided Dirichlet bound — not started
 

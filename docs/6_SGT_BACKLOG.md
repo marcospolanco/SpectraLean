@@ -168,11 +168,29 @@ computed potentials on the edge and 3-path, plus *proved unsolvability*
 witnesses for the zero-sum hypothesis (demand `e 0` on the connected
 edge) and for connectivity (zero-sum cross-component demand on the
 disconnected fixture, via the indicator kernel certificate). No
-axioms. **Next candidate in this family:** proposal step 5 — define
-`effectiveResistance` by the potential equation
-(`IsEffectiveResistance A u v r ↔ ∃ f, L *ᵥ f = e u − e v ∧ f u − f v
-= r`), consuming step 4 for existence and step 2 for uniqueness of
-`r`; then the energy identity, symmetry, nonnegativity, `R u u = 0`.
+axioms. **Step 5 delivered (2026-08-18): effective resistance by the
+potential equation** — new `GraphTheory.Electrical` (no axioms;
+Mathlib surveyed first: no effective-resistance declaration and no
+pseudoinverse in the pin). The relation `IsEffectiveResistance A u v r`
+(`∃ f, L *ᵥ f = e u − e v ∧ f u − f v = r`); existence from step 4;
+uniqueness of `r` stated at reachability-pair strength from the
+component-form kernel characterization (valid within a component of a
+disconnected graph); the total function `effectiveResistance A u v : ℝ`
+by classical choice with an explicit junk fallback `0`, its firing
+QA-witnessed (cross-component pair on the disconnected fixture: no
+value exists, function reads `0`); agreement theorems at component and
+connected strength; the energy identity at solution level
+(`quadForm (laplacian A) f = f u − f v`, hypothesis-free) and function
+level; nonnegativity from `laplacian_psd`; hypothesis-free relation
+symmetry; `R u u = 0` unconditional. QA
+`SpectralGraph/EffectiveResistance_QA.lean` (17 declarations): values
+computed on the unit edge (`1`) and 3-path (`2`, series edges add),
+energy identity cross-checked against an independently computed
+energy, junk fallback pinned, and two-distinct-potentials/one-value
+same-component witnesses. **Remaining in this family:** proposal step
+6 — the one-sided Dirichlet bound `R u v ≥ (f u − f v)² / energy f`
+(Cauchy–Schwarz over the energy identity; no attained supremum), plus
+the cheap definiteness residual `R u v = 0 ↔ u = v` (reachable pair).
 
 ## Standing decisions
 

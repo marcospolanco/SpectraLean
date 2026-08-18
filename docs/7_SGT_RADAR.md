@@ -46,16 +46,17 @@ fidelity, and downstream reuse.
 | 3 | Variational and functional methods | 3.0 | `quadForm`/Dirichlet identity and PSD **proved**; `rayleigh` defined; normalized↔combinatorial transfer **proved** (2026-08-17, `VariationalTransfer`: congruence lemma, degree-weighted Rayleigh quotient `rayleigh L_sym (√D y) = (yᵀ L y)/∑ deg·y²`, `normalizedLaplacian_psd`); λ₂ variational characterization **admitted** (`lambda2_variational`). Absent: Poincaré, log-Sobolev, generic min–max. |
 | 4 | Cuts, expansion, clustering | 2.5 | `vol`/`boundary`/`conductance`/`cheegerConstant` with nonnegativity, GLB, and full cut duality (**proved**, run 10); Cheeger bounds **admitted** (regular graphs; spectral side restated 2026-08-18 at the source-faithful `secondEval (L_sym)` shape after QA refuted the previous `lambda2`-composed side, and pinned to the classical value `2` on `K₂`). Absent: multiway expansion, spectral partitioning driver, the irregular Cheeger statement shape. |
 | 5 | Random walks and diffusion | 2.5 | Regular and irregular transition matrices with row-stochasticity **proved**; walk↔normalized similarity and both Laplacian bridges **proved**. Absent: mixing-time statements, heat kernels, reversibility; walk-spectrum transfer is the named Mathlib gap. |
-| 6 | Combinatorial and electrical structure | 2.0 | The connectivity/kernel hinge is **proved** (2026-08-18, proposal `electrical-structure-crust.md` step 2 after the re-sequencing): for connected symmetric nonnegative weights, `ker (laplacian A) = span ℝ {onesVec}` (`laplacian_kernel_eq_span_onesVec`, built on `supportGraph` + `SimpleGraph.Walk` induction), with connected and disconnected QA witnesses. **Component structure is complete for weighted graphs** (2026-08-18, proposal step 3): the component-form kernel characterization `L *ᵥ f = 0 ↔ f` constant on each support-graph component (`laplacian_mulVec_eq_zero_iff_forall_reachable`), the kernel-equality bridge `ker (laplacian A) = ker ((supportGraph A).lapMatrix ℝ)`, kernel dimension = component count, and the component-indicator basis (Mathlib's `lapMatrix_ker_basis`/rank theorem inherited through the bridge; QA computes the count to `2` and the basis to `![1,1,0,0]`/`![0,0,1,1]` on the disconnected fixture). **The potential equation is completely characterized on connected graphs** (2026-08-18, proposal step 4): every zero-sum demand is solvable (`exists_laplacian_mulVec_eq_of_sum_eq_zero`, constructive eigenbasis witness `f = ∑_{λᵢ ≠ 0} (vᵢ ⬝ᵥ b/λᵢ)•vᵢ` — the load-bearing consumer of the proved eigenbasis algebra and the step-2 kernel theorem), the unit demand `e u − e v` is solvable (`exists_laplacian_mulVec_eq_single_sub_single`), and the reciprocity identity `w ⬝ᵥ (L *ᵥ f) = (L *ᵥ w) ⬝ᵥ f` (`laplacian_dotProduct_mulVec`) certifies in proved QA form that non-zero-sum demands are unsolvable and that zero-sum does not suffice without connectivity. Absent: effective resistance itself as a *defined quantity* (step 5, now unlocked), the energy identity, spanning-tree enumeration (Matrix–Tree), Kirchhoff identities. |
+| 6 | Combinatorial and electrical structure | 2.5 | The connectivity/kernel hinge is **proved** (2026-08-18, proposal `electrical-structure-crust.md` step 2 after the re-sequencing): for connected symmetric nonnegative weights, `ker (laplacian A) = span ℝ {onesVec}` (`laplacian_kernel_eq_span_onesVec`, built on `supportGraph` + `SimpleGraph.Walk` induction), with connected and disconnected QA witnesses. **Component structure is complete for weighted graphs** (2026-08-18, proposal step 3): the component-form kernel characterization `L *ᵥ f = 0 ↔ f` constant on each support-graph component (`laplacian_mulVec_eq_zero_iff_forall_reachable`), the kernel-equality bridge `ker (laplacian A) = ker ((supportGraph A).lapMatrix ℝ)`, kernel dimension = component count, and the component-indicator basis (Mathlib's `lapMatrix_ker_basis`/rank theorem inherited through the bridge; QA computes the count to `2` and the basis to `![1,1,0,0]`/`![0,0,1,1]` on the disconnected fixture). **The potential equation is completely characterized on connected graphs** (2026-08-18, proposal step 4): every zero-sum demand is solvable (`exists_laplacian_mulVec_eq_of_sum_eq_zero`, constructive eigenbasis witness `f = ∑_{λᵢ ≠ 0} (vᵢ ⬝ᵥ b/λᵢ)•vᵢ` — the load-bearing consumer of the proved eigenbasis algebra and the step-2 kernel theorem), the unit demand `e u − e v` is solvable (`exists_laplacian_mulVec_eq_single_sub_single`), and the reciprocity identity `w ⬝ᵥ (L *ᵥ f) = (L *ᵥ w) ⬝ᵥ f` (`laplacian_dotProduct_mulVec`) certifies in proved QA form that non-zero-sum demands are unsolvable and that zero-sum does not suffice without connectivity. **Effective resistance is a defined, well-determined quantity** (2026-08-18, proposal step 5, `GraphTheory.Electrical`; Mathlib surveyed: no resistance declaration, no pseudoinverse): `IsEffectiveResistance A u v r` by the potential equation, existence from step 4, uniqueness of `r` at reachability-pair strength, the total function `effectiveResistance` with proved agreement theorems and an honestly QA-witnessed junk fallback, the energy identity at solution and function level (`quadForm L f = f u − f v`; `R = energy`), nonnegativity from PSD, hypothesis-free relation symmetry, and `R u u = 0` unconditional; QA computes `R = 1` on the unit edge, `R = 2` on the 3-vertex path (series edges add), and cross-checks the energy identity against an independently computed energy. Absent: the Dirichlet variational bound (step 6), Rayleigh monotonicity, the resistance metric's triangle inequality, spanning-tree enumeration (Matrix–Tree), Kirchhoff identities. |
 | 7 | Perturbation, randomness, algorithms | 3.0 | Weyl/Davis–Kahan **admitted** with the **derived** two-endpoint drift chain; scalar + matrix concentration **admitted** with the **derived** event-stream tail. Absent: random-graph models, numerical/spectral algorithm drivers. |
 | 8 | Adjacent systems interfaces | 1.0 | Dynamics exist only as the retained compatibility example (`Derived.{EventStream,ProjectorDrift}`, conditional on three axioms; per-step axiom deprecated). Thermodynamics/statistical mechanics gated, absent. |
 
-**Weakest axes:** 6 (combinatorial/electrical — the connectivity hinge,
-the full weighted component structure, and the solvability
-characterization are proved, but no electrical *quantity* — resistance,
-energy, Matrix–Tree, Kirchhoff — is defined yet) and 8 (adjacent
-systems — deliberately
-gated). Axis 4's admitted half and axis
+**Weakest axes:** 6 (combinatorial/electrical — the connectivity
+hinge, the full weighted component structure, the solvability
+characterization, and now effective resistance as a well-determined
+quantity with its energy identity are proved, but the variational
+Dirichlet bound, Rayleigh monotonicity, the resistance metric, and
+Matrix–Tree/Kirchhoff remain absent) and 8 (adjacent systems —
+deliberately gated). Axis 4's admitted half and axis
 5's transfer gap are the nearest load-bearing completions.
 
 ## Assurance radar
@@ -95,7 +96,16 @@ connected graphs — zero-sum demands are solvable by a proved
 constructive witness, and QA proves the converse direction through
 kernel-certificate unsolvability in both hypothesis regimes; no
 electrical quantity is defined yet, which keeps the axis from rising
-further until step 5's `effectiveResistance` lands).
+further until step 5's `effectiveResistance` lands) and 2.0 → 2.5 on
+2026-08-18 (proposal step 5: effective resistance is now a *defined,
+well-determined quantity* — the potential-equation relation with
+existence, reachability-strength uniqueness, a total function with
+proved agreement and an honestly witnessed junk fallback, the energy
+identity at both levels, nonnegativity, symmetry, and `R u u = 0`,
+QA-pinned to the classical values `1` (edge) and `2` (path); the axis
+stays below 3.0 because the variational Dirichlet bound, Rayleigh
+monotonicity, the resistance-metric inequality, and Matrix–Tree/
+Kirchhoff are still absent).
 Downstream reuse was re-scored 3.5 → 4.0 on
 2026-08-17 (`VariationalTransfer`, the second consuming module); the
 remaining gap is consumption by an admitted-axiom consumer.

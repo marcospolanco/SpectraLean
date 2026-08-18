@@ -1595,3 +1595,125 @@ nonnegativity, `R u u = 0`, and the energy identity (proposal
 authorizes splitting step 5 across two runs if needed). Or the open
 earlier candidates: `evals (c • M)` excavation; irregular Cheeger
 shape with a named consumer.
+
+## 2026-08-18T11:25:36Z — Electrical-crust step 5 started: effective resistance
+
+**Run:** `20260818T112536Z-run-1`
+**Session:** `ses_feb641df5ffenZ7eBJVWZpWAtK`
+**Status:** in-progress
+**Milestone:** Operator direction "advance
+`proposals/electrical-structure-crust.md`, step 5 only" — effective
+resistance by the potential equation (`IsEffectiveResistance A u v r ↔
+∃ f, laplacian A *ᵥ f = e u − e v ∧ f u − f v = r`), now unlocked by
+the delivered step-4 solvability hinge; existence consumes step 4,
+uniqueness of `r` consumes the step-2 kernel theorem, making the new
+definition load-bearing on both per the falsifiability principle.
+
+**Pre-implementation decisions (to be recorded in the plan):** new
+public module `GraphTheory/Electrical.lean` (keeps the 1198-line
+`Spectral.lean` from growing; mirrors Mathlib's topic layout), QA
+`SpectralGraph/EffectiveResistance_QA.lean` reusing the
+`Connectivity_QA`/`PotentialSolvability_QA` fixtures. Mathlib survey
+for an existing effective-resistance result runs before writing the
+proof, per the proposal's operating instructions.
+
+**Next action:** survey the Mathlib pin (record either way), then the
+module (relation, existence, uniqueness of `r`, total
+`effectiveResistance` + agreement, energy identity, symmetry,
+nonnegativity, `R u u = 0`), QA with positive, fallback-honesty, and
+non-unique-potential/unique-`r` witnesses, then direct elaboration,
+target builds, full build, hygiene scripts, scoreboard, and doc
+updates (backlog item 7, radar subject axis 6, SGT index map, proposal
+checklist).
+
+## 2026-08-18T11:38:59Z — Electrical-crust step 5 delivered: effective resistance (completed)
+
+**Run:** `20260818T112536Z-run-1`
+**Session:** `ses_feb641df5ffenZ7eBJVWZpWAtK`
+**Status:** completed
+**Milestone:** Operator direction "advance
+`proposals/electrical-structure-crust.md`, step 5 only" — effective
+resistance as a defined, well-determined quantity: the
+potential-equation relation `IsEffectiveResistance A u v r`, a total
+`effectiveResistance` with proved agreement, the energy identity at
+solution and function level, symmetry, nonnegativity, and `R u u = 0`.
+One step per run; step 6 (the one-sided Dirichlet bound) was not
+started. No new axioms (count unchanged at 18) — pure hard crust.
+
+**Mathlib survey (recorded before stating, per the proposal's
+operating instructions):** no effective-resistance or "resistance"
+declaration anywhere in the pin; no Moore–Penrose pseudoinverse —
+the potential-equation definition is the only available route.
+
+**Changes.** New public module
+`Scaffold/Mathlib/GraphTheory/Electrical.lean` (17 declarations, all
+proved): `IsEffectiveResistance`; hypothesis-free diagonal
+characterization `isEffectiveResistance_self_iff`; hypothesis-free
+relation symmetry `isEffectiveResistance_symm`; existence
+`exists_isEffectiveResistance` (consumes step 4's unit-demand
+solvability); uniqueness `isEffectiveResistance_unique_of_reachable` —
+stated at reachability-pair strength through step 3's component-form
+kernel characterization, so it holds within a component of a
+disconnected graph (strictly stronger than the proposal's connected
+sketch) — with the connected corollary; the total function
+`effectiveResistance` (classical choice; junk fallback `0` **stated,
+not hidden** via `effectiveResistance_eq_zero_of_not_exists`);
+agreement theorems (`effectiveResistance_eq_of_reachable`,
+`effectiveResistance_eq`); the energy identity at solution level
+(`quadForm (laplacian A) f = f u − f v` for any solution, no
+hypotheses) and function level (`effectiveResistance_eq_quadForm`);
+`effectiveResistance_nonneg` (from `laplacian_psd`);
+`effectiveResistance_symm`; `effectiveResistance_self`. New QA
+`Scaffold/QA/SpectralGraph/EffectiveResistance_QA.lean` (17
+declarations, reusing the `Connectivity_QA`/`PotentialSolvability_QA`
+fixtures): values computed from the definitions (unit edge `R 0 1 = 1`,
+3-path `R 0 2 = 2` — series edges add), the energy identity
+cross-checked against an energy computed independently from the raw
+definitions, the junk fallback pinned on the disconnected fixture
+(cross-component pair: no value exists, proved from the step-4
+unsolvability witness, while the function reads `0` — fallback, not
+measurement), and same-component witnesses (two distinct potentials
+pinning one value `1` through the reachability-form agreement where
+the connected theorem's hypothesis fails). Docs: umbrella, execution
+plan, this journal, scoreboard (336 QA declarations, 24 modules; new
+interpretation bullet; QA-target row updated), SGT index map (new
+`Electrical` section), backlog item 7, radar (subject axis 6 re-scored
+2.0 → 2.5 per protocol — the first electrical quantity; below 3.0
+while the Dirichlet bound, monotonicity, metric inequality, and
+Matrix–Tree/Kirchhoff are absent), README snapshot (counts, umbrella,
+crust description, axis cell), and the proposal checklist (steps 1–5
+of 6 delivered, with the delivery note recording the two strengthening
+deviations and the named definiteness residual).
+
+**Verification.** `lake env lean` zero errors/zero warnings on
+`GraphTheory.Electrical` and on `EffectiveResistance_QA`; `lake build`
+of the QA target and of `SimpleGraphAdapter` (downstream consumer) ✔;
+full `lake build` ✔ (2178 targets); all twenty-four QA modules
+elaborated directly in one batch (zero failures); no `sorry`/`admit`
+under `Scaffold/` (tactic-level scan; textual matches are prose only);
+`lint_axioms`, `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated (336 QA declarations, 18 explicit axioms —
+unchanged).
+
+**Trust boundary:** unchanged (18 explicit cited axioms); this slice
+added no axioms and consumes none. The resistance package is
+unconditional proved hard crust, load-bearing on the step-2/3 kernel
+characterization and the step-4 solvability theorem (a defect in
+either would break uniqueness or agreement rather than pass beside
+them).
+
+**Remaining risk.** `effectiveResistance` is noncomputable (classical
+choice), so QA pins values through the agreement theorems rather than
+`decide` on the function itself — the standard trade for totality.
+Component-restricted *solvability* is still implicit (agreement needs a
+witness in hand; on a disconnected graph, same-component existence is
+QA-witnessed but not yet a center theorem). No parametric property QA
+(standing QA-axis gap).
+
+**Next handoff:** proposal step 6 — the one-sided Dirichlet bound
+`R u v ≥ (f u − f v)² / quadForm (laplacian A) f` (Cauchy–Schwarz
+over the energy identity; the direction applications use to
+lower-bound resistance), plus the cheap definiteness residual
+`R u v = 0 ↔ u = v` (reachable pair). Or the still-open earlier
+candidates: `evals (c • M)` excavation; irregular Cheeger shape with
+a named consumer.

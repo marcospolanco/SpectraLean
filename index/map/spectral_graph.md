@@ -6,7 +6,7 @@ conductance, Cheeger theory, interlacing, and event-driven dynamics.
 ## Status
 
 **Implemented and build-certified** (see the QA scoreboard):
-`Scaffold.Mathlib.GraphTheory.{Spectral,Cheeger,Dynamics}`.
+`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,Cheeger,Dynamics}`.
 
 ## Modules and Declarations
 
@@ -110,6 +110,33 @@ Admitted axioms:
 |-------|-------------|--------|
 | `eigen_interlacing_principal_submatrix` | Cauchy interlacing for principal submatrices | [Horn & Johnson](../sources/horn_johnson_matrix_analysis.md) |
 | `lambda2_variational` | Courant–Fischer characterization of λ₂ | [Horn & Johnson](../sources/horn_johnson_matrix_analysis.md), [Chung](../sources/chung_spectral_graph.md) |
+
+### `Scaffold.Mathlib.GraphTheory.Electrical` (effective resistance)
+
+Effective resistance defined by the potential equation (2026-08-18,
+proposal `electrical-structure-crust.md` step 5; Mathlib surveyed
+first — no resistance declaration, no pseudoinverse in the pin). All
+proved, no axioms. Real definitions: `IsEffectiveResistance A u v r`
+(the relation: a potential `f` solves `laplacian A *ᵥ f = e u − e v`
+with `f u − f v = r`) and the total function `effectiveResistance A u
+v : ℝ` (classical choice over the relation, junk value `0` when no
+value exists — the fallback's firing is QA-witnessed, not hidden).
+
+| Declaration | Content |
+|-------------|---------|
+| `isEffectiveResistance_self_iff` | diagonal fully characterized, no hypotheses: `IsEffectiveResistance A u u r ↔ r = 0` |
+| `isEffectiveResistance_symm` | relation symmetry with **no hypotheses** (negate the potential) |
+| `exists_isEffectiveResistance` | existence on connected graphs — consumes the step-4 solvability theorem |
+| `isEffectiveResistance_unique_of_reachable` | uniqueness of `r` at reachability-pair strength (two solutions differ by a component-constant kernel vector) — consumes the component-form kernel characterization |
+| `isEffectiveResistance_unique` | the connected corollary |
+| `effectiveResistance_eq_zero_of_not_exists` | the junk branch, stated: value `0` when the relation is unsatisfiable |
+| `effectiveResistance_eq_of_reachable`, `effectiveResistance_eq` | agreement: the total function equals every witness value (component strength / connected strength) |
+| `quadForm_laplacian_eq_sub_of_mulVec_eq_single_sub_single` | **energy identity, solution level, no hypotheses:** every solution has `quadForm (laplacian A) f = f u − f v` |
+| `effectiveResistance_eq_quadForm` | **energy identity, function level:** `R u v = quadForm (laplacian A) f` for an actual potential |
+| `effectiveResistance_nonneg` | nonnegativity, from `laplacian_psd` through the energy identity |
+| `effectiveResistance_symm` | `R u v = R v u` on connected graphs |
+| `effectiveResistance_self` | `R u u = 0` unconditionally |
+
 
 ### `Scaffold.Mathlib.GraphTheory.Cheeger`
 

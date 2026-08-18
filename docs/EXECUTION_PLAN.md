@@ -469,15 +469,78 @@ quantity is defined yet. Umbrella, scoreboard (319 QA declarations, 23
 modules), SGT index map, backlog item 7, README snapshot, and proposal
 checklist updated.
 
+**Active slice (run 1, 2026-08-18): electrical-crust step 5 —
+effective resistance, uniqueness, and energy — DELIVERED.** Operator
+direction pinned `proposals/electrical-structure-crust.md` **step 5
+only**; step 6 (the one-sided Dirichlet bound) was NOT started; one
+step per run. All proved, **no new axioms** (count unchanged at 18).
+Both authorized halves (definitional plumbing and the energy identity)
+landed in one run.
+
+**Mathlib survey (recorded before stating, per the proposal):** no
+effective-resistance or "resistance" declaration anywhere in the pin;
+no Moore–Penrose pseudoinverse — the potential-equation definition is
+the only available route (and the intended one).
+
+**Delivered** in the new `Scaffold/Mathlib/GraphTheory.Electrical`
+(17 declarations, all proved; keeps `Spectral.lean` bounded): the
+relation `IsEffectiveResistance A u v r` (`∃ f, L *ᵥ f = e u − e v ∧
+f u − f v = r`); `exists_isEffectiveResistance` (existence, consuming
+step 4's `exists_laplacian_mulVec_eq_single_sub_single`);
+`isEffectiveResistance_unique_of_reachable` (uniqueness of `r` stated
+at **reachability-pair strength** via step 3's component-form
+characterization — valid within a component of a disconnected graph,
+strictly stronger than the proposal's connected sketch) with the
+connected corollary; the total function `effectiveResistance A u v : ℝ`
+by classical choice, junk fallback `0` **stated, not hidden**
+(`effectiveResistance_eq_zero_of_not_exists`) and QA-witnessed;
+agreement `effectiveResistance_eq_of_reachable` /
+`effectiveResistance_eq`; the energy identity at solution level —
+`quadForm (laplacian A) f = f u − f v` for *any* solution, **no
+hypotheses** (definitional unfolding of `quadForm` plus
+`Matrix.dotProduct_single`) — and at function level
+(`effectiveResistance_eq_quadForm`: `R u v = energy of an actual
+potential`); `effectiveResistance_nonneg` (from `laplacian_psd` through
+the energy identity); `effectiveResistance_symm` (relation-level
+symmetry is hypothesis-free: negate the potential;
+`isEffectiveResistance_symm`); `isEffectiveResistance_self_iff`
+(diagonal characterized exactly, no hypotheses) and unconditional
+`effectiveResistance_self`.
+
+**QA** `SpectralGraph/EffectiveResistance_QA.lean` (17 declarations,
+reusing the `Connectivity_QA`/`PotentialSolvability_QA` fixtures):
+values computed from the definitions — unit edge `R 0 1 = 1` (witness
+`![1,0]`), 3-path `R 0 2 = 2` (witness `![1,0,−1]`; series edges add);
+the energy identity cross-checked against an energy computed
+independently from the raw definitions; the junk fallback pinned on
+the disconnected fixture (cross-component pair: no value exists —
+proved from the step-4 unsolvability witness — while the function
+reads `0`: fallback, not measurement); and same-component witnesses —
+two *distinct* potentials `![1,0,0,0]`/`![2,1,0,0]` both witnessing
+`r = 1` between `0` and `1`, with the reachability-form agreement
+pinning `effectiveResistance 0 1 = 1` where the connected-graph
+theorem's hypothesis fails (uniqueness is about `r`, not `f`; a
+two-dimensional kernel does not break the value).
+
+**Named residual (cheap, deferred by the scope fence):**
+definiteness — `R u v = 0 ↔ u = v` on a reachable pair.
+
+Radar re-scored per protocol (proof + QA landed): subject axis 6
+(electrical) 2.0 → 2.5 — the first electrical quantity, with its full
+well-definedness package; below 3.0 because the variational Dirichlet
+bound, Rayleigh monotonicity, the resistance metric, and
+Matrix–Tree/Kirchhoff remain absent. Umbrella, scoreboard (336 QA
+declarations, 24 modules), SGT index map, backlog item 7, README
+snapshot, and proposal checklist updated.
+
 ## Ready queue
 
-1. Proposal step 5 — effective resistance by the potential equation
-   (`IsEffectiveResistance A u v r ↔ ∃ f, laplacian A *ᵥ f = e u − e v
-   ∧ f u − f v = r`), now unlocked: existence from step 4's
-   `exists_laplacian_mulVec_eq_single_sub_single`, uniqueness of `r`
-   from step 2's kernel theorem. Split across two runs if the
-   definition and the energy identity do not land together (proposal's
-   own guidance).
+1. Proposal step 6 — the one-sided Dirichlet bound
+   (`R u v ≥ (f u − f v)² / quadForm (laplacian A) f` for any test
+   potential `f`; Cauchy–Schwarz over the energy identity, no attained
+   supremum) — now unlocked by step 5; plus the named cheap residual
+   `R u v = 0 ↔ u = v` (reachable pair; the natural completion of
+   nonnegativity, reusing the step-2 zero-energy ⇒ constant argument).
 
 1. Citation hygiene — completed 2026-08-17 (see Active milestone and Last
    verified state); Chung provenance corrected, Weyl/Davis–Kahan fidelity
@@ -498,6 +561,24 @@ checklist updated.
    combinations, centering, sums) only when a consumer names them.
 
 ## Last verified state
+
+- 2026-08-18 (electrical-crust step 5: effective resistance): `lake
+  env lean` on `GraphTheory.Electrical` and on
+  `QA.SpectralGraph.EffectiveResistance_QA` — both zero errors, zero
+  warnings; `lake build Scaffold.QA.SpectralGraph.EffectiveResistance_QA`
+  and `lake build Scaffold.Mathlib.GraphTheory.SimpleGraphAdapter`
+  (downstream consumer of the changed dependency chain) ✔; full `lake
+  build` ✔ (2178 targets — the new module in the umbrella); all
+  twenty-four QA modules elaborated directly in one batch (exit 0,
+  zero failures); 336 QA declarations (+17), no `sorry`/`admit`
+  anywhere under `Scaffold/` (the only textual matches are prose in
+  comments and the `Scaffold/Trusted/README.md` quarantine
+  explanation); 18 explicit cited axioms (unchanged — pure hard
+  crust); all hygiene scripts pass (`lint_axioms`, `check_citations`,
+  `check_markdown_links`); scoreboard regenerated; SGT index map
+  (new `Electrical` section), backlog item 7, radar (subject axis 6:
+  2.0 → 2.5, recorded per protocol), README snapshot, and proposal
+  checklist updated (steps 1–5 of 6 delivered).
 
 - 2026-08-18 (electrical-crust step 4: potential solvability): `lake
   env lean` on `GraphTheory.Spectral` (zero errors, zero new warnings —

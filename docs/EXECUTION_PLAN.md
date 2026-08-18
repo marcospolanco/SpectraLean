@@ -590,6 +590,72 @@ unchanged (module already in it), scoreboard, SGT index map (4 new
 `Electrical` rows), backlog item 7 (program complete; residual named),
 README snapshot, and proposal checklist (all six steps ✅) updated.
 
+**Active slice (run 1, 2026-08-18): retire `lambda2_variational` —
+prove it in the matrix world, repairing a false statement shape —
+DELIVERED.** Operator direction "advance
+`proposals/prove-lambda2-variational.md`". **Finding (recorded before
+stating anything):** the axiom as admitted was *materially false* — it
+assumed only symmetry, but on `Fin 2` with `A = [[0,−1],[−1,0]]` the
+Laplacian `[[−1,1],[1,−1]]` has sorted spectrum `[−2, 0]`, so
+`lambda2 = 0` while every `x ⊥ onesVec` is a multiple of `(1,−1)` with
+Rayleigh quotient `−2`; the axiom would assert `0 = −2`. Same defect
+class as the 2026-08-18 Cheeger repair. **Delivered:** the axiom is now
+a proved theorem at the same name with the load-bearing hypothesis
+`hnonneg : ∀ i j, 0 ≤ A i j` added (matching `laplacian_psd`;
+emergency repair per architecture §9); explicit axiom count 18 → 17.
+
+**Route decision (recorded before proving):** the proposal's open next
+step was to spike the `Matrix.IsHermitian ↔ LinearMap.IsSymmetric`
+bridge (operator route through `Rayleigh.lean`, calibrated as several
+sessions). Survey found a cheaper matrix-world route through the
+repo's own proved eigenbasis tools; the LinearMap bridge was never
+built. New proved hard crust in `GraphTheory.Spectral` (13
+declarations): `eigvecOf_expansion_apply` (entrywise completeness,
+factored out of and now reused by `exists_mulVec_eq_of_zero_comp`),
+`dotProduct_eigvecOf` (Parseval), `dotProduct_eigvecOf_mulVec`
+(self-adjointness in coordinates), `quadForm_eigvalOf` (spectral
+resolution of the quadratic form), `quadForm_eigvecOf_self`,
+`eigvecOf_ortho_onesVec` (nonzero-eigenvalue eigenvectors ⊥ `onesVec`,
+symmetry only), the two **multiplicity pins** that make Courant–Fischer
+provable without operator restriction — `evals_one_le_max_of_ne` (no
+two distinct eigenbasis indices sit strictly below `evals 1`) and
+`exists_ne_eigvalOf_of_evals_head_eq` (a repeated bottom entry comes
+from two distinct indices) — and the headline `lambda2_variational`.
+Lower bound: spectral resolution + the upper pin (the unique
+below-λ₂ eigenvector is parallel to `onesVec`, invisible to the
+constraint); upper bound: the eigenvector at `evals 1` when `λ₂ > 0`,
+and a kernel vector ⊥ `onesVec` from the lower pin when `λ₂ = 0`
+(the disconnected case). Load-bearing chain: resolution consumes
+`eigvecOf_complete`; the unique-i₀ argument consumes
+`laplacian_ones_in_kernel`; PSD consumes `laplacian_psd`.
+
+**QA** `SpectralGraph/Variational_QA.lean` (+26 declarations, 371
+total): the pre-repair shape **refuted in proved form**
+(`old_lambda2_variational_refuted_QA`: `λ₂ = 0` from
+trace/determinant/sortedness while the constraint set is exactly
+`{−2}` by a parametric Rayleigh computation — `hnonneg` witnessed
+load-bearing); `K₂` exact instantiation with `λ₂ = 2` computed **twice
+independently** (sorted-spectrum pin; and *through* the theorem from
+the parametric Rayleigh side — two routes that must agree); the
+disconnected instantiation `λ₂ = 0` on two disjoint edges (kernel
+witness `![1,1,−1,−1]` ⊥ `onesVec` + PSD floor); the path bound
+`λ₂(P₃) ≤ 1` at the harmonic alternating vector.
+
+**Scope caveat (recorded in the proposal):** the Cheeger proposal's
+named intermediate is the *normalized* instance `secondEval L_sym`;
+this delivery proves the combinatorial instance, from which the
+normalized one follows via the proved congruence transfer — that
+transfer step remains to be written.
+
+Radar re-scored per protocol (proof + QA landed): subject axis 3
+(variational) 3.0 → 3.5 — the row's named admitted gap closed by a
+proved theorem; assurance axiom-minimization 3.5 → 4.0 — the first
+axiom removed by proof rather than deprecation (net trend 26 → 19 →
+18 → 17); proved-depth and QA text updated (QA count 371/24).
+Umbrella unchanged, scoreboard, both source indexes (Chung §1.3,
+Horn–Johnson §4.2 rows marked theorem), SGT index map, README
+snapshot, and both proposals' status notes updated.
+
 ## Ready queue
 
 1. ~~Proposal step 6 — the one-sided Dirichlet bound~~ — delivered
@@ -617,6 +683,25 @@ README snapshot, and proposal checklist (all six steps ✅) updated.
    combinations, centering, sums) only when a consumer names them.
 
 ## Last verified state
+
+- 2026-08-18 (`lambda2_variational` retirement: proved Courant–Fischer,
+  axiom 18 → 17): `lake env lean` on `GraphTheory.Spectral` (zero
+  errors; zero new warnings — the seven pre-existing linter notes are
+  untouched code) and on `QA.SpectralGraph.Variational_QA` (zero
+  errors); `lake build Scaffold.QA.SpectralGraph.Variational_QA` ✔;
+  full `lake build` ✔ (2178 targets); all twenty-four QA modules
+  elaborated directly in one batch (zero failures); 371 QA
+  declarations (+26), no `sorry`/`admit` anywhere under `Scaffold/`
+  (textual matches are prose in comments); 17 explicit cited axioms
+  (−1: `lambda2_variational` retired to a proved theorem restated with
+  the load-bearing `hnonneg` hypothesis); all hygiene scripts pass
+  (`lint_axioms`, `check_citations`, `check_markdown_links`);
+  scoreboard regenerated (17/371/0) with prose synced; radar re-scored
+  per protocol (subject axis 3: 3.0 → 3.5; axiom minimization 3.5 →
+  4.0; QA count synced 371/24); README snapshot (17 axioms, 371 QA);
+  both source indexes and the SGT index map updated; both proposals'
+  status notes updated with the delivery and the normalized-instance
+  scope caveat.
 
 - 2026-08-18 (electrical-crust step 6: one-sided Dirichlet bound,
   program complete): `lake env lean` on `GraphTheory.Electrical` and on

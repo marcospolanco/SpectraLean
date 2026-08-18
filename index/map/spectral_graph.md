@@ -109,7 +109,7 @@ Admitted axioms:
 | Axiom | Description | Source |
 |-------|-------------|--------|
 | `eigen_interlacing_principal_submatrix` | Cauchy interlacing for principal submatrices | [Horn & Johnson](../sources/horn_johnson_matrix_analysis.md) |
-| `lambda2_variational` | Courant–Fischer characterization of λ₂ | [Horn & Johnson](../sources/horn_johnson_matrix_analysis.md), [Chung](../sources/chung_spectral_graph.md) |
+| `lambda2_variational` | Courant–Fischer characterization of λ₂ (proved theorem since 2026-08-18; axiom retired — pre-repair symmetry-only shape refuted in QA) | [Horn & Johnson](../sources/horn_johnson_matrix_analysis.md), [Chung](../sources/chung_spectral_graph.md) |
 
 ### `Scaffold.Mathlib.GraphTheory.Electrical` (effective resistance)
 

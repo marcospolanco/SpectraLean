@@ -18,10 +18,10 @@ Courant–Fischer variational characterization.
 
 ## Theorem to Axiom Mapping
 
-| Theorem | Lean Axiom | Module |
-|---------|------------|--------|
-| Section 4.3 (Cauchy interlacing) | `eigen_interlacing_principal_submatrix` | `Scaffold.Mathlib.GraphTheory.Spectral` |
-| Section 4.2 (Courant–Fischer) | `lambda2_variational` | `Scaffold.Mathlib.GraphTheory.Spectral` |
+| Theorem | Lean Declaration | Kind | Module |
+|---------|-------------------|------|--------|
+| Section 4.3 (Cauchy interlacing) | `eigen_interlacing_principal_submatrix` | axiom | `Scaffold.Mathlib.GraphTheory.Spectral` |
+| Section 4.2 (Courant–Fischer, second-eigenvalue instance) | `lambda2_variational` | **theorem (proved 2026-08-18; axiom before, retired)** | `Scaffold.Mathlib.GraphTheory.Spectral` |
 
 ## Notes
 
@@ -30,7 +30,13 @@ Courant–Fischer variational characterization.
   index notation; the index bookkeeping is stated as explicit numeric
   hypotheses.
 - `lambda2_variational` additionally follows the Laplacian form in
-  Chung (1997) §1.3; see [Chung](chung_spectral_graph.md).
+  Chung (1997) §1.3; see [Chung](chung_spectral_graph.md). It was
+  converted from an admitted axiom to a proved theorem on 2026-08-18;
+  the proof consumes the citation as classical background only. The
+  pre-repair axiom shape (symmetry hypotheses, no weight
+  nonnegativity) was materially false and is refuted in
+  `Scaffold/QA/SpectralGraph/Variational_QA.lean`
+  (`old_lambda2_variational_refuted_QA`).
 
 ## See Also
 

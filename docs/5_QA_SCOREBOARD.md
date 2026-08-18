@@ -14,9 +14,9 @@ _Generated from Lean source on 2026-08-18._
 
 | Metric | Count |
 | --- | ---: |
-| QA theorem/lemma declarations | 345 |
+| QA theorem/lemma declarations | 371 |
 | `sorry`/`admit` tokens in QA code | 0 |
-| Explicit axioms in `Scaffold/Mathlib` | 18 |
+| Explicit axioms in `Scaffold/Mathlib` | 17 |
 | `sorry`/`admit` tokens in `Scaffold/Mathlib` code | 0 |
 
 ### QA declarations by domain
@@ -26,7 +26,7 @@ _Generated from Lean source on 2026-08-18._
 | Concentration | 12 |
 | Derived | 11 |
 | Perturbation | 5 |
-| SpectralGraph | 317 |
+| SpectralGraph | 343 |
 
 ### QA files
 
@@ -55,7 +55,7 @@ _Generated from Lean source on 2026-08-18._
 | `Scaffold/QA/SpectralGraph/SimpleGraphAdapter_QA.lean` | 38 | 0 |
 | `Scaffold/QA/SpectralGraph/Stationary_QA.lean` | 12 | 0 |
 | `Scaffold/QA/SpectralGraph/VariationalTransfer_QA.lean` | 15 | 0 |
-| `Scaffold/QA/SpectralGraph/Variational_QA.lean` | 5 | 0 |
+| `Scaffold/QA/SpectralGraph/Variational_QA.lean` | 31 | 0 |
 <!-- END GENERATED SOURCE METRICS -->
 
 ## Verification record
@@ -66,7 +66,7 @@ _Generated from Lean source on 2026-08-18._
 | Direct QA module targets | Pass | 2026-08-18 | All twenty-four QA modules compiled individually (`lake build Scaffold.QA.…` / direct elaboration) with no `sorry`/`admit`, including the repaired `SpectralGraph/Cheeger_QA.lean` (axiom-shape refutation + eigenvalue value-pinning), `SpectralGraph/Connectivity_QA.lean` (connected positive witness + disconnected negative witness for the kernel characterization), `SpectralGraph/SimpleGraphAdapter_QA.lean` (adapter agreement + kernel-span failure on a disconnected witness), `SpectralGraph/KernelBridge_QA.lean` (kernel-equality bridge coherence + disconnected component count/basis computed independently of the transferred theorem), `SpectralGraph/PotentialSolvability_QA.lean` (potential-solvability hinge: computed potentials on the edge and 3-path, plus proved unsolvability witnesses for both the zero-sum and the connectivity hypotheses), and the new `SpectralGraph/EffectiveResistance_QA.lean` (step 5: computed resistance values on the edge (`1`) and 3-path (`2`), the energy identity cross-checked against an independently computed energy, the cross-component no-resistance + junk-fallback witnesses, and same-component two-potentials/one-value witnesses; step 6: the one-sided Dirichlet bound attained at both harmonic potentials (`1/1 = 1`, `4/2 = 2`, from independently computed energies), strict at a non-harmonic potential (`1 < 2`), the reverse inequality numerically refuted (`2 ≤ 1` false — one-sidedness forced), and the disconnected zero-energy/voltage-`1` guard witness). |
 | Direct public module targets | Pass | 2026-08-18 | All public modules compile individually; the module changed in the 2026-08-18 solvability slice (`GraphTheory.Spectral` extended with the reciprocity identity, kernel certificate, spectral inversion, and the two solvability theorems) was re-elaborated directly (`lake env lean` zero errors, zero new warnings) and rebuilt via `lake build Scaffold.Mathlib.GraphTheory.Spectral` alongside the umbrella build. |
 | Mathlib cache provenance | Note | 2026-08-18 | The local `lake exe cache` binary crashes under the current macOS dyld (`__DATA_CONST segment missing SG_READ_ONLY flag`); the cache was fetched by running the same Cache tool logic interpreted via `lake env lean --run`, unpacking 5685 Mathlib oleans. Re-applied on 2026-08-18 after the local `.lake/build` state was found pruned (Mathlib oleans down to 1795); the interpreted fetch restored the full set, after which `lake build` recompiled the residue (2008 targets) and passed. |
-| `scripts/lint_axioms.py` | Pass | 2026-08-18 | All 18 explicit axioms are covered by `index/sources/` and `index/map/`. |
+| `scripts/lint_axioms.py` | Pass | 2026-08-18 | All 17 explicit axioms are covered by `index/sources/` and `index/map/` (`lambda2_variational` retired from axiom to theorem on 2026-08-18). |
 | `scripts/check_citations.py` | Pass | 2026-08-18 | Every axiom carries a `Source:` citation in its doc comment. |
 | `scripts/check_markdown_links.py` | Pass | 2026-08-18 | No broken repository-relative targets in active docs; excludes the historical archive, the dependency checkout, and the local `.opencode/` tooling directory (including its vendored `node_modules`). |
 
@@ -89,7 +89,8 @@ _Generated from Lean source on 2026-08-18._
 - **Citation and assumption review (2026-08-17):** `spectral_gap_stability` was converted from an admitted axiom into a theorem proved from `weyl_inequality` (four Weyl facts plus arithmetic), reducing the explicit axiom count from 19 to 18 at no trust cost; `weyl_inequality`'s doc now records that its Lean form is the spectral-norm corollary of the cited general theorem; `davis_kahan_sin_theta`'s separation hypothesis was tightened from a pairwise quantification to the binding single-pair two-cluster form `λ_{k+1}(A+E) − λ_k(A) ≥ δ` (the form used by the cited Yu–Wang–Samworth Theorem 2), with the derived wrapper simplified accordingly (Weyl at the gap index only). The Chung index's provenance note was corrected: git history shows no earlier page-level locators ever recorded (the initial commit cited "Theorem 2.2" without a page); theorem and page numbering remain explicitly unconfirmed rather than invented.
 - **Projector algebra (2026-08-17):** eigenbasis orthonormality (`eigvecOf_inner`) and completeness (`eigvecOf_complete`) are proved from the Mathlib spectral-theorem API, yielding proved `spectralProjector_idempotent` / `initialProjector_idempotent` and the extreme-threshold theorems `spectralProjector_eq_zero` / `spectralProjector_eq_one`. These structural facts were previously consumed implicitly through the admitted perturbation interfaces.
 - **Derived layer:** `Derived.EventStream.eventStreamTail` is proved from `matrix_azuma_hoeffding`; `Derived.ProjectorDrift.davisKahanTwoPoint` is proved from `davis_kahan_sin_theta` and `weyl_inequality`; `Derived.ProjectorDrift.eventStreamProjectorDrift` combines them with `eventStreamTail`. All three are checked deductions relative to the trust base (three concentration/perturbation axioms), not foundationally proved results.
-- **`spectral_persistence` deprecation (2026-08-17):** the per-step persistence axiom was deprecated with a migration note after a consumer inventory showed zero non-QA consumers and the derived two-endpoint chain covering the motivating use. The axiom is retained through the compatibility window (its QA deliberately exercises the deprecated surface with the linter silenced for that use only); removal is a later release decision. The explicit axiom count remains 18 until removal.
+- **`spectral_persistence` deprecation (2026-08-17):** the per-step persistence axiom was deprecated with a migration note after a consumer inventory showed zero non-QA consumers and the derived two-endpoint chain covering the motivating use. The axiom is retained through the compatibility window (its QA deliberately exercises the deprecated surface with the linter silenced for that use only); removal is a later release decision.
+- **`lambda2_variational` retirement (2026-08-18):** the Courant–Fischer characterization of the algebraic connectivity was converted from an admitted axiom (symmetry hypotheses only — a materially false shape for negative weights, refuted in QA) into a proved theorem with the load-bearing `hnonneg` hypothesis, reducing the explicit axiom count from 18 to 17. The proof is pure matrix-world hard crust (eigenbasis expansion, Parseval, spectral resolution of `quadForm`, and two sorted-multiset multiplicity pins), consuming no axioms.
 - **Azuma statement repair (2026-08-17, same day as the axiom's introduction):** preparing the derivation exposed that `matrix_azuma_hoeffding` lacked the summand-count factor `m` in the exponent denominator, which made the statement false for `m ≥ 2` (Rademacher-sum counterexample). The denominator is now `8 m R²`, the uniform-bound specialization of Tropp's variance statistic `σ² = ‖∑ Yₖ²‖ ≤ m R²`. The axiom had no downstream consumers before the repair.
 
 ## Active priorities

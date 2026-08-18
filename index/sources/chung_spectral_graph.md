@@ -16,11 +16,11 @@ variational characterization of the algebraic connectivity.
 
 ## Theorem to Axiom Mapping
 
-| Theorem | Lean Axiom | Module |
-|---------|------------|--------|
-| Chapter 2 (Cheeger lower bound) | `cheeger_lower_bound` | `Scaffold.Mathlib.GraphTheory.Cheeger` |
-| Chapter 2 (Cheeger upper bound) | `cheeger_upper_bound` | `Scaffold.Mathlib.GraphTheory.Cheeger` |
-| Section 1.3 (variational λ₂, Laplacian form) | `lambda2_variational` | `Scaffold.Mathlib.GraphTheory.Spectral` |
+| Theorem | Lean Declaration | Kind | Module |
+|---------|-------------------|------|--------|
+| Chapter 2 (Cheeger lower bound) | `cheeger_lower_bound` | axiom | `Scaffold.Mathlib.GraphTheory.Cheeger` |
+| Chapter 2 (Cheeger upper bound) | `cheeger_upper_bound` | axiom | `Scaffold.Mathlib.GraphTheory.Cheeger` |
+| Section 1.3 (variational λ₂, Laplacian form) | `lambda2_variational` | **theorem (proved 2026-08-18; axiom before, retired)** | `Scaffold.Mathlib.GraphTheory.Spectral` |
 
 ## Notes
 

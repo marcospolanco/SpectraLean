@@ -1,10 +1,16 @@
 # Proposal: Grow the Crust Through Electrical Structure
 
-**Status:** Proposed; all six steps delivered (2026-08-18, see
-checklist below). Assistant's assessment of project direction,
-requested 2026-08-17; substantially re-sequenced 2026-08-18 after
-review (see [Corrections](#corrections)). Authorizes no Lean changes,
-axiom admissions, document rewrites, or external publication.
+**Status:** Delivered. All six steps landed 2026-08-18 (see checklist
+below); axiom count held at 18 throughout. No further Lean work is
+proposed by this document — it remains in `proposals/` as the design
+record for `GraphTheory.Electrical` and is cited as such by
+`prove-lambda2-variational.md`, `prove-cheeger-easy-direction.md`,
+`get-outside-signal.md`, `fiedler-partitioning.md`,
+`mixing-time-bound.md`, and `docs/1_STRATEGY.md`'s load-bearing-growth
+section. Originally requested 2026-08-17; substantially re-sequenced
+2026-08-18 after review (see [Corrections](#corrections)). Authorizes no
+further Lean changes, axiom admissions, or external publication beyond
+what is already recorded as delivered.
 
 Companion to [Prove One Named Inequality](prove-cheeger-easy-direction.md).
 That proposal argues for *shrinking the mushy center*; this one takes the

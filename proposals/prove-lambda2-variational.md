@@ -1,6 +1,9 @@
 # Proposal: Prove λ₂'s Variational Characterization
 
-**Status:** Proposed. Assistant's assessment of project direction, requested
+**Status:** Delivered 2026-08-18 (see the delivery note at the end).
+The original proposal text follows for the record.
+
+Assistant's assessment of project direction, requested
 2026-08-18. Authorizes no Lean changes, axiom removals, document rewrites,
 or external publication.
 
@@ -152,3 +155,59 @@ existing evidence in this repository (`SimpleGraphAdapter.lean` and
 `VariationalTransfer.lean` both bridge within the matrix world; nothing yet
 crosses into Mathlib's inner-product-space operator API), so it is the
 step most likely to reveal this route is costlier than sketched above.
+
+## Delivery note (2026-08-18)
+
+**Delivered** — with two material deviations from the sketch, both
+recorded here because they change what any future reader should
+conclude from this document.
+
+1. **The route was the matrix world, not the operator bridge.** The
+   proposal's "Open next step" was to spike the
+   `Matrix.IsHermitian` ↔ `LinearMap.IsSymmetric` bridge (route steps
+   1–6 through `Rayleigh.lean`/`Spectrum.lean`). A pre-implementation
+   survey found a cheaper route through the repository's own proved
+   eigenbasis tools (`eigvecOf_inner`, `eigvecOf_complete`,
+   `mulVec_eigvecOf_sum_apply`) plus new lemmas proved in
+   `Scaffold/Mathlib/GraphTheory/Spectral.lean`:
+   `eigvecOf_expansion_apply` (entrywise completeness),
+   `dotProduct_eigvecOf` (Parseval), `dotProduct_eigvecOf_mulVec`
+   (self-adjointness in coordinates), `quadForm_eigvalOf` (spectral
+   resolution), `quadForm_eigvecOf_self`,
+   `eigvecOf_ortho_onesVec`, and the two multiplicity pins the
+   proposal's step 5 flagged as "an argument to write, not a citation
+   to make" — `evals_one_le_max_of_ne` (no two distinct indices below
+   `evals 1`) and `exists_ne_eigvalOf_of_evals_head_eq` (a repeated
+   bottom entry comes from two distinct indices), both by
+   `Multiset.sort_eq`-based counting rather than operator restriction.
+   The LinearMap bridge was never built and is no longer needed for
+   this result.
+
+2. **The admitted axiom was materially false, and this run repaired
+   the shape.** The pre-repair axiom assumed only symmetry. With
+   negative weights `onesVec` need not be a bottom eigenvector, and on
+   `Fin 2` with `A = [[0,−1],[−1,0]]` the axiom asserted `0 = −2`
+   (refuted in proved form by
+   `QA.old_lambda2_variational_refuted_QA`). The theorem is stated
+   with the load-bearing hypothesis `hnonneg : ∀ i j, 0 ≤ A i j`
+   (matching `laplacian_psd`). Emergency repair per architecture §9;
+   explicit axiom count 18 → 17.
+
+**Scope caveat for the companion proposal.** The correction inside
+`prove-cheeger-easy-direction.md` names its missing intermediate as "a
+variational characterization of `secondEval L_sym`". This delivery
+proves the **combinatorial** Laplacian instance
+(`lambda2_variational` for `laplacian A`); the normalized instance
+follows from it plus the proved congruence transfer
+(`VariationalTransfer.rayleigh_normalizedLaplacian_degreeSqrt`), but
+that transfer step still needs to be written and is not delivered
+here. The major missing piece is supplied; the proposal's scoping
+work is reduced, not eliminated.
+
+QA delivered with the theorem (in
+`Scaffold/QA/SpectralGraph/Variational_QA.lean`): the old-shape
+refutation above; the exact `K₂` instantiation with `λ₂ = 2` computed
+twice independently (trace/determinant/sortedness, and through the
+theorem from the parametric Rayleigh computation); the disconnected
+instantiation `λ₂ = 0` on two disjoint edges; and the path bound
+`λ₂(P₃) ≤ 1` at the harmonic alternating vector.

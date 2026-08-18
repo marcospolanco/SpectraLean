@@ -1814,3 +1814,109 @@ or the standing earlier candidates: `evals (c • M) = c • evals M`
 Mathlib excavation, an irregular Cheeger statement shape through
 `rayleigh_normalizedLaplacian_degreeSqrt` (needs source + consumer), or
 backlog item 3 variants with named consumers.
+
+## 2026-08-18T14:46:27Z — lambda2_variational retirement started: prove in the matrix world; false-shape repair found
+
+**Run:** `20260818T144627Z-run-1`
+**Session:** `ses_feaba2b1dffeDvdW2qjgt9LQjm`
+**Status:** in-progress
+**Milestone:** Operator direction "advance
+`proposals/prove-lambda2-variational.md`" — retire the
+`lambda2_variational` axiom (18 → 17). Survey finding recorded before
+stating anything: the axiom as admitted is materially false — symmetry
+alone does not make `onesVec` a bottom eigenvector; on `Fin 2` with
+`A = [[0,−1],[−1,0]]` the Laplacian has sorted spectrum `[−2, 0]`, so
+`lambda2 = 0` while the Rayleigh sInf side is `−2`. Repair: add
+`hnonneg : ∀ i j, 0 ≤ A i j` (matching `laplacian_psd`) at the same
+name, then prove it — axiom retirement and emergency statement-shape
+repair in one slice. Leverage: closes the radar axis-3 named gap
+("λ₂ variational characterization admitted"), removes the stated
+blocker of `proposals/prove-cheeger-easy-direction.md`, and every
+consumer of the axiom inherits a proved foundation.
+
+**Route (recorded before proving):** matrix-world proof through the
+repo's proved eigenbasis machinery (Parseval expansion, spectral
+resolution of `quadForm`, eigenvector–`onesVec` orthogonality, two
+sorted-multiset counting lemmas via `Multiset.sort_eq` +
+`filter_map`), not the proposal's LinearMap bridge — its step-5
+multiplicity pin is exactly the counting done here, at lower cost.
+
+**Next action:** implement in `GraphTheory.Spectral` (new proved
+section; axiom → theorem), QA in `Variational_QA.lean` (old-shape
+refutation on the negative-weight fixture, `K₂` exact instantiation,
+disconnected `λ₂ = 0` instantiation), direct elaboration + target
+builds + full build + hygiene scripts, then radar/index/source/proposal
+and scoreboard updates.
+
+## 2026-08-18T15:54:16Z — lambda2_variational delivered: proved Courant–Fischer, false axiom shape repaired, axioms 18 → 17 (completed)
+
+**Run:** `20260818T144627Z-run-1`
+**Session:** `ses_feaba2b1dffeDvdW2qjgt9LQjm`
+**Status:** completed
+**Milestone:** Operator direction "advance
+`proposals/prove-lambda2-variational.md`" — delivered. The
+`lambda2_variational` Courant–Fischer characterization of the algebraic
+connectivity is now a **proved theorem** (same name, hypothesis
+`hnonneg : ∀ i j, 0 ≤ A i j` added); the admitted axiom is retired and
+the explicit axiom count drops 18 → 17.
+
+**Falsity finding (recorded before stating):** the pre-repair axiom
+assumed only symmetry. On `Fin 2` with `A = [[0,−1],[−1,0]]` it
+asserted `0 = −2` (sorted spectrum `[−2, 0]`, every constraint vector a
+multiple of `(1,−1)` with Rayleigh quotient `−2`). Same defect class as
+the 2026-08-18 Cheeger repair; repaired per architecture §9 at the same
+name.
+
+**Route (matrix world; the proposal's LinearMap bridge was never
+built):** new proved hard crust in `GraphTheory.Spectral` —
+`eigvecOf_expansion_apply`, `dotProduct_eigvecOf` (Parseval),
+`dotProduct_eigvecOf_mulVec`, `quadForm_eigvalOf` (spectral
+resolution), `quadForm_eigvecOf_self`, `eigvecOf_ortho_onesVec`, the
+two multiplicity pins `evals_one_le_max_of_ne` /
+`exists_ne_eigvalOf_of_evals_head_eq` (the proposal's step-5
+"argument to write", done by `Multiset.sort_eq`-based counting), and
+`lambda2_variational`. `exists_mulVec_eq_of_zero_comp` refactored to
+consume the extracted expansion lemma.
+
+**Changes.** `Scaffold/Mathlib/GraphTheory/Spectral.lean` (axiom →
+theorem + 12 supporting proved declarations; §7 now admits exactly one
+statement); `Scaffold/QA/SpectralGraph/Variational_QA.lean` (+26
+declarations: old-shape refutation on the negative-weight fixture,
+`K₂` exact instantiation with `λ₂ = 2` computed twice independently,
+disconnected `λ₂ = 0` on two disjoint edges, path bound `λ₂(P₃) ≤ 1`).
+Docs: scoreboard (17/371/0 + retirement note), radar (subject axis 3:
+3.0 → 3.5; axiom minimization 3.5 → 4.0, first axiom removed by proof;
+proved-depth and QA text/count updated), Chung and Horn–Johnson source
+indexes and SGT index map (rows marked theorem), README snapshot, both
+proposals' status notes (delivered + normalized-instance scope caveat:
+the Cheeger proposal's `secondEval L_sym` intermediate follows from
+this plus the proved congruence transfer, but that step is not yet
+written).
+
+**Verification.** `lake env lean` on both changed modules — zero
+errors, zero new warnings; `lake build` of the QA target ✔; full
+`lake build` ✔ (2178 targets); all 24 QA modules elaborated directly
+(zero failures); 371 QA declarations, no `sorry`/`admit` under
+`Scaffold/` (prose-only matches); 17 cited axioms; `lint_axioms`,
+`check_citations`, `check_markdown_links`, scoreboard regeneration all
+pass.
+
+**Concurrent-change note:** `proposals/electrical-structure-crust.md`
+was re-statused outside this run and three untracked proposals
+(`discovery-mcp-server.md`, `fiedler-partitioning.md`,
+`mixing-time-bound.md`) appeared at run start (timestamps 07:33–07:42Z,
+before this run began at 14:46Z); all left exactly as found, not
+authored or reverted by this run.
+
+**Remaining risk.** None new in the delivered slice. Recorded caveats:
+the normalized-Laplacian variational instance (`secondEval L_sym`) is
+one proved-transfer step away and not delivered; `lambda2_variational`'s
+nonnegativity hypothesis means consumers must now supply it (no
+in-repository consumers existed at retirement).
+
+**Next handoff.** The normalized-instance transfer (combinatorial λ₂
+variational + `rayleigh_normalizedLaplacian_degreeSqrt` → variational
+characterization of `secondEval L_sym`), which is exactly the remaining
+intermediate for `proposals/prove-cheeger-easy-direction.md`; the cheap
+electrical residual `R u v = 0 ↔ u = v` (reachable pair); or the still
+open `evals (c • M) = c • evals M` Mathlib excavation.

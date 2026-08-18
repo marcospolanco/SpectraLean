@@ -98,6 +98,17 @@ one run. That is the point. Recent milestones have each landed within a
 single run, which suggests work selected for tractability rather than for
 leverage.
 
+**Update (2026-08-18):** the combinatorial-Laplacian variational
+characterization now *exists and is proved* — `lambda2_variational` was
+retired from axiom to theorem (see [the λ₂ proposal's delivery
+note](prove-lambda2-variational.md)). The intermediate this correction
+calls missing is the *normalized* instance `secondEval L_sym`; it
+follows from the proved combinatorial instance plus the proved
+congruence transfer
+(`VariationalTransfer.rayleigh_normalizedLaplacian_degreeSqrt`), but
+that transfer step is not yet written. Scoping estimate reduced
+accordingly.
+
 ## Supporting moves
 
 **Cut the meta-work in half.** Five governance documents are rewritten every

@@ -11,7 +11,12 @@ proofs and QA actually load-bearing, or do they only look like it?**
 
 Originally drafted 2026-08-19 as a standalone review plan, absorbed here
 2026-08-19 after a pilot run (see "Worked pilot" below) confirmed the
-approach surfaces real findings quickly, not just in principle.
+approach surfaces real findings quickly, not just in principle. Extended
+2026-08-19 with Phase 6, once external exposure (Palomar submission,
+`proposals/palomar-submission.md`; eventually the clean-room export) went
+from hypothetical to concretely planned — Phases 1–5 ask "is this proof
+actually sound," which is necessary but not sufficient once someone
+outside this project starts reading, citing, or pinning it.
 
 ## Why this exists
 
@@ -56,6 +61,7 @@ runnable procedures, and adds two axes the existing five do not cover:
 | Documentation | Phase 4 (citation fidelity) |
 | *(not covered)* | Phase 3 — whether QA is actually load-bearing, not just present |
 | *(not covered)* | Phase 5's ghost-dependency check — whether the roadmap matches the code |
+| *(not covered)* | Phase 6 — whether the project survives contact with a reader who has no context on it, and whether what gets pinned externally stays pinnable |
 
 ## The five phases
 
@@ -162,6 +168,74 @@ cannot run the same way as the other four.
   (breaks a consumer if changed), **connective** (a usable adapter), or
   **inert crust** (added only for declaration counts).
 
+### Phase 6: Public-exposure readiness
+
+Phases 1–5 verify the repository is internally sound. None of them ask
+whether it *survives being read by someone with no context on it* — a
+different failure mode, and the one Palomar's own founding motivation
+names directly: "unvetted claims about machine-assisted mathematical
+breakthroughs... with poor vetting, insufficient transparency, and
+inadequate context." This phase exists so that this project does not
+become one of the claims that motivation is describing.
+
+- **Cold-reader messaging audit.** Read every public-facing claim
+  (`README.md`, module docstrings, and eventually `formalization.yaml`)
+  as someone with zero context on this repository's internal conventions
+  would — not as someone who already knows "proved" means "checked
+  `#print axioms` shows only the three standard ones." For every
+  declarative "X is proved" claim in public prose, verify mechanically:
+  `#print axioms` on the specific named theorem, not the module it lives
+  in. This turns `docs/traction-plan.md`'s Communication Rules ("never
+  market an axiom-backed result as foundationally formalized") from a
+  stated rule into a runnable check, mirroring exactly the discipline
+  that catches false axioms in Phase 1 — applied to marketing prose
+  instead of Lean statements.
+- **Pinned-revision integrity.** Once any external party pins a commit —
+  a Palomar entry, a downstream `require scaffold from git @ <sha>` — that
+  commit must remain buildable and its cited declarations must never be
+  silently renamed out from under it. Before any public touchpoint:
+  confirm `main`'s history has never been force-pushed or rewritten
+  (`git reflog`, checked for `reset`/`rebase`/force-push markers), and
+  treat any commit that gets externally cited as permanent — never
+  garbage-collected, never the target of a history rewrite, even in
+  service of an otherwise-legitimate cleanup.
+- **API-stability discipline for post-exposure changes.** Today, fixing
+  a finding like the P4 `hconnB` redundancy is free — nothing external
+  depends on the signature. Once a theorem is cited from outside this
+  repository, the same fix becomes a breaking change for whoever pinned
+  it. Palomar entries are pinned to one commit forever by Palomar's own
+  design, so they are not at risk from later Scaffold changes — the real
+  exposure is anyone using the `<verified-revision>` `require` pattern
+  in `README.md`'s "Intended consumption" section and later advancing
+  their pin. Before any tagged release: decide and document a
+  deprecation-window policy for public theorem signatures, the same
+  discipline `docs/2_ARCHITECTURE.md` §9 already applies to axioms,
+  extended to cover renamed or restated *proved* declarations once they
+  have external citers, not just axioms.
+- **Disclosure-quality audit, Palomar-specific.** Any drafted
+  `formalization.yaml` gets checked against Palomar's actual stated
+  requirements (author/AI-role disclosure, source citations, fidelity
+  gaps) with the same rigor Phase 4 applies to axiom citations — a
+  `formalization.yaml` that undersells autonomous-agent authorship as
+  "manual," or overstates review that did not happen, is exactly the
+  "insufficient transparency" failure Palomar exists to catch, and
+  catching it before submission is this project's responsibility, not
+  something to leave for Palomar's own LLM reviewer to find.
+- **Pinned-dependency sanity.** Public consumers inherit whatever Mathlib
+  revision Scaffold pins. Before a public touchpoint, confirm (light
+  spot-check, not exhaustive) that no Scaffold public theorem transitively
+  depends on a pinned-Mathlib declaration later found broken or retracted
+  upstream — the same re-survey discipline
+  `docs/8_MATHLIB_COVERAGE_MAP.md` already applies to itself, extended to
+  cover "did the ground move under something we're about to expose,"
+  not just "is the map current."
+
+**Explicitly out of scope, and why:** adversarial input handling
+(injection, malformed data, resource exhaustion) — Scaffold is a proof
+library, not a service; it has no runtime attack surface in the sense
+those checks target. Noted here so the omission reads as considered, not
+overlooked.
+
 ## Severity tiers and routing
 
 | Severity | Definition | Example | Routes to |
@@ -171,6 +245,7 @@ cannot run the same way as the other four.
 | **P2: Inert / paper-tiger QA** | Tests that pass by small-fixture coincidence, tautology, or a missing negative witness | QA passes on `K₂` with a missing factor of 2; zero counter-examples in the file | Add real QA before trusting the theorem it guards |
 | **P3: Documentation / citation drift** | Lean statement diverges from the cited source without explanation, or a proposal cites a phantom declaration | Cited page/theorem mismatch; a proposal names a lemma that was never written | Fix the citation or the statement; if the gap is load-bearing, treat as P1 |
 | **P4: Hypothesis stronger than necessary** *(added 2026-08-19, from the pilot below — did not fit the original four tiers)* | A hypothesis is true and used by the current proof, but is provably redundant given the theorem's other hypotheses plus already-proved lemmas elsewhere in the repository | `effectiveResistance_le_of_le`'s `hconnB` — see "Worked pilot" | Not urgent; a real API-cleanup item, tracked with the proposal or module it belongs to, not an emergency |
+| **P5: Public-exposure risk** *(added 2026-08-19, Phase 6)* | A public-facing claim overstates what is proved, a rewritten/rebased history invalidates an external pin, or a disclosure document (`formalization.yaml`) understates automation or overstates review | A README line saying "proved" for something with an admitted-axiom dependency; a force-pushed `main` after a commit was cited elsewhere | Blocks the specific public touchpoint (submission, tagged release, export) until fixed — urgent relative to that touchpoint, not relative to the whole repository the way P0 is |
 
 ## Operating modes: what can run autonomously, what needs a human
 
@@ -186,6 +261,16 @@ needs either a human maintainer with the cited text in hand, or an
 assisted session with real literature access (e.g., a `WebSearch`-capable
 session), run as its own deliberate pass — not folded into a routine
 `opencode-pursue` milestone alongside Phases 1/2/3/5.
+
+**Phase 6 needs a human even more than Phase 4 does.** Whether a claim
+"overstates" what's proved, or whether a `formalization.yaml`'s framing
+undersells automation, is a judgment call about how an outside reader
+will parse language — not a fact an LLM or a script can check the way
+`#print axioms` mechanically checks soundness. The mechanical sub-checks
+inside Phase 6 (running `#print axioms` per public claim, checking
+`git reflog` for history rewrites) can run autonomously; the actual
+messaging judgment cannot, and should not be delegated to whichever
+model is doing the drafting — it needs a second, skeptical reader.
 
 ## Worked pilot (2026-08-19)
 
@@ -222,6 +307,41 @@ surfaces real findings or only sounds rigorous. Results:
   `Scaffold/Mathlib` is reachable from the `Scaffold.lean` umbrella; no
   orphaned top-level modules found. Declaration-level dead-code analysis
   (a real call graph, not a grep) was not attempted.
+- **Phase 6 — sweep complete, 2026-08-19.** `#print axioms` run directly
+  on every result `README.md`'s Status section names as "proved, not
+  admitted": `cheeger_upper_bound`, `eigen_interlacing_principal_submatrix`,
+  `woodbury_identity`, `sherman_morrison`, `foster_theorem`,
+  `effectiveResistance_le_flowEnergy`, `expander_mixing_lemma`, and — for
+  "Classical Laplacian facts," the closest thing to one target
+  declaration — `laplacian_psd`, `laplacian_ones_in_kernel`,
+  `laplacian_kernel_eq_span_onesVec`. All ten depend on exactly `propext,
+  Classical.choice, Quot.sound`; the public claim is now checked in full,
+  not just spot-checked. `git reflog show main` found no `reset`/
+  `rebase`/force-push markers — history is clean, nothing currently
+  pinned externally would be at risk. No `formalization.yaml` exists yet
+  to audit (no Palomar submission has been drafted). While the sweep was
+  running, a live cross-cutting gap was also caught outside Phase 6
+  proper: `proposals/discharge-perturbation-axioms.md` was still citing
+  a C*-algebra lead for Weyl's norm bridge that a sibling proposal,
+  `resolvent-calculus-psd.md`, had already spiked and found structurally
+  dead the same day — corrected, with the proved fallback bridge that
+  proposal delivered instead (`l2OpNorm_eq_max_abs_evals`) substituted
+  in as Weyl's actual next step. Not a Phase 6 finding by the letter of
+  the phase definitions above (no public claim was wrong, no pin was at
+  risk) but the same species of check: does a change in one part of the
+  repo actually propagate to every part that depends on it.
+- **Phase 2's redundancy variant, swept across other multi-step
+  proposals, 2026-08-19 — no additional P4 found.** Checked
+  `foster_theorem`'s `hconn` (genuinely independent of its other two
+  hypotheses — no nonneg-symmetric graph is connected by construction),
+  `lambda2_le_of_certificate`'s `hcard` (a definedness guard for index 1
+  existing, not an alternate-route hypothesis), and
+  `cheeger_upper_bound`'s `hdpos` (an edgeless `d`-regular graph is
+  consistent with every other hypothesis and would make `d = 0`, so
+  positivity is not implied by the rest). A spot check, not exhaustive
+  the way the original pilot's single finding wasn't either — reported
+  as "checked, clean" rather than invented to match the first pass's
+  result.
 
 ## Recommended cadence
 
@@ -237,3 +357,11 @@ surfaces real findings or only sounds rigorous. Results:
   with real literature access, prioritized by axiom (start with the ones
   this repository's own history has already gotten wrong once: anything
   touching Woodbury-family identities or Cheeger-style constants).
+- **Phase 6**: gated on events, not time — run in full immediately before
+  any of: a Palomar submission (`proposals/palomar-submission.md`), a
+  tagged release (`governance/RELEASES.md` — currently only a placeholder
+  entry, so this has not yet triggered), or the clean-room export going
+  live. The `#print axioms`-per-public-claim and `git reflog` sub-checks
+  are cheap enough to also run as part of any routine README edit,
+  independent of a real public-touchpoint trigger — treat that as good
+  hygiene, not the full Phase 6 pass.

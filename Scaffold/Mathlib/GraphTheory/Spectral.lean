@@ -296,6 +296,44 @@ theorem eigvalOf_le_evals_last {M : Matrix V V ℝ} (hM : M.IsSymm)
       Fin.ext (show p.1 = Fintype.card V - 1 by omega)
     rw [hpe]
 
+/-- The first entry of the sorted spectrum is dominated by every
+eigenvalue of the eigenbasis listing: sorting is nondecreasing and
+every listed eigenvalue survives the sort, so the first entry bounds
+each from below. The mirror of `eigvalOf_le_evals_last`; together they
+say the sorted spectrum and the eigenbasis listing carry the same
+extremes. Consumed by the operator-norm bridge
+(`Analysis.OperatorTheory.Resolvent.l2OpNorm_le_of_abs_evals_le`).
+The cardinality hypothesis keeps the first index inhabited. -/
+theorem evals_first_le_eigvalOf {M : Matrix V V ℝ} (hM : M.IsSymm)
+    (hcard : 1 ≤ Fintype.card V) (i : V) :
+    evals hM ⟨0, by omega⟩ ≤ eigvalOf M hM i := by
+  have hlen : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset V).val.map
+        ((isHermitian_of_isSymm hM).eigenvalues))).length =
+      Fintype.card V := length_sortedEvals hM
+  have hmem : eigvalOf M hM i ∈ Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset V).val.map
+        ((isHermitian_of_isSymm hM).eigenvalues)) := by
+    rw [Multiset.mem_sort]
+    exact Multiset.mem_map.2 ⟨i, Finset.mem_univ _, rfl⟩
+  obtain ⟨p, hp⟩ := List.mem_iff_get.1 hmem
+  have hsort : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset V).val.map
+        ((isHermitian_of_isSymm hM).eigenvalues))).Sorted (fun a b => a ≤ b) :=
+    Multiset.sort_sorted _ _
+  have hfirst : evals hM ⟨0, by omega⟩ =
+      (Multiset.sort (fun a b => a ≤ b)
+        ((Finset.univ : Finset V).val.map
+          ((isHermitian_of_isSymm hM).eigenvalues))).get
+        ⟨0, by rw [hlen]; omega⟩ := rfl
+  rw [hfirst, ← hp]
+  have hpn : p.1 < Fintype.card V := by simpa [hlen] using p.isLt
+  rcases Nat.eq_zero_or_pos p.1 with h0 | h0
+  · have hpe : p = ⟨0, by rw [hlen]; omega⟩ :=
+      Fin.ext (show p.1 = 0 by omega)
+    rw [hpe]
+  · exact hsort.rel_get_of_lt (by simpa [hlen] using h0)
+
 /-- The orthogonal spectral projector onto the span of the eigenvectors
 whose eigenvalues are at most `c`:
 `P_c = ∑_{λᵢ ≤ c} vᵢ vᵢᵀ` over the orthonormal eigenbasis.

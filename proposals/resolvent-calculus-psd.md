@@ -1,8 +1,13 @@
 # Proposal: Resolvent Calculus for PSD Matrices
 
-**Status:** Proposed; priority **High**. Assistant's assessment of project
+**Status:** In progress — Step 0 delivered 2026-08-19 (the C*-algebra
+thread is **structurally inapplicable**; the from-scratch bridge is
+proved instead, as this proposal's own contingency prescribed) and
+Step 1 delivered the same day (invertibility + the resolvent identity,
+zero new axioms). Priority **High**. Assistant's assessment of project
 direction, requested 2026-08-19, promoted from `sgt-gaps.md` item 2.
-Authorizes no Lean changes, axiom admissions, or external publication.
+Authorizes no Lean changes, axiom admissions, or external publication
+beyond what its own steps deliver.
 
 Companion to `sgt-gaps.md` (the triage document this was promoted from)
 and `docs/1_STRATEGY.md`'s leverage test. No backlog gate applies — this
@@ -129,4 +134,94 @@ Item 5 — a one-line consequence of Step 1.
 
 ## Open next step
 
-Step 0's survey/spike — unblocked now, no operator decision required.
+Step 2 — the norm bound `‖(A+1)⁻¹‖ ≤ 1` and the Lipschitz bound
+`‖(A+1)⁻¹ − (B+1)⁻¹‖ ≤ ‖A − B‖`, through the delivered bridge plus the
+eigenvalue transfer for shifted/inverted symmetric matrices; then
+Step 3 (injectivity, a one-line consequence). Unblocked now.
+
+## Step 0 delivery record (2026-08-19)
+
+**The spike, decisive negative on the C*-algebra thread:**
+`IsSelfAdjoint.spectralRadius_eq_nnnorm` is stated
+`{A : Type*} [CStarAlgebra A] (ha : IsSelfAdjoint a) :
+spectralRadius ℂ a = ‖a‖₊`, and `CStarAlgebra` extends
+`NormedRing`, `StarRing`, `CompleteSpace`, `CStarRing`,
+`NormedAlgebra ℂ A`, `StarModule ℂ A`. For `Matrix n n ℝ` the scoped
+`Matrix.L2OpNorm` instances `NormedRing` and `CStarRing`
+(`Matrix.instCStarRing`) resolve, but `CStarAlgebra (Matrix (Fin 2)
+(Fin 2) ℝ)` fails to synthesize — elaboration-verified; the missing
+piece is exactly `NormedAlgebra ℂ (Matrix (Fin 2) (Fin 2) ℝ)` (real
+matrices are not a complex algebra, so this is a structural
+obstruction, not an instance-search gap that a different search could
+close; the ℝ→ℂ complexification route would be its own project).
+
+**Fallback adopted and delivered** (this proposal's own contingency):
+the from-scratch finite-dimensional bridge in the new module
+`Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent`, proved from the
+already-shelf eigenbasis machinery:
+
+- `abs_eigvalOf_le_l2OpNorm` (lower direction): the unit eigenvector,
+  packaged as a `EuclideanSpace` element, is scaled by `λ` under
+  `toEuclideanCLM M`; `ContinuousLinearMap.le_opNorm` bounds every
+  image norm, and `Matrix.cstar_norm_def` (`‖M‖ = ‖toEuclideanCLM M‖`,
+  `rfl`) transfers to the matrix norm. Bookkeeping lemma:
+  `norm_euclidean_sq` (the Euclidean norm of a packaged plain function
+  squared is its dot product, through
+  `EuclideanSpace.inner_eq_star_dotProduct`).
+- `l2OpNorm_le_of_abs_eigvalOf_le` (upper direction): `‖M *ᵥ y‖²`
+  resolves by Parseval (`dotProduct_eigvecOf`) and the eigenaction
+  identity (`dotProduct_eigvecOf_mulVec`) to `∑ i, λ i² * c i²`, which
+  is termwise bounded by `c² * ∑ i, c i² = c² ‖y‖²`; then
+  `ContinuousLinearMap.opNorm_le_bound`.
+- Sorted-spectrum forms `abs_evals_le_l2OpNorm` /
+  `l2OpNorm_le_of_abs_evals_le`, consuming the new mirror lemma
+  `evals_first_le_eigvalOf` added to `GraphTheory.Spectral` (the
+  first-sorted-entry lower bound, mirror of `eigvalOf_le_evals_last`),
+  and the packaged extremal identity `l2OpNorm_eq_max_abs_evals`
+  (`‖M‖ = max |evals hM 0| |evals hM last|`) — this file's Step-0
+  target statement.
+
+**QA** (`Scaffold/QA/OperatorTheory/Resolvent_QA.lean`, 30
+declarations): the `!![2,1;1,2]` fixture with its spectrum `[1, 3]`
+pinned from trace/determinant/sortedness (independently of the
+bridge); both directions instantiated to pin `‖mat2‖ = 3` exactly (the
+literature spectral-norm value for this fixture); the packaged max
+form instantiated at `max 1 3 = 3`; the **negative witness** `¬(‖mat2‖
+≤ 1)` — bounding by one eigenvalue's absolute value instead of all of
+them is refuted, so the `∀ k` hypothesis is load-bearing.
+
+`#print axioms` on every public theorem: only `propext,
+Classical.choice, Quot.sound`. Zero new axioms (count stays 13).
+
+## Step 1 delivery record (2026-08-19)
+
+Delivered in the same module, both at the proposal's item shapes:
+
+- `isUnit_det_add_smul_one_of_quadForm_nonneg`: for any matrix with
+  everywhere-nonnegative quadratic form and `t > 0`, `M + t • 1` has
+  unit determinant. Route: a kernel vector `v ≠ 0` would force
+  `quadForm M v + t * (v ⬝ᵥ v) = 0` with the first term nonnegative
+  and the second positive — no symmetry hypothesis needed (the
+  statement is *stronger* than the proposal's sketch, which assumed
+  PSD of a symmetric matrix; the argument only evaluates the
+  quadratic form at the one hypothetical kernel vector).
+  `isUnit_det_add_one_of_quadForm_nonneg` is the `t = 1` instance
+  (item 1).
+- `resolvent_identity_sub` (item 3): `(A+1)⁻¹ − (B+1)⁻¹ = (A+1)⁻¹ *
+  (B − A) * (B+1)⁻¹` for any two matrices whose `+1` shifts have unit
+  determinants — pure `nonsing_inv` algebra (`mul_sub`,
+  `nonsing_inv_mul`, `mul_nonsing_inv`), no symmetry or PSD enters.
+
+**QA:** the `K₂` Laplacian `!![1,-1;-1,1]` (PSD through the center's
+`laplacian_psd` at the unit-edge adjacency, transferred along the
+computed `laplacian edge2 = lap2`); `IsUnit (L + 1).det` by the
+theorem, cross-checked against the computed determinant `3 ≠ 0`; the
+general-`t` instance at `t = 2` (determinant `8`); the
+**shift-load-bearing witness**: the *unshifted* Laplacian has
+determinant exactly `0`, so PSD alone gives no invertibility — the
+`+1` is not decorative; and the resolvent identity at `A = L`, `B =
+0` with `(L+1)⁻¹` computed to `(1/3)!![2,1;1,2]` by an independent
+left-inverse witness, both sides of the identity independently
+computed from the raw definitions to the same literal matrix
+`!![-1/3, 1/3; 1/3, -1/3]` — a wrong factoring (order or sign) would
+fail the check.

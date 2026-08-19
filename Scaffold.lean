@@ -17,6 +17,7 @@ import Scaffold.Mathlib.GraphTheory.VariationalTransfer
 import Scaffold.Mathlib.GraphTheory.Dynamics
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan
+import Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent
 import Scaffold.Mathlib.Probability.Concentration.Scalar.Subgaussian
 import Scaffold.Mathlib.Probability.Concentration.Scalar.Hoeffding
 import Scaffold.Mathlib.Probability.Concentration.Scalar.Bernstein
@@ -59,11 +60,16 @@ structure consuming both (`GraphTheory.Stationary`), the variational
 transfer consuming the congruence bridge
 (`GraphTheory.VariationalTransfer`), the event-driven
 frontier (`GraphTheory.Dynamics`), the perturbation bridge
-(`Analysis.OperatorTheory.Perturbation.*`), the probability concentration
-bridge (`Probability.Concentration.*`), the derived layer
-(`Derived.EventStream` and `Derived.ProjectorDrift`, whose tail and
-projector-drift theorems are conditional on the Matrix Azuma, Weyl, and
-Davis–Kahan axioms), and the core utilities.
+(`Analysis.OperatorTheory.Perturbation.*`), the resolvent calculus
+(`Analysis.OperatorTheory.Resolvent`, proposal steps 0–1: the
+operator-norm bridge `‖M‖ ↔ max-abs eigenvalue` proved from the
+eigenbasis machinery after the C*-algebra thread was found
+structurally inapplicable to real matrices, invertibility of the
+shifted PSD matrix, and the resolvent identity), the probability
+concentration bridge (`Probability.Concentration.*`), the derived
+layer (`Derived.EventStream` and `Derived.ProjectorDrift`, whose tail
+and projector-drift theorems are conditional on the Matrix Azuma,
+Weyl, and Davis–Kahan axioms), and the core utilities.
 
 Downstream consumers should prefer narrow imports (for example
 `import Scaffold.Mathlib.GraphTheory.Spectral`) over this umbrella.

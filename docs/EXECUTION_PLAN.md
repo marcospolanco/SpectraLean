@@ -6,6 +6,121 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Resolvent Calculus for PSD Matrices, Steps 0 and 1 (run 1,
+2026-08-19): DELIVERED.** The Active priority table's top High item
+(`proposals/resolvent-calculus-psd.md`), opened at its mandatory Step
+0 gate and through Step 1 (the steps-0+1 precedent). Pure hard crust —
+**zero new axioms** (count stays 13; `#print axioms` on every public
+theorem reads only `propext, Classical.choice, Quot.sound`). Steps 2–3
+(norm bound, Lipschitz bound, injectivity) were NOT started.
+
+**Step 0 (the spike, decisive negative, then the fallback bridge):**
+the C*-algebra thread `IsSelfAdjoint.spectralRadius_eq_nnnorm` is
+**structurally inapplicable** to `Matrix V V ℝ` — it is stated
+`[CStarAlgebra A]`, which extends `NormedAlgebra ℂ A` and
+`StarModule ℂ A`, and `NormedAlgebra ℂ (Matrix (Fin 2) (Fin 2) ℝ)`
+fails to synthesize (elaboration-verified; the scoped
+`Matrix.L2OpNorm` instances `NormedRing`/`CStarRing` resolve, but the
+complex-algebra bundle cannot — a structural obstruction, not an
+instance-search gap). The proposal's own contingency was adopted and
+delivered in the new `Analysis.OperatorTheory.Resolvent`: the
+from-scratch operator-norm bridge from the proved eigenbasis
+machinery — `abs_eigvalOf_le_l2OpNorm` (unit eigenvector through
+`toEuclideanCLM` + `ContinuousLinearMap.le_opNorm` +
+`cstar_norm_def`), `l2OpNorm_le_of_abs_eigvalOf_le` (Parseval
+`dotProduct_eigvecOf` + eigenaction `dotProduct_eigvecOf_mulVec`
+resolving `‖M *ᵥ y‖²` termwise, then `opNorm_le_bound`), their
+sorted-spectrum forms, and the packaged extremal identity
+`l2OpNorm_eq_max_abs_evals` (`‖M‖ = max |evals hM 0| |evals hM last|`)
+— the Step-0 target statement. One generic addition to the center:
+`evals_first_le_eigvalOf` in `GraphTheory.Spectral` (the
+first-sorted-entry mirror of `eigvalOf_le_evals_last`). The bridge is
+the one-time cost the proposal identified — the shared route for
+Step 2's norm/Lipschitz bounds and the
+`discharge-perturbation-axioms.md` Weyl target.
+
+**Step 1:** `isUnit_det_add_smul_one_of_quadForm_nonneg` — `M + t • 1`
+invertible for *any* matrix with nonnegative quadratic form and
+`t > 0` (kernel-vector route: a kernel vector would force
+`quadForm M v + t (v ⬝ᵥ v) = 0`, both terms nonnegative, the second
+positive — **no symmetry hypothesis needed**, a recorded strengthening
+over the proposal's PSD-symmetric sketch), with the `t = 1` instance;
+and `resolvent_identity_sub`
+(`(A+1)⁻¹ − (B+1)⁻¹ = (A+1)⁻¹ * (B − A) * (B+1)⁻¹`) by pure
+`nonsing_inv` algebra.
+
+**QA** `OperatorTheory/Resolvent_QA.lean` (30 declarations, the first
+OperatorTheory-domain QA file): the `!![2,1;1,2]` fixture with
+spectrum `[1,3]` pinned from trace/determinant/sortedness independent
+of the bridge; both directions composed to pin `‖mat2‖ = 3` exactly
+(the literature spectral-norm value); the extremal form at
+`max 1 3 = 3`; the **negative witness** `¬(‖mat2‖ ≤ 1)` — bounding by
+one eigenvalue's absolute value is refuted, so the `∀ k` hypothesis is
+load-bearing; the shifted-PSD invertibility cross-checked against
+computed determinants (`3` at `t = 1`, `8` at `t = 2`) with the
+**shift-load-bearing witness** (the unshifted `K₂` Laplacian's
+determinant is exactly `0` — PSD alone gives no invertibility; the
+`+1` is not decorative); and the resolvent identity at `A = L(K₂)`,
+`B = 0` with `(L+1)⁻¹` computed to `(1/3)!![2,1;1,2]` by an
+independent left-inverse witness, both sides of the identity
+independently computed from the raw definitions to the same literal
+matrix — a wrong factoring (order or sign) would fail the check.
+
+**Verification:** `lake env lean` on both changed public modules
+(`Spectral` + the new `Resolvent`) and the QA module — zero errors,
+zero warnings; `#print axioms` on all eight public theorems and six
+headline QA theorems ✔ (three standard axioms only); module oleans
+produced directly during iteration; **all thirty-two QA modules
+batch-elaborated, zero errors**; **full `lake build` ✔ (2184 targets,
+"Build completed successfully")**; `lint_axioms` (13),
+`check_citations`, `check_markdown_links` pass; scoreboard
+regeneration idempotent (**782/13/0**, `OperatorTheory` a new QA
+domain row). Environment: the pruned-oleans state recurred at run
+start (Mathlib build dir empty); the recorded interpreted cache fetch
+restored 5387 before any elaboration, and the full build replayed the
+Mathlib trace residue (~35 min). Implementation notes recorded for
+future L2OpNorm work: `CStarAlgebra` is the *complex* bundle — for
+real matrices use the scoped `Matrix.L2OpNorm` instances plus
+`cstar_norm_def`/`toEuclideanCLM_piLp_equiv_symm`/`toLin'_apply` as
+the transport spine; `omit ... in` must precede doc comments; `rw`
+with an equation whose LHS is a bare `1` rewrites every `1` in sight
+(including inside `A + 1`); matrix entrywise computation is cheapest
+via `Matrix.det_fin_two`/`det` on the *entries*
+(`simp only [Matrix.add_apply, Matrix.one_apply, ...]` + `norm_num`),
+not via literal-matrix rewriting; a numeral `2` in `2 • (1 : Matrix)`
+elaborates as ℕ-smul unless written `(2 : ℝ)`.
+
+**Records updated:** module/QA docstrings, umbrella (`Scaffold.lean` +
+docstring), scoreboard (782/13/0, verification rows for the QA and
+public module targets, milestone bullet), radar (subject axis 2
+evidence extended with the bridge + steps-1 facts and the score **held
+at 3.5** per protocol; QA count 782/32 with the pinned-norm/shift-guard/
+identity-check kinds, the QA axis **held at 4.0** — both holds logged
+in the re-scoring log; proved-depth hard-crust list extended), README
+(782; the proved list gains the operator-norm/resolvent bridge),
+Mathlib coverage map (the operator-norm row: the scoped L2OpNorm
+instances exist but no real-matrix norm↔eigenvalue bridge — the
+C*-thread's `NormedAlgebra ℂ` obstruction, elaboration-verified),
+perturbation index map (new Resolvent section, 7 rows; Deferred Work
+narrowed to steps 2–3), proposal Step-0 decision record + Step-1
+delivery record + status header + open-next-step (Step 2), and
+`proposals/README.md` (the High row now points at Step 2). The
+operator's concurrent edits (`governance/ADVERSARIAL_REVIEW.md`,
+`proposals/discharge-perturbation-axioms.md`) are preserved untouched.
+
+**Next milestone (open):** the Active table's top High rows —
+**Resolvent Step 2** (`‖(A+1)⁻¹‖ ≤ 1` and the Lipschitz bound
+`‖(A+1)⁻¹ − (B+1)⁻¹‖ ≤ ‖A − B‖` through the delivered bridge plus the
+shifted/inverted eigenvalue transfer, then Step 3's one-line
+injectivity; or the ungated High items **Tikhonov Regularization**
+(no gate — a corollary of the proved eigenbasis expansion) and
+**Spectral Band Projectors** (no gate — the difference of two
+`spectralProjector` calls). The Medium rows (Fiedler Phase B — needs
+an operator decision; mixing-time Step 1; Reversibility A and B;
+Relative Entropy; Perron–Frobenius + directed operators;
+discharge-perturbation — whose Weyl target now shares the delivered
+bridge; approximate spectral projection) stay queued.
+
 **Decidable spectral certificates, Step 4 — QA and extraction
 demonstration (run 1, 2026-08-19): DELIVERED; the program is
 COMPLETE.** The Active priority table's top High item

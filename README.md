@@ -24,7 +24,7 @@ As of August 19, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 13 |
-| QA theorems/lemmas | 752, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 782, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is the Cheeger *hard* direction at the SGT center;
 Weyl and Davis–Kahan in the perturbation bridge; the scalar and matrix
@@ -32,8 +32,10 @@ concentration family (Hoeffding, Bernstein, subgaussian, Azuma); and the
 deprecated per-step `spectral_persistence` compatibility axiom. Classical
 Laplacian facts, Courant–Fischer, Cauchy interlacing, the Cheeger *upper*
 bound, Woodbury/Sherman–Morrison, the electrical crust, Foster's
-theorem, the Expander Mixing Lemma, and the certificate-soundness layer
-(`lambda2_le_of_certificate`) are proved, not admitted.
+theorem, the Expander Mixing Lemma, the certificate-soundness layer
+(`lambda2_le_of_certificate`), and the operator-norm/resolvent bridge
+(`l2OpNorm_eq_max_abs_evals`, the resolvent identity) are proved, not
+admitted.
 
 The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for
 current counts, verification commands, and limitations.

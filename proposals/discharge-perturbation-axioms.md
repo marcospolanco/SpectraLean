@@ -55,26 +55,31 @@ admitting a restated or narrower version to claim partial credit.
 
 ## Why the three are not equally tractable — do not treat them as one problem
 
-**Weyl's inequality is the one worth spiking first, on a real (if
-unverified) lead.** The admitted statement is not the plain additive
-Courant–Fischer corollary — it is stated in the ℓ² **operator norm**, and
-its own docstring says it is built from the additive bound *plus*
-`λ₁(E) ≤ ‖E‖` / `λₙ(E) ≥ −‖E‖`, i.e. it needs an operator-norm-to-
-eigenvalue bridge that does not exist anywhere in Scaffold today (the
-same bridge `resolvent-calculus-psd.md`'s Step 0 also needs — the two
-proposals should share whatever that spike produces, not duplicate it).
-A 2026-08-19 keyword search found
-`IsSelfAdjoint.spectralRadius_eq_nnnorm` in
-`Mathlib.Analysis.CStarAlgebra.Spectrum` — a general C*-algebra fact
-that a self-adjoint element's norm equals its spectral radius, exactly
-the needed shape. **This was found by grep, not verified by
-elaboration** — real uncertainty remains about whether the instance
-chain resolves for `Matrix V V ℝ` under `Matrix.L2OpNorm` (the file
-Scaffold already imports for this axiom) and whether `spectrum ℝ A`
-connects cleanly to Scaffold's own `evals`/`eigvalOf`. If it does, the
-*additive* Weyl bound itself is a short, standard argument from
-`evals_min_max` (a subspace-intersection argument nearly identical in
-shape to the Cauchy-interlacing proof already delivered).
+**Update (2026-08-19): the norm bridge Weyl needs is now proved — this
+section originally flagged a lead, `resolvent-calculus-psd.md`'s own
+Step 0 has since resolved it, both ways.** That proposal's Step 0 spiked
+the exact C*-algebra thread named below and found it **structurally
+inapplicable** to real matrices, elaboration-verified: `CStarAlgebra`
+requires `NormedAlgebra ℂ A`, and real matrices are not a complex
+algebra — not an instance-search gap a different search could close.
+The two proposals were right to expect they'd need the same bridge; they
+were wrong to expect the C*-algebra route would supply it.
+
+**But that proposal's own contingency fired, and the fallback is exactly
+what this proposal needs.** `resolvent-calculus-psd.md` delivered a
+from-scratch finite-dimensional bridge instead, in the new module
+`Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent`:
+`l2OpNorm_eq_max_abs_evals` — `‖M‖ = max |evals hM 0| |evals hM last|`
+for symmetric `M` — proved from the already-shelf eigenbasis machinery
+(`toEuclideanCLM`, Parseval, `ContinuousLinearMap.opNorm_le_bound`), no
+axioms. This is precisely `λ₁(E) ≤ ‖E‖` / `λₙ(E) ≥ −‖E‖` in one packaged
+identity — the operator-norm-to-eigenvalue bridge Weyl's admitted axiom's
+own docstring says it's built from. **Weyl's Step 0 is now mostly done as
+a side effect of a sibling proposal, not something to re-spike from
+scratch.** What remains is composing `l2OpNorm_eq_max_abs_evals` with
+the *additive* Weyl bound from `evals_min_max` (a subspace-intersection
+argument, likely nearly identical in shape to the already-delivered
+Cauchy-interlacing proof) — genuinely closer to Step 1 than Step 0 now.
 
 **Davis–Kahan is genuinely unclear.** Nothing surveyed so far suggests a
 comparable shortcut; treat it as "large" as originally rated, with its
@@ -94,14 +99,13 @@ Weyl-side optimism to transfer here.
 
 Per axiom, in this order:
 
-1. **Weyl.** Spike the operator-norm bridge directly: write
-   `(hA : A.IsSymm) → ‖A‖ = max (|evals hA ⟨0,_⟩|) (|evals hA ⟨n-1,_⟩|)`
-   (or the equivalent spectral-radius shape) and attempt to close it via
-   the C*-algebra thread above. Record whether it elaborates and what it
-   actually needed. If it lands, spike the *additive* Weyl bound
-   separately from `evals_min_max` (do not assume the norm bridge implies
-   the additive bound is easy too — check both). Record a real cost
-   estimate for the full statement only after both spikes are done.
+1. **Weyl.** The norm bridge is delivered — reuse
+   `l2OpNorm_eq_max_abs_evals` from `Analysis.OperatorTheory.Resolvent`
+   directly; do not re-spike the C*-algebra route (confirmed dead above).
+   What remains: spike the *additive* Weyl bound from `evals_min_max`
+   (do not assume the norm bridge makes the additive bound free too —
+   check it on its own), then compose the two. Record a real cost
+   estimate for the full statement once the additive spike is done.
 2. **Davis–Kahan.** Survey what the sin-Θ bound's standard proof actually
    needs (typically: the norm bridge above, plus a resolvent-based or
    variational argument relating the perturbed and unperturbed

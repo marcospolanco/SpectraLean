@@ -6,6 +6,105 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Decidable spectral certificates, Step 3 — the computable certificate
+module (run 1, 2026-08-19): DELIVERED.** The Active priority table's
+top High item (`proposals/decidable-spectral-certificates.md`), at the
+step its Step-2 delivery record named as next. Pure hard crust —
+**zero new axioms** (count stays 13; `#print axioms` on every public
+theorem of the new module reads only `propext, Classical.choice,
+Quot.sound`). Step 4 was NOT started this run.
+
+**Delivered** in the new `GraphTheory.SpectralCertificates`, exactly
+as the Step 0 re-scoping pinned — both halves, bridged: (a) the
+ordered-field transport layer, whose hinge `algebraMap_apply`
+(`algebraMap ℚ ℝ q = (q : ℝ)`) is `rfl`, carrying symmetry,
+nonnegativity, dot products, and the Dirichlet energy
+(`quadForm_laplacian_map_algebraMap` — the certificate's `rawNumer` is
+exactly `quadForm (laplacian A ℝ) (toReal v)` halved, load-bearing on
+the center's `laplacian_quadForm` convention); (b) the one-sided
+Rayleigh consumer form `lambda2_le_rayleigh` — the division-form twin
+of the Step-2 multiplication bound, proved straight from the proved
+`lambda2_variational` (constraint-set membership + PSD
+boundedness); (c) the ℚ specification checker
+`isSpectralUpperBoundCertificate` with its soundness theorem
+`lambda2_le_of_certificate` at exactly the proposal's sketched
+statement shape — the flagship load-bearing consumer of
+`lambda2_variational`: `rawNumer/2` is the Laplacian energy,
+`dotOne = 0` is the constraint, `sInf ≤ rayleigh ≤ bound` follows
+(two recorded implementation deviations: the cross-multiplied raw
+inequality form so both checkers share one shape, and `decide`
+conjuncts with public `rfl` unfolding lemmas because the `let`-shaped
+bodies yield no usable simp equations); (d) the kernel-verifiable
+**ℤ cross-multiplied twin** `isSpectralUpperBoundCertificateInt`
+(exactly the Step 0 recorded shape, `== 0` included) and its
+fractional-bound variant, with the proved bridges —
+`...Int_iff` (sound *and complete* against the specification at an
+integer bound) and `...IntFrac_iff` (the cross-multiplication bridge;
+`0 < den` external, genuinely needed for the reverse direction — the
+ℚ-side bound alone cannot see the sign of `den`); (e) the
+kernel-facing corollaries `lambda2_le_of_certificateInt` /
+`...IntFrac` (the executable chain: `decide`d integer data → proved
+bridge → real bound; the matrix-equality transfer
+`lambda2_le_of_matrix_eq` handles `lambda2`'s proof-valued symmetry
+argument by `subst` + proof irrelevance).
+
+**QA** `SpectralGraph/SpectralCertificates_QA.lean` (22 declarations,
+fresh `C₄` fixture): kernel-`decide`d demonstrations on the twin —
+accepted at the attained bound `2`, rejected at `1`, non-orthogonal
+and zero test vectors rejected, fractional `5/2` accepted / `3/2`
+rejected; the ℚ specification proved `= true` **only through the
+proved bridge** (the Step 0 wall made explicit — the bridge is
+load-bearing in QA); the end-to-end soundness instances
+`lambda2 (C₄) ≤ 2` and `≤ 5/2` consuming `decide`d hypotheses; the
+checker's arithmetic pinned (`dotOne = 0`, `denom = 2`, `rawNumer =
+8`, Rayleigh quotient `4/2 = 2` — the certified bound is exactly the
+test vector's quotient); and the **guard refutation** —
+`lambda2 ≤ rayleigh onesVec` refuted on the connected cycle
+(`0 < lambda2` via `lambda2_pos_of_connected`, `rayleigh onesVec = 0`
+computed), so the orthogonality conjunct (and the zero-vector guard,
+same junk value `0`) is load-bearing, exactly as the proposal's
+Calibration 2 demands. Acceptance Criterion 2 thereby read against
+the ℤ twin as re-scoped.
+
+**Verification:** `lake env lean` on the new public module and its QA
+module — zero errors, zero warnings; `#print axioms` on all eight
+headline public theorems and the five key QA theorems ✔ (three
+standard axioms only); module olean produced directly during
+iteration; **all thirty-one QA modules batch-elaborated, zero
+errors**; **full `lake build` ✔ (2183 targets, one more than before —
+the new module; 6:27 wall)**; `lint_axioms` (13), `check_citations`,
+`check_markdown_links` pass; scoreboard regeneration idempotent
+(**688/13/0**). Environment: the pruned-oleans state recurred at run
+start; the recorded interpreted cache fetch re-applied (5685 files
+unpacked) before any elaboration.
+
+**Records updated:** module/QA docstrings, umbrella (`Scaffold.lean`
++ its docstring), scoreboard (688/13/0, verification rows for the new
+public and QA modules, step-3 milestone bullet), radar (subject axis
+7 re-scored **3.0 → 3.5** — the axis's first verified
+numerical/spectral algorithm driver, with the re-score logged; QA
+count 688/31 with the kernel-`decide`d algorithmic QA kind described;
+the QA axis **held at 4.0** per protocol — parametric/randomized QA
+untouched), README (688, the proved list gains the
+certificate-soundness layer, new module row, axis-7 cell 3.5), SGT
+index map (new `SpectralCertificates` section, 11 rows + header;
+module list updated), proposal Step-3 delivery record (with both
+implementation deviations and the `0 < den` external-hypothesis
+note) + status header, and `proposals/README.md` (High row now points
+at Step 4).
+
+**Next milestone (open):** proposal Step 4 — QA and extraction
+demonstration: the `C₆` kernel-`decide` demonstrations, the
+`Kₙ`/`Cₙ` Ramanujan fixture family per the Step 0 scope decision
+(drop the label rather than expand scope if awkward), exact spectrum
+pins for the derived-`μ`/certified-bound sharpness (the C₄ QA pins
+the *quotient*, not `lambda2 = 2` itself — an exact lower-bound pin
+is Step 4's natural completion), and the Acceptance-Criterion-4
+documentation notes (scoreboard/radar/traction-plan). The Medium rows
+(Fiedler Phase B — needs an operator decision; mixing-time Step 1;
+Reversibility Phase A and Phase B; Relative Entropy; the new
+resolvent/Tikhonov/band-projector High rows) stay queued.
+
 **Decidable spectral certificates, Step 2 — the Expander Mixing Lemma
 itself (run 1, 2026-08-19): DELIVERED.** The Active priority table's
 top High item (`proposals/decidable-spectral-certificates.md`), at the

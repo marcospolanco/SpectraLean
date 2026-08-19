@@ -7,6 +7,7 @@ import Scaffold.Mathlib.GraphTheory.Electrical
 import Scaffold.Mathlib.GraphTheory.ElectricalFlow
 import Scaffold.Mathlib.GraphTheory.Foster
 import Scaffold.Mathlib.GraphTheory.Expander
+import Scaffold.Mathlib.GraphTheory.SpectralCertificates
 import Scaffold.Mathlib.GraphTheory.Cheeger
 import Scaffold.Mathlib.GraphTheory.Fiedler
 import Scaffold.Mathlib.GraphTheory.RandomWalk
@@ -44,8 +45,13 @@ Expander Mixing Lemma itself (`GraphTheory.Expander`, steps 1–2 of the
 decidable-certificates program: subset edge weights, the
 centered-indicator decomposition, the Rayleigh sandwich on `1⊥`, and
 the mixing-lemma discrepancy bound with its spectral hypothesis in
-Laplacian terms), its Cheeger bridge (`GraphTheory.Cheeger`), the
-Fiedler-vector interface (`GraphTheory.Fiedler`, Phase A: the vector,
+Laplacian terms), the computable certificate layer
+(`GraphTheory.SpectralCertificates`, Step 3 of the
+decidable-certificates program: the ℚ specification checker with its
+soundness theorem `lambda2_le_of_certificate` consuming the proved
+`lambda2_variational`, and the kernel-verifiable ℤ cross-multiplied
+twin bridged by proved cross-multiplication lemmas), its Cheeger
+bridge (`GraphTheory.Cheeger`), the Fiedler-vector interface (`GraphTheory.Fiedler`, Phase A: the vector,
 the sign partition, and the algebraic-connectivity certificate),
 the random-walk interfaces (`GraphTheory.RandomWalk`), the general
 normalized Laplacian (`GraphTheory.Normalized`), the stationary

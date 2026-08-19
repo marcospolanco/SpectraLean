@@ -6,7 +6,7 @@ conductance, Cheeger theory, interlacing, and event-driven dynamics.
 ## Status
 
 **Implemented and build-certified** (see the QA scoreboard):
-`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,Cheeger,Dynamics}`.
+`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,SpectralCertificates,Cheeger,Dynamics}`.
 
 ## Modules and Declarations
 
@@ -259,6 +259,32 @@ proved, zero axioms.
 | `quadForm_bilinear_sq_le_of_ortho_onesVec` | **the sharp bilinear bound:** `(x ⬝ᵥ (A *ᵥ y))² ≤ μ² ‖x‖² ‖y‖²` on `1⊥ × 1⊥`, by the scaling trick (`√Y•x ± √X•y` through polarization; `a² = Y, b² = X` attains the AM–GM equality, so the product form carries no slack) |
 | `dotProduct_centeredIndicator_self` | the variance identity `‖centeredIndicator S‖² = \|S\|(|V|−\|S\|)/\|V\|` — the geometric factor of the mixing bound |
 | `expander_mixing_lemma` | **the Expander Mixing Lemma (headline):** `\|e(S,T) − d•\|S\|•\|T\|/\|V\|\| ≤ μ • √(\|S\|\|T\|(|V|−\|S\|)(|V|−\|T\|))/\|V\|` on symmetric, nonnegative, `d`-regular networks with the Laplacian-spectrum hypothesis — the classical discrepancy bridge between algebraic spectral gaps and combinatorial pseudorandomness (Alon–Chung 1988; Hoory–Linial–Wigderson 2006 §2; Vadhan 2012 §4), at the Step 0 restated `√` signature with squaring only inside the proof |
+
+
+### `Scaffold.Mathlib.GraphTheory.SpectralCertificates` (proof-carrying λ₂ upper-bound certificates)
+
+Step 3 of the decidable-spectral-certificates program (proposal
+`decidable-spectral-certificates.md`, High): the computable certificate
+layer over the proved spectral center. An outside solver proposes an
+inexact rational/integer test vector and a bound; Lean kernel-checks
+elementary arithmetic and a proved soundness theorem lifts the check to
+`lambda2 ≤ bound` in the real center — closing, inside Lean, the
+noncomputable-extraction gap `docs/traction-plan.md` records. All
+proved, zero axioms.
+
+| Declaration | Content |
+|-------------|---------|
+| `algebraMap_apply` | the ordered-field embedding `algebraMap ℚ ℝ` is the rational coercion *definitionally* — the hinge every transport goes through (the proposal's Calibration 1) |
+| `toReal` / `toRat` | entrywise embedding of a rational (resp. integer) test vector |
+| `isSymm_map_algebraMap` / `isSymm_map_intCast` / `isSymm_map_intCastReal` | symmetry transports along the ℚ→ℝ, ℤ→ℚ, and ℤ→ℝ embeddings |
+| `dotProduct_toReal` / `dotProduct_toReal_self` / `quadForm_laplacian_map_algebraMap` | dot products and the Dirichlet energy of an embedded test vector are the casts of the raw rational sums — the certificate's `rawNumer` is exactly `quadForm (laplacian A ℝ) (toReal v)`, halved (`laplacian_quadForm`; load-bearing on the center's exact Laplacian convention) |
+| `lambda2_le_rayleigh` | **the one-sided Rayleigh consumer form:** every nonzero test vector orthogonal to `onesVec` certifies `lambda2 ≤ R_L(x)` — the division-form twin of `Expander.lambda2_mul_dotProduct_le_quadForm`, proved straight from the characterization `lambda2_variational` (constraint-set membership + PSD boundedness) |
+| `isSpectralUpperBoundCertificate` | the ℚ-facing specification checker: orthogonality to `onesVec`, positive norm, and the raw Dirichlet sum bounded by `2 • bound • denom` — the cross-multiplied form of `R_L(v) ≤ bound`; not kernel-decidable (the Step 0 reducibility wall), reached through the proved bridges |
+| `lambda2_le_of_certificate` | **certificate soundness (ℚ-facing, headline):** an accepted certificate proves `lambda2 (A ℝ) ≤ bound` — the proposal's flagship load-bearing consumer of the proved `lambda2_variational` (`rawNumer/2` is the Laplacian energy, `dotOne = 0` is the constraint, `sInf ≤ rayleigh ≤ bound`) |
+| `isSpectralUpperBoundCertificateInt` / `isSpectralUpperBoundCertificateIntFrac` | the kernel-verifiable **integer cross-multiplied twin** (integer bound) and its fractional-bound variant (`den • rawNumer ≤ 2 • num • denom`, `0 < den`) — the checkers plain kernel `decide` evaluates on concrete `Fin n` graphs |
+| `isSpectralUpperBoundCertificateInt_iff` | the integer twin is *sound and complete* against the specification at the same integer bound — pure ordered-field algebra, no `decide` |
+| `isSpectralUpperBoundCertificateIntFrac_iff` | **the proved cross-multiplication bridge (fractional form):** with `0 < den`, the fractional twin accepts exactly when the specification accepts at the rational bound `num / den` — cross-multiplication in an ordered field plus integer-cast transport of the finite sums; the lemma that makes the ℚ specification reachable from kernel-verifiable arithmetic |
+| `lambda2_le_of_certificateInt` / `lambda2_le_of_certificateIntFrac` | **kernel-facing soundness:** a `decide`d integer (resp. fractional) certificate yields a verified `lambda2 ≤ bound` on the real network — the executable end-to-end chain (integer arithmetic → kernel `decide` → proved bridge → real spectral bound) |
 
 
 ### `Scaffold.Mathlib.GraphTheory.Cheeger`

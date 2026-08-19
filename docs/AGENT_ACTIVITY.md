@@ -2740,3 +2740,27 @@ untouched; nothing committed.
 **Remaining risk:** the derived-`μ` QA derives `μ = 2` via bounds rather than exact spectrum pinning on `C₄` (exact pins are Step 4's planned route); `Mathlib.cons_val`-style literal evaluation required the pinned simp set (`cons_val_two`, no `vecTail` unfolding) — recorded here for future QA on 4-vertex fixtures.
 
 **Next handoff:** proposal Step 3 — the certificate module (ℚ-facing soundness statement + the kernel-verifiable integer cross-multiplied twin, bridged by a proved cross-multiplication lemma), then Step 4 QA. The operator's concurrent changes (untracked `governance/ADVERSARIAL_REVIEW.md`, six new untracked proposals including `directed-graph-operators.md`, and edits to `1_STRATEGY.md`, `6_SGT_BACKLOG.md`, `CONTRIBUTING.md`, `admit-perron-frobenius.md`, `electrical-flow-routing.md`) were observed mid-run and preserved untouched.
+
+## 2026-08-19T16:55:00Z — Decidable spectral certificates, Step 3 (certificate module)
+
+**Run:** `20260819T164730Z-run-1`  
+**Session:** `ses_fe5173fcbffeWuvtINn3O7CbOt`  
+**Status:** in-progress  
+**Milestone:** Deliver Step 3 of `proposals/decidable-spectral-certificates.md` (top High item): the computable certificate module — the ℚ-facing checker with its soundness theorem `lambda2_le_of_certificate` (a load-bearing consumer of the proved `lambda2_variational`), the kernel-verifiable ℤ cross-multiplied twin, and the proved bridge between them — plus the C₄ kernel-`decide` QA core. Leverage: closes the extraction gap the proposal exists for; first end-to-end proof-carrying-certificate chain (integer arithmetic → kernel `decide` → proved ordered-field bridge → real spectral center).
+
+**Changes:** intent recorded in the execution plan; environment restored (pruned oleans state recurred; interpreted cache fetch re-applied, 5685 files unpacked); Lean work starting in `GraphTheory/SpectralCertificates.lean` and `SpectralGraph/SpectralCertificates_QA.lean`.
+
+## 2026-08-19T17:58:00Z — Decidable spectral certificates Step 3 delivered (the certificate module)
+
+**Run:** `20260819T164730Z-run-1`  
+**Session:** `ses_fe5173fcbffeWuvtINn3O7CbOt`  
+**Status:** completed  
+**Milestone:** Step 3 of `proposals/decidable-spectral-certificates.md` (top High item): the computable certificate module — the ℚ specification checker with its soundness theorem `lambda2_le_of_certificate` (the flagship load-bearing consumer of the proved `lambda2_variational`), the kernel-verifiable ℤ cross-multiplied twin and its fractional variant, and the proved cross-multiplication bridges — plus the C₄ kernel-`decide` QA core. Leverage: closes the proposal's extraction gap inside Lean; first end-to-end proof-carrying-certificate chain (integer arithmetic → kernel `decide` → proved bridge → real spectral bound).
+
+**Changes:** new `GraphTheory.SpectralCertificates` (transport layer with the `rfl` hinge `algebraMap_apply`; `lambda2_le_rayleigh` consumer form; the ℚ checker + soundness; the ℤ twins; sound-and-complete integer bridge + fractional cross-multiplication bridge with the `0 < den` hypothesis external — genuinely needed for the reverse direction; kernel-facing corollaries via the `subst`-based `lambda2_le_of_matrix_eq` transfer); new `SpectralCertificates_QA.lean` (22 declarations); umbrella, SGT index map (new section, 11 rows), scoreboard (688/13/0 + verification rows + milestone bullet), radar (axis 7 re-scored 3.0 → 3.5, logged; QA count 688/31, held at 4.0 per protocol), README, proposal Step-3 delivery record, and `proposals/README.md` (High row → Step 4) updated.
+
+**Verification:** `lake env lean` on both new modules — zero errors, zero warnings; `#print axioms` on the eight headline public theorems and five key QA theorems — only `propext, Classical.choice, Quot.sound` (zero new axioms, count stays 13); all thirty-one QA modules batch-elaborated, zero errors; full `lake build` ✔ (2183 targets, one more than before; 6:27 wall); `lint_axioms` (13), `check_citations`, `check_markdown_links` pass; scoreboard regeneration idempotent (688/13/0).
+
+**Remaining risk:** the C₄ QA pins the certified bound to the test vector's exact Rayleigh quotient and witnesses accept/reject sharpness, but `lambda2 (C₄) = 2` itself is not pinned (the exact lower bound is Step 4's natural completion, with the `C₆`/Ramanujan fixtures); the fractional bridge's reverse direction needs the external `0 < den` (recorded in the theorem docstring); the ℚ checker remains evaluation-unreachable by the kernel by design — every consumer must go through a bridge, which is the recorded architecture, not a defect. Environment: the pruned-oleans state recurred at run start; the recorded interpreted cache fetch re-applied before elaboration; the full build replayed the trace chain cleanly.
+
+**Next handoff:** proposal Step 4 — QA and extraction demonstration: `C₆` kernel-`decide` demonstrations, the `Kₙ`/`Cₙ` Ramanujan fixture family (drop-if-awkward fallback per the Step 0 scope decision), exact spectrum pins making the certified bounds' sharpness checkable against `lambda2` itself, and the Acceptance-Criterion-4 documentation notes (traction-plan included). The operator's other queued items (the new resolvent-calculus/Tikhonov/band-projector High rows with their Step-0 spikes; Fiedler Phase B still decision-gated) are unchanged; nothing committed.

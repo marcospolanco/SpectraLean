@@ -7,8 +7,9 @@ pseudorandomness and close the noncomputable extraction gap identified in
 `docs/traction-plan.md`. This document authorizes no Lean changes, axiom
 admissions, commits, clean-room copying, or external publication on its own.
 **Step 0 is COMPLETE (2026-08-19)** — see the decision record in the build
-order below; **Steps 1 and 2 are DELIVERED (2026-08-19)** as hard crust
-(zero new axioms); Steps 3–4 remain.
+order below; **Steps 1, 2, and 3 are DELIVERED (2026-08-19)** as hard crust
+(zero new axioms; the explicit count stays 13); **Step 4 (QA expansion)
+remains**.
 
 **Why High, and why contingent.** The certificate-soundness argument is a
 genuine, checked-by-hand load-bearing consumer of `lambda2_variational`
@@ -348,6 +349,80 @@ theorem lambda2_le_of_certificate
     (h_cert : isSpectralUpperBoundCertificate A v bound = true) :
     lambda2 (Matrix.map A (algebraMap ℚ ℝ)) ≤ (bound : ℝ)
 ```
+
+**STATUS: DELIVERED (2026-08-19)** as
+`Scaffold.Mathlib.GraphTheory.SpectralCertificates` — pure hard crust,
+**zero new axioms** (`#print axioms` on every public theorem reads only
+`propext, Classical.choice, Quot.sound`), delivered per the Step 0
+re-scoping: **both** the ℚ-facing soundness statement and the ℤ twin,
+bridged by proved cross-multiplication lemmas:
+
+- **Transport layer** (Calibration 1): the ordered-field embedding
+  `algebraMap ℚ ℝ` is the rational coercion *definitionally*
+  (`algebraMap_apply` is `rfl`), so symmetry (`isSymm_map_algebraMap`),
+  nonnegativity, dot products (`dotProduct_toReal`), and the Dirichlet
+  energy (`quadForm_laplacian_map_algebraMap`) all transfer through
+  standard cast bookkeeping with no re-elaborated proofs — the
+  certificate's `rawNumer` is exactly
+  `quadForm (laplacian A ℝ) (toReal v)`, halved, load-bearing on the
+  center's `laplacian_quadForm` convention.
+- **`lambda2_le_rayleigh`** — the one-sided Rayleigh consumer form
+  (`lambda2 ≤ R_L(x)` on nonzero `x ⊥ onesVec`), the division-form twin
+  of the Step-2 `lambda2_mul_dotProduct_le_quadForm`, proved straight
+  from `lambda2_variational` (constraint-set membership + PSD
+  boundedness below by `0`).
+- **`isSpectralUpperBoundCertificate`** — the ℚ specification checker.
+  Two recorded deviations from the sketch, both implementation-level:
+  the inequality is stated in cross-multiplied raw form
+  `rawNumer ≤ 2 • bound • denom` (the sketch's `numer ≤ bound • denom`
+  with the `/ 2` folded in — chosen so the ℚ and ℤ checkers have
+  literally the same shape, making the bridge pure algebra), and the
+  `Prop`-typed conjuncts of the sketch are `decide (...)` applications
+  (a `Bool` needs decidable tests; each checker ships a public `rfl`
+  unfolding lemma because the `let`-shaped bodies do not produce
+  usable simp equation lemmas).
+- **`lambda2_le_of_certificate`** — the flagship soundness theorem at
+  exactly the sketched statement shape (hypotheses: ℚ-side symmetry and
+  nonnegativity, transported; `hcard`). The proof is the proposal's
+  checked-by-hand route, now machine-checked: `toReal v` is admissible
+  (`dotOne = 0` casts to orthogonality; `denom > 0` to nonzero), its
+  Rayleigh quotient is `rawNumer / (2 • denom)`, and
+  `lambda2_le_rayleigh` + the cross-multiplied hypothesis pin it below
+  `bound`.
+- **The ℤ twins** `isSpectralUpperBoundCertificateInt` (exactly the
+  Step 0 recorded shape, `== 0` included) and
+  `isSpectralUpperBoundCertificateIntFrac` (fractional bound
+  `num/den`, cross-multiplied `den • rawNumer ≤ 2 • num • denom`).
+- **The bridges**: `isSpectralUpperBoundCertificateInt_iff` (the twin
+  is sound *and complete* against the specification at an integer
+  bound — pure ordered-field algebra, no `decide`) and
+  `isSpectralUpperBoundCertificateIntFrac_iff` (the cross-multiplication
+  bridge; the `0 < den` hypothesis is external — genuinely needed for
+  the reverse direction, since the ℚ-side bound `num / den` alone
+  cannot see the sign of `den`).
+- **Kernel-facing corollaries** `lambda2_le_of_certificateInt` /
+  `lambda2_le_of_certificateIntFrac`: a `decide`d integer certificate
+  yields a verified real `lambda2` bound (the matrix-equality transfer
+  `lambda2_le_of_matrix_eq` handles `lambda2`'s proof-valued symmetry
+  argument by `subst` + proof irrelevance).
+
+**QA delivered with the module**
+(`ScaffoldGraph/SpectralCertificates_QA.lean`, 23 declarations on a
+fresh `C₄` fixture): kernel-`decide` demonstrations on the twin —
+accepted at the attained bound `2`, rejected at `1`, non-orthogonal and
+zero test vectors rejected, fractional `5/2` accepted and `3/2`
+rejected; the ℚ specification proved `= true` **only through the
+proved bridge** from the `decide`d twin (the Step 0 wall made
+explicit); the end-to-end soundness instances `lambda2 (C₄) ≤ 2` and
+`≤ 5/2` consuming `decide`d hypotheses; the checker's arithmetic
+pinned (`dotOne = 0`, `denom = 2`, `rawNumer = 8`, Rayleigh quotient
+`4/2 = 2` — the certified bound is exactly the test vector's
+quotient); and the **guard refutation** — `lambda2 ≤ rayleigh onesVec`
+is false on the connected `C₄` (`0 < lambda2` via
+`lambda2_pos_of_connected`, `rayleigh onesVec = 0` computed), so the
+orthogonality conjunct (and the zero-vector guard, same junk value) is
+load-bearing, exactly as Calibration 2 demands. Acceptance Criterion 2
+is thereby read against the ℤ twin as re-scoped.
 
 ### Step 4: QA and Extraction Demonstration
 * Implement `SpectralGraph/Expander_QA.lean` checking the Expander Mixing Lemma on the complete graph $K_n$, cycles $C_n$, and Ramanujan graph examples.

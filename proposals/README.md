@@ -59,12 +59,20 @@ dissipated energy with the effective resistance it routes — zero axioms
 added, with the mandatory double-counting fixture (raw ordered-pair sum
 `2 ≠ 1` = Dirichlet energy on `K₂`) and the Thomson-breaking zero-energy
 competitor (energy `0 < 1` = resistance, excluded by the support conjunct
-alone) both landed in QA. The next run's milestone is step 3 (Thomson's
-principle — the minimum-energy inequality over valid unit flows, consuming
-`flowEnergy_nonneg` on the difference flow); steps 4–5 (Rayleigh
-monotonicity, the ICP example) remain. Fiedler Phase B retains its named
-operator decision, and the mixing-time program remains the unblocked
-Medium fallback.
+alone) both landed in QA. **Step 3 (Thomson's principle) was delivered
+2026-08-19 in a third run:** `effectiveResistance_le_flowEnergy` — every
+valid unit flow dissipates at least the resistance it routes — proved via
+the divergence-free superposition lemma
+`flowEnergy_add_of_flowDivergence_eq_zero` (discrete integration by
+parts; stated with no hypotheses on `A`), flow-space linearity, and
+`flowEnergy_nonneg`; QA witnesses attainment at the split current on the
+triangle (`2/3`), a strict competitor (the detour flow: `2/3 < 2`), and
+the decomposition `2 = 2/3 + 4/3`. The next run's milestone is step 4
+(Rayleigh monotonicity in conductance form — use the `A`-electrical unit
+flow as a competitor on `B`; QA plan item 2, the capacity increase
+`1 → 1/2`, belongs there); step 5 (the ICP example) remains. Fiedler
+Phase B retains its named operator decision, and the mixing-time program
+remains the unblocked Medium fallback.
 
 ## Delivered
 

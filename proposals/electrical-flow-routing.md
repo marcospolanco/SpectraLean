@@ -299,6 +299,38 @@ the agreement instantiates on a symmetric *negative*-weight network
 hypothesize nonnegativity — provably fails. QA plan item 2 (capacity
 increase `1 → 2`) belongs to step 4 and was not started.
 
+**Step 3 delivered 2026-08-19 (separate run):** Thomson's principle —
+`effectiveResistance_le_flowEnergy`
+(`effectiveResistance A u v ≤ flowEnergy A θ` for every valid unit flow
+`θ` on a connected graph with symmetric nonnegative conductances) —
+proved exactly by the proposed route: the difference `d = θ − ι`
+between the competitor and the unit-demand potential's current is a
+flow (`isFlowOn_sub`) with zero divergence
+(`flowDivergence_sub` + the Kirchhoff bridge + the demand equation),
+the superposition lemma
+`flowEnergy_add_of_flowDivergence_eq_zero` adds `d`'s energy to `ι`'s
+(discrete integration by parts kills the cross term: Ohm's law turns
+it into `∑ i j, (f i − f j) * d i j`, whose row sums vanish by zero
+divergence and whose column sums are the negated row sums by
+antisymmetry), and `flowEnergy_nonneg` discards it; `ι`'s energy is the
+resistance by the step-2 identity. No `sInf` packaging, per the
+proposal's instruction — attainment is witnessed by the constructed
+electrical flow. **Statement-shape deviation (recorded):** the
+superposition lemma is stated with **no hypotheses on `A` at all** —
+not even the symmetry the proposal's proof sketch assumed throughout:
+only the perturbation's flow properties (support, antisymmetry, zero
+divergence) enter, since Ohm's law needs no symmetry to cancel one
+conductance. QA (18 new declarations): attainment at the edge
+(`1 = 1`) and — the step-3-specific witness — at the *split* current on
+the triangle `K₃` (`R = 2/3` = the current's energy, both computed from
+the raw definitions, the current genuinely splitting `2/3`/`1/3` across
+the two routes); a **strict competitor** (the detour unit flow around
+the two-edge path: valid `IsUnitFlow` with all conjuncts computed,
+energy `2`, Thomson instantiated as `2/3 < 2` — the inequality is not
+vacuous on a network with competing routes); and the superposition
+decomposition composed (`2 = 2/3 + 4/3`, all three energies computed
+independently of the lemma). No new axioms; steps 4–5 not started.
+
 ### 1. Electrical current and Kirchhoff conservation
 
 Add the flow definitions and prove:

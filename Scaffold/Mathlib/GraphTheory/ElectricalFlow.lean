@@ -9,9 +9,12 @@
   flow predicates, and the Kirchhoff bridge turning the delivered
   potential-based resistance API into a conserved unit flow. Step 2:
   the dissipated `flowEnergy` and its agreement with the Dirichlet
-  energy and the effective resistance it routes. Thomson's principle
-  and Rayleigh monotonicity are steps 3–4 of the proposal and are
-  deliberately not attempted here.
+  energy and the effective resistance it routes. Step 3: Thomson's
+  principle — the electrical current minimizes energy among valid unit
+  flows, `effectiveResistance A u v ≤ flowEnergy A θ`, via the
+  divergence-free superposition lemma (discrete integration by parts).
+  Rayleigh monotonicity is step 4 of the proposal and is deliberately
+  not attempted here.
 
   Representation decision (proposal step 0, recorded in the proposal
   on 2026-08-19 before this module was written): flows live on ordered
@@ -228,5 +231,193 @@ theorem flowEnergy_electricalCurrent_eq_effectiveResistance
   rw [flowEnergy_electricalCurrent A hA f,
     effectiveResistance_eq A hA hnonneg hconn ⟨f, hf, rfl⟩,
     quadForm_laplacian_eq_sub_of_mulVec_eq_single_sub_single A hf]
+
+/-!
+## Thomson's principle (proposal `electrical-flow-routing.md`, step 3)
+-/
+
+omit [DecidableEq V] in
+/-- Divergence is linear: the divergence of a difference of flows is
+the difference of the divergences, entrywise over the row sums. -/
+theorem flowDivergence_sub (θ ψ : EdgeFlow (V := V)) :
+    flowDivergence (θ - ψ) = flowDivergence θ - flowDivergence ψ := by
+  funext i
+  simp only [flowDivergence, Matrix.sub_apply, Pi.sub_apply,
+    Finset.sum_sub_distrib]
+
+omit [Fintype V] [DecidableEq V] in
+/-- The flow space is linear: the difference of two flows on `A`
+(antisymmetric, supported) is again a flow on `A`. Consumed by Thomson's
+principle on the difference between a competitor flow and the electrical
+current. -/
+theorem isFlowOn_sub (A : WAdj (V := V)) {θ ψ : EdgeFlow V}
+    (hθ : IsFlowOn A θ) (hψ : IsFlowOn A ψ) : IsFlowOn A (θ - ψ) := by
+  refine ⟨fun i j => ?_, fun i j h => ?_⟩
+  · rw [Matrix.sub_apply, Matrix.sub_apply, hθ.1 i j, hψ.1 j i]
+    ring
+  · rw [Matrix.sub_apply, hθ.2 i j h, hψ.2 i j h, sub_self]
+
+omit [DecidableEq V] in
+/-- **Divergence-free perturbations of a current add energy** — the
+discrete integration-by-parts step of Thomson's principle (proposal step
+3, split out as its own interface per the proposal's suggestion: this is
+the superposition fact any flow-space argument consumes). If `d` is a
+flow on `A` with zero divergence, then perturbing the electrical
+current of a potential `f` by `d` adds exactly `d`'s energy.
+
+The proof expands the squared-current summand termwise; the cross term
+is, after Ohm's law cancels the conductance on every nonzero branch
+(and `d`'s support makes the identity total over ordered pairs), the
+sum `∑ i j, (f i − f j) * d i j`. Discrete integration by parts
+evaluates it: the row sums are `flowDivergence d` (zero by hypothesis)
+and the column sums are the negated row sums by antisymmetry, so both
+halves vanish.
+
+Statement shape (stronger than the proposal's sketch): **no hypotheses
+on `A` at all** — not even symmetry. Only `d`'s flow properties are
+used; Ohm's law needs no symmetry to cancel one conductance. -/
+theorem flowEnergy_add_of_flowDivergence_eq_zero (A : WAdj (V := V))
+    (f : V → ℝ) {d : EdgeFlow V} (hd : IsFlowOn A d)
+    (hdiv : flowDivergence d = 0) :
+    flowEnergy A (electricalCurrent A f + d)
+      = flowEnergy A (electricalCurrent A f) + flowEnergy A d := by
+  -- Termwise square expansion, respecting the zero branches.
+  have hptd : ∀ i j : V,
+      (if A i j = 0 then (0 : ℝ)
+        else (electricalCurrent A f i j + d i j) ^ 2 / A i j)
+      = (if A i j = 0 then (0 : ℝ)
+          else electricalCurrent A f i j ^ 2 / A i j)
+        + (if A i j = 0 then (0 : ℝ) else d i j ^ 2 / A i j)
+        + (if A i j = 0 then (0 : ℝ)
+            else 2 * electricalCurrent A f i j * d i j / A i j) := by
+    intro i j
+    by_cases h : A i j = 0
+    · simp [h]
+    · simp only [if_neg h]
+      field_simp
+      ring
+  -- Ohm's law turns the (undoubled) cross summand into a voltage drop
+  -- times the difference flow, on every branch.
+  have hterm : ∀ i j : V,
+      (if A i j = 0 then (0 : ℝ)
+        else electricalCurrent A f i j * d i j / A i j)
+      = (f i - f j) * d i j := by
+    intro i j
+    by_cases h : A i j = 0
+    · rw [if_pos h, hd.2 i j h, mul_zero]
+    · simp only [electricalCurrent, if_neg h]
+      field_simp
+      ring
+  -- Discrete integration by parts: the cross sum vanishes.
+  have hsplit : ∀ i : V,
+      ∑ j, (f i - f j) * d i j
+        = f i * flowDivergence d i - ∑ j, f j * d i j := by
+    intro i
+    calc ∑ j, (f i - f j) * d i j
+        = ∑ j, (f i * d i j - f j * d i j) :=
+          Finset.sum_congr rfl fun j _ => sub_mul (f i) (f j) (d i j)
+      _ = f i * ∑ j, d i j - ∑ j, f j * d i j := by
+          rw [Finset.sum_sub_distrib, Finset.mul_sum]
+      _ = f i * flowDivergence d i - ∑ j, f j * d i j := rfl
+  have hcol : ∀ j : V, ∑ i, d i j = 0 := by
+    intro j
+    have h1 : ∑ i, d i j = ∑ i, -(d j i) :=
+      Finset.sum_congr rfl fun i _ => hd.1 i j
+    rw [h1, Finset.sum_neg_distrib]
+    have h2 : ∑ i, d j i = flowDivergence d j := rfl
+    rw [h2, hdiv]
+    simp
+  have hmain : ∑ i, ∑ j, (f i - f j) * d i j = 0 := by
+    have hz1 : ∑ i, f i * flowDivergence d i = 0 := by
+      rw [hdiv]
+      simp
+    have hz2 : ∑ i, ∑ j, f j * d i j = 0 := by
+      have hinner : ∀ j : V, ∑ i, f j * d i j = 0 := by
+        intro j
+        have hpull : f j * ∑ i, d i j = ∑ i, f j * d i j :=
+          Finset.mul_sum _ _ _
+        rw [← hpull, hcol j, mul_zero]
+      calc ∑ i, ∑ j, f j * d i j
+          = ∑ j, ∑ i, f j * d i j := Finset.sum_comm
+        _ = 0 := Finset.sum_eq_zero fun j _ => hinner j
+    calc ∑ i, ∑ j, (f i - f j) * d i j
+        = ∑ i, (f i * flowDivergence d i - ∑ j, f j * d i j) :=
+          Finset.sum_congr rfl fun i _ => hsplit i
+      _ = (∑ i, f i * flowDivergence d i) - ∑ i, ∑ j, f j * d i j :=
+          Finset.sum_sub_distrib
+      _ = 0 - 0 := by rw [hz1, hz2]
+      _ = 0 := sub_self _
+  have hcross : ∑ i, ∑ j, (if A i j = 0 then (0 : ℝ)
+      else electricalCurrent A f i j * d i j / A i j) = 0 := by
+    rw [Finset.sum_congr rfl fun i _ =>
+      Finset.sum_congr rfl fun j _ => hterm i j]
+    exact hmain
+  -- Assemble: the doubled cross sum is twice the undoubled one.
+  have hdoubled : ∑ i, ∑ j, (if A i j = 0 then (0 : ℝ)
+      else 2 * electricalCurrent A f i j * d i j / A i j)
+      = 2 * ∑ i, ∑ j, (if A i j = 0 then (0 : ℝ)
+      else electricalCurrent A f i j * d i j / A i j) := by
+    have hpair : ∀ i j : V,
+        (if A i j = 0 then (0 : ℝ)
+          else 2 * electricalCurrent A f i j * d i j / A i j)
+        = 2 * (if A i j = 0 then (0 : ℝ)
+          else electricalCurrent A f i j * d i j / A i j) := by
+      intro i j
+      by_cases h : A i j = 0
+      · simp [h]
+      · simp only [if_neg h]
+        ring
+    have hstep : ∀ i : V,
+        ∑ j, (if A i j = 0 then (0 : ℝ)
+          else 2 * electricalCurrent A f i j * d i j / A i j)
+        = 2 * ∑ j, (if A i j = 0 then (0 : ℝ)
+          else electricalCurrent A f i j * d i j / A i j) := by
+      intro i
+      rw [Finset.sum_congr rfl fun j _ => hpair i j]
+      exact (Finset.mul_sum _ _ _).symm
+    rw [Finset.sum_congr rfl fun i _ => hstep i]
+    exact (Finset.mul_sum _ _ _).symm
+  simp only [flowEnergy, Matrix.add_apply, hptd, Finset.sum_add_distrib]
+  rw [hdoubled, hcross, mul_zero]
+  ring
+
+/-- **Thomson's principle (proposal step 3, headline):** on a connected
+graph with symmetric nonnegative conductances, every valid unit flow
+from `u` to `v` dissipates at least the effective resistance — the
+electrical current is the energy minimizer,
+`effectiveResistance A u v ≤ flowEnergy A θ`.
+
+Proof as proposed: the unit-demand potential's current `ι` is a unit
+flow (step 1), so the difference `d = θ − ι` is a flow with zero
+divergence; the superposition lemma adds `d`'s energy to `ι`'s, and
+`flowEnergy_nonneg` discards it. `ι`'s energy is exactly the resistance
+(step 2). Load-bearing chain: Kirchhoff conservation (the difference of
+two unit divergences vanishes), the solvability of the unit demand, the
+energy agreement, and nonnegativity — an error in any breaks this
+proof. The statement is the universal inequality the proposal pins; no
+`sInf` packaging (attainment is already witnessed by the constructed
+electrical flow through the step-2 identity). -/
+theorem effectiveResistance_le_flowEnergy (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (hconn : (supportGraph A hA).Connected)
+    {u v : V} {θ : EdgeFlow V} (hθ : IsUnitFlow A u v θ) :
+    effectiveResistance A u v ≤ flowEnergy A θ := by
+  obtain ⟨f, hf⟩ :=
+    exists_laplacian_mulVec_eq_single_sub_single A hA hnonneg hconn u v
+  have hd : IsFlowOn A (θ - electricalCurrent A f) :=
+    isFlowOn_sub A hθ.1 (isFlowOn_electricalCurrent A hA f)
+  have hdivd : flowDivergence (θ - electricalCurrent A f) = 0 := by
+    rw [flowDivergence_sub, hθ.2,
+      flowDivergence_electricalCurrent A f, hf, sub_self]
+  have hkey :=
+    flowEnergy_add_of_flowDivergence_eq_zero A f hd hdivd
+  have hsum : electricalCurrent A f + (θ - electricalCurrent A f) = θ := by
+    ext i j
+    simp only [Matrix.add_apply, Matrix.sub_apply]
+    ring
+  have hnn := flowEnergy_nonneg A hnonneg (θ - electricalCurrent A f)
+  rw [← hsum, hkey,
+    flowEnergy_electricalCurrent_eq_effectiveResistance A hA hnonneg hconn hf]
+  linarith
 
 end SpectralGraphTheory

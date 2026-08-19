@@ -5,9 +5,11 @@
   -------
   QA for `Scaffold.Mathlib.GraphTheory.ElectricalFlow` — proposal
   `proposals/electrical-flow-routing.md`. Step 1 (the electrical
-  current, divergence, flow predicates, and the Kirchhoff bridge) and
+  current, divergence, flow predicates, and the Kirchhoff bridge),
   step 2 (flow energy: the agreement with the Dirichlet energy and the
-  effective resistance it routes).
+  effective resistance it routes), and step 3 (Thomson's principle:
+  attainment at the current, a strict competitor, and the superposition
+  decomposition on the triangle).
 
   Witness plan (proposal QA items 1, 3, 4, 5, 6):
 
@@ -502,5 +504,215 @@ theorem cheat_support_load_bearing_QA :
   ⟨cheatFlow_antisymm_QA, cheatFlow_divergence_QA, by
     rw [cheatFlow_energy_zero_QA, cheat_resistance_one_QA]
     norm_num, cheatFlow_not_isFlowOn_QA⟩
+
+/-!
+## Thomson's principle (proposal step 3): attainment, a strict
+## competitor, and the superposition decomposition
+
+Witness plan for step 3 (the negative witnesses its statement needs —
+the zero-energy competitor excluded by support, the double-counting
+factor — are the step-2 fixtures above, referenced below):
+
+- **Attainment (edge):** the theorem's bound instantiated at the
+  electrical current itself, where both sides pin to `1` — the minimum
+  is achieved by the current, which is step 2's identity.
+- **Attainment with a split current (triangle `K₃`):** the smallest
+  network with two parallel routes. The unit-demand potential
+  `![1, 1/3, 2/3]` solves `L *ᵥ f = e 0 − e 1`, the resistance is
+  `2/3`, and the electrical current — which *splits* (`2/3` on the
+  direct edge, `1/3` on each path edge) — dissipates exactly `2/3`,
+  computed from the raw definitions.
+- **Strict competitor (triangle):** the detour unit flow routes the
+  whole unit around the two-edge path `0 → 2 → 1`, carrying nothing on
+  the direct edge. It is a valid `IsUnitFlow` (antisymmetric, supported,
+  correct divergence — all computed), dissipates `2` (computed from the
+  raw `flowEnergy`), and Thomson instantiates as the strict bound
+  `2/3 < 2` — the electrical current strictly beats the detour, so the
+  inequality is not vacuous.
+- **Superposition decomposition (triangle):** the difference flow
+  `detour − current` is divergence-free (both are unit flows), and the
+  integration-by-parts lemma decomposes `2 = 2/3 + 4/3` — the detour's
+  energy into the current's plus the difference's, with all three
+  values computed independently from the raw definitions.
+-/
+
+/-- The unit triangle `K₃`: three vertices, unit conductances — the
+smallest network on which two distinct routes between a pair exist, so
+unit flows are non-unique and Thomson's minimizer has a genuine
+competitor. Entrywise definition (the repo's fixture pattern; the matrix
+notation's zero-function normalization leaves `vecTail` leftovers
+otherwise). -/
+def triAdj : Matrix (Fin 3) (Fin 3) ℝ :=
+  Matrix.of fun i j => if i = j then 0 else 1
+
+theorem triAdj_isSymm : triAdj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [triAdj]
+
+theorem triAdj_nonneg : ∀ i j, 0 ≤ triAdj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [triAdj]
+
+/-- The support graph of the triangle is connected: vertices `1` and
+`2` are both adjacent to `0`. -/
+theorem tri_supportGraph_connected :
+    (supportGraph triAdj triAdj_isSymm).Connected := by
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  refine ⟨0, ?_⟩
+  intro v
+  fin_cases v
+  · exact ⟨SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 1)
+      ⟨by decide, by simp [triAdj]⟩ SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 2) (w := 2)
+      ⟨by decide, by simp [triAdj]⟩ SimpleGraph.Walk.nil⟩
+
+/-- **Potential value (triangle):** `f = ![1, 1/3, 2/3]` solves the
+unit-demand equation `L *ᵥ f = e 0 − e 1`, computed entrywise from the
+definitions. The center vertex `2` sits at the average potential
+`(1 + 1/3)/2 = 2/3`. -/
+theorem tri_potential_value_QA :
+    (laplacian triAdj).mulVec ![1, 1/3, 2/3]
+      = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [laplacian, degreeMatrix, deg, triAdj, Matrix.mulVec,
+      Matrix.dotProduct, Fin.sum_univ_three] <;>
+    norm_num
+
+/-- **Resistance value (triangle):** `R 0 1 = 2/3` — the unit edge in
+parallel with the two-edge path of resistance `2`, pinned by the
+potential witness. -/
+theorem tri_resistance_value_QA :
+    effectiveResistance triAdj 0 1 = 2 / 3 :=
+  effectiveResistance_eq triAdj triAdj_isSymm triAdj_nonneg
+    tri_supportGraph_connected
+    ⟨![1, 1/3, 2/3], tri_potential_value_QA, by norm_num [Matrix.cons_val']⟩
+
+/-- **The electrical current splits (triangle):** the potential
+`![1, 1/3, 2/3]` drives `2/3` across the direct edge and `1/3` across
+each path edge, and the dissipated energy is exactly `2/3` — computed
+from the raw `flowEnergy` and `electricalCurrent` definitions. On this
+network the minimizer is a genuinely split flow. -/
+theorem tri_current_energy_QA :
+    flowEnergy triAdj (electricalCurrent triAdj ![1, 1/3, 2/3])
+      = 2 / 3 := by
+  simp [flowEnergy, electricalCurrent, triAdj, Fin.sum_univ_three]
+  norm_num
+
+/-- **Attainment (triangle):** the current's energy is exactly the
+resistance it routes — the step-2 identity, instantiated on a network
+where the current splits. -/
+theorem tri_flowEnergy_eq_resistance_QA :
+    flowEnergy triAdj (electricalCurrent triAdj ![1, 1/3, 2/3])
+      = effectiveResistance triAdj 0 1 :=
+  flowEnergy_electricalCurrent_eq_effectiveResistance triAdj
+    triAdj_isSymm triAdj_nonneg tri_supportGraph_connected
+    tri_potential_value_QA
+
+/-- **Thomson attained at the current (edge):** the bound instantiated
+at the electrical current itself, with both sides pinned to `1` —
+`edge_effectiveResistance_eq_one_QA` and `edge_flowEnergy_value_QA`
+independently. -/
+theorem edge_thomson_attained_QA :
+    effectiveResistance edgeAdj 0 1
+      ≤ flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0])
+      ∧ effectiveResistance edgeAdj 0 1 = 1
+      ∧ flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0]) = 1 :=
+  ⟨effectiveResistance_le_flowEnergy edgeAdj edgeAdj_isSymm
+      edgeAdj_nonneg edge_supportGraph_connected edge_isUnitFlow_QA,
+    edge_effectiveResistance_eq_one_QA, edge_flowEnergy_value_QA⟩
+
+/-- The detour flow on the triangle: routes the whole unit around the
+two-edge path `0 → 2 → 1`, carrying nothing on the direct edge
+`0 — 1`. Entrywise definition for the same fixture-hygiene reason. -/
+def detourFlow : Matrix (Fin 3) (Fin 3) ℝ :=
+  Matrix.of fun i j =>
+    if (i = 0 ∧ j = 2) ∨ (i = 2 ∧ j = 1) then (1 : ℝ)
+    else if (i = 2 ∧ j = 0) ∨ (i = 1 ∧ j = 2) then (-1 : ℝ) else 0
+
+theorem detourFlow_antisymm_QA :
+    ∀ i j, detourFlow i j = -detourFlow j i := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [detourFlow]
+
+theorem detourFlow_isFlowOn_QA : IsFlowOn triAdj detourFlow :=
+  ⟨fun i j => by
+      fin_cases i <;> fin_cases j <;> simp [detourFlow],
+    fun i j h => by
+      fin_cases i <;> fin_cases j <;>
+        simp [triAdj, detourFlow] at h ⊢⟩
+
+/-- The detour has exactly the unit-demand divergence: `+1` at `0`,
+`-1` at `1`, conservation at `2` — computed from the raw definition. -/
+theorem detourFlow_divergence_QA :
+    flowDivergence detourFlow = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ) := by
+  funext i
+  fin_cases i <;> simp [flowDivergence, detourFlow, Fin.sum_univ_three]
+
+theorem detourFlow_isUnitFlow_QA : IsUnitFlow triAdj 0 1 detourFlow :=
+  ⟨detourFlow_isFlowOn_QA, detourFlow_divergence_QA⟩
+
+/-- **Detour energy:** the detour dissipates `2` — two unit resistors in
+series, the whole current through each — computed from the raw
+`flowEnergy` definition over all six nonzero ordered pairs. -/
+theorem detour_energy_two_QA : flowEnergy triAdj detourFlow = 2 := by
+  simp [flowEnergy, triAdj, detourFlow, Fin.sum_univ_three]
+  norm_num
+
+/-- **Thomson instantiated (triangle):** the theorem's bound at the
+detour competitor. -/
+theorem thomson_detour_QA :
+    effectiveResistance triAdj 0 1 ≤ flowEnergy triAdj detourFlow :=
+  effectiveResistance_le_flowEnergy triAdj triAdj_isSymm triAdj_nonneg
+    tri_supportGraph_connected detourFlow_isUnitFlow_QA
+
+/-- **The bound is strict at the detour:** `2/3 < 2` — the electrical
+current strictly beats the detour, so Thomson's inequality is not
+vacuous on a network with competing routes. -/
+theorem thomson_detour_strict_QA :
+    effectiveResistance triAdj 0 1 < flowEnergy triAdj detourFlow := by
+  rw [tri_resistance_value_QA, detour_energy_two_QA]
+  norm_num
+
+/-- **The difference flow's energy:** the detour minus the electrical
+current dissipates `4/3` — computed from the raw definitions
+independently of the superposition lemma. -/
+theorem detour_minus_current_energy_QA :
+    flowEnergy triAdj (detourFlow - electricalCurrent triAdj ![1, 1/3, 2/3])
+      = 4 / 3 := by
+  simp [flowEnergy, electricalCurrent, detourFlow, triAdj,
+    Matrix.sub_apply, Fin.sum_univ_three]
+  norm_num
+
+/-- The difference flow is a flow (both summands are), with zero
+divergence (both are unit flows of the same demand). -/
+theorem detour_minus_current_divergence_zero_QA :
+    flowDivergence (detourFlow - electricalCurrent triAdj ![1, 1/3, 2/3])
+      = 0 := by
+  rw [flowDivergence_sub, detourFlow_divergence_QA,
+    flowDivergence_electricalCurrent, tri_potential_value_QA, sub_self]
+
+/-- **The superposition decomposition:** the integration-by-parts lemma
+splits the detour's energy into the current's plus the difference's.
+All three values are pinned independently above (`2`, `2/3`, `4/3`), and
+the composed identity checks `2 = 2/3 + 4/3` — the decomposition
+consumes the lemma, the divergence computation, and the potential value,
+so an error in any breaks this witness. -/
+theorem thomson_split_decomposition_QA :
+    flowEnergy triAdj detourFlow = 2 / 3 + 4 / 3 := by
+  have h1 :=
+    flowEnergy_add_of_flowDivergence_eq_zero triAdj ![1, 1/3, 2/3]
+      (isFlowOn_sub triAdj detourFlow_isFlowOn_QA
+        (isFlowOn_electricalCurrent triAdj triAdj_isSymm _))
+      detour_minus_current_divergence_zero_QA
+  have hsum : electricalCurrent triAdj ![1, 1/3, 2/3]
+      + (detourFlow - electricalCurrent triAdj ![1, 1/3, 2/3])
+      = detourFlow := by
+    ext i j
+    simp only [Matrix.add_apply, Matrix.sub_apply]
+    ring
+  rw [hsum] at h1
+  rw [h1, tri_current_energy_QA, detour_minus_current_energy_QA]
 
 end SpectralGraphTheory.QA

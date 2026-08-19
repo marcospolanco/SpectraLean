@@ -1281,6 +1281,90 @@ statement-shape spike) or the decidable-certificates Step 0
 (convention decision + ℚ-kernel `decide` spike, both scoped in the
 proposal).
 
+**Active slice (run 1, 2026-08-19, IN PROGRESS): electrical-flow step
+3 — Thomson's principle.** Selected from `proposals/README.md`'s
+Active priority table (the electrical-flow High item, mid-program at
+its recorded next step). Scope per the proposal's one-step rule: the
+minimum-energy inequality over valid unit flows, stated as the
+universal `effectiveResistance A u v ≤ flowEnergy A θ` (no `sInf`
+packaging), plus QA (attainment at the electrical current; a strict
+competitor witness). Steps 4–5 are NOT started this run.
+
+**Active slice (run 1, 2026-08-19): electrical-flow step 3 —
+Thomson's principle — DELIVERED.** The Active priority table's top
+High item at its recorded next step; one-step rule held (steps 4–5 —
+Rayleigh monotonicity and the ICP example — NOT started). All proved,
+**no new axioms** (count stays 13).
+
+**Delivered in `GraphTheory.ElectricalFlow`:** the flow-space
+plumbing (`flowDivergence_sub` — divergence is linear;
+`isFlowOn_sub` — the flow space is linear); the **divergence-free
+superposition lemma**
+`flowEnergy_add_of_flowDivergence_eq_zero` (a zero-divergence flow
+perturbation of a current adds exactly its own energy — the discrete
+integration-by-parts step, split out as its own reusable interface per
+the proposal's suggestion); and the headline
+`effectiveResistance_le_flowEnergy` (**Thomson's principle**: every
+valid unit flow dissipates at least the resistance it routes — the
+electrical current is the energy minimizer). Route exactly as
+proposed: the competitor minus the unit-demand current is a flow with
+zero divergence (Kirchhoff bridge + the demand equation — load-bearing
+on the center's sign convention), the superposition lemma kills the
+cross term (Ohm's law reduces it to `∑ i j, (f i − f j) * d i j`;
+row sums vanish by zero divergence, column sums are the negated row
+sums by antisymmetry), `flowEnergy_nonneg` discards the remainder, and
+the step-2 identity evaluates the current's energy as the resistance.
+**Statement-shape deviation (recorded in the proposal):** the
+superposition lemma is stated with **no hypotheses on `A`** — not even
+the symmetry the proposal's sketch assumed; only the perturbation's
+flow properties enter. No `sInf` packaging, per the proposal's
+explicit instruction.
+
+**QA** `SpectralGraph/ElectricalFlow_QA.lean` (+18 declarations, 59 in
+file, 543 total): the new triangle `K₃` fixture (the smallest network
+with two parallel routes — unit flows non-unique) with the
+unit-demand potential `![1, 1/3, 2/3]`, resistance `2/3`, and the
+**split current** (`2/3` direct, `1/3` per path edge) whose energy
+attains `2/3` from the raw definitions; the **detour competitor** (a
+valid `IsUnitFlow` routing around the two-edge path, every conjunct
+computed, energy `2`) with Thomson instantiated as the *strict* bound
+`2/3 < 2` — the inequality is not vacuous on a network with competing
+routes; the superposition decomposition composed as `2 = 2/3 + 4/3`
+(all three energies computed independently of the lemma); and edge
+attainment (`1 ≤ 1` with both values independently pinned). Fixture
+note: the triangle and detour matrices use the entrywise-`if` pattern
+(the matrix notation's zero-function normalization trap, already
+recorded in step 2).
+
+**Verification:** `lake env lean` on both changed modules — zero
+errors, zero warnings; `lake build` of both targets ✔; full `lake
+build` ✔ (2180 targets); all twenty-eight QA modules batch-elaborated
+with zero errors; `lint_axioms` (13 covered), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (543/13/0) and
+idempotent. Radar re-scored per protocol (the recorded reservation —
+"the axis is reserved to rise with Thomson/Rayleigh" — fired):
+subject axis 6 **3.0 → 3.5** with the milestone recorded in the
+re-score log; QA-axis count synced 543/28 with the step-3 QA kind
+(triangular variational witnesses) described; proved-depth text
+extended. Umbrella unchanged (module already in it); SGT index map
+(4 new `ElectricalFlow` rows, section re-titled), README snapshot
+(axis-6 cell 3.5, 543 QA), scoreboard verification rows + milestone
+bullet, proposal step-3 delivery record + statement-shape deviation,
+and `proposals/README.md` progress note updated.
+
+**Next milestone (open):** proposal step 4 — **Rayleigh monotonicity
+in conductance form** (`A ≤ B` entrywise ⇒ `effectiveResistance B u v
+≤ effectiveResistance A u v`, both graphs connected symmetric
+nonnegative; route per the proposal: the `A`-electrical unit flow as
+competitor on `B`, its `B`-energy at most its `A`-energy since every
+denominator increased, Thomson on `B` closes; the orientation is
+binding — conductances, not resistances — and QA plan item 2, the
+capacity increase `1 → 1/2` fixture, belongs there); then step 5 (the
+ICP capacity-reinforcement example). Or the remaining High items:
+Foster Phase A (pseudoinverse-free eigenbasis route, needs its own
+statement-shape spike) or the decidable-certificates Step 0 (convention
+decision + ℚ-kernel `decide` spike, both scoped in the proposal).
+
 ## Ready queue
 
 1. ~~Proposal step 6 — the one-sided Dirichlet bound~~ — delivered
@@ -1308,6 +1392,36 @@ proposal).
    combinations, centering, sums) only when a consumer names them.
 
 ## Last verified state
+
+- 2026-08-19 (electrical-flow step 3: Thomson's principle, no axiom
+  change): `lake env lean` on `GraphTheory.ElectricalFlow` and on
+  `QA.SpectralGraph.ElectricalFlow_QA` — both zero errors, zero
+  warnings (five no-`Fintype`/`DecidableEq`-needed lemmas silenced with
+  `omit` clauses); `lake build
+  Scaffold.Mathlib.GraphTheory.ElectricalFlow` and `lake build
+  Scaffold.QA.SpectralGraph.ElectricalFlow_QA` ✔; full `lake build` ✔
+  (2180 targets); all twenty-eight QA modules elaborated directly in
+  one batch (zero errors — the only outputs are the documented
+  pre-existing linter notes in untouched modules); 543 QA declarations
+  (+18 in `ElectricalFlow_QA`, 59 in file), no `sorry`/`admit` anywhere
+  under `Scaffold/` (textual matches are prose in comments/docstrings);
+  13 explicit cited axioms (unchanged — pure hard crust; Thomson is
+  proved from the step-1 Kirchhoff bridge, flow-space linearity, the
+  superposition lemma, `flowEnergy_nonneg`, and the step-2 energy
+  identity — an error in any would break the proof rather than pass
+  beside it); all hygiene scripts pass (`lint_axioms` 13 covered,
+  `check_citations`, `check_markdown_links`); scoreboard regenerated
+  (543/13/0) and idempotent after the prose edits; radar re-scored per
+  protocol (subject axis 6: 3.0 → 3.5 — the recorded reservation for
+  Thomson fired — with the milestone in the re-score log; QA-axis count
+  synced 543/28 with the step-3 QA kind; proved-depth text extended;
+  weakest-axes paragraph updated), README snapshot (axis-6 cell 3.5,
+  543 QA — a surgical count/score sync inside the operator's
+  uncommitted rewrite, which is otherwise preserved untouched), SGT
+  index map (4 new `ElectricalFlow` rows), proposal step-3 delivery
+  record + statement-shape deviation (superposition lemma stated with
+  no hypotheses on `A`), and `proposals/README.md` progress note
+  updated. Nothing committed.
 
 - 2026-08-19 (electrical-flow step 2: flow energy and the energy
   agreement, no axiom change): `lake env lean` on

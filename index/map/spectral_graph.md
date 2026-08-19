@@ -164,18 +164,18 @@ value exists — the fallback's firing is QA-witnessed, not hidden).
 | `laplacian_cauchy_schwarz` | **semidefinite Cauchy–Schwarz:** `(f ⬝ᵥ L g)² ≤ quadForm L f * quadForm L g`, no connectivity hypothesis (proposal step 6, 2026-08-18) |
 | `effectiveResistance_ge_sq_div_quadForm` | **one-sided Dirichlet bound:** `(f u − f v)² / quadForm L f ≤ R u v` for any test potential of positive energy (proposal step 6, 2026-08-18) |
 
-### `Scaffold.Mathlib.GraphTheory.ElectricalFlow` (electrical flows, Kirchhoff conservation, flow energy, Thomson's principle)
+### `Scaffold.Mathlib.GraphTheory.ElectricalFlow` (electrical flows, Kirchhoff conservation, flow energy, Thomson's principle, Rayleigh monotonicity)
 
 The routing object of proposal `electrical-flow-routing.md` (High,
-2026-08-18), steps 0–3 delivered 2026-08-19. Step 0 decision recorded
+2026-08-18), steps 0–4 delivered 2026-08-19. Step 0 decision recorded
 in the proposal before any Lean: matrix representation on ordered
 pairs (`EdgeFlow V = Matrix V V ℝ`; Mathlib re-surveyed — no
 flow/circulation/graph-divergence API in the pin, `SimpleGraph.Dart`
 carries none), weights are **conductances**, zero-conductance support
 is a named `IsFlowOn` conjunct, and the ordered-pair `1/2` factor
 lives in `flowEnergy` (delivered, step 2). All proved, no axioms.
-Consumer to come: Rayleigh monotonicity (step 4) builds on Thomson's
-principle and the flow interface.
+Remaining program step: the ICP capacity-reinforcement example
+(step 5).
 
 | Declaration | Content |
 |-------------|---------|
@@ -183,7 +183,7 @@ principle and the flow interface.
 | `electricalCurrent` | Ohm's law: `A i j * (f i − f j)` — conductance times voltage drop |
 | `flowDivergence` | net outflow: `∑ j, θ i j` |
 | `IsFlowOn` | valid flow: antisymmetric **and** supported (`A i j = 0 → θ i j = 0` — the zero-conductance trap guard; QA-witnessed load-bearing at the energy level) |
-| `IsUnitFlow` | `IsFlowOn` + divergence exactly the unit demand `e u − e v` |
+| `IsUnitFlow` | `IsFlowOn` + divergence exactly the unit demand `e u − eᵥ` |
 | `electricalCurrent_antisymm` | current negates under pair reversal (symmetric weights; QA-witnessed load-bearing) |
 | `electricalCurrent_eq_zero_of_weight_eq_zero` | no conductance, no current (support, unconditional) |
 | `flowDivergence_electricalCurrent` | **Kirchhoff bridge**: `flowDivergence (electricalCurrent A f) = laplacian A *ᵥ f` (consumes the center's `laplacian_mulVec_apply` sign convention) |
@@ -197,6 +197,9 @@ principle and the flow interface.
 | `isFlowOn_sub` | the flow space is linear: difference of two flows on `A` is a flow on `A` (step 3) |
 | `flowEnergy_add_of_flowDivergence_eq_zero` | **discrete integration by parts / superposition** (step 3): a divergence-free flow perturbation of a current adds exactly its own energy — **no hypotheses on `A`**, only the perturbation's flow properties (QA-decomposed on the triangle: `2 = 2/3 + 4/3`) |
 | `effectiveResistance_le_flowEnergy` | **Thomson's principle (step-3 headline)**: `R u v ≤ flowEnergy A θ` for every valid unit flow — the electrical current is the energy minimizer; QA witnesses attainment (split current `2/3` on the triangle) and a strict competitor (detour `2`, `2/3 < 2`) |
+| `isFlowOn_of_le` | **flow-space growth (step 4)**: a flow supported on `A` is a flow on every entrywise larger `B ≥ A ≥ 0` (support load-bearing: a `B`-zero entry squeezes the nonnegative `A` entry to zero) — the competitor-transfer interface |
+| `flowEnergy_le_of_le` | **raising conductances lowers dissipated energy (step 4)**: `flowEnergy B θ ≤ flowEnergy A θ` for `0 ≤ A ≤ B` entrywise, termwise (`θ²/B ≤ θ²/A` on nonzero branches); support again load-bearing on the `A i j = 0 < B i j` branch |
+| `effectiveResistance_le_of_le` | **Rayleigh monotonicity in conductance form (step-4 headline)**: `A ≤ B` entrywise ⇒ `effectiveResistance B u v ≤ effectiveResistance A u v` on connected symmetric nonnegative networks — the `A`-current as competitor on `B`, Thomson on `B`, the energy comparison, and the step-2 identity; QA certifies `1 → 1/2` (capacity increase) and `2/3 → 2/5` (partial increase), strict, with the orientation guard refuting the reverse direction |
 
 
 ### `Scaffold.Mathlib.GraphTheory.Cheeger`

@@ -24,7 +24,7 @@ As of August 19, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 13 |
-| QA theorems/lemmas | 543, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 563, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is the Cheeger *hard* direction at the SGT center;
 Weyl and Davis–Kahan in the perturbation bridge; the scalar and matrix
@@ -142,7 +142,7 @@ example, and the [SGT Radar](docs/7_SGT_RADAR.md) for coverage scores.
 
 ### SGT coverage snapshot
 
-Last assessed: August 18, 2026. Scores reflect usable, verified coverage on a
+Last assessed: August 19, 2026. Scores reflect usable, verified coverage on a
 0–5 scale; see the [full radar and evidence](docs/7_SGT_RADAR.md).
 
 | Area | Coverage |
@@ -152,7 +152,7 @@ Last assessed: August 18, 2026. Scores reflect usable, verified coverage on a
 | Variational and functional methods | 4.0 / 5 |
 | Cuts, expansion, and clustering | 3.5 / 5 |
 | Random walks and diffusion | 2.5 / 5 |
-| Combinatorial and electrical structure | 3.5 / 5 |
+| Combinatorial and electrical structure | 4.0 / 5 |
 | Perturbation, randomness, and algorithms | 3.0 / 5 |
 | Adjacent systems interfaces | 1.0 / 5 |
 

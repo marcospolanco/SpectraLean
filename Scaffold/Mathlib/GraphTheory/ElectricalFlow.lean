@@ -13,8 +13,10 @@
   principle — the electrical current minimizes energy among valid unit
   flows, `effectiveResistance A u v ≤ flowEnergy A θ`, via the
   divergence-free superposition lemma (discrete integration by parts).
-  Rayleigh monotonicity is step 4 of the proposal and is deliberately
-  not attempted here.
+  Step 4: Rayleigh monotonicity in conductance form — entrywise
+  conductance increase cannot increase effective resistance,
+  `A ≤ B ⇒ R_B ≤ R_A`. Step 5 (the ICP capacity-reinforcement example)
+  is deliberately not attempted here.
 
   Representation decision (proposal step 0, recorded in the proposal
   on 2026-08-19 before this module was written): flows live on ordered
@@ -418,6 +420,110 @@ theorem effectiveResistance_le_flowEnergy (A : WAdj (V := V))
   have hnn := flowEnergy_nonneg A hnonneg (θ - electricalCurrent A f)
   rw [← hsum, hkey,
     flowEnergy_electricalCurrent_eq_effectiveResistance A hA hnonneg hconn hf]
+  linarith
+
+/-!
+## Rayleigh monotonicity in conductance form (proposal
+`electrical-flow-routing.md`, step 4)
+-/
+
+omit [Fintype V] [DecidableEq V] in
+/-- **The flow space grows with conductances:** a flow supported on `A`
+(antisymmetric, no current on zero-conductance ordered pairs) is also a
+flow on every entrywise larger network `B ≥ A` with `A ≥ 0`.
+Antisymmetry is a property of the flow alone; the load-bearing step is
+support — a zero entry of `B` above a nonnegative `A` forces that entry
+of `A` to vanish too, so the flow carries nothing there. This is the
+competitor-transfer interface of Rayleigh monotonicity: the `A`-electrical
+unit current is a valid flow on `B`. -/
+theorem isFlowOn_of_le {A B : WAdj (V := V)} {θ : EdgeFlow V}
+    (hθ : IsFlowOn A θ) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (hle : ∀ i j, A i j ≤ B i j) : IsFlowOn B θ := by
+  refine ⟨hθ.1, fun i j hB => ?_⟩
+  have hBij : A i j ≤ B i j := hle i j
+  rw [hB] at hBij
+  exact hθ.2 i j (le_antisymm hBij (hnonneg i j))
+
+omit [DecidableEq V] in
+/-- **Raising conductances lowers dissipated energy** (the comparison
+half of Rayleigh monotonicity): for a flow supported on `A` and networks
+`0 ≤ A ≤ B` entrywise, `flowEnergy B θ ≤ flowEnergy A θ`. Termwise: on a
+`B`-zero branch both sides vanish (the `A` entry is squeezed to `0`, and
+support kills the flow there — the second place the support conjunct is
+load-bearing, now on the `A i j = 0 < B i j` branch, where the `B`-term
+`θ i j ^ 2 / B i j` would otherwise exceed the `A`-zero branch); on a
+nonzero branch `θ ^ 2 / B ≤ θ ^ 2 / A` because `θ ^ 2 ≥ 0` and
+`0 < A ≤ B` — every denominator increased, exactly as the proposal's
+proof sketch states. -/
+theorem flowEnergy_le_of_le {A B : WAdj (V := V)} {θ : EdgeFlow V}
+    (hθ : IsFlowOn A θ) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (hle : ∀ i j, A i j ≤ B i j) : flowEnergy B θ ≤ flowEnergy A θ := by
+  have hterm : ∀ i j : V,
+      (if B i j = 0 then (0 : ℝ) else θ i j ^ 2 / B i j)
+        ≤ (if A i j = 0 then (0 : ℝ) else θ i j ^ 2 / A i j) := by
+    intro i j
+    have hBnn : 0 ≤ B i j := le_trans (hnonneg i j) (hle i j)
+    by_cases hB : B i j = 0
+    · -- `B i j = 0` above nonnegative `A` squeezes `A i j` to `0` as
+      -- well, so both branches read `0 ≤ 0`.
+      have hBij : A i j ≤ B i j := hle i j
+      rw [hB] at hBij
+      have hA0 : A i j = 0 := le_antisymm hBij (hnonneg i j)
+      rw [if_pos hB, if_pos hA0]
+    · have hBpos : 0 < B i j := lt_of_le_of_ne hBnn (Ne.symm hB)
+      by_cases hA : A i j = 0
+      · rw [if_neg hB, if_pos hA, hθ.2 i j hA]
+        simp
+      · have hApos : 0 < A i j := lt_of_le_of_ne (hnonneg i j) (Ne.symm hA)
+        rw [if_neg hB, if_neg hA, div_le_div_iff₀ hBpos hApos]
+        exact mul_le_mul_of_nonneg_left (hle i j) (sq_nonneg (θ i j))
+  simp only [flowEnergy]
+  exact (div_le_div_iff_of_pos_right (by norm_num : (0 : ℝ) < 2)).mpr
+    (Finset.sum_le_sum fun i _ =>
+      Finset.sum_le_sum fun j _ => hterm i j)
+
+/-- **Rayleigh monotonicity in conductance form (proposal step 4,
+headline):** on connected graphs with symmetric nonnegative weights,
+raising conductances entrywise cannot increase effective resistance,
+`A ≤ B ⇒ effectiveResistance B u v ≤ effectiveResistance A u v`.
+Weights are **conductances**, so the inequality runs this way —
+resistance is the inverse quantity, and reversing the inequality is a
+statement bug (proposal calibration; QA refutes the reverse direction
+numerically on the capacity-increase fixture).
+
+Proof as proposed: solve the unit demand on `A` (step-4 crust
+solvability); its electrical current `ι` is a unit flow on `B` —
+antisymmetric by `A`'s symmetry, supported on `B` by flow-space growth,
+of the unit divergence by the Kirchhoff bridge — so Thomson's principle
+(step 3) on `B` bounds `R_B ≤ flowEnergy B ι`; the energy comparison
+gives `flowEnergy B ι ≤ flowEnergy A ι`; and the step-2 identity
+evaluates `flowEnergy A ι = R_A`. Load-bearing on the whole delivered
+chain: solvability, the Kirchhoff bridge, support, Thomson, and the
+energy identity — an error in any breaks this proof.
+
+Connectivity of both graphs is required initially, per the proposal; the
+convenience adapter deriving `supportGraph B`'s connectivity from `A`'s
+is deliberately not attempted here (the proposal keeps it optional and
+non-blocking). -/
+theorem effectiveResistance_le_of_le (A B : WAdj (V := V))
+    (hA : A.IsSymm) (hnonnegA : ∀ i j, 0 ≤ A i j)
+    (hconnA : (supportGraph A hA).Connected)
+    (hB : B.IsSymm) (hnonnegB : ∀ i j, 0 ≤ B i j)
+    (hconnB : (supportGraph B hB).Connected)
+    (hle : ∀ i j, A i j ≤ B i j) (u v : V) :
+    effectiveResistance B u v ≤ effectiveResistance A u v := by
+  obtain ⟨f, hf⟩ :=
+    exists_laplacian_mulVec_eq_single_sub_single A hA hnonnegA hconnA u v
+  have hι : IsUnitFlow B u v (electricalCurrent A f) :=
+    ⟨isFlowOn_of_le (isFlowOn_electricalCurrent A hA f) hnonnegA hle, by
+      rw [flowDivergence_electricalCurrent A f, hf]⟩
+  have hthomson :=
+    effectiveResistance_le_flowEnergy B hB hnonnegB hconnB hι
+  have henergy :=
+    flowEnergy_le_of_le (isFlowOn_electricalCurrent A hA f) hnonnegA hle
+  have hident :=
+    flowEnergy_electricalCurrent_eq_effectiveResistance A hA hnonnegA
+      hconnA hf
   linarith
 
 end SpectralGraphTheory

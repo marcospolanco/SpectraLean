@@ -6,6 +6,83 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Electrical-flow routing, step 4 — Rayleigh monotonicity in conductance
+form (run 1, 2026-08-19): DELIVERED.** The Active priority table's top
+High item `proposals/electrical-flow-routing.md`, at its recorded next
+step: entrywise `A ≤ B` ⇒ `effectiveResistance B u v ≤
+effectiveResistance A u v` for connected symmetric nonnegative networks,
+zero new axioms (count stays 13). The first *network-comparison* theorem
+in the center (it relates two graphs, not two objects of one graph) and
+the proposal's named ICP-facing fact — adding capacity cannot worsen the
+certified energy cost of electrical routing.
+
+**Delivered** in `GraphTheory.ElectricalFlow` (3 new declarations, all
+proved): `isFlowOn_of_le` (flow-space growth — a flow supported on `A`
+is a flow on every entrywise larger `B ≥ A ≥ 0`; support load-bearing: a
+`B`-zero entry above a nonnegative `A` entry squeezes the latter to
+zero), `flowEnergy_le_of_le` (raising conductances lowers dissipated
+energy, termwise `θ²/B ≤ θ²/A`; support load-bearing a second time on
+the `A i j = 0 < B i j` branch — the zero-conductance trap now guarding
+the comparison), and the headline `effectiveResistance_le_of_le` —
+exactly the proposed route: the `A`-unit-demand potential's current is a
+unit flow *on `B`* (growth + Kirchhoff bridge), Thomson (step 3) on `B`
+bounds `R_B` by its `B`-energy, the comparison bounds that by its
+`A`-energy, and the step-2 identity evaluates it as `R_A`. Load-bearing
+on solvability, the Kirchhoff bridge, support, Thomson, and the energy
+identity — an error in any breaks the proof. Connectivity of both graphs
+hypothesized per the proposal's initial-shape instruction; the optional
+`supportGraph B`-from-`A` adapter deliberately not attempted (kept
+non-blocking; noted for step 5 if its reinforcement shape wants a
+one-hypothesis form).
+
+**QA** `SpectralGraph/ElectricalFlow_QA.lean` (+20 declarations, 79 in
+file): the proposal's QA item 2 — conductance `1 → 2` on the unit edge,
+resistance certified to decrease `1 → 1/2` from an independent potential
+witness, monotonicity instantiated, decrease certified strict, and the
+**orientation guard** (reverse inequality `1 ≤ 1/2` refuted numerically —
+weights are conductances; a resistance-direction statement would be false
+here, exactly the statement bug the proposal's calibration names); the
+competitor transfer instantiated on computed objects (the `edgeAdj`-current
+is a unit flow on `edge2Adj`; cross-network energy `1/2 ≤ 1` computed from
+the raw definitions on both sides); and a partial increase on the triangle
+(one edge's conductance doubled: `2/3 → 2/5` strict, new value pinned by
+the independent potential `![2/5, 0, 1/5]`).
+
+**Verification:** `lake env lean` on both changed modules — zero errors,
+zero warnings; `lake build` of both targets ✔; all twenty-eight QA
+modules batch-elaborated, zero errors (only the documented pre-existing
+linter notes in untouched modules); full `lake build` ✔ (2180 targets);
+`lint_axioms` (13), `check_citations`, `check_markdown_links` pass;
+scoreboard regeneration idempotent (563/13/0). Environment: the pruned
+Mathlib-oleans state recurred at run start; the recorded interpreted
+cache fetch restored all 5685 before the checks.
+
+**Records updated:** module/QA docstrings, scoreboard (563/13/0,
+verification rows, step-4 milestone bullet), radar (subject axis 6
+re-scored **3.5 → 4.0** per the step-3 recorded reservation — Thomson
+and Rayleigh have both now landed; QA count 563/28 with the step-4 kind;
+proved-depth text; weakest-axes paragraph), README (counts + axis-6 cell
+4.0 + last-assessed date), SGT index map (3 new rows; section header to
+steps 0–4), backlog item 7 (the stale "deferred Rayleigh" note corrected:
+the conductance-form theorem is delivered via the flow route; only the
+Dirichlet-principle *route* remains deferred), proposal step-4 delivery
+record (+ the adapter note), and `proposals/README.md` progress note.
+
+**Next milestone (open):** proposal step 5 — the ICP capacity-reinforcement
+example (`effectiveResistance (increaseConductance A i j δ) u v ≤
+effectiveResistance A u v` on a small `SimpleGraph.toWAdj` or weighted
+fixture, short enough for release documentation; a packaging of step 4,
+not new mathematics — the proposal's final step, after which the
+electrical-flow program is complete). Or the other High items: Foster
+Phase A (needs its pseudoinverse-free statement-shape spike) or
+decidable-certificates Step 0 (convention decision + ℚ-`decide` spike,
+both scoped in its proposal). The operator's concurrently added Medium
+rows (Reversibility Phase A, Relative Entropy) and the icebox additions
+are indexed by the operator in the priority table and preserved
+untouched.
+
+## Superseded milestones (historical)
+
 **Citation hygiene and broad-SGT reorientation.** The projector algebra is
 proved in the center. The persistence package is retained as an existing
 compatibility/example result, not a roadmap goal. The citation-hygiene

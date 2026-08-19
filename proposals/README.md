@@ -67,12 +67,22 @@ the divergence-free superposition lemma
 parts; stated with no hypotheses on `A`), flow-space linearity, and
 `flowEnergy_nonneg`; QA witnesses attainment at the split current on the
 triangle (`2/3`), a strict competitor (the detour flow: `2/3 < 2`), and
-the decomposition `2 = 2/3 + 4/3`. The next run's milestone is step 4
-(Rayleigh monotonicity in conductance form — use the `A`-electrical unit
-flow as a competitor on `B`; QA plan item 2, the capacity increase
-`1 → 1/2`, belongs there); step 5 (the ICP example) remains. Fiedler
-Phase B retains its named operator decision, and the mixing-time program
-remains the unblocked Medium fallback.
+the decomposition `2 = 2/3 + 4/3`. **Step 4 (Rayleigh monotonicity in
+conductance form) was delivered 2026-08-19 in a fourth run:**
+`effectiveResistance_le_of_le` — entrywise `A ≤ B` on connected symmetric
+nonnegative networks gives `R_B ≤ R_A` — via the flow-space-growth and
+energy-comparison interfaces (`isFlowOn_of_le`, `flowEnergy_le_of_le`,
+support load-bearing in both), Thomson on `B` at the transferred
+`A`-current, and the step-2 energy identity; QA delivers the proposal's
+capacity-increase item (`1 → 1/2`, strict, with the orientation guard
+refuting the reverse direction) plus a partial increase on the triangle
+(`2/3 → 2/5`); zero axioms. The next run's milestone is step 5 (the ICP
+capacity-reinforcement example — packaging the monotonicity theorem as
+`effectiveResistance (increaseConductance A i j δ) u v ≤
+effectiveResistance A u v`; the optional connectivity adapter noted in the
+step-4 record belongs there if that shape wants it). Fiedler Phase B
+retains its named operator decision, and the mixing-time program remains
+the unblocked Medium fallback.
 
 ## Delivered
 

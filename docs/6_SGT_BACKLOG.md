@@ -213,10 +213,15 @@ inner-product one). QA: attainment at both harmonic potentials
 potential, the reverse inequality numerically refuted, and the
 `0 <` energy guard witnessed on the disconnected fixture. **Remaining
 in this family:** the cheap definiteness residual `R u v = 0 ↔ u = v`
-(reachable pair; natural completion of nonnegativity) and, at proposal
-level, the deferred full Rayleigh monotonicity (needs the
-attained-supremum Dirichlet principle) — re-admission requires its own
-dependency path per the proposal's deferral record.
+(reachable pair; natural completion of nonnegativity). **Update
+(2026-08-19):** the conductance-form Rayleigh monotonicity below is no
+longer deferred — `effectiveResistance_le_of_le` (proposal
+`electrical-flow-routing.md` step 4, `GraphTheory.ElectricalFlow`)
+delivers `A ≤ B ⇒ R_B ≤ R_A` through the *flow* route (Thomson's
+principle at the transferred `A`-current), which never needed the
+attained-supremum Dirichlet principle; what remains deferred at
+proposal level is only the Dirichlet-principle *route* (the variational
+upper bound the crust keeps out of scope).
 
 ## Standing decisions
 

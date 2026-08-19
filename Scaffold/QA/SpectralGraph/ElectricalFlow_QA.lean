@@ -7,11 +7,13 @@
   `proposals/electrical-flow-routing.md`. Step 1 (the electrical
   current, divergence, flow predicates, and the Kirchhoff bridge),
   step 2 (flow energy: the agreement with the Dirichlet energy and the
-  effective resistance it routes), and step 3 (Thomson's principle:
+  effective resistance it routes), step 3 (Thomson's principle:
   attainment at the current, a strict competitor, and the superposition
-  decomposition on the triangle).
+  decomposition on the triangle), and step 4 (Rayleigh monotonicity in
+  conductance form: the capacity-increase fixture and the orientation
+  guard).
 
-  Witness plan (proposal QA items 1, 3, 4, 5, 6):
+  Witness plan (proposal QA items 1, 2, 3, 4, 5, 6):
 
   - **Single edge** (`K₂`): the current matrix, its divergence, and
     the unit-flow instantiation (step 1); the flow energy computed from
@@ -42,6 +44,25 @@
     would make Thomson's principle (step 3) assert `1 ≤ 0` here. The
     step-1 phantom on the edgeless network gets its deferred energy
     pinning (`0`) in the same section.
+
+  Step 4 witnesses (the proposal's QA item 2 plus its orientation
+  calibration):
+
+  - **Capacity increase (edge):** the unit edge `edgeAdj` against the
+    conductance-`2` edge `edge2Adj` — resistance certified to decrease
+    `1 → 1/2`, Rayleigh monotonicity instantiated, the decrease
+    certified *strict*, and the **orientation guard**: the reverse
+    inequality `1 ≤ 1/2` refuted numerically (weights are conductances;
+    a resistance-direction statement would be false here).
+  - **Competitor transfer (edge):** the `edgeAdj`-electrical current is
+    a unit flow on `edge2Adj` (flow-space growth + Kirchhoff), and its
+    `edge2Adj`-energy computes to `1/2 ≤ 1` = its `edgeAdj`-energy —
+    the comparison half instantiated at computed values.
+  - **Partial increase (triangle):** doubling one edge of `K₃`
+    (conductance `2` on `0 — 1`, all else equal) strictly decreases the
+    resistance `2/3 → 2/5` — the theorem instantiated at a network
+    where `A < B` on exactly one undirected edge, with the new
+    resistance computed from an independent potential witness.
 
   All proofs are real Lean proofs (no `sorry`/`admit`). These are
   theorems, not axioms; QA checks the interfaces where the arithmetic
@@ -714,5 +735,206 @@ theorem thomson_split_decomposition_QA :
     ring
   rw [hsum] at h1
   rw [h1, tri_current_energy_QA, detour_minus_current_energy_QA]
+
+/-!
+## Rayleigh monotonicity (proposal step 4): capacity increase,
+## competitor transfer, and the orientation guard
+-/
+
+/-- The conductance-`2` edge: the capacity-increase fixture of the
+proposal's QA item 2 — `edgeAdj` with its single conductance doubled. -/
+def edge2Adj : Matrix (Fin 2) (Fin 2) ℝ :=
+  Matrix.of !![0, 2; 2, 0]
+
+theorem edge2Adj_isSymm : edge2Adj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [edge2Adj]
+
+theorem edge2Adj_nonneg : ∀ i j, 0 ≤ edge2Adj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [edge2Adj]
+
+/-- Entrywise `edgeAdj ≤ edge2Adj`: one conductance raised, none
+lowered. -/
+theorem edge_le_edge2Adj : ∀ i j, edgeAdj i j ≤ edge2Adj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [edgeAdj, edge2Adj]
+
+/-- The conductance-`2` edge is connected. -/
+theorem edge2_supportGraph_connected :
+    (supportGraph edge2Adj edge2Adj_isSymm).Connected := by
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  refine ⟨0, ?_⟩
+  intro v
+  fin_cases v
+  · exact ⟨SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 1)
+      (supportGraph_adj.2 ⟨by decide, by simp [edge2Adj]⟩)
+      SimpleGraph.Walk.nil⟩
+
+/-- **Potential value (conductance-`2` edge):** `f = ![1/2, 0]` solves
+the unit-demand equation — the voltage drop halves when the conductance
+doubles. Computed entrywise from the definitions. -/
+theorem edge2_potential_value_QA :
+    (laplacian edge2Adj).mulVec ![1/2, 0]
+      = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [laplacian, degreeMatrix, deg, edge2Adj, Matrix.mulVec,
+      Matrix.dotProduct, Fin.sum_univ_two]
+
+/-- **Resistance value (conductance-`2` edge):** `R 0 1 = 1/2` — the
+capacity increase `1 → 2` halves the resistance, pinned by the potential
+witness (voltage drop `1/2 − 0`). -/
+theorem edge2_resistance_value_QA :
+    effectiveResistance edge2Adj 0 1 = 1 / 2 :=
+  effectiveResistance_eq edge2Adj edge2Adj_isSymm edge2Adj_nonneg
+    edge2_supportGraph_connected
+    ⟨![1/2, 0], edge2_potential_value_QA, by norm_num [Matrix.cons_val']⟩
+
+/-- **Rayleigh monotonicity instantiated (QA item 2):** doubling the
+only conductance cannot increase the resistance. -/
+theorem rayleigh_edge_QA :
+    effectiveResistance edge2Adj 0 1 ≤ effectiveResistance edgeAdj 0 1 :=
+  effectiveResistance_le_of_le edgeAdj edge2Adj edgeAdj_isSymm
+    edgeAdj_nonneg edge_supportGraph_connected edge2Adj_isSymm
+    edge2Adj_nonneg edge2_supportGraph_connected edge_le_edge2Adj 0 1
+
+/-- **The decrease is strict and certified:** `1/2 < 1`, from the two
+independently pinned resistance values. -/
+theorem rayleigh_edge_strict_QA :
+    effectiveResistance edge2Adj 0 1 < effectiveResistance edgeAdj 0 1 := by
+  rw [edge2_resistance_value_QA, edge_effectiveResistance_eq_one_QA]
+  norm_num
+
+/-- **Orientation guard (proposal calibration):** the *reverse*
+inequality is false on this fixture — `1 ≤ 1/2` fails numerically.
+Weights are conductances, so `R_B ≤ R_A` is the only direction that can
+hold; a resistance-direction restatement would be a statement bug, and
+this witness would catch it. -/
+theorem rayleigh_orientation_guard_QA :
+    ¬ (effectiveResistance edgeAdj 0 1
+      ≤ effectiveResistance edge2Adj 0 1) := by
+  rw [edge_effectiveResistance_eq_one_QA, edge2_resistance_value_QA]
+  norm_num
+
+/-- **Competitor transfer:** the `edgeAdj`-electrical current (the unit
+flow computed in `edge_current_matrix_QA`) is a valid unit flow on the
+doubled network — flow-space growth supplies support, the Kirchhoff
+bridge the divergence. This is the interface the headline proof routes
+through, instantiated on computed objects. -/
+theorem edge_current_isUnitFlow_on_edge2_QA :
+    IsUnitFlow edge2Adj 0 1 (electricalCurrent edgeAdj ![1, 0]) :=
+  ⟨isFlowOn_of_le (isFlowOn_electricalCurrent edgeAdj edgeAdj_isSymm _)
+      edgeAdj_nonneg edge_le_edge2Adj, by
+    rw [flowDivergence_electricalCurrent, edge_potential_value_QA]⟩
+
+/-- **Cross-network energy value:** the `edgeAdj`-current dissipates
+`1/2` on the doubled network — computed from the raw `flowEnergy`
+definition (current `1` across conductance `2`, both ordered pairs,
+halved). -/
+theorem edge2_crossEnergy_value_QA :
+    flowEnergy edge2Adj (electricalCurrent edgeAdj ![1, 0]) = 1 / 2 := by
+  simp [flowEnergy, electricalCurrent, edgeAdj, edge2Adj, Fin.sum_univ_two]
+
+/-- **The comparison half instantiated:** `1/2 ≤ 1` — the transferred
+competitor's energy on `B` is at most its energy on `A`, with both
+sides independently computed (`edge_flowEnergy_value_QA` pins the
+`A`-side at `1`). -/
+theorem edge_crossEnergy_le_QA :
+    flowEnergy edge2Adj (electricalCurrent edgeAdj ![1, 0])
+      ≤ flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0])
+      ∧ flowEnergy edge2Adj (electricalCurrent edgeAdj ![1, 0]) = 1 / 2
+      ∧ flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0]) = 1 :=
+  ⟨flowEnergy_le_of_le
+      (isFlowOn_electricalCurrent edgeAdj edgeAdj_isSymm _)
+      edgeAdj_nonneg edge_le_edge2Adj,
+    edge2_crossEnergy_value_QA, edge_flowEnergy_value_QA⟩
+
+/-!
+### Partial increase: doubling one edge of the triangle
+-/
+
+/-- The triangle with the direct edge `0 — 1` doubled: conductance `2`
+there, unit conductances elsewhere. `triAdj ≤ triDoubledAdj` entrywise
+with a strict increase on exactly one undirected edge — the partial
+capacity reinforcement. Entrywise definition (fixture-hygiene pattern). -/
+def triDoubledAdj : Matrix (Fin 3) (Fin 3) ℝ :=
+  Matrix.of fun i j =>
+    if (i = 0 ∧ j = 1) ∨ (i = 1 ∧ j = 0) then (2 : ℝ)
+    else if i = j then 0 else 1
+
+theorem triDoubledAdj_isSymm : triDoubledAdj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [triDoubledAdj]
+
+theorem triDoubledAdj_nonneg : ∀ i j, 0 ≤ triDoubledAdj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [triDoubledAdj]
+
+/-- One edge raised, none lowered: `triAdj ≤ triDoubledAdj` entrywise. -/
+theorem tri_le_triDoubledAdj : ∀ i j, triAdj i j ≤ triDoubledAdj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [triAdj, triDoubledAdj]
+
+/-- The doubled triangle stays connected. -/
+theorem triDoubled_supportGraph_connected :
+    (supportGraph triDoubledAdj triDoubledAdj_isSymm).Connected := by
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  refine ⟨0, ?_⟩
+  intro v
+  fin_cases v
+  · exact ⟨SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 1)
+      (supportGraph_adj.2 ⟨by decide, by simp [triDoubledAdj]⟩)
+      SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 2) (w := 2)
+      (supportGraph_adj.2 ⟨by decide, by simp [triDoubledAdj]⟩)
+      SimpleGraph.Walk.nil⟩
+
+/-- **Potential value (doubled triangle):** `f = ![2/5, 0, 1/5]` solves
+the unit-demand equation `L *ᵥ f = e 0 − e 1` — the center vertex sits
+at `(2/5 + 0)/2 = 1/5` by symmetry of its two unit conductances, and
+the direct voltage drop is `2/5`. Computed entrywise from the
+definitions. -/
+theorem triDoubled_potential_value_QA :
+    (laplacian triDoubledAdj).mulVec ![2/5, 0, 1/5]
+      = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [laplacian, degreeMatrix, deg, triDoubledAdj, Matrix.mulVec,
+      Matrix.dotProduct, Fin.sum_univ_three] <;>
+    norm_num
+
+/-- **Resistance value (doubled triangle):** `R 0 1 = 2/5` — the direct
+conductance-`2` edge (resistance `1/2`) in parallel with the two-edge
+path (resistance `2`), and parallel resistances combine as
+`(1/2 · 2)/(1/2 + 2) = 2/5`. Pinned here by the potential witness
+(voltage drop `2/5 − 0`). -/
+theorem triDoubled_resistance_value_QA :
+    effectiveResistance triDoubledAdj 0 1 = 2 / 5 :=
+  effectiveResistance_eq triDoubledAdj triDoubledAdj_isSymm
+    triDoubledAdj_nonneg triDoubled_supportGraph_connected
+    ⟨![2/5, 0, 1/5], triDoubled_potential_value_QA,
+      by norm_num [Matrix.cons_val']⟩
+
+/-- **Rayleigh monotonicity instantiated (partial increase):** raising
+one conductance of a network with competing routes cannot increase the
+resistance across it. -/
+theorem rayleigh_tri_QA :
+    effectiveResistance triDoubledAdj 0 1
+      ≤ effectiveResistance triAdj 0 1 :=
+  effectiveResistance_le_of_le triAdj triDoubledAdj triAdj_isSymm
+    triAdj_nonneg tri_supportGraph_connected triDoubledAdj_isSymm
+    triDoubledAdj_nonneg triDoubled_supportGraph_connected
+    tri_le_triDoubledAdj 0 1
+
+/-- **Strict partial increase:** `2/5 < 2/3` — reinforcing one edge of
+the triangle strictly helps, from the two independently pinned values. -/
+theorem rayleigh_tri_strict_QA :
+    effectiveResistance triDoubledAdj 0 1
+      < effectiveResistance triAdj 0 1 := by
+  rw [triDoubled_resistance_value_QA, tri_resistance_value_QA]
+  norm_num
 
 end SpectralGraphTheory.QA

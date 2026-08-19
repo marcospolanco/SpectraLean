@@ -331,6 +331,45 @@ vacuous on a network with competing routes); and the superposition
 decomposition composed (`2 = 2/3 + 4/3`, all three energies computed
 independently of the lemma). No new axioms; steps 4–5 not started.
 
+**Step 4 delivered 2026-08-19 (separate run):** Rayleigh monotonicity
+in conductance form — `effectiveResistance_le_of_le`: for two connected
+symmetric nonnegative networks with entrywise `A ≤ B`,
+`effectiveResistance B u v ≤ effectiveResistance A u v`, with the
+conductance orientation exactly as the calibration section binds (the
+QA **orientation guard** refutes the reverse direction numerically on
+the capacity-increase fixture: `1 ≤ 1/2` is false). Route exactly as
+proposed, through two new reusable interfaces: `isFlowOn_of_le`
+(flow-space growth — a flow supported on `A` is a flow on every
+`B ≥ A ≥ 0`; support load-bearing: a `B`-zero entry above a
+nonnegative `A` entry squeezes the latter to zero, so the transferred
+current carries nothing there) and `flowEnergy_le_of_le` (raising
+conductances lowers dissipated energy — termwise `θ²/B ≤ θ²/A` on
+nonzero branches since every denominator increased; support load-bearing
+a second time on the `A i j = 0 < B i j` branch, where the `B`-term
+would otherwise exceed the zeroed `A`-branch — the same zero-conductance
+trap as steps 2–3, now guarding the comparison). The headline composes
+them: the `A`-unit-demand potential's current is a unit flow *on `B`*
+(growth + the Kirchhoff bridge), Thomson's principle on `B` bounds
+`R_B` by its `B`-energy, the comparison bounds that by its `A`-energy,
+and the step-2 identity evaluates it as `R_A` — load-bearing on
+solvability, the Kirchhoff bridge, support, Thomson, and the energy
+identity. Connectivity of both graphs is hypothesized, per the
+proposal's initial-shape instruction; the optional adapter deriving
+`supportGraph B`'s connectivity from `A`'s and `A ≤ B` was **not**
+attempted (kept non-blocking, as the proposal requires; it is the
+natural packaging companion if step 5's reinforcement theorem wants a
+one-hypothesis shape). QA (20 new declarations): the proposal's QA item
+2 — conductance `1 → 2` on the unit edge, the resistance decrease
+`1 → 1/2` certified from an independent potential witness, monotonicity
+instantiated, the decrease certified strict, and the orientation guard;
+the competitor transfer instantiated on computed objects (the
+`edgeAdj`-current is a unit flow on `edge2Adj`, cross-network energy
+`1/2 ≤ 1` computed from the raw definitions on both sides); and a
+partial increase on the triangle — one edge's conductance doubled,
+resistance strictly `2/3 → 2/5`, the new value pinned by the
+independent potential `![2/5, 0, 1/5]`. No new axioms; step 5 not
+started.
+
 ### 1. Electrical current and Kirchhoff conservation
 
 Add the flow definitions and prove:

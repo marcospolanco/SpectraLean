@@ -29,7 +29,6 @@ drift apart.
 
 | Priority | Proposal | Why |
 | --- | --- | --- |
-| High | [Decidable Spectral Certificates and the Expander Mixing Lemma](decidable-spectral-certificates.md) | Upgraded from Medium 2026-08-18. Its certificate-soundness proof is a checked-by-hand load-bearing consumer of `lambda2_variational` (proved the same day) — closes the exact noncomputable-extraction gap `docs/traction-plan.md` names as the reason broader-audience outreach stays premature, so strategically bigger than a typical proof target. **Steps 0, 1, 2, and 3 delivered 2026-08-19**: the convention decision, the ℚ-`decide` spike (kernel `decide` cannot verify ℚ arithmetic; the integer cross-multiplied twin is the adopted checker), the edge-weight/discrepancy core, **the Expander Mixing Lemma itself** (Rayleigh sandwich on `1⊥`, no eigenspace split; `hloop` found unnecessary and dropped), and **Step 3, the certificate module** — `GraphTheory.SpectralCertificates` with the ℚ specification checker, the soundness theorem `lambda2_le_of_certificate` (the flagship load-bearing consumer of the proved `lambda2_variational`), the kernel-verifiable ℤ cross-multiplied twin and its fractional variant, the proved cross-multiplication bridges, and the kernel-facing soundness corollaries, with C₄ QA whose accepted certificate certifies `lambda2 ≤ 2` end-to-end from `decide`d integer data and whose guard-free statement shape is refuted at `onesVec`. Zero new axioms throughout (count stays 13). **Next: Step 4** — QA expansion (the `C₆` kernel demonstrations, the `Kₙ`/`Cₙ` Ramanujan fixture family per the Step 0 scope decision, exact spectrum pins, and the scoreboard/traction-plan notes of Acceptance Criterion 4). |
 | Medium | [The Fiedler Vector and a Certified Spectral Partition](fiedler-partitioning.md) | Phase A (A1/A2) delivered 2026-08-18 as hard crust (`GraphTheory.Fiedler`: the vector, the algebraic-connectivity certificate `lambda2_pos_of_connected`, and the sign partition proved nonempty/proper; no new axioms). What remains is Phase B — a certified conductance bound on the Fiedler partition — which is *not* hard crust: it composes the proved easy direction with the still-admitted Cheeger hard direction, so it is an axiom-backed derived theorem. Real, unblocked work, but it needs the operator decision the proposal itself names (run against the admitted hard direction, or defer until it is proved) and adds trust surface rather than reducing it — hence Medium, not High. |
 | Medium | [A Spectral Mixing-Time Bound](mixing-time-bound.md) | Step 1 (eigenvalue transfer via the already-proved similarity identity) is reachable now, but the program's own calibration section rates the full bound as "at least as hard as the electrical program's solvability step" — real, unblocked work, but bigger and riskier than the High items. |
 | Medium | [Reversibility and the Heat Semigroup](reversibility-and-heat-semigroup.md) (Phase A only — reversibility/detailed balance) | Added 2026-08-18, closing the two items `docs/7_SGT_RADAR.md` axis 5 names as absent that `mixing-time-bound.md` does not already claim (heat kernels, reversibility). Phase A's own backlog gate (item 6, "gated on item 1-2 stability") is already open — items 1-2 are recorded delivered — so this is unblocked, cheap (composes existing `Stationary`/`Normalized` lemmas), zero new axioms. |
@@ -51,36 +50,24 @@ drift apart.
 | Low — technical decision required | [The Weighted Matrix-Tree (Kirchhoff) Theorem](weighted-matrix-tree-theorem.md) | Added 2026-08-19 as the answer to "if we build one more piece of genuinely new machinery, what should it be" — compared explicitly against `icebox/`'s three candidates (Golden-Thompson, ODE-trajectory calculus, stochastic calculus) and judged the best fit for this project's idiom (finite determinants and graph induction, not a foreign kind of math) and its most active axis (6). Not self-authorizing: `docs/6_SGT_BACKLOG.md` item 7 already names this exact candidate and gates it explicitly — "admit or define nothing here until a named consumer states which identity it needs" — and this proposal does not supply one. Does **not** accelerate or feed Foster's theorem (`spectral-graph-sparsification.md` Phase A already has its own pseudoinverse-free route); the document is explicit about not overstating that connection. |
 | Low — process decision required | [Retire the Mushy Center Systematically](retire-the-mushy-center.md) | Found unindexed while auditing this table (2026-08-18) — added by the same run that delivered the Cheeger easy direction, never previously recorded here. Proposes a heavier apparatus for axiom retirement: a formal elimination board, parallel per-candidate worktrees, a four-stage survey/formalize/falsify/integrate workflow. Worth an honest tension check before adoption: its own pilot section names the normalized-Cheeger transfer as its first candidate, and that has *already been delivered* using the lightweight mechanism already in place (this table plus one-step-per-run) — four axiom-related deliveries landed that way in short order. Whether the heavier process is worth adopting over what's already working is an operator call, not a default; an autonomous run should not stand up the board unprompted. |
 
-With the electrical-flow proposal **delivered in full** (all steps
-0–5, 2026-08-19 — see the Delivered table) and **Foster's Theorem
-Phase A delivered** (2026-08-19, zero new axioms via the
-pseudoinverse-free eigenbasis route — see the Delivered table), the
-top of the Active priority table is **decidable spectral certificates,
-now in progress**: its Step 0 gate landed 2026-08-19 (the Laplacian
-convention decision with the restated `expander_mixing_lemma`
-signature, and the ℚ-`decide` spike whose outcome — kernel `decide`
-cannot reduce ℚ arithmetic at all; the integer cross-multiplied twin
-can, verified at `Fin 4`/`Fin 6` — is recorded in the proposal), and
-Step 1 (`GraphTheory.Expander`: `edgeWeight`, the centered-indicator
-decomposition, and the `d`-regular main-term split) is delivered as
-hard crust. **Step 2, the Expander Mixing Lemma itself, is delivered
-the same day** — proved through a Rayleigh sandwich on `1⊥` (both
-variational bounds already in the center plus the `d`-regular identity
-`A + L = D`), with the `hloop` hypothesis found unnecessary and
-dropped, and with `C₄` QA whose *derived* `μ = 2` is tight (the
-opposite cut and the alternating vector both attain equality). **Step
-3, the certificate module, is delivered the same day** — the ℚ
-specification checker with its soundness theorem consuming the proved
-`lambda2_variational`, the kernel-verifiable ℤ cross-multiplied twin
-(fractional variant included), the proved cross-multiplication
-bridges, and the kernel-facing soundness corollaries; the C₄ QA
-demonstrates the full chain (`decide`d integer data → verified
-`lambda2 ≤ 2` and `≤ 5/2`) and refutes the guard-free statement shape.
-Zero new axioms throughout. **Next: Step 4**, the QA expansion
-(`C₆`, the `Kₙ`/`Cₙ` Ramanujan fixture family, exact spectrum pins,
-and the Acceptance-Criterion-4 documentation notes). The
-electrical-flow program's delivery history,
-one step per run: step 0 (representation survey — no flow/circulation/divergence API in the pin;
+With the decidable-certificates program **delivered in full** (all
+five steps 0–4, 2026-08-19 — Step 0's convention decision and ℚ-decide
+spike, Step 1's discrepancy core, the Expander Mixing Lemma, the
+certificate module with its soundness theorem and kernel-verifiable
+integer twin, and Step 4's QA expansion: the `C₆` kernel demonstrations,
+exact spectrum pins making the certified bounds witnessed-sharp against
+`lambda2` itself, and the `Kₙ`/`Cₙ` Ramanujan fixtures — see the
+Delivered table), **the top of the Active priority table is now the
+three `sgt-gaps`-promoted High rows**: Resolvent Calculus for PSD
+Matrices, Tikhonov Regularization in the Laplacian Eigenbasis, and
+Spectral Band Projectors — each recorded with its own Step 0 spike
+where required. The Medium rows (Fiedler Phase B — needs an operator
+decision; mixing-time Step 1; Reversibility Phases A and B; Relative
+Entropy; Perron–Frobenius + directed operators; discharge-perturbation;
+approximate spectral projection) stay queued behind them.
+
+The electrical-flow program's delivery history, one step per run:
+step 0 (representation survey — no flow/circulation/divergence API in the pin;
 matrix representation pinned) and step 1 (the flow interface and
 Kirchhoff conservation) on 2026-08-19; step 2 (flow energy and the
 energy agreement, with the mandatory double-counting fixture and the
@@ -97,6 +84,7 @@ axioms throughout.
 
 | Proposal | Delivered | Result |
 | --- | --- | --- |
+| Decidable Spectral Certificates and the Expander Mixing Lemma ([`decidable-spectral-certificates.md`](decidable-spectral-certificates.md)) | 2026-08-19 | **Program complete — all five steps (0–4) delivered 2026-08-19, zero new axioms throughout (count stays 13).** Step 0: the Laplacian-first convention decision (restated EML signature) and the decisive ℚ-`decide` spike (kernel `decide` cannot reduce ℚ arithmetic at all — a reducibility wall; the integer cross-multiplied twin is the adopted checker, kernel-verified at `Fin 4`/`Fin 6` at spike time). Step 1: the discrepancy core (`edgeWeight`, centered indicators, the `d`-regular main-term split). Step 2: **the Expander Mixing Lemma itself** (Rayleigh sandwich on `1⊥` via the `A + L = D` identity; `hloop` found unnecessary and dropped; `C₄` QA with derived-then-attained `μ = 2`). Step 3: **the certificate module** (`GraphTheory.SpectralCertificates` — the ℚ specification checker, the kernel-verifiable ℤ twin + fractional variant, proved cross-multiplication bridges, and the flagship soundness theorem `lambda2_le_of_certificate`, the load-bearing consumer of the proved `lambda2_variational`). Step 4: QA and extraction demonstration — the `C₆` chain kernel-decided end-to-end (`lambda2 (C₆) ≤ 1` from `decide`d integer data), the exact spectrum pins (`lambda2 (C₄) = 2` via a Poincaré inequality through the *lower* half of `lambda2_variational`; `λ_max = 4`; `μ(C₄) = 2` at Ramanujan equality; `K₃` pinned with `μ = 1` and the EML attained on both cuts tested), and the Acceptance-Criterion-4 documentation (scoreboard, radar, traction-plan note). 688 → 752 QA declarations. |
 | Foster's Theorem, Phase A ([`spectral-graph-sparsification.md`](spectral-graph-sparsification.md)) | 2026-08-19 | `GraphTheory.Foster` delivered as pure hard crust, zero new axioms (count stayed 13; `#print axioms` confirms only the three standard axioms): `foster_theorem` (`(∑ i, ∑ j, A i j * R i j)/2 = card V − 1` on every connected symmetric-nonnegative network, stated at full strength with no cardinality hypothesis), the per-pair spectral sum `effectiveResistance_eq_sum_eigbasis`, the one-kernel-index count `card_filter_eigvalOf_laplacian_eq_zero`, and the leverage-score objects (`leverageScore`, `sum_leverageScore_eq_two` — the importance-sampling distribution of the blocked Phase B). Route exactly as scoped in the "Correction": pseudoinverse-free eigenbasis, reconciling (not reversing) the `electrical-structure-crust.md` removal, which was of the `L⁺` route only. QA `Foster_QA.lean` (53 declarations): `K₃`/`K₄`/`P₃`/star, every resistance pinned by explicit potentials (`K₄` via the general-pair potential `(e i − e j)/4` proved for *every* pair), ordered sums computed independently of the theorem and cross-checked, the double-counting factor refuted-on-omission on both cliques (`4 ≠ 2`, `6 ≠ 3`), leverage pinned. Phase B remains blocked unchanged. |
 | [Electrical Flows, Thomson's Principle, and Rayleigh Monotonicity](electrical-flow-routing.md) | 2026-08-19 | All six steps delivered, zero new axioms (count stayed 13): the flow interface with Kirchhoff conservation (step 1), flow energy with the energy agreement and the double-counting/zero-competitor guards (step 2), Thomson's principle via the divergence-free superposition lemma (step 3), Rayleigh monotonicity in conductance form with the orientation guard (step 4), and the ICP capacity-reinforcement example — `increaseConductance` + the connectivity adapter + the one-hypothesis headline `effectiveResistance_le_increaseConductance`, with the release QA example on the Mathlib path graph (`2 → 3/2` strict, step 5). The resistance API is now a routing object with a certified minimum-energy guarantee and a capacity-monotonicity theorem. |
 | Cauchy interlacing retirement (`eigen_interlacing_principal_submatrix`, no dedicated proposal file — the min–max proposal's first named consumer) | 2026-08-18 | `eigen_interlacing_principal_submatrix` proved from the locally built Courant–Fischer engine (14 → 13 axioms) — the first SGT-center retirement, and the engine's first named consumer as `prove-courant-fischer.md` itself anticipated. The interlacing window is pinned numerically in QA. See the delivery note in `prove-courant-fischer.md` for the route. |

@@ -45,6 +45,22 @@ result here is `noncomputable` Lean with no extraction path to a runnable
 artifact, so an engineer outside a proof assistant has nothing to consume
 yet. Revisit only if that extraction gap closes.
 
+> **Note (2026-08-19, per `proposals/decidable-spectral-certificates.md`
+> Acceptance Criterion 4):** the revisit precondition named above is now
+> met in the source repository. The decidable-certificates program
+> (steps 0–4, delivered 2026-08-19, zero new axioms) closes the
+> extraction gap *inside Lean*: an external numerical solver emits an
+> integer/rational test vector and bound, and Scaffold kernel-checks
+> the certificate (`decide` on the integer twin, verified at `Fin 4`
+> and `Fin 6` sizes) while a proved soundness theorem
+> (`lambda2_le_of_certificate`) lifts the check to a verified
+> `lambda2 ≤ bound` in the real spectral center — QA pins the chain
+> *exactly tight* on `C₄` (the checker accepts precisely at the true
+> `lambda2 = 2` and rejects every integer bound below it). This note is
+> planning provenance for the revisit decision, not release material;
+> the clean-room boundary above still governs what the new repository's
+> public materials may say.
+
 ## Launch sequence
 
 1. Publish a tagged release with the readiness material above.

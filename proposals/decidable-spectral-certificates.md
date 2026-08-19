@@ -7,9 +7,11 @@ pseudorandomness and close the noncomputable extraction gap identified in
 `docs/traction-plan.md`. This document authorizes no Lean changes, axiom
 admissions, commits, clean-room copying, or external publication on its own.
 **Step 0 is COMPLETE (2026-08-19)** — see the decision record in the build
-order below; **Steps 1, 2, and 3 are DELIVERED (2026-08-19)** as hard crust
-(zero new axioms; the explicit count stays 13); **Step 4 (QA expansion)
-remains**.
+order below; **Steps 1, 2, 3, and 4 are ALL DELIVERED (2026-08-19)** (steps
+1–3 as hard crust with zero new axioms — the explicit count stays 13 — and
+step 4 as pure QA, 688 → 752 QA declarations, again zero new axioms). The
+program is COMPLETE; its acceptance criteria 1–4 are all met (see the
+Step 4 delivery record).
 
 **Why High, and why contingent.** The certificate-soundness argument is a
 genuine, checked-by-hand load-bearing consumer of `lambda2_variational`
@@ -427,6 +429,71 @@ is thereby read against the ℤ twin as re-scoped.
 ### Step 4: QA and Extraction Demonstration
 * Implement `SpectralGraph/Expander_QA.lean` checking the Expander Mixing Lemma on the complete graph $K_n$, cycles $C_n$, and Ramanujan graph examples.
 * Implement a concrete `#eval` / `decide` test verifying a rational certificate for a non-trivial graph.
+
+**STATUS: DELIVERED (2026-08-19)** as pure QA (zero new axioms, count
+stays 13; no public-module changes; 688 → 752 QA declarations across
+the two QA files; `#print axioms` on all twenty-two new headline
+theorems reads only `propext, Classical.choice, Quot.sound`):
+
+- **`SpectralCertificates_QA.lean` (+17, 39 in file) — the second
+  required size and the exact pin.** The whole chain kernel-decided on
+  `C₆` (`Fin 6`, test vector `![1,1,0,−1,−1,0]`): accept at the
+  attained bound `1`, reject at `0`, fractional `3/2` accepted and
+  `1/2` rejected, the checker's arithmetic pinned from the raw
+  definitions (`dotOne = 0`, `denom = 4`, `rawNumer = 8` — quotient
+  `8/(2·4) = 1`, the classical `λ₂(C₆) = 2 − 2cos(2π/6)`), the ℚ
+  specification reached only through the proved bridge, and the
+  end-to-end corollaries `lambda2 (C₆) ≤ 1` and `≤ 3/2` consuming
+  `decide`d hypotheses. On `C₄`: the **Poincaré inequality**
+  `2‖x‖² ≤ xᵀLx` for `x ⊥ 1` (the exact `n = 4` discrete Wirtinger
+  identity `E = 2Σx² + 2(x₀+x₂)²` under `Σx = 0`, by
+  `linear_combination` on the cross-term collapse), consumed through
+  the **lower** half of `lambda2_variational` (`le_csInf` against the
+  constraint set — its first QA consumer in the `≥` direction) to pin
+  `lambda2 (C₄) = 2` exactly; the headline
+  `cert4_certificate_exact_QA` states the chain's exact tightness —
+  the kernel checker accepts precisely at the true `lambda2` and
+  rejects the integer bound `1` below it.
+- **`Expander_QA.lean` (+47, 88 in file) — exact pins and the
+  Ramanujan fixture family** (per the Step 0 Decision 3 scope: the
+  existing `Kₙ`/`Cₙ` fixtures, no external sourcing):
+  - `C₄`: `λ₂ = 2` and `λ_max = 4` pinned exactly (Poincaré below; the
+    alternating vector `![1,−1,1,−1]` through the generic
+    `quadForm_le_evals_last` above), so **`μ(C₄) = 2` exactly** — the
+    Ramanujan bound `2√(d−1)` *attained with equality*, a checkable
+    fact rather than a literature value (`expC4_ramanujan_eq_QA`).
+  - `K₃`: the exact energy identity `xᵀLx = 3‖x‖² − (Σx)²` (both the
+    Poincaré inequality and the top bound at once — the `n = 3`
+    instance of the clique identity), pinning `λ₂ = λ_max = 3` (lower
+    half by `le_csInf` + identity, upper by test vector / sortedness)
+    and **`μ(K₃) = 1`** — the classical `μ(Kₙ) = 1` at `n = 3`,
+    *strictly* inside the Ramanujan range; the EML instantiated on the
+    singleton cut `({0},{0})` and the edge cut `({0,1},{0,1})` with
+    the bound **attained exactly on both** (both sides independently
+    compute to `2/3`).
+  - `C₆`: the EML instantiated with a **derived** `μ ≤ 2` (test vector
+    for `λ₂ ≤ 1`, the energy identity `xᵀLx = 4‖x‖² − Σ_edges(xᵢ+xᵢ₊₁)²`
+    for `λ_max ≤ 4`, PSD below), attained **exactly** on the
+    alternating cut `({0,2,4}, {0,2,4})` (both sides compute to `3`);
+    the Ramanujan inequality `μ ≤ 2√(d−1)` holds (the exact `μ = 2`
+    would need the `C₆` Wirtinger pins — recorded residual, not
+    attempted).
+- **Acceptance Criterion 4 (documentation):** scoreboard (752/13/0,
+  verification rows + the step-4 milestone bullet), radar (QA axis
+  count and kinds synced; subject axes 4 and 7 evidence extended with
+  scores **held** per protocol — QA strengthening, no new theorem
+  family; the holds logged), and the traction-plan extraction-gap note
+  added (the revisit precondition it names is met; the note is
+  planning provenance, respecting that document's clean-room boundary).
+
+Implementation notes recorded for future QA on 6-vertex fixtures: the
+`cons_val` simp family stops at index four — index five needs a
+`rfl`-provable `vecCons_val_five` helper, which fires when both
+indices come from `Fin.sum_univ_*` expansion (`OfNat`-literals) but
+not when the row index is a `fin_cases`-produced `Fin.mk` (row sums
+are therefore proved per row by `show` up to defeq); ℤ structural
+facts (`IsSymm`, nonnegativity) evaluate by `decide` where ℝ ones
+cannot (no `Real.decidableEq` reduction).
 
 ---
 

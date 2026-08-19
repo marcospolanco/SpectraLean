@@ -38,6 +38,17 @@
     (`rayleigh = 0 < lambda2` on the connected `C₄`) — the
     orthogonality conjunct is load-bearing, exactly as the proposal's
     Sharp Edge 2 demands.
+  - *Step 4: the second required size and the exact pin.* The six-cycle
+    `C₆` runs the whole chain again by kernel `decide` (accept at the
+    attained `1`, reject at `0`, fractional `3/2`/`1/2`, the ℚ
+    specification through the bridge, and the end-to-end
+    `lambda2 (C₆) ≤ 1` and `≤ 3/2`); and on `C₄` a Poincaré inequality
+    (`2‖x‖² ≤ xᵀLx` on `1⊥`, the exact `n = 4` Wirtinger fact) pins
+    `lambda2 (C₄) = 2` through the *lower* half of
+    `lambda2_variational` — the certified bound `2` is the true
+    algebraic connectivity, and the kernel checker rejects every
+    integer bound below it: the certificate method is exactly tight
+    on this fixture.
 
   Fixtures are declared under fresh names rather than imported from
   sibling QA modules: QA modules are built independently and must not
@@ -297,5 +308,191 @@ theorem cert4_orthogonality_guard_load_bearing_QA :
   intro h
   rw [cert4_rayleigh_onesVec_eq_zero_QA] at h
   exact absurd h (not_le.2 cert4_lambda2_pos_QA)
+
+/-!
+## The six-cycle fixture `0 — 1 — 2 — 3 — 4 — 5 — 0` (Step 4)
+
+The proposal's second required size: the integer twin kernel-decides
+accept and reject paths at `Fin 6`, the end-to-end corollary certifies
+`lambda2 (C₆) ≤ 1`, and the checker's arithmetic is pinned from the raw
+definitions — the certificate's quotient `8/(2 • 4) = 1` is exactly the
+classical `λ₂(C₆) = 2 − 2cos(2π/6)`.
+-/
+
+
+/-- Adjacency of the cycle `C₆` on `Fin 6`, over ℤ: symmetric, unit
+weights, all degrees `2`. -/
+def certCycleAdj6 : Matrix (Fin 6) (Fin 6) ℤ :=
+  Matrix.of !![0, 1, 0, 0, 0, 1; 1, 0, 1, 0, 0, 0; 0, 1, 0, 1, 0, 0;
+               0, 0, 1, 0, 1, 0; 0, 0, 0, 1, 0, 1; 1, 0, 0, 0, 1, 0]
+
+theorem certCycleAdj6_isSymm : certCycleAdj6.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> decide
+
+theorem certCycleAdj6_nonneg : ∀ i j, (0 : ℤ) ≤ certCycleAdj6 i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> decide
+
+/-- The real six-cycle adjacency the soundness theorem bounds. -/
+def certAdj6ℝ : Matrix (Fin 6) (Fin 6) ℝ :=
+  certCycleAdj6.map (fun a => (a : ℝ))
+
+theorem certAdj6ℝ_isSymm : certAdj6ℝ.IsSymm :=
+  isSymm_map_intCastReal certCycleAdj6_isSymm
+
+/-- The half-wave test vector `![1, 1, 0, −1, −1, 0]` over ℤ:
+orthogonal to `onesVec`, squared norm `4`. -/
+def certTestVec6 : Fin 6 → ℤ :=
+  ![1, 1, 0, -1, -1, 0]
+
+/-- The orthogonality sum vanishes. -/
+theorem cert6_dotOne_QA : ∑ i, certTestVec6 i = 0 := by
+  decide
+
+/-- The squared norm is `4`. -/
+theorem cert6_denom_QA : ∑ i, (certTestVec6 i) ^ 2 = 4 := by
+  decide
+
+/-- The raw Dirichlet sum over the ordered pairs of the cycle is `8`
+(the four edges `(1,2), (2,3), (4,5), (5,0)` contribute `1` each, in
+each direction). The certificate's quotient is therefore
+`8 / (2 • 4) = 1`. -/
+theorem cert6_rawNumer_QA :
+    ∑ i, ∑ j, certCycleAdj6 i j * (certTestVec6 i - certTestVec6 j) ^ 2 = 8 := by
+  decide
+
+/-- Accept path: the attained bound `1` is accepted by plain kernel
+`decide`. -/
+theorem cert6_accepted_QA :
+    isSpectralUpperBoundCertificateInt certCycleAdj6 certTestVec6 1 = true := by
+  decide
+
+/-- Reject path: the bound `0` is rejected. -/
+theorem cert6_rejected_QA :
+    isSpectralUpperBoundCertificateInt certCycleAdj6 certTestVec6 0 = false := by
+  decide
+
+/-- Fractional accept path: the bound `3/2` is accepted by kernel
+`decide` in the cross-multiplied form `2 • 8 ≤ 2 • 3 • 4`. -/
+theorem cert6_frac_accepted_QA :
+    isSpectralUpperBoundCertificateIntFrac certCycleAdj6 certTestVec6 3 2 = true := by
+  decide
+
+/-- Fractional reject path: the bound `1/2` is rejected
+(`2 • 8 ≤ 2 • 1 • 4` fails). -/
+theorem cert6_frac_rejected_QA :
+    isSpectralUpperBoundCertificateIntFrac certCycleAdj6 certTestVec6 1 2 = false := by
+  decide
+
+/-- The ℚ specification checker accepts the cast data at `3/2` — proved
+through the cross-multiplication bridge from the `decide`d twin (the
+Step 0 wall; the module's consumption route, at the second size). -/
+theorem cert6_spec_via_bridge_QA :
+    isSpectralUpperBoundCertificate (certCycleAdj6.map (Int.cast : ℤ → ℚ))
+      (toRat certTestVec6) (((3 : ℤ) : ℚ) / ((2 : ℤ) : ℚ)) = true :=
+  (isSpectralUpperBoundCertificateIntFrac_iff certCycleAdj6 certTestVec6 3 2
+    (by decide)).mp cert6_frac_accepted_QA
+
+/-- The accepted integer certificate certifies `lambda2 (C₆) ≤ 1` in
+the real spectral center — the full chain at the second required size. -/
+theorem cert6_lambda2_le_one_QA :
+    lambda2 certAdj6ℝ certAdj6ℝ_isSymm (by decide : 2 ≤ Fintype.card (Fin 6))
+      ≤ ((1 : ℤ) : ℝ) :=
+  lambda2_le_of_certificateInt certCycleAdj6_isSymm certCycleAdj6_nonneg
+    (by decide) certTestVec6 1 cert6_accepted_QA
+
+/-- The accepted fractional certificate certifies
+`lambda2 (C₆) ≤ 3/2`. -/
+theorem cert6_lambda2_le_three_halves_QA :
+    lambda2 certAdj6ℝ certAdj6ℝ_isSymm (by decide : 2 ≤ Fintype.card (Fin 6))
+      ≤ 3 / 2 := by
+  have h := lambda2_le_of_certificateIntFrac certCycleAdj6_isSymm
+    certCycleAdj6_nonneg (by decide) certTestVec6 3 2 (by decide)
+    cert6_frac_accepted_QA
+  norm_num at h ⊢
+  exact h
+
+/-!
+## Step 4: the exact pin — `lambda2 (C₄) = 2`, and the certificate is
+exactly tight
+
+The C₄ blocks above pin the *checker's arithmetic* and the quotient;
+here a Poincaré inequality (the exact `n = 4` discrete Wirtinger fact:
+`E = 2Σx² + 2(x₀+x₂)²` under `Σx = 0`) pins `lambda2` from below
+through the *lower* half of `lambda2_variational`, so the certified
+bound `2` is the true algebraic connectivity — and the kernel checker
+rejects every integer bound below it.
+-/
+
+
+/-- **The `C₄` Poincaré inequality.** Every vector orthogonal to
+`onesVec` has Laplacian energy at least twice its squared norm — the
+exact lower half of the C₄ spectrum. -/
+theorem cert4_poincare_QA (x : Fin 4 → ℝ)
+    (hxorth : Matrix.dotProduct x onesVec = 0) :
+    2 * (x ⬝ᵥ x) ≤ quadForm (laplacian certAdj4ℝ) x := by
+  have hsum : x 0 + x 1 + x 2 + x 3 = 0 := by
+    have h := hxorth
+    simp only [Matrix.dotProduct, onesVec, Fin.sum_univ_four, mul_one] at h
+    exact h
+  have hnorm : x ⬝ᵥ x = x 0 * x 0 + x 1 * x 1 + x 2 * x 2 + x 3 * x 3 := by
+    simp only [Matrix.dotProduct, Fin.sum_univ_four]
+  have hedges : (∑ i, ∑ j, certAdj4ℝ i j * (x i - x j) ^ 2)
+      = 2 * ((x 0 - x 1) ^ 2 + (x 1 - x 2) ^ 2 + (x 2 - x 3) ^ 2
+        + (x 3 - x 0) ^ 2) := by
+    simp only [certAdj4ℝ, certCycleAdj4, Matrix.map_apply, Matrix.of_apply,
+      Fin.sum_univ_four, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.cons_val_two, Matrix.cons_val_three, Matrix.head_cons,
+      Matrix.tail_cons]
+    ring
+  have hkey : (x 0 - x 1) ^ 2 + (x 1 - x 2) ^ 2 + (x 2 - x 3) ^ 2
+      + (x 3 - x 0) ^ 2
+      = 2 * (x 0 * x 0 + x 1 * x 1 + x 2 * x 2 + x 3 * x 3)
+        + 2 * (x 0 + x 2) ^ 2 := by
+    linear_combination (-(2:ℝ) * (x 0 + x 2)) * hsum
+  rw [laplacian_quadForm certAdj4ℝ certAdj4ℝ_isSymm, hedges, hkey, hnorm]
+  linarith [sq_nonneg (x 0 + x 2)]
+
+/-- **`lambda2 (C₄) ≥ 2`** through the lower half of
+`lambda2_variational`: every admissible test vector has Rayleigh
+quotient ≥ 2 (Poincaré), and the constraint set is nonempty. -/
+theorem cert4_lambda2_ge_two_QA :
+    2 ≤ lambda2 certAdj4ℝ certAdj4ℝ_isSymm
+      (by decide : 2 ≤ Fintype.card (Fin 4)) := by
+  have hx0 : (![1, 0, -1, 0] : Fin 4 → ℝ) ≠ 0 := by
+    intro h
+    have h0 : (![1, 0, -1, 0] : Fin 4 → ℝ) 0 = 0 := congrFun h 0
+    simp at h0
+  have hxorth : Matrix.dotProduct (![1, 0, -1, 0] : Fin 4 → ℝ) onesVec = 0 := by
+    simp only [Matrix.dotProduct, onesVec, mul_one, Fin.sum_univ_four,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      Matrix.vecTail, Matrix.vecHead]
+    norm_num
+  rw [lambda2_variational certAdj4ℝ certAdj4ℝ_isSymm
+    (fun i j => Int.cast_nonneg.2 (certCycleAdj4_nonneg i j)) (by decide)]
+  refine le_csInf ⟨(2:ℝ), ![1, 0, -1, 0], hx0, hxorth,
+    cert4_rayleigh_eq_two_QA⟩ ?_
+  rintro r ⟨y, hy0, hyorth, hyr⟩
+  rw [← hyr, rayleigh, if_neg hy0]
+  exact (le_div_iff₀ (dotProduct_self_pos hy0)).2 (cert4_poincare_QA y hyorth)
+
+/-- **The exact pin: `lambda2 (C₄) = 2`.** The certified bound is not
+merely valid — it is the true algebraic connectivity. -/
+theorem cert4_lambda2_eq_two_QA :
+    lambda2 certAdj4ℝ certAdj4ℝ_isSymm (by decide : 2 ≤ Fintype.card (Fin 4))
+      = ((2 : ℤ) : ℝ) := by
+  refine le_antisymm cert4_lambda2_le_two_QA ?_
+  exact_mod_cast cert4_lambda2_ge_two_QA
+
+/-- **The certificate chain is exactly tight on `C₄`.** The
+kernel-decided certificate accepts precisely at the attained `lambda2`
+and rejects the integer bound `1` below it: the method, with this test
+vector, is optimal — no stronger integer bound is certifiable. -/
+theorem cert4_certificate_exact_QA :
+    lambda2 certAdj4ℝ certAdj4ℝ_isSymm (by decide : 2 ≤ Fintype.card (Fin 4))
+      = ((2 : ℤ) : ℝ)
+    ∧ isSpectralUpperBoundCertificateInt certCycleAdj4 certTestVec4 1 = false :=
+  ⟨cert4_lambda2_eq_two_QA, cert4_rejected_QA⟩
 
 end SpectralGraphTheory.QA

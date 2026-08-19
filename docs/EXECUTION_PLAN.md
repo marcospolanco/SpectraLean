@@ -6,6 +6,80 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Decidable spectral certificates, Step 4 — QA and extraction
+demonstration (run 1, 2026-08-19): DELIVERED; the program is
+COMPLETE.** The Active priority table's top High item
+(`proposals/decidable-spectral-certificates.md`) at its final step —
+pure QA, **zero new axioms** (count stays 13; no public-module
+changes), 688 → 752 QA declarations; `#print axioms` on all 22 new
+headline theorems reads only `propext, Classical.choice, Quot.sound`.
+
+**Delivered in the two QA modules:**
+
+- `SpectralCertificates_QA.lean` (+17, 39 in file): the **`C₆`
+  chain at the second required size** — kernel `decide` accept at the
+  attained `1`, reject at `0`, fractional `3/2`/`1/2`, arithmetic
+  pinned (`rawNumer = 8`, `denom = 4`, quotient `8/(2·4) = 1`), the ℚ
+  specification through the proved bridge, end-to-end
+  `lambda2 (C₆) ≤ 1` and `≤ 3/2`; and the **exact pin** — a C₄
+  Poincaré inequality (`2‖x‖² ≤ xᵀLx` on `1⊥`; the `n = 4` Wirtinger
+  identity `E = 2Σx² + 2(x₀+x₂)²` by `linear_combination`) through the
+  **lower** half of `lambda2_variational` (`le_csInf` — its first
+  `≥`-direction QA consumer) pins `lambda2 (C₄) = 2`, so the
+  certificate chain is **exactly tight** (`cert4_certificate_exact_QA`:
+  the kernel checker accepts precisely at the true `lambda2` and
+  rejects the integer bound `1` below it).
+- `Expander_QA.lean` (+47, 88 in file): the exact C₄ pins
+  (`λ₂ = 2`, `λ_max = 4` — the latter via the alternating vector
+  through `quadForm_le_evals_last`), so **`μ(C₄) = 2` exactly** and the
+  Ramanujan bound `2√(d−1)` is *attained with equality*; the **`K₃`
+  fixture** — the energy identity `xᵀLx = 3‖x‖² − (Σx)²` pinning
+  `λ₂ = λ_max = 3`, `μ(K₃) = 1` (classical `μ(Kₙ) = 1`, strictly
+  Ramanujan), with the EML **attained exactly on both cuts tested**
+  (both sides compute to `2/3`); the **`C₆` EML** with derived `μ ≤ 2`
+  (test vector + the identity `xᵀLx = 4‖x‖² − Σ_edges(xᵢ+xᵢ₊₁)²` +
+  PSD), attained exactly on the alternating cut `({0,2,4},{0,2,4})`.
+
+**Acceptance Criterion 4 (documentation):** scoreboard (752/13/0,
+verification rows + step-4 milestone bullet), radar (QA count/kinds
+synced; subject axes 4 and 7 evidence extended with scores **held** per
+protocol and the holds logged in the re-scoring log), the
+traction-plan extraction-gap note (the revisit precondition named there
+is met — added as planning provenance respecting that document's
+clean-room boundary), README count (752), proposal Step-4 delivery
+record + status header (program complete, AC 1–4 all met), and
+`proposals/README.md` (row moved to Delivered; progress note rewritten
+— the three `sgt-gaps`-promoted High rows are now the top of the Active
+table).
+
+**Verification:** `lake env lean` on both changed QA modules — zero
+errors, zero warnings; `#print axioms` on the 22 new headline theorems
+✔ (three standard axioms only); all thirty-one QA modules
+batch-elaborated, zero errors; **full `lake build` ✔ (2183 targets)**;
+`lint_axioms` (13), `check_citations`, `check_markdown_links` pass;
+scoreboard regeneration idempotent (752/13/0). Environment healthy at
+run start (full Mathlib oleans present — the pruned-oleans state did
+not recur; no cache fetch needed). Recorded implementation notes: the
+`cons_val` simp family stops at index four (the `rfl`-provable
+`vecCons_val_five` helper bridges index five when both indices are
+`OfNat`-literals from sum expansion; `fin_cases` row indices defeat the
+chain, so C₆ row sums are proved per row by `show` up to defeq); ℤ
+structural facts evaluate by `decide` where ℝ ones cannot.
+
+**Next milestone (open):** the Active table's top High rows are now the
+three `sgt-gaps`-promoted items, each with its recorded entry point —
+**Resolvent Calculus for PSD Matrices** (Step 0 first: the unverified
+`IsSelfAdjoint.spectralRadius_eq_nnnorm` C*-algebra thread for the
+operator-norm bridge, shared with `discharge-perturbation-axioms.md`'s
+Weyl target), **Tikhonov Regularization in the Laplacian Eigenbasis**
+(no gate — a corollary of the proved eigenbasis expansion), and
+**Spectral Band Projectors** (no gate — the two-sided band is the
+difference of two existing `spectralProjector` calls). The Medium rows
+(Fiedler Phase B — needs an operator decision; mixing-time Step 1;
+Reversibility Phases A and B; Relative Entropy; Perron–Frobenius +
+directed operators; discharge-perturbation; approximate spectral
+projection) stay queued.
+
 **Decidable spectral certificates, Step 3 — the computable certificate
 module (run 1, 2026-08-19): DELIVERED.** The Active priority table's
 top High item (`proposals/decidable-spectral-certificates.md`), at the

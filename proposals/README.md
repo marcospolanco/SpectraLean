@@ -30,9 +30,11 @@ drift apart.
 | Priority | Proposal | Why |
 | --- | --- | --- |
 | High | [Electrical Flows, Thomson's Principle, and Rayleigh Monotonicity](electrical-flow-routing.md) | The strongest zero-axiom center-to-ICP bridge: turns the delivered potential-based resistance API into a conserved unit-flow routing interface, proves the minimum-energy characterization, and derives the capacity-monotonicity theorem the traction plan can demonstrate to Lean/Mathlib adopters. Load-bearing on the Laplacian sign convention, support, solvability, kernel uniqueness, energy identity, and effective-resistance agreement; no new axioms. |
+| High | [Foster's Theorem](spectral-graph-sparsification.md) (Phase A only) | Reviewed and split 2026-08-18 from a bundled proposal that also claimed a full Spielman–Srivastava sparsification result — see that document's "Correction" for why only this half is ready. Foster's theorem was explicitly removed from `electrical-structure-crust.md`'s program for needing a pseudoinverse trace identity; the removal stands, but a genuine pseudoinverse-free route now exists (eigenbasis expansion + the now-proved one-dimensional kernel characterization, reusing exactly today's Courant–Fischer-era machinery), which is why this reopens the decision rather than quietly reversing it. Zero new axioms if the eigenbasis route holds up. |
 | High | [Decidable Spectral Certificates and the Expander Mixing Lemma](decidable-spectral-certificates.md) | Upgraded from Medium 2026-08-18. Its certificate-soundness proof is a checked-by-hand load-bearing consumer of `lambda2_variational` (proved the same day) — closes the exact noncomputable-extraction gap `docs/traction-plan.md` names as the reason broader-audience outreach stays premature, so strategically bigger than a typical proof target. **Run Step 0 first**: the proposal shipped without resolving the adjacency-vs-Laplacian eigenvalue convention the classical Expander Mixing Lemma needs, or spiking whether kernel `decide` on ℚ arithmetic is actually fast enough at even modest `Fin n` sizes to satisfy its own acceptance criterion. Both are now scoped in the proposal's own Step 0 — do not begin Step 1 before that decision and spike are recorded. |
 | Medium | [The Fiedler Vector and a Certified Spectral Partition](fiedler-partitioning.md) | Phase A (A1/A2) delivered 2026-08-18 as hard crust (`GraphTheory.Fiedler`: the vector, the algebraic-connectivity certificate `lambda2_pos_of_connected`, and the sign partition proved nonempty/proper; no new axioms). What remains is Phase B — a certified conductance bound on the Fiedler partition — which is *not* hard crust: it composes the proved easy direction with the still-admitted Cheeger hard direction, so it is an axiom-backed derived theorem. Real, unblocked work, but it needs the operator decision the proposal itself names (run against the admitted hard direction, or defer until it is proved) and adds trust surface rather than reducing it — hence Medium, not High. |
 | Medium | [A Spectral Mixing-Time Bound](mixing-time-bound.md) | Step 1 (eigenvalue transfer via the already-proved similarity identity) is reachable now, but the program's own calibration section rates the full bound as "at least as hard as the electrical program's solvability step" — real, unblocked work, but bigger and riskier than the High items. |
+| Low — technical decision required | [Spielman–Srivastava Sparsification](spectral-graph-sparsification.md) (Phase B only — Foster's theorem, Phase A, is the separate High item above) | Not the "Medium" this row previously said — reviewed 2026-08-18 and found to cite a theorem, `Scaffold.Probability.Concentration.MatrixChernoff.matrix_chernoff_upper_lower`, that does not exist anywhere in this repository; `sampledLaplacian` is likewise undefined. This is not a citation fix — the entire sparsification guarantee currently rests on nothing. Three real paths forward are named in the proposal's own "Correction": survey whether the existing `matrix_bernstein` axiom's hypotheses can actually supply what's needed, admit a new carefully-scoped matrix-Chernoff axiom with its own leverage case, or attempt a from-scratch proof (likely needing Lieb's concavity theorem or Golden–Thompson, neither remotely available). None of the three is a routine Lean-implementation decision; an autonomous run should not begin any Phase B work under this proposal until one is chosen. |
 | Low — human decision required | [Clean-Room SGT Export](clean-room-sgt-export.md) | Needs patent counsel sign-off before any phase starts. Potentially the highest-leverage item in this directory overall, but not one an autonomous Lean-work run can act on. |
 | Low — human decision required | [Get Outside Signal](get-outside-signal.md) | Phase 0 is explicitly "outside this document's authority" — gated on the same counsel sign-off as the export. |
 | Low — human decision required | [Sell the Methodology](sell-the-methodology.md) | Gated on the export existing and, per its own text, likely a *stricter* clean-room pass than the code export. |
@@ -48,11 +50,21 @@ anywhere; `SimpleGraph.Dart` carries none) with the matrix representation,
 zero-edge semantics, and the focused `GraphTheory.ElectricalFlow` module
 recorded in the proposal before any Lean — and step 1 (the flow interface
 and Kirchhoff conservation, `isUnitFlow_electricalCurrent`) landed the same
-run at no axiom cost. The next run's milestone is step 2 (energy
-agreement, with the mandatory `1/2` ordered-pair factor QA fixture);
-steps 3–5 (Thomson, Rayleigh monotonicity, the ICP example) remain. Fiedler
-Phase B retains its named operator decision, and the mixing-time program
-remains the unblocked Medium fallback.
+run at no axiom cost. **Step 2 (flow energy and the energy agreement) was
+delivered 2026-08-19 in a follow-up run:** `flowEnergy` with the explicit
+zero branch and the `1/2` ordered-pair factor, the symmetry-only agreement
+`flowEnergy A (electricalCurrent A f) = quadForm (laplacian A) f`,
+`flowEnergy_nonneg`, and the unit-demand identity equating the current's
+dissipated energy with the effective resistance it routes — zero axioms
+added, with the mandatory double-counting fixture (raw ordered-pair sum
+`2 ≠ 1` = Dirichlet energy on `K₂`) and the Thomson-breaking zero-energy
+competitor (energy `0 < 1` = resistance, excluded by the support conjunct
+alone) both landed in QA. The next run's milestone is step 3 (Thomson's
+principle — the minimum-energy inequality over valid unit flows, consuming
+`flowEnergy_nonneg` on the difference flow); steps 4–5 (Rayleigh
+monotonicity, the ICP example) remain. Fiedler Phase B retains its named
+operator decision, and the mixing-time program remains the unblocked
+Medium fallback.
 
 ## Delivered
 

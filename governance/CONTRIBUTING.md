@@ -137,6 +137,11 @@ Maintainers will review your PR and may request:
 - Additional documentation
 - Splitting large PRs into smaller pieces
 
+For a theorem with several hypotheses, reviewers should also ask whether
+each one is actually necessary, not just used by the proof as written —
+see [Adversarial Review](ADVERSARIAL_REVIEW.md) for the full methodology
+and a real example this check found.
+
 ## License
 
 By contributing, you agree that your contributions will be licensed under the Apache 2.0 License.

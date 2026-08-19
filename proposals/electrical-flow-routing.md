@@ -571,3 +571,19 @@ multicomponent routing, infinite networks, randomized rounding,
 pseudoinverse formulas, the resistance-metric package, and any `sInf`
 packaging all remain outside this proposal's delivered scope and would
 need new consumer-driven proposals.
+
+## API note (2026-08-19, post-delivery)
+
+Found by the `governance/ADVERSARIAL_REVIEW.md` pilot, Phase 2's
+hypothesis-redundancy check: `effectiveResistance_le_of_le`'s `hconnB`
+hypothesis (the reinforced network `B`'s connectivity) is provably
+redundant. `supportGraph_connected_of_le`, delivered in the same file at
+step 5, derives exactly `hconnB` from `hA, hB, hle, hconnA` — no
+`hnonnegA`/`hnonnegB` needed. Not a soundness bug (the theorem is true
+either way) and not urgent — a real API-cleanup item: the step-4 headline
+could drop `hconnB` from its signature and derive it internally via the
+step-5 adapter, matching what `effectiveResistance_le_increaseConductance`
+already does one step later. Left as-is rather than fixed opportunistically
+here, since this proposal's own program is closed and any signature change
+to a delivered theorem should go through normal review, not a drive-by
+edit while documenting an unrelated audit finding.

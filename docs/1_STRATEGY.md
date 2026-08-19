@@ -56,6 +56,18 @@ When adjacent or application work reveals an ambiguous definition, missing
 assumption, placeholder, or broken interface, the priority moves inward to
 the nearest load-bearing defect.
 
+**Scope decision (2026-08-19): directed and asymmetric graphs are within
+scope.** Every backlog item and radar axis before this date was scoped to
+undirected, weighted graphs — `admit-perron-frobenius.md` named this
+explicitly as a deliberate expansion this policy did not yet cover, not a
+routine backlog item. Adopted, operator decision on record: the directed
+axis (asymmetric/random-walk Laplacians, directed normalized Laplacians,
+magnetic Laplacians, Perron–Frobenius for irreducible nonnegative
+matrices) is now a legitimate SGT-center extension, on the same leverage
+test as everything else in this section — adjacency alone still does not
+justify admission, but "undirected only" is no longer a standing
+constraint an autonomous run should assume.
+
 ### Leverage test
 
 Compare proposed work using these questions:

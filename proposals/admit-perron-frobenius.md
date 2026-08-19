@@ -1,8 +1,11 @@
 # Proposal: Admit Perron–Frobenius for Irreducible Nonnegative Matrices
 
-**Status:** Proposed. Assistant's assessment of project direction, requested
-2026-08-18. Authorizes no Lean changes, axiom admissions, document
-rewrites, or external publication.
+**Status:** Proposed; priority **Medium**. Assistant's assessment of
+project direction, requested 2026-08-18. **The scope decision below is
+now adopted** (2026-08-19, operator decision on record — see
+`docs/1_STRATEGY.md`'s center-out prioritization section) — this
+document's own math and QA content still authorizes no Lean changes on
+its own until an autonomous run is directed at it.
 
 Assessed from `docs/8_MATHLIB_COVERAGE_MAP.md` (Perron–Frobenius confirmed
 absent from the pinned Mathlib — the only "Perron" hits anywhere in the
@@ -13,19 +16,19 @@ territory), and `Scaffold/Mathlib/GraphTheory/{RandomWalk,Normalized,
 Stationary}.lean` (every existing walk/stationary-distribution result is
 scoped to undirected, reversible, weighted graphs).
 
-## Correction before this goes further: this is a scope decision, not a backlog item
+## This was a scope decision, not a backlog item — now resolved
 
-Read `docs/1_STRATEGY.md` literally before treating this as routine: "The
-near-term center is general SGT: weighted and normalized Laplacians...
-Outward work must improve one of those interfaces or make a concrete,
-broadly reusable connection." Directed graphs and general (possibly
-non-reversible) Markov chains are not named anywhere in the current
-backlog or radar's eight axes — every one of them is scoped to undirected
-graphs. So this proposal is not "the next item in the queue"; adopting it
-is a **deliberate expansion of the center's scope**, and should be
-recognized as that decision explicitly, not adopted by momentum because
-the math is exciting. The rest of this document argues for making that
-decision, but does not make it.
+Directed graphs and general (possibly non-reversible) Markov chains were
+not named anywhere in the backlog or radar's eight axes before this
+proposal — every one of them was scoped to undirected graphs, so adopting
+this was a deliberate expansion of the center's scope, not routine
+backlog work. **Resolved 2026-08-19: adopted.** `docs/1_STRATEGY.md`'s
+center-out prioritization section now records the directed axis as in
+scope, on the strength of this proposal's own leverage case (below) and
+`sgt-gaps.md`'s external-consumer evidence (PageRank-style centrality,
+directed community detection). The leverage test itself is unchanged —
+adjacency alone still does not justify admission — only the "undirected
+only" default is lifted.
 
 ## The finding
 
@@ -167,6 +170,7 @@ this one.
 - `docs/8_MATHLIB_COVERAGE_MAP.md`'s "Perron–Frobenius / nonnegative-matrix
   theory: Absent" row is updated to reflect the new admission, not left
   stale.
-- The scope-decision correction at the top of this document is resolved
-  explicitly (adopted or declined) before any Lean work starts — this is
-  not a default per the leverage test as currently written.
+- The scope decision is resolved (adopted, 2026-08-19, recorded above and
+  in `docs/1_STRATEGY.md`) — no longer a precondition, but the axiom
+  admission itself still needs an autonomous run directed at this
+  proposal specifically, per the standing one-step-per-run discipline.

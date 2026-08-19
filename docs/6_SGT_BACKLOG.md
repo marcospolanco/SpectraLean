@@ -97,6 +97,14 @@ heat flow `e^{-tL}`, consensus maps, synchronization, graph semigroups.
 The retained persistence package is a compatibility example, not a
 roadmap driver.
 
+*Gate opened 2026-08-19 for the heat semigroup specifically*
+(`reversibility-and-heat-semigroup.md` Phase B): an established external
+field — diffusion models, heat-kernel graph signatures — accepted as the
+named consumer this item requires, an operator decision on record rather
+than the proposal self-authorizing. Consensus maps, synchronization, and
+general graph semigroups remain gated; this opens only the heat-semigroup
+instance.
+
 ### 6. Thermodynamics / statistical mechanics (conditional)
 
 *Gated on item 1–2 stability:* entropy and reversibility interfaces,
@@ -243,6 +251,29 @@ remaining items are unchanged: the definiteness residual
 `R u v = 0 ↔ u = v`, the resistance metric (triangle inequality),
 Matrix–Tree, and Kirchhoff network theorems beyond the conservation
 bridge — the last two still gated on a named consumer.
+
+### 8. Directed and asymmetric graph operators (2026-08-19, axis newly opened)
+
+*Scope decision resolved (2026-08-19):* `docs/1_STRATEGY.md`'s center-out
+prioritization now covers directed graphs — see that document's
+2026-08-19 note and `admit-perron-frobenius.md`'s resolved gate. Every
+item 1–7 above is scoped to undirected, weighted graphs; this item is the
+first to open the other side.
+
+*Named external consumers* (`sgt-gaps.md` item 6, spot-checked
+2026-08-19): PageRank-style directed Markov chains, citation/web-graph
+analysis, directed community detection via the magnetic Laplacian — an
+active area with no route into this backlog before today.
+
+*Candidate first slice:* the foundational directed objects — random-walk
+and asymmetric Laplacians, directed normalized Laplacians, the relation
+of each back to the symmetric case — which `admit-perron-frobenius.md`'s
+algebraic tool (Perron–Frobenius for irreducible nonnegative matrices)
+consumes once they exist. Scope both together, per that proposal's own
+note: they are two pieces of the same decision, not independent ones.
+Magnetic Laplacians and Hermitian embeddings of directed graphs are a
+further, separate slice — real, but do not fold into the first proposal
+under this item by default.
 
 ## Standing decisions
 

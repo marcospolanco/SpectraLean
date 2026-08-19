@@ -56,6 +56,28 @@ This is stronger than informal derivation because Lean checks the downstream
 reasoning. It is weaker than foundational formalization because the admitted
 mathematics remains part of the trust base.
 
+### Why spectral graph theory
+
+The center could have been a few other applied-math domains instead; SGT
+was chosen over each for a specific tradeoff, not by default.
+
+| Alternative | Its case | Why SGT won instead |
+| --- | --- | --- |
+| Matrix concentration (Bernstein, Azuma) | Highest immediate utility — nearly every randomized-algorithm and high-dimensional-statistics bound depends on it directly | Needs substantial measure-theoretic setup before any concrete consequence; used here as an admitted bridge (`Probability.Concentration.Matrix.*`), not a starting point |
+| Optimization and convex analysis | Interfaces directly with control theory and machine learning | Branches quickly into special cases (convex cones, non-smooth subgradients, constraint qualifications) that resist a clean formalization boundary |
+| Classical (unweighted) graph theory | Already well developed in Mathlib; little extra machinery needed | Stays discrete — does not naturally bridge into the continuous linear algebra (eigenvalues, quadratic forms) that connects graphs to the rest of formalized mathematics |
+
+SGT sits at the intersection instead: finite matrices and graphs avoid most
+infinite-dimensional measure-theoretic and topological overhead, while its
+spectral machinery (eigenvalues, Rayleigh quotients, quadratic forms)
+immediately exercises Mathlib's bridges across linear algebra, analysis,
+and probability at once. Formalizing SGT is what forces this project to
+build reusable interfaces spanning linear algebra (`Spectral`),
+combinatorics and expansion (`Cheeger`, `Fiedler`, `Expander`), random
+walks (`RandomWalk`, `Normalized`, `Stationary`), and variational analysis
+(Courant–Fischer, the Cheeger bounds) — see "What's here" below — rather
+than one isolated result.
+
 ### The mushy center and hard crust
 
 Scaffold deliberately keeps two kinds of work separate:

@@ -6,6 +6,85 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Foster's Theorem Phase A (run 1, 2026-08-19): DELIVERED.** The Active
+priority table's top High item, `proposals/spectral-graph-sparsification.md`
+**Phase A only**, delivered as pure hard crust in the new
+`Scaffold/Mathlib/GraphTheory/Foster` — **zero new axioms** (count stays 13;
+`#print axioms foster_theorem` reads only `propext, Classical.choice,
+Quot.sound`). Phase B was NOT started (blocked in the proposal on the
+unresolved matrix-Chernoff scope decision).
+
+**Delivered** (all proved): `card_filter_eigvalOf_laplacian_eq_zero` (the
+kernel of a connected Laplacian occupies exactly one eigenbasis index —
+at most one by orthonormality against the one-dimensional kernel, at
+least one because `onesVec` is a nonzero kernel vector — the counting
+fact behind `n − 1`); `effectiveResistance_eq_sum_eigbasis` (the
+per-pair spectral sum `R u v = ∑_k (v_k u − v_k v)²/λ_k` over nonzero
+eigenvalues — the pseudoinverse-free Foster kernel); the headline
+`foster_theorem` (`(∑ i, ∑ j, A i j * R i j)/2 = card V − 1` on every
+connected symmetric-nonnegative network, stated at full strength with
+no cardinality hypothesis); and the leverage-score objects
+(`leverageScore` — the importance-sampling object of the blocked
+Phase B, junk below `2 ≤ card V` documented — and
+`sum_leverageScore_eq_two`, the probability-distribution corollary with
+`hcard` as the division guard). Route exactly as the proposal's
+"Correction" scoped: spectral resolution + double-sum swap +
+per-eigenvector Dirichlet evaluation (`∑_{i,j} A i j (v_k i − v_k j)² =
+2 λ_k` via `laplacian_quadForm`/`quadForm_eigvecOf_self`) + the
+kernel-index count — reconciling (not reversing) the
+`electrical-structure-crust.md` removal, which was of the `L⁺` route
+only; no pseudoinverse or matrix square root anywhere.
+
+**QA** `SpectralGraph/Foster_QA.lean` (53 declarations): the cliques
+`K₃`/`K₄`, the path `P₃`, and the 3-leaf star — every resistance pinned
+by an explicit potential witness (`K₄` through the general-pair
+potential `(e i − e j)/4`, proved to solve the unit demand for *every*
+pair via the entrywise `L = 4I − J` structure, so all twelve ordered
+terms are pinned by one lemma); each ordered Foster sum computed
+independently of the theorem (`4`, `6`, `4`, `6`) and cross-checked
+against the theorem's `card V − 1` (`2`, `3`, `2`, `3`); the
+**double-counting factor refuted-on-omission on both cliques** exactly
+as the proposal's calibration demands (`4 ≠ 2` on `K₃`, `6 ≠ 3` on
+`K₄` — a statement shape dropping the `/ 2` would be refuted);
+non-edge pairs provably absent (zero conductance); leverage pinned
+(`K₃` edge `1/3`, total `2`; `K₄` edge `1/6`).
+
+**Verification:** `lake env lean` on both changed modules — zero
+errors, zero warnings (the five `K₄`-adjacent QA lemmas where `simp`
+closes some `fin_cases` branches carry targeted
+`set_option linter.unreachableTactic/unusedTactic false in`
+modifiers); `#print axioms` on all four public theorems confirms only
+the three standard axioms; `lake build` of the Foster target ✔; full
+`lake build` ✔ (2181 targets, one more than before — the new module);
+all twenty-nine QA modules batch-elaborated, zero errors (only the
+eight documented pre-existing section-variable warnings in untouched
+modules); `lint_axioms` (13), `check_citations`, `check_markdown_links`
+pass; scoreboard regeneration idempotent (625/13/0). Environment: the
+pruned Mathlib-oleans state recurred at run start; the recorded
+interpreted cache fetch restored 5387 oleans before any elaboration
+(see the scoreboard's provenance note).
+
+**Records updated:** module/QA docstrings, umbrella (`Scaffold.lean` +
+its docstring), scoreboard (625/13/0, verification rows, Foster
+milestone bullet), radar (subject axis 6 re-scored **4.0 → 4.5** — a
+new theorem family, global network identities, not packaging — with
+the re-score logged; QA 625/29 with the Foster QA kind; weakest-axes
+paragraph; re-scoring log), README (625, axis-6 cell 4.5, Foster added
+to the proved list and the electrical-structure module row), SGT index
+map (new Foster section, 5 rows), backlog item 7 (Foster delivered;
+family residuals unchanged), proposal Phase A delivery record + status
+header, and `proposals/README.md` (Phase A row moved from Active to
+Delivered; progress note rewritten — **decidable spectral certificates
+is now the top High item**, Step 0 gate first).
+
+**Next milestone (open):** the Active table's top High item is now
+**decidable spectral certificates Step 0** (the convention decision +
+ℚ-`decide` spike, both scoped in its own proposal — do not begin Step
+1 before they are recorded); the Medium rows (Fiedler Phase B — needs
+an operator decision; mixing-time Step 1; Reversibility Phase A;
+Relative Entropy) are queued behind it. The operator's Medium/Low rows
+and the untracked `why-sgt.md` are preserved untouched.
+
 **Electrical-flow routing, step 5 — the ICP capacity-reinforcement
 example (run 1, 2026-08-19): DELIVERED; the program is COMPLETE.** The
 Active priority table's top High item `proposals/electrical-flow-routing.md`,

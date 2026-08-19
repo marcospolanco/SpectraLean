@@ -1,12 +1,60 @@
 # Proposal: Foster's Theorem, and (Separately, Blocked) Spielman–Srivastava Sparsification
 
-**Status:** Split 2026-08-18 into two independently-gated pieces on review —
-see "Correction" below before treating this as one proposal. **Phase A
-(Foster's theorem): priority High, ready now.** **Phase B (the
-sparsification guarantee): not ready — blocked on a factual error in its
-own citation, requires a scope decision before any Lean work.** This
-document authorizes no Lean changes, axiom admissions, commits, clean-room
-copying, or external publication on its own.
+**Status:** Phase A (Foster's theorem) **DELIVERED 2026-08-19** — see
+"Phase A delivery record" below; the Active priority row has moved to
+the Delivered table. Phase B (the sparsification guarantee) remains
+**not ready — blocked on a factual error in its own citation, requiring
+a scope decision before any Lean work.** This document authorizes no
+commits, clean-room copying, or external publication on its own.
+
+## Phase A delivery record (2026-08-19)
+
+Delivered in the new `Scaffold/Mathlib/GraphTheory.Foster`, all proved,
+**zero new axioms** (explicit count stays 13; `#print axioms
+foster_theorem` reads only `propext, Classical.choice, Quot.sound`):
+
+- `card_filter_eigvalOf_laplacian_eq_zero` — the kernel of a connected
+  Laplacian occupies exactly one eigenbasis index (at most one by
+  orthonormality against the one-dimensional kernel, at least one
+  because `onesVec` is a nonzero kernel vector) — the counting fact
+  behind `n − 1`.
+- `effectiveResistance_eq_sum_eigbasis` — the per-pair spectral sum
+  `R u v = ∑_k (v_k u − v_k v)²/λ_k` over nonzero eigenvalues.
+- `foster_theorem` — `(∑ i, ∑ j, A i j * R i j)/2 = card V − 1`, proved
+  at full strength (no `hcard` hypothesis; the `card V = 1` case
+  degenerates to `0 = 0` on both sides).
+- `leverageScore` (no cardinality parameter, matching the sketch; junk
+  below `2 ≤ card V` documented) and `sum_leverageScore_eq_two` (the
+  ordered scores sum to exactly `2` — the probability-distribution
+  statement, with `hcard` as the division guard).
+
+Route: exactly the eigenbasis route this document's "Correction"
+scoped — the spectral-resolution + kernel-count argument, no
+pseudoinverse, no matrix square root, no new Mathlib machinery. **The
+prior removal decision stands reconciled:** the rejection was of the
+`Tr(L^{1/2}L⁺L^{1/2})` route; the delivered proof never forms `L⁺`.
+
+QA `Scaffold/QA/SpectralGraph/Foster_QA.lean` (53 declarations), per
+acceptance criterion 3: the cliques `K₃` and `K₄` (every resistance
+pinned by explicit potential witnesses — `K₄` through the general-pair
+potential `(e i − e j)/4`, proved to solve the unit demand for *every*
+pair via the entrywise `L = 4I − J` structure), the path `P₃`, and the
+3-leaf star; each ordered Foster sum computed independently of the
+theorem (`4`, `6`, `4`, `6`) and cross-checked against the theorem's
+`card V − 1`; **the double-counting factor tested on both cliques
+exactly as the calibration section demands** (`4 ≠ 2` on `K₃`, `6 ≠ 3`
+on `K₄` — a statement shape dropping the `/ 2` would be refuted);
+non-edge pairs provably absent; leverage computed (`K₃` edge `1/3`,
+total `2`; `K₄` edge `1/6`). Acceptance criterion 4 (docs): umbrella,
+scoreboard (625/13/0), radar (subject axis 6 re-scored 4.0 → 4.5 with
+the milestone logged; QA count 625/29), README, SGT index map, and
+backlog item 7 all updated.
+
+Open next step within this proposal: **none for Phase A.** Phase B
+stays blocked exactly as before — no matrix-Chernoff result exists in
+this repository, and the three named resolution paths remain a human
+scope decision.
+
 
 ## Correction (2026-08-18, on review)
 

@@ -226,7 +226,19 @@ upper bound the crust keeps out of scope). **Program complete
 capacity-reinforcement packaging (`increaseConductance`,
 `supportGraph_connected_of_le`, the one-hypothesis
 `effectiveResistance_le_increaseConductance`), closing
-`electrical-flow-routing.md` in full at zero axiom cost. The family's
+`electrical-flow-routing.md` in full at zero axiom cost. **Foster's
+theorem delivered (2026-08-19):** `GraphTheory.Foster`
+(`proposals/spectral-graph-sparsification.md` Phase A, the top High item
+after the flow program closed) proves `(∑ i, ∑ j, A i j * R i j)/2 =
+card V − 1` on every connected symmetric-nonnegative network — zero
+new axioms, via the pseudoinverse-free eigenbasis route (the per-pair
+spectral sum, the double-sum swap, per-eigenvector Dirichlet
+evaluation, and the one-kernel-index count against
+`laplacian_kernel_eq_span_onesVec`), with the leverage-score
+corollaries (`leverageScore`, `sum_leverageScore_eq_two`) defining the
+sparsification-facing importance-sampling object; QA on `K₃`/`K₄`/`P₃`/
+star witnesses the ordered-pair double-counting factor (`4 ≠ 2`,
+`6 ≠ 3`) exactly as the proposal's calibration demands. The family's
 remaining items are unchanged: the definiteness residual
 `R u v = 0 ↔ u = v`, the resistance metric (triangle inequality),
 Matrix–Tree, and Kirchhoff network theorems beyond the conservation

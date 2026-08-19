@@ -6,7 +6,7 @@ conductance, Cheeger theory, interlacing, and event-driven dynamics.
 ## Status
 
 **Implemented and build-certified** (see the QA scoreboard):
-`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,Cheeger,Dynamics}`.
+`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Cheeger,Dynamics}`.
 
 ## Modules and Declarations
 
@@ -203,6 +203,27 @@ All proved, no axioms.
 | `supportGraph_le_of_le` | support graphs grow with the network: entrywise `A ≤ B` ⇒ `supportGraph A ≤ supportGraph B` (no nonnegativity hypothesis — `0 < A i j ≤ B i j`) |
 | `supportGraph_connected_of_le` | capacity growth preserves connectivity: `A ≤ B` entrywise and `supportGraph A` connected ⇒ `supportGraph B` connected (Mathlib's `SimpleGraph.Connected.mono` along the containment) — the step-4-recorded optional adapter, delivered as step 5's packaging companion |
 | `effectiveResistance_le_increaseConductance` | **capacity reinforcement cannot worsen certified routing cost (step-5 headline, the ICP example)**: `effectiveResistance (increaseConductance A i j δ) u v ≤ effectiveResistance A u v` for `δ ≥ 0`, with only the *original* network's connectivity hypothesized (the reinforced network's derived by the adapter); QA is the release example — the Mathlib `Fin 3` path graph through `toWAdj`, reinforcement computed to the doubled-path matrix, `2 → 3/2` strict |
+
+
+### `Scaffold.Mathlib.GraphTheory.Foster` (Foster's theorem, leverage scores)
+
+Foster's theorem for weighted graphs (proposal
+`spectral-graph-sparsification.md` **Phase A only**, High, delivered
+2026-08-19): the conductance-weighted effective resistances sum to the
+spanning-tree edge count. All proved, zero axioms, via the proposal's
+**pseudoinverse-free eigenbasis route** — no `L⁺` and no matrix square
+root anywhere; the unit-demand potential is used only through its
+energy, resolved spectrally (`quadForm_eigvalOf`). Phase B (the
+sparsification guarantee) is blocked in that proposal on an unresolved
+matrix-Chernoff scope decision and is not developed.
+
+| Declaration | Content |
+|-------------|---------|
+| `card_filter_eigvalOf_laplacian_eq_zero` | the kernel of a connected Laplacian occupies exactly one eigenbasis index — at most one by orthonormality against the one-dimensional kernel (`laplacian_kernel_eq_span_onesVec`), at least one because `onesVec` is a nonzero kernel vector; the counting fact that turns "each nonzero eigenvalue contributes `1`" into `card V − 1` |
+| `effectiveResistance_eq_sum_eigbasis` | **resistance as a spectral sum:** `R u v = ∑_k (v_k u − v_k v)² / λ_k` over the nonzero-eigenvalue eigenvectors (zero-eigenvalue terms omitted; their voltage differences vanish) — the per-pair Foster kernel |
+| `foster_theorem` | **Foster's theorem (1949):** `(∑ i, ∑ j, A i j * R i j) / 2 = card V − 1` on every connected symmetric-nonnegative network — in unordered-pair form `∑_{u<v} w_e R_e = n − 1`; the `/ 2` is the ordered-pair double count (QA-witnessed load-bearing: the ordered sums compute to `4 ≠ 2` on `K₃` and `6 ≠ 3` on `K₄`) |
+| `leverageScore` | the pair's share `A u v * R u v / (card V − 1)` of the Foster budget — the importance-sampling object of Spielman–Srivastava sparsification (Phase B, blocked); junk values below `2 ≤ card V` documented in the docstring |
+| `sum_leverageScore_eq_two` | **Foster in leverage form:** the ordered-pair leverage scores sum to exactly `2` (unordered: `1`), making them a probability distribution over edges; `2 ≤ card V` is the division guard |
 
 
 ### `Scaffold.Mathlib.GraphTheory.Cheeger`

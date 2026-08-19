@@ -4,6 +4,7 @@ import Scaffold.Mathlib.Core.MatrixUpdates
 import Scaffold.Mathlib.GraphTheory.Spectral
 import Scaffold.Mathlib.GraphTheory.SimpleGraphAdapter
 import Scaffold.Mathlib.GraphTheory.Electrical
+import Scaffold.Mathlib.GraphTheory.ElectricalFlow
 import Scaffold.Mathlib.GraphTheory.Cheeger
 import Scaffold.Mathlib.GraphTheory.Fiedler
 import Scaffold.Mathlib.GraphTheory.RandomWalk

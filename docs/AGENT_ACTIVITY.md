@@ -2562,3 +2562,25 @@ Rayleigh/Dirichlet monotonicity (cheaper now through the padding
 bridge), Fiedler Phase B (decision-gated). The operator's concurrent
 `proposals/electrical-flow-routing.md` and its priority row preserved
 untouched; nothing committed.
+
+## 2026-08-19T00:30:01Z — Electrical-flow routing, step 0 (representation survey) + step 1 (Kirchhoff conservation)
+
+**Run:** `20260819T003001Z-run-1`  
+**Session:** `ses_fe897785cffejcLqL4bSCUd1j6`  
+**Status:** in-progress  
+**Milestone:** Open the High item `proposals/electrical-flow-routing.md`: run its step 0 (pin and record the flow representation against a fresh Mathlib survey) and then its step 1 — the smallest independently useful Lean slice (electrical current, divergence, flow predicates, the Kirchhoff bridge from unit-demand potentials to unit flows). Zero new axioms; turns the delivered potential-based resistance API into a routing object. Steps 2–5 are not started this run.
+
+## 2026-08-19T00:41:19Z — Electrical-flow routing steps 0–1 delivered (representation + Kirchhoff conservation)
+
+**Run:** `20260819T003001Z-run-1`  
+**Session:** `ses_fe897785cffejcLqL4bSCUd1j6`  
+**Status:** completed  
+**Milestone:** Open the Active table's High item `proposals/electrical-flow-routing.md`: step 0 (representation survey/decision, recorded before any Lean) and step 1 (the flow interface and Kirchhoff bridge — the resistance API becomes a routing object). Zero new axioms (13 unchanged); steps 2–5 not started.
+
+**Changes:** step 0 recorded in the proposal first — fresh pin survey found no flow/circulation/max-flow API, no graph-native divergence (only continuum divergence theorems), nothing electrical, and no usable oriented-edge API (`SimpleGraph.Dart` is counting machinery), so the matrix representation `EdgeFlow V = Matrix V V ℝ` was pinned with conductance orientation, the zero-conductance support as an explicit `IsFlowOn` conjunct, and the `1/2` ordered-pair factor reserved for step-2 `flowEnergy`; target module the new focused `GraphTheory.ElectricalFlow` (coverage map's electrical row re-surveyed, same absence verdict). Step 1: `electricalCurrent`, `flowDivergence`, `IsFlowOn`, `IsUnitFlow`, `electricalCurrent_antisymm`, `electricalCurrent_eq_zero_of_weight_eq_zero`, the Kirchhoff bridge `flowDivergence_electricalCurrent` (a one-line load-bearing consumer of `laplacian_mulVec_apply`'s exact sign convention), `isFlowOn_electricalCurrent`, and the headline `isUnitFlow_electricalCurrent` (a unit-demand potential induces a valid unit flow). QA `SpectralGraph/ElectricalFlow_QA.lean` (16 declarations): `K₂` and 3-path currents/divergences computed from raw definitions (internal vertex `0`), plus negative witnesses for both proposal-named traps — asymmetric network `!![0,2;1,0]` refutes current antisymmetry (`2 ≠ 1`), and an edgeless-network phantom (antisymmetric, unit divergence) excluded by the support conjunct alone. Umbrella import added; scoreboard (500/13/0), radar (QA 500/28; subject axis 6 evidence extended, score held at 3.0 per protocol and recorded), README, SGT index map, coverage map, proposal, and `proposals/README.md` progress note updated.
+
+**Decisive commands and outcomes:** `lake env lean` on `GraphTheory.ElectricalFlow` and `ElectricalFlow_QA` — both zero errors/warnings (three `omit` clauses for unused section variables); `lake build` of both targets ✔; full `lake build` ✔; all 28 QA modules batch-elaborated with zero failures; `lint_axioms` (13), `check_citations`, `check_markdown_links` pass; scoreboard regeneration byte-idempotent.
+
+**Remaining risk:** the flow interface is plumbing — its mathematical payoff (Thomson, Rayleigh monotonicity) is steps 3–4 and depends on step 2's `flowEnergy` landing with the `1/2` factor QA-witnessed; the zero-edge trap's energy-level refutation is deferred to step 2 by design (no energy definition exists yet to refute with).
+
+**Next handoff:** proposal step 2 — `flowEnergy` (explicit zero branch, mandatory `1/2` factor), the agreement `flowEnergy A (electricalCurrent A f) = quadForm (laplacian A) f`, and the double-counting QA fixture; then steps 3–4 as separate runs. Concurrent operator additions preserved untouched: the uncommitted `proposals/README.md` interlacing-row edit and the new untracked `proposals/decidable-spectral-certificates.md` (a High proposal not yet indexed in the priority table — the next run should treat the table, kept current by the operator, as authoritative). Nothing committed.

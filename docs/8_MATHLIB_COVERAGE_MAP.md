@@ -2,7 +2,8 @@
 
 **Status:** Canonical reference, dated snapshot against a pinned dependency  
 **Pinned Mathlib:** v4.14.0 (`lakefile.lean`)  
-**Survey date:** 2026-08-18
+**Survey date:** 2026-08-19 (electrical/flow row re-surveyed for
+`proposals/electrical-flow-routing.md` step 0; other rows as of 2026-08-18)
 
 ## Purpose
 
@@ -36,7 +37,7 @@ the correction here so it doesn't live only inside one proposal.
 | Probability & concentration | **Foundational only** | `Mathlib/Probability/` — 60+ files, but primitives: `Moments.lean`, `Variance.lean`, martingale/stopping-time infrastructure, `StrongLaw.lean`, `BorelCantelli.lean`, standard distributions (`Gaussian.lean`, `Binomial.lean`, `Poisson.lean`). **Zero** named concentration inequalities — no Hoeffding, no Bernstein, no sub-Gaussian package under any name. This is why Scaffold's `hoeffding_iid`/`bernstein_iid` could be converted from admitted to proved (`docs/7_SGT_RADAR.md`, axiom minimization axis): the ingredients exist upstream, the named theorems don't. |
 | Perturbation theory (Weyl / Davis–Kahan / interlacing) | **Absent** | Zero matches anywhere in the pinned tree, under any naming — checked directly against `Mathlib/LinearAlgebra`, `Mathlib/Analysis`. This is the weakest tendril outright, and it is exactly the set Scaffold carries at the perturbation boundary: Weyl and Davis–Kahan as admitted axioms (the perturbation bridges), while interlacing — still absent upstream — was proved *locally* on 2026-08-18 from Scaffold's own Courant–Fischer engine (itself built on Mathlib's spectral theorem), retiring its axiom. Not a coincidence: absence upstream forced the local engine. |
 | Random walks / Markov chains (graph-native) | **Absent** | No transition-matrix or stationary-distribution package for graphs. The only "Markov" hits in the pinned tree are Markov's inequality (`Function/LpSeminorm/ChebyshevMarkov.lean`) and the Riesz–Markov–Kakutani representation theorem — unrelated to stochastic processes on graphs. `Data/Matrix/DoublyStochastic.lean` exists (Birkhoff–von Neumann territory) but is not graph-native. |
-| Electrical structure (resistance, Kirchhoff, Matrix-Tree) | **Absent** | No Moore–Penrose pseudoinverse — `LinearAlgebra/Matrix/NonsingularInverse.lean:17` states explicitly: "pseudoinverses which we do not consider here." No resistance, no spanning-tree enumeration, no Kirchhoff identity under any naming. |
+| Electrical structure (resistance, Kirchhoff, Matrix-Tree) | **Absent** | No Moore–Penrose pseudoinverse — `LinearAlgebra/Matrix/NonsingularInverse.lean:17` states explicitly: "pseudoinverses which we do not consider here." No resistance, no spanning-tree enumeration, no Kirchhoff identity under any naming. Re-surveyed 2026-08-19 for the electrical-flow proposal: also no network-flow/max-flow/circulation API, no graph-native divergence (the only `Divergence` files are the box/measure-integral divergence *theorems* on continua), and no flow/energy API on the one oriented-edge type (`SimpleGraph.Dart` is counting machinery) — the flow representation decision is recorded in that proposal. |
 | Functional inequalities (Poincaré, log-Sobolev, Dirichlet forms) | **Absent** | The only "Poincaré" hit in the entire pinned tree is `Geometry/Manifold/PoincareConjecture.lean` — the topological conjecture, unrelated to the functional-analysis inequality. No log-Sobolev, no Dirichlet-form theory under any naming. |
 | Perron–Frobenius / nonnegative-matrix theory | **Absent** | Zero hits, checked against `Mathlib/LinearAlgebra` and `Mathlib/Combinatorics` directly (the only "Perron" hits anywhere in the pinned tree are unrelated `BoxIntegral` files — Perron integration, a different Oskar Perron result). |
 

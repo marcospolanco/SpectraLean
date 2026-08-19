@@ -218,6 +218,53 @@ Prefer the matrix form unless the survey reveals an upstream oriented-edge API
 that materially reduces the proof and conversion cost. Record the choice and
 its zero-edge semantics before stating a theorem.
 
+#### Decision (recorded 2026-08-19, before any Lean in this program)
+
+**Survey of the pinned Mathlib (v4.14.0), re-run 2026-08-19:**
+
+- No network-flow, max-flow/min-cut, or circulation declaration anywhere
+  (`networkflow|network_flow|maxflow|maxFlow|min_cut|circulation`: zero hits).
+- No graph-native divergence: the only `Divergence` material is the box- and
+  measure-integral divergence *theorem* on `ℝⁿ`-style domains
+  (`Analysis/BoxIntegral/DivergenceTheorem.lean`,
+  `MeasureTheory/Integral/DivergenceTheorem.lean`) — analysis on continua,
+  with nothing discrete or finite-graph.
+- No electrical-network API: zero hits for `electric`, `Kirchhoff`, or
+  `Thomson`; the `Rayleigh` hits are number theory and the Rayleigh
+  *quotient* (`Analysis/InnerProductSpace/Rayleigh.lean` — operator
+  theory, unrelated to monotonicity); no `conductance`, no `resistance`.
+  Confirms the coverage map's electrical row (absent) — row evidence
+  extended with the flow/divergence specifics, same date.
+- The only oriented-edge API is `SimpleGraph.Dart` (a bundled `V × V` with
+  an adjacency proof; `symm`, `edge`, counting uses). It carries no flow,
+  divergence, or energy API, and a dart-indexed flow would force converting
+  `WAdj` weights through `supportGraph` (which drops self-loop weights by
+  looplessness) at every interface, with no upstream consumer of the
+  conversion. No `Matrix.IsAntiSymm` exists in the pin, so antisymmetry is
+  stated as a plain quantifier in `IsFlowOn` as proposed.
+
+**Decision:** the matrix representation `EdgeFlow V := Matrix V V ℝ` exactly
+as sketched above (`electricalCurrent`, `flowDivergence`, `IsFlowOn`,
+`IsUnitFlow` at the proposal's semantics; divergence stated as the function
+equality `flowDivergence θ = Pi.single u 1 − Pi.single v 1`, which is the
+sketch's `(fun i => flowDivergence θ i) = …` in curried form). Zero-edge
+semantics: support is the `IsFlowOn` second conjunct (current may not ride a
+zero-conductance ordered pair); `flowEnergy` (step 2) takes the explicit
+zero branch with the mandatory `1/2` ordered-pair factor. **Target module:**
+a focused new `Scaffold.Mathlib.GraphTheory.ElectricalFlow` importing
+`GraphTheory.Electrical` — `Electrical.lean` keeps its resistance scope
+bounded, and the flow interface has its own growth path (energy, Thomson,
+monotonicity).
+
+**Step 1 delivered 2026-08-19 (same run, after this decision):**
+`electricalCurrent_antisymm`, `electricalCurrent_eq_zero_of_weight_eq_zero`,
+`flowDivergence_electricalCurrent`
+(`flowDivergence (electricalCurrent A f) = laplacian A *ᵥ f`),
+`isFlowOn_electricalCurrent`, and the headline
+`isUnitFlow_electricalCurrent` (a unit-demand potential induces a unit
+flow), plus QA `SpectralGraph/ElectricalFlow_QA.lean` (see the delivery
+notes in the execution plan). No new axioms; steps 2–5 not started.
+
 ### 1. Electrical current and Kirchhoff conservation
 
 Add the flow definitions and prove:

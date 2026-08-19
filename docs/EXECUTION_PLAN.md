@@ -1120,6 +1120,87 @@ Mediums (Fiedler Phase B, decision-gated; mixing-time step 1) and the
 min–max engine's other named consumers (full Rayleigh/Dirichlet
 monotonicity — now cheaper through the delivered padding bridge).
 
+**Active slice (run 1, 2026-08-19): electrical-flow routing steps 0
+and 1 — representation pinned and Kirchhoff conservation delivered —
+DELIVERED.** Selected from `proposals/README.md`'s Active priority
+table (its High entry at run start). Per the proposal's own operating
+instructions: step 0 ran first (the pinned Mathlib re-surveyed; the
+representation choice, zero-edge semantics, and target module recorded
+in the proposal *before any Lean*), then the one Lean build step —
+step 1. Zero new axioms (count stays 13); steps 2–5 (energy
+agreement, Thomson, Rayleigh monotonicity, the ICP example) were
+**not** started this run.
+
+**Step 0 (survey and representation decision, recorded in the
+proposal):** the pin has no network-flow/circulation/max-flow API
+anywhere, no graph-native divergence (its only `Divergence` files are
+the box/measure-integral divergence *theorems* on continua), no
+electrical-network API (the `Rayleigh` hits are number theory and the
+Rayleigh *quotient*), and the one oriented-edge type
+`SimpleGraph.Dart` carries no flow/energy API and would force
+`supportGraph` conversions with no upstream consumer — the matrix
+representation `EdgeFlow V = Matrix V V ℝ` was pinned exactly as the
+proposal sketched (conductance orientation; support as `IsFlowOn`'s
+second conjunct; the ordered-pair `1/2` factor reserved for
+`flowEnergy` in step 2), in a new focused module
+`GraphTheory.ElectricalFlow` importing `Electrical` (keeps the
+resistance module bounded; the flow interface has its own growth
+path). Coverage map's electrical row re-surveyed with the
+flow/divergence specifics (same absence verdict).
+
+**Step 1 delivered** (all proved, `GraphTheory.ElectricalFlow`):
+`electricalCurrent` (Ohm's law `A i j * (f i − f j)`), `flowDivergence`
+(net outflow `∑ j, θ i j`), the predicates `IsFlowOn` (antisymmetry +
+zero-conductance support — the guard against the proposal's named
+zero-conductance trap) and `IsUnitFlow` (divergence exactly the unit
+demand `e u − e v`),
+`electricalCurrent_antisymm` (symmetry load-bearing),
+`electricalCurrent_eq_zero_of_weight_eq_zero` (support,
+unconditional), the **Kirchhoff bridge**
+`flowDivergence_electricalCurrent`
+(`flowDivergence (electricalCurrent A f) = laplacian A *ᵥ f` — a
+one-line load-bearing consumer of the center's exact sign convention
+`laplacian_mulVec_apply`), `isFlowOn_electricalCurrent`, and the
+headline `isUnitFlow_electricalCurrent`: every unit-demand potential
+induces a valid unit flow — the potential-based resistance API becomes
+a routing object.
+
+**QA** `SpectralGraph/ElectricalFlow_QA.lean` (16 declarations, 500
+total, 28 modules): `K₂` — current matrix `!![0,1;-1,0]`, divergence
+`![1,-1]`, both computed from the raw definitions independently of the
+bridge, plus the unit-flow instantiation through the headline theorem;
+3-path — unit flow `0 → 1 → 2` with the internal vertex's divergence
+computed to `0` (Kirchhoff conservation away from source/sink) and
+nothing on the non-adjacent pair; **negative witnesses for both
+proposal-named traps** — the asymmetric network `!![0,2;1,0]` where
+the current provably fails antisymmetry (`2 ≠ 1`: `A.IsSymm`
+load-bearing), and the edgeless-network phantom `!![0,1;-1,0]` which
+satisfies antisymmetry *and* the unit divergence yet is excluded by
+`IsFlowOn`'s support conjunct alone (dropping it would admit a unit
+flow on a network with no edges; the energy-level refutation is
+deferred to step 2 with `flowEnergy`).
+
+**Docs updated:** umbrella (new import), scoreboard (500/13/0,
+verification rows, milestone bullet), radar (QA-axis count 500/28 with
+the new QA kind; subject axis 6 evidence extended and the score
+**held at 3.0** per protocol — the axis rises with Thomson/Rayleigh,
+which this interface exists to carry; proved-depth text), README
+snapshot (umbrella list, 500 QA, date), SGT index map (new
+`ElectricalFlow` section), coverage map (electrical row re-survey),
+proposal step-0 decision + step-1 delivery record, and
+`proposals/README.md` progress note (the operator's uncommitted
+interlacing-table edit preserved untouched).
+
+**Next milestone (open):** proposal step 2 — flow energy
+(`flowEnergy` with the explicit zero branch and the mandatory `1/2`
+ordered-pair factor), the energy agreement
+`flowEnergy A (electricalCurrent A f) = quadForm (laplacian A) f`
+(load-bearing on the `1/2` conventions in both the current energy and
+`laplacian_quadForm`), and its QA double-counting fixture; then steps
+3–4 (Thomson, Rayleigh monotonicity) as separate runs. Or the
+remaining Mediums (Fiedler Phase B, decision-gated; mixing-time step
+1).
+
 ## Ready queue
 
 1. ~~Proposal step 6 — the one-sided Dirichlet bound~~ — delivered
@@ -1147,6 +1228,32 @@ monotonicity — now cheaper through the delivered padding bridge).
    combinations, centering, sums) only when a consumer names them.
 
 ## Last verified state
+
+- 2026-08-19 (electrical-flow steps 0–1: representation decision +
+  Kirchhoff conservation, no axiom change): `lake env lean` on
+  `GraphTheory.ElectricalFlow` and on
+  `QA.SpectralGraph.ElectricalFlow_QA` — both zero errors, zero
+  warnings (the three no-`Fintype`-needed lemmas silenced with `omit`
+  clauses); `lake build Scaffold.Mathlib.GraphTheory.ElectricalFlow`
+  and `lake build Scaffold.QA.SpectralGraph.ElectricalFlow_QA` ✔;
+  full `lake build` ✔; all twenty-eight QA modules elaborated
+  directly in one batch (zero failures); 500 QA declarations (+16, the
+  new `ElectricalFlow_QA`), no `sorry`/`admit` anywhere under
+  `Scaffold/`; 13 explicit cited axioms (unchanged — pure hard crust;
+  the flow interface is the routing plumbing the proposal's steps 2–4
+  consume); all hygiene scripts pass (`lint_axioms` 13 covered,
+  `check_citations`, `check_markdown_links`); scoreboard regenerated
+  (500/13/0) with verification rows and the milestone bullet; radar
+  (QA-axis count synced 500/28 with the new QA kind; subject axis 6
+  evidence extended with the score **held at 3.0** per protocol and
+  the hold recorded in the re-score log; proved-depth text), README
+  snapshot, SGT index map (new `ElectricalFlow` section), coverage
+  map (electrical row re-surveyed for flows/divergence, same absence
+  verdict), proposal step-0 decision + step-1 delivery record, and
+  `proposals/README.md` progress note updated. The operator's
+  uncommitted `proposals/README.md` change (the interlacing delivery
+  row moved into the Delivered table) preserved untouched; nothing
+  committed.
 
 - 2026-08-18 (interlacing retirement, axiom 14 → 13): `lake env lean`
   on `GraphTheory.Spectral` — zero errors; the new-code

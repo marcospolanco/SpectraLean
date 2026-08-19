@@ -265,6 +265,40 @@ monotonicity).
 flow), plus QA `SpectralGraph/ElectricalFlow_QA.lean` (see the delivery
 notes in the execution plan). No new axioms; steps 2–5 not started.
 
+**Step 2 delivered 2026-08-19 (separate run):** `flowEnergy` defined
+exactly as pinned above (explicit zero branch, mandatory `1/2`
+ordered-pair factor), with `flowEnergy_electricalCurrent`
+(the energy agreement with `quadForm (laplacian A) f`),
+`flowEnergy_nonneg`, and
+`flowEnergy_electricalCurrent_eq_effectiveResistance` (a unit-demand
+current dissipates exactly the resistance it routes, on a connected
+graph). QA delivered the mandatory double-counting fixture (raw
+ordered-pair sum computes to `2 ≠ 1` = the Dirichlet energy on the unit
+edge, so omitting the `1/2` factor would break the agreement
+numerically — QA plan item 4), the deferred energy-level zero-edge
+refutation (QA plan item 5: the step-1 phantom's zero energy pinned,
+plus a Thomson-breaking refinement — an antisymmetric unit-divergence
+flow routing through zero-conductance pairs on a
+real-edge-plus-isolated-vertex network dissipates `0 < 1` = the real
+resistance, and is excluded by the support conjunct alone), the energy
+values of QA plan items 1 and 3 (`1` on the edge, `2` on the path,
+each cross-checked against independently computed Dirichlet energies
+and pinned resistance values), and a hypothesis-set witness (below).
+No new axioms; steps 3–5 not started.
+
+**Statement-shape deviation (recorded):** the proposal said the
+agreement proof "must use nonnegative weights and handle zero weights
+explicitly." The zero weights are handled explicitly — the termwise
+identity matches the zero branch to the vanishing weight — but the
+*nonnegativity hypothesis is not needed*: on a nonzero conductance the
+algebra `(c·x)²/c = c·x²` is pure field algebra. `flowEnergy_electricalCurrent`
+is therefore stated at **symmetry-only** strength (that is what
+`laplacian_quadForm` requires). QA witnesses both sides of this claim:
+the agreement instantiates on a symmetric *negative*-weight network
+(both sides compute to `-1`), where `flowEnergy_nonneg` — which does
+hypothesize nonnegativity — provably fails. QA plan item 2 (capacity
+increase `1 → 2`) belongs to step 4 and was not started.
+
 ### 1. Electrical current and Kirchhoff conservation
 
 Add the flow definitions and prove:

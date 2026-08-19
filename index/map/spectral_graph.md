@@ -164,32 +164,35 @@ value exists — the fallback's firing is QA-witnessed, not hidden).
 | `laplacian_cauchy_schwarz` | **semidefinite Cauchy–Schwarz:** `(f ⬝ᵥ L g)² ≤ quadForm L f * quadForm L g`, no connectivity hypothesis (proposal step 6, 2026-08-18) |
 | `effectiveResistance_ge_sq_div_quadForm` | **one-sided Dirichlet bound:** `(f u − f v)² / quadForm L f ≤ R u v` for any test potential of positive energy (proposal step 6, 2026-08-18) |
 
-### `Scaffold.Mathlib.GraphTheory.ElectricalFlow` (electrical flows and Kirchhoff conservation)
+### `Scaffold.Mathlib.GraphTheory.ElectricalFlow` (electrical flows, Kirchhoff conservation, flow energy)
 
 The routing object of proposal `electrical-flow-routing.md` (High,
-2026-08-18), steps 0–1 delivered 2026-08-19. Step 0 decision recorded
+2026-08-18), steps 0–2 delivered 2026-08-19. Step 0 decision recorded
 in the proposal before any Lean: matrix representation on ordered
 pairs (`EdgeFlow V = Matrix V V ℝ`; Mathlib re-surveyed — no
 flow/circulation/graph-divergence API in the pin, `SimpleGraph.Dart`
 carries none), weights are **conductances**, zero-conductance support
-is a named `IsFlowOn` conjunct, and the ordered-pair `1/2` factor is
-reserved for `flowEnergy` (step 2, not yet defined). All proved, no
-axioms. Consumers to come: flow energy and Thomson's principle
-(steps 2–3) and Rayleigh monotonicity (step 4) build on this
-interface.
+is a named `IsFlowOn` conjunct, and the ordered-pair `1/2` factor
+lives in `flowEnergy` (delivered, step 2). All proved, no axioms.
+Consumers to come: Thomson's principle (step 3) and Rayleigh
+monotonicity (step 4) build on this interface.
 
 | Declaration | Content |
 |-------------|---------|
 | `EdgeFlow` | flows on ordered vertex pairs (`abbrev` of `Matrix V V ℝ`) |
 | `electricalCurrent` | Ohm's law: `A i j * (f i − f j)` — conductance times voltage drop |
 | `flowDivergence` | net outflow: `∑ j, θ i j` |
-| `IsFlowOn` | valid flow: antisymmetric **and** supported (`A i j = 0 → θ i j = 0` — the zero-conductance trap guard) |
+| `IsFlowOn` | valid flow: antisymmetric **and** supported (`A i j = 0 → θ i j = 0` — the zero-conductance trap guard; QA-witnessed load-bearing at the energy level) |
 | `IsUnitFlow` | `IsFlowOn` + divergence exactly the unit demand `e u − e v` |
 | `electricalCurrent_antisymm` | current negates under pair reversal (symmetric weights; QA-witnessed load-bearing) |
 | `electricalCurrent_eq_zero_of_weight_eq_zero` | no conductance, no current (support, unconditional) |
 | `flowDivergence_electricalCurrent` | **Kirchhoff bridge**: `flowDivergence (electricalCurrent A f) = laplacian A *ᵥ f` (consumes the center's `laplacian_mulVec_apply` sign convention) |
 | `isFlowOn_electricalCurrent` | any potential's current is a flow on the network |
-| `isUnitFlow_electricalCurrent` | **headline**: a unit-demand potential induces a unit flow — the resistance API becomes a routing object |
+| `isUnitFlow_electricalCurrent` | **headline (step 1)**: a unit-demand potential induces a unit flow — the resistance API becomes a routing object |
+| `flowEnergy` | dissipated energy: ordered-pair sum of squared current over conductance with an explicit zero branch, halved for double counting (the `1/2` factor QA-witnessed mandatory, step 2) |
+| `flowEnergy_electricalCurrent` | **energy agreement (step 2)**: `flowEnergy A (electricalCurrent A f) = quadForm (laplacian A) f`, symmetry-only |
+| `flowEnergy_nonneg` | `0 ≤ flowEnergy A θ` for nonnegative conductances (nonnegativity load-bearing, QA-witnessed) |
+| `flowEnergy_electricalCurrent_eq_effectiveResistance` | **step-2 headline**: a unit-demand current dissipates exactly the resistance it routes (connected graph) |
 
 
 ### `Scaffold.Mathlib.GraphTheory.Cheeger`

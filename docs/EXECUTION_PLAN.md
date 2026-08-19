@@ -1201,6 +1201,86 @@ ordered-pair factor), the energy agreement
 remaining Mediums (Fiedler Phase B, decision-gated; mixing-time step
 1).
 
+**Active slice (run 1, 2026-08-19): electrical-flow step 2 — flow
+energy and the energy agreement — DELIVERED.** The Active priority
+table's top High item (electrical-flow routing), continuing its
+recorded next milestone. Scope held to the proposal's one-step rule:
+steps 3–5 (Thomson, Rayleigh, the ICP example) were **not** started.
+All proved, **no new axioms** (count stays 13).
+
+**Delivered in `GraphTheory.ElectricalFlow`:** `flowEnergy` exactly as
+the proposal pinned it — explicit zero branch (`if A i j = 0 then 0
+else θ i j ^ 2 / A i j`), summed over ordered pairs, halved for double
+counting; the **energy agreement**
+`flowEnergy_electricalCurrent` (`flowEnergy A (electricalCurrent A f)
+= quadForm (laplacian A) f` — termwise Ohm's-law algebra on the
+nonzero branch, zero-on-zero on the branch, then `laplacian_quadForm`;
+load-bearing on the `1/2` convention in *both* sums);
+`flowEnergy_nonneg` (squares over positive conductances — the base
+order fact steps 3–4 compare flows by); and the step-2 headline
+`flowEnergy_electricalCurrent_eq_effectiveResistance` (on a connected
+graph, a unit-demand current dissipates exactly the resistance it
+routes — agreement composed with the crust's solution-level energy
+identity and the total-function agreement theorem).
+
+**Statement-shape deviation (recorded in the proposal):** the
+agreement landed at **symmetry-only** strength — the proposal's
+"must use nonnegative weights" is satisfied by the explicit zero-branch
+handling; the nonzero-branch algebra `(c x)²/c = c x²` is pure field
+algebra. QA witnesses both sides of the claim: the agreement
+instantiates on a symmetric negative-weight network (both sides `-1`)
+where `flowEnergy_nonneg` — which does hypothesize nonnegativity —
+provably fails (energy `-1 < 0`).
+
+**QA** `SpectralGraph/ElectricalFlow_QA.lean` (+25 declarations, 41 in
+file, 525 total): energies `1`/`2` computed from the raw `flowEnergy`
+definition on `K₂`/`P₃`, each cross-checked against the independently
+computed Dirichlet energies and pinned resistance values (three routes
+meeting at each number); the **mandatory double-counting fixture** —
+raw ordered-pair sum computes to `2 ≠ 1` = Dirichlet energy, so
+omitting the `1/2` factor would numerically break the agreement; the
+step-1 phantom's deferred energy pinning (`0` on the edgeless
+network); the **zero-energy competitor** — on a real edge plus an
+isolated vertex, an antisymmetric unit-divergence flow routing through
+zero-conductance pairs dissipates `0 < 1` = the real resistance and is
+excluded by `IsFlowOn`'s support conjunct alone (over
+flows-satisfying-everything-except-support, Thomson's step-3 statement
+would assert `1 ≤ 0` on this fixture); and the hypothesis-set witness
+above. Fixture note recorded: all-zero-row matrices use the repo's
+entrywise-`if` definition pattern (the matrix notation's zero-function
+normalization leaves `vecTail` leftovers otherwise).
+
+**Verification:** `lake env lean` on both changed modules — zero
+errors, zero warnings (one new `omit` clause for `flowEnergy_nonneg`);
+`lake build` of both targets ✔; full `lake build` ✔; all 28 QA
+modules batch-elaborated with zero errors (only the documented
+pre-existing linter notes in untouched modules); `lint_axioms` (13
+covered), `check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (525/13/0) and idempotent.
+
+**Docs updated:** scoreboard (525/13/0, milestone bullet, verification
+rows, reviewed date), radar (QA-axis count 525/28 with the step-2 QA
+kind described; subject axis 6 evidence extended with the score **held
+at 3.0** per protocol — an identity, not a new inequality; proved-depth
+text), README snapshot (umbrella cell, 525 QA), SGT index map (4 new
+`ElectricalFlow` rows, section re-titled), proposal step-2 delivery
+record + statement-shape deviation, and `proposals/README.md` progress
+note (the operator's uncommitted sparsification-split table rows
+preserved untouched).
+
+**Next milestone (open):** proposal step 3 — **Thomson's principle**
+(`effectiveResistance A u v ≤ flowEnergy A θ` for every valid unit
+flow `θ`, via the electrical current as the minimizer and
+`flowEnergy_nonneg` on the divergence-free difference; the proposal
+suggests splitting out the discrete integration-by-parts lemma if it
+deserves a reusable interface); then steps 4–5 (Rayleigh monotonicity
+in conductance form — orientation recorded as binding — and the ICP
+capacity-reinforcement example). Or the remaining High items: Foster
+Phase A (pseudoinverse-free eigenbasis route, needs its own
+statement-shape spike) or the decidable-certificates Step 0
+(convention decision + ℚ-kernel `decide` spike, both scoped in the
+proposal).
+
 ## Ready queue
 
 1. ~~Proposal step 6 — the one-sided Dirichlet bound~~ — delivered
@@ -1228,6 +1308,36 @@ remaining Mediums (Fiedler Phase B, decision-gated; mixing-time step
    combinations, centering, sums) only when a consumer names them.
 
 ## Last verified state
+
+- 2026-08-19 (electrical-flow step 2: flow energy and the energy
+  agreement, no axiom change): `lake env lean` on
+  `GraphTheory.ElectricalFlow` and on
+  `QA.SpectralGraph.ElectricalFlow_QA` — both zero errors, zero
+  warnings (one new `omit` clause on `flowEnergy_nonneg`; the
+  module's three step-1 clauses unchanged); `lake build
+  Scaffold.Mathlib.GraphTheory.ElectricalFlow` and `lake build
+  Scaffold.QA.SpectralGraph.ElectricalFlow_QA` ✔; full `lake build` ✔
+  (2180 targets); all twenty-eight QA modules elaborated directly in
+  one batch (zero errors — the only outputs are the documented
+  pre-existing `unusedSectionVars` notes in untouched modules); 525 QA
+  declarations (+25 in `ElectricalFlow_QA`, 41 in file), no
+  `sorry`/`admit` anywhere under `Scaffold/` (textual matches are
+  prose in comments/docstrings); 13 explicit cited axioms (unchanged —
+  pure hard crust; the energy agreement and its corollaries are proved
+  from `laplacian_quadForm`, the crust's solution-level energy
+  identity, and the total-function agreement theorem); all hygiene
+  scripts pass (`lint_axioms` 13 covered, `check_citations`,
+  `check_markdown_links`); scoreboard regenerated (525/13/0) and
+  idempotent after the prose edits; radar (QA-axis count synced
+  525/28 with the step-2 QA kind; subject axis 6 evidence extended,
+  score held at 3.0 per protocol with the hold recorded in the
+  re-score log; proved-depth text extended), README snapshot, SGT
+  index map, proposal step-2 delivery record + statement-shape
+  deviation, and `proposals/README.md` progress note updated. The
+  operator's uncommitted changes (`proposals/README.md` sparsification
+  split rows, untracked `icebox/` and
+  `proposals/spectral-graph-sparsification.md`) preserved untouched;
+  nothing committed.
 
 - 2026-08-19 (electrical-flow steps 0–1: representation decision +
   Kirchhoff conservation, no axiom change): `lake env lean` on

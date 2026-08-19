@@ -4,13 +4,14 @@
   Purpose
   -------
   Edge flows for weighted graphs — the routing object of proposal
-  `proposals/electrical-flow-routing.md` (High, 2026-08-18). This
-  module delivers step 1: the electrical current induced by a
-  potential, its divergence, the flow predicates, and the Kirchhoff
-  bridge turning the delivered potential-based resistance API into a
-  conserved unit flow. No variational machinery yet — flow energy,
-  Thomson's principle, and Rayleigh monotonicity are steps 2–4 of the
-  proposal and are deliberately not attempted here.
+  `proposals/electrical-flow-routing.md` (High, 2026-08-18). Step 1:
+  the electrical current induced by a potential, its divergence, the
+  flow predicates, and the Kirchhoff bridge turning the delivered
+  potential-based resistance API into a conserved unit flow. Step 2:
+  the dissipated `flowEnergy` and its agreement with the Dirichlet
+  energy and the effective resistance it routes. Thomson's principle
+  and Rayleigh monotonicity are steps 3–4 of the proposal and are
+  deliberately not attempted here.
 
   Representation decision (proposal step 0, recorded in the proposal
   on 2026-08-19 before this module was written): flows live on ordered
@@ -28,11 +29,11 @@
   `θ i j` is current flowing `i → j`; `flowDivergence θ i` is net
   outflow at `i`. The zero-conductance trap is closed by the `IsFlowOn`
   support conjunct — without it, current on a zero-weight pair would
-  dissipate no energy in step 2 and Thomson's principle would fail, so
-  the conjunct is load-bearing, not hygiene. Flows are summed over
-  ordered pairs, so every undirected edge is counted twice; that
-  factor lives in `flowEnergy` (step 2, not yet defined), where the
-  proposal requires a QA fixture that fails without it.
+  dissipate no energy in `flowEnergy` and Thomson's principle would
+  fail, so the conjunct is load-bearing, not hygiene. Flows are summed
+  over ordered pairs, so every undirected edge is counted twice; the
+  `1/2` factor lives in `flowEnergy` (step 2), with a QA fixture that
+  fails without it.
 
   Everything here is proved hard crust; this module adds no axioms.
   The Kirchhoff bridge is load-bearing on the exact Laplacian sign
@@ -148,5 +149,84 @@ theorem isUnitFlow_electricalCurrent (A : WAdj (V := V)) (hA : A.IsSymm)
   ⟨isFlowOn_electricalCurrent A hA f, by
     rw [← hf]
     exact flowDivergence_electricalCurrent A f⟩
+
+/-!
+## Flow energy (proposal `electrical-flow-routing.md`, step 2)
+-/
+
+/-- Energy dissipated by a flow `θ` on the network `A`: squared
+current over conductance, summed over ordered pairs and halved. The
+`1/2` corrects the ordered-pair double count — every undirected edge is
+carried by its two opposite entries — and is load-bearing: QA pins the
+raw ordered-pair sum at exactly twice the energy on the unit edge, so
+omitting the factor would break the agreement with the Dirichlet
+energy below (proposal QA item 4). The zero branch is explicit: a
+zero-conductance ordered pair contributes *no* energy, which is
+precisely why `IsFlowOn`'s support conjunct is load-bearing for the
+variational theory (steps 3–4) — without it, a phantom flow could
+route current through a zero-weight pair for free and Thomson's
+principle would be false (proposal QA item 5; QA exhibits exactly such
+a zero-energy unit-divergence phantom). -/
+noncomputable def flowEnergy (A : WAdj (V := V)) (θ : EdgeFlow V) : ℝ :=
+  (∑ i, ∑ j, if A i j = 0 then 0 else (θ i j) ^ 2 / A i j) / 2
+
+/-- **Energy agreement (proposal step 2, headline):** the energy
+dissipated by the electrical current equals the Dirichlet energy of its
+potential. Termwise, Ohm's law gives
+`(A i j * (f i − f j))² / A i j = A i j * (f i − f j)²` whenever
+`A i j ≠ 0` — pure field algebra, no nonnegativity needed — and the
+zero branch matches the vanishing weight, so the ordered-pair sum is
+termwise the Dirichlet summand of `laplacian_quadForm`. The identity is
+load-bearing on the `1/2` convention in *both* sums: either factor
+without its half breaks the equality (QA `edge_double_counting_guard_QA`
+pins the unhalved ordered-pair sum at `2 ≠ 1` on the unit edge). Only
+symmetry is hypothesized — that is what `laplacian_quadForm` needs; the
+entrywise algebra is unconditional. -/
+theorem flowEnergy_electricalCurrent (A : WAdj (V := V)) (hA : A.IsSymm)
+    (f : V → ℝ) :
+    flowEnergy A (electricalCurrent A f) = quadForm (laplacian A) f := by
+  have hterm : ∀ i j : V,
+      (if A i j = 0 then 0 else electricalCurrent A f i j ^ 2 / A i j)
+        = A i j * (f i - f j) ^ 2 := by
+    intro i j
+    by_cases h : A i j = 0
+    · simp [h]
+    · simp only [electricalCurrent, if_neg h]
+      field_simp
+      ring
+  simp only [flowEnergy, hterm]
+  exact (laplacian_quadForm A hA f).symm
+
+omit [DecidableEq V] in
+/-- **Energy is nonnegative** for nonnegative conductances: every
+summand is a square over a positive conductance, or the zero branch.
+This is the base order fact the variational theory (steps 3–4)
+compares flows by — Thomson's principle and Rayleigh monotonicity both
+reduce to it on the difference flow. -/
+theorem flowEnergy_nonneg (A : WAdj (V := V)) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (θ : EdgeFlow V) : 0 ≤ flowEnergy A θ := by
+  refine div_nonneg ?_ zero_le_two
+  refine Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ => ?_
+  by_cases h : A i j = 0
+  · simp [h]
+  · rw [if_neg h]
+    exact div_nonneg (sq_nonneg _) (lt_of_le_of_ne (hnonneg i j) (Ne.symm h)).le
+
+/-- **Energy identity, flow level (proposal step 2):** on a connected
+graph with symmetric nonnegative weights, the energy dissipated by the
+current of a unit-demand potential is exactly the effective resistance
+it routes. Composes the agreement theorem with the electrical-crust
+solution-level identity
+(`quadForm_laplacian_eq_sub_of_mulVec_eq_single_sub_single`) and the
+agreement of the total resistance function (`effectiveResistance_eq`).
+Step 3 (Thomson) consumes this as the value the minimum attains. -/
+theorem flowEnergy_electricalCurrent_eq_effectiveResistance
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (hconn : (supportGraph A hA).Connected) {u v : V} {f : V → ℝ}
+    (hf : (laplacian A).mulVec f = Pi.single u (1 : ℝ) - Pi.single v (1 : ℝ)) :
+    flowEnergy A (electricalCurrent A f) = effectiveResistance A u v := by
+  rw [flowEnergy_electricalCurrent A hA f,
+    effectiveResistance_eq A hA hnonneg hconn ⟨f, hf, rfl⟩,
+    quadForm_laplacian_eq_sub_of_mulVec_eq_single_sub_single A hf]
 
 end SpectralGraphTheory

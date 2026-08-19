@@ -24,7 +24,7 @@ As of August 19, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 13 |
-| QA theorems/lemmas | 647, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 666, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is the Cheeger *hard* direction at the SGT center;
 Weyl and Davis–Kahan in the perturbation bridge; the scalar and matrix
@@ -32,7 +32,7 @@ concentration family (Hoeffding, Bernstein, subgaussian, Azuma); and the
 deprecated per-step `spectral_persistence` compatibility axiom. Classical
 Laplacian facts, Courant–Fischer, Cauchy interlacing, the Cheeger *upper*
 bound, Woodbury/Sherman–Morrison, the electrical crust, and Foster's
-theorem are proved, not admitted.
+theorem, and the Expander Mixing Lemma are proved, not admitted.
 
 The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for
 current counts, verification commands, and limitations.
@@ -124,7 +124,7 @@ The near-term center is general SGT. Public modules currently cover:
 | --- | --- |
 | Graphs and Laplacians | `GraphTheory.Spectral`, `GraphTheory.SimpleGraphAdapter` |
 | Variational spectra | Courant–Fischer, Rayleigh, Cauchy interlacing (in `Spectral`) |
-| Cuts and expansion | `GraphTheory.Cheeger`, `GraphTheory.Fiedler`, `GraphTheory.Expander` (edge weights, the discrepancy core of the Expander Mixing Lemma) |
+| Cuts and expansion | `GraphTheory.Cheeger`, `GraphTheory.Fiedler`, `GraphTheory.Expander` (edge weights, the centered-indicator decomposition, and the Expander Mixing Lemma itself) |
 | Electrical structure | `GraphTheory.Electrical`, `GraphTheory.ElectricalFlow`, `GraphTheory.Foster` |
 | Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized`, `GraphTheory.Stationary` |
 | Perturbation | `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan}` |
@@ -150,7 +150,7 @@ Last assessed: August 19, 2026. Scores reflect usable, verified coverage on a
 | Graph and Laplacian models | 3.5 / 5 |
 | Spectral linear algebra | 3.5 / 5 |
 | Variational and functional methods | 4.0 / 5 |
-| Cuts, expansion, and clustering | 3.5 / 5 |
+| Cuts, expansion, and clustering | 4.0 / 5 |
 | Random walks and diffusion | 2.5 / 5 |
 | Combinatorial and electrical structure | 4.5 / 5 |
 | Perturbation, randomness, and algorithms | 3.0 / 5 |

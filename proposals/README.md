@@ -29,7 +29,7 @@ drift apart.
 
 | Priority | Proposal | Why |
 | --- | --- | --- |
-| High | [Decidable Spectral Certificates and the Expander Mixing Lemma](decidable-spectral-certificates.md) | Upgraded from Medium 2026-08-18. Its certificate-soundness proof is a checked-by-hand load-bearing consumer of `lambda2_variational` (proved the same day) — closes the exact noncomputable-extraction gap `docs/traction-plan.md` names as the reason broader-audience outreach stays premature, so strategically bigger than a typical proof target. **Run Step 0 first**: the proposal shipped without resolving the adjacency-vs-Laplacian eigenvalue convention the classical Expander Mixing Lemma needs, or spiking whether kernel `decide` on ℚ arithmetic is actually fast enough at even modest `Fin n` sizes to satisfy its own acceptance criterion. Both are now scoped in the proposal's own Step 0 — do not begin Step 1 before that decision and spike are recorded. With Foster Phase A delivered (2026-08-19), this is the top High item. |
+| High | [Decidable Spectral Certificates and the Expander Mixing Lemma](decidable-spectral-certificates.md) | Upgraded from Medium 2026-08-18. Its certificate-soundness proof is a checked-by-hand load-bearing consumer of `lambda2_variational` (proved the same day) — closes the exact noncomputable-extraction gap `docs/traction-plan.md` names as the reason broader-audience outreach stays premature, so strategically bigger than a typical proof target. **Step 0 (the gate) and Step 1 delivered 2026-08-19**: the convention decision is recorded (Laplacian-first via the `d`-regular bridge, with the restated theorem signature), the ℚ-`decide` spike is recorded (plain kernel `decide` cannot verify ℚ arithmetic — a reducibility wall, not speed; the integer cross-multiplied twin is the adopted kernel-verifiable checker, verified at `Fin 4` and `Fin 6`), and `GraphTheory.Expander` delivers the edge-weight/discrepancy core as hard crust. **Next: Step 2** — the Expander Mixing Lemma itself through the bridge (the eigenvalue hypothesis → Rayleigh-form operator bound on `x ⊥ 1`, then the centered-cross-term bound). |
 | Medium | [The Fiedler Vector and a Certified Spectral Partition](fiedler-partitioning.md) | Phase A (A1/A2) delivered 2026-08-18 as hard crust (`GraphTheory.Fiedler`: the vector, the algebraic-connectivity certificate `lambda2_pos_of_connected`, and the sign partition proved nonempty/proper; no new axioms). What remains is Phase B — a certified conductance bound on the Fiedler partition — which is *not* hard crust: it composes the proved easy direction with the still-admitted Cheeger hard direction, so it is an axiom-backed derived theorem. Real, unblocked work, but it needs the operator decision the proposal itself names (run against the admitted hard direction, or defer until it is proved) and adds trust surface rather than reducing it — hence Medium, not High. |
 | Medium | [A Spectral Mixing-Time Bound](mixing-time-bound.md) | Step 1 (eigenvalue transfer via the already-proved similarity identity) is reachable now, but the program's own calibration section rates the full bound as "at least as hard as the electrical program's solvability step" — real, unblocked work, but bigger and riskier than the High items. |
 | Medium | [Reversibility and the Heat Semigroup](reversibility-and-heat-semigroup.md) (Phase A only — reversibility/detailed balance) | Added 2026-08-18, closing the two items `docs/7_SGT_RADAR.md` axis 5 names as absent that `mixing-time-bound.md` does not already claim (heat kernels, reversibility). Phase A's own backlog gate (item 6, "gated on item 1-2 stability") is already open — items 1-2 are recorded delivered — so this is unblocked, cheap (composes existing `Stationary`/`Normalized` lemmas), zero new axioms. |
@@ -48,9 +48,16 @@ With the electrical-flow proposal **delivered in full** (all steps
 0–5, 2026-08-19 — see the Delivered table) and **Foster's Theorem
 Phase A delivered** (2026-08-19, zero new axioms via the
 pseudoinverse-free eigenbasis route — see the Delivered table), the
-top of the Active priority table is now **decidable spectral
-certificates**, whose own Step 0 gate (convention decision + ℚ-`decide`
-spike) must run first. The electrical-flow program's delivery history,
+top of the Active priority table is **decidable spectral certificates,
+now in progress**: its Step 0 gate landed 2026-08-19 (the Laplacian
+convention decision with the restated `expander_mixing_lemma`
+signature, and the ℚ-`decide` spike whose outcome — kernel `decide`
+cannot reduce ℚ arithmetic at all; the integer cross-multiplied twin
+can, verified at `Fin 4`/`Fin 6` — is recorded in the proposal), and
+Step 1 (`GraphTheory.Expander`: `edgeWeight`, the centered-indicator
+decomposition, and the `d`-regular main-term split) is delivered as
+hard crust. **Next: Step 2**, the mixing lemma itself. The
+electrical-flow program's delivery history,
 one step per run: step 0 (representation survey — no flow/circulation/divergence API in the pin;
 matrix representation pinned) and step 1 (the flow interface and
 Kirchhoff conservation) on 2026-08-19; step 2 (flow energy and the

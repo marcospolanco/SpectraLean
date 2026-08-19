@@ -6,7 +6,7 @@ conductance, Cheeger theory, interlacing, and event-driven dynamics.
 ## Status
 
 **Implemented and build-certified** (see the QA scoreboard):
-`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Cheeger,Dynamics}`.
+`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,Cheeger,Dynamics}`.
 
 ## Modules and Declarations
 
@@ -224,6 +224,25 @@ matrix-Chernoff scope decision and is not developed.
 | `foster_theorem` | **Foster's theorem (1949):** `(∑ i, ∑ j, A i j * R i j) / 2 = card V − 1` on every connected symmetric-nonnegative network — in unordered-pair form `∑_{u<v} w_e R_e = n − 1`; the `/ 2` is the ordered-pair double count (QA-witnessed load-bearing: the ordered sums compute to `4 ≠ 2` on `K₃` and `6 ≠ 3` on `K₄`) |
 | `leverageScore` | the pair's share `A u v * R u v / (card V − 1)` of the Foster budget — the importance-sampling object of Spielman–Srivastava sparsification (Phase B, blocked); junk values below `2 ≤ card V` documented in the docstring |
 | `sum_leverageScore_eq_two` | **Foster in leverage form:** the ordered-pair leverage scores sum to exactly `2` (unordered: `1`), making them a probability distribution over edges; `2 ≤ card V` is the division guard |
+
+
+### `Scaffold.Mathlib.GraphTheory.Expander` (edge weights, the centered-indicator decomposition)
+
+Step 1 of the decidable-spectral-certificates program (proposal
+`decidable-spectral-certificates.md`, High; its Step 0 gate — the
+Laplacian-convention decision and the ℚ-`decide` spike with the integer
+cross-multiplied fallback — was completed and recorded in the proposal
+on 2026-08-19 immediately before this module): the combinatorial
+edge-weight and discrepancy core for the Expander Mixing Lemma. All
+proved, zero axioms.
+
+| Declaration | Content |
+|-------------|---------|
+| `edgeWeight` | the ordered `(S, T)` cut weight `∑ i ∈ S, ∑ j ∈ T, A i j`, with degenerate-cut guards (`edgeWeight_empty_left/right`), the degree-sum form against `univ` (`edgeWeight_univ_right`), the hypothesis-free matrix form `edgeWeight_eq_dotProduct` (`indicatorVec S ⬝ᵥ (A *ᵥ indicatorVec T)`, the bilinear identity every spectral mixing-lemma proof starts from), and `edgeWeight_symm` (cut-weight symmetry under entrywise symmetry, by sum swap) |
+| `indicatorVec` / `centeredIndicator` | the 0/1 characteristic vector of a subset and its centered (mean-removed) version — the decomposition `indicatorVec_eq_smul_onesVec_add_centeredIndicator` splits the characteristic vector into its `onesVec` component plus the centered remainder |
+| `sum_centeredIndicator_eq_zero` / `centeredIndicator_dotProduct_onesVec` | the centered indicator is **exactly** orthogonal to `onesVec` — unconditionally (the empty-type case is handled; no `Nonempty`/cardinality hypothesis is carried) — the fact that kills the `d`-regular cross terms in the headline |
+| `mulVec_onesVec_eq_const` | on a `d`-regular network, `A *ᵥ onesVec` is the constant `d` (`deg` is exactly the row sum) |
+| `edgeWeight_eq_regular_add_centered` | **the `d`-regular decomposition (headline):** `edgeWeight A S T = d·\|S\|·\|T\|/\|V\| + centeredIndicator S ⬝ᵥ (A *ᵥ centeredIndicator T)` on symmetric `d`-regular networks — the population main term plus the centered cross term the Expander Mixing Lemma bounds by `μ`; symmetry load-bearing (the `1 ⬝ᵥ (A *ᵥ v)` cross term dies through `Matrix.dotProduct_mulVec`'s transpose) and regularity load-bearing (the `A *ᵥ onesVec = d` evaluation); no cardinality hypothesis (empty type degenerates to `0 = 0 + 0`) |
 
 
 ### `Scaffold.Mathlib.GraphTheory.Cheeger`

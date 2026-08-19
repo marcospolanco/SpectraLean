@@ -6,6 +6,8 @@ contingent on the Step 0 survey below landing before Step 1 begins). Proposed
 pseudorandomness and close the noncomputable extraction gap identified in
 `docs/traction-plan.md`. This document authorizes no Lean changes, axiom
 admissions, commits, clean-room copying, or external publication on its own.
+**Step 0 is COMPLETE (2026-08-19)** — see the decision record in the build
+order below; Steps 1+ are unblocked.
 
 **Why High, and why contingent.** The certificate-soundness argument is a
 genuine, checked-by-hand load-bearing consumer of `lambda2_variational`
@@ -75,25 +77,15 @@ Deliver two interlocking zero-axiom modules:
    A candidate witness with $v = 0$ or $v \not\perp \mathbf{1}$ must be rejected by the boolean decider. The certificate predicate must strictly check $\sum_i v_i = 0$ and $\sum_i v_i^2 > 0$ before dividing.
 3. **Regular vs Irregular Normalization:**
    The standard Expander Mixing Lemma is stated for $d$-regular graphs. For general irregular graphs, the statement generalizes cleanly via the normalized Laplacian $L_{\text{sym}}$ and degree-weighted volumes $\mathrm{vol}(S), \mathrm{vol}(T)$. Scoping should begin with the regular case and extend via `VariationalTransfer`.
-4. **Adjacency vs. Laplacian eigenvalue convention — unresolved as written.**
-   The classical Expander Mixing Lemma bounds $\mu$, the second-largest
-   *adjacency*-matrix eigenvalue. Every existing Scaffold spectral tool
-   (`evals`, `lambda2`, `lambda2_variational`) is Laplacian-first; there is no
-   adjacency-eigenvalue interface anywhere in this codebase. For $d$-regular
-   graphs $\mu = d - \lambda_2(L)$ bridges the two, but Steps 1–2 as drafted
-   work with a generic `Matrix V V ℝ` without saying which convention is
-   meant or proving the bridge. Resolve this — pin one convention and prove
-   the bridge identity if needed — before writing `expander_mixing_lemma`'s
-   statement, not while proving it.
-5. **`decide` on ℚ arithmetic is an unverified performance risk.**
-   Acceptance Criterion 2 requires `decide` to kernel-verify certificate
-   instances on concrete `Fin n` graphs. Lean 4's kernel has efficient
-   GMP-backed `Nat`/`Int` reduction, so this is *probably* fine at small
-   sizes — but "probably" is not sufficient for a criterion the traction
-   story depends on, and `native_decide` (a different trust posture, not
-   fully kernel-checked) is not an acceptable silent substitute if plain
-   `decide` turns out to choke. Spike this on one concrete graph before
-   committing to the full build order.
+4. **Adjacency vs. Laplacian eigenvalue convention — RESOLVED 2026-08-19
+   (Step 0, Decision 1): Laplacian-first through the `d`-regular bridge**
+   `μ = max(|d − λ₂(L)|, |d − λ_max(L)|)`. See the Step 0 record for the
+   survey evidence and the restated theorem signature.
+5. **`decide` on ℚ arithmetic is an unverified performance risk — RESOLVED
+   2026-08-19 (Step 0, Decision 2): it is not merely slow, it does not
+   kernel-reduce at all** (`Rat` operations are opaque to elaborator
+   reduction in the pinned environment). The kernel-verifiable checker is
+   the integer cross-multiplied twin; see the Step 0 record.
 
 ---
 
@@ -109,28 +101,125 @@ Deliver two interlocking zero-axiom modules:
 
 ### Step 0: Survey and resolve the two open gaps
 
-Before any Step 1 code lands, resolve both items 4–5 in "Calibration and
-Sharp Edges" and record the decision:
+**STATUS: COMPLETE (2026-08-19).** All three items below are decided and
+recorded here, per this section's own instruction, before any Step 1 code.
+The spike artifacts were scratch files (not committed, not part of any
+build target); the decisive commands and outcomes are recorded below.
 
-- **Convention.** Decide whether `expander_mixing_lemma` is stated directly
-  for the adjacency matrix (requiring a small new adjacency-eigenvalue
-  interface, since none exists) or for the Laplacian via the $d$-regular
-  bridge $\mu = d - \lambda_2(L)$ (reusing existing machinery, likely
-  cheaper). Prefer the Laplacian route unless the survey finds a concrete
-  reason the adjacency form is needed by a named consumer. Record the choice
-  and restate the theorem signature in this proposal before Step 2 begins.
-- **`decide` spike.** Construct one small concrete `Fin n` graph (`n` around
-  4–6) with a known certificate, and confirm `decide` actually kernel-checks
-  `isSpectralUpperBoundCertificate` on it in reasonable time. If it does not,
-  record the exact failure and scope a fallback (e.g. restating the
-  arithmetic to reduce kernel reduction cost) before treating Step 3 as
-  ready — do not silently reach for `native_decide` as a substitute.
-- **Ramanujan QA scope, clarified.** "Ramanujan graph examples" in Step 4
-  means one small, concrete graph already known and independently verified
-  to be Ramanujan (e.g. a documented small instance with published
-  eigenvalues) — not a construction or a proof that some family is
-  Ramanujan. If no suitable small instance is easy to source and verify,
-  drop this specific QA item rather than let it expand the proposal's scope.
+#### Decision 1 — Convention: Laplacian-first, through the d-regular bridge
+
+`expander_mixing_lemma` is stated with its spectral hypothesis in
+**Laplacian** terms. Survey evidence (2026-08-19, this repository):
+
+- No adjacency-*eigenvalue* interface exists anywhere in the codebase.
+  `grep` over `Scaffold/` shows adjacency only as weight matrices and QA
+  fixtures; every spectral declaration (`evals`, `lambda2`, `lambda2`,
+  `lambda2_variational`, `secondEval`, `secondEval_le_rayleigh`, the
+  Courant–Fischer engine, all `eigvecOf` machinery) is either
+  Laplacian-wrapped or generic-symmetric.
+- The certificate half of this proposal (Step 3) is already Laplacian
+  (`lambda2 (laplacian A)`); a common convention keeps the EML and the
+  certificates composable — a verified bound `λ₂(L) ≤ d − μ` is exactly
+  the input the bridged EML consumes.
+- The generic symmetric-matrix engine applies to an adjacency matrix for
+  free (it only needs `IsSymm`), so proving the bridge needs **no new
+  adjacency-spectral interface**: under loopless `d`-regular weights,
+  `A = d • 1 − L` entrywise, adjacency and Laplacian eigenvectors
+  coincide, and adjacency eigenvalues are `d − λᵢ(L)`. The only new cost
+  is the affine spectrum transfer plus a Rayleigh-form bound on `1⊥`,
+  both Step 2 work.
+- No named consumer requires adjacency eigenvalues.
+
+**Restated theorem signature** (replacing the convention-free draft;
+`edgeWeight` is Step 1's definition; the `√`-form is the mathematical
+statement — the Lean-facing form may square both sides to stay in
+ordered-field arithmetic, a Step-2 implementation choice, since both
+sides are nonnegative):
+
+```lean
+theorem expander_mixing_lemma
+    (A : WAdj (V := V)) (hsymm : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hloop : ∀ i, A i i = 0) (d : ℝ) (hreg : ∀ i, deg A i = d)
+    (hcard : 2 ≤ Fintype.card V) (μ : ℝ)
+    (hμ : max |d - lambda2 A hsymm hcard|
+          |d - evals (laplacian_symmetric A hsymm)
+              ⟨Fintype.card V - 1, by omega⟩| ≤ μ)
+    (S T : Finset V) :
+    |edgeWeight A S T - d * (S.card : ℝ) * (T.card : ℝ) / Fintype.card V| ≤
+      μ * √(S.card * T.card * (Fintype.card V - S.card)
+              * (Fintype.card V - T.card)) / Fintype.card V
+```
+
+The proof layers stay as the build order sketches: (a) the pure
+linear-algebra core (the indicator decomposition is convention-free, so
+Step 1 is unblocked by this decision), (b) the bridge from the eigenvalue
+hypothesis to the Rayleigh-form operator bound on `x ⊥ 1`, (c) the
+packaged corollary above.
+
+#### Decision 2 — `decide` spike: ℚ arithmetic as sketched is NOT
+kernel-decidable; the integer cross-multiplied twin IS
+
+Plain kernel `decide` **cannot** verify the Step-3 checker as drafted —
+this is a reducibility wall, not a performance limit. Evidence (scratch
+elaboration against the pinned environment, `lake env lean`):
+
+- `(0 : ℚ) < 2` decides (literal comparison only), but `((2:ℚ) + 2) = 4`
+  is already stuck: elaborator reduction halts at `(Rat.add 2 2).num` —
+  ℚ literals are opaque kernel literals, `Rat.add`'s matcher cannot fire,
+  and elaborator `whnf` has no `Rat`-operation acceleration. Every
+  nontrivial ℚ computation (sums `/`, `≤` via `Rat.blt`, `==` via
+  `Rat.decEq`) fails the same way (`∑ i : Fin 4, v i = 0` on
+  `v = ![1,0,-1,0]` sticks at an unapplied `Rat.add`).
+- `#eval` of the same checker returns `true` (native extern code), but
+  that is not kernel-checked and `native_decide` is excluded by this
+  proposal's own trust-posture rule. Not a fallback.
+- Control probes that *do* decide: `Nat.gcd 6 4 = 2`, `∑ i : Fin 4, (i:ℕ) = 6`,
+  `(2:ℤ) * 3 - 5 = 1` — the obstruction is specific to `Rat` operations.
+
+**Adopted fallback (recorded per this section's own instruction):** the
+kernel-verifiable checker is the **integer cross-multiplied twin** — all
+certificate data integer (adjacency entries, test vector with
+denominators cleared, rational bound as an integer numerator/denominator
+pair), and the rational inequality replaced by its cross-multiplied
+integer form:
+
+```lean
+def isSpectralUpperBoundCertificateInt {n : ℕ}
+    (A : Matrix (Fin n) (Fin n) ℤ) (v : Fin n → ℤ) (bound : ℤ) : Bool :=
+  let dotOne := ∑ i, v i
+  let denom := ∑ i, (v i)^2
+  let rawNumer := ∑ i, ∑ j, (A i j) * (v i - v j)^2
+  (dotOne == 0) && decide (0 < denom) && decide (rawNumer ≤ 2 * bound * denom)
+```
+
+(`rawNumer/(2 · denom) ≤ bound` with `denom > 0`; a fractional bound
+`num/boundDen` is `boundDen * rawNumer ≤ 2 * num * denom`.) Verified by
+kernel `decide`, accept and reject paths, at both required sizes: `C₄`
+(`Fin 4`, certificate `![1,0,-1,0]` attaining `λ₂ = 2`: accepted at
+bound `2`, rejected at `1`; non-orthogonal and zero test vectors
+rejected) and `C₆` (`Fin 6`, `![1,1,0,-1,-1,0]` attaining `λ₂ = 1`:
+accepted at `1`, rejected at `0`); fractional form on `C₄`: `λ₂ ≤ 5/2`
+accepted, `λ₂ ≤ 3/2` rejected. Decisive commands: `lake env lean` on
+the probe files — failures exactly as described for ℚ; the
+integer-twin acceptance file elaborates clean in ~15 s wall (almost all
+`Mathlib.Tactic` import; per-`decide` overhead well under a second).
+Step 3 therefore delivers **both** the ℚ-facing soundness statement and
+this ℤ twin, bridged by a proved lemma (cross-multiplication in ordered
+fields — pure algebra, no `decide`); Acceptance Criterion 2 is read
+against the ℤ twin.
+
+#### Decision 3 — Ramanujan QA scope: use the existing fixture family; no external sourcing
+
+"Ramanujan graph examples" in Step 4 means: the fixtures already in the
+QA family — cycles `Cₙ` (`d = 2`, adjacency spectrum `2cos(2πk/n)`,
+published standard) and complete graphs `Kₙ` (`d = n−1`, μ = 1) — are
+themselves small Ramanujan instances for `n ≥ 3` (`μ(C₄) = 2 = 2√(d−1)`
+with equality; `μ(C₆) = 1 ≤ 2`; `μ(K₃) = 1 ≤ 2`). Checking
+Ramanujan-ness reduces to the same pinned-spectrum computations Step 2's
+bridge needs anyway. No construction, no family proof, no external
+sourcing; if the spectral-bound check proves awkward once Step 4 is
+reached, drop the label rather than expand scope, per this section's
+own fallback.
 
 ### Step 1: Combinatorial Edge Weight and Discrepancy Core
 Define subset edge weight:
@@ -139,6 +228,45 @@ def edgeWeight (A : Matrix V V ℝ) (S T : Finset V) : ℝ :=
   ∑ i ∈ S, ∑ j ∈ T, A i j
 ```
 Prove decomposition of characteristic vectors $\mathbf{1}_S = \alpha \mathbf{1} + v_S^\perp$ where $v_S^\perp \perp \mathbf{1}$.
+
+**STATUS: DELIVERED (2026-08-19)** as `Scaffold.Mathlib.GraphTheory.Expander`
+(pure hard crust, zero new axioms; `#print axioms` on every public
+theorem reads only `propext, Classical.choice, Quot.sound`):
+
+- `edgeWeight` exactly as sketched, with degenerate-cut guards, the
+  degree-sum form `edgeWeight A S univ = ∑ i ∈ S, deg A i`, the
+  hypothesis-free matrix form `edgeWeight_eq_dotProduct`
+  (`indicatorVec S ⬝ᵥ (A *ᵥ indicatorVec T)` — the bilinear identity
+  Step 2's spectral proof starts from), and `edgeWeight_symm` (sum
+  swap under entrywise symmetry).
+- `indicatorVec` / `centeredIndicator` with the decomposition
+  `indicatorVec_eq_smul_onesVec_add_centeredIndicator` and
+  `sum_centeredIndicator_eq_zero` /
+  `centeredIndicator_dotProduct_onesVec` — the orthogonality is
+  **unconditional** (the empty-type case is handled; no `Nonempty`
+  hypothesis carried), a small statement-shape strengthening over the
+  sketch.
+- The headline `edgeWeight_eq_regular_add_centered`:
+  `edgeWeight A S T = d · |S| · |T| / |V| + centeredIndicator S ⬝ᵥ (A
+  *ᵥ centeredIndicator T)` on symmetric `d`-regular networks. Both
+  hypotheses are load-bearing: symmetry through
+  `Matrix.dotProduct_mulVec`'s transpose (the `1 ⬝ᵥ (A *ᵥ v)` cross
+  term dies only after `Aᵀ = A`), regularity through
+  `mulVec_onesVec_eq_const` (`A *ᵥ onesVec = d`, consuming `deg`'s
+  row-sum shape).
+
+QA `Scaffold/QA/SpectralGraph/Expander_QA.lean` (22 declarations, fresh
+`C₄` fixture per the QA-independence convention): all values computed
+from the raw definitions — adjacent cut `1`, opposite cut `0`,
+half-and-half `2`, total `8`, matrix form cross-checked, centered
+indicators pinned entrywise (`±1/2`, `3/4/−1/4`) with orthogonality
+computed from the pinned entries; the decomposition instantiated on an
+adjacent cut (`1 = 1/2 + 1/2`) and an opposite cut (`0 = 1/2 − 1/2`),
+cross terms computed independently; three negative witnesses — the
+main-term-only statement refuted on the opposite cut (`0 ≠ 1/2`), the
+main term's degree pinned by regularity (wrong `d = 3` refuted,
+`1 ≠ 3/4`), and cut-weight symmetry genuinely failing on the
+asymmetric weight `!![0,2;1,0]` (`2 ≠ 1`).
 
 ### Step 2: Expander Mixing Lemma
 Prove `expander_mixing_lemma` for regular graphs by expanding $\mathbf{1}_S^T A \mathbf{1}_T$ across the eigenspaces of $A$ and bounding the orthogonal component via Cauchy–Schwarz and $\mu$.

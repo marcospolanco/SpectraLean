@@ -24,7 +24,7 @@ As of August 19, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 13 |
-| QA theorems/lemmas | 625, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 647, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is the Cheeger *hard* direction at the SGT center;
 Weyl and Davis–Kahan in the perturbation bridge; the scalar and matrix
@@ -124,7 +124,7 @@ The near-term center is general SGT. Public modules currently cover:
 | --- | --- |
 | Graphs and Laplacians | `GraphTheory.Spectral`, `GraphTheory.SimpleGraphAdapter` |
 | Variational spectra | Courant–Fischer, Rayleigh, Cauchy interlacing (in `Spectral`) |
-| Cuts and expansion | `GraphTheory.Cheeger`, `GraphTheory.Fiedler` |
+| Cuts and expansion | `GraphTheory.Cheeger`, `GraphTheory.Fiedler`, `GraphTheory.Expander` (edge weights, the discrepancy core of the Expander Mixing Lemma) |
 | Electrical structure | `GraphTheory.Electrical`, `GraphTheory.ElectricalFlow`, `GraphTheory.Foster` |
 | Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized`, `GraphTheory.Stationary` |
 | Perturbation | `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan}` |

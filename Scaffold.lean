@@ -6,6 +6,7 @@ import Scaffold.Mathlib.GraphTheory.SimpleGraphAdapter
 import Scaffold.Mathlib.GraphTheory.Electrical
 import Scaffold.Mathlib.GraphTheory.ElectricalFlow
 import Scaffold.Mathlib.GraphTheory.Foster
+import Scaffold.Mathlib.GraphTheory.Expander
 import Scaffold.Mathlib.GraphTheory.Cheeger
 import Scaffold.Mathlib.GraphTheory.Fiedler
 import Scaffold.Mathlib.GraphTheory.RandomWalk
@@ -38,7 +39,11 @@ potential equation), its flow-routing extension
 (`GraphTheory.ElectricalFlow`, Thomson's principle and Rayleigh
 monotonicity), Foster's theorem
 (`GraphTheory.Foster`, the conductance-weighted resistance identity
-`∑_{u<v} w_e R_e = n - 1`), its Cheeger bridge (`GraphTheory.Cheeger`), the
+`∑_{u<v} w_e R_e = n - 1`), the expander discrepancy core
+(`GraphTheory.Expander`, step 1 of the decidable-certificates
+program: subset edge weights, the centered-indicator decomposition,
+and the `d`-regular main-term split the Expander Mixing Lemma
+measures), its Cheeger bridge (`GraphTheory.Cheeger`), the
 Fiedler-vector interface (`GraphTheory.Fiedler`, Phase A: the vector,
 the sign partition, and the algebraic-connectivity certificate),
 the random-walk interfaces (`GraphTheory.RandomWalk`), the general

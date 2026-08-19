@@ -6,6 +6,114 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Decidable spectral certificates, steps 0 and 1 (run 1, 2026-08-19):
+DELIVERED.** The Active priority table's top High item
+(`proposals/decidable-spectral-certificates.md`) opened at its
+recorded gate and through its first build step — the steps 0–1
+precedent of the electrical-flow program. Zero new axioms (count stays
+13); steps 2–4 were NOT started this run.
+
+**Step 0 (the gate, recorded in the proposal before any Lean):** (1)
+the adjacency-vs-Laplacian convention resolved **Laplacian-first
+through the `d`-regular bridge** — survey evidence: no
+adjacency-eigenvalue interface exists anywhere (adjacency is weights
+and fixtures only; every spectral declaration is Laplacian-wrapped or
+generic-symmetric), the certificate half (Step 3) is already
+Laplacian, the generic symmetric engine applies to an adjacency matrix
+for free (so the bridge `A = d•1 − L` needs no new interface), and no
+named consumer wants adjacency eigenvalues; the restated
+`expander_mixing_lemma` signature is pinned in the proposal with the
+`√`-form as the mathematical statement and squaring as a recorded
+Step-2 implementation option. (2) The ℚ-`decide` spike returned a
+decisive **negative**: plain kernel `decide` cannot verify the
+proposal's ℚ-arithmetic certificate — a reducibility wall, not
+performance (`((2:ℚ) + 2) = 4` is already stuck at `(Rat.add 2 2).num`:
+ℚ literals are opaque kernel literals, so `Rat.add`/`Rat.div`/
+`Rat.blt` never unfold in elaborator reduction; `#eval` works via
+native externs but is not kernel-checked; controls `Nat.gcd`,
+ℕ-sums-over-`Fin`, and ℤ arithmetic all decide fine). Adopted fallback
+(recorded): the **integer cross-multiplied twin** — all data in ℤ,
+inequality `rawNumer ≤ 2 * bound * denom` — kernel-decided clean at
+`C₄` (`Fin 4`, attained `λ₂ = 2`: accepted at `2`, rejected at `1`;
+non-orthogonal and zero test vectors rejected) and `C₆` (`Fin 6`,
+attained `λ₂ = 1`), plus the fractional-bound clearing form (`λ₂ ≤ 5/2`
+accepted, `≤ 3/2` rejected); whole acceptance file ~15 s wall, almost
+all `Mathlib.Tactic` import. Step 3 is thereby re-scoped: deliver both
+the ℚ-facing soundness statement and the ℤ twin, bridged by a proved
+cross-multiplication lemma; Acceptance Criterion 2 reads against the
+twin. (3) Ramanujan QA scope resolved to the existing `Kₙ`/`Cₙ`
+fixture family (both are small Ramanujan instances), with the
+drop-if-awkward fallback per the proposal's own rule.
+
+**Step 1 (hard crust):** the new `Scaffold/Mathlib/GraphTheory/Expander`
+— `edgeWeight` (degenerate-cut guards, the degree-sum form
+`edgeWeight A S univ = ∑ i ∈ S, deg A i`, the hypothesis-free matrix
+form `edgeWeight_eq_dotProduct`, `edgeWeight_symm` by sum swap);
+`indicatorVec`/`centeredIndicator` with the decomposition and the
+orthogonality `sum_centeredIndicator_eq_zero` /
+`centeredIndicator_dotProduct_onesVec` — both **unconditional** (the
+empty-type case handled; no `Nonempty` hypothesis carried — a small
+strengthening over the proposal's sketch); `mulVec_onesVec_eq_const`
+(consuming `deg`'s row-sum shape); and the headline
+`edgeWeight_eq_regular_add_centered` (`e(S,T) = d·|S|·|T|/n +
+centered cross term`), symmetry load-bearing through
+`Matrix.dotProduct_mulVec`'s transpose and regularity through the
+`A *ᵥ onesVec = d` evaluation. `#print axioms` on all seven public
+theorems: only the three standard axioms.
+
+**QA** `SpectralGraph/Expander_QA.lean` (22 declarations, fresh `C₄`
+fixture per the QA-independence convention): values computed from the
+raw definitions (adjacent `1`, opposite `0`, half-and-half `2`, total
+`8`, matrix form cross-checked, centered indicators pinned entrywise
+with orthogonality computed from the pinned entries); the
+decomposition instantiated on an adjacent cut (`1 = 1/2 + 1/2`) and an
+opposite cut (`0 = 1/2 − 1/2`), cross terms computed independently;
+three negative witnesses — main-term-only refuted (`0 ≠ 1/2`), wrong
+degree refuted (`1 ≠ 3/4`), asymmetric weight breaks cut symmetry
+(`2 ≠ 1`).
+
+**Verification:** `lake env lean` on both changed modules — zero
+errors, zero warnings (targeted `omit` clauses on unused section
+variables; two `set_option linter.unnecessarySeqFocus false in` on the
+cross-term lemmas where `simp` closes some `fin_cases` branches —
+repo precedent); `#print axioms` on the seven public theorems ✔;
+explicit `lake build` of both targets ✔; full `lake build` ✔ (2182
+targets, one more than before — the new module); all **thirty** QA
+modules batch-elaborated, zero errors (only the documented
+pre-existing section-variable warnings in untouched modules);
+`lint_axioms` (13), `check_citations`, `check_markdown_links` pass;
+scoreboard regeneration idempotent (647/13/0). Environment: the pruned
+oleans state recurred at run start (Mathlib empty, Batteries partial,
+Scaffold empty) — the recorded interpreted cache fetch restored
+Mathlib's 5685, then an explicit `lake build Batteries` (the fetch
+does not cover Batteries' non-default facet modules that
+`Mathlib.Tactic` needs) preceded the full `lake build` (~33 min cold
+residue; recorded for the next run).
+
+**Records updated:** module/QA docstrings, umbrella (`Scaffold.lean` +
+docstring), scoreboard (647/13/0, verification rows, milestone
+bullet), radar (QA 647/30 with the discrepancy-core QA kind described;
+the QA axis **held at 4.0** per protocol with the hold recorded in the
+re-scoring log — steps 0–1 are decisions and interface plumbing, the
+parametric-QA gap untouched), README (647, cuts-and-expansion module
+row), SGT index map (new `Expander` section, 6 rows + status line),
+proposal Step-0 decision record + restated signature + Step-1 delivery
+record, and `proposals/README.md` (High row now points at Step 2).
+
+**Next milestone (open):** proposal Step 2 — **the Expander Mixing
+Lemma** itself: the bridge layer (the eigenvalue hypothesis
+`max |d − λ| ≤ μ` → the Rayleigh-form operator bound `|xᵀAx| ≤ μ xᵀx`
+on `x ⊥ 1`, through the eigenbasis/Courant–Fischer machinery), then
+the centered-cross-term bound by Cauchy–Schwarz, packaged as the
+restated signature (with the recorded option to square both sides to
+stay in ordered-field arithmetic); then Step 3 (the certificate
+module, now scoped with the ℤ twin) and Step 4 (QA incl. the kernel
+`decide` demonstrations on `C₄`/`C₆`). The Medium rows (Fiedler Phase
+B — needs an operator decision; mixing-time Step 1; Reversibility
+Phase A; Relative Entropy) stay queued. The operator's untracked
+`adversarial.md`, `sgt-gaps.md`, and `why-sgt.md` are preserved
+untouched.
+
 **Foster's Theorem Phase A (run 1, 2026-08-19): DELIVERED.** The Active
 priority table's top High item, `proposals/spectral-graph-sparsification.md`
 **Phase A only**, delivered as pure hard crust in the new
@@ -1620,6 +1728,34 @@ decision + ℚ-kernel `decide` spike, both scoped in the proposal).
    combinations, centering, sums) only when a consumer names them.
 
 ## Last verified state
+
+- 2026-08-19 (decidable-certificates steps 0–1: convention decision +
+  ℚ-decide spike + the `GraphTheory.Expander` discrepancy core, no
+  axiom change): `lake env lean` on `GraphTheory.Expander` and on
+  `QA.SpectralGraph.Expander_QA` — both zero errors, zero warnings
+  (targeted `omit` clauses; two targeted
+  `set_option linter.unnecessarySeqFocus false in` lines on the
+  cross-term lemmas per repo precedent); `#print axioms` on all seven
+  public theorems — only `propext, Classical.choice, Quot.sound`;
+  `lake build Scaffold.Mathlib.GraphTheory.Expander` and
+  `Scaffold.QA.SpectralGraph.Expander_QA` ✔; full `lake build` ✔
+  (2182 targets); all thirty QA modules elaborated directly in one
+  batch (zero errors — only the documented pre-existing linter notes
+  in untouched modules); 647 QA declarations (+22 in `Expander_QA`),
+  no `sorry`/`admit` anywhere under `Scaffold/`; 13 explicit cited
+  axioms (unchanged — pure hard crust); all hygiene scripts pass
+  (`lint_axioms` 13 covered, `check_citations`,
+  `check_markdown_links`); scoreboard regenerated (647/13/0) and
+  idempotent after the prose edits; radar QA-axis count synced 647/30
+  with the axis **held at 4.0** per protocol (hold recorded); README,
+  SGT index map, proposal Step-0/Step-1 records, and
+  `proposals/README.md` updated. The Step-0 spike artifacts were
+  scratch files (removed after the outcomes were recorded in the
+  proposal); environment recovery: mathlib interpreted cache fetch +
+  explicit `lake build Batteries` (the fetch does not restore
+  Batteries' modules needed by `Mathlib.Tactic`) + full build. The
+  operator's concurrent untracked files (`adversarial.md`,
+  `sgt-gaps.md`, `why-sgt.md`) preserved untouched. Nothing committed.
 
 - 2026-08-19 (electrical-flow step 3: Thomson's principle, no axiom
   change): `lake env lean` on `GraphTheory.ElectricalFlow` and on

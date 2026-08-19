@@ -27,3 +27,21 @@ re-deriving it.
 - [Matrix Chernoff / Golden–Thompson Formalization Gap](matrix-chernoff-formalization-gap.md)
   — why `proposals/spectral-graph-sparsification.md`'s Phase B is blocked,
   in full technical detail; the proposal itself carries only the summary.
+- [Lyapunov Stability Formalization Gap](lyapunov-stability-formalization-gap.md)
+  — why Lyapunov stability has no proposal despite being well-established
+  math: neither Scaffold nor the pinned Mathlib has any ODE-trajectory or
+  derivative-along-a-curve infrastructure to state it in terms of. The
+  discrete/spectral content anyone citing "Lyapunov" likely wants is
+  already a free corollary of `proposals/reversibility-and-heat-semigroup.md`.
+- [Stochastic Calculus and Log-Sobolev Formalization Gap](stochastic-calculus-and-log-sobolev-gap.md)
+  — why the two hard pieces of backlog item 6 (continuous-time
+  noisy/stochastic dynamics, and log-Sobolev inequalities beyond the
+  already-available Poincaré/spectral-gap bound) stay off the active list:
+  both are entirely absent from the pinned Mathlib, and log-Sobolev
+  additionally has no comparison theorem to build from even once
+  `proposals/finite-relative-entropy.md`'s entropy functional exists.
+- [Non-Mathlib Lean Dependencies](external-lean-dependencies.md) — what
+  exists elsewhere on GitHub for the machinery named absent in the three
+  entries above (real repos for Matrix-Tree and Lieb's concavity turn up),
+  and why consuming one is a governance decision this project has never
+  made and has no process for, not a `lakefile.lean` one-liner.

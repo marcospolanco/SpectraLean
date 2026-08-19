@@ -39,11 +39,12 @@ potential equation), its flow-routing extension
 (`GraphTheory.ElectricalFlow`, Thomson's principle and Rayleigh
 monotonicity), Foster's theorem
 (`GraphTheory.Foster`, the conductance-weighted resistance identity
-`∑_{u<v} w_e R_e = n - 1`), the expander discrepancy core
-(`GraphTheory.Expander`, step 1 of the decidable-certificates
-program: subset edge weights, the centered-indicator decomposition,
-and the `d`-regular main-term split the Expander Mixing Lemma
-measures), its Cheeger bridge (`GraphTheory.Cheeger`), the
+`∑_{u<v} w_e R_e = n - 1`), the expander discrepancy core and the
+Expander Mixing Lemma itself (`GraphTheory.Expander`, steps 1–2 of the
+decidable-certificates program: subset edge weights, the
+centered-indicator decomposition, the Rayleigh sandwich on `1⊥`, and
+the mixing-lemma discrepancy bound with its spectral hypothesis in
+Laplacian terms), its Cheeger bridge (`GraphTheory.Cheeger`), the
 Fiedler-vector interface (`GraphTheory.Fiedler`, Phase A: the vector,
 the sign partition, and the algebraic-connectivity certificate),
 the random-walk interfaces (`GraphTheory.RandomWalk`), the general

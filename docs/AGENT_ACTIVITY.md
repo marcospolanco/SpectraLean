@@ -2716,3 +2716,27 @@ untouched; nothing committed.
 **Remaining risk:** the integer-twin re-scoping changes Step 3's deliverable shape (ℚ soundness statement + ℤ twin + proved bridge lemma); the twin has been spiked but its soundness bridge is unproved. The Step-2 bridge (eigenvalue hypothesis → Rayleigh-form operator bound on `x ⊥ 1`) is unbuilt and is the next load-bearing dependency; the radar holds reflect that the mixing lemma itself is not yet stated. The restated EML signature is recorded but not yet elaborated.
 
 **Next handoff:** proposal Step 2 — the Expander Mixing Lemma: the bridge layer (eigenvalue hypothesis → `|xᵀAx| ≤ μ xᵀx` on `x ⊥ 1` via the eigenbasis/Courant–Fischer machinery), the centered-cross-term bound by Cauchy–Schwarz, packaged at the restated signature; then Step 3 (certificate module with the ℤ twin + soundness bridge) and Step 4 (QA incl. kernel-`decide` demonstrations). Medium alternatives queued (Fiedler Phase B — decision-gated; mixing-time Step 1; Reversibility Phase A; Relative Entropy). The operator's untracked `adversarial.md`, `sgt-gaps.md`, and `why-sgt.md` preserved untouched; nothing committed.
+
+## 2026-08-19T15:01:42Z — Decidable spectral certificates, Step 2 (Expander Mixing Lemma)
+
+**Run:** `20260819T150142Z-run-1`  
+**Session:** `ses_fe57b012dffeLl1r2RrcTtsu8E`  
+**Status:** in-progress  
+**Milestone:** Deliver Step 2 of `proposals/decidable-spectral-certificates.md` (top High item): the Expander Mixing Lemma as hard crust — the bridge from the Laplacian-form eigenvalue hypothesis to the Rayleigh-form operator bound on `1⊥`, the centered cross-term bound, and the packaged restated `expander_mixing_lemma` signature, with C₄ QA including equality sharpness witnesses. Leverage: the theorem the proposal exists to deliver and the layer Step 3's certificates compose with.
+
+**Changes:** intent recorded; Lean work starting (generic `evals`-last facts in `Spectral.lean`, bridge layer + headline in `GraphTheory/Expander.lean`, QA extension in `SpectralGraph/Expander_QA.lean`).
+
+## 2026-08-19T16:25:49Z — Decidable spectral certificates Step 2 delivered (the Expander Mixing Lemma)
+
+**Run:** `20260819T150142Z-run-1`  
+**Session:** `ses_fe57b012dffeLl1r2RrcTtsu8E`  
+**Status:** completed  
+**Milestone:** Step 2 of `proposals/decidable-spectral-certificates.md` (top High item): the Expander Mixing Lemma proved as hard crust — the classical discrepancy bridge between Laplacian spectral gaps and combinatorial pseudorandomness, and the layer Step 3's certificates compose with.
+
+**Changes:** `GraphTheory.Expander` extended with the Step-2 bridge layer and the headline `expander_mixing_lemma` (at the Step 0 restated `√` signature, minus the found-unnecessary `hloop` hypothesis — deviation recorded in the proposal); `GraphTheory.Spectral` gains the generic `eigvalOf_le_evals_last`, `quadForm_le_evals_last` (top Rayleigh domination, multiplication form), and a public `dotProduct_self_pos`; `Expander_QA.lean` +19 declarations (derived spectral hypothesis, EML instantiations, sharpness witnesses); scoreboard, radar (axis 4 re-scored 3.5 → 4.0, logged; QA held at 4.0 per protocol), README (666 counts, axis-4 cell), SGT index map, umbrella, and both proposal records updated.
+
+**Verification:** `lake env lean` on both changed public modules and the QA module — zero errors, zero warnings; `#print axioms` on the nine new public theorems — only `propext, Classical.choice, Quot.sound` (zero new axioms, count stays 13); full `lake build` ✔ (2182 targets); all thirty QA modules batch-elaborated, zero errors; `lint_axioms`, `check_citations`, `check_markdown_links` pass; scoreboard regeneration idempotent (666/13/0).
+
+**Remaining risk:** the derived-`μ` QA derives `μ = 2` via bounds rather than exact spectrum pinning on `C₄` (exact pins are Step 4's planned route); `Mathlib.cons_val`-style literal evaluation required the pinned simp set (`cons_val_two`, no `vecTail` unfolding) — recorded here for future QA on 4-vertex fixtures.
+
+**Next handoff:** proposal Step 3 — the certificate module (ℚ-facing soundness statement + the kernel-verifiable integer cross-multiplied twin, bridged by a proved cross-multiplication lemma), then Step 4 QA. The operator's concurrent changes (untracked `governance/ADVERSARIAL_REVIEW.md`, six new untracked proposals including `directed-graph-operators.md`, and edits to `1_STRATEGY.md`, `6_SGT_BACKLOG.md`, `CONTRIBUTING.md`, `admit-perron-frobenius.md`, `electrical-flow-routing.md`) were observed mid-run and preserved untouched.

@@ -45,7 +45,15 @@ spectral theorem (2026-08-17): `initialProjector_congr`,
 matrix-facing λ₂ APIs), `evals_mem_eigvalOf` (sorted-spectrum ↔
 eigenbasis connection), `eigvalOf_sum_eq_trace` (trace from the unitary
 diagonalization), `eigvalOf_le_of_quadForm_nonpos` (one-sided Rayleigh
-eigenvalue bound — the refutation engine of `Cheeger_QA`);
+eigenvalue bound — the refutation engine of `Cheeger_QA`); top-of-
+spectrum tools (2026-08-19, the decidable-certificates Step-2 slice):
+`eigvalOf_le_evals_last` (the sorted spectrum's last entry dominates
+every eigenbasis eigenvalue), `quadForm_le_evals_last` (**top
+eigenvalue Rayleigh domination in multiplication form**:
+`xᵀ M x ≤ λ_max • (x ⬝ᵥ x)` for every symmetric matrix,
+unconditionally in `x`, no positivity — the upper half of the
+Rayleigh sandwich), and `dotProduct_self_pos` made public (the
+positivity idiom for division-form variational consumers);
 connectivity and the kernel characterization (2026-08-18):
 `supportGraph_adj` (adapter interface lemma),
 `eq_of_laplacian_mulVec_eq_zero_of_pos_weight` (zero Dirichlet energy
@@ -226,14 +234,15 @@ matrix-Chernoff scope decision and is not developed.
 | `sum_leverageScore_eq_two` | **Foster in leverage form:** the ordered-pair leverage scores sum to exactly `2` (unordered: `1`), making them a probability distribution over edges; `2 ≤ card V` is the division guard |
 
 
-### `Scaffold.Mathlib.GraphTheory.Expander` (edge weights, the centered-indicator decomposition)
+### `Scaffold.Mathlib.GraphTheory.Expander` (edge weights, the centered-indicator decomposition, the Expander Mixing Lemma)
 
-Step 1 of the decidable-spectral-certificates program (proposal
+Steps 1 and 2 of the decidable-spectral-certificates program (proposal
 `decidable-spectral-certificates.md`, High; its Step 0 gate — the
 Laplacian-convention decision and the ℚ-`decide` spike with the integer
 cross-multiplied fallback — was completed and recorded in the proposal
 on 2026-08-19 immediately before this module): the combinatorial
-edge-weight and discrepancy core for the Expander Mixing Lemma. All
+edge-weight and discrepancy core, and the Expander Mixing Lemma itself
+delivered the same day through the Rayleigh-sandwich route. All
 proved, zero axioms.
 
 | Declaration | Content |
@@ -243,6 +252,13 @@ proved, zero axioms.
 | `sum_centeredIndicator_eq_zero` / `centeredIndicator_dotProduct_onesVec` | the centered indicator is **exactly** orthogonal to `onesVec` — unconditionally (the empty-type case is handled; no `Nonempty`/cardinality hypothesis is carried) — the fact that kills the `d`-regular cross terms in the headline |
 | `mulVec_onesVec_eq_const` | on a `d`-regular network, `A *ᵥ onesVec` is the constant `d` (`deg` is exactly the row sum) |
 | `edgeWeight_eq_regular_add_centered` | **the `d`-regular decomposition (headline):** `edgeWeight A S T = d·\|S\|·\|T\|/\|V\| + centeredIndicator S ⬝ᵥ (A *ᵥ centeredIndicator T)` on symmetric `d`-regular networks — the population main term plus the centered cross term the Expander Mixing Lemma bounds by `μ`; symmetry load-bearing (the `1 ⬝ᵥ (A *ᵥ v)` cross term dies through `Matrix.dotProduct_mulVec`'s transpose) and regularity load-bearing (the `A *ᵥ onesVec = d` evaluation); no cardinality hypothesis (empty type degenerates to `0 = 0 + 0`) |
+| `quadForm_add` / `quadForm_add_sub_eq` / `quadForm_degreeMatrix` | generic matrix algebra consumed by the sandwich: quadratic forms are additive in the matrix; **polarization** — the difference of the quadratic form at `x + y` and `x − y` isolates `4 • (x ⬝ᵥ (M *ᵥ y))` for symmetric `M` (symmetry load-bearing: it folds the `y ⬝ᵥ (M *ᵥ x)` half onto the `x ⬝ᵥ (M *ᵥ y)` half); and the degree matrix's form is the degree-weighted sum of squares |
+| `quadForm_add_quadForm_laplacian` | **the `d`-regular identity:** `xᵀAx + xᵀLx = d • ‖x‖²` — the quadratic form of `A + L = D`; regularity only, no looplessness (the Step 0 sketch's `hloop` found unnecessary and dropped — a recorded statement-shape strengthening) |
+| `lambda2_mul_dotProduct_le_quadForm` | the variational lower bound in multiplication form: `λ₂ • ‖x‖² ≤ xᵀLx` on `x ⊥ onesVec` (the center's `secondEval_le_rayleigh` multiplied out; zero vector handled so consumers never case-split) |
+| `abs_quadForm_le_of_ortho_onesVec` | **the operator bound on `1⊥` (Step 2 bridge):** `\|xᵀAx\| ≤ μ ‖x‖²` under the Laplacian-spectrum hypothesis `μ ≥ max \|d − λ₂(L)\| \|d − λ_max(L)\|` — the Rayleigh sandwich (lower bound + the generic top domination + the `d`-regular identity; load-bearing on all three) |
+| `quadForm_bilinear_sq_le_of_ortho_onesVec` | **the sharp bilinear bound:** `(x ⬝ᵥ (A *ᵥ y))² ≤ μ² ‖x‖² ‖y‖²` on `1⊥ × 1⊥`, by the scaling trick (`√Y•x ± √X•y` through polarization; `a² = Y, b² = X` attains the AM–GM equality, so the product form carries no slack) |
+| `dotProduct_centeredIndicator_self` | the variance identity `‖centeredIndicator S‖² = \|S\|(|V|−\|S\|)/\|V\|` — the geometric factor of the mixing bound |
+| `expander_mixing_lemma` | **the Expander Mixing Lemma (headline):** `\|e(S,T) − d•\|S\|•\|T\|/\|V\|\| ≤ μ • √(\|S\|\|T\|(|V|−\|S\|)(|V|−\|T\|))/\|V\|` on symmetric, nonnegative, `d`-regular networks with the Laplacian-spectrum hypothesis — the classical discrepancy bridge between algebraic spectral gaps and combinatorial pseudorandomness (Alon–Chung 1988; Hoory–Linial–Wigderson 2006 §2; Vadhan 2012 §4), at the Step 0 restated `√` signature with squaring only inside the proof |
 
 
 ### `Scaffold.Mathlib.GraphTheory.Cheeger`

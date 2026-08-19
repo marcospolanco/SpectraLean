@@ -7,7 +7,8 @@ pseudorandomness and close the noncomputable extraction gap identified in
 `docs/traction-plan.md`. This document authorizes no Lean changes, axiom
 admissions, commits, clean-room copying, or external publication on its own.
 **Step 0 is COMPLETE (2026-08-19)** — see the decision record in the build
-order below; Steps 1+ are unblocked.
+order below; **Steps 1 and 2 are DELIVERED (2026-08-19)** as hard crust
+(zero new axioms); Steps 3–4 remain.
 
 **Why High, and why contingent.** The certificate-soundness argument is a
 genuine, checked-by-hand load-bearing consumer of `lambda2_variational`
@@ -270,6 +271,65 @@ asymmetric weight `!![0,2;1,0]` (`2 ≠ 1`).
 
 ### Step 2: Expander Mixing Lemma
 Prove `expander_mixing_lemma` for regular graphs by expanding $\mathbf{1}_S^T A \mathbf{1}_T$ across the eigenspaces of $A$ and bounding the orthogonal component via Cauchy–Schwarz and $\mu$.
+
+**STATUS: DELIVERED (2026-08-19)** as pure hard crust in
+`Scaffold.Mathlib.GraphTheory.Expander` (zero new axioms; `#print
+axioms expander_mixing_lemma` reads only `propext, Classical.choice,
+Quot.sound`). The delivered route is *cheaper and stronger* than the
+sketched eigenspace expansion — no eigenspace decomposition of the
+adjacency operator, no Cauchy–Schwarz, no kernel case analysis, and no
+affine spectrum transfer `evals (d•1 − L)`:
+
+1. **Center additions to `GraphTheory.Spectral`** (generic, reusable):
+   `eigvalOf_le_evals_last` (the sorted spectrum's last entry dominates
+   every eigenbasis eigenvalue — sort membership plus monotonicity),
+   the top Rayleigh domination in multiplication form
+   `quadForm_le_evals_last` (`xᵀ M x ≤ λ_max • (x ⬝ᵥ x)` for every
+   symmetric matrix, unconditionally in `x`, no positivity), and the
+   formerly-private positivity idiom `dotProduct_self_pos` made public
+   for division-form variational consumers.
+2. **The `d`-regular identity** `quadForm_add_quadForm_laplacian`:
+   `xᵀAx + xᵀLx = d • ‖x‖²` — the quadratic form of `A + L = D`, with
+   generic support lemmas `quadForm_add`, `quadForm_add_sub_eq`
+   (polarization: the sum/difference difference isolates `4 • x ⬝ᵥ
+   (M *ᵥ y)`), and `quadForm_degreeMatrix`.
+   **Hypothesis deviation recorded:** the Step 0 sketch carried
+   `hloop : ∀ i, A i i = 0`; the delivered statement drops it — the
+   `A + L = D` identity needs regularity only (self-loop weights sit
+   on `D`'s diagonal either way). A statement-shape strengthening.
+3. **The Rayleigh sandwich on `1⊥`.** The lower half
+   `lambda2_mul_dotProduct_le_quadForm` (`λ₂ • ‖x‖² ≤ xᵀLx` on
+   `x ⊥ 1`, from the proved `secondEval_le_rayleigh` multiplied out)
+   and the upper half `quadForm_le_evals_last` pin the Laplacian
+   energy; the identity trades them for the adjacency energy, giving
+   the operator bound `abs_quadForm_le_of_ortho_onesVec`
+   (`|xᵀAx| ≤ μ ‖x‖²` on `1⊥`). Load-bearing on both variational
+   bounds and the `A + L = D` identity — an error in any breaks the
+   sandwich.
+4. **The sharp bilinear bound** `quadForm_bilinear_sq_le_of_ortho_onesVec`
+   (`(x ⬝ᵥ (A *ᵥ y))² ≤ μ² ‖x‖² ‖y‖²` on `1⊥ × 1⊥`) by the scaling
+   trick: polarization applied to `√Y • x ± √X • y`, dividing by
+   `(4√X√Y)²`; the choice `a² = Y, b² = X` attains the AM–GM equality,
+   so the product form is sharp (no slack).
+5. **The variance identity** `dotProduct_centeredIndicator_self`
+   (`‖centeredIndicator S‖² = |S|(|V|−|S|)/|V|`), evaluating the
+   geometric factor; the headline `expander_mixing_lemma` at the
+   Step 0 restated `√` signature (squaring only inside the proof, in
+   ordered-field arithmetic, via the private `sqrt_assembly`).
+
+QA (`Scaffold/QA/SpectralGraph/Expander_QA.lean`, +19 declarations,
+41 in file): the spectral hypothesis is **derived, not assumed** —
+`μ = 2` is proved on `C₄` from three independent bounds (test vector
+`![1,0,−1,0]` with Rayleigh quotient `2` for `λ₂ ≤ 2`; a direct
+sum-of-squares estimate `xᵀLx ≤ 4‖x‖²` routed to `λ_max ≤ 4` through
+`quadForm_eigvecOf_self` + `evals_mem_eigvalOf`; PSD for both lower
+bounds). The lemma is instantiated on two cuts, and **the opposite cut
+attains the bound exactly** — both sides independently compute to `2`
+(`|0 − 2| = 2 = 2√16/4`) — as does the alternating vector in the
+operator bound (`|xᵀAx| = 8 = 2‖x‖²`): the derived `μ` is tight, the
+theorem not vacuous. The half cut's deviation computes to `0` (the
+population main term is exact there), and the variance identity is
+cross-checked against the pinned `±1/2` entries.
 
 ### Step 3: Computable Rational Certificate Validator
 Define computable verification functions:

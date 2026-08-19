@@ -259,6 +259,43 @@ theorem evals_mem_eigvalOf (hM : M.IsSymm) (k : Fin (Fintype.card V)) :
   rcases Multiset.mem_map.1 hmem with ⟨i, _, hi⟩
   exact ⟨i, hi.symm⟩
 
+/-- The last entry of the sorted spectrum dominates every eigenvalue of
+the eigenbasis listing: sorting is nondecreasing and every listed
+eigenvalue survives the sort, so each is bounded by the final entry.
+This is the half of "the sorted spectrum and the eigenbasis listing
+carry the same multiset" that top-eigenvalue bounds consume. The
+cardinality hypothesis keeps the last index inhabited (the empty type
+has no last index). -/
+theorem eigvalOf_le_evals_last {M : Matrix V V ℝ} (hM : M.IsSymm)
+    (hcard : 1 ≤ Fintype.card V) (i : V) :
+    eigvalOf M hM i ≤ evals hM ⟨Fintype.card V - 1, by omega⟩ := by
+  have hlen : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset V).val.map
+        ((isHermitian_of_isSymm hM).eigenvalues))).length =
+      Fintype.card V := length_sortedEvals hM
+  have hmem : eigvalOf M hM i ∈ Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset V).val.map
+        ((isHermitian_of_isSymm hM).eigenvalues)) := by
+    rw [Multiset.mem_sort]
+    exact Multiset.mem_map.2 ⟨i, Finset.mem_univ _, rfl⟩
+  obtain ⟨p, hp⟩ := List.mem_iff_get.1 hmem
+  have hsort : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset V).val.map
+        ((isHermitian_of_isSymm hM).eigenvalues))).Sorted (fun a b => a ≤ b) :=
+    Multiset.sort_sorted _ _
+  have hlast : evals hM ⟨Fintype.card V - 1, by omega⟩ =
+      (Multiset.sort (fun a b => a ≤ b)
+        ((Finset.univ : Finset V).val.map
+          ((isHermitian_of_isSymm hM).eigenvalues))).get
+      ⟨Fintype.card V - 1, by rw [hlen]; omega⟩ := rfl
+  rw [hlast, ← hp]
+  have hpn : p.1 < Fintype.card V := by simpa [hlen] using p.isLt
+  rcases Nat.lt_or_ge p.1 (Fintype.card V - 1) with hlt | heq
+  · exact hsort.rel_get_of_lt (by simpa using hlt)
+  · have hpe : p = ⟨Fintype.card V - 1, by rw [hlen]; omega⟩ :=
+      Fin.ext (show p.1 = Fintype.card V - 1 by omega)
+    rw [hpe]
+
 /-- The orthogonal spectral projector onto the span of the eigenvectors
 whose eigenvalues are at most `c`:
 `P_c = ∑_{λᵢ ≤ c} vᵢ vᵢᵀ` over the orthonormal eigenbasis.
@@ -1090,6 +1127,32 @@ theorem quadForm_eigvecOf_self {M : Matrix V V ℝ} (hM : M.IsSymm)
       = eigvalOf M hM i := by
         show Matrix.dotProduct (eigvecOf M hM i) (M *ᵥ eigvecOf M hM i) = _
         rw [hev, Matrix.dotProduct_smul, smul_eq_mul, h1, mul_one]
+
+/-- **Top-eigenvalue Rayleigh domination, multiplication form.** For any
+symmetric matrix, `xᵀ M x ≤ λ_max • (x ⬝ᵥ x)` where `λ_max` is the last
+entry of the sorted spectrum: the quadratic form is the eigenvalue-weighted
+sum of squared eigencomponents (`quadForm_eigvalOf`), Parseval identifies
+the weight sum with `x ⬝ᵥ x` (`dotProduct_eigvecOf`), and every
+eigenvalue is dominated by the last sorted entry
+(`eigvalOf_le_evals_last`). Stated unconditionally in `x` (both sides
+vanish at `x = 0`) and without any positivity hypothesis — this is the
+upper half of the Rayleigh sandwich that perturbation and mixing
+arguments consume. -/
+theorem quadForm_le_evals_last {M : Matrix V V ℝ} (hM : M.IsSymm)
+    (hcard : 1 ≤ Fintype.card V) (x : V → ℝ) :
+    quadForm M x ≤
+      evals hM ⟨Fintype.card V - 1, by omega⟩ * Matrix.dotProduct x x := by
+  have hq : quadForm M x
+      = ∑ i, eigvalOf M hM i
+        * (Matrix.dotProduct (eigvecOf M hM i) x) ^ 2 :=
+    quadForm_eigvalOf hM x
+  have hD : Matrix.dotProduct x x
+      = ∑ i, (Matrix.dotProduct (eigvecOf M hM i) x) ^ 2 := by
+    rw [dotProduct_eigvecOf hM x x]
+    exact Finset.sum_congr rfl fun i _ => (pow_two _).symm
+  rw [hq, hD, Finset.mul_sum]
+  exact Finset.sum_le_sum fun i _ =>
+    mul_le_mul_of_nonneg_right (eigvalOf_le_evals_last hM hcard i) (sq_nonneg _)
 
 /-- Generic form: for any symmetric matrix whose kernel contains
 `onesVec` (`M *ᵥ onesVec = 0`), eigenvectors at nonzero eigenvalues are
@@ -2040,9 +2103,11 @@ theorem finrank_span_eigvecOf_finset {M : Matrix V V ℝ} (hM : M.IsSymm)
   simp
 
 omit [DecidableEq V] in
-/-- Positivity idiom (private): the dot product of a nonzero real vector
-with itself is positive. -/
-private theorem dotProduct_self_pos {x : V → ℝ} (hx : x ≠ 0) :
+/-- Positivity idiom: the dot product of a nonzero real vector with
+itself is positive. Public since the Rayleigh-sandwich consumers in
+`GraphTheory.Expander` (and any division-form variational bound) need
+the same denominator fact. -/
+theorem dotProduct_self_pos {x : V → ℝ} (hx : x ≠ 0) :
     0 < Matrix.dotProduct x x := by
   obtain ⟨i, hi⟩ : ∃ i, x i ≠ 0 := by
     by_contra hcon

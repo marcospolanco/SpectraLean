@@ -6,6 +6,95 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Decidable spectral certificates, Step 2 — the Expander Mixing Lemma
+itself (run 1, 2026-08-19): DELIVERED.** The Active priority table's
+top High item (`proposals/decidable-spectral-certificates.md`), at the
+step its Step-1 delivery record named as next. Pure hard crust —
+**zero new axioms** (count stays 13; `#print axioms` on all nine new
+public theorems reads only `propext, Classical.choice, Quot.sound`).
+Steps 3–4 were NOT started this run.
+
+**Delivered route** (cheaper and stronger than the proposal's
+eigenspace-expansion sketch — no eigenspace split of `A`, no
+Cauchy–Schwarz, no kernel case analysis, no affine spectrum transfer):
+(a) two generic additions to `Spectral.lean` — `eigvalOf_le_evals_last`
+(sort membership + monotonicity) and the top Rayleigh domination in
+multiplication form `quadForm_le_evals_last` (`xᵀ M x ≤ λ_max •
+(x ⬝ᵥ x)` for every symmetric matrix, unconditionally in `x`), plus
+`dotProduct_self_pos` made public; (b) the `d`-regular identity
+`quadForm_add_quadForm_laplacian` (`xᵀAx + xᵀLx = d • ‖x‖²` — the
+quadratic form of `A + L = D`), with generic support `quadForm_add`,
+`quadForm_add_sub_eq` (polarization), `quadForm_degreeMatrix`;
+(c) the Rayleigh sandwich on `1⊥` — `lambda2_mul_dotProduct_le_quadForm`
+(the proved `secondEval_le_rayleigh` multiplied out) below,
+`quadForm_le_evals_last` above — giving the operator bound
+`abs_quadForm_le_of_ortho_onesVec`; (d) the sharp bilinear bound
+`quadForm_bilinear_sq_le_of_ortho_onesVec` by the scaling trick
+(`√Y•x ± √X•y` through polarization; `a² = Y, b² = X` attains AM–GM
+equality — no slack); (e) the variance identity
+`dotProduct_centeredIndicator_self` (`‖cS‖² = |S|(|V|−|S|)/|V|`);
+(f) the headline `expander_mixing_lemma` at the Step 0 restated `√`
+signature, squaring only inside the proof. **Statement-shape
+strengthening recorded in the proposal:** the Step 0 sketch's `hloop`
+hypothesis is dropped — the `A + L = D` identity needs regularity
+only (self-loops sit on `D`'s diagonal either way).
+
+**QA** `SpectralGraph/Expander_QA.lean` (+19 declarations, 41 in
+file): the spectral hypothesis is **derived, not assumed** — `μ = 2`
+proved on `C₄` from three independent bounds (test vector
+`![1,0,−1,0]` with Rayleigh quotient `2` for `λ₂ ≤ 2` via
+`secondEval_le_rayleigh`; a direct sum-of-squares estimate
+`xᵀLx ≤ 4‖x‖²` routed to `λ_max ≤ 4` through `quadForm_eigvecOf_self`
++ `evals_mem_eigvalOf`; PSD lower bounds for both). The lemma is
+instantiated on two cuts, and the bound is **attained exactly** on the
+opposite cut (both sides independently compute to `2`: `|0−2| =
+2√16/4`) and on the alternating vector in the operator bound
+(`|xᵀAx| = 8 = 2‖x‖²`) — the derived `μ` is tight, the theorem not
+vacuous; the half cut's deviation computes to `0`, and the variance
+identity cross-checks against the pinned `±1/2` entries.
+
+**Verification:** `lake env lean` on both changed public modules and
+the QA module — zero errors, zero warnings; `#print axioms` on the
+nine new public theorems ✔ (three standard axioms only); explicit
+`lake build` of the two targets ✔; **full `lake build` ✔ (2182
+targets)**; all thirty QA modules batch-elaborated, zero errors;
+`lint_axioms` (13), `check_citations`, `check_markdown_links` pass;
+scoreboard regeneration idempotent (**666/13/0**). Environment: the
+pruned oleans state recurred at run start; the recorded interpreted
+cache fetch restored Mathlib's oleans, then `lake build Batteries`
+preceded iteration (direct `lake env lean -o` used for fast olean
+updates during iteration; the final full `lake build` replayed the
+trace chain and rebuilt cleanly).
+
+**Records updated:** module/QA docstrings, umbrella (`Scaffold.lean`),
+scoreboard (666/13/0, verification rows, step-2 milestone bullet),
+radar (subject axis 4 re-scored **3.5 → 4.0** — a new theorem family,
+spectral–combinatorial discrepancy, with the re-score logged; QA count
+666/30 with the derived-hypothesis and sharpness QA kinds described;
+the QA axis **held at 4.0** per protocol — parametric/randomized QA
+untouched; proved-depth text; weakest-axes paragraph), README (666,
+axis-4 cell 4.0, the proved list gains the EML, cuts-and-expansion
+module row), SGT index map (8 new Expander rows + section header; 3
+new Spectral rows), proposal Step-2 delivery record (+ the `hloop`
+deviation) + status header, and `proposals/README.md` (High row now
+points at Step 3). The operator's concurrent changes (README's
+why-SGT section; untracked `governance/ADVERSARIAL_REVIEW.md` and six
+new untracked proposals incl. `directed-graph-operators.md`; edits to
+`1_STRATEGY.md`, `6_SGT_BACKLOG.md`, `CONTRIBUTING.md`,
+`admit-perron-frobenius.md`, `electrical-flow-routing.md`) are
+preserved untouched.
+
+**Next milestone (open):** proposal Step 3 — the computable
+certificate module, now scoped by the Step 0 record: deliver both the
+ℚ-facing soundness statement (`isSpectralUpperBoundCertificate` /
+`lambda2_le_of_certificate`, consuming `lambda2_variational` — the
+proposal's flagship load-bearing consumer) and the kernel-verifiable
+integer cross-multiplied twin, bridged by a proved cross-multiplication
+lemma; then Step 4 (QA incl. the kernel `decide` demonstrations on
+`C₄`/`C₆` and the Ramanujan fixture family). The Medium rows (Fiedler
+Phase B — needs an operator decision; mixing-time Step 1; Reversibility
+Phase A; Relative Entropy) stay queued.
+
 **Decidable spectral certificates, steps 0 and 1 (run 1, 2026-08-19):
 DELIVERED.** The Active priority table's top High item
 (`proposals/decidable-spectral-certificates.md`) opened at its

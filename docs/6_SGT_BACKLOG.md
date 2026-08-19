@@ -221,7 +221,16 @@ delivers `A ≤ B ⇒ R_B ≤ R_A` through the *flow* route (Thomson's
 principle at the transferred `A`-current), which never needed the
 attained-supremum Dirichlet principle; what remains deferred at
 proposal level is only the Dirichlet-principle *route* (the variational
-upper bound the crust keeps out of scope).
+upper bound the crust keeps out of scope). **Program complete
+(2026-08-19):** the flow proposal's step 5 delivered the
+capacity-reinforcement packaging (`increaseConductance`,
+`supportGraph_connected_of_le`, the one-hypothesis
+`effectiveResistance_le_increaseConductance`), closing
+`electrical-flow-routing.md` in full at zero axiom cost. The family's
+remaining items are unchanged: the definiteness residual
+`R u v = 0 ↔ u = v`, the resistance metric (triangle inequality),
+Matrix–Tree, and Kirchhoff network theorems beyond the conservation
+bridge — the last two still gated on a named consumer.
 
 ## Standing decisions
 

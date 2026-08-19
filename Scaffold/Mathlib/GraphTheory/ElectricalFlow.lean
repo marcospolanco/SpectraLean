@@ -15,8 +15,11 @@
   divergence-free superposition lemma (discrete integration by parts).
   Step 4: Rayleigh monotonicity in conductance form — entrywise
   conductance increase cannot increase effective resistance,
-  `A ≤ B ⇒ R_B ≤ R_A`. Step 5 (the ICP capacity-reinforcement example)
-  is deliberately not attempted here.
+  `A ≤ B ⇒ R_B ≤ R_A`. Step 5: the ICP capacity-reinforcement packaging
+  — `increaseConductance` raises one undirected pair's conductance, and
+  `effectiveResistance_le_increaseConductance` states the reinforced
+  network's resistance bound with only the original network's
+  connectivity as hypothesis.
 
   Representation decision (proposal step 0, recorded in the proposal
   on 2026-08-19 before this module was written): flows live on ordered
@@ -525,5 +528,146 @@ theorem effectiveResistance_le_of_le (A B : WAdj (V := V))
     flowEnergy_electricalCurrent_eq_effectiveResistance A hA hnonnegA
       hconnA hf
   linarith
+
+/-!
+## Capacity reinforcement (proposal `electrical-flow-routing.md`, step 5)
+-/
+
+/-- **Capacity reinforcement:** raise the conductance of the single
+undirected pair `{i, j}` by `δ`, leaving every other entry of the
+network alone. Both ordered entries `(i, j)` and `(j, i)` are raised
+together, so a symmetric network stays symmetric (and a nonnegative one
+stays nonnegative whenever `0 ≤ δ`). On the diagonal `i = j` the two
+ordered entries coincide; diagonal weights cancel in `D − A`, so a
+self-reinforcement leaves the Laplacian action unchanged. This is the
+ICP-facing operation: add capacity on one link. -/
+def increaseConductance (A : WAdj (V := V)) (i j : V) (δ : ℝ) :
+    WAdj (V := V) :=
+  Matrix.of fun k l =>
+    if (k = i ∧ l = j) ∨ (k = j ∧ l = i) then A k l + δ else A k l
+
+omit [Fintype V] in
+/-- Entry interface, reinforced case: the conductance of an ordered
+entry of the reinforced pair is raised by `δ`. -/
+theorem increaseConductance_apply_of_reinforced {A : WAdj (V := V)}
+    {i j k l : V} {δ : ℝ}
+    (h : (k = i ∧ l = j) ∨ (k = j ∧ l = i)) :
+    increaseConductance A i j δ k l = A k l + δ := by
+  show (if (k = i ∧ l = j) ∨ (k = j ∧ l = i) then A k l + δ else A k l)
+    = A k l + δ
+  rw [if_pos h]
+
+omit [Fintype V] in
+/-- Entry interface, untouched case: every entry off the reinforced
+pair is unchanged. -/
+theorem increaseConductance_apply_of_not_reinforced {A : WAdj (V := V)}
+    {i j k l : V} {δ : ℝ}
+    (h : ¬ ((k = i ∧ l = j) ∨ (k = j ∧ l = i))) :
+    increaseConductance A i j δ k l = A k l := by
+  show (if (k = i ∧ l = j) ∨ (k = j ∧ l = i) then A k l + δ else A k l)
+    = A k l
+  rw [if_neg h]
+
+omit [Fintype V] in
+/-- **Reinforcement is entrywise monotone:** for `0 ≤ δ`, no conductance
+decreases — the network only gains capacity. This is the comparison
+hypothesis of Rayleigh monotonicity, supplied constructionally. -/
+theorem le_increaseConductance (A : WAdj (V := V)) (i j : V) {δ : ℝ}
+    (hδ : 0 ≤ δ) (k l : V) :
+    A k l ≤ increaseConductance A i j δ k l := by
+  by_cases h : (k = i ∧ l = j) ∨ (k = j ∧ l = i)
+  · rw [increaseConductance_apply_of_reinforced h]
+    exact le_add_of_nonneg_right hδ
+  · rw [increaseConductance_apply_of_not_reinforced h]
+
+omit [Fintype V] in
+/-- Reinforcement preserves symmetry: both ordered entries of the pair
+are raised by the same `δ`, and the mirrored condition picks up the
+mirrored entry. -/
+theorem increaseConductance_isSymm (A : WAdj (V := V)) (hA : A.IsSymm)
+    (i j : V) (δ : ℝ) : (increaseConductance A i j δ).IsSymm := by
+  refine Matrix.IsSymm.ext fun k l => ?_
+  by_cases h : (k = i ∧ l = j) ∨ (k = j ∧ l = i)
+  · rcases h with ⟨hk, hl⟩ | ⟨hk, hl⟩
+    · rw [increaseConductance_apply_of_reinforced (Or.inl ⟨hk, hl⟩),
+        increaseConductance_apply_of_reinforced (Or.inr ⟨hl, hk⟩),
+        hA.apply k l]
+    · rw [increaseConductance_apply_of_reinforced (Or.inr ⟨hk, hl⟩),
+        increaseConductance_apply_of_reinforced (Or.inl ⟨hl, hk⟩),
+        hA.apply k l]
+  · have hswap : ¬ ((l = i ∧ k = j) ∨ (l = j ∧ k = i)) := by
+      intro hc
+      rcases hc with ⟨h1, h2⟩ | ⟨h1, h2⟩
+      · exact h (Or.inr ⟨h2, h1⟩)
+      · exact h (Or.inl ⟨h2, h1⟩)
+    rw [increaseConductance_apply_of_not_reinforced h,
+      increaseConductance_apply_of_not_reinforced hswap, hA.apply k l]
+
+omit [Fintype V] in
+/-- Reinforcement preserves nonnegativity: capacities only increase. -/
+theorem increaseConductance_nonneg (A : WAdj (V := V))
+    (hnonneg : ∀ k l, 0 ≤ A k l) (i j : V) {δ : ℝ} (hδ : 0 ≤ δ) :
+    ∀ k l, 0 ≤ increaseConductance A i j δ k l := by
+  intro k l
+  by_cases h : (k = i ∧ l = j) ∨ (k = j ∧ l = i)
+  · rw [increaseConductance_apply_of_reinforced h]
+    exact add_nonneg (hnonneg k l) hδ
+  · rw [increaseConductance_apply_of_not_reinforced h]
+    exact hnonneg k l
+
+omit [Fintype V] [DecidableEq V] in
+/-- **The support graph grows with the network:** if `B` dominates `A`
+entrywise, every edge of `A`'s support graph (a positive off-diagonal
+weight) is an edge of `B`'s — `0 < A i j ≤ B i j` — so `supportGraph B`
+contains `supportGraph A`. No nonnegativity hypothesis is needed. -/
+theorem supportGraph_le_of_le {A B : WAdj (V := V)} (hA : A.IsSymm)
+    (hB : B.IsSymm) (hle : ∀ i j, A i j ≤ B i j) :
+    supportGraph A hA ≤ supportGraph B hB := by
+  intro k l hadj
+  rw [supportGraph_adj] at hadj ⊢
+  exact ⟨hadj.1, lt_of_lt_of_le hadj.2 (hle k l)⟩
+
+omit [Fintype V] [DecidableEq V] in
+/-- **Capacity growth preserves connectivity** (the step-4-recorded
+optional adapter, delivered as step 5's packaging companion): a network
+that dominates a connected network entrywise is connected — every edge
+of the smaller support graph is an edge of the larger
+(`supportGraph_le_of_le`), and Mathlib's `SimpleGraph.Connected.mono`
+lifts connectedness along the containment. This is what lets the
+reinforcement theorem below hypothesize only the *original* network's
+connectivity. -/
+theorem supportGraph_connected_of_le {A B : WAdj (V := V)} (hA : A.IsSymm)
+    (hB : B.IsSymm) (hle : ∀ i j, A i j ≤ B i j)
+    (hconn : (supportGraph A hA).Connected) :
+    (supportGraph B hB).Connected :=
+  SimpleGraph.Connected.mono (supportGraph_le_of_le hA hB hle) hconn
+
+/-- **Capacity reinforcement cannot worsen certified routing cost
+(proposal step 5, headline):** on a connected symmetric nonnegative
+network, raising the conductance of any single undirected pair by
+`δ ≥ 0` cannot increase the effective resistance between any two
+vertices,
+`effectiveResistance (increaseConductance A i j δ) u v ≤ effectiveResistance A u v`.
+
+This is the ICP-facing packaging of Rayleigh monotonicity (step 4):
+*adding network capacity cannot worsen the certified energy cost of
+electrical routing*, now as a one-hypothesis theorem — the reinforced
+network's connectivity is derived by the adapter
+(`supportGraph_connected_of_le`), not assumed. Weights are conductances,
+so the inequality runs this way (reversing it is a statement bug; QA
+refutes the reverse direction numerically on the step-4 fixture and
+certifies the strict decrease `2 → 3/2` on the reinforced path). -/
+theorem effectiveResistance_le_increaseConductance (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (hconn : (supportGraph A hA).Connected) (i j u v : V) (δ : ℝ)
+    (hδ : 0 ≤ δ) :
+    effectiveResistance (increaseConductance A i j δ) u v
+      ≤ effectiveResistance A u v :=
+  effectiveResistance_le_of_le A (increaseConductance A i j δ) hA hnonneg
+    hconn (increaseConductance_isSymm A hA i j δ)
+    (increaseConductance_nonneg A hnonneg i j hδ)
+    (supportGraph_connected_of_le hA (increaseConductance_isSymm A hA i j δ)
+      (fun k l => le_increaseConductance A i j hδ k l) hconn)
+    (fun k l => le_increaseConductance A i j hδ k l) u v
 
 end SpectralGraphTheory

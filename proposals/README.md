@@ -29,7 +29,6 @@ drift apart.
 
 | Priority | Proposal | Why |
 | --- | --- | --- |
-| High | [Electrical Flows, Thomson's Principle, and Rayleigh Monotonicity](electrical-flow-routing.md) | The strongest zero-axiom center-to-ICP bridge: turns the delivered potential-based resistance API into a conserved unit-flow routing interface, proves the minimum-energy characterization, and derives the capacity-monotonicity theorem the traction plan can demonstrate to Lean/Mathlib adopters. Load-bearing on the Laplacian sign convention, support, solvability, kernel uniqueness, energy identity, and effective-resistance agreement; no new axioms. |
 | High | [Foster's Theorem](spectral-graph-sparsification.md) (Phase A only) | Reviewed and split 2026-08-18 from a bundled proposal that also claimed a full Spielman–Srivastava sparsification result — see that document's "Correction" for why only this half is ready. Foster's theorem was explicitly removed from `electrical-structure-crust.md`'s program for needing a pseudoinverse trace identity; the removal stands, but a genuine pseudoinverse-free route now exists (eigenbasis expansion + the now-proved one-dimensional kernel characterization, reusing exactly today's Courant–Fischer-era machinery), which is why this reopens the decision rather than quietly reversing it. Zero new axioms if the eigenbasis route holds up. |
 | High | [Decidable Spectral Certificates and the Expander Mixing Lemma](decidable-spectral-certificates.md) | Upgraded from Medium 2026-08-18. Its certificate-soundness proof is a checked-by-hand load-bearing consumer of `lambda2_variational` (proved the same day) — closes the exact noncomputable-extraction gap `docs/traction-plan.md` names as the reason broader-audience outreach stays premature, so strategically bigger than a typical proof target. **Run Step 0 first**: the proposal shipped without resolving the adjacency-vs-Laplacian eigenvalue convention the classical Expander Mixing Lemma needs, or spiking whether kernel `decide` on ℚ arithmetic is actually fast enough at even modest `Fin n` sizes to satisfy its own acceptance criterion. Both are now scoped in the proposal's own Step 0 — do not begin Step 1 before that decision and spike are recorded. |
 | Medium | [The Fiedler Vector and a Certified Spectral Partition](fiedler-partitioning.md) | Phase A (A1/A2) delivered 2026-08-18 as hard crust (`GraphTheory.Fiedler`: the vector, the algebraic-connectivity certificate `lambda2_pos_of_connected`, and the sign partition proved nonempty/proper; no new axioms). What remains is Phase B — a certified conductance bound on the Fiedler partition — which is *not* hard crust: it composes the proved easy direction with the still-admitted Cheeger hard direction, so it is an axiom-backed derived theorem. Real, unblocked work, but it needs the operator decision the proposal itself names (run against the admitted hard direction, or defer until it is proved) and adds trust surface rather than reducing it — hence Medium, not High. |
@@ -46,52 +45,30 @@ drift apart.
 | Low — technical decision required | [The Weighted Matrix-Tree (Kirchhoff) Theorem](weighted-matrix-tree-theorem.md) | Added 2026-08-19 as the answer to "if we build one more piece of genuinely new machinery, what should it be" — compared explicitly against `icebox/`'s three candidates (Golden-Thompson, ODE-trajectory calculus, stochastic calculus) and judged the best fit for this project's idiom (finite determinants and graph induction, not a foreign kind of math) and its most active axis (6). Not self-authorizing: `docs/6_SGT_BACKLOG.md` item 7 already names this exact candidate and gates it explicitly — "admit or define nothing here until a named consumer states which identity it needs" — and this proposal does not supply one. Does **not** accelerate or feed Foster's theorem (`spectral-graph-sparsification.md` Phase A already has its own pseudoinverse-free route); the document is explicit about not overstating that connection. |
 | Low — process decision required | [Retire the Mushy Center Systematically](retire-the-mushy-center.md) | Found unindexed while auditing this table (2026-08-18) — added by the same run that delivered the Cheeger easy direction, never previously recorded here. Proposes a heavier apparatus for axiom retirement: a formal elimination board, parallel per-candidate worktrees, a four-stage survey/formalize/falsify/integrate workflow. Worth an honest tension check before adoption: its own pilot section names the normalized-Cheeger transfer as its first candidate, and that has *already been delivered* using the lightweight mechanism already in place (this table plus one-step-per-run) — four axiom-related deliveries landed that way in short order. Whether the heavier process is worth adopting over what's already working is an operator call, not a default; an autonomous run should not stand up the board unprompted. |
 
-With the electrical-flow proposal indexed, it is the active High item and
-therefore the next autonomous milestone under the priority policy above.
-**Progress (2026-08-19):** its step 0 is delivered — the representation
-survey re-run against the pin (no flow/circulation/graph-divergence API
-anywhere; `SimpleGraph.Dart` carries none) with the matrix representation,
-zero-edge semantics, and the focused `GraphTheory.ElectricalFlow` module
-recorded in the proposal before any Lean — and step 1 (the flow interface
-and Kirchhoff conservation, `isUnitFlow_electricalCurrent`) landed the same
-run at no axiom cost. **Step 2 (flow energy and the energy agreement) was
-delivered 2026-08-19 in a follow-up run:** `flowEnergy` with the explicit
-zero branch and the `1/2` ordered-pair factor, the symmetry-only agreement
-`flowEnergy A (electricalCurrent A f) = quadForm (laplacian A) f`,
-`flowEnergy_nonneg`, and the unit-demand identity equating the current's
-dissipated energy with the effective resistance it routes — zero axioms
-added, with the mandatory double-counting fixture (raw ordered-pair sum
-`2 ≠ 1` = Dirichlet energy on `K₂`) and the Thomson-breaking zero-energy
-competitor (energy `0 < 1` = resistance, excluded by the support conjunct
-alone) both landed in QA. **Step 3 (Thomson's principle) was delivered
-2026-08-19 in a third run:** `effectiveResistance_le_flowEnergy` — every
-valid unit flow dissipates at least the resistance it routes — proved via
-the divergence-free superposition lemma
-`flowEnergy_add_of_flowDivergence_eq_zero` (discrete integration by
-parts; stated with no hypotheses on `A`), flow-space linearity, and
-`flowEnergy_nonneg`; QA witnesses attainment at the split current on the
-triangle (`2/3`), a strict competitor (the detour flow: `2/3 < 2`), and
-the decomposition `2 = 2/3 + 4/3`. **Step 4 (Rayleigh monotonicity in
-conductance form) was delivered 2026-08-19 in a fourth run:**
-`effectiveResistance_le_of_le` — entrywise `A ≤ B` on connected symmetric
-nonnegative networks gives `R_B ≤ R_A` — via the flow-space-growth and
-energy-comparison interfaces (`isFlowOn_of_le`, `flowEnergy_le_of_le`,
-support load-bearing in both), Thomson on `B` at the transferred
-`A`-current, and the step-2 energy identity; QA delivers the proposal's
-capacity-increase item (`1 → 1/2`, strict, with the orientation guard
-refuting the reverse direction) plus a partial increase on the triangle
-(`2/3 → 2/5`); zero axioms. The next run's milestone is step 5 (the ICP
-capacity-reinforcement example — packaging the monotonicity theorem as
-`effectiveResistance (increaseConductance A i j δ) u v ≤
-effectiveResistance A u v`; the optional connectivity adapter noted in the
-step-4 record belongs there if that shape wants it). Fiedler Phase B
-retains its named operator decision, and the mixing-time program remains
-the unblocked Medium fallback.
+With the electrical-flow proposal **delivered in full** (all steps
+0–5, 2026-08-19 — see the Delivered table), the top of the Active
+priority table is now **Foster's Theorem Phase A** (`spectral-graph-sparsification.md`),
+followed by decidable spectral certificates (whose own Step 0 gate must
+run first). Both carry recorded scoping spikes in their proposals. The
+electrical-flow program's delivery history, one step per run: step 0
+(representation survey — no flow/circulation/divergence API in the pin;
+matrix representation pinned) and step 1 (the flow interface and
+Kirchhoff conservation) on 2026-08-19; step 2 (flow energy and the
+energy agreement, with the mandatory double-counting fixture and the
+zero-energy-competitor refutation); step 3 (Thomson's principle via the
+divergence-free superposition lemma); step 4 (Rayleigh monotonicity in
+conductance form, with the orientation guard); and step 5 (the ICP
+capacity-reinforcement example — `increaseConductance`, the
+`supportGraph_connected_of_le` adapter, and the one-hypothesis headline
+`effectiveResistance_le_increaseConductance`, with the release example
+on the Mathlib path graph through `toWAdj`: `2 → 3/2` strict). Zero new
+axioms throughout.
 
 ## Delivered
 
 | Proposal | Delivered | Result |
 | --- | --- | --- |
+| [Electrical Flows, Thomson's Principle, and Rayleigh Monotonicity](electrical-flow-routing.md) | 2026-08-19 | All six steps delivered, zero new axioms (count stayed 13): the flow interface with Kirchhoff conservation (step 1), flow energy with the energy agreement and the double-counting/zero-competitor guards (step 2), Thomson's principle via the divergence-free superposition lemma (step 3), Rayleigh monotonicity in conductance form with the orientation guard (step 4), and the ICP capacity-reinforcement example — `increaseConductance` + the connectivity adapter + the one-hypothesis headline `effectiveResistance_le_increaseConductance`, with the release QA example on the Mathlib path graph (`2 → 3/2` strict, step 5). The resistance API is now a routing object with a certified minimum-energy guarantee and a capacity-monotonicity theorem. |
 | Cauchy interlacing retirement (`eigen_interlacing_principal_submatrix`, no dedicated proposal file — the min–max proposal's first named consumer) | 2026-08-18 | `eigen_interlacing_principal_submatrix` proved from the locally built Courant–Fischer engine (14 → 13 axioms) — the first SGT-center retirement, and the engine's first named consumer as `prove-courant-fischer.md` itself anticipated. The interlacing window is pinned numerically in QA. See the delivery note in `prove-courant-fischer.md` for the route. |
 | [Derive and Retire the Sherman–Morrison Axiom](retire-sherman-morrison.md) | 2026-08-18 | The `sherman_morrison` axiom retired to a proved theorem at unchanged name, hypotheses, and statement (15 → 14 axioms) — a **pure proof task, not a correctness repair** (the proposal's own pre-check verified the statement correct against the corrected Woodbury shape; the `C`/`C⁻¹` defect is invisible at rank one). Route as proposed: the `k = Fin 1` specialization of the proved `woodbury_identity` — `Fin 1` column/row packing, the 1×1 middle factor with entry `1 + v ⬝ᵥ (A⁻¹ *ᵥ u)` (`Fin.sum_univ_one` computation), unit determinant from `hv` through `Matrix.det_fin_one`, the 1×1 scalar inverse through `Matrix.inv_eq_left_inv`, and the pin's `mul_smul`/`smul_mul` reshaping. Load-bearing on the Woodbury repair. QA (+4 in `MatrixUpdates_QA`): adjugate-independent positive instance at `diag 2 2` + all-ones (`!![3/8,-1/8;-1/8,3/8]`, denominator computed to `1`), and the excluded-denominator negative witness (`v ⬝ᵥ (A⁻¹ *ᵥ u) = -1` attained at a `Fin 1` fixture where the update is the singular zero matrix). |
 | [Prove General Courant–Fischer Min-Max](prove-courant-fischer.md) | 2026-08-18 | The `k`-th sorted eigenvalue of any real symmetric matrix characterized at every index, pure hard crust (axiom count stays 15 — general min–max was never admitted): the two witness directions (`exists_submodule_forall_rayleigh_le`, `exists_ne_mem_rayleigh_ge_of_finrank_eq`) and the packaged infimum equation `evals_min_max`, all symmetry-only, proved through the existing eigenbasis algebra plus the pin's dimension-intersection lemma (the proposal's open survey step resolved affirmatively first). New public center API: general-`k` multiplicity pins and component-form Rayleigh bounds. QA (33 declarations): pinned spectra, both directions instantiated (incl. the derived top-eigenvalue-domination universal and exact attainment), and negative witnesses (wrong subspace refuted; dimension hypothesis load-bearing; interior-index wrong subspace refuted on the path Laplacian with cross-engine agreement). The four named consumers (interlacing, Rayleigh monotonicity, Cheeger hard direction, Fiedler Phase B) remain open follow-ons, as the proposal itself requires. |

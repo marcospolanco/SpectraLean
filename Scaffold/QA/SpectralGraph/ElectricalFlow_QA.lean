@@ -9,9 +9,11 @@
   step 2 (flow energy: the agreement with the Dirichlet energy and the
   effective resistance it routes), step 3 (Thomson's principle:
   attainment at the current, a strict competitor, and the superposition
-  decomposition on the triangle), and step 4 (Rayleigh monotonicity in
+  decomposition on the triangle), step 4 (Rayleigh monotonicity in
   conductance form: the capacity-increase fixture and the orientation
-  guard).
+  guard), and step 5 (the ICP capacity-reinforcement example: the
+  `toWAdj` path network with one link reinforced, the decrease computed
+  and certified strict).
 
   Witness plan (proposal QA items 1, 2, 3, 4, 5, 6):
 
@@ -64,6 +66,18 @@
     where `A < B` on exactly one undirected edge, with the new
     resistance computed from an independent potential witness.
 
+  Step 5 witnesses (the proposal's ICP proof example — the release's
+  short demonstration):
+
+  - **Capacity reinforcement (path, via `SimpleGraph.toWAdj`):** the
+    Mathlib `Fin 3` path graph enters through the adapter;
+    `increaseConductance … 0 1 1` computes to exactly the concrete
+    doubled-path matrix; the reinforced endpoint resistance is pinned
+    at `3/2` from an independent potential witness; the one-hypothesis
+    reinforcement theorem instantiates (only the original network's
+    connectivity hypothesized); and the certified decrease is strict,
+    `3/2 < 2` against the adapter-bridged pinned value.
+
   All proofs are real Lean proofs (no `sorry`/`admit`). These are
   theorems, not axioms; QA checks the interfaces where the arithmetic
   is fully evaluated.
@@ -74,6 +88,7 @@
 import Scaffold.Mathlib.GraphTheory.ElectricalFlow
 import Scaffold.QA.SpectralGraph.PotentialSolvability_QA
 import Scaffold.QA.SpectralGraph.EffectiveResistance_QA
+import Scaffold.QA.SpectralGraph.SimpleGraphAdapter_QA
 import Mathlib.Data.Matrix.Notation
 
 open scoped BigOperators Matrix
@@ -935,6 +950,123 @@ theorem rayleigh_tri_strict_QA :
     effectiveResistance triDoubledAdj 0 1
       < effectiveResistance triAdj 0 1 := by
   rw [triDoubled_resistance_value_QA, tri_resistance_value_QA]
+  norm_num
+
+/-!
+## Capacity reinforcement (proposal step 5): the ICP proof example
+
+The release-facing demonstration: a Mathlib `SimpleGraph` enters
+through the `toWAdj` adapter, one link's capacity is reinforced with
+`increaseConductance`, and the one-hypothesis theorem certifies the
+routing resistance cannot worsen — with the improvement itself computed
+numerically from independent potential witnesses.
+-/
+
+/-- **Adapter bridge:** the Mathlib path graph's adapter weights are
+exactly the `connPathAdj` fixture — the `toWAdj` world and the weighted
+fixture world compute the same network, entry for entry. -/
+theorem path3_toWAdj_eq_connPathAdj :
+    pathGraph3.toWAdj = connPathAdj := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [SimpleGraph.toWAdj_apply, connPathAdj, pathGraph3]
+
+/-- The reinforced path network as a concrete matrix: the `Fin 3` path
+with the `0 — 1` conductance doubled (`1 → 2`), the `1 — 2` link left
+alone. -/
+def pathDoubledAdj : Matrix (Fin 3) (Fin 3) ℝ :=
+  Matrix.of !![0, 2, 0; 2, 0, 1; 0, 1, 0]
+
+theorem pathDoubledAdj_isSymm : pathDoubledAdj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [pathDoubledAdj]
+
+theorem pathDoubledAdj_nonneg : ∀ i j, 0 ≤ pathDoubledAdj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [pathDoubledAdj]
+
+/-- **The reinforcement computes:** reinforcing the Mathlib path
+graph's `0 — 1` link by `δ = 1` yields exactly the concrete
+doubled-path matrix — the ICP operation evaluated on `toWAdj` weights,
+entry for entry against the raw `if`-definition. -/
+theorem path3_reinforced_eq_pathDoubled_QA :
+    increaseConductance pathGraph3.toWAdj 0 1 1 = pathDoubledAdj := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [increaseConductance, pathDoubledAdj, SimpleGraph.toWAdj_apply,
+      pathGraph3] <;>
+    norm_num
+
+/-- The doubled path stays connected: explicit walks to every vertex
+through the reinforced `0 — 1` link and the untouched `1 — 2` link
+(computed independently of the connectivity adapter the headline
+theorem consumes). -/
+theorem pathDoubled_supportGraph_connected :
+    (supportGraph pathDoubledAdj pathDoubledAdj_isSymm).Connected := by
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  refine ⟨0, ?_⟩
+  intro v
+  fin_cases v
+  · exact ⟨SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 1)
+      (supportGraph_adj.2 ⟨by decide, by simp [pathDoubledAdj]⟩)
+      SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 2)
+      (supportGraph_adj.2 ⟨by decide, by simp [pathDoubledAdj]⟩)
+      (SimpleGraph.Walk.cons (u := 1) (v := 2) (w := 2)
+        (supportGraph_adj.2 ⟨by decide, by simp [pathDoubledAdj]⟩)
+        SimpleGraph.Walk.nil)⟩
+
+/-- **Potential value (reinforced path):** `f = ![1/2, 0, −1]` solves
+the unit-demand equation `L *ᵥ f = e 0 − e 2` on the reinforced
+network — the reinforced link (conductance `2`) carries the same unit
+current at half the voltage drop. Computed entrywise from the
+definitions. -/
+theorem pathDoubled_potential_value_QA :
+    (laplacian pathDoubledAdj).mulVec ![1/2, 0, -1]
+      = Pi.single 0 (1 : ℝ) - Pi.single 2 (1 : ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [laplacian, degreeMatrix, deg, pathDoubledAdj, Matrix.mulVec,
+      Matrix.dotProduct, Fin.sum_univ_three]
+
+/-- **Resistance value (reinforced path):** `R 0 2 = 3/2` — the
+reinforced link (resistance `1/2`) in series with the untouched link
+(resistance `1`), pinned by the potential witness (voltage drop
+`1/2 − (−1)`). -/
+theorem pathDoubled_resistance_value_QA :
+    effectiveResistance pathDoubledAdj 0 2 = 3 / 2 :=
+  effectiveResistance_eq pathDoubledAdj pathDoubledAdj_isSymm
+    pathDoubledAdj_nonneg pathDoubled_supportGraph_connected
+    ⟨![1/2, 0, -1], pathDoubled_potential_value_QA,
+      by norm_num [Matrix.cons_val']⟩
+
+/-- **Capacity reinforcement, the ICP proof example (proposal step 5,
+headline):** raising the `0 — 1` capacity of the path network from `1`
+to `2` cannot increase the end-to-end routing resistance `0 → 2`. The
+one-hypothesis form: only the original network's connectivity is
+assumed (through the adapter roundtrip it *is* `pathGraph3`'s, already
+proved) — the reinforced network's connectivity is derived inside the
+theorem. -/
+theorem path3_reinforcement_QA :
+    effectiveResistance (increaseConductance pathGraph3.toWAdj 0 1 1) 0 2
+      ≤ effectiveResistance pathGraph3.toWAdj 0 2 :=
+  effectiveResistance_le_increaseConductance pathGraph3.toWAdj
+    (SimpleGraph.toWAdj_symm pathGraph3)
+    (SimpleGraph.toWAdj_nonneg pathGraph3)
+    (by rw [supportGraph_toWAdj_eq_self]; exact path3_connected)
+    0 1 0 2 1 zero_le_one
+
+/-- **The certified decrease is strict:** the reinforced endpoint
+resistance is `3/2` (independently pinned above) and the original is
+`2` (the step-2-era pinned value, reached through the adapter bridge).
+Reinforcing one link of a two-link path certifiably lowers the
+end-to-end routing resistance. -/
+theorem path3_reinforcement_strict_QA :
+    effectiveResistance (increaseConductance pathGraph3.toWAdj 0 1 1) 0 2
+      < effectiveResistance pathGraph3.toWAdj 0 2 := by
+  rw [path3_reinforced_eq_pathDoubled_QA, pathDoubled_resistance_value_QA,
+    path3_toWAdj_eq_connPathAdj, path_effectiveResistance_eq_two_QA]
   norm_num
 
 end SpectralGraphTheory.QA

@@ -164,18 +164,17 @@ value exists — the fallback's firing is QA-witnessed, not hidden).
 | `laplacian_cauchy_schwarz` | **semidefinite Cauchy–Schwarz:** `(f ⬝ᵥ L g)² ≤ quadForm L f * quadForm L g`, no connectivity hypothesis (proposal step 6, 2026-08-18) |
 | `effectiveResistance_ge_sq_div_quadForm` | **one-sided Dirichlet bound:** `(f u − f v)² / quadForm L f ≤ R u v` for any test potential of positive energy (proposal step 6, 2026-08-18) |
 
-### `Scaffold.Mathlib.GraphTheory.ElectricalFlow` (electrical flows, Kirchhoff conservation, flow energy, Thomson's principle, Rayleigh monotonicity)
+### `Scaffold.Mathlib.GraphTheory.ElectricalFlow` (electrical flows, Kirchhoff conservation, flow energy, Thomson's principle, Rayleigh monotonicity, capacity reinforcement)
 
 The routing object of proposal `electrical-flow-routing.md` (High,
-2026-08-18), steps 0–4 delivered 2026-08-19. Step 0 decision recorded
-in the proposal before any Lean: matrix representation on ordered
-pairs (`EdgeFlow V = Matrix V V ℝ`; Mathlib re-surveyed — no
-flow/circulation/graph-divergence API in the pin, `SimpleGraph.Dart`
-carries none), weights are **conductances**, zero-conductance support
-is a named `IsFlowOn` conjunct, and the ordered-pair `1/2` factor
-lives in `flowEnergy` (delivered, step 2). All proved, no axioms.
-Remaining program step: the ICP capacity-reinforcement example
-(step 5).
+2026-08-18), all six steps (0–5) delivered 2026-08-19 — the program is
+complete. Step 0 decision recorded in the proposal before any Lean:
+matrix representation on ordered pairs (`EdgeFlow V = Matrix V V ℝ`;
+Mathlib re-surveyed — no flow/circulation/graph-divergence API in the
+pin, `SimpleGraph.Dart` carries none), weights are **conductances**,
+zero-conductance support is a named `IsFlowOn` conjunct, and the
+ordered-pair `1/2` factor lives in `flowEnergy` (delivered, step 2).
+All proved, no axioms.
 
 | Declaration | Content |
 |-------------|---------|
@@ -200,6 +199,10 @@ Remaining program step: the ICP capacity-reinforcement example
 | `isFlowOn_of_le` | **flow-space growth (step 4)**: a flow supported on `A` is a flow on every entrywise larger `B ≥ A ≥ 0` (support load-bearing: a `B`-zero entry squeezes the nonnegative `A` entry to zero) — the competitor-transfer interface |
 | `flowEnergy_le_of_le` | **raising conductances lowers dissipated energy (step 4)**: `flowEnergy B θ ≤ flowEnergy A θ` for `0 ≤ A ≤ B` entrywise, termwise (`θ²/B ≤ θ²/A` on nonzero branches); support again load-bearing on the `A i j = 0 < B i j` branch |
 | `effectiveResistance_le_of_le` | **Rayleigh monotonicity in conductance form (step-4 headline)**: `A ≤ B` entrywise ⇒ `effectiveResistance B u v ≤ effectiveResistance A u v` on connected symmetric nonnegative networks — the `A`-current as competitor on `B`, Thomson on `B`, the energy comparison, and the step-2 identity; QA certifies `1 → 1/2` (capacity increase) and `2/3 → 2/5` (partial increase), strict, with the orientation guard refuting the reverse direction |
+| `increaseConductance` | capacity reinforcement (step 5): raise one undirected pair's conductance by `δ`, both ordered entries together (symmetry-preserving; entry interface lemmas `increaseConductance_apply_of_reinforced` / `_of_not_reinforced`, plus `le_increaseConductance` for `0 ≤ δ`, `increaseConductance_isSymm`, `increaseConductance_nonneg`) |
+| `supportGraph_le_of_le` | support graphs grow with the network: entrywise `A ≤ B` ⇒ `supportGraph A ≤ supportGraph B` (no nonnegativity hypothesis — `0 < A i j ≤ B i j`) |
+| `supportGraph_connected_of_le` | capacity growth preserves connectivity: `A ≤ B` entrywise and `supportGraph A` connected ⇒ `supportGraph B` connected (Mathlib's `SimpleGraph.Connected.mono` along the containment) — the step-4-recorded optional adapter, delivered as step 5's packaging companion |
+| `effectiveResistance_le_increaseConductance` | **capacity reinforcement cannot worsen certified routing cost (step-5 headline, the ICP example)**: `effectiveResistance (increaseConductance A i j δ) u v ≤ effectiveResistance A u v` for `δ ≥ 0`, with only the *original* network's connectivity hypothesized (the reinforced network's derived by the adapter); QA is the release example — the Mathlib `Fin 3` path graph through `toWAdj`, reinforcement computed to the doubled-path matrix, `2 → 3/2` strict |
 
 
 ### `Scaffold.Mathlib.GraphTheory.Cheeger`

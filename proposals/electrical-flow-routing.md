@@ -1,9 +1,12 @@
 # Proposal: Electrical Flows, Thomson's Principle, and Rayleigh Monotonicity
 
-**Status:** Proposed; **priority:** High. Requested 2026-08-18 as the
-center-to-ICP follow-on to the delivered electrical-structure crust. This
-document authorizes no Lean changes, axiom admissions, commits, clean-room
-copying, or external publication on its own.
+**Status:** Delivered 2026-08-19 — all six steps (0–5), the program
+complete; zero new axioms throughout (the explicit count stayed at 13).
+Originally requested 2026-08-18 as the center-to-ICP follow-on to the
+delivered electrical-structure crust. This document authorized no Lean
+changes, axiom admissions, commits, clean-room copying, or external
+publication on its own; every step was directed at it by the priority
+table and delivered one step per run.
 
 Companion to [Grow the Crust Through Electrical
 Structure](electrical-structure-crust.md), whose six delivered steps provide
@@ -370,6 +373,42 @@ resistance strictly `2/3 → 2/5`, the new value pinned by the
 independent potential `![2/5, 0, 1/5]`. No new axioms; step 5 not
 started.
 
+**Step 5 delivered 2026-08-19 (separate run; program complete):** the
+ICP capacity-reinforcement example. Delivered in
+`GraphTheory.ElectricalFlow` (9 new declarations, all proved, zero new
+axioms — the count stays 13 throughout the program): `increaseConductance`
+(raise one undirected pair's conductance by `δ`, both ordered entries
+together, so symmetry and nonnegativity are preserved) with its entry
+interfaces (`increaseConductance_apply_of_reinforced`,
+`increaseConductance_apply_of_not_reinforced`) and the structural
+lemmas `le_increaseConductance` (entrywise monotone for `0 ≤ δ` — the
+comparison hypothesis supplied constructionally),
+`increaseConductance_isSymm`, `increaseConductance_nonneg`; the
+connectivity adapter pair `supportGraph_le_of_le` (support graphs grow
+along entrywise domination — **no nonnegativity hypothesis needed**,
+`0 < A i j ≤ B i j`) and `supportGraph_connected_of_le` (capacity
+growth preserves connectivity, via Mathlib's
+`SimpleGraph.Connected.mono`) — exactly the optional adapter step 4
+recorded as "the natural packaging companion if step 5's reinforcement
+theorem wants a one-hypothesis form," and it does; and the headline
+`effectiveResistance_le_increaseConductance`:
+`effectiveResistance (increaseConductance A i j δ) u v ≤
+effectiveResistance A u v` with **only the original network's
+connectivity hypothesized** — the one-hypothesis packaging of step 4's
+monotonicity the proposal's schematic sketched. QA (+9 declarations,
+88 in file) is the release-facing proof example, on the Mathlib `Fin 3`
+path graph through `SimpleGraph.toWAdj` (the proposal's suggested
+route): the adapter weights bridged entrywise to the weighted-fixture
+world (`path3_toWAdj_eq_connPathAdj`), the reinforcement
+`increaseConductance … 0 1 1` computed to exactly the concrete
+doubled-path matrix, the reinforced resistance `3/2` pinned by the
+independent potential witness `![1/2, 0, −1]` with connectivity from
+explicit walks (computed independently of the new adapter the theorem
+consumes), the headline instantiated in the one-hypothesis form, and
+the decrease certified strict `3/2 < 2` against the pinned original
+value `2`. With this step all six build steps and the proposal's
+acceptance criteria are delivered.
+
 ### 1. Electrical current and Kirchhoff conservation
 
 Add the flow definitions and prove:
@@ -526,7 +565,9 @@ quarantined application.
 
 ## Open next step
 
-Run build step 0 only: survey the pinned Mathlib, choose and document the flow
-representation, and identify the exact target module (`GraphTheory.Electrical`
-extension versus a focused `GraphTheory.ElectricalFlow`). Do not begin Lean
-implementation until that representation decision is recorded.
+None — the program is complete (steps 0–5 delivered 2026-08-19, one step
+per run; delivery records above). The deferred list stands as written:
+multicomponent routing, infinite networks, randomized rounding,
+pseudoinverse formulas, the resistance-metric package, and any `sInf`
+packaging all remain outside this proposal's delivered scope and would
+need new consumer-driven proposals.

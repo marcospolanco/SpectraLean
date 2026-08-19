@@ -24,7 +24,7 @@ As of August 19, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 13 |
-| QA theorems/lemmas | 563, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 572, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is the Cheeger *hard* direction at the SGT center;
 Weyl and Davis–Kahan in the perturbation bridge; the scalar and matrix

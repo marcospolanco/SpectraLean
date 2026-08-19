@@ -6,6 +6,78 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Electrical-flow routing, step 5 — the ICP capacity-reinforcement
+example (run 1, 2026-08-19): DELIVERED; the program is COMPLETE.** The
+Active priority table's top High item `proposals/electrical-flow-routing.md`,
+at its recorded final step, delivered as pure packaging of step 4 (zero
+new axioms; the explicit count stayed 13 throughout the program).
+
+**Delivered** in `GraphTheory.ElectricalFlow` (9 declarations, all
+proved): `increaseConductance` (raise one undirected pair's conductance
+by `δ`, both ordered entries together so symmetry/nonnegativity are
+preserved) with the entry interfaces and structural lemmas
+(`increaseConductance_apply_of_reinforced`/`_of_not_reinforced`,
+`le_increaseConductance`, `increaseConductance_isSymm`,
+`increaseConductance_nonneg`); the connectivity adapter pair the step-4
+record named as step 5's natural companion — `supportGraph_le_of_le`
+(support graphs grow along entrywise domination, **no nonnegativity
+hypothesis** since `0 < A i j ≤ B i j`) and `supportGraph_connected_of_le`
+(capacity growth preserves connectivity, via Mathlib's
+`SimpleGraph.Connected.mono` — found in the pin, no local walk
+induction needed); and the one-hypothesis headline
+`effectiveResistance_le_increaseConductance`:
+`effectiveResistance (increaseConductance A i j δ) u v ≤
+effectiveResistance A u v` for `δ ≥ 0`, with only the *original*
+network's connectivity hypothesized — the reinforced network's is
+derived. This is the proposal's ICP-facing fact as a one-line consumable
+theorem: adding capacity cannot worsen the certified energy cost of
+electrical routing.
+
+**QA** `SpectralGraph/ElectricalFlow_QA.lean` (+9 declarations, 88 in
+file) — the release-facing proof example, on the Mathlib `Fin 3` path
+graph through `SimpleGraph.toWAdj` (the proposal's suggested route):
+the adapter weights bridged entrywise to the weighted-fixture world
+(`path3_toWAdj_eq_connPathAdj`); the reinforcement computed to exactly
+the concrete doubled-path matrix (`path3_reinforced_eq_pathDoubled_QA`);
+the reinforced resistance `3/2` pinned by the independent potential
+witness `![1/2, 0, −1]`, with the reinforced network's connectivity
+proved by explicit walks — computed independently of the adapter the
+headline consumes; the headline instantiated in the one-hypothesis form
+(`path3_reinforcement_QA`); and the decrease certified strict
+`3/2 < 2` against the adapter-bridged pinned original value
+(`path3_reinforcement_strict_QA`).
+
+**Verification:** `lake env lean` on both changed modules — zero
+errors, zero warnings (targeted `omit [Fintype V]`/`[DecidableEq V]`
+clauses where the section variables are unused); explicit `lake build`
+of both targets ✔; all twenty-eight QA modules batch-elaborated, zero
+errors; full `lake build` ✔ (2180 targets); `lint_axioms` (13),
+`check_citations`, `check_markdown_links` pass; scoreboard regeneration
+idempotent (572/13/0). One mid-run repair: a placeholder stub inserted
+by a bad edit was replaced with the real section before any
+verification ran (the policy forbids `True` placeholders; the delivered
+module contains none).
+
+**Records updated:** module/QA docstrings, scoreboard (572/13/0,
+verification rows, step-5 milestone bullet), radar (QA 572/28 with the
+step-5 kind; axis-6 evidence extended to program-complete with the
+score **held at 4.0** — packaging, not new mathematics; the step-4
+3.5 → 4.0 re-score added to the re-scoring log for continuity;
+proved-depth completion clause; weakest-axes paragraph; header review
+date), README (572), SGT index map (4 new rows; section header to
+steps 0–5 complete), backlog item 7 (program-complete note), proposal
+step-5 delivery record + status/open-next-step sections, and
+`proposals/README.md` (row moved from the Active table to Delivered;
+progress note rewritten — **Foster Phase A is now the top High item**).
+
+**Next milestone (open):** the Active table's top High item is now
+Foster's Theorem Phase A (`spectral-graph-sparsification.md`) — its
+recorded scoping spike (the pseudoinverse-free statement shape:
+eigenbasis expansion + the proved one-dimensional kernel
+characterization) is the natural first run; or decidable-certificates
+Step 0 (convention decision + ℚ-`decide` spike, both scoped in its
+proposal). The operator's Medium/Low rows are preserved untouched.
+
 **Electrical-flow routing, step 4 — Rayleigh monotonicity in conductance
 form (run 1, 2026-08-19): DELIVERED.** The Active priority table's top
 High item `proposals/electrical-flow-routing.md`, at its recorded next

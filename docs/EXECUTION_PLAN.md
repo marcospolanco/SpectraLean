@@ -1046,8 +1046,79 @@ remaining Medium items (Fiedler Phase B — needs its named operator
 decision; the mixing-time program); the min–max theorem's named
 consumers as separately scoped runs (interlacing retirement via
 min–max over shared test subspaces; full Rayleigh/Dirichlet
-monotonicity); the electrical definiteness residual; the
-`evals (c • M)` excavation.
+monotonicity); the electrical definiteness residual; the `evals (c • M)`
+excavation.
+
+**Active slice (run 1, 2026-08-18): retire the Cauchy interlacing axiom
+— the min–max theorem's first named consumer — DELIVERED.** Selected
+from the center-out queue: `eigen_interlacing_principal_submatrix` was
+one of the 14 remaining admitted axioms and the Courant–Fischer
+proposal's first named consumer; retiring it both shrank the trust
+surface (**14 → 13**) and made the brand-new min–max engine carry real
+weight — its proof would fail if `evals_min_max`'s two witness
+directions or the multiplicity pins were wrong (load-bearing growth,
+per strategy §Load-bearing). Pre-check recorded: the statement is the
+textbook two-sided window `λᵢ(M) ≤ μᵢ(B) ≤ λ_{i+d}(M)` and is true as
+stated (the derivable `hn` aside) — a **pure proof task**, like
+Sherman–Morrison, not a correctness repair. At unchanged
+name/hypotheses/statement; zero consumers existed, so no migration
+surface.
+
+**Route (delivered as scoped, per the proposal's warning that the
+subspace-intersection step is extra work):** the extend-by-zero padding
+bridge `padVec`/`padVecLinear` (`↥S → ℝ` into `V → ℝ`) with proved
+preservation of dot products (`dotProduct_padVec_self`), quadratic
+forms (`quadForm_padVec`, no symmetry needed), and hence Rayleigh
+quotients (`rayleigh_padVec`); lower bound via the CF existence
+direction on the submatrix + `Submodule.map` image + the CF competitor
+direction on the ambient; upper bound via the CF existence direction on
+the ambient at index `i + d` + the dimension count
+`finrank (U ⊓ range pad) ≥ i + 1` (the same
+`Submodule.finrank_sup_add_finrank_inf_eq` + `Module.finrank_pi`
+pattern the CF proof itself used — the proposal's warned extra step) +
+exact-dimension extraction `exists_submodule_finrank_eq_of_le` (span
+of `k` basis vectors, meeting the competitor direction's
+equality-shaped hypothesis) + the comap dimension transfer
+`finrank_comap_eq_of_le_range`. Pin survey recorded before proving:
+`LinearEquiv.finrank_eq`, `LinearMap.finrank_range_of_inj`,
+`finrank_span_eq_card`, `Module.finBasis`,
+`Submodule.equivMapOfInjective` all present in the pin; one new import
+(`Mathlib.Algebra.Module.Submodule.Range`, for `LinearMap.mem_range`).
+
+**QA** `SpectralGraph/Interlacing_QA.lean` (+4 public declarations,
+484 total): the `K₂` Laplacian spectrum `[0, 2]` and its
+singleton-(`{0}`)-submatrix spectrum `[1]` both pinned from
+trace/determinant/sortedness independent of the theorem; the theorem
+instantiated to the **strict window `0 ≤ 1 ≤ 2`** (all three values
+computed); and the negative witness — both collapsed one-sided bounds
+(`μ₀ ≤ λ₀`, `λ₁ ≤ μ₀`) refuted in proved form, so the two-sided window
+shape itself is witnessed. This supersedes the axiom-era note that no
+thin QA of the inequality existed: computational eigenvalue QA
+machinery (delivered with the Cheeger repair) did not exist when that
+note was written.
+
+Docs updated: module docstring and section header (Spectral.lean now
+carries **zero** `axiom` declarations), scoreboard (13/484/0 +
+milestone bullet + verification rows), radar (subject axis 2 evidence:
+interlacing proved; assurance axiom-minimization trend
+26 → … → 13; QA count 484/27; proved-depth and downstream-reuse text —
+the retirement is the min–max engine's first *proof-level* consumer),
+README (13 axioms, 484 QA, maturity bullet), Horn–Johnson source index
+(interlacing row → theorem, §4.2 general min–max row added), SGT index
+map (padding-bridge definitions + proved-status annotations), Mathlib
+coverage map (interlacing now locally proved though still absent
+upstream), Courant–Fischer proposal delivery note, and
+`proposals/README.md` (additive record; the operator's concurrent
+electrical-flow High item preserved untouched and acknowledged as the
+next run's milestone).
+
+**Next milestone (open):** the operator's new High item —
+`proposals/electrical-flow-routing.md` (electrical flows, Thomson's
+principle, Rayleigh monotonicity; step 0 is its representation/Mathlib
+survey, per the operator's own indexing note). Or the remaining
+Mediums (Fiedler Phase B, decision-gated; mixing-time step 1) and the
+min–max engine's other named consumers (full Rayleigh/Dirichlet
+monotonicity — now cheaper through the delivered padding bridge).
 
 ## Ready queue
 
@@ -1076,6 +1147,35 @@ monotonicity); the electrical definiteness residual; the
    combinations, centering, sums) only when a consumer names them.
 
 ## Last verified state
+
+- 2026-08-18 (interlacing retirement, axiom 14 → 13): `lake env lean`
+  on `GraphTheory.Spectral` — zero errors; the new-code
+  section-variable notes silenced with `omit` clauses (the remaining
+  notes at lines 163/527/2291/2313 are the documented pre-existing
+  ones in untouched code) — and on
+  `QA.SpectralGraph.Interlacing_QA` — zero errors (its two warnings
+  are pre-existing, in untouched declarations); `lake build
+  Scaffold.Mathlib.GraphTheory.Spectral` and `lake build
+  Scaffold.QA.SpectralGraph.Interlacing_QA` ✔; full `lake build` ✔
+  (2179 targets); 484 QA declarations (+4 public: `edgeLap_evals`,
+  `edgeLap_sub_evals_eq_one`, `interlacing_edge_window_QA`,
+  `interlacing_edge_window_strict_QA`; private helpers not counted), no
+  `sorry`/`admit` anywhere under `Scaffold/`; 13 explicit cited axioms
+  (−1: `eigen_interlacing_principal_submatrix` retired to a proved
+  theorem at unchanged name/hypotheses/statement, proved from the
+  locally proved Courant–Fischer engine through the padding bridge and
+  the subspace-intersection dimension count — a pure proof task per the
+  recorded pre-check, not a correctness repair); all hygiene scripts
+  pass (`lint_axioms` 13 covered, `check_citations`,
+  `check_markdown_links`); scoreboard regenerated (13/484/0) and
+  idempotent after the manual prose edits; radar (axis-2 evidence
+  updated to proved; axiom-minimization trend → 13; QA 484/27;
+  proved-depth and reuse text), README (13 axioms, 484 QA), both
+  index files, coverage map, proposal delivery note, and
+  `proposals/README.md` updated. The operator's concurrent
+  working-tree additions (`proposals/electrical-flow-routing.md` — now
+  the active High item and the next run's milestone — and its priority
+  row) preserved untouched.
 
 - 2026-08-18 (Sherman–Morrison retirement, axiom 15 → 14): `lake env
   lean` on `Core.MatrixUpdates` and on `QA.Core.MatrixUpdates_QA` —

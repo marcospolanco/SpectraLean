@@ -7,17 +7,18 @@
   weighted adjacency matrices, degrees, the combinatorial Laplacian,
   quadratic/Rayleigh forms, a canonically sorted real spectrum,
   cut/volume/conductance quantities, and event-driven adjacency updates,
-  together with proved structural theorems and a minimal set of explicit,
-  cited axioms (Cauchy interlacing; the variational characterization of
-  the algebraic connectivity λ₂ was admitted until 2026-08-18 and is now
-  proved here, `lambda2_variational`). It also provides the
+  together with proved structural theorems. No statement is admitted in
+  this module: the variational characterization of the algebraic
+  connectivity λ₂ was admitted until 2026-08-18 and is proved here
+  (`lambda2_variational`), and Cauchy interlacing was admitted until
+  2026-08-18 and is proved here
+  (`eigen_interlacing_principal_submatrix`). It also provides the
   `supportGraph` adapter from weighted adjacency matrices to Mathlib's
   `SimpleGraph`, through which the Laplacian kernel is characterized on
   connected graphs: the kernel is exactly the constants.
 
-  Everything definable and provable here is defined and proved; the only
-  admitted statement is the `axiom` declaration, carrying a
-  `Source:` citation.
+  Everything definable and provable here is defined and proved; this
+  module carries no `axiom` declarations.
 
   Related modules: Cheeger-type inequalities live in
   `Scaffold.Mathlib.GraphTheory.Cheeger`, event-driven persistence in
@@ -50,6 +51,7 @@ import Mathlib.LinearAlgebra.Matrix.Spectrum
 import Mathlib.LinearAlgebra.Matrix.Trace
 import Mathlib.LinearAlgebra.Matrix.ToLin
 import Mathlib.Combinatorics.SimpleGraph.Path
+import Mathlib.Algebra.Module.Submodule.Range
 
 open scoped BigOperators Matrix
 open InnerProductSpace
@@ -2296,12 +2298,14 @@ theorem eventUpdate_preserves_symmetry (A : WAdj (V := V)) (hA : Matrix.IsSymm A
     exact (hA.apply j i).symm
 
 /-!
-## 7. Admitted classical results (explicit axiom boundary)
+## 7. Principal submatrices and Cauchy interlacing (proved)
 
-Exactly one statement is admitted here; it is a classical finite
-dimensional result stated against the `evals` API defined above. (The
-variational characterization of `λ₂` formerly admitted here is proved
-above, `lambda2_variational`.)
+No statement is admitted in this module anymore. The one classical
+result that remained an `axiom` here — Cauchy interlacing for principal
+submatrices — was retired on 2026-08-18 and is proved below from the
+Courant–Fischer min–max engine
+(`exists_submodule_forall_rayleigh_le`,
+`exists_ne_mem_rayleigh_ge_of_finrank_eq`): its first named consumer.
 -/
 
 /-- The principal submatrix of `M` on the vertices in `S`, symmetric when
@@ -2313,12 +2317,219 @@ theorem principalSubmatrix_symmetric (M : Matrix V V ℝ) (hM : M.IsSymm)
       = M.submatrix (fun i : ↥S => (i : V)) (fun i : ↥S => (i : V))
   rw [Matrix.transpose_submatrix, hM.eq]
 
-/-- Cauchy interlacing for eigenvalues of a principal submatrix: with the
-spectra of `M` (size `n`) and its principal submatrix on `S` (size `m`)
-both in nondecreasing order, for every admissible index `i`,
-`λᵢ ≤ μᵢ ≤ λᵢ₊ₙ₋ₘ`.
+/-!
+### The extend-by-zero padding bridge
 
-Source:
+Vectors on the vertex set `S` embed into vectors on `V` by extension
+with zero. The embedding preserves dot products and quadratic forms
+against `M` (entries with an index outside `S` never contribute), so it
+preserves Rayleigh quotients. Through this bridge, test subspaces for
+the principal submatrix and for the ambient matrix share one
+Courant–Fischer engine.
+-/
+
+/-- Extend a vector defined on `S` by zero to all of `V`. -/
+def padVec (S : Finset V) (y : ↥S → ℝ) : V → ℝ :=
+  fun v => if h : v ∈ S then y ⟨v, h⟩ else 0
+
+omit [Fintype V] in
+theorem padVec_apply {S : Finset V} {y : ↥S → ℝ} {v : V} (hv : v ∈ S) :
+    padVec S y v = y ⟨v, hv⟩ := dif_pos hv
+
+omit [Fintype V] in
+theorem padVec_apply_of_not_mem {S : Finset V} {y : ↥S → ℝ} {v : V}
+    (hv : v ∉ S) : padVec S y v = 0 := dif_neg hv
+
+omit [Fintype V] in
+theorem padVec_zero (S : Finset V) : padVec S 0 = 0 := by
+  funext v
+  simp only [Pi.zero_apply]
+  by_cases hv : v ∈ S
+  · simp [padVec, hv, Pi.zero_apply]
+  · simp [padVec, hv]
+
+omit [Fintype V] in
+theorem padVec_injective (S : Finset V) : Function.Injective (padVec S) := by
+  intro y₁ y₂ h
+  funext a
+  have h₁ : padVec S y₁ (a : V) = padVec S y₂ (a : V) := by rw [h]
+  rw [padVec_apply a.2, padVec_apply a.2] at h₁
+  exact h₁
+
+omit [Fintype V] in
+theorem padVec_ne_zero {S : Finset V} {y : ↥S → ℝ} (hy : y ≠ 0) :
+    padVec S y ≠ 0 := fun h =>
+  hy (padVec_injective S (by rw [h, padVec_zero]))
+
+/-- The padding as a linear map. -/
+def padVecLinear (S : Finset V) : (↥S → ℝ) →ₗ[ℝ] (V → ℝ) where
+  toFun := padVec S
+  map_add' y z := by
+    funext v
+    by_cases hv : v ∈ S
+    · simp only [padVec_apply hv, Pi.add_apply]
+    · simp only [padVec_apply_of_not_mem hv, Pi.add_apply, add_zero]
+  map_smul' c y := by
+    funext v
+    by_cases hv : v ∈ S
+    · simp only [padVec_apply hv, Pi.smul_apply, smul_eq_mul, RingHom.id_apply]
+    · simp only [padVec_apply_of_not_mem hv, Pi.smul_apply, smul_eq_mul,
+        mul_zero]
+
+omit [Fintype V] in
+theorem padVecLinear_apply (S : Finset V) (y : ↥S → ℝ) :
+    padVecLinear S y = padVec S y := rfl
+
+omit [Fintype V] in
+theorem padVecLinear_injective (S : Finset V) :
+    Function.Injective (padVecLinear S) := by
+  intro y₁ y₂ h
+  refine padVec_injective S ?_
+  rw [← padVecLinear_apply S y₁, ← padVecLinear_apply S y₂]
+  exact h
+
+/-- Padding preserves the ambient dot product: the norm term of the
+Rayleigh quotient is computed entirely on `S`. -/
+theorem dotProduct_padVec_self (S : Finset V) (y : ↥S → ℝ) :
+    Matrix.dotProduct (padVec S y) (padVec S y) = Matrix.dotProduct y y := by
+  classical
+  simp only [Matrix.dotProduct]
+  have hzero : ∀ v ∈ (Finset.univ : Finset V), v ∉ S →
+      padVec S y v * padVec S y v = 0 := by
+    intro v _ hv
+    rw [padVec_apply_of_not_mem hv]; ring
+  rw [← Finset.sum_subset (Finset.subset_univ S) hzero,
+    ← Finset.sum_attach (f := fun v : V => padVec S y v * padVec S y v),
+    Finset.sum_coe_sort_eq_attach]
+  exact Finset.sum_congr rfl fun x _ => by
+    simp only [padVec_apply x.2, Subtype.eta]
+
+omit [DecidableEq V] in
+/-- The quadratic form as an explicit double sum. -/
+theorem quadForm_eq_sum (M : Matrix V V ℝ) (x : V → ℝ) :
+    quadForm M x = ∑ i ∈ (Finset.univ : Finset V), ∑ j ∈ (Finset.univ : Finset V),
+      M i j * x i * x j := by
+  simp only [quadForm, Matrix.dotProduct, Matrix.mulVec, Matrix.dotProduct,
+    Finset.mul_sum]
+  exact Finset.sum_congr rfl fun i _ =>
+    Finset.sum_congr rfl fun j _ => by ring
+
+/-- Padding preserves the quadratic form against `M`: the padded vector
+sees exactly the principal submatrix. No symmetry is needed. -/
+theorem quadForm_padVec (M : Matrix V V ℝ) (S : Finset V) (y : ↥S → ℝ) :
+    quadForm M (padVec S y) =
+      quadForm (M.submatrix (fun a : ↥S => (a : V)) (fun b : ↥S => (b : V))) y := by
+  classical
+  rw [quadForm_eq_sum, quadForm_eq_sum]
+  have hinner : ∀ v ∈ (Finset.univ : Finset V),
+      (∑ j ∈ (Finset.univ : Finset V), M v j * padVec S y v * padVec S y j)
+        = ∑ j ∈ S, M v j * padVec S y v * padVec S y j := by
+    intro v _
+    have hz : ∀ j ∈ (Finset.univ : Finset V), j ∉ S →
+        M v j * padVec S y v * padVec S y j = 0 := by
+      intro j _ hj
+      rw [padVec_apply_of_not_mem hj]; ring
+    rw [← Finset.sum_subset (Finset.subset_univ S) hz]
+  have hzero : ∀ v ∈ (Finset.univ : Finset V), v ∉ S →
+      (∑ j ∈ S, M v j * padVec S y v * padVec S y j) = 0 := by
+    intro v _ hv
+    rw [padVec_apply_of_not_mem hv, Finset.sum_eq_zero]
+    intro j _; ring
+  rw [Finset.sum_congr rfl hinner,
+    ← Finset.sum_subset (Finset.subset_univ S) hzero,
+    ← Finset.sum_attach (f := fun v : V => ∑ j ∈ S, M v j * padVec S y v * padVec S y j)]
+  simp only [Finset.sum_coe_sort_eq_attach]
+  refine Finset.sum_congr rfl fun x _ => ?_
+  rw [← Finset.sum_attach (f := fun j : V => M ↑x j * padVec S y ↑x * padVec S y j)]
+  exact Finset.sum_congr rfl fun j _ => by
+    rw [padVec_apply x.2, padVec_apply j.2]
+    rfl
+
+/-- Padding preserves Rayleigh quotients of nonzero vectors — the
+interface fact through which both interlacing directions transport
+spectral information between `M` and its principal submatrix. -/
+theorem rayleigh_padVec (M : Matrix V V ℝ) (S : Finset V) {y : ↥S → ℝ}
+    (hy : y ≠ 0) :
+    rayleigh M (padVec S y) =
+      rayleigh (M.submatrix (fun a : ↥S => (a : V)) (fun b : ↥S => (b : V))) y := by
+  have h0 : padVec S y ≠ 0 := padVec_ne_zero hy
+  simp only [rayleigh, if_neg h0, if_neg hy, quadForm_padVec,
+    dotProduct_padVec_self]
+
+/-!
+### Subspace bookkeeping for the interlacing proof
+
+Two finite-dimensional facts shared by the interlacing argument:
+padding preserves submodule dimensions, and every subspace of dimension
+at least `k` contains one of dimension exactly `k` (the competitor
+direction of Courant–Fischer demands an exact dimension).
+-/
+
+/-- An injective linear map preserves submodule dimensions. -/
+theorem finrank_map_eq_of_injective {X Y : Type*} [AddCommGroup X] [AddCommGroup Y]
+    [Module ℝ X] [Module ℝ Y] (f : X →ₗ[ℝ] Y) (hf : Function.Injective f)
+    (P : Submodule ℝ X) :
+    Module.finrank ℝ (Submodule.map f P) = Module.finrank ℝ P :=
+  (LinearEquiv.finrank_eq (Submodule.equivMapOfInjective f hf P)).symm
+
+/-- Under an injective linear map, the dimension of a preimage submodule
+is the dimension of the submodule itself, when it lies in the range. -/
+theorem finrank_comap_eq_of_le_range {X Y : Type*} [AddCommGroup X] [AddCommGroup Y]
+    [Module ℝ X] [Module ℝ Y] (f : X →ₗ[ℝ] Y) (hf : Function.Injective f)
+    (P : Submodule ℝ Y) (hP : P ≤ LinearMap.range f) :
+    Module.finrank ℝ (Submodule.comap f P) = Module.finrank ℝ P := by
+  classical
+  have gm : ∀ a : Submodule.comap f P, (f.comp (Submodule.subtype _)) a ∈ P :=
+    fun a => a.2
+  let g := (f.comp (Submodule.subtype (Submodule.comap f P))).codRestrict P gm
+  have hbij : Function.Bijective g := by
+    constructor
+    · rintro ⟨a, ha⟩ ⟨b, hb⟩ h
+      have hv : f a = f b := congrArg Subtype.val h
+      exact Subtype.ext (hf hv)
+    · rintro ⟨c, hc⟩
+      obtain ⟨x, hx⟩ := LinearMap.mem_range.mp (hP hc)
+      refine ⟨⟨x, Submodule.mem_comap.2 (by rw [hx]; exact hc)⟩, ?_⟩
+      exact Subtype.ext hx
+  exact LinearEquiv.finrank_eq (LinearEquiv.ofBijective g hbij)
+
+/-- In finite dimension, every subspace of dimension at least `k`
+contains a subspace of dimension exactly `k`: the span of `k` basis
+vectors. -/
+theorem exists_submodule_finrank_eq_of_le {X : Type*} [AddCommGroup X] [Module ℝ X]
+    [FiniteDimensional ℝ X] (P : Submodule ℝ X) {k : ℕ}
+    (hk : k ≤ Module.finrank ℝ P) :
+    ∃ W : Submodule ℝ X, W ≤ P ∧ Module.finrank ℝ W = k := by
+  classical
+  have hb : LinearIndependent ℝ
+      (fun k' : Fin k => ((Module.finBasis ℝ P) (Fin.castLE hk k') : X)) :=
+    ((Module.finBasis ℝ P).linearIndependent.comp
+      (Fin.castLE hk) (Fin.castLE_injective hk)).map'
+        (Submodule.subtype P) (Submodule.ker_subtype P)
+  refine ⟨Submodule.span ℝ
+    (Set.range fun k' : Fin k => ((Module.finBasis ℝ P) (Fin.castLE hk k') : X)), ?_, ?_⟩
+  · rw [Submodule.span_le]
+    rintro _ ⟨i, rfl⟩
+    exact Submodule.coe_mem _
+  · rw [finrank_span_eq_card hb]; simp
+
+/-- **Cauchy interlacing for eigenvalues of a principal submatrix
+(proved, no axioms).** With the spectra of `M` (size `n`) and its
+principal submatrix on `S` (size `m`) both in nondecreasing order, for
+every admissible index `i`, `λᵢ ≤ μᵢ ≤ λᵢ₊ₙ₋ₘ`.
+
+Formerly an explicit axiom; retired 2026-08-18. The proof is the
+textbook min–max argument through the padding bridge: the lower bound
+pads the submatrix's attaining subspace into the ambient space and
+applies the Courant–Fischer competitor direction; the upper bound
+intersects the ambient's attaining subspace with the range of padding
+(the dimension count `dim (U ⊓ range pad) ≥ i + 1` is the extra
+subspace-intersection step the proposal warned about), extracts an
+exact-dimensional competitor subspace, and transports back through
+`rayleigh_padVec`. The proof is load-bearing on both Courant–Fischer
+witness directions: a defect in either would surface here.
+
+Source (classical background; this is a proof, not an admission):
 - Horn, R. & Johnson, C., "Matrix Analysis", 2nd ed., Cambridge
   University Press, 2013, Section 4.3 (Cauchy interlacing; section-level
   locator, page number to be confirmed during citation review).
@@ -2328,13 +2539,13 @@ nondecreasing, `Fin (Fintype.card _)`-indexed) rather than a notation of
 the textbook; the index bookkeeping is stated as explicit numeric
 hypotheses `hi`/`hn`.
 
-QA: exercised structurally by
-`SpectralGraphTheory.QA.principal_submatrix_preserves_symmetry_QA` in
-`Scaffold/QA/SpectralGraph/Interlacing_QA.lean`; no thin QA of the
-inequality itself exists because any instance requires an independent
-eigenvalue computation.
+QA: pinned to its values on the two-vertex Laplacian with a singleton
+submatrix (strict window `0 < 1 < 2`, both naive one-sided bounds
+refuted) in `Scaffold/QA/SpectralGraph/Interlacing_QA.lean`, using the
+computational eigenvalue machinery (`eigvalOf_sum_eq_trace`,
+`det_eq_prod_eigenvalues`, sortedness).
 -/
-axiom eigen_interlacing_principal_submatrix
+theorem eigen_interlacing_principal_submatrix
     (M : Matrix V V ℝ) (hM : M.IsSymm) (S : Finset V)
     (i : Fin (Fintype.card ↥S))
     (hn : (i : ℕ) + (Fintype.card V - Fintype.card ↥S) < Fintype.card V) :
@@ -2343,7 +2554,71 @@ axiom eigen_interlacing_principal_submatrix
         exact mod_cast Finset.card_le_univ S)⟩ ≤
         evals (principalSubmatrix_symmetric M hM S) i ∧
       evals (principalSubmatrix_symmetric M hM S) i ≤
-        evals hM ⟨(i : ℕ) + (Fintype.card V - Fintype.card ↥S), hn⟩
+        evals hM ⟨(i : ℕ) + (Fintype.card V - Fintype.card ↥S), hn⟩ := by
+  classical
+  have hB : Matrix.IsSymm
+      (M.submatrix (fun a : ↥S => (a : V)) (fun b : ↥S => (b : V))) :=
+    principalSubmatrix_symmetric M hM S
+  have hray : ∀ y : ↥S → ℝ, y ≠ 0 →
+      rayleigh M (padVec S y) =
+        rayleigh (M.submatrix (fun a : ↥S => (a : V)) (fun b : ↥S => (b : V))) y :=
+    fun y hy => rayleigh_padVec M S hy
+  have hmn : Fintype.card ↥S ≤ Fintype.card V := by
+    rw [Fintype.card_coe, ← Finset.card_univ]
+    exact Finset.card_le_card (Finset.subset_univ S)
+  constructor
+  · -- Lower bound: pad the submatrix's attaining subspace into `V`.
+    obtain ⟨W_B, hWdim, hWb⟩ := exists_submodule_forall_rayleigh_le hB i
+    have hW'im : Module.finrank ℝ (Submodule.map (padVecLinear S) W_B)
+        = (i : ℕ) + 1 := by
+      rw [finrank_map_eq_of_injective _ (padVecLinear_injective S)]; exact hWdim
+    obtain ⟨x', hx'mem, hx'0, hx'ge⟩ :=
+      exists_ne_mem_rayleigh_ge_of_finrank_eq hM ⟨(i : ℕ),
+        lt_of_lt_of_le i.isLt hmn⟩ (Submodule.map (padVecLinear S) W_B) hW'im
+    obtain ⟨y, hyW, hyx⟩ := Submodule.mem_map.1 hx'mem
+    have hy0 : y ≠ 0 := fun h => hx'0 (by
+      rw [← hyx, h, padVecLinear_apply, padVec_zero])
+    rw [← hyx, padVecLinear_apply] at hx'ge
+    refine le_trans hx'ge ?_
+    rw [hray y hy0]
+    exact hWb y hyW hy0
+  · -- Upper bound: intersect the ambient's attaining subspace with the
+    -- range of padding, then transport back.
+    obtain ⟨U, hUdim, hUb⟩ := exists_submodule_forall_rayleigh_le hM
+      ⟨(i : ℕ) + (Fintype.card V - Fintype.card ↥S), hn⟩
+    have hRdim : Module.finrank ℝ (LinearMap.range (padVecLinear S))
+        = Fintype.card ↥S := by
+      rw [LinearMap.finrank_range_of_inj (padVecLinear_injective S),
+        Module.finrank_pi]
+    have hVdim : Module.finrank ℝ (V → ℝ) = Fintype.card V :=
+      Module.finrank_pi ℝ
+    have hform := Submodule.finrank_sup_add_finrank_inf_eq U
+      (LinearMap.range (padVecLinear S))
+    have hsup : Module.finrank ℝ ↥(U ⊔ LinearMap.range (padVecLinear S))
+        ≤ Fintype.card V := by
+      have hle := Submodule.finrank_le (U ⊔ LinearMap.range (padVecLinear S))
+      rwa [hVdim] at hle
+    have hUdim' : Module.finrank ℝ U
+        = (i : ℕ) + (Fintype.card V - Fintype.card ↥S) + 1 := hUdim
+    have hint : (i : ℕ) + 1 ≤ Module.finrank ℝ
+        ↥(U ⊓ LinearMap.range (padVecLinear S)) := by omega
+    obtain ⟨P, hPU, hPdim⟩ := exists_submodule_finrank_eq_of_le
+      (U ⊓ LinearMap.range (padVecLinear S)) hint
+    have hPR : P ≤ LinearMap.range (padVecLinear S) :=
+      hPU.trans inf_le_right
+    have hWdimB : Module.finrank ℝ
+        (Submodule.comap (padVecLinear S) P) = (i : ℕ) + 1 := by
+      rw [finrank_comap_eq_of_le_range _ (padVecLinear_injective S) P hPR]
+      exact hPdim
+    obtain ⟨y, hyW, hy0, hyge⟩ :=
+      exists_ne_mem_rayleigh_ge_of_finrank_eq hB i
+        (Submodule.comap (padVecLinear S) P) hWdimB
+    have hypadU : padVecLinear S y ∈ U := by
+      have h1 : padVecLinear S y ∈ P := Submodule.mem_comap.mp hyW
+      exact (hPU h1).1
+    refine le_trans hyge ?_
+    rw [← hray y hy0]
+    exact hUb (padVec S y) hypadU (padVec_ne_zero hy0)
 
 /- The `lambda2_variational` Courant–Fischer characterization formerly
 admitted here (symmetry hypotheses only, no weight nonnegativity) was

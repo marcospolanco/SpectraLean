@@ -2475,3 +2475,90 @@ or the `evals (c • M)` excavation. Unrelated working-tree changes (the
 operator's `.gitignore`, clean-room proposal files,
 `cdx-clean-assess.md`, and the mushy-center priority row) preserved
 untouched; nothing committed.
+
+## 2026-08-18T23:05:12Z — Cauchy interlacing axiom retirement (proof)
+
+**Run:** `20260818T230335Z-run-1`
+**Session:** `ses_fe8e869ffffekg9H8jzuweYEGJ`
+**Status:** in-progress
+**Milestone:** Retire the `eigen_interlacing_principal_submatrix` axiom
+(the min–max theorem's first named consumer; explicit axiom count target
+14 → 13) by proving Cauchy interlacing from the proved Courant–Fischer
+engine. Pure trust-surface reduction and load-bearing growth: the proof
+consumes both CF witness directions, so a defect in the new engine would
+surface here rather than pass beside it. Pre-check: the admitted
+statement is the textbook true window — a proof task, not a repair.
+
+**Plan (recorded before editing):** padding bridge (extend-by-zero,
+Rayleigh-preserving), lower bound via CF existence on the submatrix +
+competitor on the ambient, upper bound via CF existence on the ambient
+at `i + d` + the dimension-intersection count (the same
+`finrank_sup_add_finrank_inf_eq` pattern CF used) + basis extraction for
+the exact competitor dimension. QA: numeric instantiation at `K₂` with a
+singleton submatrix (strict window, both naive one-sided bounds
+refuted). Records to follow: module docstring, both index rows,
+scoreboard, radar, README, coverage map, Courant–Fischer proposal note,
+`proposals/README.md`.
+
+## 2026-08-18T23:43:10Z — Cauchy interlacing axiom retired (proved from Courant–Fischer)
+
+**Run:** `20260818T230335Z-run-1`
+**Session:** `ses_fe8e869ffffekg9H8jzuweYEGJ`
+**Status:** completed
+**Milestone:** `eigen_interlacing_principal_submatrix` retired from
+axiom to proved theorem at unchanged name/hypotheses/statement —
+explicit axiom count **14 → 13**. A pure proof task per the recorded
+pre-check (the admitted statement was the true textbook window
+`λᵢ ≤ μᵢ ≤ λᵢ₊ₙ₋ₘ`), and the Courant–Fischer min–max engine's first
+named consumer: the proof consumes both witness directions, so a defect
+in the new engine would surface here (load-bearing growth).
+
+**Changes:** `GraphTheory.Spectral` — the axiom replaced by a theorem
+proved through a new extend-by-zero padding bridge (`padVec`/
+`padVecLinear` with `dotProduct_padVec_self`, `quadForm_padVec`,
+`rayleigh_padVec` — Rayleigh preservation needs no symmetry) plus
+subspace bookkeeping (`finrank_map_eq_of_injective`,
+`finrank_comap_eq_of_le_range`, `exists_submodule_finrank_eq_of_le`).
+Lower bound: CF-existence on the submatrix, image under padding,
+CF-competitor on the ambient. Upper bound: CF-existence on the ambient
+at `i + d`, the dimension count `finrank (U ⊓ range pad) ≥ i + 1` (the
+proposal's warned subspace-intersection step, via the same
+`Submodule.finrank_sup_add_finrank_inf_eq` the min–max proof used),
+exact-dimension extraction, comap transfer, back through
+`rayleigh_padVec`. One new import (`Mathlib.Algebra.Module.Submodule.Range`).
+The module now carries zero `axiom` declarations. QA
+`SpectralGraph/Interlacing_QA.lean` (+4 public, 484 total): `K₂`
+spectrum `[0,2]` and singleton-submatrix spectrum `[1]` pinned from
+trace/determinant/sortedness independent of the theorem; window
+instantiated to the strict `0 ≤ 1 ≤ 2`; both collapsed one-sided bounds
+refuted in proved form — superseding the axiom-era "no thin QA exists"
+note (the machinery did not exist then). Docs: module docstring and
+section header, scoreboard (13/484/0 + milestone bullet + verification
+rows), radar (axis-2 interlacing proved; axiom-minimization trend → 13;
+QA 484/27; proved-depth and reuse text), README (13 axioms, 484 QA),
+Horn–Johnson source index and SGT index map, coverage map,
+Courant–Fischer proposal delivery note, `proposals/README.md`.
+
+**Verification:** `lake env lean` on both changed modules — zero errors
+(new-code section-variable notes silenced with `omit`; remaining notes
+are the documented pre-existing ones); targeted `lake build` of both
+targets ✔; full `lake build` ✔ (2179 targets); 484 QA declarations, no
+`sorry`/`admit` anywhere under `Scaffold/`; 13 explicit cited axioms;
+`lint_axioms`, `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated and idempotent after the prose edits.
+
+**Remaining risk:** none identified — the retired statement is
+unchanged (verified true before the proof), kernel-checked with no new
+axioms, and zero consumers existed to migrate. The 1×1/2×2 QA fixtures
+pin the window only at small sizes; the interlacing statement's index
+arithmetic (`hn`) is exercised at the singleton instance.
+
+**Next handoff:** the operator's new High item
+(`proposals/electrical-flow-routing.md`, indexed mid-run — electrical
+flows, Thomson's principle, Rayleigh monotonicity; step 0 is its
+representation/Mathlib survey) is the next run's milestone per the
+operator's own note. Alternatives: mixing-time step 1 (Medium),
+Rayleigh/Dirichlet monotonicity (cheaper now through the padding
+bridge), Fiedler Phase B (decision-gated). The operator's concurrent
+`proposals/electrical-flow-routing.md` and its priority row preserved
+untouched; nothing committed.

@@ -34,7 +34,7 @@ the correction here so it doesn't live only inside one proposal.
 | Finite graph combinatorics | **Strong** | `Mathlib/Combinatorics/SimpleGraph/` — 48 files: `LapMatrix.lean` (Laplacian, kernel-reachability, component-rank), `Walk.lean`/`Path.lean` (connectivity), `Clique.lean`, `Coloring.lean`, `StronglyRegular.lean`, `Turan.lean`, `Hamiltonian.lean`, `Matching.lean`, `Girth.lean`, `Diam.lean`, `AdjMatrix.lean`, `DegreeSum.lean`. Scaffold's `SimpleGraphAdapter.lean` bridges directly into this. |
 | Matrix / spectral linear algebra | **Solid core, stops at extremes** | `Matrix.IsHermitian` spectral theorem (`LinearAlgebra/Matrix/Spectrum.lean`), `PosDef.lean`/`PosSemidef`; the extreme-eigenvalue variational principle `LinearMap.IsSymmetric.hasEigenvalue_iInf_of_finiteDimensional`/`_iSup_` (`Analysis/InnerProductSpace/Rayleigh.lean:230,249`) plus invariant-subspace restriction (`invariant_orthogonalComplement_eigenspace`, `Analysis/InnerProductSpace/Spectrum.lean:65`; `IsSymmetric.restrict_invariant`, `Analysis/InnerProductSpace/Symmetric.lean:127`). **Absent:** general Courant–Fischer min-max for arbitrary eigenvalue index, Cauchy interlacing, Weyl's eigenvalue-perturbation inequality — zero hits repo-wide for all three, under any naming, as of this survey. |
 | Probability & concentration | **Foundational only** | `Mathlib/Probability/` — 60+ files, but primitives: `Moments.lean`, `Variance.lean`, martingale/stopping-time infrastructure, `StrongLaw.lean`, `BorelCantelli.lean`, standard distributions (`Gaussian.lean`, `Binomial.lean`, `Poisson.lean`). **Zero** named concentration inequalities — no Hoeffding, no Bernstein, no sub-Gaussian package under any name. This is why Scaffold's `hoeffding_iid`/`bernstein_iid` could be converted from admitted to proved (`docs/7_SGT_RADAR.md`, axiom minimization axis): the ingredients exist upstream, the named theorems don't. |
-| Perturbation theory (Weyl / Davis–Kahan / interlacing) | **Absent** | Zero matches anywhere in the pinned tree, under any naming — checked directly against `Mathlib/LinearAlgebra`, `Mathlib/Analysis`. This is the weakest tendril outright, and it is exactly the set Scaffold carries as admitted axioms (`Spectral.lean` — `eigen_interlacing_principal_submatrix`, and the perturbation bridges). Not a coincidence. |
+| Perturbation theory (Weyl / Davis–Kahan / interlacing) | **Absent** | Zero matches anywhere in the pinned tree, under any naming — checked directly against `Mathlib/LinearAlgebra`, `Mathlib/Analysis`. This is the weakest tendril outright, and it is exactly the set Scaffold carries at the perturbation boundary: Weyl and Davis–Kahan as admitted axioms (the perturbation bridges), while interlacing — still absent upstream — was proved *locally* on 2026-08-18 from Scaffold's own Courant–Fischer engine (itself built on Mathlib's spectral theorem), retiring its axiom. Not a coincidence: absence upstream forced the local engine. |
 | Random walks / Markov chains (graph-native) | **Absent** | No transition-matrix or stationary-distribution package for graphs. The only "Markov" hits in the pinned tree are Markov's inequality (`Function/LpSeminorm/ChebyshevMarkov.lean`) and the Riesz–Markov–Kakutani representation theorem — unrelated to stochastic processes on graphs. `Data/Matrix/DoublyStochastic.lean` exists (Birkhoff–von Neumann territory) but is not graph-native. |
 | Electrical structure (resistance, Kirchhoff, Matrix-Tree) | **Absent** | No Moore–Penrose pseudoinverse — `LinearAlgebra/Matrix/NonsingularInverse.lean:17` states explicitly: "pseudoinverses which we do not consider here." No resistance, no spanning-tree enumeration, no Kirchhoff identity under any naming. |
 | Functional inequalities (Poincaré, log-Sobolev, Dirichlet forms) | **Absent** | The only "Poincaré" hit in the entire pinned tree is `Geometry/Manifold/PoincareConjecture.lean` — the topological conjecture, unrelated to the functional-analysis inequality. No log-Sobolev, no Dirichlet-form theory under any naming. |
@@ -43,15 +43,17 @@ the correction here so it doesn't live only inside one proposal.
 ## The pattern
 
 Scaffold's axiom boundary is not an arbitrary trust decision — it is close
-to a direct trace of this map. Weyl, Davis–Kahan, interlacing, and the
-Cheeger bounds are admitted because nothing upstream exists to build them
+to a direct trace of this map. Weyl, Davis–Kahan, and the Cheeger hard
+direction are admitted because nothing upstream exists to build them
 from. Hoeffding/Bernstein got proved, not admitted, because Mathlib
 supplies the raw probability machinery even though it lacks the named
 theorems. Where Mathlib has a partial tendril — the extreme-eigenvalue
-Rayleigh principle plus invariant-subspace restriction — Scaffold has a
-live proposal (`proposals/prove-lambda2-variational.md`) betting that the
-second-eigenvalue case is assemblable from those pieces even though the
-general min-max theorem isn't.
+Rayleigh principle plus invariant-subspace restriction — Scaffold built
+the full Courant–Fischer min–max engine locally and then proved both the
+λ₂ instance (2026-08-18, `lambda2_variational`) and interlacing
+(`eigen_interlacing_principal_submatrix`, retired from axiom the same
+day) on top of it, even though the general min–max theorem isn't
+upstream.
 
 The radar's per-axis ceilings inherit this directly: axes 2–3 (spectral
 linear algebra, variational methods) are ceiling-limited by Mathlib

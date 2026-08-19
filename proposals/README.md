@@ -29,6 +29,7 @@ drift apart.
 
 | Priority | Proposal | Why |
 | --- | --- | --- |
+| High | [Electrical Flows, Thomson's Principle, and Rayleigh Monotonicity](electrical-flow-routing.md) | The strongest zero-axiom center-to-ICP bridge: turns the delivered potential-based resistance API into a conserved unit-flow routing interface, proves the minimum-energy characterization, and derives the capacity-monotonicity theorem the traction plan can demonstrate to Lean/Mathlib adopters. Load-bearing on the Laplacian sign convention, support, solvability, kernel uniqueness, energy identity, and effective-resistance agreement; no new axioms. |
 | Medium | [The Fiedler Vector and a Certified Spectral Partition](fiedler-partitioning.md) | Phase A (A1/A2) delivered 2026-08-18 as hard crust (`GraphTheory.Fiedler`: the vector, the algebraic-connectivity certificate `lambda2_pos_of_connected`, and the sign partition proved nonempty/proper; no new axioms). What remains is Phase B — a certified conductance bound on the Fiedler partition — which is *not* hard crust: it composes the proved easy direction with the still-admitted Cheeger hard direction, so it is an axiom-backed derived theorem. Real, unblocked work, but it needs the operator decision the proposal itself names (run against the admitted hard direction, or defer until it is proved) and adds trust surface rather than reducing it — hence Medium, not High. |
 | Medium | [A Spectral Mixing-Time Bound](mixing-time-bound.md) | Step 1 (eigenvalue transfer via the already-proved similarity identity) is reachable now, but the program's own calibration section rates the full bound as "at least as hard as the electrical program's solvability step" — real, unblocked work, but bigger and riskier than the High items. |
 | Low — human decision required | [Clean-Room SGT Export](clean-room-sgt-export.md) | Needs patent counsel sign-off before any phase starts. Potentially the highest-leverage item in this directory overall, but not one an autonomous Lean-work run can act on. |
@@ -38,14 +39,17 @@ drift apart.
 | Low — scope decision required | [Admit Perron–Frobenius for Irreducible Nonnegative Matrices](admit-perron-frobenius.md) | Different gate than the counsel items above: this is a *strategic* scope-expansion decision, not an external sign-off. Every existing backlog item and radar axis is scoped to undirected graphs; this proposal explicitly names itself as opening a new axis (directed graphs / general Markov chains) that `docs/1_STRATEGY.md`'s center-out policy does not currently cover. The proposal's own acceptance criteria require that decision resolved, adopted or declined, before any Lean work starts — an autonomous run should not treat this as routine backlog and should not start it without that decision on record. |
 | Low — process decision required | [Retire the Mushy Center Systematically](retire-the-mushy-center.md) | Found unindexed while auditing this table (2026-08-18) — added by the same run that delivered the Cheeger easy direction, never previously recorded here. Proposes a heavier apparatus for axiom retirement: a formal elimination board, parallel per-candidate worktrees, a four-stage survey/formalize/falsify/integrate workflow. Worth an honest tension check before adoption: its own pilot section names the normalized-Cheeger transfer as its first candidate, and that has *already been delivered* using the lightweight mechanism already in place (this table plus one-step-per-run) — four axiom-related deliveries landed that way in short order. Whether the heavier process is worth adopting over what's already working is an operator call, not a default; an autonomous run should not stand up the board unprompted. |
 
-Note: with Sherman–Morrison delivered (2026-08-18, axioms 15 → 14),
-nothing is currently marked High; the next run should pick a Medium item
-above (Fiedler Phase B needs its named operator decision; the
-mixing-time program is the remaining unblocked Medium), or continue the
-center-out queue in `docs/EXECUTION_PLAN.md` (candidate follow-ons
-unlocked by the min–max theorem: the interlacing retirement — the
-proposal's first named consumer — and full Rayleigh/Dirichlet
-monotonicity, both needing separate scoping runs).
+With the electrical-flow proposal indexed, it is the active High item and
+therefore the next autonomous milestone under the priority policy above. Its
+step 0 is a representation/Mathlib survey; no Lean implementation begins until
+that decision is recorded. Fiedler Phase B retains its named operator decision,
+and the mixing-time program remains the unblocked Medium fallback.
+
+(Recorded 2026-08-18, later the same day: the interlacing retirement — the
+min–max proposal's first named consumer — was delivered between table edits:
+`eigen_interlacing_principal_submatrix` proved from the Courant–Fischer
+engine, axioms 14 → 13, with the window pinned numerically in QA. See the
+delivery note in `prove-courant-fischer.md`.)
 
 ## Delivered
 

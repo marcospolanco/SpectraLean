@@ -20,8 +20,9 @@ Courant–Fischer variational characterization.
 
 | Theorem | Lean Declaration | Kind | Module |
 |---------|-------------------|------|--------|
-| Section 4.3 (Cauchy interlacing) | `eigen_interlacing_principal_submatrix` | axiom | `Scaffold.Mathlib.GraphTheory.Spectral` |
+| Section 4.3 (Cauchy interlacing) | `eigen_interlacing_principal_submatrix` | **theorem (proved 2026-08-18; axiom before, retired)** | `Scaffold.Mathlib.GraphTheory.Spectral` |
 | Section 4.2 (Courant–Fischer, second-eigenvalue instance) | `lambda2_variational` | **theorem (proved 2026-08-18; axiom before, retired)** | `Scaffold.Mathlib.GraphTheory.Spectral` |
+| Section 4.2 (Courant–Fischer, general min–max at every index) | `evals_min_max` | **theorem (proved 2026-08-18; never admitted)** | `Scaffold.Mathlib.GraphTheory.Spectral` |
 
 ## Notes
 
@@ -37,6 +38,12 @@ Courant–Fischer variational characterization.
   nonnegativity) was materially false and is refuted in
   `Scaffold/QA/SpectralGraph/Variational_QA.lean`
   (`old_lambda2_variational_refuted_QA`).
+- `eigen_interlacing_principal_submatrix` was converted from an
+  admitted axiom to a proved theorem on 2026-08-18 (a pure proof task:
+  the admitted statement was the true textbook window). The proof
+  consumes the proved general Courant–Fischer engine (`evals_min_max`
+  and its two witness directions) through the extend-by-zero padding
+  bridge; the citation is classical background only.
 
 ## See Also
 

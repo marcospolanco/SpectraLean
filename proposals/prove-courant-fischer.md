@@ -147,6 +147,23 @@ delivered only for a fixed, special case:
   guaranteed one — the interlacing argument needs an additional
   subspace-intersection step of its own, so scope it as a separate
   follow-on proposal, not an automatic consequence.
+  **Delivered 2026-08-18 (later the same day):** the axiom was retired
+  to a proved theorem at the same name and statement (a pure proof
+  task — the admitted window was the true textbook statement). The
+  extra subspace-intersection step is exactly the dimension count
+  `finrank (U ⊓ range pad) ≥ i + 1` through the same
+  `Submodule.finrank_sup_add_finrank_inf_eq` the min–max proof itself
+  used, plus an exact-dimension extraction
+  (`exists_submodule_finrank_eq_of_le`) to meet the competitor
+  direction's equality-shaped hypothesis. The bridge between the two
+  spaces is the extend-by-zero padding `padVec`/`padVecLinear`, proved
+  to preserve dot products, quadratic forms, and Rayleigh quotients.
+  This is this proposal's first named consumer, consuming both witness
+  directions. The former axiom's "no thin QA exists" note is also
+  superseded: the computational eigenvalue machinery delivered with the
+  Cheeger repair pins the window numerically on `K₂` with a singleton
+  submatrix (`0 ≤ 1 ≤ 2`, both collapsed one-sided bounds refuted) in
+  `Scaffold/QA/SpectralGraph/Interlacing_QA.lean`.
 - **Full Rayleigh/Dirichlet monotonicity** — `electrical-structure-crust.md`
   deferred this explicitly because it "needs the Dirichlet principle as
   an attained variational characterization," which is exactly what this

@@ -18,10 +18,13 @@ Real definitions: `WAdj`, `deg`, `degreeMatrix`, `laplacian`,
 `laplacian` wrap; added in the 2026-08-18 Cheeger shape repair),
 `spectralGap`, `spectralProjector`, `initialProjector`,
 `eigvecOf`, `eigvalOf`, `vol`, `boundary`, `conductance`,
-`cheegerConstant`, `eventUpdate`, and `supportGraph` (2026-08-18: the
+`cheegerConstant`, `eventUpdate`, `supportGraph` (2026-08-18: the
 `WAdj → SimpleGraph` adapter, `Adj i j ↔ i ≠ j ∧ 0 < A i j` — the first
 bridge from the matrix-first representation to Mathlib's connectivity
-API).
+API), and `padVec`/`padVecLinear` (2026-08-18: the extend-by-zero
+embedding `↥S → ℝ → V → ℝ` preserving dot products, quadratic forms,
+and Rayleigh quotients — the bridge through which principal-submatrix
+test subspaces share the Courant–Fischer engine).
 
 Proved theorems (no admission): `degreeMatrix_*`, `laplacian_symmetric`,
 `laplacian_ones_in_kernel`, `evals_sorted`, `laplacian_quadForm`
@@ -128,8 +131,8 @@ Admitted axioms:
 
 | Axiom | Description | Source |
 |-------|-------------|--------|
-| `eigen_interlacing_principal_submatrix` | Cauchy interlacing for principal submatrices | [Horn & Johnson](../sources/horn_johnson_matrix_analysis.md) |
 | `lambda2_variational` | Courant–Fischer characterization of λ₂ (proved theorem since 2026-08-18; axiom retired — pre-repair symmetry-only shape refuted in QA) | [Horn & Johnson](../sources/horn_johnson_matrix_analysis.md), [Chung](../sources/chung_spectral_graph.md) |
+| `eigen_interlacing_principal_submatrix` | Cauchy interlacing for principal submatrices (proved theorem since 2026-08-18; axiom retired — a pure proof task from the proved Courant–Fischer engine, whose first named consumer it is) | [Horn & Johnson](../sources/horn_johnson_matrix_analysis.md) |
 
 ### `Scaffold.Mathlib.GraphTheory.Electrical` (effective resistance)
 

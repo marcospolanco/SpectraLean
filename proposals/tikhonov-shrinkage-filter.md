@@ -1,8 +1,19 @@
 # Proposal: Tikhonov Regularization in the Laplacian Eigenbasis
 
-**Status:** Proposed; priority **High**. Assistant's assessment of project
-direction, requested 2026-08-19, promoted from `sgt-gaps.md` item 4.
-Authorizes no Lean changes, axiom admissions, or external publication.
+**Status:** **DELIVERED 2026-08-20** — all three build steps in one run
+(the proposal's own "may cover more than one if the first lands
+cleanly" clause), as pure hard crust in
+`Scaffold.Mathlib.GraphTheory.Tikhonov` + QA in
+`Scaffold/QA/SpectralGraph/Tikhonov_QA.lean`. Zero new axioms (count
+stays 12; `#print axioms` on all 18 public theorems reads only
+`propext, Classical.choice, Quot.sound`). Two recorded deviations from
+the sketch, both in Step 3's endpoint claims — see the delivery record.
+Original assessment text follows.
+
+**Assessment:** proposed 2026-08-19, priority **High**. Assistant's
+assessment of project direction, requested 2026-08-19, promoted from
+`sgt-gaps.md` item 4. Authorizes no Lean changes, axiom admissions, or
+external publication.
 
 Companion to `sgt-gaps.md` and `finite-relative-entropy.md` (comparable
 cost profile — a direct corollary of already-proved eigenbasis machinery,
@@ -113,4 +124,86 @@ not-a-projection distinction explicitly as a corollary or docstring note.
 
 ## Open next step
 
-Unblocked now — begin with Step 1.
+None — delivered. See the delivery record below.
+
+## Delivery record (2026-08-20)
+
+Delivered in `Scaffold.Mathlib.GraphTheory.Tikhonov` (namespace
+`SpectralGraphTheory`), all proved, zero axioms:
+
+- **Step 1** — `tikhonovObjective` (the total objective, junk-degenerate
+  at `π = 0` documented), `tikhonovObjective_minimizer_le` (minimality),
+  `eq_of_tikhonovObjective_eq_minimizer` (uniqueness in the strong
+  vector-equality sense), both derived from the single
+  **strict-convexity decomposition** `tikhonovObjective_sub_minimizer`
+  (`obj(x) − obj(x*) = ∑_k (1 + λ_k/π)(d_k − d*_k)²`, positive weights).
+  *Definition-route decision, per the standing rule:* the minimizer is
+  `tikhonovMinimizer` **defined by the eigenbasis formula**
+  `∑_k (π/(λ_k+π)) (v_k ⬝ᵥ y) • v_k`, not `Classical.choice` over
+  strict convexity — every interface theorem becomes a computation and
+  uniqueness a corollary of the decomposition. A Mathlib
+  convexity-API survey was not needed on this route (nothing outside
+  the eigenbasis machinery is consumed — the proposal's own
+  cost case).
+- **Step 2** — `tikhonovMinimizer_dotProduct_eigvecOf`, the closed-form
+  eigencoefficient identity, proved hypothesis-free (pure
+  orthonormality) through a *generic* workhorse
+  `dotProduct_eigvecOf_filter` (any filter function `g`, reusable by
+  other spectral-filter consumers), plus the **normal equation**
+  `tikhonovMinimizer_add_smul_one_mulVec`
+  (`(L + π•1) *ᵥ x* = π • y`) and its converse characterization
+  `eq_tikhonovMinimizer_of_add_smul_one_mulVec` — the interface QA pins
+  the spectral construction against a hand-solved linear system.
+- **Step 3** — the shrinkage-factor arithmetic layer
+  (`tikhonovShrinkage` with `pos`, `ne_zero`, `le_one`, `lt_one`,
+  `eq_one_iff`, strict antitonicity), mean preservation
+  `sum_tikhonovMinimizer_eq_sum` (symmetry + `π ≠ 0` only — each
+  component's mean is preserved, the correct disconnected behavior),
+  and the not-a-projection theorem
+  `tikhonovMinimizer_ne_apply_self_of_eigvalOf_pos` (failure of
+  idempotence at any positive-eigenvalue eigenvector; **hypothesis
+  strengthened by deletion**: the nonnegativity hypothesis the sketch
+  carried turned out unnecessary and was dropped).
+- **Recorded statement-shape deviation 1:** the recommendation's
+  "never exactly 0 or 1" is *half wrong*. The factor is never `0` ✓,
+  but at `λ = 0` it is **exactly `1`** (`π/(0+π) = 1`) — and that is a
+  feature: the kernel mode passes through untouched, which is precisely
+  mean preservation. The delivered statements are the true ones:
+  `0 < factor`, `factor ≤ 1`, `factor < 1 ↔ 0 < λ`,
+  `factor = 1 ↔ λ = 0`, strict antitonicity on `λ ≥ 0`.
+- **Recorded statement-shape deviation 2:** the "not a projection"
+  claim is delivered as a *theorem*, not a docstring note: failure of
+  idempotence `T(T v) ≠ T v` — the precise mathematical sense in which
+  the filter differs from `spectralProjector`.
+
+**QA** (`Tikhonov_QA.lean`, `K₂` fixture, signal `![1,0]`, `π = 1`):
+the minimizer **pinned through the normal equation** — the candidate
+`![2/3,1/3]` verified by hand (entrywise Gaussian elimination,
+independent of the module) and promoted to
+`tikhonovMinimizer = ![2/3,1/3]` by the converse characterization, so
+the spectral-theorem construction and a hand-solved 2×2 system meet at
+the same vector; the objective pinned (`obj(x*) = 1/3` exactly, against
+`obj(y) = obj(0) = 1`, minimality instantiated at `1/3 ≤ 1` and
+strictly better); the spectrum pinned (trace `2`, determinant `0`, PSD
+⇒ every eigenvalue is `0` or `2`) so the shrinkage story is exact:
+factor exactly `1` on the kernel mode, exactly `1/3` on every other,
+`1/3 < 1` by antitonicity, `1/3 ∈ Ioo 0 1`; **not-a-projection
+numerically**: a second hand-solved system pins `T(T y) = ![5/9,4/9] ≠
+![6/9,3/9] = T y`; mean preservation instantiated twice (`1` both);
+and the **`hπ` guard refuted-on-omission**: at `π = 0` the minimizer is
+the zero vector and the hypothesis-free minimality would read `1 ≤ 0`.
+
+**Verification:** `lake env lean` on the public module and QA — zero
+errors, zero warnings; `#print axioms` on all 18 public and 14 headline
+QA theorems — three standard axioms only; all thirty-three QA modules
+batch-elaborated, zero errors (only the documented pre-existing
+section-variable warnings in untouched modules); full `lake build` ✔;
+`lint_axioms` (12), `check_citations`, `check_markdown_links` pass;
+scoreboard regeneration (**890/12/0**, +30 QA declarations).
+
+**Named residual:** `tikhonovMinimizer_eigvecOf` (eigenvector inputs
+come out as `factor • v`) is proved generally but not numerically
+instantiated in QA — `eigvecOf` entries are not kernel-computable on
+the fixture; its content is covered transitively by the two
+normal-equation pins. The unverified Shuman et al. citation stays
+unverified and out of committed docstrings.

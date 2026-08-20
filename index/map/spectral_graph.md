@@ -6,7 +6,7 @@ conductance, Cheeger theory, interlacing, and event-driven dynamics.
 ## Status
 
 **Implemented and build-certified** (see the QA scoreboard):
-`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,SpectralCertificates,Cheeger,Dynamics}`.
+`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,SpectralCertificates,Tikhonov,Cheeger,Dynamics}`.
 
 ## Modules and Declarations
 
@@ -285,6 +285,41 @@ proved, zero axioms.
 | `isSpectralUpperBoundCertificateInt_iff` | the integer twin is *sound and complete* against the specification at the same integer bound — pure ordered-field algebra, no `decide` |
 | `isSpectralUpperBoundCertificateIntFrac_iff` | **the proved cross-multiplication bridge (fractional form):** with `0 < den`, the fractional twin accepts exactly when the specification accepts at the rational bound `num / den` — cross-multiplication in an ordered field plus integer-cast transport of the finite sums; the lemma that makes the ℚ specification reachable from kernel-verifiable arithmetic |
 | `lambda2_le_of_certificateInt` / `lambda2_le_of_certificateIntFrac` | **kernel-facing soundness:** a `decide`d integer (resp. fractional) certificate yields a verified `lambda2 ≤ bound` on the real network — the executable end-to-end chain (integer arithmetic → kernel `decide` → proved bridge → real spectral bound) |
+
+
+### `Scaffold.Mathlib.GraphTheory.Tikhonov` (graph-signal smoothing in the Laplacian eigenbasis)
+
+Tikhonov regularization on a network (proposal
+`tikhonov-shrinkage-filter.md`, High): the smoothing operator
+minimizing `‖x − y‖² + (1/π) · xᵀLx` — the standard denoising /
+label-propagation filter of graph signal processing, delivered as pure
+hard crust on the eigenbasis machinery. Zero axioms. A recorded
+statement-shape deviation from the proposal: the attenuation factor is
+`1` *exactly* at a zero eigenvalue (kernel modes pass through
+untouched — that is mean preservation), so the delivered endpoint
+facts are `factor = 1 ↔ λ = 0` and `factor < 1 ↔ 0 < λ`, not the
+proposal's "never exactly 1".
+
+| Declaration | Content |
+|-------------|---------|
+| `tikhonovShrinkage` | the attenuation factor `π / (λ + π)` a mode of eigenvalue `λ` is multiplied by |
+| `tikhonovShrinkage_pos` / `_ne_zero` / `_le_one` / `_lt_one` | the factor is in `(0, 1]` on nonnegative eigenvalues — no mode is ever annihilated (the true half of the proposal's Step-3 claim) |
+| `tikhonovShrinkage_eq_one_iff` | the factor is exactly `1` iff `λ = 0` — the kernel mode is fixed, the engine of mean preservation |
+| `tikhonovShrinkage_lt_tikhonovShrinkage` | strict antitonicity in `λ` on `λ ≥ 0` — larger eigenvalues attenuated more (the low-pass property) |
+| `dotProduct_eigvecOf_filter` | **generic spectral-filter coefficient identity:** the eigenbasis coefficient of `∑_i g(λ_i) (v_i ⬝ᵥ y) • v_i` along `v_k` is `g(λ_k) (v_k ⬝ᵥ y)` — orthonormality collapse, any filter `g`, reusable by any GSP filter consumer |
+| `ext_of_dotProduct_eigvecOf_eq` | eigenbasis expansion is injective — the uniqueness engine |
+| `eigvalOf_laplacian_nonneg` | every Laplacian eigenvalue of a symmetric nonnegative network is nonnegative (`quadForm_eigvecOf_self` + `laplacian_psd`) |
+| `tikhonovMinimizer` | **the minimizer, defined by the eigenbasis formula** `x* = ∑_k (π/(λ_k+π)) (v_k ⬝ᵥ y) • v_k` (the recorded route: explicit formula over `Classical.choice` strict convexity) |
+| `tikhonovMinimizer_dotProduct_eigvecOf` | **the closed-form eigencoefficient identity** (proposal Step 2): the minimizer's coefficient along any eigenvector is the signal's coefficient shrunk by `π/(λ_k+π)`; hypothesis-free |
+| `tikhonovMinimizer_add_smul_one_mulVec` | **the normal equation:** `(L + π•1) *ᵥ x* = π • y` |
+| `eq_tikhonovMinimizer_of_add_smul_one_mulVec` | **the converse characterization:** any solution of the normal equation *is* the minimizer — the interface that lets QA pin the spectral construction against a hand-solved linear system |
+| `tikhonovObjective` | the objective `‖x − y‖² + (1/π) · xᵀLx` (junk-degenerate at `π = 0`, excluded by the theorems) |
+| `tikhonovObjective_sub_minimizer` | **the strict-convexity decomposition:** the objective's excess over its minimum is `∑_k (1 + λ_k/π) (d_k − d*_k)²` with positive weights — one identity delivering minimality and uniqueness |
+| `tikhonovObjective_minimizer_le` | **minimality** (proposal Step 1) |
+| `eq_of_tikhonovObjective_eq_minimizer` | **uniqueness:** a tie in the objective forces vector equality |
+| `sum_tikhonovMinimizer_eq_sum` | **mean preservation:** `∑ x* = ∑ y` — needs symmetry and `π ≠ 0` only (each component's mean is preserved on disconnected graphs) |
+| `tikhonovMinimizer_eigvecOf` | an eigenvector input comes out as `factor • v` — pure orthonormality |
+| `tikhonovMinimizer_ne_apply_self_of_eigvalOf_pos` | **not a projection:** the filter is not idempotent — `T(T v) = s² • v ≠ s • v` at any positive-eigenvalue eigenvector; the precise sense in which Tikhonov smoothing differs from `spectralProjector` (which fixes its image exactly) |
 
 
 ### `Scaffold.Mathlib.GraphTheory.Cheeger`

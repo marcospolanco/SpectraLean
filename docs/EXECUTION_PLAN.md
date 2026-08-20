@@ -6,6 +6,117 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Tikhonov Regularization in the Laplacian Eigenbasis (run 1,
+2026-08-20; `proposals/tikhonov-shrinkage-filter.md`, the Active
+table's top High row): DELIVERED — all three build steps in one run**
+(the proposal's own "may cover more than one if the first lands
+cleanly" clause). Pure hard crust — **zero new axioms** (count stays
+12; `#print axioms` on all 18 public theorems reads only `propext,
+Classical.choice, Quot.sound`).
+
+**Definition-route decision (recorded before stating, per the standing
+rule):** the minimizer is **defined directly by the eigenbasis
+formula** `x* = ∑_k (π/(λ_k+π)) (v_k ⬝ᵥ y) • v_k`, not extracted by
+`Classical.choice` from strict convexity — every interface theorem
+(coefficient identity, normal equation, minimality) becomes a
+computation and uniqueness a corollary of the strict-convexity
+decomposition. A Mathlib convexity-API survey proved unnecessary on
+this route (nothing outside the eigenbasis machinery is consumed —
+the proposal's own cost case).
+
+**Delivered in the new `GraphTheory.Tikhonov`:**
+
+- **Step 2 first (the identity layer):** the closed-form
+  eigencoefficient identity `tikhonovMinimizer_dotProduct_eigvecOf`
+  (hypothesis-free — pure orthonormality), proved through a *generic*
+  spectral-filter workhorse `dotProduct_eigvecOf_filter` (any filter
+  function `g`; any graph-signal-processing consumer can reuse it),
+  plus the expansion-injectivity `ext_of_dotProduct_eigvecOf_eq` and
+  `eigvalOf_laplacian_nonneg`.
+- **The normal equation both ways:** `tikhonovMinimizer_add_smul_one_mulVec`
+  (`(L + π•1) *ᵥ x* = π • y`) and the **converse characterization**
+  `eq_tikhonovMinimizer_of_add_smul_one_mulVec` — any solution of the
+  normal equation *is* the minimizer. This is the interface that lets
+  QA pin the spectral construction against a hand-solved linear
+  system.
+- **Step 1:** the objective `tikhonovObjective`, the
+  **strict-convexity decomposition** `tikhonovObjective_sub_minimizer`
+  (`obj(x) − obj(x*) = ∑_k (1 + λ_k/π)(d_k − d*_k)²`, positive
+  weights by PSD + `π > 0`), and its two corollaries
+  `tikhonovObjective_minimizer_le` (minimality) and
+  `eq_of_tikhonovObjective_eq_minimizer` (vector-equality uniqueness).
+- **Step 3:** the shrinkage-factor arithmetic layer
+  (`tikhonovShrinkage` with `pos`, `ne_zero`, `le_one`, `lt_one`,
+  `eq_one_iff`, strict antitonicity), mean preservation
+  `sum_tikhonovMinimizer_eq_sum` (symmetry + `π ≠ 0` only — each
+  component's mean is preserved on disconnected graphs),
+  `tikhonovMinimizer_eigvecOf`, and the not-a-projection theorem
+  `tikhonovMinimizer_ne_apply_self_of_eigvalOf_pos` (idempotence
+  failure `T(T v) ≠ T v` at any positive-eigenvalue eigenvector; the
+  sketch's nonnegativity hypothesis found unnecessary and deleted).
+- **Two recorded statement-shape deviations from the proposal's
+  Step 3:** (1) the claim "never exactly 1" is *false at λ = 0* — the
+  factor is exactly `1` there, the kernel mode passes through
+  untouched, and that **is** mean preservation; the delivered
+  statements are `0 < factor`, `factor ≤ 1`, `factor < 1 ↔ 0 < λ`,
+  `factor = 1 ↔ λ = 0`, strict antitonicity. (2) "not a projection"
+  is delivered as a theorem (idempotence failure), not a docstring
+  note.
+
+**QA** `SpectralGraph/Tikhonov_QA.lean` (+30 by the generator metric;
+`K₂`, signal `![1,0]`, `π = 1`): the minimizer **pinned through the
+normal equation** — candidate `![2/3,1/3]` verified by hand (entrywise
+Gaussian elimination, independent of the module) and promoted by the
+converse characterization, so the spectral-theorem construction and a
+hand-solved 2×2 system independently meet at the same vector; the
+objective pinned exactly (`obj(x*) = 1/3` against `obj(y) = obj(0) =
+1`, minimality instantiated, strict improvement certified); the
+spectrum pinned (trace `2`, det `0`, PSD ⇒ eigenvalues ∈ {0,2}) making
+the shrinkage story exact (factors `1` and `1/3`, ordering,
+`1/3 ∈ Ioo 0 1`); **not-a-projection numerically** (`T(T y) =
+![5/9,4/9] ≠ ![6/9,3/9] = T y` via a second hand-solved system);
+mean preservation instantiated twice; and the **`hπ` guard
+refuted-on-omission** (at `π = 0` the minimizer is the zero vector and
+the hypothesis-free minimality would read `1 ≤ 0`). Named residual:
+`tikhonovMinimizer_eigvecOf` not numerically instantiated (`eigvecOf`
+entries are not kernel-computable; covered transitively by the two
+normal-equation pins).
+
+**Verification:** `lake env lean` on the public module and its QA —
+zero errors, zero warnings; `#print axioms` on all 18 public and 14
+headline QA theorems ✔ (three standard axioms only); oleans produced
+directly during iteration; **all thirty-three QA modules
+batch-elaborated, zero errors** (only the documented pre-existing
+section-variable warnings in untouched modules); **full `lake build` ✔
+(2185 targets, "Build completed successfully" — run detached from the
+tool timeout after one invocation was killed at its tool timeout
+mid-replay, the recorded hazard; the Mathlib oleans survived that
+kill)**; `lint_axioms` (**12**), `check_citations`,
+`check_markdown_links` pass; scoreboard regeneration idempotent
+(**890/12/0**; `Tikhonov_QA` a new file row at 30).
+
+**Records updated:** module/QA/umbrella docstrings, scoreboard
+(890/12/0, the `lake build` row extended with the Tikhonov module and
+the detached-build operational note, both Direct-rows prepended with
+the Tikhonov slice, new milestone interpretation bullet, provenance
+note), radar (subject axis 2 re-scored **3.5 → 4.0** — the axis's
+first *constructed application-facing operator family*, the EML
+re-score's precedent class; QA count synced 890/33 with the QA axis
+**held at 4.0**; both logged in the re-scoring log), README (890;
+proved list gains the Tikhonov family), SGT index map (new Tikhonov
+section, 18 rows; module list updated), proposal (status header
+DELIVERED + delivery record with both deviations + named residuals +
+open-next-step none), and `proposals/README.md` (the High row moved to
+Delivered; **Spectral Band Projectors is now the top High row**).
+
+**Next milestone (open):** the Active table's remaining High row —
+**Spectral Band Projectors** (`spectral-band-projectors.md`, no gate:
+the two-sided band as the difference of two `spectralProjector`
+calls); or the Medium rows (Fiedler Phase B — needs an operator
+decision; mixing-time Step 1; Reversibility A and B; Relative
+Entropy; Perron–Frobenius + directed operators; discharge-perturbation
+— Davis–Kahan Step 0 survey; approximate spectral projection).
+
 **Discharge the Weyl perturbation axiom (run 1, 2026-08-20; operator
 direction: `proposals/discharge-perturbation-axioms.md`, `weyl_inequality`
 only): DELIVERED.** Step 0's additive-bound spike returned a decisive

@@ -8,6 +8,7 @@ import Scaffold.Mathlib.GraphTheory.ElectricalFlow
 import Scaffold.Mathlib.GraphTheory.Foster
 import Scaffold.Mathlib.GraphTheory.Expander
 import Scaffold.Mathlib.GraphTheory.SpectralCertificates
+import Scaffold.Mathlib.GraphTheory.Tikhonov
 import Scaffold.Mathlib.GraphTheory.Cheeger
 import Scaffold.Mathlib.GraphTheory.Fiedler
 import Scaffold.Mathlib.GraphTheory.RandomWalk
@@ -51,7 +52,14 @@ Laplacian terms), the computable certificate layer
 decidable-certificates program: the ℚ specification checker with its
 soundness theorem `lambda2_le_of_certificate` consuming the proved
 `lambda2_variational`, and the kernel-verifiable ℤ cross-multiplied
-twin bridged by proved cross-multiplication lemmas), its Cheeger
+twin bridged by proved cross-multiplication lemmas), Tikhonov
+regularization in the Laplacian eigenbasis
+(`GraphTheory.Tikhonov`, the graph-signal smoothing operator: the
+eigenbasis-defined minimizer of `‖x−y‖² + (1/π)·xᵀLx`, its
+eigencoefficient shrinkage identity, the normal equation with its
+converse characterization, minimality and uniqueness through the
+strict-convexity decomposition, mean preservation, and the
+not-a-projection (idempotence-failure) theorem), its Cheeger
 bridge (`GraphTheory.Cheeger`), the Fiedler-vector interface (`GraphTheory.Fiedler`, Phase A: the vector,
 the sign partition, and the algebraic-connectivity certificate),
 the random-walk interfaces (`GraphTheory.RandomWalk`), the general

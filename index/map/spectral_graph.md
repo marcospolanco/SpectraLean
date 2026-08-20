@@ -331,7 +331,7 @@ proposal's "never exactly 1".
 ### `Scaffold.Mathlib.GraphTheory.Band` (two-sided spectral band projectors)
 
 The `(a, b]` band projector (proposal `spectral-band-projectors.md`,
-High, Step 1): the orthogonal projector onto the eigenspaces with
+High, Steps 1–2): the orthogonal projector onto the eigenspaces with
 eigenvalues strictly above `a` and at most `b` — the bandpass-filtering
 object of frequency-selective graph signal processing — delivered as
 the difference of two `spectralProjector` calls, pure hard crust on
@@ -343,6 +343,8 @@ lemmas live one module in, in `Spectral`: the nestedness cross-law
 with ordered forms; `spectralProjector_idempotent` re-derived from it
 at unchanged statement) and the complete projector-eigenvector action
 `spectralProjector_mulVec_eigvecOf` (`P_c *ᵥ vᵢ = if λᵢ ≤ c then vᵢ else 0`).
+Step 2 (delivered 2026-08-20): disjoint bands are orthogonal — the
+pairwise half of the partition completeness Step 3 generalizes.
 
 | Declaration | Content |
 |-------------|---------|
@@ -353,6 +355,9 @@ at unchanged statement) and the complete projector-eigenvector action
 | `bandProjector_mulVec_eigvecOf_eq_zero_left` / `_right` | **out-of-band modes are annihilated** (`λᵢ ≤ a`, or `b < λᵢ`): below-band and above-band guards |
 | `bandProjector_eq_spectralProjector_of_lt` | below the whole spectrum, the band *is* the below-threshold projector — the design note's named special case (`spectralProjector` kept, not re-derived) |
 | `bandProjector_eq_one` | a covering band is the identity — the two-band instance of the Step-3 completeness statement |
+| `bandProjector_mul_bandProjector_eq_zero` / `_eq_zero'` | **disjoint bands compose to zero in both orders** (`b ≤ c` = interval disjointness, load-bearing): the four-term cross-law expansion collapses under the ordering |
+| `bandProjector_inner_eq_zero` | **orthogonality of the images:** `(B_{a,b} *ᵥ x) ⬝ᵥ (B_{c,d} *ᵥ y) = 0` for disjoint bands — the frequency-selective consumer's form |
+| `eq_zero_of_bandProjector_mulVec_eq_self` | **disjoint bands share no mode:** a vector fixed by both band projectors is zero — the subspace-level reading of "they share no eigenvector" |
 
 ### `Scaffold.Mathlib.GraphTheory.Cheeger`
 

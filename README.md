@@ -21,8 +21,8 @@ As of August 20, 2026:
 | Check | Result |
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
-| Explicit cited axioms | 12 |
-| QA theorems/lemmas | 917, with no `sorry` or `admit` under `Scaffold/` |
+| Explicit cited axioms | 11 |
+| QA theorems/lemmas | 932, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is the Cheeger *hard* direction at the SGT center;
 Davis–Kahan in the perturbation bridge; and the scalar and matrix
@@ -33,14 +33,16 @@ electrical crust, Foster's theorem, the Expander Mixing Lemma, the
 certificate-soundness layer (`lambda2_le_of_certificate`), the
 operator-norm/resolvent bridge (`l2OpNorm_eq_max_abs_evals`, the resolvent
 identity, the resolvent norm/Lipschitz bounds, and the resolvent-map
-injectivity), and **Tikhonov regularization in the Laplacian eigenbasis**
+injectivity), **Tikhonov regularization in the Laplacian eigenbasis**
 (the graph-signal smoothing minimizer, its eigencoefficient shrinkage
 identity, the normal equation and its converse characterization,
 minimality/uniqueness, and mean preservation), and **two-sided spectral
 band projectors** (the `(a, b]` band as the difference of two
 `spectralProjector` calls, idempotence through the nestedness
-cross-law `P_{c₁} * P_{c₂} = P_{min c₁ c₂}`, and the mode-selection
-action interface) are proved, not admitted.
+cross-law `P_{c₁} * P_{c₂} = P_{min c₁ c₂}`, the mode-selection
+action interface, and the orthogonality of disjoint bands — both
+composition orders, image orthogonality, and shared-mode-freeness)
+are proved, not admitted.
 
 The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for
 current counts, verification commands, and limitations.

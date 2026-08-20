@@ -4,7 +4,7 @@
   Purpose
   -------
   QA lemmas for the two-sided spectral band projector of
-  `Scaffold.Mathlib.GraphTheory.Band` (Step 1 of
+  `Scaffold.Mathlib.GraphTheory.Band` (Steps 1 and 2 of
   `proposals/spectral-band-projectors.md`): band values computed
   independently of the construction, idempotence instantiated both
   through the theorem and by raw matrix arithmetic, the nestedness
@@ -12,7 +12,14 @@
   witnessed in both directions — an excluded mode annihilated (and
   provably not fixed), an in-band mode fixed, a mode strictly between
   the band's endpoints fixed, and a band strictly between two
-  eigenvalues equal to zero (no mode silently grabbed).
+  eigenvalues equal to zero (no mode silently grabbed). The Step-2
+  slice: disjoint bands' composition to zero computed through the
+  theorem and by raw literal arithmetic in both orders, vector-level
+  orthogonality of the images (with the same-band counter-witness
+  showing the vanishing is genuinely about disjointness), the composed
+  action annihilating a filtered signal, and the overlap guard — two
+  bands sharing an eigenvalue compose to a provably nonzero matrix,
+  refuting the hypothesis-free form of the disjointness statement.
 
   Fixture: the diagonal matrix `!![1, 0; 0, 3]` on `Fin 2` — chosen
   over the dense `!![2, 1; 1, 2]` used elsewhere because its
@@ -373,5 +380,179 @@ theorem band_diag13_low_mulVec_numeric (i : Fin 2)
   funext k
   fin_cases k <;>
     simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, hv1]
+
+/-!
+## Step 2: orthogonality of disjoint bands
+
+The low band `(−1, 2]` (value `diag(1, 0)`) and the high band `(2, 4]`
+(value `diag(0, 1)`) are disjoint — the shared endpoint `2 ≤ 2` is the
+disjointness hypothesis in force. Every statement below is instantiated
+twice: through the new theorem and by raw literal arithmetic on the
+pinned band values, so a wrong composition law would fail the numeric
+cross-check.
+-/
+
+/-- Raw arithmetic: the two pinned single-axis band values multiply to
+zero by literal matrix multiplication, independent of every theorem. -/
+theorem diag13_axis_mul_axis_raw :
+    (!![1, 0; 0, 0] : Matrix (Fin 2) (Fin 2) ℝ) *
+      (!![0, 0; 0, 1] : Matrix (Fin 2) (Fin 2) ℝ) = 0 := by
+  ext a b
+  fin_cases a <;> fin_cases b <;> simp [Matrix.mul_apply, Fin.sum_univ_two]
+
+/-- Raw arithmetic, flipped order. -/
+theorem diag13_axis_mul_axis_raw' :
+    (!![0, 0; 0, 1] : Matrix (Fin 2) (Fin 2) ℝ) *
+      (!![1, 0; 0, 0] : Matrix (Fin 2) (Fin 2) ℝ) = 0 := by
+  ext a b
+  fin_cases a <;> fin_cases b <;> simp [Matrix.mul_apply, Fin.sum_univ_two]
+
+/-- Disjoint bands compose to zero — computed from the pinned band
+values and raw literal multiplication, no theorem consumed. -/
+theorem band_diag13_low_mul_high_raw :
+    bandProjector diag13 diag13_symm (-1) 2 * bandProjector diag13 diag13_symm 2 4
+      = 0 := by
+  rw [band_diag13_low, band_diag13_high, diag13_axis_mul_axis_raw]
+
+/-- Disjoint bands compose to zero — the theorem route. Both routes
+meet at `0`: a wrong cross-law expansion would leave a nonzero literal
+product. -/
+theorem band_diag13_low_mul_high :
+    bandProjector diag13 diag13_symm (-1) 2 * bandProjector diag13 diag13_symm 2 4
+      = 0 :=
+  bandProjector_mul_bandProjector_eq_zero diag13 diag13_symm (-1) 2 2 4
+    (by norm_num) (by norm_num) (by norm_num)
+
+/-- Flipped order, raw route. -/
+theorem band_diag13_high_mul_low_raw :
+    bandProjector diag13 diag13_symm 2 4 * bandProjector diag13 diag13_symm (-1) 2
+      = 0 := by
+  rw [band_diag13_low, band_diag13_high, diag13_axis_mul_axis_raw']
+
+/-- Flipped order, theorem route. -/
+theorem band_diag13_high_mul_low :
+    bandProjector diag13 diag13_symm 2 4 * bandProjector diag13 diag13_symm (-1) 2
+      = 0 :=
+  bandProjector_mul_bandProjector_eq_zero' diag13 diag13_symm (-1) 2 2 4
+    (by norm_num) (by norm_num) (by norm_num)
+
+/-- Vector-level orthogonality, theorem route: the low-band image of
+`![1, 2]` is dot-orthogonal to the high-band image of `![3, 5]`. -/
+theorem band_diag13_orthogonal_vectors :
+    (bandProjector diag13 diag13_symm (-1) 2 *ᵥ (![1, 2] : Fin 2 → ℝ))
+      ⬝ᵥ (bandProjector diag13 diag13_symm 2 4 *ᵥ (![3, 5] : Fin 2 → ℝ))
+      = 0 :=
+  bandProjector_inner_eq_zero diag13 diag13_symm (-1) 2 2 4
+    (by norm_num) (by norm_num) (by norm_num) _ _
+
+/-- Vector-level orthogonality, raw route: `diag(1,0) *ᵥ ![1,2] =
+![1,0]` and `diag(0,1) *ᵥ ![3,5] = ![0,5]`, whose dot product
+`1·0 + 0·5` vanishes. -/
+theorem band_diag13_orthogonal_vectors_raw :
+    (bandProjector diag13 diag13_symm (-1) 2 *ᵥ (![1, 2] : Fin 2 → ℝ))
+      ⬝ᵥ (bandProjector diag13 diag13_symm 2 4 *ᵥ (![3, 5] : Fin 2 → ℝ))
+      = 0 := by
+  rw [band_diag13_low, band_diag13_high]
+  simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+
+/-- Counter-witness: the *same* band paired with itself is not
+orthogonal — the raw computation gives `1·1 + 0·0 = 1 ≠ 0` — so the
+vanishing above is genuinely about disjointness, not an artifact of the
+fixture's zero entries. -/
+theorem band_diag13_low_not_orthogonal_self :
+    (bandProjector diag13 diag13_symm (-1) 2 *ᵥ (![1, 2] : Fin 2 → ℝ))
+      ⬝ᵥ (bandProjector diag13 diag13_symm (-1) 2 *ᵥ (![1, 2] : Fin 2 → ℝ))
+      ≠ 0 := by
+  rw [band_diag13_low]
+  simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+
+/-- The composed action annihilates, theorem route: applying the high
+band after the low band kills every vector. -/
+theorem band_diag13_high_after_low :
+    bandProjector diag13 diag13_symm 2 4 *ᵥ
+      (bandProjector diag13 diag13_symm (-1) 2 *ᵥ (![1, 2] : Fin 2 → ℝ))
+      = 0 := by
+  rw [Matrix.mulVec_mulVec,
+    bandProjector_mul_bandProjector_eq_zero' diag13 diag13_symm (-1) 2 2 4
+      (by norm_num) (by norm_num) (by norm_num),
+    Matrix.zero_mulVec]
+
+/-- The composed action annihilates, raw route: `diag(1,0) *ᵥ ![1,2] =
+![1,0]`, then `diag(0,1) *ᵥ ![1,0] = ![0,0]`. -/
+theorem band_diag13_high_after_low_raw :
+    bandProjector diag13 diag13_symm 2 4 *ᵥ
+      (bandProjector diag13 diag13_symm (-1) 2 *ᵥ (![1, 2] : Fin 2 → ℝ))
+      = 0 := by
+  rw [band_diag13_low, band_diag13_high]
+  funext k
+  fin_cases k <;> simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+
+/-- A low-band range vector is killed by the high band: `![1,0]` lies in
+the low band's range (the low band fixes it) and the high band
+annihilates it — the numeric companion of
+`eq_zero_of_bandProjector_mulVec_eq_self`: disjoint bands share no
+nonzero vector. -/
+theorem band_diag13_high_kills_low_range_vector :
+    bandProjector diag13 diag13_symm 2 4 *ᵥ (![1, 0] : Fin 2 → ℝ) = 0 ∧
+      bandProjector diag13 diag13_symm (-1) 2 *ᵥ (![1, 0] : Fin 2 → ℝ)
+        = (![1, 0] : Fin 2 → ℝ) := by
+  refine ⟨?_, ?_⟩
+  · rw [band_diag13_high]
+    funext k
+    fin_cases k <;> simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+  · rw [band_diag13_low]
+    funext k
+    fin_cases k <;> simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+
+/-!
+### The overlap guard: disjointness is load-bearing
+-/
+
+/-- Pin: the threshold-`1` projector is the first-axis projector — the
+eigenvalue `1` is the only one at or below `1`. -/
+theorem spectralProjector_diag13_one :
+    spectralProjector diag13 diag13_symm 1 = !![1, 0; 0, 0] :=
+  spectralProjector_diag13_eq 1 (by norm_num) (by norm_num)
+
+/-- The overlapping band `(−1, 3]` covers the whole spectrum: it is the
+identity. -/
+theorem band_diag13_overlap_low :
+    bandProjector diag13 diag13_symm (-1) 3 = 1 := by
+  rw [bandProjector,
+    spectralProjector_eq_one diag13 diag13_symm 3
+      (fun i => by
+        rcases diag13_eigvalOf_mem i with h | h
+        · rw [h]; norm_num
+        · rw [h]),
+    spectralProjector_eq_zero diag13 diag13_symm (-1)
+      (fun i => by
+        rcases diag13_eigvalOf_mem i with h | h <;> rw [h] <;> norm_num),
+    sub_zero]
+
+/-- The overlapping band `(1, 4]` keeps the eigenvalue-`3` mode only:
+the second-axis projector. -/
+theorem band_diag13_overlap_high :
+    bandProjector diag13 diag13_symm 1 4 = !![0, 0; 0, 1] := by
+  rw [bandProjector,
+    spectralProjector_eq_one diag13 diag13_symm 4
+      (fun i => by
+        rcases diag13_eigvalOf_mem i with h | h <;> rw [h] <;> norm_num),
+    spectralProjector_diag13_one]
+  ext a b
+  fin_cases a <;> fin_cases b <;> simp [Matrix.one_apply]
+
+/-- The overlap guard: the bands `(−1, 3]` and `(1, 4]` overlap — both
+contain the eigenvalue `3`, so `b ≤ c` fails (`3 ≤ 1` is false) — and
+their product is the nonzero second-axis projector. The hypothesis-free
+form "any two bands compose to zero" is thereby refuted: the
+disjointness hypothesis of `bandProjector_mul_bandProjector_eq_zero` is
+load-bearing, not decorative. -/
+theorem band_diag13_overlap_mul_ne_zero :
+    bandProjector diag13 diag13_symm (-1) 3 * bandProjector diag13 diag13_symm 1 4
+      ≠ 0 := by
+  rw [band_diag13_overlap_low, band_diag13_overlap_high, one_mul]
+  intro h
+  have h11 := congrFun (congrFun h 1) 1
+  simp at h11
 
 end SpectralGraphTheory.QA

@@ -6,6 +6,99 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Spectral Band Projectors, Step 2 — orthogonality of disjoint bands (run 1,
+2026-08-20; `proposals/spectral-band-projectors.md`, the Active table's
+only remaining High row, at its recorded open next step): DELIVERED.**
+Pure hard crust — **zero new axioms** (count stays 11; `#print axioms`
+on all four new public theorems reads only `propext, Classical.choice,
+Quot.sound`). The proposal's one-step-per-run rule was honored —
+Steps 3–4 untouched.
+
+**Route (as recorded before stating):** exactly the paved path — the
+Step-1 nestedness cross-law's ordered forms expand
+`(P_b − P_a)(P_d − P_c)` to the four-term expression that collapses
+under the ordering; the residue is literally `X − X`, closed by
+`sub_self`. Hypotheses folded to `a ≤ b`, `c ≤ d`, `b ≤ c` — with
+`b ≤ c` *exactly* interval disjointness of `(a, b]` and `(c, d]`,
+load-bearing rather than decorative (the QA overlap guard refutes the
+hypothesis-free form).
+
+**Delivered in `GraphTheory.Band`** (public module elaborated clean on
+the first pass, zero errors, zero warnings):
+
+- `bandProjector_mul_bandProjector_eq_zero` — the forward composition
+  law (each of the four products through
+  `spectralProjector_mul_spectralProjector_of_le`);
+- `bandProjector_mul_bandProjector_eq_zero'` — the flipped order, as a
+  *direct* four-term expansion through `_of_le'` (not a transpose
+  wrapper);
+- `bandProjector_inner_eq_zero` — the consumer's vector-level form:
+  `(B_{a,b} *ᵥ x) ⬝ᵥ (B_{c,d} *ᵥ y) = 0`, the first band moved across
+  the dot product (`vecMul_transpose`, `dotProduct_mulVec`,
+  `vecMul_vecMul`; its symmetry makes the transpose itself);
+- `eq_zero_of_bandProjector_mulVec_eq_self` — the subspace-level
+  reading of the step's "they share no eigenvector": a vector fixed by
+  two disjoint bands is zero (the second band annihilates the first
+  band's image).
+
+**QA** `SpectralGraph/Band_QA.lean` (+16 by the generator metric, 43 in
+file, 932 total): the disjoint low/high bands' composition to zero
+checked **through the theorem and by raw literal multiplication** on the
+pinned band values, in both orders; image orthogonality on concrete
+vectors by both routes, with the **same-band counter-witness** (`1 ≠ 0`
+— the vanishing is about disjointness, not the fixture's zero entries);
+the composed action `B_high *ᵥ (B_low *ᵥ x)` annihilating a filtered
+signal by both routes; a low-band range vector killed by the high band;
+and the **overlap guard** — the bands `(−1, 3]` and `(1, 4]`, both
+containing the eigenvalue `3`, compose to the provably nonzero
+`diag(0,1)` (entry `1` at the shared mode's axis).
+
+**Verification:** `lake env lean` on `Band` and `Band_QA` — zero
+errors, zero warnings (public module first pass; three small QA proof
+shape fixes during iteration, including the discovered `rw`-closes-
+`3 ≤ 3`-by-itself behavior behind one linter warning);
+`#print axioms` on the four public and twelve headline QA theorems ✔
+(three standard axioms only); oleans produced directly during
+iteration; **all thirty-four QA modules batch-elaborated, zero errors**
+(BATCH-DONE fail=0); **full `lake build` ✔ (2186 targets, "Build
+completed successfully", detached log + poll; the only diagnostic the
+documented pre-existing `hγ` warning in `ProjectorDrift.lean`)**;
+`lint_axioms` (**11**), `check_citations`, `check_markdown_links` pass;
+scoreboard regeneration idempotent (**932/11/0**). Environment: the
+pruned-oleans state recurred at run start; the interpreted cache fetch
+restored 5387 (with the invocation note recorded in the scoreboard:
+the `--run` file argument resolves relative to the cwd, not `--dir`).
+
+**Records updated:** module/QA/umbrella docstrings, scoreboard
+(932/11/0, both Direct rows prepended with the Step-2 slice, the
+`lake build` row extended, the Step-2 interpretation bullet, the
+cache-provenance invocation note, two stale narrative counts fixed —
+the lint row's axiom count 12 → 11 and the QA-definition line
+917 → 932), radar (axis 2 evidence extended with the orthogonality
+layer, **score held at 4.0** per protocol — completion within the band
+family counted at Step 1, Steps 3–4 the natural re-score triggers; QA
+count synced 932/34 with the QA axis **held at 4.0**; both holds
+logged), README (status table synced to the scoreboard authority
+11/932; the proved list gains the disjoint-band orthogonality), SGT
+index map (Band section extended, Steps 1–2; +3 rows), proposal
+(status header Step 2 DELIVERED, delivery record with the route and
+the overlap guard, open-next-step rewritten to Step 3),
+`proposals/README.md` (High row note + Delivered row + progress
+paragraph).
+
+**Next milestone (open):** the same proposal's **Step 3 — completeness
+under a partition** (a finite ordered threshold sequence covering the
+spectral range sums to the identity; the two-band covering instance
+`bandProjector_eq_one` already exists, and Step 2's orthogonality is
+the pairwise half), then Step 4 (the Hilbert projection
+specialization — survey `Analysis/InnerProductSpace/Projection.lean`
+signatures first). Or the Medium rows (Fiedler Phase B — needs an
+operator decision; mixing-time Step 1; Reversibility A and B; Relative
+Entropy; Perron–Frobenius + directed operators; discharge-perturbation
+— the Davis–Kahan Step 0 survey; approximate spectral projection).
+
+---
+
 **`spectral_persistence` removal (2026-08-20, operator-directed, interactive
 session — not an `opencode-pursue` run): DELIVERED.** Editorial axiom
 removal, not a proof-based retirement: the operator's stated criterion was

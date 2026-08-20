@@ -7,9 +7,10 @@
   span of the eigenvectors whose eigenvalues lie in a spectral interval
   `(a, b]`, defined as the difference of two `spectralProjector` calls —
   `bandProjector M hM a b = spectralProjector M hM b - spectralProjector M hM a`
-  — together with its basic properties (Step 1 of
-  `proposals/spectral-band-projectors.md`, the Active priority table's
-  High row at delivery time). Pure hard crust: no `axiom` declarations;
+  — together with its basic properties and the orthogonality of disjoint
+  bands (Steps 1 and 2 of `proposals/spectral-band-projectors.md`, the
+  Active priority table's High row at delivery time). Pure hard crust: no
+  `axiom` declarations;
   every theorem is proved from the already-proved algebra of
   `Scaffold.Mathlib.GraphTheory.Spectral` — symmetry
   (`spectralProjector_symmetric`), the nestedness product law
@@ -37,9 +38,18 @@
   (frequency-selective analysis in graph signal processing; context,
   not citation).
 
-  Open steps of the proposal (not in this module): Step 2, orthogonality
-  of disjoint bands; Step 3, completeness over a partition of the
-  spectrum; Step 4, the Hilbert-projection-theorem specialization.
+  Step 2 of the proposal is delivered here as well: orthogonality of
+  disjoint bands. When `(a, b]` and `(c, d]` are disjoint (`b ≤ c`, each
+  band nonnegated), the two band projectors compose to zero in both
+  orders (`bandProjector_mul_bandProjector_eq_zero`, `...'`), their
+  images are orthogonal in the dot-product sense
+  (`bandProjector_inner_eq_zero`), and no nonzero vector is fixed by
+  both (`eq_zero_of_bandProjector_mulVec_eq_self` — the subspace-level
+  reading of the proposal's "they share no eigenvector").
+
+  Open steps of the proposal (not in this module): Step 3, completeness
+  over a partition of the spectrum; Step 4, the Hilbert-projection
+  specialization.
 
   Related modules: the below-threshold projector and its algebra live in
   `Scaffold.Mathlib.GraphTheory.Spectral`; the Tikhonov filter
@@ -146,5 +156,89 @@ theorem bandProjector_eq_one (M : Matrix V V ℝ) (hM : M.IsSymm)
     bandProjector M hM a b = 1 := by
   rw [bandProjector_eq_spectralProjector_of_lt M hM a b ha,
     spectralProjector_eq_one M hM b hb]
+
+/-! ### Step 2: orthogonality of disjoint bands
+
+The pairwise half of the completeness statement Step 3 generalizes to
+partitions: two bands over disjoint spectral intervals project onto
+orthogonal subspaces. All three statements below are load-bearing on the
+Step-1 nestedness cross-law — the product of two band projectors expands
+through its ordered forms to `P_{min b d} − P_{min b c} − P_{min a d} +
+P_{min a c}`, which collapses under the ordering hypotheses. -/
+
+/-- Disjoint bands compose to zero, forward order: when `(a, b]` and
+`(c, d]` are disjoint (`b ≤ c`, with each band nonnegated so `a ≤ b` and
+`c ≤ d`), the product `B_{a,b} * B_{c,d}` vanishes. The `b ≤ c`
+hypothesis is exactly interval disjointness and is load-bearing:
+overlapping bands sharing an eigenvalue compose to a nonzero matrix (the
+QA overlap guard refutes the hypothesis-free form). -/
+theorem bandProjector_mul_bandProjector_eq_zero (M : Matrix V V ℝ)
+    (hM : M.IsSymm) (a b c d : ℝ) (hab : a ≤ b) (hcd : c ≤ d)
+    (hbc : b ≤ c) :
+    bandProjector M hM a b * bandProjector M hM c d = 0 := by
+  rw [bandProjector, bandProjector, Matrix.mul_sub, Matrix.sub_mul,
+    Matrix.sub_mul,
+    spectralProjector_mul_spectralProjector_of_le M hM (hbc.trans hcd),
+    spectralProjector_mul_spectralProjector_of_le M hM
+      (hab.trans (hbc.trans hcd)),
+    spectralProjector_mul_spectralProjector_of_le M hM hbc,
+    spectralProjector_mul_spectralProjector_of_le M hM (hab.trans hbc),
+    sub_self]
+
+/-- Disjoint bands compose to zero, flipped order: `B_{c,d} * B_{a,b} = 0`
+as well, by the same four-term expansion through the flipped nestedness
+forms. Together with the forward order this says the two band images are
+mutually annihilating subspaces. -/
+theorem bandProjector_mul_bandProjector_eq_zero' (M : Matrix V V ℝ)
+    (hM : M.IsSymm) (a b c d : ℝ) (hab : a ≤ b) (hcd : c ≤ d)
+    (hbc : b ≤ c) :
+    bandProjector M hM c d * bandProjector M hM a b = 0 := by
+  rw [bandProjector, bandProjector, Matrix.mul_sub, Matrix.sub_mul,
+    Matrix.sub_mul,
+    spectralProjector_mul_spectralProjector_of_le' M hM (hbc.trans hcd),
+    spectralProjector_mul_spectralProjector_of_le' M hM hbc,
+    spectralProjector_mul_spectralProjector_of_le' M hM
+      (hab.trans (hbc.trans hcd)),
+    spectralProjector_mul_spectralProjector_of_le' M hM (hab.trans hbc),
+    sub_self, sub_self, sub_zero]
+
+/-- The images of disjoint bands are orthogonal: for any two vectors,
+the low-band image of one is dot-orthogonal to the high-band image of
+the other. This is the frequency-selective consumer's form of
+orthogonality — filtered components from disjoint bands carry no shared
+signal — and follows from the composition law by moving the first band
+across the dot product (its transpose is itself). -/
+theorem bandProjector_inner_eq_zero (M : Matrix V V ℝ) (hM : M.IsSymm)
+    (a b c d : ℝ) (hab : a ≤ b) (hcd : c ≤ d) (hbc : b ≤ c)
+    (x y : V → ℝ) :
+    (bandProjector M hM a b *ᵥ x) ⬝ᵥ (bandProjector M hM c d *ᵥ y)
+      = 0 := by
+  have hB₁ : bandProjector M hM a b *ᵥ x
+      = x ᵥ* (bandProjector M hM a b)ᵀ :=
+    (Matrix.vecMul_transpose _ _).symm
+  rw [hB₁, Matrix.dotProduct_mulVec, Matrix.vecMul_vecMul,
+    show (bandProjector M hM a b)ᵀ = bandProjector M hM a b from
+      bandProjector_symmetric M hM a b,
+    bandProjector_mul_bandProjector_eq_zero M hM a b c d hab hcd hbc,
+    Matrix.vecMul_zero, Matrix.zero_dotProduct]
+
+/-- Disjoint bands share no mode: a vector fixed by both band
+projectors is zero — the subspace-level reading of the proposal's "they
+share no eigenvector". A common fixed vector would be simultaneously a
+low-band and a high-band signal, which the disjointness of the intervals
+forbids. -/
+theorem eq_zero_of_bandProjector_mulVec_eq_self (M : Matrix V V ℝ)
+    (hM : M.IsSymm) (a b c d : ℝ) (hab : a ≤ b) (hcd : c ≤ d)
+    (hbc : b ≤ c) (w : V → ℝ)
+    (h₁ : bandProjector M hM a b *ᵥ w = w)
+    (h₂ : bandProjector M hM c d *ᵥ w = w) :
+    w = 0 := by
+  have key : bandProjector M hM c d *ᵥ (bandProjector M hM a b *ᵥ w)
+      = 0 := by
+    rw [Matrix.mulVec_mulVec,
+      bandProjector_mul_bandProjector_eq_zero' M hM a b c d hab hcd hbc,
+      Matrix.zero_mulVec]
+  rw [h₁, h₂] at key
+  exact key
 
 end SpectralGraphTheory

@@ -1,6 +1,6 @@
 # Proposal: Spectral Band Projectors
 
-**Status:** Step 1 DELIVERED 2026-08-20 (see the delivery record under
+**Status:** Step 2 DELIVERED 2026-08-20 (see the delivery record under
 "Build order"). Priority **High**. Assistant's assessment of project
 direction, requested 2026-08-19, promoted from `sgt-gaps.md` item 5.
 Authorizes no Lean changes, axiom admissions, or external publication.
@@ -133,6 +133,46 @@ above.)*
 
 ### Step 2: Orthogonality of disjoint bands
 
+**DELIVERED 2026-08-20** (zero new axioms; count stays 11 after the
+operator-directed `spectral_persistence` removal; `#print axioms` on all
+four new public theorems reads only `propext, Classical.choice,
+Quot.sound`). **Route as the Open-next-step section recorded:** the
+cross-law's ordered forms expand `(P_b − P_a)(P_d − P_c)` to
+`P_{min b d} − P_{min b c} − P_{min a d} + P_{min a c}`, which collapses
+to `0` under the ordering — each product rewrites through
+`spectralProjector_mul_spectralProjector_of_le` (forward order; the
+flipped theorem through `_of_le'`), the residue being literally
+`X − X`, closed by `sub_self`. Hypotheses folded to `a ≤ b`, `c ≤ d`,
+`b ≤ c`: the `b ≤ c` line is *exactly* disjointness of the half-open
+intervals `(a, b]` and `(c, d]`, so it is load-bearing rather than
+decorative. Delivered in `GraphTheory.Band`:
+`bandProjector_mul_bandProjector_eq_zero` (forward order),
+`bandProjector_mul_bandProjector_eq_zero'` (flipped, direct
+four-term expansion — not a transpose wrapper),
+`bandProjector_inner_eq_zero` (the vector-level form:
+`(B_{a,b} *ᵥ x) ⬝ᵥ (B_{c,d} *ᵥ y) = 0`, by moving the first band across
+the dot product — `vecMul_transpose`, `dotProduct_mulVec`,
+`vecMul_vecMul` — its symmetry making the transpose itself), and
+`eq_zero_of_bandProjector_mulVec_eq_self` (the subspace-level reading
+of the step's "they share no eigenvector": a vector fixed by two
+disjoint bands is zero, since the second band annihilates the first
+band's image). **QA** `Band_QA.lean` (+16, 43 in file): the disjoint
+low/high bands' composition to zero checked through the theorem *and*
+by raw literal multiplication on the pinned band values, in both
+orders; image orthogonality on concrete vectors by both routes, with
+the **same-band counter-witness** (`1 ≠ 0`) showing the vanishing is
+about disjointness, not the fixture's zero entries; the composed action
+annihilating a filtered signal by both routes; a low-band range vector
+killed by the high band (the numeric companion of the shared-mode
+theorem); and the **overlap guard** — bands `(−1, 3]` and `(1, 4]`
+sharing the eigenvalue `3` compose to the provably nonzero `diag(0,1)`,
+refuting the hypothesis-free form. **Verification:** `lake env lean` on
+`Band` and `Band_QA` (zero errors, zero warnings); `#print axioms` on
+all four public and twelve headline QA theorems (three standard axioms
+only); the QA-module batch and full `lake build` per the scoreboard's
+verification record; lint/citation/link checks pass; scoreboard
+932/11/0.
+
 For `a ≤ b ≤ c ≤ d`, prove `bandProjector M hM a b` and `bandProjector M
 hM c d` project onto orthogonal subspaces (they share no eigenvector,
 since the eigenbasis is orthonormal and the two eigenvalue ranges are
@@ -180,12 +220,12 @@ survey the exact lemma signature first.
 
 ## Open next step
 
-Step 2 — orthogonality of disjoint bands (`a ≤ b ≤ c ≤ d` → the two
-band projectors compose to zero). The route is now paved: the nestedness
-cross-law's ordered forms expand `(P_b − P_a)(P_d − P_c)` to
-`P_{min b d} − P_{min b c} − P_{min a d} + P_{min a c}`, which
-collapses to `0` under the ordering hypotheses; alternatively the
-action lemmas annihilate each eigenvector in one band or the other.
-Steps 3 (partition completeness) and 4 (the Hilbert projection
-specialization — survey `Analysis/InnerProductSpace/Projection.lean`
-lemma signatures first) remain queued behind it.
+Step 3 — completeness under a partition: for a finite ordered sequence
+of thresholds `t₀ < t₁ < … < tₙ` covering the full spectral range, the
+sum of the resulting band projectors is the identity (the design note
+requires the statement over a partition, not pairwise; Step 2's
+orthogonality layer is the pairwise half, and the two-band instance
+`bandProjector_eq_one` already exists as the covering case). Step 4
+(the Hilbert projection specialization — survey
+`Analysis/InnerProductSpace/Projection.lean` lemma signatures first)
+remains queued behind it.

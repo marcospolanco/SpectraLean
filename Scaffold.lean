@@ -61,12 +61,14 @@ eigencoefficient shrinkage identity, the normal equation with its
 converse characterization, minimality and uniqueness through the
 strict-convexity decomposition, mean preservation, and the
 not-a-projection (idempotence-failure) theorem), the two-sided
-spectral band projectors (`GraphTheory.Band`, Step 1 of the
+spectral band projectors (`GraphTheory.Band`, Steps 1–2 of the
 band-projector program: the `(a, b]` band as the difference of two
 `spectralProjector` calls, idempotence through the nestedness
-cross-law `spectralProjector_mul_spectralProjector`, and the
+cross-law `spectralProjector_mul_spectralProjector`, the
 mode-selection action interface — in-band modes fixed, out-of-band
-modes annihilated), its Cheeger
+modes annihilated — and orthogonality of disjoint bands: both
+composition orders, image orthogonality, and shared-mode-freeness),
+its Cheeger
 bridge (`GraphTheory.Cheeger`), the Fiedler-vector interface (`GraphTheory.Fiedler`, Phase A: the vector,
 the sign partition, and the algebraic-connectivity certificate),
 the random-walk interfaces (`GraphTheory.RandomWalk`), the general

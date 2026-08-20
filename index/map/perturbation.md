@@ -40,7 +40,7 @@ spectral stability.
 
 **Module**: `Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent`
 
-All proved, zero axioms (delivered 2026-08-19, proposal steps 0–1 of
+All proved, zero axioms (delivered 2026-08-19, proposal steps 0–2 of
 `proposals/resolvent-calculus-psd.md`).
 
 | Declaration | Kind | Description | Source |
@@ -52,15 +52,17 @@ All proved, zero axioms (delivered 2026-08-19, proposal steps 0–1 of
 | `isUnit_det_add_smul_one_of_quadForm_nonneg` | proved | `M + t • 1` invertible for any matrix with nonnegative quadratic form and `t > 0` (kernel vector route; no symmetry needed) | proposal item 1 |
 | `isUnit_det_add_one_of_quadForm_nonneg` | proved | The `t = 1` instance — the resolvent's own shift | corollary |
 | `resolvent_identity_sub` | proved | `(A+1)⁻¹ − (B+1)⁻¹ = (A+1)⁻¹ * (B − A) * (B+1)⁻¹` | proposal item 3 |
+| `l2OpNorm_inv_add_smul_one_le_inv_of_quadForm_nonneg` | proved | `‖(M + t•1)⁻¹‖ ≤ t⁻¹` for any matrix with nonnegative quadratic form and `t > 0` — no symmetry hypothesis (the recorded Step-2 route deviation: energy inequality + dot-product Cauchy–Schwarz through the bridge's transport spine, not the eigenvalue transfer) | proposal item 2 (general-`t` strengthening) |
+| `l2OpNorm_inv_add_one_le_one_of_quadForm_nonneg` | proved | The `t = 1` instance: the resolvent is a contraction | proposal item 2 |
+| `l2OpNorm_resolvent_sub_le_of_quadForm_nonneg` | proved | The resolvent map is `1`-Lipschitz: `‖(A+1)⁻¹ − (B+1)⁻¹‖ ≤ ‖A − B‖` (Step-1 identity + scoped `NormedRing` submultiplicativity + the norm bound twice) | proposal item 4 |
 
 ## Deferred Work
 
 The following entries from an earlier plan remain unimplemented and are
 not promised: `davis_kahan_tan_theta`, `davis_kahan_delta`, the
-resolvent *norm* bounds (`‖(A+1)⁻¹‖ ≤ 1` and the Lipschitz bound —
-proposal steps 2, which consume the delivered bridge — and step 3,
-injectivity), and a separate spectral-projector module (the real
-projector definitions live in
+resolvent *injectivity* statement (proposal step 3, a one-line
+consequence of the Step-1 identity), and a separate spectral-projector
+module (the real projector definitions live in
 `Scaffold.Mathlib.GraphTheory.Spectral`).
 
 ## Applications

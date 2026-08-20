@@ -26,7 +26,7 @@ symmetric PSD matrix `A` is, without any spectral-gap hypothesis,
 because the shift by the identity moves every eigenvalue strictly to
 the right of zero.
 
-This module delivers Steps 0 and 1 of
+This module delivers Steps 0, 1, and 2 of
 `proposals/resolvent-calculus-psd.md`:
 
 - **Step 0, the operator-norm bridge** (`l2OpNorm` ↔ spectrum): for a
@@ -58,11 +58,28 @@ This module delivers Steps 0 and 1 of
   `(A+1)⁻¹ - (B+1)⁻¹ = (A+1)⁻¹ * (B - A) * (B+1)⁻¹` by pure
   `nonsing_inv` algebra.
 
+- **Step 2, the norm bound and the Lipschitz bound**: for every matrix
+  with nonnegative quadratic form and every `t > 0`, the resolvent
+  satisfies `‖(M + t•1)⁻¹‖ ≤ t⁻¹` (at `t = 1`: the proposal's item 2,
+  `‖(A+1)⁻¹‖ ≤ 1`), and the resolvent map is `1`-Lipschitz in the
+  operator norm, `‖(A+1)⁻¹ - (B+1)⁻¹‖ ≤ ‖A - B‖` (item 4). Route
+  (recorded deviation from the proposal's eigenvalue-transfer sketch):
+  the *energy* argument — `y = (M+t•1)⁻¹ x` has
+  `t‖y‖² ≤ quadForm M y + t‖y‖² = y ⬝ᵥ x ≤ ‖y‖‖x‖` by dot-product
+  Cauchy–Schwarz — packaged through the same
+  `ContinuousLinearMap.opNorm_le_bound` transport spine as the bridge.
+  This needs **no symmetry hypothesis** (the same strengthening as
+  Step 1's invertibility theorem: only the quadratic form at the
+  resolvent's own argument is evaluated) and no sorted-eigenvalue
+  transfer; the Lipschitz bound then composes the Step-1 resolvent
+  identity with the scoped `NormedRing` submultiplicativity and the
+  norm bound on both factors, so it is load-bearing on Step 1's
+  invertibility theorem and on the identity itself.
+
 Every declaration here is proved (`#print axioms` reads only
 `propext, Classical.choice, Quot.sound`); there are no new axioms.
-Steps 2–3 of the proposal (the norm bound `‖(A+1)⁻¹‖ ≤ 1`, the
-Lipschitz bound, and injectivity) consume this module and are not
-attempted here.
+Step 3 of the proposal (injectivity of the resolvent map) consumes
+this module and is not attempted here.
 
 The norm throughout is the `Matrix.L2OpNorm` operator norm, the same
 instance the admitted `weyl_inequality` uses.
@@ -371,5 +388,186 @@ theorem resolvent_identity_sub {A B : Matrix V V ℝ}
         refine congrArg (fun X => X * (B + 1)⁻¹) ?_
         refine congrArg ((A + 1)⁻¹ * ·) ?_
         abel
+
+/-!
+## 5. The resolvent norm bound (Step 2, item 2)
+
+The energy route: for `y = (M + t•1)⁻¹ *ᵥ x`, the quadratic-form
+hypothesis gives `t • (y ⬝ᵥ y) ≤ y ⬝ᵥ ((M + t•1) *ᵥ y) = y ⬝ᵥ x`, and
+Cauchy–Schwarz bounds the right side by `‖y‖‖x‖`. Packaged through the
+same `opNorm_le_bound` transport spine as the bridge, this yields the
+norm bound at general `t > 0` — with **no symmetry hypothesis**
+(the recorded deviation from the proposal's eigenvalue-transfer sketch,
+mirroring Step 1's strengthening).
+-/
+
+section NormBound
+
+variable {M : Matrix V V ℝ}
+
+omit [DecidableEq V] in
+/-- Cauchy–Schwarz for plain-function dot products: the transported
+`abs_real_inner_le_norm`, through the same `EuclideanSpace` packaging
+as the bridge's norm bookkeeping. -/
+private theorem abs_dotProduct_le (x y : V → ℝ) :
+    |x ⬝ᵥ y| ≤ ‖((WithLp.equiv 2 (V → ℝ)).symm x : EuclideanSpace ℝ V)‖ *
+      ‖((WithLp.equiv 2 (V → ℝ)).symm y : EuclideanSpace ℝ V)‖ := by
+  have hin : inner ((WithLp.equiv 2 (V → ℝ)).symm x : EuclideanSpace ℝ V)
+      ((WithLp.equiv 2 (V → ℝ)).symm y) = x ⬝ᵥ y := by
+    rw [EuclideanSpace.inner_eq_star_dotProduct]
+    simp [star_trivial]
+  have hcs := abs_real_inner_le_norm
+    ((WithLp.equiv 2 (V → ℝ)).symm x : EuclideanSpace ℝ V)
+    ((WithLp.equiv 2 (V → ℝ)).symm y)
+  rw [hin] at hcs
+  exact hcs
+
+/-- The energy inequality behind the norm bound: if
+`(M + t•1) *ᵥ y = x` with `M` of nonnegative quadratic form, then
+`t • (y ⬝ᵥ y) ≤ y ⬝ᵥ x` for **any** `t` (the shift supplies `t‖y‖²` of
+energy and `M` a nonnegative remainder; strict positivity of `t`
+enters only at the division step in the packaged bound). -/
+private theorem t_smul_dotProduct_self_le (hpsd : ∀ x, 0 ≤ quadForm M x)
+    {t : ℝ} {y x : V → ℝ} (hy : (M + t • 1) *ᵥ y = x) :
+    t * Matrix.dotProduct y y ≤ Matrix.dotProduct y x := by
+  have hsplit : (M + t • 1) *ᵥ y = M *ᵥ y + t • y := by
+    rw [Matrix.add_mulVec, Matrix.smul_mulVec_assoc, Matrix.one_mulVec]
+  have hlhs : Matrix.dotProduct y ((M + t • 1) *ᵥ y)
+      = Matrix.dotProduct y (M *ᵥ y) + t * Matrix.dotProduct y y := by
+    rw [hsplit, Matrix.dotProduct_add, Matrix.dotProduct_smul, smul_eq_mul]
+  rw [hy] at hlhs
+  have hq : 0 ≤ quadForm M y := hpsd y
+  have hqf : quadForm M y = Matrix.dotProduct y (M *ᵥ y) := rfl
+  linarith
+
+/-- **Step 2, item 2, general shift:** for every matrix with
+nonnegative quadratic form (PSD in the center's hypothesis style) and
+every `t > 0`, the resolvent `(M + t•1)⁻¹` is `t⁻¹`-bounded in the
+operator norm. Route (recorded deviation from the proposal's
+eigenvalue-transfer sketch): the energy inequality plus dot-product
+Cauchy–Schwarz through the bridge's `opNorm_le_bound` transport spine —
+no symmetry hypothesis is needed, and the sorted-eigenvalue transfer
+for inverted matrices is never required. Load-bearing on Step 1: the
+invertibility hypothesis is supplied by
+`isUnit_det_add_smul_one_of_quadForm_nonneg`. -/
+theorem l2OpNorm_inv_add_smul_one_le_inv_of_quadForm_nonneg
+    (hpsd : ∀ x, 0 ≤ quadForm M x) {t : ℝ} (ht : 0 < t) :
+    ‖(M + t • 1)⁻¹‖ ≤ t⁻¹ := by
+  have hN : IsUnit (M + t • 1).det :=
+    isUnit_det_add_smul_one_of_quadForm_nonneg hpsd ht
+  rw [Matrix.cstar_norm_def]
+  refine ContinuousLinearMap.opNorm_le_bound
+    ((Matrix.toEuclideanCLM (𝕜 := ℝ) ((M + t • 1)⁻¹) :
+      EuclideanSpace ℝ V →L[ℝ] EuclideanSpace ℝ V))
+      (le_of_lt (inv_pos.2 ht)) ?_
+  intro z
+  have hxe : z = (WithLp.equiv 2 (V → ℝ)).symm
+      ((WithLp.equiv 2 (V → ℝ)) z) := (Equiv.apply_symm_apply _ _).symm
+  have hact : ((Matrix.toEuclideanCLM (𝕜 := ℝ) ((M + t • 1)⁻¹) :
+      EuclideanSpace ℝ V →L[ℝ] EuclideanSpace ℝ V)) z
+      = (WithLp.equiv 2 (V → ℝ)).symm
+          ((M + t • 1)⁻¹ *ᵥ (WithLp.equiv 2 (V → ℝ)) z) := by
+    conv_lhs => rw [hxe]
+    rw [Matrix.toEuclideanCLM_piLp_equiv_symm, Matrix.toLin'_apply]
+  set x := (WithLp.equiv 2 (V → ℝ)) z with hxz
+  set y := (M + t • 1)⁻¹ *ᵥ x with hyd
+  have hnormz : ‖z‖
+      = ‖((WithLp.equiv 2 (V → ℝ)).symm x : EuclideanSpace ℝ V)‖ := by
+    rw [hxe]
+  rw [hact, hnormz]
+  have hinv : (M + t • 1) *ᵥ y = x := by
+    rw [hyd, Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ hN,
+      Matrix.one_mulVec]
+  have henergy := t_smul_dotProduct_self_le hpsd hinv
+  rw [← norm_euclidean_sq y] at henergy
+  have hcs := abs_dotProduct_le y x
+  have hyx : Matrix.dotProduct y x
+      ≤ ‖((WithLp.equiv 2 (V → ℝ)).symm y : EuclideanSpace ℝ V)‖ *
+        ‖((WithLp.equiv 2 (V → ℝ)).symm x : EuclideanSpace ℝ V)‖ :=
+    (le_abs_self _).trans hcs
+  have hchain : t * ‖((WithLp.equiv 2 (V → ℝ)).symm y : EuclideanSpace ℝ V)‖ ^ 2
+      ≤ ‖((WithLp.equiv 2 (V → ℝ)).symm y : EuclideanSpace ℝ V)‖ *
+        ‖((WithLp.equiv 2 (V → ℝ)).symm x : EuclideanSpace ℝ V)‖ :=
+    henergy.trans hyx
+  rcases eq_or_ne ‖((WithLp.equiv 2 (V → ℝ)).symm y : EuclideanSpace ℝ V)‖ 0
+    with h0 | hne
+  · rw [h0]
+    positivity
+  · have hpos : 0 < ‖((WithLp.equiv 2 (V → ℝ)).symm y : EuclideanSpace ℝ V)‖ :=
+      lt_of_le_of_ne (norm_nonneg _) (Ne.symm hne)
+    have hkey : t * ‖((WithLp.equiv 2 (V → ℝ)).symm y : EuclideanSpace ℝ V)‖
+          * ‖((WithLp.equiv 2 (V → ℝ)).symm y : EuclideanSpace ℝ V)‖
+        ≤ ‖((WithLp.equiv 2 (V → ℝ)).symm x : EuclideanSpace ℝ V)‖ *
+          ‖((WithLp.equiv 2 (V → ℝ)).symm y : EuclideanSpace ℝ V)‖ := by
+      have hring : t * ‖((WithLp.equiv 2 (V → ℝ)).symm y : EuclideanSpace ℝ V)‖
+          * ‖((WithLp.equiv 2 (V → ℝ)).symm y : EuclideanSpace ℝ V)‖
+          = t * ‖((WithLp.equiv 2 (V → ℝ)).symm y : EuclideanSpace ℝ V)‖ ^ 2 := by
+        ring
+      rw [hring, mul_comm ‖((WithLp.equiv 2 (V → ℝ)).symm x : EuclideanSpace ℝ V)‖
+        ‖((WithLp.equiv 2 (V → ℝ)).symm y : EuclideanSpace ℝ V)‖]
+      exact hchain
+    have hdiv : t * ‖((WithLp.equiv 2 (V → ℝ)).symm y : EuclideanSpace ℝ V)‖
+        ≤ ‖((WithLp.equiv 2 (V → ℝ)).symm x : EuclideanSpace ℝ V)‖ :=
+      (mul_le_mul_iff_of_pos_right hpos).1 hkey
+    calc ‖((WithLp.equiv 2 (V → ℝ)).symm y : EuclideanSpace ℝ V)‖
+        = t⁻¹ * (t * ‖((WithLp.equiv 2 (V → ℝ)).symm y : EuclideanSpace ℝ V)‖) := by
+          rw [← mul_assoc, inv_mul_cancel₀ (ne_of_gt ht), one_mul]
+      _ ≤ t⁻¹ * ‖((WithLp.equiv 2 (V → ℝ)).symm x : EuclideanSpace ℝ V)‖ :=
+          mul_le_mul_of_nonneg_left hdiv (inv_nonneg.2 ht.le)
+
+/-- **Step 2, item 2**, the proposal's statement: the resolvent
+`(A+1)⁻¹` of a matrix with nonnegative quadratic form is a contraction
+in the operator norm. -/
+theorem l2OpNorm_inv_add_one_le_one_of_quadForm_nonneg
+    (hpsd : ∀ x, 0 ≤ quadForm M x) :
+    ‖(M + 1)⁻¹‖ ≤ 1 := by
+  have hone : (1 : ℝ) • (1 : Matrix V V ℝ) = 1 := one_smul _ _
+  have hM : M + 1 = M + (1 : ℝ) • (1 : Matrix V V ℝ) := by rw [hone]
+  have h := l2OpNorm_inv_add_smul_one_le_inv_of_quadForm_nonneg hpsd one_pos
+  rw [inv_one] at h
+  rw [hM]
+  exact h
+
+end NormBound
+
+/-!
+## 6. The Lipschitz bound (Step 2, item 4)
+
+The resolvent map `A ↦ (A+1)⁻¹` is `1`-Lipschitz in the operator norm
+on the matrices with nonnegative quadratic form: factor the difference
+by the Step-1 resolvent identity, then bound each factor — the two
+resolvents by the norm bound (item 2) and the middle by the scoped
+`NormedRing` submultiplicativity. Load-bearing on Step 1 throughout:
+the determinant hypotheses are supplied by the Step-1 invertibility
+theorem, and the factoring *is* the Step-1 identity.
+-/
+
+/-- **Step 2, item 4 — the Lipschitz bound:** for any two matrices
+with nonnegative quadratic form,
+`‖(A + 1)⁻¹ - (B + 1)⁻¹‖ ≤ ‖A - B‖`. -/
+theorem l2OpNorm_resolvent_sub_le_of_quadForm_nonneg
+    {A B : Matrix V V ℝ}
+    (hA : ∀ x, 0 ≤ quadForm A x) (hB : ∀ x, 0 ≤ quadForm B x) :
+    ‖(A + 1)⁻¹ - (B + 1)⁻¹‖ ≤ ‖A - B‖ := by
+  have hA' := isUnit_det_add_one_of_quadForm_nonneg hA
+  have hB' := isUnit_det_add_one_of_quadForm_nonneg hB
+  have hnormA : ‖(A + 1)⁻¹‖ ≤ 1 :=
+    l2OpNorm_inv_add_one_le_one_of_quadForm_nonneg hA
+  have hnormB : ‖(B + 1)⁻¹‖ ≤ 1 :=
+    l2OpNorm_inv_add_one_le_one_of_quadForm_nonneg hB
+  have hBA : ‖B - A‖ = ‖A - B‖ := norm_sub_rev B A
+  have hBAle : ‖B - A‖ ≤ ‖A - B‖ := by rw [hBA]
+  calc ‖(A + 1)⁻¹ - (B + 1)⁻¹‖
+      = ‖(A + 1)⁻¹ * (B - A) * (B + 1)⁻¹‖ := by
+        rw [resolvent_identity_sub hA' hB']
+    _ = ‖(A + 1)⁻¹ * ((B - A) * (B + 1)⁻¹)‖ := by rw [Matrix.mul_assoc]
+    _ ≤ ‖(A + 1)⁻¹‖ * ‖(B - A) * (B + 1)⁻¹‖ := norm_mul_le _ _
+    _ ≤ ‖(A + 1)⁻¹‖ * (‖B - A‖ * ‖(B + 1)⁻¹‖) :=
+        mul_le_mul_of_nonneg_left (norm_mul_le _ _) (norm_nonneg _)
+    _ ≤ 1 * (‖A - B‖ * 1) := by
+        refine mul_le_mul hnormA ?_
+          (mul_nonneg (norm_nonneg _) (norm_nonneg _)) (by norm_num)
+        exact mul_le_mul hBAle hnormB (norm_nonneg _) (norm_nonneg _)
+    _ = ‖A - B‖ := by ring
 
 end Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent

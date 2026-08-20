@@ -2,9 +2,12 @@
 
 **Status:** In progress — Step 0 delivered 2026-08-19 (the C*-algebra
 thread is **structurally inapplicable**; the from-scratch bridge is
-proved instead, as this proposal's own contingency prescribed) and
-Step 1 delivered the same day (invertibility + the resolvent identity,
-zero new axioms). Priority **High**. Assistant's assessment of project
+proved instead, as this proposal's own contingency prescribed), Step 1
+delivered the same day (invertibility + the resolvent identity, zero
+new axioms), and Step 2 delivered the same day (the norm bound and the
+Lipschitz bound, zero new axioms, by the recorded energy-route
+deviation below). Only Step 3 (injectivity, one line) remains.
+Priority **High**. Assistant's assessment of project
 direction, requested 2026-08-19, promoted from `sgt-gaps.md` item 2.
 Authorizes no Lean changes, axiom admissions, or external publication
 beyond what its own steps deliver.
@@ -134,10 +137,71 @@ Item 5 — a one-line consequence of Step 1.
 
 ## Open next step
 
-Step 2 — the norm bound `‖(A+1)⁻¹‖ ≤ 1` and the Lipschitz bound
-`‖(A+1)⁻¹ − (B+1)⁻¹‖ ≤ ‖A − B‖`, through the delivered bridge plus the
-eigenvalue transfer for shifted/inverted symmetric matrices; then
-Step 3 (injectivity, a one-line consequence). Unblocked now.
+Step 3 — injectivity (item 5): `A ≠ B → (A+1)⁻¹ ≠ (B+1)⁻¹`, a one-line
+consequence of Step 1 (contrapose the resolvent identity: equal
+resolvents force `(A+1)⁻¹(B−A)(B+1)⁻¹ = 0` with both outer factors
+invertible, hence `B − A = 0`). Unblocked now.
+
+## Step 2 delivery record (2026-08-19)
+
+Delivered in `Analysis.OperatorTheory.Resolvent`, at the proposal's
+item shapes 2 and 4, **zero new axioms** (count stays 13; `#print
+axioms` on all three new public theorems reads only `propext,
+Classical.choice, Quot.sound`):
+
+- **Recorded route deviation** (the proposal sketched "the delivered
+  bridge plus the shifted/inverted eigenvalue transfer"): delivered via
+  the *energy route* instead. For `y = (M + t•1)⁻¹ *ᵥ x`, the
+  quadratic-form hypothesis gives `t ‖y‖² ≤ quadForm M y + t‖y‖² =
+  y ⬝ᵥ x ≤ ‖y‖‖x‖` (dot-product Cauchy–Schwarz, transported to
+  `EuclideanSpace` inner products through the bridge's own spine),
+  packaged by `ContinuousLinearMap.opNorm_le_bound` exactly as Step 0's
+  upper direction was. This yields the **strictly stronger
+  general-`t`** statement `‖(M + t•1)⁻¹‖ ≤ t⁻¹` with **no symmetry
+  hypothesis** (the same strengthening style as Step 1's invertibility
+  theorem — only the quadratic form at the resolvent's own argument is
+  ever evaluated). The sorted-eigenvalue transfer for inverted
+  matrices is thereby not needed by this step at all; it remains a
+  named residual for a consumer that genuinely needs eigenvalue pins
+  of transformed matrices (the mixing-time program's similarity
+  transfer is the named such consumer). A bonus strengthening
+  recorded in passing: the underlying energy inequality
+  `t • (y ⬝ᵥ y) ≤ y ⬝ᵥ x` holds for *any* `t` (strict positivity
+  enters only at the division step).
+- `l2OpNorm_inv_add_smul_one_le_inv_of_quadForm_nonneg` (general `t`,
+  above); `l2OpNorm_inv_add_one_le_one_of_quadForm_nonneg` (item 2,
+  the `t = 1` instance); and `l2OpNorm_resolvent_sub_le_of_quadForm_nonneg`
+  (item 4): the resolvent map is `1`-Lipschitz in the operator norm on
+  the quadForm-nonneg matrices — the Step-1 resolvent identity, the
+  scoped `NormedRing` submultiplicativity (`norm_mul_le`, resolving
+  under `Matrix.L2OpNorm` — the instance Step 0 verified), and the norm
+  bound on both factors. Load-bearing on Step 1 throughout: both
+  determinant hypotheses are supplied by
+  `isUnit_det_add_one_of_quadForm_nonneg`, and the factoring *is*
+  `resolvent_identity_sub`.
+
+**QA** (`OperatorTheory/Resolvent_QA.lean`, +57 declarations, 87 in
+file): the proposal's three QA items plus tightness. The norm bound is
+**attained, with route agreement**: `‖(L(K₂)+1)⁻¹‖ = 1` exactly, where
+the theorem's energy route and the eigenvalue-bridge route meet at the
+same value — the resolvent `(1/3)!![2,1;1,2]`'s spectrum `{1/3, 1}`
+pinned from trace/determinant/sortedness (independent of both routes),
+`‖·‖ = 1` by both bridge directions; likewise the general-`t` instance
+`‖(L + 2•1)⁻¹‖ = 1/2` exactly (spectrum `{1/4, 1/2}`, `(1/8)!![3,1;1,3]`
+pinned by an independent left-inverse witness). The Lipschitz bound
+instantiated at `A = L`, `B = 0` with **both sides independently
+pinned**: the difference `!![-1/3,1/3;1/3,-1/3]`'s spectrum
+`{-2/3, 0}` pinned, norm `2/3`; `‖L‖ = 2` (spectrum `{0, 2}`); the
+instantiated theorem therefore reads `2/3 ≤ 2` — a reversed or
+badly-factored statement would produce a falsehood. **Shift
+load-bearing (the proposal's QA item 3):** the invertible PSD
+`(1/4)I` *without* the shift has `‖A⁻¹‖ = 4 > 1` (inverse `4I` by an
+independent left-inverse witness, norm by the pinned spectrum `{4,4}`),
+so the unshifted bound is refuted numerically. **Hypothesis
+load-bearing (beyond the proposal's list):** the symmetric non-PSD
+`-(3/4)I` has `+1` shift equal to `(1/4)I` — invertible, inverse norm
+`4 > 1` — while `quadForm (-(3/4)I) ![1,0] = -3/4 < 0` exhibits the
+violated hypothesis; dropping the PSD assumption breaks the bound.
 
 ## Step 0 delivery record (2026-08-19)
 

@@ -6,6 +6,121 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Resolvent Calculus for PSD Matrices, Step 2 — the norm and Lipschitz
+bounds (run 1, 2026-08-19): DELIVERED.** The Active priority table's
+top High item (`proposals/resolvent-calculus-psd.md`), at the step its
+Step-1 delivery record and the proposal's Open-next-step section both
+named — pure hard crust, **zero new axioms** (count stays 13;
+`#print axioms` on all three new public theorems reads only `propext,
+Classical.choice, Quot.sound`). Step 3 (injectivity) was NOT started
+(the proposal's one-step-per-run rule).
+
+**Delivered** in `Analysis.OperatorTheory.Resolvent`, the proposal's
+items 2 and 4, by the **recorded route deviation** (the proposal
+sketched "the delivered bridge plus the shifted/inverted eigenvalue
+transfer"; the *energy route* is strictly stronger and cheaper): for
+`y = (M + t•1)⁻¹ *ᵥ x`, the quadratic-form hypothesis gives
+`t‖y‖² ≤ quadForm M y + t‖y‖² = y ⬝ᵥ x ≤ ‖y‖‖x‖` (dot-product
+Cauchy–Schwarz, transported to `EuclideanSpace` inner products through
+the bridge's own `opNorm_le_bound`/`cstar_norm_def` spine), packaged
+exactly as Step 0's upper direction was:
+
+- `l2OpNorm_inv_add_smul_one_le_inv_of_quadForm_nonneg` — the
+  **general-`t`** bound `‖(M + t•1)⁻¹‖ ≤ t⁻¹` with **no symmetry
+  hypothesis** (the same strengthening style as Step 1's invertibility
+  theorem; only the quadratic form at the resolvent's own argument is
+  evaluated). Bonus strengthening recorded: the underlying energy
+  inequality `t • (y ⬝ᵥ y) ≤ y ⬝ᵥ x` holds for *any* `t`
+  (positivity enters only at the division step).
+- `l2OpNorm_inv_add_one_le_one_of_quadForm_nonneg` — the `t = 1`
+  instance, the proposal's item 2 (`‖(A+1)⁻¹‖ ≤ 1`).
+- `l2OpNorm_resolvent_sub_le_of_quadForm_nonneg` — the proposal's item
+  4, the **Lipschitz bound** `‖(A+1)⁻¹ − (B+1)⁻¹‖ ≤ ‖A−B‖`: the
+  Step-1 resolvent identity, the scoped `NormedRing`
+  submultiplicativity (`norm_mul_le` — resolving under
+  `Matrix.L2OpNorm`, the instance Step 0 verified), and the norm bound
+  on both factors — **load-bearing on Step 1 throughout** (both
+  determinant hypotheses supplied by the Step-1 invertibility theorem;
+  the factoring *is* `resolvent_identity_sub`).
+
+The sorted-eigenvalue transfer for shifted/inverted matrices is
+thereby not needed by this step and remains a named residual for a
+consumer that genuinely needs eigenvalue pins of transformed matrices
+(the mixing-time program's similarity transfer is the named such
+consumer).
+
+**QA** `OperatorTheory/Resolvent_QA.lean` (+45 declarations by the
+scoreboard metric, 75 in file) — the proposal's three QA items plus
+tightness: the norm bound **attained with route agreement**
+(`‖(L(K₂)+1)⁻¹‖ = 1` exactly — the theorem's energy route and the
+eigenvalue-bridge route, on the pinned spectrum `{1/3, 1}` of
+`(1/3)!![2,1;1,2]`, independently meet at the value); the general-`t`
+instance `‖(L+2•1)⁻¹‖ = 1/2` exactly (spectrum `{1/4, 1/2}`, the
+`t = 2` resolvent `(1/8)!![3,1;1,3]` pinned by an independent
+left-inverse witness) — also attained; the Lipschitz instance at
+`A = L`, `B = 0` with **both sides independently pinned** (difference
+spectrum `{-2/3, 0}` → norm `2/3`; `‖L‖ = 2` from spectrum `{0, 2}`;
+the instantiated theorem reads `2/3 ≤ 2` — a reversed or badly-factored
+statement would produce a falsehood); the **shift-load-bearing
+witness** (the proposal's QA item 3): the invertible PSD `(1/4)I`
+*without* the shift has `‖A⁻¹‖ = 4 > 1` (inverse `4I` by an
+independent left-inverse witness, norm from the pinned spectrum
+`{4,4}`); and the **hypothesis-load-bearing witness**: the symmetric
+non-PSD `-(3/4)I` has `+1` shift equal to `(1/4)I` — invertible,
+inverse norm `4 > 1` — with the violated hypothesis exhibited at
+`![1,0]` (`quadForm = -3/4 < 0`).
+
+**Verification:** `lake env lean` on the changed public module and its
+QA module — zero errors, zero warnings; `#print axioms` on the three
+new public theorems and eight headline QA theorems ✔ (three standard
+axioms only); module oleans produced directly during iteration (the
+recorded fast-`lean -o` path); **all thirty-two QA modules
+batch-elaborated, zero errors** (the only diagnostics are the eight
+documented pre-existing section-variable warnings in untouched
+modules); full `lake build` ✔; `lint_axioms` (13), `check_citations`,
+`check_markdown_links` pass; scoreboard regeneration idempotent
+(**827/13/0**; `Resolvent_QA` 30 → 75 by the generator metric).
+Environment: the pruned-oleans state recurred again at run start; the
+recorded interpreted cache fetch restored the oleans (5685, ~4 min)
+before any elaboration. Implementation notes recorded for future QA
+work: the `Finset.prod_eq_multiset_prod` bridge (not `..._sum`) for
+product pins; `det_eq_prod_eigenvalues` carries a `ℝ→𝕜` coercion that
+only `simpa` normalizes away (the two-step `simpa` + `norm_num`
+converts to the `lo * hi` pin shape); `norm_num` does not close
+`|1/3| ≤ 1` — rewrite with `abs_of_nonneg (show (0:ℝ) ≤ 1/3 by
+norm_num)` explicitly, and a trailing `try norm_num` absorbs `rw`'s
+inconsistent auto-closing; `-2/3` parses as `(-2)/3`, so `abs_neg`
+does not match — convert with `show (-2/3:ℝ) = -(2/3) from by
+norm_num` first; `1/4 * 1/2` parses left-associatively as
+`(1/4 * 1)/2` — parenthesize; the two-point spectrum pin is
+generalized (`two_point_pin_of_sum_prod`, target roots `lo ≤ hi` with
+sum/prod matching) and reused five times.
+
+**Records updated:** module/QA docstrings, scoreboard (827/13/0, the
+QA-module and public-module verification rows extended, Step-2
+milestone bullet), radar (axis 2 evidence completed with the bounds,
+score **held at 3.5** — family completion, not a new capability; QA
+count 827/32 with the attainment/route-agreement and guard kinds; the
+QA axis **held at 4.0**; both holds logged in the re-scoring log;
+proved-depth hard-crust list extended), README (827; the proved list
+gains the resolvent norm/Lipschitz bounds), perturbation index map
+(3 new Resolvent rows; Deferred Work narrowed to Step-3 injectivity),
+proposal Step-2 delivery record + status header + open-next-step
+(Step 3), and `proposals/README.md` (the High row now points at Step
+3).
+
+**Next milestone (open):** Resolvent **Step 3** — injectivity
+(`A ≠ B → (A+1)⁻¹ ≠ (B+1)⁻¹`, a one-line consequence of the Step-1
+identity), which completes the program; or the two ungated High rows —
+**Tikhonov Regularization** (a corollary of the proved eigenbasis
+expansion) and **Spectral Band Projectors** (the difference of two
+`spectralProjector` calls). The Medium rows (Fiedler Phase B — needs
+an operator decision; mixing-time Step 1; Reversibility A and B;
+Relative Entropy; Perron–Frobenius + directed operators;
+discharge-perturbation — whose Weyl target now shares the bridge AND
+the delivered norm/Lipschitz pattern; approximate spectral projection)
+stay queued.
+
 **Resolvent Calculus for PSD Matrices, Steps 0 and 1 (run 1,
 2026-08-19): DELIVERED.** The Active priority table's top High item
 (`proposals/resolvent-calculus-psd.md`), opened at its mandatory Step

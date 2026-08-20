@@ -2862,3 +2862,29 @@ untouched; nothing committed.
 **Remaining risk:** low — the step is one-consequence algebra over already-QA'd Step-1 interfaces, with the hypothesis guard refuted-on-omission. Environment note recorded in the scoreboard's provenance note: two `lake build` invocations killed at tool timeouts left the Mathlib olean dir wiped mid-replay (re-fetch restored; the final uninterrupted build passed), and a macOS case-insensitivity trap was diagnosed — creating `.lake/build/lib/lean/` shadows the toolchain's core `Lean/` tree; this repo's olean layout is `.lake/build/lib/Scaffold/...` directly.
 
 **Next handoff:** the Active table's remaining High rows — Tikhonov Regularization (`tikhonov-shrinkage-filter.md`, no gate) and Spectral Band Projectors (`spectral-band-projectors.md`, no gate); the Medium rows stay queued behind them.
+
+## 2026-08-20T03:39:00Z — Discharge the Weyl axiom: Step 0 spike, then retirement if positive
+
+**Run:** `20260820T033600Z-run-1`  
+**Session:** `ses_fe2c2a966ffe71pmKdtv7309zW`  
+**Status:** in-progress  
+**Milestone:** `proposals/discharge-perturbation-axioms.md` per explicit operator direction — `weyl_inequality` only. Step 0: spike the additive Weyl bound from `evals_min_max` and confirm composition with the proved `l2OpNorm_eq_max_abs_evals`; Step 1 only if positive: retire the axiom at its exact existing statement. `davis_kahan_sin_theta` and `cheeger_lower_bound` untouched. Zero new axioms; expected count 13 → 12.
+
+**Changes:** intent recorded in the execution plan; environment verified healthy at run start (5387 Mathlib oleans present; no cache fetch needed); Lean spike starting in a scratch file against the delivered Courant–Fischer engine.
+
+## 2026-08-20T04:12:00Z — Weyl axiom discharged: proved at its unchanged statement
+
+**Run:** `20260820T033600Z-run-1`  
+**Session:** `ses_fe2c2a966ffe71pmKdtv7309zW`  
+**Status:** completed  
+**Milestone:** `proposals/discharge-perturbation-axioms.md`, Weyl target only (explicit operator direction). Step 0's additive-bound spike returned a decisive positive; Step 1 retired `weyl_inequality` from admitted axiom to proved theorem at the unchanged name, hypotheses, and conclusion. Explicit axioms **13 → 12**. `davis_kahan_sin_theta` and `cheeger_lower_bound` untouched.
+
+**Changes:** `GraphTheory.Spectral` gained the bottom-Rayleigh-domination mirror `evals_first_mul_dotProduct_le_quadForm` (`λ_min • (x ⬝ᵥ x) ≤ xᵀMx`, the missing lower half of the Rayleigh sandwich). `Perturbation.Weyl` now contains no axiom: the public additive bounds `weyl_additive_upper`/`weyl_additive_lower` (`λᵢ(A) + λ₁(E) ≤ λᵢ(A+E) ≤ λᵢ(A) + λₙ(E)`, proved from the Courant–Fischer engine's two witness forms — upper: the witness subspace for `A` exhibited as a member of the competitor set defining `λᵢ(A+E)` through `evals_min_max`; lower: the competitor direction for `A` run inside the witness subspace for `A+E`), composed into the retired `theorem weyl_inequality` through the proved `l2OpNorm_eq_max_abs_evals` bridge. `spectral_gap_stability` unchanged and now fully hard crust. QA `Weyl_QA.lean` 4 → 18 declarations: nonzero fixture `A = E = !![2,1;1,2]` with both spectra pinned independently (trace/det/sortedness) and `‖E‖ = 3` via the bridge — bound attained exactly at the top index (`|6−3| = 3`), strict at the bottom (`1 < 3`, the proposal's required non-vacuity witness), additive bounds instantiated at both indices, and the window-endpoint guard (`λ₁(E)` for `λₙ(E)` refuted: `6 ≤ 4` false).
+
+**Decisive commands and outcomes:** `lake env lean` on both changed public modules and the QA module — zero errors, zero warnings (oleans produced directly); `#print axioms`: `weyl_inequality`, both additive bounds, `spectral_gap_stability`, and all nine QA theorems read only `propext, Classical.choice, Quot.sound`; derived consumers verified — `davisKahanTwoPoint` now depends on `davis_kahan_sin_theta` only, `eventStreamProjectorDrift` on two axioms instead of three; all thirty-two QA modules batch-elaborated, zero errors; **full `lake build` ✔ twice** (2184 targets; once after the Lean edits, once after the `ProjectorDrift` docstring updates); `lint_axioms` (**12**), `check_citations`, `check_markdown_links` pass; scoreboard regeneration idempotent (**860/12/0**).
+
+**Verification:** the Step-0 spike ran first in a scratch file (`wip/weyl_spike.lean`, ignored) and confirmed the proposal's caution — the additive bound is *not* free from the norm bridge (it consumes both witness directions plus both domination bounds, the bottom one newly added) — before any module edit; the cost estimate (~120 lines) was recorded in the proposal, and the spike transferred verbatim. The retirement is at the exact axiom statement, verified by the unchanged downstream code re-linking against the theorem.
+
+**Remaining risk:** low — the proof is the same Courant–Fischer engine shape as the delivered interlacing retirement, with QA pinning both perturbed spectra and the norm independently of the theorem; the derived layer's remaining conditionality (Davis–Kahan, Matrix Azuma) is unchanged and honestly labeled. Davis–Kahan and Cheeger-hard remain unsurveyed — this run's positive outcome does not transfer to them (the proposal's own ranking).
+
+**Next handoff:** the Active table's two ungated High rows (Tikhonov Regularization; Spectral Band Projectors), or the Davis–Kahan Step 0 survey on this proposal's track.

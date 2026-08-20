@@ -6,6 +6,92 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Discharge the Weyl perturbation axiom (run 1, 2026-08-20; operator
+direction: `proposals/discharge-perturbation-axioms.md`, `weyl_inequality`
+only): DELIVERED.** Step 0's additive-bound spike returned a decisive
+**positive** (recorded in the proposal before any module edit): the
+additive window is *not* a free corollary of the norm bridge — it needs
+both Courant–Fischer witness directions plus **both** Rayleigh
+domination bounds, the bottom half (`evals_first_mul_dotProduct_le_quadForm`)
+newly added to `GraphTheory.Spectral` as the mirror of the EML step's
+`quadForm_le_evals_last` — but alongside them it is cheap (~120 lines).
+Step 1 then executed per the direction: **`weyl_inequality` retired from
+admitted axiom to proved theorem at the unchanged name, hypotheses, and
+conclusion** (explicit axioms **13 → 12**; `#print axioms` reads only
+`propext, Classical.choice, Quot.sound`). `davis_kahan_sin_theta` and
+`cheeger_lower_bound` untouched, per the direction and the proposal's
+own tractability ranking.
+
+**Delivered in `Analysis.OperatorTheory.Perturbation.Weyl`:**
+
+- `weyl_additive_upper` — `λᵢ(A+E) ≤ λᵢ(A) + λₙ(E)` (the witness
+  subspace for `A` exhibited as a member of the competitor set defining
+  `λᵢ(A+E)` through `evals_min_max`; `R_{A+E} = R_A + R_E` split by the
+  local `quadForm_add'` copy, `R_E ≤ λₙ(E)` by `quadForm_le_evals_last`).
+- `weyl_additive_lower` — `λᵢ(A) + λ₁(E) ≤ λᵢ(A+E)` (the competitor
+  direction for `A` inside the `(i+1)`-dimensional witness subspace for
+  `A+E`; the competitor vector's `R_A = R_{A+E} − R_E ≤ λᵢ(A+E) −
+  λ₁(E)` by the new bottom domination).
+- `theorem weyl_inequality` — the composed retirement (window →
+  `l2OpNorm_eq_max_abs_evals` bridge; bridge's `1 ≤ card V` covered by
+  vacuity at `card V = 0`).
+- `spectral_gap_stability` — unchanged code, now fully hard crust.
+
+**Downstream effect (verified by `#print axioms`):**
+`davisKahanTwoPoint` conditional on `davis_kahan_sin_theta` alone;
+`eventStreamProjectorDrift` on `davis_kahan_sin_theta` +
+`matrix_azuma_hoeffding` — both shed the `weyl_inequality` dependency
+without code changes.
+
+**QA** `Perturbation/Weyl_QA.lean` (+14 by the generator metric, 18 in
+file): the nonzero fixture `A = E = !![2,1;1,2]` with both spectra
+pinned independently (trace/determinant/sortedness: `[1,3]`, `[2,6]`)
+and `‖E‖ = 3` through the proved bridge — the bound instantiated at
+both indices, **attained exactly** at the top (`|6−3| = 3 = ‖E‖`),
+**strict** at the bottom (`1 < 3` — the proposal's required
+non-vacuity witness), both additive bounds instantiated at both indices
+with endpoint attainment, and the **window-endpoint guard**: the upper
+additive bound with `λ₁(E)` in place of `λₙ(E)` refuted (`6 ≤ 4` is
+false), so the window's endpoints are load-bearing and not
+interchangeable. All nine QA theorems: three standard axioms only.
+
+**Verification:** `lake env lean` on both changed public modules
+(`GraphTheory.Spectral` + `Perturbation.Weyl`) and the QA module —
+zero errors, zero warnings; oleans produced directly during iteration;
+`#print axioms` on the four public theorems, nine QA theorems, and both
+derived consumers ✔; **all thirty-two QA modules batch-elaborated, zero
+errors**; **full `lake build` ✔ (2184 targets, "Build completed
+successfully")**; `lint_axioms` (**12**), `check_citations`,
+`check_markdown_links` pass; scoreboard regeneration idempotent
+(**860/12/0**; `Weyl_QA` 4 → 18 by the generator metric). Environment
+healthy at run start (5387 Mathlib oleans present; no cache fetch
+needed).
+
+**Records updated:** module/QA/derived docstrings (`ProjectorDrift`'s
+dependency-status notes), scoreboard (860/12/0, verification rows
+extended, Weyl-retirement interpretation bullet, derived-layer
+provenance), radar (axes 2/7, proved-depth, downstream-reuse evidence
+extended with scores **held** per protocol — assurance tracked through
+the shrinking axiom count instead; QA count 860/32 with the holds
+logged), README (860/12; Weyl moved to the proved list),
+Mathlib coverage map (perturbation row: Weyl proved locally),
+perturbation index map (Weyl section all-proved, 3 new rows),
+probability index map (derived-chain dependency note), Weyl source
+index (retirement annotation), proposal (Step-0 record + Step-1
+delivery + status header + open-next-step), and
+`proposals/README.md` (the Medium row's note rewritten).
+
+**Next milestone (open):** back to the Active table's two ungated High
+rows — **Tikhonov Regularization** (`tikhonov-shrinkage-filter.md`, a
+corollary of the proved eigenbasis expansion) and **Spectral Band
+Projectors** (`spectral-band-projectors.md`, the difference of two
+`spectralProjector` calls) — or, on this proposal's track, the
+**Davis–Kahan Step 0 survey** (its tractability is still genuinely
+unknown even with the now-richer shelf). The other Medium rows (Fiedler
+Phase B — needs an operator decision; mixing-time Step 1; Reversibility
+A and B; Relative Entropy; Perron–Frobenius + directed operators;
+approximate spectral projection) stay queued.
+
 **Resolvent Calculus for PSD Matrices, Step 3 — injectivity (run 1,
 2026-08-20): DELIVERED; the program is COMPLETE.** The Active
 priority table's top High item (`proposals/resolvent-calculus-psd.md`)

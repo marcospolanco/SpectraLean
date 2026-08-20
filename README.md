@@ -23,20 +23,20 @@ As of August 20, 2026:
 | Check | Result |
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
-| Explicit cited axioms | 13 |
-| QA theorems/lemmas | 846, with no `sorry` or `admit` under `Scaffold/` |
+| Explicit cited axioms | 12 |
+| QA theorems/lemmas | 860, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is the Cheeger *hard* direction at the SGT center;
-Weyl and Davis–Kahan in the perturbation bridge; the scalar and matrix
+Davis–Kahan in the perturbation bridge; the scalar and matrix
 concentration family (Hoeffding, Bernstein, subgaussian, Azuma); and the
 deprecated per-step `spectral_persistence` compatibility axiom. Classical
 Laplacian facts, Courant–Fischer, Cauchy interlacing, the Cheeger *upper*
-bound, Woodbury/Sherman–Morrison, the electrical crust, Foster's
-theorem, the Expander Mixing Lemma, the certificate-soundness layer
-(`lambda2_le_of_certificate`), and the operator-norm/resolvent bridge
-(`l2OpNorm_eq_max_abs_evals`, the resolvent identity, the resolvent
-norm/Lipschitz bounds, and the resolvent-map injectivity) are proved,
-not admitted.
+bound, **Weyl's perturbation inequality**, Woodbury/Sherman–Morrison, the
+electrical crust, Foster's theorem, the Expander Mixing Lemma, the
+certificate-soundness layer (`lambda2_le_of_certificate`), and the
+operator-norm/resolvent bridge (`l2OpNorm_eq_max_abs_evals`, the resolvent
+identity, the resolvent norm/Lipschitz bounds, and the resolvent-map
+injectivity) are proved, not admitted.
 
 The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for
 current counts, verification commands, and limitations.
@@ -162,7 +162,7 @@ Outward work must improve one of those interfaces or make a concrete, broadly
 reusable connection. The existing persistence modules
 (`GraphTheory.Dynamics`, `Derived.EventStream`, `Derived.ProjectorDrift`) do
 not set this agenda; they are a retained example whose tail and projector-drift
-theorems remain conditional on Matrix Azuma, Weyl, and Davis–Kahan.
+theorems remain conditional on Matrix Azuma and Davis–Kahan.
 
 See [Spectral Theory](docs/3_SPECTRAL_THEORY.md) for the status of that
 example, and the [SGT Radar](docs/7_SGT_RADAR.md) for coverage scores.

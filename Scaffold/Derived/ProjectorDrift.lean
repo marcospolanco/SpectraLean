@@ -27,10 +27,11 @@ response of the invariant spectral subspace to that displacement is
 controlled by Weyl plus Davis–Kahan.
 
 Everything here is either proved (`initialProjector_congr`,
-`evals_sorted`, telescoping, measure monotonicity) or an explicit
-combination of the admitted axioms `weyl_inequality`,
-`davis_kahan_sin_theta`, and `matrix_azuma_hoeffding`. No new axioms are
-introduced, and the conclusions are conditional on the axioms they
+`evals_sorted`, telescoping, measure monotonicity — and, since the
+2026-08-20 retirement, `weyl_inequality`) or an explicit combination of
+the admitted axioms `davis_kahan_sin_theta` and
+`matrix_azuma_hoeffding`. No new axioms are introduced, and the
+conclusions are conditional on the axioms they
 consume; they are not foundationally proved results.
 
 The composition is *two-endpoint* rather than per-step: Davis–Kahan is a
@@ -61,7 +62,9 @@ spectral-gap hypothesis: if `B` has spectral gap at least
 
 Dependency status: derived from the admitted `davis_kahan_sin_theta`
 (Davis–Kahan sin Θ, single-pair cluster separation) and `weyl_inequality`
-(Weyl, at the gap index only). Conditional on those two axioms.
+(Weyl, at the gap index only — itself a proved theorem since the
+2026-08-20 retirement, no longer an axiom dependency). Conditional on
+that one axiom.
 
 The gap hypothesis is honest: by Weyl at index `k + 1`, the bottom of the
 upper cluster of `C = B + E` stays above the bottom of the upper cluster
@@ -98,9 +101,9 @@ where `d = card V`.
 
 Dependency status: derived theorem. It combines `eventStreamTail` (itself
 derived from `matrix_azuma_hoeffding`) with `davisKahanTwoPoint` (derived
-from `davis_kahan_sin_theta` and `weyl_inequality`). The conclusion is
-conditional on those three axioms and is not a foundationally proved
-result.
+from `davis_kahan_sin_theta` and the proved `weyl_inequality`, retired
+from axiom on 2026-08-20). The conclusion is conditional on the two
+remaining axioms and is not a foundationally proved result.
 
 The shape answers the cumulative-vs-per-step interface question: the
 bound is a *two-endpoint* statement with the probabilistic input entering

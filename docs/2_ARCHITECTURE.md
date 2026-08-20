@@ -43,7 +43,8 @@ endpoint rotation of the invariant spectral subspace,
 `μ{‖P_{L_m} − P_{L_0}‖ ≥ s/(γ−s)} ≤ 2 d exp(−s²/(8 m R²))`.
 
 Both are proved from admitted axioms (`matrix_azuma_hoeffding`,
-`davis_kahan_sin_theta`, `weyl_inequality`) plus proved steps and are
+`davis_kahan_sin_theta`) plus proved steps — including, since the
+2026-08-20 Weyl retirement, the *proved* `weyl_inequality` — and are
 conditional on those axioms; they must not be described as foundationally
 proved. Novel work may also live in a downstream repository. Derived
 claims must distinguish proved Lean theorems from axiom-backed results. The
@@ -185,8 +186,10 @@ Community process is defined by `governance/CONTRIBUTING.md`, `MAINTAINERS.md`, 
   audit corrected an inaccurate provenance note in the Chung index and
   confirmed no in-repository page numbers were ever recorded. Locator
   numbers are to be confirmed against physical or publisher copies, not
-  invented. `spectral_gap_stability` is proved from `weyl_inequality`
-  rather than admitted; `davis_kahan_sin_theta` states its separation
+  invented. `weyl_inequality` is proved (retired from axiom on 2026-08-20
+  — the additive window from the Courant–Fischer engine composed with the
+  `l2OpNorm_eq_max_abs_evals` bridge), so `spectral_gap_stability` is
+  fully hard crust; `davis_kahan_sin_theta` states its separation
   hypothesis in the single-pair two-cluster form of the cited
   Yu–Wang–Samworth Theorem 2.
 - There is no executable target; the former `scaffold` executable referenced a missing `Main.lean` and was removed from the default build until a real driver exists.

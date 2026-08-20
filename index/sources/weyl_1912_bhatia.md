@@ -23,8 +23,8 @@ corollary.
 
 | Theorem | Lean Axiom | Module |
 |---------|------------|--------|
-| Theorem III.2.1 (Weyl's inequality) | `weyl_inequality` | `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl` |
-| Corollary of Theorem III.2.1 | `spectral_gap_stability` | `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl` |
+| Theorem III.2.1 (Weyl's inequality) | `weyl_inequality` — **retired from axiom to proved theorem 2026-08-20** (`proposals/discharge-perturbation-axioms.md`: the additive window from the Courant–Fischer engine + the proved `l2OpNorm_eq_max_abs_evals` bridge; the entry is kept for provenance) | `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl` |
+| Corollary of Theorem III.2.1 | `spectral_gap_stability` (proved; fully hard crust since the Weyl retirement) | `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl` |
 
 ## Notes
 

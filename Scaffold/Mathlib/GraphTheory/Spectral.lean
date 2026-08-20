@@ -1192,6 +1192,32 @@ theorem quadForm_le_evals_last {M : Matrix V V ℝ} (hM : M.IsSymm)
   exact Finset.sum_le_sum fun i _ =>
     mul_le_mul_of_nonneg_right (eigvalOf_le_evals_last hM hcard i) (sq_nonneg _)
 
+/-- **Bottom-eigenvalue Rayleigh domination, multiplication form.** For any
+symmetric matrix, `λ_min * (x ⬝ᵥ x) ≤ xᵀ M x` where `λ_min` is the first
+entry of the sorted spectrum — the mirror of `quadForm_le_evals_last`:
+the quadratic form is the eigenvalue-weighted sum of squared eigencomponents
+(`quadForm_eigvalOf`), Parseval identifies the weight sum with `x ⬝ᵥ x`
+(`dotProduct_eigvecOf`), and every eigenvalue dominates the first sorted
+entry (`evals_first_le_eigvalOf`). Stated unconditionally in `x` (both
+sides vanish at `x = 0`) and without any positivity hypothesis — this is
+the lower half of the Rayleigh sandwich that perturbation arguments
+consume (the additive Weyl bound in
+`Analysis.OperatorTheory.Perturbation.Weyl` is its first consumer). -/
+theorem evals_first_mul_dotProduct_le_quadForm {M : Matrix V V ℝ} (hM : M.IsSymm)
+    (hcard : 1 ≤ Fintype.card V) (x : V → ℝ) :
+    evals hM ⟨0, by omega⟩ * Matrix.dotProduct x x ≤ quadForm M x := by
+  have hq : quadForm M x
+      = ∑ i, eigvalOf M hM i
+        * (Matrix.dotProduct (eigvecOf M hM i) x) ^ 2 :=
+    quadForm_eigvalOf hM x
+  have hD : Matrix.dotProduct x x
+      = ∑ i, (Matrix.dotProduct (eigvecOf M hM i) x) ^ 2 := by
+    rw [dotProduct_eigvecOf hM x x]
+    exact Finset.sum_congr rfl fun i _ => (pow_two _).symm
+  rw [hq, hD, Finset.mul_sum]
+  exact Finset.sum_le_sum fun i _ =>
+    mul_le_mul_of_nonneg_right (evals_first_le_eigvalOf hM hcard i) (sq_nonneg _)
+
 /-- Generic form: for any symmetric matrix whose kernel contains
 `onesVec` (`M *ᵥ onesVec = 0`), eigenvectors at nonzero eigenvalues are
 orthogonal to `onesVec`. Proof: Parseval on the pair `(v i, M *ᵥ

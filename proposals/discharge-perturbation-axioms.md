@@ -1,10 +1,15 @@
 # Proposal: Discharge Davis–Kahan / Weyl / Cheeger Hard Direction
 
-**Status:** Proposed; priority **Medium**, contingent on Step 0's survey
-landing before Step 1 begins — the same contingency pattern
+**Status:** In progress — the Weyl target is **delivered** (Step 0
+surveyed positive and Step 1 executed 2026-08-20; see the delivery
+record below). Davis–Kahan and the Cheeger hard direction remain
+unsurveyed — their Step 0s are the open next steps, and Step 1 on
+either is unauthorized until its own survey lands. Priority **Medium**,
+contingent on each target's Step 0 survey landing before its Step 1
+begins — the same contingency pattern
 `decidable-spectral-certificates.md` used. Assistant's assessment of
-project direction, requested 2026-08-19, promoted from `sgt-gaps.md` item
-3. Authorizes no Lean changes, axiom admissions, or external publication.
+project direction, requested 2026-08-19, promoted from `sgt-gaps.md`
+item 3. Authorizes no axiom admissions or external publication.
 
 Companion to `docs/2_ARCHITECTURE.md` §9 (upstream-replacement lifecycle)
 and this session's precedent of axiom retirements (Courant–Fischer,
@@ -97,24 +102,64 @@ Weyl-side optimism to transfer here.
 
 ### Step 0: Tractability survey (mandatory; the whole gate)
 
-Per axiom, in this order:
+**Weyl — surveyed 2026-08-20, decisive positive.** The additive bound
+was spiked exactly as this section directs, before any Step 1 edit, and
+the proposal's caution was vindicated in both directions:
 
-1. **Weyl.** The norm bridge is delivered — reuse
-   `l2OpNorm_eq_max_abs_evals` from `Analysis.OperatorTheory.Resolvent`
-   directly; do not re-spike the C*-algebra route (confirmed dead above).
-   What remains: spike the *additive* Weyl bound from `evals_min_max`
-   (do not assume the norm bridge makes the additive bound free too —
-   check it on its own), then compose the two. Record a real cost
-   estimate for the full statement once the additive spike is done.
+- The additive bound is **not** a free corollary of the norm bridge. It
+  consumes *both* Courant–Fischer witness directions
+  (`exists_submodule_forall_rayleigh_le` for the upper bound — the
+  witness subspace for `A` is exhibited as a member of the competitor
+  set defining `λᵢ(A+E)` through `evals_min_max`;
+  `exists_ne_mem_rayleigh_ge_of_finrank_eq` for the lower — the
+  competitor direction for `A` run inside the witness subspace for
+  `A+E`), plus *both* Rayleigh domination bounds: the top half from the
+  EML step's `quadForm_le_evals_last` and the bottom half from the new
+  mirror `evals_first_mul_dotProduct_le_quadForm` (added to
+  `GraphTheory.Spectral` with this delivery — it did not exist).
+- Composition with `l2OpNorm_eq_max_abs_evals` is then exactly as
+  predicted: `‖E‖ = max |λ₁(E)| |λₙ(E)|` turns the additive window into
+  the spectral-norm statement in two `linarith` steps, with the bridge's
+  `1 ≤ card V` hypothesis covered by vacuity (`Fin 0` has no index).
+- **Cost estimate for the full statement (the recording this section
+  requires):** ~120 lines of Lean — three private translation lemmas
+  (Rayleigh↔multiplication form both directions; a local
+  `quadForm_add'` copy, since the generic one lives in the outer
+  `GraphTheory.Expander` module this perturbation module must not
+  import), two public additive-bound theorems, and the composed
+  retirement theorem. Verified end-to-end in a scratch spike before any
+  module was edited; the spike then transferred to
+  `Perturbation/Weyl.lean` essentially verbatim.
+
+**Davis–Kahan — unsurveyed.** The plan below stands unchanged.
+
+**Cheeger hard direction — unsurveyed.** The plan below stands
+unchanged.
+
+Per-axiom order as originally written:
+
+1. **Weyl.** ~~The norm bridge is delivered — reuse
+    `l2OpNorm_eq_max_abs_evals` from `Analysis.OperatorTheory.Resolvent`
+    directly; do not re-spike the C*-algebra route (confirmed dead above).
+    What remains: spike the *additive* Weyl bound from `evals_min_max`
+    (do not assume the norm bridge makes the additive bound free too —
+    check it on its own), then compose the two. Record a real cost
+    estimate for the full statement once the additive spike is done.~~
+    **Done — see above and the delivery record below.**
 2. **Davis–Kahan.** Survey what the sin-Θ bound's standard proof actually
-   needs (typically: the norm bridge above, plus a resolvent-based or
-   variational argument relating the perturbed and unperturbed
-   eigenspaces) against what's on the shelf. Record findings even if
-   negative.
+    needs (typically: the norm bridge above, plus a resolvent-based or
+    variational argument relating the perturbed and unperturbed
+    eigenspaces) against what's on the shelf. Record findings even if
+    negative. Note added 2026-08-20: the shelf gained since the original
+    writing — the resolvent identity, the norm/Lipschitz resolvent
+    bounds, and the resolvent-map injectivity are all proved in
+    `Analysis.OperatorTheory.Resolvent`, and Weyl itself is now proved —
+    but no survey of what a sin-Θ proof needs has been run, so "large"
+    stands.
 3. **Cheeger hard direction.** Survey the standard sweep-cut argument's
-   Lean cost specifically — this is the one where "known-hard" should be
-   treated as the working assumption unless the survey finds otherwise,
-   not spiked with the same optimism as Weyl.
+    Lean cost specifically — this is the one where "known-hard" should be
+    treated as the working assumption unless the survey finds otherwise,
+    not spiked with the same optimism as Weyl.
 
 Record all three findings in this document before any Step 1 begins on
 any of the three axioms — they may be pursued independently once
@@ -128,6 +173,34 @@ theorem more narrowly to make it easier; a narrower proved theorem is not
 a valid discharge of the existing axiom (the `sherman_morrison`/
 `woodbury_identity` retirements are the precedent for "same shape,
 now proved").
+
+**Weyl Step 1 — DELIVERED 2026-08-20.** `weyl_inequality` retired from
+admitted axiom to proved theorem in `Perturbation/Weyl.lean` at the
+unchanged name, hypotheses, and conclusion (explicit axioms 13 → 12),
+exactly along the surveyed route:
+
+- the two public additive bounds `weyl_additive_upper` /
+  `weyl_additive_lower` (`λᵢ(A) + λ₁(E) ≤ λᵢ(A+E) ≤ λᵢ(A) + λₙ(E)`,
+  symmetry-only, every sorted index) — reusable hard-crust interfaces in
+  their own right;
+- the composed retirement `theorem weyl_inequality` (additive window →
+  norm bridge), `#print axioms` reading only `propext,
+  Classical.choice, Quot.sound`;
+- `spectral_gap_stability` is unchanged code and now fully hard crust;
+- the derived consumers shed the axiom dependency without recompilation
+  changes: `davisKahanTwoPoint` is conditional on
+  `davis_kahan_sin_theta` alone, `eventStreamProjectorDrift` on two
+  axioms instead of three (both verified by `#print axioms`);
+- QA per this proposal's plan: the existing `Weyl_QA` fixtures kept
+  (zero-perturbation instances), plus the required non-vacuity witness
+  and more — the nonzero fixture `A = E = !![2,1;1,2]` with both spectra
+  pinned independently (trace/determinant/sortedness) and `‖E‖ = 3`
+  through the proved bridge: the bound **attained exactly** at the top
+  index (`|6−3| = 3 = ‖E‖`), **strict** at the bottom (`1 < 3`), both
+  additive bounds instantiated at both indices, and the
+  **window-endpoint guard** — the upper additive bound with `λ₁(E)` in
+  place of `λₙ(E)` refuted (`6 ≤ 4` is false), so the window's
+  endpoints are load-bearing and not interchangeable.
 
 ## QA plan
 
@@ -154,5 +227,8 @@ equality trivially).
 
 ## Open next step
 
-Step 0's Weyl spike — unblocked now, the cheapest of the three surveys to
-run given the concrete lead already found.
+The Davis–Kahan Step 0 survey (what a sin-Θ proof needs vs. the now
+richer shelf — the proved resolvent identity/norm/Lipschitz/injectivity
+family and the proved Weyl); the Cheeger hard-direction survey after
+that, still under its known-hard working assumption. Weyl is delivered
+and closed (2026-08-20).

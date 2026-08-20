@@ -14,10 +14,17 @@ spectral stability.
 
 **Module**: `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl`
 
+All proved, zero axioms (`weyl_inequality` retired from admitted axiom to
+proved theorem on 2026-08-20 — `proposals/discharge-perturbation-axioms.md`,
+the additive window from the Courant–Fischer engine composed with the proved
+`l2OpNorm_eq_max_abs_evals` bridge).
+
 | Declaration | Kind | Description | Source |
 |-------------|------|-------------|--------|
-| `weyl_inequality` | axiom | Each sorted eigenvalue moves by at most `‖E‖` under a symmetric perturbation | [Weyl 1912 / Bhatia 1997](../sources/weyl_1912_bhatia.md) |
-| `spectral_gap_stability` | proved (from `weyl_inequality`) | A gap shrinks by at most `2‖E‖` | corollary; see [Weyl 1912 / Bhatia 1997](../sources/weyl_1912_bhatia.md) |
+| `weyl_inequality` | proved (retired from axiom 2026-08-20) | Each sorted eigenvalue moves by at most `‖E‖` under a symmetric perturbation | [Weyl 1912 / Bhatia 1997](../sources/weyl_1912_bhatia.md) |
+| `weyl_additive_upper` | proved | `λᵢ(A+E) ≤ λᵢ(A) + λₙ(E)` — the top half of the additive Weyl window, from the Courant–Fischer engine's two witness forms | [Horn & Johnson, Matrix Analysis, Thm 4.3.1](../sources/weyl_1912_bhatia.md); [Weyl 1912 / Bhatia 1997](../sources/weyl_1912_bhatia.md) |
+| `weyl_additive_lower` | proved | `λᵢ(A) + λ₁(E) ≤ λᵢ(A+E)` — the bottom half of the additive window (mirror route; consumes `evals_first_mul_dotProduct_le_quadForm`, the bottom Rayleigh domination added to `GraphTheory.Spectral` with this retirement) | same |
+| `spectral_gap_stability` | proved (fully hard crust since the Weyl retirement) | A gap shrinks by at most `2‖E‖` | corollary; see [Weyl 1912 / Bhatia 1997](../sources/weyl_1912_bhatia.md) |
 
 ### Davis–Kahan
 
@@ -71,7 +78,8 @@ completing the resolvent program).
 
 ## Applications
 
-- `weyl_inequality` / `spectral_gap_stability` control how far event
+- `weyl_inequality` / `spectral_gap_stability` (both proved since the
+  2026-08-20 retirement) control how far event
   streams can move Laplacian spectra ([Spectral Graph Theory map](spectral_graph.md)).
 - `davis_kahan_sin_theta` is the engine of the derived projector-drift
   chain (`Derived.davisKahanTwoPoint`, `Derived.eventStreamProjectorDrift`)

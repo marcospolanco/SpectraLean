@@ -58,3 +58,6 @@ Desktop.ini
 *.bak
 *.orig
 *.sw?
+
+# Work in progress
+wip/

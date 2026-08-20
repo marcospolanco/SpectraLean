@@ -2836,3 +2836,29 @@ untouched; nothing committed.
 **Remaining risk:** the QA fixtures are 2×2 (the bounds are not exercised on a larger PSD family — though attainment and both guards are witnessed); the norm bound's `t⁻¹` form assumes exact arithmetic (no rounding model — out of scope); the Weyl-discharge target still needs its own additive-bound spike (the bridge and the now-proved submultiplicativity pattern are available to it).
 
 **Next handoff:** Resolvent Step 3 — injectivity (`A ≠ B → (A+1)⁻¹ ≠ (B+1)⁻¹`, one line from the Step-1 identity), completing the program; or the ungated High rows (Tikhonov Regularization, Spectral Band Projectors). Medium rows queued behind them.
+
+## 2026-08-20T01:02:00Z — Resolvent Step 3: injectivity (program completion)
+
+**Run:** `20260820T010200Z-run-1`  
+**Session:** `ses_fe35034fbffezAyn8Uof2QyQBn`  
+**Status:** in-progress  
+**Milestone:** Resolvent Calculus for PSD Matrices Step 3 — the proposal's item 5, `A ≠ B → (A+1)⁻¹ ≠ (B+1)⁻¹`, the recorded open next step of the Active table's top High item and the program's final step. Zero new axioms; load-bearing on Step 1's resolvent identity and invertibility theorem.
+
+**Changes:** intent recorded in the execution plan; environment restored (pruned-oleans state recurred at run start — the recorded interpreted cache fetch re-applied, 5685 Mathlib oleans unpacked); Lean work starting in `Analysis/OperatorTheory/Resolvent.lean` and `QA/OperatorTheory/Resolvent_QA.lean`.
+
+## 2026-08-20T03:08:46Z — Resolvent Step 3 delivered; program complete
+
+**Run:** `20260820T010200Z-run-1`  
+**Session:** `ses_fe35034fbffezAyn8Uof2QyQBn`  
+**Status:** completed  
+**Milestone:** Resolvent Calculus for PSD Matrices Step 3 — injectivity (`A ≠ B → (A+1)⁻¹ ≠ (B+1)⁻¹`), the recorded open next step of the Active table's top High item and the program's final step; zero new axioms, load-bearing on Step 1's resolvent identity and invertibility theorem.
+
+**Changes:** `Analysis.OperatorTheory.Resolvent` gained the Step-3 section: `eq_of_inv_add_one_eq_inv_add_one` (the core form — equal resolvents of `+1`-invertible matrices force equal matrices, by the proposal's recorded route: the Step-1 identity collapses to `0`, and multiplying through by `A + 1` / `B + 1` cancels both invertible outer factors), `resolvent_map_injective_of_quadForm_nonneg` (the item-5 shape on quadForm-nonneg matrices), and `inv_add_one_eq_inv_add_one_iff_of_quadForm_nonneg` (the certificate iff). QA `OperatorTheory/Resolvent_QA.lean` +19 (94 in file): two distinct PSD pairs instantiated (`lap2` vs `0`; `lap2` vs `mat2` with `mat2`'s PSD proved from `xᵀ(mat2)x = (x₀+x₁)² + x₀² + x₁²`), both resolvents left-inverse-pinned (`(mat2+1)⁻¹ = (1/8)!![3,−1;−1,3]` a new fixture), entry-verified distinctness (`1/3 ≠ 0`, `2/3 ≠ 3/8`), bridge lemmas from the theorem's output to the numeric facts, the iff consumed contrapositively, and the **invertibility guard**: the hypothesis-free implication refuted at `A = −1` vs `−1 + nilpotent` (both `+1` shifts singular — determinant `0` by a zero row — so both resolvents are the junk inverse `0` while the matrices differ).
+
+**Decisive commands and outcomes:** `lake env lean` on the public module and QA module — zero errors, zero warnings; `#print axioms` on the three public and eleven QA theorems — only `propext, Classical.choice, Quot.sound`; all thirty-two QA modules batch-elaborated, zero errors (only the eight documented pre-existing section-variable warnings); **full `lake build` ✔ (2184 targets)**; `lint_axioms` (13), `check_citations`, `check_markdown_links` pass; scoreboard regeneration idempotent (**846/13/0**).
+
+**Verification:** program complete per the proposal's acceptance shape (all four steps, zero new axioms throughout — count stayed 13). Records updated: module/QA docstrings, scoreboard (verification rows, Step-3 interpretation bullet, provenance note), radar (axis 2 / proved-depth / QA evidence extended, scores **held** with the holds logged — completion within counted interfaces; QA count 846/32), README (846; proved list gains the injectivity), perturbation index map (3 new rows; Deferred Work updated), proposal (Step-3 delivery record, status header: program complete), `proposals/README.md` (row moved to Delivered; **Tikhonov Regularization is now the top High row**), execution plan.
+
+**Remaining risk:** low — the step is one-consequence algebra over already-QA'd Step-1 interfaces, with the hypothesis guard refuted-on-omission. Environment note recorded in the scoreboard's provenance note: two `lake build` invocations killed at tool timeouts left the Mathlib olean dir wiped mid-replay (re-fetch restored; the final uninterrupted build passed), and a macOS case-insensitivity trap was diagnosed — creating `.lake/build/lib/lean/` shadows the toolchain's core `Lean/` tree; this repo's olean layout is `.lake/build/lib/Scaffold/...` directly.
+
+**Next handoff:** the Active table's remaining High rows — Tikhonov Regularization (`tikhonov-shrinkage-filter.md`, no gate) and Spectral Band Projectors (`spectral-band-projectors.md`, no gate); the Medium rows stay queued behind them.

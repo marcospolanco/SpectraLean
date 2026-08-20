@@ -1,16 +1,17 @@
 # Proposal: Resolvent Calculus for PSD Matrices
 
-**Status:** In progress — Step 0 delivered 2026-08-19 (the C*-algebra
-thread is **structurally inapplicable**; the from-scratch bridge is
-proved instead, as this proposal's own contingency prescribed), Step 1
-delivered the same day (invertibility + the resolvent identity, zero
-new axioms), and Step 2 delivered the same day (the norm bound and the
-Lipschitz bound, zero new axioms, by the recorded energy-route
-deviation below). Only Step 3 (injectivity, one line) remains.
-Priority **High**. Assistant's assessment of project
+**Status:** **Delivered in full (program complete) — all four steps
+(0–3) delivered 2026-08-19/20, zero new axioms throughout** (count
+stays 13). Step 0: the C*-algebra thread is **structurally
+inapplicable**; the from-scratch bridge is proved instead, as this
+proposal's own contingency prescribed. Step 1: invertibility + the
+resolvent identity. Step 2: the norm bound and the Lipschitz bound
+(the recorded energy-route deviation). Step 3 (2026-08-20):
+injectivity — the proposal's final item, completing the program.
+Priority was **High**. Assistant's assessment of project
 direction, requested 2026-08-19, promoted from `sgt-gaps.md` item 2.
-Authorizes no Lean changes, axiom admissions, or external publication
-beyond what its own steps deliver.
+Authorized no axiom admissions or external publication beyond what its
+own steps delivered.
 
 Companion to `sgt-gaps.md` (the triage document this was promoted from)
 and `docs/1_STRATEGY.md`'s leverage test. No backlog gate applies — this
@@ -137,10 +138,53 @@ Item 5 — a one-line consequence of Step 1.
 
 ## Open next step
 
-Step 3 — injectivity (item 5): `A ≠ B → (A+1)⁻¹ ≠ (B+1)⁻¹`, a one-line
-consequence of Step 1 (contrapose the resolvent identity: equal
-resolvents force `(A+1)⁻¹(B−A)(B+1)⁻¹ = 0` with both outer factors
-invertible, hence `B − A = 0`). Unblocked now.
+None — the program is complete (all four steps delivered; see the
+delivery records). Follow-ons live elsewhere: the
+sorted-eigenvalue-transfer residual is named for the mixing-time
+program's similarity transfer, and `discharge-perturbation-axioms.md`'s
+Weyl target consumes the delivered operator-norm bridge.
+
+## Step 3 delivery record (2026-08-20)
+
+Delivered in `Analysis.OperatorTheory.Resolvent`, the proposal's item
+5, **zero new axioms** (count stays 13; `#print axioms` on all three
+new public theorems reads only `propext, Classical.choice,
+Quot.sound`) — exactly the route the Open-next-step section recorded:
+
+- `eq_of_inv_add_one_eq_inv_add_one` (the core algebraic form): if
+  both `+1` shifts are invertible and `(A + 1)⁻¹ = (B + 1)⁻¹`, then
+  `A = B`. Proof: the Step-1 resolvent identity's left side collapses
+  to `0`, so `(A+1)⁻¹ * (B − A) * (B+1)⁻¹ = 0`; multiplying through by
+  `A + 1` on the left and `B + 1` on the right cancels both invertible
+  outer factors (`Matrix.mul_nonsing_inv`, `Matrix.nonsing_inv_mul`),
+  leaving `B − A = 0`. The two determinant hypotheses are exactly what
+  the cancellation consumes — load-bearing, not decorative (the QA
+  guard below refutes the hypothesis-free form).
+- `resolvent_map_injective_of_quadForm_nonneg` (the proposal's item-5
+  shape): on matrices with nonnegative quadratic form,
+  `A ≠ B → (A + 1)⁻¹ ≠ (B + 1)⁻¹`; both determinant hypotheses are
+  supplied by Step 1's `isUnit_det_add_one_of_quadForm_nonneg`.
+- `inv_add_one_eq_inv_add_one_iff_of_quadForm_nonneg` (packaged): the
+  resolvent map is injective *as an iff* — resolvent equality is a
+  certificate of matrix equality, for contrapositive consumers.
+
+**QA** (`OperatorTheory/Resolvent_QA.lean`, +19 declarations by the
+scoreboard metric, 94 in file): the injectivity instantiated at **two
+distinct PSD pairs** — `lap2` vs `0` and the less degenerate `lap2` vs
+`mat2` (neither zero; `mat2`'s PSD proved from the sum-of-squares
+identity `xᵀ(mat2)x = (x₀+x₁)² + x₀² + x₁²`) — with both resolvents
+independently pinned by left-inverse witnesses
+(`(mat2+1)⁻¹ = (1/8)!![3,−1;−1,3]`, a new fixture alongside the
+existing `(lap2+1)⁻¹ = (1/3)!![2,1;1,2]`), distinctness verified by
+entries (`1/3 ≠ 0`, `2/3 ≠ 3/8`), and bridge lemmas rewriting the
+theorem's output to exactly those numeric facts; the packaged iff
+consumed contrapositively; and the **invertibility guard**: the
+hypothesis-free implication "equal resolvents → equal matrices" is
+**refuted** at `A = −1` vs `B = −1 + E` with `E = !![0,1;0,0]`
+nilpotent — `A + 1 = 0` and `B + 1 = E` are both singular (the
+latter's determinant `0` by a zero row), so both resolvents are the
+junk inverse `0` and equal, while the matrices differ (`A 0 1 = 0 ≠ 1
+= B 0 1`).
 
 ## Step 2 delivery record (2026-08-19)
 

@@ -26,8 +26,8 @@ symmetric PSD matrix `A` is, without any spectral-gap hypothesis,
 because the shift by the identity moves every eigenvalue strictly to
 the right of zero.
 
-This module delivers Steps 0, 1, and 2 of
-`proposals/resolvent-calculus-psd.md`:
+This module delivers Steps 0, 1, 2, and 3 of
+`proposals/resolvent-calculus-psd.md` — the complete program:
 
 - **Step 0, the operator-norm bridge** (`l2OpNorm` ↔ spectrum): for a
   real symmetric matrix `M`, every eigenvalue satisfies
@@ -76,10 +76,18 @@ This module delivers Steps 0, 1, and 2 of
   norm bound on both factors, so it is load-bearing on Step 1's
   invertibility theorem and on the identity itself.
 
+- **Step 3, injectivity of the resolvent map**: on matrices with
+  nonnegative quadratic form, `A ≠ B` implies `(A+1)⁻¹ ≠ (B+1)⁻¹`, by
+  the proposal's own route — contrapose the Step-1 resolvent identity:
+  equal resolvents force `(A+1)⁻¹ * (B - A) * (B+1)⁻¹ = 0`, and
+  multiplying through by the invertible `A + 1` on the left and `B + 1`
+  on the right cancels both outer factors, leaving `B - A = 0`. The
+  core algebraic theorem carries only the two determinant hypotheses
+  (load-bearing: both are supplied by Step 1's invertibility theorem in
+  the PSD-packaged forms).
+
 Every declaration here is proved (`#print axioms` reads only
 `propext, Classical.choice, Quot.sound`); there are no new axioms.
-Step 3 of the proposal (injectivity of the resolvent map) consumes
-this module and is not attempted here.
 
 The norm throughout is the `Matrix.L2OpNorm` operator norm, the same
 instance the admitted `weyl_inequality` uses.
@@ -569,5 +577,67 @@ theorem l2OpNorm_resolvent_sub_le_of_quadForm_nonneg
           (mul_nonneg (norm_nonneg _) (norm_nonneg _)) (by norm_num)
         exact mul_le_mul hBAle hnormB (norm_nonneg _) (norm_nonneg _)
     _ = ‖A - B‖ := by ring
+
+/-!
+## 7. Injectivity of the resolvent map (Step 3, item 5)
+
+The proposal's final item: the resolvent map `A ↦ (A+1)⁻¹` is
+injective. Route (the proposal's own): contrapose the Step-1 resolvent
+identity — equal resolvents `(A+1)⁻¹ = (B+1)⁻¹` force
+`(A+1)⁻¹ * (B - A) * (B+1)⁻¹ = 0` (the identity's left side collapses
+to `0`), and multiplying through by `A + 1` on the left and `B + 1` on
+the right cancels both invertible outer factors, leaving `B - A = 0`.
+Load-bearing on Step 1 throughout: the factoring *is*
+`resolvent_identity_sub`, and both invertibility hypotheses are the
+ones its cancellation steps consume.
+-/
+
+/-- **Step 3, the core algebraic form:** if two matrices' `+1` shifts
+are invertible (unit determinant) and their resolvents coincide, the
+matrices coincide. The determinant hypotheses are load-bearing: they
+are what cancels the outer factors of the resolvent identity, and they
+are exactly what Step 1's invertibility theorem supplies on the
+quadratic-form-nonnegative matrices. -/
+theorem eq_of_inv_add_one_eq_inv_add_one {A B : Matrix V V ℝ}
+    (hA : IsUnit (A + 1).det) (hB : IsUnit (B + 1).det)
+    (h : (A + 1)⁻¹ = (B + 1)⁻¹) : A = B := by
+  have hzero : (A + 1)⁻¹ * (B - A) * (B + 1)⁻¹ = 0 := by
+    rw [← resolvent_identity_sub hA hB, h, sub_self]
+  have hkey : B - A = 0 :=
+    calc B - A = 1 * (B - A) * 1 := by rw [Matrix.mul_one, Matrix.one_mul]
+      _ = ((A + 1) * (A + 1)⁻¹) * (B - A) * ((B + 1)⁻¹ * (B + 1)) := by
+            rw [Matrix.mul_nonsing_inv _ hA, Matrix.nonsing_inv_mul _ hB]
+      _ = (A + 1) * ((A + 1)⁻¹ * (B - A) * (B + 1)⁻¹) * (B + 1) := by
+            simp only [Matrix.mul_assoc]
+      _ = (A + 1) * 0 * (B + 1) := by rw [hzero]
+      _ = 0 := by rw [Matrix.mul_zero, Matrix.zero_mul]
+  exact (sub_eq_zero.1 hkey).symm
+
+/-- **Step 3, the proposal's item 5 — injectivity:** on matrices with
+nonnegative quadratic form (PSD in the center's hypothesis style),
+`A ≠ B` implies `(A + 1)⁻¹ ≠ (B + 1)⁻¹`: the resolvent map is
+injective on the quadratic-form-nonneg cone. Both determinant
+hypotheses of the core theorem are supplied by Step 1's
+`isUnit_det_add_one_of_quadForm_nonneg`. -/
+theorem resolvent_map_injective_of_quadForm_nonneg {A B : Matrix V V ℝ}
+    (hA : ∀ x, 0 ≤ quadForm A x) (hB : ∀ x, 0 ≤ quadForm B x)
+    (h : A ≠ B) : (A + 1)⁻¹ ≠ (B + 1)⁻¹ := fun hinv => h
+  (eq_of_inv_add_one_eq_inv_add_one
+    (isUnit_det_add_one_of_quadForm_nonneg hA)
+    (isUnit_det_add_one_of_quadForm_nonneg hB) hinv)
+
+/-- **Step 3, packaged:** on matrices with nonnegative quadratic form,
+two resolvents are equal *exactly when* the underlying matrices are —
+the injectivity statement as an `iff`, for consumers that want the
+contrapositive (resolvent equality as a *certificate* of matrix
+equality) rather than the inequality direction. -/
+theorem inv_add_one_eq_inv_add_one_iff_of_quadForm_nonneg
+    {A B : Matrix V V ℝ}
+    (hA : ∀ x, 0 ≤ quadForm A x) (hB : ∀ x, 0 ≤ quadForm B x) :
+    (A + 1)⁻¹ = (B + 1)⁻¹ ↔ A = B :=
+  ⟨eq_of_inv_add_one_eq_inv_add_one
+    (isUnit_det_add_one_of_quadForm_nonneg hA)
+    (isUnit_det_add_one_of_quadForm_nonneg hB),
+    fun h => by rw [h]⟩
 
 end Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent

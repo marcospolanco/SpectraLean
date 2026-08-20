@@ -18,13 +18,13 @@ revision](docs/5_QA_SCOREBOARD.md) rather than tracking `main`.
 
 ## Status
 
-As of August 19, 2026:
+As of August 20, 2026:
 
 | Check | Result |
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 13 |
-| QA theorems/lemmas | 827, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 846, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is the Cheeger *hard* direction at the SGT center;
 Weyl and Davis–Kahan in the perturbation bridge; the scalar and matrix
@@ -35,8 +35,8 @@ bound, Woodbury/Sherman–Morrison, the electrical crust, Foster's
 theorem, the Expander Mixing Lemma, the certificate-soundness layer
 (`lambda2_le_of_certificate`), and the operator-norm/resolvent bridge
 (`l2OpNorm_eq_max_abs_evals`, the resolvent identity, the resolvent
-norm/Lipschitz bounds) are proved, not
-admitted.
+norm/Lipschitz bounds, and the resolvent-map injectivity) are proved,
+not admitted.
 
 The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for
 current counts, verification commands, and limitations.

@@ -4,8 +4,8 @@
   Purpose
   -------
   QA lemmas for `Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent`
-  (the resolvent-calculus module, proposal steps 0–2), proved
-  2026-08-19:
+  (the resolvent-calculus module, proposal steps 0–3), proved
+  2026-08-19/20:
 
   - the operator-norm bridge on the two-vertex symmetric fixture
     `!![2, 1; 1, 2]` whose sorted spectrum `[1, 3]` is pinned from
@@ -49,7 +49,19 @@
     and **the quadratic-form hypothesis is load-bearing** (the symmetric
     non-PSD `-(3/4)I` has `+1` shift equal to `(1/4)I`, whose inverse
     has norm `4 > 1`, while `quadForm (-(3/4)I) ![1,0] = -3/4 < 0`
-    exhibits the violated hypothesis).
+    exhibits the violated hypothesis);
+  - the Step-3 injectivity instantiated at two distinct pairs of PSD
+    matrices (`lap2` vs `0`, and the less degenerate `lap2` vs `mat2`),
+    each with **both resolvents independently computed** (left-inverse
+    witnesses) and their distinctness verified by entries — the
+    theorem's output is cross-checked against values computed without
+    it; the contrapositive certificate direction is exercised through
+    the packaged `iff`; and the **invertibility guard**: the
+    hypothesis-free implication "equal resolvents → equal matrices" is
+    refuted at `A = -1` vs `B = -1 + E` with `E` nilpotent — two
+    distinct matrices whose `+1` shifts are both singular, so both
+    resolvents are the junk inverse `0` and the determinant hypotheses
+    of the core theorem are load-bearing.
 
   All proofs are real Lean proofs (no `sorry`/`admit`). QA does not
   prove the theorems; it checks their interfaces against independently
@@ -974,5 +986,168 @@ theorem hypothesis_guard_not_le_one_QA :
   linarith
 
 end Negative
+
+/-!
+## Fixture 7 (Step 3): injectivity of the resolvent map
+
+The theorem is instantiated at two distinct pairs of PSD matrices with
+both resolvents independently computed (left-inverse witnesses), and
+the **invertibility guard** refutes the hypothesis-free implication at
+two distinct matrices whose `+1` shifts are both singular.
+-/
+
+section Injective
+
+/-- The `K₂` Laplacian is not the zero matrix (entry `0 0 = 1`). -/
+theorem lap2_ne_zero_QA : lap2 ≠ (0 : Matrix (Fin 2) (Fin 2) ℝ) := by
+  intro h
+  apply_fun (fun M => M 0 0) at h
+  rw [show lap2 0 0 = 1 from by simp [lap2]] at h
+  simp at h
+
+/-- **Step 3 instantiated** at `A = lap2`, `B = 0`: distinct PSD
+matrices have distinct resolvents, by the theorem alone. -/
+theorem resolvent_injective_edge_QA :
+    (lap2 + 1)⁻¹ ≠ ((0 : Matrix (Fin 2) (Fin 2) ℝ) + 1)⁻¹ :=
+  resolvent_map_injective_of_quadForm_nonneg lap2_psd zero_psd_QA
+    lap2_ne_zero_QA
+
+/-- The theorem's output, rewritten by the pinned resolvents, is the
+numeric statement `res2 ≠ 1` (a left-inverse-computed value vs. the
+identity). -/
+theorem resolvent_injective_edge_check_QA :
+    ((lap2 + 1)⁻¹ ≠ ((0 : Matrix (Fin 2) (Fin 2) ℝ) + 1)⁻¹)
+      ↔ (res2 ≠ (1 : Matrix (Fin 2) (Fin 2) ℝ)) := by
+  rw [lap2_resolvent_eq_QA, zero_add, inv_one]
+
+/-- The numeric statement holds, by an off-diagonal entry: `1/3 ≠ 0`. -/
+theorem res2_ne_one_QA : res2 ≠ (1 : Matrix (Fin 2) (Fin 2) ℝ) := by
+  intro h
+  apply_fun (fun M => M 0 1) at h
+  rw [show res2 0 1 = 1/3 from by simp [res2]] at h
+  simp at h
+
+/-- `mat2` has nonnegative quadratic form:
+`xᵀ (mat2) x = (x₀ + x₁)² + x₀² + x₁² ≥ 0`. -/
+theorem mat2_psd (x : Fin 2 → ℝ) : 0 ≤ quadForm mat2 x := by
+  have hexp : quadForm mat2 x = (x 0 + x 1) ^ 2 + (x 0) ^ 2 + (x 1) ^ 2 := by
+    simp only [quadForm, Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+      mat2_apply, Matrix.one_apply]
+    norm_num
+    ring
+  rw [hexp]
+  positivity
+
+/-- The two fixtures are distinct: off-diagonal entries `-1 ≠ 1`. -/
+theorem lap2_ne_mat2_QA : lap2 ≠ mat2 := by
+  intro h
+  apply_fun (fun M => M 0 1) at h
+  rw [show lap2 0 1 = -1 from by simp [lap2],
+    show mat2 0 1 = 1 from by simp [mat2]] at h
+  norm_num at h
+
+/-- The computed resolvent of `mat2`: `(mat2 + 1)⁻¹ = (1/8)!![3, -1; -1, 3]`. -/
+noncomputable def resM : Matrix (Fin 2) (Fin 2) ℝ :=
+  !![3/8, -1/8; -1/8, 3/8]
+
+theorem mat2_add_one_eq : mat2 + 1 = !![3, 1; 1, 3] := by
+  refine Matrix.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;>
+    simp [mat2_apply, Matrix.one_apply] <;> norm_num
+
+theorem resM_mul_QA :
+    resM * (!![3, 1; 1, 3] : Matrix (Fin 2) (Fin 2) ℝ) = 1 := by
+  refine Matrix.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;>
+    simp [resM, Matrix.mul_apply, Fin.sum_univ_two] <;> norm_num
+
+/-- The resolvent computes to `(1/8)!![3, -1; -1, 3]` by the
+independent left-inverse witness, not by any theorem. -/
+theorem mat2_resolvent_eq_QA :
+    (mat2 + 1)⁻¹ = resM := by
+  refine Matrix.inv_eq_left_inv ?_
+  rw [mat2_add_one_eq]
+  exact resM_mul_QA
+
+/-- **Step 3 instantiated** at the less degenerate pair
+`A = lap2`, `B = mat2` (neither is zero): distinct PSD matrices have
+distinct resolvents, by the theorem alone. -/
+theorem resolvent_injective_lap_mat_QA :
+    (lap2 + 1)⁻¹ ≠ (mat2 + 1)⁻¹ :=
+  resolvent_map_injective_of_quadForm_nonneg lap2_psd mat2_psd
+    lap2_ne_mat2_QA
+
+/-- The theorem's output, rewritten by the pinned resolvents, is the
+numeric statement `res2 ≠ resM`. -/
+theorem resolvent_injective_lap_mat_check_QA :
+    ((lap2 + 1)⁻¹ ≠ (mat2 + 1)⁻¹) ↔ (res2 ≠ resM) := by
+  rw [lap2_resolvent_eq_QA, mat2_resolvent_eq_QA]
+
+/-- The numeric statement holds, by a diagonal entry: `2/3 ≠ 3/8`. -/
+theorem res2_ne_resM_QA : res2 ≠ resM := by
+  intro h
+  apply_fun (fun M => M 0 0) at h
+  rw [show res2 0 0 = 2/3 from by simp [res2],
+    show resM 0 0 = 3/8 from by simp [resM]] at h
+  norm_num at h
+
+/-- The packaged `iff` consumed in the certificate direction: resolvent
+equality would *prove* matrix equality — here used contrapositively to
+keep the two resolvents apart. -/
+theorem resolvent_ne_of_iff_QA :
+    (lap2 + 1)⁻¹ ≠ (mat2 + 1)⁻¹ := fun heq =>
+  lap2_ne_mat2_QA
+    ((inv_add_one_eq_inv_add_one_iff_of_quadForm_nonneg lap2_psd mat2_psd).1
+      heq)
+
+/-- The guard fixture: `-1 + E` with `E = !![0, 1; 0, 0]` nilpotent —
+distinct from `-1`, with a singular `+1` shift. -/
+def negOneShift : Matrix (Fin 2) (Fin 2) ℝ :=
+  !![-1, 1; 0, -1]
+
+theorem negOne_add_one_inv_eq_zero_QA :
+    (-(1 : Matrix (Fin 2) (Fin 2) ℝ) + 1)⁻¹ = 0 := by
+  rw [neg_add_cancel, Matrix.inv_zero]
+
+theorem negOneShift_add_one :
+    negOneShift + 1 = !![0, 1; 0, 0] := by
+  refine Matrix.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [negOneShift, Matrix.one_apply]
+
+theorem nilpotent_det_eq_zero_QA :
+    (!![0, 1; 0, 0] : Matrix (Fin 2) (Fin 2) ℝ).det = 0 := by
+  refine Matrix.det_eq_zero_of_row_eq_zero 1 ?_
+  intro j
+  fin_cases j <;> simp
+
+theorem negOneShift_add_one_inv_eq_zero_QA :
+    (negOneShift + 1)⁻¹ = 0 := by
+  rw [negOneShift_add_one, Matrix.inv_def, nilpotent_det_eq_zero_QA,
+    Ring.inverse_zero, zero_smul]
+
+theorem negOne_ne_negOneShift_QA :
+    (-(1 : Matrix (Fin 2) (Fin 2) ℝ)) ≠ negOneShift := by
+  intro h
+  apply_fun (fun M => M 0 1) at h
+  rw [show (-(1 : Matrix (Fin 2) (Fin 2) ℝ)) 0 1 = 0 from by simp,
+    show negOneShift 0 1 = 1 from by simp [negOneShift]] at h
+  norm_num at h
+
+/-- **The invertibility guard:** the hypothesis-free implication
+"equal resolvents → equal matrices" is **refuted** — at `A = -1` and
+`B = -1 + E` (distinct), both `+1` shifts are singular so both
+resolvents are the junk inverse `0`, equal while the matrices differ.
+The core theorem's determinant hypotheses are load-bearing, not
+decorative. -/
+theorem resolvent_injective_needs_invertibility_QA :
+    ¬ (∀ A B : Matrix (Fin 2) (Fin 2) ℝ,
+        (A + 1)⁻¹ = (B + 1)⁻¹ → A = B) := by
+  intro h
+  exact negOne_ne_negOneShift_QA
+    (h (-(1 : Matrix (Fin 2) (Fin 2) ℝ)) negOneShift
+      (by rw [negOne_add_one_inv_eq_zero_QA,
+        negOneShift_add_one_inv_eq_zero_QA]))
+
+end Injective
 
 end Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent.QA

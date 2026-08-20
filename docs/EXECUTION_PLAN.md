@@ -6,6 +6,97 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Resolvent Calculus for PSD Matrices, Step 3 — injectivity (run 1,
+2026-08-20): DELIVERED; the program is COMPLETE.** The Active
+priority table's top High item (`proposals/resolvent-calculus-psd.md`)
+at its recorded open next step — the final step, the proposal's item 5.
+Pure hard crust — **zero new axioms** (count stays 13; `#print axioms`
+on all three new public theorems reads only `propext,
+Classical.choice, Quot.sound`).
+
+**Delivered** in `Analysis.OperatorTheory.Resolvent`, exactly the
+proposal's recorded route (contrapose the Step-1 resolvent identity:
+equal resolvents collapse the identity's left side to `0`, so
+`(A+1)⁻¹ * (B − A) * (B+1)⁻¹ = 0`; multiplying through by `A + 1` on
+the left and `B + 1` on the right cancels both invertible outer
+factors, leaving `B − A = 0`):
+
+- `eq_of_inv_add_one_eq_inv_add_one` — the core algebraic form: equal
+  resolvents of `+1`-invertible matrices force equal matrices. The two
+  determinant hypotheses are exactly what the cancellation consumes
+  (load-bearing — the QA guard refutes the hypothesis-free form).
+- `resolvent_map_injective_of_quadForm_nonneg` — the proposal's item-5
+  shape: `A ≠ B → (A+1)⁻¹ ≠ (B+1)⁻¹` on quadForm-nonneg matrices (the
+  determinant hypotheses supplied by Step 1's
+  `isUnit_det_add_one_of_quadForm_nonneg`).
+- `inv_add_one_eq_inv_add_one_iff_of_quadForm_nonneg` — the packaged
+  iff: resolvent equality as a *certificate* of matrix equality, for
+  contrapositive consumers.
+
+Load-bearing on Step 1 throughout — the factoring *is*
+`resolvent_identity_sub`.
+
+**QA** `OperatorTheory/Resolvent_QA.lean` (+19 declarations by the
+scoreboard metric, 94 in file): the injectivity instantiated at **two
+distinct PSD pairs** — `lap2` vs `0`, and the less degenerate `lap2`
+vs `mat2` (neither zero; `mat2`'s PSD proved from the sum-of-squares
+identity `xᵀ(mat2)x = (x₀+x₁)² + x₀² + x₁²`) — with both resolvents
+independently pinned by left-inverse witnesses (`(mat2+1)⁻¹ =
+(1/8)!![3,−1;−1,3]`, a new fixture), distinctness verified by entries
+(`1/3 ≠ 0`, `2/3 ≠ 3/8`), bridge lemmas rewriting the theorem's
+output to exactly those numeric facts, and the packaged iff consumed
+contrapositively; plus the **invertibility guard** — the
+hypothesis-free implication "equal resolvents → equal matrices"
+**refuted** at `A = −1` vs `B = −1 + E` (`E` nilpotent, `B + 1 =
+!![0,1;0,0]`, determinant `0` by a zero row): distinct matrices whose
+`+1` shifts are both singular, so both resolvents are the junk inverse
+`0` — equal while the matrices differ; the core theorem's determinant
+hypotheses are load-bearing, not decorative.
+
+**Verification:** `lake env lean` on the changed public module and its
+QA module — zero errors, zero warnings; `#print axioms` on the three
+new public theorems and eleven new QA theorems ✔ (three standard
+axioms only); oleans produced directly during iteration; **all
+thirty-two QA modules batch-elaborated, zero errors** (the only
+diagnostics are the eight documented pre-existing section-variable
+warnings in untouched modules); **full `lake build` ✔ (2184 targets,
+"Build completed successfully")**; `lint_axioms` (13),
+`check_citations`, `check_markdown_links` pass; scoreboard
+regeneration idempotent (**846/13/0**; `Resolvent_QA` 75 → 94 by the
+generator metric). Environment: the pruned-oleans state recurred at
+run start; the recorded interpreted cache fetch restored the oleans.
+Two mid-run operational events recorded in the scoreboard's
+provenance note: `lake build` invocations interrupted at their tool
+timeouts left the Mathlib olean dir wiped mid-replay (a re-fetch
+restored it, and the final *uninterrupted* full build replayed the
+trace residue and passed), and a macOS case-insensitivity trap was
+diagnosed (creating `.lake/build/lib/lean/` in this workspace shadows
+the toolchain's core `Lean/` tree and breaks all elaboration; this
+repo's layout is `.lake/build/lib/Scaffold/...` directly).
+
+**Records updated:** module/QA docstrings, scoreboard (846/13/0, the
+QA-module and public-module verification rows extended, Step-3
+interpretation bullet, provenance note), radar (axis 2, proved-depth,
+and QA axis evidence extended with scores **held** — program
+completion within counted interfaces, not a new capability family;
+QA count 846/32; the holds logged in the re-scoring log), README
+(846; the proved list gains the resolvent-map injectivity),
+perturbation index map (3 new Resolvent rows; Deferred Work loses the
+injectivity item), proposal Step-3 delivery record + status header
+(program complete) + open-next-step (none; named residuals), and
+`proposals/README.md` (the High row moved to Delivered; progress note
+rewritten — **Tikhonov Regularization is now the top High row**).
+
+**Next milestone (open):** the Active table's remaining High rows —
+**Tikhonov Regularization** (`tikhonov-shrinkage-filter.md`, no gate:
+a corollary of the proved eigenbasis expansion) and **Spectral Band
+Projectors** (`spectral-band-projectors.md`, no gate: the two-sided
+band as the difference of two `spectralProjector` calls). The Medium
+rows (Fiedler Phase B — needs an operator decision; mixing-time Step
+1; Reversibility A and B; Relative Entropy; Perron–Frobenius +
+directed operators; discharge-perturbation; approximate spectral
+projection) stay queued.
+
 **Resolvent Calculus for PSD Matrices, Step 2 — the norm and Lipschitz
 bounds (run 1, 2026-08-19): DELIVERED.** The Active priority table's
 top High item (`proposals/resolvent-calculus-psd.md`), at the step its

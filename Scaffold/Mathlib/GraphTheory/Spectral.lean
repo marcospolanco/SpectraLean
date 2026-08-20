@@ -480,35 +480,38 @@ theorem eigvalOf_sum_eq_trace (M : Matrix V V ℝ) (hM : M.IsSymm) :
           Matrix.one_mul]
     _ = M.trace := by congr 1; exact hst.symm
 
-/-- Spectral projectors are idempotent: `P_c * P_c = P_c`. Entrywise, the
-product expands into outer products of eigenvectors whose cross terms
-vanish by pairwise orthonormality, leaving the original sum. This is the
-structural fact consumed (previously implicitly) by every projector-based
-statement in the Cheeger, persistence, and drift interfaces. -/
-theorem spectralProjector_idempotent (M : Matrix V V ℝ) (hM : M.IsSymm)
-    (c : ℝ) :
-    spectralProjector M hM c * spectralProjector M hM c
-      = spectralProjector M hM c := by
+/-- Spectral projectors compose by nested thresholds: the product of the
+projectors at `c₁` and `c₂` is the projector at the smaller threshold,
+whenever `c₁ ≤ c₂`. Entrywise, the product expands into outer products
+of eigenvectors whose cross terms vanish by pairwise orthonormality,
+and the two threshold filters intersect in the filter of the smaller
+threshold. The consumption half of the projector algebra's master law
+(`spectralProjector_mul_spectralProjector`); the two-sided band
+projectors of `GraphTheory.Band` are built on it. -/
+theorem spectralProjector_mul_spectralProjector_of_le
+    (M : Matrix V V ℝ) (hM : M.IsSymm) {c₁ c₂ : ℝ} (h : c₁ ≤ c₂) :
+    spectralProjector M hM c₁ * spectralProjector M hM c₂
+      = spectralProjector M hM c₁ := by
   ext a b
   simp only [Matrix.mul_apply, spectralProjector, Matrix.of_apply]
   have hexp : ∀ k : V,
-      (∑ i ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+      (∑ i ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c₁),
           eigvecOf M hM i a * eigvecOf M hM i k) *
-        (∑ j ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+        (∑ j ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c₂),
             eigvecOf M hM j k * eigvecOf M hM j b) =
-      ∑ i ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
-        ∑ j ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+      ∑ i ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c₁),
+        ∑ j ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c₂),
           (eigvecOf M hM i a * eigvecOf M hM i k) *
             (eigvecOf M hM j k * eigvecOf M hM j b) :=
     fun k => Finset.sum_mul_sum _ _ _ _
   simp only [hexp]
   have hreorder : ∑ k : V,
-      ∑ i ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
-        ∑ j ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+      ∑ i ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c₁),
+        ∑ j ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c₂),
           (eigvecOf M hM i a * eigvecOf M hM i k) *
             (eigvecOf M hM j k * eigvecOf M hM j b) =
-    ∑ i ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
-      ∑ j ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+    ∑ i ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c₁),
+      ∑ j ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c₂),
         ∑ k : V,
           (eigvecOf M hM i a * eigvecOf M hM i k) *
             (eigvecOf M hM j k * eigvecOf M hM j b) := by
@@ -530,15 +533,126 @@ theorem spectralProjector_idempotent (M : Matrix V V ℝ) (hM : M.IsSymm)
     rw [Finset.sum_congr rfl (fun k _ => hterm k), ← Finset.mul_sum,
       eigvecOf_inner]
   rw [Finset.sum_congr rfl (fun j _ => hinner j)]
-  have hsingle : ∑ x ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
-      eigvecOf M hM i a * eigvecOf M hM x b * (if i = x then 1 else 0)
-      = eigvecOf M hM i a * eigvecOf M hM i b := by
-    rw [Finset.sum_eq_single i
-      (fun x _ hx => by
-        rw [if_neg (fun h => hx h.symm), mul_zero])
-      (fun hcon => absurd hi hcon)]
-    simp
-  rw [hsingle]
+  have hite : ∀ j : V,
+      eigvecOf M hM i a * eigvecOf M hM j b * (if i = j then 1 else 0) =
+      if i = j then eigvecOf M hM i a * eigvecOf M hM j b else 0 := by
+    intro j
+    by_cases hd : i = j <;> simp [hd]
+  rw [Finset.sum_congr rfl (fun j _ => hite j), Finset.sum_ite_eq]
+  have hmem : i ∈ Finset.univ.filter (fun x => eigvalOf M hM x ≤ c₂) := by
+    obtain ⟨_, hi1⟩ := Finset.mem_filter.1 hi
+    exact Finset.mem_filter.2 ⟨Finset.mem_univ _, hi1.trans h⟩
+  rw [if_pos hmem]
+
+/-- The flipped nestedness law: for `c₁ ≤ c₂`, `P_{c₂} * P_{c₁} = P_{c₁}`
+as well — nested projectors commute, and both orders land on the smaller
+threshold. By transposing `spectralProjector_mul_spectralProjector_of_le`
+(spectral projectors are symmetric). -/
+theorem spectralProjector_mul_spectralProjector_of_le'
+    (M : Matrix V V ℝ) (hM : M.IsSymm) {c₁ c₂ : ℝ} (h : c₁ ≤ c₂) :
+    spectralProjector M hM c₂ * spectralProjector M hM c₁
+      = spectralProjector M hM c₁ := by
+  calc spectralProjector M hM c₂ * spectralProjector M hM c₁
+      = (spectralProjector M hM c₁ * spectralProjector M hM c₂)ᵀ := by
+        rw [Matrix.transpose_mul]
+        rw [show (spectralProjector M hM c₁)ᵀ = spectralProjector M hM c₁ from
+          spectralProjector_symmetric M hM c₁,
+          show (spectralProjector M hM c₂)ᵀ = spectralProjector M hM c₂ from
+          spectralProjector_symmetric M hM c₂]
+    _ = (spectralProjector M hM c₁)ᵀ := by
+        rw [spectralProjector_mul_spectralProjector_of_le M hM h]
+    _ = spectralProjector M hM c₁ := spectralProjector_symmetric M hM c₁
+
+/-- The master product law of the spectral-projector family: projectors
+at two thresholds compose to the projector at the *minimum* threshold,
+with no order constraint. Idempotence is the diagonal case (`min c c = c`;
+`spectralProjector_idempotent` is derived from this law), and the
+two-sided band projectors of `GraphTheory.Band` consume the ordered
+forms to expand products of differences. -/
+theorem spectralProjector_mul_spectralProjector
+    (M : Matrix V V ℝ) (hM : M.IsSymm) (c₁ c₂ : ℝ) :
+    spectralProjector M hM c₁ * spectralProjector M hM c₂
+      = spectralProjector M hM (min c₁ c₂) := by
+  rcases le_total c₁ c₂ with h | h
+  · rw [min_eq_left h]
+    exact spectralProjector_mul_spectralProjector_of_le M hM h
+  · rw [min_eq_right h]
+    exact spectralProjector_mul_spectralProjector_of_le' M hM h
+
+/-- The complete action of a spectral projector on the eigenbasis: the
+projector at threshold `c` fixes the eigenvector when its eigenvalue is
+at most `c` and annihilates it when the eigenvalue is strictly above.
+This is the bandpass-filtering interface: it describes exactly which
+modes survive a threshold, and the two-sided version is
+`GraphTheory.Band.bandProjector_mulVec_eigvecOf_self` and its
+annihilation counterparts. -/
+theorem spectralProjector_mulVec_eigvecOf (M : Matrix V V ℝ)
+    (hM : M.IsSymm) (c : ℝ) (i : V) :
+    spectralProjector M hM c *ᵥ eigvecOf M hM i
+      = if eigvalOf M hM i ≤ c then eigvecOf M hM i else 0 := by
+  ext b
+  simp only [Matrix.mulVec, Matrix.dotProduct, spectralProjector,
+    Matrix.of_apply]
+  have hexp : ∀ k : V,
+      (∑ i' ∈ Finset.univ.filter (fun x => eigvalOf M hM x ≤ c),
+          eigvecOf M hM i' b * eigvecOf M hM i' k) * eigvecOf M hM i k =
+      ∑ i' ∈ Finset.univ.filter (fun x => eigvalOf M hM x ≤ c),
+        (eigvecOf M hM i' b * eigvecOf M hM i' k * eigvecOf M hM i k) :=
+    fun k => Finset.sum_mul _ _ _
+  simp only [hexp]
+  rw [Finset.sum_comm]
+  have hterm : ∀ i' : V,
+      (∑ k : V, eigvecOf M hM i' b * eigvecOf M hM i' k
+          * eigvecOf M hM i k) =
+      eigvecOf M hM i' b * (if i' = i then 1 else 0) := by
+    intro i'
+    have hring : ∀ k : V,
+        eigvecOf M hM i' b * eigvecOf M hM i' k * eigvecOf M hM i k =
+        eigvecOf M hM i' b * (eigvecOf M hM i' k * eigvecOf M hM i k) :=
+      fun k => by ring
+    rw [Finset.sum_congr rfl (fun k _ => hring k), ← Finset.mul_sum,
+      eigvecOf_inner]
+  rw [Finset.sum_congr rfl (fun i' _ => hterm i')]
+  have hite : ∀ i' : V,
+      eigvecOf M hM i' b * (if i' = i then 1 else 0) =
+      if i' = i then eigvecOf M hM i' b else 0 := by
+    intro i'
+    by_cases hd : i' = i <;> simp [hd]
+  rw [Finset.sum_congr rfl (fun i' _ => hite i'), Finset.sum_ite_eq']
+  have hmem : i ∈ Finset.univ.filter (fun x : V => eigvalOf M hM x ≤ c) ↔
+      eigvalOf M hM i ≤ c := by simp [Finset.mem_filter]
+  by_cases h : eigvalOf M hM i ≤ c
+  · rw [if_pos (hmem.2 h), ite_apply, if_pos h]
+  · rw [if_neg (fun hc => h (hmem.1 hc)), ite_apply, if_neg h]
+    rfl
+
+/-- Below-threshold eigenvectors are fixed by the projector at that
+threshold: the specialization of `spectralProjector_mulVec_eigvecOf`. -/
+theorem spectralProjector_mulVec_eigvecOf_self (M : Matrix V V ℝ)
+    (hM : M.IsSymm) (c : ℝ) (i : V) (h : eigvalOf M hM i ≤ c) :
+    spectralProjector M hM c *ᵥ eigvecOf M hM i = eigvecOf M hM i := by
+  rw [spectralProjector_mulVec_eigvecOf M hM c i, if_pos h]
+
+/-- Above-threshold eigenvectors are annihilated by the projector at
+that threshold: the other specialization of
+`spectralProjector_mulVec_eigvecOf`. -/
+theorem spectralProjector_mulVec_eigvecOf_of_lt (M : Matrix V V ℝ)
+    (hM : M.IsSymm) (c : ℝ) (i : V) (h : c < eigvalOf M hM i) :
+    spectralProjector M hM c *ᵥ eigvecOf M hM i = 0 := by
+  rw [spectralProjector_mulVec_eigvecOf M hM c i, if_neg h.not_le]
+
+/-- Spectral projectors are idempotent: `P_c * P_c = P_c`. Entrywise, the
+product expands into outer products of eigenvectors whose cross terms
+vanish by pairwise orthonormality, leaving the original sum. This is the
+structural fact consumed (previously implicitly) by every projector-based
+statement in the Cheeger, persistence, and drift interfaces. Since the
+master product law `spectralProjector_mul_spectralProjector` was proved,
+this is its diagonal case, re-derived rather than re-proved. -/
+theorem spectralProjector_idempotent (M : Matrix V V ℝ) (hM : M.IsSymm)
+    (c : ℝ) :
+    spectralProjector M hM c * spectralProjector M hM c
+      = spectralProjector M hM c := by
+  rw [spectralProjector_mul_spectralProjector, min_self]
 
 /-- Below the whole spectrum the spectral projector vanishes: the
 threshold filter is empty. -/

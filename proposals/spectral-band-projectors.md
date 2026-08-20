@@ -1,6 +1,7 @@
 # Proposal: Spectral Band Projectors
 
-**Status:** Proposed; priority **High**. Assistant's assessment of project
+**Status:** Step 1 DELIVERED 2026-08-20 (see the delivery record under
+"Build order"). Priority **High**. Assistant's assessment of project
 direction, requested 2026-08-19, promoted from `sgt-gaps.md` item 5.
 Authorizes no Lean changes, axiom admissions, or external publication.
 
@@ -69,12 +70,66 @@ partition, not assumed pairwise.
 
 ### Step 1: The two-sided band projector and its basic properties
 
+**DELIVERED 2026-08-20** (zero new axioms; `#print axioms` on all seven
+new public theorems reads only `propext, Classical.choice,
+Quot.sound`). The mandated pre-edit survey found the projector lemma
+set already carries symmetry, idempotence, and the extreme-threshold
+theorems — nothing reproved. **Route finding recorded before stating:**
+idempotence of the *difference* does not transfer from idempotence of
+each factor (differences of idempotents are not idempotent in
+general); the load-bearing missing piece is the nestedness cross-law,
+delivered in `GraphTheory.Spectral` as
+`spectralProjector_mul_spectralProjector`
+(`P_{c₁} * P_{c₂} = P_{min c₁ c₂}`, no order constraint; ordered
+shapes `_of_le` / `_of_le'` for direct consumption, the flipped form
+by transposing symmetry). The existing `spectralProjector_idempotent`
+is **re-derived from the master law at unchanged statement** — its
+50-line entrywise proof is now one rewrite. Alongside it, the complete
+projector-eigenvector action description
+`spectralProjector_mulVec_eigvecOf`
+(`P_c *ᵥ vᵢ = if λᵢ ≤ c then vᵢ else 0`) with its `_self` / `_of_lt`
+specializations — the bandpass-selection interface this proposal's
+external consumer names. In the new `GraphTheory.Band`:
+`bandProjector M hM a b := spectralProjector M hM b − spectralProjector M hM a`
+(total definition, the `a > b` negated-band junk documented rather
+than type-guarded; every property carries `a ≤ b` exactly where
+needed), `bandProjector_symmetric`, `bandProjector_idempotent` (`a ≤ b`),
+the action interface `bandProjector_mulVec_eigvecOf_self` /
+`_eq_zero_left` / `_eq_zero_right`, the design note's named special
+case `bandProjector_eq_spectralProjector_of_lt` (`spectralProjector`
+kept, not re-derived), and the covering band `bandProjector_eq_one`
+(the two-band instance of Step 3's completeness statement).
+**QA** `SpectralGraph/Band_QA.lean` (27 declarations): the diagonal
+fixture `!![1,0;0,3]` — one-dimensional eigenspaces force computable
+eigenvector *directions* (`λ = 1 ⇒ v = ![±1,0]`, sign-independent
+outer products) — with the spectrum `{1,3}` pinned from
+trace+determinant independent of the machinery under test; the
+projector at any threshold in `[1,3)` pinned to the hand-computed
+outer product `e₀e₀ᵀ = !![1,0;0,0]`; band values computed
+independently (`B(−1,2] = diag(1,0)`, `B(2,4] = diag(0,1)`,
+`B(−1,4] = 1`, and the between-eigenvalues band `B(3/2,5/2] = 0` —
+the gapped-definition guard this proposal's design note names);
+idempotence both through the theorem and by raw literal
+multiplication; the cross-law instantiated numerically in both orders;
+and mode selection witnessed in both directions — the excluded mode
+**annihilated and provably not fixed** (`B(2,4] *ᵥ v₁ = 0 ≠ v₁`, with
+`v₁ ≠ 0` from unit norm; a definition silently keeping out-of-band
+modes would fail this), the strictly-interior mode (`λ = 3 ∈ (2,4]`)
+fixed, and the low-band action recomputed by raw arithmetic.
+**Verification:** `lake env lean` on `Spectral`, `Band`, and `Band_QA`
+(zero errors, zero warnings); `#print axioms` on seven public and nine
+headline QA theorems (three standard axioms only); all thirty-four QA
+modules batch-elaborated, zero errors; full `lake build` ✔; the lint /
+citation / link checks pass; scoreboard 917/12/0.
+
 Define `bandProjector M hM a b := spectralProjector M hM b -
 spectralProjector M hM a` (for `a ≤ b`). Prove idempotence and
 self-adjointness — both should transfer cheaply from
 `spectralProjector_symmetric` and the existing idempotence argument for
 `spectralProjector` itself (survey whether that idempotence lemma already
-exists before reproving it).
+exists before reproving it). *(Survey outcome: the idempotence lemma
+exists; the transfer needed the new nestedness cross-law, as recorded
+above.)*
 
 ### Step 2: Orthogonality of disjoint bands
 
@@ -125,4 +180,12 @@ survey the exact lemma signature first.
 
 ## Open next step
 
-Unblocked now — begin with Step 1.
+Step 2 — orthogonality of disjoint bands (`a ≤ b ≤ c ≤ d` → the two
+band projectors compose to zero). The route is now paved: the nestedness
+cross-law's ordered forms expand `(P_b − P_a)(P_d − P_c)` to
+`P_{min b d} − P_{min b c} − P_{min a d} + P_{min a c}`, which
+collapses to `0` under the ordering hypotheses; alternatively the
+action lemmas annihilate each eigenvector in one band or the other.
+Steps 3 (partition completeness) and 4 (the Hilbert projection
+specialization — survey `Analysis/InnerProductSpace/Projection.lean`
+lemma signatures first) remain queued behind it.

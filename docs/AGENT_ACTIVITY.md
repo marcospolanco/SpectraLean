@@ -24,6 +24,100 @@ entry. If a session ID cannot be established from repository evidence, write
 Follow the metadata with concise `Changes`, `Verification`, `Remaining risk`,
 and `Next handoff` paragraphs as applicable.
 
+## 2026-08-20T13:39:48Z — Spectral band projectors, Step 1 (two-sided band projector)
+
+**Run:** `20260820T133553Z-run-1`  
+**Session:** `ses_fe0a0f4b6ffeOdvy2Pf5lWRbOv`  
+**Status:** in-progress  
+**Milestone:** The Active priority table's only remaining High row
+(`proposals/spectral-band-projectors.md`) at its recorded open next step —
+the two-sided band projector `bandProjector M hM a b := spectralProjector M hM b − spectralProjector M hM a`
+with idempotence and self-adjointness, pure hard crust (zero new axioms), the
+frequency-selective bandpass object named by the proposal's external consumer.
+
+**Changes:** intent + route recorded in the execution plan (pre-edit survey:
+the projector lemma set already has symmetry/idempotence/extremes — the
+load-bearing missing piece is the nestedness cross-law
+`P_{c₁} * P_{c₂} = P_{min c₁ c₂}`, from which band idempotence and the old
+idempotence both derive). Environment: the pruned Mathlib-oleans state
+recurred at run start (0 present); the recorded interpreted cache fetch
+restored 5685 (`lake --dir=.lake/packages/mathlib env lean --run <pkg>/Cache/Main.lean get`).
+Lean work starting in `GraphTheory/Spectral.lean` (cross-law + action pair)
+and the new `GraphTheory/Band.lean` + `QA/SpectralGraph/Band_QA.lean`.
+
+## 2026-08-20T16:26:39Z — Spectral band projectors, Step 1 (two-sided band projector)
+
+**Run:** `20260820T133553Z-run-1`  
+**Session:** `ses_fe0a0f4b6ffeOdvy2Pf5lWRbOv`  
+**Status:** completed  
+**Milestone:** The Active priority table's only remaining High row
+(`proposals/spectral-band-projectors.md`) at its recorded open next step —
+the two-sided `(a, b]` band projector with idempotence and self-adjointness,
+pure hard crust (zero new axioms; count stays 12).
+
+**Changes:** the new `Scaffold/Mathlib/GraphTheory/Band.lean`
+(`bandProjector M hM a b := spectralProjector M hM b − spectralProjector M hM a`,
+parameterized by interval per the design note, total definition with the
+`a > b` junk documented; symmetry, idempotence at `a ≤ b`, the mode-selection
+action interface — in-band fixed, below-/above-band annihilated — the
+below-spectrum special case, the covering band `= 1`); enabling lemmas in
+`GraphTheory.Spectral` (the nestedness cross-law
+`spectralProjector_mul_spectralProjector` `P_{c₁} * P_{c₂} = P_{min c₁ c₂}`
+with ordered forms — the pre-edit survey's route finding: idempotence of a
+*difference* needs the cross-law, not just idempotence of the factors; the
+old `spectralProjector_idempotent` re-derived from it at unchanged
+statement, its 50-line proof now one rewrite; and the complete action
+description `spectralProjector_mulVec_eigvecOf` with specializations); the
+new `QA/SpectralGraph/Band_QA.lean` (27 declarations); the umbrella import
++ docstring; records (scoreboard, radar, README, SGT index map, proposal
+status/delivery record/open-next-step, proposals README High row + Delivered
+row + progress note, execution plan).
+
+**Decisive commands and outcomes:** `lake env lean` on `Spectral`,
+`Band`, and `Band_QA` — zero errors, zero warnings on the two new modules
+(`Spectral`'s only diagnostics are the documented pre-existing
+section-variable warnings); `#print axioms` on the seven public and nine
+headline QA theorems — only `propext, Classical.choice, Quot.sound`; **all
+thirty-four QA modules batch-elaborated, zero errors**; **full `lake build`
+✔ — "Build completed successfully", 2186 targets, zero errors** (executed
+detached from the tool timeout, log + poll, per the recorded recovery
+procedure; the Mathlib residue replay ~2 h); `lint_axioms` (12),
+`check_citations`, `check_markdown_links` pass; scoreboard regeneration
+idempotent (**917/12/0**; `Band_QA` a new file row at 27). Environment: the
+pruned-oleans state recurred at run start; the interpreted cache fetch
+restored 5685 before any elaboration (`lake --dir=.lake/packages/mathlib env
+lean --run <pkg-path>/Cache/Main.lean get` — `--dir` from the repo root,
+since direct `cd` into the package is sandboxed). Implementation notes for
+future projector QA: `fin_cases` eta-expanded `Fin` indices defeat
+`rw`/`linarith` atom matching (coerce back with defeq-tolerant `have`s or
+`show`, the recorded trap); `rw ... at` accepts only local hypotheses, not
+theorem names (copy with `have` first); `linear_combination` likewise wants
+local fvar atoms; `Finset.sum_ite_eq` matches `if b = x` and `sum_ite_eq'`
+matches `if x = b`; `(if P then f else 0) k` distributes via `ite_apply`
+(root namespace), not `apply_ite`; un-ascribed `!![..]` literals elaborate
+as ℕ — ascribe `(!![..] : Matrix (Fin 2) (Fin 2) ℝ)`; type-ascribed `have`
+is the bridge for `eigvecOf`/`eigvalOf` defs versus Mathlib's raw
+`WithLp`-coerced spectral-theorem terms (the center's own idiom).
+
+**Verification:** every changed module elaborated directly and built in the
+full default build; QA covers both mode-selection directions with the
+excluded-mode-not-fixed witness and the between-eigenvalues zero band (the
+gapped-definition guard), the band values pinned against hand-computed
+outer products on a diagonal fixture whose spectrum is pinned from
+trace+determinant independent of the machinery under test.
+
+**Remaining risk:** low — Step 1 is one-consequence algebra over the
+already-QA'd projector machinery, with the new cross-law itself numerically
+instantiated in both orders. The `a > b` junk region is documented, not
+guarded; no theorem claims anything there. Steps 2–4 of the proposal
+(orthogonality of disjoint bands, partition completeness, the Hilbert
+projection specialization) remain open.
+
+**Next handoff:** the same proposal's Step 2 — orthogonality of disjoint
+bands (`a ≤ b ≤ c ≤ d`; the cross-law's ordered forms already expand
+`(P_b − P_a)(P_d − P_c)` to the collapsing four-term expression), then
+Steps 3–4; or the queued Medium rows.
+
 ## 2026-08-17 — SGT center reaches a clean default build
 
 **Status:** completed  

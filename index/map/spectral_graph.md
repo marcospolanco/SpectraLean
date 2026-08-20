@@ -6,7 +6,7 @@ conductance, Cheeger theory, interlacing, and event-driven dynamics.
 ## Status
 
 **Implemented and build-certified** (see the QA scoreboard):
-`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,SpectralCertificates,Tikhonov,Cheeger,Dynamics}`.
+`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,SpectralCertificates,Tikhonov,Band,Cheeger,Dynamics}`.
 
 ## Modules and Declarations
 
@@ -40,7 +40,14 @@ spectral theorem (2026-08-17): `initialProjector_congr`,
 `eigvecOf_inner` (eigenbasis orthonormality), `eigvecOf_complete`
 (eigenbasis completeness), `spectralProjector_idempotent`,
 `spectralProjector_eq_zero`, `spectralProjector_eq_one`,
-`initialProjector_idempotent`; spectrum pinning tools (2026-08-18):
+`initialProjector_idempotent`; the projector product-and-action layer
+(2026-08-20, enabling `GraphTheory.Band`):
+`spectralProjector_mul_spectralProjector` (the nestedness cross-law
+`P_{c₁} * P_{c₂} = P_{min c₁ c₂}`, with the ordered forms `_of_le` /
+`_of_le'`; `spectralProjector_idempotent` re-derived from it at
+unchanged statement) and `spectralProjector_mulVec_eigvecOf` (the
+complete action description `P_c *ᵥ vᵢ = if λᵢ ≤ c then vᵢ else 0`,
+with the `_self` / `_of_lt` specializations); spectrum pinning tools (2026-08-18):
 `lambda2_eq_secondEval` (bridge between the adjacency-facing and
 matrix-facing λ₂ APIs), `evals_mem_eigvalOf` (sorted-spectrum ↔
 eigenbasis connection), `eigvalOf_sum_eq_trace` (trace from the unitary
@@ -321,6 +328,31 @@ proposal's "never exactly 1".
 | `tikhonovMinimizer_eigvecOf` | an eigenvector input comes out as `factor • v` — pure orthonormality |
 | `tikhonovMinimizer_ne_apply_self_of_eigvalOf_pos` | **not a projection:** the filter is not idempotent — `T(T v) = s² • v ≠ s • v` at any positive-eigenvalue eigenvector; the precise sense in which Tikhonov smoothing differs from `spectralProjector` (which fixes its image exactly) |
 
+### `Scaffold.Mathlib.GraphTheory.Band` (two-sided spectral band projectors)
+
+The `(a, b]` band projector (proposal `spectral-band-projectors.md`,
+High, Step 1): the orthogonal projector onto the eigenspaces with
+eigenvalues strictly above `a` and at most `b` — the bandpass-filtering
+object of frequency-selective graph signal processing — delivered as
+the difference of two `spectralProjector` calls, pure hard crust on
+the proved projector algebra. Zero axioms. Parameterized by spectral
+interval, not index (the proposal's design note); the definition is
+total, with the `a > b` negated-band junk documented. The enabling
+lemmas live one module in, in `Spectral`: the nestedness cross-law
+`spectralProjector_mul_spectralProjector` (`P_{c₁} * P_{c₂} = P_{min c₁ c₂}`,
+with ordered forms; `spectralProjector_idempotent` re-derived from it
+at unchanged statement) and the complete projector-eigenvector action
+`spectralProjector_mulVec_eigvecOf` (`P_c *ᵥ vᵢ = if λᵢ ≤ c then vᵢ else 0`).
+
+| Declaration | Content |
+|-------------|---------|
+| `bandProjector` | **the two-sided band projector** `spectralProjector M hM b − spectralProjector M hM a` — projects onto `∑_{a < λᵢ ≤ b} span vᵢ` |
+| `bandProjector_symmetric` | self-adjointness (difference of symmetric matrices) |
+| `bandProjector_idempotent` | **idempotence for `a ≤ b`**, through the nestedness cross-law — the difference of two idempotents is idempotent precisely because `P_a P_b = P_b P_a = P_a` |
+| `bandProjector_mulVec_eigvecOf_self` | **in-band modes are fixed** (`a < λᵢ ≤ b`): the bandpass-selection interface |
+| `bandProjector_mulVec_eigvecOf_eq_zero_left` / `_right` | **out-of-band modes are annihilated** (`λᵢ ≤ a`, or `b < λᵢ`): below-band and above-band guards |
+| `bandProjector_eq_spectralProjector_of_lt` | below the whole spectrum, the band *is* the below-threshold projector — the design note's named special case (`spectralProjector` kept, not re-derived) |
+| `bandProjector_eq_one` | a covering band is the identity — the two-band instance of the Step-3 completeness statement |
 
 ### `Scaffold.Mathlib.GraphTheory.Cheeger`
 

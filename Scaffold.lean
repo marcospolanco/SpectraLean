@@ -9,6 +9,7 @@ import Scaffold.Mathlib.GraphTheory.Foster
 import Scaffold.Mathlib.GraphTheory.Expander
 import Scaffold.Mathlib.GraphTheory.SpectralCertificates
 import Scaffold.Mathlib.GraphTheory.Tikhonov
+import Scaffold.Mathlib.GraphTheory.Band
 import Scaffold.Mathlib.GraphTheory.Cheeger
 import Scaffold.Mathlib.GraphTheory.Fiedler
 import Scaffold.Mathlib.GraphTheory.RandomWalk
@@ -59,7 +60,13 @@ eigenbasis-defined minimizer of `‖x−y‖² + (1/π)·xᵀLx`, its
 eigencoefficient shrinkage identity, the normal equation with its
 converse characterization, minimality and uniqueness through the
 strict-convexity decomposition, mean preservation, and the
-not-a-projection (idempotence-failure) theorem), its Cheeger
+not-a-projection (idempotence-failure) theorem), the two-sided
+spectral band projectors (`GraphTheory.Band`, Step 1 of the
+band-projector program: the `(a, b]` band as the difference of two
+`spectralProjector` calls, idempotence through the nestedness
+cross-law `spectralProjector_mul_spectralProjector`, and the
+mode-selection action interface — in-band modes fixed, out-of-band
+modes annihilated), its Cheeger
 bridge (`GraphTheory.Cheeger`), the Fiedler-vector interface (`GraphTheory.Fiedler`, Phase A: the vector,
 the sign partition, and the algebraic-connectivity certificate),
 the random-walk interfaces (`GraphTheory.RandomWalk`), the general

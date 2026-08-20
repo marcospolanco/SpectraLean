@@ -6,6 +6,107 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Spectral Band Projectors, Step 1 — the two-sided band projector (run 1,
+2026-08-20; `proposals/spectral-band-projectors.md`, the Active table's
+only remaining High row, at its recorded open next step "begin with
+Step 1"): DELIVERED.** Pure hard crust — **zero new axioms** (count stays
+12; `#print axioms` on all seven new public theorems reads only
+`propext, Classical.choice, Quot.sound`).
+
+**Pre-edit survey of `spectralProjector`'s lemma set (the proposal's
+mandatory Step-1 check):** `spectralProjector_symmetric`,
+`spectralProjector_idempotent`, `spectralProjector_eq_zero`,
+`spectralProjector_eq_one` all exist and are proved — nothing to
+reprove. **Route decision recorded before stating:** idempotence of the
+*difference* `P_b − P_a` does not transfer from idempotence of each
+factor (differences of idempotents are not idempotent in general); the
+load-bearing missing piece is the **nestedness cross-law**
+`P_{c₁} * P_{c₂} = P_{min c₁ c₂}`, proved entrywise by the same
+orthonormal expansion as the existing idempotence proof with the two
+threshold filters intersecting (the flipped order by transposing
+symmetry). Delivered as the new master lemma
+`spectralProjector_mul_spectralProjector` plus the two ordered
+consumption shapes `_of_le` / `_of_le'`; the existing
+`spectralProjector_idempotent` is **re-derived from the master at
+unchanged statement** (its 50-line entrywise proof replaced by one
+rewrite). Alongside it, the eigenvector-*action* layer: the complete
+`spectralProjector_mulVec_eigvecOf`
+(`P_c *ᵥ vᵢ = if λᵢ ≤ c then vᵢ else 0`) with its `_self` / `_of_lt`
+specializations — the bandpass consumer interface.
+
+**Delivered in the new `GraphTheory.Band`** (parameterized by interval
+`(a, b]` per the design note, not by index; the definition is total
+with the `a > b` negated-band junk documented rather than type-guarded;
+every property carries `a ≤ b` exactly where needed): `bandProjector`,
+`bandProjector_symmetric`, `bandProjector_idempotent` (through the
+cross-law), the action interface
+`bandProjector_mulVec_eigvecOf_self` / `_eq_zero_left` /
+`_eq_zero_right`, the design note's named special case
+`bandProjector_eq_spectralProjector_of_lt` (`spectralProjector` kept,
+not re-derived), and the covering band `bandProjector_eq_one` (the
+two-band instance of Step 3's completeness statement).
+
+**QA** `SpectralGraph/Band_QA.lean` (27 declarations by the generator
+metric, 917 total): the diagonal fixture `!![1,0;0,3]` — chosen over
+the dense `!![2,1;1,2]` because one-dimensional eigenspaces make the
+eigenvector *directions* computable from the eigen equations
+(`λ = 1 ⇒ v = ![±1,0]`, sign-independent outer products, so no control
+over Mathlib's classical choice is needed) — with the spectrum `{1,3}`
+pinned from trace + determinant independent of the machinery under
+test; the projector at any threshold in `[1,3)` pinned to the
+hand-computed outer product `e₀e₀ᵀ = !![1,0;0,0]` (the proposal's
+positive witness); band values computed independently (`B(−1,2] =
+diag(1,0)`, `B(2,4] = diag(0,1)`, `B(−1,4] = 1`, and the
+between-eigenvalues band `B(3/2,5/2] = 0` — the gapped-definition
+guard); idempotence both through the theorem and by raw literal
+multiplication; the cross-law instantiated numerically in both orders;
+and mode selection witnessed in both directions — the excluded mode
+**annihilated and provably not fixed** (`B(2,4] *ᵥ v₁ = 0 ≠ v₁` with
+`v₁ ≠ 0` from unit norm), the strictly-interior mode (`λ = 3 ∈ (2,4]`)
+fixed, the low-band mode fixed (theorem) and recomputed by raw
+arithmetic.
+
+**Verification:** `lake env lean` on `GraphTheory.Spectral`,
+`GraphTheory.Band`, and `SpectralGraph/Band_QA` — zero errors, zero
+warnings on the two new modules, `Spectral`'s only diagnostics the
+documented pre-existing section-variable warnings; oleans produced
+directly during iteration; `#print axioms` on the seven public and nine
+headline QA theorems ✔ (three standard axioms only); **all thirty-four
+QA modules batch-elaborated, zero errors**; the full `lake build`
+detached from the tool timeout (log + poll) — see the terminal activity
+entry for the final count; `lint_axioms` (**12**), `check_citations`,
+`check_markdown_links` pass; scoreboard regeneration idempotent
+(**917/12/0**; `Band_QA` a new file row at 27).
+
+**Records updated:** module docstrings (Band + the Spectral additions),
+umbrella (`Scaffold.lean` import + docstring), scoreboard (917/12/0,
+the QA-module and public-module verification rows prepended with the
+Band slice, the Step-1 interpretation bullet, the stale QA-declaration
+count note fixed), radar (subject axis 2 evidence extended with the
+band family and the QA axis count synced 917/34, **both held** per
+protocol — the band projector is a second member of the
+constructed-operator-family capability counted at the Tikhonov
+re-score; Steps 2–4 are the natural re-score triggers; holds logged),
+README (917; the proved list gains the band projectors), SGT index map
+(new Band section, 8 rows; the Spectral section's projector-algebra
+paragraph extended with the product-and-action layer; module list
+updated), proposal (status header, Step-1 delivery record with the
+route finding and the survey outcome, open-next-step rewritten to
+Step 2), and `proposals/README.md` (High row note + Delivered row +
+progress paragraph).
+
+**Next milestone (open):** the same proposal's **Step 2 — orthogonality
+of disjoint bands** (`a ≤ b ≤ c ≤ d`: the two band projectors compose
+to zero; the route is paved — the cross-law's ordered forms expand the
+product to `P_{min b d} − P_{min b c} − P_{min a d} + P_{min a c}`,
+which collapses under the ordering), then Step 3 (partition
+completeness) and Step 4 (the Hilbert projection specialization —
+survey `Analysis/InnerProductSpace/Projection.lean` signatures first).
+Or the Medium rows (Fiedler Phase B — needs an operator decision;
+mixing-time Step 1; Reversibility A and B; Relative Entropy;
+Perron–Frobenius + directed operators; discharge-perturbation — the
+Davis–Kahan Step 0 survey; approximate spectral projection).
+
 **Tikhonov Regularization in the Laplacian Eigenbasis (run 1,
 2026-08-20; `proposals/tikhonov-shrinkage-filter.md`, the Active
 table's top High row): DELIVERED — all three build steps in one run**

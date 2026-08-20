@@ -23,7 +23,6 @@ form used by the event-driven persistence frontier.
 | Theorem | Lean Axiom | Module |
 |---------|------------|--------|
 | §3 (sin Θ theorem) via Yu–Wang–Samworth Thm 2 | `davis_kahan_sin_theta` | `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan` |
-| Consequence applied per step | `spectral_persistence` (**deprecated** 2026-08-17; see migration note) | `Scaffold.Mathlib.GraphTheory.Dynamics` |
 
 ## Notes
 
@@ -31,11 +30,13 @@ form used by the event-driven persistence frontier.
   eigenvalues, with the two-cluster separation hypothesis on sorted
   eigenvalues, distance measured by the ℓ² operator norm
   (`Matrix.L2OpNorm`).
-- `spectral_persistence` composed the per-step Davis–Kahan bound with
-  Weyl gap stability along an event stream. Deprecated 2026-08-17 with
-  zero non-QA consumers: the derived layer's two-endpoint chain
+- A per-step consequence, `spectral_persistence`, formerly composed the
+  per-step Davis–Kahan bound with Weyl gap stability along an event
+  stream. Deprecated 2026-08-17 (zero non-QA consumers) and retired
+  2026-08-20: the derived layer's two-endpoint chain
   (`davisKahanTwoPoint`, `eventStreamProjectorDrift`) covers the
-  motivating use; retained through the compatibility window.
+  motivating use — see `docs/6_SGT_BACKLOG.md` for the retirement
+  record.
 
 ## See Also
 

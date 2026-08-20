@@ -21,7 +21,7 @@
   module carries no `axiom` declarations.
 
   Related modules: Cheeger-type inequalities live in
-  `Scaffold.Mathlib.GraphTheory.Cheeger`, event-driven persistence in
+  `Scaffold.Mathlib.GraphTheory.Cheeger`, event-driven dynamics in
   `Scaffold.Mathlib.GraphTheory.Dynamics`, and Weyl / Davis–Kahan
   perturbation bounds in
   `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl` and
@@ -645,7 +645,7 @@ theorem spectralProjector_mulVec_eigvecOf_of_lt (M : Matrix V V ℝ)
 product expands into outer products of eigenvectors whose cross terms
 vanish by pairwise orthonormality, leaving the original sum. This is the
 structural fact consumed (previously implicitly) by every projector-based
-statement in the Cheeger, persistence, and drift interfaces. Since the
+statement in the Cheeger, dynamics, and drift interfaces. Since the
 master product law `spectralProjector_mul_spectralProjector` was proved,
 this is its diagonal case, re-derived rather than re-proved. -/
 theorem spectralProjector_idempotent (M : Matrix V V ℝ) (hM : M.IsSymm)

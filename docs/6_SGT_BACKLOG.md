@@ -290,6 +290,18 @@ under this item by default.
   covered by the derived two-endpoint chain. Retained through the
   compatibility window with a migration note; removal is a later release
   decision. Do not extend its theorem family.
+  **Update (2026-08-20, operator-directed): removed.** Not well-established
+  math per the operator's own retirement criterion — the compatibility
+  window is closed. Deleted from `Scaffold/Mathlib/GraphTheory/Dynamics.lean`
+  along with its sole QA consumer
+  (`persistence_zero_perturbation_QA` in `Dynamics_QA.lean`); the
+  `TimeVaryingGraph`/`laplacianSequence`/`IsEventDriven` building blocks
+  it shared with the derived layer are untouched and still load-bearing
+  for `Derived.EventStream`/`Derived.ProjectorDrift`. Explicit axiom
+  count 12 → 11. `research/archive/` mentions of the axiom under its
+  original name (`spectral_persistence_under_events`) are historical
+  record and were deliberately left unedited, per this repository's
+  archive-immutability policy (`AGENTS.md`).
 - Removed subgaussian statements (moment growth, linear combinations,
   centering, sums) are re-admitted only when a consumer names them.
 - Horn–Johnson/Chung locator confirmation awaits a physical or publisher

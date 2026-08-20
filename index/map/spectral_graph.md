@@ -471,9 +471,14 @@ module of the `Normalized`/`Spectral` interfaces (after `Stationary`):
 Real definitions: `TimeVaryingGraph`, `laplacianSequence`,
 `IsEventDriven`, `laplacianSequence_symmetric`.
 
-| Axiom | Description | Source |
-|-------|-------------|--------|
-| `spectral_persistence` (**deprecated** 2026-08-17; zero non-QA consumers, covered by the derived two-endpoint chain — see migration note) | Per-step projector stability `≤ ε/γ` under gap-separated event streams | [Davis & Kahan 1970](../sources/davis_kahan_1970.md) |
+No axioms remain in this module. It previously admitted a per-step
+subspace-persistence axiom (`spectral_persistence`, deprecated
+2026-08-17), retired 2026-08-20 with zero non-QA consumers — the
+motivating use is covered by the derived layer's proved two-endpoint
+chain (`Derived.ProjectorDrift.davisKahanTwoPoint`,
+`Derived.ProjectorDrift.eventStreamProjectorDrift`, which sums to a
+per-step bound if one is needed). See `docs/6_SGT_BACKLOG.md` for the
+retirement record.
 
 ## Applications
 

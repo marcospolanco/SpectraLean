@@ -23,9 +23,9 @@ import Scaffold.Mathlib.Probability.Concentration.Matrix.Basic
 # Matrix Azuma–Hoeffding inequality
 
 Tail bound for finite sums of matrix martingale differences with a uniform
-spectral-norm bound. This is the event-stream statement consumed by
-Scaffold's dynamic-persistence frontier: dependent per-step perturbations
-whose conditional means vanish given the past.
+spectral-norm bound: dependent per-step perturbations whose conditional
+means vanish given the past. Consumed by `Scaffold.Derived.EventStream`'s
+`eventStreamTail`.
 
 The pinned Mathlib snapshot has no filtration or conditional-expectation
 API, so the martingale-difference structure is expressed elementarily:

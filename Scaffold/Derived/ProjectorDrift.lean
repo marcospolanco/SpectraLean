@@ -20,7 +20,7 @@ import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan
 /-!
 # High-probability projector drift (derived layer)
 
-Second derived module: the `‖Σₖ Eₖ‖ / γ` persistence chain assembled
+Second derived module: bounds high-probability spectral-projector drift
 end-to-end. The random cumulative Laplacian displacement `‖L_m − L_0‖` is
 controlled in probability by Azuma (`eventStreamTail`); the deterministic
 response of the invariant spectral subspace to that displacement is
@@ -36,9 +36,9 @@ consume; they are not foundationally proved results.
 
 The composition is *two-endpoint* rather than per-step: Davis–Kahan is a
 two-point statement at `(B, B + E)`, and the Azuma input controls exactly
-the two-endpoint displacement `‖L_m − L_0‖`. A per-step summation
-`m ε / γ` is available deterministically from `spectral_persistence` and
-is not used here.
+the two-endpoint displacement `‖L_m − L_0‖`. A per-step bound is
+available, at a cruder constant, by summing this two-endpoint bound over
+consecutive times.
 -/
 
 open MeasureTheory ProbabilityTheory

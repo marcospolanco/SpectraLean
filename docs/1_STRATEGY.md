@@ -32,11 +32,12 @@ Scaffold should therefore stay subordinate and interoperable:
 
 The intended applications cross several formal domains: finite graph combinatorics, matrices and operator norms, probability and concentration, and perturbation theory. A usable result often depends on all four. That intersection makes API alignment as important as theorem availability. See the [Mathlib Coverage Map](8_MATHLIB_COVERAGE_MAP.md) for a dated survey of how well the pinned Mathlib itself covers each of these tendrils — the admitted-axiom surface below traces that map closely.
 
-Spectral persistence is already developed elsewhere and is retained here only
-as an existing compatibility/example package. It is not Scaffold's research
-goal or the criterion for choosing new work. Scaffold's agenda is to grow a
-broad, reusable neighborhood around SGT, so future research can start from
-well-specified graph, spectral, probabilistic, and operator-theoretic APIs.
+Scaffold's agenda is to grow a broad, reusable neighborhood around SGT, so
+future research can start from well-specified graph, spectral,
+probabilistic, and operator-theoretic APIs. An example event-driven
+dynamics package exists in the derived layer (`docs/3_SPECTRAL_THEORY.md`)
+built along the way to that agenda; it is not itself the research goal or
+the criterion for choosing new work.
 
 ## Center-out prioritization
 

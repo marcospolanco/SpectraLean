@@ -14,9 +14,9 @@ _Generated from Lean source on 2026-08-20._
 
 | Metric | Count |
 | --- | ---: |
-| QA theorem/lemma declarations | 917 |
+| QA theorem/lemma declarations | 916 |
 | `sorry`/`admit` tokens in QA code | 0 |
-| Explicit axioms in `Scaffold/Mathlib` | 12 |
+| Explicit axioms in `Scaffold/Mathlib` | 11 |
 | `sorry`/`admit` tokens in `Scaffold/Mathlib` code | 0 |
 
 ### QA declarations by domain
@@ -28,7 +28,7 @@ _Generated from Lean source on 2026-08-20._
 | Derived | 11 |
 | OperatorTheory | 94 |
 | Perturbation | 19 |
-| SpectralGraph | 769 |
+| SpectralGraph | 768 |
 
 ### QA files
 
@@ -49,7 +49,7 @@ _Generated from Lean source on 2026-08-20._
 | `Scaffold/QA/SpectralGraph/Connectivity_QA.lean` | 15 | 0 |
 | `Scaffold/QA/SpectralGraph/CourantFischer_QA.lean` | 33 | 0 |
 | `Scaffold/QA/SpectralGraph/Cuts_QA.lean` | 11 | 0 |
-| `Scaffold/QA/SpectralGraph/Dynamics_QA.lean` | 6 | 0 |
+| `Scaffold/QA/SpectralGraph/Dynamics_QA.lean` | 5 | 0 |
 | `Scaffold/QA/SpectralGraph/EffectiveResistance_QA.lean` | 26 | 0 |
 | `Scaffold/QA/SpectralGraph/ElectricalFlow_QA.lean` | 88 | 0 |
 | `Scaffold/QA/SpectralGraph/Exhaustive_QA.lean` | 87 | 0 |
@@ -124,19 +124,18 @@ _Generated from Lean source on 2026-08-20._
 - **Projector algebra (2026-08-17):** eigenbasis orthonormality (`eigvecOf_inner`) and completeness (`eigvecOf_complete`) are proved from the Mathlib spectral-theorem API, yielding proved `spectralProjector_idempotent` / `initialProjector_idempotent` and the extreme-threshold theorems `spectralProjector_eq_zero` / `spectralProjector_eq_one`. These structural facts were previously consumed implicitly through the admitted perturbation interfaces.
 - **Derived layer:** `Derived.EventStream.eventStreamTail` is proved from `matrix_azuma_hoeffding`; `Derived.ProjectorDrift.davisKahanTwoPoint` is proved from `davis_kahan_sin_theta` (and, since the 2026-08-20 Weyl retirement, the *proved* `weyl_inequality` — no longer an axiom dependency); `Derived.ProjectorDrift.eventStreamProjectorDrift` combines them with `eventStreamTail`. All three are checked deductions relative to the trust base (two concentration/perturbation axioms after the Weyl retirement), not foundationally proved results.
 - **`spectral_persistence` deprecation (2026-08-17):** the per-step persistence axiom was deprecated with a migration note after a consumer inventory showed zero non-QA consumers and the derived two-endpoint chain covering the motivating use. The axiom is retained through the compatibility window (its QA deliberately exercises the deprecated surface with the linter silenced for that use only); removal is a later release decision.
+- **`spectral_persistence` removal (2026-08-20, operator-directed):** the compatibility window closed; the axiom and its sole QA consumer (`persistence_zero_perturbation_QA`) were deleted from `Dynamics.lean`/`Dynamics_QA.lean`. Not a proof-based retirement (no theorem replaces it) — an editorial removal on the stated criterion that it is not well-established published math the way the repository's other axioms are, distinct from every prior retirement in this list, which discharged a citation-backed axiom by proof. `TimeVaryingGraph`, `laplacianSequence`, `IsEventDriven`, and `laplacianSequence_symmetric` are untouched — they remain load-bearing for `Derived.EventStream`/`Derived.ProjectorDrift`, which already covered the motivating persistence use without this axiom. Explicit axiom count 12 → 11; QA declarations 917 → 916. `lake env lean` on the three touched modules (`Dynamics.lean`, `Dynamics_QA.lean`, `Derived/ProjectorDrift.lean`, the last for a dangling-reference docstring fix only) — zero errors. `research/archive/` references to the axiom's original name (`spectral_persistence_under_events`) are left as historical record, per `AGENTS.md`'s archive-immutability rule.
 - **`lambda2_variational` retirement (2026-08-18):** the Courant–Fischer characterization of the algebraic connectivity was converted from an admitted axiom (symmetry hypotheses only — a materially false shape for negative weights, refuted in QA) into a proved theorem with the load-bearing `hnonneg` hypothesis, reducing the explicit axiom count from 18 to 17. The proof is pure matrix-world hard crust (eigenbasis expansion, Parseval, spectral resolution of `quadForm`, and two sorted-multiset multiplicity pins), consuming no axioms.
 - **Azuma statement repair (2026-08-17, same day as the axiom's introduction):** preparing the derivation exposed that `matrix_azuma_hoeffding` lacked the summand-count factor `m` in the exponent denominator, which made the statement false for `m ≥ 2` (Rademacher-sum counterexample). The denominator is now `8 m R²`, the uniform-bound specialization of Tropp's variance statistic `σ² = ‖∑ Yₖ²‖ ≤ m R²`. The axiom had no downstream consumers before the repair.
 
 ## Active priorities
 
-1. Fold or deprecate the unconsumed per-step `spectral_persistence` axiom
-   in favor of the two-endpoint derived chain.
-2. Confirm Horn–Johnson section-level and Chung chapter-level locators
+1. Confirm Horn–Johnson section-level and Chung chapter-level locators
    against physical or publisher copies (no local copy available; numbers
    must not be invented).
-3. Specify the x90 observable against the completed persistence chain
+2. Specify the x90 observable against the completed persistence chain
    (application ring; the inner chain is now credible end-to-end).
-4. Add QA based on risk and composability rather than targeting a cosmetic one-to-one ratio.
+3. Add QA based on risk and composability rather than targeting a cosmetic one-to-one ratio.
 
 ## Historical reports
 

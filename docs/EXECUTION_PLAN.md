@@ -6,6 +6,39 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**`spectral_persistence` removal (2026-08-20, operator-directed, interactive
+session — not an `opencode-pursue` run): DELIVERED.** Editorial axiom
+removal, not a proof-based retirement: the operator's stated criterion was
+that the axiom is not well-established published math, distinct from
+every prior retirement (all of which discharged a citation-backed axiom
+by proof). Deleted `axiom spectral_persistence` from
+`Scaffold/Mathlib/GraphTheory/Dynamics.lean` and its sole QA consumer
+`persistence_zero_perturbation_QA` from `Scaffold/QA/SpectralGraph/Dynamics_QA.lean`;
+fixed a dangling docstring reference in `Scaffold/Derived/ProjectorDrift.lean`.
+`TimeVaryingGraph`/`laplacianSequence`/`IsEventDriven`/
+`laplacianSequence_symmetric` are untouched (still consumed by
+`Derived.EventStream`/`Derived.ProjectorDrift`, which already cover the
+motivating persistence use without this axiom via the proved two-endpoint
+chain). Explicit axiom count 12 → 11; QA declarations 917 → 916. Synced:
+`index/map/spectral_graph.md`, `index/map/perturbation.md`,
+`index/sources/davis_kahan_1970.md`, `docs/2_ARCHITECTURE.md`,
+`docs/7_SGT_RADAR.md`, `README.md`, `docs/5_QA_SCOREBOARD.md` (regenerated
++ a new dated narrative bullet), `docs/6_SGT_BACKLOG.md` (appended, not
+rewritten). `research/archive/` left untouched per `AGENTS.md`'s
+archive-immutability rule — the earlier request in this session to also
+scrub archive mentions was declined for that reason; this narrower
+Lean-only removal was carried out instead.
+
+**Verification:** `lake env lean` on the three touched modules — zero
+errors (one pre-existing, unrelated unused-variable warning in
+`ProjectorDrift.lean`, confirmed present before this change);
+`scripts/generate_qa_scoreboard.py` regeneration reflects the new counts;
+a full `lake build` was not run for this change (not requested, and the
+three touched modules elaborate cleanly in isolation with no signature
+changes to anything else imports).
+
+---
+
 **Spectral Band Projectors, Step 1 — the two-sided band projector (run 1,
 2026-08-20; `proposals/spectral-band-projectors.md`, the Active table's
 only remaining High row, at its recorded open next step "begin with

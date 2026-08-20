@@ -3,21 +3,10 @@
 
   Purpose
   -------
-  Event-driven spectral dynamics: time-varying weighted graphs, bounded
-  per-step Laplacian perturbations, real spectral gaps, real spectral
-  projectors built from the orthonormal eigenbasis of the spectral
-  theorem, and the admitted (cited) subspace-persistence principle.
-
-  The persistence statement is the dynamic frontier of Scaffold's SGT
-  center; its per-step engine is the Davis–Kahan theorem admitted in
-  `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan`.
-
-  Source:
-  - Davis, C. & Kahan, W. M., "The rotation of eigenvectors by a
-    perturbation", SIAM J. Numer. Anal. 7(1):1–46, 1970.
-  - Yu, Y., Wang, T., Samworth, R. J., "A useful variant of the
-    Davis–Kahan theorem for statisticians", Annals of Statistics
-    43(3):2028–2061, 2015 (two-sided gap projector form, constant 1).
+  Event-driven graph dynamics: time-varying weighted graphs, bounded
+  per-step Laplacian perturbations, and real spectral gaps — building
+  blocks consumed by `Scaffold.Derived.EventStream` and
+  `Scaffold.Derived.ProjectorDrift`.
 -/
 
 import Scaffold.Mathlib.GraphTheory.Spectral
@@ -60,59 +49,5 @@ The projector definitions (`spectralProjector`, `initialProjector`) live
 in the SGT center `Scaffold.Mathlib.GraphTheory.Spectral`, because the
 Davis–Kahan perturbation bridge consumes them as well.
 -/
-/-!
-## 3. The persistence principle (admitted)
-
-One-step stability of an invariant spectral subspace under bounded,
-gap-separated event streams. This is the dynamic-SGT frontier claim; its
-classical engine is Davis–Kahan.
--/
-
-/-- Event-driven spectral persistence: if every step perturbs the
-Laplacian by at most `ε` in operator norm, and the spectral gap at index
-`k` stays at least `γ` along the whole evolution, then the invariant
-subspace projector rotates by at most `ε / γ` per step.
-
-Source:
-- Davis, C. & Kahan, W. M., SIAM J. Numer. Anal. 7(1):1–46, 1970
-  (sin Θ theorem, §3).
-- Yu, Y., Wang, T., Samworth, R. J., Annals of Statistics 43(3):2028–2061,
-  2015, Theorem 2 (two-sided gap projector variant with constant 1).
-
-Statement differences: stated for the projector onto the `k+1` smallest
-eigenvalues of the Laplacian sequence, with the separation hypothesis
-phrased through the one-step gap lower bound; the per-step engine is the
-projector form of Davis–Kahan. The `1 ≤` version omits the sharper
-constants available in the two papers.
-
-Deprecated 2026-08-17: this axiom has no non-QA consumers, and the
-derived layer now covers the motivating persistence use through the
-two-endpoint chain — `SpectralGraphTheory.Derived.davisKahanTwoPoint`
-(Davis–Kahan + Weyl, proved steps only) and
-`SpectralGraphTheory.Derived.eventStreamProjectorDrift` (with the Azuma
-event-stream tail). Migration: for per-step bounds, sum the two-endpoint
-bound over consecutive times (cruder constant, no admission), or consume
-`davisKahanTwoPoint` directly at the times of interest. Retained through
-the compatibility window per the deprecation policy; removal is a later
-release decision.
-
-QA: exercised by
-`SpectralGraphTheory.QA.persistence_zero_perturbation_QA` in
-`Scaffold/QA/SpectralGraph/Dynamics_QA.lean`, which checks the zero-event
-degenerate case against the (deprecated) compatibility surface.
--/
-@[deprecated (since := "2026-08-17")]
-axiom spectral_persistence
-    (A : TimeVaryingGraph V) (k : Fin (Fintype.card V))
-    (hk : (k : ℕ) + 1 < Fintype.card V)
-    (ε γ : ℝ) (hγ : 0 < γ)
-    (hsymm : ∀ t, (A t).IsSymm)
-    (hevent : IsEventDriven A ε)
-    (hgap : ∀ t, spectralGap (laplacianSequence A t)
-      (laplacianSequence_symmetric A hsymm t) k hk ≥ γ) :
-    ∀ t, ‖initialProjector (laplacianSequence A (t + 1))
-          (laplacianSequence_symmetric A hsymm (t + 1)) k
-        - initialProjector (laplacianSequence A t)
-          (laplacianSequence_symmetric A hsymm t) k‖ ≤ ε / γ
 
 end SpectralGraphTheory

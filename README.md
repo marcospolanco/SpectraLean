@@ -8,9 +8,7 @@ replaceable as formal proofs become available.
 The project’s center is **spectral graph theory (SGT)**. Its goal is a broad,
 reusable formal neighborhood around SGT: graph and Laplacian theory,
 spectral and variational methods, matrix/operator tools, probability, and
-bridges that future research can compose. Spectral persistence is an existing
-formalization, retained as a compatibility/example package, not the project’s
-research objective.
+bridges that future research can compose.
 
 Scaffold is both a Lean library and a research substrate. It is **pre-release**:
 the default `lake build` currently passes, but consumers should pin a [verified
@@ -27,9 +25,8 @@ As of August 20, 2026:
 | QA theorems/lemmas | 917, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is the Cheeger *hard* direction at the SGT center;
-Davis–Kahan in the perturbation bridge; the scalar and matrix
-concentration family (Hoeffding, Bernstein, subgaussian, Azuma); and the
-deprecated per-step `spectral_persistence` compatibility axiom. Classical
+Davis–Kahan in the perturbation bridge; and the scalar and matrix
+concentration family (Hoeffding, Bernstein, subgaussian, Azuma). Classical
 Laplacian facts, Courant–Fischer, Cauchy interlacing, the Cheeger *upper*
 bound, **Weyl's perturbation inequality**, Woodbury/Sherman–Morrison, the
 electrical crust, Foster's theorem, the Expander Mixing Lemma, the

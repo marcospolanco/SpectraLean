@@ -82,8 +82,8 @@ completing the resolvent program).
   2026-08-20 retirement) control how far event
   streams can move Laplacian spectra ([Spectral Graph Theory map](spectral_graph.md)).
 - `davis_kahan_sin_theta` is the engine of the derived projector-drift
-  chain (`Derived.davisKahanTwoPoint`, `Derived.eventStreamProjectorDrift`)
-  and was the engine of the now-deprecated (2026-08-17)
+  chain (`Derived.davisKahanTwoPoint`, `Derived.eventStreamProjectorDrift`),
+  which covers the motivating use of the now-retired (2026-08-20)
   `spectral_persistence` compatibility axiom.
 
 ## See Also

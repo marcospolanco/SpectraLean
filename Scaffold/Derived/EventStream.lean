@@ -20,9 +20,11 @@ import Scaffold.Mathlib.Probability.Concentration.Matrix.Azuma
 # Event-stream tail bound (derived layer)
 
 First inhabitants of the derived layer: an axiom-backed theorem connecting
-the dynamic-persistence frontier (`SpectralGraphTheory.IsEventDriven`) to
+event-driven Laplacian evolution (`SpectralGraphTheory.IsEventDriven`) to
 the matrix-concentration bridge
-(`Probability.Concentration.Matrix.matrix_azuma_hoeffding`).
+(`Probability.Concentration.Matrix.matrix_azuma_hoeffding`) — a
+probabilistic tail bound on the cumulative random Laplacian displacement
+`‖L_m − L_0‖` over `m` dependent per-step events.
 
 The deterministic content is proved: the telescoping identity
 `∑_{k < m} (L_{k+1} - L_k) = L_m - L_0`, and the identification of the
@@ -32,9 +34,8 @@ The tail statement itself is a derived theorem: the proof combines the
 telescoping identity (proved here) with the admitted Matrix Azuma axiom
 (Tropp 2012, Theorem 7.1). It is conditional on that axiom and is not a
 foundationally proved result; the axiom remains the visible trust
-boundary. This is the probabilistic half of the `‖Σₖ Eₖ‖ / γ`
-persistence hypothesis; combining it with the Davis–Kahan bridge is the
-next derivation.
+boundary. `Scaffold.Derived.ProjectorDrift` combines this with the
+Davis–Kahan bridge to bound spectral-projector displacement.
 -/
 
 open MeasureTheory ProbabilityTheory

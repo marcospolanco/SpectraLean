@@ -2,7 +2,7 @@
 
 ## Mission
 
-Advance Scaffold as a disciplined, axiom-transparent Lean research substrate centered on spectral graph theory. Work radiates outward from load-bearing SGT definitions and theorem interfaces toward perturbation and concentration bridges, dynamic spectral persistence, and finally x90 applications.
+Advance Scaffold as a disciplined, axiom-transparent Lean research substrate centered on spectral graph theory. Work radiates outward from load-bearing SGT definitions and theorem interfaces toward perturbation and concentration bridges, and reusable downstream applications. `docs/3_SPECTRAL_THEORY.md` retains an example event-driven/dynamic-persistence package built along the way; it is not a roadmap goal — see that document's own scope boundary.
 
 ## Read first
 
@@ -31,7 +31,7 @@ Advance Scaffold as a disciplined, axiom-transparent Lean research substrate cen
 3. Replace `True`, constant, and admitted placeholders with meaningful SGT definitions or theorem shapes.
 4. Reduce the explicit trust surface and improve citation/index coverage.
 5. Strengthen reusable SGT QA and bridge interfaces.
-6. Advance dynamic persistence and application work only when its inner dependencies are credible.
+6. Advance application-facing work only when its inner dependencies are credible.
 
 Choose the smallest coherent milestone that unlocks the most downstream SGT progress per unit of complexity. When outer work exposes an inner defect, move inward and fix the load-bearing dependency first.
 

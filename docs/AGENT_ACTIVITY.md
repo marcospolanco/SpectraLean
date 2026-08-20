@@ -24,6 +24,126 @@ entry. If a session ID cannot be established from repository evidence, write
 Follow the metadata with concise `Changes`, `Verification`, `Remaining risk`,
 and `Next handoff` paragraphs as applicable.
 
+## 2026-08-20 — Strip "dynamic spectral persistence" framing from strategy docs (operator-directed, interactive session)
+
+**Run:** `unavailable` (interactive Claude Code session)  
+**Session:** `unavailable`  
+**Status:** completed  
+**Milestone:** Follow-up to the `spectral_persistence` axiom removal above.
+The operator asked where else "spectral persistence" appears in the
+repository; the answer was that it's a named strategic direction in
+`AGENTS.md`'s Mission and Priority-order sections, in
+`docs/1_STRATEGY.md`, and in `Azuma.lean`'s docstring — distinct from the
+axiom itself, since the underlying proved modules
+(`Derived/EventStream.lean`, `Derived/ProjectorDrift.lean`) rest on
+legitimate axioms (Davis–Kahan, matrix Azuma-Hoeffding) and were not in
+question. Given a choice between leaving it, stripping the framing while
+keeping the proved math, or deleting the modules outright, the operator
+chose **strip the framing, keep the math** — scoped explicitly to
+`AGENTS.md`, `docs/1_STRATEGY.md`, and the `Azuma.lean` docstring; no
+other file in the broader "persistence" grep footprint (`docs/2_ARCHITECTURE.md`,
+`docs/3_SPECTRAL_THEORY.md`, `Spectral.lean`, the proposals mentioning
+it) was touched, since they were outside the selected option.
+
+**Changes:** `AGENTS.md` — the Mission sentence no longer names "dynamic
+spectral persistence" and "x90 applications" as a direction to radiate
+toward (replaced with a pointer to `docs/3_SPECTRAL_THEORY.md`'s own
+retained-example status, which already disclaims itself as a roadmap
+goal); Priority order item 6 reworded from "Advance dynamic persistence
+and application work" to "Advance application-facing work." This also
+fixes a standing internal inconsistency: `AGENTS.md` was telling
+autonomous runs to advance toward persistence as a destination, while
+`docs/1_STRATEGY.md` and `docs/3_SPECTRAL_THEORY.md` already said the
+opposite ("not Scaffold's research goal," "do not extend... merely
+because... available"). `docs/1_STRATEGY.md`'s paragraph reworded to
+drop "already developed elsewhere" (inaccurate — it was developed in
+this repository's own derived layer) while keeping the substantive
+disclaimer. `Azuma.lean`'s docstring reworded to introduce matrix
+Azuma–Hoeffding on its own terms (a real, independently citable
+theorem) rather than via the persistence narrative, with a factual
+pointer to its actual consumer (`eventStreamTail`) instead.
+
+**Verification:** `lake env lean` on `Azuma.lean` — zero errors (the
+other two edits are prose-only, in `.md` files);
+`scripts/check_markdown_links.py` passes.
+
+**Remaining risk:** none identified. This was a framing/wording change
+with no effect on any theorem, axiom, or QA declaration; counts are
+unchanged from the prior entry (11 axioms, 916 QA declarations).
+
+**Next handoff:** none opened by this change.
+
+## 2026-08-20 — `spectral_persistence` removed (operator-directed, interactive session)
+
+**Run:** `unavailable` (interactive Claude Code session, not an
+`opencode-pursue`/OpenCode wrapper invocation)  
+**Session:** `unavailable`  
+**Status:** completed  
+**Milestone:** Remove the `spectral_persistence` axiom
+(`Scaffold/Mathlib/GraphTheory/Dynamics.lean`) and its sole QA consumer,
+per explicit operator instruction. Editorial removal, not a proof-based
+retirement: the operator's stated criterion was that the axiom is not
+well-established published math, unlike this repository's other
+axioms — distinct from every prior retirement, which discharged a
+citation-backed axiom by proof. A broader initial request to also scrub
+all mentions from `research/archive/` was raised earlier in the same
+session and declined (conflicts with `AGENTS.md`'s archive-immutability
+rule and would falsify historical QA-coverage records); this narrower
+Lean-source-only removal was carried out instead, at the operator's
+explicit re-scoping ("remove the lean").
+
+**Changes:** deleted `axiom spectral_persistence` and its docstring
+section from `Dynamics.lean`; deleted its sole consumer
+`persistence_zero_perturbation_QA` (and the `set_option
+linter.deprecated false in` it required) from `Dynamics_QA.lean`; updated
+both files' module docstrings to drop the persistence framing. Fixed a
+dangling reference in `Scaffold/Derived/ProjectorDrift.lean`'s docstring
+(previously named the axiom as an available-but-unused per-step route).
+`TimeVaryingGraph`, `laplacianSequence`, `IsEventDriven`, and
+`laplacianSequence_symmetric` are untouched — confirmed still consumed
+by `Derived/EventStream.lean` and `Derived/ProjectorDrift.lean`/their QA
+files via grep before editing, since those are the load-bearing building
+blocks the derived layer's proved two-endpoint persistence chain
+(`davisKahanTwoPoint`, `eventStreamProjectorDrift`) actually uses.
+Synced: `index/map/spectral_graph.md` (removed the axiom's table row),
+`index/map/perturbation.md`, `index/sources/davis_kahan_1970.md`
+(removed the axiom's citation-mapping row; the `davis_kahan_sin_theta`
+citation itself is untouched, since that axiom still stands),
+`docs/2_ARCHITECTURE.md`, `docs/7_SGT_RADAR.md` (axiom-minimization trend
+line), `README.md` (status table and trust-surface prose),
+`docs/5_QA_SCOREBOARD.md` (regenerated metrics via
+`scripts/generate_qa_scoreboard.py`, plus a new dated narrative bullet
+and a trimmed now-resolved priority item), `docs/6_SGT_BACKLOG.md`
+(appended an update note to the existing entry, not rewritten), and
+`docs/EXECUTION_PLAN.md`. `cdx-clean-assess.md` (a dated point-in-time
+audit snapshot) and `research/archive/` were deliberately left
+untouched — both are historical record, not live documentation.
+
+**Decisive commands and outcomes:** `lake env lean` on the three touched
+Lean modules individually — zero errors on all three; one pre-existing,
+unrelated `unused variable 'hγ'` warning in `ProjectorDrift.lean`
+(confirmed present before this change, in code untouched by this edit —
+the only change to that file was a documentation comment).
+`scripts/generate_qa_scoreboard.py` regeneration: explicit axioms 12 →
+11, QA declarations 917 → 916 (`Dynamics_QA.lean` 6 → 5). A full `lake
+build` was not run for this change — not requested, and the edit makes
+no signature changes to anything another module imports, so isolated
+elaboration of the three touched files is the relevant check.
+
+**Remaining risk:** low for correctness (the removed axiom had zero
+non-QA consumers by its own deprecation record, confirmed again here by
+grep before deletion). The larger judgment call — whether "not
+well-established math" is the right bar for what belongs in this
+repository's axiom set, and whether it should be applied to any other
+axiom — was not evaluated here; this entry documents one instance
+executed on explicit, scoped operator instruction, not a new standing
+policy.
+
+**Next handoff:** none opened by this change; the Active priority table
+in `proposals/README.md` and the Active milestone in
+`docs/EXECUTION_PLAN.md` (Spectral Band Projectors Steps 2–4) are
+unaffected.
+
 ## 2026-08-20T13:39:48Z — Spectral band projectors, Step 1 (two-sided band projector)
 
 **Run:** `20260820T133553Z-run-1`  

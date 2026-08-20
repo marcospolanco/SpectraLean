@@ -174,13 +174,13 @@ Community process is defined by `governance/CONTRIBUTING.md`, `MAINTAINERS.md`, 
   `spectralProjector_eq_zero`, `spectralProjector_eq_one`), from the
   Mathlib spectral-theorem API; the admitted perturbation interfaces
   remain the trust boundary for the perturbation inequalities themselves.
-- The retained persistence example is assembled end-to-end in the derived layer
+- The persistence example is assembled end-to-end in the derived layer
   (`eventStreamTail`, `davisKahanTwoPoint`, `eventStreamProjectorDrift`),
-  all conditional on three admitted axioms. The per-step
-  `spectral_persistence` axiom was deprecated on 2026-08-17 with a
-  migration note (zero non-QA consumers; the derived chain covers the
-  motivating use); it is retained through the compatibility window, and
-  removal is a later release decision.
+  conditional on two admitted axioms (`davis_kahan_sin_theta`,
+  `matrix_azuma_hoeffding`; `weyl_inequality` is proved since 2026-08-20).
+  The per-step `spectral_persistence` axiom was deprecated on 2026-08-17
+  (zero non-QA consumers; the derived chain covers the motivating use)
+  and removed on 2026-08-20 at the end of its compatibility window.
 - Page-level locators remain pending for Horn–Johnson (section-level
   recorded) and Chung (chapter-level recorded); the 2026-08-17 citation
   audit corrected an inaccurate provenance note in the Chung index and

@@ -1,9 +1,10 @@
 # Proposal: Spectral Band Projectors
 
-**Status:** Step 3 DELIVERED 2026-08-20 (see the delivery record under
-"Build order"). Priority **High**. Assistant's assessment of project
-direction, requested 2026-08-19, promoted from `sgt-gaps.md` item 5.
-Authorizes no Lean changes, axiom admissions, or external publication.
+**Status:** Step 4 DELIVERED 2026-08-21 — the program is COMPLETE (see
+the delivery record under "Build order"). Priority **High**.
+Assistant's assessment of project direction, requested 2026-08-19,
+promoted from `sgt-gaps.md` item 5. Authorizes no Lean changes, axiom
+admissions, or external publication.
 
 Companion to `sgt-gaps.md` and `Scaffold/Mathlib/GraphTheory/Spectral.lean`'s
 already-delivered `spectralProjector`, of which this proposal is a direct
@@ -247,10 +248,100 @@ orthogonality theorem, where monotonicity is load-bearing.)*
 
 ### Step 4: The Hilbert-projection-theorem specialization
 
+**DELIVERED 2026-08-21 (zero new axioms; count stays 11; `#print
+axioms` on all three new public theorems reads only `propext,
+Classical.choice, Quot.sound`). The program is complete.** The
+proposal's mandatory pre-step survey (exact lemma signatures) ran
+against the pinned snapshot before any edit and found the whole shelf
+present: `eq_orthogonalProjection_of_mem_of_inner_eq_zero`
+(the identification lemma — membership plus `⟪u − v, w⟫ = 0` for every
+`w ∈ K` forces `orthogonalProjection K u = v`),
+`orthogonalProjection_minimal` (`‖u − proj_K u‖ = ⨅ c : K, ‖u − c‖`),
+`HasOrthogonalProjection.ofCompleteSpace` (resolving on
+finite-dimensional `EuclideanSpace` submodules), and the transport
+spine — `EuclideanSpace.inner_piLp_equiv_symm` (`rfl` on this
+snapshot) and `Matrix.toEuclideanLin_piLp_equiv_symm` (also `rfl`) —
+the resolvent Step-0 record's `toEuclideanCLM` precedent, one
+notation-level cleaner (`toEuclideanLin` needs no coercion). No
+obstruction; the stop-and-record clause was not triggered.
+
+**Delivered in `GraphTheory.Band`** (with the two Mathlib imports
+`Analysis.InnerProductSpace.{Projection,PiL2}` added):
+
+- `bandProjector_residual_dotProduct_eq_zero` — the engine:
+  `(x − B *ᵥ x) ⬝ᵥ (B *ᵥ z) = 0`, load-bearing on exactly the two
+  Step-1 facts (symmetry moves the band across the dot product;
+  idempotence collapses `B *ᵥ (x − B *ᵥ x)` to `0`). No new machinery
+  consumed — the whole Step-4 section reduces to Step 1 plus Mathlib.
+- `bandProjector_toEuclidean_apply_eq_orthogonalProjection` — the
+  identification: `orthogonalProjection (range (toEuclideanLin B))
+  (e x) = e (B *ᵥ x)`, by `eq_orthogonalProjection_of_mem_of_inner_eq_zero`
+  with membership via the transport (witness `e x` itself) and
+  orthogonality via the engine (every range member is `e (B *ᵥ z')`).
+- `norm_sub_bandProjector_apply_le` — the closest-point property: for
+  every fixed point `y` of the band — equivalent to range membership
+  by idempotence, and stated without an existential —
+  `‖e x − e (B *ᵥ x)‖ ≤ ‖e x − e y‖`, from `orthogonalProjection_minimal`
+  composed with the identification and `ciInf_le` (conditionally
+  complete over ℝ; the `BddBelow` witness is `0` by norm
+  nonnegativity).
+
+**Statement-shape decision recorded before stating:** both
+Euclidean-level statements are made at `EuclideanSpace ℝ V`, not at
+the bare `V → ℝ` — the bare type's default norm instance is the sup
+norm, and a closest-point claim there would be silently wrong-normed.
+The fixed-point hypothesis form (`B *ᵥ y = y`) was chosen over the
+range-membership existential deliberately (equivalent by idempotence;
+no witness juggling for consumers).
+
+**QA** `SpectralGraph/Band_QA.lean` (+25 by the generator metric, 109
+in file, 998 total): the band `(0, 2] = diag(1,0)` pinned from the
+pinned threshold projectors; the identification instantiated
+(`orthogonalProjection` at the transported range of the packaged band
+equals the packaged `![3, 0]`); the residual-orthogonality engine
+witnessed **through the theorem and by raw literal arithmetic**
+(`![0,4] ⬝ᵥ ![1,0] = 0`, both routes meeting at `0`); the
+closest-point minimality instantiated at three competitors —
+**attained** (the signal-to-projection distance is exactly `4`),
+**strict over the zero signal** (`4 ≤ 5` — the 3-4-5 triangle), and
+**generic over the whole range line** (`band_diag13_hilb_min_line`:
+`4 ≤ ‖![3−t, 4]‖`, `_sqrt` form `4 ≤ √((3−t)²+16)`) — with
+`band_diag13_hilb_min_line_raw` proving the *same* line inequality by
+bare square-positivity (`4 = √16 ≤ √(16 + (3−t)²)` via
+`Real.sqrt_le_sqrt`), an independent hand-check of closest-point on
+the band's range line that the transported theorem's claim must
+reproduce; the **high band** instantiated too (`3 ≤ 5` — the property
+is not fixture-locked to the low band); and the **fixed-space guard**
+(`band_diag13_hilb_guard`): the hypothesis-free form "the projection
+beats every vector" is refuted at the unfiltered signal itself —
+distance `0 < 4`, the signal provably not fixed by the band — so the
+fixed-point hypothesis is load-bearing. Norm pins route through
+`‖e v‖² = v ⬝ᵥ v` (the Resolvent QA idiom, restated locally) plus a
+small nonnegative-square-pin helper. **Verification:** `lake env lean`
+on `Band` and `Band_QA` — zero errors, zero warnings (public module
+after two argument-shape fixes recorded in the scoreboard's
+verification row: `LinearMap.mem_range` carries no explicit arguments
+on this snapshot and `orthogonalProjection_minimal` takes its
+submodule implicitly; `iInf_le` does not apply over ℝ — the
+conditionally-complete `ciInf_le` with a `BddBelow` witness does);
+`#print axioms` on the three public and nine headline QA theorems ✔
+(three standard axioms only); oleans produced during iteration; **all
+thirty-four QA modules batch-elaborated, zero errors (BATCH-DONE
+fail=0)**; **full `lake build` ✔ (2186 targets, "Build completed
+successfully", detached log + poll)**; `lint_axioms` (11),
+`check_citations`, `check_markdown_links` pass; scoreboard
+regeneration idempotent (**998/11/0**). Environment healthy at run
+start (correct-path olean check: 5387 present, no fetch needed).
+
 Prove `bandProjector M hM a b x` is the closest point in its range to
 `x`, by instantiating Mathlib's Hilbert projection theorem
 (`Analysis/InnerProductSpace/Projection.lean`) at the band's eigenspace,
-survey the exact lemma signature first.
+survey the exact lemma signature first. *(Delivered as recorded above;
+the survey found everything needed, the transport is the resolvent
+Step-0 spine via `toEuclideanLin`, and the range form
+`LinearMap.range (toEuclideanLin B)` was used rather than an
+eigenspace-span form — for an idempotent self-adjoint band projector
+they coincide, and the range form needs no extra agreement theorem.)*
 
 ## QA plan
 
@@ -280,17 +371,12 @@ survey the exact lemma signature first.
 
 ## Open next step
 
-Step 4 — the Hilbert-projection-theorem specialization: prove
-`bandProjector M hM a b x` is the closest point in its range to `x`,
-by instantiating Mathlib's Hilbert projection theorem
-(`Analysis/InnerProductSpace/Projection.lean`) at the band's
-eigenspace. The proposal's own mandatory pre-step: survey the exact
-lemma signatures first (`orthogonalProjection`, the closest-point
-uniqueness/minimality lemmas, and the transport spine from
-`EuclideanSpace` inner products to matrix `mulVec` actions — the
-resolvent Step-0 record's `toEuclideanCLM` route is the precedent);
-if the instantiation needs machinery not on the shelf, stop and record
-the exact obstruction (the operating instruction below). Steps 1–3
-are delivered (the band projector, its algebra, disjoint-band
-orthogonality, and partition completeness); this is the program's
-last step.
+None — the program is complete (Step 4 delivered 2026-08-21; the
+four-step build order ran one step per run: Steps 1–3 on 2026-08-20,
+Step 4 on 2026-08-21). Named residual, not a step: the Step-4 range
+form `LinearMap.range (toEuclideanLin B)` coincides with the
+in-band-eigenspace span for the band projector (idempotent,
+self-adjoint), but no explicit agreement theorem with
+`Submodule.span` of the in-band eigenvectors was delivered — a
+consumer needing the span *form* specifically would add it as its own
+lemma.

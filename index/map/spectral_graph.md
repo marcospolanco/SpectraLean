@@ -331,7 +331,9 @@ proposal's "never exactly 1".
 ### `Scaffold.Mathlib.GraphTheory.Band` (two-sided spectral band projectors)
 
 The `(a, b]` band projector (proposal `spectral-band-projectors.md`,
-High, Steps 1–3): the orthogonal projector onto the eigenspaces with
+High, the four-step program complete — Steps 1–3 delivered
+2026-08-20, Step 4 delivered 2026-08-21): the orthogonal projector
+onto the eigenspaces with
 eigenvalues strictly above `a` and at most `b` — the bandpass-filtering
 object of frequency-selective graph signal processing — delivered as
 the difference of two `spectralProjector` calls, pure hard crust on
@@ -350,6 +352,11 @@ unconditional telescoping law, the covering-family resolution of the
 identity, monotone-family orthogonality (where monotonicity is exactly
 what makes the family a partition), and the consumer's vector
 decomposition `x = ∑ B_k x`.
+Step 4 (delivered 2026-08-21): **the Hilbert-projection
+specialization** — the band projector's output *is* Mathlib's
+`orthogonalProjection` onto its transported range and the closest
+point of that range to the input (statements at `EuclideanSpace ℝ V`;
+the bare `V → ℝ` default norm is the sup norm and is not used).
 
 | Declaration | Content |
 |-------------|---------|
@@ -367,6 +374,9 @@ decomposition `x = ∑ B_k x`.
 | `sum_range_bandProjector_eq_one` | **completeness under a partition:** a family whose start is strictly below every eigenvalue and whose end covers them all resolves the identity — both covering hypotheses load-bearing (the QA endpoint guards refute the hypothesis-free form) |
 | `bandProjector_mul_bandProjector_eq_zero_of_monotone` | **distinct members of a monotone family are orthogonal** — monotonicity supplies exactly the disjointness Step 2 consumes; together with completeness, the identity resolves into mutually orthogonal band projectors |
 | `sum_range_bandProjector_mulVec_eq_self` | **the consumer's form:** `∑ B_k *ᵥ x = x` under the same covering hypotheses — the frequency-band decomposition a graph-signal-processing consumer filters with |
+| `bandProjector_residual_dotProduct_eq_zero` | **the residual-orthogonality engine** `(x − B *ᵥ x) ⬝ᵥ (B *ᵥ z) = 0` — load-bearing on exactly the two Step-1 facts (symmetry moves the band across the dot product; idempotence collapses the band of the residual to zero) |
+| `bandProjector_toEuclidean_apply_eq_orthogonalProjection` | **the Hilbert-projection identification:** Mathlib's `orthogonalProjection` at `LinearMap.range (toEuclideanLin B)` maps the packaged signal to the packaged band-filtered signal — the SGT center's first consumption of `Analysis/InnerProductSpace/Projection.lean` (transport per the resolvent Step-0 precedent) |
+| `norm_sub_bandProjector_apply_le` | **the closest-point property:** `‖e x − e (B *ᵥ x)‖ ≤ ‖e x − e y‖` for every fixed point `y` of the band (equivalently every range member) — from `orthogonalProjection_minimal` + `ciInf_le`; the fixed-point hypothesis is load-bearing (the QA guard refutes the hypothesis-free form) |
 
 ### `Scaffold.Mathlib.GraphTheory.Cheeger`
 

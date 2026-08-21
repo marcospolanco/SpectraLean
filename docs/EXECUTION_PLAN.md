@@ -6,6 +6,281 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Davis–Kahan Step 1, component 1 of 2 — the equal-rank projector
+identity as its own hard-crust delivery (run 1, 2026-08-21;
+`proposals/discharge-perturbation-axioms.md` at its recorded open next
+step, the authorized two-component split's first half): DELIVERED.**
+`‖P − Q‖ = ‖(I−Q)P‖` for real symmetric idempotent matrices (orthogonal
+projectors) of equal rank, in a new public module
+`Analysis/OperatorTheory/Perturbation/ProjectionGap.lean` (~1570 lines),
+zero new axioms — `#print axioms` on every public theorem reads only
+`propext, Classical.choice, Quot.sound`. This was the component the
+Step-0 survey rated "moderate-large, the least-predictable piece" —
+REQUIRED for the constant-1 operator-norm Davis–Kahan statement.
+**Component 2, the Duhamel/FTC assembly, is a separate, later, dedicated
+run** — not started, per the proposal's one-step-per-run discipline.
+
+**Leverage:** it is the enabling lemma of the largest remaining
+axiom-retirement this proposal contemplates (11 explicit axioms → 10 at
+Step-1 completion); it is load-bearing on the proved Courant–Fischer
+engine's counting lemmas (`card_filter_eigvalOf_lt_evals_le`,
+`succ_le_card_filter_eigvalOf_le`,
+`finrank_span_eigvecOf_finset`,
+`dotProduct_eigvecOf_eq_zero_of_mem_span`) and on Mathlib's
+`Matrix.L2OpNorm` C*-layer (`l2_opNorm_conjTranspose_mul_self`,
+`l2_opNorm_mul`) — an error in any of those would surface here.
+
+**Route (recorded before stating, after a pre-edit shelf survey):**
+no characteristic-polynomial/XY-YX machinery is needed — this pin's
+Mathlib has no AB/BA charpoly lemma (surveyed), and the shelf's own
+counting lemmas route everything: (A) the always-true layer
+`‖P−Q‖ = max ‖(I−Q)P‖ ‖(I−P)Q‖` by the orthogonal decomposition
+`(P−Q)x = (I−Q)Px ⊥ Q(I−P)x` plus the factorizations
+`(I−Q)P = (I−Q)(P−Q)`, `Q(I−P) = Q(Q−P)`; (B) the equal-rank core
+`‖(I−Q)P‖ = ‖(I−P)Q‖` via `‖(I−Q)P‖² = ‖P(I−Q)P‖` (C*-identity) `=
+evals hSP last = 1 − τ` with `τ := evals h(PQP) ⟨n − rank P⟩`, where
+the two inequality directions reduce to: PQP ⪰ τ·P on ran P (eigenbasis
+expansion: eigvalOf ≥ τ on the nonzero spectrum by the strict-count
+lemma, `span{vᵢ : μᵢ ≠ 0} = ran P` when rank PQP = rank P; else
+τ = 0 by the same counting), and a witness at τ (the minimizing
+eigenvector, or a `ran P ∩ ker Q` vector when τ = 0 — nonempty because
+ker(QP) = ker(PQP) via the identity `x ⬝ᵥ (PQP*ᵥx) = ‖Q*(ᵥPx)‖²`);
+τ symmetry `τ_P = τ_Q` from `evals hPQP = evals hQPQ` via the
+eigenspace transfer `v ↦ QP*ᵥv` (injective at μ ≠ 0 since
+`PQ*(ᵥQP*ᵥv) = μ•v`) plus per-μ basis-count = eigenspace-dimension
+(`finrank_span_eigvecOf_finset`) plus equal zero-counts
+(Mathlib `rank_eq_card_non_zero_eigs`, `rank_transpose`).
+
+**Delivered QA** (`Scaffold/QA/Perturbation/ProjectionGap_QA.lean`,
+37 declarations, 0 `sorry`): the 30°-rotation projector fixture realized
+as the Pythagorean rotation (`P = diag(1,0)`, `Q` onto the line of
+`(4/5, 3/5)`, `sin θ = 3/5`, kept rational throughout) — both projector
+ranks pinned, the sandwich `PQP` and its spectrum pinned, `‖(I−Q)P‖ =
+3/5` verified by two independent routes (the module's squared-residual
+theorem and raw literal arithmetic through the proved operator-norm
+bridge), `‖P − Q‖ = 3/5` from the difference's own pinned spectrum, and
+the unequal-rank guard `P` vs `1` refuting the hypothesis-free form
+(`‖P−1‖ = 1 ≠ 0 = ‖(1−1)P‖`).
+
+**Verification:** `Scaffold.lean` now imports `ProjectionGap`; both the
+core module and its QA file elaborate with zero errors and zero
+warnings; `lint_axioms` (11, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (QA declarations
+998 → 1035).
+
+**Next milestone (open):** Davis–Kahan Step 1, component 2 — the
+Duhamel/FTC assembly consuming this identity plus the spike-verified
+semigroup primitives (`wip/dk_spike.lean`) — as a dedicated run, per the
+proposal's one-step-per-run discipline. After that, `davis_kahan_sin_theta`
+retires from axiom to proved theorem.
+
+---
+
+**Davis–Kahan Step 0 tractability survey (run 1, 2026-08-21;
+`proposals/discharge-perturbation-axioms.md` — with no High rows left in
+the Active priority table, the top Medium item by the recorded ranking):
+DELIVERED — decisive positive-with-large-cost, the route named and
+spike-verified, plus the citation mislocation the survey surfaced
+repaired in all four files.** Step 1 (the retirement itself) was NOT
+started — the survey's own cost estimate (600–1000 lines, two genuinely
+new components) puts it beyond one run; it is now authorized as a
+dedicated run per the proposal's contingency gate.
+
+**Survey findings (paper read in full, arXiv:1405.0680):**
+
+- **Citation mislocation, repaired.** The axiom's provenance note paired
+  "Theorem 2" with "constant 1" — a pairing that does not exist in the
+  paper. YWS's actual Theorem 2 is population-gap/Frobenius/constant-2
+  (Weyl + Wielandt–Hoffman + a Kronecker Sylvester bound); the repo's
+  mixed-gap operator-norm constant-1 statement is the paper's
+  **Theorem 1** (classical Davis–Kahan restated, operator-norm variant
+  noted there) at the bottom cluster, single-pair δ by sortedness —
+  equivalence re-verified during the survey. The axiom statement itself
+  is unchanged and its constant-1 tightness re-verified numerically at
+  the 2×2 rotation family (sinθ ≈ 0.0985 vs bound ≈ 0.0990, attained
+  asymptotically). Corrected: `DavisKahan.lean`'s docstring (with a
+  dated correction note), `index/sources/davis_kahan_1970.md`,
+  `index/map/perturbation.md`, `docs/2_ARCHITECTURE.md` §12.
+- **Route map.** The entrywise eigenbasis-coordinate identity
+  `(λ̂ᵢ − λⱼ)⟨vⱼ,ûᵢ⟩ = −⟨ûᵢ,Evⱼ⟩` over the cleanly side-separated
+  pairing caps at Frobenius shape, constant √(k+1) — exactly YWS Thm 2's
+  `d^{1/2}` numerator; it cannot discharge the exact statement.
+  Constant-1 operator-norm needs the **Duhamel/exponential integral**
+  `(I−Q)P = ∫₀^∞ e^{-tÃ}(I−Q)E e^{tA}P dt` (the mixed gap *is* side
+  separation, giving `e^{-tδ}` decay; no `Matrix.exp` — the semigroups
+  live at vector level as damped eigenbasis expansions), plus the
+  **equal-rank projector identity** `‖P−Q‖ = ‖(I−Q)P‖` (principal
+  angles; required for constant 1 since the reverse direction degrades
+  through Weyl to `δ − 2‖E‖`; naive `(P−Q)²` decompositions were
+  hand-checked and fail — a 2×2 counterexample to the tempting identity
+  was worked out).
+- **Spike (`wip/dk_spike.lean`, git-ignored): all five primitives
+  PROVED, each `#print axioms`-clean (`propext, Classical.choice,
+  Quot.sound` only)** — the vector-level heat semigroup `heatApply`,
+  its expansion/adjoint workhorse, **Parseval damping**
+  (`‖S_t x‖² = ∑ e^{-2tλᵢ}cᵢ²`), **eigenaction** (through the shelf's
+  `mulVec_eigvecOf_sum_apply`), **differentiability in `t`** (this
+  pin's `HasDerivAt.sum`/`HasDerivAt.exp` — imports
+  `Analysis.Calculus.Deriv.Add` + `Analysis.SpecialFunctions.ExpDeriv`
+  are not transitive through `GraphTheory.Spectral`), and the
+  **reducing commutation** `spectralProjector M hM c * M =
+  M * spectralProjector M hM c` (+ `mulVec` form). ~250 spike lines,
+  essentially transferable.
+- **Step-1 estimate: 600–1000 lines over 2–3 runs** — spike transfer,
+  the equal-rank identity (moderate-large, least predictable), the FTC
+  assembly (moderate — scalar `intervalIntegral` FTC + the `e^{-δt}`
+  decay bound from cluster-filtered Parseval damping), cluster-filtered
+  norm corollaries, QA.
+
+**Verification:** `lake env lean` on the changed module
+(`Perturbation/DavisKahan.lean` — docstring only, zero errors/zero
+warnings), its closest QA consumer (`DavisKahan_QA.lean` — clean), and
+the derived consumer (`Derived/ProjectorDrift.lean` — only the
+documented pre-existing `hγ` warning); the spike elaborates end-to-end
+with all three `#print axioms` reads clean; `lint_axioms` (**11**),
+`check_citations`, `check_markdown_links` pass; scoreboard regeneration
+idempotent (**998/11/0** — this run changed no Lean declarations, so
+counts are the previous run's Step-4 state). Environment healthy at run
+start (5387 Mathlib oleans; no fetch needed).
+
+**Records updated:** proposal (Status header, the full Step-0 survey
+record with all findings and estimates, per-axiom item 2 closed,
+Open-next-step rewritten to the authorized Step 1), the axiom docstring
++ both index files + architecture §12 (the citation repair),
+`proposals/README.md` (the Medium row and the progress paragraph — the
+top next candidate is now Davis–Kahan Step 1 itself), scoreboard
+(regenerated, idempotent), this plan, and the activity log.
+
+**Next milestone (open):** **Davis–Kahan Step 1** — now authorized, as a
+dedicated run (or the two-component split: the equal-rank projector
+identity first as its own hard-crust delivery, then the Duhamel
+assembly); or the other Medium rows by leverage (mixing-time Step 1;
+Reversibility Phase A; Relative Entropy; Perron–Frobenius + directed
+operators, Step 0 first; the Cheeger hard-direction survey, known-hard;
+approximate spectral projection, Step 0 first; Fiedler Phase B still
+needs an operator decision).
+
+---
+
+**Spectral Band Projectors, Step 4 — the Hilbert-projection
+specialization (run 1, 2026-08-21; `proposals/spectral-band-projectors.md`,
+the Active table's only High row, at its recorded open next step — the
+program's last step): DELIVERED; the program is COMPLETE.** Pure hard
+crust — **zero new axioms** (count stays 11; `#print axioms` on all
+three new public theorems reads only `propext, Classical.choice,
+Quot.sound`). The proposal's one-step-per-run rule held throughout the
+program (Steps 1–3 on 2026-08-20, Step 4 on 2026-08-21).
+
+**Pre-edit survey outcome (the proposal's mandatory pre-step):** the
+pinned snapshot has the whole shelf — the identification lemma
+`eq_orthogonalProjection_of_mem_of_inner_eq_zero`, the minimality
+lemma `orthogonalProjection_minimal`,
+`HasOrthogonalProjection.ofCompleteSpace` (resolving on
+finite-dimensional EuclideanSpace), and the transport spine
+(`EuclideanSpace.inner_piLp_equiv_symm` and
+`Matrix.toEuclideanLin_piLp_equiv_symm`, both `rfl` — the resolvent
+Step-0 precedent one notation-level cleaner, `toEuclideanLin` needing
+no coercion). No obstruction; the proposal's stop-and-record clause
+was not triggered.
+
+**Delivered in `GraphTheory.Band`** (with the two Mathlib imports
+`Analysis.InnerProductSpace.{Projection,PiL2}` added):
+
+- `bandProjector_residual_dotProduct_eq_zero` — the engine:
+  `(x − B *ᵥ x) ⬝ᵥ (B *ᵥ z) = 0`, consuming exactly the two Step-1
+  facts (symmetry moves the band across the dot product; idempotence
+  collapses `B *ᵥ (x − B *ᵥ x)` to `0`) — the section reduces to
+  Step 1 plus Mathlib.
+- `bandProjector_toEuclidean_apply_eq_orthogonalProjection` — the
+  identification: `orthogonalProjection (range (toEuclideanLin B))
+  (e x) = e (B *ᵥ x)` — the SGT center's first consumption of
+  `Analysis/InnerProductSpace/Projection.lean`.
+- `norm_sub_bandProjector_apply_le` — the closest-point property over
+  the band's fixed space (equivalent to range membership by
+  idempotence): from `orthogonalProjection_minimal` + the
+  conditionally-complete `ciInf_le` (`iInf_le` does not apply over ℝ;
+  `BddBelow` witnessed by `0`).
+
+**Statement-shape decisions recorded before stating:** statements at
+`EuclideanSpace ℝ V` — the bare `V → ℝ` default norm instance is the
+sup norm, and a closest-point claim there would be silently
+wrong-normed; the fixed-point hypothesis form over the
+range-membership existential (equivalent by idempotence, no witness
+juggling for consumers); the range form `LinearMap.range
+(toEuclideanLin B)` over an eigenspace-span form (they coincide for an
+idempotent self-adjoint band projector; the range form needs no
+agreement theorem — a named residual in the proposal).
+
+**QA** `SpectralGraph/Band_QA.lean` (+25 by the generator metric, 109
+in file, 998 total): the band `(0,2] = diag(1,0)` pinned from the
+pinned threshold projectors; the identification instantiated and
+pinned to the packaged band image; the residual engine witnessed
+through the theorem *and* by raw literal arithmetic; minimality
+instantiated at three competitors — **attained** (signal-to-projection
+distance exactly `4`), **strict over the zero signal** (`4 ≤ 5`, the
+3-4-5 triangle), **generic over the whole range line**
+(`4 ≤ √((3−t)²+16)`, both norms pinned through `‖e v‖² = v ⬝ᵥ v`) —
+with `band_diag13_hilb_min_line_raw` reproducing the identical line
+inequality from bare square-positivity (an independent hand-check the
+transported theorem's claim must match); the **high band** also
+instantiated (`3 ≤ 5`, not fixture-locked); and the **fixed-space
+guard** — the hypothesis-free form refuted at the unfiltered signal
+(distance `0 < 4`, the signal provably not fixed by the band), so the
+fixed-point hypothesis is load-bearing.
+
+**Verification:** `lake env lean` on `Band` and `Band_QA` — zero
+errors, zero warnings (public module after two argument-shape fixes:
+`LinearMap.mem_range` has no explicit arguments on this snapshot, and
+`orthogonalProjection_minimal` takes its submodule implicitly with the
+point explicit; plus the `ciInf_le`-for-ℝ substitution; QA after three
+proof-shape fixes — the simp-closes-goal/norm_num-trap, the
+dot-product `ring` residue, and a `rw`-scope fix replaced by `calc`);
+`#print axioms` on the three public and nine headline QA theorems ✔
+(three standard axioms only); oleans produced during iteration; **all
+thirty-four QA modules batch-elaborated, zero errors (BATCH-DONE
+fail=0 — one mid-batch restart at the 10-minute tool timeout, no state
+damage)**; **full `lake build` ✔ (2186 targets, "Build completed
+successfully", detached log + poll)**; `lint_axioms` (**11**),
+`check_citations`, `check_markdown_links` pass; scoreboard
+regeneration idempotent (**998/11/0**). Environment healthy at run
+start (correct-path olean check: 5387 present; no fetch needed).
+
+**Records updated:** module/QA/umbrella docstrings, scoreboard
+(998/11/0, both Direct rows prepended with the Step-4 slice, the
+`lake build` row extended, the Step-4 interpretation bullet, the
+provenance note's run events), radar (**axis 2 re-scored 4.0 → 4.5** —
+the capability dimension the two prior records explicitly reserved as
+the trigger: a characterized closest-point/projection interface into
+Mathlib's inner-product-space machinery, not another band-family
+member; QA count synced 998/34 with the QA axis **held at 4.0** and
+both decisions logged in the re-scoring log; the QA axis's evidence
+row gains the Step-4 kinds), README (998/11; the proved list gains the
+Hilbert-projection specialization; the coverage snapshot's spectral
+linear algebra row synced 3.5 → 4.5 — it had been stale at 3.5 since
+the Tikhonov re-score, now matching the radar), SGT index map (Band
+section: program-complete header + 3 rows), proposal (status header
+program complete, Step-4 delivery record with the survey outcome and
+statement-shape decisions, open-next-step rewritten to none with the
+named span-form residual), and `proposals/README.md` (the High row
+removed from the Active table; Delivered row added; progress paragraph
+rewritten — **the Active table now has no High rows; the next run
+falls through to the Medium rows by leverage**).
+
+**Next milestone (open):** with no High rows, the next run selects
+among the Medium rows by leverage — the top candidates as ranked in
+`proposals/README.md`'s progress paragraph: the **Davis–Kahan Step 0
+survey** (`discharge-perturbation-axioms.md` — shrinking the mushy
+center; tractability genuinely unknown), **mixing-time Step 1**
+(eigenvalue transfer via the proved similarity identity),
+**Reversibility Phase A** (cheap, zero new axioms, composes existing
+lemmas), **Relative Entropy** (Gibbs' inequality from Mathlib's proved
+strict-concavity machinery), **Perron–Frobenius + directed operators**
+(scoped together, Step 0 first), and **approximate spectral
+projection** (Step 0 first). Fiedler Phase B still needs an operator
+decision.
+
+---
+
 **Spectral Band Projectors, Step 3 — completeness under a partition
 (run 1, 2026-08-20; `proposals/spectral-band-projectors.md`, the
 Active table's only remaining High row, at its recorded open next

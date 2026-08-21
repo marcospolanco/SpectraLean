@@ -16,13 +16,13 @@ revision](docs/5_QA_SCOREBOARD.md) rather than tracking `main`.
 
 ## Status
 
-As of August 20, 2026:
+As of August 21, 2026:
 
 | Check | Result |
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 11 |
-| QA theorems/lemmas | 973, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 1035, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is the Cheeger *hard* direction at the SGT center;
 Davis–Kahan in the perturbation bridge; and the scalar and matrix
@@ -44,7 +44,12 @@ action interface, the orthogonality of disjoint bands — both
 composition orders, image orthogonality, and shared-mode-freeness —
 and completeness under a partition: the unconditional telescoping
 law, the covering-family resolution of the identity, monotone-family
-orthogonality, and the vector decomposition `x = ∑ B_k x`)
+orthogonality, and the vector decomposition `x = ∑ B_k x`), capped
+by the **Hilbert-projection specialization** (the band projector's
+output *is* Mathlib's `orthogonalProjection` onto its transported
+range and the closest point of that range to the input — the
+residual-orthogonality engine, the identification, and the
+closest-point minimality over the band's fixed space),
 are proved, not admitted.
 
 The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for
@@ -163,7 +168,7 @@ The near-term center is general SGT. Public modules currently cover:
 | Decidable spectral certificates | `GraphTheory.SpectralCertificates` (the ℚ specification checker with its soundness theorem, and the kernel-verifiable ℤ cross-multiplied twin with proved bridges) |
 | Electrical structure | `GraphTheory.Electrical`, `GraphTheory.ElectricalFlow`, `GraphTheory.Foster` |
 | Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized`, `GraphTheory.Stationary` |
-| Perturbation | `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan}` |
+| Perturbation | `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan,ProjectionGap}` |
 | Concentration | `Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*` |
 | Matrix updates | `Core.MatrixUpdates` (Woodbury, Sherman–Morrison) |
 
@@ -178,13 +183,13 @@ example, and the [SGT Radar](docs/7_SGT_RADAR.md) for coverage scores.
 
 ### SGT coverage snapshot
 
-Last assessed: August 19, 2026. Scores reflect usable, verified coverage on a
+Last assessed: August 21, 2026. Scores reflect usable, verified coverage on a
 0–5 scale; see the [full radar and evidence](docs/7_SGT_RADAR.md).
 
 | Area | Coverage |
 | --- | ---: |
 | Graph and Laplacian models | 3.5 / 5 |
-| Spectral linear algebra | 3.5 / 5 |
+| Spectral linear algebra | 4.5 / 5 |
 | Variational and functional methods | 4.0 / 5 |
 | Cuts, expansion, and clustering | 4.0 / 5 |
 | Random walks and diffusion | 2.5 / 5 |

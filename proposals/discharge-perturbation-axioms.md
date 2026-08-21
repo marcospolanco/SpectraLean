@@ -2,11 +2,14 @@
 
 **Status:** In progress — the Weyl target is **delivered** (Step 0
 surveyed positive and Step 1 executed 2026-08-20; see the delivery
-record below). Davis–Kahan and the Cheeger hard direction remain
-unsurveyed — their Step 0s are the open next steps, and Step 1 on
-either is unauthorized until its own survey lands. Priority **Medium**,
-contingent on each target's Step 0 survey landing before its Step 1
-begins — the same contingency pattern
+record below). Davis–Kahan's Step 0 survey **landed 2026-08-21**: the
+route is named and spike-verified (Duhamel/exponential integral; see the
+survey record below) with a 600–1000-line Step-1 estimate — Step 1 is
+authorized but should be a dedicated run, not bundled. The Cheeger hard
+direction remains unsurveyed — its Step 0 is an open next step, and
+Step 1 on it is unauthorized until that survey lands. Priority
+**Medium**, contingent on each target's Step 0 survey landing before its
+Step 1 begins — the same contingency pattern
 `decidable-spectral-certificates.md` used. Assistant's assessment of
 project direction, requested 2026-08-19, promoted from `sgt-gaps.md`
 item 3. Authorizes no axiom admissions or external publication.
@@ -131,7 +134,126 @@ the proposal's caution was vindicated in both directions:
   module was edited; the spike then transferred to
   `Perturbation/Weyl.lean` essentially verbatim.
 
-**Davis–Kahan — unsurveyed.** The plan below stands unchanged.
+**Davis–Kahan — surveyed 2026-08-21, decisive positive-with-large-cost;
+the route is named and its primitives are spike-verified.** The paper was
+read in full (arXiv:1405.0680, YWS "A useful variant of the Davis–Kahan
+theorem for statisticians"); findings, all recorded before any Step-1
+edit:
+
+- **Citation mislocation found and repaired.** The axiom's provenance
+  note cited "YWS Theorem 2 (two-sided separation, projector form,
+  constant 1)" — a locator/constant pairing that does not exist in the
+  paper. YWS's actual Theorem 2 is a *population-gap* result with
+  constant 2 (`‖sinΘ‖_F ≤ 2 min(d^{1/2}‖E‖_op, ‖E‖_F)/min(gap)`, proved
+  via Weyl + Wielandt–Hoffman + a Kronecker/vec Sylvester separation).
+  The repo's statement — mixed cross-gap `λ_{k+1}(A+E) − λ_k(A)`,
+  operator norm on the projector difference, constant 1 — is YWS
+  **Theorem 1** (the classical Davis–Kahan restatement; the paper notes
+  the operator-norm variant) specialized to the bottom cluster, the
+  single-pair δ reduction by sortedness still valid. Docstring,
+  `index/sources/davis_kahan_1970.md`, `index/map/perturbation.md`, and
+  `docs/2_ARCHITECTURE.md` §12 corrected 2026-08-21; the axiom statement
+  itself is unchanged and remains true (constant-1 tightness was
+  re-verified numerically at the 2×2 rotation family during the survey:
+  sinθ ≈ 0.0985 vs bound ≈ 0.0990 at t = 0.1, asymptotically attained).
+- **Why the cheap route cannot discharge the exact statement.** The
+  entrywise eigenbasis-coordinate identity
+  `(λ̂ᵢ − λⱼ)·⟨vⱼ, ûᵢ⟩ = −⟨ûᵢ, E vⱼ⟩` (from `M *ᵥ vⱼ = λⱼ vⱼ` and
+  symmetry — both sides shelf-provable today) is available over the
+  cleanly side-separated pairing (A's lower cluster vs (A+E)'s upper
+  cluster, gap exactly δ, no Weyl loss), but summing it gives only the
+  Frobenius shape with constant √(k+1) — exactly the `d^{1/2}` numerator
+  of YWS Theorem 2. The operator-norm constant-1 statement additionally
+  requires either the Schur/Sylvester operator-norm bound (false in
+  general) or an integral representation.
+- **The route that works: Duhamel/exponential integral.**
+  `(I−Q)P = ∫₀^∞ e^{-tÃ}(I−Q) E e^{tA} P dt`, where `P` is A's
+  lower-cluster projector, `Q` the same for `Ã = A+E`. The mixed gap is
+  *side separation* (Ã's upper cluster `≥ b = λ_{k+1}(Ã)`, A's lower
+  cluster `≤ a = λ_k(A)`, `b − a ≥ δ`), which makes the integrand decay
+  at rate `e^{-tδ}` and the integral converge to the boundary value
+  `(I−Q)P` at `t = 0`. Norm: `‖(I−Q)P‖ ≤ ∫₀^∞ e^{-tδ}‖E‖ dt =
+  ‖E‖/δ` — **constant 1, operator norm.** No `Matrix.exp` needed: the
+  semigroups live at vector level as damped eigenbasis expansions.
+- **A cheaper algebraic technique exists for a related but distinct
+  statement — checked against this axiom's exact hypothesis and found
+  NOT to substitute for the Duhamel route; recorded so no future run
+  re-derives this.** A standard textbook packaging (Vershynin,
+  *High-Dimensional Probability*, 2018, Thm 4.1.15–4.1.16 —
+  `index/sources/vershynin_hdp.md`) proves the product-projector bound
+  `‖QP‖ ≤ ‖A−B‖/δ` by a purely algebraic commutator/shift argument: no
+  integral, no `HasDerivAt`, no differentiability API — only that a
+  self-adjoint operator commutes with its own spectral projections and
+  that spectral projections are contractive. Center both spectra at a
+  point `c`; if `P`'s selected eigenvalues lie within `r` of `c` and
+  `Q`'s selected eigenvalues lie at least `r+δ` from `c`, two one-line
+  norm inequalities combine to `δ‖QP‖ ≤ ‖A−B‖` — and `r` cancels out of
+  the *final* bound algebraically, which is what makes the technique look
+  free. **The catch, worked through by hand before writing this down:**
+  `r` cancelling in the final step does not mean `r` is unconstrained —
+  a *single* finite `r` must satisfy both containment conditions
+  simultaneously, and `davis_kahan_sin_theta`'s `P` (`initialProjector`)
+  selects the entire half-line `(−∞, evals hA k]`, not a bounded window.
+  That forces `r` up to the *full spread* of `A`'s lower cluster
+  (`evals hA k − evals hA 0`, a number the spectrum determines and the
+  axiom's hypothesis does not bound), while the separation condition
+  needs `r ≤ (evals hAE ⟨k+1⟩ − evals hA k) − δ`. Satisfying both requires
+  the actual gap to exceed `δ` by the *entire lower-cluster spread* — a
+  strictly stronger hypothesis than `hsep : δ ≤ evals hAE ⟨k+1⟩ −
+  evals hA k`, which bounds nothing about the spread below the threshold.
+  Duhamel does not have this limitation because it uses the *local*
+  decay rate `e^{-tδ}` rather than a fixed global containment radius —
+  which is presumably why it, not the shift trick, is the route that
+  closes the exact half-line statement.
+  **Do not substitute this technique into Step 1** — doing so would
+  require either weakening `davis_kahan_sin_theta`'s hypothesis (Step 1's
+  own contract below forbids restating the axiom more narrowly to make it
+  easier) or changing the conclusion to a bounded spectral window instead
+  of a half-line threshold, neither of which is a valid discharge of the
+  existing axiom.
+  **What it is genuinely good for, as separate future work (not part of
+  Step 1 or Step 2):** a *bounded-window* ("band") Davis–Kahan theorem —
+  both `P` and `Q` are finite spectral windows, `δ`-separated — is a
+  different, new, axiom-free statement this technique proves cheaply with
+  no calculus at all, and it would compose naturally with the just-delivered
+  `GraphTheory.Band` program (Steps 1–4, 2026-08-20/21). Recorded as
+  backlog item 9 in `docs/6_SGT_BACKLOG.md`; it needs its own proposal
+  entry and Step-0 survey before any Lean is written, and is not
+  authorized inside a Davis–Kahan Step-1/2 run.
+- **Spike-verified primitives** (`wip/dk_spike.lean`, all proved with
+  only `propext, Classical.choice, Quot.sound`): the vector-level heat
+  semigroup `heatApply t x = ∑ i e^{-tλᵢ}(vᵢ ⬝ᵥ x) vᵢ`; its expansion/
+  adjoint workhorse and **Parseval damping**
+  (`‖heatApply t x‖² = ∑ e^{-2tλᵢ}(vᵢ⬝ᵥx)²`); its **eigenaction**
+  (`M *ᵥ heatApply t x` through the shelf's
+  `mulVec_eigvecOf_sum_apply`); **differentiability in `t`** under the
+  finite sum (`HasDerivAt`, this pin's `HasDerivAt.sum`/`HasDerivAt.exp`
+  from `Analysis.Calculus.Deriv.Add`/`Analysis.SpecialFunctions.ExpDeriv`);
+  and the **reducing commutation** `spectralProjector M hM c * M =
+  M * spectralProjector M hM c` (entrywise double-sum through
+  `Matrix.IsSymm.apply` + the eigenvector action) plus its `mulVec`
+  form. Cost for these: ~250 spike lines, essentially transferable.
+- **The two genuinely new components, with cost estimates:** (1) the
+  **equal-rank projector identity** `‖P − Q‖ = ‖(I−Q)P‖` for orthogonal
+  projectors of equal rank (principal angles) — REQUIRED for constant 1:
+  Duhamel directly bounds `‖(I−Q)P‖`, and the alternative (bounding
+  `‖(I−P)Q‖` by the reverse cross-gap) degrades through Weyl to
+  `δ − 2‖E‖`. Naive `(P−Q)²` decompositions were checked by hand and
+  fail (a 2×2 counterexample to the tempting
+  `(P−Q)² = P(I−Q)P + Q(I−P)Q` identity was worked out); the
+  principal-angles/CS route is the honest one — moderate-large, the
+  least-predictable piece. (2) the **FTC assembly** — scalar pairing
+  `⟨y, e^{-tÃ}(I−Q)E e^{tA}P x⟩`, derivative via the spike's
+  differentiability + commutation, improper integral over `[0,∞)` with
+  the `e^{-δt}` decay bound (cluster-filtered Parseval damping; scalar
+  `intervalIntegral` FTC) — moderate, mostly analysis-API friction.
+- **Step-1 cost estimate (the recording this section requires):**
+  600–1000 lines over 2–3 runs — spike transfer (~250), the two new
+  components above, the cluster-filtered norm corollaries, and QA. This
+  is the largest single retirement this proposal contemplates; it should
+  be a dedicated run (or a two-component split: the equal-rank lemma
+  first as its own hard-crust delivery, then the Duhamel assembly),
+  not bundled with survey work.
 
 **Cheeger hard direction — unsurveyed.** The plan below stands
 unchanged.
@@ -146,7 +268,7 @@ Per-axiom order as originally written:
     check it on its own), then compose the two. Record a real cost
     estimate for the full statement once the additive spike is done.~~
     **Done — see above and the delivery record below.**
-2. **Davis–Kahan.** Survey what the sin-Θ bound's standard proof actually
+2. **Davis–Kahan.** ~~Survey what the sin-Θ bound's standard proof actually
     needs (typically: the norm bridge above, plus a resolvent-based or
     variational argument relating the perturbed and unperturbed
     eigenspaces) against what's on the shelf. Record findings even if
@@ -155,7 +277,11 @@ Per-axiom order as originally written:
     bounds, and the resolvent-map injectivity are all proved in
     `Analysis.OperatorTheory.Resolvent`, and Weyl itself is now proved —
     but no survey of what a sin-Θ proof needs has been run, so "large"
-    stands.
+    stands.~~ **Done 2026-08-21 — see the survey record above:
+    positive-with-large-cost; the Duhamel route's primitives are
+    spike-verified; Step 1 estimated at 600–1000 lines over 2–3 runs,
+    with the equal-rank projector identity and the FTC assembly as the
+    two new components.**
 3. **Cheeger hard direction.** Survey the standard sweep-cut argument's
     Lean cost specifically — this is the one where "known-hard" should be
     treated as the working assumption unless the survey finds otherwise,
@@ -227,8 +353,20 @@ equality trivially).
 
 ## Open next step
 
-The Davis–Kahan Step 0 survey (what a sin-Θ proof needs vs. the now
-richer shelf — the proved resolvent identity/norm/Lipschitz/injectivity
-family and the proved Weyl); the Cheeger hard-direction survey after
-that, still under its known-hard working assumption. Weyl is delivered
+**Davis–Kahan Step 1, component 1 — DELIVERED 2026-08-21.** The
+equal-rank projector identity `‖P − Q‖ = ‖(I−Q)P‖` for real symmetric
+idempotent matrices of equal rank, in `Analysis/OperatorTheory/
+Perturbation/ProjectionGap.lean` (~1570 lines), zero new axioms
+(`#print axioms` on every public theorem: `propext, Classical.choice,
+Quot.sound` only), with QA (`ProjectionGap_QA.lean`, 37 declarations).
+Exactly the route recorded in the survey above (the always-true max
+layer, the sandwich/eigenspace-transfer core, no charpoly machinery).
+
+**Component 2 — the Duhamel/FTC assembly — remains open**, as its own
+dedicated run per this proposal's one-step-per-run discipline: the
+exponential-integral representation `(I−Q)P = ∫₀^∞ e^{-tÃ}(I−Q) E e^{tA}
+P dt`, consuming the spike-verified semigroup primitives
+(`wip/dk_spike.lean`) and this delivered identity, to assemble the exact
+`davis_kahan_sin_theta` statement. After that, the Cheeger hard-direction
+survey, still under its known-hard working assumption. Weyl is delivered
 and closed (2026-08-20).

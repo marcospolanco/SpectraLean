@@ -8,10 +8,10 @@
   <array>
     <string>/bin/zsh</string>
     <string>-lc</string>
-    <string>exec /Users/marcos/Developer/scaffold/scripts/opencode-pursue --runs 1</string>
+    <string>exec /Users/marcospolanco/Developer/scaffold/scripts/opencode-pursue --runs 1</string>
   </array>
   <key>WorkingDirectory</key>
-  <string>/Users/marcos/Developer/scaffold</string>
+  <string>/Users/marcospolanco/Developer/scaffold</string>
   <key>RunAtLoad</key>
   <true/>
   <key>StartInterval</key>
@@ -19,8 +19,8 @@
   <key>ThrottleInterval</key>
   <integer>60</integer>
   <key>StandardOutPath</key>
-  <string>/Users/marcos/Developer/scaffold/.opencode/scaffold-pursue.launchd.log</string>
+  <string>/Users/marcospolanco/Developer/scaffold/.opencode/scaffold-pursue.launchd.log</string>
   <key>StandardErrorPath</key>
-  <string>/Users/marcos/Developer/scaffold/.opencode/scaffold-pursue.launchd.log</string>
+  <string>/Users/marcospolanco/Developer/scaffold/.opencode/scaffold-pursue.launchd.log</string>
 </dict>
 </plist>

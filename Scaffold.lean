@@ -19,6 +19,7 @@ import Scaffold.Mathlib.GraphTheory.VariationalTransfer
 import Scaffold.Mathlib.GraphTheory.Dynamics
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan
+import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.ProjectionGap
 import Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent
 import Scaffold.Mathlib.Probability.Concentration.Scalar.Subgaussian
 import Scaffold.Mathlib.Probability.Concentration.Scalar.Hoeffding
@@ -61,16 +62,22 @@ eigencoefficient shrinkage identity, the normal equation with its
 converse characterization, minimality and uniqueness through the
 strict-convexity decomposition, mean preservation, and the
 not-a-projection (idempotence-failure) theorem), the two-sided
-spectral band projectors (`GraphTheory.Band`, Steps 1–3 of the
-band-projector program: the `(a, b]` band as the difference of two
-`spectralProjector` calls, idempotence through the nestedness
+spectral band projectors (`GraphTheory.Band`, the four-step
+band-projector program complete: the `(a, b]` band as the difference
+of two `spectralProjector` calls, idempotence through the nestedness
 cross-law `spectralProjector_mul_spectralProjector`, the
 mode-selection action interface — in-band modes fixed, out-of-band
 modes annihilated — and orthogonality of disjoint bands: both
 composition orders, image orthogonality, and shared-mode-freeness —
 and completeness under a partition: the unconditional telescoping
 law, the covering-family resolution of the identity, monotone-family
-orthogonality, and the consumer's vector decomposition `x = ∑ B_k x`),
+orthogonality, and the consumer's vector decomposition `x = ∑ B_k x`;
+Step 4 caps the program with the Hilbert-projection specialization:
+the band projector's output *is* Mathlib's `orthogonalProjection`
+onto its transported range and the closest point of that range to
+the input — the residual-orthogonality engine, the identification
+`bandProjector_toEuclidean_apply_eq_orthogonalProjection`, and the
+closest-point minimality `norm_sub_bandProjector_apply_le`),
 its Cheeger
 bridge (`GraphTheory.Cheeger`), the Fiedler-vector interface (`GraphTheory.Fiedler`, Phase A: the vector,
 the sign partition, and the algebraic-connectivity certificate),

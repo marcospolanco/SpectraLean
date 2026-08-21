@@ -10,8 +10,12 @@
 - **Year**: 1970
 - **Secondary source**: Yu, Y., Wang, T., Samworth, R. J., "A useful
   variant of the Davis–Kahan theorem for statisticians", Annals of
-  Statistics 43(3):2028–2061, 2015, Theorem 2 (two-sided separation,
-  projector form, constant 1).
+  Statistics 43(3):2028–2061, 2015, Theorem 1 — the classical Davis–Kahan
+  sin Θ bound restated with mixed population/sample separation and
+  constant 1; the operator-norm variant used here is noted in the paper.
+  (Corrected 2026-08-21 from "Theorem 2": the paper's Theorem 2 is a
+  population-gap, constant-2 result, a different statement — see
+  `proposals/discharge-perturbation-axioms.md`'s Step-0 survey.)
 
 ## Scope of Results Used
 
@@ -22,7 +26,7 @@ form used by the event-driven persistence frontier.
 
 | Theorem | Lean Axiom | Module |
 |---------|------------|--------|
-| §3 (sin Θ theorem) via Yu–Wang–Samworth Thm 2 | `davis_kahan_sin_theta` | `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan` |
+| §3 (sin Θ theorem) via Yu–Wang–Samworth Thm 1 (operator-norm variant, bottom cluster) | `davis_kahan_sin_theta` | `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan` |
 
 ## Notes
 

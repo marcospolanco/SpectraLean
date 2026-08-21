@@ -30,7 +30,18 @@
   "silently ignores modes" failure mode), the unconditional telescoping
   law witnessed on a deliberately non-monotone family whose junk bands
   cancel, monotone-family orthogonality instantiated, and the vector
-  decomposition `∑ B_k *ᵥ x = x` on a concrete signal by both routes.
+  decomposition `∑ B_k *ᵥ x = x` on a concrete signal by both routes. The
+  Step-4 slice: the Hilbert-projection specialization instantiated on the
+  same fixture — the orthogonal projection onto the band's transported
+  range identified with the band-filtered signal, the closest-point
+  minimality instantiated at three competitors (attained with equality at
+  the projection itself, strictly improved over the zero signal — the
+  3-4-5 triangle — and over a generic in-band point), an independent
+  raw-arithmetic cross-check of closest-point on the band's range line,
+  the residual-orthogonality engine witnessed on both routes, and the
+  fixed-space guard: a non-range competitor (the unfiltered signal
+  itself) is strictly closer than the projection, refuting the
+  hypothesis-free form of the minimality statement.
 
   Fixture: the diagonal matrix `!![1, 0; 0, 3]` on `Fin 2` — chosen
   over the dense `!![2, 1; 1, 2]` used elsewhere because its
@@ -890,5 +901,289 @@ theorem sum_band_diag13_nonmono_both_zero :
         (fun i => by
           rcases diag13_eigvalOf_mem i with h | h <;> rw [h] <;> norm_num),
       sub_self]
+
+/-!
+## Step 4: the Hilbert-projection specialization
+
+The band `(0, 2]` (value `diag(1, 0)`, pinned below from the pinned
+threshold projectors) is the projector onto the first coordinate axis,
+and the signal `![3, 4]` has band image `![3, 0]` with residual
+`![0, 4]` — the 3-4-5 triangle, so every closest-point claim below has
+exact numerically checkable content. Norms are pinned through the
+identity `‖e v‖² = v ⬝ᵥ v` (`e` the Euclidean packaging), independent
+of the projection machinery under test.
+-/
+
+/-- The band `(0, 2]` is the first-axis projector, from the pinned
+threshold projector at `2` and the pinned vanishing one at `0`. -/
+theorem band_diag13_pos_low :
+    bandProjector diag13 diag13_symm 0 2 = !![1, 0; 0, 0] := by
+  rw [bandProjector, spectralProjector_diag13_eq 2 (by norm_num)
+    (by norm_num), spectralProjector_diag13_zero]
+  ext a b
+  fin_cases a <;> fin_cases b <;> simp [Matrix.sub_apply]
+
+/-- Raw arithmetic: the band `(0, 2]` filters `![3, 4]` to `![3, 0]`. -/
+theorem band_diag13_pos_low_mulVec :
+    bandProjector diag13 diag13_symm 0 2 *ᵥ ![3, 4] = ![3, 0] := by
+  rw [band_diag13_pos_low]
+  funext k
+  fin_cases k <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+
+/-- Raw arithmetic: the high band `(2, 4]` filters `![3, 4]` to
+`![0, 4]`. -/
+theorem band_diag13_high_mulVec :
+    bandProjector diag13 diag13_symm 2 4 *ᵥ ![3, 4] = ![0, 4] := by
+  rw [band_diag13_high]
+  funext k
+  fin_cases k <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+
+/-- Raw arithmetic: the band `(0, 2]` filters `![1, 1]` to `![1, 0]`
+(the residual-orthogonality witness's second argument). -/
+theorem band_diag13_pos_low_mulVec_one_one :
+    bandProjector diag13 diag13_symm 0 2 *ᵥ ![1, 1] = ![1, 0] := by
+  rw [band_diag13_pos_low]
+  funext k
+  fin_cases k <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+
+/-- Raw arithmetic: every point of the range line `![t, 0]` is fixed by
+the band. -/
+theorem band_diag13_pos_low_fixes (t : ℝ) :
+    bandProjector diag13 diag13_symm 0 2 *ᵥ ![t, 0] = ![t, 0] := by
+  rw [band_diag13_pos_low]
+  funext k
+  fin_cases k <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+
+/-- The zero vector is fixed (its own band image). -/
+theorem band_diag13_pos_low_fixes_zero :
+    bandProjector diag13 diag13_symm 0 2 *ᵥ 0 = 0 := by
+  rw [band_diag13_pos_low, Matrix.mulVec_zero]
+
+/-- The Euclidean norm squared of a packaged function is its dot
+product with itself — the pin every numeric norm claim below routes
+through (same identity as the Resolvent QA, restated locally). -/
+private theorem norm_euclidean_sq (v : Fin 2 → ℝ) :
+    ‖((WithLp.equiv 2 (Fin 2 → ℝ)).symm v : EuclideanSpace ℝ (Fin 2))‖ ^ 2
+      = v ⬝ᵥ v := by
+  have h : inner
+      ((WithLp.equiv 2 (Fin 2 → ℝ)).symm v : EuclideanSpace ℝ (Fin 2))
+      ((WithLp.equiv 2 (Fin 2 → ℝ)).symm v) = v ⬝ᵥ v := by
+    rw [EuclideanSpace.inner_piLp_equiv_symm]
+    simp [star_trivial]
+  rw [← real_inner_self_eq_norm_sq, h]
+
+/-- A nonnegative real pinned by its square. -/
+private theorem norm_pin_of_sq {x r : ℝ} (hx : 0 ≤ x) (hr : 0 ≤ r)
+    (h : x ^ 2 = r ^ 2) : x = r := by
+  have key : (x - r) * (x + r) = 0 := by
+    have h' : (x - r) * (x + r) = x ^ 2 - r ^ 2 := by ring
+    rw [h', h, sub_self]
+  rcases mul_eq_zero.1 key with h' | h'
+  · exact sub_eq_zero.1 h'
+  · have hx0 : x = 0 := by linarith
+    have hr0 : r = 0 := by linarith
+    rw [hx0, hr0]
+
+/-- Pin via the square-root form: when the dot product evaluates to a
+nonnegative `r`, the packaged norm is `√r`. -/
+private theorem norm_euclidean_eq_sqrt_pin {v : Fin 2 → ℝ} {r : ℝ}
+    (hr : 0 ≤ r) (h : v ⬝ᵥ v = r) :
+    ‖((WithLp.equiv 2 (Fin 2 → ℝ)).symm v : EuclideanSpace ℝ (Fin 2))‖
+      = Real.sqrt r :=
+  ((Real.sqrt_eq_iff_eq_sq hr (norm_nonneg _)).2
+    (by rw [norm_euclidean_sq, h])).symm
+
+/-- Packaging transports subtraction (`rfl`: `WithLp` is a type synonym
+on this Mathlib snapshot). -/
+private theorem toEuclidean_sub (u v : Fin 2 → ℝ) :
+    (WithLp.equiv 2 (Fin 2 → ℝ)).symm u -
+      (WithLp.equiv 2 (Fin 2 → ℝ)).symm v
+      = (WithLp.equiv 2 (Fin 2 → ℝ)).symm (u - v) := rfl
+
+/-- Raw arithmetic: the residual of `![3, 4]` against its band image. -/
+theorem sub_three_four_three_zero :
+    (![3, 4] - ![3, 0] : Fin 2 → ℝ) = ![0, 4] := by
+  funext k
+  fin_cases k <;> simp
+
+/-- Raw arithmetic: the signal against a generic range point. -/
+theorem sub_three_four_t_zero (t : ℝ) :
+    (![3, 4] - ![t, 0] : Fin 2 → ℝ) = ![3 - t, 4] := by
+  funext k
+  fin_cases k <;> simp
+
+theorem dot_zero_four_self : (![0, 4] ⬝ᵥ ![0, 4] : ℝ) = 16 := by
+  simp [Matrix.dotProduct, Fin.sum_univ_two]
+  norm_num
+
+theorem dot_three_four_self : (![3, 4] ⬝ᵥ ![3, 4] : ℝ) = 25 := by
+  simp [Matrix.dotProduct, Fin.sum_univ_two]
+  norm_num
+
+theorem dot_three_zero_self : (![3, 0] ⬝ᵥ ![3, 0] : ℝ) = 9 := by
+  simp [Matrix.dotProduct, Fin.sum_univ_two]
+  norm_num
+
+theorem dot_zero_four_one_zero : (![0, 4] ⬝ᵥ ![1, 0] : ℝ) = 0 := by
+  simp [Matrix.dotProduct, Fin.sum_univ_two]
+
+/-- Pin: the packaged residual has norm `4`. -/
+theorem norm_euclidean_zero_four :
+    ‖((WithLp.equiv 2 (Fin 2 → ℝ)).symm ![0, 4] :
+      EuclideanSpace ℝ (Fin 2))‖ = 4 :=
+  norm_pin_of_sq (norm_nonneg _) (by norm_num)
+    (by rw [norm_euclidean_sq, dot_zero_four_self]; norm_num)
+
+/-- Pin: the packaged signal has norm `5`. -/
+theorem norm_euclidean_three_four :
+    ‖((WithLp.equiv 2 (Fin 2 → ℝ)).symm ![3, 4] :
+      EuclideanSpace ℝ (Fin 2))‖ = 5 :=
+  norm_pin_of_sq (norm_nonneg _) (by norm_num)
+    (by rw [norm_euclidean_sq, dot_three_four_self]; norm_num)
+
+/-- Pin: the packaged band image has norm `3`. -/
+theorem norm_euclidean_three_zero :
+    ‖((WithLp.equiv 2 (Fin 2 → ℝ)).symm ![3, 0] :
+      EuclideanSpace ℝ (Fin 2))‖ = 3 :=
+  norm_pin_of_sq (norm_nonneg _) (by norm_num)
+    (by rw [norm_euclidean_sq, dot_three_zero_self]; norm_num)
+
+/-- **The identification, instantiated.** Mathlib's orthogonal
+projection of the packaged signal onto the transported band range is
+the packaged band image `![3, 0]`. -/
+theorem band_diag13_hilb_identification :
+    (orthogonalProjection
+        (LinearMap.range
+          (Matrix.toEuclideanLin (bandProjector diag13 diag13_symm 0 2)))
+        ((WithLp.equiv 2 (Fin 2 → ℝ)).symm ![3, 4]) :
+      EuclideanSpace ℝ (Fin 2))
+      = (WithLp.equiv 2 (Fin 2 → ℝ)).symm ![3, 0] := by
+  rw [bandProjector_toEuclidean_apply_eq_orthogonalProjection
+    diag13 diag13_symm 0 2 (by norm_num) ![3, 4],
+    band_diag13_pos_low_mulVec]
+
+/-- **The residual-orthogonality engine, instantiated.** The out-of-band
+residual of the signal is dot-orthogonal to the band image of any
+signal — here `![1, 1]`. -/
+theorem band_diag13_residual_orthogonal :
+    (![3, 4] - bandProjector diag13 diag13_symm 0 2 *ᵥ ![3, 4]) ⬝ᵥ
+      (bandProjector diag13 diag13_symm 0 2 *ᵥ ![1, 1]) = 0 :=
+  bandProjector_residual_dotProduct_eq_zero diag13 diag13_symm 0 2
+    (by norm_num) ![3, 4] ![1, 1]
+
+/-- The same fact by raw literal arithmetic on the pinned band values:
+`![0, 4] ⬝ᵥ ![1, 0] = 0` — the two routes meet at `0`. -/
+theorem band_diag13_residual_orthogonal_raw :
+    (![3, 4] - bandProjector diag13 diag13_symm 0 2 *ᵥ ![3, 4]) ⬝ᵥ
+      (bandProjector diag13 diag13_symm 0 2 *ᵥ ![1, 1]) = 0 := by
+  rw [band_diag13_pos_low_mulVec, band_diag13_pos_low_mulVec_one_one,
+    sub_three_four_three_zero, dot_zero_four_one_zero]
+
+/-- **Attainment, numeric.** The distance from the signal to its band
+image is exactly `4` — the closest-point distance is achieved, not
+merely bounded. -/
+theorem band_diag13_hilb_min_attained :
+    ‖(WithLp.equiv 2 (Fin 2 → ℝ)).symm ![3, 4] -
+      (WithLp.equiv 2 (Fin 2 → ℝ)).symm
+        (bandProjector diag13 diag13_symm 0 2 *ᵥ ![3, 4])‖ = 4 := by
+  rw [band_diag13_pos_low_mulVec, toEuclidean_sub,
+    sub_three_four_three_zero, norm_euclidean_zero_four]
+
+/-- **Minimality over the range line.** For every point `![t, 0]` of
+the band's range, the projection `![3, 0]` is at least as close to the
+signal `![3, 4]` — the instantiated theorem, reduced to pinned norms:
+`4 ≤ ‖![3 − t, 4]‖`. -/
+theorem band_diag13_hilb_min_line (t : ℝ) :
+    (4 : ℝ) ≤ ‖((WithLp.equiv 2 (Fin 2 → ℝ)).symm ![3 - t, 4] :
+      EuclideanSpace ℝ (Fin 2))‖ := by
+  have h := norm_sub_bandProjector_apply_le diag13 diag13_symm 0 2
+    (by norm_num) ![3, 4] ![t, 0] (band_diag13_pos_low_fixes t)
+  rw [band_diag13_pos_low_mulVec, toEuclidean_sub,
+    sub_three_four_three_zero, norm_euclidean_zero_four,
+    toEuclidean_sub, sub_three_four_t_zero] at h
+  exact h
+
+/-- The same line inequality with the right-hand norm evaluated to a
+square root. -/
+theorem band_diag13_hilb_min_line_sqrt (t : ℝ) :
+    (4 : ℝ) ≤ Real.sqrt ((3 - t) ^ 2 + 4 ^ 2) := by
+  have hdot : (![3 - t, 4] ⬝ᵥ ![3 - t, 4] : ℝ)
+      = (3 - t) ^ 2 + 4 ^ 2 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+    ring
+  rw [← norm_euclidean_eq_sqrt_pin (v := ![3 - t, 4])
+    (r := (3 - t) ^ 2 + 4 ^ 2)
+    (by
+      have hsq := sq_nonneg (3 - t)
+      nlinarith)
+    hdot]
+  exact band_diag13_hilb_min_line t
+
+/-- Raw arithmetic, no theorem consumed: `4 ≤ √((3 − t)² + 16)` is
+plain positivity of a square — an independent hand-check of
+closest-point on the band's range line that the transported theorem's
+claim (`band_diag13_hilb_min_line_sqrt`) must reproduce. -/
+theorem band_diag13_hilb_min_line_raw (t : ℝ) :
+    (4 : ℝ) ≤ Real.sqrt ((3 - t) ^ 2 + 4 ^ 2) := by
+  have hsq := sq_nonneg (3 - t)
+  have h16 : (4 : ℝ) ^ 2 = 16 := by norm_num
+  calc (4 : ℝ) = Real.sqrt 16 :=
+        ((Real.sqrt_eq_iff_eq_sq (by norm_num) (by norm_num)).2
+          (by norm_num)).symm
+    _ ≤ Real.sqrt ((3 - t) ^ 2 + 4 ^ 2) := by
+        refine Real.sqrt_le_sqrt ?_
+        rw [h16]
+        nlinarith
+
+/-- **Minimality at the zero competitor, numeric.** The projection is
+strictly closer than the zero signal: `4 ≤ 5` (the 3-4-5 triangle). -/
+theorem band_diag13_hilb_min_zero_numeric : (4 : ℝ) ≤ 5 := by
+  have h := norm_sub_bandProjector_apply_le diag13 diag13_symm 0 2
+    (by norm_num) ![3, 4] 0 band_diag13_pos_low_fixes_zero
+  rw [band_diag13_pos_low_mulVec, toEuclidean_sub,
+    sub_three_four_three_zero, norm_euclidean_zero_four,
+    toEuclidean_sub, sub_zero, norm_euclidean_three_four] at h
+  exact h
+
+/-- **Minimality on the high band too, numeric.** The high band's
+projection `![0, 4]` of the same signal is closer than the zero signal
+(`3 ≤ 5`) — the closest-point property is not locked to the low-band
+fixture. -/
+theorem band_diag13_hilb_high_min_zero_numeric : (3 : ℝ) ≤ 5 := by
+  have h := norm_sub_bandProjector_apply_le diag13 diag13_symm 2 4
+    (by norm_num) ![3, 4] 0 (by
+      rw [band_diag13_high, Matrix.mulVec_zero])
+  rw [band_diag13_high_mulVec, toEuclidean_sub,
+    show (![3, 4] - ![0, 4] : Fin 2 → ℝ) = ![3, 0] from by
+      funext k; fin_cases k <;> simp,
+    norm_euclidean_three_zero,
+    toEuclidean_sub, sub_zero, norm_euclidean_three_four] at h
+  exact h
+
+/-- **The fixed-space guard.** The hypothesis-free form of minimality
+("the projection beats *every* vector") is false: the unfiltered signal
+`![3, 4]` is not a range point (not fixed by the band), and it is
+strictly closer to itself (distance `0`) than the projection is
+(distance `4`). The fixed-point hypothesis is load-bearing. -/
+theorem band_diag13_hilb_guard :
+    ¬ ∀ y : Fin 2 → ℝ,
+      ‖(WithLp.equiv 2 (Fin 2 → ℝ)).symm ![3, 4] -
+        (WithLp.equiv 2 (Fin 2 → ℝ)).symm
+          (bandProjector diag13 diag13_symm 0 2 *ᵥ ![3, 4])‖
+        ≤ ‖(WithLp.equiv 2 (Fin 2 → ℝ)).symm ![3, 4] -
+          (WithLp.equiv 2 (Fin 2 → ℝ)).symm y‖ := by
+  intro h
+  have h0 := h ![3, 4]
+  rw [band_diag13_pos_low_mulVec, toEuclidean_sub,
+    sub_three_four_three_zero, norm_euclidean_zero_four,
+    toEuclidean_sub, sub_self,
+    show ((WithLp.equiv 2 (Fin 2 → ℝ)).symm (0 : Fin 2 → ℝ) :
+      EuclideanSpace ℝ (Fin 2)) = 0 from rfl,
+    norm_zero] at h0
+  norm_num at h0
 
 end SpectralGraphTheory.QA

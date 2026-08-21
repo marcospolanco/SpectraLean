@@ -191,7 +191,9 @@ Community process is defined by `governance/CONTRIBUTING.md`, `MAINTAINERS.md`, 
   `l2OpNorm_eq_max_abs_evals` bridge), so `spectral_gap_stability` is
   fully hard crust; `davis_kahan_sin_theta` states its separation
   hypothesis in the single-pair two-cluster form of the cited
-  Yu–Wang–Samworth Theorem 2.
+  Yu–Wang–Samworth Theorem 1 (operator-norm variant, bottom cluster; the
+  locator was corrected from "Theorem 2" by the 2026-08-21 Step-0 survey —
+  the paper's Theorem 2 is a population-gap constant-2 result).
 - There is no executable target; the former `scaffold` executable referenced a missing `Main.lean` and was removed from the default build until a real driver exists.
 
 These are tracked as facts, not hidden by the target architecture.

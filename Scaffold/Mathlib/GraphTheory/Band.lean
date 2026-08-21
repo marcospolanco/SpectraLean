@@ -64,8 +64,14 @@
   monotone family compose to zero (`..._eq_zero_of_monotone`), which is
   what makes the family a partition rather than a mere sequence.
 
-  Open step of the proposal (not in this module): Step 4, the
-  Hilbert-projection specialization.
+  Open step of the proposal: none — Step 4 (the Hilbert-projection
+  specialization) is delivered below, completing the program. The band
+  projector's action is Mathlib's orthogonal projection onto its range
+  (`bandProjector_toEuclidean_apply_eq_orthogonalProjection`), and it is
+  the closest point of that range to the input
+  (`norm_sub_bandProjector_apply_le`) — the Hilbert projection theorem
+  instantiated at the band's range through the `toEuclideanLin`
+  transport, the resolvent Step-0 record's precedent.
 
   Related modules: the below-threshold projector and its algebra live in
   `Scaffold.Mathlib.GraphTheory.Spectral`; the Tikhonov filter
@@ -74,6 +80,8 @@
 -/
 
 import Scaffold.Mathlib.GraphTheory.Spectral
+import Mathlib.Analysis.InnerProductSpace.Projection
+import Mathlib.Analysis.InnerProductSpace.PiL2
 
 open scoped BigOperators Matrix
 
@@ -342,5 +350,127 @@ theorem sum_range_bandProjector_mulVec_eq_self (M : Matrix V V ℝ)
     rw [Finset.sum_comm]
   rw [hsplit, sum_range_bandProjector_eq_one M hM t n hb hc,
     Matrix.one_mulVec]
+
+/-! ### Step 4: the Hilbert-projection specialization
+
+The closing statement of the proposal: the band projector's output is
+the closest point of its own range to the input. Mathlib's Hilbert
+projection theorem is instantiated at `K := LinearMap.range
+(toEuclideanLin B)` through the Euclidean transport (the resolvent
+Step-0 record's precedent); the engine is the residual-orthogonality
+fact below, which consumes exactly the two Step-1 facts — symmetry
+(moving the band across the dot product) and idempotence (collapsing
+`B *ᵥ (x − B *ᵥ x)` to `0`).
+
+Statements are made at `EuclideanSpace ℝ V`, the honest Hilbert-space
+norm. The bare type `V → ℝ` carries the sup-norm instance by default,
+which is deliberately not used for any closest-point claim. -/
+
+/-- The residual of the band projector is orthogonal to its range, in
+dot-product form: for any signal `x` and any range member `B *ᵥ z`, the
+out-of-band residual carries no in-band signal. Load-bearing on both
+Step-1 facts: symmetry moves the band across the dot product, and
+idempotence collapses the band of the residual to zero. -/
+theorem bandProjector_residual_dotProduct_eq_zero
+    (M : Matrix V V ℝ) (hM : M.IsSymm) (a b : ℝ) (hab : a ≤ b)
+    (x z : V → ℝ) :
+    (x - bandProjector M hM a b *ᵥ x) ⬝ᵥ
+      (bandProjector M hM a b *ᵥ z) = 0 := by
+  have hmove : (x - bandProjector M hM a b *ᵥ x) ᵥ*
+      bandProjector M hM a b
+      = bandProjector M hM a b *ᵥ
+          (x - bandProjector M hM a b *ᵥ x) := by
+    conv_rhs => rw [← Matrix.vecMul_transpose]
+    rw [show (bandProjector M hM a b)ᵀ = bandProjector M hM a b from
+      bandProjector_symmetric M hM a b]
+  rw [Matrix.dotProduct_mulVec, hmove, Matrix.mulVec_sub,
+    Matrix.mulVec_mulVec, bandProjector_idempotent M hM a b hab,
+    sub_self, Matrix.zero_dotProduct]
+
+/-- Transport of the band action: under the Euclidean packaging, the
+band projector maps the packaged signal to the packaged filtered
+signal. (`WithLp` is a type synonym on this Mathlib snapshot, so the
+packaging is definitionally the identity; the lemma fixes the
+*syntactic* form consumers rewrite with.) -/
+private theorem toEuclideanLin_bandProjector_apply
+    (M : Matrix V V ℝ) (hM : M.IsSymm) (a b : ℝ) (x : V → ℝ) :
+    Matrix.toEuclideanLin (bandProjector M hM a b)
+        ((WithLp.equiv 2 (V → ℝ)).symm x)
+      = (WithLp.equiv 2 (V → ℝ)).symm
+          (bandProjector M hM a b *ᵥ x) := by
+  rw [Matrix.toEuclideanLin_piLp_equiv_symm, Matrix.toLin'_apply]
+
+/-- **Step 4: the Hilbert-projection identification.** Under the
+Euclidean transport, Mathlib's orthogonal projection of a signal onto
+the band's range is exactly the band-filtered signal — the band
+projector *is* the closest-point map of its own range, instantiated
+through `eq_orthogonalProjection_of_mem_of_inner_eq_zero` (membership of
+the filtered signal via the transport above; orthogonality of the
+residual via `bandProjector_residual_dotProduct_eq_zero`). -/
+
+theorem bandProjector_toEuclidean_apply_eq_orthogonalProjection
+    (M : Matrix V V ℝ) (hM : M.IsSymm) (a b : ℝ) (hab : a ≤ b)
+    (x : V → ℝ) :
+    (orthogonalProjection
+        (LinearMap.range
+          (Matrix.toEuclideanLin (bandProjector M hM a b)))
+        ((WithLp.equiv 2 (V → ℝ)).symm x) : EuclideanSpace ℝ V)
+      = (WithLp.equiv 2 (V → ℝ)).symm
+          (bandProjector M hM a b *ᵥ x) := by
+  refine eq_orthogonalProjection_of_mem_of_inner_eq_zero ?_ ?_
+  · rw [LinearMap.mem_range]
+    exact ⟨(WithLp.equiv 2 (V → ℝ)).symm x,
+      toEuclideanLin_bandProjector_apply M hM a b x⟩
+  · intro w hw
+    obtain ⟨z, hz⟩ := LinearMap.mem_range.1 hw
+    have hz' : w = (WithLp.equiv 2 (V → ℝ)).symm
+        (bandProjector M hM a b *ᵥ
+          ((WithLp.equiv 2 (V → ℝ)) z)) :=
+      hz ▸ (toEuclideanLin_bandProjector_apply M hM a b _).symm
+    rw [hz']
+    have hdiff : (WithLp.equiv 2 (V → ℝ)).symm x -
+        (WithLp.equiv 2 (V → ℝ)).symm (bandProjector M hM a b *ᵥ x)
+        = (WithLp.equiv 2 (V → ℝ)).symm
+            (x - bandProjector M hM a b *ᵥ x) := rfl
+    rw [hdiff, EuclideanSpace.inner_piLp_equiv_symm]
+    simpa using bandProjector_residual_dotProduct_eq_zero M hM a b
+      hab x ((WithLp.equiv 2 (V → ℝ)) z)
+
+/-- **Step 4: the closest-point property.** For every fixed point `y`
+of the band projector — equivalently, by idempotence, every member of
+its range — the filtered signal `B *ᵥ x` is at least as close to `x` as
+`y` is: the band projector's output is the closest point in its range
+to the input, the Hilbert projection theorem's conclusion instantiated
+at the band. Derived from `orthogonalProjection_minimal` composed with
+the identification above; the fixed-point hypothesis is load-bearing
+(the QA guard exhibits a non-range competitor strictly closer than the
+projection, refuting the hypothesis-free form). -/
+theorem norm_sub_bandProjector_apply_le
+    (M : Matrix V V ℝ) (hM : M.IsSymm) (a b : ℝ) (hab : a ≤ b)
+    (x y : V → ℝ) (hy : bandProjector M hM a b *ᵥ y = y) :
+    ‖(WithLp.equiv 2 (V → ℝ)).symm x -
+      (WithLp.equiv 2 (V → ℝ)).symm (bandProjector M hM a b *ᵥ x)‖
+      ≤ ‖(WithLp.equiv 2 (V → ℝ)).symm x -
+        (WithLp.equiv 2 (V → ℝ)).symm y‖ := by
+  have hmin := orthogonalProjection_minimal
+    (U := LinearMap.range
+      (Matrix.toEuclideanLin (bandProjector M hM a b)))
+    ((WithLp.equiv 2 (V → ℝ)).symm x)
+  rw [bandProjector_toEuclidean_apply_eq_orthogonalProjection
+    M hM a b hab x] at hmin
+  have hmem : (WithLp.equiv 2 (V → ℝ)).symm y ∈ LinearMap.range
+      (Matrix.toEuclideanLin (bandProjector M hM a b)) := by
+    rw [LinearMap.mem_range]
+    refine ⟨(WithLp.equiv 2 (V → ℝ)).symm y, ?_⟩
+    rw [toEuclideanLin_bandProjector_apply M hM a b y, hy]
+  have hbdd : BddBelow (Set.range fun
+      c : LinearMap.range
+        (Matrix.toEuclideanLin (bandProjector M hM a b)) =>
+      ‖(WithLp.equiv 2 (V → ℝ)).symm x - (c : EuclideanSpace ℝ V)‖) :=
+    ⟨0, fun r hr => by
+      obtain ⟨c, rfl⟩ := hr
+      exact norm_nonneg _⟩
+  exact hmin.le.trans
+    (ciInf_le hbdd ⟨(WithLp.equiv 2 (V → ℝ)).symm y, hmem⟩)
 
 end SpectralGraphTheory

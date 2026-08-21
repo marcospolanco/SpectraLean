@@ -275,6 +275,40 @@ Magnetic Laplacians and Hermitian embeddings of directed graphs are a
 further, separate slice — real, but do not fold into the first proposal
 under this item by default.
 
+### 9. Bounded-window ("band") Davis–Kahan (2026-08-21, opened by the Davis–Kahan Step-0/1 survey)
+
+*Scope:* `proposals/discharge-perturbation-axioms.md`'s Davis–Kahan
+survey found a purely algebraic commutator/shift proof technique
+(Vershynin, *High-Dimensional Probability*, 2018, Thm 4.1.15–4.1.16;
+`index/sources/vershynin_hdp.md`) that proves a Davis–Kahan-shaped bound
+`‖QP‖ ≤ ‖A−B‖/δ` with no integral calculus at all — but only when both
+`P` and `Q` select a *bounded* spectral window, not the half-line
+threshold form `davis_kahan_sin_theta` actually states. It is explicitly
+**not** a substitute for that axiom's retirement (see the proposal's
+survey record for the worked-through reason: the technique needs a
+containment radius `r` the half-line hypothesis does not bound). It is,
+however, a different, new, axiom-free theorem in its own right.
+
+*Named consumer / leverage:* the object model this technique needs —
+two finite, `δ`-separated spectral windows — is exactly what
+`GraphTheory.Band` already provides (Steps 1–4 delivered 2026-08-20/21:
+two-sided bands, disjoint-band orthogonality, completeness under a
+partition, the Hilbert-projection specialization). A band-form
+Davis–Kahan theorem would be the first perturbation-stability result for
+band projectors, and — being provable by pure finite-dimensional algebra
+(operator-norm submultiplicativity, projection contractivity, spectral-
+subspace invariance under a shifted operator) — is plausibly cheap
+relative to the half-line case's Duhamel route.
+
+*Candidate first slice:* state the exact theorem first (bounded interval
+`I` for `A`, bounded-away set `J` for `B`, `δ`-separation) against
+`GraphTheory.Band`'s existing projector definitions before writing any
+proof — a Step-0 survey confirming the shelf (commutation of a
+self-adjoint operator with its own spectral/band projector; contractivity;
+invariance of a band under the shifted operator) is a prerequisite, per
+this backlog's own admission rule. Not authorized to start inside a
+Davis–Kahan Step-1/2 run — it needs its own proposal entry.
+
 ## Standing decisions
 
 - Coverage is assessed on the [SGT Radar](7_SGT_RADAR.md); scores move

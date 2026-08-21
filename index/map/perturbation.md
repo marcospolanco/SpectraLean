@@ -32,7 +32,23 @@ the additive window from the Courant–Fischer engine composed with the proved
 
 | Declaration | Kind | Description | Source |
 |-------------|------|-------------|--------|
-| `davis_kahan_sin_theta` | axiom | Projector rotation `≤ ‖E‖/δ` under the two-cluster separation `λ_{k+1}(A+E) - λ_k(A) ≥ δ` (single-pair form, matching Yu–Wang–Samworth Thm 2) | [Davis & Kahan 1970](../sources/davis_kahan_1970.md) |
+| `davis_kahan_sin_theta` | axiom | Projector rotation `≤ ‖E‖/δ` under the two-cluster separation `λ_{k+1}(A+E) - λ_k(A) ≥ δ` (single-pair form, the YWS Theorem 1 operator-norm variant at the bottom cluster — locator corrected 2026-08-21, see the source index) | [Davis & Kahan 1970](../sources/davis_kahan_1970.md) |
+
+### Equal-Rank Projector Identity (Davis–Kahan Step 1, component 1)
+
+**Module**: `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.ProjectionGap`
+
+Delivered 2026-08-21, all proved, zero new axioms — the first of the two
+components `discharge-perturbation-axioms.md`'s Step-0 survey named as
+required to retire `davis_kahan_sin_theta` at its exact constant-1
+operator-norm statement.
+
+| Declaration | Kind | Description | Source |
+|-------------|------|-------------|--------|
+| `l2OpNorm_sub_eq_max_of_isSymm_idempotent` | proved | `‖P−Q‖ = max ‖(I−Q)P‖ ‖(I−P)Q‖` for symmetric idempotent `P, Q` — always true, no rank hypothesis | proposal's route, layer (A) |
+| `l2OpNorm_sub_eq_of_rank_eq` | proved | The headline identity: `‖P−Q‖ = ‖(I−Q)P‖` when `P, Q` additionally have equal rank (principal-angles route via the sandwich `PQP`, eigenspace transfer, and the norm-eigenvalue bridge) | proposal's route, layer (B); no external citation — closed-form finite-dimensional linear algebra |
+| `l2OpNorm_one_sub_mul_sq_eq` | proved | The squared-residual pin `‖(I−Q)P‖² = 1 − τ` (`τ` the sandwich's threshold eigenvalue) underlying the headline identity | same |
+| `evals_pqp_eq_evals_qpq` | proved | Spectral symmetry `evals(PQP) = evals(QPQ)` via the injective eigenspace transfer `v ↦ QPv` — the equal-rank core's key symmetry step | same |
 
 ### Matrix Update Identities (bridge utilities)
 
@@ -75,6 +91,12 @@ separate spectral-projector module (the real projector definitions live
 in `Scaffold.Mathlib.GraphTheory.Spectral`). The resolvent *injectivity*
 statement formerly listed here was delivered 2026-08-20 (Step 3,
 completing the resolvent program).
+
+A distinct *bounded-window* Davis–Kahan theorem (both clusters finite,
+provable by pure algebra against `GraphTheory.Band` — see
+`docs/6_SGT_BACKLOG.md` item 9 and `index/sources/vershynin_hdp.md`'s
+Chapter 4 note) is recorded as a future opportunity, not the same
+statement as `davis_kahan_sin_theta` and not part of its retirement.
 
 ## Applications
 

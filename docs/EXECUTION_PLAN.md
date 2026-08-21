@@ -6,93 +6,106 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**Spectral Band Projectors, Step 2 — orthogonality of disjoint bands (run 1,
-2026-08-20; `proposals/spectral-band-projectors.md`, the Active table's
-only remaining High row, at its recorded open next step): DELIVERED.**
-Pure hard crust — **zero new axioms** (count stays 11; `#print axioms`
-on all four new public theorems reads only `propext, Classical.choice,
-Quot.sound`). The proposal's one-step-per-run rule was honored —
-Steps 3–4 untouched.
+**Spectral Band Projectors, Step 3 — completeness under a partition
+(run 1, 2026-08-20; `proposals/spectral-band-projectors.md`, the
+Active table's only remaining High row, at its recorded open next
+step): DELIVERED.** Pure hard crust — **zero new axioms** (count stays
+11; `#print axioms` on all four new public theorems reads only
+`propext, Classical.choice, Quot.sound`). The proposal's
+one-step-per-run rule was honored — Step 4 (the Hilbert projection
+specialization) untouched.
 
-**Route (as recorded before stating):** exactly the paved path — the
-Step-1 nestedness cross-law's ordered forms expand
-`(P_b − P_a)(P_d − P_c)` to the four-term expression that collapses
-under the ordering; the residue is literally `X − X`, closed by
-`sub_self`. Hypotheses folded to `a ≤ b`, `c ≤ d`, `b ≤ c` — with
-`b ≤ c` *exactly* interval disjointness of `(a, b]` and `(c, d]`,
-load-bearing rather than decorative (the QA overlap guard refutes the
-hypothesis-free form).
+**Route (as recorded before stating):** the algebraic engine is the
+*unconditional* telescoping law, and it landed exactly as paved —
+`Finset.sum_range_succ` induction with the residue closed by `abel`
+(one snapshot surprise recorded: this Mathlib's `sum_range_succ`
+appends the new term on the *right*, giving the natural order
+`f 0 + f 1 + …`, and neither `Finset.sum_range_two` nor `Nat.cast_mono`
+exists here). Completeness consumes exactly the two endpoint covering
+hypotheses; monotonicity is deliberately *not* folded into the sum
+identity (telescoping does not consume it — it would be decorative),
+and is delivered as its own theorem where it is load-bearing.
 
-**Delivered in `GraphTheory.Band`** (public module elaborated clean on
-the first pass, zero errors, zero warnings):
+**Delivered in `GraphTheory.Band`:**
 
-- `bandProjector_mul_bandProjector_eq_zero` — the forward composition
-  law (each of the four products through
-  `spectralProjector_mul_spectralProjector_of_le`);
-- `bandProjector_mul_bandProjector_eq_zero'` — the flipped order, as a
-  *direct* four-term expansion through `_of_le'` (not a transpose
-  wrapper);
-- `bandProjector_inner_eq_zero` — the consumer's vector-level form:
-  `(B_{a,b} *ᵥ x) ⬝ᵥ (B_{c,d} *ᵥ y) = 0`, the first band moved across
-  the dot product (`vecMul_transpose`, `dotProduct_mulVec`,
-  `vecMul_vecMul`; its symmetry makes the transpose itself);
-- `eq_zero_of_bandProjector_mulVec_eq_self` — the subspace-level
-  reading of the step's "they share no eigenvector": a vector fixed by
-  two disjoint bands is zero (the second band annihilates the first
-  band's image).
+- `sum_range_bandProjector_eq_sub` — the unconditional telescoping law
+  `∑_{k<n} B(t_k, t_{k+1}) = P_{t_n} − P_{t_0}` for *any* threshold
+  sequence, ordered or not (load-bearing on the band definition's
+  exact difference shape: a sign-flipped or transposed definition
+  would leave an uncancellable residue);
+- `sum_range_bandProjector_eq_one` — **completeness under a
+  partition**: a family whose start is strictly below every eigenvalue
+  and whose end covers them all resolves the identity (both covering
+  hypotheses load-bearing — refutable-on-omission in both directions);
+- `bandProjector_mul_bandProjector_eq_zero_of_monotone` — distinct
+  members of a **monotone** family compose to zero (`Monotone t`
+  supplies exactly the disjointness `t (k+1) ≤ t m` Step 2 consumes);
+  together with completeness, the identity resolves into mutually
+  orthogonal band projectors — the partition character stated rather
+  than assumed;
+- `sum_range_bandProjector_mulVec_eq_self` — the consumer's form
+  `∑ B_k *ᵥ x = x`, through the inlined `mulVec` analog of
+  `Matrix.sum_mul` (a sum-interchange needing `Matrix.sum_apply`
+  because `Finset.sum_apply` cannot see through the `Matrix.of`
+  wrapper).
 
-**QA** `SpectralGraph/Band_QA.lean` (+16 by the generator metric, 43 in
-file, 932 total): the disjoint low/high bands' composition to zero
-checked **through the theorem and by raw literal multiplication** on the
-pinned band values, in both orders; image orthogonality on concrete
-vectors by both routes, with the **same-band counter-witness** (`1 ≠ 0`
-— the vanishing is about disjointness, not the fixture's zero entries);
-the composed action `B_high *ᵥ (B_low *ᵥ x)` annihilating a filtered
-signal by both routes; a low-band range vector killed by the high band;
-and the **overlap guard** — the bands `(−1, 3]` and `(1, 4]`, both
-containing the eigenvalue `3`, compose to the provably nonzero
-`diag(0,1)` (entry `1` at the shared mode's axis).
+**QA** `SpectralGraph/Band_QA.lean` (+41 by the generator metric, 84 in
+file, 973 total): the proposal's partition witness — the covering
+two-band family `t k = 2k` summed to the identity **through the
+theorem and from independently pinned band values**; a three-band
+partition `t k = k` with an **empty middle band** and its top
+threshold exactly touching the eigenvalue `3` (the closed right
+endpoint); the **two endpoint guards** — a family starting at `2` and
+a family truncated at `n = 1` each provably fails to sum to the
+identity, with each violated covering hypothesis separately refuted
+(the design note's "silently ignores modes" failure mode, witnessed in
+both directions); the **non-monotone telescoping witness** (family
+`4, 0, 4`: junk band `−1` cancelling covering band `1`, both sides
+independently `0`); monotone-family orthogonality instantiated; and
+the vector decomposition on `![7,−5]` by theorem and raw routes.
 
 **Verification:** `lake env lean` on `Band` and `Band_QA` — zero
-errors, zero warnings (public module first pass; three small QA proof
-shape fixes during iteration, including the discovered `rw`-closes-
-`3 ≤ 3`-by-itself behavior behind one linter warning);
-`#print axioms` on the four public and twelve headline QA theorems ✔
-(three standard axioms only); oleans produced directly during
-iteration; **all thirty-four QA modules batch-elaborated, zero errors**
-(BATCH-DONE fail=0); **full `lake build` ✔ (2186 targets, "Build
-completed successfully", detached log + poll; the only diagnostic the
-documented pre-existing `hγ` warning in `ProjectorDrift.lean`)**;
+errors, zero warnings (public module first pass; QA after two
+proof-shape fixes, one being the `rw`-closes-`3 ≤ 3`-by-itself linter
+trap already documented at Step 2); `#print axioms` on the four public
+and thirteen headline QA theorems ✔ (three standard axioms only);
+oleans produced directly during iteration (the recorded fast `lean -o`
+path); **all thirty-four QA modules batch-elaborated, zero errors
+(BATCH-DONE fail=0)**; **full `lake build` ✔ (2186 targets,
+"Build completed successfully", detached log + poll)**;
 `lint_axioms` (**11**), `check_citations`, `check_markdown_links` pass;
-scoreboard regeneration idempotent (**932/11/0**). Environment: the
-pruned-oleans state recurred at run start; the interpreted cache fetch
-restored 5387 (with the invocation note recorded in the scoreboard:
-the `--run` file argument resolves relative to the cwd, not `--dir`).
+scoreboard regeneration idempotent (**973/11/0**). Environment: an
+olean-presence false alarm at run start (the check used the wrong
+path — no `lean/` level in the layout; corrected check recorded in
+the scoreboard's provenance note, with one redundant idempotent
+re-fetch), and one `lake build` invocation killed at its tool timeout
+during Mathlib trace replay left the olean set intact (verified by
+count); the final build ran detached per the recorded procedure.
 
 **Records updated:** module/QA/umbrella docstrings, scoreboard
-(932/11/0, both Direct rows prepended with the Step-2 slice, the
-`lake build` row extended, the Step-2 interpretation bullet, the
-cache-provenance invocation note, two stale narrative counts fixed —
-the lint row's axiom count 12 → 11 and the QA-definition line
-917 → 932), radar (axis 2 evidence extended with the orthogonality
-layer, **score held at 4.0** per protocol — completion within the band
-family counted at Step 1, Steps 3–4 the natural re-score triggers; QA
-count synced 932/34 with the QA axis **held at 4.0**; both holds
-logged), README (status table synced to the scoreboard authority
-11/932; the proved list gains the disjoint-band orthogonality), SGT
-index map (Band section extended, Steps 1–2; +3 rows), proposal
-(status header Step 2 DELIVERED, delivery record with the route and
-the overlap guard, open-next-step rewritten to Step 3),
-`proposals/README.md` (High row note + Delivered row + progress
-paragraph).
+(973/11/0, both Direct rows prepended with the Step-3 slice, the
+`lake build` row extended, the Step-3 interpretation bullet, the
+provenance note amended with the wrong-path check correction), radar
+(axis 2 evidence extended with the completeness layer, **score held at
+4.0** per protocol — same-family completion; Step 4, consuming
+Mathlib's Hilbert projection machinery, stays the natural re-score
+trigger; QA count synced 973/34 with the QA axis **held at 4.0**; both
+holds logged), README (status table synced to 973/11; the proved list
+gains partition completeness), SGT index map (Band section extended,
+Steps 1–3; +4 rows), proposal (status header Step 3 DELIVERED,
+delivery record with the route and the statement-shape decision,
+open-next-step rewritten to Step 4), `proposals/README.md` (High row
+note + Delivered row + progress paragraph — **Step 4 is now the top
+of the Active table**).
 
-**Next milestone (open):** the same proposal's **Step 3 — completeness
-under a partition** (a finite ordered threshold sequence covering the
-spectral range sums to the identity; the two-band covering instance
-`bandProjector_eq_one` already exists, and Step 2's orthogonality is
-the pairwise half), then Step 4 (the Hilbert projection
-specialization — survey `Analysis/InnerProductSpace/Projection.lean`
-signatures first). Or the Medium rows (Fiedler Phase B — needs an
+**Next milestone (open):** the same proposal's **Step 4 — the
+Hilbert-projection specialization** (the band projector's output is
+the closest point in its range to the input, by instantiating
+Mathlib's Hilbert projection theorem at the band's eigenspace; the
+proposal's own mandatory pre-step is the signature survey of
+`Analysis/InnerProductSpace/Projection.lean`, with the resolvent
+Step-0 record's `toEuclideanCLM` transport spine as precedent — the
+program's last step). Or the Medium rows (Fiedler Phase B — needs an
 operator decision; mixing-time Step 1; Reversibility A and B; Relative
 Entropy; Perron–Frobenius + directed operators; discharge-perturbation
 — the Davis–Kahan Step 0 survey; approximate spectral projection).

@@ -7,8 +7,9 @@
   span of the eigenvectors whose eigenvalues lie in a spectral interval
   `(a, b]`, defined as the difference of two `spectralProjector` calls —
   `bandProjector M hM a b = spectralProjector M hM b - spectralProjector M hM a`
-  — together with its basic properties and the orthogonality of disjoint
-  bands (Steps 1 and 2 of `proposals/spectral-band-projectors.md`, the
+  — together with its basic properties, the orthogonality of disjoint
+  bands, and completeness under a partition of the spectrum (Steps 1, 2,
+  and 3 of `proposals/spectral-band-projectors.md`, the
   Active priority table's High row at delivery time). Pure hard crust: no
   `axiom` declarations;
   every theorem is proved from the already-proved algebra of
@@ -47,9 +48,24 @@
   both (`eq_zero_of_bandProjector_mulVec_eq_self` — the subspace-level
   reading of the proposal's "they share no eigenvector").
 
-  Open steps of the proposal (not in this module): Step 3, completeness
-  over a partition of the spectrum; Step 4, the Hilbert-projection
-  specialization.
+  Step 3 is delivered here too: completeness under a partition. The
+  algebraic engine is an unconditional telescoping law — the sum of the
+  consecutive band projectors of *any* threshold sequence `t` collapses
+  to the difference of the two extreme below-threshold projectors
+  (`sum_range_bandProjector_eq_sub`); when the sequence covers the
+  spectrum (start strictly below every eigenvalue, end at or above
+  them all), that difference is the identity
+  (`sum_range_bandProjector_eq_one`), and dually every signal is the
+  sum of its band components (`sum_range_bandProjector_mulVec_eq_self`)
+  — the resolution of the identity the proposal's external consumer
+  consumes. Monotonicity of the family is deliberately *not* a
+  hypothesis of the sum identity (telescoping does not use it); it is
+  exactly what the fourth theorem consumes — distinct members of a
+  monotone family compose to zero (`..._eq_zero_of_monotone`), which is
+  what makes the family a partition rather than a mere sequence.
+
+  Open step of the proposal (not in this module): Step 4, the
+  Hilbert-projection specialization.
 
   Related modules: the below-threshold projector and its algebra live in
   `Scaffold.Mathlib.GraphTheory.Spectral`; the Tikhonov filter
@@ -240,5 +256,91 @@ theorem eq_zero_of_bandProjector_mulVec_eq_self (M : Matrix V V ℝ)
       Matrix.zero_mulVec]
   rw [h₁, h₂] at key
   exact key
+
+/-! ### Step 3: completeness under a partition
+
+The assembling statement of the proposal's design note: a family of
+disjoint bands covering the spectral range resolves the identity. The
+engine is the *unconditional* telescoping law below — the sum of
+consecutive band projectors collapses to the difference of the extreme
+below-threshold projectors for **any** threshold sequence, ordered or
+not (the junk bands of a non-monotone family cancel in pairs). The
+completeness theorem adds exactly the two endpoint covering hypotheses
+that turn that difference into `1 − 0`; monotonicity, which the sum
+identity does not consume, is the hypothesis of the orthogonality
+theorem, where it is what makes the family a partition. -/
+
+/-- The telescoping law: the sum of the consecutive band projectors of
+any threshold sequence `t` — ordered or not — collapses to the
+difference of the below-threshold projectors at the sequence's ends.
+This is the algebraic engine of completeness, and it is load-bearing on
+the band definition's exact difference shape: a sign-flipped or
+transposed definition would leave an uncancellable residue. -/
+theorem sum_range_bandProjector_eq_sub (M : Matrix V V ℝ) (hM : M.IsSymm)
+    (t : ℕ → ℝ) (n : ℕ) :
+    ∑ k in Finset.range n, bandProjector M hM (t k) (t (k + 1))
+      = spectralProjector M hM (t n) - spectralProjector M hM (t 0) := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      rw [Finset.sum_range_succ, ih, bandProjector]
+      abel
+
+/-- **Completeness under a partition.** For a threshold family whose
+first term is strictly below every eigenvalue and whose `n`-th term is
+at or above them all, the sum of the consecutive band projectors is the
+identity — every mode of the spectrum lies in exactly one band of the
+induced partition. Both covering hypotheses are load-bearing: a family
+starting above the lowest mode drops it (the sum is missing that mode's
+projector), and a family ending below the highest mode drops that one
+(the QA endpoint guards refute the hypothesis-free form in both
+directions). Monotonicity is deliberately not a hypothesis here — the
+telescoping law consumes only the endpoints — and is delivered as the
+orthogonality theorem below, where it is exactly what is used. -/
+theorem sum_range_bandProjector_eq_one (M : Matrix V V ℝ) (hM : M.IsSymm)
+    (t : ℕ → ℝ) (n : ℕ)
+    (hb : ∀ i, t 0 < eigvalOf M hM i)
+    (hc : ∀ i, eigvalOf M hM i ≤ t n) :
+    ∑ k in Finset.range n, bandProjector M hM (t k) (t (k + 1)) = 1 := by
+  rw [sum_range_bandProjector_eq_sub M hM t n,
+    spectralProjector_eq_one M hM (t n) hc,
+    spectralProjector_eq_zero M hM (t 0) hb, sub_zero]
+
+/-- Distinct members of a monotone threshold family are orthogonal: for
+`k < m`, the bands `(t k, t (k+1)]` and `(t m, t (m+1)]` are disjoint,
+so their projectors compose to zero. Monotonicity is load-bearing here
+— it supplies exactly the interval disjointness `t (k+1) ≤ t m` that
+Step 2's composition law consumes — and this is what makes the family
+a partition: together with completeness, the identity resolves into
+mutually orthogonal band projectors. -/
+theorem bandProjector_mul_bandProjector_eq_zero_of_monotone
+    (M : Matrix V V ℝ) (hM : M.IsSymm) (t : ℕ → ℝ) (ht : Monotone t)
+    (k m : ℕ) (hkm : k < m) :
+    bandProjector M hM (t k) (t (k + 1)) * bandProjector M hM (t m) (t (m + 1))
+      = 0 :=
+  bandProjector_mul_bandProjector_eq_zero M hM (t k) (t (k + 1))
+    (t m) (t (m + 1)) (ht (Nat.le_succ k)) (ht (Nat.le_succ m))
+    (ht (show k + 1 ≤ m by omega))
+
+/-- The consumer's form of completeness: under the same covering
+hypotheses, every vector is the sum of its band components — the
+frequency-band decomposition a graph-signal-processing consumer
+filters with. The matrix-to-vector pass is the `mulVec` analog of
+Mathlib's `Matrix.sum_mul` (not present in the pinned snapshot in this
+shape), proved by interchanging the two finite sums. -/
+theorem sum_range_bandProjector_mulVec_eq_self (M : Matrix V V ℝ)
+    (hM : M.IsSymm) (t : ℕ → ℝ) (n : ℕ)
+    (hb : ∀ i, t 0 < eigvalOf M hM i)
+    (hc : ∀ i, eigvalOf M hM i ≤ t n) (x : V → ℝ) :
+    ∑ k in Finset.range n, bandProjector M hM (t k) (t (k + 1)) *ᵥ x = x := by
+  have hsplit : ∑ k in Finset.range n,
+      bandProjector M hM (t k) (t (k + 1)) *ᵥ x
+      = (∑ k in Finset.range n, bandProjector M hM (t k) (t (k + 1))) *ᵥ x := by
+    funext i
+    simp only [Matrix.mulVec, Matrix.dotProduct, Finset.sum_apply,
+      Matrix.sum_apply, Finset.sum_mul]
+    rw [Finset.sum_comm]
+  rw [hsplit, sum_range_bandProjector_eq_one M hM t n hb hc,
+    Matrix.one_mulVec]
 
 end SpectralGraphTheory

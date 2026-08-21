@@ -22,7 +22,7 @@ As of August 20, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 11 |
-| QA theorems/lemmas | 932, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 973, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is the Cheeger *hard* direction at the SGT center;
 Davis–Kahan in the perturbation bridge; and the scalar and matrix
@@ -40,8 +40,11 @@ minimality/uniqueness, and mean preservation), and **two-sided spectral
 band projectors** (the `(a, b]` band as the difference of two
 `spectralProjector` calls, idempotence through the nestedness
 cross-law `P_{c₁} * P_{c₂} = P_{min c₁ c₂}`, the mode-selection
-action interface, and the orthogonality of disjoint bands — both
-composition orders, image orthogonality, and shared-mode-freeness)
+action interface, the orthogonality of disjoint bands — both
+composition orders, image orthogonality, and shared-mode-freeness —
+and completeness under a partition: the unconditional telescoping
+law, the covering-family resolution of the identity, monotone-family
+orthogonality, and the vector decomposition `x = ∑ B_k x`)
 are proved, not admitted.
 
 The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for

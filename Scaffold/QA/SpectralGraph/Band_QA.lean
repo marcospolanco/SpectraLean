@@ -4,7 +4,7 @@
   Purpose
   -------
   QA lemmas for the two-sided spectral band projector of
-  `Scaffold.Mathlib.GraphTheory.Band` (Steps 1 and 2 of
+  `Scaffold.Mathlib.GraphTheory.Band` (Steps 1, 2, and 3 of
   `proposals/spectral-band-projectors.md`): band values computed
   independently of the construction, idempotence instantiated both
   through the theorem and by raw matrix arithmetic, the nestedness
@@ -19,7 +19,18 @@
   showing the vanishing is genuinely about disjointness), the composed
   action annihilating a filtered signal, and the overlap guard — two
   bands sharing an eigenvalue compose to a provably nonzero matrix,
-  refuting the hypothesis-free form of the disjointness statement.
+  refuting the hypothesis-free form of the disjointness statement. The
+  Step-3 slice: the partition witness — a covering two-band family
+  summing to the identity both through the completeness theorem and
+  from independently pinned band values — a three-band partition with
+  an empty middle band whose top threshold exactly touches the top
+  eigenvalue (the closed right endpoint), the two endpoint guards (a
+  family starting above the lowest mode, or ending below the highest
+  one, provably fails to sum to the identity — the design note's
+  "silently ignores modes" failure mode), the unconditional telescoping
+  law witnessed on a deliberately non-monotone family whose junk bands
+  cancel, monotone-family orthogonality instantiated, and the vector
+  decomposition `∑ B_k *ᵥ x = x` on a concrete signal by both routes.
 
   Fixture: the diagonal matrix `!![1, 0; 0, 3]` on `Fin 2` — chosen
   over the dense `!![2, 1; 1, 2]` used elsewhere because its
@@ -554,5 +565,330 @@ theorem band_diag13_overlap_mul_ne_zero :
   intro h
   have h11 := congrFun (congrFun h 1) 1
   simp at h11
+
+/-!
+## Step 3: completeness under a partition
+
+Every family below lives on the pinned fixture (spectrum `{1, 3}`), and
+each summation identity is checked twice: through the new theorem and
+from band values pinned by the Step-1/Step-2 machinery — so a wrong
+telescoping law or a wrong pin would break one route while the other
+still computes.
+-/
+
+/-- Pin: the zero-threshold projector vanishes (both eigenvalues are
+positive). -/
+theorem spectralProjector_diag13_zero :
+    spectralProjector diag13 diag13_symm 0 = 0 :=
+  spectralProjector_eq_zero diag13 diag13_symm 0
+    (fun i => by
+      rcases diag13_eigvalOf_mem i with h | h <;> rw [h] <;> norm_num)
+
+/-- Raw arithmetic: the two single-axis band values of a partition add
+to the identity matrix. -/
+theorem diag13_axis_add_axis_raw :
+    (!![1, 0; 0, 0] : Matrix (Fin 2) (Fin 2) ℝ) +
+      (!![0, 0; 0, 1] : Matrix (Fin 2) (Fin 2) ℝ)
+      = 1 := by
+  ext a b
+  fin_cases a <;> fin_cases b <;> simp [Matrix.add_apply, Matrix.one_apply]
+
+/-- Raw arithmetic, flipped order. -/
+theorem diag13_axis_add_axis_raw' :
+    (!![0, 0; 0, 1] : Matrix (Fin 2) (Fin 2) ℝ) +
+      (!![1, 0; 0, 0] : Matrix (Fin 2) (Fin 2) ℝ)
+      = 1 := by
+  ext a b
+  fin_cases a <;> fin_cases b <;> simp [Matrix.add_apply, Matrix.one_apply]
+
+/-- An eigenvalue `3` occurs somewhere (the index other than the one
+carrying `1`). -/
+theorem diag13_exists_three : ∃ j : Fin 2, eigvalOf diag13 diag13_symm j = 3 := by
+  obtain ⟨i, hi⟩ := diag13_exists_one
+  fin_cases i
+  · exact ⟨1, diag13_other_eq_three (by decide) hi⟩
+  · exact ⟨0, diag13_other_eq_three (by decide) hi⟩
+
+/-! ### The two-band partition `t k = 2k` (thresholds `0, 2, 4`) -/
+
+/-- The two-band partition family: monotone, starting strictly below
+the spectrum (`0 < 1`) and ending above it (`4 ≥ 3`). -/
+def part2 : ℕ → ℝ := fun k => 2 * k
+
+theorem part2_monotone : Monotone part2 := by
+  intro a b hab
+  simp only [part2]
+  exact mul_le_mul_of_nonneg_left (Nat.cast_le.2 hab) (by norm_num)
+
+theorem part2_zero : part2 0 = 0 := by simp [part2]
+
+theorem part2_one : part2 1 = 2 := by simp [part2]
+
+theorem part2_two : part2 2 = 4 := by norm_num [part2]
+
+theorem part2_cover_low (i : Fin 2) :
+    part2 0 < eigvalOf diag13 diag13_symm i := by
+  rw [part2_zero]
+  rcases diag13_eigvalOf_mem i with h | h <;> rw [h] <;> norm_num
+
+theorem part2_cover_high (i : Fin 2) :
+    eigvalOf diag13 diag13_symm i ≤ part2 2 := by
+  rw [part2_two]
+  rcases diag13_eigvalOf_mem i with h | h <;> rw [h] <;> norm_num
+
+/-- The partition's low band `(0, 2]` is the first-axis projector
+(`P_0 = 0` below, `P_2 = e₀e₀ᵀ` at the middle threshold). -/
+theorem band_diag13_part2_low :
+    bandProjector diag13 diag13_symm 0 2 = !![1, 0; 0, 0] := by
+  rw [bandProjector, spectralProjector_diag13_zero, sub_zero,
+    spectralProjector_diag13_eq 2 (by norm_num) (by norm_num)]
+
+/-- The partition witness, raw route: the sum computed from the two
+pinned band values, no completeness theorem consumed. -/
+theorem sum_band_diag13_part2_raw :
+    ∑ k in Finset.range 2,
+      bandProjector diag13 diag13_symm (part2 k) (part2 (k + 1)) = 1 := by
+  rw [Finset.sum_range_succ, Finset.sum_range_one]
+  show bandProjector diag13 diag13_symm (part2 0) (part2 1)
+      + bandProjector diag13 diag13_symm (part2 1) (part2 2) = 1
+  rw [part2_zero, part2_one, part2_two, band_diag13_part2_low,
+    band_diag13_high, diag13_axis_add_axis_raw]
+
+/-- The partition witness, theorem route — both routes meet at `1`:
+the covering two-band family resolves the identity. -/
+theorem sum_band_diag13_part2 :
+    ∑ k in Finset.range 2,
+      bandProjector diag13 diag13_symm (part2 k) (part2 (k + 1)) = 1 :=
+  sum_range_bandProjector_eq_one diag13 diag13_symm part2 2
+    part2_cover_low part2_cover_high
+
+/-- Distinct members of the monotone family are orthogonal, theorem
+route: the two bands of the partition compose to zero. -/
+theorem band_diag13_part2_orthogonal :
+    bandProjector diag13 diag13_symm (part2 0) (part2 1) *
+      bandProjector diag13 diag13_symm (part2 1) (part2 2) = 0 :=
+  bandProjector_mul_bandProjector_eq_zero_of_monotone diag13 diag13_symm
+    part2 part2_monotone 0 1 (by norm_num)
+
+/-- The vector decomposition, theorem route: the signal `![7, −5]` is
+the sum of its band components. -/
+theorem sum_band_diag13_part2_mulVec :
+    ∑ k in Finset.range 2, bandProjector diag13 diag13_symm (part2 k)
+      (part2 (k + 1)) *ᵥ (![7, -5] : Fin 2 → ℝ)
+      = (![7, -5] : Fin 2 → ℝ) :=
+  sum_range_bandProjector_mulVec_eq_self diag13 diag13_symm part2 2
+    part2_cover_low part2_cover_high _
+
+/-- The vector decomposition, raw route: `diag(1,0) *ᵥ ![7,−5] =
+![7,0]` plus `diag(0,1) *ᵥ ![7,−5] = ![0,−5]`, adding back to the
+signal. -/
+theorem sum_band_diag13_part2_mulVec_raw :
+    ∑ k in Finset.range 2, bandProjector diag13 diag13_symm (part2 k)
+      (part2 (k + 1)) *ᵥ (![7, -5] : Fin 2 → ℝ)
+      = (![7, -5] : Fin 2 → ℝ) := by
+  rw [Finset.sum_range_succ, Finset.sum_range_one]
+  show bandProjector diag13 diag13_symm (part2 0) (part2 1) *ᵥ (![7, -5] : Fin 2 → ℝ)
+      + bandProjector diag13 diag13_symm (part2 1) (part2 2) *ᵥ (![7, -5] : Fin 2 → ℝ)
+      = (![7, -5] : Fin 2 → ℝ)
+  rw [part2_zero, part2_one, part2_two, band_diag13_part2_low,
+    band_diag13_high]
+  funext k
+  fin_cases k <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+
+/-! ### The three-band partition `t k = k` (thresholds `0, 1, 2, 3`)
+
+The middle band `(1, 2]` is empty — no eigenvalue lies strictly above
+`1` and at most `2` — and the top threshold `3` exactly touches the top
+eigenvalue, exercising the closed right endpoint of the band intervals.
+-/
+
+/-- The three-band partition family: `t k = k`, monotone by
+`Nat.cast_mono`. -/
+def part3 : ℕ → ℝ := fun k => (k : ℝ)
+
+theorem part3_monotone : Monotone part3 := by
+  intro a b hab
+  exact Nat.cast_le.2 hab
+
+theorem part3_cover_low (i : Fin 2) :
+    part3 0 < eigvalOf diag13 diag13_symm i := by
+  rcases diag13_eigvalOf_mem i with h | h <;> rw [h] <;> norm_num [part3]
+
+theorem part3_cover_high (i : Fin 2) :
+    eigvalOf diag13 diag13_symm i ≤ part3 3 := by
+  rcases diag13_eigvalOf_mem i with h | h <;> rw [h] <;> norm_num [part3]
+
+theorem part3_eq_zero : part3 0 = 0 := by norm_num [part3]
+
+theorem part3_eq_one : part3 1 = 1 := by norm_num [part3]
+
+theorem part3_eq_two : part3 2 = 2 := by norm_num [part3]
+
+theorem part3_eq_three : part3 3 = 3 := by norm_num [part3]
+
+/-- The partition's low band `(0, 1]`: the first-axis projector. -/
+theorem band_diag13_part3_low :
+    bandProjector diag13 diag13_symm 0 1 = !![1, 0; 0, 0] := by
+  rw [bandProjector, spectralProjector_diag13_one,
+    spectralProjector_diag13_zero, sub_zero]
+
+/-- The partition's middle band `(1, 2]` is empty: both thresholds
+select exactly the eigenvalue-`1` mode, so their difference is zero —
+a zero-width member of the partition, contributing nothing. -/
+theorem band_diag13_part3_mid :
+    bandProjector diag13 diag13_symm 1 2 = 0 := by
+  rw [bandProjector,
+    spectralProjector_diag13_eq 2 (by norm_num) (by norm_num),
+    spectralProjector_diag13_one, sub_self]
+
+/-- The partition's top band `(2, 3]`: the second-axis projector — the
+eigenvalue `3` sits exactly at the closed right endpoint `t 3 = 3`. -/
+theorem band_diag13_part3_high :
+    bandProjector diag13 diag13_symm 2 3 = !![0, 0; 0, 1] := by
+  rw [bandProjector,
+    spectralProjector_eq_one diag13 diag13_symm 3
+      (fun i => by
+        rcases diag13_eigvalOf_mem i with h | h <;> simp only [h] <;> norm_num),
+    spectralProjector_diag13_eq 2 (by norm_num) (by norm_num)]
+  ext a b
+  fin_cases a <;> fin_cases b <;> simp [Matrix.one_apply]
+
+/-- The three-band partition sums to the identity, raw route: the
+empty middle band contributes zero and the two axis projectors add to
+the identity. -/
+theorem sum_band_diag13_part3_raw :
+    ∑ k in Finset.range 3,
+      bandProjector diag13 diag13_symm (part3 k) (part3 (k + 1)) = 1 := by
+  rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one]
+  show bandProjector diag13 diag13_symm (part3 0) (part3 1)
+      + bandProjector diag13 diag13_symm (part3 1) (part3 2)
+      + bandProjector diag13 diag13_symm (part3 2) (part3 3) = 1
+  rw [part3_eq_zero, part3_eq_one, part3_eq_two, part3_eq_three,
+    band_diag13_part3_low, band_diag13_part3_mid, add_zero,
+    band_diag13_part3_high, diag13_axis_add_axis_raw]
+
+/-- The three-band partition sums to the identity, theorem route. -/
+theorem sum_band_diag13_part3 :
+    ∑ k in Finset.range 3,
+      bandProjector diag13 diag13_symm (part3 k) (part3 (k + 1)) = 1 :=
+  sum_range_bandProjector_eq_one diag13 diag13_symm part3 3
+    part3_cover_low part3_cover_high
+
+/-! ### The endpoint guards: covering is load-bearing both ways -/
+
+/-- A family that starts too high: thresholds `2, 4` — the mode `1`
+lies strictly below the first threshold, exactly the "silently ignores
+a mode" failure mode the design note names. -/
+def gap_hi : ℕ → ℝ := fun k => 2 + 2 * k
+
+theorem gap_hi_zero : gap_hi 0 = 2 := by simp [gap_hi]
+
+theorem gap_hi_one : gap_hi 1 = 4 := by norm_num [gap_hi]
+
+theorem gap_hi_violates_cover_low :
+    ¬ ∀ i, gap_hi 0 < eigvalOf diag13 diag13_symm i := by
+  intro h
+  obtain ⟨i, hi⟩ := diag13_exists_one
+  have hvi := h i
+  rw [hi, gap_hi_zero] at hvi
+  norm_num at hvi
+
+/-- The high-start guard: the one-band family `(2, 4]` sums to the
+second-axis projector, not the identity (entry `(0,0)` is `0 ≠ 1`) —
+the hypothesis-free form of completeness is refuted. -/
+theorem sum_band_diag13_gap_hi_ne_one :
+    ∑ k in Finset.range 1,
+      bandProjector diag13 diag13_symm (gap_hi k) (gap_hi (k + 1)) ≠ 1 := by
+  rw [Finset.sum_range_one]
+  show bandProjector diag13 diag13_symm (gap_hi 0) (gap_hi 1) ≠ 1
+  rw [gap_hi_zero, gap_hi_one, band_diag13_high]
+  intro h
+  have h00 := congrFun (congrFun h 0) 0
+  simp at h00
+
+theorem part2_violates_cover_high :
+    ¬ ∀ i, eigvalOf diag13 diag13_symm i ≤ part2 1 := by
+  intro h
+  obtain ⟨j, hj⟩ := diag13_exists_three
+  have hvj := h j
+  rw [hj, part2_one] at hvj
+  norm_num at hvj
+
+/-- The low-end guard: truncating the partition at `n = 1` (top
+threshold `2` below the eigenvalue `3`) sums to the first-axis
+projector, not the identity (entry `(1,1)` is `0 ≠ 1`). -/
+theorem sum_band_diag13_part2_truncated_ne_one :
+    ∑ k in Finset.range 1,
+      bandProjector diag13 diag13_symm (part2 k) (part2 (k + 1)) ≠ 1 := by
+  rw [Finset.sum_range_one]
+  show bandProjector diag13 diag13_symm (part2 0) (part2 1) ≠ 1
+  rw [part2_zero, part2_one, band_diag13_part2_low]
+  intro h
+  have h11 := congrFun (congrFun h 1) 1
+  simp at h11
+
+/-! ### The unconditional telescoping law on a non-monotone family -/
+
+/-- A deliberately non-monotone family `4, 0, 4`: its middle band is
+the negated junk value `B(4, 0] = −1`, and the telescoping law must
+still hold — the junk cancels against the covering band `B(0, 4] = 1`. -/
+def nonmono : ℕ → ℝ := fun k => if k = 1 then 0 else 4
+
+theorem nonmono_zero : nonmono 0 = 4 := by simp [nonmono]
+
+theorem nonmono_one : nonmono 1 = 0 := by simp [nonmono]
+
+theorem nonmono_two : nonmono 2 = 4 := by simp [nonmono]
+
+/-- The junk band: `B(4, 0] = P_0 − P_4 = 0 − 1 = −1`, the negated
+covering band. -/
+theorem band_diag13_four_zero :
+    bandProjector diag13 diag13_symm 4 0 = -1 := by
+  rw [bandProjector, spectralProjector_diag13_zero,
+    spectralProjector_eq_one diag13 diag13_symm 4
+      (fun i => by
+        rcases diag13_eigvalOf_mem i with h | h <;> rw [h] <;> norm_num),
+    zero_sub]
+
+/-- The covering band at the partition-friendly endpoints:
+`B(0, 4] = P_4 − P_0 = 1 − 0 = 1`. -/
+theorem band_diag13_zero_four :
+    bandProjector diag13 diag13_symm 0 4 = 1 := by
+  rw [bandProjector,
+    spectralProjector_eq_one diag13 diag13_symm 4
+      (fun i => by
+        rcases diag13_eigvalOf_mem i with h | h <;> rw [h] <;> norm_num),
+    spectralProjector_diag13_zero, sub_zero]
+
+/-- The telescoping law on the non-monotone family, theorem route. -/
+theorem sum_band_diag13_nonmono :
+    ∑ k in Finset.range 2,
+      bandProjector diag13 diag13_symm (nonmono k) (nonmono (k + 1))
+      = spectralProjector diag13 diag13_symm (nonmono 2)
+          - spectralProjector diag13 diag13_symm (nonmono 0) :=
+  sum_range_bandProjector_eq_sub diag13 diag13_symm nonmono 2
+
+/-- Both sides of the telescoping law compute to zero on the
+non-monotone family: the sum is `−1 + 1 = 0` from the pinned band
+values, and the residue is `P_4 − P_4 = 1 − 1 = 0` from the pinned
+extreme projectors. The law is unconditional — no order, no covering. -/
+theorem sum_band_diag13_nonmono_both_zero :
+    ∑ k in Finset.range 2,
+      bandProjector diag13 diag13_symm (nonmono k) (nonmono (k + 1)) = 0 ∧
+      spectralProjector diag13 diag13_symm (nonmono 2)
+        - spectralProjector diag13 diag13_symm (nonmono 0) = 0 := by
+  refine ⟨?_, ?_⟩
+  · rw [Finset.sum_range_succ, Finset.sum_range_one]
+    show bandProjector diag13 diag13_symm (nonmono 0) (nonmono 1)
+        + bandProjector diag13 diag13_symm (nonmono 1) (nonmono 2) = 0
+    rw [nonmono_zero, nonmono_one, nonmono_two, band_diag13_four_zero,
+      band_diag13_zero_four]
+    exact neg_add_cancel _
+  · rw [nonmono_two, nonmono_zero,
+      spectralProjector_eq_one diag13 diag13_symm 4
+        (fun i => by
+          rcases diag13_eigvalOf_mem i with h | h <;> rw [h] <;> norm_num),
+      sub_self]
 
 end SpectralGraphTheory.QA

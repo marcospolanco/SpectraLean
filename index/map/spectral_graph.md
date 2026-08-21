@@ -331,7 +331,7 @@ proposal's "never exactly 1".
 ### `Scaffold.Mathlib.GraphTheory.Band` (two-sided spectral band projectors)
 
 The `(a, b]` band projector (proposal `spectral-band-projectors.md`,
-High, Steps 1–2): the orthogonal projector onto the eigenspaces with
+High, Steps 1–3): the orthogonal projector onto the eigenspaces with
 eigenvalues strictly above `a` and at most `b` — the bandpass-filtering
 object of frequency-selective graph signal processing — delivered as
 the difference of two `spectralProjector` calls, pure hard crust on
@@ -345,6 +345,11 @@ at unchanged statement) and the complete projector-eigenvector action
 `spectralProjector_mulVec_eigvecOf` (`P_c *ᵥ vᵢ = if λᵢ ≤ c then vᵢ else 0`).
 Step 2 (delivered 2026-08-20): disjoint bands are orthogonal — the
 pairwise half of the partition completeness Step 3 generalizes.
+Step 3 (delivered 2026-08-20): **completeness under a partition** — the
+unconditional telescoping law, the covering-family resolution of the
+identity, monotone-family orthogonality (where monotonicity is exactly
+what makes the family a partition), and the consumer's vector
+decomposition `x = ∑ B_k x`.
 
 | Declaration | Content |
 |-------------|---------|
@@ -358,6 +363,10 @@ pairwise half of the partition completeness Step 3 generalizes.
 | `bandProjector_mul_bandProjector_eq_zero` / `_eq_zero'` | **disjoint bands compose to zero in both orders** (`b ≤ c` = interval disjointness, load-bearing): the four-term cross-law expansion collapses under the ordering |
 | `bandProjector_inner_eq_zero` | **orthogonality of the images:** `(B_{a,b} *ᵥ x) ⬝ᵥ (B_{c,d} *ᵥ y) = 0` for disjoint bands — the frequency-selective consumer's form |
 | `eq_zero_of_bandProjector_mulVec_eq_self` | **disjoint bands share no mode:** a vector fixed by both band projectors is zero — the subspace-level reading of "they share no eigenvector" |
+| `sum_range_bandProjector_eq_sub` | **the unconditional telescoping law:** `∑_{k<n} B(t_k, t_{k+1}) = P_{t_n} − P_{t_0}` for *any* threshold sequence, ordered or not — the algebraic engine of completeness, load-bearing on the band definition's exact difference shape |
+| `sum_range_bandProjector_eq_one` | **completeness under a partition:** a family whose start is strictly below every eigenvalue and whose end covers them all resolves the identity — both covering hypotheses load-bearing (the QA endpoint guards refute the hypothesis-free form) |
+| `bandProjector_mul_bandProjector_eq_zero_of_monotone` | **distinct members of a monotone family are orthogonal** — monotonicity supplies exactly the disjointness Step 2 consumes; together with completeness, the identity resolves into mutually orthogonal band projectors |
+| `sum_range_bandProjector_mulVec_eq_self` | **the consumer's form:** `∑ B_k *ᵥ x = x` under the same covering hypotheses — the frequency-band decomposition a graph-signal-processing consumer filters with |
 
 ### `Scaffold.Mathlib.GraphTheory.Cheeger`
 

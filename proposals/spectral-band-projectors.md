@@ -1,6 +1,6 @@
 # Proposal: Spectral Band Projectors
 
-**Status:** Step 2 DELIVERED 2026-08-20 (see the delivery record under
+**Status:** Step 3 DELIVERED 2026-08-20 (see the delivery record under
 "Build order"). Priority **High**. Assistant's assessment of project
 direction, requested 2026-08-19, promoted from `sgt-gaps.md` item 5.
 Authorizes no Lean changes, axiom admissions, or external publication.
@@ -180,10 +180,70 @@ disjoint).
 
 ### Step 3: Completeness under a partition
 
+**DELIVERED 2026-08-20** (zero new axioms; count stays 11;
+`#print axioms` on all four new public theorems reads only `propext,
+Classical.choice, Quot.sound`). **Route as the Open-next-step section
+recorded:** the algebraic engine is an *unconditional* telescoping law
+— `sum_range_bandProjector_eq_sub`: `∑_{k<n} B(t_k, t_{k+1}) =
+P_{t_n} − P_{t_0}` for **any** threshold sequence `t : ℕ → ℝ`, ordered
+or not, by `Finset.sum_range_succ` induction with the residue closed
+by `abel` (load-bearing on the band definition's exact difference
+shape — a sign-flipped or transposed definition would leave an
+uncancellable residue; the QA witnesses this on a deliberately
+non-monotone family whose junk band `−1` cancels the covering band
+`1`). Completeness — `sum_range_bandProjector_eq_one` — then consumes
+exactly the two endpoint covering hypotheses (`t₀` strictly below
+every eigenvalue ⇒ `P_{t₀} = 0`; every eigenvalue `≤ tₙ` ⇒
+`P_{tₙ} = 1`), both load-bearing: the QA endpoint guards refute the
+hypothesis-free form in both directions (a family starting at `2`
+drops the mode below it, a family truncated at `2` drops the mode
+above it — the design note's "silently ignores a mode" failure mode).
+**Statement-shape decision recorded before stating:** monotonicity of
+the threshold family is deliberately *not* a hypothesis of the sum
+identity (the telescoping law does not consume it — folding it in
+would make it decorative, against the no-decorative-hypotheses
+discipline); it is delivered as its own theorem
+`bandProjector_mul_bandProjector_eq_zero_of_monotone`, where it is
+exactly what is consumed — `Monotone t` supplies the interval
+disjointness `t (k+1) ≤ t m` that Step 2's composition law takes — so
+together with completeness the identity resolves into *mutually
+orthogonal* band projectors: the partition character, stated rather
+than assumed. The consumer's form
+`sum_range_bandProjector_mulVec_eq_self` (`∑ B_k *ᵥ x = x` under the
+same covering hypotheses — the frequency-band decomposition the
+external consumer filters with) is proved through the inlined `mulVec`
+analog of Mathlib's `Matrix.sum_mul` (sum-interchange; not present in
+the pinned snapshot in that shape — `Finset.sum_apply` cannot see
+through the `Matrix.of` wrapper, `Matrix.sum_apply` can).
+**QA** `Band_QA.lean` (+41, 84 in file, 973 total): the partition
+witness on the pinned fixture — the covering two-band family
+`t k = 2k`, summed to the identity through the theorem *and* from
+independently pinned band values; a three-band partition `t k = k`
+whose middle band `(1,2]` is empty (zero-width member, value `0`)
+and whose top threshold exactly touches the eigenvalue `3` (the
+closed right endpoint exercised); the two **endpoint guards**, each
+with its violated covering hypothesis separately proved violated at
+the pinned spectrum; the **non-monotone telescoping witness** (both
+sides of the law independently computed to `0` from pinned projectors
+and band values); monotone-family orthogonality instantiated; and the
+vector decomposition on a concrete signal by theorem and raw routes.
+**Verification:** `lake env lean` on `Band` and `Band_QA` (zero
+errors, zero warnings after two QA proof-shape fixes — the
+`Finset.sum_range_succ` append-on-the-right shape and the `rw`-closes-
+`3 ≤ 3`-by-itself linter trap, both recorded in the scoreboard's
+provenance note); `#print axioms` on all four public and thirteen
+headline QA theorems (three standard axioms only); the QA-module
+batch and full `lake build` per the scoreboard's verification record;
+lint/citation/link checks pass; scoreboard 973/11/0.
+
 For a finite ordered sequence of thresholds `t₀ < t₁ < ... < tₙ` covering
 the full spectrum's range, prove the sum of the resulting band projectors
 equals the identity — the completeness statement the design note above
-requires be stated over a partition, not pairwise.
+requires be stated over a partition, not pairwise. *(Delivered with the
+recorded statement-shape sharpening: the sum identity itself needs only
+the two covering endpoints because the telescoping law is unconditional;
+the ordered/partition character is the separate monotone-family
+orthogonality theorem, where monotonicity is load-bearing.)*
 
 ### Step 4: The Hilbert-projection-theorem specialization
 
@@ -220,12 +280,17 @@ survey the exact lemma signature first.
 
 ## Open next step
 
-Step 3 — completeness under a partition: for a finite ordered sequence
-of thresholds `t₀ < t₁ < … < tₙ` covering the full spectral range, the
-sum of the resulting band projectors is the identity (the design note
-requires the statement over a partition, not pairwise; Step 2's
-orthogonality layer is the pairwise half, and the two-band instance
-`bandProjector_eq_one` already exists as the covering case). Step 4
-(the Hilbert projection specialization — survey
-`Analysis/InnerProductSpace/Projection.lean` lemma signatures first)
-remains queued behind it.
+Step 4 — the Hilbert-projection-theorem specialization: prove
+`bandProjector M hM a b x` is the closest point in its range to `x`,
+by instantiating Mathlib's Hilbert projection theorem
+(`Analysis/InnerProductSpace/Projection.lean`) at the band's
+eigenspace. The proposal's own mandatory pre-step: survey the exact
+lemma signatures first (`orthogonalProjection`, the closest-point
+uniqueness/minimality lemmas, and the transport spine from
+`EuclideanSpace` inner products to matrix `mulVec` actions — the
+resolvent Step-0 record's `toEuclideanCLM` route is the precedent);
+if the instantiation needs machinery not on the shelf, stop and record
+the exact obstruction (the operating instruction below). Steps 1–3
+are delivered (the band projector, its algebra, disjoint-band
+orthogonality, and partition completeness); this is the program's
+last step.

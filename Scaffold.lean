@@ -16,6 +16,7 @@ import Scaffold.Mathlib.GraphTheory.RandomWalk
 import Scaffold.Mathlib.GraphTheory.Normalized
 import Scaffold.Mathlib.GraphTheory.Stationary
 import Scaffold.Mathlib.GraphTheory.Mixing
+import Scaffold.Mathlib.GraphTheory.Directed
 import Scaffold.Mathlib.GraphTheory.VariationalTransfer
 import Scaffold.Mathlib.GraphTheory.Dynamics
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl

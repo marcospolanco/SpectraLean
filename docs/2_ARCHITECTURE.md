@@ -167,7 +167,16 @@ Community process is defined by `governance/CONTRIBUTING.md`, `MAINTAINERS.md`, 
   conditional means) because the pinned Mathlib snapshot has no
   filtration/conditional-expectation API. If a later Mathlib provides one,
   restating `MatrixMDS` through `Filtration`/`Adapted` is the intended
-  upstream alignment.
+  upstream alignment. `subgaussian_tail_bound` was retired from axiom to
+  proved theorem on 2026-08-22 as a correctness repair
+  (`proposals/prove-subgaussian-tail-bound.md`): the old
+  `subgaussianNorm ≤ K`-mediated shape was materially false through two
+  junk mechanisms (`Real.sInf_empty` vacuity; `integral_undef` making the
+  MGF integral junk-zero, hence the defining set full, for heavy tails),
+  and the theorem now states the moment integrably. A recorded residual:
+  the same junk-integral surface touches the mean hypotheses of
+  `hoeffding_inequality`/`bernstein_inequality` on infinite measures and
+  the `MatrixMDS` set-integrals — their own future Step 0s must check it.
 - Spectral-projector idempotence and eigenbasis orthonormality/completeness
   behind `spectralProjector` are proved locally
   (`eigvecOf_inner`, `eigvecOf_complete`, `spectralProjector_idempotent`,

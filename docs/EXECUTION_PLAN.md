@@ -6,6 +6,182 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Directed operators Step 0 (survey + convention decisions) + Step 1
+(the degree layer) — run 1, 2026-08-22;
+`proposals/directed-graph-operators.md` + the coordinated build-order
+decision with `proposals/admit-perron-frobenius.md`, the top-ranked
+Medium program with the Active table holding no High rows: DELIVERED —
+the directed axis is open, zero new axioms (count stays 9).**
+
+**Step 0 decisions (all recorded in the proposal before any Lean
+statement):**
+
+- **(c) Mathlib re-survey:** no directed Laplacian in the pin —
+  `LapMatrix.lean` is the undirected SimpleGraph one; `Combinatorics/
+  Digraph/` is relation-structures only. PF re-confirmed absent.
+  Coverage map rows hold; no correction needed.
+- **(a) Carrier:** reuse — no new type. `WAdj` is an abbrev of
+  `Matrix V V ℝ` with symmetry only ever a call-site hypothesis, so the
+  named reuse risk is structurally absent; the directed axis is stated
+  on `Matrix V V ℝ` directly.
+- **Discovery:** items 1 and 3 of the recommendation *already exist
+  hypothesis-free* — `deg` is the row sum (out-degree) and
+  `walkTransitionMatrix = D⁻¹A`, `walkLaplacian = I − D⁻¹A` carry no
+  symmetry hypothesis, with row-stochasticity and conservation proved
+  for any positive-row-sum matrix. Step 1's genuine content: `inDeg`,
+  degree agreements, directed handshaking, and the asymmetric-input QA
+  certification.
+- **(b) Convention:** the out-degree-symmetrized normalized Laplacian
+  `I − ½(D_out^{-1/2}AD_out^{-1/2} + D_out^{-1/2}AᵀD_out^{-1/2})` —
+  symmetric by construction, reduces to `normalizedLaplacian` on the
+  symmetric cone, axiom-free. Deliberately *not* Chung 2005's
+  Perron-vector convention (which would make an admitted axiom a
+  prerequisite of a definition). **Build-order consequence recorded:
+  the two proposals are decoupled** — PF proceeds on its own leverage
+  case (irreducible stationary distributions, PageRank); Chung's
+  Laplacian remains a later separate definition once PF exists.
+
+**Step 1 delivery:** the new `Scaffold/Mathlib/GraphTheory/Directed.lean`
+— `outDeg`, `inDeg` (column sum), `outDeg_eq_deg` /
+`inDeg_eq_deg_transpose` (both `rfl`), `inDeg_eq_outDeg_of_isSymm` +
+`inDeg_eq_deg_of_isSymm` (the symmetric cone — the walk-operator part
+of the Step-3 bar needs no separate theorem since the definitions are
+shared), and `sum_outDeg_eq_sum_inDeg` (directed handshaking by
+`Finset.sum_comm`). QA `Scaffold/QA/SpectralGraph/Directed_QA.lean`
+(41 declarations): the genuinely-directed fixture
+`!![0,3,1;1,0,0;1,0,0]` with `outDeg = (4,1,1) ≠ (2,3,1) = inDeg` (the
+negative witness), row-stochasticity + conservation instantiated **on
+asymmetric input** through the pre-existing shelf theorems (the
+load-bearing certification — had `walkTransitionMatrix` been defined
+through the symmetrized adjacency, or `deg` through a symmetric sum,
+these instantiations would fail), the walk matrix's asymmetry refuted
+(`3/4 ≠ 1`), agreement on a symmetric fixture through the theorems and
+raw, handshaking `6 = 6` by both routes.
+
+**Verification:** `lake env lean` on the module and QA — zero errors,
+zero warnings each (the `DecidableEq`-free theorems carry `omit`
+clauses); explicit target builds of both ✔; `#print axioms` on the
+seven public and twelve headline QA theorems ✔ (three standard axioms
+only); umbrella import added and **full `lake build` ✔ (2230 targets,
+"Build completed successfully", zero errors, detached)**;
+`lint_axioms` (**9**, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1295/9/0**;
+`Directed_QA` a new file row at 41; both Direct rows and the
+`lake build` row extended; a new interpretation bullet). Records
+updated: the proposal (status header, Step-0 record, Step-1 delivery
+record with the pin-specific QA technique — the `vecHead/vecTail`
+simp residue on new-def unfolds and the `rfl`-table +
+`Fin.sum_univ_three` deterministic route), `proposals/README.md`
+(Medium row + progress paragraph), backlog item 8, the SGT index map
+(new Directed section), README (1295, proved list, module table),
+radar (QA axis count synced **1295/38**, held at 4.0, hold logged),
+this plan, and the activity log. Nothing committed; the worktree's
+prior-run uncommitted deliveries remain preserved.
+
+**Next milestone (open):** the Medium rows by leverage — **directed
+operators Step 2** (the normalized Laplacian at the recorded
+convention; unblocked), **the Perron–Frobenius admission**
+(`admit-perron-frobenius.md` — decoupled by the Step-0 record; its QA
+plan's imprimitive-cycle negative witness is its centerpiece), the
+**Cheeger hard-direction Step 0 survey** (known-hard working
+assumption), and **approximate spectral projection** (Step 0 first).
+Reversibility Phase B and Fiedler Phase B still need operator
+decisions.
+
+**Subgaussian tail bound — Step 0 spike + repair-and-retire in one run
+(run 1, 2026-08-22; `proposals/prove-subgaussian-tail-bound.md`, the
+2026-08-22 operator-directed addition — the top-ranked Medium row with
+the Active table holding no High rows): DELIVERED — explicit axioms
+10 → 9, the repository's first measure-theoretic axiom retirement.**
+
+**Not the retirement the proposal's Step 2 envisioned — a correctness
+repair instead (Woodbury precedent, decision recorded before stating).**
+The mandated Step 0 spike (`wip/subgaussian_spike.lean`, git-ignored,
+green end-to-end) confirmed the old statement — `(hK : 0 ≤ K)
+(h_sub : subgaussianNorm X μ ≤ K)` — was **materially false in two
+independent junk ways**: (1) `Real.sInf_empty` (Archimedean.lean:190)
+makes the norm-hypothesis vacuous when the defining set is empty (any
+measure of total mass > 2); (2) `MeasureTheory.integral_undef`
+(Bochner.lean:743) — the Bochner integral of a non-integrable function
+*is defined to be 0* — so heavy-tailed `X` satisfy the defining MGF
+bound at every `K` (the set is **full**, not empty — this also
+falsified the `subgaussianNorm` docstring's recorded junk behavior,
+which was corrected with a dated note), norm `0`, and the old
+conclusion would claim subgaussian tails even under probability
+measures. Both refuted in QA with the old hypotheses proved satisfied
+(`3 • δ₀`: every MGF integral `3 > 2`, norm `= 0 ≤ 1` vacuously,
+conclusion at `t = 0` reads `3 ≤ 2`).
+
+**Repaired statement (same name, same conclusion incl. the `2K²`
+constant, same `t`/`ht`):** hypotheses `(hK : 0 < K)`,
+`h_int : Integrable (fun ω => exp (X ω ^ 2 / K ^ 2)) μ`,
+`h_mom : ∫ ω, exp (X ω ^ 2 / K ^ 2) ∂μ ≤ 2` — exactly the content
+Markov's inequality consumes; strictly stronger than the old shape
+whenever that was non-vacuous; the junk `K = 0` branch (bound `2·exp 0
+= 2`) dropped. **The proposal's open `K = sInf` boundary question
+dissolves** — the repaired hypotheses never mention the `sInf`
+(recorded in the delivery record per the acceptance criteria).
+
+**Route (every lemma verified at this pin's exact signature):** the
+`Real.exp_half` square-root bridge gives ae-strong-measurability at the
+half scale *as a function of the hypothesis-side MGF* (no measurability
+hypothesis on `X` needed — `Continuous.comp_aestronglyMeasurable`);
+`Integrable.mono'` + `integral_mono_of_nonneg` transfer the moment;
+shelf Markov `mul_meas_ge_le_integral_of_nonneg` (no `0 ≤ ε` at this
+signature) at `exp (t²/(2K²))`;
+`Integrable.measure_norm_ge_lt_top` forces the Markov event finite (the
+step the toReal-shaped Markov cannot give at `μ = ∞`); ENNReal
+conversion via `ofReal_toReal`/`ofReal_le_ofReal`. `#print axioms` on
+the theorem: `propext, Classical.choice, Quot.sound` only.
+
+**QA** (`Scalar_QA.lean` 6 → 17; axiom-clean on all twelve touched/new
+theorems; the zero-QA family no longer consumes `hoeffding_lemma`): the
+zero fixture through the new hypotheses; the proposal-mandated
+**nonzero instance** (constant-1, `K = 2`, `t = 1` on `dirac 0`;
+moment `exp (1/4) ≤ 2` via the pinned `Real.log_two_gt_d9`; event side
+`= 1` and bound side `1 ≤ 2·exp (−1/8)` both pinned raw); the
+four-piece refutation family (fixture, empty-set junk mechanism
+exhibited as a theorem, old hypotheses provably satisfiable, old
+conclusion refuted).
+
+**Verification:** `lake env lean` on the module (only the pre-existing
+`unused variable K` warning, verified identical in HEAD) and on the QA
+file (zero errors; nine remaining warnings = the pre-existing set in
+untouched declarations, verified against HEAD); module + QA oleans
+built explicitly; **full `lake build` ✔ (2229 targets, "Build completed
+successfully", detached)**; `lint_axioms` (**9**), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated
+(**1254/9/0**, idempotent under re-run). Records updated: both index
+files (`vershynin_hdp.md` — the Chapter-2 row is its first
+proved-not-axiom row; `probability_concentration.md` with the
+junk-behavior notes), scoreboard (counts, both Direct rows, `lake
+build` row, lint row, interpretation bullet), radar (axiom-minimization
+axis synced to 9 with the trend extended and the hold logged; QA axis
+count synced 1254/37, held), README (counts, trust-surface prose),
+architecture §12 (retirement + residual note), the module's two
+docstrings (`subgaussianNorm` junk-behavior correction;
+`hoeffding_lemma`'s stale QA-note referencing the nonexistent
+`hoeffding_lemma_zero_QA`), the proposal (full delivery record with
+pin-specific API notes and the adjacent-hazard residual), this plan,
+and the activity log. The worktree's unrelated operator-side change
+(the `proposals/README.md` Low row for the clean-room lemma map) was
+preserved untouched. Nothing committed.
+
+**Named residual (for other axioms' Step 0s, not addressed here):** the
+same junk-integral mechanism likely infects
+`hoeffding_inequality`/`bernstein_inequality`'s mean hypotheses on
+infinite measures and the matrix trio's `MatrixMDS` set-integrals —
+recorded in the proposal and architecture §12.
+
+**Next milestone (open):** the Medium rows by leverage —
+**Perron–Frobenius + directed operators** (scoped together, Step 0
+first per the convention-choice gate), the **Cheeger hard-direction
+Step 0 survey** (known-hard working assumption), and **approximate
+spectral projection** (Step 0 first). Reversibility Phase B and Fiedler
+Phase B still need operator decisions.
+
+---
+
 **Relative Entropy and Shannon Entropy for finite distributions — both
 steps, one program (run 1, 2026-08-22; `proposals/finite-relative-
 entropy.md`, the top-ranked Medium row with the Active table holding no

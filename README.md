@@ -21,12 +21,17 @@ As of August 22, 2026:
 | Check | Result |
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
-| Explicit cited axioms | 10 |
-| QA theorems/lemmas | 1243, with no `sorry` or `admit` under `Scaffold/` |
+| Explicit cited axioms | 9 |
+| QA theorems/lemmas | 1295, with no `sorry` or `admit` under `Scaffold/` |
 
-The remaining trust surface is the Cheeger *hard* direction at the SGT center;
-and the scalar and matrix
-concentration family (Hoeffding, Bernstein, subgaussian, Azuma). Classical
+The remaining trust surface is the Cheeger *hard* direction at the SGT
+center; the scalar and matrix
+concentration family (Hoeffding, Bernstein, Azuma — the subgaussian
+tail bound was retired 2026-08-22 by the Markov-route repair-and-retire
+of `proposals/prove-subgaussian-tail-bound.md`, whose Step 0 spike
+proved the old `subgaussianNorm ≤ K`-shaped axiom materially false via
+two junk mechanisms and replaced it with the moment stated integrably
+at the same name and conclusion); and Hoeffding's lemma. Classical
 Laplacian facts, Courant–Fischer, Cauchy interlacing, the Cheeger *upper*
 bound, **Weyl's perturbation inequality**, **Davis–Kahan sin Θ** (retired
 2026-08-21 by the Duhamel/exponential-integral route: the equal-rank
@@ -77,7 +82,15 @@ under value-based mode exclusion, and the closing χ² mixing bound
 `χ²(t, x) ≤ (λ*)^{2t} · ((π x)⁻¹ − 1)` on connected graphs under the
 rate hypothesis, its mode hypothesis *derived* from the connectivity
 kernel characterization of `L_sym` transferred through the proved
-congruence, not assumed) — are likewise proved. The finite-distribution **entropy layer** (`InformationTheory.Entropy`: relative entropy `klDiv` and Shannon entropy `shannonEntropy` with the visible `p i = 0 ↦ 0` junk convention, Gibbs' inequality in both directions (`0 ≤ klDiv p q`, with equality exactly at `p = q`), the uniform bridge, the entropy maximum `shannonEntropy p ≤ log |V|` with equality exactly at uniform, and nonnegativity) is proved from the term-wise information inequality `log t ≤ t − 1` — the same textbook route as the pinned Mathlib strict-concavity machinery, with zero axioms.
+congruence, not assumed) — are likewise proved. On the directed axis,
+the **directed degree layer** (`GraphTheory.Directed`: the out-degree
+`outDeg` (definitionally the shelf's `deg` — the undirected shelf was
+carrying the out-degree walk operators symmetry-free all along), the
+in-degree `inDeg`, the symmetric-cone agreements, and directed
+handshaking `∑ outDeg = ∑ inDeg`, with QA certifying
+`walkTransitionMatrix`'s row-stochasticity and the walk Laplacian's
+mass conservation on genuinely asymmetric input and refuting symmetry
+of the directed walk matrix) is proved with zero axioms. The finite-distribution **entropy layer** (`InformationTheory.Entropy`: relative entropy `klDiv` and Shannon entropy `shannonEntropy` with the visible `p i = 0 ↦ 0` junk convention, Gibbs' inequality in both directions (`0 ≤ klDiv p q`, with equality exactly at `p = q`), the uniform bridge, the entropy maximum `shannonEntropy p ≤ log |V|` with equality exactly at uniform, and nonnegativity) is proved from the term-wise information inequality `log t ≤ t − 1` — the same textbook route as the pinned Mathlib strict-concavity machinery, with zero axioms.
 
 The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for
 current counts, verification commands, and limitations.
@@ -195,6 +208,7 @@ The near-term center is general SGT. Public modules currently cover:
 | Decidable spectral certificates | `GraphTheory.SpectralCertificates` (the ℚ specification checker with its soundness theorem, and the kernel-verifiable ℤ cross-multiplied twin with proved bridges) |
 | Electrical structure | `GraphTheory.Electrical`, `GraphTheory.ElectricalFlow`, `GraphTheory.Foster` |
 | Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized` (the similarity, eigenpair transfer, conjugated powers), `GraphTheory.Stationary`, `GraphTheory.Mixing` (the ℓ²-mixing proxy: stationary vector, walk law, density evolution, χ² distance, decay engine) |
+| Directed operators | `GraphTheory.Directed` (the directed degree layer: `outDeg`/`inDeg`, symmetric-cone agreements, directed handshaking — the first slice of the directed axis) |
 | Perturbation | `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan,ProjectionGap,Duhamel}` |
 | Concentration | `Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*` |
 | Finite-distribution entropy | `InformationTheory.Entropy` (relative entropy and Shannon entropy, Gibbs' inequality, the entropy maximum — all proved) |

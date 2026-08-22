@@ -24,6 +24,70 @@ entry. If a session ID cannot be established from repository evidence, write
 Follow the metadata with concise `Changes`, `Verification`, `Remaining risk`,
 and `Next handoff` paragraphs as applicable.
 
+## 2026-08-22T18:17:01Z — Directed operators Step 0 + Step 1: convention decisions and the degree layer
+
+**Run:** `20260822T181701Z-run-1`  
+**Session:** `ses_fd5521f76ffeRFs1v4dJctUmET`  
+**Status:** in-progress  
+**Milestone:** `proposals/directed-graph-operators.md` Step 0 (the mandated survey and convention decisions, coordinated with `proposals/admit-perron-frobenius.md` per the scoped-together instruction) + Step 1 (the degree layer `outDeg`/`inDeg`, directed handshaking, and the asymmetric-input certification of the pre-existing walk operators) — the top-ranked Medium program with the Active table holding no High rows. Zero new axioms.
+
+**Changes:** Step 0 record written into the proposal (decisions (a)/(b)/(c) plus the discovery that `deg`/`walkTransitionMatrix`/`walkLaplacian` are already the out-degree walk operators, hypothesis-free); intent recorded in the execution plan. Lean: new `Scaffold/Mathlib/GraphTheory/Directed.lean` and `Scaffold/QA/SpectralGraph/Directed_QA.lean` pending below.
+
+**Verification:** pending — module + QA elaboration, `#print axioms`, oleans, umbrella import, full `lake build`, lint/citation/link checks, scoreboard regeneration at the milestone boundary.
+
+**Remaining risk:** low — every consumed shelf lemma was read at its exact signature during the Step-0 survey; the convention decision (b) decouples rather than couples, so no build-order hazard.
+
+**Next handoff:** delivery record, records sync, terminal entry.
+
+## 2026-08-22T18:39:13Z — Directed operators Step 0 + Step 1 delivered: the directed axis is open, decoupled from Perron–Frobenius
+
+**Run:** `20260822T181701Z-run-1`  
+**Session:** `ses_fd5521f76ffeRFs1v4dJctUmET`  
+**Status:** completed  
+**Milestone:** `proposals/directed-graph-operators.md` Steps 0+1 — the three mandated Step-0 convention decisions recorded before any statement, then Step 1 (the run's one Lean step): the directed degree layer in the new `Scaffold.Mathlib.GraphTheory.Directed` plus the asymmetric-input QA certification of the pre-existing walk operators. Zero new axioms (count stays 9). The Step-0 convention decision **decouples this program from `admit-perron-frobenius.md`** (out-degree-symmetrized normalized Laplacian, not Chung's Perron-vector form, so no admitted axiom becomes a prerequisite of a definition).
+
+**Changes:** new `Scaffold/Mathlib/GraphTheory/Directed.lean` (seven public declarations: `outDeg`, `inDeg`, the two `rfl` identifications with the shelf's `deg` and its transpose, the symmetric-cone agreements, directed handshaking `∑ outDeg = ∑ inDeg`) and new QA `Scaffold/QA/SpectralGraph/Directed_QA.lean` (41 declarations: the genuinely-directed fixture `!![0,3,1;1,0,0;1,0,0]` with a nine-entry `rfl` table, both degree functions pinned raw `outDeg = (4,1,1)` / `inDeg = (2,3,1)`, handshaking `6 = 6` by both routes, the symmetric-edge agreement witness, the load-bearing instantiation of `walkTransitionMatrix_row_sum` and `walkLaplacian_mulVec_one_eq_zero` **on asymmetric input** with a raw cross-check, and the two negative witnesses `outDeg 0 ≠ inDeg 0` and `¬ (walkTransitionMatrix dirA).IsSymm`). Umbrella import added. Records: the proposal (status header, Step-0 record, Step-1 delivery record with the pin-specific QA technique), `proposals/README.md` (Medium row + progress paragraph), backlog item 8, the SGT index map (Directed section), README (1295, proved list, module table), radar (QA axis held at 4.0, count synced 1254/37 → 1295/38), scoreboard (both Direct rows, the `lake build` row, a new interpretation bullet), the execution plan, and this log. Nothing committed; prior-run uncommitted deliveries preserved untouched.
+
+**Decisive commands and outcomes:** `lake env lean` on the module and on the QA file — zero errors, zero warnings each; explicit `lake build` targets for both modules ✔; `#print axioms` on the seven public and twelve headline QA theorems — `propext, Classical.choice, Quot.sound` only; **full `lake build` ✔ (2230 targets, "Build completed successfully", zero errors, detached log + poll)**; `lint_axioms` (**9**, unchanged), `check_citations`, `check_markdown_links` pass; scoreboard regenerated **1295/9/0** (`Directed_QA` a new file row at 41). One QA-engineering detour recorded for future fixture work on this pin: `simp only` unfolds of *new* degree defs against matrix literals leave `vecHead/vecTail` residue (while the same list through the shelf's `deg` behaves), and `show` cannot kernel-reduce `Finset.sum` — the deterministic route is a `rfl` entry table plus `Fin.sum_univ_three` splitting with table rewrites, now recorded in the proposal.
+
+**Verification:** the delivery is fully proved hard crust — nothing axiom-backed was added, no `sorry` anywhere, and the QA is load-bearing in both directions: the asymmetric-input instantiations would fail if the pre-existing walk operators had secretly depended on symmetry (that dependence-absence is the certification's whole point), and both negative witnesses refute the hypothesis-free forms (`outDeg = inDeg`; walk-matrix symmetry) that undirected habits would suggest.
+
+**Remaining risk:** low. The named residual is Step 2's to carry: the chosen convention forfeits Chung's directed-Cheeger content (recorded honestly in the Step-0 record); any future directed-isoperimetric work must adopt Chung's convention there or prove its own bounds. The Mathlib coverage map needed no correction — the Step-0 re-survey confirmed its rows.
+
+**Next handoff:** the Medium rows by leverage — **directed operators Step 2** (the normalized Laplacian at the recorded convention; unblocked), **the Perron–Frobenius admission** (decoupled; its imprimitive-cycle negative witness is the centerpiece its QA plan mandates), the **Cheeger hard-direction Step 0 survey** (known-hard), and **approximate spectral projection** (Step 0 first). Reversibility Phase B and Fiedler Phase B still need operator decisions.
+
+## 2026-08-22T17:12:56Z — Subgaussian tail bound retired by repair: the Step 0 spike proved the old axiom materially false
+
+**Run:** `20260822T164518Z-run-1`  
+**Session:** `ses_fd5aa3374ffeR6W0kz6WrMW4ho`  
+**Status:** completed  
+**Milestone:** `proposals/prove-subgaussian-tail-bound.md` — the mandated Step 0 spike plus the repair-and-retire in one run: `subgaussian_tail_bound` is a proved theorem, **explicit axioms 10 → 9** (the first measure-theoretic axiom retirement), delivered as the Woodbury-precedent emergency correctness repair after the spike proved the old statement materially false.
+
+**Changes:** `Subgaussian.lean` — `axiom subgaussian_tail_bound` became `theorem` at the same name and conclusion (including the `2K²` constant) with honest hypotheses `(hK : 0 < K)`, MGF integrability at `K`, and the MGF bound at `K`; the `subgaussianNorm` docstring's junk-behavior paragraph corrected with a dated note (unbounded tails make the defining set *full*, not empty — `integral_undef` junk-zero integrals); `hoeffding_lemma`'s stale QA-note (referencing the nonexistent `hoeffding_lemma_zero_QA`) fixed. `Scalar_QA.lean` 6 → 17 declarations: the zero fixture through the new hypotheses, the proposal-mandated nonzero instance (constant-1, `K = 2`, `t = 1` on `dirac 0`; moment `exp (1/4) ≤ 2` via the pinned `Real.log_two_gt_d9`; event and bound sides pinned raw), and the four-piece refutation family (`3 • δ₀` fixture; the empty-set junk mechanism exhibited as a theorem; the old hypotheses proved satisfiable-vacuously; the old conclusion `3 ≤ 2` refuted). Records: both index files, scoreboard (counts, Direct rows, `lake build` row, lint row, interpretation bullet), radar (axiom-minimization synced to 9, trend extended, hold logged; QA count 1254/37, held), README, architecture §12, the proposal (full delivery record with the pin-specific API notes and the adjacent-hazard residual), the execution plan, and this log. The operator-side worktree change (the `proposals/README.md` Low row) preserved untouched; nothing committed.
+
+**Decisive commands and outcomes:** the Step 0 spike (`wip/subgaussian_spike.lean`, git-ignored) elaborated green with `#print axioms subgaussian_tail_bound` reading only `propext, Classical.choice, Quot.sound` — confirming both falsity mechanisms against the pin (`Real.sInf_empty` at Archimedean.lean:190; `integral_undef` at Bochner.lean:743) before the module was touched; `lake env lean` on the module (only the pre-existing `unused variable K` warning, verified identical in HEAD via a HEAD elaboration) and on the QA file (zero errors; nine remaining warnings = the pre-existing set, verified by a stashed-HEAD elaboration); `#print axioms` on the retired theorem and all twelve touched/new QA theorems — three standard axioms only; `lake build` on both targets ✔; **full `lake build` ✔ (2229 targets, "Build completed successfully", detached log + poll)**; `lint_axioms` (**9**), `check_citations`, `check_markdown_links` pass; scoreboard regenerated **1254/9/0**, idempotent.
+
+**Verification:** the delivery is fully proved hard crust at the repaired statement; the QA is load-bearing in both directions — the nonzero instance pins the bound's two sides raw (a wrong `2K²` constant or hypothesis orientation would break it), and the refutation family falsifies the old shape with its hypotheses proved satisfied (the Woodbury/old-Cheeger falsification pattern). One operational lesson re-confirmed: QA files elaborate against built oleans, so the module must be rebuilt before its QA consumer sees a changed interface (the QA's first failure was the stale axiom-shaped olean, not the code).
+
+**Remaining risk:** low for what is delivered. The named residual — the same junk-integral mechanism likely touching `hoeffding_inequality`/`bernstein_inequality`'s mean hypotheses on infinite measures and the `MatrixMDS` set-integrals — is recorded in the proposal and architecture §12 for their own Step 0s. `hoeffding_lemma` remains an admitted axiom (statement unchanged); the repaired theorem no longer consumes it, so its only remaining consumer is the `subgaussian_norm_zero_QA` cross-coherence check.
+
+**Next handoff:** the Medium rows by leverage — **Perron–Frobenius + directed operators** (scoped together, Step 0 first per the convention-choice gate), the **Cheeger hard-direction Step 0 survey** (known-hard working assumption), and **approximate spectral projection** (Step 0 first). Reversibility Phase B and Fiedler Phase B still need operator decisions.
+
+## 2026-08-22T16:45:18Z — Subgaussian tail bound: Step 0 spike (and contingent repair-and-retire)
+
+**Run:** `20260822T164518Z-run-1`  
+**Session:** `ses_fd5aa3374ffeR6W0kz6WrMW4ho`  
+**Status:** superseded (by the completed delivery entry above)  
+**Milestone:** `proposals/prove-subgaussian-tail-bound.md` — the proposal's mandated Step 0 (Lean spike against the pinned Mathlib: `Real.sInf_empty`, `integral_undef`, `mul_meas_ge_le_integral_of_nonneg` at exact signatures; the monotone-in-`K` moment transfer; the Markov assembly), with Step 1 (retire `subgaussian_tail_bound`, axioms 10 → 9) to follow in this run if the spike confirms tractability. Pre-edit reading surfaced two junk hazards in the axiom's current shape (empty-`sInf` vacuity on measures of mass > 2; junk-zero Bochner integrals making the defining set full for heavy tails) — if the spike confirms either, the run executes the Woodbury-precedent repair-and-retire with the decision recorded before stating.
+
+**Changes:** intent recorded in the execution plan (hazards, contingent route, next action). No Lean or record edits yet beyond that.
+
+**Verification:** pending — spike elaboration, then module + QA elaboration, `#print axioms`, full `lake build`, lint/citation/link checks, scoreboard regeneration at the milestone boundary.
+
+**Remaining risk:** the falsity hazards, if confirmed, convert this from a proof task to a correctness repair; the repaired statement's shape (moment+integrability hypotheses at `K`, conclusion unchanged) is already drafted in the execution plan.
+
+**Next handoff:** spike results and the go/no-go on the repair route.
+
 ## 2026-08-22T14:07:07Z — Relative entropy and Shannon entropy delivered: the finite-distribution program complete
 
 **Run:** `20260822T134800Z-run-1`  

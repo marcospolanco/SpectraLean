@@ -10,10 +10,10 @@ This index maps Lean modules and axioms for concentration inequalities by topic 
 
 | Declaration | Kind | Description | Source |
 |-------------|------|-------------|--------|
-| `subgaussianNorm` | definition | Ψ₂ norm via the MGF characterization | Vershynin Def 2.5.1 / Prop 2.5.2 |
+| `subgaussianNorm` | definition | Ψ₂ norm via the MGF characterization; junk behavior documented (empty set → 0 via `Real.sInf_empty`; non-integrable MGFs → junk-zero integrals make the set *full*, also 0) | Vershynin Def 2.5.1 / Prop 2.5.2 |
 | `subgaussianNorm_nonneg` | proved | `0 ≤ subgaussianNorm X μ` | — |
 | `hoeffding_lemma` | axiom | Bounded and centered ⇒ subgaussian | Vershynin Lem 2.6.2 |
-| `subgaussian_tail_bound` | axiom | P(\|X\| ≥ t) ≤ 2exp(-t²/(2K²)) | Vershynin Prop 2.5.2 (ii) |
+| `subgaussian_tail_bound` | **proved** (2026-08-22; retired from axiom with repaired hypotheses `0 < K`, MGF integrable, MGF integral ≤ 2 — the old `subgaussianNorm ≤ K` shape was materially false via `sInf ∅ = 0` and junk-zero integrals, refuted in QA at `3 • δ₀`) | μ{\|X\| ≥ t} ≤ 2exp(−t²/(2K²)) | Vershynin Prop 2.5.2 (ii) |
 
 Formerly admitted subgaussian statements without a current consumer
 (`subgaussian_moment_growth`, `subgaussian_linear_combination`,

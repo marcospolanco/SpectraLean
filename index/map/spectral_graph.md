@@ -552,6 +552,26 @@ transfer — `√D *ᵥ (Pᵗ *ᵥ g) = (1 − L_sym)ᵗ *ᵥ (√D *ᵥ g)`), p
 (the constant fix `P *ᵥ 1 = 1`), `degreeSqrt_mulVec_apply`, and
 `degreeInvSqrt_mulVec_apply` (the conjugating actions' entry forms).
 
+### `Scaffold.Mathlib.GraphTheory.Directed` (the directed degree layer)
+
+All statements proved (2026-08-22, `proposals/directed-graph-operators.md`
+Steps 0+1), no axioms, no symmetry anywhere. The Step-0 record's discovery
+shapes the module: the undirected shelf's `deg` (the row sum) *is* the
+out-degree and `walkTransitionMatrix = D⁻¹ A` / `walkLaplacian = I − D⁻¹ A`
+are defined symmetry-free — so this module adds the genuinely new directed
+quantity (the in-degree) and the degree-level agreement theorems, while
+QA certifies the pre-existing walk operators on asymmetric input.
+
+| Declaration | Content |
+|-------------|---------|
+| `outDeg` | the out-degree `∑ j, A i j` — definitionally the shelf's `deg` (definition) |
+| `inDeg` | the in-degree `∑ j, A j i`, the column sum — the genuinely new directed quantity (definition) |
+| `outDeg_eq_deg` | the out-degree *is* `deg` (`rfl`) — every `deg`-indexed theorem applies to directed out-degrees verbatim |
+| `inDeg_eq_deg_transpose` | the in-degree is `deg` of the transposed network (`rfl`) |
+| `inDeg_eq_outDeg_of_isSymm` | agreement on the symmetric cone: `A.IsSymm → inDeg A i = outDeg A i` — the degree brick of the proposal's Step-3 acceptance bar |
+| `inDeg_eq_deg_of_isSymm` | agreement with the shelf: `A.IsSymm → inDeg A i = deg A i` |
+| `sum_outDeg_eq_sum_inDeg` | **directed handshaking:** `∑ i, outDeg A i = ∑ i, inDeg A i` with no nonnegativity or symmetry hypothesis (`Finset.sum_comm`) |
+
 ### `Scaffold.Mathlib.GraphTheory.VariationalTransfer` (variational consumer of the congruence bridge)
 
 All statements proved (2026-08-17), no axioms; the second consuming

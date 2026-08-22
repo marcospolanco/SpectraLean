@@ -344,6 +344,25 @@ Magnetic Laplacians and Hermitian embeddings of directed graphs are a
 further, separate slice — real, but do not fold into the first proposal
 under this item by default.
 
+*Update (2026-08-22):* **Step 0 + Step 1 of
+`proposals/directed-graph-operators.md` delivered** (zero new axioms):
+the Step-0 record made the three mandated decisions — carrier reuse (no
+new type), the out-degree-symmetrized normalized-Laplacian convention
+(deliberately *not* Chung's Perron-vector one, which would make the
+admitted axiom a prerequisite of a definition; the two proposals are
+thereby **decoupled**, PF proceeding on its own leverage case), and the
+Mathlib re-survey (no directed Laplacian anywhere in the pin) — and
+found that items 1 and 3 of the recommendation already exist
+hypothesis-free on the undirected shelf (`deg` is the row sum =
+out-degree; `walkTransitionMatrix = D⁻¹ A` and
+`walkLaplacian = I − D⁻¹ A` are defined with no symmetry hypothesis).
+Step 1 delivered the genuinely new layer (`GraphTheory.Directed`:
+`inDeg`, the `rfl` identifications, the symmetric-cone degree
+agreements, directed handshaking) plus the asymmetric-input QA
+certification of the pre-existing walk operators. Remaining: Step 2
+(the directed normalized Laplacian at the recorded convention), then
+the Step-3 agreement bar.
+
 ### 9. Bounded-window ("band") Davis–Kahan (2026-08-21, opened by the Davis–Kahan Step-0/1 survey)
 
 *Scope:* `proposals/discharge-perturbation-axioms.md`'s Davis–Kahan

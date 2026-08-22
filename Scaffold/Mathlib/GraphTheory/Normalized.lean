@@ -36,6 +36,9 @@ Delivered (all proved, no axioms):
 - `degreeSqrt`, `degreeInvSqrt` — the diagonal `√D` and `1/√D` matrices;
 - `degreeSqrt_mul_degreeSqrt` — `√D √D = degreeMatrix` (nonneg degrees);
 - `degreeSqrt_mul_degreeInvSqrt` — `√D (1/√D) = 1` (positive degrees);
+- `degreeSqrt_mulVec_apply` / `degreeInvSqrt_mulVec_apply` — the entry
+  forms of the conjugating actions (the interface the mixing program's
+  kernel-characterization transfer and QA consume);
 - `normalizedLaplacian` — `L_sym = 1 - (1/√D) A (1/√D)`;
 - `normalizedLaplacian_symmetric` — symmetry for symmetric `A`;
 - `degreeSqrt_mul_normalizedLaplacian_mul_degreeSqrt` — the congruence
@@ -44,7 +47,11 @@ Delivered (all proved, no axioms):
   and combinatorial worlds (all quadratic-form statements transfer);
 - `normalizedLaplacian_eq_regularNormalizedLaplacian` — agreement with
   the regular cone: on `d`-regular graphs the general definition
-  specializes to `regularNormalizedLaplacian A d`.
+  specializes to `regularNormalizedLaplacian A d`;
+- `walkTransitionMatrix_mulVec_one` — the constant fix `P *ᵥ 1 = 1`
+  (row-stochasticity in vector form; the stationary direction of the
+  density dynamics, consumed by the mixing program's centered-evolution
+  step).
 
 Delivered 2026-08-22 (`proposals/mixing-time-bound.md` Step 1; all
 proved, no axioms) — the eigenpair transfer through the similarity:
@@ -65,7 +72,12 @@ proved, no axioms) — the eigenpair transfer through the similarity:
 - `walkEvals` with
   `exists_eigenvector_walkTransitionMatrix_eq_walkEvals` — the walk
   spectrum `1 - evals L_sym`, each entry certified a genuine eigenvalue
-  of `P` by an explicit transferred eigenvector witness.
+  of `P` by an explicit transferred eigenvector witness;
+- `degreeSqrt_mulVec_pow_walkTransitionMatrix` — the conjugated-power
+  transfer: a power of the non-symmetric walk matrix, conjugated by
+  `√D`, is the same power of the *symmetric* `1 − L_sym` (the
+  matrix-power layer of the mixing program's Step 3, through the
+  commutation form `degreeSqrt_mul_walkTransitionMatrix_eq`).
 
 The pinned Mathlib snapshot has no general
 similar-matrices-share-eigenvalues interface (surveyed 2026-08-22: no
@@ -138,6 +150,19 @@ theorem degreeInvSqrt_mul_degreeSqrt (A : WAdj (V := V))
     simp only [if_pos rfl]
     exact inv_mul_cancel₀ (Real.sqrt_ne_zero'.mpr (hd i))
   · simp [h]
+
+/-- Entry form of the degree-square-root action:
+`(√D *ᵥ f) i = √(deg A i) * f i`. The entry-level interface the
+mixing program's conjugation lemmas and QA consume. -/
+theorem degreeSqrt_mulVec_apply (A : WAdj (V := V)) (f : V → ℝ) (i : V) :
+    (degreeSqrt A *ᵥ f) i = Real.sqrt (deg A i) * f i := by
+  simp [degreeSqrt, Matrix.mulVec_diagonal]
+
+/-- Entry form of the reciprocal action:
+`((1/√D) *ᵥ f) i = (√(deg A i))⁻¹ * f i`. -/
+theorem degreeInvSqrt_mulVec_apply (A : WAdj (V := V)) (f : V → ℝ) (i : V) :
+    (degreeInvSqrt A *ᵥ f) i = (Real.sqrt (deg A i))⁻¹ * f i := by
+  simp [degreeInvSqrt, Matrix.mulVec_diagonal]
 
 /-!
 ## The normalized Laplacian
@@ -234,6 +259,26 @@ theorem walkTransitionMatrix_row_sum (A : WAdj (V := V))
     deg]
   exact inv_mul_cancel₀ (ne_of_gt (hd i))
 
+/-- Entry form of the general walk transition matrix:
+`P i j = (deg A i)⁻¹ * A i j`. The entry-level interface that
+detailed-balance (`Stationary.walk_detailed_balance`) and per-edge flow
+computations consume. -/
+theorem walkTransitionMatrix_apply (A : WAdj (V := V)) (i j : V) :
+    walkTransitionMatrix A i j = (deg A i)⁻¹ * A i j := by
+  simp only [walkTransitionMatrix, Matrix.diagonal_mul]
+
+/-- The constant fix: row-stochasticity in vector form, `P *ᵥ 1 = 1`.
+The stationary direction of the walk's density dynamics — the piece the
+mixing program's centered-evolution step
+(`Mixing.walkDensity_sub_one`) consumes alongside
+`walkDensity_succ` to evolve the *centered* density. -/
+theorem walkTransitionMatrix_mulVec_one (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) :
+    walkTransitionMatrix A *ᵥ (1 : V → ℝ) = 1 := by
+  funext i
+  simp only [Matrix.mulVec, Matrix.dotProduct, Pi.one_apply, mul_one,
+    walkTransitionMatrix_row_sum A hd i]
+
 /-- The walk Laplacian of an arbitrary graph with positive degrees:
 `L_walk = I - D⁻¹ A`. Unlike `normalizedLaplacian` this matrix is *not*
 symmetric in general (`(D⁻¹A)ᵀ = A D⁻¹ ≠ D⁻¹ A` for irregular degrees);
@@ -248,11 +293,13 @@ Laplacian is similar (conjugated by `√D`) to the symmetric normalized
 Laplacian, so every spectral statement about one transfers to the other
 in the usual linear-algebra sense.
 
-Named gap (deferred): turning this identity into an equality of
-eigenvalue *lists* requires a characteristic-polynomial-roots interface
-for the non-symmetric walk matrix, which the pinned Mathlib snapshot
-does not provide; Scaffold's `evals` is defined only for `IsSymm`
-matrices and therefore does not apply to `L_walk` directly. -/
+The eigenvalue content of this identity is now delivered above (2026-08-22,
+`proposals/mixing-time-bound.md` Step 1): eigenpairs transfer in both
+directions by conjugating the eigenvector with `1/√D`/`√D` — no
+characteristic-polynomial-roots interface is needed (`walkEvals` certifies
+each transferred entry a genuine eigenvalue of the walk matrix with an
+explicit eigenvector witness). The former "named gap" note here
+anticipated a charpoly route the delivered `mulVec` algebra dissolves. -/
 theorem degreeSqrt_mul_walkLaplacian_mul_degreeInvSqrt
     (A : WAdj (V := V)) (hd : ∀ i, 0 < deg A i) :
     degreeSqrt A * walkLaplacian A * degreeInvSqrt A
@@ -491,5 +538,70 @@ theorem exists_eigenvector_walkTransitionMatrix_eq_walkEvals
       (eigvecOf_ne_zero _ _ i), ?_⟩
   rw [walkTransitionMatrix_mulVec_eigvecOf A hA hd i]
   simp only [walkEvals, ← hi]
+
+/-!
+## The conjugated-power transfer
+
+The matrix-power layer of the mixing program's Step 3: powers of the
+non-symmetric walk matrix move across the similarity, where the
+orthonormal eigenbasis of `L_sym` governs them. The commutation form
+`√D * P = (1 − L_sym) * √D` is the one-line algebraic content; the
+power transfer is its induction.
+-/
+
+/-- The commutation form of the similarity: `√D * P = (1 − L_sym) * √D`.
+The symmetrized walk operator `1 − L_sym` absorbs the degree square root
+on the right — equivalently, `(1 − L_sym) = √D P (1/√D)` — so the walk's
+action conjugated by `√D` is the action of a *symmetric* operator. This
+is the identity the conjugated-power transfer below runs on. -/
+theorem degreeSqrt_mul_walkTransitionMatrix_eq (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) :
+    degreeSqrt A * walkTransitionMatrix A
+      = (1 - normalizedLaplacian A) * degreeSqrt A := by
+  have h1 : (1 - normalizedLaplacian A) * degreeSqrt A
+      = degreeSqrt A - degreeSqrt A * walkLaplacian A := by
+    rw [Matrix.sub_mul, Matrix.one_mul,
+      ← degreeSqrt_mul_walkLaplacian_mul_degreeInvSqrt A hd,
+      Matrix.mul_assoc, degreeInvSqrt_mul_degreeSqrt A hd, Matrix.mul_one]
+  rw [h1, walkLaplacian, Matrix.mul_sub, Matrix.mul_one, sub_sub_cancel]
+
+/-- **The conjugated-power transfer**: `√D *ᵥ (Pᵗ *ᵥ g)` is the `t`-th
+power of the *symmetrized* walk operator `1 − L_sym` acting on
+`√D *ᵥ g`. The non-symmetric power never has to be diagonalized: it is
+moved across the similarity (one `√D` factor per step, the interior
+`√D (1/√D)` collapsing to `1`), where the orthonormal eigenbasis of
+`L_sym` — the basis the Step-1 transfer certifies — governs it. This is
+the matrix-power layer of `proposals/mixing-time-bound.md` Step 3,
+load-bearing on the similarity identity
+`degreeSqrt_mul_walkLaplacian_mul_degreeInvSqrt`. -/
+theorem degreeSqrt_mulVec_pow_walkTransitionMatrix (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) (t : ℕ) (g : V → ℝ) :
+    degreeSqrt A *ᵥ ((walkTransitionMatrix A ^ t) *ᵥ g)
+      = ((1 - normalizedLaplacian A) ^ t) *ᵥ (degreeSqrt A *ᵥ g) := by
+  induction t with
+  | zero => simp
+  | succ t ih =>
+    calc degreeSqrt A *ᵥ ((walkTransitionMatrix A ^ (t + 1)) *ᵥ g)
+        = degreeSqrt A *ᵥ (walkTransitionMatrix A *ᵥ
+            ((walkTransitionMatrix A ^ t) *ᵥ g)) := by
+              rw [pow_succ', Matrix.mulVec_mulVec g
+                (walkTransitionMatrix A) (walkTransitionMatrix A ^ t)]
+      _ = (degreeSqrt A * walkTransitionMatrix A) *ᵥ
+            ((walkTransitionMatrix A ^ t) *ᵥ g) :=
+              Matrix.mulVec_mulVec _ _ _
+      _ = ((1 - normalizedLaplacian A) * degreeSqrt A) *ᵥ
+            ((walkTransitionMatrix A ^ t) *ᵥ g) := by
+              rw [degreeSqrt_mul_walkTransitionMatrix_eq A hd]
+      _ = (1 - normalizedLaplacian A) *ᵥ
+            (degreeSqrt A *ᵥ ((walkTransitionMatrix A ^ t) *ᵥ g)) :=
+              (Matrix.mulVec_mulVec _ _ _).symm
+      _ = (1 - normalizedLaplacian A) *ᵥ
+            (((1 - normalizedLaplacian A) ^ t) *ᵥ
+              (degreeSqrt A *ᵥ g)) := by rw [ih]
+      _ = ((1 - normalizedLaplacian A) ^ (t + 1)) *ᵥ
+            (degreeSqrt A *ᵥ g) := by
+              rw [pow_succ', ← Matrix.mulVec_mulVec (degreeSqrt A *ᵥ g)
+                (1 - normalizedLaplacian A)
+                ((1 - normalizedLaplacian A) ^ t)]
 
 end SpectralGraphTheory

@@ -60,7 +60,50 @@ Mathlib's lack of one (still true, re-surveyed 2026-08-22: no
 similar-matrices-share-eigenvalues lemma anywhere under
 `Mathlib/LinearAlgebra/`) stopped being the obstruction it appeared to
 be. The remaining open piece on this axis is the mixing-time program's
-Step 2+ (an ℓ² decay proxy and the geometric mixing bound).
+Step 3 — the geometric decay bound. **Step 2 (the ℓ²-mixing proxy) was
+delivered 2026-08-22** in the new `GraphTheory.Mixing` (zero new
+axioms): the scoping gate decided and recorded first (ℓ² alone, with
+the weighted χ² form `∑ (ν_t − π)²/π` primary — the form in which the
+decay bound is Parseval-exact — and the plain Euclidean shape a
+corollary bridge), then `stationaryVec`/`walkDistribution`/
+`walkDensity`/`chiSquareDistance` with the evolution interface, the
+density-coordinate evolution `walkDensity_succ` consuming the Phase A
+detailed-balance interface (`h_{t+1} = P *ᵥ h_t` — the coordinates the
+transferred eigenbasis diagonalizes), the vanishing characterization,
+the `t = 0` normalization `(π x)⁻¹ − 1`, and mass conservation. Step 3
+consumes exactly this interface plus the Step-1 transfer theorems; its
+new work is the matrix-power layer (`Pᵗ` on eigencomponents, induction
+on `t`). **Step 3, component 1 (the decay engine) was delivered
+2026-08-22** under the proposal's authorized sub-decomposition, zero
+new axioms: the conjugated-power transfer
+`√D *ᵥ (Pᵗ *ᵥ g) = (1 − L_sym)ᵗ *ᵥ (√D *ᵥ g)` in `Normalized` (through
+the new commutation form `√D · P = (1 − L_sym) · √D` — the
+matrix-power layer done, never diagonalizing the non-symmetric
+power), the generic eigenaction `eigvecOf_dotProduct_one_sub_mulVec`
+in the center, and in `Mixing` the eigencoordinate evolution, the
+Parseval-exact decay identity, and the ℓ²(π) contraction
+`∑ π ((Pᵗ g))² ≤ r^{2t} ∑ π g²` under **value-based** mode exclusion
+(`eigvalOf i = 0`, not index-0 — true unconditionally on degenerate
+graphs) and a hypothesis-shaped rate. QA: exact decay on the
+non-bipartite K₃ (`2 → 1/2 → 1/8` at rate `1/2`), the P₃ λ* = 1
+oscillation cross-check against the pinned `χ²(2) = 1`, and the
+mode-hypothesis negative witness. **Component 2 (the χ² assembly) was
+delivered 2026-08-22 — the program is COMPLETE**, zero new axioms:
+the centered evolution `h_t − 1 = Pᵗ(h₀ − 1)` (through the new
+constant fix `P *ᵥ 1 = 1`), mass conservation in the conjugated
+pairing, the **connectivity kernel characterization of `L_sym`**
+(the kernel transferred through the proved congruence
+`√D L_sym √D = L` to the shelf's combinatorial kernel theorem, then
+collapsed by mass conservation — the mode hypothesis *derived*, not
+assumed), and the closing mixing bound
+`chiSquareDistance_le_of_connected`:
+`χ²(t, x) ≤ (λ*)^{2t} · ((π x)⁻¹ − 1)`. QA pins the bound attained
+*exactly* on K₃ at `t = 1, 2`, derives the P₃ rate basis-independently
+from two sum-of-squares certificates (every eigenvalue in `[0, 2]`,
+no exact-spectrum computation), and refutes the connectivity-dropped
+form on a triangle⊕self-loop fixture where the rate hypothesis
+provably holds yet the conclusion fails (`χ²(3) = 3/8 > 3/64`).
+Radar axis 5 re-scored 3.0 → 3.5 (the mixing statement's own landing).
 
 ### 3. Expansion and cut interfaces
 
@@ -119,6 +162,23 @@ instance.
 *Gated on item 1–2 stability:* entropy and reversibility interfaces,
 Dirichlet/functional inequalities, dissipation. No admission before the
 Markov prerequisites are stable.
+
+*2026-08-22 note:* the reversibility half of this item's named
+interface set is now delivered as proved hard crust —
+`GraphTheory.Stationary`'s detailed-balance layer
+(`walk_detailed_balance`, `walk_detailed_balance_measure`,
+`diagonal_deg_mul_walkTransitionMatrix_isSymm`,
+`transitionMatrix_detailed_balance_uniform`; proposal
+`proposals/reversibility-and-heat-semigroup.md` Phase A, zero new
+axioms). **The entropy half is delivered too** (2026-08-22,
+`proposals/finite-relative-entropy.md` — both steps, zero new axioms,
+in the new `Scaffold.Mathlib.InformationTheory.Entropy`: `klDiv` and
+`shannonEntropy` with Gibbs' inequality in both directions and the
+entropy maximum with its equality case; backlog item 6's named
+interface set is complete). What remains gated on this item is the
+*inequality* layer — Dirichlet/functional inequalities, dissipation,
+log-Sobolev — which stays conditional on consumer demand per the
+icebox note.
 
 ### 7. Combinatorial and electrical structure (radar-driven candidate)
 

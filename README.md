@@ -22,7 +22,7 @@ As of August 22, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 10 |
-| QA theorems/lemmas | 1081, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 1243, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is the Cheeger *hard* direction at the SGT center;
 and the scalar and matrix
@@ -56,7 +56,28 @@ output *is* Mathlib's `orthogonalProjection` onto its transported
 range and the closest point of that range to the input — the
 residual-orthogonality engine, the identification, and the
 closest-point minimality over the band's fixed space),
-are proved, not admitted.
+are proved, not admitted. On the random-walk axis, the walk-matrix
+**eigenpair transfer** through the proved similarity (both directions,
+the reflected walk spectrum `walkEvals` with explicit eigenvector
+witnesses, and the transferred-family expansion) and
+**reversibility/detailed balance** (`deg i * P i j = deg j * P j i`
+with its stationary-measure form `π i * P i j = π j * P j i` and the
+symmetrizability packaging `D * P` symmetric — the property that makes
+spectral methods apply to the walk at all) the **ℓ²-mixing proxy**
+(`GraphTheory.Mixing`: the stationary vector `π = deg/vol`, the walk
+law `(Pᵀ)ᵗ *ᵥ δₓ` with mass conservation, the density-coordinate
+evolution `h_{t+1} = P *ᵥ h_t` consuming detailed balance, and the χ²
+mixing distance with its vanishing characterization, `t = 0`
+normalization, and plain-ℓ² corollary bridge), and the **complete
+geometric-decay mixing statement** of the mixing-time program
+(the conjugated-power transfer through the similarity, eigencoordinate
+evolution, the Parseval-exact decay identity, the ℓ²(π) contraction
+under value-based mode exclusion, and the closing χ² mixing bound
+`chiSquareDistance_le_of_connected` —
+`χ²(t, x) ≤ (λ*)^{2t} · ((π x)⁻¹ − 1)` on connected graphs under the
+rate hypothesis, its mode hypothesis *derived* from the connectivity
+kernel characterization of `L_sym` transferred through the proved
+congruence, not assumed) — are likewise proved. The finite-distribution **entropy layer** (`InformationTheory.Entropy`: relative entropy `klDiv` and Shannon entropy `shannonEntropy` with the visible `p i = 0 ↦ 0` junk convention, Gibbs' inequality in both directions (`0 ≤ klDiv p q`, with equality exactly at `p = q`), the uniform bridge, the entropy maximum `shannonEntropy p ≤ log |V|` with equality exactly at uniform, and nonnegativity) is proved from the term-wise information inequality `log t ≤ t − 1` — the same textbook route as the pinned Mathlib strict-concavity machinery, with zero axioms.
 
 The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for
 current counts, verification commands, and limitations.
@@ -98,7 +119,7 @@ immediately exercises Mathlib's bridges across linear algebra, analysis,
 and probability at once. Formalizing SGT is what forces this project to
 build reusable interfaces spanning linear algebra (`Spectral`),
 combinatorics and expansion (`Cheeger`, `Fiedler`, `Expander`), random
-walks (`RandomWalk`, `Normalized`, `Stationary`), and variational analysis
+walks (`RandomWalk`, `Normalized`, `Stationary`, `Mixing`), and variational analysis
 (Courant–Fischer, the Cheeger bounds) — see "What's here" below — rather
 than one isolated result.
 
@@ -173,16 +194,18 @@ The near-term center is general SGT. Public modules currently cover:
 | Cuts and expansion | `GraphTheory.Cheeger`, `GraphTheory.Fiedler`, `GraphTheory.Expander` (edge weights, the centered-indicator decomposition, and the Expander Mixing Lemma itself) |
 | Decidable spectral certificates | `GraphTheory.SpectralCertificates` (the ℚ specification checker with its soundness theorem, and the kernel-verifiable ℤ cross-multiplied twin with proved bridges) |
 | Electrical structure | `GraphTheory.Electrical`, `GraphTheory.ElectricalFlow`, `GraphTheory.Foster` |
-| Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized`, `GraphTheory.Stationary` |
+| Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized` (the similarity, eigenpair transfer, conjugated powers), `GraphTheory.Stationary`, `GraphTheory.Mixing` (the ℓ²-mixing proxy: stationary vector, walk law, density evolution, χ² distance, decay engine) |
 | Perturbation | `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan,ProjectionGap,Duhamel}` |
 | Concentration | `Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*` |
+| Finite-distribution entropy | `InformationTheory.Entropy` (relative entropy and Shannon entropy, Gibbs' inequality, the entropy maximum — all proved) |
 | Matrix updates | `Core.MatrixUpdates` (Woodbury, Sherman–Morrison) |
 
 Outward work must improve one of those interfaces or make a concrete, broadly
 reusable connection. The existing persistence modules
 (`GraphTheory.Dynamics`, `Derived.EventStream`, `Derived.ProjectorDrift`) do
 not set this agenda; they are a retained example whose tail and projector-drift
-theorems remain conditional on Matrix Azuma and Davis–Kahan.
+theorems remain conditional on Matrix Azuma alone (Davis–Kahan and Weyl
+are proved since 2026-08-21/20).
 
 See [Spectral Theory](docs/3_SPECTRAL_THEORY.md) for the status of that
 example, and the [SGT Radar](docs/7_SGT_RADAR.md) for coverage scores.
@@ -198,7 +221,7 @@ Last assessed: August 22, 2026. Scores reflect usable, verified coverage on a
 | Spectral linear algebra | 4.5 / 5 |
 | Variational and functional methods | 4.0 / 5 |
 | Cuts, expansion, and clustering | 4.0 / 5 |
-| Random walks and diffusion | 3.0 / 5 |
+| Random walks and diffusion | 3.5 / 5 |
 | Combinatorial and electrical structure | 4.5 / 5 |
 | Perturbation, randomness, and algorithms | 3.5 / 5 |
 | Adjacent systems interfaces | 1.0 / 5 |

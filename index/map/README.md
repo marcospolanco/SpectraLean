@@ -17,6 +17,7 @@ Each file in this directory:
 - [Probability Concentration](probability_concentration.md) - Scalar concentration inequalities
 - [Random Matrix Theory](random_matrix.md) - Matrix concentration inequalities
 - [Perturbation Theory](perturbation.md) - Spectral stability and perturbation bounds
+- [Information Theory](information_theory.md) - Relative entropy and Shannon entropy for finite distributions (all proved, no axioms)
 
 ## Contributing
 

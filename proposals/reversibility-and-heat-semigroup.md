@@ -1,9 +1,10 @@
 # Proposal: Reversibility and the Heat Semigroup on the Graph Laplacian
 
-**Status:** Proposed. Assistant's assessment of project direction, requested
-2026-08-18 (closes the two named-but-unclaimed gaps on the random-walk/
-diffusion axis). Authorizes no Lean changes, axiom admissions, document
-rewrites, or external publication.
+**Status:** Active — Phase A (reversibility/detailed balance, both of its
+steps) DELIVERED 2026-08-22 as pure hard crust in `GraphTheory.Stationary`
+(zero new axioms, no new definitions); Phase B (the heat semigroup)
+remains open behind its recorded operator-decision gate. Originally
+proposed 2026-08-18.
 
 Two independent phases, split because they sit on opposite sides of an
 existing backlog gate — see "Why this axis." Assessed from
@@ -223,12 +224,15 @@ claim beyond the inequality itself.
 
 ## Open next step
 
-**Phase A** is unblocked now: begin with Step 1 (irregular-case detailed
-balance).
+**Phase A — DELIVERED 2026-08-22** (see the delivery record below). No
+Phase A work remains; the regular-case Step 2 was delivered as the
+uniform-measure corollary composed from `transitionMatrix_symmetric`
+(the already-on-shelf theorem the pre-edit survey found), exactly the
+proposal's own "otherwise Step 1 subsumes it" branch.
 
-**Phase B** needs one operator decision first, per `docs/6_SGT_BACKLOG.md`
-item 5's own gate: whether this proposal — which names itself as a
-consumer, and notes it needs none of `mixing-time-bound.md`'s still-open
+**Phase B needs one operator decision first, per `docs/6_SGT_BACKLOG.md`
+item 5's own gate:** whether this proposal — which names itself as a
+consumer, and needs none of `mixing-time-bound.md`'s still-open
 walk-eigenvalue-transfer step — counts as the "named SGT consumer" that
 gate requires, or whether that decision should wait for
 `mixing-time-bound.md` to reach a point where it explicitly asks for a
@@ -236,3 +240,83 @@ continuous-time comparison. This is a scope call in the same spirit as
 `admit-perron-frobenius.md`'s axis-opening decision, not a routine
 backlog item; an autonomous run should not start Phase B Lean work
 without it recorded here.
+
+## Delivery record
+
+### Phase A — reversibility (detailed balance) (DELIVERED 2026-08-22,
+run `20260822T061043Z-run-1`)
+
+Delivered in `GraphTheory.Stationary` (the module that already holds the
+adjoint-stationarity theorem the stationary measure rests on), all
+proved, zero new axioms, **no new definitions** (the proposal's own
+mandate — composes `deg`/`vol`/`walkTransitionMatrix`/
+`transitionMatrix_symmetric` rather than growing the interface).
+`#print axioms` on every new public theorem reads only `propext,
+Classical.choice, Quot.sound`:
+
+- **Step 1 (irregular case)**, exactly the proposal's one-line route:
+  `walk_detailed_balance` — `deg A i * P i j = deg A j * P j i`, both
+  sides exactly `A i j` (the degree weight cancels `walkTransitionMatrix`'s
+  `D⁻¹` row factor through the new entry lemma
+  `Normalized.walkTransitionMatrix_apply`; `A.IsSymm` identifies the two
+  adjacency entries); `walk_detailed_balance_measure` — the π-form
+  `deg A i / vol A Finset.univ * P i j = deg A j / vol A Finset.univ *
+  P j i`, obtained by side-condition-free division of the degree
+  identity (`div_mul_eq_mul_div`), so **no volume-positivity hypothesis
+  is carried** (for positive degrees on a nonempty vertex type the
+  volume is positive and `π` is the stationary measure certified by
+  `walkTransitionMatrix_transpose_mulVec_deg`);
+  `diagonal_deg_mul_walkTransitionMatrix_isSymm` — the matrix
+  packaging `(D * P).IsSymm` (reversibility *is* symmetrizability; the
+  balance identity is exactly its entrywise `IsSymm` condition), the
+  self-adjointness interface the mixing-time program's ℓ²(π) proxy
+  consumes.
+- **Step 2 (regular case)**: delivered as
+  `transitionMatrix_detailed_balance_uniform` — the uniform-measure
+  balance for `RandomWalk.transitionMatrix`, *composed* from the
+  already-proved `RandomWalk.transitionMatrix_symmetric` (found on the
+  shelf by the pre-edit survey) rather than re-proved; the proposal's
+  own "worth stating separately only if a consumer needs it" clause was
+  resolved in favor of stating it, since the uniform form is the
+  regular-cone mirror of `walk_detailed_balance_measure` and costs one
+  rewrite.
+- **Mathlib survey (recorded before proving):** no detailed-balance,
+  reversibility, or Markov-chain-structure machinery anywhere in the
+  pin (the coverage map already records the random-walk/Markov absence
+  upstream; no correction needed).
+- **QA** (`Stationary_QA.lean`, 12 → 26 declarations), the proposal's
+  two prescribed witnesses: **positive** — the P₃ path fixture
+  (degrees 1, 2, 1), balance instantiated through the theorems at every
+  index pair and cross-checked by raw literal arithmetic (degree form
+  `1 = 1` at `(0,1)`; π-form `1/4 = 1/4` with `vol = 4` pinned
+  independently from the degrees; the symmetrized matrix's
+  off-diagonal entries both `1` — the two directed flows carry equal
+  degree-weighted mass; the uniform form instantiated at the edge);
+  **negative** — the asymmetric matrix `!![0,2;1,0]` with positive
+  degrees `(2, 1)`, where the hypothesis-free balance statement is
+  refuted (`deg 0 * P 0 1 = 2 ≠ 1 = deg 1 * P 1 0`) and the symmetry
+  hypothesis is provably violated at the same entry pair — `hA` is
+  load-bearing, not decorative.
+- **Statement-shape note (recorded before stating):** the π-form was
+  initially drafted with a `vol ≠ 0` side condition; the delivered
+  statement carries none — the identity holds for any `vol` value by
+  the division route, making the theorem strictly more general. Also
+  fixed during delivery: bare `univ` in a statement elaborates as an
+  auto-bound *local* finset (not `Finset.univ`) — the house form
+  `(Finset.univ : Finset V)` is used explicitly.
+
+Verification: `lake env lean` on `Normalized.lean`, `Stationary.lean`,
+and `Stationary_QA.lean` — zero errors (the two Stationary warnings are
+the documented pre-existing ones, verified identical in HEAD);
+`#print axioms` on all public and headline QA theorems — three standard
+axioms only; oleans built; **full `lake build` ✔ (2227 targets,
+"Build completed successfully")**; `lint_axioms` (10, unchanged),
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+(**1095 QA declarations / 10 explicit axioms / 0 sorries**). Radar axis
+5 **held at 3.0** per protocol (a composed identity within the
+walk-operator interface family counted at the same day's mixing-time
+re-score, not a new capability family; the hold and the natural
+re-score triggers logged in the radar). One records repair delivered
+alongside: the radar axis-5 *table row* and "Weakest axes" paragraph,
+which the 2026-08-22 mixing-time run had left stale at score 2.5 with
+the closed gap still named, were synced to the recorded 3.0 state.

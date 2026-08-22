@@ -6,6 +6,508 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Relative Entropy and Shannon Entropy for finite distributions — both
+steps, one program (run 1, 2026-08-22; `proposals/finite-relative-
+entropy.md`, the top-ranked Medium row with the Active table holding no
+High rows and its own backlog gate recorded open): DELIVERED — the
+program is COMPLETE.**
+Pure hard crust — **zero new axioms** (count stays 10; `#print axioms`
+on all nine public theorems — the scalar pair, the four Gibbs/entropy
+statements, the bridge, and the uniform normalization — reads only
+`propext, Classical.choice, Quot.sound`). Closes the entropy half of
+backlog item 6 (the reversibility half landed earlier the same day).
+
+**Pre-edit survey (the proposal's mandated Jensen-API survey, done
+before any statement):** the full shelf is present in the pin —
+`ConcaveOn.le_map_sum` (Jensen.lean:71), `StrictConcaveOn.lt_map_sum`
+(:145), `StrictConcaveOn.eq_of_map_sum_eq` (:169),
+`StrictConcaveOn.map_sum_eq_iff'` (:233, the nonnegative-weights
+equality case), `strictConcaveOn_log_Ioi`
+(SpecificFunctions/Basic.lean:63) — so the proposal's stop-and-record
+clause (a missing Jensen variant) is **not** triggered.
+
+**Route decision (recorded before stating):** delivered by the *term-wise*
+information inequality instead — `Real.one_sub_inv_le_log_of_pos`
+(Log/Basic.lean:281, `1 − x⁻¹ ≤ log x`) for nonnegativity and
+`Real.log_lt_sub_one_of_pos` (Log/Basic.lean:230, strict off `x = 1`)
+for the equality case. This is the same textbook proof (Cover–Thomas
+2.6.3's own route via `log t ≤ t − 1` term-wise), needs no Finset-`smul`
+Jensen plumbing, no `Ioi`-membership side conditions, and no
+support-finset filtering: the `p i = 0` junk case is discharged inside
+the per-term bound (`0 ≥ −q i`), and strictness there is *stronger*
+(`gap = q i > 0`) — the equality case `p = q` falls out with no
+`∑_{support} q` argument at all.
+
+**Statement-shape decisions (recorded before stating, honored as
+stated):** `klDiv p q := ∑ i, if p i = 0 then 0 else p i * Real.log
+(p i / q i)` (factored through the scalar `klTerm` — the visible junk
+convention the proposal mandates); `shannonEntropy p := -∑ i, klTerm
+(p i) 1` (the proposal's exact sign); the equality iff at full
+function equality `p = q`; the entropy maximum at `Real.log
+(Fintype.card V)` with equality iff `p` is uniform, with `Nonempty V`
+*derived* from `∑ p = 1` rather than assumed.
+
+**Delivered:** the new `Scaffold/Mathlib/InformationTheory/Entropy.lean`
+(namespace `Scaffold.InformationTheory`): `klTerm`, `klDiv`,
+`shannonEntropy`, `sub_le_klTerm` + `eq_of_klTerm_eq_sub` (the
+term-wise core), `klDiv_nonneg` + `klDiv_eq_zero_iff` (Gibbs both
+directions), `sum_inv_card_eq_one`,
+`klDiv_apply_uniform` (the bridge), `shannonEntropy_le_log_card` +
+`shannonEntropy_eq_log_card_iff`, and `shannonEntropy_nonneg`.
+
+**QA** (`Scaffold/QA/InformationTheory/Entropy_QA.lean`, 31
+declarations; `#print axioms` on thirteen headlines clean): the biased
+coin's divergence and entropy each **hand-computed** to closed
+log-forms (`¼·log(27/16)`, `¼·log(256/27)`) with the divergence pinned
+strictly positive; the equality case exercised in both directions
+against raw computations; **the uniform bridge numerically
+cross-checked** at the fair coin (`¼·log(27/16) = log 2 −
+¼·log(256/27)`, both sides independently pinned — load-bearing on the
+bridge); the maximum attained at uniform on `Fin 4` two ways and
+**strictly missed** by the non-uniform `(1/2, 1/6, 1/6, 1/6)` —
+strictness only through the equality-case iff, the proposal's
+prescribed load-bearing use — plus the divergence-side companion; and
+the delta distribution's entropy exactly `0`, the junk convention
+exhibited.
+
+**Verification:** `lake env lean` on the module and QA — zero errors,
+zero warnings each; explicit target builds of both modules ✔;
+`#print axioms` on the nine public and thirteen headline QA theorems ✔
+(three standard axioms only); umbrella import added and **full
+`lake build` ✔ (2229 targets, "Build completed successfully", zero
+errors)**; `lint_axioms` (10, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1243/10/0**;
+`Entropy_QA` a new file row at 31). **Build-reachability fact recorded
+this run (content-change probe):** the default `lake build` target is
+the `Scaffold.lean` umbrella closure — it certifies every public
+module including the new one, but does not itself compile the QA tree;
+QA modules are certified by direct elaboration and explicit targets
+(the scoreboard's `lake build` row now states this scope precisely).
+Records updated: proposal (status header, full delivery record with
+pin-specific API notes — `Real.log_pow`/`Real.log_inv` explicit
+arguments, `Finset.sum_one` absent at that name, `ring_nf` for
+coefficient-atom identities, `Finset.sum_sub_distrib`'s orientation —
+open-next-step → none with the deferred items named),
+`proposals/README.md` (Medium row → Delivered; progress paragraph),
+the new `index/map/information_theory.md` + map README row, scoreboard
+(counts, both Direct rows, `lake build` row, QA-declaration bullet, a
+new interpretation bullet), radar (QA axis held at 4.0, count synced
+**1243/37**, sync logged), README (1243, module table, proved list,
+and the stale conditional-on-Davis–Kahan persistence note corrected),
+backlog item 6 (entropy half delivered), this plan, and the activity
+log. The worktree's unrelated operator-side and prior-run-uncommitted
+changes remain preserved untouched.
+
+**Next milestone (open):** the Medium rows by leverage — **the
+subgaussian tail bound** (the 2026-08-22 operator-directed addition —
+run its Step 0 first), **Perron–Frobenius + directed operators** (Step
+0 first per the convention-choice gate), the **Cheeger hard-direction
+Step 0 survey** (known-hard), and **approximate spectral projection**
+(Step 0 first). Reversibility Phase B and Fiedler Phase B still need
+operator decisions.
+
+---
+
+**Mixing-time Step 3, component 2 of 2 — the χ² assembly, the program's
+closing statement (run 1, 2026-08-22; `proposals/mixing-time-bound.md`
+at its recorded open next step — the top Medium row with the Active
+table holding no High rows; component 2 is exactly the numbered gluing
+list the component-1 delivery record left): DELIVERED — the mixing-time
+program is COMPLETE.**
+Pure hard crust — **zero new axioms** (count stays 10; `#print axioms`
+on all seven new public theorems — three entry lemmas in `Normalized`,
+four theorems in `Mixing` — reads only `propext, Classical.choice,
+Quot.sound`). Radar axis 5 **re-scored 3.0 → 3.5** per the proposal's
+own gate (the mixing *statement* is the trigger; its proof and QA have
+both landed).
+
+**Statement-shape decisions (recorded before stating, honored as
+stated):** connectivity enters as the shelf kernel theorem's exact
+hypotheses (`(supportGraph A hA).Connected` + `hnonneg`) — the QA
+negative witness proves the conclusion *false* without it even when the
+rate hypothesis genuinely holds; the rate stays hypothesis-shaped; no
+`t = 0` special case.
+
+**Delivered:** in `Normalized.lean` the constant fix
+`walkTransitionMatrix_mulVec_one` (`P *ᵥ 1 = 1`) and the entry lemmas
+`degreeSqrt_mulVec_apply`/`degreeInvSqrt_mulVec_apply`; in `Mixing.lean`
+the centered evolution `walkDensity_sub_one`
+(`h_t − 1 = Pᵗ *ᵥ (h₀ − 1)`), mass conservation
+`sum_deg_mul_walkDensity_sub_one_eq_zero`, the connectivity mode
+derivation `eigvecOf_dotProduct_degreeSqrt_walkDensity_sub_one_
+of_eigvalOf_eq_zero` (the one piece with real content: kernel transfer
+through the congruence `√D L_sym √D = L` → the shelf's
+`exists_const_of_laplacian_mulVec_eq_zero` → entrywise
+`v k = √(deg k)·c` → collapse by mass conservation), and the headline
+`chiSquareDistance_le_of_connected` —
+`χ²(t, x) ≤ r^(2t) · ((π x)⁻¹ − 1)`. The route landed exactly as
+paved, with the forecast risks (the `√2`-atom QA arithmetic, the
+loop-row symmetry step) both consumed by the recorded techniques.
+
+**QA** (`Mixing_QA.lean`, 67 → 117 declarations; `#print axioms` on
+twelve headline QA theorems clean): K₃ with the final bound
+**attained exactly** at `t = 1, 2` (both sides pinned raw); the
+centered-evolution and connectivity-derived-mode cross-checks against
+the component-1 hand computations; P₃'s rate derived basis-independently
+from two SOS certificates (the Dirichlet identity
+`v ⬝ L_sym v = (v₀ − v₁/√2)² + (v₂ − v₁/√2)²` and its `2‖v‖² − ·`
+companion — every eigenvalue in `[0, 2]`, no exact spectrum), the
+λ* = 1 bound honest and strict (`1 ≤ 3`); **negative witnesses**:
+connectivity load-bearing on the triangle⊕self-loop `Fin 4` fixture
+(spectrum `{0, 0, 3/2, 3/2}` derived basis-independently, rate
+hypothesis *provably holding* at `r = 1/2` — the loop's `μ = 0` mode
+excluded from the rate hypothesis by design, exactly the hole
+connectivity plugs — while `χ²(3) = 3/8 > 3/64` refutes the
+conclusion), and the rate load-bearing at `r = 1/4` (hypothesis
+unsatisfiable by the trace, conclusion `1/2 > 1/8` refuted).
+
+**Verification:** `lake env lean` on `Normalized.lean` (only its
+documented pre-existing `congr 1` note), `Mixing.lean`, and
+`Mixing_QA.lean` (zero errors, zero warnings on the latter two);
+`#print axioms` on the seven new public and twelve headline QA theorems
+✔ (three standard axioms only); oleans built; **full `lake build` ✔
+(2228 targets, "Build completed successfully", detached, zero
+errors)**; `lint_axioms` (10, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1212/10/0**;
+`Mixing_QA` 67 → 117). Records updated: proposal (status header
+COMPLETE, full component-2 delivery record with the two pin-specific
+API discoveries — this snapshot's `Finset.mul_sum`/`sum_mul` argument
+order `(s)(f)(a)` with `mul_sum : a * ∑ f = ∑ (a·f)`, and the
+matrix-literal far-corner entry (`!![…;0,0,0,2]`-shaped) defeating
+`rfl`-in-`fin_cases` and `norm_num`, the robust routes being an
+entry-table lemma or a scalar-multiple route — and open-next-step →
+none with the three optional items named), `proposals/README.md`
+(the Medium row retired to the Delivered table; the progress paragraph
+rewritten; the duplicate reversibility row — 2026-08-19 drift —
+removed), scoreboard (both Direct rows prepended, the `lake build` row
+extended, a new interpretation bullet), radar (axis 5 re-scored
+**3.0 → 3.5** with the full re-score log entry; the weakest-axes
+paragraph rewritten; QA count synced 1212/36), README (1212, the
+proved list gains the closing mixing bound, module table, coverage
+snapshot 3.0 → 3.5), SGT index map (Mixing section: program-complete
+header + 4 rows + the entry-lemma note), backlog item 2 (program
+complete), this plan, and the activity log. The worktree's unrelated
+operator-side changes (`proposals/prove-subgaussian-tail-bound.md` +
+its README row, untracked) remain preserved untouched, as do the
+uncommitted-but-delivered Step-2/Phase A/Step-3-component-1 changes.
+
+**Next milestone (open):** the Medium rows by leverage — **Relative
+Entropy** (Gibbs' inequality and the entropy maximum from Mathlib's
+proved strict-concavity machinery), **the subgaussian tail bound**
+(Step 0 first), **Perron–Frobenius + directed operators** (Step 0
+first per the convention-choice gate), the **Cheeger hard-direction
+Step 0 survey** (known-hard), and **approximate spectral projection**
+(Step 0 first). Reversibility Phase B and Fiedler Phase B still need
+operator decisions.
+
+---
+
+**Mixing-time Step 3, component 1 of 2 — the geometric decay engine
+(run 1, 2026-08-22; `proposals/mixing-time-bound.md` at its recorded open
+next step, the top Medium row with the Active table holding no High rows,
+executed as the sub-decomposition the proposal itself licenses for its
+hardest step — the electrical program's own steps-4/5 precedent):
+DELIVERED.**
+Pure hard crust — **zero new axioms** (count stays 10; `#print axioms`
+on all eight new public theorems reads only `propext,
+Classical.choice, Quot.sound`).
+
+**Scope decision recorded before any statement (the split the proposal
+authorizes):** Step 3 = (1) the decay engine — conjugated matrix powers,
+eigencomponent evolution, the Parseval-exact decay identity, and the
+hypothesis-shaped ℓ²(π) contraction — plus (2) the χ² assembly — the
+density-evolution bridge `h_t − 1 = Pᵗ(h₀ − 1)`, the kernel-orthogonality
+derivation under connectivity, and the final
+`χ²(t, x) ≤ (λ*)²ᵗ·((π x)⁻¹ − 1)`. This run delivered (1) only; (2) is a
+later dedicated run.
+
+**Statement-shape decisions, made before stating:**
+
+1. **Value-based mode exclusion, not index-based.** The non-decaying mode
+   is excluded by `eigvalOf (L_sym) i = 0` (the zero-eigenvalue modes of
+   the *symmetrized* operator), not by excluding spectral index 0 — the
+   index form is only correct when the kernel is one-dimensional, and the
+   value form keeps the contraction true unconditionally (on a
+   disconnected graph the mode hypothesis honestly fails for a
+   one-component start, exactly as it should: there is no decay to
+   stationarity).
+2. **Hypothesis-shaped rate `r`**, not a `sup'`-packaged definition:
+   `hrate : ∀ i, eigvalOf i ≠ 0 → |1 − eigvalOf i| ≤ r`. QA instantiates
+   with hand-computed rates; packaging the sup is component 2's business
+   when the walkEvals-side instantiation is needed.
+3. **No sign hypothesis on `r`** — the rate hypothesis already forces
+   `r ≥ 0` whenever it is non-vacuous (`|1 − μ| ≥ 0`), and the vacuous
+   case collapses term-wise; carrying `0 ≤ r` would be decorative.
+4. **The public headline is the π-form contraction**
+   `∑ π ((Pᵗ g) i)² ≤ r^{2t} ∑ π (g i)²`, with the Euclidean
+   √D-conjugated engine beneath it — the mixing-relevant shape, per the
+   Step-2 scoping record's weighted-form-is-primary decision.
+
+**Route (recorded before stating, from this run's pre-edit reading of the
+delivered Step-1/Step-2 interfaces):** the engine never forms the
+non-symmetric power `Pᵗ` in eigen-coordinates; it conjugates it —
+`√D *ᵥ (Pᵗ *ᵥ g) = (1 − L_sym)ᵗ *ᵥ (√D *ᵥ g)` (one induction from the
+similarity identity `√D P = (1 − L_sym) √D`), then reads coefficients
+through the *generic* eigenaction at `1 − M`
+(`v i ⬝ᵥ ((1−M) *ᵥ x) = (1 − μ i)(v i ⬝ᵥ x)`, composed from the shelf's
+`dotProduct_eigvecOf_mulVec`), so each eigencoefficient evolves by
+multiplication by `1 − μ i` per step. Parseval (`dotProduct_eigvecOf`)
+then resolves `‖√D (Pᵗ g)‖² = ∑ ((1−μ i)ᵗ c i)²` exactly, and the
+contraction is term-wise: kernel modes die by the mode hypothesis,
+decaying modes by the rate hypothesis (`|1−μ| ≤ r` ⟹ even powers
+dominate), with no case split on `r < 1` needed at all. Load-bearing on
+`degreeSqrt_mul_walkLaplacian_mul_degreeInvSqrt`,
+`dotProduct_eigvecOf_mulVec`, `dotProduct_eigvecOf`, and
+`eigvecOf_inner` — an error in any would surface here. The route landed
+exactly as paved.
+
+**Delivered:** one generic lemma in `GraphTheory.Spectral`
+(`eigvecOf_dotProduct_one_sub_mulVec`, the `1 − M` eigenaction), the
+conjugated-power layer in `GraphTheory.Normalized`
+(`degreeSqrt_mul_walkTransitionMatrix_eq` + the headline
+`degreeSqrt_mulVec_pow_walkTransitionMatrix`), and the engine in
+`GraphTheory.Mixing` (eigencoordinate evolution, the Parseval-exact
+identity, the norm-form contraction, the π-norm bridge
+`sum_stationaryVec_smul_sq_eq`, and the π-form headline
+`sum_stationaryVec_smul_sq_pow_walkTransitionMatrix_le`).
+
+**QA** (`Mixing_QA.lean`, 33 → 67 declarations): the triangle K₃
+(connected, non-bipartite — λ* = 1/2, *genuine* decay): every
+eigen-fact derived **without naming Mathlib's classically chosen basis
+vectors** (`tri_eigvalOf_cases`: every eigenvalue `0` or `3/2`, from the
+summed eigen equation plus the unit-norm quadratic form;
+`tri_kernel_const`: kernel = constants; `tri_exists_kernel_index`: by
+trace `3` vs `9/2`); the mode and rate hypotheses derived from these;
+the contraction instantiated at `t = 1, 2` on `h₀ − 1 = (2,−1,−1)` with
+**exact** decay (`2 → 1/2 → 1/8` against bounds `(1/4)·2`, `(1/16)·2` —
+equalities, pinned raw both sides). P₃ retained for the degenerate
+λ* = 1 oscillation cross-check: the exact Parseval identity at `t = 2`
+pins the basis-independent eigencomponent sum to `4`, tied by the π-norm
+bridge to the already-pinned `χ²(2) = 1`. Negative witness: the mode
+hypothesis dropped at `g = 1` — conclusion refuted (`1 ≤ 1/4`) *and* the
+hypothesis provably unsatisfiable at the kernel index (coefficient
+`3·c·√2 ≠ 0`, `c ≠ 0` by unit norm).
+
+**Verification:** `lake env lean` on `Spectral.lean` (only its documented
+pre-existing section-variable warnings), `Normalized.lean` (only the
+documented pre-existing `congr 1` note), `Mixing.lean` and
+`Mixing_QA.lean` — zero errors, zero warnings; `#print axioms` on the
+eight public and thirteen headline QA theorems ✔ (three standard axioms
+only); oleans built; **full `lake build` ✔ (2227 targets, "Build
+completed successfully", detached, zero errors)**; `lint_axioms` (10,
+unchanged), `check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**1162/10/0**; `Mixing_QA` 33 → 67). The pre-edit Mathlib
+survey recorded in the plan: `Matrix.dotProduct_sub`, `pow_le_pow_left₀`,
+`sq_le_sq'`, `Matrix.mulVec_mulVec` all present; the generic `1 − M`
+eigenaction absent (hence added to the center); one pin-specific
+discovery logged here — this snapshot's `Finset.sum_sub` is named
+`Finset.sum_sub_distrib`, and `linear_combination` takes the exact
+coefficient expression (the `-hunit` sign mattered in QA). Radar axis 5
+**held at 3.0** per the proposal's own gate (the mixing *statement* is
+component 2's to deliver; hold + trigger logged); QA axis count synced
+1162/36, held. Records updated: proposal (status header, full
+component-1 delivery record, open-next-step rewritten to the numbered
+component-2 gluing list), `proposals/README.md` (Medium row + progress
+paragraph + Delivered row), scoreboard (counts, both Direct rows, `lake
+build` row, interpretation bullet, definitions count), radar (new hold
+entry), README (1162, proved list, module table), SGT index map (Mixing
+section +5 rows, supporting-additions note), backlog item 2, this plan,
+and the activity log. The worktree's unrelated operator-side changes
+(`proposals/prove-subgaussian-tail-bound.md` + its README row, untracked)
+remain preserved untouched, as do the uncommitted-but-delivered Step-2
+and Phase A changes.
+
+**Next milestone (open):** the Medium rows by leverage — **mixing-time
+Step 3 component 2** (the χ² assembly: centered evolution,
+connectivity kernel-orthogonality, the final
+`χ²(t, x) ≤ (λ*)²ᵗ · ((π x)⁻¹ − 1)` — pure gluing on this delivery per
+the proposal's numbered list; the program's closing statement),
+**Relative Entropy**, **the subgaussian tail bound** (Step 0 first),
+**Perron–Frobenius + directed operators** (Step 0 first per the
+convention-choice gate), the **Cheeger hard-direction Step 0 survey**
+(known-hard), and **approximate spectral projection** (Step 0 first).
+Reversibility Phase B and Fiedler Phase B still need operator
+decisions.
+
+---
+
+**Mixing-time Step 2 — the ℓ²-mixing proxy: definitions and evolution
+interface (run 1, 2026-08-22; `proposals/mixing-time-bound.md` at its
+recorded open next step, the top Medium row with the Active table
+holding no High rows): DELIVERED.**
+Pure hard crust — **zero new axioms** (count stays 10; `#print axioms`
+on all fourteen new public theorems reads only `propext,
+Classical.choice, Quot.sound`).
+
+**The decide-and-record scoping gate, made first, before any statement
+(exactly the record the proposal authorizes a run to make):**
+(1) *The ℓ² statement alone satisfies this proposal's goal* — the
+ℓ² → TV conversion stays scoped as a further, separate step, per the
+proposal's own Step 4 framing ("own proposal-scale decision, not a
+default continuation of this one"). (2) Within ℓ², the *weighted* form
+is primary: the proxy is the χ² distance
+`χ²(t, x) = ∑ i, (ν_t i − π i)² / π i` with `π = deg/vol`, because the
+geometric decay bound of Step 3 is Parseval-exact in the π-weighted
+inner product — the only inner product in which the transferred
+eigenbasis of Step 1 is orthogonal (D-orthogonality; the plain
+Euclidean inner product does not diagonalize the walk's adjoint
+evolution). The unweighted Euclidean distance of the proposal's
+original sketch is delivered as the corollary bridge
+(`sum_sub_sq_walkDistribution_le`), not as the primary object.
+
+**Delivered in the new `GraphTheory.Mixing`:** `stationaryVec`
+(`deg/vol`) with positivity and sums-to-one, `walk_isStationary`
+(the π-form composed from the proved degree form),
+`walkDistribution` (`(Pᵀ)ᵗ *ᵥ δₓ`) with the zero/succ evolution
+equations and mass conservation, `walkDensity` (`ν_t/π`) with the
+**density evolution `walkDensity_succ`** (`h_{t+1} = P *ᵥ h_t` — the
+first consumer of the Phase A detailed-balance interface
+`walk_detailed_balance_measure`, load-bearing on it and on the `D⁻¹A`
+orientation; the exact interface Step 3 consumes), and
+`chiSquareDistance` with nonnegativity, the `= 0 ↔ ν_t = π`
+characterization, the `t = 0` value `(π x)⁻¹ − 1` (Step 3's
+normalization), the density-form equivalence, and the plain-ℓ²
+corollary bridge. Junk-value discipline documented in the definition
+docstrings; every theorem carries the positivity hypothesis that rules
+the junk case out.
+
+**QA** (`Mixing_QA.lean`, 33 declarations): the P₃ fixture —
+`π = (1/4, 1/2, 1/4)` pinned from degrees and volume; stationarity
+through the theorem *and* raw (`Pᵀ *ᵥ π = π`); the laws at `t = 0, 1, 2`
+pinned (`δ₀`, `(0,1,0)`, `(1/2,0,1/2)`) with mass conservation
+instantiated and recomputed from the pinned literal; the density
+evolution instantiated and cross-checked raw (`P *ᵥ (4,0,0) = (0,2,0)`
+— `P` itself, not its adjoint); `χ²(0) = 3` by *both* routes (theorem
+and the raw termwise sum `9/4 + 1/2 + 1/4`); `χ²(2) = 1` raw — the
+bipartite *oscillation* the Step-3 bound must reproduce on this
+fixture (λ* = 1, no decay); the density-form equivalence instantiated
+with its sum recomputed raw (`1`); the plain-ℓ² bridge instantiated at
+`c = 1/2` with the unweighted sum pinned to `3/8 < 1/2` strict. Two
+negative witnesses: the asymmetric `!![0,2;1,0]` (positive degrees, so
+only `IsSymm` missing) where hypothesis-free stationarity is refuted
+at the entry where symmetry provably fails (`1/3 ≠ 2/3`); and the zero
+adjacency where `χ²(0, 0) = 0` (junk division) while the law is the
+point mass `≠ π` — refuting the hypothesis-free vanishing
+characterization.
+
+**Verification:** `lake env lean` on `Mixing.lean` and
+`Mixing_QA.lean` — zero errors, zero warnings each;
+`#print axioms` on the fourteen public and twelve headline QA
+theorems ✔ (three standard axioms only); oleans built; **full
+`lake build` ✔ (2227 targets, "Build completed successfully",
+detached)**; `lint_axioms` (10, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1128/10/0**;
+`Mixing_QA` a new file row at 33). The pre-edit Mathlib survey
+recorded in the proposal: no chi-square/total-variation/mixing-time
+objects in the pin — the coverage map's recorded absence holds (no
+correction needed). Records updated: proposal (status header, scoping
+record + full Step-2 delivery record, open-next-step → Step 3 with the
+consumed interfaces named), `proposals/README.md` (Medium row +
+progress paragraph + Delivered row), scoreboard (both Direct rows
+prepended, `lake build` row, lint dates, interpretation bullet), radar
+(axis-5 evidence row + weakest-axes paragraph extended; **held at
+3.0** per the proposal's own no-re-score-before-Step-3 gate, hold
+logged; QA count synced 1128/36), README (1128, proved list, module
+table, span list), SGT index map (new Mixing section, 17 rows), the
+umbrella import, backlog item 2 (Step 2 delivered, Step 3 named as the
+remaining piece), this plan, and the activity log. The worktree's
+unrelated operator-side change (`proposals/prove-subgaussian-tail-bound.md`
++ its README row, uncommitted) remains preserved untouched.
+
+**Next milestone (open):** the Medium rows by leverage — **mixing-time
+Step 3** (the geometric decay bound `χ² ≤ (λ*)²ᵗ · normalization`, the
+program's hardest single step, consuming exactly this delivery plus
+the Step-1 transfer; may need sub-decomposition across runs),
+**Relative Entropy**, **the subgaussian tail bound** (Step 0 first),
+**Perron–Frobenius + directed operators** (Step 0 first per the
+convention-choice gate), the **Cheeger hard-direction Step 0 survey**
+(known-hard), and **approximate spectral projection** (Step 0 first).
+Reversibility Phase B and Fiedler Phase B still need operator
+decisions.
+
+---
+
+**Reversibility Phase A — detailed balance for the simple random walk on
+weighted graphs (run 1, 2026-08-22; `proposals/reversibility-and-heat-
+semigroup.md` Phase A, both of its steps in one run per its own operating
+instruction — the top unblocked Medium row by the inner-dependency test:
+the higher-ranked mixing-time Step 2's ℓ²(π) proxy geometry consumes
+exactly this detailed-balance interface, so this is the strictly inner,
+cheaper dependency delivered first): DELIVERED.**
+Pure hard crust — **zero new axioms** (count stays 10; `#print axioms`
+on all four new public theorems plus the new
+`Normalized.walkTransitionMatrix_apply` reads only `propext,
+Classical.choice, Quot.sound`) and **no new definitions** (the
+proposal's own mandate).
+
+**Delivered in `GraphTheory.Stationary`:** `walk_detailed_balance`
+(degree-measure form `deg i * P i j = deg j * P j i`, both sides exactly
+`A i j` — the degree weight cancels `walkTransitionMatrix`'s `D⁻¹` row
+factor and `A.IsSymm` identifies the entries), `walk_detailed_balance_
+measure` (the stationary-measure π-form at `π = deg/vol`, by
+side-condition-free division — **no volume-positivity hypothesis
+carried**, strictly more general than drafted; stated with the explicit
+house form `(Finset.univ : Finset V)` after discovering that bare
+`univ` auto-binds as a *local* arbitrary finset),
+`diagonal_deg_mul_walkTransitionMatrix_isSymm` (reversibility *is*
+symmetrizability: `D * P` symmetric — the self-adjointness interface the
+mixing program's ℓ²(π) proxy consumes), and
+`transitionMatrix_detailed_balance_uniform` (the Phase A Step-2 regular
+case, *composed* from the already-proved `transitionMatrix_symmetric`
+— the pre-edit survey's finding — rather than re-proved). Alongside in
+`Normalized.lean`: the entry lemma `walkTransitionMatrix_apply`
+(`P i j = (deg A i)⁻¹ * A i j`) and the correction of the stale "Named
+gap (deferred)" similarity docstring (the 2026-08-22 transfer closed it).
+
+**QA** (`Stationary_QA.lean`, 12 → 26 declarations): the proposal's two
+prescribed witnesses. Positive — P₃ balance instantiated through the
+theorems at every index pair and cross-checked by raw literal
+arithmetic (degree form `1 = 1`; π-form `1/4 = 1/4` with `vol = 4`
+pinned independently from the degrees; symmetrized off-diagonal entries
+both `1` — equal degree-weighted mass in both directions; uniform form
+instantiated at the edge). Negative — the asymmetric `!![0,2;1,0]` with
+positive degrees `(2, 1)`: hypothesis-free balance *refuted*
+(`2 ≠ 1`) with the symmetry hypothesis provably violated at the same
+entry pair, so `hA` is load-bearing.
+
+**Verification:** `lake env lean` on `Normalized.lean`,
+`Stationary.lean`, `Stationary_QA.lean` — zero errors (Stationary's two
+warnings are the documented pre-existing ones, verified identical in
+HEAD via stash); `#print axioms` on all public and eight headline QA
+theorems ✔ (three standard axioms only); oleans built; **full
+`lake build` ✔ (2227 targets, "Build completed successfully",
+detached)** — which compiles every QA module as a library target;
+`lint_axioms`, `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated (**1095/10/0**; `Stationary_QA` 12 → 26).
+**Records repaired alongside:** the radar axis-5 *table row* and
+"Weakest axes" paragraph, which the same day's earlier mixing-time
+re-score had left stale at 2.5 with the closed gap still named — synced
+to the recorded 3.0 state. Radar axis 5 **held at 3.0** for this
+delivery (composed identity within the counted walk-operator family;
+hold + triggers logged). Records updated: proposal (status header,
+Phase A delivery record with the statement-shape notes, open-next-step
+→ Phase B's operator gate only), `proposals/README.md` (Phase B-only
+row + Delivered row + progress paragraph), scoreboard (both Direct rows
+prepended, new interpretation bullet), radar (table row, weakest-axes,
+narrative entry), README (1095, proved list), SGT index map (Stationary
+section, 4 new rows + entry-lemma note), backlog item 6 (reversibility
+half delivered), this plan, and the activity log. An unrelated
+operator-side change in the worktree (the new
+`proposals/prove-subgaussian-tail-bound.md` + its README row) was
+preserved untouched and left uncommitted.
+
+**Next milestone (open):** the Medium rows by leverage — **mixing-time
+Step 2** (the ℓ²-mixing proxy; its decide-and-record scoping gate
+first, now with this run's detailed-balance interface available to it),
+**Relative Entropy**, **the subgaussian tail bound** (the 2026-08-22
+operator-directed addition; Step 0 first), **Perron–Frobenius + directed
+operators** (Step 0 first), the **Cheeger hard-direction Step 0 survey**
+(known-hard), and **approximate spectral projection** (Step 0 first).
+Reversibility Phase B and Fiedler Phase B still need operator
+decisions.
+
+---
+
 **Mixing-time Step 1 — eigenpair transfer to the general walk matrix through
 the proved similarity identity (run 1, 2026-08-22;
 `proposals/mixing-time-bound.md` at its recorded open next step, the top

@@ -15,6 +15,7 @@ import Scaffold.Mathlib.GraphTheory.Fiedler
 import Scaffold.Mathlib.GraphTheory.RandomWalk
 import Scaffold.Mathlib.GraphTheory.Normalized
 import Scaffold.Mathlib.GraphTheory.Stationary
+import Scaffold.Mathlib.GraphTheory.Mixing
 import Scaffold.Mathlib.GraphTheory.VariationalTransfer
 import Scaffold.Mathlib.GraphTheory.Dynamics
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl
@@ -29,6 +30,7 @@ import Scaffold.Mathlib.Probability.Concentration.Matrix.Basic
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Hoeffding
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Bernstein
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Azuma
+import Scaffold.Mathlib.InformationTheory.Entropy
 import Scaffold.Derived.EventStream
 import Scaffold.Derived.ProjectorDrift
 
@@ -94,10 +96,14 @@ operator-norm bridge `‖M‖ ↔ max-abs eigenvalue` proved from the
 eigenbasis machinery after the C*-algebra thread was found
 structurally inapplicable to real matrices, invertibility of the
 shifted PSD matrix, and the resolvent identity), the probability
-concentration bridge (`Probability.Concentration.*`), the derived
+concentration bridge (`Probability.Concentration.*`), the
+finite-distribution entropy layer (`InformationTheory.Entropy`:
+relative entropy and Shannon entropy with Gibbs' inequality and the
+entropy maximum, all proved hard crust), the derived
 layer (`Derived.EventStream` and `Derived.ProjectorDrift`, whose tail
-and projector-drift theorems are conditional on the Matrix Azuma,
-Weyl, and Davis–Kahan axioms), and the core utilities.
+and projector-drift theorems are conditional on the Matrix Azuma
+axiom; Weyl and Davis–Kahan are proved since 2026-08-20/21), and the
+core utilities.
 
 Downstream consumers should prefer narrow imports (for example
 `import Scaffold.Mathlib.GraphTheory.Spectral`) over this umbrella.

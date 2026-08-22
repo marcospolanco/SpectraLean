@@ -6,7 +6,7 @@ conductance, Cheeger theory, interlacing, and event-driven dynamics.
 ## Status
 
 **Implemented and build-certified** (see the QA scoreboard):
-`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,SpectralCertificates,Tikhonov,Band,Cheeger,Dynamics}`.
+`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,SpectralCertificates,Tikhonov,Band,Cheeger,Mixing,Dynamics}`.
 
 ## Modules and Declarations
 
@@ -481,16 +481,76 @@ does not apply to it, and the pin has no charpoly-similarity interface):
 
 ### `Scaffold.Mathlib.GraphTheory.Stationary` (first walk/normalized consumer)
 
-All statements proved (2026-08-17), no axioms; consumes the `RandomWalk`
-and `Normalized` interfaces — demonstrated downstream reuse:
+All statements proved (stationarity/kernel layer 2026-08-17;
+reversibility/detailed-balance layer 2026-08-22,
+`proposals/reversibility-and-heat-semigroup.md` Phase A), no axioms;
+consumes the `RandomWalk` and `Normalized` interfaces — demonstrated
+downstream reuse:
 
 | Declaration | Content |
 |-------------|---------|
 | `mulVec_one_eq_deg` | `A *ᵥ 1 = deg A` (row sums in vector form) |
 | `normalizedLaplacian_mulVec_sqrtDeg_eq_zero` | kernel of `L_sym` is `√deg` — normalized counterpart of `laplacian_ones_in_kernel` |
 | `walkTransitionMatrix_transpose_mulVec_deg` | degree measure stationary for the adjoint walk (`π ∝ deg`; Markov-mixing consumer interface) |
+| `walk_detailed_balance` | **reversibility**, degree-measure form: `deg i * P i j = deg j * P j i` (both sides `A i j`); the property that makes spectral methods apply to the walk |
+| `walk_detailed_balance_measure` | **reversibility**, stationary-measure form: `π i * P i j = π j * P j i` with `π i = deg i / vol univ`; no volume hypothesis carried |
+| `diagonal_deg_mul_walkTransitionMatrix_isSymm` | the matrix packaging: `D * P` is symmetric — reversibility *is* symmetrizability (the self-adjointness interface spectral arguments consume) |
+| `transitionMatrix_detailed_balance_uniform` | regular-case uniform-measure balance, composed from `RandomWalk.transitionMatrix_symmetric` |
 | `randomWalkLaplacian_mulVec_one_eq_zero` | conservation of mass, regular case (consumes `RandomWalk.transitionMatrix_row_sum`) |
 | `walkLaplacian_mulVec_one_eq_zero` | conservation of mass, irregular case (consumes `Normalized.walkTransitionMatrix_row_sum`) |
+
+(The entry form `Normalized.walkTransitionMatrix_apply`
+(`P i j = (deg A i)⁻¹ * A i j`) was added alongside, next to the
+`walkTransitionMatrix` definition.)
+
+### `Scaffold.Mathlib.GraphTheory.Mixing` (the ℓ²-mixing proxy, decay engine, and closing mixing bound)
+
+All statements proved (2026-08-22, `proposals/mixing-time-bound.md`,
+the program complete: Steps 1–2 plus both Step-3 components), no
+axioms; the third consuming module of the walk interfaces (after
+`Stationary` and `VariationalTransfer`) and the first consumer of the
+Phase A detailed-balance layer. The scoping record: the weighted χ²
+form is primary (the form in which Step 3's decay bound is
+Parseval-exact); the plain Euclidean distance is a corollary bridge.
+
+| Declaration | Content |
+|-------------|---------|
+| `stationaryVec` | the stationary distribution as a vector: `π i = deg A i / vol A univ` (definition) |
+| `vol_univ_pos` | positive degrees + nonempty ⟹ `0 < vol A univ` |
+| `stationaryVec_pos` | `π` strictly positive entrywise — what makes every χ² division meaningful |
+| `sum_stationaryVec` | `∑ π = 1`: the stationary vector is a probability vector |
+| `stationaryVec_eq_inv_smul_deg` | `π = vol⁻¹ • deg` (unpacking) |
+| `walk_isStationary` | the adjoint walk fixes `π` — the probability-measure form of the proved degree-form stationarity |
+| `walkDistribution` | the walk law started at `x` after `t` steps: `(Pᵀ)ᵗ *ᵥ δₓ` (definition) |
+| `walkDistribution_zero` / `walkDistribution_succ` | `ν₀ = δₓ`; `ν_{t+1} = Pᵀ *ᵥ ν_t` (evolution equations) |
+| `sum_walkDistribution` | mass conservation: `∑ ν_t = 1` at every `t` (load-bearing on row-stochasticity) |
+| `walkDensity` | the density `h_t = ν_t/π` (definition) — the coordinate the transferred eigenbasis diagonalizes |
+| `walkDensity_succ` | **the density evolution** `h_{t+1} = P *ᵥ h_t` — detailed balance in action (the Phase A interface's first consumer); the interface Step 3 consumes |
+| `chiSquareDistance` | the χ² mixing distance `∑ (ν_t − π)²/π` (definition; junk `0` at `π i = 0`) |
+| `chiSquareDistance_nonneg` | nonnegativity (squares over a positive measure) |
+| `chiSquareDistance_eq_zero_iff` | `χ²(t, x) = 0 ↔ ν_t = π` (vanishing characterization; positivity load-bearing) |
+| `chiSquareDistance_zero` | `χ²(0, x) = (π x)⁻¹ − 1` — Step 3's normalization constant |
+| `chiSquareDistance_eq_sum_smul` | density form `∑ π (h_t − 1)²` — the π-weighted norm Step 3 computes by Parseval |
+| `sum_sub_sq_walkDistribution_le` | the plain-ℓ² corollary bridge: `∑ (ν−π)² ≤ c · χ²` whenever every `π i ≤ c` |
+| `eigvecOf_dotProduct_degreeSqrt_mulVec_pow_walkTransitionMatrix` | **eigencoordinate evolution (Step 3 engine):** the `i`-th eigencoefficient of the conjugated `t`-step walk evolution is the initial coefficient times `(1 − μ i)ᵗ` |
+| `dotProduct_self_degreeSqrt_mulVec_pow_walkTransitionMatrix` | **the Parseval-exact decay identity:** the squared conjugated norm is the eigenvalue-weighted sum of squared initial eigencoordinates — no inequality lost |
+| `dotProduct_self_degreeSqrt_mulVec_pow_walkTransitionMatrix_le` | **the ℓ²(π) contraction, norm form:** under the value-based mode hypothesis (no kernel component) and rate hypothesis (`\|1 − μ i\| ≤ r`), `‖√D (Pᵗ g)‖² ≤ r^{2t} ‖√D g‖²` — term-wise, no case split on `r < 1` |
+| `sum_stationaryVec_smul_sq_eq` | **the π-norm bridge** `∑ π f² = vol⁻¹ · ‖√D f‖²` (degree nonnegativity only) |
+| `sum_stationaryVec_smul_sq_pow_walkTransitionMatrix_le` | **the ℓ²(π) contraction (headline):** `∑ π ((Pᵗ g))² ≤ r^{2t} ∑ π g²` — the exact interface the Step-3 χ² assembly instantiates at `g = h₀ − 1` |
+| `walkDensity_sub_one` | **centered evolution (χ² assembly):** `h_t − 1 = Pᵗ *ᵥ (h₀ − 1)` — one induction from `walkDensity_succ` plus the constant fix `P *ᵥ 1 = 1` |
+| `sum_deg_mul_walkDensity_sub_one_eq_zero` | **mass conservation in the conjugated pairing:** `∑ deg (h₀ − 1) = 0` (termwise `deg · h₀ = vol · ν₀`, both sums `vol`) |
+| `eigvecOf_dotProduct_degreeSqrt_walkDensity_sub_one_of_eigvalOf_eq_zero` | **the connectivity mode derivation:** on a connected graph every `μ = 0` eigenvector of `L_sym` is orthogonal to `√D *ᵥ (h₀ − 1)` — the kernel transferred through the congruence `√D L_sym √D = L`, pinned constant by the shelf's kernel theorem, collapsed by mass conservation |
+| `chiSquareDistance_le_of_connected` | **the closing mixing bound:** `χ²(t, x) ≤ r ^ (2t) · ((π x)⁻¹ − 1)` on connected symmetric-nonnegative positive-degree networks under the rate hypothesis — the mixing-time program's target statement, mode hypothesis *derived* from connectivity rather than assumed |
+
+Supporting additions elsewhere: `Spectral.eigvecOf_dotProduct_one_sub_mulVec`
+(the generic eigenaction at `1 − M`, composed from
+`dotProduct_eigvecOf_mulVec`) and in `Normalized`
+`degreeSqrt_mul_walkTransitionMatrix_eq` (`√D · P = (1 − L_sym) · √D`)
+with `degreeSqrt_mulVec_pow_walkTransitionMatrix` (the conjugated-power
+transfer — `√D *ᵥ (Pᵗ *ᵥ g) = (1 − L_sym)ᵗ *ᵥ (√D *ᵥ g)`), plus the
+χ²-assembly entry lemmas `walkTransitionMatrix_mulVec_one`
+(the constant fix `P *ᵥ 1 = 1`), `degreeSqrt_mulVec_apply`, and
+`degreeInvSqrt_mulVec_apply` (the conjugating actions' entry forms).
 
 ### `Scaffold.Mathlib.GraphTheory.VariationalTransfer` (variational consumer of the congruence bridge)
 

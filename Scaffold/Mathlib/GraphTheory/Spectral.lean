@@ -1253,6 +1253,19 @@ theorem dotProduct_eigvecOf_mulVec {M : Matrix V V ℝ} (hM : M.IsSymm)
   rw [Matrix.dotProduct_mulVec, ← Matrix.mulVec_transpose, hM.eq, hev,
     Matrix.smul_dotProduct, smul_eq_mul]
 
+/-- The eigenaction at `1 - M`: for symmetric `M`, reading a component of
+`(1 - M) *ᵥ x` in the eigenbasis multiplies the component of `x` by
+`1 - μ i`. Composed from `dotProduct_eigvecOf_mulVec` (self-adjointness in
+coordinates). The reflection-shaped operators of the mixing program — the
+walk transition matrix, seen through the degree-square-root similarity as
+`1 − L_sym` — consume this to evolve eigencoordinates stepwise. -/
+theorem eigvecOf_dotProduct_one_sub_mulVec {M : Matrix V V ℝ} (hM : M.IsSymm)
+    (i : V) (x : V → ℝ) :
+    Matrix.dotProduct (eigvecOf M hM i) ((1 - M) *ᵥ x)
+      = (1 - eigvalOf M hM i) * Matrix.dotProduct (eigvecOf M hM i) x := by
+  rw [Matrix.sub_mulVec, Matrix.one_mulVec, Matrix.dotProduct_sub,
+    dotProduct_eigvecOf_mulVec hM i x, sub_mul, one_mul]
+
 /-- Spectral resolution of the quadratic form: for symmetric `M`,
 `xᵀ M x = ∑ i, μ i * (v i ⬝ᵥ x)²` — the energy is the eigenvalue-weighted
 sum of squared eigencomponents. -/

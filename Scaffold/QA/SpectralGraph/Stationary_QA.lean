@@ -115,4 +115,145 @@ theorem edge_randomWalkLaplacian_kernel_QA :
     randomWalkLaplacian edgeAdj2 1 *ᵥ (fun _ => (1 : ℝ)) = 0 :=
   randomWalkLaplacian_mulVec_one_eq_zero edgeAdj2 1 edgeAdj2_deg one_pos
 
+/-!
+## Reversibility: detailed balance
+
+The proposal's two prescribed witnesses: a positive check on the
+irregular path fixture (every balance identity computed through the
+theorems *and* by raw literal arithmetic on `P = D⁻¹A` and
+`π = deg/vol`), and a negative check on an asymmetric weight matrix
+where the hypothesis-free balance statement is refuted and the symmetry
+hypothesis is provably violated at the same entry pair.
+-/
+
+/-- The path's total volume is `4` (degrees `1 + 2 + 1`), computed
+independently of the balance theorems — the stationary measure of the
+fixture is `π = (1/4, 1/2, 1/4)`. -/
+theorem path_vol_QA :
+    vol pathAdj (Finset.univ : Finset (Fin 3)) = 4 := by
+  rw [vol, Fin.sum_univ_three, pathAdj_deg_zero, pathAdj_deg_one,
+    pathAdj_deg_two]
+  norm_num
+/-- Detailed balance (degree-measure form) instantiated at every index
+pair of the path, through the theorem. -/
+theorem path_detailed_balance_QA (i j : Fin 3) :
+    deg pathAdj i * walkTransitionMatrix pathAdj i j
+      = deg pathAdj j * walkTransitionMatrix pathAdj j i :=
+  walk_detailed_balance pathAdj pathAdj_isSymm pathAdj_deg_pos i j
+
+/-- Both balance sides at the pair `(0, 1)` computed by raw literal
+arithmetic on the definitions — `deg 0 * P 0 1 = 1 * 1 = 1` and
+`deg 1 * P 1 0 = 2 * (1/2) = 1` — agreeing with the common adjacency
+entry `A 0 1 = 1`. -/
+theorem path_detailed_balance_raw_QA :
+    deg pathAdj 0 * walkTransitionMatrix pathAdj 0 1 = 1
+      ∧ deg pathAdj 1 * walkTransitionMatrix pathAdj 1 0 = 1 := by
+  constructor
+  · simp only [walkTransitionMatrix_apply, deg, pathAdj, Matrix.of_apply,
+      Fin.sum_univ_three]
+    norm_num
+  · simp only [walkTransitionMatrix_apply, deg, pathAdj, Matrix.of_apply,
+      Fin.sum_univ_three]
+    norm_num
+
+/-- Detailed balance in the stationary-measure form instantiated at
+every index pair of the path, through the theorem. -/
+theorem path_detailed_balance_measure_QA (i j : Fin 3) :
+    deg pathAdj i / vol pathAdj (Finset.univ : Finset (Fin 3)) * walkTransitionMatrix pathAdj i j
+      = deg pathAdj j / vol pathAdj (Finset.univ : Finset (Fin 3))
+          * walkTransitionMatrix pathAdj j i :=
+  walk_detailed_balance_measure pathAdj pathAdj_isSymm pathAdj_deg_pos i j
+
+/-- The stationary-measure balance at `(0, 1)` by raw literal
+arithmetic: `π 0 * P 0 1 = (1/4) * 1 = 1/4` and
+`π 1 * P 1 0 = (1/2) * (1/2) = 1/4` — both equal the common value
+`A 0 1 / vol = 1/4`. -/
+theorem path_detailed_balance_measure_raw_QA :
+    deg pathAdj 0 / vol pathAdj (Finset.univ : Finset (Fin 3))
+        * walkTransitionMatrix pathAdj 0 1 = 1 / 4
+      ∧ deg pathAdj 1 / vol pathAdj (Finset.univ : Finset (Fin 3))
+        * walkTransitionMatrix pathAdj 1 0 = 1 / 4 := by
+  rw [path_vol_QA]
+  constructor
+  · simp only [walkTransitionMatrix_apply, deg, pathAdj, Matrix.of_apply,
+      Fin.sum_univ_three]
+    norm_num
+  · simp only [walkTransitionMatrix_apply, deg, pathAdj, Matrix.of_apply,
+      Fin.sum_univ_three]
+    norm_num
+
+/-- The matrix packaging instantiated at the path: the degree-weighted
+transition matrix `D * P` is symmetric. -/
+theorem path_symmetrized_isSymm_QA :
+    (Matrix.diagonal (deg pathAdj) * walkTransitionMatrix pathAdj).IsSymm :=
+  diagonal_deg_mul_walkTransitionMatrix_isSymm pathAdj pathAdj_isSymm
+    pathAdj_deg_pos
+
+/-- The symmetrized matrix's off-diagonal entries computed raw:
+`(D * P) 0 1 = deg 0 * P 0 1 = 1` and `(D * P) 1 0 = deg 1 * P 1 0 = 1`
+— the two flows `1 → 2` and `2 → 1` carry equal degree-weighted mass,
+which is exactly reversibility. -/
+theorem path_symmetrized_entries_QA :
+    (Matrix.diagonal (deg pathAdj) * walkTransitionMatrix pathAdj) 0 1 = 1
+      ∧ (Matrix.diagonal (deg pathAdj) * walkTransitionMatrix pathAdj) 1 0
+        = 1 := by
+  constructor
+  · rw [Matrix.diagonal_mul]
+    exact path_detailed_balance_raw_QA.1
+  · rw [Matrix.diagonal_mul]
+    exact path_detailed_balance_raw_QA.2
+
+/-- The edge's adjacency is symmetric. -/
+theorem edgeAdj2_isSymm : edgeAdj2.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [edgeAdj2]
+
+/-- Uniform-measure detailed balance instantiated at the single edge —
+the regular-case interface, through the theorem. -/
+theorem edge_uniform_balance_QA (i j : Fin 2) :
+    ((Fintype.card (Fin 2) : ℝ)⁻¹) * transitionMatrix edgeAdj2 1 i j
+      = ((Fintype.card (Fin 2) : ℝ)⁻¹) * transitionMatrix edgeAdj2 1 j i :=
+  transitionMatrix_detailed_balance_uniform edgeAdj2 edgeAdj2_isSymm 1 i j
+
+/-!
+### The negative witness: asymmetry breaks detailed balance
+-/
+
+/-- The asymmetric weight matrix of the directed two-network: edge
+`0 → 1` of weight `2`, edge `1 → 0` of weight `1`. Both degrees are
+positive (`2` and `1`), so the walk is well-defined — but `A` is not
+symmetric, and detailed balance fails. -/
+def asymAdj2 : Matrix (Fin 2) (Fin 2) ℝ :=
+  Matrix.of !![0, 2; 1, 0]
+
+theorem asymAdj2_deg_zero : deg asymAdj2 0 = 2 := by
+  simp only [deg, asymAdj2, Matrix.of_apply, Fin.sum_univ_two]
+  norm_num
+
+theorem asymAdj2_deg_one : deg asymAdj2 1 = 1 := by
+  simp only [deg, asymAdj2, Matrix.of_apply, Fin.sum_univ_two]
+  norm_num
+
+theorem asymAdj2_deg_pos (i : Fin 2) : 0 < deg asymAdj2 i := by
+  fin_cases i <;> simp [asymAdj2_deg_zero, asymAdj2_deg_one]
+
+/-- The fixture is provably *not* symmetric at the pair where balance
+fails: `A 0 1 = 2 ≠ 1 = A 1 0`. -/
+theorem asymAdj2_not_isSymm : ¬ asymAdj2.IsSymm := by
+  intro h
+  have hne := h.apply 0 1
+  simp only [asymAdj2, Matrix.of_apply] at hne
+  norm_num at hne
+
+/-- The hypothesis-free detailed balance statement is **refuted** at the
+asymmetric fixture: `deg 0 * P 0 1 = 2 * 1 = 2` while
+`deg 1 * P 1 0 = 1 * 1 = 1`. The symmetry hypothesis of
+`walk_detailed_balance` is load-bearing, not decorative. -/
+theorem asym_detailed_balance_refuted_QA :
+    ¬ (deg asymAdj2 0 * walkTransitionMatrix asymAdj2 0 1
+        = deg asymAdj2 1 * walkTransitionMatrix asymAdj2 1 0) := by
+  simp only [walkTransitionMatrix_apply, deg, asymAdj2, Matrix.of_apply,
+    Fin.sum_univ_two]
+  norm_num
+
 end SpectralGraphTheory.QA

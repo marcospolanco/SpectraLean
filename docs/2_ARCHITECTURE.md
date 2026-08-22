@@ -175,9 +175,16 @@ Community process is defined by `governance/CONTRIBUTING.md`, `MAINTAINERS.md`, 
   Mathlib spectral-theorem API; the admitted perturbation interfaces
   remain the trust boundary for the perturbation inequalities themselves.
 - The persistence example is assembled end-to-end in the derived layer
-  (`eventStreamTail`, `davisKahanTwoPoint`, `eventStreamProjectorDrift`),
-  conditional on two admitted axioms (`davis_kahan_sin_theta`,
-  `matrix_azuma_hoeffding`; `weyl_inequality` is proved since 2026-08-20).
+  (`eventStreamTail`, `davisKahanTwoPoint`, `eventStreamProjectorDrift`).
+  `davisKahanTwoPoint` is fully hard crust since 2026-08-21
+  (`davis_kahan_sin_theta` proved that day — retired from axiom by the
+  Duhamel/exponential-integral route of
+  `proposals/discharge-perturbation-axioms.md`: the equal-rank projector
+  identity `Perturbation.ProjectionGap` plus the Duhamel bound
+  `Perturbation.Duhamel`, with eigenvalue-tie cases collapsed through the
+  proved Weyl additive bound); `eventStreamProjectorDrift` is conditional
+  on `matrix_azuma_hoeffding` alone (`weyl_inequality` proved since
+  2026-08-20).
   The per-step `spectral_persistence` axiom was deprecated on 2026-08-17
   (zero non-QA consumers; the derived chain covers the motivating use)
   and removed on 2026-08-20 at the end of its compatibility window.

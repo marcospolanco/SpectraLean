@@ -1,9 +1,10 @@
 # Proposal: A Spectral Mixing-Time Bound
 
-**Status:** Proposed. Assistant's assessment of project direction, requested
-2026-08-18 (surface-area follow-up for the formal-methods/high-assurance
-audience). Authorizes no Lean changes, axiom admissions, document
-rewrites, or external publication.
+**Status:** Active — Step 1 DELIVERED 2026-08-22 (eigenpair transfer,
+pure hard crust, zero new axioms); Step 2 (the ℓ² mixing proxy) is the
+open next step, gated on its own decide-and-record scoping choice.
+Originally proposed 2026-08-18 (surface-area follow-up for the
+formal-methods/high-assurance audience).
 
 Companion to [Grow the Crust Through Electrical
 Structure](electrical-structure-crust.md) — same "grow the crust" premise,
@@ -134,8 +135,83 @@ not a default continuation of this one.
 - Do not re-score `docs/7_SGT_RADAR.md` axis 5 until a step's proof lands
   and its QA passes.
 
+## Delivery record
+
+### Step 1 — eigenpair transfer (DELIVERED 2026-08-22, run
+`20260822T042339Z-run-1`)
+
+Delivered in `GraphTheory/Normalized.lean` (its own named residual gap,
+closed there), all proved, zero new axioms — `#print axioms` on every
+new public theorem reads only `propext, Classical.choice, Quot.sound`:
+
+- **The mandatory Mathlib survey came back empty**: no general
+  similar-matrices-share-eigenvalues interface anywhere in the pinned
+  snapshot (no `IsSimilar`, no charpoly-conjugation invariance under
+  `Mathlib/LinearAlgebra/`) — exactly this proposal's anticipated
+  branch, so the direct diagonal-case transfer was the cheaper route
+  and no coverage-map correction was needed (the map already records
+  the absence upstream).
+- `walkLaplacian_mulVec_degreeInvSqrt` / `normalizedLaplacian_mulVec_degreeSqrt`
+  — eigenpairs transfer **in both directions** through the similarity
+  identity at the same eigenvalue, by conjugating the eigenvector
+  (`(1/√D) *ᵥ v` forward, `√D *ᵥ w` backward). No characteristic
+  polynomial is needed — the module docstring's recorded obstruction
+  ("needs a charpoly-roots interface") turned out to be avoidable: pure
+  `mulVec` algebra (`Matrix.mulVec_mulVec`, `Matrix.mulVec_smul_assoc`,
+  the two inverse-factor lemmas, `Matrix.one_mulVec`) suffices.
+- `walkTransitionMatrix_mulVec_degreeInvSqrt` — the transition form:
+  a `μ`-eigenpair of `L_sym` gives a `(1 − μ)`-eigenpair of `P = D⁻¹A`.
+- `walkLaplacian_mulVec_eigvecOf` / `walkTransitionMatrix_mulVec_eigvecOf`
+  — the transfer instantiated at Mathlib's spectral-theorem eigenbasis
+  of `L_sym` (`IsHermitian.mulVec_eigenvectorBasis`).
+- `walk_eigvec_expansion` — completeness of the transferred family:
+  every `w` is `∑ i, (v i ⬝ᵥ (√D *ᵥ w)) • ((1/√D) *ᵥ v i)` — the
+  diagonalizability interface Step 3's decay bound consumes (built from
+  `eigvecOf_expansion_apply` plus the invertibility shuffle).
+- `walkEvals` (definition: `1 − evals (L_sym)`) with
+  `exists_eigenvector_walkTransitionMatrix_eq_walkEvals` — every entry
+  of the transferred walk spectrum is a genuine eigenvalue of `P` with
+  an explicit nonzero conjugated-eigenvector witness (via
+  `evals_mem_eigvalOf`); support lemmas `eigvecOf_ne_zero`,
+  `degreeInvSqrt_mulVec_ne_zero`.
+
+QA (`Normalized_QA.lean`, 14 → 34 declarations, all proved): the P₃
+fixture (degrees 1, 2, 1 — genuinely irregular) with hand eigenpairs
+`(1, √2, 1)`, `(1, 0, −1)`, `(1, −√2, 1)` at eigenvalues 0, 1, 2 — each
+verified by raw computation, transferred **through the theorems**, and
+cross-checked by raw arithmetic on the conjugated vectors `(1,1,1)`,
+`(1,0,−1)`, `(1,−1,1)`; the backward transfer fed from the raw walk
+eigenpair `(1,−1,1)`/eigenvalue 2 and pinned back to the hand
+eigenvector; the `walkEvals` existential instantiated at every spectral
+index; the transferred family's spanning witnessed by a hand-solved
+combination reconstructing `(1,2,3)`; and the two guards the proposal's
+negative-witness requirement motivates — **skipping the conjugation**
+(`L_sym *ᵥ (1,−1,1) ≠ −1 • (1,−1,1)`) and **forgetting the `1 − μ`
+reflection** (`P *ᵥ (1,−1,1) ≠ 2 • (1,−1,1)`), both refuted in proved
+form. One QA-infrastructure note: the `√(deg)` atoms simp leaves behind
+do not match hypothesis atoms written over `√2` (`√(1+1)` vs `√2`), so
+the file pins a normalization bridge (`path_one_add_one_QA :
+(1:ℝ) + 1 = 2`) consumed as a simp rewrite — future `√`-arithmetic QA
+on this fixture reuses it.
+
+Verification: `lake env lean` on the module and its QA — zero errors,
+zero warnings (the module's only diagnostic is the pre-existing
+`congr 1` note, identical in HEAD); `#print axioms` on all nine new
+public theorems and seven headline QA theorems — three standard axioms
+only; oleans built; **full `lake build` ✔ (2227 targets, detached)**;
+`lint_axioms`, `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated (**1081 QA declarations / 10 explicit axioms /
+0 sorries**); radar axis 5 re-scored 2.5 → 3.0 per the proposal's own
+gate (proof landed, QA passed; the axis's named walk-spectrum gap
+closed).
+
 ## Open next step
 
-Scope step 1 in detail — specifically, whether Mathlib already has any
-general similar-matrices-eigenvalues lemma usable off the shelf, since
-that changes step 1's cost materially — before committing a run.
+**Step 2 — the ℓ²-mixing proxy.** Its own decide-and-record gate comes
+first: whether the ℓ² statement alone satisfies this proposal's goal,
+or the ℓ² → TV conversion is scoped as a further step, must be decided
+and recorded *before* writing the statement (a scoping record, not a
+Lean decision — a run may make it). Step 3 (the geometric decay bound)
+then consumes `walk_eigvec_expansion` and
+`walkTransitionMatrix_mulVec_eigvecOf` exactly as delivered; the
+matrix-power layer (`Pᵗ` action on eigencomponents) is its new work.

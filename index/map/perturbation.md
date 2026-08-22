@@ -32,7 +32,28 @@ the additive window from the Courant–Fischer engine composed with the proved
 
 | Declaration | Kind | Description | Source |
 |-------------|------|-------------|--------|
-| `davis_kahan_sin_theta` | axiom | Projector rotation `≤ ‖E‖/δ` under the two-cluster separation `λ_{k+1}(A+E) - λ_k(A) ≥ δ` (single-pair form, the YWS Theorem 1 operator-norm variant at the bottom cluster — locator corrected 2026-08-21, see the source index) | [Davis & Kahan 1970](../sources/davis_kahan_1970.md) |
+| `davis_kahan_sin_theta` | **proved theorem** (retired from axiom 2026-08-21 — the Duhamel/exponential-integral route; `#print axioms` reads only the three standard axioms) | Projector rotation `≤ ‖E‖/δ` under the two-cluster separation `λ_{k+1}(A+E) - λ_k(A) ≥ δ` (single-pair form, the YWS Theorem 1 operator-norm variant at the bottom cluster — locator corrected 2026-08-21, see the source index); proof: three-way tie split consuming the equal-rank identity and the Duhamel bound below, plus Weyl and the `≤ 1` endpoint for the tied cases | [Davis & Kahan 1970](../sources/davis_kahan_1970.md) |
+
+### The Duhamel Bound (Davis–Kahan Step 1, component 2)
+
+**Module**: `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Duhamel`
+
+Delivered 2026-08-21, all proved, zero new axioms — the second of the
+two components `discharge-perturbation-axioms.md`'s Step-0 survey named
+as required: the exponential-integral route that reaches the
+constant-1 operator-norm bound the entrywise eigenbasis-coordinate
+route provably cannot.
+
+| Declaration | Kind | Description | Source |
+|-------------|------|-------------|--------|
+| `l2OpNorm_one_sub_spectralProjector_mul_spectralProjector_le` | proved | **The Duhamel bound**: `‖(1 − Q) * P‖ ≤ ‖E‖ / (b − a)` for `P = spectralProjector A a`, `Q = spectralProjector (A+E) c'`, every eigenvalue of `A+E` above `c'` at least `b > a`; scalar pairing + FTC + cluster-filtered Parseval damping + the pairing (duality) norm reduction | proposal's route; the standard semigroup/Duhamel argument specialized to finite dimensions, no single external citation |
+| `l2OpNorm_le_of_abs_dotProduct_le` | proved | Operator-norm bound through pairings (duality): `|y ⬝ᵥ (M *ᵥ x)| ≤ c‖x‖‖y‖` forces `‖M‖ ≤ c` — by self-application | same |
+| `heatApply` and its layer | proved | The vector-level heat semigroup (damped eigenbasis expansion), Parseval damping, eigenaction, differentiability in `t`, the `t = 0` expansion identity | spike-verified primitives (`wip/dk_spike.lean`), transferred |
+| `evals_succ_le_of_lt` | proved | Sorted-spectrum step: eigenvalues strictly above `evals ⟨k⟩` are at least `evals ⟨k+1⟩` — the interior companion of the two extreme pins | closed-form |
+| `dotProduct_eigvecOf_spectralProjector_mulVec` | proved | The projector coefficient filter: `vᵢ ⬝ᵥ (P_c *ᵥ z) = if λᵢ ≤ c then vᵢ ⬝ᵥ z else 0` | closed-form |
+| `heatApply_dotProduct_self_le_of_le` / `_of_gt` | proved | Cluster-filtered decay: `‖e^{-tM} z‖² ≤ e^{-2bt}‖z‖²` (z orthogonal to the low cluster, eigenvalues above it ≥ b) and the growing-side mirror | Parseval damping |
+| `rank_spectralProjector_eq_card_filter` / `rank_spectralProjector_evals_of_lt` | proved | The rank of a spectral projector is the threshold filter's card; exactly `k+1` under no tie | closed-form |
+| `l2OpNorm_sub_le_one_of_isSymm_idempotent` | proved | The trivial gap-metric endpoint `‖P − Q‖ ≤ 1`, load-bearing for the retirement's tie cases | closed-form |
 
 ### Equal-Rank Projector Identity (Davis–Kahan Step 1, component 1)
 

@@ -47,11 +47,20 @@ agreement with `regularNormalizedLaplacian` on the regular cone. QA at a
 *Remaining in this item:* ~~spectral similarity transfer to the walk form~~
 delivered 2026-08-17 as the proved similarity identity
 `√D · L_walk · (1/√D) = L_sym` plus irregular row-stochasticity
-(`walkTransitionMatrix_row_sum`); the *eigenvalue-list* transfer is the
-precisely named residual gap — `L_walk` is not symmetric for irregular
-graphs, so `evals` does not apply to it, and a
-characteristic-polynomial-roots interface for non-symmetric matrices is
-absent from the pinned Mathlib.
+(`walkTransitionMatrix_row_sum`); ~~the *eigenvalue-list* transfer is the
+precisely named residual gap~~ — **closed 2026-08-22** (proposal
+`mixing-time-bound.md` Step 1): the eigenpair-transfer section of
+`GraphTheory.Normalized` conjugates eigenpairs through the similarity in
+both directions, reflects the transition matrix's eigenvalues as
+`1 − λ`, reconstructs every vector from the transferred eigenbasis
+(`walk_eigvec_expansion`), and certifies every `walkEvals` entry a
+genuine eigenvalue of `P` with an explicit nonzero witness — no
+characteristic-polynomial interface needed, which is why the pinned
+Mathlib's lack of one (still true, re-surveyed 2026-08-22: no
+similar-matrices-share-eigenvalues lemma anywhere under
+`Mathlib/LinearAlgebra/`) stopped being the obstruction it appeared to
+be. The remaining open piece on this axis is the mixing-time program's
+Step 2+ (an ℓ² decay proxy and the geometric mixing bound).
 
 ### 3. Expansion and cut interfaces
 

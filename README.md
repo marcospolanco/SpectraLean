@@ -16,19 +16,25 @@ revision](docs/5_QA_SCOREBOARD.md) rather than tracking `main`.
 
 ## Status
 
-As of August 21, 2026:
+As of August 22, 2026:
 
 | Check | Result |
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
-| Explicit cited axioms | 11 |
-| QA theorems/lemmas | 1035, with no `sorry` or `admit` under `Scaffold/` |
+| Explicit cited axioms | 10 |
+| QA theorems/lemmas | 1081, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is the Cheeger *hard* direction at the SGT center;
-Davis–Kahan in the perturbation bridge; and the scalar and matrix
+and the scalar and matrix
 concentration family (Hoeffding, Bernstein, subgaussian, Azuma). Classical
 Laplacian facts, Courant–Fischer, Cauchy interlacing, the Cheeger *upper*
-bound, **Weyl's perturbation inequality**, Woodbury/Sherman–Morrison, the
+bound, **Weyl's perturbation inequality**, **Davis–Kahan sin Θ** (retired
+2026-08-21 by the Duhamel/exponential-integral route: the equal-rank
+projector identity plus the vector-level heat-semigroup FTC assembly,
+`Analysis.OperatorTheory.Perturbation.{ProjectionGap,Duhamel}`), the
+**equal-rank projector identity** `‖P − Q‖ = ‖(I−Q)P‖`, the **Duhamel
+bound** `‖(I−Q)P‖ ≤ ‖E‖/(b−a)`, the derived `davisKahanTwoPoint`
+(now fully hard crust), Woodbury/Sherman–Morrison, the
 electrical crust, Foster's theorem, the Expander Mixing Lemma, the
 certificate-soundness layer (`lambda2_le_of_certificate`), the
 operator-norm/resolvent bridge (`l2OpNorm_eq_max_abs_evals`, the resolvent
@@ -168,7 +174,7 @@ The near-term center is general SGT. Public modules currently cover:
 | Decidable spectral certificates | `GraphTheory.SpectralCertificates` (the ℚ specification checker with its soundness theorem, and the kernel-verifiable ℤ cross-multiplied twin with proved bridges) |
 | Electrical structure | `GraphTheory.Electrical`, `GraphTheory.ElectricalFlow`, `GraphTheory.Foster` |
 | Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized`, `GraphTheory.Stationary` |
-| Perturbation | `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan,ProjectionGap}` |
+| Perturbation | `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan,ProjectionGap,Duhamel}` |
 | Concentration | `Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*` |
 | Matrix updates | `Core.MatrixUpdates` (Woodbury, Sherman–Morrison) |
 
@@ -183,7 +189,7 @@ example, and the [SGT Radar](docs/7_SGT_RADAR.md) for coverage scores.
 
 ### SGT coverage snapshot
 
-Last assessed: August 21, 2026. Scores reflect usable, verified coverage on a
+Last assessed: August 22, 2026. Scores reflect usable, verified coverage on a
 0–5 scale; see the [full radar and evidence](docs/7_SGT_RADAR.md).
 
 | Area | Coverage |
@@ -192,7 +198,7 @@ Last assessed: August 21, 2026. Scores reflect usable, verified coverage on a
 | Spectral linear algebra | 4.5 / 5 |
 | Variational and functional methods | 4.0 / 5 |
 | Cuts, expansion, and clustering | 4.0 / 5 |
-| Random walks and diffusion | 2.5 / 5 |
+| Random walks and diffusion | 3.0 / 5 |
 | Combinatorial and electrical structure | 4.5 / 5 |
 | Perturbation, randomness, and algorithms | 3.5 / 5 |
 | Adjacent systems interfaces | 1.0 / 5 |

@@ -6,6 +6,203 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Mixing-time Step 1 — eigenpair transfer to the general walk matrix through
+the proved similarity identity (run 1, 2026-08-22;
+`proposals/mixing-time-bound.md` at its recorded open next step, the top
+Medium row now that the Active table has no High rows): DELIVERED.**
+Pure hard crust — **zero new axioms** (count stays 10; `#print axioms` on
+all nine new public theorems reads only `propext, Classical.choice,
+Quot.sound`). This closes `Normalized.lean`'s own named residual gap (the
+walk form is not symmetric, so `evals` does not apply to it) and builds the
+interface the proposal's Step 3 decay bound consumes.
+
+**Delivered in `GraphTheory.Normalized`** (the mandatory Mathlib survey
+found no general similar-matrices-share-eigenvalues interface in the pin —
+no `IsSimilar`, no charpoly-conjugation invariance — so the direct
+diagonal-case transfer was the route, exactly the proposal's anticipated
+cheaper branch): `walkLaplacian_mulVec_degreeInvSqrt` /
+`normalizedLaplacian_mulVec_degreeSqrt` (eigenpair transfer in **both
+directions** at the same eigenvalue, by conjugating the eigenvector with
+`1/√D`/`√D` — pure `mulVec` algebra, no characteristic polynomial, which
+dissolves the module docstring's recorded charpoly obstruction),
+`walkTransitionMatrix_mulVec_degreeInvSqrt` (the `(1 − μ)` transition
+reflection), the eigenbasis instantiations
+`walkLaplacian_mulVec_eigvecOf`/`walkTransitionMatrix_mulVec_eigvecOf`,
+`degreeInvSqrt_mulVec_ne_zero` + `eigvecOf_ne_zero` (witness nonvanishing),
+`walk_eigvec_expansion` (completeness of the transferred family — the
+diagonalizability interface, from `eigvecOf_expansion_apply` + the
+invertibility shuffle), and `walkEvals` +
+`exists_eigenvector_walkTransitionMatrix_eq_walkEvals` (every transferred
+spectrum entry certified a genuine eigenvalue of `P` with an explicit
+nonzero conjugated-eigenvector witness).
+
+**QA** (`Normalized_QA.lean`, 14 → 34 declarations): the P₃ fixture
+(degrees 1, 2, 1) with hand eigenpairs `(1, √2, 1)`, `(1, 0, −1)`,
+`(1, −√2, 1)` at eigenvalues 0, 1, 2 — each verified by raw computation,
+transferred **through the theorems**, and cross-checked by raw arithmetic
+on the conjugated vectors `(1,1,1)`, `(1,0,−1)`, `(1,−1,1)`; the backward
+transfer fed from the raw walk eigenpair and pinned back to the hand
+eigenvector; the `walkEvals` existential at every spectral index; the
+spanning hand-solve reconstructing `(1,2,3)`; and the two shortcut guards
+refuted in proved form (skipping the conjugation; forgetting `1 − μ`).
+QA-infrastructure note recorded in the proposal: the `√(1+1)` vs `√2`
+atom mismatch is bridged by a pinned `1 + 1 = 2` simp rewrite
+(`path_one_add_one_QA`), reusable by future `√`-arithmetic QA on this
+fixture.
+
+**Verification:** `lake env lean` on the module and QA — zero errors, zero
+new warnings (the module's only diagnostic is the pre-existing `congr 1`
+note, identical in HEAD); `#print axioms` on the nine public and seven
+headline QA theorems ✔ (three standard axioms only); oleans built; **full
+`lake build` ✔ (2227 targets, "Build completed successfully", detached)**;
+`lint_axioms`, `check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**1081/10/0**). Records updated: the scoreboard (both Direct
+rows + the `lake build` row prepended, a new interpretation bullet), radar
+(**axis 5 re-scored 2.5 → 3.0** — the axis's named walk-spectrum gap
+closed, the proposal's proof-landed-and-QA-passed gate satisfied; QA axis
+count synced 1081/35, held, logged), README (status table, the proved
+list, the coverage snapshot's axis-5 row), the SGT index map (Normalized
+transfer section, 9 rows), the backlog (item 2's residual marked closed
+with the survey re-confirmation), the proposal (status header, full
+delivery record, open-next-step → Step 2), `proposals/README.md` (Medium
+row + progress paragraph), this plan, and the activity log.
+
+**Next milestone (open):** the Medium rows by leverage — **mixing-time
+Step 2** (the ℓ²-mixing proxy; its own decide-and-record scoping gate
+first: ℓ² alone, or scope the TV conversion as a further step — a
+scoping record a run may make), **Reversibility Phase A** (cheap, zero
+new axioms), **Relative Entropy**, **Perron–Frobenius + directed
+operators** (Step 0 first), the **Cheeger hard-direction Step 0 survey**
+(known-hard), and **approximate spectral projection** (Step 0 first).
+Fiedler Phase B still needs an operator decision.
+
+---
+
+**Davis–Kahan Step 1, component 2 of 2 — the Duhamel/FTC assembly, retiring
+`davis_kahan_sin_theta` from axiom to proved theorem (run 1, 2026-08-21;
+`proposals/discharge-perturbation-axioms.md` at its recorded open next step,
+consuming the delivered component 1): DELIVERED — the Davis–Kahan target is
+CLOSED (explicit axioms 11 → 10).**
+
+The new public module
+`Scaffold/Mathlib/Analysis/OperatorTheory/Perturbation/Duhamel.lean`
+(~900 lines, zero new axioms — `#print axioms` on every public theorem
+reads only `propext, Classical.choice, Quot.sound`): the heat-semigroup
+layer transferred from the Step-0 spike (`heatApply` with
+expansion/adjoint, Parseval damping, eigenaction, differentiability,
+and the new `t = 0` eigenbasis-expansion identity), the sorted-spectrum
+step `evals_succ_le_of_lt`, the projector coefficient filter
+`dotProduct_eigvecOf_spectralProjector_mulVec`, the two
+cluster-filtered decay bounds, the pairing (duality) norm reduction
+`l2OpNorm_le_of_abs_dotProduct_le` (self-application route), the
+headline Duhamel bound
+`l2OpNorm_one_sub_spectralProjector_mul_spectralProjector_le`
+(`‖(1 − Q) * P‖ ≤ ‖E‖ / (b − a)` — the scalar pairing
+`⟨e^{-t(A+E)}z_y, e^{tA}z_x⟩` whose derivative is exactly
+`−⟨e^{-t(A+E)}z_y, E e^{tA}z_x⟩` by the symmetry shuffle; FTC on
+`[0,T]` with the explicit exponential majorant; the boundary term sent
+to `T → ∞`), the rank layer (`rank_spectralProjector_eq_card_filter`,
+the no-tie pin), and the `‖P − Q‖ ≤ 1` gap-metric endpoint.
+`Perturbation/DavisKahan.lean`'s `axiom davis_kahan_sin_theta` became
+`theorem` at the **unchanged statement**, by the recorded pre-edit
+three-way tie case split (no-tie: equal ranks → component 1's identity
+→ the Duhamel bound; either tie: separation + the proved
+`weyl_additive_upper` force `δ ≤ ‖E‖` → the `≤ 1` endpoint finishes).
+
+**Downstream (verified by `#print axioms`):** `davisKahanTwoPoint`
+fully hard crust; `eventStreamProjectorDrift` conditional on
+`matrix_azuma_hoeffding` alone.
+
+**QA** (`DavisKahan_QA.lean`, 3 → 20 declarations): the retained
+zero-perturbation instance plus the proposal-required **strict
+non-vacuity witness** — `dkA = diag(0,2)` perturbed by
+`dkE = [[0,3/4],[3/4,0]]`, both spectra and `‖dkE‖ = 3/4` pinned
+independently (trace/determinant/sortedness + the proved bridge), the
+eigenvector directions pinned from the eigen equations
+(one-dimensional eigenspaces, no control over Mathlib's classical
+eigenbasis needed), both projectors pinned to literals
+(`Q = (1/10)!![9,−3;−3,1]`, `P = diag(1,0)`), the bound instance
+`‖Q − P‖ ≤ 1/3`, and the difference's own pinned spectrum giving the
+exact distance `1/√10 < 1/3` — strict, exercising the no-tie (Duhamel)
+branch.
+
+**Verification:** both new modules and the QA elaborate directly
+(`lake env lean`, zero errors, zero warnings); oleans built;
+`#print axioms` on the retired theorem, the derived consumers, and all
+new QA headlines reads only the three standard axioms; **all 35 QA
+modules batch-elaborated, zero errors (BATCH-DONE fail=0)**; **full
+`lake build` ✔ (2227 targets, "Build completed successfully",
+detached)**; `lint_axioms`, `check_citations`, `check_markdown_links`
+pass; scoreboard regenerated (**1061/10/0**). Records updated: the two
+index files (`sources/davis_kahan_1970.md` retirement annotation; a new
+Duhamel section + retirement note in `map/perturbation.md`), README
+(10 axioms, 1061 QA, proved list, module table), architecture §12, the
+scoreboard (counts, lint/build/QA/public rows, interpretation bullet),
+radar (axis 7 re-scored **3.5 → 4.0** — the axis's first calculus-based
+proof technique as a new capability family; axiom-minimization trend →
+10; proved-depth and QA-count syncs; the re-score logged), the proposal
+(status header, full Step-1 delivery record with the tie-case
+discovery, open-next-step → the Cheeger hard-direction survey),
+`proposals/README.md` (Medium row + progress paragraph), the umbrella
+import, this plan, and the activity log.
+
+**Next milestone (open):** the Medium rows by leverage — **mixing-time
+Step 1** (eigenvalue transfer via the proved similarity identity),
+**Reversibility Phase A** (cheap, zero new axioms), **Relative
+Entropy**, **Perron–Frobenius + directed operators** (Step 0 first),
+the **Cheeger hard-direction Step 0 survey** (known-hard working
+assumption, now this proposal's only remaining target), and
+**approximate spectral projection** (Step 0 first). Fiedler Phase B
+still needs an operator decision.
+
+---
+
+**Leverage:** the largest single axiom retirement this proposal
+contemplates — explicit axioms 11 → 10 — and the one whose downstream
+effect is widest: `Derived.ProjectorDrift.davisKahanTwoPoint` would become
+fully proved hard crust (its last axiom dependency shed) and
+`eventStreamProjectorDrift` conditional on `matrix_azuma_hoeffding` alone.
+Load-bearing on the delivered component 1 (`l2OpNorm_sub_eq_of_rank_eq`),
+the spike-verified semigroup primitives (`wip/dk_spike.lean`), the proved
+`weyl_additive_upper` + `l2OpNorm_eq_max_abs_evals` bridge, and the
+center's eigenbasis layer — errors in any would surface here.
+
+**Route (recorded before stating, from the Step-0 survey plus this run's
+pre-edit reading of the exact axiom shape):** the scalar Duhamel pairing —
+for `P = spectralProjector A a`, `Q = spectralProjector (A+E) c'`,
+`u(t) = e^{-t(A+E)}((I−Q)y)` (damped eigenbasis expansion, spike's
+`heatApply`), `w(t) = e^{tA}(Px)` (negative-parameter `heatApply`):
+`d/dt ⟨u(t), w(t)⟩ = −⟨u(t), E w(t)⟩` (spike differentiability + eigenaction
++ the reducing commutation), FTC on `[0,T]` with the explicit exponential
+majorant gives
+`|⟨y, ((I−Q)P)x⟩| ≤ |g(T)| + ‖E‖(1−e^{−δ'T})/δ'` at `δ' = b − a`, and
+`g(T) ≤ e^{−Tδ'}‖x‖‖y‖ → 0`, so the pairing norm bound is `‖E‖/δ' ≤ ‖E‖/δ`
+by the separation hypothesis. The A-side decay needs only `λ ≤ a` on P's
+range (definitional coefficient filter); the (A+E)-side decay needs the
+sortedness step `evals ⟨k⟩ < μᵢ → evals ⟨k+1⟩ ≤ μᵢ` (b := `evals ⟨k+1⟩`).
+**Tie handling found during this pre-edit pass (new decision, recorded
+before stating):** `initialProjector` includes whole tied eigenspaces, so
+under eigenvalue ties at a threshold the two projector ranks differ and
+component 1's identity does not apply directly. Both tie cases collapse:
+if either `evals hA ⟨k⟩ = evals hA ⟨k+1⟩` or `evals hAE ⟨k⟩ =
+evals hAE ⟨k+1⟩`, the proved Weyl additive bound + separation force
+`δ ≤ ‖E‖`, and the unconditional `‖P − Q‖ ≤ 1` (max decomposition +
+`l2OpNorm_le_one_of_isSymm_idempotent` + submultiplicativity) finishes via
+`‖P−Q‖ ≤ 1 ≤ ‖E‖/δ`. In the no-tie case both ranks are `k+1` (count
+lemma) and the delivered identity applies. So the retirement is a
+three-way case split, two of which need no Duhamel at all.
+
+**Next action:** survey the exact Mathlib intervalIntegral/dotProduct
+signatures on the pinned snapshot, then build the new
+`Analysis/OperatorTheory/Perturbation/Duhamel.lean` (semigroup layer
+transfer + sortedness step + decay bounds + FTC assembly), rewrite
+`DavisKahan.lean`'s `axiom` to `theorem`, verify consumers, and extend
+`DavisKahan_QA.lean` with the proposal-required strict non-vacuity
+witness (rational 2×2 rotation fixture, projector pinned through the
+eigen equations per the Band-QA technique).
+
+---
+
 **Davis–Kahan Step 1, component 1 of 2 — the equal-rank projector
 identity as its own hard-crust delivery (run 1, 2026-08-21;
 `proposals/discharge-perturbation-axioms.md` at its recorded open next

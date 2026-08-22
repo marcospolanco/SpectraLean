@@ -22,11 +22,11 @@
 The sin Θ theorem for invariant spectral subspaces, in the projector
 form used by the event-driven persistence frontier.
 
-## Theorem to Axiom Mapping
+## Theorem to Declaration Mapping
 
-| Theorem | Lean Axiom | Module |
-|---------|------------|--------|
-| §3 (sin Θ theorem) via Yu–Wang–Samworth Thm 1 (operator-norm variant, bottom cluster) | `davis_kahan_sin_theta` | `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan` |
+| Theorem | Lean Declaration | Module |
+|---------|------------------|--------|
+| §3 (sin Θ theorem) via Yu–Wang–Samworth Thm 1 (operator-norm variant, bottom cluster) | `davis_kahan_sin_theta` (**proved theorem** — retired from axiom 2026-08-21 by the Duhamel/exponential-integral route of `proposals/discharge-perturbation-axioms.md`; `#print axioms` reads only `propext, Classical.choice, Quot.sound`) | `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan` |
 
 ## Notes
 

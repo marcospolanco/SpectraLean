@@ -462,6 +462,23 @@ All statements proved (2026-08-17), no axioms:
 | `walkTransitionMatrix_row_sum` | row-stochasticity on irregular graphs (positive degrees) |
 | `degreeSqrt_mul_walkLaplacian_mul_degreeInvSqrt` | similarity `√D · L_walk · (1/√D) = L_sym` |
 
+Eigenpair transfer through the similarity (2026-08-22, proposal
+`mixing-time-bound.md` Step 1, no axioms; the section closing this
+module's named residual gap — the walk form is not symmetric, so `evals`
+does not apply to it, and the pin has no charpoly-similarity interface):
+
+| Declaration | Content |
+|-------------|---------|
+| `eigvecOf_ne_zero` | eigenbasis vectors are nonzero (unit self-inner-product) |
+| `walkLaplacian_mulVec_degreeInvSqrt` | **forward transfer**: a `μ`-eigenpair of `L_sym` conjugates to a `μ`-eigenpair of `L_walk` at eigenvector `(1/√D) *ᵥ v` |
+| `normalizedLaplacian_mulVec_degreeSqrt` | **backward transfer**: a `μ`-eigenpair of `L_walk` conjugates back to `L_sym` at eigenvector `√D *ᵥ w` |
+| `walkTransitionMatrix_mulVec_degreeInvSqrt` | transition form: `μ`-eigenpair of `L_sym` gives a `(1 − μ)`-eigenpair of `P = D⁻¹A` |
+| `walkLaplacian_mulVec_eigvecOf`, `walkTransitionMatrix_mulVec_eigvecOf` | the transfer instantiated at the spectral-theorem eigenbasis of `L_sym` |
+| `degreeInvSqrt_mulVec_ne_zero` | conjugation by the invertible `1/√D` preserves nonvanishing |
+| `walk_eigvec_expansion` | completeness of the transferred family: every vector reconstructed from the conjugated walk eigenvectors (the diagonalizability interface) |
+| `walkEvals` | definition: the walk spectrum `1 − evals (L_sym)`, transferred through the similarity |
+| `exists_eigenvector_walkTransitionMatrix_eq_walkEvals` | every `walkEvals` entry is a genuine eigenvalue of `P` with an explicit nonzero conjugated-eigenvector witness |
+
 ### `Scaffold.Mathlib.GraphTheory.Stationary` (first walk/normalized consumer)
 
 All statements proved (2026-08-17), no axioms; consumes the `RandomWalk`

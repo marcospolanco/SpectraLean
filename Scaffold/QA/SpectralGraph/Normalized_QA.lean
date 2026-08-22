@@ -164,4 +164,228 @@ theorem path_similarity_entry_QA :
     (degreeSqrt_mul_walkLaplacian_mul_degreeInvSqrt pathAdj pathAdj_deg_pos)
     1) 2
 
+/-!
+## Eigenpair transfer through the similarity (mixing-time Step 1)
+
+The path `0 — 1 — 2` has normalized spectrum `{0, 1, 2}` with hand
+eigenvectors `(1, √2, 1)`, `(1, 0, -1)`, `(1, -√2, 1)`. Each eigenpair
+is transferred to the *walk* world two ways — through the transfer
+theorems and by raw arithmetic on the conjugated vectors (which are
+`(1,1,1)`, `(1,0,-1)`, `(1,-1,1)`) — and two guards witness that the
+conjugation and the `1 - μ` reflection are load-bearing.
+-/
+
+/-- Normalization bridge: `deg` unfolds to literal sums, and the
+center degree lands as `1 + 1`; rewriting it to `2` puts the surviving
+`√(1 + 1)` atoms into the canonical `√2` form the pinned arithmetic
+facts below use. -/
+theorem path_one_add_one_QA : (1 : ℝ) + 1 = 2 := by norm_num
+
+/-- The `√2`-arithmetic used throughout: `√2 · √2 = 2`, `(1/√2) · √2 = 1`,
+and `2/√2 = √2`. -/
+theorem path_sqrt2_arith_QA :
+    Real.sqrt 2 * Real.sqrt 2 = 2
+      ∧ (Real.sqrt 2)⁻¹ * Real.sqrt 2 = 1
+      ∧ 2 * (Real.sqrt 2)⁻¹ = Real.sqrt 2 := by
+  have ht : (Real.sqrt 2 : ℝ) ≠ 0 := Real.sqrt_ne_zero'.mpr (by norm_num)
+  have h2 : Real.sqrt 2 * Real.sqrt 2 = 2 :=
+    Real.mul_self_sqrt (by norm_num)
+  refine ⟨h2, inv_mul_cancel₀ ht, ?_⟩
+  nth_rewrite 1 [← h2]
+  rw [mul_assoc, mul_inv_cancel₀ ht, mul_one]
+
+/-- The hand eigenpair at eigenvalue `0`: `(1, √2, 1)` is in the kernel
+of the path's normalized Laplacian (raw computation, independent of the
+transfer machinery). -/
+theorem path_Lsym_eigen_zero_QA :
+    normalizedLaplacian pathAdj *ᵥ ![1, Real.sqrt 2, 1]
+      = (0 : ℝ) • ![1, Real.sqrt 2, 1] := by
+  have hinv := path_sqrt2_arith_QA.2.1
+  have htwo := path_sqrt2_arith_QA.2.2
+  funext i
+  fin_cases i
+  all_goals simp [normalizedLaplacian, degreeInvSqrt, deg,
+    path_one_add_one_QA, pathAdj, Matrix.mulVec, Matrix.dotProduct,
+    Fin.sum_univ_three]
+  all_goals nlinarith [hinv, htwo]
+
+/-- The conjugated kernel vector is the all-ones vector: the degree
+square roots cancel the eigenvector's entries (raw computation). -/
+theorem path_degreeInvSqrt_mulVec_kervec_QA :
+    degreeInvSqrt pathAdj *ᵥ ![1, Real.sqrt 2, 1] = ![1, 1, 1] := by
+  funext i
+  fin_cases i <;>
+    simp [degreeInvSqrt, deg, path_one_add_one_QA, pathAdj, Matrix.mulVec,
+      Matrix.dotProduct, Fin.sum_univ_three]
+
+/-- Forward transfer at eigenvalue `0`, through the theorem: the kernel
+pair of `L_sym` conjugates to a kernel pair of the walk Laplacian. -/
+theorem path_walkLaplacian_transfer_zero_QA :
+    walkLaplacian pathAdj *ᵥ (degreeInvSqrt pathAdj *ᵥ ![1, Real.sqrt 2, 1])
+      = (0 : ℝ) • (degreeInvSqrt pathAdj *ᵥ ![1, Real.sqrt 2, 1]) :=
+  walkLaplacian_mulVec_degreeInvSqrt pathAdj pathAdj_deg_pos
+    path_Lsym_eigen_zero_QA
+
+/-- Raw cross-check of the transferred kernel pair: the walk Laplacian
+annihilates the all-ones vector (computed directly from `P = D⁻¹A`'s
+entries, independent of the transfer theorem and of `Stationary`). -/
+theorem path_walkLaplacian_ones_raw_QA :
+    walkLaplacian pathAdj *ᵥ ![1, 1, 1] = 0 := by
+  funext i
+  fin_cases i
+  all_goals simp [walkLaplacian, walkTransitionMatrix, deg,
+    path_one_add_one_QA, pathAdj, Matrix.mulVec, Matrix.dotProduct,
+    Fin.sum_univ_three]
+  all_goals nlinarith [path_sqrt2_arith_QA.2.1]
+
+/-- The hand eigenpair at eigenvalue `1`: `(1, 0, -1)`. -/
+theorem path_Lsym_eigen_one_QA :
+    normalizedLaplacian pathAdj *ᵥ ![1, 0, -1]
+      = (1 : ℝ) • ![1, 0, -1] := by
+  funext i
+  fin_cases i <;>
+    simp [normalizedLaplacian, degreeInvSqrt, deg, path_one_add_one_QA,
+      pathAdj, Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three]
+
+/-- Transition transfer at eigenvalue `1`: the `1`-eigenpair of `L_sym`
+gives a `0`-eigenpair of the walk transition matrix, through the
+theorem. -/
+theorem path_walkTransition_transfer_one_QA :
+    walkTransitionMatrix pathAdj *ᵥ (degreeInvSqrt pathAdj *ᵥ ![1, 0, -1])
+      = (1 - 1 : ℝ) • (degreeInvSqrt pathAdj *ᵥ ![1, 0, -1]) :=
+  walkTransitionMatrix_mulVec_degreeInvSqrt pathAdj pathAdj_deg_pos
+    path_Lsym_eigen_one_QA
+
+/-- Raw cross-check: the transition matrix annihilates `(1, 0, -1)`
+(the leaf rows move the difference to the center, where it cancels). -/
+theorem path_walkTransition_middle_raw_QA :
+    walkTransitionMatrix pathAdj *ᵥ ![1, 0, -1] = 0 := by
+  funext i
+  fin_cases i <;>
+    simp [walkTransitionMatrix, deg, path_one_add_one_QA, pathAdj,
+      Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three]
+
+/-- The hand eigenpair at eigenvalue `2`: `(1, -√2, 1)`. -/
+theorem path_Lsym_eigen_two_QA :
+    normalizedLaplacian pathAdj *ᵥ ![1, -Real.sqrt 2, 1]
+      = (2 : ℝ) • ![1, -Real.sqrt 2, 1] := by
+  have hinv := path_sqrt2_arith_QA.2.1
+  have htwo := path_sqrt2_arith_QA.2.2
+  funext i
+  fin_cases i
+  all_goals simp [normalizedLaplacian, degreeInvSqrt, deg,
+    path_one_add_one_QA, pathAdj, Matrix.mulVec, Matrix.dotProduct,
+    Fin.sum_univ_three]
+  all_goals nlinarith [hinv, htwo]
+
+/-- The conjugate of `(1, -√2, 1)` is `(1, -1, 1)` (raw computation). -/
+theorem path_degreeInvSqrt_mulVec_alt_QA :
+    degreeInvSqrt pathAdj *ᵥ ![1, -Real.sqrt 2, 1] = ![1, -1, 1] := by
+  funext i
+  fin_cases i <;>
+    simp [degreeInvSqrt, deg, path_one_add_one_QA, pathAdj, Matrix.mulVec,
+      Matrix.dotProduct, Fin.sum_univ_three]
+
+/-- Transition transfer at eigenvalue `2`: the `2`-eigenpair of `L_sym`
+gives a `(1 - 2)`-eigenpair of the transition matrix, through the
+theorem. -/
+theorem path_walkTransition_transfer_two_QA :
+    walkTransitionMatrix pathAdj *ᵥ
+      (degreeInvSqrt pathAdj *ᵥ ![1, -Real.sqrt 2, 1])
+      = (1 - 2 : ℝ) • (degreeInvSqrt pathAdj *ᵥ ![1, -Real.sqrt 2, 1]) :=
+  walkTransitionMatrix_mulVec_degreeInvSqrt pathAdj pathAdj_deg_pos
+    path_Lsym_eigen_two_QA
+
+/-- Raw cross-check: the transition matrix acts on `(1, -1, 1)` as
+multiplication by `-1` — the alternating (period-2) mode of the path
+walk. -/
+theorem path_walkTransition_alt_raw_QA :
+    walkTransitionMatrix pathAdj *ᵥ ![1, -1, 1]
+      = (-1 : ℝ) • ![1, -1, 1] := by
+  funext i
+  fin_cases i
+  all_goals simp [walkTransitionMatrix, deg, path_one_add_one_QA, pathAdj,
+    Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three]
+  all_goals norm_num
+
+/-- The walk-Laplacian eigenpair at `(1, -1, 1)`: eigenvalue `2`, by raw
+arithmetic (`L_walk = 1 - P`, `P *ᵥ w = -w`). -/
+theorem path_walkLaplacian_alt_raw_QA :
+    walkLaplacian pathAdj *ᵥ ![1, -1, 1] = (2 : ℝ) • ![1, -1, 1] := by
+  funext i
+  fin_cases i
+  all_goals simp [walkLaplacian, walkTransitionMatrix, deg,
+    path_one_add_one_QA, pathAdj, Matrix.mulVec, Matrix.dotProduct,
+    Fin.sum_univ_three]
+  all_goals nlinarith [path_sqrt2_arith_QA.2.1]
+
+/-- Backward transfer, through the theorem: the raw walk eigenpair
+`(1, -1, 1)` at eigenvalue `2` conjugates back to a `2`-eigenpair of
+`L_sym`. -/
+theorem path_backward_transfer_QA :
+    normalizedLaplacian pathAdj *ᵥ (degreeSqrt pathAdj *ᵥ ![1, -1, 1])
+      = (2 : ℝ) • (degreeSqrt pathAdj *ᵥ ![1, -1, 1]) :=
+  normalizedLaplacian_mulVec_degreeSqrt pathAdj pathAdj_deg_pos
+    path_walkLaplacian_alt_raw_QA
+
+/-- The backward-conjugated witness is the hand eigenvector `(1, -√2, 1)`
+— the two routes produce the same vector. -/
+theorem path_degreeSqrt_mulVec_alt_QA :
+    degreeSqrt pathAdj *ᵥ ![1, -1, 1] = ![1, -Real.sqrt 2, 1] := by
+  funext i
+  fin_cases i <;>
+    simp [degreeSqrt, deg, path_one_add_one_QA, pathAdj, Matrix.mulVec,
+      Matrix.dotProduct, Fin.sum_univ_three]
+
+/-- Every entry of the transferred walk spectrum is a genuine eigenvalue
+of the transition matrix with a nonzero witness — the existential
+interface instantiated at each of the path's three spectral indices. -/
+theorem path_exists_walk_eigenvector_QA (k : Fin 3) :
+    ∃ w : Fin 3 → ℝ, w ≠ 0 ∧
+      walkTransitionMatrix pathAdj *ᵥ w
+        = walkEvals pathAdj pathAdj_isSymm k • w :=
+  exists_eigenvector_walkTransitionMatrix_eq_walkEvals pathAdj
+    pathAdj_isSymm pathAdj_deg_pos k
+
+/-- The transferred family spans, on the fixture: the three conjugated
+eigenvectors reconstruct `(1, 2, 3)` with hand-solved coefficients
+`2, -1, 0` (independent of the theorem — a linear solve). -/
+theorem path_transferred_span_QA :
+    (2 : ℝ) • ![1, 1, 1] + (-1 : ℝ) • ![1, 0, -1] + (0 : ℝ) • ![1, -1, 1]
+      = (![1, 2, 3] : Fin 3 → ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      smul_eq_mul] <;>
+    norm_num
+
+/-- **Guard:** the conjugation is load-bearing. The walk eigenvector
+`(1, -1, 1)` (eigenvalue `2` of `L_walk`) is *not* an eigenvector of
+`L_sym` at the reflected eigenvalue `-1`: skipping the `√D`
+conjugation is refutable. -/
+theorem path_no_skip_conjugation_QA :
+    ¬ (normalizedLaplacian pathAdj *ᵥ ![1, -1, 1]
+        = (-1 : ℝ) • ![1, -1, 1]) := by
+  have htwo := path_sqrt2_arith_QA.2.2
+  have hnn : (0 : ℝ) ≤ Real.sqrt 2 := Real.sqrt_nonneg _
+  intro h
+  have e1 := congrFun h 1
+  simp [normalizedLaplacian, degreeInvSqrt, deg, path_one_add_one_QA,
+    pathAdj, Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three,
+    Pi.smul_apply, smul_eq_mul] at e1
+  nlinarith [htwo, hnn]
+
+/-- **Guard:** the `1 - μ` reflection is load-bearing. The transition
+matrix does *not* act on `(1, -1, 1)` as multiplication by `2` (the
+unreflected normalized eigenvalue): the raw action is by `-1`. -/
+theorem path_transition_not_unreflected_QA :
+    ¬ (walkTransitionMatrix pathAdj *ᵥ ![1, -1, 1]
+        = (2 : ℝ) • ![1, -1, 1]) := by
+  rw [path_walkTransition_alt_raw_QA]
+  intro h
+  have h0 := congrFun h 0
+  simp only [Pi.smul_apply, smul_eq_mul, Matrix.cons_val_zero,
+    Matrix.head_cons] at h0
+  norm_num at h0
+
 end SpectralGraphTheory.QA

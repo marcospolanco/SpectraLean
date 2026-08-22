@@ -46,10 +46,32 @@ Delivered (all proved, no axioms):
   the regular cone: on `d`-regular graphs the general definition
   specializes to `regularNormalizedLaplacian A d`.
 
-Deferred to the next slice (see `docs/6_SGT_BACKLOG.md`): spectral
-similarity transfer to the walk form `I - D⁻¹A` (same spectrum as
-`L_sym`), which needs an invariance-of-`evals`-under-similarity
-interface.
+Delivered 2026-08-22 (`proposals/mixing-time-bound.md` Step 1; all
+proved, no axioms) — the eigenpair transfer through the similarity:
+
+- `walkLaplacian_mulVec_degreeInvSqrt` / `normalizedLaplacian_mulVec_degreeSqrt`
+  — eigenpairs transfer in **both directions** between `L_sym` and the
+  non-symmetric `L_walk` by conjugating the eigenvector with `1/√D`/`√D`,
+  at the same eigenvalue;
+- `walkTransitionMatrix_mulVec_degreeInvSqrt` — the transition-matrix
+  form: a `μ`-eigenpair of `L_sym` gives a `(1 - μ)`-eigenpair of
+  `P = D⁻¹A`;
+- `walkLaplacian_mulVec_eigvecOf` / `walkTransitionMatrix_mulVec_eigvecOf`
+  — the transfer instantiated at the spectral-theorem eigenbasis of
+  `L_sym`;
+- `walk_eigvec_expansion` — completeness of the transferred family: every
+  vector is reconstructed from the transferred walk eigenvectors (the
+  diagonalizability interface the mixing-decay step consumes);
+- `walkEvals` with
+  `exists_eigenvector_walkTransitionMatrix_eq_walkEvals` — the walk
+  spectrum `1 - evals L_sym`, each entry certified a genuine eigenvalue
+  of `P` by an explicit transferred eigenvector witness.
+
+The pinned Mathlib snapshot has no general
+similar-matrices-share-eigenvalues interface (surveyed 2026-08-22: no
+`IsSimilar`, no charpoly-conjugation invariance), so the transfer is
+proved directly at the diagonal case from the similarity identity — the
+route `proposals/mixing-time-bound.md` anticipated as the cheaper branch.
 -/
 
 namespace SpectralGraphTheory
@@ -258,5 +280,216 @@ theorem degreeSqrt_mul_walkLaplacian_mul_degreeInvSqrt
   rw [walkLaplacian, walkTransitionMatrix, Matrix.mul_sub,
     Matrix.sub_mul, Matrix.mul_one, ← Matrix.mul_assoc, hSDinv, hST,
     normalizedLaplacian]
+
+/-!
+## Eigenpair transfer through the similarity
+
+`L_walk` is not symmetric in general, so `evals` (defined for `IsSymm`
+matrices) does not apply to it. The similarity identity
+`degreeSqrt_mul_walkLaplacian_mul_degreeInvSqrt` nevertheless transfers
+every eigenpair between the two worlds, in both directions, at the same
+eigenvalue — no characteristic-polynomial machinery is required. This is
+Step 1 of the mixing-time program (`proposals/mixing-time-bound.md`).
+-/
+
+/-- Eigenvectors of a symmetric matrix are nonzero: the eigenbasis is
+orthonormal, so each basis vector has unit self-inner-product. Support
+lemma for the transferred-eigenpair witnesses. -/
+theorem eigvecOf_ne_zero (M : Matrix V V ℝ) (hM : M.IsSymm) (i : V) :
+    eigvecOf M hM i ≠ 0 := by
+  intro h
+  have h1 : ∑ k, eigvecOf M hM i k * eigvecOf M hM i k = 1 := by
+    simpa using eigvecOf_inner M hM i i
+  rw [h] at h1
+  simp at h1
+
+/-- **Forward eigenpair transfer**: every eigenpair of the symmetric
+normalized Laplacian conjugates to an eigenpair of the (non-symmetric)
+walk Laplacian, at the *same* eigenvalue. The walk eigenvector is
+`(1/√D) *ᵥ v`. Load-bearing on the similarity identity
+`√D · L_walk · (1/√D) = L_sym`: conjugating the eigen-equation by
+`1/√D` on both sides cancels the outer factor exactly. -/
+theorem walkLaplacian_mulVec_degreeInvSqrt (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) {v : V → ℝ} {μ : ℝ}
+    (h : normalizedLaplacian A *ᵥ v = μ • v) :
+    walkLaplacian A *ᵥ (degreeInvSqrt A *ᵥ v)
+      = μ • (degreeInvSqrt A *ᵥ v) := by
+  have hcancel : ∀ x : V → ℝ,
+      degreeInvSqrt A *ᵥ (degreeSqrt A *ᵥ x) = x := by
+    intro x
+    rw [Matrix.mulVec_mulVec, degreeInvSqrt_mul_degreeSqrt A hd,
+      Matrix.one_mulVec]
+  have h' : normalizedLaplacian A *ᵥ v
+      = degreeSqrt A *ᵥ (walkLaplacian A *ᵥ (degreeInvSqrt A *ᵥ v)) := by
+    rw [← degreeSqrt_mul_walkLaplacian_mul_degreeInvSqrt A hd,
+      ← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec]
+  rw [h'] at h
+  have h2 := congrArg (Matrix.mulVec (degreeInvSqrt A)) h
+  rw [hcancel, Matrix.mulVec_smul_assoc] at h2
+  exact h2
+
+/-- **Backward eigenpair transfer**: every eigenpair of the walk
+Laplacian conjugates back to an eigenpair of the symmetric normalized
+Laplacian, at the same eigenvalue. The normalized eigenvector is
+`√D *ᵥ w`. Together with `walkLaplacian_mulVec_degreeInvSqrt` this is
+the full two-way spectral bridge between the walk and normalized
+worlds. -/
+theorem normalizedLaplacian_mulVec_degreeSqrt (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) {w : V → ℝ} {μ : ℝ}
+    (h : walkLaplacian A *ᵥ w = μ • w) :
+    normalizedLaplacian A *ᵥ (degreeSqrt A *ᵥ w)
+      = μ • (degreeSqrt A *ᵥ w) := by
+  have hcancel : ∀ x : V → ℝ,
+      degreeInvSqrt A *ᵥ (degreeSqrt A *ᵥ x) = x := by
+    intro x
+    rw [Matrix.mulVec_mulVec, degreeInvSqrt_mul_degreeSqrt A hd,
+      Matrix.one_mulVec]
+  calc normalizedLaplacian A *ᵥ (degreeSqrt A *ᵥ w)
+      = degreeSqrt A *ᵥ (walkLaplacian A *ᵥ
+          (degreeInvSqrt A *ᵥ (degreeSqrt A *ᵥ w))) := by
+        rw [← degreeSqrt_mul_walkLaplacian_mul_degreeInvSqrt A hd,
+          ← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec]
+    _ = degreeSqrt A *ᵥ (walkLaplacian A *ᵥ w) := by rw [hcancel]
+    _ = degreeSqrt A *ᵥ (μ • w) := by rw [h]
+    _ = μ • (degreeSqrt A *ᵥ w) := Matrix.mulVec_smul_assoc _ _ _
+
+/-- The transition-matrix form of the forward transfer: a `μ`-eigenpair
+of `L_sym` gives a `(1 - μ)`-eigenpair of the walk transition matrix
+`P = D⁻¹A` (since `L_walk = 1 - P`). This is the shape the mixing-time
+program consumes: the walk's nontrivial eigenvalues are `1 - λ` for the
+normalized spectrum `λ`. -/
+theorem walkTransitionMatrix_mulVec_degreeInvSqrt (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) {v : V → ℝ} {μ : ℝ}
+    (h : normalizedLaplacian A *ᵥ v = μ • v) :
+    walkTransitionMatrix A *ᵥ (degreeInvSqrt A *ᵥ v)
+      = (1 - μ) • (degreeInvSqrt A *ᵥ v) := by
+  have hw := walkLaplacian_mulVec_degreeInvSqrt A hd h
+  rw [walkLaplacian, Matrix.sub_mulVec, Matrix.one_mulVec] at hw
+  have hP : walkTransitionMatrix A *ᵥ (degreeInvSqrt A *ᵥ v)
+      = (degreeInvSqrt A *ᵥ v) - μ • (degreeInvSqrt A *ᵥ v) := by
+    rw [← hw, sub_sub_cancel]
+  rw [hP, sub_smul, one_smul]
+
+/-- The forward transfer instantiated at the spectral-theorem
+eigenbasis: the `i`-th eigenvector of `L_sym`, conjugated by `1/√D`, is
+an eigenvector of the non-symmetric walk Laplacian at the same
+eigenvalue. -/
+theorem walkLaplacian_mulVec_eigvecOf (A : WAdj (V := V))
+    (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i) (i : V) :
+    walkLaplacian A *ᵥ (degreeInvSqrt A *ᵥ
+        eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i)
+      = eigvalOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i
+        • (degreeInvSqrt A *ᵥ
+        eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i) :=
+  walkLaplacian_mulVec_degreeInvSqrt A hd
+    ((isHermitian_of_isSymm (normalizedLaplacian_symmetric A hA)).mulVec_eigenvectorBasis i)
+
+/-- The transition-matrix form at the eigenbasis: the `i`-th
+normalized-Laplacian eigenvector, conjugated by `1/√D`, is an
+eigenvector of the walk transition matrix at eigenvalue
+`1 - eigvalOf`. -/
+theorem walkTransitionMatrix_mulVec_eigvecOf (A : WAdj (V := V))
+    (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i) (i : V) :
+    walkTransitionMatrix A *ᵥ (degreeInvSqrt A *ᵥ
+        eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i)
+      = (1 - eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i)
+        • (degreeInvSqrt A *ᵥ
+        eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i) :=
+  walkTransitionMatrix_mulVec_degreeInvSqrt A hd
+    ((isHermitian_of_isSymm (normalizedLaplacian_symmetric A hA)).mulVec_eigenvectorBasis i)
+
+/-- Conjugation by the invertible `1/√D` preserves nonvanishing. The
+transferred eigenvector witnesses are genuine (nonzero) eigenvectors. -/
+theorem degreeInvSqrt_mulVec_ne_zero (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) {v : V → ℝ} (hv : v ≠ 0) :
+    degreeInvSqrt A *ᵥ v ≠ 0 := by
+  intro h
+  apply hv
+  have hc : degreeSqrt A *ᵥ (degreeInvSqrt A *ᵥ v) = v := by
+    rw [Matrix.mulVec_mulVec, degreeSqrt_mul_degreeInvSqrt A hd,
+      Matrix.one_mulVec]
+  rw [← hc, h, Matrix.mulVec_zero]
+
+/-- **Completeness of the transferred family**: every vector is
+reconstructed from the transferred walk eigenvectors
+`(1/√D) *ᵥ vᵢ`, with coefficients `vᵢ ⬝ᵥ (√D *ᵥ w)`. This is the
+diagonalizability interface of the walk transition matrix through the
+normalized eigenbasis — the mixing-decay step expands the walk's action
+on these components. Load-bearing on both the similarity invertibility
+(`√D (1/√D) = 1`) and `eigvecOf_expansion_apply`. -/
+theorem walk_eigvec_expansion (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hd : ∀ i, 0 < deg A i) (w : V → ℝ) :
+    ∑ i, Matrix.dotProduct
+        (eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i)
+        (degreeSqrt A *ᵥ w)
+      • (degreeInvSqrt A *ᵥ
+          eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i)
+      = w := by
+  have hcancel' : ∀ x : V → ℝ,
+      degreeInvSqrt A *ᵥ (degreeSqrt A *ᵥ x) = x := by
+    intro x
+    rw [Matrix.mulVec_mulVec, degreeInvSqrt_mul_degreeSqrt A hd,
+      Matrix.one_mulVec]
+  have hexp : ∀ x : V → ℝ,
+      ∑ i, Matrix.dotProduct
+          (eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i) x
+        • eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i
+      = x := by
+    intro x
+    funext a
+    simpa using eigvecOf_expansion_apply
+      (normalizedLaplacian_symmetric A hA) x a
+  have hlinear : ∀ (c : V → ℝ) (y : V → (V → ℝ)),
+      (∑ i, c i • (degreeInvSqrt A *ᵥ y i))
+        = degreeInvSqrt A *ᵥ (∑ i, c i • y i) := by
+    intro c y
+    funext a
+    simp only [Matrix.mulVec, Matrix.dotProduct, Finset.sum_apply,
+      Pi.smul_apply, smul_eq_mul]
+    calc ∑ i, c i * ∑ j, degreeInvSqrt A a j * y i j
+        = ∑ i, ∑ j, c i * (degreeInvSqrt A a j * y i j) := by
+          exact Finset.sum_congr rfl fun i _ => Finset.mul_sum _ _ _
+      _ = ∑ j, ∑ i, c i * (degreeInvSqrt A a j * y i j) := Finset.sum_comm
+      _ = ∑ j, degreeInvSqrt A a j * ∑ i, c i * y i j := by
+          refine Finset.sum_congr rfl fun j _ => ?_
+          rw [Finset.mul_sum]
+          exact Finset.sum_congr rfl fun i _ => by ring
+  rw [hlinear]
+  rw [show (∑ i, Matrix.dotProduct
+        (eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i)
+        (degreeSqrt A *ᵥ w)
+      • eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i)
+      = degreeSqrt A *ᵥ w from hexp (degreeSqrt A *ᵥ w)]
+  exact hcancel' w
+
+/-- The spectrum of the walk transition matrix, transferred through the
+similarity: `walkEvals A hA i = 1 - evals (L_sym) i`, the sorted
+normalized spectrum reflected about `1/2`. Real definition (same
+provenance as `evals`); `exists_eigenvector_walkTransitionMatrix_eq_walkEvals`
+certifies each entry is a genuine eigenvalue of `walkTransitionMatrix A`
+with an explicit transferred eigenvector as witness. -/
+noncomputable def walkEvals (A : WAdj (V := V)) (hA : A.IsSymm)
+    (i : Fin (Fintype.card V)) : ℝ :=
+  1 - evals (normalizedLaplacian_symmetric A hA) i
+
+/-- Every entry of the transferred walk spectrum is a genuine eigenvalue
+of the walk transition matrix: the witness is the conjugated eigenbasis
+vector. This closes `Normalized.lean`'s named residual gap — the
+non-symmetric walk matrix has no `evals` of its own, but its eigenvalues
+are now available, with witnesses, through `walkEvals`. -/
+theorem exists_eigenvector_walkTransitionMatrix_eq_walkEvals
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i)
+    (k : Fin (Fintype.card V)) :
+    ∃ w : V → ℝ, w ≠ 0 ∧
+      walkTransitionMatrix A *ᵥ w = walkEvals A hA k • w := by
+  obtain ⟨i, hi⟩ :=
+    evals_mem_eigvalOf (normalizedLaplacian_symmetric A hA) k
+  refine ⟨degreeInvSqrt A *ᵥ
+    eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i,
+    degreeInvSqrt_mulVec_ne_zero A hd
+      (eigvecOf_ne_zero _ _ i), ?_⟩
+  rw [walkTransitionMatrix_mulVec_eigvecOf A hA hd i]
+  simp only [walkEvals, ← hi]
 
 end SpectralGraphTheory

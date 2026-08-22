@@ -1,12 +1,10 @@
 # Proposal: Discharge Davis–Kahan / Weyl / Cheeger Hard Direction
 
-**Status:** In progress — the Weyl target is **delivered** (Step 0
-surveyed positive and Step 1 executed 2026-08-20; see the delivery
-record below). Davis–Kahan's Step 0 survey **landed 2026-08-21**: the
-route is named and spike-verified (Duhamel/exponential integral; see the
-survey record below) with a 600–1000-line Step-1 estimate — Step 1 is
-authorized but should be a dedicated run, not bundled. The Cheeger hard
-direction remains unsurveyed — its Step 0 is an open next step, and
+**Status:** Weyl **delivered** (2026-08-20) and **Davis–Kahan
+delivered** (2026-08-21 — Step 0 surveyed, then both Step-1 components
+executed as the recorded two-component split, with the retirement at
+the unchanged statement; explicit axioms 11 → 10). The Cheeger hard
+direction remains unsurveyed — its Step 0 is the open next step, and
 Step 1 on it is unauthorized until that survey lands. Priority
 **Medium**, contingent on each target's Step 0 survey landing before its
 Step 1 begins — the same contingency pattern
@@ -353,20 +351,80 @@ equality trivially).
 
 ## Open next step
 
-**Davis–Kahan Step 1, component 1 — DELIVERED 2026-08-21.** The
-equal-rank projector identity `‖P − Q‖ = ‖(I−Q)P‖` for real symmetric
-idempotent matrices of equal rank, in `Analysis/OperatorTheory/
-Perturbation/ProjectionGap.lean` (~1570 lines), zero new axioms
-(`#print axioms` on every public theorem: `propext, Classical.choice,
-Quot.sound` only), with QA (`ProjectionGap_QA.lean`, 37 declarations).
-Exactly the route recorded in the survey above (the always-true max
-layer, the sandwich/eigenspace-transfer core, no charpoly machinery).
+**The Cheeger hard-direction Step 0 survey** (`cheeger_lower_bound`,
+`Cheeger.lean`): survey the standard sweep-cut argument's Lean cost
+specifically, under the known-hard working assumption unless the survey
+finds otherwise — do not spike it with the optimism that served Weyl or
+the route confidence that served Davis–Kahan (their outcomes do not
+transfer; this proposal's own three-target ranking says so). Record the
+findings here before any Step 1 begins. If the survey lands negative,
+the axiom stays, visible and cited, per the standing rule.
 
-**Component 2 — the Duhamel/FTC assembly — remains open**, as its own
-dedicated run per this proposal's one-step-per-run discipline: the
-exponential-integral representation `(I−Q)P = ∫₀^∞ e^{-tÃ}(I−Q) E e^{tA}
-P dt`, consuming the spike-verified semigroup primitives
-(`wip/dk_spike.lean`) and this delivered identity, to assemble the exact
-`davis_kahan_sin_theta` statement. After that, the Cheeger hard-direction
-survey, still under its known-hard working assumption. Weyl is delivered
-and closed (2026-08-20).
+Weyl is delivered and closed (2026-08-20). Davis–Kahan is delivered and
+closed (2026-08-21; records below).
+
+## Davis–Kahan Step 1 — DELIVERED 2026-08-21 (both components; explicit axioms 11 → 10)
+
+`davis_kahan_sin_theta` retired from admitted axiom to proved theorem
+at the **unchanged name, hypotheses, and conclusion** in
+`Perturbation/DavisKahan.lean`, by the recorded two-component split,
+executed as two runs the same day:
+
+- **Component 1** — the equal-rank projector identity `‖P − Q‖ =
+  ‖(I−Q)P‖` for real symmetric idempotent matrices of equal rank,
+  `Analysis/OperatorTheory/Perturbation/ProjectionGap.lean` (~1570
+  lines), zero new axioms, QA'd (`ProjectionGap_QA.lean`, 37
+  declarations; the 30° Pythagorean rotation fixture by two routes plus
+  the unequal-rank guard).
+- **Component 2** — the Duhamel/FTC assembly,
+  `Analysis/OperatorTheory/Perturbation/Duhamel.lean` (~900 lines),
+  zero new axioms (`#print axioms` on every public theorem: `propext,
+  Classical.choice, Quot.sound` only): the spike's semigroup primitives
+  transferred (`heatApply` with expansion/adjoint, Parseval damping,
+  eigenaction, differentiability, and the `t = 0` eigenbasis expansion),
+  the sorted-spectrum step `evals_succ_le_of_lt`, the projector
+  coefficient filter, the two cluster-filtered decay bounds, the
+  pairing (duality) norm reduction `l2OpNorm_le_of_abs_dotProduct_le`
+  (self-application route), and the headline
+  `l2OpNorm_one_sub_spectralProjector_mul_spectralProjector_le`
+  (`‖(1 − Q) * P‖ ≤ ‖E‖ / (b − a)`) — the scalar Duhamel pairing
+  `⟨e^{-t(A+E)} z_y, e^{tA} z_x⟩` whose derivative is exactly the
+  integrand `−⟨e^{-t(A+E)} z_y, E e^{tA} z_x⟩` (the two semigroup
+  derivatives cancel through the symmetry shuffle, leaving the defect
+  `E`), FTC on `[0, T]` with the explicit exponential majorant
+  `‖E‖ e^{-(b-a)t}`, and the boundary term killed by `T → ∞`. Plus
+  the rank layer (`rank_spectralProjector_eq_card_filter`, the no-tie
+  pin `rank_spectralProjector_evals_of_lt`) and the `≤ 1` gap-metric
+  endpoint.
+
+**A route discovery the survey did not need to resolve, recorded at
+delivery:** `initialProjector` includes whole tied eigenspaces, so under
+eigenvalue ties at a threshold the two projector ranks differ and the
+equal-rank identity does not apply directly. The retirement proof is a
+three-way case split: **no tie at either `k`-th threshold** → both
+ranks `k+1` → the equal-rank identity converts the goal to `‖(I−Q)P‖` →
+the Duhamel bound → `‖E‖/(b−a) ≤ ‖E‖/δ`; **tie at `(A+E)`'s threshold**
+(`λ_k = λ_{k+1}` there) → separation plus the proved
+`weyl_additive_upper` at index `k` force `δ ≤ ‖E‖`; **tie at `A`'s
+threshold** → the same through Weyl at index `k+1`; in both tie cases
+the unconditional `‖P − Q‖ ≤ 1` finishes `‖P − Q‖ ≤ 1 ≤ ‖E‖/δ`. (A
+2×2 hand example confirms the tie case is real, not vacuous: `A =
+diag(0,0,3)`, `Ã = diag(0,2,3)` has ranks 2 vs 1 at `k = 0` with the
+separation holding and the bound attained at equality.)
+
+**QA** (`DavisKahan_QA.lean`, extended to 20 declarations): the retained
+zero-perturbation instance, plus the proposal-required **strict
+non-vacuity witness** — `dkA = diag(0,2)` perturbed by
+`dkE = [[0,3/4],[3/4,0]]`, both spectra and `‖dkE‖ = 3/4` pinned
+independently (trace/determinant/sortedness + the proved bridge), the
+eigenvector directions pinned from the eigen equations (one-dimensional
+eigenspaces; no control over Mathlib's classical eigenbasis needed), so
+both projectors are pinned to explicit literals (`Q = (1/10)·[[9,−3],
+[−3,1]]`, `P = diag(1,0)`), the bound instance reads `‖Q − P‖ ≤ 1/3`,
+and the difference's own pinned spectrum gives the exact distance
+`1/√10 < 1/3` — strict, and the fixture exercises the no-tie (Duhamel)
+branch of the proof.
+
+**Downstream effect (verified by `#print axioms`):**
+`davisKahanTwoPoint` is **fully hard crust**; `eventStreamProjectorDrift`
+is conditional on `matrix_azuma_hoeffding` alone.

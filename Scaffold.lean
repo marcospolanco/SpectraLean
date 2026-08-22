@@ -20,6 +20,7 @@ import Scaffold.Mathlib.GraphTheory.Dynamics
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.ProjectionGap
+import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Duhamel
 import Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent
 import Scaffold.Mathlib.Probability.Concentration.Scalar.Subgaussian
 import Scaffold.Mathlib.Probability.Concentration.Scalar.Hoeffding

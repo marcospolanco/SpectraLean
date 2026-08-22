@@ -359,9 +359,17 @@ out-degree; `walkTransitionMatrix = D⁻¹ A` and
 Step 1 delivered the genuinely new layer (`GraphTheory.Directed`:
 `inDeg`, the `rfl` identifications, the symmetric-cone degree
 agreements, directed handshaking) plus the asymmetric-input QA
-certification of the pre-existing walk operators. Remaining: Step 2
-(the directed normalized Laplacian at the recorded convention), then
-the Step-3 agreement bar.
+certification of the pre-existing walk operators. *Second update
+(2026-08-22, same day):* **Step 2 + the Step-3 agreement brick
+delivered — the proposal's Lean content is complete** (zero new
+axioms): `directedNormalizedLaplacian I − ½(SAS + SAᵀS)` with
+hypothesis-free symmetry, the acceptance-bar agreement with
+`normalizedLaplacian` under `A.IsSymm`, and the square-root-free
+conjugate `√D L_dir √D = D_out − ½(A + Aᵀ)`; QA adds the calibration
+refutation (symmetric but not PSD on directed input — `quadForm` at
+`!![0,4;1,0]` is `−1/2 < 0`), witnessing the boundary the item's
+follow-on work (directed spectral theory via
+`admit-perron-frobenius.md`) must cross.
 
 ### 9. Bounded-window ("band") Davis–Kahan (2026-08-21, opened by the Davis–Kahan Step-0/1 survey)
 

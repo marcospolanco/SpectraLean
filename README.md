@@ -22,7 +22,7 @@ As of August 22, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 9 |
-| QA theorems/lemmas | 1295, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 1342, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is the Cheeger *hard* direction at the SGT
 center; the scalar and matrix
@@ -90,7 +90,16 @@ in-degree `inDeg`, the symmetric-cone agreements, and directed
 handshaking `∑ outDeg = ∑ inDeg`, with QA certifying
 `walkTransitionMatrix`'s row-stochasticity and the walk Laplacian's
 mass conservation on genuinely asymmetric input and refuting symmetry
-of the directed walk matrix) is proved with zero axioms. The finite-distribution **entropy layer** (`InformationTheory.Entropy`: relative entropy `klDiv` and Shannon entropy `shannonEntropy` with the visible `p i = 0 ↦ 0` junk convention, Gibbs' inequality in both directions (`0 ≤ klDiv p q`, with equality exactly at `p = q`), the uniform bridge, the entropy maximum `shannonEntropy p ≤ log |V|` with equality exactly at uniform, and nonnegativity) is proved from the term-wise information inequality `log t ≤ t − 1` — the same textbook route as the pinned Mathlib strict-concavity machinery, with zero axioms.
+of the directed walk matrix) **and the directed normalized Laplacian**
+(`directedNormalizedLaplacian := I − ½(SAS + SAᵀS)` at the out-degree
+normalization — symmetric *hypothesis-free* (the two defining halves
+are transposes of each other), agreeing exactly with
+`normalizedLaplacian` on the symmetric cone, and conjugate by `√D` to
+the square-root-free symmetrized-adjacency pair `D_out − ½(A+Aᵀ)`;
+QA exhibits the calibration refutation — symmetric but **not PSD** on
+directed input, the quadratic form at `!![0,4;1,0]` evaluating to
+`−1/2 < 0`, so the positivity layer of the undirected toolkit does
+not transfer) are proved with zero axioms. The finite-distribution **entropy layer** (`InformationTheory.Entropy`: relative entropy `klDiv` and Shannon entropy `shannonEntropy` with the visible `p i = 0 ↦ 0` junk convention, Gibbs' inequality in both directions (`0 ≤ klDiv p q`, with equality exactly at `p = q`), the uniform bridge, the entropy maximum `shannonEntropy p ≤ log |V|` with equality exactly at uniform, and nonnegativity) is proved from the term-wise information inequality `log t ≤ t − 1` — the same textbook route as the pinned Mathlib strict-concavity machinery, with zero axioms.
 
 The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for
 current counts, verification commands, and limitations.
@@ -208,7 +217,7 @@ The near-term center is general SGT. Public modules currently cover:
 | Decidable spectral certificates | `GraphTheory.SpectralCertificates` (the ℚ specification checker with its soundness theorem, and the kernel-verifiable ℤ cross-multiplied twin with proved bridges) |
 | Electrical structure | `GraphTheory.Electrical`, `GraphTheory.ElectricalFlow`, `GraphTheory.Foster` |
 | Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized` (the similarity, eigenpair transfer, conjugated powers), `GraphTheory.Stationary`, `GraphTheory.Mixing` (the ℓ²-mixing proxy: stationary vector, walk law, density evolution, χ² distance, decay engine) |
-| Directed operators | `GraphTheory.Directed` (the directed degree layer: `outDeg`/`inDeg`, symmetric-cone agreements, directed handshaking — the first slice of the directed axis) |
+| Directed operators | `GraphTheory.Directed` (the degree layer `outDeg`/`inDeg`, directed handshaking, and the directed normalized Laplacian `I − ½(SAS + SAᵀS)` — symmetric hypothesis-free, agreeing with `normalizedLaplacian` on the symmetric cone — with the PSD-refutation calibration witness; the directed axis, program complete) |
 | Perturbation | `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan,ProjectionGap,Duhamel}` |
 | Concentration | `Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*` |
 | Finite-distribution entropy | `InformationTheory.Entropy` (relative entropy and Shannon entropy, Gibbs' inequality, the entropy maximum — all proved) |

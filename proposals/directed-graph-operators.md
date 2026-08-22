@@ -1,11 +1,12 @@
 # Proposal: Directed and Asymmetric Graph Operators (Foundational Objects)
 
-**Status:** In progress (Steps 0–1 delivered 2026-08-22, run
-`20260822T181701Z-run-1`, zero new axioms — see the delivery record and
-the Step 0 record below). Priority **Medium**. Assistant's assessment of
-project direction, requested 2026-08-19, promoted from `sgt-gaps.md` item
-6. Authorizes no Lean changes, axiom admissions, or external publication
-beyond its own steps.
+**Status:** COMPLETE (Lean content) — Steps 0–2 delivered 2026-08-22
+across two runs (`20260822T181701Z-run-1` Steps 0+1,
+`20260822T194020Z-run-1` Step 2 + the Step-3 agreement brick, zero new
+axioms — see the delivery records below). Priority was **Medium**.
+Assistant's assessment of project direction, requested 2026-08-19,
+promoted from `sgt-gaps.md` item 6. Authorizes no Lean changes, axiom
+admissions, or external publication beyond its own steps.
 
 **The scope decision this needed is resolved.** `docs/1_STRATEGY.md`'s
 center-out prioritization now covers directed graphs (2026-08-19, operator
@@ -235,9 +236,12 @@ agreement, one line from decision (b).
 
 Step 0 — **delivered 2026-08-22** (record above). Step 1 delivered in
 the same run per the record-before-Step-1 requirement (Step 0 produces
-no Lean, so the run's one Lean step is Step 1); see the delivery record
-below. Next: Step 2 (the directed normalized Laplacian at decision (b)'s
-convention).
+no Lean, so the run's one Lean step is Step 1). Step 2 + the Step-3
+agreement brick delivered 2026-08-22 in run `20260822T194020Z-run-1`
+(record below) — **the proposal's Lean content is complete.** The
+follow-on axes named in Deferred (directed spectral theory via
+Perron–Frobenius, magnetic Laplacians, PageRank) each need their own
+proposal; none is scoped here.
 
 ## Step 1 delivery record (2026-08-22)
 
@@ -291,8 +295,8 @@ unfolding) followed by table rewrites and `norm_num`.
 **Verification:** `lake env lean` on the module and on the QA file —
 zero errors, zero warnings each; explicit target builds of both ✔;
 `#print axioms` on the seven public and twelve headline QA theorems ✔
-(three standard axioms only); umbrella import added and **full
-`lake build` ✔ (2230 targets, "Build completed successfully", zero
+(three standard axioms only); umbrella import added and **full `lake
+build` ✔ (2230 targets, "Build completed successfully", zero
 errors, detached log + poll)**; `lint_axioms` (9, unchanged),
 `check_citations`, `check_markdown_links` pass; scoreboard
 regenerated (**1295/9/0**; `Directed_QA` a new file row at 41; the
@@ -302,3 +306,99 @@ section), README (counts, proved list, module table), radar (QA axis
 count synced 1254/37 → **1295/38**, held at 4.0 with the hold
 logged), `proposals/README.md`, the execution plan, and the activity
 log.
+
+## Step 2 delivery record (2026-08-22, run `20260822T194020Z-run-1`)
+
+**Scope decision recorded before any statement:** this run delivers
+Step 2 *and* the Step-3 agreement brick, because the Step-0 record
+already scoped the latter as "the normalized-Laplacian agreement, one
+line from decision (b)" — the same one-Lean-step-per-run shape the
+Steps 0+1 run used. On delivery the proposal's Lean content is
+complete.
+
+**Delivered (zero new axioms; `#print axioms` on all five new public
+declarations reads only `propext, Classical.choice, Quot.sound`):** in
+`Scaffold/Mathlib/GraphTheory/Directed.lean` —
+
+- `directedNormalizedLaplacian A := 1 − (1/2) • (SAS + SAᵀS)`, `S =
+  `degreeInvSqrt A` — exactly decision (b)'s convention; the
+  normalization is out-degree because `deg` *is* the out-degree
+  (`outDeg_eq_deg`), so the shelf's square-root diagonal matrices are
+  reused verbatim, no new degree machinery;
+- `directedNormalizedLaplacian_apply` — the entry form
+  `δ_ij − ½·(√d_i)⁻¹(A_ij + A_ji)(√d_j)⁻¹` (the same second term in
+  both arc directions *is* the symmetrization; the interface QA
+  computes through);
+- `directedNormalizedLaplacian_isSymm` — **hypothesis-free symmetry
+  for every matrix**: `(SAS)ᵀ = SAᵀS` (`S` diagonal), so the defining
+  sum is symmetric even when `A` is not — the directed axis' one
+  symmetric operator, the exact complement of the walk operators
+  (provably asymmetric on directed input, Step 1's negative witness);
+- `directedNormalizedLaplacian_eq_normalizedLaplacian` — **the Step-3
+  acceptance bar**: on `A.IsSymm` the transpose half coincides with
+  the first (`Aᵀ = A`) and `½ • (M + M) = M`, so `L_dir` *is* the
+  shelf's `normalizedLaplacian`. Together with the Step-1 degree
+  agreements and the Step-0 record that the directed axis shares the
+  walk-operator definitions, every directed construction now reduces
+  to its undirected counterpart on the symmetric cone;
+- `degreeSqrt_mul_directedNormalizedLaplacian_mul_degreeSqrt` — the
+  square-root-free conjugate `√D L_dir √D = degreeMatrix A −
+  ½(A + Aᵀ)` (the cancellation `√D(1/√D) = 1` twice): the underlying
+  symmetric-combinatorial object is the *symmetrized adjacency*
+  `½(A + Aᵀ)` with the out-degree matrix, the exact analogue of the
+  shelf's `degreeSqrt_mul_normalizedLaplacian_mul_degreeSqrt`.
+
+**Calibration fact (the delivery's sharpest output, stated in the
+module docstring and witnessed in QA):** symmetric does not mean PSD
+here — on directed input `L_dir` can have a negative eigenvalue, so
+the positivity layer of the undirected toolkit (PSD-ness, variational
+eigenvalue bounds) does *not* transfer, exactly as this proposal's
+Calibration section draws the boundary. The QA refutation fixture is
+`dirB = !![0,4;1,0]`: nonnegative, positive out-degrees `(4,1)`, both
+squares; the symmetrized adjacency `½(A+Aᵀ)` carries weight `5/2`
+against the normalization `√4·√1 = 2`, so `L_dir 0 1 = −5/4` (past
+`−1`) and `quadForm L_dir 1 = −1/2 < 0` — the hypothesis-free
+symmetry theorem instantiated on the same fixture, so the refutation
+is about PSD-ness alone.
+
+**QA (`Scaffold/QA/SpectralGraph/Directed_QA.lean`, 41 → 88
+declarations; `#print axioms` on nineteen headline QA theorems
+clean):** all nine `L_dir dirA` entries computed from the entry form
+(degrees `(4,1,1)` all squares → `√D = diag(2,1,1)` → the operator is
+exactly `[[1,−1,−1/2],[−1,1,0],[−1/2,0,1]]`); symmetry through the
+theorem on the asymmetric fixture (the load-bearing certification) and
+raw at the `(0,1)/(1,0)` pair; the conjugate instantiated with both
+sides' `(0,1)` entries computed raw and matching at `−2`
+(`√4·(−1)·√1 = 0 − ½(3+1)` — an independent hand-check the theorem's
+claim must match); the symmetric-edge agreement through the Step-3
+theorem with both operators' `(0,0)`/`(0,1)` entries pinned raw; and
+the two new negative witnesses — undirected reuse
+(`L_dir dirA ≠ normalizedLaplacian dirA`, entry `−1 ≠ −3/2`) and the
+PSD refutation above.
+
+**Pin-specific QA techniques (recorded for future fixtures):** square
+roots of numerals need `Real.sqrt_eq_iff_eq_sq` on this pin (`norm_num`
+alone does not evaluate `Real.sqrt 4`; `Real.sqrt_one` covers `1`);
+the entry form's `if i = j` discharges by `if_pos rfl` / `if_neg (by
+decide : ¬(i = j))` — *not* by `Matrix.one_apply_ne (by decide)`,
+whose `by decide` elaborates with metavariables and fails (the
+entry-form statement already carries the `if`, not a matrix-one
+application); ground `Fin`-index `if`s left by `simp only
+[Matrix.diagonal_apply, …]` inside entry computations are resolved by
+full `simp` (`norm_num` leaves them standing — the residue looks like
+`2 = 1 → (−1 + if 0 = 2 then 2 else 0) = 0`); `rw` rewrites *all*
+occurrences of an instantiated pattern at once, so listing an entry
+lemma twice in a `rw` list fails on the second.
+
+**Verification:** `lake env lean` on the module and on the QA file —
+zero errors, zero warnings each; explicit target builds of both ✔;
+`#print axioms` on the five new public and nineteen headline QA
+theorems ✔ (three standard axioms only); **full `lake build` ✔ (2230
+targets, "Build completed successfully", zero errors, detached log +
+poll)**; `lint_axioms` (**9**, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1342/9/0**;
+`Directed_QA` 41 → 88). Records updated: this record, backlog item 8,
+the SGT index map (Directed section), README (counts, proved list,
+module table), radar (QA axis count synced 1295/38 → **1342/38**, held
+with the hold logged), `proposals/README.md`, the execution plan, and
+the activity log. Nothing committed.

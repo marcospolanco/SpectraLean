@@ -24,6 +24,38 @@ entry. If a session ID cannot be established from repository evidence, write
 Follow the metadata with concise `Changes`, `Verification`, `Remaining risk`,
 and `Next handoff` paragraphs as applicable.
 
+## 2026-08-22T20:10:13Z — Directed operators Step 2 delivered: the symmetrized normalized Laplacian; the proposal's Lean content complete
+
+**Run:** `20260822T194020Z-run-1`  
+**Session:** `ses_fd5032572ffe4qTynTCxjNs6hi`  
+**Status:** completed  
+**Milestone:** `proposals/directed-graph-operators.md` Step 2 (the directed normalized Laplacian `I − ½(SAS + SAᵀS)` at the Step-0-recorded out-degree-symmetrized convention) plus the Step-3 agreement brick (folded in per the Step-0 record's "one line from decision (b)" scoping) — the proposal's Lean content is complete. Top-ranked Medium row, Active table holding no High rows. Zero new axioms (count stays 9).
+
+**Changes:** `GraphTheory.Directed` extended with `directedNormalizedLaplacian` (the shelf's `degreeInvSqrt`/`degreeSqrt` reused verbatim — `deg` *is* the out-degree), the entry form, **hypothesis-free symmetry** (the two defining halves are transposes of each other; the directed axis' one symmetric operator), the acceptance-bar agreement `= normalizedLaplacian` under `A.IsSymm`, and the square-root-free conjugate `√D L_dir √D = degreeMatrix A − ½(A + Aᵀ)`. QA `Directed_QA.lean` 41 → 88: all nine `L_dir dirA` entries computed from the entry form (exactly `[[1,−1,−1/2],[−1,1,0],[−1/2,0,1]]`), the symmetry theorem instantiated on asymmetric input, the conjugate's two sides independently hand-checked at `−2`, the symmetric-edge agreement pinned raw both sides, and the two new negative witnesses — undirected reuse (`L_dir ≠ normalizedLaplacian` on directed input, `−1 ≠ −3/2`) and the **PSD refutation**: on `dirB = !![0,4;1,0]` (nonnegative, positive out-degrees, symmetric `L_dir`) `quadForm L_dir 1 = −1/2 < 0` — symmetric does not mean PSD; the positivity layer of the undirected toolkit provably does not transfer, and the directed spectral theory needs Perron–Frobenius (the proposal's Calibration boundary, now witnessed numerically). Records: the proposal (status COMPLETE, Step-2 delivery record), `proposals/README.md` (row, progress paragraph, Delivered table), backlog item 8, the SGT index map, README (1342, proved list, module table), radar (QA count 1295/38 → 1342/38, held 4.0), scoreboard (both Direct rows, `lake build` row, interpretation bullet), the execution plan, and this log. Nothing committed.
+
+**Decisive commands and outcomes:** `lake env lean` on the module and QA — zero errors, zero warnings each (after one rebuild of the module olean; QA elaboration had initially consumed the stale olean); explicit `lake build` targets for both modules ✔; `#print axioms` on the five new public and nineteen headline QA theorems — `propext, Classical.choice, Quot.sound` only; **full `lake build` ✔ (2230 targets, "Build completed successfully", zero errors, detached)**; `lint_axioms` (9), `check_citations`, `check_markdown_links` pass; scoreboard regenerated **1342/9/0**, idempotent under re-run. Pin-specific QA techniques recorded in the proposal for future fixtures: `Real.sqrt_eq_iff_eq_sq` for numerals (`norm_num` alone does not evaluate `Real.sqrt 4`); the entry form's conditional discharges by `if_pos rfl`/`if_neg (by decide : ¬(i = j))` — `Matrix.one_apply_ne (by decide)` elaborates with metavariables and fails; ground `Fin`-index `if`s inside entry computations need full `simp` (`norm_num` leaves residue); `rw` rewrites all occurrences of an instantiated pattern at once, so duplicate lemma mentions in a `rw` list fail.
+
+**Verification:** fully proved hard crust — nothing axiom-backed was added, no `sorry` anywhere; the QA is load-bearing in both directions (the hypothesis-free symmetry instantiated on asymmetric input would fail to elaborate against a definition that secretly needed `IsSymm`; the conjugate's two sides were computed independently and must match; the PSD refutation exercises the shelf's `quadForm` interface against the new operator).
+
+**Remaining risk:** low. The named residual is unchanged and now witnessed: the convention forfeits Chung's directed-Cheeger content, and the PSD refutation shows the undirected positivity layer does not transfer — any directed spectral statement must wait for Perron–Frobenius. The Mathlib coverage map needed no correction.
+
+**Next handoff:** the Medium rows by leverage — **the Perron–Frobenius admission** (`admit-perron-frobenius.md` — decoupled by the Step-0 record; its imprimitive-cycle negative witness is the centerpiece its QA plan mandates; the natural continuation of the directed axis), the **Cheeger hard-direction Step 0 survey** (known-hard), and **approximate spectral projection** (Step 0 first). Reversibility Phase B and Fiedler Phase B still need operator decisions.
+
+## 2026-08-22T19:40:20Z — Directed operators Step 2: the symmetrized normalized Laplacian, closing the proposal
+
+**Run:** `20260822T194020Z-run-1`  
+**Session:** `ses_fd5032572ffe4qTynTCxjNs6hi`  
+**Status:** in-progress  
+**Milestone:** `proposals/directed-graph-operators.md` Step 2 (the directed normalized Laplacian `I − ½(SAS + SAᵀS)` at the Step-0-recorded out-degree-symmetrized convention) plus the Step-3 agreement brick (recorded by Step 0 as one line from decision (b)) — on delivery the proposal's Lean content is complete. Top-ranked Medium row, Active table holding no High rows. Zero new axioms.
+
+**Changes:** intent recorded in the execution plan; Lean work pending below (`GraphTheory.Directed` + `Directed_QA.lean`).
+
+**Verification:** pending — module + QA elaboration, `#print axioms`, explicit builds, full `lake build`, lint/citation/link checks, scoreboard regeneration at the milestone boundary.
+
+**Remaining risk:** low — the convention is decided, the consumed shelf lemmas (`degreeSqrt`/`degreeInvSqrt` cancellation pair, `normalizedLaplacian`) were read at their exact signatures during the Step-0 survey and again this run.
+
+**Next handoff:** delivery record, records sync, terminal entry.
+
 ## 2026-08-22T18:17:01Z — Directed operators Step 0 + Step 1: convention decisions and the degree layer
 
 **Run:** `20260822T181701Z-run-1`  

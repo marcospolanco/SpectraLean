@@ -345,6 +345,19 @@ spectrum-then-refute witness — the mode exclusion of an *axiom-free*
 theorem tied to its load-bearing hypothesis — strengthen existing
 witness kinds without touching the parametric gap; held).
 
+The QA axis was **held at 4.0** and its count synced to **1342/38** on
+2026-08-22 (the directed normalized Laplacian,
+`proposals/directed-graph-operators.md` Step 2 + the Step-3 agreement
+brick, zero new axioms: `SpectralGraph/Directed_QA` 41 → 88
+declarations — all nine `L_dir` entries computed from the entry form
+on the all-square-degree fixture, the hypothesis-free symmetry
+instantiated on asymmetric input, the conjugate's two sides
+independently hand-checked, and a genuinely new **calibration negative
+witness**: symmetric-but-not-PSD, `quadForm` refuted at `!![0,4;1,0]`
+with `−1/2 < 0` — a refutation-of-transfer witness kind rather than a
+new parametric capability, so the axis's named gap is untouched and
+the score holds).
+
 The QA axis was **held at 4.0** and its count synced to **1295/38** on
 2026-08-22 (the directed degree layer, `proposals/directed-graph-operators.md`
 Steps 0+1, zero new axioms: the new `SpectralGraph/Directed_QA` at 41

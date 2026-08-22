@@ -6,6 +6,74 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Directed operators Step 2 (the directed normalized Laplacian) + the
+Step-3 agreement brick — run 1, 2026-08-22; `proposals/directed-graph-operators.md`
+at its recorded open next step, the top-ranked Medium row with the Active table
+holding no High rows: DELIVERED — the proposal's Lean content is COMPLETE
+(Step 3's remaining content was recorded by the Step-0 record as "one line from
+decision (b)", so folding it into Step 2's run is the same one-Lean-step shape
+Steps 0+1 used). Zero new axioms (count stays 9).**
+
+**Delivered:** in `GraphTheory.Directed` — `directedNormalizedLaplacian`
+(`I − ½(SAS + SAᵀS)`, `S = degreeInvSqrt` — the out-degree normalization of
+decision (b); the shelf's square-root diagonals reused verbatim since `deg`
+*is* the out-degree), the entry form, **hypothesis-free symmetry** (the two
+defining halves are transposes of each other — the directed axis' one
+symmetric operator), the acceptance-bar agreement
+`= normalizedLaplacian` under `A.IsSymm`, and the square-root-free conjugate
+`√D L_dir √D = degreeMatrix A − ½(A + Aᵀ)` (the symmetrized adjacency at
+out-degree normalization, exact analogue of the shelf's
+`degreeSqrt_mul_normalizedLaplacian_mul_degreeSqrt`).
+
+**The delivery's sharpest output is a refutation:** `L_dir` is symmetric but
+provably **not PSD** on directed input — QA's `dirB = !![0,4;1,0]` fixture
+(nonnegative, positive out-degrees, `L_dir` symmetric by the theorem) has
+`quadForm L_dir 1 = −1/2 < 0` (the symmetrized weight `5/2` overweights the
+out-degree normalization `√4·√1 = 2`, driving `L_dir 0 1` to `−5/4` past
+`−1`), so the positivity layer of the undirected toolkit does not transfer —
+the proposal's Calibration boundary, now witnessed numerically; the directed
+spectral theory needs Perron–Frobenius.
+
+**QA** (`Directed_QA.lean`, 41 → 88 declarations; `#print axioms` on nineteen
+headline QA theorems clean): all nine `L_dir dirA` entries computed from the
+entry form (degrees `(4,1,1)` all squares → the operator is exactly
+`[[1,−1,−1/2],[−1,1,0],[−1/2,0,1]]`); symmetry through the theorem on
+asymmetric input (the load-bearing certification) and raw at the `(0,1)/(1,0)`
+pair; the conjugate instantiated with both sides' `(0,1)` entries computed raw
+and matching at `−2`; the symmetric-edge agreement through the Step-3 theorem
+with both operators pinned raw; and the two new negative witnesses — undirected
+reuse (`L_dir dirA ≠ normalizedLaplacian dirA`, `−1 ≠ −3/2`) and the PSD
+refutation above.
+
+**Verification:** `lake env lean` on the module and QA — zero errors, zero
+warnings each; explicit target builds of both ✔; `#print axioms` on the five
+new public and nineteen headline QA theorems ✔ (three standard axioms only);
+**full `lake build` ✔ (2230 targets, "Build completed successfully", zero
+errors, detached)**; `lint_axioms` (**9**, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1342/9/0**;
+`Directed_QA` 41 → 88). Records updated: the proposal (status header
+COMPLETE, Step-2 delivery record with the pin-specific QA techniques —
+`Real.sqrt_eq_iff_eq_sq` for numerals, `if_pos rfl`/`if_neg (by decide : …)`
+for the entry form's conditional (not `Matrix.one_apply_ne (by decide)`:
+metavariables), full `simp` for ground `Fin`-index `if`s that `norm_num`
+leaves standing, and the `rw`-rewrites-all-occurrences duplicate trap),
+`proposals/README.md` (Medium row → program complete, progress paragraph,
+Delivered row), backlog item 8 (second update), the SGT index map (Directed
+section, +5 rows), README (1342, proved list, module table), radar (QA axis
+count synced **1295/38 → 1342/38**, held at 4.0, hold logged), scoreboard
+(both Direct rows, the `lake build` row, a new interpretation bullet), this
+plan, and the activity log. Nothing committed.
+
+**Next milestone (open):** the Medium rows by leverage — **the Perron–Frobenius
+admission** (`admit-perron-frobenius.md` — decoupled by the Step-0 record;
+its QA plan's imprimitive-cycle negative witness is the centerpiece; the
+natural continuation of the directed axis this run completed), the **Cheeger
+hard-direction Step 0 survey** (known-hard working assumption), and
+**approximate spectral projection** (Step 0 first). Reversibility Phase B and
+Fiedler Phase B still need operator decisions.
+
+---
+
 **Directed operators Step 0 (survey + convention decisions) + Step 1
 (the degree layer) — run 1, 2026-08-22;
 `proposals/directed-graph-operators.md` + the coordinated build-order

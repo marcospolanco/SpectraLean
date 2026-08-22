@@ -552,15 +552,19 @@ transfer — `√D *ᵥ (Pᵗ *ᵥ g) = (1 − L_sym)ᵗ *ᵥ (√D *ᵥ g)`), p
 (the constant fix `P *ᵥ 1 = 1`), `degreeSqrt_mulVec_apply`, and
 `degreeInvSqrt_mulVec_apply` (the conjugating actions' entry forms).
 
-### `Scaffold.Mathlib.GraphTheory.Directed` (the directed degree layer)
+### `Scaffold.Mathlib.GraphTheory.Directed` (the directed degree layer and the directed normalized Laplacian)
 
 All statements proved (2026-08-22, `proposals/directed-graph-operators.md`
-Steps 0+1), no axioms, no symmetry anywhere. The Step-0 record's discovery
-shapes the module: the undirected shelf's `deg` (the row sum) *is* the
-out-degree and `walkTransitionMatrix = D⁻¹ A` / `walkLaplacian = I − D⁻¹ A`
-are defined symmetry-free — so this module adds the genuinely new directed
-quantity (the in-degree) and the degree-level agreement theorems, while
-QA certifies the pre-existing walk operators on asymmetric input.
+— Steps 0+1, then Step 2 + the Step-3 agreement brick; the program
+complete), no axioms, no symmetry assumed anywhere it is not named. The
+Step-0 record's discovery shapes the module: the undirected shelf's
+`deg` (the row sum) *is* the out-degree and `walkTransitionMatrix =
+D⁻¹ A` / `walkLaplacian = I − D⁻¹ A` are defined symmetry-free — so
+this module adds the genuinely new directed quantity (the in-degree),
+the degree-level agreement theorems, and the directed normalized
+Laplacian at the out-degree-symmetrized convention, while QA
+certifies the pre-existing walk operators on asymmetric input and
+refutes PSD-ness of the new operator (the calibration boundary).
 
 | Declaration | Content |
 |-------------|---------|
@@ -571,6 +575,11 @@ QA certifies the pre-existing walk operators on asymmetric input.
 | `inDeg_eq_outDeg_of_isSymm` | agreement on the symmetric cone: `A.IsSymm → inDeg A i = outDeg A i` — the degree brick of the proposal's Step-3 acceptance bar |
 | `inDeg_eq_deg_of_isSymm` | agreement with the shelf: `A.IsSymm → inDeg A i = deg A i` |
 | `sum_outDeg_eq_sum_inDeg` | **directed handshaking:** `∑ i, outDeg A i = ∑ i, inDeg A i` with no nonnegativity or symmetry hypothesis (`Finset.sum_comm`) |
+| `directedNormalizedLaplacian` | the directed normalized Laplacian `I − ½(SAS + SAᵀS)`, `S = degreeInvSqrt` (the out-degree normalization, Step-0 decision (b); definition — total, noncomputable through `Real.sqrt`) |
+| `directedNormalizedLaplacian_apply` | the entry form `δ_ij − ½·(√d_i)⁻¹(A_ij + A_ji)(√d_j)⁻¹` — the same second term in both arc directions *is* the symmetrization |
+| `directedNormalizedLaplacian_isSymm` | **symmetry, hypothesis-free, for every matrix** — the two defining halves are transposes of each other; the directed axis' one symmetric operator (contrast the provably asymmetric walk operators) |
+| `directedNormalizedLaplacian_eq_normalizedLaplacian` | **the Step-3 acceptance bar:** `A.IsSymm → L_dir = normalizedLaplacian` — both halves coincide on the symmetric cone; every directed construction reduces to its undirected counterpart there |
+| `degreeSqrt_mul_directedNormalizedLaplacian_mul_degreeSqrt` | the square-root-free conjugate `√D L_dir √D = degreeMatrix A − ½(A + Aᵀ)` — the symmetrized adjacency at out-degree normalization; every quadratic-form statement transfers to this pair |
 
 ### `Scaffold.Mathlib.GraphTheory.VariationalTransfer` (variational consumer of the congruence bridge)
 

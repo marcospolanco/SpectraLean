@@ -24,6 +24,7 @@ import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.ProjectionGap
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Duhamel
 import Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent
+import Scaffold.Mathlib.LinearAlgebra.PerronFrobenius
 import Scaffold.Mathlib.Probability.Concentration.Scalar.Subgaussian
 import Scaffold.Mathlib.Probability.Concentration.Scalar.Hoeffding
 import Scaffold.Mathlib.Probability.Concentration.Scalar.Bernstein
@@ -96,7 +97,17 @@ frontier (`GraphTheory.Dynamics`), the perturbation bridge
 operator-norm bridge `‖M‖ ↔ max-abs eigenvalue` proved from the
 eigenbasis machinery after the C*-algebra thread was found
 structurally inapplicable to real matrices, invertibility of the
-shifted PSD matrix, and the resolvent identity), the probability
+shifted PSD matrix, and the resolvent identity), the nonnegative-matrix
+spectral theory for the directed axis (`LinearAlgebra.PerronFrobenius`:
+the combinatorial irreducibility predicate
+`Matrix.IsIrreducible` — strong connectivity through positive-weight
+arcs — and the admitted Perron–Frobenius theorem for irreducible
+nonnegative matrices at the Horn–Johnson 8.4.4 qualification level:
+positive simple Perron root with a strictly positive eigenvector, the
+positive-multiple uniqueness among nonnegative eigenvectors, and
+complex-spectrum domination, deliberately with **no** strict-dominance
+clause since imprimitive directed cycles have peripheral eigenvalues of
+equal modulus), the probability
 concentration bridge (`Probability.Concentration.*`), the
 finite-distribution entropy layer (`InformationTheory.Entropy`:
 relative entropy and Shannon entropy with Gibbs' inequality and the

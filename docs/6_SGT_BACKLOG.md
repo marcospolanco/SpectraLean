@@ -369,7 +369,18 @@ conjugate `√D L_dir √D = D_out − ½(A + Aᵀ)`; QA adds the calibration
 refutation (symmetric but not PSD on directed input — `quadForm` at
 `!![0,4;1,0]` is `−1/2 < 0`), witnessing the boundary the item's
 follow-on work (directed spectral theory via
-`admit-perron-frobenius.md`) must cross.
+`admit-perron-frobenius.md`) must cross. *Third update (2026-08-22,
+same day):* **that follow-on's first half crossed —
+`proposals/admit-perron-frobenius.md` delivered** (the scoped
+admission, explicit axioms 9 → 10): `Matrix.IsIrreducible` (directed
+reachability) and the admitted Horn–Johnson 8.4.4 theorem at the
+irreducible-case qualification level — positive simple Perron root,
+strictly positive eigenvector, positive-multiple uniqueness among
+nonnegative eigenvectors, complex-spectrum domination, deliberately no
+strict-dominance clause (QA's `strict_dominance_refuted_QA` exhibits
+the directed 2-cycle where the strengthening dies at `|−2| = 2 = r`).
+The item's named consumers — irreducible stationary distributions and
+PageRank — are now unblocked as separate follow-on proposals.
 
 ### 9. Bounded-window ("band") Davis–Kahan (2026-08-21, opened by the Davis–Kahan Step-0/1 survey)
 

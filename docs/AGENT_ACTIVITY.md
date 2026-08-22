@@ -24,6 +24,38 @@ entry. If a session ID cannot be established from repository evidence, write
 Follow the metadata with concise `Changes`, `Verification`, `Remaining risk`,
 and `Next handoff` paragraphs as applicable.
 
+## 2026-08-22T21:42:53Z — Perron–Frobenius admitted: the directed axis' second spectral toolkit
+
+**Run:** `20260822T211552Z-run-1`  
+**Session:** `ses_fd4b02ef7ffeucven25tSq36wL`  
+**Status:** completed  
+**Milestone:** `proposals/admit-perron-frobenius.md` — the scoped admission delivered: `Matrix.IsIrreducible` (combinatorial, global, Fintype-free) plus the admitted Horn–Johnson 8.4.4 axiom at the irreducible-case qualification level, QA with the mandated imprimitive-cycle negative witness, and the index/coverage/count records. One new explicit cited axiom (9 → 10) — the first admission since the 2026-08-19 scope decision, and deliberately so: the directed-operators program's PSD refutation showed the undirected positivity layer does not transfer, and this is the nonnegative-matrix theory that replaces the symmetric `evals` toolkit on the directed axis. No consumer work (stationary distributions, PageRank stay named follow-ons).
+
+**Changes:** the new `Scaffold/Mathlib/LinearAlgebra/PerronFrobenius.lean` (namespace `Scaffold.LinearAlgebra`) and `Scaffold/QA/LinearAlgebra/PerronFrobenius_QA.lean` (36 declarations, the first LinearAlgebra-domain QA file); umbrella import + doc entry in `Scaffold.lean`; Horn–Johnson source-index row (Theorem 8.4.4) + scope note; the new `index/map/linear_algebra.md` + map README row; coverage map's named-absent Perron–Frobenius row updated to "Absent (upstream) / Admitted (Scaffold)"; backlog item 8 third update; README (10 axioms, 1378 QA, trust surface, module table); radar QA-axis sync (1342/38 → 1378/39, held 4.0); scoreboard (counts, both Direct rows, `lake build` row, lint row, interpretation bullet); the proposal's status header + full delivery record; `proposals/README.md` (row retired, paragraph rewritten, Delivered row); the execution plan. Statement-shape decisions recorded before stating: the `hex` degeneracy guard (exactly the missing strength at `card V ≤ 1`, derivable from irreducibility at `n ≥ 2`), `rootMultiplicity`-over-ℝ simplicity, the strong uniqueness clause with the explicit `μ = r` conjunct, spectral radius encoded through complex charpoly roots (no matrix spectral radius in the pin), and no strict-dominance clause.
+
+**Decisive commands and outcomes:** `lake env lean` on the module and QA — zero errors, zero warnings each; explicit `lake build` targets for both ✔; `#print axioms` — the five axiom-consuming QA theorems (`perron_frobenius_P_QA`, `perron_frobenius_D_QA`, the only-eigenvalue cross-check, both domination instantiations) list exactly `Scaffold.LinearAlgebra.perron_frobenius` + `propext, Classical.choice, Quot.sound`, while the eleven hand theorems (including the centerpiece `strict_dominance_refuted_QA` and both hand-only only-eigenvalue theorems) read only the standard three; **full `lake build` ✔ (2232 targets, "Build completed successfully", zero errors, detached)**; `lint_axioms`, `check_citations`, `check_markdown_links` pass; scoreboard regenerated **1378/10/0**, idempotent under re-run. QA highlights: on the positive witness `!![1,2;1,0]` the Perron root is *derived to be exactly 2* from the axiom's eigen-equation on its unknown witness, with simplicity and complex-domination clauses pinned against hand factorizations; on the asymmetric directed 2-cycle `!![0,4;1,0]` the strengthening's `|μ| < r` is refuted at `|−2| = 2 = r` while the admitted `|−2| ≤ r` holds with equality — the fence the proposal's Calibration section demanded. Pin-specific techniques recorded in the proposal for future fixtures: plain `open Polynomial` (not `open scoped`) activates `X`/`C`; eta-expanded `fin_cases` indices need explicit `show`; C-numerals must be normalized to numerals before `ring` (this pin's `C_mul` points opposite to modern Mathlib, `C_eq_natCast` misses OfNat literals); scalar `2 • x` needs `(2:ℝ)` annotation; `charpoly_map`'s RingHom argument does not match `coe_algebraMap`'s coerced form — compute mapped charpolys directly.
+
+**Verification:** the axiom is admitted, not proved — nothing here is described as foundationally established, and the QA's role is interface pinning plus the falsification fence, not validation of the axiom's truth. The axiom-transparency split is machine-checked: every axiom-consuming QA theorem shows the dependency, every hand theorem does not.
+
+**Remaining risk:** low. The statement is guarded exactly where this repository has been burned before (no strict dominance; `hex` for the degenerate sizes), and the QA refutes the canonical misstatement. The named residuals are the follow-on consumers (irreducible stationary distributions, PageRank), each requiring its own proposal, and the standing note that an upstream Mathlib Perron–Frobenius would trigger the replacement lifecycle (a global `Matrix.IsIrreducible` from Scaffold would then be renamed).
+
+**Next handoff:** the Medium rows by leverage — the **Cheeger hard-direction Step 0 survey** (known-hard; the last perturbation-axiom remainder) and **approximate spectral projection** (Step 0 first). The PF consumers are unblocked as new-proposal candidates. Reversibility Phase B and Fiedler Phase B still need operator decisions.
+
+## 2026-08-22T21:15:52Z — Perron–Frobenius admission: the directed axis' second toolkit
+
+**Run:** `20260822T211552Z-run-1`  
+**Session:** `ses_fd4b02ef7ffeucven25tSq36wL`  
+**Status:** in-progress  
+**Milestone:** `proposals/admit-perron-frobenius.md` scoped admission — irreducibility via directed reachability, the Horn & Johnson 8.4.4 axiom at the irreducible-case qualification level (no strict-dominance clause), QA with the mandated imprimitive-cycle negative witness, and the index/coverage/axiom-count records. Top-ranked Medium row, Active table holding no High rows, and the recorded next handoff of the directed-operators completion (whose PSD refutation names this as what the directed spectral theory needs). One new explicit cited axiom (9 → 10); no consumer work.
+
+**Changes:** intent recorded in the execution plan (pre-edit survey + statement-shape decisions: the `hex` degeneracy guard, the strong uniqueness clause, `rootMultiplicity`-over-ℝ simplicity, global `Matrix.IsIrreducible`, rational QA fixtures). Lean work pending below (`Scaffold/Mathlib/LinearAlgebra/PerronFrobenius.lean` + `Scaffold/QA/LinearAlgebra/PerronFrobenius_QA.lean`).
+
+**Verification:** pending — module + QA elaboration, `#print axioms` on the axiom's QA consumers (must list the new axiom), explicit builds, full `lake build`, lint/citation/link checks, scoreboard regeneration at the milestone boundary.
+
+**Remaining risk:** low — the statement is scoped by a proposal whose Calibration section was written against exactly the misstatement this repository has made before; the QA plan's negative witness is designed to fence it.
+
+**Next handoff:** delivery record, records sync, terminal entry.
+
 ## 2026-08-22T20:10:13Z — Directed operators Step 2 delivered: the symmetrized normalized Laplacian; the proposal's Lean content complete
 
 **Run:** `20260822T194020Z-run-1`  

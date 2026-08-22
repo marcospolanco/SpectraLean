@@ -345,6 +345,22 @@ spectrum-then-refute witness — the mode exclusion of an *axiom-free*
 theorem tied to its load-bearing hypothesis — strengthen existing
 witness kinds without touching the parametric gap; held).
 
+The QA axis was **held at 4.0** and its count synced to **1378/39** on
+2026-08-22 (the Perron–Frobenius admission,
+`proposals/admit-perron-frobenius.md`: the new
+`LinearAlgebra/PerronFrobenius_QA.lean` at 36 declarations — the
+axiom's Perron root derived to be exactly the hand value on two
+asymmetric irreducible fixtures, the simplicity and
+complex-spectrum-domination clauses pinned against hand factorizations,
+and the proposal-mandated **imprimitive-cycle negative witness**
+`strict_dominance_refuted_QA` (on the directed 2-cycle `!![0,4;1,0]`
+the strengthening's `|μ| < r` is refuted at `|−2| = 2 = r` while the
+admitted statement's `|−2| ≤ r` holds *with equality* — a genuinely new
+witness kind, a falsification fence around an admitted axiom's
+qualification level, and the first QA file in the LinearAlgebra domain;
+the parametric coverage gap — unit tests over parametric definitions —
+is untouched, hence the hold).
+
 The QA axis was **held at 4.0** and its count synced to **1342/38** on
 2026-08-22 (the directed normalized Laplacian,
 `proposals/directed-graph-operators.md` Step 2 + the Step-3 agreement

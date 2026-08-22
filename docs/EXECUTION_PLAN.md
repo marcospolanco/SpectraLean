@@ -6,6 +6,142 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Perron–Frobenius admission (run 1, 2026-08-22; `proposals/admit-perron-frobenius.md`,
+the top-ranked Medium row with the Active table holding no High rows and
+the recorded next milestone of the directed-operators completion — whose
+sharpest output, the PSD refutation, explicitly names Perron–Frobenius as
+what the directed spectral theory now needs): DELIVERED — the scoped
+admission, one new explicit cited axiom (9 → 10), the first admission
+since the 2026-08-19 scope decision.**
+
+**Delivered:** the new `Scaffold/Mathlib/LinearAlgebra/PerronFrobenius.lean`
+(namespace `Scaffold.LinearAlgebra`) — the combinatorial irreducibility
+predicate `Matrix.IsIrreducible` (global, Fintype-free, `ReflTransGen`
+on positive entries — mirroring `Matrix.IsSymm`'s reading surface rather
+than a bespoke predicate) and the admitted axiom `perron_frobenius` at
+the proposal's scoped qualification level: `0 < r` with a strictly
+positive eigenvector `A *ᵥ x = r • x`; simplicity as
+`rootMultiplicity r A.charpoly = 1` over ℝ; the strong H&J uniqueness
+(every nonzero nonnegative eigenvector, whatever its eigenvalue, is a
+positive multiple of `x`) with the only-eigenvalue clause `μ = r` as an
+explicit conjunct; and complex-spectrum domination
+`∀ z ∈ (charpoly (A.map (algebraMap ℝ ℂ))).roots, |z| ≤ r` — together
+with the first conjunct this is exactly "`r = ρ(A)` and `ρ(A)` is an
+eigenvalue", encoded directly because the pin has no matrix spectral
+radius. Two recorded statement guards: the `hex : ∃ i j, 0 < A i j`
+degeneracy guard (H&J implicitly at `n ≥ 2`, where irreducibility
+already forces a positive entry; over arbitrary `Fintype V` the
+vacuously irreducible 1×1 zero matrix and the empty type would falsify
+`0 < r` — `hex` is exactly the missing strength) and **no
+strict-dominance clause** (primitivity's requirement, honored verbatim
+from the proposal's Calibration section).
+
+**QA** (`Scaffold/QA/LinearAlgebra/PerronFrobenius_QA.lean`, 36
+declarations — the first LinearAlgebra-domain file; zero errors, zero
+warnings; `#print axioms` split verified: the five axiom-consuming
+theorems list exactly `perron_frobenius` + the three standard axioms,
+the eleven hand theorems only the standard three): both fixtures
+asymmetric and rational — the positive witness `P = !![1,2;1,0]`
+(primitive) with the Perron root **derived to be exactly 2** from the
+axiom's eigen-equation on its unknown existential witness, the Perron
+vector pinned to a positive multiple of the hand `(2,1)`, the
+simplicity clause cross-checked against the hand factorization
+(`charpoly = (X+1)(X−2)`, `rootMultiplicity 2 = 1`), the complexified
+charpoly's roots pinned to `{2, −1}`, and the domination clause
+instantiated at both roots (the strict case); and the mandated
+**imprimitive-cycle negative witness** `D = !![0,4;1,0]` (asymmetric
+directed 2-cycle) — `strict_dominance_refuted_QA` refutes the
+strengthening at `|−2| = 2 = r` (hand Perron pair + hand eigenpair, no
+axiom consumed: the refutation targets the strengthening, not the
+axiom) while `D_axiom_domination_QA` instantiates the axiom's own
+clause at the same peripheral root with equality — the weaker
+conclusion is exactly what survives on imprimitive input. Hand-only
+only-eigenvalue theorems on both fixtures, cross-checked against the
+axiom's clause through the hand Perron eigenvector.
+
+**Verification:** `lake env lean` on the module and QA — zero errors,
+zero warnings each; explicit target builds of both ✔; `#print axioms`
+as above ✔; umbrella import added and **full `lake build` ✔ (2232
+targets, "Build completed successfully", zero errors, detached)**;
+`lint_axioms`, `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated (**1378/10/0**, idempotent under re-run). Records
+updated: the proposal (status header DELIVERED, full delivery record
+with pin-specific QA techniques — `open Polynomial` plain vs scoped for
+`X`/`C`, eta-expanded `fin_cases` indices bridged by `show`,
+C-numeral-to-numeral helpers because `ring` treats `C c` as an atom and
+this pin's `C_mul` points opposite to modern Mathlib, the `(2:ℝ) •`
+annotation trap, and the `charpoly_map`-vs-`coe_algebraMap` mismatch
+avoided by direct `det_fin_two` computation), `proposals/README.md`
+(Active Medium row retired, progress paragraph rewritten, Delivered row
+prepended), the Horn–Johnson source index (Theorem 8.4.4 row + scope
+note), the new `index/map/linear_algebra.md` + map README row, the
+coverage map's named-absent row updated, backlog item 8 (third update),
+README (10 axioms, 1378 QA, trust-surface prose, module table row),
+radar (QA axis count synced 1342/38 → 1378/39, held at 4.0, hold
+logged), scoreboard (both Direct rows, `lake build` row, lint row,
+interpretation bullet), this plan, and the activity log. Nothing
+committed.
+
+**Next milestone (open):** the Medium rows by leverage — **the Cheeger
+hard-direction Step 0 survey** (known-hard working assumption; the
+last perturbation-axiom remainder) and **approximate spectral
+projection** (Step 0 first). The PF consumers — irreducible stationary
+distributions and PageRank — are now unblocked as new-proposal
+candidates, each needing its own document per the one-step discipline.
+Reversibility Phase B and Fiedler Phase B still need operator
+decisions.
+
+---
+
+**Perron–Frobenius admission (run 1, 2026-08-22; `proposals/admit-perron-frobenius.md`,
+the top-ranked Medium row with the Active table holding no High rows and
+the recorded next milestone of the directed-operators completion — whose
+sharpest output, the PSD refutation, explicitly names Perron–Frobenius as
+what the directed spectral theory now needs): the proposal's scoped
+admission — irreducibility via directed reachability, the axiom at Horn &
+Johnson Theorem 8.4.4's qualification level (no strict-dominance clause),
+QA with the mandated positive witness and the imprimitive-cycle negative
+witness, and the index/coverage/count records. Adds one explicit cited
+axiom (9 → 10). No consumer work (stationary distributions, PageRank stay
+named follow-ons).**
+
+**Pre-edit survey findings (this run):** no `Matrix.spectralRadius` in the
+pin (the only `spectralRadius` hits are operator-theory/C* files, the same
+thread the resolvent program already found structurally inapplicable to
+real matrices), so the spectral-radius content is encoded directly: `r` is
+an eigenvalue with the complex-spectrum domination clause
+`∀ z ∈ (charpoly (A.map (algebraMap ℝ ℂ))).roots, |z| ≤ r` — together these
+say exactly "r = ρ(A) and ρ(A) is an eigenvalue". Pin facts verified:
+`rootMultiplicity a p` argument order, `Polynomial.roots_mul`,
+`roots_X_sub_C`, `Matrix.charpoly_map`, `Complex.abs` (not `Complex.norm`)
+with `abs_ofReal`/`abs_natCast`.
+
+**Statement-shape decisions (recorded before stating):** (1) statement
+degeneracy guard `(hex : ∃ i j, 0 < A i j)` — H&J implicitly work at
+n ≥ 2, where irreducibility already forces a positive entry; over
+arbitrary `Fintype V` the 1×1 zero matrix (vacuously irreducible) and the
+empty type would make `0 < r` false, so `hex` is exactly the missing
+strength, not decoration. (2) The uniqueness clause is the strong H&J
+form — every nonnegative eigenvector (any eigenvalue, nonzero) is a
+positive multiple of the Perron vector — with the proposal's fourth bullet
+(only `r` has a nonnegative eigenvector) as an explicit conjunct. (3)
+Simplicity as `rootMultiplicity r (charpoly A) = 1` over ℝ (real-root
+multiplicity is invariant under ℝ → ℂ extension). (4) Irreducibility
+defined globally as `Matrix.IsIrreducible` via `ReflTransGen` on positive
+entries (Mathlib-convention reading surface, mirroring `Matrix.IsSymm`),
+Fintype-free. QA fixtures both rational by design: positive witness
+`!![1,2;1,0]` (asymmetric, Perron root 2, eigenvector (2,1), other
+eigenvalue −1 — the primitive case where dominance is strict), negative
+witness `!![0,4;1,0]` (asymmetric directed 2-cycle, Perron root 2, second
+eigenvalue −2 with eigenvector (−2,1), equal moduli — the imprimitive
+peripheral spectrum the Calibration section warns about).
+
+**Next action:** write `Scaffold/Mathlib/LinearAlgebra/PerronFrobenius.lean`,
+QA at `Scaffold/QA/LinearAlgebra/PerronFrobenius_QA.lean`, then
+records (umbrella, Horn–Johnson index row, map row, coverage map, counts).
+
+---
+
 **Directed operators Step 2 (the directed normalized Laplacian) + the
 Step-3 agreement brick — run 1, 2026-08-22; `proposals/directed-graph-operators.md`
 at its recorded open next step, the top-ranked Medium row with the Active table

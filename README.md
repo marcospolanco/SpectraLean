@@ -21,11 +21,17 @@ As of August 22, 2026:
 | Check | Result |
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
-| Explicit cited axioms | 9 |
-| QA theorems/lemmas | 1342, with no `sorry` or `admit` under `Scaffold/` |
+| Explicit cited axioms | 10 |
+| QA theorems/lemmas | 1378, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is the Cheeger *hard* direction at the SGT
-center; the scalar and matrix
+center; **Perron–Frobenius for irreducible nonnegative matrices**
+(admitted 2026-08-22 as `Scaffold.LinearAlgebra.perron_frobenius`,
+Horn & Johnson Theorem 8.4.4 at the irreducible-case qualification
+level — no strict-dominance clause, with the imprimitive-cycle
+refutation witness `strict_dominance_refuted_QA` fencing exactly that
+misstatement — opening the directed axis' second spectral toolkit,
+absent from the pinned Mathlib); the scalar and matrix
 concentration family (Hoeffding, Bernstein, Azuma — the subgaussian
 tail bound was retired 2026-08-22 by the Markov-route repair-and-retire
 of `proposals/prove-subgaussian-tail-bound.md`, whose Step 0 spike
@@ -218,6 +224,7 @@ The near-term center is general SGT. Public modules currently cover:
 | Electrical structure | `GraphTheory.Electrical`, `GraphTheory.ElectricalFlow`, `GraphTheory.Foster` |
 | Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized` (the similarity, eigenpair transfer, conjugated powers), `GraphTheory.Stationary`, `GraphTheory.Mixing` (the ℓ²-mixing proxy: stationary vector, walk law, density evolution, χ² distance, decay engine) |
 | Directed operators | `GraphTheory.Directed` (the degree layer `outDeg`/`inDeg`, directed handshaking, and the directed normalized Laplacian `I − ½(SAS + SAᵀS)` — symmetric hypothesis-free, agreeing with `normalizedLaplacian` on the symmetric cone — with the PSD-refutation calibration witness; the directed axis, program complete) |
+| Nonnegative-matrix spectral theory | `LinearAlgebra.PerronFrobenius` (`Matrix.IsIrreducible` via directed reachability; the admitted Perron–Frobenius theorem for irreducible nonnegative matrices — the directed axis' second spectral toolkit) |
 | Perturbation | `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan,ProjectionGap,Duhamel}` |
 | Concentration | `Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*` |
 | Finite-distribution entropy | `InformationTheory.Entropy` (relative entropy and Shannon entropy, Gibbs' inequality, the entropy maximum — all proved) |

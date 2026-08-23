@@ -345,6 +345,18 @@ spectrum-then-refute witness — the mode exclusion of an *axiom-free*
 theorem tied to its load-bearing hypothesis — strengthen existing
 witness kinds without touching the parametric gap; held).
 
+The QA axis was **held at 4.0** and its count synced to **1404/39** on
+2026-08-23 (the Cheeger hard-direction Step 1a,
+`proposals/discharge-perturbation-axioms.md`: `Cheeger_QA.lean` 33 → 59
+— the pure-algebra component's constants pinned numerically (Component A
+on `K₂` with all three quantities independently computed and the strict
+gap `4 < 8` visible; the contraction in equality *and* strict cases on
+`C₄`; the normalization cross-checked against the independently pinned
+`λ₂(L_sym) = 2`) plus two guard refutations fencing the new theorems'
+`IsSymm` and nonnegativity hypotheses against hypothesis-free forms —
+witness kinds that strengthen existing coverage without touching the
+parametric gap, hence the hold).
+
 The QA axis was **held at 4.0** and its count synced to **1378/39** on
 2026-08-22 (the Perron–Frobenius admission,
 `proposals/admit-perron-frobenius.md`: the new

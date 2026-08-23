@@ -386,6 +386,10 @@ Real definitions: `regularNormalizedLaplacian`, `cutTestVector`.
 |-------|------|-------------|--------|
 | `cheeger_lower_bound` | axiom | `φ(G)²/2 ≤ λ₂(L_sym)` for `d`-regular graphs (the hard direction) | [Chung](../sources/chung_spectral_graph.md) |
 | `cheeger_upper_bound` | **theorem (proved 2026-08-18; axiom before, retired)** | `λ₂(L_sym) ≤ 2 φ(G)` for `d`-regular graphs — proved from `secondEval_variational` at the volume-centered cut indicator | [Chung](../sources/chung_spectral_graph.md) |
+| `core_sum_abs_sq_sub_sq` | theorem (2026-08-23, hard-direction Step 1a) | **Component A**, the Cauchy–Schwarz core: `(∑ i j, A i j \|f i² − f j²\|)² ≤ E'(f) · 4 ∑ i deg A i f i²` (no sign hypothesis on `f`; `IsSymm` load-bearing on the degree collapse — refuted in QA on asymmetric nonnegative input) | [Chung](../sources/chung_spectral_graph.md) |
+| `sq_posPart_sub_add_sq_negPart_sub_le`, `sum_edgeWeight_sq_posPart_add_sq_negPart_le` | theorem (2026-08-23, hard-direction Step 1a) | the *fused* median-part contraction: `(max (a−m) 0 − max (b−m) 0)² + (max (m−a) 0 − max (m−b) 0)² ≤ (a−b)²` pointwise (translation invariance absorbed into the RHS), summed to `E'((x−m)⁺) + E'((x−m)⁻) ≤ E'(x)` under nonneg weights only — the tight form whose cross-edge slack pays for carrying both parts | [Chung](../sources/chung_spectral_graph.md) |
+| `sum_deg_mul_eq_of_regular` | theorem (2026-08-23, hard-direction Step 1a) | regularity bridge `∑ i, deg A i · f i² = d · ∑ i, f i²` | [Chung](../sources/chung_spectral_graph.md) |
+| `rayleigh_regularNormalizedLaplacian_eq` | theorem (2026-08-23, hard-direction Step 1a) | the normalization `R_{L_sym}(x) = E'(x) / (2·d·‖x‖²)` for `x ≠ 0` — the explicit `2` is the constant budget of the hard-direction chain (`E'` is the ordered double sum, twice `quadForm (laplacian A)`); cross-checked in QA against the independently pinned `λ₂(L_sym) = 2` on `K₂` | [Chung](../sources/chung_spectral_graph.md) |
 
 Statement-shape correction (2026-08-18): through 2026-08-17 both axioms
 stated the spectral side as `lambda2 (regularNormalizedLaplacian A d)`,
@@ -395,6 +399,14 @@ two-vertex edge (`1/2 ≤ 0`; refuted by
 `secondEval (regularNormalizedLaplacian A d) …` — the source-faithful
 `λ₂(L_sym)`, pinned to its classical value `2` on `K₂` by
 `QA.edge_normLap_secondEval_eq_two_QA`.
+
+Hard-direction program (2026-08-22 survey, 2026-08-23 Step 1a
+delivered): the pure-algebra layer above is Step 1a of the
+`discharge-perturbation-axioms.md` Cheeger track, toward retiring
+`cheeger_lower_bound` (Step 1b = the co-area core, Step 1c = median +
+assembly). The Step-1a delivery also recorded a constant-budget
+correction to the survey's summation route — the fused contraction and
+the explicit-`2` normalization are the tight shapes 1b/1c consume.
 
 ### `Scaffold.Mathlib.GraphTheory.Fiedler` (Fiedler vector, Phase A)
 

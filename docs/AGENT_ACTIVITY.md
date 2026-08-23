@@ -24,6 +24,54 @@ entry. If a session ID cannot be established from repository evidence, write
 Follow the metadata with concise `Changes`, `Verification`, `Remaining risk`,
 and `Next handoff` paragraphs as applicable.
 
+## 2026-08-23T00:29:17Z — Cheeger hard-direction Step 1a delivered: the pure-algebra component, with the survey's constant budget corrected
+
+**Run:** `20260823T001333Z-run-1`  
+**Session:** `ses_fd40f0fb2fferjXqdE5FUMcbVE`  
+**Status:** completed  
+**Milestone:** `proposals/discharge-perturbation-axioms.md` Step 1a — the spike-verified pure-algebra component transferred to `Cheeger.lean` at public shape with QA, **zero new axioms** (count stays 10; `#print axioms` on all five new public theorems and eight QA headlines reads only `propext, Classical.choice, Quot.sound`). The delivery's sharpest output is a **constant-budget correction to the survey record**, found by the pre-edit re-derivation before any statement was frozen: the survey's step-5 summation (`E'(u), E'(v) ≤ E'(x)` summed to `2E'(x)`) is loose by exactly the factor `2` the statement's `/2` spends, and its step-6 normalization `R = E'/(d‖x‖²)` omits `laplacian_quadForm`'s `/2` — as recorded the two errors cancel, which is why the twice-hand-checked writeup looked exact.
+
+**Changes:** `GraphTheory.Cheeger` — Component A `core_sum_abs_sq_sub_sq` (verbatim from the spike, `IsSymm` guard), the fused median-part contraction `sq_posPart_sub_add_sq_negPart_sub_le` + `sum_edgeWeight_sq_posPart_add_sq_negPart_le` (the *tight* form: the pointwise pair-summed identity whose cross-edge slack `(u+v)² ≥ u²+v²` pays for carrying both parts, translation invariance absorbed into its RHS — the separate translation-invariance lemma the sketch named is inert and was not added), the regularity bridge `sum_deg_mul_eq_of_regular`, and the normalization `rayleigh_regularNormalizedLaplacian_eq` (`R = E'/(2d‖x‖²)`). `Cheeger_QA.lean` 33 → 59: Component A on `K₂` with all three quantities independently computed (the degree sum through the new bridge, load-bearing) and the strict gap `4 < 8` pinned; the contraction on `C₄` in an equality case (`4 + 4 = 8`) and a strict case (`4 + 4 < 16`); the normalization cross-checked against the independently pinned `λ₂(L_sym) = 2`; and two guard refutations — `IsSymm` at the nonnegative asymmetric `!![0,1/10;1,0]` (`121/100 ≤ 44/100` false, the column-vs-row-sum mismatch at vertex `0`), nonnegativity at the symmetric negative `!![0,-1;-1,0]` (`-1 ≤ -2` false) — each with the surviving structure proved to hold on the fixture. Records: the proposal (Step-1a delivery record, the inline dated correction at the survey's step 6 so 1b/1c cannot follow the loose route, status header, open-next-step → 1b), `proposals/README.md` (Medium row, no-High-rows paragraph), SGT index map (Cheeger section +4 rows + program note), README (1404, the trust-surface sentence), radar (QA axis held 4.0, count synced 1378/39 → 1404/39, hold logged), scoreboard (both Direct rows, `lake build` row, lint date, interpretation bullet), the execution plan, this log.
+
+**Decisive commands and outcomes:** `lake env lean Scaffold/Mathlib/GraphTheory/Cheeger.lean` — zero errors (only the documented pre-existing `unusedSectionVars` warning at `regularNormalizedLaplacian_symmetric`, verified identical in HEAD by a `git stash` round-trip); `lake env lean Scaffold/QA/SpectralGraph/Cheeger_QA.lean` — zero errors, zero warnings; `lake build` on both targets ✔; `#print axioms` via `wip/` check files — the five public and eight QA headline declarations each `propext, Classical.choice, Quot.sound` only; **full `lake build` ✔ (2232 targets, "Build completed successfully")**; `lint_axioms` (10, unchanged), `check_citations`, `check_markdown_links` pass; scoreboard regenerated **1404/10/0**, idempotent under re-run. Two pin-specific proof notes for the record: `max_eq_left ha` mis-instantiates when `ha` is the *threshold* comparison rather than `0 ≤ a−m` (side conditions written `(by linarith)` throughout), and `field_simp` mangles the Rayleigh-normalization goal into disjunctive junk — the robust route is `← div_div` + `simp only [div_eq_mul_inv]` + `ring`.
+
+**Verification:** every changed module elaborates directly and is linked into the full default build; the delivery is fully proved hard crust — nothing axiom-backed was added, so nothing here is conditional, and `cheeger_lower_bound` remains admitted, visible, and cited. The new theorems are load-bearing on the shelf they consume (`laplacian_quadForm`'s exact `/2`, `quadForm_regularNormalizedLaplacian`, `Finset.sum_mul_sq_le_sq_mul_sq`, `deg`'s row-sum shape): the QA normalization witness would fail if the `/2` were wrong, and the guard refutations tie each statement guard to a refuted hypothesis-free form at a fixture satisfying every other hypothesis.
+
+**Remaining risk:** the corrected constant chain is now machine-checked at both endpoints (Component A, the fused contraction, the normalization) but its *middle* — the per-part combination `φ²d‖y‖² ≤ E'(y)` — lands with Step 1b's co-area core, still hand mathematics; the K₂/C₄ numeric pins above constrain it but do not prove it. Step 1b is rated moderate-high risk (no finite-sum/interval-integral interchange in the pin; ~30 lines of Finset-induction Fubini priced in). Step 1c must consume the corrected shapes per the proposal's inline annotation.
+
+**Next handoff:** **Cheeger Step 1b** — the co-area core (`½ ∑ A |y i² − y j²| ≥ φ d ∑ y i²` for minority-level-set `y ≥ 0`), its own dedicated run per the Davis–Kahan precedent; then Step 1c (median + assembly) retires `cheeger_lower_bound` at the unchanged statement. Approximate spectral projection still needs its Step 0; the PF consumers (irreducible stationary distributions, PageRank) are new-proposal candidates. Reversibility Phase B and Fiedler Phase B still need operator decisions.
+
+## 2026-08-23T00:13:33Z — Cheeger hard-direction Step 1a: the pure-algebra component (transfer run)
+
+**Run:** `20260823T001333Z-run-1`  
+**Session:** `ses_fd40f0fb2fferjXqdE5FUMcbVE`  
+**Status:** superseded  
+**Milestone:** The in-progress record for this run's Step-1a work — superseded by the completed entry above (same run, same session).
+
+## 2026-08-22T23:05:59Z — Cheeger hard-direction Step 0 surveyed: decisive positive-with-large-cost, the gate opened
+
+**Run:** `20260822T224324Z-run-1`  
+**Session:** `ses_fd45b5b09ffeCDr541zsEJofYM`  
+**Status:** completed  
+**Milestone:** `proposals/discharge-perturbation-axioms.md` open next step — the mandated per-axiom Step 0 tractability survey of `cheeger_lower_bound` (`Cheeger.lean:88`, `φ²/2 ≤ λ₂(L_sym)`, d-regular), the last remaining perturbation axiom after the Weyl (2026-08-20) and Davis–Kahan (2026-08-21) retirements. Top Medium row with no High rows and the plan's recorded next handoff naming it first. Delivered as survey + spike only, no Cheeger source edits, per the Davis–Kahan one-step precedent; the proposal's own gate now authorizes Step 1 as dedicated runs.
+
+**Changes:** the survey record in the proposal (status header; the full record replacing the "unsurveyed" placeholder; per-axiom item 3; open-next-step → Step 1a) — the route with tight constants, the half-volume obstruction recorded with its counterexample shape so no future run re-derives the median trick, the pin facts with their traps, the 1a/1b/1c decomposition with cost estimates (550–900 lines over 2–3 runs); `proposals/README.md` (Medium row, no-High-rows paragraph); the execution plan; this log. The green spike `wip/cheeger_spike.lean` (git-ignored): the Cauchy–Schwarz core at final shape, the shifted-positive-part contraction, the variational-assembly skeleton in hypothesis form, and the scalar FTC primitive — every `#print axioms` clean.
+
+**Decisive commands and outcomes:** `lake env lean wip/cheeger_spike.lean` — zero errors, `CheegerSpike.core_sum_abs_sq_sub_sq`, `abs_posPart_sub`, `assembly_skeleton` each depend on `propext, Classical.choice, Quot.sound` only; `lake build Scaffold.Mathlib.GraphTheory.Cheeger` ✔ (untouched module; no `Scaffold/**` file changed this run, so the spike's direct elaboration is the decisive check and the umbrella build certifies nothing new); `lint_axioms` (10, unchanged), `check_citations`, `check_markdown_links` pass; scoreboard regenerated with zero diff (idempotent, 1378/10/0). Survey findings: the sInf reduction through the proved `secondEval_variational` dissolves the eigenvector/spectral side entirely; the two-median-part norm split `‖u‖²+‖v‖² = ‖x‖² + nm²` makes the factor-2 budget exactly the statement's `/2` — constants reconstructed and hand-checked twice, with the K₂-equality QA pin prescribed before Step 1's statements freeze.
+
+**Verification:** the survey's positive verdict rests on elaboration-verified primitives (the spike), shelf lemmas read at their exact statements (`secondEval_variational`, `regularNormalizedLaplacian_psd`, `regularNormalizedLaplacian_mulVec_onesVec`, `conductance_ge_cheegerConstant`, `vol_eq_of_regular`, `laplacian_quadForm`, `quadForm_regularNormalizedLaplacian` — all already proved), and hand mathematics that remains unproved until Step 1 lands. Nothing here claims the axiom discharged; `cheeger_lower_bound` is still admitted, visible, and cited.
+
+**Remaining risk:** the hand-verified constant chain is not machine-checked — the recorded mitigation is the numeric QA witness (K₂ equality, strict C₄/P₃) before Step 1's statements freeze, this repository having been burned by a false Cheeger shape before. The co-area core (Step 1b) is rated moderate-high risk; no finite-sum/interval-integral interchange exists at this pin (priced in as ~30 lines of Finset induction).
+
+**Next handoff:** **Cheeger Step 1a** — transfer the spike-verified pure-algebra component into `Cheeger.lean` at its public shape (with the `IsSymm` statement guard) plus QA; then 1b (the crux) and 1c as dedicated runs. Approximate spectral projection still needs its Step 0; the PF consumers (irreducible stationary distributions, PageRank) are unblocked as new-proposal candidates. Reversibility Phase B and Fiedler Phase B still need operator decisions.
+
+## 2026-08-22T22:53:19Z — Cheeger hard-direction Step 0: the survey that gates the last perturbation axiom
+
+**Run:** `20260822T224324Z-run-1`  
+**Session:** `pending`  
+**Status:** superseded  
+**Milestone:** The in-progress record for this run's survey work — superseded by the completed entry above (same run, same session once established).
+
 ## 2026-08-22T21:42:53Z — Perron–Frobenius admitted: the directed axis' second spectral toolkit
 
 **Run:** `20260822T211552Z-run-1`  

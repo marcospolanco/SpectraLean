@@ -532,4 +532,278 @@ theorem cheeger_upper_bound_cycle_le_QA :
 
 end ProvedEasyDirection
 
+/-!
+## The hard direction, Step 1a: pure-algebra components (witnesses)
+
+The pure-algebra layer of the Cheeger hard-direction program
+(`proposals/discharge-perturbation-axioms.md` Step 1a, added 2026-08-23,
+all proved, zero axioms): Component A (`core_sum_abs_sq_sub_sq`), the
+fused median-part contraction
+(`sum_edgeWeight_sq_posPart_add_sq_negPart_le`), and the normalization
+(`rayleigh_regularNormalizedLaplacian_eq`). The witnesses pin their
+constants numerically — the discipline the proposal carries forward
+after the repository was burned by a false Cheeger shape — and fence
+their statement guards with negative witnesses: symmetry is load-bearing
+on Component A (refuted on asymmetric nonnegative input) and
+nonnegativity on the contraction (refuted on a symmetric negative-input
+fixture). The K₂ equality pins of the surrounding chain (`φ = d = 1`,
+`λ₂(L_sym) = 2`) are `edge_cheegerConstant`,
+`edge_normLap_secondEval_eq_two_QA` above.
+-/
+
+section HardDirectionStep1a
+
+/-- Test function `![1, 0]` on `Fin 2` for the Component A witness. -/
+def edgeF : Fin 2 → ℝ := ![1, 0]
+
+theorem edgeF_zero : edgeF 0 = 1 := by simp [edgeF]
+
+theorem edgeF_one : edgeF 1 = 0 := by simp [edgeF]
+
+/-- Component A's left-hand total-variation sum on `K₂` at `edgeF`,
+computed from the definitions: `|1² - 0²|` across both ordered pairs. -/
+theorem edge_core_tv :
+    ∑ i, ∑ j, edgeAdj i j * |edgeF i ^ 2 - edgeF j ^ 2| = 2 := by
+  simp only [Fin.sum_univ_two, edgeAdj, edgeF_zero, edgeF_one]
+  norm_num
+
+/-- Component A's energy factor on `K₂` at `edgeF`, computed raw. -/
+theorem edge_core_E' :
+    ∑ i, ∑ j, edgeAdj i j * (edgeF i - edgeF j) ^ 2 = 2 := by
+  simp only [Fin.sum_univ_two, edgeAdj, edgeF_zero, edgeF_one]
+  norm_num
+
+/-- Component A's degree-weighted factor on `K₂` at `edgeF`, through
+the new regularity bridge `sum_deg_mul_eq_of_regular` (so the bridge is
+load-bearing here, not decorative). -/
+theorem edge_core_degsum :
+    ∑ i, deg edgeAdj i * edgeF i ^ 2 = 1 := by
+  rw [sum_deg_mul_eq_of_regular edgeAdj 1 edgeAdj_regular edgeF]
+  simp only [Fin.sum_univ_two, edgeF_zero, edgeF_one]
+  norm_num
+
+/-- **Component A instantiated on `K₂`:** at `edgeF = ![1, 0]` the
+instance reads `4 ≤ 8`, with all three quantities pinned independently
+above. -/
+theorem core_edge_QA :
+    (∑ i, ∑ j, edgeAdj i j * |edgeF i ^ 2 - edgeF j ^ 2|) ^ 2
+      ≤ (∑ i, ∑ j, edgeAdj i j * (edgeF i - edgeF j) ^ 2)
+        * (4 * ∑ i, deg edgeAdj i * edgeF i ^ 2) :=
+  core_sum_abs_sq_sub_sq edgeAdj edgeAdj_symmetric edgeAdj_nonneg edgeF
+
+/-- **The strict case:** on `K₂` at `edgeF` the Component A bound is
+strict with a visible gap, `4 < 8` — the bound is not vacuously tight
+here. (The slack is exactly the AM-GM loss on the crossing pair:
+`(1 + 0)² = 1 < 2·1² + 2·0² = 2`.) -/
+theorem core_edge_strict_QA :
+    (∑ i, ∑ j, edgeAdj i j * |edgeF i ^ 2 - edgeF j ^ 2|) ^ 2
+      < (∑ i, ∑ j, edgeAdj i j * (edgeF i - edgeF j) ^ 2)
+        * (4 * ∑ i, deg edgeAdj i * edgeF i ^ 2) := by
+  rw [edge_core_tv, edge_core_E', edge_core_degsum]
+  norm_num
+
+/-- Test function on `C₄` for the contraction *equality* case: the
+values `![1, 0, -1, 0]` at threshold `m = 0` put one vertex strictly
+above, one strictly below, and two exactly at the threshold. -/
+def cycX1 : Fin 4 → ℝ := ![1, 0, -1, 0]
+
+/-- Test function on `C₄` for the contraction *strict* case: the
+values `![1, 1, -1, -1]` at threshold `m = 0` split the cycle into two
+dominant halves. -/
+def cycX2 : Fin 4 → ℝ := ![1, 1, -1, -1]
+
+theorem cycX1_pos_E' :
+    ∑ i, ∑ j, cycleAdj4 i j
+      * (max (cycX1 i - 0) 0 - max (cycX1 j - 0) 0) ^ 2 = 4 := by
+  simp only [Fin.sum_univ_four, cycleAdj4, cycX1, sub_zero]
+  norm_num
+
+theorem cycX1_neg_E' :
+    ∑ i, ∑ j, cycleAdj4 i j
+      * (max (0 - cycX1 i) 0 - max (0 - cycX1 j) 0) ^ 2 = 4 := by
+  simp only [Fin.sum_univ_four, cycleAdj4, cycX1]
+  norm_num
+
+theorem cycX1_E' :
+    ∑ i, ∑ j, cycleAdj4 i j * (cycX1 i - cycX1 j) ^ 2 = 8 := by
+  simp only [Fin.sum_univ_four, cycleAdj4, cycX1]
+  norm_num
+
+theorem cycX2_pos_E' :
+    ∑ i, ∑ j, cycleAdj4 i j
+      * (max (cycX2 i - 0) 0 - max (cycX2 j - 0) 0) ^ 2 = 4 := by
+  simp only [Fin.sum_univ_four, cycleAdj4, cycX2, sub_zero]
+  norm_num
+
+theorem cycX2_neg_E' :
+    ∑ i, ∑ j, cycleAdj4 i j
+      * (max (0 - cycX2 i) 0 - max (0 - cycX2 j) 0) ^ 2 = 4 := by
+  simp only [Fin.sum_univ_four, cycleAdj4, cycX2]
+  norm_num
+
+theorem cycX2_E' :
+    ∑ i, ∑ j, cycleAdj4 i j * (cycX2 i - cycX2 j) ^ 2 = 16 := by
+  simp only [Fin.sum_univ_four, cycleAdj4, cycX2]
+  norm_num
+
+/-- **The contraction is attained with equality on `C₄` at `cycX1`:**
+the two median parts carry `4 + 4` and the energy of `x` is `8`. Every
+edge of this fixture either stays within one side or touches a threshold
+vertex, so the cross-edge slack is never used — the equality case of
+`sum_edgeWeight_sq_posPart_add_sq_negPart_le`. -/
+theorem pair_contraction_cycle_eq_QA :
+    (∑ i, ∑ j, cycleAdj4 i j
+        * (max (cycX1 i - 0) 0 - max (cycX1 j - 0) 0) ^ 2)
+      + (∑ i, ∑ j, cycleAdj4 i j
+          * (max (0 - cycX1 i) 0 - max (0 - cycX1 j) 0) ^ 2)
+      = ∑ i, ∑ j, cycleAdj4 i j * (cycX1 i - cycX1 j) ^ 2 := by
+  have h := sum_edgeWeight_sq_posPart_add_sq_negPart_le cycleAdj4
+    cycleAdj4_nonneg 0 cycX1
+  rw [cycX1_pos_E', cycX1_neg_E', cycX1_E'] at h
+  rw [cycX1_pos_E', cycX1_neg_E', cycX1_E']
+  linarith
+
+/-- **The strict case:** on `C₄` at `cycX2 = ![1, 1, -1, -1]` the parts
+carry `4 + 4 = 8` against the energy `16` — the cross-edge slack
+`(1 - (-1))² = 4 ≥ 1² + 1²` is visibly in use. -/
+theorem pair_contraction_cycle_lt_QA :
+    (∑ i, ∑ j, cycleAdj4 i j
+        * (max (cycX2 i - 0) 0 - max (cycX2 j - 0) 0) ^ 2)
+      + (∑ i, ∑ j, cycleAdj4 i j
+          * (max (0 - cycX2 i) 0 - max (0 - cycX2 j) 0) ^ 2)
+      < ∑ i, ∑ j, cycleAdj4 i j * (cycX2 i - cycX2 j) ^ 2 := by
+  have h := sum_edgeWeight_sq_posPart_add_sq_negPart_le cycleAdj4
+    cycleAdj4_nonneg 0 cycX2
+  rw [cycX2_pos_E', cycX2_neg_E', cycX2_E'] at h
+  rw [cycX2_pos_E', cycX2_neg_E', cycX2_E']
+  linarith
+
+/-- **The normalization on `K₂`, cross-checked.** The new lemma
+evaluates the Rayleigh quotient of `L_sym` at `![1, -1]` through the
+Dirichlet double sum: `E' = 8`, `‖x‖² = 2`, `d = 1`, giving `8 / 4 = 2`
+— the independently pinned `λ₂(L_sym) = 2`
+(`edge_normLap_secondEval_eq_two_QA`) and the cut test vector's
+Rayleigh value (`cutTestVector_edge_rayleigh_QA`, at the same vector
+`![1, -1]` by `cutTestVector_edge_QA`). -/
+theorem rayleigh_regularNormalizedLaplacian_edge_eq_QA :
+    rayleigh (regularNormalizedLaplacian edgeAdj 1) ![1, -1] = 2 := by
+  rw [rayleigh_regularNormalizedLaplacian_eq edgeAdj edgeAdj_symmetric 1
+    edgeAdj_regular (by norm_num) (by
+      intro h
+      have h0 : (![1, -1] : Fin 2 → ℝ) 0 = 0 := congrFun h 0
+      norm_num at h0)]
+  have hE : ∑ i, ∑ j, edgeAdj i j * (![1, -1] i - ![1, -1] j) ^ 2 = 8 := by
+    simp only [Fin.sum_univ_two, edgeAdj]
+    norm_num
+  have hd : Matrix.dotProduct (![1, -1] : Fin 2 → ℝ) ![1, -1] = 2 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+    norm_num
+  rw [hE, hd]
+  norm_num
+
+/-- **The normalized quotient attains the pinned spectrum:** the value
+delivered by `rayleigh_regularNormalizedLaplacian_eq` at `![1, -1]`
+equals the independently computed `λ₂(L_sym) = 2` — the constant-`2`
+denominator of the normalization is exactly right; a defective `/ 1`
+or `/ 4` shape would fail this check. -/
+theorem rayleigh_edge_attains_secondEval_QA :
+    rayleigh (regularNormalizedLaplacian edgeAdj 1) ![1, -1]
+      = secondEval (regularNormalizedLaplacian edgeAdj 1)
+          (regularNormalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric 1)
+          (le_refl 2) := by
+  rw [rayleigh_regularNormalizedLaplacian_edge_eq_QA,
+    edge_normLap_secondEval_eq_two_QA]
+
+/-- The asymmetric fixture for the Component A guard: nonnegative, with
+the column sum at vertex `0` exceeding its row sum (`1` vs `1/10`) —
+exactly the mismatch `IsSymm` rules out. -/
+noncomputable def asymA : Matrix (Fin 2) (Fin 2) ℝ :=
+  Matrix.of !![0, 1 / 10; 1, 0]
+
+theorem asymA_nonneg : ∀ i j, 0 ≤ asymA i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [asymA]
+
+theorem asymA_not_isSymm : ¬ asymA.IsSymm := by
+  intro h
+  have h1 := h.apply 1 0
+  simp only [asymA, Matrix.of_apply] at h1
+  norm_num at h1
+
+theorem asymA_core_lhs :
+    (∑ i, ∑ j, asymA i j * |edgeF i ^ 2 - edgeF j ^ 2|) ^ 2
+      = 121 / 100 := by
+  simp only [Fin.sum_univ_two, asymA, edgeF_zero, edgeF_one]
+  norm_num
+
+theorem asymA_core_rhs :
+    (∑ i, ∑ j, asymA i j * (edgeF i - edgeF j) ^ 2)
+      * (4 * ∑ i, deg asymA i * edgeF i ^ 2) = 44 / 100 := by
+  simp only [Fin.sum_univ_two, asymA, edgeF_zero, edgeF_one, deg]
+  norm_num
+
+/-- **The `IsSymm` guard of Component A is load-bearing.** With the
+symmetry hypothesis dropped, the statement is false at a nonnegative
+fixture satisfying every other hypothesis: `asymA` above has all entries
+nonnegative (`asymA_nonneg`) but is provably not symmetric
+(`asymA_not_isSymm`), and the instance reads `121/100 ≤ 44/100`. The
+mechanism: the cross double sum's column sums must match `deg`'s row
+sums for the second factor's degree collapse, and here vertex `0`'s
+column sum (`1`) exceeds its row sum (`1/10`). -/
+theorem core_sum_abs_sq_sub_sq_asymmetry_refuted_QA
+    (h : (∑ i, ∑ j, asymA i j * |edgeF i ^ 2 - edgeF j ^ 2|) ^ 2
+      ≤ (∑ i, ∑ j, asymA i j * (edgeF i - edgeF j) ^ 2)
+        * (4 * ∑ i, deg asymA i * edgeF i ^ 2)) : False := by
+  rw [asymA_core_lhs, asymA_core_rhs] at h
+  norm_num at h
+
+/-- The negative-weight fixture for the contraction guard: symmetric
+with unit-magnitude off-diagonal entries, all negative. -/
+def negEdge : Matrix (Fin 2) (Fin 2) ℝ :=
+  Matrix.of !![0, -1; -1, 0]
+
+theorem negEdge_isSymm : negEdge.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [negEdge]
+
+theorem negEdge_not_nonneg : ¬ (∀ i j, 0 ≤ negEdge i j) := by
+  intro h
+  have h1 := h 0 1
+  simp only [negEdge, Matrix.of_apply] at h1
+  norm_num at h1
+
+/-- Test function `![2, 1]` for the contraction guard witness, at
+threshold `m = 3/2` (its median level). -/
+def negX : Fin 2 → ℝ := ![2, 1]
+
+theorem negEdge_pair_parts :
+    ((∑ i, ∑ j, negEdge i j
+        * (max (negX i - 3 / 2) 0 - max (negX j - 3 / 2) 0) ^ 2)
+      + ∑ i, ∑ j, negEdge i j
+          * (max (3 / 2 - negX i) 0 - max (3 / 2 - negX j) 0) ^ 2)
+      = -1 ∧
+    ∑ i, ∑ j, negEdge i j * (negX i - negX j) ^ 2 = -2 := by
+  constructor
+  · simp only [Fin.sum_univ_two, negEdge, negX]
+    norm_num
+  · simp only [Fin.sum_univ_two, negEdge, negX]
+    norm_num
+
+/-- **The nonnegativity guard of the contraction is load-bearing.**
+With the weight-nonnegativity hypothesis dropped, the statement is false
+at a fixture satisfying the other structure: `negEdge` is provably
+symmetric (`negEdge_isSymm`) but has negative entries
+(`negEdge_not_nonneg`), and at `negX = ![2, 1]`, `m = 3/2` the parts
+carry `-1/2 + -1/2 = -1` against the energy `-2`. -/
+theorem pair_contraction_refuted_QA
+    (h : (∑ i, ∑ j, negEdge i j
+        * (max (negX i - 3 / 2) 0 - max (negX j - 3 / 2) 0) ^ 2)
+      + (∑ i, ∑ j, negEdge i j
+          * (max (3 / 2 - negX i) 0 - max (3 / 2 - negX j) 0) ^ 2)
+      ≤ ∑ i, ∑ j, negEdge i j * (negX i - negX j) ^ 2) : False := by
+  rw [negEdge_pair_parts.1, negEdge_pair_parts.2] at h
+  norm_num at h
+
+end HardDirectionStep1a
+
 end SpectralGraphTheory.QA

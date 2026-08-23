@@ -1,7 +1,9 @@
 # Proposal: Submit to the Palomar Registry
 
 **Status:** Proposed; priority **Low — human decision required**. Assistant's
-assessment of project direction, requested 2026-08-19. Authorizes no GitHub
+assessment of project direction, requested 2026-08-19; candidate inventory
+re-verified 2026-08-22 at `7f0c6a0` (recommendation unchanged, bench
+deepened — see *Update 2026-08-22* under the Recommendation). Authorizes no GitHub
 authentication, external submission, or publication of any kind — every
 action past Step 2 below needs the operator's own explicit go-ahead, and the
 final submission step needs the operator's own GitHub credentials, which
@@ -81,10 +83,19 @@ commit `91b7cb6` (2026-08-19 06:20:51 -0700) — **over fourteen hours after
 merely unlikely to be contaminated; the source material was not present to
 contaminate it from. The same argument covers everything in
 `GraphTheory.ElectricalFlow` and `GraphTheory.Expander` (all authored
-2026-08-18 17:20:51 or later). It does **not** cover `evals_min_max`
+2026-08-18 17:20:51 or later), and — verified from git history 2026-08-22 —
+the post-deletion material landed since this proposal was written:
+`GraphTheory.Mixing` and `InformationTheory.Entropy` (both created
+`10f71a0`, 2026-08-22 07:17) and `GraphTheory.Expander` (created `d378d9f`,
+2026-08-19 07:45). It does **not** cover `evals_min_max`
 (Courant–Fischer, committed `3f7ca8e`, 2026-08-18 15:12:10 — before the
 deletion) — that theorem needs the name-diff argument instead, not the
-temporal one, if it's ever the submission target.
+temporal one, if it's ever the submission target. As of 2026-08-22 the same
+caveat applies to `davis_kahan_sin_theta`: its *proof* was authored after
+the deletion (retired from axiom to theorem at `c7fb645`, 2026-08-21
+23:01), but the module was created 2026-08-07 (`6acd7ac`) and lived
+alongside `spectral-proof/` for eleven days, so its statement shape cannot
+claim the temporal argument — name-diff, not temporal.
 
 **Still recommend a lightweight sign-off, not zero gate.** "I checked the
 timestamps" is this assistant's own reasoning, not a legal determination.
@@ -114,6 +125,36 @@ Not `evals_min_max`, not a bundle, not "several at once." Reasons:
   (he submitted his own Sendov's-conjecture formalization first, as a
   single-result test, not a bundle) — this mirrors the intended usage
   pattern exactly.
+
+### Update 2026-08-22 — bench re-verified at `7f0c6a0`
+
+Every current zero-axiom candidate was re-confirmed by `#print axioms` at
+`7f0c6a0` (now public on `origin`): each depends on exactly
+`propext, Classical.choice, Quot.sound` — the three axioms Palomar permits.
+The recommendation is unchanged; the bench behind it is deeper than when
+this proposal was written:
+
+- `foster_theorem` — still the pick. Its 2026-08-19 zero-axiom check
+  survives three days of repo movement (retirement of `davis_kahan_sin_theta`,
+  the mixing-time program, the entropy layer, the Perron–Frobenius admit).
+- `expander_mixing_lemma` (`GraphTheory/Expander.lean`) — now the clear
+  second: a named classical result *and* the clean temporal provenance
+  argument (module created post-deletion, `d378d9f`, 2026-08-19).
+- `davis_kahan_sin_theta` — famous name, zero axioms, but provenance falls
+  in the name-diff category (proof post-deletion, module pre-deletion —
+  see "Clean-room boundary" above). Behind `expander_mixing_lemma` until
+  that argument is actually made.
+- Mixing-time deliverables (in `GraphTheory/Mixing.lean`:
+  `sum_stationaryVec_smul_sq_pow_walkTransitionMatrix_le`,
+  `chiSquareDistance_le_of_connected`) — real, temporally clean (created
+  `10f71a0`, 2026-08-22), but not named classical results; weakest of the
+  four on the registry's research-interest bar.
+
+`perron_frobenius` (admitted 2026-08-22, `7f0c6a0`) does **not** qualify:
+an explicit custom axiom, forbidden in `Solution.lean` unless individually
+declared in `comparator.json` and approved — and a textbook admit, not a
+formalization. The same bar excludes the concentration-inequality axiom
+family and `cheeger_lower_bound`.
 
 ## The real design work: restating `effectiveResistance` in Mathlib-only terms
 
@@ -149,7 +190,8 @@ submission, even in draft form.
 
 - A public commit SHA on `origin` (any commit; Palomar does not require a
   tagged release — `governance/RELEASES.md` currently has no real tag past
-  a placeholder `0.1.0` entry, so this does not block).
+  a placeholder `0.1.0` entry, so this does not block). `7f0c6a0`,
+  pushed 2026-08-22, already satisfies this.
 - Confirm `lakefile.lean`/`lake-manifest.json`/`lean-toolchain` at that
   commit satisfy Palomar's build-file requirements (they should already,
   since this repository already builds cleanly — verify, don't assume).
@@ -210,8 +252,19 @@ explicit per-instance authorization, not standing permission.
 - **`evals_min_max` (Courant–Fischer) as a submission target** — real and
   arguably more foundational than Foster's theorem, but committed before
   the `spectral-proof/` deletion, so it needs the weaker name-diff
-  provenance argument rather than the clean temporal one. A fine second
-  submission, not the first.
+  provenance argument rather than the clean temporal one. As of 2026-08-22
+  it also no longer ranks second — `expander_mixing_lemma` has both the
+  name and the temporal argument. A fine later submission.
+- **`davis_kahan_sin_theta`** — joins `evals_min_max` in the name-diff
+  category (proof authored post-deletion at `c7fb645`, 2026-08-21; module
+  created pre-deletion at `6acd7ac`, 2026-08-07 — see "Clean-room
+  boundary"). Famous name, so a strong candidate once the name-diff
+  argument is made; not before `expander_mixing_lemma`.
+- **`perron_frobenius`** (admitted `7f0c6a0`, 2026-08-22) — structurally
+  barred: an explicit custom axiom, forbidden in `Solution.lean` unless
+  individually declared in `comparator.json` and approved. Listed so no
+  future run reaches for the newest famous name without checking why it
+  cannot qualify.
 - **Any submission from the clean-room repository** — belongs to
   `docs/traction-plan.md`'s scope once that repository exists, not this
   document's.

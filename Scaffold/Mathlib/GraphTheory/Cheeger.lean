@@ -502,4 +502,264 @@ theorem cheeger_upper_bound (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
     _ ≤ 2 * cheegerConstant A :=
         mul_le_mul_of_nonneg_left hdiv (by norm_num)
 
+/-!
+### The Cheeger hard direction, Step 1a: pure-algebra components (proved)
+
+`proposals/discharge-perturbation-axioms.md` Step 1a (surveyed
+2026-08-22): the pure-algebra layers of the hard-direction proof, proved
+here with zero new axioms. The remaining components — the co-area core
+(Step 1b) and the median/assembly layer (Step 1c) — consume exactly
+these interfaces.
+
+Convention: `E'(x) := ∑ i j, A i j * (x i - x j) ^ 2` is the *ordered*
+double sum, which is twice the combinatorial energy
+(`laplacian_quadForm`). The constant budget of the hard-direction chain
+runs through these statements as follows: Component A bounds the squared
+weighted total variation of `f ^ 2` by `E'(f) * 4 * ∑ i, deg A i * f i ^ 2`;
+the co-area core (1b) will bound it from below by `2 * φ * d * ‖f‖²`;
+together they give the per-part bound `φ ^ 2 * d * ‖y‖² ≤ E'(y)`, and
+the fused contraction below sums the two median parts *jointly* into
+`E'(x)` — the cross-edge slack `(u + v) ^ 2 ≥ u ^ 2 + v ^ 2` is exactly
+what pays for carrying both parts, so nothing is lost against the
+statement's final `/2`.
+-/
+
+omit [DecidableEq V] in
+/-- **Step 1a contraction (pointwise).** The two median parts of a
+shift by `m`, taken jointly, contract the squared difference. This
+*fused* form — rather than two separate 1-Lipschitz contractions summed
+afterwards — is what makes the Cheeger constant budget exact: each part
+contracts individually, and the cross terms `(u + v) ^ 2 ≥ u ^ 2 + v ^ 2`
+absorb the doubling that summing two separate bounds would otherwise
+introduce. The translation invariance of the energy is built into the
+right-hand side being `(a - b) ^ 2` itself. -/
+theorem sq_posPart_sub_add_sq_negPart_sub_le (m a b : ℝ) :
+    (max (a - m) 0 - max (b - m) 0) ^ 2
+      + (max (m - a) 0 - max (m - b) 0) ^ 2 ≤ (a - b) ^ 2 := by
+  rcases le_total m a with ha | ha <;> rcases le_total m b with hb | hb
+  · rw [max_eq_left (by linarith), max_eq_left (by linarith),
+      max_eq_right (by linarith), max_eq_right (by linarith)]
+    have heq : (a - m - (b - m)) ^ 2 + (0 - 0) ^ 2 = (a - b) ^ 2 := by ring
+    rw [heq]
+  · rw [max_eq_left (by linarith), max_eq_right (by linarith),
+      max_eq_right (by linarith), max_eq_left (by linarith)]
+    have h1 : (0 : ℝ) ≤ (a - m) * (m - b) :=
+      mul_nonneg (by linarith) (by linarith)
+    have heq : (a - b) ^ 2 = (a - m - 0) ^ 2 + (0 - (m - b)) ^ 2
+      + 2 * (a - m) * (m - b) := by ring
+    rw [heq]
+    linarith
+  · rw [max_eq_right (by linarith), max_eq_left (by linarith),
+      max_eq_left (by linarith), max_eq_right (by linarith)]
+    have h1 : (0 : ℝ) ≤ (m - a) * (b - m) :=
+      mul_nonneg (by linarith) (by linarith)
+    have heq : (a - b) ^ 2 = (0 - (b - m)) ^ 2 + (m - a - 0) ^ 2
+      + 2 * (m - a) * (b - m) := by ring
+    rw [heq]
+    linarith
+  · rw [max_eq_right (by linarith), max_eq_right (by linarith),
+      max_eq_left (by linarith), max_eq_left (by linarith)]
+    have heq : (0 - 0) ^ 2 + (m - a - (m - b)) ^ 2 = (a - b) ^ 2 := by ring
+    rw [heq]
+
+omit [DecidableEq V] in
+/-- **Step 1a contraction, summed.** For nonnegative weights, the two
+median parts of `x` (at threshold `m`) carry *jointly* at most the
+energy of `x` itself: `E'((x - m)⁺) + E'((x - m)⁻) ≤ E'(x)`. This is
+the tight form of the contraction that the hard-direction assembly
+consumes; summing two separate partwise bounds would lose the factor
+`2` that the statement's `/2` exactly spends. Only nonnegativity of the
+weights is used — symmetry is not needed.
+
+QA: instantiated to equality and strict cases on `C₄` in
+`SpectralGraphTheory.QA.pair_contraction_cycle_eq_QA` and
+`SpectralGraphTheory.QA.pair_contraction_cycle_lt_QA`, with the
+nonnegativity hypothesis refuted-on-omission in
+`SpectralGraphTheory.QA.pair_contraction_refuted_QA`. -/
+theorem sum_edgeWeight_sq_posPart_add_sq_negPart_le (A : WAdj (V := V))
+    (hnn : ∀ i j, 0 ≤ A i j) (m : ℝ) (x : V → ℝ) :
+    (∑ i, ∑ j, A i j * (max (x i - m) 0 - max (x j - m) 0) ^ 2)
+      + (∑ i, ∑ j, A i j * (max (m - x i) 0 - max (m - x j) 0) ^ 2)
+      ≤ ∑ i, ∑ j, A i j * (x i - x j) ^ 2 := by
+  have hpt : ∀ i j : V,
+      A i j * (max (x i - m) 0 - max (x j - m) 0) ^ 2
+        + A i j * (max (m - x i) 0 - max (m - x j) 0) ^ 2
+      ≤ A i j * (x i - x j) ^ 2 := by
+    intro i j
+    have h := mul_le_mul_of_nonneg_left
+      (sq_posPart_sub_add_sq_negPart_sub_le m (x i) (x j)) (hnn i j)
+    rw [mul_add] at h
+    exact h
+  calc (∑ i, ∑ j, A i j * (max (x i - m) 0 - max (x j - m) 0) ^ 2)
+        + ∑ i, ∑ j, A i j * (max (m - x i) 0 - max (m - x j) 0) ^ 2
+      = ∑ i, ∑ j, (A i j * (max (x i - m) 0 - max (x j - m) 0) ^ 2
+          + A i j * (max (m - x i) 0 - max (m - x j) 0) ^ 2) := by
+        rw [← Finset.sum_add_distrib]
+        exact Finset.sum_congr rfl fun i _ => Finset.sum_add_distrib.symm
+    _ ≤ ∑ i, ∑ j, A i j * (x i - x j) ^ 2 :=
+        Finset.sum_le_sum fun i _ => Finset.sum_le_sum fun j _ => hpt i j
+
+omit [DecidableEq V] in
+/-- **Component A of the Cheeger hard direction** (the Cauchy–Schwarz
+core): the squared `A`-weighted total variation of the squared values is
+controlled by the Dirichlet energy times four times the degree-weighted
+squared norm,
+
+`(∑ i j, A i j * |f i ^ 2 - f j ^ 2|) ^ 2
+  ≤ E'(f) * (4 * ∑ i, deg A i * f i ^ 2)`.
+
+Unconditional in `f` (no sign hypothesis needed). By
+Cauchy–Schwarz (`Finset.sum_mul_sq_le_sq_mul_sq`) over the product type
+`V × V` with the pointwise factorization
+`|a ^ 2 - b ^ 2| = |a - b| * |a + b|`; the second factor's estimate
+`(f i + f j) ^ 2 ≤ 2 * f i ^ 2 + 2 * f j ^ 2` needs the *column* sums of
+the cross double sum to match `deg`'s row sums, which is why `IsSymm` is
+load-bearing here (refuted on asymmetric nonnegative input in QA:
+`SpectralGraphTheory.QA.core_sum_abs_sq_sub_sq_asymmetry_refuted_QA`).
+
+QA: pinned on `K₂` (both sides computed raw, the strict inequality
+`4 < 8` visible) in `SpectralGraphTheory.QA.core_edge_QA` and
+`SpectralGraphTheory.QA.core_edge_strict_QA`. -/
+theorem core_sum_abs_sq_sub_sq (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnn : ∀ i j, 0 ≤ A i j) (f : V → ℝ) :
+    (∑ i, ∑ j, A i j * |f i ^ 2 - f j ^ 2|) ^ 2
+      ≤ (∑ i, ∑ j, A i j * (f i - f j) ^ 2)
+        * (4 * ∑ i, deg A i * f i ^ 2) := by
+  classical
+  have habs : ∀ x : ℝ, |x| * |x| = x * x := fun x => by
+    rw [← abs_mul, abs_of_nonneg (mul_self_nonneg x)]
+  have h1 : ∀ p : V × V, Real.sqrt (A p.1 p.2) * Real.sqrt (A p.1 p.2)
+      = A p.1 p.2 := fun p => Real.mul_self_sqrt (hnn p.1 p.2)
+  -- the pointwise cross identity: √A|Δ| · √A|Σ| = A |f₁² − f₂²|
+  have hlhs : ∀ p : V × V, Real.sqrt (A p.1 p.2) * |f p.1 - f p.2|
+      * (Real.sqrt (A p.1 p.2) * |f p.1 + f p.2|)
+      = A p.1 p.2 * |f p.1 ^ 2 - f p.2 ^ 2| := by
+    intro p
+    rw [mul_mul_mul_comm, h1 p, ← abs_mul]
+    have hring : (f p.1 - f p.2) * (f p.1 + f p.2)
+        = f p.1 ^ 2 - f p.2 ^ 2 := by ring
+    rw [hring]
+  -- Cauchy–Schwarz over the product type, restated at the target shape
+  have hcs : (∑ p : V × V, A p.1 p.2 * |f p.1 ^ 2 - f p.2 ^ 2|) ^ 2
+      ≤ (∑ p : V × V, (Real.sqrt (A p.1 p.2) * |f p.1 - f p.2|) ^ 2)
+        * ∑ p : V × V, (Real.sqrt (A p.1 p.2) * |f p.1 + f p.2|) ^ 2 := by
+    have h := Finset.sum_mul_sq_le_sq_mul_sq (Finset.univ : Finset (V × V))
+      (fun p => Real.sqrt (A p.1 p.2) * |f p.1 - f p.2|)
+      (fun p => Real.sqrt (A p.1 p.2) * |f p.1 + f p.2|)
+    simp only [hlhs] at h
+    exact h
+  -- first factor: exactly the Dirichlet double sum
+  have hF2 : ∑ p : V × V, (Real.sqrt (A p.1 p.2) * |f p.1 - f p.2|) ^ 2
+      = ∑ i, ∑ j, A i j * (f i - f j) ^ 2 := by
+    rw [← Fintype.sum_prod_type' (fun i j => A i j * (f i - f j) ^ 2)]
+    refine Finset.sum_congr rfl fun p _ => ?_
+    calc (Real.sqrt (A p.1 p.2) * |f p.1 - f p.2|) ^ 2
+        = (Real.sqrt (A p.1 p.2) * |f p.1 - f p.2|)
+            * (Real.sqrt (A p.1 p.2) * |f p.1 - f p.2|) := by rw [pow_two]
+      _ = A p.1 p.2 * (f p.1 - f p.2) ^ 2 := by
+          rw [mul_mul_mul_comm, h1 p, habs, pow_two]
+  -- second factor: pointwise AM-GM, then the two degree sums (symmetry
+  -- load-bearing on the column side)
+  have hG2 : ∑ p : V × V, (Real.sqrt (A p.1 p.2) * |f p.1 + f p.2|) ^ 2
+      ≤ 4 * ∑ i, deg A i * f i ^ 2 := by
+    have hpt : ∀ p : V × V,
+        (Real.sqrt (A p.1 p.2) * |f p.1 + f p.2|) ^ 2
+          ≤ A p.1 p.2 * (2 * f p.1 ^ 2 + 2 * f p.2 ^ 2) := by
+      intro p
+      have ham : (f p.1 + f p.2) ^ 2 ≤ 2 * f p.1 ^ 2 + 2 * f p.2 ^ 2 := by
+        nlinarith [sq_nonneg (f p.1 - f p.2)]
+      have heq : (Real.sqrt (A p.1 p.2) * |f p.1 + f p.2|) ^ 2
+          = A p.1 p.2 * (f p.1 + f p.2) ^ 2 := by
+        rw [pow_two, mul_mul_mul_comm, h1 p, habs, pow_two]
+      calc (Real.sqrt (A p.1 p.2) * |f p.1 + f p.2|) ^ 2
+          = A p.1 p.2 * (f p.1 + f p.2) ^ 2 := heq
+        _ ≤ A p.1 p.2 * (2 * f p.1 ^ 2 + 2 * f p.2 ^ 2) :=
+            mul_le_mul_of_nonneg_left ham (hnn p.1 p.2)
+    have hsplit : ∑ p : V × V, A p.1 p.2 * (2 * f p.1 ^ 2 + 2 * f p.2 ^ 2)
+        = 2 * ∑ p : V × V, A p.1 p.2 * f p.1 ^ 2
+          + 2 * ∑ p : V × V, A p.1 p.2 * f p.2 ^ 2 := by
+      rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
+      exact Finset.sum_congr rfl fun p _ => by ring
+    have hrow : ∑ p : V × V, A p.1 p.2 * f p.1 ^ 2
+        = ∑ i, deg A i * f i ^ 2 := by
+      rw [Fintype.sum_prod_type' (fun i j => A i j * f i ^ 2)]
+      exact Finset.sum_congr rfl fun i _ => by rw [← Finset.sum_mul]; rfl
+    have hcol : ∑ p : V × V, A p.1 p.2 * f p.2 ^ 2
+        = ∑ i, deg A i * f i ^ 2 := by
+      rw [Fintype.sum_prod_type' (fun i j => A i j * f j ^ 2), Finset.sum_comm]
+      refine Finset.sum_congr rfl fun j _ => ?_
+      rw [← Finset.sum_mul]
+      have hsym : ∑ i, A i j = deg A j :=
+        Finset.sum_congr rfl fun i _ => hA.apply j i
+      rw [hsym]
+    calc ∑ p : V × V, (Real.sqrt (A p.1 p.2) * |f p.1 + f p.2|) ^ 2
+        ≤ ∑ p : V × V, A p.1 p.2 * (2 * f p.1 ^ 2 + 2 * f p.2 ^ 2) :=
+          Finset.sum_le_sum fun p _ => hpt p
+      _ = 4 * ∑ i, deg A i * f i ^ 2 := by rw [hsplit, hrow, hcol]; ring
+  -- final assembly on the double-sum goal
+  have hAbs2 : ∑ i, ∑ j, A i j * |f i ^ 2 - f j ^ 2|
+      = ∑ p : V × V, A p.1 p.2 * |f p.1 ^ 2 - f p.2 ^ 2| :=
+    (Fintype.sum_prod_type' (fun i j => A i j * |f i ^ 2 - f j ^ 2|)).symm
+  have hDir2 : ∑ i, ∑ j, A i j * (f i - f j) ^ 2
+      = ∑ p : V × V, A p.1 p.2 * (f p.1 - f p.2) ^ 2 :=
+    (Fintype.sum_prod_type' (fun i j => A i j * (f i - f j) ^ 2)).symm
+  rw [hAbs2, hDir2]
+  calc (∑ p : V × V, A p.1 p.2 * |f p.1 ^ 2 - f p.2 ^ 2|) ^ 2
+      ≤ (∑ p : V × V, (Real.sqrt (A p.1 p.2) * |f p.1 - f p.2|) ^ 2)
+        * ∑ p : V × V, (Real.sqrt (A p.1 p.2) * |f p.1 + f p.2|) ^ 2 := hcs
+    _ = (∑ p : V × V, A p.1 p.2 * (f p.1 - f p.2) ^ 2)
+        * ∑ p : V × V, (Real.sqrt (A p.1 p.2) * |f p.1 + f p.2|) ^ 2 := by
+        rw [hF2, hDir2]
+    _ ≤ (∑ p : V × V, A p.1 p.2 * (f p.1 - f p.2) ^ 2)
+        * (4 * ∑ i, deg A i * f i ^ 2) :=
+        mul_le_mul_of_nonneg_left hG2 (Finset.sum_nonneg fun p _ =>
+          mul_nonneg (hnn p.1 p.2) (sq_nonneg _))
+
+omit [DecidableEq V] in
+/-- Under `d`-regularity the degree-weighted squared norm collapses to
+`d` times the plain squared norm — the bridge between Component A's
+second factor `4 * ∑ i, deg A i * f i ^ 2` and the `4 * d * ‖f‖²` form
+the hard-direction chain combines it into. -/
+theorem sum_deg_mul_eq_of_regular (A : WAdj (V := V)) (d : ℝ)
+    (hd : ∀ i, deg A i = d) (f : V → ℝ) :
+    ∑ i, deg A i * f i ^ 2 = d * ∑ i, f i ^ 2 := by
+  calc ∑ i, deg A i * f i ^ 2
+      = ∑ i, d * f i ^ 2 := Finset.sum_congr rfl fun i _ => by rw [hd i]
+    _ = d * ∑ i, f i ^ 2 := (Finset.mul_sum Finset.univ (fun i => f i ^ 2) d).symm
+
+/-- **Step 1a normalization.** The Rayleigh quotient of the regular
+normalized Laplacian, expressed through the ordered Dirichlet double
+sum `E'(x) := ∑ i j, A i j * (x i - x j) ^ 2`: since
+`quadForm (laplacian A) x = E'(x) / 2` (`laplacian_quadForm`) and
+`quadForm (L_sym) x = d⁻¹ * quadForm (laplacian A) x`, the quotient is
+`R(x) = E'(x) / (2 * d * ‖x‖²)`. The explicit `2` in the denominator is
+the constant budget of the hard-direction chain: the per-part bound
+`φ ^ 2 * d * ‖y‖² ≤ E'(y)` sums (through
+`sum_edgeWeight_sq_posPart_add_sq_negPart_le`) to
+`φ ^ 2 * d * ‖x‖² ≤ E'(x) = 2 * d * R(x) * ‖x‖²`, i.e.
+`φ ^ 2 / 2 ≤ R(x)` — the sweep lemma, with nothing lost anywhere.
+
+QA: cross-checked on `K₂` against the independently pinned values
+`λ₂(L_sym) = 2` and the cut test vector's Rayleigh quotient in
+`SpectralGraphTheory.QA.rayleigh_regularNormalizedLaplacian_edge_eq_QA`. -/
+theorem rayleigh_regularNormalizedLaplacian_eq (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (d : ℝ) (hd : ∀ i, deg A i = d) (hdne : d ≠ 0)
+    {x : V → ℝ} (hx : x ≠ 0) :
+    rayleigh (regularNormalizedLaplacian A d) x
+      = (∑ i, ∑ j, A i j * (x i - x j) ^ 2)
+          / (2 * d * Matrix.dotProduct x x) := by
+  have hdot : Matrix.dotProduct x x ≠ 0 := by
+    intro h
+    apply hx
+    funext i
+    have hsum : ∑ j, x j * x j = 0 := by
+      simpa [Matrix.dotProduct] using h
+    have hmem := (Finset.sum_eq_zero_iff_of_nonneg
+      (fun j _ => mul_self_nonneg (x j))).1 hsum i (Finset.mem_univ i)
+    exact mul_self_eq_zero.mp hmem
+  rw [rayleigh, if_neg hx, quadForm_regularNormalizedLaplacian A d hd hdne,
+    laplacian_quadForm A hA, ← div_div]
+  simp only [div_eq_mul_inv]
+  ring
+
 end SpectralGraphTheory

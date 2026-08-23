@@ -22,10 +22,14 @@ As of August 22, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 10 |
-| QA theorems/lemmas | 1378, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 1404, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is the Cheeger *hard* direction at the SGT
-center; **Perron–Frobenius for irreducible nonnegative matrices**
+center (its pure-algebra component — the Cauchy–Schwarz core, the fused
+median-part contraction, the `E'/(2d‖x‖²)` normalization — was proved
+2026-08-23 as Step 1a of `proposals/discharge-perturbation-axioms.md`,
+with the survey's constant budget corrected on record; the co-area core
+and the median/assembly remain); **Perron–Frobenius for irreducible nonnegative matrices**
 (admitted 2026-08-22 as `Scaffold.LinearAlgebra.perron_frobenius`,
 Horn & Johnson Theorem 8.4.4 at the irreducible-case qualification
 level — no strict-dominance clause, with the imprimitive-cycle

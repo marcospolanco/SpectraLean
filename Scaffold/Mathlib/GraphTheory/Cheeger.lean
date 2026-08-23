@@ -1,4 +1,5 @@
 import Scaffold.Mathlib.GraphTheory.Spectral
+import Mathlib.Analysis.SpecialFunctions.Integrals
 
 /-!
 # Cheeger inequalities for regular graphs
@@ -51,46 +52,15 @@ theorem regularNormalizedLaplacian_symmetric (A : WAdj (V := V))
     simp [(hA.apply i i).symm]
   · simp [h, Ne.symm h, hA.apply j i]
 
-/-- Cheeger lower bound for `d`-regular graphs: the squared conductance
-controls the second-smallest normalized Laplacian eigenvalue from below,
-`φ(G)² / 2 ≤ λ₂(L_sym)`.
+/-!
+### The Cheeger lower bound (hard direction)
 
-Source:
-- Chung, F. R. K., "Spectral Graph Theory", CBMS 92, AMS, 1997,
-  Chapter 2.
-
-Statement differences: restricted to `d`-regular graphs with positive
-degree `d` (so that `regularNormalizedLaplacian A d` is the symmetric
-normalized Laplacian); `cheegerConstant` is the infimum of the
-volume-based conductance over nonempty proper vertex subsets.
-
-Statement-shape correction (2026-08-18): earlier revisions stated the
-spectral side as `lambda2 (regularNormalizedLaplacian A d) …`. That was
-a defective shape, not a strengthening: `lambda2` reads the spectrum of
-the *combinatorial Laplacian of* its argument, and every row of a
-normalized Laplacian sums to zero, so the asserted quantity was
-`λ₂(L(L_sym)) = λ₂(-L_sym)` — on the two-vertex edge the instance reads
-`1/2 ≤ 0`, which is false (refuted in proved form by
-`SpectralGraphTheory.QA.old_cheeger_lower_bound_refuted_QA`). The
-corrected side `secondEval (regularNormalizedLaplacian A d) …` reads
-`λ₂(L_sym)` itself, matching the cited source; hypotheses and name are
-otherwise unchanged.
-
-QA: exercised by
-`SpectralGraphTheory.QA.cheeger_positive_implies_secondEval_pos_QA` and
-`SpectralGraphTheory.QA.cheeger_bounds_coherent_QA` in
-`Scaffold/QA/SpectralGraph/Cheeger_QA.lean`, which derives consequences
-from this axiom, and by
-`SpectralGraphTheory.QA.edge_normLap_secondEval_eq_two_QA`, which pins
-the corrected right-hand side on the two-vertex edge to its classical
-value `2`.
+`cheeger_lower_bound` — `φ(G)² / 2 ≤ λ₂(L_sym)` on `d`-regular graphs —
+was this file's last explicit axiom (admitted 2026-08-18, statement
+repaired the same day) and is proved below at the unchanged statement in
+the "hard direction Step 1c" section (2026-08-23); the declaration lives
+there, after its dependencies.
 -/
-axiom cheeger_lower_bound (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
-    (hnonneg : ∀ i j, 0 ≤ A i j) (d : ℝ) (hd : ∀ i, deg A i = d)
-    (hdpos : 0 < d) (hcard : 2 ≤ Fintype.card V) :
-    (cheegerConstant A) ^ 2 / 2 ≤
-      secondEval (regularNormalizedLaplacian A d)
-        (regularNormalizedLaplacian_symmetric A hA d) hcard
 
 /-!
 ### Regularity bridges to the combinatorial Laplacian and volumes
@@ -761,5 +731,871 @@ theorem rayleigh_regularNormalizedLaplacian_eq (A : WAdj (V := V))
     laplacian_quadForm A hA, ← div_div]
   simp only [div_eq_mul_inv]
   ring
+
+/-!
+### The Cheeger hard direction, Step 1b: the co-area core (proved)
+
+`proposals/discharge-perturbation-axioms.md` Step 1b (surveyed
+2026-08-22): the co-area layer of the hard-direction proof, proved here
+with zero new axioms. For a vector whose nonempty closed superlevel sets
+are all minority-side, the weighted total variation of the squared
+values dominates `2 * φ * d` times the squared norm — the lower
+complement of Component A above; composed with it (Step 1c) this yields
+the per-part bound `φ ^ 2 * d * ‖y‖ ^ 2 ≤ E'(y)`.
+
+Survey correction (2026-08-23, found by the Step-1b spike): the priced
+hand Finset-induction Fubini is unnecessary — the pin *has* a
+finite-sum ↔ interval-integral interchange, `intervalIntegral.
+integral_finset_sum` (the survey searched for the name
+`integral_sum`), together with `IntervalIntegrable.sum`, `.abs`, and
+`integral_mono_ae_restrict`. The `Iic`-indicator encoding below — chosen
+to match `intervalIntegral.integral_indicator`'s own truncation shape —
+also dissolves the survey's `Ι = Ioc` right-endpoint drop-point trap:
+every congruence in the chain is pointwise.
+
+Statement-shape notes (both are hypothesis *drops* relative to the
+survey's sketch): no `hynonneg : ∀ i, 0 ≤ y i` — the whole chain runs
+on `y i ^ 2`, nonnegative automatically, so the theorem holds for
+arbitrary `y : V → ℝ`; and no `hcard : 2 ≤ Fintype.card V` — minority
+`2 * |S| ≤ n` already forces `Sᶜ` nonempty whenever `S` is (`|Sᶜ| ≥
+|S| ≥ 1`), which is all the conductance step needs.
+-/
+
+section Step1b
+
+open MeasureTheory intervalIntegral
+
+/-- The closed cumulative level step `1_{t ≤ c}`. Layer-cake primitive
+of the co-area encoding; stated through `Set.indicator` on `{x | x ≤ c}`
+to match `intervalIntegral.integral_indicator` exactly. -/
+noncomputable def indicatorLE (c t : ℝ) : ℝ :=
+  Set.indicator {x : ℝ | x ≤ c} (fun _ => 1) t
+
+theorem indicatorLE_of_le {c t : ℝ} (h : t ≤ c) : indicatorLE c t = 1 :=
+  Set.indicator_of_mem (show t ∈ {x : ℝ | x ≤ c} by exact h) _
+
+theorem indicatorLE_of_lt {c t : ℝ} (h : c < t) : indicatorLE c t = 0 :=
+  Set.indicator_of_not_mem (show t ∉ {x : ℝ | x ≤ c} by exact not_le.2 h) _
+
+theorem indicatorLE_mono (c d t : ℝ) (hcd : c ≤ d) :
+    indicatorLE c t ≤ indicatorLE d t := by
+  by_cases h1 : t ≤ c
+  · rw [indicatorLE_of_le h1, indicatorLE_of_le (h1.trans hcd)]
+  · have hc : c < t := not_le.1 h1
+    rw [indicatorLE_of_lt hc]
+    by_cases h2 : t ≤ d
+    · have h3 := indicatorLE_of_le h2; simp [h3]
+    · have h3 := indicatorLE_of_lt (not_le.1 h2); simp [h3]
+
+/-- The level step is interval-integrable on every interval: it is the
+indicator of a measurable set, bounded, on a finite-measure interval. -/
+theorem intervalIntegrable_indicatorLE (c a b : ℝ) :
+    IntervalIntegrable (indicatorLE c) volume a b := by
+  rw [intervalIntegrable_iff]
+  refine ((integrableOn_const (C := (1 : ℝ)) (μ := volume)).mpr ?_).indicator
+    (measurableSet_Iic (a := c))
+  right
+  rcases le_total a b with hab | hab
+  · rw [Set.uIoc_of_le hab, Real.volume_Ioc]
+    exact ENNReal.ofReal_lt_top
+  · rw [Set.uIoc_of_ge hab, Real.volume_Ioc]
+    exact ENNReal.ofReal_lt_top
+
+/-- A constant multiple of an interval-integrable function is
+interval-integrable (small helper; the pin's `IntervalIntegrable`
+API has no `const_mul`). -/
+theorem intervalIntegrable_const_mul {f : ℝ → ℝ} {a b : ℝ} (k : ℝ)
+    (hf : IntervalIntegrable f volume a b) :
+    IntervalIntegrable (fun t => k * f t) volume a b := by
+  rw [intervalIntegrable_iff] at hf ⊢
+  exact hf.const_mul k
+
+/-- **Mass layer-cake.** The closed level step integrates to its
+threshold: `∫ t in 0..R, 1_{t ≤ c} = c` for `0 ≤ c ≤ R`. Direct from
+`intervalIntegral.integral_indicator` (whose truncation shape the
+indicator matches exactly) and `integral_const`. -/
+theorem integral_indicatorLE {c R : ℝ} (h1 : 0 ≤ c) (h2 : c ≤ R) :
+    ∫ t in (0:ℝ)..R, indicatorLE c t = c := by
+  have h := intervalIntegral.integral_indicator (μ := volume)
+    (f := fun _ => (1 : ℝ))
+    (show c ∈ Set.Icc 0 R from ⟨h1, h2⟩)
+  simp only [indicatorLE] at h ⊢
+  rw [h, intervalIntegral.integral_const]
+  simp
+
+/-- **Pair layer-cake.** The total variation of the two level steps
+integrates to the absolute value gap: for `0 ≤ c, d` with `max c d ≤ R`,
+`∫ t in 0..R, |1_{t ≤ c} − 1_{t ≤ d}| = |c − d|`. Pointwise
+monotonicity of the steps resolves the absolute value by cases, then
+two mass layer-cakes close each case. -/
+theorem integral_abs_indicatorLE_sub {c d R : ℝ} (hc : 0 ≤ c) (hd : 0 ≤ d)
+    (hR : max c d ≤ R) :
+    ∫ t in (0:ℝ)..R, |indicatorLE c t - indicatorLE d t| = |c - d| := by
+  have hRc : c ≤ R := le_trans (le_max_left c d) hR
+  have hRd : d ≤ R := le_trans (le_max_right c d) hR
+  rcases le_total c d with h | h
+  · have hpt : ∀ t : ℝ,
+        |indicatorLE c t - indicatorLE d t|
+          = indicatorLE d t - indicatorLE c t := by
+      intro t
+      have hle := indicatorLE_mono c d t h
+      rw [abs_of_nonpos (by linarith)]
+      ring
+    rw [intervalIntegral.integral_congr (fun t _ => hpt t),
+      intervalIntegral.integral_sub (intervalIntegrable_indicatorLE d 0 R)
+        (intervalIntegrable_indicatorLE c 0 R),
+      integral_indicatorLE hd hRd, integral_indicatorLE hc hRc]
+    rw [abs_of_nonpos (by linarith : c - d ≤ 0)]
+    ring
+  · have hpt : ∀ t : ℝ,
+        |indicatorLE c t - indicatorLE d t|
+          = indicatorLE c t - indicatorLE d t := by
+      intro t
+      have hle := indicatorLE_mono d c t h
+      rw [abs_of_nonneg (by linarith)]
+    rw [intervalIntegral.integral_congr (fun t _ => hpt t),
+      intervalIntegral.integral_sub (intervalIntegrable_indicatorLE c 0 R)
+        (intervalIntegrable_indicatorLE d 0 R),
+      integral_indicatorLE hc hRc, integral_indicatorLE hd hRd]
+    rw [abs_of_nonneg (by linarith : 0 ≤ c - d)]
+
+omit [DecidableEq V] in
+/-- The indicator↔cardinality dictionary: the sum of the level
+indicators is the size of the closed level set `{i : t ≤ g i}`. -/
+theorem sum_indicatorLE_eq_card_filter (g : V → ℝ) (t : ℝ) :
+    ∑ i, indicatorLE (g i) t
+      = ((Finset.univ.filter (fun i => t ≤ g i)).card : ℝ) := by
+  classical
+  have h1 : ∀ i : V, indicatorLE (g i) t
+      = ↑(if t ≤ g i then (1 : ℕ) else 0) := by
+    intro i
+    by_cases h : t ≤ g i
+    · rw [indicatorLE_of_le h, if_pos h]; norm_num
+    · rw [indicatorLE_of_lt (not_le.1 h), if_neg h]; norm_num
+  rw [Finset.sum_congr rfl (fun i _ => h1 i), ← Nat.cast_sum,
+    ← Finset.sum_filter, Finset.sum_const]
+  simp
+
+/-- **Per-level cut identity.** For any threshold `t`, the
+`A`-weighted total variation of the level indicators is twice the edge
+boundary of the closed level set `S = {i : t ≤ y i ^ 2}` — crossing
+pairs contribute `1` in each direction, and the two directions are the
+two boundaries, equal by symmetry (`boundary_compl`). -/
+theorem sum_pairAbs_eq_two_boundary (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (y : V → ℝ) (t : ℝ) (S : Finset V) (hS : ∀ i, i ∈ S ↔ t ≤ y i ^ 2) :
+    ∑ i, ∑ j, A i j * |indicatorLE (y i ^ 2) t - indicatorLE (y j ^ 2) t|
+      = 2 * boundary A S := by
+  have hin : ∀ i ∈ S, indicatorLE (y i ^ 2) t = 1 := fun i hi =>
+    indicatorLE_of_le ((hS i).1 hi)
+  have hout : ∀ i ∉ S, indicatorLE (y i ^ 2) t = 0 := by
+    intro i hi
+    refine indicatorLE_of_lt ?_
+    by_contra hcon
+    exact hi ((hS i).2 (not_lt.1 hcon))
+  have hSS : ∀ i ∈ S, ∑ j, A i j * |indicatorLE (y i ^ 2) t
+        - indicatorLE (y j ^ 2) t| = ∑ j in Sᶜ, A i j := by
+    intro i hi
+    rw [← Finset.sum_add_sum_compl S (fun j => A i j
+      * |indicatorLE (y i ^ 2) t - indicatorLE (y j ^ 2) t|)]
+    have h1 : ∑ j in S, A i j * |indicatorLE (y i ^ 2) t
+        - indicatorLE (y j ^ 2) t| = 0 :=
+      Finset.sum_eq_zero fun j hj => by simp [hin i hi, hin j hj]
+    rw [h1, zero_add]
+    have hcongr1 : ∀ j ∈ Sᶜ, A i j * |indicatorLE (y i ^ 2) t
+        - indicatorLE (y j ^ 2) t| = A i j := by
+      intro j hj
+      simp [hin i hi, hout j (Finset.mem_compl.1 hj)]
+    exact Finset.sum_congr rfl hcongr1
+  have hScSc : ∀ i ∈ Sᶜ, ∑ j, A i j * |indicatorLE (y i ^ 2) t
+        - indicatorLE (y j ^ 2) t| = ∑ j in S, A i j := by
+    intro i hi
+    rw [← Finset.sum_add_sum_compl S (fun j => A i j
+      * |indicatorLE (y i ^ 2) t - indicatorLE (y j ^ 2) t|)]
+    have h2 : ∑ j in Sᶜ, A i j * |indicatorLE (y i ^ 2) t
+        - indicatorLE (y j ^ 2) t| = 0 :=
+      Finset.sum_eq_zero fun j hj => by
+        simp [hout i (Finset.mem_compl.1 hi), hout j (Finset.mem_compl.1 hj)]
+    have hcongr2 : ∀ j ∈ S, A i j * |indicatorLE (y i ^ 2) t
+        - indicatorLE (y j ^ 2) t| = A i j := by
+      intro j hj
+      simp [hout i (Finset.mem_compl.1 hi), hin j hj]
+    rw [Finset.sum_congr rfl hcongr2, h2, add_zero]
+  have hbd1 : ∑ i ∈ S, ∑ j ∈ Sᶜ, A i j = boundary A S := rfl
+  rw [← Finset.sum_add_sum_compl S (fun i => ∑ j, A i j
+      * |indicatorLE (y i ^ 2) t - indicatorLE (y j ^ 2) t|),
+    Finset.sum_congr rfl (fun i hi => hSS i hi),
+    Finset.sum_congr rfl (fun i hi => hScSc i hi), hbd1,
+    show ∑ i ∈ Sᶜ, ∑ j ∈ S, A i j = boundary A Sᶜ from by
+      simp only [boundary, compl_compl],
+    boundary_compl A hA S]
+  ring
+
+/-- **Minority conductance.** On a `d`-regular graph with `0 < d`, a
+nonempty set occupying at most half the vertices has boundary at least
+`φ * d * |S|`: its conductance bounds the Cheeger constant from below,
+and minority makes `S`'s volume the smaller side. -/
+theorem boundary_ge_of_minority (A : WAdj (V := V)) (hnn : ∀ i j, 0 ≤ A i j)
+    (d : ℝ) (hd : ∀ i, deg A i = d) (hdpos : 0 < d) {S : Finset V}
+    (hS : S.Nonempty) (hcard : 2 * S.card ≤ Fintype.card V) :
+    cheegerConstant A * d * (S.card : ℝ) ≤ boundary A S := by
+  have hc := Finset.card_add_card_compl S
+  have h0 : 0 < S.card := Finset.card_pos.2 hS
+  have hcardle : S.card ≤ Sᶜ.card := by omega
+  obtain ⟨j, hj⟩ := Finset.card_pos.1 (by omega : 0 < Sᶜ.card)
+  have hφ := conductance_ge_cheegerConstant A hnn S hS ⟨j, hj⟩
+  have hmin : min (vol A S) (vol A Sᶜ) = d * (S.card : ℝ) := by
+    rw [vol_eq_of_regular A d hd S, vol_eq_of_regular A d hd Sᶜ,
+      min_eq_left (mul_le_mul_of_nonneg_left (by exact_mod_cast hcardle) hdpos.le)]
+  have hcond : conductance A S = boundary A S / min (vol A S) (vol A Sᶜ) := rfl
+  rw [hcond, hmin] at hφ
+  have hkey := (le_div_iff₀ (by positivity : 0 < d * (S.card : ℝ))).1 hφ
+  linarith
+
+/-- **The per-level co-area bound.** At every positive level `t`, twice
+the minority conductance bound bounds the weighted total variation of
+the level indicators: the closed level set's cardinality enters through
+`sum_indicatorLE_eq_card_filter`, and the cut identity plus minority
+conductance close the chain. -/
+theorem sum_pairAbs_ge (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnn : ∀ i j, 0 ≤ A i j) (d : ℝ) (hd : ∀ i, deg A i = d) (hdpos : 0 < d)
+    (y : V → ℝ) (hy : ∀ t : ℝ, 0 < t →
+      2 * (Finset.univ.filter (fun i => t ≤ y i ^ 2)).card ≤ Fintype.card V)
+    (t : ℝ) (ht : 0 < t) :
+    2 * (cheegerConstant A * d
+        * ((Finset.univ.filter (fun i => t ≤ y i ^ 2)).card : ℝ))
+      ≤ ∑ i, ∑ j, A i j * |indicatorLE (y i ^ 2) t - indicatorLE (y j ^ 2) t| := by
+  have hSm : ∀ i, i ∈ Finset.univ.filter (fun i => t ≤ y i ^ 2) ↔ t ≤ y i ^ 2 := by
+    intro i
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+  rw [sum_pairAbs_eq_two_boundary A hA y t _ hSm]
+  rcases (Finset.univ.filter (fun i => t ≤ y i ^ 2)).eq_empty_or_nonempty
+    with hE | hNE
+  · rw [hE]
+    have hb0 : boundary A (∅ : Finset V) = 0 := by simp [boundary]
+    rw [hb0]
+    simp
+  · have hbd := boundary_ge_of_minority A hnn d hd hdpos hNE (hy t ht)
+    linarith
+
+/-- **The co-area core of the Cheeger hard direction** (Step 1b; the
+`1b` component of `proposals/discharge-perturbation-axioms.md`): for any
+`y : V → ℝ` whose nonempty closed superlevel sets `{i : t ≤ y i ^ 2}`
+(`0 < t`) are all minority-side (`2 * |S_t| ≤ Fintype.card V`),
+
+`2 * (φ * d * ∑ i, y i ^ 2) ≤ ∑ i j, A i j * |y i ^ 2 - y j ^ 2|`.
+
+Composed with Component A (`core_sum_abs_sq_sub_sq`, whose upper bound
+carries the same total-variation quantity) this yields the per-part
+bound `φ ^ 2 * d * ‖y‖ ^ 2 ≤ E'(y)` of the hard-direction chain — the
+input Step 1c consumes through the Step-1a fused contraction and the
+`E' / (2 * d * ‖x‖ ^ 2)` normalization.
+
+Route: both sides are layer-cake integrals over `[0, R]` for any
+`R ≥ max_i y i ^ 2` (mass: `integral_indicatorLE`; pair:
+`integral_abs_indicatorLE_sub`; interchange by
+`intervalIntegral.integral_finset_sum` over the product type), and the
+integrand inequality holds at every level `t > 0` by the per-level
+bound above; `t = 0` is the single failure point of the integrand
+inequality and is absorbed measure-theoretically
+(`integral_mono_ae_restrict`; Lebesgue has no atoms).
+
+Statement-shape guards: the minority hypothesis is stated on *closed*
+superlevel sets at positive levels only — at `t = 0` the closed set is
+all of `V` for every `y`, so a `t ≥ 0` reading would be unsatisfiable;
+and `2 ≤ Fintype.card V` is *not* assumed (see the section header).
+
+QA: the `K₂` equality pin (both sides `2`), the strict multi-level `C₄`
+witness, the indicator↔cardinality dictionary pin, and the
+minority-hypothesis refutation-on-omission live in
+`Scaffold/QA/SpectralGraph/Cheeger_QA.lean` (`coarea_edge_eq_QA`,
+`coarea_cycle_lt_QA`, `sum_indicatorLE_edge_QA`,
+`coarea_minority_refuted_QA`). -/
+theorem coarea_core (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnn : ∀ i j, 0 ≤ A i j) (d : ℝ) (hd : ∀ i, deg A i = d) (hdpos : 0 < d)
+    (y : V → ℝ) (hy : ∀ t : ℝ, 0 < t →
+      2 * (Finset.univ.filter (fun i => t ≤ y i ^ 2)).card ≤ Fintype.card V) :
+    2 * (cheegerConstant A * d * ∑ i, y i ^ 2)
+      ≤ ∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2| := by
+  classical
+  have hy2 : ∀ i, 0 ≤ y i ^ 2 := fun i => sq_nonneg _
+  obtain ⟨R, hRdef⟩ : ∃ R : ℝ, R = ∑ i, y i ^ 2 + 1 := ⟨_, rfl⟩
+  have hRpos : 0 ≤ R := by
+    rw [hRdef]
+    have hsumnn : 0 ≤ ∑ i, y i ^ 2 := Finset.sum_nonneg fun i _ => hy2 i
+    linarith
+  have hcR : ∀ i, y i ^ 2 ≤ R := by
+    intro i
+    have hle := Finset.single_le_sum (fun i (_ : i ∈ Finset.univ) => hy2 i)
+      (Finset.mem_univ i)
+    rw [hRdef]
+    linarith
+  -- integrability of both mono sides
+  have hintL : IntervalIntegrable (fun t =>
+      (2 * (cheegerConstant A * d)) * ∑ i, indicatorLE (y i ^ 2) t) volume 0 R := by
+    have hsum : IntervalIntegrable
+        (fun t => ∑ i, indicatorLE (y i ^ 2) t) volume 0 R := by
+      have h := IntervalIntegrable.sum (Finset.univ : Finset V)
+        (f := fun i t => indicatorLE (y i ^ 2) t)
+        (fun i _ => intervalIntegrable_indicatorLE (y i ^ 2) 0 R)
+      have hfun : (fun t => ∑ i, indicatorLE (y i ^ 2) t)
+          = ∑ i : V, (fun t => indicatorLE (y i ^ 2) t) := by
+        funext t
+        rw [Finset.sum_apply]
+      rw [hfun]
+      exact h
+    exact intervalIntegrable_const_mul _ hsum
+  have hintR : IntervalIntegrable (fun t => ∑ p : V × V,
+      A p.1 p.2 * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|)
+      volume 0 R := by
+    have h := IntervalIntegrable.sum (Finset.univ : Finset (V × V))
+      (f := fun p t => A p.1 p.2
+        * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|)
+      (fun p _ => intervalIntegrable_const_mul _
+        (((intervalIntegrable_indicatorLE (y p.1 ^ 2) 0 R).sub
+          (intervalIntegrable_indicatorLE (y p.2 ^ 2) 0 R)).abs))
+    have hfun : (fun t => ∑ p : V × V, A p.1 p.2
+        * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|)
+        = ∑ p : V × V, (fun t => A p.1 p.2
+          * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|) := by
+      funext t
+      rw [Finset.sum_apply]
+    rw [hfun]
+    exact h
+  -- the mass layer-cake
+  have hmass : ∫ t in (0:ℝ)..R, ∑ i, indicatorLE (y i ^ 2) t
+      = ∑ i, y i ^ 2 := by
+    rw [intervalIntegral.integral_finset_sum
+      (fun i _ => intervalIntegrable_indicatorLE (y i ^ 2) 0 R)]
+    exact Finset.sum_congr rfl fun i _ => integral_indicatorLE (hy2 i) (hcR i)
+  -- the pair layer-cake
+  have hint : ∫ t in (0:ℝ)..R, ∑ p : V × V, A p.1 p.2
+        * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|
+      = ∑ p : V × V, ∫ t in (0:ℝ)..R, A p.1 p.2
+        * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t| :=
+    intervalIntegral.integral_finset_sum
+      (fun p _ => intervalIntegrable_const_mul _
+        (((intervalIntegrable_indicatorLE (y p.1 ^ 2) 0 R).sub
+          (intervalIntegrable_indicatorLE (y p.2 ^ 2) 0 R)).abs))
+  have hpair : ∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2|
+      = ∫ t in (0:ℝ)..R, ∑ p : V × V, A p.1 p.2
+          * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t| := by
+    rw [hint, ← Fintype.sum_prod_type'
+      (fun i j => A i j * |y i ^ 2 - y j ^ 2|)]
+    exact Finset.sum_congr rfl fun p _ => by
+      rw [intervalIntegral.integral_const_mul,
+        integral_abs_indicatorLE_sub (hy2 p.1) (hy2 p.2)
+          (max_le (hcR p.1) (hcR p.2))]
+  -- the ae mono (the t = 0 endpoint is the only failure point)
+  have hne : {t : ℝ | t ≠ 0} ∈ MeasureTheory.ae volume := by
+    rw [MeasureTheory.mem_ae_iff]; simp [Real.volume_singleton]
+  have hae : ∀ᵐ t ∂(volume.restrict (Set.Icc 0 R)),
+      (2 * (cheegerConstant A * d)) * ∑ i, indicatorLE (y i ^ 2) t
+        ≤ ∑ p : V × V, A p.1 p.2
+          * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t| := by
+    rw [MeasureTheory.ae_restrict_iff' measurableSet_Icc]
+    filter_upwards [hne] with t ht
+    intro htI
+    have h0t : 0 < t := lt_of_le_of_ne htI.1 (Ne.symm ht)
+    have hper := sum_pairAbs_ge A hA hnn d hd hdpos y hy t h0t
+    rw [← sum_indicatorLE_eq_card_filter (fun i => y i ^ 2) t] at hper
+    rw [← Fintype.sum_prod_type'
+      (fun i j => A i j * |indicatorLE (y i ^ 2) t
+        - indicatorLE (y j ^ 2) t|)] at hper
+    linarith
+  calc 2 * (cheegerConstant A * d * ∑ i, y i ^ 2)
+      = (2 * (cheegerConstant A * d)) * ∑ i, y i ^ 2 := by ring
+    _ = (2 * (cheegerConstant A * d))
+        * ∫ t in (0:ℝ)..R, ∑ i, indicatorLE (y i ^ 2) t := by rw [hmass]
+    _ = ∫ t in (0:ℝ)..R, (2 * (cheegerConstant A * d))
+        * ∑ i, indicatorLE (y i ^ 2) t :=
+        (intervalIntegral.integral_const_mul _ _).symm
+    _ ≤ ∫ t in (0:ℝ)..R, ∑ p : V × V,
+          A p.1 p.2 * |indicatorLE (y p.1 ^ 2) t
+            - indicatorLE (y p.2 ^ 2) t| :=
+        intervalIntegral.integral_mono_ae_restrict hRpos hintL hintR hae
+    _ = ∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2| := hpair.symm
+
+end Step1b
+
+/-!
+### The Cheeger hard direction, Step 1c: median + assembly (proved)
+
+`proposals/discharge-perturbation-axioms.md` Step 1c (the final
+component): the median split of `x − m·1` into its two nonzero-sign
+parts, the per-part bound `φ ^ 2 * d * ‖y‖ ^ 2 ≤ E'(y)` composing the
+Step-1b co-area core with the Step-1a Cauchy–Schwarz core, the norm
+split, the fused contraction, and the assembly into the sweep lemma —
+retiring `cheeger_lower_bound` from admitted axiom to proved theorem at
+the unchanged statement (explicit axioms 10 → 9; the proposal's program
+is thereby complete: Weyl, Davis–Kahan, and both Cheeger directions are
+all proved hard crust).
+
+The median here is *any* value splitting the value multiset into two
+at-most-half strict sides (`|{x > m}| ≤ n/2` and `|{x < m}| ≤ n/2`); it
+exists by pure Finset arithmetic — no sorting: the set
+`T := {i : 2·|{j : x i < x j}| ≤ n}` is nonempty at a maximizing vertex,
+and a `T`-member of minimal value works, since otherwise the maximizer
+inside the (majority) strict lower level set would itself lie in `T`
+below the minimum.
+-/
+
+section Step1c
+
+omit [DecidableEq V] in
+/-- **A median exists on every finite value multiset**: there is `m` with
+at most half the values strictly above and at most half strictly below
+(`2 * |{m < x i}| ≤ n` and `2 * |{x i < m}| ≤ n`). Route: `T := {i :
+2·|{j : x i < x j}| ≤ n}` is nonempty (a maximizing vertex has an empty
+strict upper level set); a vertex of `T` with minimal value works —
+otherwise the (majority) strict lower level set's maximizer would itself
+lie in `T` below the minimum. Pure Finset arithmetic; no sorting.
+
+QA: `SpectralGraphTheory.QA.median_fin4_QA` pins the returned median of
+a four-vertex tie-heavy vector into the forced interval `[-1, 1]`. -/
+theorem exists_median (x : V → ℝ) :
+    ∃ m : ℝ,
+      2 * (Finset.univ.filter (fun i => m < x i)).card ≤ Fintype.card V
+        ∧ 2 * (Finset.univ.filter (fun i => x i < m)).card
+            ≤ Fintype.card V := by
+  classical
+  rcases isEmpty_or_nonempty V with hEmpty | hNE
+  · -- empty vertex type: every level set is empty and `n = 0`
+    have hcard0 : Fintype.card V = 0 := Fintype.card_eq_zero
+    have huniv : (Finset.univ : Finset V) = ∅ := by
+      have : (Finset.univ : Finset V).card = 0 := by
+        rw [Finset.card_univ, hcard0]
+      exact Finset.card_eq_zero.1 this
+    refine ⟨0, ?_, ?_⟩
+    · rw [huniv, Finset.filter_empty, Finset.card_empty, hcard0]
+    · rw [huniv, Finset.filter_empty, Finset.card_empty, hcard0]
+  -- T is nonempty: at a maximizing vertex the strict upper set is empty
+  obtain ⟨imax0⟩ := hNE
+  obtain ⟨imax, -, himax⟩ :=
+    Finset.exists_max_image (Finset.univ : Finset V) x
+      ⟨imax0, Finset.mem_univ imax0⟩
+  have hempty : (Finset.univ.filter (fun j => x imax < x j)) = ∅ :=
+    Finset.filter_eq_empty_iff.2 fun j hj => not_lt.2 (himax j hj)
+  have hcardmax : 2 * (Finset.univ.filter (fun j => x imax < x j)).card
+      ≤ Fintype.card V := by
+    rw [hempty, Finset.card_empty]; omega
+  -- take a T-member with minimal value
+  obtain ⟨i₀, hi₀, hi₀min⟩ := Finset.exists_min_image
+    (Finset.univ.filter (fun i =>
+      2 * (Finset.univ.filter (fun j => x i < x j)).card ≤ Fintype.card V))
+    x ⟨imax, Finset.mem_filter.2 ⟨Finset.mem_univ imax, hcardmax⟩⟩
+  have hi₀cond := (Finset.mem_filter.1 hi₀).2
+  refine ⟨x i₀, hi₀cond, ?_⟩
+  -- the lower count: by contradiction, the lower level set would be a
+  -- majority, and its maximizer would be a T-member below the minimum
+  by_contra hcon
+  push_neg at hcon
+  have hSne : (Finset.univ.filter (fun i => x i < x i₀)).Nonempty := by
+    rcases Finset.eq_empty_or_nonempty
+      (Finset.univ.filter (fun i => x i < x i₀)) with hE | hNE'
+    · rw [hE, Finset.card_empty] at hcon; omega
+    · exact hNE'
+  obtain ⟨i₁, hi₁S, hi₁max⟩ := Finset.exists_max_image
+    (Finset.univ.filter (fun i => x i < x i₀)) x hSne
+  have hsub : (Finset.univ.filter (fun j => x i₁ < x j))
+      ⊆ (Finset.univ.filter (fun i => x i < x i₀))ᶜ := by
+    intro j hj
+    rw [Finset.mem_compl]
+    by_contra hjlow
+    have hup := (Finset.mem_filter.1 hj).2
+    have hlow := (Finset.mem_filter.1 hjlow).2
+    have hmax := hi₁max j hjlow
+    linarith
+  have hcardle : 2 * (Finset.univ.filter (fun j => x i₁ < x j)).card
+      ≤ Fintype.card V := by
+    have h1 := Finset.card_le_card hsub
+    have h2 := Finset.card_add_card_compl
+      (Finset.univ.filter (fun i => x i < x i₀))
+    have h3 : (Finset.univ.filter (fun i => x i < x i₀)).card
+        ≤ Fintype.card V := by
+      rw [← Finset.card_univ (α := V)]
+      exact Finset.card_le_univ _
+    omega
+  have hi₁T : i₁ ∈ Finset.univ.filter (fun i =>
+      2 * (Finset.univ.filter (fun j => x i < x j)).card ≤ Fintype.card V) :=
+    Finset.mem_filter.2 ⟨Finset.mem_univ i₁, hcardle⟩
+  have hmin := hi₀min i₁ hi₁T
+  have hlow := (Finset.mem_filter.1 hi₁S).2
+  linarith
+
+omit [DecidableEq V] in
+/-- The positive part's closed superlevel set at a positive level sits
+inside the strict upper level set `{i : m < x i}` — at `t > 0` the level
+condition forces `x i - m` strictly positive. -/
+theorem posPart_superlevel_subset {x : V → ℝ} {m : ℝ} (t : ℝ) (ht : 0 < t) :
+    (Finset.univ.filter (fun i => t ≤ (max (x i - m) 0) ^ 2))
+      ⊆ (Finset.univ.filter (fun i => m < x i)) := by
+  intro i hi
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hi
+  refine Finset.mem_filter.2 ⟨Finset.mem_univ _, ?_⟩
+  by_contra hc
+  push_neg at hc
+  have hle : max (x i - m) 0 = 0 := max_eq_right (by linarith)
+  rw [hle, zero_pow two_ne_zero] at hi
+  linarith
+
+omit [DecidableEq V] in
+/-- The negative part's closed superlevel set at a positive level sits
+inside the strict lower level set `{i : x i < m}`. -/
+theorem negPart_superlevel_subset {x : V → ℝ} {m : ℝ} (t : ℝ) (ht : 0 < t) :
+    (Finset.univ.filter (fun i => t ≤ (max (m - x i) 0) ^ 2))
+      ⊆ (Finset.univ.filter (fun i => x i < m)) := by
+  intro i hi
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hi
+  refine Finset.mem_filter.2 ⟨Finset.mem_univ _, ?_⟩
+  by_contra hc
+  push_neg at hc
+  have hle : max (m - x i) 0 = 0 := max_eq_right (by linarith)
+  rw [hle, zero_pow two_ne_zero] at hi
+  linarith
+
+omit [DecidableEq V] in
+/-- The positive part's closed superlevel sets at positive levels are
+minority-side, from the median's upper count — exactly `coarea_core`'s
+hypothesis, supplied by the median. -/
+theorem minority_posPart {x : V → ℝ} {m : ℝ}
+    (hup : 2 * (Finset.univ.filter (fun i => m < x i)).card ≤ Fintype.card V)
+    (t : ℝ) (ht : 0 < t) :
+    2 * (Finset.univ.filter (fun i => t ≤ (max (x i - m) 0) ^ 2)).card
+      ≤ Fintype.card V := by
+  have h1 : (Finset.univ.filter (fun i => t ≤ (max (x i - m) 0) ^ 2)).card
+      ≤ (Finset.univ.filter (fun i => m < x i)).card :=
+    Finset.card_le_card (posPart_superlevel_subset t ht)
+  omega
+
+omit [DecidableEq V] in
+/-- The negative part's closed superlevel sets at positive levels are
+minority-side, from the median's lower count. -/
+theorem minority_negPart {x : V → ℝ} {m : ℝ}
+    (hlow : 2 * (Finset.univ.filter (fun i => x i < m)).card ≤ Fintype.card V)
+    (t : ℝ) (ht : 0 < t) :
+    2 * (Finset.univ.filter (fun i => t ≤ (max (m - x i) 0) ^ 2)).card
+      ≤ Fintype.card V := by
+  have h1 : (Finset.univ.filter (fun i => t ≤ (max (m - x i) 0) ^ 2)).card
+      ≤ (Finset.univ.filter (fun i => x i < m)).card :=
+    Finset.card_le_card (negPart_superlevel_subset t ht)
+  omega
+
+/-- **Per-part bound of the hard-direction chain** (Step 1c composing
+1a with 1b): for any `y : V → ℝ` whose closed superlevel sets at
+positive levels are minority-side,
+`φ ^ 2 * d * ∑ i, y i ^ 2 ≤ E'(y)`. The Step-1b co-area core bounds the
+weighted total variation of `y ^ 2` from below, the Step-1a
+Cauchy–Schwarz core bounds its square from above, and the regularity
+bridge turns the degree-weighted second factor into `4 * d * ‖y‖²`; the
+degenerate zero-norm case is discharged by nonnegativity of `E'` (the
+weights are nonnegative).
+
+QA: `SpectralGraphTheory.QA.perPart_edge_QA` pins the instance on `K₂`
+at `![1, 0]` (`1 ≤ 2`, both sides computed raw). -/
+theorem hardDirection_perPart (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnn : ∀ i j, 0 ≤ A i j) (d : ℝ) (hd : ∀ i, deg A i = d) (hdpos : 0 < d)
+    (y : V → ℝ) (hy : ∀ t : ℝ, 0 < t →
+      2 * (Finset.univ.filter (fun i => t ≤ y i ^ 2)).card ≤ Fintype.card V) :
+    cheegerConstant A ^ 2 * d * ∑ i, y i ^ 2
+      ≤ ∑ i, ∑ j, A i j * (y i - y j) ^ 2 := by
+  have hSnn : 0 ≤ ∑ i, y i ^ 2 := Finset.sum_nonneg fun i _ => sq_nonneg _
+  have hEnn : 0 ≤ ∑ i, ∑ j, A i j * (y i - y j) ^ 2 :=
+    Finset.sum_nonneg fun i _ =>
+      Finset.sum_nonneg fun j _ => mul_nonneg (hnn i j) (sq_nonneg _)
+  rcases eq_or_ne (∑ i, y i ^ 2) 0 with h0 | h0
+  · rw [h0, mul_zero]
+    exact hEnn
+  · have hco := coarea_core A hA hnn d hd hdpos y hy
+    have hcs := core_sum_abs_sq_sub_sq A hA hnn y
+    rw [sum_deg_mul_eq_of_regular A d hd y] at hcs
+    have hTVnn : 0 ≤ ∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2| :=
+      Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ =>
+        mul_nonneg (hnn i j) (abs_nonneg _)
+    have hc0 : 0 ≤ 2 * (cheegerConstant A * d * ∑ i, y i ^ 2) :=
+      mul_nonneg (by norm_num)
+        (mul_nonneg (mul_nonneg (cheegerConstant_nonneg A hnn) hdpos.le) hSnn)
+    have hsq : (2 * (cheegerConstant A * d * ∑ i, y i ^ 2)) ^ 2
+        ≤ (∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2|) ^ 2 := by
+      have h1 := mul_le_mul hco hco hc0 hTVnn
+      rw [sq, sq]
+      exact h1
+    have hcomb : (2 * (cheegerConstant A * d * ∑ i, y i ^ 2)) ^ 2
+        ≤ (∑ i, ∑ j, A i j * (y i - y j) ^ 2) * (4 * (d * ∑ i, y i ^ 2)) :=
+      le_trans hsq hcs
+    have hprod : 0 < 4 * (d * ∑ i, y i ^ 2) := by
+      refine mul_pos (by norm_num) (mul_pos hdpos ?_)
+      exact lt_of_le_of_ne hSnn (Ne.symm h0)
+    have hring : (2 * (cheegerConstant A * d * ∑ i, y i ^ 2)) ^ 2
+        = 4 * (d * ∑ i, y i ^ 2)
+            * (cheegerConstant A ^ 2 * d * ∑ i, y i ^ 2) := by
+      ring
+    rw [hring] at hcomb
+    have hfinal : 4 * (d * ∑ i, y i ^ 2)
+          * (cheegerConstant A ^ 2 * d * ∑ i, y i ^ 2)
+        ≤ 4 * (d * ∑ i, y i ^ 2)
+            * (∑ i, ∑ j, A i j * (y i - y j) ^ 2) := by
+      rw [mul_comm (4 * (d * ∑ i, y i ^ 2))
+        (∑ i, ∑ j, A i j * (y i - y j) ^ 2)]
+      exact hcomb
+    exact le_of_mul_le_mul_left hfinal hprod
+
+omit [DecidableEq V] in
+/-- Pointwise, the two median parts of `x - m` split its square: at each
+vertex one of the two parts vanishes, so `u ^ 2 + v ^ 2 = (x - m) ^ 2`
+entrywise. -/
+theorem posPart_add_negPart_sq (a m : ℝ) :
+    (max (a - m) 0) ^ 2 + (max (m - a) 0) ^ 2 = (a - m) ^ 2 := by
+  rcases le_total m a with h | h
+  · rw [max_eq_left (by linarith), max_eq_right (by linarith)]
+    ring
+  · rw [max_eq_right (by linarith), max_eq_left (by linarith)]
+    ring
+
+omit [DecidableEq V] in
+/-- **Norm split.** For `x ⊥ 1`, the two median parts jointly carry at
+least the full squared norm — in fact
+`∑ (x−m)⁺² + ∑ (m−x)⁺² = ∑ x² + n·m² ≥ ∑ x²`, the `n·m²` remainder being
+nonnegative. This is the step that makes the constants tight: the two
+parts jointly carry the full norm, so summing the per-part bound over
+both parts loses nothing that the statement's `/2` does not pay back.
+
+QA: `SpectralGraphTheory.QA.median_parts_norm_fin4_eq_QA` pins the exact
+identity (with the `+ 4·m²` remainder visible) at two medians. -/
+theorem median_parts_norm {x : V → ℝ} {m : ℝ}
+    (horth : Matrix.dotProduct x onesVec = 0) :
+    ∑ i, x i ^ 2
+      ≤ ∑ i, (max (x i - m) 0) ^ 2 + ∑ i, (max (m - x i) 0) ^ 2 := by
+  have hsum : ∑ i, x i = 0 := by
+    simpa [Matrix.dotProduct, onesVec] using horth
+  have hpt : ∀ i, (max (x i - m) 0) ^ 2 + (max (m - x i) 0) ^ 2
+      = (x i - m) ^ 2 := fun i => posPart_add_negPart_sq (x i) m
+  have hterm : ∀ i, (x i - m) ^ 2 = (x i ^ 2 - 2 * m * x i) + m ^ 2 :=
+    fun i => by ring
+  have hsplit : (∑ i, (max (x i - m) 0) ^ 2
+      + ∑ i, (max (m - x i) 0) ^ 2)
+      = ∑ i, x i ^ 2 + (Fintype.card V : ℝ) * m ^ 2 := by
+    rw [← Finset.sum_add_distrib,
+      Finset.sum_congr rfl (fun i _ => hpt i),
+      Finset.sum_congr rfl (fun i _ => hterm i), Finset.sum_add_distrib,
+      Finset.sum_sub_distrib, ← Finset.mul_sum, hsum, mul_zero, sub_zero,
+      Finset.sum_const, nsmul_eq_mul, Finset.card_univ]
+  rw [hsplit]
+  have : 0 ≤ (Fintype.card V : ℝ) * m ^ 2 := by positivity
+  linarith
+
+/-- **Sweep lemma** (the Cheeger hard direction at test-vector level): on
+a `d`-regular graph with positive degree, every nonzero `x ⊥ 1` has
+`φ²/2 ≤ R_{L_sym}(x)`. The median split routes both parts to their
+minority sides (so the Step-1b co-area core applies to each), the per-part
+bounds sum through the Step-1a *fused* contraction — whose cross-edge
+slack pays for carrying both parts — and the norm split carries the full
+squared norm; the Step-1a normalization `R = E'/(2·d·‖x‖²)` then turns
+`φ²·d·‖x‖² ≤ E'(x)` into the claimed `φ²/2 ≤ R` with nothing lost
+anywhere in the chain.
+
+QA: `SpectralGraphTheory.QA.sweep_edge_QA` (on `K₂`, `1/2 ≤ 2` against
+the independently pinned `λ₂(L_sym) = 2`) and
+`SpectralGraphTheory.QA.sweep_cycle_QA` (on `C₄` at `d = 2`, where
+`φ²/2 ≤ 1/8 < 1 = R(x)` with a visible gap). -/
+theorem cheeger_sweep (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnn : ∀ i j, 0 ≤ A i j) (d : ℝ) (hd : ∀ i, deg A i = d) (hdpos : 0 < d)
+    {x : V → ℝ} (hx0 : x ≠ 0) (horth : Matrix.dotProduct x onesVec = 0) :
+    cheegerConstant A ^ 2 / 2
+      ≤ rayleigh (regularNormalizedLaplacian A d) x := by
+  obtain ⟨m, hup, hlow⟩ := exists_median x
+  have hyu : ∀ t : ℝ, 0 < t →
+      2 * (Finset.univ.filter (fun i => t ≤ (max (x i - m) 0) ^ 2)).card
+        ≤ Fintype.card V :=
+    fun t ht => minority_posPart hup t ht
+  have hyv : ∀ t : ℝ, 0 < t →
+      2 * (Finset.univ.filter (fun i => t ≤ (max (m - x i) 0) ^ 2)).card
+        ≤ Fintype.card V :=
+    fun t ht => minority_negPart hlow t ht
+  have hu := hardDirection_perPart A hA hnn d hd hdpos
+    (fun i => max (x i - m) 0) (fun t ht => hyu t ht)
+  have hv := hardDirection_perPart A hA hnn d hd hdpos
+    (fun i => max (m - x i) 0) (fun t ht => hyv t ht)
+  have hc := sum_edgeWeight_sq_posPart_add_sq_negPart_le A hnn m x
+  have hn := median_parts_norm (m := m) horth
+  -- the two per-part bounds sum, through the fused contraction, into E'
+  have hsum : cheegerConstant A ^ 2 * d * ∑ i, x i ^ 2
+      ≤ ∑ i, ∑ j, A i j * (x i - x j) ^ 2 := by
+    calc cheegerConstant A ^ 2 * d * ∑ i, x i ^ 2
+        ≤ cheegerConstant A ^ 2 * d
+            * (∑ i, (max (x i - m) 0) ^ 2
+              + ∑ i, (max (m - x i) 0) ^ 2) := by
+              refine mul_le_mul_of_nonneg_left hn ?_
+              exact mul_nonneg
+                (pow_nonneg (cheegerConstant_nonneg A hnn) 2) hdpos.le
+      _ = cheegerConstant A ^ 2 * d * ∑ i, (max (x i - m) 0) ^ 2
+          + cheegerConstant A ^ 2 * d * ∑ i, (max (m - x i) 0) ^ 2 := by
+          ring
+      _ ≤ ∑ i, ∑ j, A i j * (max (x i - m) 0 - max (x j - m) 0) ^ 2
+          + ∑ i, ∑ j, A i j * (max (m - x i) 0 - max (m - x j) 0) ^ 2 :=
+          add_le_add hu hv
+      _ ≤ ∑ i, ∑ j, A i j * (x i - x j) ^ 2 := hc
+  -- normalization and division
+  have hR := rayleigh_regularNormalizedLaplacian_eq A hA d hd hdpos.ne' hx0
+  have hdot : Matrix.dotProduct x x ≠ 0 := by
+    intro h
+    apply hx0
+    funext i
+    have hsum2 : ∑ j, x j * x j = 0 := by
+      simpa [Matrix.dotProduct] using h
+    have hmem := (Finset.sum_eq_zero_iff_of_nonneg
+      (fun j _ => mul_self_nonneg (x j))).1 hsum2 i (Finset.mem_univ i)
+    exact mul_self_eq_zero.mp hmem
+  have hdotpos : 0 < Matrix.dotProduct x x := by
+    rcases lt_or_ge 0 (Matrix.dotProduct x x) with h | h
+    · exact h
+    · exfalso
+      have hE : Matrix.dotProduct x x = 0 :=
+        le_antisymm h (by
+          simp only [Matrix.dotProduct]
+          exact Finset.sum_nonneg fun j _ => mul_self_nonneg _)
+      exact hdot hE
+  have hprod : 0 < 2 * d * Matrix.dotProduct x x :=
+    mul_pos (mul_pos two_pos hdpos) hdotpos
+  have hdotsum : Matrix.dotProduct x x = ∑ i, x i ^ 2 := by
+    simp only [Matrix.dotProduct, pow_two]
+  rw [hR, div_le_div_iff₀ two_pos hprod]
+  calc cheegerConstant A ^ 2 * (2 * d * Matrix.dotProduct x x)
+      = 2 * (cheegerConstant A ^ 2 * d * ∑ i, x i ^ 2) := by
+        rw [hdotsum]; ring
+    _ ≤ 2 * ∑ i, ∑ j, A i j * (x i - x j) ^ 2 :=
+        mul_le_mul_of_nonneg_left hsum (by norm_num)
+    _ = (∑ i, ∑ j, A i j * (x i - x j) ^ 2) * 2 := by ring
+
+/-- Cheeger lower bound for `d`-regular graphs: the squared conductance
+controls the second-smallest normalized Laplacian eigenvalue from below,
+`φ(G)² / 2 ≤ λ₂(L_sym)`.
+
+Source:
+- Chung, F. R. K., "Spectral Graph Theory", CBMS 92, AMS, 1997,
+  Chapter 2.
+
+Statement differences: restricted to `d`-regular graphs with positive
+degree `d` (so that `regularNormalizedLaplacian A d` is the symmetric
+normalized Laplacian); `cheegerConstant` is the infimum of the
+volume-based conductance over nonempty proper vertex subsets.
+
+Statement-shape correction (2026-08-18): earlier revisions stated the
+spectral side as `lambda2 (regularNormalizedLaplacian A d) …`. That was
+a defective shape, not a strengthening: `lambda2` reads the spectrum of
+the *combinatorial Laplacian of* its argument, and every row of a
+normalized Laplacian sums to zero, so the asserted quantity was
+`λ₂(L(L_sym)) = λ₂(-L_sym)` — on the two-vertex edge the instance reads
+`1/2 ≤ 0`, which is false (refuted in proved form by
+`SpectralGraphTheory.QA.old_cheeger_lower_bound_refuted_QA`). The
+corrected side `secondEval (regularNormalizedLaplacian A d) …` reads
+`λ₂(L_sym)` itself, matching the cited source; hypotheses and name are
+otherwise unchanged.
+
+Retirement (2026-08-23): previously admitted as an axiom; now proved
+(`proposals/discharge-perturbation-axioms.md` Steps 1a/1b/1c), with no
+admitted dependencies — the explicit axiom count drops 10 → 9, and the
+proposal's program (Weyl, Davis–Kahan, Cheeger easy and hard
+directions) is complete. Route: the sweep lemma `cheeger_sweep` above
+(the median split, per-part co-area + Cauchy–Schwarz composition, the
+fused contraction, the norm split, and the exact-constant
+normalization), discharged to the spectrum through
+`secondEval_variational` + `le_csInf` at the `Pi.single` difference
+witness. With `cheeger_upper_bound` proved since 2026-08-18, both
+Cheeger inequalities are now hard crust.
+
+QA: exercised by
+`SpectralGraphTheory.QA.cheeger_positive_implies_secondEval_pos_QA` and
+`SpectralGraphTheory.QA.cheeger_bounds_coherent_QA` in
+`Scaffold/QA/SpectralGraph/Cheeger_QA.lean` (which now derive
+consequences from a proved theorem), by
+`SpectralGraphTheory.QA.edge_normLap_secondEval_eq_two_QA`, which pins
+the right-hand side on the two-vertex edge to its classical value `2`,
+and by the Step-1c witnesses `SpectralGraphTheory.QA.median_fin4_QA`,
+`SpectralGraphTheory.QA.perPart_edge_QA`,
+`SpectralGraphTheory.QA.median_parts_norm_fin4_eq_QA`,
+`SpectralGraphTheory.QA.sweep_edge_QA`, and
+`SpectralGraphTheory.QA.sweep_cycle_QA`, which pin the new layers
+numerically. -/
+theorem cheeger_lower_bound (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnonneg : ∀ i j, 0 ≤ A i j) (d : ℝ) (hd : ∀ i, deg A i = d)
+    (hdpos : 0 < d) (hcard : 2 ≤ Fintype.card V) :
+    (cheegerConstant A) ^ 2 / 2 ≤
+      secondEval (regularNormalizedLaplacian A d)
+        (regularNormalizedLaplacian_symmetric A hA d) hcard := by
+  obtain ⟨u, v, huv⟩ : ∃ u v : V, u ≠ v := by
+    have h1 : 1 < (Finset.univ : Finset V).card := by
+      rw [Finset.card_univ]; omega
+    obtain ⟨a, b, -, -, hab⟩ := Finset.one_lt_card_iff.1 h1
+    exact ⟨a, b, hab⟩
+  -- the sInf set is nonempty: the single-edge difference vector
+  have hsetne : {r : ℝ | ∃ x : V → ℝ, x ≠ 0 ∧ Matrix.dotProduct x onesVec = 0 ∧
+      rayleigh (regularNormalizedLaplacian A d) x = r}.Nonempty := by
+    refine ⟨rayleigh (regularNormalizedLaplacian A d)
+      (Pi.single u 1 - Pi.single v 1 : V → ℝ), ?_⟩
+    refine ⟨Pi.single u 1 - Pi.single v 1, ?_, ?_, rfl⟩
+    · intro h
+      have h1 : (Pi.single u 1 - Pi.single v 1 : V → ℝ) u = 0 := congrFun h u
+      simp [Pi.sub_apply, Pi.single_apply, huv] at h1
+    · simp only [Matrix.dotProduct, onesVec, Pi.sub_apply, mul_one,
+        Finset.sum_sub_distrib]
+      have hpu : ∀ w : V, ∑ i, Pi.single w (1 : ℝ) i = 1 := fun w => by simp
+      rw [hpu u, hpu v, sub_self]
+  rw [secondEval_variational (regularNormalizedLaplacian_symmetric A hA d)
+    (regularNormalizedLaplacian_psd A hA hnonneg d hd hdpos)
+    (regularNormalizedLaplacian_mulVec_onesVec A d hd hdpos.ne') hcard]
+  refine le_csInf hsetne ?_
+  rintro r ⟨x, hx0, horth, rfl⟩
+  exact cheeger_sweep A hA hnonneg d hd hdpos hx0 horth
+
+end Step1c
+
+/-!
+### The conductance minimum is attained (proved)
+
+On a type with at least two vertices the `sInf` defining
+`cheegerConstant` is a minimum: the filtered powerset of nonempty proper
+subsets is a nonempty finite set, so a conductance-minimal cut exists.
+This is what turns the Cheeger *inequalities* (bounds on the infimum)
+into *cut-existence* corollaries — the Fiedler Phase B certificate
+(`GraphTheory.Fiedler.cheeger_cut_existence`) is its named consumer.
+-/
+
+/-- The conductance minimum is attained: on at least two vertices there
+is a nonempty proper cut whose conductance equals `cheegerConstant`
+(the filtered powerset is a nonempty finite set, so
+`Finset.exists_min_image` realizes the `sInf` as a minimum).
+
+QA: `SpectralGraphTheory.QA.attainment_edge_QA` in
+`Scaffold/QA/SpectralGraph/Fiedler_QA.lean` instantiates it on `K₂`
+against the independently pinned `cheegerConstant edgeAdj = 1`. -/
+theorem cheegerConstant_attained (A : WAdj (V := V))
+    (hnonneg : ∀ i j, 0 ≤ A i j) (hcard : 2 ≤ Fintype.card V) :
+    ∃ S : Finset V, S.Nonempty ∧ Sᶜ.Nonempty ∧
+      conductance A S = cheegerConstant A := by
+  classical
+  obtain ⟨u, v, huv⟩ : ∃ u v : V, u ≠ v := by
+    have h1 : 1 < (Finset.univ : Finset V).card := by
+      rw [Finset.card_univ]; omega
+    obtain ⟨a, b, -, -, hab⟩ := Finset.one_lt_card_iff.1 h1
+    exact ⟨a, b, hab⟩
+  have hucompl : ({u} : Finset V)ᶜ.Nonempty :=
+    ⟨v, Finset.mem_compl.2 (fun hv =>
+      Ne.symm huv (Finset.mem_singleton.1 hv))⟩
+  obtain ⟨S₀, hS₀, hmin⟩ := Finset.exists_min_image
+    ((Finset.univ : Finset (Finset V)).filter
+      (fun S => S.Nonempty ∧ Sᶜ.Nonempty))
+    (fun S => conductance A S)
+    ⟨{u}, Finset.mem_filter.2 ⟨Finset.mem_univ {u},
+      ⟨Finset.singleton_nonempty u, hucompl⟩⟩⟩
+  obtain ⟨-, ⟨hS₀ne, hS₀c⟩⟩ := Finset.mem_filter.1 hS₀
+  refine ⟨S₀, hS₀ne, hS₀c, ?_⟩
+  have hle : conductance A S₀ ≤ cheegerConstant A := by
+    rw [cheegerConstant]
+    refine le_csInf ⟨conductance A {u},
+      ⟨{u}, Finset.singleton_nonempty u, hucompl, rfl⟩⟩ ?_
+    rintro c ⟨S, hS, hSc, rfl⟩
+    exact hmin S (Finset.mem_filter.2 ⟨Finset.mem_univ S, ⟨hS, hSc⟩⟩)
+  exact le_antisymm hle
+    (conductance_ge_cheegerConstant A hnonneg S₀ hS₀ne hS₀c)
 
 end SpectralGraphTheory

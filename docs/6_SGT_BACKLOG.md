@@ -137,10 +137,16 @@ the algebraic-connectivity certificate `lambda2_pos_of_connected`, and
 the sign partition `fiedlerPartition` proved nonempty and proper on
 connected graphs, all hard crust; QA computes the partition on the
 `P₄` barbell to be exactly the known good cut. See
-`proposals/fiedler-partitioning.md`); the open remainder is **Phase B**
-— a certified conductance bound on `fiedlerPartition`, whose trust
-level is exactly the Cheeger hard direction's (admitted until proved);
-walk mixing through the transition spectrum.
+`proposals/fiedler-partitioning.md`); **Phase B delivered 2026-08-23**
+— `cheeger_cut_existence`, the classical Cheeger cut-existence
+certificate: on every connected `d`-regular graph a nonempty proper
+`S` exists with `conductance S ^ 2 ≤ 2 · lambda2 / d` (the recorded
+operator gate dissolved by the same day's `cheeger_lower_bound`
+retirement; pure hard crust, assembled from the proved sweep lemma at
+the Fiedler vector, attainment of the conductance minimum, and the
+Rayleigh transfer — the certificate is existential over the minimizer,
+with the *swept-level-set* extraction the named strengthening
+follow-on); walk mixing through the transition spectrum.
 
 ### 5. Graph-dynamical systems (conditional)
 

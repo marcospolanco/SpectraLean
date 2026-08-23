@@ -6,6 +6,313 @@ holds the append-only narrative.
 
 ## Active milestone
 
+**Fiedler Phase B — the certified conductance cut (run 1, 2026-08-23;
+`proposals/fiedler-partitioning.md` Phase B, whose recorded operator gate
+("run against the admitted Cheeger hard direction, or defer until it is
+proved") was **dissolved by the previous run's retirement**: the hard
+direction is now proved hard crust, so the deferral option completed and a
+Phase B run no longer adds trust surface — it composes proved theorems only
+(pure hard crust, zero new axioms; the count stays 9). Selected over
+`approximate-spectral-projection.md`'s Step-0 survey because it is (a) the
+first load-bearing consumer of the 2026-08-23 `cheeger_lower_bound`/
+`cheeger_sweep` retirement — the strategy's load-bearing-growth principle
+asks for exactly this; (b) a bounded increment from delivered shelf pieces;
+and (c) the closing step of a Medium proposal open since 2026-08-18, named
+by backlog item 4 as the application ring's first candidate): DELIVERED —
+the proposal is **COMPLETE** (Phase A 2026-08-18, Phase B 2026-08-23), QA
+1449 → 1457 (`Fiedler_QA` 57 → 65).**
+
+**Delivered:** in `GraphTheory.Cheeger` — **`cheegerConstant_attained`**
+(∃ `S₀` nonempty proper with `conductance S₀ = cheegerConstant`, by
+`Finset.exists_min_image` over the filtered powerset of nonempty proper
+subsets; no regularity hypothesis — the finiteness step that converts
+Cheeger's *inequality about an infimum* into a statement about an actual
+cut). In `GraphTheory.Fiedler` (a new Phase B section; the module now
+imports `Cheeger`) — **`fiedlerVector_rayleigh_regularNormalizedLaplacian`**
+(`R_{L_sym}(f) = lambda2 / d`: `rayleigh`'s nonzero branch, the
+quadratic-form transfer `quadForm (L_sym) = d⁻¹ • quadForm (L)`, the
+energy identity, unit norm, and `inv_mul_eq_div`) and the headline
+**`cheeger_cut_existence`**: on every connected `d`-regular graph,
+`∃ S` nonempty proper with `conductance A S ^ 2 ≤ 2 * lambda2 A / d` — the
+classical Cheeger cut-existence corollary, assembled from
+`cheeger_sweep` at the Fiedler vector (Phase A's
+`lambda2_pos_of_connected` supplying the orthogonality) composed with
+attainment, constants through `le_div_iff₀`/`div_le_iff₀`/`div_mul_cancel₀`.
+
+**Statement-shape deviation (recorded before stating, in the proposal and
+module docstring):** the sketch's sign-partition bound
+(`conductance (fiedlerPartition …) ≤ bound`) is **not certifiable from the
+Cheeger inequalities** — they bound the conductance *minimum*, and no
+λ₂-only upper bound on the sign half-space holds in general (the classical
+certificate is existential over the minimizer; algorithmic guarantees
+certify a *sweep* level set, never the bare sign cut). The certified object
+is the conductance-minimizing cut; the swept-level-set extraction is the
+recorded strengthening follow-on.
+
+**QA (`Fiedler_QA.lean`, Phase B section, 57 → 65 declarations; all on the
+`Variational_QA` `K₂` fixture):** `cheegerConstant (K₂) = 1` pinned **both
+directions** (≤ by the exhibited singleton cut computed from the
+definitions — boundary `1`, volumes `1`/`1`; ≥ by the card-count
+identification that every nonempty proper cut on `Fin 2` is a singleton);
+attainment instantiated at the pinned value; the **Rayleigh transfer
+cross-checked** against the independently pinned `lambda2 (K₂) = 2` (a
+defective `/d` normalization or quadratic-form transfer breaks the
+agreement); the certified cut **identified** (singleton) with its bound
+theorem-sourced, then displayed in numbers (`1 ≤ 4`); the connectivity
+hypothesis proved to hold on the fixture; and the **regularity
+refutation** — the `hd`-dropped form at `d = 100` (every other hypothesis
+holding on `K₂`) demands a cut of conductance squared `≤ 2·2/100 = 1/25`
+while every candidate is a singleton of conductance `1`: `1 ≤ 1/25` false.
+
+**Verification:** spike discipline followed (`wip/fiedlerB_spike.lean`
+green before transfer); `lake env lean` on both modules (Cheeger: only the
+documented pre-existing `unusedSectionVars` warning; Fiedler: zero errors,
+zero warnings) and on the QA file (zero errors, zero warnings); explicit
+`lake build` targets for all three ✔; `#print axioms` via
+`wip/fiedlerB_axcheck{,2}.lean` on the three new public theorems and all
+eight QA headlines — `propext, Classical.choice, Quot.sound` only; **full
+`lake build` ✔ (2250 targets, "Build completed successfully")**;
+`lint_axioms` (**9**, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1457/9/0**,
+idempotent under re-run). Records updated: the proposal (status header
+COMPLETE, the gate-dissolution record, the Phase B delivery record with
+the statement-shape deviation and the load-bearing chain),
+`proposals/README.md` (Medium row retired to the Delivered table; progress
+paragraph rewritten), README (1457, the certified-conductance corollary in
+the proved list, module-table row), the radar (axis 4 **held at 4.5** with
+the delivery recorded and the absent list updated — the swept-level-set
+certificate replaces the certified guarantee as the named gap; QA axis
+count synced 1449/39 → 1457/39, held at 4.0; the weakest-axes paragraph
+updated), the scoreboard (both Direct rows, the `lake build` row, lint
+row, a new interpretation bullet), backlog item 4 (Phase B delivered), the
+SGT index map (Fiedler section +3 rows + the Cheeger enabling-lemma note),
+the Chung source index (cut-existence corollary row + note), this plan,
+and the activity log. The worktree's prior-run uncommitted Step-1a/1b/1c
+deliveries preserved untouched; nothing committed.
+
+**Next milestone (open):** the remaining Medium rows by leverage —
+**approximate spectral projection** (`approximate-spectral-projection.md`
+— Step 0 first; it may legitimately conclude nothing is tractable at
+reasonable cost, a valid recorded outcome) and the **PF consumers**
+(irreducible stationary distributions, PageRank) as new-proposal
+candidates, each needing its own document per the one-step discipline.
+Reversibility Phase B still needs its recorded operator decision. The
+**swept-level-set certified cut** (strengthening `cheeger_cut_existence`
+to an explicit Fiedler level set) is now also a named new-proposal
+candidate, needing a sweep-extraction lemma beyond the Cheeger
+inequalities themselves.
+
+---
+
+## Delivered milestones (most recent first)
+
+**Cheeger hard-direction Step 1c — median + assembly in `Cheeger.lean`,
+
+**Cheeger hard-direction Step 1c — median + assembly in `Cheeger.lean`,
+retiring `cheeger_lower_bound` (run 1, 2026-08-23;
+`proposals/discharge-perturbation-axioms.md` at its recorded open next
+step — the top-ranked Medium item with the Active table holding no High
+rows, and both the proposal's Step-1c plan and the 1b delivery's next
+handoff naming this run; the *final* component): DELIVERED —
+`cheeger_lower_bound` proved at the unchanged name, hypotheses, and
+conclusion, **explicit axioms 10 → 9**, the discharge program
+COMPLETE (Weyl, Davis–Kahan, and both Cheeger directions all proved
+hard crust). QA 1423 → 1449 (`Cheeger_QA` 78 → 104).**
+
+**Delivered:** in `GraphTheory.Cheeger`, a new "hard direction Step 1c"
+section — **median existence** `exists_median` (some `m` with
+`2·|{m < x i}| ≤ n` and `2·|{x i < m}| ≤ n`) by pure Finset arithmetic
+with **no sorting** (a route simplification over the survey's
+`Finset.sort` + `get` sketch: the at-most-half set
+`T := {i : 2·|{j : x i < x j}| ≤ n}` is nonempty at a maximizing vertex
+via `Finset.exists_max_image`, a `T`-minimal value works via
+`Finset.exists_min_image`, and the failure case is self-refuting — a
+majority strict lower level set's maximizer lies in `T` below the
+`T`-minimum; the empty-type case discharged separately); the level-set
+**inclusions** `posPart_superlevel_subset`/`negPart_superlevel_subset`
+(at `t > 0`, `{t ≤ (x−m)⁺²} ⊆ {x > m}` and `{t ≤ (m−x)⁺²} ⊆ {x < m}`)
+supplying `coarea_core`'s `hy` in exactly its delivered closed-set form
+(`minority_posPart`/`minority_negPart`); the **per-part bound**
+`hardDirection_perPart` (`φ²·d·∑y² ≤ E'(y)`: the 1b co-area core
+squared and composed with the 1a Cauchy–Schwarz core through the
+regularity bridge, `cheegerConstant_nonneg` supplying the squaring's
+side condition, the zero-norm case by `E'`-nonnegativity); the **norm
+split** `median_parts_norm` (`∑(x−m)⁺² + ∑(m−x)⁺² = ∑x² + n·m² ≥ ∑x²`,
+pointwise `u² + v² = (x−m)²` since the parts are disjointly
+supported); the **sweep lemma** `cheeger_sweep` (`φ²/2 ≤ R_{L_sym}(x)`
+for every nonzero `x ⊥ 1` — both median parts through the 1a *fused*
+contraction and the `E'/(2d‖x‖²)` normalization, the corrected 1a
+constant budget consumed exactly); and the retirement itself — the
+spike's `assembly_skeleton` with the hypothesis discharged:
+`secondEval_variational` + `le_csInf` at the `Pi.single` witness.
+
+**QA** (`Cheeger_QA.lean` 78 → 104): the **median forced into its
+interval** on the tie-heavy `![1,1,−1,−1]` (the theorem's returned `m`
+provably in `[−1, 1]`; a defective median puts all four values on one
+strict side and one at-most-half count reads `2·4 ≤ 4` — refuted); the
+**per-part bound pinned** at the 1b `K₂` equality fixture (`1 ≤ 2`,
+both sides raw); the **norm split's exact `+ n·m²` remainder** at two
+medians on `![1,−1,3,−3]` (`m = 0`: `20 = ∑x²` exact; `m = 1`:
+`24 = 20 + 4·1²`, the theorem's inequality the strict `20 ≤ 24`); the
+**sweep on `K₂`** (`1/2 ≤ 2`, the quotient the independently pinned
+`λ₂` value) and **on `C₄` at `d = 2`** (non-unit degree: `R = 1`
+through the 1a normalization with `E' = 8`, `‖x‖² = 2` raw; the
+visible gap `φ²/2 ≤ 1/8 < 1 = R` via the exhaustively computed
+`φ ≤ 1/2`); and the **retirement instance**
+`cheeger_lower_bound_edge_QA` (`1/2 ≤ λ₂(L_sym) = 2` through the
+proved theorem, both endpoints independently pinned — the
+instantiation that previously consumed the admitted axiom). The two
+pre-existing axiom-consuming QA theorems
+(`cheeger_positive_implies_secondEval_pos_QA`,
+`cheeger_bounds_coherent_QA`) compiled unchanged and **silently shed
+their `cheeger_lower_bound` dependency**.
+
+**Verification:** `lake env lean` on the module (only the documented
+pre-existing `unusedSectionVars` warning) and on the QA file (zero
+errors, zero warnings); explicit `lake build` targets for both ✔;
+`#print axioms` via `wip/cheeger1c_axcheck.lean` on the retired
+theorem, all ten new public theorems, all nine new QA headlines, and
+the two former axiom-consumers — `propext, Classical.choice,
+Quot.sound` only; **full `lake build` ✔ (2250 targets, "Build
+completed successfully", detached)**; `lint_axioms` (**9**),
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+(**1449/9/0**). Spike discipline followed: the development landed
+green in `wip/cheeger1c_spike.lean` first, then transferred. Records
+updated: the proposal (status header COMPLETE, the Step-1c delivery
+record replacing the open next step, with pin-specific technique notes
+— `Finset.filter_eq_univ_iff` absent (`Finset.eq_univ_iff_forall` +
+hand-assembled `Finset.mem_filter` instead), metavariable-stuck
+partial applications needing ascribed `have`s, the
+`Finset.mem_filter` beta-redex defeating `rw` until `simp only`
+beta-reduces, and `le_of_mul_le_mul_left`'s left-multiplier signature
+taking its positivity argument directly), `proposals/README.md`
+(Medium row retired to the Delivered table; progress paragraph
+rewritten), the Chung source index (the lower-bound row proved-not-
+axiom, the retirement note), the SGT index map (Cheeger section +5
+rows + program-complete note), README (9 axioms, 1449, both Cheeger
+inequalities in the proved list, trust-surface paragraph rewritten),
+the radar (axis 4 **re-scored 4.0 → 4.5** — both directions of the
+axis's central isoperimetric–spectral family now proved; the
+axiom-minimization trend extended to `... → 9 → 10 → 9` with the
+row-head count drift from the PF admission repaired; QA count synced
+1423/39 → 1449/39; the downstream-reuse gap clause updated), the
+scoreboard (both Direct rows, the `lake build` row, lint row, a new
+retirement interpretation bullet), backlog item 4's Phase-B trust
+note, this plan, and the activity log. The worktree's prior-run
+uncommitted Step-1b delivery preserved untouched; nothing committed.
+
+**Next milestone (open):** the Medium rows by leverage — **approximate
+spectral projection** (`approximate-spectral-projection.md` — Step 0
+first; it may legitimately conclude nothing is tractable at reasonable
+cost, a valid recorded outcome). The PF consumers (irreducible
+stationary distributions, PageRank) are unblocked as new-proposal
+candidates, each needing its own document per the one-step discipline.
+Reversibility Phase B and Fiedler Phase B still need operator
+decisions.
+
+---
+
+**Cheeger hard-direction Step 1b — the co-area core in `Cheeger.lean`
+(run 1, 2026-08-23;
+`proposals/discharge-perturbation-axioms.md` at its recorded open next
+step — the top-ranked Medium item with the Active table holding no High
+rows, the plan's own recorded next handoff naming this run, and the
+survey's dedicated-run instruction for the crux): DELIVERED — zero new
+axioms (count stays 10), QA 1404 → 1423 (`Cheeger_QA` 59 → 78).**
+
+**Delivered:** in `GraphTheory.Cheeger`, a new "hard direction Step 1b"
+section — the layer-cake primitive `indicatorLE` (`1_{t ≤ c}`, stated
+through `Set.indicator` on `{x | x ≤ c}` to match
+`intervalIntegral.integral_indicator`'s own truncation shape exactly)
+with the **mass layer-cake** `integral_indicatorLE`
+(`∫₀^R 1_{t ≤ c} dt = c`) and the **pair layer-cake**
+`integral_abs_indicatorLE_sub` (`∫₀^R |1_{t ≤ c} − 1_{t ≤ d}| dt =
+|c − d|`), their integrability (`intervalIntegrable_indicatorLE` +
+a generic `intervalIntegrable_const_mul` for the pin's missing
+`IntervalIntegrable.const_mul`), the **closed-superlevel cut identity**
+`sum_pairAbs_eq_two_boundary` (`∑ i j, A i j |1_{t ≤ c_i} −
+1_{t ≤ c_j}| = 2 · boundary S_t`; `hA` load-bearing through
+`boundary_compl`), the **minority conductance**
+`boundary_ge_of_minority` (`φ·d·|S| ≤ boundary S` for nonempty
+`2|S| ≤ n`), the indicator↔cardinality dictionary
+`sum_indicatorLE_eq_card_filter`, the per-level bound `sum_pairAbs_ge`,
+and the headline **`coarea_core`**: for *any* `y : V → ℝ` whose
+nonempty closed superlevel sets `{i : t ≤ y i²}` at positive levels are
+minority-side, `2·(φ·d·∑ y i²) ≤ ∑ i j, A i j·|y i² − y j²|` — the
+lower complement of Component A; composed with it, the per-part bound
+`φ²·d·‖y‖² ≤ E'(y)` that Step 1c consumes.
+
+**The run's two sharpest outputs are survey corrections:**
+(1) the priced ~30-line hand Finset-induction Fubini is *unnecessary* —
+the pin has `intervalIntegral.integral_finset_sum` (the survey searched
+for the name `integral_sum`), plus `IntervalIntegrable.sum`, `.abs`,
+and `integral_mono_ae_restrict`; (2) the `Iic`-indicator encoding
+dissolves the survey's `Ι = Ioc` right-endpoint drop-point trap — every
+congruence in the delivered chain is pointwise, with the single `t = 0`
+integrand-failure point (φ-side `2φd·n` against a vanishing cut side)
+absorbed by Lebesgue's atom-freeness (`mem_ae_iff` +
+`Real.volume_singleton`). **Two hypothesis drops verified:** no
+`hynonneg` (the chain runs on `y i² ≥ 0`, automatic) and no `hcard`
+(minority already forces the complement nonempty); the minority
+hypothesis itself is stated on *closed* superlevel sets at *positive*
+levels — at `t = 0` the closed set is all of `V` for every `y`, so a
+`t ≥ 0` reading would be unsatisfiable.
+
+**QA** (`Cheeger_QA.lean` 59 → 78): the **K₂ equality pin** — at
+`edgeY = ![1,0]` both sides independently evaluate to `2`, so the
+bound is *attained with equality* and any defective constant anywhere
+in the layer-cake chain breaks it (minority hypothesis derived,
+load-bearing); the **strict multi-level C₄ witness** at
+`cycY = ![2,1,0,0]` (squared values `(4,1,0,0)`, two level strata): raw
+total variation `16` against `20φ ≤ 10` (φ bounded by the adjacent-pair
+cut's exhaustively computed conductance `1/2` — no `φ(C₄)` enumeration
+needed); the **dictionary pin** at level `t = 1` where vertex `1` has
+`y² = 1 = t` and its indicator is `1` — the closed-set semantics
+load-bearing; and the **minority refutation-on-omission** — at
+`edgeOnes = ![1,1]` the hypothesis-free conclusion reads `4 ≤ 0` with
+the minority hypothesis provably unsatisfiable at `t = 1` and every
+other hypothesis holding on the fixture.
+
+**Verification:** `lake env lean` on the module (only the documented
+pre-existing `unusedSectionVars` warning) and on the QA file (zero
+errors, zero warnings); explicit `lake build` targets for both ✔;
+`#print axioms` on all twelve new public theorems and seven QA
+headlines — `propext, Classical.choice, Quot.sound` only; **full
+`lake build` ✔ (2250 targets, "Build completed successfully",
+detached)**; `lint_axioms` (10, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1423/10/0**).
+Records updated: the proposal (status header, second inline dated
+survey correction at the Fubini note, the Step-1b delivery record with
+pin-specific technique notes — the `(0:ℝ)..R` Float-lexing trap, the
+`Set.indicator_of_mem` membership-direction trap, `Set.Iic`-vs-setOf
+`rw` matching, the `IntervalIntegrable.sum` Pi-application whnf loop
+routed through an explicit `Finset.sum_apply` function equation,
+`integral_const` ambiguity, and `integrable_const`'s
+`IsFiniteMeasure` requirement at this pin — open-next-step → 1c),
+`proposals/README.md` (Medium row + the no-High-rows paragraph), the
+SGT index map (Cheeger section +7 rows + program note), README (1423,
+the trust-surface paragraph: the hard direction now reduced to its
+final component), the radar (QA axis held 4.0, count synced
+1404/39 → 1423/39, hold logged, and the row-head count drift left by
+earlier syncs repaired), the scoreboard (both Direct rows, the
+`lake build` row, lint row, a new interpretation bullet), this plan,
+and the activity log. Nothing committed.
+
+**Next milestone (open):** **Cheeger Step 1c** — median + assembly,
+the *final* component: median existence over the value multiset, the
+inclusion `{(x−m)⁺ ≥ t} ⊆ {x > m}` at `t > 0` supplying `coarea_core`'s
+`hy` in its delivered closed-set-at-`0 < t` form, the degenerate cases,
+the norm split, and the assembly `(2φd∑y²)² ≤ (∑|Δ|)² ≤ E'·4d∑y²` per
+part, summed through the fused contraction into `φ²/2 ≤ R`, retiring
+`cheeger_lower_bound` at the unchanged statement (explicit axioms
+10 → 9) through the spike's `assembly_skeleton`. **Approximate
+spectral projection** still needs its Step 0; the PF consumers
+(irreducible stationary distributions, PageRank) are new-proposal
+candidates. Reversibility Phase B and Fiedler Phase B still need
+operator decisions.
+
+---
+
 **Cheeger hard-direction Step 1a — the pure-algebra component in
 `Cheeger.lean` (run 1, 2026-08-23;
 `proposals/discharge-perturbation-axioms.md` at its recorded open next

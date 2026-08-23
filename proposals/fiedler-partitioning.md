@@ -1,10 +1,15 @@
 # Proposal: The Fiedler Vector and a Certified Spectral Partition
 
-**Status:** Phase A (A1/A2) delivered 2026-08-18; Phase B open —
-decision pending on running it against the currently admitted Cheeger
-hard direction or deferring until that direction is proved. The
-delivery record is at the end of this file. Authorizes no further Lean
-changes, axiom admissions, document rewrites, or external publication.
+**Status:** COMPLETE. Phase A (A1/A2) delivered 2026-08-18; Phase B
+delivered 2026-08-23 as pure hard crust in `GraphTheory.Fiedler`
+(`cheeger_cut_existence`) — the operator decision this proposal left
+open (run Phase B against the then-admitted Cheeger hard direction, or
+defer until it was proved) was dissolved by the hard direction's
+retirement on 2026-08-23: the deferral option completed, and the
+delivered Phase B composes proved theorems only, adding no trust
+surface. Both delivery records are at the end of this file. Authorizes
+no further Lean changes, axiom admissions, document rewrites, or
+external publication.
 
 Assistant's assessment of project direction, requested
 2026-08-18 (surface-area follow-up for the formal-methods/high-assurance
@@ -195,3 +200,92 @@ since been proved (`prove-cheeger-easy-direction.md` delivered), so a
 Phase B run today would rest its lower-bound half on exactly one
 admitted Cheeger statement (the hard direction); the easy-direction
 half would be fully proved.
+
+## Delivery record (Phase B, 2026-08-23)
+
+Delivered as a Phase B section of `Scaffold/Mathlib/GraphTheory/
+Fiedler.lean` (which now imports `GraphTheory.Cheeger`) plus a
+`FiedlerPhaseB` section of `Scaffold/QA/SpectralGraph/Fiedler_QA.lean`
+(57 → 65 declarations), all proved, **no new axioms** (count stays 9;
+`#print axioms` on both new public theorems, the new attainment lemma
+in `Cheeger.lean`, and all eight QA headlines reads only `propext,
+Classical.choice, Quot.sound`).
+
+**Gate resolution (recorded before starting):** this proposal left
+Phase B on an operator decision — run against the then-admitted Cheeger
+hard direction, or defer until it was proved. The hard direction was
+proved on 2026-08-23 (`proposals/discharge-perturbation-axioms.md`
+Step 1c, `cheeger_lower_bound` retired at the unchanged statement), so
+the decision's two options converged: there is no longer a trust-cost
+trade-off to decide, and the run proceeded as the natural closing step.
+The proposal's own operating instruction — "Phase B … is explicitly not
+hard crust … its trust level is exactly the Cheeger axiom's trust
+level" — now evaluates to *hard crust*; the radar re-score labels it
+as such, with a dated note that the instruction's premise expired.
+
+**Statement-shape deviation from the build-order sketch, recorded
+before stating:** the sketch wrote
+`conductance (fiedlerPartition A hA hcard) ≤ [bound in terms of
+lambda2]` — the *sign* half-space. The Cheeger inequalities bound the
+conductance **minimum** `φ(G)`; they cannot certify a specific cut's
+conductance from `lambda2` alone, and the sign half-space in
+particular admits no λ₂-only bound in general (the classical
+certificate is an existence bound on the minimizer, and every textbook
+algorithmic guarantee certifies a *sweep* level set, not the sign cut).
+The delivered Phase B statement is therefore the classical
+**Cheeger cut-existence corollary**:
+
+```
+theorem cheeger_cut_existence (A : WAdj V) (hA : A.IsSymm)
+    (hnn : ∀ i j, 0 ≤ A i j) (d : ℝ) (hd : ∀ i, deg A i = d)
+    (hdpos : 0 < d) (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected) :
+    ∃ S : Finset V, S.Nonempty ∧ Sᶜ.Nonempty ∧
+      conductance A S ^ 2 ≤ 2 * lambda2 A hA hcard / d
+```
+
+Certifying an explicitly *swept* Fiedler level set (the strictly
+stronger algorithmic statement — `∃ t`, `conductance {fiedler² ≥ t}`
+bounded) is the recorded follow-on; it needs a sweep-extraction lemma
+beyond the Cheeger inequalities themselves and is not claimed here.
+
+**Delivered:** in `GraphTheory.Cheeger` — `cheegerConstant_attained`
+(the conductance `sInf` is realized as a minimum: the filtered powerset
+of nonempty proper subsets is a nonempty finite set, so
+`Finset.exists_min_image` produces a minimizing cut; no regularity
+hypothesis). In `GraphTheory.Fiedler` —
+`fiedlerVector_rayleigh_regularNormalizedLaplacian` (`R_{L_sym}(f) =
+lambda2 / d`: `rayleigh`'s nonzero branch, the quadratic-form transfer
+`quadForm (L_sym) = d⁻¹ • quadForm (L)`, the energy identity, and the
+unit-norm dot product — this pin's `inv_mul_eq_div` closing the
+`d⁻¹ * λ₂ = λ₂ / d` step) and the headline `cheeger_cut_existence`
+(`cheeger_sweep` at the Fiedler vector — which needs Phase A's
+`lambda2_pos_of_connected` for orthogonality — composed with
+attainment, with the constant chain `φ²/2 ≤ λ₂/d ⟹ φ² ≤ 2λ₂/d`
+through `le_div_iff₀`/`div_le_iff₀` and `div_mul_cancel₀`).
+
+**Load-bearing chain (why this tests the substrate):** the theorem
+consumes the previous day's retirement end-to-end — a wrong constant
+anywhere in the `cheeger_sweep` chain (median parts, co-area, Component
+A, the normalization) would falsify `cheeger_cut_existence` outright,
+and the QA pins would fail: the Rayleigh transfer is cross-checked
+against the independently pinned `lambda2 (K₂) = 2`, and the certified
+bound is displayed numerically (`1 ≤ 4`) against pinned values.
+
+**QA (per the standing witness convention):** positive witnesses on
+`K₂` (the `Variational_QA` fixture): `cheegerConstant (K₂) = 1` pinned
+both directions (≤ by the exhibited singleton cut computed from the
+definitions — boundary `1`, volumes `1` and `1`; ≥ because every
+nonempty proper cut on `Fin 2` is a singleton, by the
+card-count identification); `cheegerConstant_attained` instantiated at
+that value; the Rayleigh transfer pinned to `2` (a defective `/d`
+normalization or quadratic-form transfer breaks the agreement with the
+independent pin); the certified cut **identified** as a singleton with
+its bound theorem-sourced, then displayed in numbers; and the
+connectivity hypothesis proved to hold on the fixture
+(`k2Adj_supportGraph_connected_QA`, the reachability walk). Negative
+witness: the regularity hypothesis `hd` refuted-on-omission — at the
+wrong degree `d = 100` on `K₂` (every other hypothesis holding) the
+`hd`-dropped conclusion demands a cut of conductance squared
+`≤ 2·2/100 = 1/25`, while every candidate is a singleton of
+conductance `1`: `1 ≤ 1/25` is false.

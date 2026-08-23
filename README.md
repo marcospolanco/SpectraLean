@@ -16,20 +16,16 @@ revision](docs/5_QA_SCOREBOARD.md) rather than tracking `main`.
 
 ## Status
 
-As of August 22, 2026:
+As of August 23, 2026:
 
 | Check | Result |
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
-| Explicit cited axioms | 10 |
-| QA theorems/lemmas | 1404, with no `sorry` or `admit` under `Scaffold/` |
+| Explicit cited axioms | 9 |
+| QA theorems/lemmas | 1457, with no `sorry` or `admit` under `Scaffold/` |
 
-The remaining trust surface is the Cheeger *hard* direction at the SGT
-center (its pure-algebra component — the Cauchy–Schwarz core, the fused
-median-part contraction, the `E'/(2d‖x‖²)` normalization — was proved
-2026-08-23 as Step 1a of `proposals/discharge-perturbation-axioms.md`,
-with the survey's constant budget corrected on record; the co-area core
-and the median/assembly remain); **Perron–Frobenius for irreducible nonnegative matrices**
+The remaining trust surface is: **Perron–Frobenius for irreducible
+nonnegative matrices**
 (admitted 2026-08-22 as `Scaffold.LinearAlgebra.perron_frobenius`,
 Horn & Johnson Theorem 8.4.4 at the irreducible-case qualification
 level — no strict-dominance clause, with the imprimitive-cycle
@@ -42,8 +38,22 @@ of `proposals/prove-subgaussian-tail-bound.md`, whose Step 0 spike
 proved the old `subgaussianNorm ≤ K`-shaped axiom materially false via
 two junk mechanisms and replaced it with the moment stated integrably
 at the same name and conclusion); and Hoeffding's lemma. Classical
-Laplacian facts, Courant–Fischer, Cauchy interlacing, the Cheeger *upper*
-bound, **Weyl's perturbation inequality**, **Davis–Kahan sin Θ** (retired
+Laplacian facts, Courant–Fischer, Cauchy interlacing, **both Cheeger
+inequalities** (the easy direction since 2026-08-18; the *hard*
+direction `φ²/2 ≤ λ₂` proved 2026-08-23 and retired from axiom by the
+median-split route of
+`proposals/discharge-perturbation-axioms.md` — the Cauchy–Schwarz core
+and fused contraction, the interval-integral co-area core, and the
+median/level-set/assembly layer closing through the variational
+characterization; explicit axioms 10 → 9), and the **Fiedler
+certified-conductance corollary** `cheeger_cut_existence` (2026-08-23:
+on every connected `d`-regular graph a nonempty proper cut exists with
+`conductance S ^ 2 ≤ 2 · lambda2 / d` — the cut-existence form of
+Cheeger's inequality, assembled from the proved sweep lemma at the
+Fiedler vector and the attained conductance minimum; Phase B of
+`proposals/fiedler-partitioning.md`, pure hard crust and the
+retirement's first consumer), **Weyl's perturbation
+inequality**, **Davis–Kahan sin Θ** (retired
 2026-08-21 by the Duhamel/exponential-integral route: the equal-rank
 projector identity plus the vector-level heat-semigroup FTC assembly,
 `Analysis.OperatorTheory.Perturbation.{ProjectionGap,Duhamel}`), the
@@ -223,7 +233,7 @@ The near-term center is general SGT. Public modules currently cover:
 | --- | --- |
 | Graphs and Laplacians | `GraphTheory.Spectral`, `GraphTheory.SimpleGraphAdapter` |
 | Variational spectra | Courant–Fischer, Rayleigh, Cauchy interlacing (in `Spectral`) |
-| Cuts and expansion | `GraphTheory.Cheeger`, `GraphTheory.Fiedler`, `GraphTheory.Expander` (edge weights, the centered-indicator decomposition, and the Expander Mixing Lemma itself) |
+| Cuts and expansion | `GraphTheory.Cheeger`, `GraphTheory.Fiedler`, `GraphTheory.Expander` (edge weights, the centered-indicator decomposition, the Expander Mixing Lemma, and the Fiedler certified-conductance cut `cheeger_cut_existence`) |
 | Decidable spectral certificates | `GraphTheory.SpectralCertificates` (the ℚ specification checker with its soundness theorem, and the kernel-verifiable ℤ cross-multiplied twin with proved bridges) |
 | Electrical structure | `GraphTheory.Electrical`, `GraphTheory.ElectricalFlow`, `GraphTheory.Foster` |
 | Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized` (the similarity, eigenpair transfer, conjugated powers), `GraphTheory.Stationary`, `GraphTheory.Mixing` (the ℓ²-mixing proxy: stationary vector, walk law, density evolution, χ² distance, decay engine) |

@@ -18,19 +18,36 @@ variational characterization of the algebraic connectivity.
 
 | Theorem | Lean Declaration | Kind | Module |
 |---------|-------------------|------|--------|
-| Chapter 2 (Cheeger lower bound) | `cheeger_lower_bound` | axiom | `Scaffold.Mathlib.GraphTheory.Cheeger` |
+| Chapter 2 (Cheeger lower bound) | `cheeger_lower_bound` | **theorem (proved 2026-08-23; axiom before, retired)** | `Scaffold.Mathlib.GraphTheory.Cheeger` |
 | Chapter 2 (Cheeger upper bound) | `cheeger_upper_bound` | **theorem (proved 2026-08-18; axiom before, retired)** | `Scaffold.Mathlib.GraphTheory.Cheeger` |
+| Chapter 2 (cut-existence corollary) | `cheeger_cut_existence` | theorem (proved 2026-08-23; never admitted) | `Scaffold.Mathlib.GraphTheory.Fiedler` |
 | Section 1.3 (variational λ₂, Laplacian form) | `lambda2_variational` | **theorem (proved 2026-08-18; axiom before, retired)** | `Scaffold.Mathlib.GraphTheory.Spectral` |
 
 ## Notes
+
+- **Cut-existence corollary (2026-08-23):** `cheeger_cut_existence`
+  (Fiedler Phase B, `proposals/fiedler-partitioning.md`) — on every
+  connected `d`-regular graph a nonempty proper `S` exists with
+  `conductance S ^ 2 ≤ 2 · lambda2 / d` — composed from the proved
+  sweep lemma evaluated at the Fiedler vector, the attained conductance
+  minimum (`cheegerConstant_attained`), and the Rayleigh transfer
+  `R_{L_sym}(f) = lambda2 / d`. Never admitted; hard crust from birth.
+
+- **Retirement (2026-08-23):** the lower bound (`cheeger_lower_bound`,
+  the hard direction `φ²/2 ≤ λ₂`) is now *proved* — the median split
+  route of `proposals/discharge-perturbation-axioms.md` Steps 1a/1b/1c
+  (the Cauchy–Schwarz core and fused contraction; the co-area core; the
+  median/level-set/assembly layer and sweep lemma), discharged to the
+  spectrum through `secondEval_variational`. No admitted dependencies;
+  both Cheeger inequalities are now hard crust, and this source's rows
+  are all proved.
 
 - **Retirement (2026-08-18):** the upper bound (`cheeger_upper_bound`,
   the easy direction `λ₂ ≤ 2φ`) is now *proved* from the
   general-operator Courant–Fischer (`secondEval_variational` in
   `Spectral.lean`, whose Laplacian instance is the retired
   `lambda2_variational`) via the volume-centered cut indicator — no
-  admitted dependencies. The remaining Cheeger axiom
-  (`cheeger_lower_bound`, `φ²/2 ≤ λ₂`) is the hard direction only.
+  admitted dependencies.
 
 - **Restriction**: the Lean statements are restricted to `d`-regular
   weighted graphs with positive degree `d`, where the symmetric

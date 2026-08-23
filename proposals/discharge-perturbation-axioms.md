@@ -12,9 +12,15 @@ three bounded components (recorded below). **Step 1a delivered
 2026-08-23** (the pure-algebra component — Component A, the fused
 median-part contraction, the normalization — zero new axioms, plus a
 recorded constant-budget correction to the survey's step-5/6 route; see
-the delivery record below the Open next step). Step 1b (the co-area
-crux) is the next dedicated run per the Davis–Kahan precedent. Priority
-**Medium**. Authorizes no axiom admissions or external publication.
+the delivery record below the Open next step). **Step 1b delivered
+2026-08-23** (the co-area core `coarea_core` — the crux — zero new
+axioms, with a second survey correction: the priced hand Fubini exists
+in the pin as `intervalIntegral.integral_finset_sum`; see the delivery
+record below). **Step 1c delivered 2026-08-23 — `cheeger_lower_bound`
+retired at the unchanged statement, explicit axioms 10 → 9, the
+proposal's program COMPLETE** (all three axioms proved: Weyl,
+Davis–Kahan, and both Cheeger directions; see the delivery record
+below). Authorizes no axiom admissions or external publication.
 
 Companion to `docs/2_ARCHITECTURE.md` §9 (upstream-replacement lifecycle)
 and this session's precedent of axiom retirements (Courant–Fischer,
@@ -385,6 +391,12 @@ sketched, in the git-ignored spike `wip/cheeger_spike.lean`):
   conditions (bounded indicator functions on bounded intervals —
   each summand is integrable, so `intervalIntegrable` follows). ~30
   lines of friction, priced into Step 1b below.
+  **[Correction, 2026-08-23, found by the Step-1b run's spike: the
+  interchange IS in the pin — as `intervalIntegral.integral_finset_sum`
+  (with `IntervalIntegrable.sum`, `.abs`,
+  `integral_mono_ae_restrict`). The survey's name-search for
+  `integral_sum` missed it. The priced hand induction was not needed;
+  see the Step-1b delivery record below.]**
 - **Step-1 cost estimate (the recording this section requires):
   550–900 lines over 2–3 dedicated runs**, the largest single
   retirement remaining in this proposal, decomposed as:
@@ -512,22 +524,177 @@ equality trivially).
 
 ## Open next step
 
-**Cheeger hard-direction Step 1b** (the co-area core — the crux, its own
-dedicated run per the Davis–Kahan precedent): for `y ≥ 0` whose
-nonempty level sets are all minority-side,
-`½ ∑ i j, A i j * |y i² − y j²| ≥ φ * d * ∑ i, y i²`, by the
-interval-integral encoding (per-pair FTC + the hand Finset-induction
-Fubini, since this pin has no finite-sum/interval-integral interchange —
-the ~30-line friction priced in the survey) + per-level conductance
-(level sets as `Finset.filter`). Its composition with the delivered
-Component A is the per-part bound `φ² * d * ‖y‖² ≤ E'(y)` (ordered
-convention) — Step 1c consumes it through the delivered *fused*
-contraction and normalization, per the corrected constant budget
-recorded in the Step-1a delivery note below (do **not** follow the
-survey's original step-5/6 summation route — it is loose by exactly the
-factor `2` the statement spends; the 1a correction record has the
-tight shapes). Then Step 1c (median + assembly) retires
-`cheeger_lower_bound` at the unchanged statement.
+**None — the proposal's program is complete** (Weyl 2026-08-20,
+Davis–Kahan 2026-08-21, Cheeger hard direction 2026-08-23; all three
+axioms retired by proof at unchanged statements). This document is now
+a delivered record kept in place as evidence for the axiom-count and
+trust-surface claims that cite it.
+
+**Cheeger hard-direction Step 1c — DELIVERED 2026-08-23** (median +
+assembly, the final component; **`cheeger_lower_bound` retired from
+admitted axiom to proved theorem at the unchanged name, hypotheses, and
+conclusion — explicit axioms 10 → 9, the proposal's program complete**;
+zero new axioms; `#print axioms` on `cheeger_lower_bound`, every new
+public theorem, and all QA headlines reads only `propext,
+Classical.choice, Quot.sound` — the two pre-existing axiom-consuming QA
+theorems `cheeger_positive_implies_secondEval_pos_QA` and
+`cheeger_bounds_coherent_QA` silently shed their
+`cheeger_lower_bound` dependency, verified):
+
+- `GraphTheory.Cheeger` gained, in a new "hard direction Step 1c"
+  section (developed green in the git-ignored spike
+  `wip/cheeger1c_spike.lean` first, then transferred): **median
+  existence** `exists_median` — some `m` with `2·|{m < x i}| ≤ n` and
+  `2·|{x i < m}| ≤ n` — by pure Finset arithmetic with **no sorting**
+  (a route simplification over the survey's `Finset.sort` + `get`
+  sketch): the set `T := {i : 2·|{j : x i < x j}| ≤ n}` is nonempty at
+  a maximizing vertex (`Finset.exists_max_image` over `univ`, empty
+  strict upper set), a `T`-member of minimal value
+  (`Finset.exists_min_image`) works, and the failure case is
+  self-refuting: if the strict lower level set were a majority, its
+  maximizer would lie in `T` *below* the `T`-minimum (the lower set's
+  maximizer has its own strict upper set inside the lower set's
+  complement, so at most `n − |{x < m}| < n/2`). The empty-type case is
+  discharged separately (`n = 0`, both counts `0`); the two level-set
+  **inclusions** `posPart_superlevel_subset` /
+  `negPart_superlevel_subset` (at `t > 0`, `{t ≤ (x−m)⁺²} ⊆ {x > m}`
+  and `{t ≤ (m−x)⁺²} ⊆ {x < m}` — at a positive level the level
+  condition forces the corresponding strict inequality) supply
+  `coarea_core`'s `hy` in exactly its delivered closed-set form via
+  `minority_posPart` / `minority_negPart`.
+- The **per-part bound** `hardDirection_perPart`: `φ²·d·∑ y i² ≤ E'(y)`
+  for any minority-superlevel `y` — the Step-1b co-area core (lower
+  bound on the weighted total variation of `y²`) squared and composed
+  with the Step-1a Cauchy–Schwarz core through the regularity bridge,
+  `cheegerConstant_nonneg` supplying the squaring's side condition; the
+  degenerate zero-norm case discharged by nonnegativity of `E'`. The
+  **norm split** `median_parts_norm` (pointwise
+  `(x−m)⁺² + (m−x)⁺² = (x−m)²` since the parts are disjointly supported,
+  summed with `∑ x = 0` to `∑x² + n·m² ≥ ∑x²`). The **sweep lemma**
+  `cheeger_sweep`: `φ²/2 ≤ R_{L_sym}(x)` for every nonzero `x ⊥ 1` —
+  per-part bounds on both median parts, summed through the Step-1a
+  *fused* contraction into `φ²·d·∑x² ≤ E'(x)`, then the
+  `E'/(2·d·‖x‖²)` normalization (`div_le_div_iff₀`), with nothing lost
+  anywhere — exactly the corrected Step-1a constant budget. The
+  retirement theorem itself is the spike's `assembly_skeleton` with the
+  hypothesis discharged: `secondEval_variational` + `le_csInf` at the
+  `Pi.single u 1 − Pi.single v 1` witness.
+- **QA** (`Cheeger_QA.lean` 78 → 104 declarations): the **median forced
+  into its interval** on the tie-heavy `![1, 1, −1, −1]` (the
+  theorem's returned `m` provably satisfies `−1 ≤ m ≤ 1` — a defective
+  median puts all four values on one strict side and one of the two
+  at-most-half counts reads `2·4 ≤ 4`, refuted); the **per-part bound
+  pinned** at the Step-1b `K₂` equality fixture (`φ²·d·∑y² = 1 ≤ 2 = E'`,
+  both sides raw); the **norm split's exact `+ n·m²` remainder** pinned
+  at two medians on `![1, −1, 3, −3]` (`m = 0`: parts sum exactly
+  `20 = ∑x²`; `m = 1`: `24 = 20 + 4·1²`, the theorem's inequality the
+  strict `20 ≤ 24`); the **sweep on `K₂`** (`1/2 ≤ 2` through the
+  theorem, the quotient the independently pinned `λ₂` value) and **on
+  `C₄` at `d = 2`** (a non-unit degree: `R = 1` through the
+  normalization with `E' = 8`, `‖x‖² = 2` pinned raw; the visible gap
+  `φ²/2 ≤ 1/8 < 1 = R` via the exhaustively computed `φ ≤ 1/2`); and
+  the **retirement instance** `cheeger_lower_bound_edge_QA` — `1/2 ≤
+  λ₂(L_sym) = 2` on `K₂` through the proved theorem with both endpoints
+  independently pinned, the instantiation that previously consumed the
+  admitted axiom.
+- Pin-specific technique notes for future Finset-counting work at this
+  pin: `Finset.filter_eq_univ_iff` does not exist — use
+  `Finset.eq_univ_iff_forall` with `Finset.mem_filter` assembled by
+  hand; a `have h := partial_application` of a lemma with unsolved
+  implicit `{x m}` arguments leaves metavariables ("DecidableEq stuck")
+  — ascribe the `have`'s type; `rw` cannot see through
+  `Finset.mem_filter`'s beta-redex into a lambda's body — `simp only
+  [Finset.mem_filter, Finset.mem_univ, true_and]` beta-reduces first;
+  and `le_of_mul_le_mul_left` at this pin takes the multiplier on the
+  *left* (`b * a ≤ b * c → 0 < b → a ≤ c`) and its positivity argument
+  directly (`hprod`, not `hprod.ne'`).
+
+**Cheeger hard-direction Step 1b — DELIVERED 2026-08-23** (the co-area
+core, the crux; zero new axioms, count stays 10; `#print axioms` on all
+twelve new public theorems and seven QA headlines reads only `propext,
+Classical.choice, Quot.sound`):
+
+- `GraphTheory.Cheeger` gained, in a new "hard direction Step 1b"
+  section: the layer-cake primitive `indicatorLE` (`1_{t ≤ c}`, stated
+  through `Set.indicator` on `{x | x ≤ c}` so it matches
+  `intervalIntegral.integral_indicator`'s own truncation shape
+  exactly), the **mass layer-cake** `integral_indicatorLE`
+  (`∫ t in 0..R, 1_{t ≤ c} dt = c`) and the **pair layer-cake**
+  `integral_abs_indicatorLE_sub` (`∫ t in 0..R, |1_{t ≤ c} −
+  1_{t ≤ d}| dt = |c − d|`, by pointwise monotonicity + `integral_sub`
+  — no case-split-indicator gymnastics), their integrability
+  (`intervalIntegrable_indicatorLE` via `integrableOn_const`-on-a-
+  finite-interval + `IntegrableOn.indicator`; a generic
+  `intervalIntegrable_const_mul` helper for the pin's missing
+  `IntervalIntegrable.const_mul`), the **closed-superlevel cut
+  identity** `sum_pairAbs_eq_two_boundary` (`∑ i j, A i j |1_{t≤c_i} −
+  1_{t≤c_j}| = 2 · boundary S_t` for the abstract `S` with membership
+  `↔ t ≤ y i²`; `hA` load-bearing through `boundary_compl`), the
+  **minority conductance** `boundary_ge_of_minority`
+  (`cheegerConstant·d·|S| ≤ boundary S` for nonempty `2|S| ≤ n`),
+  the **indicator↔cardinality dictionary**
+  `sum_indicatorLE_eq_card_filter` (`∑ i, 1_{t ≤ g i} = |{i : t ≤ g
+  i}|`, in the closed-set form the whole chain runs on), the per-level
+  bound `sum_pairAbs_ge`, and the headline **`coarea_core`**: for any
+  `y : V → ℝ` with `∀ 0 < t, 2·|{i : t ≤ y i²}| ≤ n`,
+  `2·(φ·d·∑ y i²) ≤ ∑ i j, A i j·|y i² − y j²|`.
+- **Second survey correction (route-cost class, found by the spike):**
+  the priced ~30-line hand Finset-induction Fubini is **unnecessary** —
+  the pin has `intervalIntegral.integral_finset_sum` (the survey
+  searched for the name `integral_sum`), together with
+  `IntervalIntegrable.sum`, `.abs`, and `integral_mono_ae_restrict`.
+  Additionally the `Iic`-indicator encoding dissolves the survey's
+  `Ι = Ioc` right-endpoint drop-point trap (the survey's recorded
+  `Set.EqOn (uIcc a b)` congruence requirement cannot hold pointwise
+  at indicator drop points): with the *closed* step `1_{t ≤ c}` every
+  congruence in the chain is genuinely pointwise, and the one point
+  where the integrand inequality fails — `t = 0`, where the φ-side is
+  `2φd·n` against a vanishing cut side — is a Lebesgue null singleton,
+  absorbed by `integral_mono_ae_restrict` + `mem_ae_iff` +
+  `Real.volume_singleton`.
+- **Two hypothesis drops over the survey's sketch, both verified by
+  the delivered statement:** `hynneg : ∀ i, 0 ≤ y i` is unnecessary
+  (the whole chain runs on `y i² ≥ 0`, automatic — the theorem holds
+  for arbitrary `y`), and `hcard : 2 ≤ Fintype.card V` is unnecessary
+  (minority `2|S| ≤ n` already forces `Sᶜ` nonempty whenever `S` is:
+  `|Sᶜ| ≥ |S| ≥ 1`). The minority hypothesis itself is stated on
+  *closed* superlevel sets at *positive* levels only — at `t = 0` the
+  closed set is all of `V` for every `y`, so a `t ≥ 0` reading would
+  be unsatisfiable; the per-level bound is consumed only on `(0, R]`,
+  exactly the ae support of the mono.
+- **QA** (`Cheeger_QA.lean` 59 → 78 declarations): the **`K₂` equality
+  pin** — at `edgeY = ![1,0]` both sides evaluate to `2`
+  (`φ = 1` by enumeration, `d = 1`, `∑y² = 1` against the raw
+  total-variation sum), so the co-area bound is *attained with
+  equality* and any defective constant in the layer-cake chain (a
+  wrong FTC constant, a missing factor at the cut identity, a
+  half-volume slip in the conductance step) would break it; the
+  **strict multi-level `C₄` witness** at `cycY = ![2,1,0,0]` (squared
+  values `(4,1,0,0)`, two distinct level strata): raw total variation
+  `16` against `20·φ ≤ 10` (φ bounded by the adjacent-pair cut's
+  exhaustively computed conductance `1/2` — no enumeration of
+  `φ(C₄)` needed), strict with a visible gap; the **dictionary pin**
+  at level `t = 1` where vertex `1` has `y² = 1 = t` and its
+  indicator is `1` — the *closed*-set semantics load-bearing; and the
+  **minority refutation-on-omission** — at `edgeOnes = ![1,1]` the
+  hypothesis-free conclusion reads `4 ≤ 0` (false) with the minority
+  hypothesis provably unsatisfiable at `t = 1` (`S₁ = univ`, `2·2 ≤ 2`
+  false) while every other hypothesis holds on the fixture.
+- Pin-specific technique notes for 1c and future interval-integral
+  work at this pin: `∫ t in 0..R` must be written `∫ t in
+  (0:ℝ)..R` (the bare numeral lexes `0.` as a Float); `Set.indicator_
+  of_mem` takes membership explicitly *after* the hypothesis (a bare
+  `t ≤ c` unifies as membership in the coerced `Real.le t` set — direct
+  the membership with `show t ∈ {x | x ≤ c}`); `Set.Iic` and `{x | x ≤
+  c}` are interchangeable for `exact` but *not* for `rw` (match the
+  lemma's literal setOf form); term-mode composition of
+  `IntervalIntegrable.sum` with a `fun t => ∑ i, f i t` goal can whnf-
+  loop (`Finset.sum_apply` is not defeq) — route through an explicit
+  function equation `funext t; rw [Finset.sum_apply]` and `rw` the
+  goal before `exact`; `integral_const` is ambiguous (root
+  `MeasureTheory` vs `intervalIntegral`) — qualify; and
+  `integrable_const` requires `[IsFiniteMeasure μ]` at this pin (use
+  `integrableOn_const` with the interval's finite volume instead).
 
 **Cheeger hard-direction Step 1a — DELIVERED 2026-08-23** (the
 pure-algebra component, zero new axioms, count stays 10; `#print

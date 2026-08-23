@@ -1,4 +1,5 @@
 import Scaffold.Mathlib.GraphTheory.Spectral
+import Scaffold.Mathlib.GraphTheory.Cheeger
 
 /-!
 # The Fiedler vector and its sign partition
@@ -37,8 +38,23 @@ Delivered statements:
   the eigenvector can be a kernel vector (e.g. `onesVec` itself) whose
   positive set is everything.
 
-Phase B (a certified conductance bound on `fiedlerPartition`) is a
-separate, explicitly axiom-backed milestone and is not attempted here.
+Phase B (a certified conductance bound, delivered 2026-08-23 in the
+"Phase B" section below) is the classical **Cheeger cut-existence
+corollary**: on every connected `d`-regular graph there is a nonempty
+proper `S` with `conductance S ^ 2 ≤ 2 * lambda2 / d`, assembled from
+the proved Cheeger sweep lemma and `cheegerConstant_attained`. It is
+pure hard crust — the proposal's original gate ("run against the
+admitted Cheeger hard direction, or defer until it is proved") was
+dissolved by the hard direction's retirement on 2026-08-23. Statement
+difference from the proposal's Phase B sketch, recorded before stating:
+the sketch wrote `conductance (fiedlerPartition …) ≤ [bound]` — the
+*sign* half-space — but the Cheeger inequalities bound the conductance
+*minimum*, and no λ₂-only upper bound on the sign cut's conductance
+holds in general (certifying a specific Fiedler *level set* — the
+sweep-extraction statement — is a strictly stronger, separately scoped
+follow-on). The delivered existential certificate is over the
+conductance minimizer, with the bound running through the Fiedler
+vector's Rayleigh quotient.
 
 QA: `Scaffold/QA/SpectralGraph/Fiedler_QA.lean` — the `K₂` fixture
 (partition pinned to one of the two singleton halves through the
@@ -49,7 +65,12 @@ partition computed to be exactly the known good cut `{0, 1}` or its
 complement, with boundary `1` and volume `3`), and the disconnected
 negative witness (the connectivity/`lambda2 > 0` hypothesis shown
 load-bearing: `lambda2 = 0` and `onesVec` is a nonzero eigenvector
-there whose sign filter is all of `univ`).
+there whose sign filter is all of `univ`). The Phase B section adds the
+`K₂` certificate witnesses: `lambda2 (K₂) = 2` pinned through the
+`1 • L_sym = L` scaling bridge to the independently pinned
+normalized-Laplacian eigenvalue, the Rayleigh transfer cross-checked
+against that pin, the attainment instantiation, the identified cut, and
+the regularity refutation (`d = 100`).
 -/
 
 open scoped Classical Matrix
@@ -348,5 +369,89 @@ theorem fiedlerPartition_ne_univ (A : WAdj (V := V)) (hA : A.IsSymm)
     fiedlerPartition A hA hcard ≠ Finset.univ :=
   fiedlerPartition_ne_univ_of_pos A hA hcard
     (lambda2_pos_of_connected A hA hnonneg hcard hconn)
+
+/-!
+## Phase B: the certified conductance cut
+
+`proposals/fiedler-partitioning.md` Phase B, delivered 2026-08-23 as
+pure hard crust (zero new axioms): the hard direction of Cheeger was
+proved the same day
+(`GraphTheory.Cheeger.cheeger_lower_bound`/`cheeger_sweep`), dissolving
+the proposal's recorded gate. The certificate is the classical Cheeger
+cut-existence corollary rather than the sketch's sign-partition bound —
+see the module header for the recorded statement-shape deviation.
+-/
+
+/-- The Fiedler vector's Rayleigh quotient at the regular normalized
+Laplacian is `lambda2 / d`: unit norm, the quadratic-form transfer
+`quadForm (L_sym) = d⁻¹ • quadForm (laplacian)`, and the energy
+identity `quadForm (laplacian) f = lambda2`. This is the bridge through
+which the proved sweep lemma's spectral side (`rayleigh` of the
+normalized operator) reads the combinatorial eigenvalue that
+`lambda2_pos_of_connected` certifies.
+
+QA: `SpectralGraphTheory.QA.k2_fiedler_rayleigh_QA` in
+`Scaffold/QA/SpectralGraph/Fiedler_QA.lean` pins the value on `K₂` to
+`2` and cross-checks it against the independently pinned
+`λ₂(L_sym) = 2`. -/
+theorem fiedlerVector_rayleigh_regularNormalizedLaplacian
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hcard : 2 ≤ Fintype.card V)
+    (d : ℝ) (hd : ∀ i, deg A i = d) (hdpos : 0 < d) :
+    rayleigh (regularNormalizedLaplacian A d) (fiedlerVector A hA hcard)
+      = lambda2 A hA hcard / d := by
+  rw [rayleigh, if_neg (fiedlerVector_ne_zero A hA hcard),
+    quadForm_regularNormalizedLaplacian A d hd hdpos.ne',
+    fiedlerVector_quadForm A hA hcard, fiedlerVector_norm A hA hcard,
+    div_one]
+  exact inv_mul_eq_div d _
+
+/-- **Phase B: the certified conductance cut.** On every connected
+`d`-regular graph with symmetric nonnegative weights there exists a
+nonempty proper vertex set whose conductance satisfies
+`φ(S) ^ 2 ≤ 2 λ₂(L) / d` — the classical cut-existence corollary of
+Cheeger's inequality (`φ(G) ^ 2 / 2 ≤ λ₂(L_sym)` with
+`λ₂(L_sym) = λ₂(L) / d`), made *existential* by the attained conductance
+minimum (`cheegerConstant_attained`).
+
+Trust level: hard crust. Every ingredient is proved — the sweep lemma
+(`cheeger_sweep`, proved 2026-08-23), attainment (finiteness), the
+Rayleigh transfer above, and the algebraic-connectivity certificate
+(`lambda2_pos_of_connected`, Phase A). Nothing axiom-backed enters.
+
+Statement difference from the proposal's Phase B sketch, recorded
+before stating: the sketch bounded the conductance of the *sign*
+partition `fiedlerPartition`; the Cheeger inequalities cannot certify
+any specific cut's conductance from `lambda2` alone — they bound the
+minimum — and the sign half-space admits no λ₂-only bound in general.
+The certified object here is therefore the conductance-minimizing cut
+(whose *value* is bounded, through the Fiedler vector's Rayleigh
+quotient), and certifying an explicitly swept Fiedler level set is the
+recorded follow-on.
+
+QA: `SpectralGraphTheory.QA.k2_cut_certified_QA`,
+`SpectralGraphTheory.QA.k2_cut_identified_QA`, and
+`SpectralGraphTheory.QA.cut_existence_regular_dropped_refuted_QA` in
+`Scaffold/QA/SpectralGraph/Fiedler_QA.lean`. -/
+theorem cheeger_cut_existence (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hnn : ∀ i j, 0 ≤ A i j) (d : ℝ) (hd : ∀ i, deg A i = d)
+    (hdpos : 0 < d) (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected) :
+    ∃ S : Finset V, S.Nonempty ∧ Sᶜ.Nonempty ∧
+      conductance A S ^ 2 ≤ 2 * lambda2 A hA hcard / d := by
+  obtain ⟨S, hS, hSc, hSφ⟩ := cheegerConstant_attained A hnn hcard
+  refine ⟨S, hS, hSc, ?_⟩
+  have hsweep := cheeger_sweep A hA hnn d hd hdpos
+    (fiedlerVector_ne_zero A hA hcard)
+    (fiedlerVector_ortho_onesVec A hA hcard
+      (lambda2_pos_of_connected A hA hnn hcard hconn))
+  rw [fiedlerVector_rayleigh_regularNormalizedLaplacian A hA hcard d
+    hd hdpos] at hsweep
+  rw [hSφ, le_div_iff₀ hdpos]
+  have h2 := (div_le_iff₀ two_pos).1 hsweep
+  calc cheegerConstant A ^ 2 * d
+      ≤ (lambda2 A hA hcard / d * 2) * d :=
+        mul_le_mul_of_nonneg_right h2 hdpos.le
+    _ = 2 * lambda2 A hA hcard := by
+        rw [div_mul_eq_mul_div, div_mul_cancel₀ _ hdpos.ne']; ring
 
 end SpectralGraphTheory

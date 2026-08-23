@@ -806,4 +806,434 @@ theorem pair_contraction_refuted_QA
 
 end HardDirectionStep1a
 
+/-!
+## The Cheeger hard direction, Step 1b: the co-area core (proved)
+-/
+
+section HardDirectionStep1b
+
+/-- Test function for the co-area witnesses on `K₂`: the one-hot
+`![1, 0]` — every positive level set is `{0}` or empty, so the minority
+hypothesis holds. -/
+def edgeY : Fin 2 → ℝ := ![1, 0]
+
+theorem edgeY_zero : edgeY 0 = 1 := by simp [edgeY]
+
+theorem edgeY_one : edgeY 1 = 0 := by simp [edgeY]
+
+/-- The minority hypothesis holds at `edgeY`: at any positive level the
+closed superlevel set is `{0}` (card `1`) or empty, and `2 * 1 ≤ 2`. -/
+theorem edgeY_minority : ∀ t : ℝ, 0 < t →
+    2 * (Finset.univ.filter (fun i => t ≤ edgeY i ^ 2)).card
+      ≤ Fintype.card (Fin 2) := by
+  intro t ht
+  have hsub : (Finset.univ.filter (fun i => t ≤ edgeY i ^ 2))
+      ⊆ ({0} : Finset (Fin 2)) := by
+    intro i hi
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hi
+    fin_cases i
+    · decide
+    · exfalso
+      simp [edgeY] at hi
+      linarith
+  have hcard : (Finset.univ.filter (fun i => t ≤ edgeY i ^ 2)).card
+      ≤ ({0} : Finset (Fin 2)).card := Finset.card_le_card hsub
+  rw [Fintype.card_fin]
+  have h1 : ({0} : Finset (Fin 2)).card = 1 := by decide
+  omega
+
+/-- The right-hand total-variation sum at `edgeY`, computed raw:
+`|1² - 0²|` across both ordered pairs of the edge. -/
+theorem edge_pairsum :
+    ∑ i, ∑ j, edgeAdj i j * |edgeY i ^ 2 - edgeY j ^ 2| = 2 := by
+  simp only [Fin.sum_univ_two, edgeAdj, edgeY_zero, edgeY_one]
+  norm_num
+
+theorem edge_sumYsq : ∑ i, edgeY i ^ 2 = 1 := by
+  simp only [Fin.sum_univ_two, edgeY_zero, edgeY_one]
+  norm_num
+
+/-- **The co-area core instantiated on `K₂`** at `edgeY`, through the
+theorem (the minority hypothesis supplied by `edgeY_minority`,
+load-bearing). -/
+theorem coarea_edge_instance_QA :
+    2 * (cheegerConstant edgeAdj * (1:ℝ) * ∑ i, edgeY i ^ 2)
+      ≤ ∑ i, ∑ j, edgeAdj i j * |edgeY i ^ 2 - edgeY j ^ 2| :=
+  coarea_core edgeAdj edgeAdj_symmetric edgeAdj_nonneg 1 edgeAdj_regular
+    (by norm_num) edgeY edgeY_minority
+
+/-- **The co-area bound is attained with equality on `K₂`:** both sides
+evaluate to `2` — `φ = 1` (`edge_cheegerConstant`), `d = 1`, `∑ y² = 1`
+against the raw total variation above. A defective constant anywhere in
+the layer-cake chain would break this equality. -/
+theorem coarea_edge_eq_QA :
+    2 * (cheegerConstant edgeAdj * (1:ℝ) * ∑ i, edgeY i ^ 2)
+      = ∑ i, ∑ j, edgeAdj i j * |edgeY i ^ 2 - edgeY j ^ 2| := by
+  rw [edge_cheegerConstant, edge_sumYsq, edge_pairsum]
+  norm_num
+
+/-- Test function for the strict `C₄` witness: the two-level vector
+`![2, 1, 0, 0]`, whose squared values `(4, 1, 0, 0)` exercise two
+distinct positive level strata (`{0, 1}` on `(0, 1]`, `{0}` on
+`(1, 4]`). -/
+def cycY : Fin 4 → ℝ := ![2, 1, 0, 0]
+
+theorem cycY_zero : cycY 0 = 2 := by simp [cycY]
+
+theorem cycY_one : cycY 1 = 1 := by simp [cycY]
+
+theorem cycY_two : cycY 2 = 0 := by simp [cycY]
+
+theorem cycY_three : cycY 3 = 0 := by simp [cycY]
+
+/-- The minority hypothesis holds at `cycY`: every positive level set
+sits inside `{0, 1}` (card `2`), and `2 * 2 ≤ 4`. -/
+theorem cycY_minority : ∀ t : ℝ, 0 < t →
+    2 * (Finset.univ.filter (fun i => t ≤ cycY i ^ 2)).card
+      ≤ Fintype.card (Fin 4) := by
+  intro t ht
+  have hsub : (Finset.univ.filter (fun i => t ≤ cycY i ^ 2))
+      ⊆ ({0, 1} : Finset (Fin 4)) := by
+    intro i hi
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hi
+    fin_cases i
+    · decide
+    · decide
+    · exfalso
+      simp [cycY] at hi
+      linarith
+    · exfalso
+      simp [cycY] at hi
+      linarith
+  have hcard : (Finset.univ.filter (fun i => t ≤ cycY i ^ 2)).card
+      ≤ ({0, 1} : Finset (Fin 4)).card := Finset.card_le_card hsub
+  rw [Fintype.card_fin]
+  have h2 : ({0, 1} : Finset (Fin 4)).card = 2 := by decide
+  omega
+
+/-- The right-hand total-variation sum at `cycY`, computed raw: the
+adjacent pairs of `C₄` contribute `3 + 3` (edge `0-1`), `1 + 1`
+(edge `1-2`), `0` (edge `2-3`), `4 + 4` (edge `3-0`) — total `16`. -/
+theorem cyc_pairsum :
+    ∑ i, ∑ j, cycleAdj4 i j * |cycY i ^ 2 - cycY j ^ 2| = 16 := by
+  simp only [Fin.sum_univ_four, cycleAdj4, cycY_zero, cycY_one, cycY_two,
+    cycY_three]
+  norm_num
+
+theorem cyc_sumYsq : ∑ i, cycY i ^ 2 = 5 := by
+  simp only [Fin.sum_univ_four, cycY_zero, cycY_one, cycY_two, cycY_three]
+  norm_num
+
+/-- **The indicator↔cardinality dictionary pinned on `cycY` at level
+`t = 1`:** the closed-set semantics is load-bearing — vertex `1` has
+`cycY 1 ^ 2 = 1 = t` and its indicator is `1` (closed superlevel set),
+not `0`. -/
+theorem sum_indicatorLE_cycY_QA :
+    ∑ i, indicatorLE (cycY i ^ 2) 1 = 2 := by
+  have h0 : indicatorLE (cycY 0 ^ 2) 1 = 1 := by
+    rw [cycY_zero]; exact indicatorLE_of_le (by norm_num)
+  have h1 : indicatorLE (cycY 1 ^ 2) 1 = 1 := by
+    rw [cycY_one]; exact indicatorLE_of_le (by norm_num)
+  have h2 : indicatorLE (cycY 2 ^ 2) 1 = 0 := by
+    rw [cycY_two]; exact indicatorLE_of_lt (by norm_num)
+  have h3 : indicatorLE (cycY 3 ^ 2) 1 = 0 := by
+    rw [cycY_three]; exact indicatorLE_of_lt (by norm_num)
+  simp only [Fin.sum_univ_four, h0, h1, h2, h3]
+  norm_num
+
+/-- **The co-area core instantiated on `C₄`** at the multi-level
+`cycY`, through the theorem. -/
+theorem coarea_cycle_instance_QA :
+    2 * (cheegerConstant cycleAdj4 * 2 * ∑ i, cycY i ^ 2)
+      ≤ ∑ i, ∑ j, cycleAdj4 i j * |cycY i ^ 2 - cycY j ^ 2| :=
+  coarea_core cycleAdj4 cycleAdj4_isSymm cycleAdj4_nonneg 2 cycleAdj4_deg
+    (by norm_num) cycY cycY_minority
+
+/-- **The co-area bound is strict on the `C₄` witness:** the left side
+is `2 * φ * 2 * 5 = 20 * φ ≤ 10` (via the adjacent-pair cut's
+conducted conductance `φ ≤ 1/2`), strictly below the raw total
+variation `16`. -/
+theorem coarea_cycle_lt_QA :
+    2 * (cheegerConstant cycleAdj4 * 2 * ∑ i, cycY i ^ 2)
+      < ∑ i, ∑ j, cycleAdj4 i j * |cycY i ^ 2 - cycY j ^ 2| := by
+  have hφ : cheegerConstant cycleAdj4 ≤ 1 / 2 :=
+    le_trans (conductance_ge_cheegerConstant cycleAdj4 cycleAdj4_nonneg
+      {0, 1} (by decide) (by decide)) (le_of_eq cyc_conductance_01)
+  rw [cyc_sumYsq, cyc_pairsum]
+  nlinarith
+
+/-- The minority-hypothesis-free conclusion is refuted on `K₂` at
+`![1, 1]`: the level set at `t = 1` is everything, so the hypothesis
+provably fails (both vertices on the majority side), while every other
+hypothesis of the theorem holds on the fixture — the minority
+hypothesis is the load-bearing one. -/
+def edgeOnes : Fin 2 → ℝ := ![1, 1]
+
+theorem edgeOnes_minority_fails :
+    ¬ (∀ t : ℝ, 0 < t →
+      2 * (Finset.univ.filter (fun i => t ≤ edgeOnes i ^ 2)).card
+        ≤ Fintype.card (Fin 2)) := by
+  intro h
+  have h1 := h 1 (by norm_num)
+  have hcard : (Finset.univ.filter (fun i => (1:ℝ) ≤ edgeOnes i ^ 2)).card
+      = 2 := by
+    have huniv : (Finset.univ.filter (fun i => (1:ℝ) ≤ edgeOnes i ^ 2))
+        = Finset.univ := by
+      ext i
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and,
+        Finset.mem_univ]
+      fin_cases i <;> simp [edgeOnes]
+    rw [huniv, Finset.card_univ, Fintype.card_fin]
+  rw [hcard, Fintype.card_fin] at h1
+  norm_num at h1
+
+/-- **Minority refuted-on-omission:** at `![1, 1]` the hypothesis-free
+statement reads `4 ≤ 0` (left side `2 * 1 * 1 * 2` against vanishing
+total variation) — false, with the failure isolated at the minority
+hypothesis by `edgeOnes_minority_fails`. -/
+theorem coarea_minority_refuted_QA :
+    ¬ (2 * (cheegerConstant edgeAdj * (1:ℝ) * ∑ i, edgeOnes i ^ 2)
+      ≤ ∑ i, ∑ j, edgeAdj i j * |edgeOnes i ^ 2 - edgeOnes j ^ 2|) := by
+  intro h
+  rw [edge_cheegerConstant] at h
+  simp only [Fin.sum_univ_two, edgeAdj, edgeOnes] at h
+  norm_num at h
+
+end HardDirectionStep1b
+
+/-!
+## The hard direction, Step 1c: median + assembly (witnesses)
+
+The final layer of the Cheeger hard-direction program
+(`proposals/discharge-perturbation-axioms.md` Step 1c, added 2026-08-23,
+all proved, zero axioms): median existence, the per-part composition,
+the norm split, the sweep lemma, and the retirement of
+`cheeger_lower_bound` to a proved theorem. The witnesses pin each new
+layer numerically: the median forced into its interval on a tie-heavy
+`Fin 4` fixture, the per-part bound at the Step-1b `K₂` equality data,
+the norm split's exact `+ n·m²` remainder at two medians, and the sweep
+on `K₂` (`1/2 ≤ 2`, against the pinned `λ₂`) and on `C₄` (`φ²/2 ≤ 1/8 <
+1 = R`, at `d = 2`).
+-/
+
+section HardDirectionStep1c
+
+/-- Tie-heavy test vector `![1, 1, -1, -1]` on `Fin 4` for the median
+witness: both values repeated twice, so any valid median must land in
+`[-1, 1]` — a value above `1` or below `-1` puts all four values on one
+strict side, violating one of the two at-most-half counts. -/
+def tieX : Fin 4 → ℝ := ![1, 1, -1, -1]
+
+theorem tieX_val : ∀ i : Fin 4, tieX i = 1 ∨ tieX i = -1 := by
+  intro i
+  fin_cases i <;> simp [tieX]
+
+/-- **The median is forced into its interval on the tie-heavy fixture:**
+the theorem's returned `m` satisfies `-1 ≤ m ≤ 1`. A defective median
+(off-by-one counting, min/max of the values) would return `m > 1` or
+`m < -1`, and the corresponding at-most-half count would read `2 * 4 ≤
+4` — refuted. -/
+theorem median_fin4_QA :
+    ∃ m : ℝ, -1 ≤ m ∧ m ≤ 1 := by
+  obtain ⟨m, hup, hlow⟩ := exists_median (tieX : Fin 4 → ℝ)
+  refine ⟨m, ?_, ?_⟩
+  · by_contra hc
+    push_neg at hc
+    have hfull : (Finset.univ.filter (fun i => m < tieX i))
+        = (Finset.univ : Finset (Fin 4)) :=
+      Finset.eq_univ_iff_forall.2 fun i => Finset.mem_filter.2
+        ⟨Finset.mem_univ i, by
+          rcases tieX_val i with h | h <;> rw [h] <;> linarith⟩
+    rw [hfull, Finset.card_univ, Fintype.card_fin] at hup
+    norm_num at hup
+  · by_contra hc
+    push_neg at hc
+    have hfull : (Finset.univ.filter (fun i => tieX i < m))
+        = (Finset.univ : Finset (Fin 4)) :=
+      Finset.eq_univ_iff_forall.2 fun i => Finset.mem_filter.2
+        ⟨Finset.mem_univ i, by
+          rcases tieX_val i with h | h <;> rw [h] <;> linarith⟩
+    rw [hfull, Finset.card_univ, Fintype.card_fin] at hlow
+    norm_num at hlow
+
+/-- The Dirichlet double sum at `edgeY`, computed raw: `(1 - 0)²` across
+both ordered pairs of the edge. -/
+theorem edge_energy_Y :
+    ∑ i, ∑ j, edgeAdj i j * (edgeY i - edgeY j) ^ 2 = 2 := by
+  simp only [Fin.sum_univ_two, edgeAdj, edgeY_zero, edgeY_one]
+  norm_num
+
+/-- **The per-part bound instantiated on `K₂`** at the Step-1b equality
+fixture `edgeY` (the minority hypothesis supplied by `edgeY_minority`,
+load-bearing). -/
+theorem perPart_edge_QA :
+    cheegerConstant edgeAdj ^ 2 * (1:ℝ) * ∑ i, edgeY i ^ 2
+      ≤ ∑ i, ∑ j, edgeAdj i j * (edgeY i - edgeY j) ^ 2 :=
+  hardDirection_perPart edgeAdj edgeAdj_symmetric edgeAdj_nonneg 1
+    edgeAdj_regular (by norm_num) edgeY edgeY_minority
+
+/-- **The per-part bound pinned numerically:** the left side is exactly
+`φ² · d · ∑ y² = 1` against the raw energy `2` — the composition of the
+Step-1b co-area core (itself at equality, `2 ≤ 2`) with the Step-1a
+Cauchy–Schwarz core (strict, `4 ≤ 8`), so the composed bound inherits
+coarea's tight left factor. -/
+theorem perPart_edge_eq_QA :
+    cheegerConstant edgeAdj ^ 2 * (1:ℝ) * ∑ i, edgeY i ^ 2 = 1
+      ∧ ∑ i, ∑ j, edgeAdj i j * (edgeY i - edgeY j) ^ 2 = 2 := by
+  rw [edge_cheegerConstant, edge_sumYsq, edge_energy_Y]
+  norm_num
+
+/-- Test vector `![1, -1, 3, -3]` on `Fin 4` for the norm-split witness:
+orthogonal to `1`, with squared mass `20`. -/
+def normX : Fin 4 → ℝ := ![1, -1, 3, -3]
+
+theorem normX_val_zero : normX 0 = 1 := by simp [normX]
+
+theorem normX_val_one : normX 1 = -1 := by simp [normX]
+
+theorem normX_val_two : normX 2 = 3 := by simp [normX]
+
+theorem normX_val_three : normX 3 = -3 := by simp [normX]
+
+theorem normX_orth : Matrix.dotProduct normX onesVec = 0 := by
+  simp only [Matrix.dotProduct, onesVec, mul_one, Fin.sum_univ_four,
+    normX_val_zero, normX_val_one, normX_val_two, normX_val_three]
+  norm_num
+
+theorem normX_sumsq : ∑ i, normX i ^ 2 = 20 := by
+  simp only [Fin.sum_univ_four, normX_val_zero, normX_val_one,
+    normX_val_two, normX_val_three]
+  norm_num
+
+/-- **The norm split's exact remainder, at the trivial median `m = 0`:**
+the two parts carry exactly `∑ x² = 20` (one part vanishes on each
+side; no `n·m²` remainder). -/
+theorem median_parts_norm_fin4_m0_QA :
+    (∑ i, (max (normX i - 0) 0) ^ 2
+        + ∑ i, (max (0 - normX i) 0) ^ 2) = 20 := by
+  simp only [Fin.sum_univ_four, normX_val_zero, normX_val_one,
+    normX_val_two, normX_val_three]
+  norm_num
+
+/-- **The norm split at the nontrivial median `m = 1`:** the two parts
+carry `24 = 20 + 4 · 1²` — the `n·m²` remainder visible — and the
+theorem's inequality is the strict `20 ≤ 24`. -/
+theorem median_parts_norm_fin4_m1_QA :
+    ∑ i, normX i ^ 2
+      ≤ ∑ i, (max (normX i - 1) 0) ^ 2 + ∑ i, (max (1 - normX i) 0) ^ 2
+        ∧ (∑ i, (max (normX i - 1) 0) ^ 2
+            + ∑ i, (max (1 - normX i) 0) ^ 2) = 24 := by
+  constructor
+  · exact median_parts_norm (m := 1) normX_orth
+  · simp only [Fin.sum_univ_four, normX_val_zero, normX_val_one,
+      normX_val_two, normX_val_three]
+    norm_num
+
+/-- Test vector `![1, 0, -1, 0]` on `Fin 4` for the `C₄` sweep witness:
+orthogonal to `1`, the normalized-Laplacian eigen-shape of the cycle. -/
+def cycSweepX : Fin 4 → ℝ := ![1, 0, -1, 0]
+
+theorem cycSweepX_val_zero : cycSweepX 0 = 1 := by simp [cycSweepX]
+
+theorem cycSweepX_val_one : cycSweepX 1 = 0 := by simp [cycSweepX]
+
+theorem cycSweepX_val_two : cycSweepX 2 = -1 := by simp [cycSweepX]
+
+theorem cycSweepX_val_three : cycSweepX 3 = 0 := by simp [cycSweepX]
+
+theorem cycSweepX_ne_zero : cycSweepX ≠ 0 := by
+  intro h
+  have h0 : cycSweepX 0 = 0 := congrFun h 0
+  rw [cycSweepX_val_zero] at h0
+  norm_num at h0
+
+theorem cycSweepX_orth : Matrix.dotProduct cycSweepX onesVec = 0 := by
+  simp only [Matrix.dotProduct, onesVec, mul_one, Fin.sum_univ_four,
+    cycSweepX_val_zero, cycSweepX_val_one, cycSweepX_val_two,
+    cycSweepX_val_three]
+  norm_num
+
+/-- The Dirichlet double sum of the sweep vector on `C₄`, raw: each of
+the four edges contributes `1` twice, total `8`. -/
+theorem cycSweepX_energy :
+    ∑ i, ∑ j, cycleAdj4 i j * (cycSweepX i - cycSweepX j) ^ 2 = 8 := by
+  simp only [Fin.sum_univ_four, cycleAdj4, cycSweepX_val_zero,
+    cycSweepX_val_one, cycSweepX_val_two, cycSweepX_val_three]
+  norm_num
+
+theorem cycSweepX_dot :
+    Matrix.dotProduct cycSweepX cycSweepX = 2 := by
+  simp only [Matrix.dotProduct, Fin.sum_univ_four, cycSweepX_val_zero,
+    cycSweepX_val_one, cycSweepX_val_two, cycSweepX_val_three]
+  norm_num
+
+/-- The sweep vector's Rayleigh quotient on `C₄` (`d = 2`), through the
+Step-1a normalization: `E' / (2 · d · ‖x‖²) = 8 / 8 = 1` — the classical
+`λ₂` of the normalized cycle Laplacian. -/
+theorem cycSweepX_rayleigh :
+    rayleigh (regularNormalizedLaplacian cycleAdj4 2) cycSweepX = 1 := by
+  rw [rayleigh_regularNormalizedLaplacian_eq cycleAdj4 cycleAdj4_isSymm 2
+    cycleAdj4_deg (by norm_num) cycSweepX_ne_zero, cycSweepX_energy,
+    cycSweepX_dot]
+  norm_num
+
+/-- **The sweep lemma instantiated on `K₂`:** `φ²/2 = 1/2 ≤
+R(![1, -1])` — through the theorem, with the quotient independently
+pinned at `2` (`rayleigh_regularNormalizedLaplacian_edge_eq_QA`), the
+same value as the pinned `λ₂`. A defective constant anywhere in the 1c
+chain would fail this instance. -/
+theorem sweep_edge_QA :
+    (1:ℝ) / 2
+      ≤ rayleigh (regularNormalizedLaplacian edgeAdj 1) ![1, -1] := by
+  have h := cheeger_sweep edgeAdj edgeAdj_symmetric edgeAdj_nonneg 1
+    edgeAdj_regular (by norm_num) (by
+      intro h
+      have h0 : (![1, -1] : Fin 2 → ℝ) 0 = 0 := congrFun h 0
+      norm_num at h0) (by
+      simp only [Matrix.dotProduct, onesVec, mul_one, Fin.sum_univ_two]
+      norm_num)
+  rw [edge_cheegerConstant] at h
+  norm_num at h
+  exact h
+
+/-- **The sweep lemma instantiated on `C₄`** (`d = 2`, a non-unit
+degree): `φ²/2 ≤ R(cycSweepX)`. -/
+theorem sweep_cycle_QA :
+    cheegerConstant cycleAdj4 ^ 2 / 2
+      ≤ rayleigh (regularNormalizedLaplacian cycleAdj4 2) cycSweepX :=
+  cheeger_sweep cycleAdj4 cycleAdj4_isSymm cycleAdj4_nonneg 2
+    cycleAdj4_deg (by norm_num) cycSweepX_ne_zero cycSweepX_orth
+
+/-- **The visible gap on `C₄`:** `φ ≤ 1/2` (the adjacent-pair cut's
+exhaustively computed conductance) makes `φ²/2 ≤ 1/8 < 1 = R` — the
+sweep bound is honest with a wide margin at this non-critical vector. -/
+theorem sweep_cycle_gap_QA :
+    cheegerConstant cycleAdj4 ^ 2 / 2
+      < rayleigh (regularNormalizedLaplacian cycleAdj4 2) cycSweepX := by
+  have hφ : cheegerConstant cycleAdj4 ≤ 1 / 2 :=
+    le_trans (conductance_ge_cheegerConstant cycleAdj4 cycleAdj4_nonneg
+      {0, 1} (by decide) (by decide)) (le_of_eq cyc_conductance_01)
+  have hφ0 : 0 ≤ cheegerConstant cycleAdj4 :=
+    cheegerConstant_nonneg cycleAdj4 cycleAdj4_nonneg
+  rw [cycSweepX_rayleigh]
+  nlinarith
+
+/-- **The retired bound instantiated on `K₂`:** `φ²/2 = 1/2 ≤
+λ₂(L_sym) = 2` — through the proved `cheeger_lower_bound`, with both
+endpoints independently pinned (`edge_cheegerConstant`,
+`edge_normLap_secondEval_eq_two_QA`). Previously this instantiation
+consumed the admitted axiom; it is now hard crust. -/
+theorem cheeger_lower_bound_edge_QA :
+    (1:ℝ) / 2
+      ≤ secondEval (regularNormalizedLaplacian edgeAdj 1)
+          (regularNormalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric 1)
+          (le_refl 2) := by
+  rw [edge_normLap_secondEval_eq_two_QA]
+  have h := cheeger_lower_bound edgeAdj edgeAdj_symmetric edgeAdj_nonneg 1
+    edgeAdj_regular (by norm_num) (le_refl 2)
+  rw [edge_cheegerConstant, edge_normLap_secondEval_eq_two_QA] at h
+  simpa using h
+
+end HardDirectionStep1c
+
 end SpectralGraphTheory.QA

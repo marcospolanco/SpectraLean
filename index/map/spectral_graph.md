@@ -384,12 +384,24 @@ Real definitions: `regularNormalizedLaplacian`, `cutTestVector`.
 
 | Declaration | Kind | Description | Source |
 |-------|------|-------------|--------|
-| `cheeger_lower_bound` | axiom | `φ(G)²/2 ≤ λ₂(L_sym)` for `d`-regular graphs (the hard direction) | [Chung](../sources/chung_spectral_graph.md) |
+| `cheeger_lower_bound` | **theorem (proved 2026-08-23; axiom before, retired)** | `φ(G)²/2 ≤ λ₂(L_sym)` for `d`-regular graphs (the hard direction) — proved by the median-split route: `exists_median`, the median-part level-set inclusions, `hardDirection_perPart`, the norm split, the sweep lemma `cheeger_sweep`, and the `secondEval_variational` + `le_csInf` assembly (Steps 1a/1b/1c of `proposals/discharge-perturbation-axioms.md`) | [Chung](../sources/chung_spectral_graph.md) |
 | `cheeger_upper_bound` | **theorem (proved 2026-08-18; axiom before, retired)** | `λ₂(L_sym) ≤ 2 φ(G)` for `d`-regular graphs — proved from `secondEval_variational` at the volume-centered cut indicator | [Chung](../sources/chung_spectral_graph.md) |
 | `core_sum_abs_sq_sub_sq` | theorem (2026-08-23, hard-direction Step 1a) | **Component A**, the Cauchy–Schwarz core: `(∑ i j, A i j \|f i² − f j²\|)² ≤ E'(f) · 4 ∑ i deg A i f i²` (no sign hypothesis on `f`; `IsSymm` load-bearing on the degree collapse — refuted in QA on asymmetric nonnegative input) | [Chung](../sources/chung_spectral_graph.md) |
 | `sq_posPart_sub_add_sq_negPart_sub_le`, `sum_edgeWeight_sq_posPart_add_sq_negPart_le` | theorem (2026-08-23, hard-direction Step 1a) | the *fused* median-part contraction: `(max (a−m) 0 − max (b−m) 0)² + (max (m−a) 0 − max (m−b) 0)² ≤ (a−b)²` pointwise (translation invariance absorbed into the RHS), summed to `E'((x−m)⁺) + E'((x−m)⁻) ≤ E'(x)` under nonneg weights only — the tight form whose cross-edge slack pays for carrying both parts | [Chung](../sources/chung_spectral_graph.md) |
 | `sum_deg_mul_eq_of_regular` | theorem (2026-08-23, hard-direction Step 1a) | regularity bridge `∑ i, deg A i · f i² = d · ∑ i, f i²` | [Chung](../sources/chung_spectral_graph.md) |
 | `rayleigh_regularNormalizedLaplacian_eq` | theorem (2026-08-23, hard-direction Step 1a) | the normalization `R_{L_sym}(x) = E'(x) / (2·d·‖x‖²)` for `x ≠ 0` — the explicit `2` is the constant budget of the hard-direction chain (`E'` is the ordered double sum, twice `quadForm (laplacian A)`); cross-checked in QA against the independently pinned `λ₂(L_sym) = 2` on `K₂` | [Chung](../sources/chung_spectral_graph.md) |
+| `indicatorLE`, `indicatorLE_of_le`, `indicatorLE_of_lt`, `indicatorLE_mono` | def + lemmas (2026-08-23, hard-direction Step 1b) | the closed cumulative level step `1_{t ≤ c}` — the layer-cake primitive of the co-area encoding, stated through `Set.indicator` on `{x \| x ≤ c}` to match `intervalIntegral.integral_indicator`'s truncation shape exactly | [Chung](../sources/chung_spectral_graph.md) |
+| `intervalIntegrable_indicatorLE`, `intervalIntegrable_const_mul` | theorem (2026-08-23, hard-direction Step 1b) | integrability of the level step on every interval (indicator of a measurable set on a finite-measure interval) and the constant-multiple helper for the pin's missing `IntervalIntegrable.const_mul` | [Chung](../sources/chung_spectral_graph.md) |
+| `integral_indicatorLE`, `integral_abs_indicatorLE_sub` | theorem (2026-08-23, hard-direction Step 1b) | the two layer-cake primitives: `∫₀^R 1_{t ≤ c} dt = c` and `∫₀^R \|1_{t ≤ c} − 1_{t ≤ d}\| dt = \|c − d\|` for `0 ≤ c, d` and `max c d ≤ R` | [Chung](../sources/chung_spectral_graph.md) |
+| `sum_pairAbs_eq_two_boundary` | theorem (2026-08-23, hard-direction Step 1b) | the closed-superlevel cut identity `∑ i j, A i j \|1_{t ≤ c_i} − 1_{t ≤ c_j}\| = 2 · boundary S_t` (symmetry load-bearing through `boundary_compl`) | [Chung](../sources/chung_spectral_graph.md) |
+| `boundary_ge_of_minority` | theorem (2026-08-23, hard-direction Step 1b) | minority conductance: `cheegerConstant A · d · \|S\| ≤ boundary A S` for nonempty `S` with `2\|S\| ≤ card V` on a `d`-regular network (`0 < d`) | [Chung](../sources/chung_spectral_graph.md) |
+| `sum_indicatorLE_eq_card_filter`, `sum_pairAbs_ge` | theorem (2026-08-23, hard-direction Step 1b) | the indicator↔cardinality dictionary (`∑ i, 1_{t ≤ g i} = \|{i : t ≤ g i}\|`, closed-set form) and the per-level co-area bound `2·φ·d·\|S_t\| ≤ ∑ i j, A i j \|1_{t ≤ c_i} − 1_{t ≤ c_j}\|` at every `t > 0` | [Chung](../sources/chung_spectral_graph.md) |
+| `coarea_core` | theorem (2026-08-23, hard-direction Step 1b) | **the co-area core, the crux of the hard direction**: `2·(φ·d·∑ y i²) ≤ ∑ i j, A i j · \|y i² − y j²\|` for *any* `y : V → ℝ` whose nonempty closed superlevel sets `{i : t ≤ y i²}` at positive levels are minority-side (`2\|S_t\| ≤ card V`) — no sign or cardinality hypothesis needed; composed with Component A this is the per-part bound `φ²·d·‖y‖² ≤ E'(y)` that Step 1c's assembly consumes. QA: attained *with equality* on `K₂` at `![1,0]` (both sides `2`), strict on the multi-level `C₄` witness (`20φ ≤ 10 < 16`), and the minority hypothesis refuted-on-omission (`4 ≤ 0` at `![1,1]`) | [Chung](../sources/chung_spectral_graph.md) |
+| `exists_median` | theorem (2026-08-23, hard-direction Step 1c) | a median exists on every finite value multiset: some `m` with `2·\|{m < x i}\| ≤ n` and `2·\|{x i < m}\| ≤ n` — by pure Finset arithmetic (the at-most-half `T`-set is nonempty at a maximizing vertex; a `T`-minimal value works), no sorting; QA pins the returned median of `![1,1,−1,−1]` into the forced interval `[−1, 1]` | [Chung](../sources/chung_spectral_graph.md) |
+| `posPart_superlevel_subset`, `negPart_superlevel_subset`, `minority_posPart`, `minority_negPart` | theorem (2026-08-23, hard-direction Step 1c) | the median-part level-set inclusions: at every `t > 0`, `{t ≤ (x−m)⁺²} ⊆ {x > m}` and `{t ≤ (m−x)⁺²} ⊆ {x < m}` — supplying `coarea_core`'s minority hypothesis for both median parts from the median's two counts | [Chung](../sources/chung_spectral_graph.md) |
+| `hardDirection_perPart` | theorem (2026-08-23, hard-direction Step 1c) | the per-part bound `φ²·d·∑ y i² ≤ E'(y)` — `coarea_core` (below) composed with Component A (above) through the regularity bridge, the zero-norm case discharged by nonnegativity; QA pins `1 ≤ 2` on `K₂` at the Step-1b equality fixture | [Chung](../sources/chung_spectral_graph.md) |
+| `posPart_add_negPart_sq`, `median_parts_norm` | theorem (2026-08-23, hard-direction Step 1c) | the norm split: pointwise `(x−m)⁺² + (m−x)⁺² = (x−m)²`, summed with `∑ x = 0` to `∑(x−m)⁺² + ∑(m−x)⁺² = ∑x² + n·m² ≥ ∑x²`; QA pins the exact `+4m²` remainder at `m = 0, 1` on `![1,−1,3,−3]` | [Chung](../sources/chung_spectral_graph.md) |
+| `cheeger_sweep` | theorem (2026-08-23, hard-direction Step 1c) | **the sweep lemma**: `φ²/2 ≤ R_{L_sym}(x)` for every nonzero `x ⊥ 1` — median split, per-part bounds summed through the Step-1a fused contraction, the norm split, and the `E'/(2d‖x‖²)` normalization (exact constant budget); QA on `K₂` (`1/2 ≤ 2`, against the pinned `λ₂`) and on `C₄` at `d = 2` (`φ²/2 ≤ 1/8 < 1 = R`) | [Chung](../sources/chung_spectral_graph.md) |
 
 Statement-shape correction (2026-08-18): through 2026-08-17 both axioms
 stated the spectral side as `lambda2 (regularNormalizedLaplacian A d)`,
@@ -400,15 +412,23 @@ two-vertex edge (`1/2 ≤ 0`; refuted by
 `λ₂(L_sym)`, pinned to its classical value `2` on `K₂` by
 `QA.edge_normLap_secondEval_eq_two_QA`.
 
-Hard-direction program (2026-08-22 survey, 2026-08-23 Step 1a
-delivered): the pure-algebra layer above is Step 1a of the
-`discharge-perturbation-axioms.md` Cheeger track, toward retiring
-`cheeger_lower_bound` (Step 1b = the co-area core, Step 1c = median +
-assembly). The Step-1a delivery also recorded a constant-budget
-correction to the survey's summation route — the fused contraction and
-the explicit-`2` normalization are the tight shapes 1b/1c consume.
+Hard-direction program (2026-08-22 survey, 2026-08-23 Steps 1a, 1b,
+and 1c delivered — **the axiom retired, program complete**): the
+pure-algebra layer above is Step 1a, the co-area layer Step 1b, and the
+median/assembly layer Step 1c of the
+`discharge-perturbation-axioms.md` Cheeger track. `cheeger_lower_bound`
+is proved at the unchanged statement as of 2026-08-23 (explicit axioms
+10 → 9): the sweep lemma plus the `secondEval_variational` + `le_csInf`
+assembly at the `Pi.single` witness. The Step-1a delivery recorded a
+constant-budget correction to the survey's summation route (the fused
+contraction and the explicit-`2` normalization are the tight shapes
+1b/1c consume); the Step-1b delivery recorded a second survey
+correction (the priced hand Fubini exists in the pin as
+`intervalIntegral.integral_finset_sum`) and two verified hypothesis
+drops (`hynonneg`, `hcard`). With both directions proved, the Chung
+source's rows are all proved theorems.
 
-### `Scaffold.Mathlib.GraphTheory.Fiedler` (Fiedler vector, Phase A)
+### `Scaffold.Mathlib.GraphTheory.Fiedler` (Fiedler vector, Phases A and B)
 
 The Fiedler-vector interface — proposal `fiedler-partitioning.md`
 Phase A (2026-08-18), all proved, no axioms. Real definitions:
@@ -417,7 +437,8 @@ classical choice through `evals_mem_eigvalOf` — the proposal's sketch
 indexed `eigvecOf` by a sorted-spectrum position, which is not that
 function's type; deviation recorded in the module docstring) and
 `fiedlerVector` (the unit eigenvector there), plus the sign-pattern
-partition `fiedlerPartition`.
+partition `fiedlerPartition`. Phase B (2026-08-23, the module now
+importing `Cheeger`): the certified conductance cut, pure hard crust.
 
 | Declaration | Content |
 |-------------|---------|
@@ -430,6 +451,14 @@ partition `fiedlerPartition`.
 | `fiedlerPartition_mem` | membership interface (`0 ≤ f i`) |
 | `fiedlerPartition_nonempty_of_pos`, `fiedlerPartition_ne_univ_of_pos` | interface-form sanity under `0 < lambda2` |
 | `fiedlerPartition_nonempty`, `fiedlerPartition_ne_univ` | connectivity corollaries: a genuine bipartition |
+| `fiedlerVector_rayleigh_regularNormalizedLaplacian` | **Phase B bridge:** `R_{L_sym}(f) = lambda2 / d` (unit norm × the quadratic-form transfer × the energy identity) |
+| `cheeger_cut_existence` | **Phase B, the certified conductance cut:** on every connected `d`-regular graph, `∃ S` nonempty proper with `conductance S ^ 2 ≤ 2 · lambda2 / d` — the classical Cheeger cut-existence corollary, composed from the proved sweep lemma at the Fiedler vector + `cheegerConstant_attained` (the sign cut itself is not certifiable from `lambda2` alone; the swept-level-set extraction is the named follow-on) |
+
+`GraphTheory.Cheeger` additionally carries Phase B's enabling lemma:
+`cheegerConstant_attained` (the conductance `sInf` realized as a
+minimum by `Finset.exists_min_image` over the filtered powerset — no
+regularity hypothesis; the step converting Cheeger's inequality about
+an infimum into a statement about an actual cut).
 
 QA: `SpectralGraph/Fiedler_QA.lean` — `K₂` (partition pinned to a
 singleton half, boundary `1`), the `P₄` barbell (two `K₂` near-cliques

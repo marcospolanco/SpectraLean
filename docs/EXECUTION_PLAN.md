@@ -6,20 +6,257 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**None — approximate-spectral-projection Step 0 is DELIVERED (see the
-top delivered entry) and the proposal's own operating instructions
-gate its Step 1 to one shape per run, with 1a (the interface layer) as
-the recorded open next step. Next run: Step 1a — transfer the spike's
-four real lemmas plus the two priced shallow gaps (`natDegree T`, the
-growth lemma) into a new shelf module with the survey note and
-pin-technique record. Fallbacks in leverage order: the PF consumers
-(irreducible stationary distributions, PageRank) as new-proposal
-candidates, each needing its own document per the one-step
-discipline.**
+**None — Tikhonov Phase 2 is COMPLETE (delivered this run, both steps
+in one run; see the top delivered entry) and the proposal is closed
+end-to-end. Next run: the Active priority table's single remaining
+High row — discrete affine convergence (`sgt-gaps.md` item 2, the
+finite-vector wrapper around the pin's
+`tendsto_pow_atTop_nhds_zero_of_abs_lt_one` plus the linear
+affine-iteration convergence theorem). Then the Medium rows by
+leverage (approximate spectral projection Step 1a next).**
 
 ---
 
 ## Delivered milestones (most recent first)
+
+**Tikhonov Phase 2 — the hard-filter limit + tail suppression; the
+proposal COMPLETE (run 1, 2026-08-23, run `20260823T183842Z-run-1`;
+`proposals/tikhonov-shrinkage-filter.md` Phase 2, the Active priority
+table's first remaining High row and the recorded next handoff of the
+reversibility-completion run): DELIVERED — Steps 1+2 in one run as pure
+hard crust, zero new axioms (count stays 9), QA 1522 → 1546
+(`Tikhonov_QA` +24, three new sections).**
+
+**Delivered:** in `GraphTheory.Tikhonov` Section 5 —
+`tikhonovShrinkage_tendsto_zero` (the `sgt-gaps.md` item-1 consumer's
+exact statement `Tendsto (fun π => tikhonovShrinkage π lam) (𝓝 0)
+(𝓝 0)` at fixed `0 < lam`, two-sided — strictly stronger than the
+requested `π → 0⁺` — via `ContinuousAt.div` at the nonzero denominator
+`lam`); the tail-suppression corollary in two forms — the general
+symmetric-matrix `tikhonovShrinkage_tail_energy_tendsto_zero`
+(statement-shape decision recorded: nothing in the proof uses PSD or
+the Laplacian, so the carrier is any symmetric matrix — the module's
+own `dotProduct_eigvecOf_filter` generality precedent; each tail term
+by Step 1 at its own eigenvalue through an ascribed-constant
+`Tendsto.mul` then `.pow 2`, the sum by `tendsto_finset_sum`) and the
+consumer-facing Laplacian `tikhonovMinimizer_tail_energy_tendsto_zero`
+(the filtered signal's coefficient energy on the selected
+positive-eigenvalue tail vanishes; composed through the coefficient
+identity at `Tendsto.congr`'s pointwise-∀ form) — **suppression-stated
+per the requester's explicit non-overclaim instruction**: no
+band-projector convergence claimed anywhere, in statement or
+docstring.
+
+**QA** (+24): the **two-mode tail** on the diagonal `diag13` fixture
+*reused from `Band_QA`* (its eigenvector-direction lemmas supplying
+the coefficient squares `1` and `0` without re-derivation — the
+QA-to-QA import precedent): the tail energy pinned in **closed form**
+`∑ i, (…)² = tikhonovShrinkage π 1 ^ 2` at every `π`, evaluated
+exactly at `π = 1/10` (`1/121`) and `π = 1/100` (`1/10201`); the
+corollary consumed at a concrete tolerance (`∃ δ > 0` forcing tail
+energy `< 1/100` near `0`, through `Metric.tendsto_nhds_nhds`); the
+**scalar `lam = 0` refutation** (the hypothesis-free form false — the
+factor is `1` at every `π ≠ 0`, `0` at `π = 0`, so it has no limit at
+all); the **tail-level boundary refutation on `K₂`** (the requester's
+mandated "mode below lam" witness: kernel mode included ⇒ the energy
+provably `≥ 1/2` at every nonzero `π`, from the kernel-eigenvector
+line + unit norm + Parseval — the kernel mode passing through
+untouched is exactly why the statement fails); and the
+**minimizer-form instantiation** (the filtered nonzero-mode tail
+identified as the eigenvalue-`2` singleton via a trace-based
+uniqueness lemma, its `π = 1` energy pinned to `1/18` through the
+coefficient identity).
+
+**Verification:** spike first (`wip/tikP2_spike.lean` green — the
+several rounds' fixes becoming the recorded trap list: `𝓝` needs
+`open scoped Topology`; `λ` inside identifiers (`hλi`!) unlexable, the
+re-hit ASP trap; `tendsto_finset_sum` a non-greppable `to_additive`
+child of `tendsto_finset_prod`; `tendsto_const_nhds`'s value implicit
+so the constant needs an ascribed `have`; square-term rewrites need
+term-form lemmas (`(a·b)² ≠ b²`-shaped hypotheses cannot fire under
+the outer square); `fin_cases`-on-witness beta-redexes fixed by
+type-ascribed `have`s; `Metric.tendsto_nhds_nhds`'s `dist x 0`
+needing `Real.dist_eq, sub_zero`); `lake env lean` on the module and
+the QA file — zero errors, zero warnings each; explicit `lake build`
+targets both ✔; `#print axioms` via `wip/tikP2_axcheck2.lean` on all
+three public and all 24 QA declarations — `propext,
+Classical.choice, Quot.sound` only; **full `lake build` ✔ (2252
+targets, "Build completed successfully"; zero warnings in the changed
+modules — the log's warning mass is Mathlib-internal plus documented
+pre-existing notes in untouched modules)**; `lint_axioms` (**9**,
+unchanged), `check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**1546/9/0**, idempotent). Records updated: the proposal
+(status header COMPLETE, the Phase-2 delivery record with
+pin-technique notes), `proposals/README.md` (High row retired to the
+Delivered table, progress paragraph and delivered-table row), README
+(1546; the Tikhonov proved-list entry gaining the hard-filter limit
+and tail suppression), the radar (QA axis count synced 1522/40 →
+1546/40 held 4.0, assurance-log entry), the scoreboard (both Direct
+rows, `lake build` row, lint row, a new interpretation bullet), the
+SGT index map (+3 declaration rows, Phase-2 status note), this plan,
+and the activity log. Nothing committed; prior runs' uncommitted
+deliveries preserved untouched.
+
+**Next milestone (open):** **discrete affine convergence** (the Active
+table's single remaining High row — `sgt-gaps.md` item 2), then the
+Medium rows by leverage (approximate spectral projection Step 1a).
+
+**Reversibility Phase C, Step 2 — the first-order remainder bound (run
+1, 2026-08-23, run `20260823T170118Z-run-1`;
+`proposals/reversibility-and-heat-semigroup.md` Phase C Step 2, the
+Active priority table's first High row and the recorded open next step
+of the Steps 0+1 delivery; **the proposal COMPLETE**): DELIVERED —
+pure hard crust, zero new axioms (count stays 9), QA 1507 → 1522
+(`Heat_QA` 50 → 66).**
+
+**Delivered:** in `GraphTheory.Heat` —
+`heatKernel_firstOrder_remainder_apply_le`: on the smallness window
+`∀ i, |t · λᵢ| ≤ 1`, every coordinate of the heat flow deviates from
+its first-order Taylor polynomial at zero by at most
+`t² · ∑ᵢ λᵢ² |vᵢ ⬝ᵥ x| |vᵢ a|` — the entrywise
+(boundary-observable) form the `spectral-proof` rewrite's dissolution
+theorem reads, at exactly the Step-0-surveyed committed shape: the
+flow coordinate through `heatKernel_mulVec_eq_sum`, `x a` through
+`eigvecOf_expansion_apply`, the generator coordinate through the same
+expansion + `dotProduct_eigvecOf_mulVec`, the three sums combined
+termwise (the pin's to_additive children used right-to-left), the
+triangle by `Finset.abs_sum_le_sum_abs`, and each mode's scalar
+remainder by `Real.abs_exp_sub_one_sub_id_le` at `x := -(t · λᵢ)` —
+**no nonnegativity hypothesis** (per-mode, valid for any symmetric
+network); plus `heatKernel_firstOrder_remainder_interval`, the
+uniform `[0, T]` packaging (monotonicity hypothesis-transfer at
+`0 ≤ t ≤ T`). The Euclidean-norm variant deliberately not stated
+(√n-loss Cauchy–Schwarz plumbing, no new content; a consumer naming
+one can adjoin it — recorded).
+
+**QA** (`Heat_QA.lean` 50 → 66, the proposal's named pair): the K₂
+eigenvalue inventory per vertex index (PSD/trace/determinant — no sort
+machinery) with `edge_eigvalOf_cases`/`exists_two`; the eigenmode
+structure `v = c • ![1,-1]`, `2c² = 1` making the spectral constant
+**exactly `4`** (orientation-sign-independent — robust to the
+spectral-theorem choice); the window fact `[0, 1/2]`; the
+**concrete-bound witness** (theorem at the endpoint `t = 1/2`, RHS
+evaluated to the concrete `1`; raw value `1 − 2t − e^{-2t}` pinned at
+every nonzero time by the closed-form route — no eigenbasis, no
+exponential lemma; composite `e⁻¹ ≤ 1`); the **boundary-degradation
+witness** (both times' concrete constants `1/4` at `t = 1/4`
+(interval route) and `1` at `t = 1/2`, pinning the `t²` scaling — a
+wrong power of `t` contradicts at least one component); and the
+**fence** (the window hypothesis refuted at `t = 1`: `|1 · 2| = 2 ≰ 1`
+— local by construction, not accidentally global).
+
+**Verification:** spiked first (`wip/heatC2_spike.lean`,
+`wip/heatC2_qa_spike.lean` — both green pre-transfer, the fixes
+becoming the recorded trap list: `set`-abstraction vs `rw`; the
+sum-distrib direction; per-term `(t·λᵢ)²` splitting before
+`← Finset.mul_sum`; ℕ-numeral smul (`2 • v` needs `(2 : ℝ) •`);
+`rw`-under-`eigvecOf` motive failures solved by fresh-goal coordinate
+lemmas; `mul_self_abs` absent at the pin); `lake env lean` on the
+module and QA — zero errors, zero warnings each; explicit `lake build`
+targets both ✔; `#print axioms` via `wip/heatC2_axcheck.lean` on all
+seventeen new declarations — `propext, Classical.choice, Quot.sound`
+only; **full `lake build` ✔ (2252 targets, "Build completed
+successfully"; zero warnings in the changed modules)**; `lint_axioms`
+(**9**, unchanged), `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated (**1522/9/0**, idempotent). Records updated: the
+proposal (status header, the Step-2 delivery record with
+pin-technique notes), `proposals/README.md` (High row → Delivered,
+prose de-staled), README (1522; heat paragraph + module table), the
+radar (axes 5 + QA **held** 4.0/4.0, counts synced 1507/40 →
+1522/40), the scoreboard (both Direct rows, build row, lint row, a new
+interpretation bullet), the SGT index map (+2 declaration rows, Phase
+C status line), this plan, and the activity log. Nothing committed;
+prior runs' uncommitted deliveries preserved untouched.
+
+**Next milestone (open):** **Tikhonov Phase 2** — the hard-filter
+limit (`tikhonovShrinkage π λ → 1` as `λ > 0`, `π → 0`-side), plus the
+finite tail-suppression corollary, stated as suppression per the
+requester's non-overclaim instruction; then discrete affine
+convergence (the other High row).
+
+**Reversibility Phase C, Steps 0 + 1 — the survey + the heat-flow
+derivative at zero (run 1, 2026-08-23, run `20260823T153334Z-run-1`;
+`proposals/reversibility-and-heat-semigroup.md` Phase C, the Active
+priority table's first High row of the new 2026-08-23/24 `sgt-gaps.md`
+wave — the priority-0 rule; the precedented survey+small-step
+pairing): DELIVERED — pure hard crust, zero new axioms (count stays 9),
+QA 1503 → 1507 (`Heat_QA` 46 → 50).**
+
+**Delivered:** in `GraphTheory.Heat` — the Step-0 survey recorded in
+the module's own docstring before any statement was frozen: the pin's
+`Real.abs_exp_sub_one_sub_id_le` (`|x| ≤ 1 → |Real.exp x − 1 − x| ≤
+x²`, `Complex/Exponential.lean:1211`) committed as Step 2's termwise
+remainder engine (the Taylor file exists but adds plumbing the plain
+bound doesn't need), and the run's sharpest elaboration finding: **a
+direct vector-form proof times out at `whnf` on a variable vertex
+type** (the `smul_const`/`HasDerivAt.sum` instance synthesis over the
+`Pi` norms; the `Fin 2` QA statements elaborating fine is what
+isolated it). Step 1: the entrywise engine
+`heatKernel_mulVec_apply_hasDerivAt_zero` — Duhamel's
+`heatApply_hasDerivAt` termwise-sum technique (`HasDerivAt.exp`,
+`HasDerivAt.sum`) adapted to the Step-4 eigenbasis expansion
+`heatKernel_mulVec_eq_sum`, the derivative-at-zero sum re-expanded to
+`−(L *ᵥ x)` through `eigvecOf_expansion_apply` + the shelf's
+self-adjoint pairing transfer `dotProduct_eigvecOf_mulVec` (the
+pre-edit survey finding that this lemma already exists on the shelf
+saved the run its one planned sub-proof) — and the headline
+**`heatKernel_mulVec_hasDerivAt_zero`**: `HasDerivAt (fun t =>
+heatKernel A t *ᵥ x) (-(laplacian A *ᵥ x)) 0`, the infinitesimal
+generator statement `d/dt e^{-tL} x |₀ = −L x`, the `spectral-proof`
+rewrite's dissolution-theorem input, assembled by the pin's
+`hasDerivAt_pi`. `hA : A.IsSymm` carried exactly as the expansion
+lemma already requires.
+
+**QA** (`Heat_QA.lean` 46 → 50): the derivative value on K₂ at
+`x = ![1,3]` pinned to `![2,-2]` by **two independent routes to one
+statement** — the theorem route vs. the raw route (the Step-4 closed
+form `1 + ((e^{−2t}−1)/2) • L` plus scalar calculus only — no
+eigenbasis, no expansion, no `hasDerivAt_pi`); plus the
+**infinitesimal-conservation cross-check in both directions**
+(derivative `0` at `onesVec` through the Phase C theorem +
+`laplacian_ones_in_kernel` vs. from Step 3's constant-flow
+conservation alone — Phase C and Phase B Step 3 checking each other).
+
+**Pin-technique notes (recorded in the proposal):** Duhamel's
+`(hasDerivAt_id t).neg.mul_const` chain yields the unparenthesized
+`−t * c` shape while the expansion's factors are `Real.exp (-(t * λ))`
+— build the inner `HasDerivAt` parenthesized (`(.mul_const).neg`) and
+reduce the derivative only at the final value identification;
+`HasDerivAt.const_mul` elaborates the constant on the left at this
+pin; `Finset.sum_neg_distrib` exists only as the `to_additive` child
+of `prod_inv_distrib` (not greppable, but usable); the per-term
+`Pi.smul_apply, smul_eq_mul` chain leaves a `mul_assoc` residue
+(close with `ring`); the QA t=0 closed-form extension needs the
+`by_cases` split.
+
+**Verification:** spike first (`wip/heatC_spike.lean` green, all
+`#print axioms` the standard three; eight rounds to green, the fixes
+becoming the recorded trap list, the decisive one the
+entrywise-plus-`hasDerivAt_pi` restructure) then transfer;
+`lake env lean` on the module and the QA file — zero errors, zero
+warnings each; explicit `lake build` targets for both ✔;
+`#print axioms` via `wip/heatC_axcheck.lean` on all six new
+declarations — `propext, Classical.choice, Quot.sound` only; **full
+`lake build` ✔ (2252 targets, "Build completed successfully"; no
+warnings in the changed modules)**; `lint_axioms` (**9**, unchanged),
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+(**1507/9/0**, idempotent; `Heat_QA` 46 → 50). Records updated: the
+proposal (Phase C delivery record, open-next-step → Step 2),
+`proposals/README.md` (the High row), README (1507; heat-semigroup
+sentence + module-table row), the radar (axis 5 + QA axis **held** at
+4.0/4.0 with the delivery recorded and counts synced 1503/40 →
+1507/40), the scoreboard (both Direct rows, the `lake build` row, lint
+row, a new interpretation bullet), the SGT index map (Heat section +2
+declaration rows, Phase C status line), this plan, and the activity
+log. Nothing committed; the prior runs' uncommitted deliveries
+preserved untouched.
+
+**Next milestone (open):** **Phase C Step 2** — the first-order
+remainder bound on `[0, T]`, termwise through the surveyed
+`Real.abs_exp_sub_one_sub_id_le` per the committed shape, with the QA
+pair the proposal names (concrete-bound witness cross-checked against
+the direct exponential-series value; boundary-degradation witness).
+Then the other two High rows by leverage.
 
 **Approximate spectral projection, Step 0 — the scoping survey;
 Lanczos/Kaniel–Paige cleared (run 1, 2026-08-23, run

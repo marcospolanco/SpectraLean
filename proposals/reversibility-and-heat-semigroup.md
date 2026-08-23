@@ -1,19 +1,25 @@
 # Proposal: Reversibility and the Heat Semigroup on the Graph Laplacian
 
-**Status:** Phases A and B COMPLETE — Phase A (reversibility/detailed
-balance, both of its steps) DELIVERED 2026-08-22 as pure hard crust in
-`GraphTheory.Stationary` (zero new axioms, no new definitions). **Phase
-B DELIVERED in full 2026-08-23 across four runs, zero new axioms at
-every step (count stays 9)**: Step 0 (survey) + Step 1 (definition,
-symmetry, identity at zero), Step 2 (the semigroup law), Step 3 (mass
-conservation), and Step 4 (eigenmode decay + the connected-graph DC
-limit — the payoff statement; see the delivery record below) — all in
-`GraphTheory.Heat`. The external consumer's four-item interface
-(identity, semigroup law, mass conservation, eigenmode decay with the
-DC limit) is complete hard crust. **Phase C (the heat-flow derivative +
-remainder bound) OPENED 2026-08-23/24, priority High** — see "Phase C"
-near the end of this document; a second, more specific `sgt-gaps.md`
-request (item 3) on the same `heatKernel` Phase B just built.
+**Status:** **PROPOSAL COMPLETE 2026-08-23 — Phases A, B, and C all
+delivered, zero new axioms at every step (count stays 9 from first
+delivery to last).** Phase A (reversibility/detailed balance, both of
+its steps) DELIVERED 2026-08-22 as pure hard crust in
+`GraphTheory.Stationary` (no new definitions). **Phase B DELIVERED in
+full 2026-08-23 across four runs**: Step 0 (survey) + Step 1
+(definition, symmetry, identity at zero), Step 2 (the semigroup law),
+Step 3 (mass conservation), and Step 4 (eigenmode decay + the
+connected-graph DC limit — the payoff statement; see the delivery
+record below) — all in `GraphTheory.Heat`. The external consumer's
+four-item interface (identity, semigroup law, mass conservation,
+eigenmode decay with the DC limit) is complete hard crust. **Phase C
+(the heat-flow derivative + remainder bound, the second `sgt-gaps.md`
+request) DELIVERED 2026-08-23, priority High — Steps 0 + 1** (the
+survey + `heatKernel_mulVec_hasDerivAt_zero`)**, Step 2** (the
+first-order remainder bound
+`heatKernel_firstOrder_remainder_apply_le` +
+`heatKernel_firstOrder_remainder_interval`, completing the
+dissolution-theorem analytic input; see "Phase C delivery record" near
+the end).
 **Phase B's operator-decision gate was
 RESOLVED 2026-08-23, priority raised to High.** `sgt-gaps.md` — a
 document from the independent `spectral-proof` clean-sheet rewrite
@@ -785,3 +791,233 @@ witness showing the bound degrades as expected as `T` grows, so the
 
 **No new axioms; no proposal-scope change beyond this phase.** One step
 per run.
+
+## Phase C delivery record
+
+### Phase C, Steps 0 + 1 — survey + the derivative at zero (DELIVERED
+2026-08-23, run `20260823T153334Z-run-1`)
+
+Delivered in `Scaffold/Mathlib/GraphTheory/Heat.lean` (QA extended at
+`Scaffold/QA/SpectralGraph/Heat_QA.lean`, 46 → 50 theorem
+declarations), all proved, zero new axioms per this proposal's own
+mandate (count stays 9). `#print axioms` on both new public and all
+four new QA declarations reads only `propext, Classical.choice,
+Quot.sound`:
+
+- **Step 0 (survey, recorded before any statement was frozen, and in
+  the module's own docstring):** the pin carries
+  `Real.abs_exp_sub_one_sub_id_le`
+  (`Mathlib/Data/Complex/Exponential.lean:1211`) — `|x| ≤ 1 →
+  |Real.exp x - 1 - x| ≤ x ^ 2` — exactly the termwise quadratic
+  remainder engine the proposal's cost sketch guessed, so Step 2's
+  statement shape is committed to the termwise route through
+  `heatKernel_mulVec_eq_sum` at `|t * λᵢ| ≤ 1`, summed entrywise (the
+  pin's `Analysis/Calculus/Taylor.lean` exists but adds Taylor-coordinate
+  plumbing the plain exponential bound does not need). The run's
+  sharpest elaboration finding, recorded in the module: **stating the
+  derivative theorem's proof directly in vector form times out at
+  `whnf`** on a variable vertex type `V` (the `HasDerivAt.smul_const` /
+  `HasDerivAt.sum` instance synthesis over the `Pi` norm instances) —
+  the `Fin 2` QA statements elaborate fine, which is what isolated the
+  trap to the variable-type instance search. The delivered route is
+  two-layer by design: the entrywise engine plus a one-line assembly.
+- **Step 1 (delivery), the headline
+  `heatKernel_mulVec_hasDerivAt_zero`:**
+  `HasDerivAt (fun t : ℝ => heatKernel A t *ᵥ x) (-(laplacian A *ᵥ x))
+  0` — the infinitesimal generator statement `d/dt e^{-tL} x |₀ = -L x`
+  in `HasDerivAt` form, exactly the requester's asked shape. The
+  entrywise engine `heatKernel_mulVec_apply_hasDerivAt_zero` is
+  Duhamel's `heatApply_hasDerivAt` technique verbatim, adapted to the
+  Step-4 eigenbasis expansion `heatKernel_mulVec_eq_sum`: each mode's
+  factor differentiated by `HasDerivAt.exp`/`.mul_const`, the finite
+  sum by `HasDerivAt.sum`; at `t = 0` every factor is `1` and the
+  derivative sum is re-expanded to `-(L *ᵥ x)` by
+  `eigvecOf_expansion_apply` with the shelf's self-adjoint pairing
+  transfer `dotProduct_eigvecOf_mulVec` (`v i ⬝ᵥ (L *ᵥ x) = λ i (v i
+  ⬝ᵥ x)` — the pre-edit survey's finding that this lemma already
+  exists on the shelf saved the run its one planned sub-proof). The
+  vector form assembles by the pin's `hasDerivAt_pi`
+  (`Analysis/Calculus/Deriv/Prod.lean`). `hA : A.IsSymm` is carried
+  exactly as `heatKernel_mulVec_eq_sum` already requires — nothing
+  more (the proposal's own minimal-hypothesis instruction).
+- **QA (4 new declarations):** the derivative value on K₂ at
+  `x = ![1, 3]` pinned to `![2, -2]` by **two independent routes to one
+  statement** — the theorem route (`heatKernel_edge_deriv_theorem_QA`,
+  the Laplacian action supplied by the raw entrywise computation
+  `edgeLaplacian_mulVec_dc`) vs. the raw route
+  (`heatKernel_edge_deriv_raw_QA`: the Step-4 closed form
+  `1 + ((e^{-2t}-1)/2) • L` plus scalar calculus only — `d/dt
+  (e^{-2t}-1)/2 |₀ = -1` — no eigenbasis, no expansion, no
+  `hasDerivAt_pi`); plus the **infinitesimal-conservation cross-check
+  in both directions** (`heatKernel_edge_deriv_conservation_QA`:
+  derivative `0` at `onesVec` through the Phase C theorem +
+  `laplacian_ones_in_kernel`, vs.
+  `heatKernel_edge_deriv_conservation_route2_QA`: the same from Step
+  3's conservation alone, the flow being *constant* — Phase C and
+  Phase B Step 3 checking each other).
+
+Pin-specific technique notes for the Step-2 run: Duhamel's
+`(hasDerivAt_id t).neg.mul_const c` chain produces the unparenthesized
+`-t * c` function shape, while `heatKernel_mulVec_eq_sum`'s factors
+are `Real.exp (-(t * λᵢ))` — build the inner `HasDerivAt` at the
+parenthesized shape (`((hasDerivAt_id 0).mul_const λ).neg`) and let
+the stated derivative stay unnormalized (`-(1 * λᵢ)`, reduced only in
+the final value identification); `HasDerivAt.const_mul` at this pin
+elaborates the constant on the *left* (`fun y => d * id y` — use
+`.mul_const` for right-multiplication and `2 * t`-shaped inner
+functions via `.const_mul`); `Finset.sum_neg_distrib` exists only as
+the `to_additive` child of `prod_inv_distrib` (not greppable as a
+declaration — it is usable); a per-term `rw` chain through
+`Pi.smul_apply, smul_eq_mul` leaves a `mul_assoc` residue (close with
+`ring`, not a second `rw`); and the QA t=0 closed-form extension needs
+the `by_cases` split (the collapse lemma requires `t ≠ 0`; at `t = 0`
+both sides compute directly).
+
+Verification: spike first (`wip/heatC_spike.lean` green, all
+`#print axioms` the standard three; eight rounds to green — the fixes
+became the trap list above, the decisive one being the entrywise-plus-
+`hasDerivAt_pi` restructure after the vector-form `whnf` timeout) then
+transfer; `lake env lean` on the module and the QA file — zero errors,
+zero warnings each; explicit `lake build` targets for both ✔;
+`#print axioms` via `wip/heatC_axcheck.lean` on all six new
+declarations — `propext, Classical.choice, Quot.sound` only; **full
+`lake build` ✔ (2252 targets, "Build completed successfully"; no
+warnings in the changed modules)**; `lint_axioms` (**9**, unchanged),
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+(**1507 QA declarations / 9 explicit axioms / 0 sorries**, idempotent;
+`Heat_QA` 46 → 50). Records updated: this proposal (the Phase C
+delivery record, open-next-step → Step 2), `proposals/README.md` (the
+High row), README (1507; the heat-semigroup sentence and module-table
+row gaining the derivative), the scoreboard (both Direct rows, the
+`lake build` row, lint row, a new interpretation bullet), the SGT
+index map (Heat section +2 declaration rows, Phase C status line), the
+execution plan, and the activity log. Nothing committed; the prior
+runs' uncommitted deliveries preserved untouched.
+
+### Phase C, Step 2 — the first-order remainder bound (DELIVERED
+2026-08-23, run `20260823T170118Z-run-1`; the proposal COMPLETE)
+
+Delivered in `Scaffold/Mathlib/GraphTheory/Heat.lean` (QA extended at
+`Scaffold/QA/SpectralGraph/Heat_QA.lean`, 50 → 66 theorem
+declarations), all proved, zero new axioms per this proposal's own
+mandate (count stays 9; `#print axioms` on both new public and all
+fifteen new public QA declarations reads only `propext,
+Classical.choice, Quot.sound`):
+
+- **The core bound `heatKernel_firstOrder_remainder_apply_le`**: on
+  the window `ht : ∀ i, |t * λᵢ| ≤ 1`,
+  `|(heatKernel A t *ᵥ x) a - x a + t * ((laplacian A *ᵥ x) a)| ≤
+  t ^ 2 * ∑ i, λᵢ ^ 2 * |vᵢ ⬝ᵥ x| * |vᵢ a|` — the entrywise
+  (boundary-observable) form the requester's dissolution theorem reads
+  (a coordinate functional *is* the "observable formed from boundary
+  coordinates" of the original ask; the Euclidean-norm variant would
+  add Cauchy–Schwarz plumbing with a √n loss and no new content, and is
+  deliberately not stated — a consumer naming one can adjoin it). The
+  committed Step-0 route verbatim: the flow coordinate expanded by
+  `heatKernel_mulVec_eq_sum`, `x a` by `eigvecOf_expansion_apply`, and
+  the generator coordinate by the same expansion with
+  `dotProduct_eigvecOf_mulVec` transferring `vᵢ ⬝ᵥ (L *ᵥ x)` to
+  `λᵢ (vᵢ ⬝ᵥ x)`; the three sums combined termwise (the pin's
+  to_additive children `Finset.sum_sub_distrib`/`Finset.sum_add_distrib`,
+  used right-to-left); the triangle by `Finset.abs_sum_le_sum_abs`; and
+  per mode the surveyed `Real.abs_exp_sub_one_sub_id_le` at
+  `x := -(t * λᵢ)` (its `|exp x - 1 - x| ≤ x ^ 2` matching the
+  `-(-tλ) = +tλ` sign by one `ring`). **Hypotheses minimal**: `hA`
+  exactly as the expansion requires — *no* nonnegativity, the bound
+  being per-mode and valid for any symmetric network, PSD or not; and
+  the window hypothesis is stated per eigenvalue, the weakest usable
+  form.
+- **The interval packaging `heatKernel_firstOrder_remainder_interval`**:
+  if `T` itself meets the window, every `t ∈ [0, T]` obeys the same
+  bound — the uniform-in-time form on a bounded interval, the
+  hypothesis transfer `|t · λ| = t|λ| ≤ T|λ| = |T · λ| ≤ 1` by
+  monotonicity at `0 ≤ t ≤ T`. The proposal's `[0, T]` phrasing made
+  literal.
+
+QA (`Heat_QA.lean`, 15 new public + 1 private declaration), the
+proposal's named pair and their support:
+
+- **Support layer** — the K₂ eigenvalue inventory, stated per vertex
+  index (not through the sort machinery): `edge_eigvalOf_nonneg`
+  (PSD at the unit eigenvector), `edge_eigvalOf_sum` (trace `2`),
+  `edge_eigvalOf_prod` (determinant `0`), `edge_eigvalOf_cases`
+  (every `eigvalOf` is `0` or `2`, both orderings covered by
+  `fin_cases` at the vanishing product factor), and
+  `edge_eigvalOf_exists_two` (exactly one mode at `2` — the trace
+  forces it).
+- **The eigen-sum constant `edge_remainder_sum_eq`**: the theorem's
+  spectral constant at `x = ![1, 3]`, `a = 0` on K₂ is *exactly* `4` —
+  through the eigenmode structure `edge_eigvecOf_mode_two` (every
+  λ = 2 eigenvector is `c • ![1, -1]` with `2c² = 1`, from the
+  coordinate eigen-equation via the new
+  `edgeLaplacian_mulVec_coords` plus the unit normalization
+  `eigvecOf_inner`), making the mode's contribution
+  `4 · 2|c| · |c| = 8c² = 4` **independent of the spectral-theorem
+  choice's orientation sign** — the QA constant is robust to however
+  Mathlib happened to pick the eigenvector.
+- **The concrete-bound witness** (positive witness, cross-checked):
+  `heatKernel_edge_remainder_bound_half_QA` instantiates the theorem
+  at the window endpoint `t = 1/2` (hypothesis by `edge_window`) with
+  the RHS evaluated to the concrete `1`;
+  `heatKernel_edge_remainder_value_raw` pins the *raw* remainder
+  `1 - 2t - e^{-2t}` at every nonzero time through the independently
+  QA'd closed form `heatKernel_edge_closed_QA` — no eigenbasis, no
+  exponential bound lemma; `heatKernel_edge_remainder_cross_QA`
+  composes them into `Real.exp (-1) ≤ 1`.
+- **The boundary-degradation witness**:
+  `heatKernel_edge_remainder_degrades_QA` exhibits *both* times'
+  concrete constants — `|1/2 - e^{-1/2}| ≤ 1/4` (at `t = 1/4`, through
+  the interval-route instance `heatKernel_edge_remainder_interval_QA`)
+  and `e⁻¹ ≤ 1` (at `t = 1/2`) — so a wrong power of `t` in the
+  theorem (t¹ would give `2` and `1/2`; t³ would give `1/2` and
+  `1/16`) contradicts at least one component; the "first-order" claim
+  is pinned as exactly quadratic.
+- **The fence** `heatKernel_edge_remainder_window_fenced_QA`: the
+  window hypothesis provably *fails* at `t = 1` on K₂ (some mode has
+  `|1 · 2| = 2 ≰ 1`), so the bound is local to `[0, 1/2]` on this
+  fixture by construction — the first-order claim is not accidentally
+  global.
+
+Pin-technique notes recorded for future runs: `set`-abstracting
+`eigvalOf`/`eigvecOf` mid-proof breaks subsequent `rw`s (new terms
+reintroduce the un-abstracted spelling — prove `have`s at the original
+spelling or avoid `set`); `Finset.sum_sub_distrib` rewrites
+sum-of-differences to difference-of-sums, so assembling the three-sum
+combination needs it *right-to-left*; the final `t²`-factoring must
+split `(t * λᵢ)²` per-term *before* `← Finset.mul_sum` (the
+i-dependent square is not a constant factor); the numeral `2 • v`
+elaborates as ℕ-smul (`nsmul`) at `V → ℝ` — always annotate
+`(2 : ℝ) •`; `rw [edgeLaplacian_eq]` under an `eigvecOf` term dies
+with motive-not-type-correct (the rewrite would touch the proof
+`laplacian_symmetric …` inside `eigvecOf`'s arguments) — derive
+coordinate facts on fresh goals (`edgeLaplacian_mulVec_coords`) and
+combine by `linarith`; `mul_self_abs` does not exist at this pin
+(`← abs_mul` + `abs_of_nonneg (mul_self_nonneg _)` instead);
+`eigvecOf_inner`'s diagonal instance reduces with
+`simp only [if_pos rfl, if_true]` (`if_pos rfl` alone leaves
+`if True then _ else _`); and in `degrades`-style composites, rewrite
+numeric arguments *before* combining (`2 * (1/4)` collapses inside
+`Real.exp`'s argument under one `rw [harg]` pass, so follow-ups must
+match the collapsed form).
+
+Verification: spike first (`wip/heatC2_spike.lean` core, then
+`wip/heatC2_qa_spike.lean` QA, both green before transfer; the
+recorded trap list above is the fixes en route); `lake env lean` on the
+module and the QA file — zero errors, zero warnings each; explicit
+`lake build` targets for both ✔; `#print axioms` via
+`wip/heatC2_axcheck.lean` on all seventeen new declarations —
+`propext, Classical.choice, Quot.sound` only; **full `lake build` ✔
+(2252 targets, "Build completed successfully"; zero warnings in the
+changed modules — the log's warning mass is the documented Mathlib-pin
+doc-string set)**; `lint_axioms` (**9**, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1522/9/0**,
+idempotent; `Heat_QA` 50 → 66). Records updated: this proposal (status
+header, the Phase C Step-2 delivery record, open-next-step retired),
+`proposals/README.md` (the High row moved to Delivered), README (1522;
+heat-semigroup paragraph + module-table row), the radar (axis 5 + QA
+axis **held** at 4.0/4.0 with the delivery recorded and counts synced
+1507/40 → 1522/40), the scoreboard (both Direct rows, the `lake build`
+row, lint row, a new interpretation bullet), the SGT index map (Heat
+section +2 declaration rows, Phase C status line), the execution plan,
+and the activity log. Nothing committed; the prior runs' uncommitted
+deliveries preserved untouched.

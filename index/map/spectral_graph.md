@@ -305,7 +305,11 @@ statement-shape deviation from the proposal: the attenuation factor is
 `1` *exactly* at a zero eigenvalue (kernel modes pass through
 untouched — that is mean preservation), so the delivered endpoint
 facts are `factor = 1 ↔ λ = 0` and `factor < 1 ↔ 0 < λ`, not the
-proposal's "never exactly 1".
+proposal's "never exactly 1". **Phase 2 (the hard-filter limit,
+2026-08-23) delivered in full — the proposal COMPLETE:** the
+positive-eigenvalue limit of `tikhonovShrinkage` plus the finite
+tail-suppression corollary (suppression-stated per the external
+consumer's explicit non-overclaim instruction), still zero axioms.
 
 | Declaration | Content |
 |-------------|---------|
@@ -327,6 +331,9 @@ proposal's "never exactly 1".
 | `sum_tikhonovMinimizer_eq_sum` | **mean preservation:** `∑ x* = ∑ y` — needs symmetry and `π ≠ 0` only (each component's mean is preserved on disconnected graphs) |
 | `tikhonovMinimizer_eigvecOf` | an eigenvector input comes out as `factor • v` — pure orthonormality |
 | `tikhonovMinimizer_ne_apply_self_of_eigvalOf_pos` | **not a projection:** the filter is not idempotent — `T(T v) = s² • v ≠ s • v` at any positive-eigenvalue eigenvector; the precise sense in which Tikhonov smoothing differs from `spectralProjector` (which fixes its image exactly) |
+| `tikhonovShrinkage_tendsto_zero` | **the hard-filter limit (Phase 2, 2026-08-23):** `π/(lam+π) → 0` as `π → 0` at every fixed `0 < lam` — two-sided (the full `𝓝 0`), via continuity of division at the nonzero denominator; the `0 < lam` hypothesis load-bearing (QA: at `lam = 0` the factor has no limit at all) |
+| `tikhonovShrinkage_tail_energy_tendsto_zero` | **tail suppression, general symmetric form (Phase 2):** for a finite set of modes each with `lam ≤ λᵢ` (`lam > 0`), the filtered coefficient energy `∑_{i∈t} (g(π,λᵢ) cᵢ)² → 0` as `π → 0` — stated as suppression of the selected positive-eigenvalue tail (the requester's non-overclaim instruction), on a general symmetric matrix since nothing in the proof uses PSD |
+| `tikhonovMinimizer_tail_energy_tendsto_zero` | **tail suppression, minimizer form (Phase 2):** the filtered signal's coefficient energy on any selected positive-enough mode set vanishes in the hard-filter limit — the consumer-facing `sgt-gaps.md` item-1 statement, no band-projector convergence claimed |
 
 ### `Scaffold.Mathlib.GraphTheory.Band` (two-sided spectral band projectors)
 
@@ -648,8 +655,16 @@ identity/semigroup, mass conservation, and eigenmode decay — Steps 1–4
 of the proposal verbatim). **Steps 0–4 delivered — the proposal
 COMPLETE 2026-08-23** (survey; definition, symmetry, identity; the
 semigroup law; mass conservation; eigenmode decay + the connected-graph
-DC limit — the payoff statement). Pure hard crust, zero axioms;
-QA at `Scaffold/QA/SpectralGraph/Heat_QA.lean`.
+DC limit — the payoff statement). **Phase C (the heat-flow derivative +
+remainder bound, the second `sgt-gaps.md` request) opened 2026-08-23,
+priority High: COMPLETE** — Step 1 the derivative at zero (entrywise +
+vector form), Step 2 the first-order remainder bound
+`heatKernel_firstOrder_remainder_apply_le` (the coordinate form
+`|(e^{-tL} x) a − x a + t (L x) a| ≤ t² · ∑ᵢ λᵢ² |vᵢ ⬝ᵥ x| |vᵢ a|` on
+the window `|t · λᵢ| ≤ 1`, termwise through the pin's
+`Real.abs_exp_sub_one_sub_id_le`) plus its `[0, T]` interval packaging
+`heatKernel_firstOrder_remainder_interval`. Pure hard crust, zero
+axioms; QA at `Scaffold/QA/SpectralGraph/Heat_QA.lean`.
 
 | Declaration | Content |
 |-------------|---------|
@@ -674,6 +689,10 @@ QA at `Scaffold/QA/SpectralGraph/Heat_QA.lean`.
 | `heatKernel_decayFactor_le_one` | PSD dissipation: on symmetric-nonnegative input every sorted eigenvalue is ≥ 0 (`evals_mem_eigvalOf` + `laplacian_psd`), so every mode factor is ≤ 1 at `t ≥ 0` |
 | `heatKernel_mulVec_eq_sum` | **the eigenbasis expansion** — the spectral-calculus identity in action form: `heatKernel A t *ᵥ x = ∑ᵢ e^{−t·λᵢ} (vᵢ ⬝ᵥ x) • vᵢ` over the proved orthonormal basis (`eigvecOf_expansion_apply` + `mulVecLin` linearity + the mode theorem) |
 | `heatKernel_mulVec_tendsto_atTop` | **the connected-graph DC limit — the payoff** (Step 4): the heat flow of any vector converges to its mean `((∑ j, x j)/\|V\|) • onesVec` — PSD, kernel-mode existence (`det L = 0` + `det_eq_prod_eigenvalues`), the kernel characterization (a second kernel mode would put two orthogonal unit vectors in one line), and finite-sum limit passage |
+| `heatKernel_mulVec_apply_hasDerivAt_zero` | **the heat-flow derivative at zero, entrywise** (Phase C Step 1, the `spectral-proof` rewrite's dissolution-theorem input): each coordinate of `t ↦ heatKernel A t *ᵥ x` differentiates at `t = 0` to `-(L *ᵥ x)`'s coordinate — `heatKernel_mulVec_eq_sum` differentiated termwise (Duhamel's `heatApply_hasDerivAt` technique), the derivative sum re-expanded through `eigvecOf_expansion_apply` + the self-adjoint pairing transfer `dotProduct_eigvecOf_mulVec` |
+| `heatKernel_mulVec_hasDerivAt_zero` | **the heat-flow derivative at zero, vector form** (Phase C Step 1): `HasDerivAt (fun t => heatKernel A t *ᵥ x) (-(laplacian A *ᵥ x)) 0` — the infinitesimal generator `d/dt e^{-tL} x\|₀ = -L x`, assembled from the entrywise engine by the pin's `hasDerivAt_pi` (the direct vector-form proof times out at `whnf` on a variable vertex type; recorded trap) |
+| `heatKernel_firstOrder_remainder_apply_le` | **the first-order remainder bound, entrywise form** (Phase C Step 2): on the window `\|t · λᵢ\| ≤ 1`, `\|(e^{-tL} x) a − x a + t (L x) a\| ≤ t² · ∑ᵢ λᵢ² \|vᵢ ⬝ᵥ x\| \|vᵢ a\|` at every coordinate `a` — the boundary-observable Taylor bound the dissolution theorem consumes; coordinate + generator coordinate expanded over the proved eigenbasis, the three sums combined termwise, each mode's scalar remainder by the pin's `Real.abs_exp_sub_one_sub_id_le`; no nonnegativity hypothesis |
+| `heatKernel_firstOrder_remainder_interval` | **the `[0, T]` interval packaging** (Phase C Step 2): the same bound uniformly on `[0, T]` whenever `T` meets the window (`\|T · λᵢ\| ≤ 1`), the hypothesis transfer `\|t · λ\| = t\|λ\| ≤ T\|λ\| = \|T · λ\| ≤ 1` by monotonicity |
 
 ### `Scaffold.Mathlib.GraphTheory.Dynamics` (dynamic frontier)
 

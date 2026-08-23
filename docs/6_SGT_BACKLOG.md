@@ -212,6 +212,23 @@ formalization-gap.md` already found unsupported. Graph-structured
 consensus dynamics, synchronization proper, and general graph semigroups
 remain gated; this opens only the discrete-affine-convergence instance.
 
+*Discrete-affine slice DELIVERED 2026-08-23:* both steps in one run as
+pure hard crust (`proposals/discrete-affine-convergence.md` COMPLETE)
+— the new `Scaffold.Mathlib.Dynamics.DiscreteAffine` (a standalone
+`Dynamics` area: no graph structure in the statements, per the
+proposal's scope note): `tendsto_pow_smul_atTop_nhds_zero`
+(`r ^ n • x → 0` for `|r| < 1` — the pin's scalar decay fact lifted
+through `Filter.Tendsto.smul_const`), `affineIteration_eq` (the closed
+form), and `affineIteration_tendsto_atTop` (`x_{n+1} = (1−α) • x_n +
+α • e → e` under `0 < α < 2`). Zero new axioms; stated at a general
+real normed space with the consumer's `V → ℝ` shape as the instance;
+QA +25 in the new `Dynamics` domain with both endpoint hypotheses
+refuted-on-omission as proved non-convergence (`α = 2` oscillation,
+`α = 0` constancy — complementary fixtures, each isolating exactly one
+dropped hypothesis). The gate's remaining scope (graph-structured
+consensus dynamics, synchronization, general graph semigroups) is
+unchanged and still gated.
+
 ### 6. Thermodynamics / statistical mechanics (conditional)
 
 *Gated on item 1–2 stability:* entropy and reversibility interfaces,

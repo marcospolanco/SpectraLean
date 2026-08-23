@@ -1,12 +1,11 @@
 # Proposal: Tikhonov Regularization in the Laplacian Eigenbasis
 
-**Status:** Original three build steps **DELIVERED 2026-08-20** (see
-below). **Phase 2 (the hard-filter limit) OPENED 2026-08-23/24, priority
-High** — a real external named consumer, `sgt-gaps.md` item 1 from the
-`spectral-proof` rewrite project, asks for the positive-eigenvalue
-limit of `tikhonovShrinkage`; see "Phase 2" near the end of this
-document for the full ask and build order. Original assessment text
-follows.
+**Status:** **COMPLETE.** Original three build steps **DELIVERED
+2026-08-20** and **Phase 2 (the hard-filter limit) DELIVERED 2026-08-23**
+(both steps in one run — see the Phase-2 delivery record at the end).
+Zero new axioms at every step; the explicit-axiom count was 12 at the
+original delivery and 9 at Phase 2, unchanged by both. Original
+assessment text follows.
 
 **Assessment:** proposed 2026-08-19, priority **High**. Assistant's
 assessment of project direction, requested 2026-08-19, promoted from
@@ -205,16 +204,19 @@ instantiated in QA — `eigvecOf` entries are not kernel-computable on
 the fixture; its content is covered transitively by the two
 normal-equation pins. The unverified Shuman et al. citation stays
 unverified and out of committed docstrings.
-
 ## Phase 2: The hard-filter limit (opened 2026-08-23/24, priority High)
 
-**Status:** Proposed — a real external named consumer, `sgt-gaps.md`
-item 1 (from the independent `spectral-proof` clean-sheet rewrite
-project), asks for the standard positive-eigenvalue limit of
-`tikhonovShrinkage`. Promoted straight to High in `proposals/README.md`:
-the same class of resolution as `reversibility-and-heat-semigroup.md`
-Phase B — a different project naming this exact interface by file path,
-not this proposal naming itself.
+**Status: DELIVERED 2026-08-23 (both steps in one run); see the Phase-2
+delivery record below.** What follows is the opening assessment text.
+
+**Status (opening):** Proposed — a real external named consumer,
+`sgt-gaps.md` item 1 (from the independent `spectral-proof` clean-sheet
+rewrite project), asks for the standard positive-eigenvalue limit of
+`tikhonovShrinkage`. Promoted straight to High in
+`proposals/README.md`: the same class of resolution as
+`reversibility-and-heat-semigroup.md` Phase B — a different project
+naming this exact interface by file path, not this proposal naming
+itself.
 
 **The ask, precisely (per `sgt-gaps.md`):** for `tikhonovShrinkage π lam
 := π / (lam + π)` (`Tikhonov.lean:79`) with `0 < lam` fixed,
@@ -273,3 +275,104 @@ projector" instruction.
 
 **No new axioms; no proposal-scope change beyond this phase.** One step
 per run, per this repository's standing operating instructions.
+
+## Phase-2 delivery record (2026-08-23)
+
+Delivered in `Scaffold.Mathlib.GraphTheory.Tikhonov` Section 5 and
+`Tikhonov_QA.lean` (three new QA sections), all proved, zero axioms,
+QA 1522 → 1546 (24 new QA declarations).
+
+- **Step 1** — `tikhonovShrinkage_tendsto_zero`: the consumer's exact
+  statement `Filter.Tendsto (fun π => tikhonovShrinkage π lam) (𝓝 0)
+  (𝓝 0)` at fixed `0 < lam`, proved in three lines through
+  `ContinuousAt.div` at the nonzero denominator `lam + 0 = lam`
+  (`continuousAt_id.div (continuousAt_const.add continuousAt_id)`),
+  with `simpa [tikhonovShrinkage]` evaluating the limit point
+  `0 / lam = 0`. The delivered form is **two-sided** (the full
+  neighborhood filter), strictly stronger than the requested
+  `π → 0⁺` — the survey's continuity observation: at fixed `lam > 0`
+  the denominator stays nonzero near `0` from both sides.
+- **Step 2** — the tail-suppression corollary, in two forms.
+  `tikhonovShrinkage_tail_energy_tendsto_zero` (the general form): on
+  *any* symmetric matrix `M`, for a `Finset t` of modes each with
+  `lam ≤ eigvalOf M i` (`0 < lam`), the filtered coefficient energy
+  `∑_{i ∈ t} (tikhonovShrinkage π λᵢ * cᵢ)²` tends to `0` as `π → 0` —
+  each term by Step 1 at that mode's own eigenvalue (`Tendsto.mul` at
+  the constant coefficient, then `.pow 2`), the sum by
+  `tendsto_finset_sum`. `tikhonovMinimizer_tail_energy_tendsto_zero`
+  (the consumer-facing Laplacian form): the same conclusion with the
+  minimizer's own coefficients `(vᵢ ⬝ᵥ tikhonovMinimizer A hA π y)²`,
+  composed from the general form through the coefficient identity
+  (`Tendsto.congr` at the pointwise `Finset.sum_congr`, the Heat run's
+  recorded pointwise-∀ congruence pattern). **Suppression-stated per
+  the requester's explicit non-overclaim instruction** — no
+  band-projector convergence is claimed or implied anywhere; the
+  docstrings say so and the QA's boundary refutation witnesses exactly
+  the one-sidedness (below).
+- **Statement-shape decisions recorded:** (1) the general form is
+  stated for a symmetric matrix, not the Laplacian — nothing in the
+  proof uses PSD (the `lam ≤ λᵢ` tail hypothesis carries the
+  positivity), the module's own `dotProduct_eigvecOf_filter`
+  generality precedent; the Laplacian packaging is the wrapper. (2) No
+  `hnonneg` hypothesis anywhere in Section 5. (3) The tail set is an
+  abstract `Finset`, not a threshold filter — the consumer constructs
+  whatever selection it needs (the QA constructs both a `univ` tail
+  and a filtered tail).
+- **QA** (24 declarations): the **two-mode positive witness** on the
+  diagonal fixture `diag13` *reused from `Band_QA`* (spectrum `{1,3}`,
+  each eigenspace a coordinate axis — its eigenvector-direction lemmas
+  supply the coefficient squares `1` and `0` without re-derivation):
+  the tail energy pinned in **closed form**
+  `diag13_tail_energy_eq : ∑ i, (…)² = tikhonovShrinkage π 1 ^ 2` at
+  every `π`, evaluated exactly at `π = 1/10` (`1/121`) and `π = 1/100`
+  (`1/10201`) — the energy visibly collapsing — and the corollary
+  consumed at a concrete tolerance (`diag13_corollary_consumed`:
+  `∃ δ > 0` forcing tail energy `< 1/100` near `0`, through
+  `Metric.tendsto_nhds_nhds`); the **scalar `lam = 0` refutation**
+  (`not_shrinkage_zero_tendsto`): the hypothesis-free form is false —
+  the factor is `1` at every `π ≠ 0` and `0` at `π = 0`, so it has no
+  limit at all (the ε-δ refutation at `ε = 1/2`, `π = min(δ/2, 1)`); the
+  **tail-level boundary refutation on `K₂`**
+  (`not_lapK2_univ_tail_tendsto`, the requester's mandated
+  "mode below lam" witness): with the kernel mode included in the tail,
+  the energy provably stays `≥ 1/2` at every nonzero `π`
+  (`lapK2_energy_ge`, from the kernel-eigenvector line
+  `v 0 = v 1` + unit norm ⇒ coefficient² `= 1/2`, and Parseval for the
+  other mode) — the kernel mode passing through untouched is exactly
+  why the statement fails, the `lam ≤ λᵢ` hypothesis load-bearing; and
+  the **minimizer-form instantiation** (`lapK2_minimizer_tail`) at the
+  filtered nonzero-mode tail (identified as exactly the eigenvalue-`2`
+  singleton through a trace-based uniqueness lemma), with its `π = 1`
+  energy pinned to `1/18` through the coefficient identity
+  (`(1/3)² · 1/2`, Parseval + the kernel line).
+- **Pin-technique notes (recorded for future runs):** `𝓝` needs
+  `open scoped Topology`, not just `open Filter`; `λ₀`/`hλi` are not
+  lexable identifiers (λ is a reserved token — the recorded ASP Step-0
+  trap, re-hit); `tendsto_finset_sum` exists only as the `to_additive`
+  child of `tendsto_finset_prod` (not greppable, but usable — the
+  recorded `Finset.sum_neg_distrib` phenomenon, re-verified);
+  `tendsto_const_nhds`'s value is *implicit*, so the constant must be
+  pinned by an ascribed `have` before `.mul`; `Tendsto.congr` takes
+  pointwise-∀ equality (the Heat note, re-verified); rewriting *under*
+  a square needs the term-form coefficient lemmas (`term_of_eq_one`)
+  since `simp only` cannot rewrite `(a * (b)) ^ 2` from a hypothesis
+  about `b ^ 2`; `fin_cases` on an `obtain`ed witness leaves a
+  beta-redex in the hypothesis — the robust fix is a type-ascribed
+  `have hi' : … := hi`; and `Metric.tendsto_nhds_nhds`'
+  ε-δ form wants `dist x 0 < δ` (rewrite `|π| < δ` through
+  `Real.dist_eq, sub_zero`).
+
+**Verification:** spike first (`wip/tikP2_spike.lean` green, zero
+errors/warnings, several rounds — the fixes becoming the technique
+list above), then transfer; `lake env lean` on the public module and
+the QA file — zero errors, zero warnings each; explicit `lake build`
+targets for both ✔; `#print axioms` via `wip/tikP2_axcheck2.lean` on
+all three public and all 24 QA declarations — `propext,
+Classical.choice, Quot.sound` only; full `lake build` ✔ (2252 targets,
+"Build completed successfully"; zero warnings in the changed modules);
+`lint_axioms` (9, unchanged), `check_citations`, `check_markdown_links`
+pass; scoreboard regenerated (**1546/9/0**, idempotent). Records
+updated: this proposal, `proposals/README.md`, README, the radar, the
+scoreboard (three verification rows, lint row, a new interpretation
+bullet), the SGT index map (+3 declaration rows, Phase-2 status note),
+the execution plan, and the activity log.

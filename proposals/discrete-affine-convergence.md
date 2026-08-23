@@ -1,6 +1,14 @@
 # Proposal: Discrete Affine-Control Convergence on Finite Vector Spaces
 
-**Status:** Proposed — 2026-08-23/24, priority **High**. `sgt-gaps.md`
+**Status:** **COMPLETE** — both steps delivered in one run on 2026-08-23
+(run `20260823T194800Z-run-1`), per this document's own operating
+instruction that one run comfortably covers both steps. Zero new
+axioms; every declaration composes pinned-Mathlib lemmas (`#print
+axioms` reads only the standard three on all three public theorems and
+all 25 QA declarations). See "Delivery record" at the end. Original
+assessment text follows.
+
+**Assessment:** proposed 2026-08-23/24, priority **High**. `sgt-gaps.md`
 item 2, from the independent `spectral-proof` clean-sheet rewrite
 project, asks for a finite-dimensional discrete-time convergence
 wrapper. Unlike Tikhonov Phase 2 and Heat Phase C (both extensions of
@@ -145,6 +153,86 @@ equilibrium` term and conclude via `Filter.Tendsto.add`/`const`.
 
 ## Open next step
 
-Authorized to begin immediately — this is a real external named
-consumer with no operator decision pending, per the resolution recorded
-above.
+None — delivered and closed. (Opening text, retained: authorized to
+begin immediately — a real external named consumer with no operator
+decision pending, per the resolution recorded above.)
+
+## Delivery record (2026-08-23)
+
+Delivered in the new `Scaffold.Mathlib.Dynamics.DiscreteAffine`
+(namespace `Scaffold.Dynamics`) and `Scaffold/QA/Dynamics/
+DiscreteAffine_QA.lean`, all proved, zero new axioms (count stays 9),
+QA 1546 → 1571 (+25, a new `Dynamics` QA domain).
+
+- **Module placement** — a new `Scaffold/Mathlib/Dynamics/` area, not
+  the event-driven `GraphTheory/Dynamics.lean`: the statements carry
+  no graph structure (this document's own scope note), and that
+  module's purpose (time-varying Laplacian perturbation blocks for the
+  derived persistence example) is different. Minimal imports (two
+  Mathlib analysis/topology files); the umbrella `Scaffold.lean`
+  imports it and its docstring records the new slice.
+- **Step 1** — `tendsto_pow_smul_atTop_nhds_zero`: `r ^ n • x → 0`
+  for `|r| < 1`, exactly the ask, proved in one composed line — the
+  pin's `tendsto_pow_atTop_nhds_zero_of_abs_lt_one`
+  (`Analysis/SpecificLimits/Normed.lean:197`) lifted through the pin's
+  `Filter.Tendsto.smul_const` (`Topology/Algebra/MulAction.lean:109`;
+  the survey's "exact Mathlib API should be confirmed" clause
+  discharged: `smul_const` is the lifting lemma, and the `0 • x = 0`
+  endpoint closes by `zero_smul`).
+- **Step 2** — `affineIteration_tendsto_atTop` under
+  `hα0 : 0 < α`, `hα2 : α < 2`, with the closed form factored out as
+  its own public theorem `affineIteration_eq`
+  (`x_n = (1−α)^n • (x_0 − e) + e`, pure module induction, no
+  topology), then Step 1 at `r = 1 − α` (`|1−α| < 1` from the pair by
+  `abs_lt` + `linarith`) plus `Tendsto.add`/`const`. The consumer's
+  exact conclusion shape `Tendsto x atTop (𝓝 equilibrium)`.
+- **Statement-shape decision recorded before stating** — all three
+  theorems are stated at a general real normed space `E` (the
+  closed form at `[AddCommGroup E] [Module ℝ E]` only): the proofs
+  never use finiteness or coordinates, the drafted `V → ℝ` /
+  `Fintype V` shape is the `E := V → ℝ` instance, and QA instantiates
+  exactly that instance — the Tikhonov Section-5 generality precedent.
+- **QA (+25, four sections)** — Section A: the decay wrapper by two
+  routes (theorem vs. entrywise `tendsto_pi_nhds` +
+  per-coordinate `Tendsto.mul` from the pin's scalar lemma — the
+  lifting exercised through disjoint API paths) and numeric decay
+  instances (`(1/2)^5 • eqm = ![1/32, 1/16]`, `(1/2)^10 • eqm =
+  ![1/1024, 1/512]`). Section B: the positive fixture at `α = 1/2`
+  (`x_0 = ![3,6]`, `e = ![1,2]`) with the recurrence in the theorem's
+  exact hypothesis form, both endpoint hypotheses exhibited, per-step
+  values (`![2,4]`, `![3/2,3]`), the closed form pinned from the
+  public `affineIteration_eq`, per-coordinate geometric decay
+  `|x_n i − e i| = ![2,4] i · (1/2)^n`, and convergence by the two
+  independent routes. Section C: the `α = 2` fence — the closed form
+  `xosc n = (−1)^n • ![1,0]` through the public theorem, the scalar
+  ε-δ refutation (`(−1)^n ↛ 0` at `ε = 1`), and the **proved
+  non-convergence** `xosc_not_tendsto_QA`, with `0 < α` still
+  satisfied (exactly `hα2` isolated). Section D: the `α = 0` fence —
+  constant `![1,0] ≠ 0` **provably not converging** to the
+  equilibrium, with `α < 2` still satisfied (exactly `hα0`
+  isolated). Both fences follow this document's QA plan verbatim, and
+  the two fixtures are complementary: each violates exactly one
+  hypothesis while satisfying the other.
+- **Pin-technique notes (recorded for future runs)** — the left-dotted
+  `Filter.Tendsto.congr` runs `f₁ → f₂`; extracting the reverse
+  direction needs the `Filter.tendsto_congr` iff's `.mpr` (namespaced
+  under `Filter` at this pin). The affine-induction's `← add_smul`
+  fires only after `add_assoc` reassociates `(a + b) + c` — the
+  `b + c` subterm is otherwise not a syntactic subterm. Bare
+  `![2, 4] i` in a standalone ascription defaults to `ℕ` (the
+  recorded numeric-default trap re-hit); ascribe
+  `(![2, 4] : Fin 2 → ℝ)`. `norm_num` does not close `|(1:ℝ)/2| < 1`
+  directly — `rw [abs_lt]; constructor <;> norm_num` does.
+  `Metric.tendsto_atTop`'s ε-δ form is the clean refutation engine
+  for non-convergence (`rw` the `dist` away, then `absurd`).
+- **Verification** — spike first (`wip/dac_spike.lean`, five rounds to
+  green, the fixes becoming the trap list above) then transfer;
+  `lake env lean` on the module and the QA file — zero errors, zero
+  warnings each; explicit `lake build` targets both ✔;
+  `#print axioms` via `wip/dac_axcheck.lean` on all 28 declarations —
+  `propext, Classical.choice, Quot.sound` only; full `lake build` ✔
+  (2253 targets); `lint_axioms` (**9**, unchanged), `check_citations`,
+  `check_markdown_links` pass; scoreboard regenerated
+  (**1571/9/0**, idempotent). Backlog item 5's discrete-affine slice
+  recorded as opened (consensus maps/synchronization remain gated, per
+  this document's scope note).

@@ -694,6 +694,27 @@ axioms; QA at `Scaffold/QA/SpectralGraph/Heat_QA.lean`.
 | `heatKernel_firstOrder_remainder_apply_le` | **the first-order remainder bound, entrywise form** (Phase C Step 2): on the window `\|t · λᵢ\| ≤ 1`, `\|(e^{-tL} x) a − x a + t (L x) a\| ≤ t² · ∑ᵢ λᵢ² \|vᵢ ⬝ᵥ x\| \|vᵢ a\|` at every coordinate `a` — the boundary-observable Taylor bound the dissolution theorem consumes; coordinate + generator coordinate expanded over the proved eigenbasis, the three sums combined termwise, each mode's scalar remainder by the pin's `Real.abs_exp_sub_one_sub_id_le`; no nonnegativity hypothesis |
 | `heatKernel_firstOrder_remainder_interval` | **the `[0, T]` interval packaging** (Phase C Step 2): the same bound uniformly on `[0, T]` whenever `T` meets the window (`\|T · λᵢ\| ≤ 1`), the hypothesis transfer `\|t · λ\| = t\|λ\| ≤ T\|λ\| = \|T · λ\| ≤ 1` by monotonicity |
 
+### `Scaffold.Mathlib.Dynamics.DiscreteAffine` (discrete-affine dynamics)
+
+Delivered 2026-08-23, complete, per
+`proposals/discrete-affine-convergence.md` — the `sgt-gaps.md` item-2
+consumer interface (the external `spectral-proof` rewrite project's
+named request), opening the discrete-affine slice of backlog item 5
+(consensus maps, synchronization, and general graph semigroups remain
+gated). Pure hard crust, zero axioms — everything composes the pin's
+`tendsto_pow_atTop_nhds_zero_of_abs_lt_one` and
+`Filter.Tendsto.smul_const`; the statements carry no graph structure
+(the proposal's own scope note), hence the standalone `Dynamics` area
+rather than the event-driven `GraphTheory.Dynamics`. Stated at a
+general real normed space; the consumer's `V → ℝ`/`Fintype V` shape is
+the instance. QA at `Scaffold/QA/Dynamics/DiscreteAffine_QA.lean`.
+
+| Declaration | Content |
+|-------------|---------|
+| `tendsto_pow_smul_atTop_nhds_zero` | geometric decay on vectors: `\|r\| < 1 → r ^ n • x → 0` (Step 1 — the pin's scalar fact lifted through `smul_const`) |
+| `affineIteration_eq` | the affine-iteration closed form `x n = (1−α)^n • (x 0 − e) + e` by pure module induction (no topology) |
+| `affineIteration_tendsto_atTop` | convergence of `x_{n+1} = (1−α) • x_n + α • e` to `e` under `0 < α < 2` (Step 2 — the closed form plus Step 1 at `r = 1−α`) |
+
 ### `Scaffold.Mathlib.GraphTheory.Dynamics` (dynamic frontier)
 
 Real definitions: `TimeVaryingGraph`, `laplacianSequence`,

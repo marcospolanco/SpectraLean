@@ -55,11 +55,21 @@
   live in `Scaffold.Mathlib.GraphTheory.Spectral`; the shifted-matrix
   invertibility tooling this module's normal equation complements lives
   in `Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent`.
+
+  Phase 2 (the hard-filter limit, 2026-08-23): Section 5 delivers the
+  positive-eigenvalue limit of the shrinkage factor and the finite
+  tail-suppression corollary. The corollary is deliberately stated as
+  *suppression of the selected positive-eigenvalue tail* — not as
+  convergence to a two-sided band projector. Ordinary (low-pass)
+  Tikhonov cannot erase modes below a band's lower endpoint, and the
+  statements here do not overclaim that it does.
 -/
 
 import Scaffold.Mathlib.GraphTheory.Spectral
+import Mathlib.Topology.Instances.Real
+import Mathlib.Topology.Algebra.Monoid
 
-open scoped BigOperators Matrix
+open scoped BigOperators Matrix Topology
 
 namespace SpectralGraphTheory
 
@@ -665,3 +675,95 @@ theorem tikhonovMinimizer_ne_apply_self_of_eigvalOf_pos (A : WAdj (V := V))
     · exact absurd (by linarith : (tikhonovShrinkage π
         (eigvalOf (laplacian A) (laplacian_symmetric A hA) i)) = 1) (ne_of_lt hs01.2)
   · exact absurd hv₀ hvne
+
+/-!
+## 5. The hard-filter limit (Phase 2)
+
+As the regularization weight `π` tends to `0`, every *positive*
+eigenvalue's shrinkage factor tends to `0`: the filter degenerates to
+the hard filter that annihilates every positive mode while still fixing
+the kernel modes exactly (Section 4). The finite-tail corollary says
+the filtered coefficient energy of any selected set of positive-enough
+modes is driven to zero. Both statements are two-sided limits at the
+full neighborhood `𝓝 0` — strictly stronger than the one-sided
+`π → 0⁺` — because at fixed `0 < lam` the denominator `lam + π` stays
+nonzero near `0`.
+
+Per the requesting consumer's explicit instruction, the corollary is
+phrased as *suppression of the selected positive-eigenvalue tail*, not
+as convergence to a band projector: low-pass Tikhonov leaves modes
+below a band's lower endpoint intact, and no claim is made here about
+them (the QA's boundary refutation exhibits exactly this one-sided
+behavior — the kernel mode included in a tail breaks the conclusion).
+-/
+
+/-- **The hard-filter limit (scalar form).** For every fixed positive
+eigenvalue `lam`, the shrinkage factor `π / (lam + π)` tends to `0` as
+`π` tends to `0` — as the regularization weight vanishes, every
+positive mode is driven to zero attenuation. The limit is two-sided
+(the full neighborhood filter): the denominator `lam + π` is nonzero
+near `0` since `lam > 0`, so the quotient is continuous there and takes
+the value `0 / lam = 0`. The `0 < lam` hypothesis is load-bearing: at
+`lam = 0` the factor equals `1` at every `π ≠ 0` and `0` at `π = 0`,
+so it has no limit at all. -/
+theorem tikhonovShrinkage_tendsto_zero {lam : ℝ} (hlam : 0 < lam) :
+    Filter.Tendsto (fun π : ℝ => tikhonovShrinkage π lam) (𝓝 0) (𝓝 0) := by
+  have hcont : ContinuousAt (fun π : ℝ => π / (lam + π)) 0 :=
+    continuousAt_id.div (continuousAt_const.add continuousAt_id) (by linarith)
+  simpa [tikhonovShrinkage] using hcont.tendsto
+
+/-- **Tail suppression (general symmetric form).** On any symmetric
+matrix `M`, for any selected finite set `t` of modes each carrying an
+eigenvalue of at least `lam > 0`, the filtered coefficient energy
+`∑_{i ∈ t} (g(π, λᵢ) cᵢ)²` of a signal `y` tends to `0` as `π → 0`:
+each mode's factor tends to zero (the scalar hard-filter limit at its
+own eigenvalue `λᵢ ≥ lam > 0`), and a finite sum of vanishing squares
+vanishes.
+
+Statement-shape decisions (recorded per the proposal's Phase-2 sketch):
+the statement is *suppression of the selected tail* — no band-projector
+convergence is claimed or implied; and the carrier is a general
+symmetric matrix, since nothing in the proof uses PSD or the Laplacian
+(the module's own `dotProduct_eigvecOf_filter` precedent for
+filter-level generality), with the Laplacian packaging delivered as
+`tikhonovMinimizer_tail_energy_tendsto_zero` below. -/
+theorem tikhonovShrinkage_tail_energy_tendsto_zero {M : Matrix V V ℝ}
+    (hM : M.IsSymm) {lam : ℝ} (hlam : 0 < lam) (y : V → ℝ) (t : Finset V)
+    (ht : ∀ i ∈ t, lam ≤ eigvalOf M hM i) :
+    Filter.Tendsto (fun π : ℝ =>
+        ∑ i ∈ t, (tikhonovShrinkage π (eigvalOf M hM i)
+          * Matrix.dotProduct (eigvecOf M hM i) y) ^ 2)
+      (𝓝 0) (𝓝 0) := by
+  have hterm : ∀ i ∈ t, Filter.Tendsto (fun π : ℝ =>
+      tikhonovShrinkage π (eigvalOf M hM i)
+        * Matrix.dotProduct (eigvecOf M hM i) y) (𝓝 0) (𝓝 0) := by
+    intro i hi
+    have hμi : 0 < eigvalOf M hM i := lt_of_lt_of_le hlam (ht i hi)
+    have hconst : Filter.Tendsto (fun _ : ℝ =>
+        Matrix.dotProduct (eigvecOf M hM i) y) (𝓝 0)
+        (𝓝 (Matrix.dotProduct (eigvecOf M hM i) y)) := tendsto_const_nhds
+    simpa using (tikhonovShrinkage_tendsto_zero hμi).mul hconst
+  simpa using (tendsto_finset_sum t fun i hi => (hterm i hi).pow 2)
+
+/-- **Tail suppression, minimizer form (the consumer-facing
+statement).** On a network with symmetric weights, the filtered signal
+`tikhonovMinimizer A hA π y` has its coefficient energy on any selected
+set of positive-enough modes (`lam ≤ λᵢ`, `lam > 0`) driven to zero as
+the regularization weight `π` tends to `0`: in the hard-filter limit
+the Tikhonov reconstruction keeps only the modes below `lam` (the
+kernel among them, exactly — Section 4). Suppression-stated per the
+requesting consumer's explicit non-overclaim instruction: this is a
+statement about the *selected positive-eigenvalue tail* only, not a
+convergence-to-band-projector claim. -/
+theorem tikhonovMinimizer_tail_energy_tendsto_zero (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) {lam : ℝ} (hlam : 0 < lam) (y : V → ℝ)
+    (t : Finset V) (ht : ∀ i ∈ t, lam ≤ eigvalOf (laplacian A)
+      (laplacian_symmetric A hA) i) :
+    Filter.Tendsto (fun π : ℝ =>
+        ∑ i ∈ t, (Matrix.dotProduct (eigvecOf (laplacian A)
+            (laplacian_symmetric A hA) i) (tikhonovMinimizer A hA π y)) ^ 2)
+      (𝓝 0) (𝓝 0) :=
+  (tikhonovShrinkage_tail_energy_tendsto_zero
+    (laplacian_symmetric A hA) hlam y t ht).congr
+    (fun π => Finset.sum_congr rfl fun i _ => by
+      rw [tikhonovMinimizer_dotProduct_eigvecOf A hA π y i])

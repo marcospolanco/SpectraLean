@@ -6,18 +6,98 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**None — Tikhonov Phase 2 is COMPLETE (delivered this run, both steps
-in one run; see the top delivered entry) and the proposal is closed
-end-to-end. Next run: the Active priority table's single remaining
-High row — discrete affine convergence (`sgt-gaps.md` item 2, the
-finite-vector wrapper around the pin's
-`tendsto_pow_atTop_nhds_zero_of_abs_lt_one` plus the linear
-affine-iteration convergence theorem). Then the Medium rows by
-leverage (approximate spectral projection Step 1a next).**
+**None — discrete affine convergence is COMPLETE (delivered this run,
+both steps in one run per the proposal's own operating instruction;
+see the top delivered entry), and with it the Active priority table
+holds no High rows. Next run: the Medium rows by leverage —
+approximate spectral projection Step 1a (the interface layer, the
+recorded open next step of its Step-0 survey: the spike's four real
+lemmas plus the two priced shallow gaps into a new shelf module), then
+1b (spectral discharge) and 1c (statement + QA). The PF consumers
+(irreducible stationary distributions, PageRank) remain new-proposal
+candidates, each needing its own document per the one-step
+discipline.**
 
 ---
 
 ## Delivered milestones (most recent first)
+
+**Discrete affine convergence — the `sgt-gaps.md` item-2 consumer
+interface; the proposal COMPLETE (run 1, 2026-08-23, run
+`20260823T194800Z-run-1`; `proposals/discrete-affine-convergence.md`,
+the Active priority table's single remaining High row, the previous
+run's recorded next handoff, and the proposal's own "authorized to
+begin immediately"): DELIVERED — both steps in one run as pure hard
+crust, zero new axioms (count stays 9), QA 1546 → 1571 (the new
+`Dynamics` domain, `DiscreteAffine_QA` a new file at 25), opening
+backlog item 5's discrete-affine slice.**
+
+**Delivered:** the new `Scaffold/Mathlib/Dynamics/DiscreteAffine.lean`
+(namespace `Scaffold.Dynamics`, a new `Dynamics` area — the statements
+carry no graph structure per the proposal's own scope note, so not the
+event-driven `GraphTheory/Dynamics`; minimal imports, the umbrella
+importing it) — `tendsto_pow_smul_atTop_nhds_zero` (Step 1: `r ^ n • x
+→ 0` for `|r| < 1`, the pin's `tendsto_pow_atTop_nhds_zero_of_abs_lt_one`
+lifted through the pin's `Filter.Tendsto.smul_const`, both located by
+the survey and re-verified on delivery), `affineIteration_eq` (the
+closed form `x_n = (1−α)^n • (x_0 − e) + e`, pure module induction),
+and `affineIteration_tendsto_atTop` (Step 2: convergence to the
+equilibrium under `0 < α < 2` at the consumer's exact `Tendsto x atTop
+(𝓝 equilibrium)` shape). **Statement-shape decision recorded before
+stating:** all three at a general real normed space `E` — the proofs
+never use finiteness or coordinates, the drafted `V → ℝ`/`Fintype V`
+shape is the instance, QA instantiating exactly it (the Tikhonov
+Section-5 generality precedent).
+
+**QA (+25, four sections, `Scaffold/QA/Dynamics/DiscreteAffine_QA.lean`):**
+the decay wrapper by **two routes** (theorem vs. entrywise
+`tendsto_pi_nhds` + per-coordinate `Tendsto.mul` — the lifting through
+disjoint API paths) with numeric decay instances (`(1/2)^5`/`(1/2)^10`
+pins); the positive fixture at `α = 1/2` with the recurrence in the
+theorem's exact hypothesis form, per-step values, the closed form from
+the public theorem, per-coordinate geometric decay, and convergence by
+two independent routes; and the proposal's two mandated boundary
+witnesses as **proved refutations**, complementary by construction —
+`α = 2` oscillation (`xosc n = (−1)^n • ![1,0]`, ε-δ non-convergence at
+`ε = 1`, `0 < α` intact so exactly `hα2` isolated) and `α = 0`
+constancy (constant `![1,0] ≠ 0` provably not converging, `α < 2`
+intact so exactly `hα0` isolated).
+
+**Verification:** spike first (`wip/dac_spike.lean`, five rounds to
+green — the fixes becoming the recorded trap list:
+`Filter.Tendsto.congr`'s direction (use `Filter.tendsto_congr`'s
+`.mpr` for the reverse); `← add_smul` needs `add_assoc` first (the
+`b + c` subterm is otherwise not a syntactic subterm of `(a+b)+c`);
+bare `![2,4] i` in standalone ascriptions defaults to `ℕ` (the
+recorded trap re-hit); `norm_num` does not close `|(1:ℝ)/2| < 1`
+directly — `abs_lt` first; `Metric.tendsto_atTop` as the
+non-convergence refutation engine); `lake env lean` on the module and
+the QA file — zero errors, zero warnings each; explicit `lake build`
+targets both ✔; `#print axioms` via `wip/dac_axcheck.lean` on all 28
+declarations (3 public + 25 QA) — `propext, Classical.choice,
+Quot.sound` only; **full `lake build` ✔ (2253 targets, +1 for the new
+umbrella-reachable module; zero warnings in the changed modules — the
+log's warning mass is the documented Mathlib-internal set)**;
+`lint_axioms` (**9**, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1571/9/0**,
+idempotent). Records updated: the proposal (status header COMPLETE,
+the delivery record with pin-technique notes), `proposals/README.md`
+(the High row retired to the Delivered table; the progress paragraph
+de-staled — its historical program facts all preserved in the
+Delivered table, with the three previously paragraph-only slices
+consolidated into one row; a new delivered row), README (1571; the
+module table + proved-list sentence), the radar (QA axis count synced
+1546/40 → 1571/41, held 4.0), the scoreboard (both Direct rows, build
+row, lint row, a new interpretation bullet), the SGT index map (new
+`Dynamics.DiscreteAffine` section + 3 declaration rows), backlog item
+5 (the discrete-affine slice delivery note, remaining scope still
+gated), the umbrella, this plan, and the activity log. Nothing
+committed; the prior run's uncommitted Tikhonov Phase-2 delivery and
+the untracked `docs/scaffold.jpeg` preserved untouched.
+
+**Next milestone (open):** **approximate spectral projection Step 1a —
+the interface layer** (the recorded open next step of its Step-0
+survey), then 1b, then 1c.
 
 **Tikhonov Phase 2 — the hard-filter limit + tail suppression; the
 proposal COMPLETE (run 1, 2026-08-23, run `20260823T183842Z-run-1`;

@@ -22,7 +22,7 @@ As of August 23, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 9 |
-| QA theorems/lemmas | 1546, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 1571, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is: **Perron–Frobenius for irreducible
 nonnegative matrices**
@@ -124,7 +124,7 @@ the square-root-free symmetrized-adjacency pair `D_out − ½(A+Aᵀ)`;
 QA exhibits the calibration refutation — symmetric but **not PSD** on
 directed input, the quadratic form at `!![0,4;1,0]` evaluating to
 `−1/2 < 0`, so the positivity layer of the undirected toolkit does
-not transfer) are proved with zero axioms. The finite-distribution **entropy layer** (`InformationTheory.Entropy`: relative entropy `klDiv` and Shannon entropy `shannonEntropy` with the visible `p i = 0 ↦ 0` junk convention, Gibbs' inequality in both directions (`0 ≤ klDiv p q`, with equality exactly at `p = q`), the uniform bridge, the entropy maximum `shannonEntropy p ≤ log |V|` with equality exactly at uniform, and nonnegativity) is proved from the term-wise information inequality `log t ≤ t − 1` — the same textbook route as the pinned Mathlib strict-concavity machinery, with zero axioms.
+not transfer) are proved with zero axioms. The finite-distribution **entropy layer** (`InformationTheory.Entropy`: relative entropy `klDiv` and Shannon entropy `shannonEntropy` with the visible `p i = 0 ↦ 0` junk convention, Gibbs' inequality in both directions (`0 ≤ klDiv p q`, with equality exactly at `p = q`), the uniform bridge, the entropy maximum `shannonEntropy p ≤ log |V|` with equality exactly at uniform, and nonnegativity) is proved from the term-wise information inequality `log t ≤ t − 1` — the same textbook route as the pinned Mathlib strict-concavity machinery, with zero axioms. The **discrete-affine dynamics layer** (`Dynamics.DiscreteAffine`, the `sgt-gaps.md` item-2 consumer interface delivered 2026-08-23: the finite-vector geometric-decay wrapper `r ^ n • x → 0` for `|r| < 1` and the affine-iteration convergence theorem — `x_{n+1} = (1−α) • x_n + α • e` converges to `e` for `0 < α < 2`, via the closed form `x_n = (1−α)^n • (x_0 − e) + e` — both stated at a general real normed space) is likewise proved from pinned Mathlib lemmas with zero axioms, opening the discrete-affine slice of the graph-dynamics backlog item.
 
 The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for
 current counts, verification commands, and limitations.
@@ -260,6 +260,7 @@ The near-term center is general SGT. Public modules currently cover:
 | Perturbation | `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan,ProjectionGap,Duhamel}` |
 | Concentration | `Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*` |
 | Finite-distribution entropy | `InformationTheory.Entropy` (relative entropy and Shannon entropy, Gibbs' inequality, the entropy maximum — all proved) |
+| Discrete-affine dynamics | `Dynamics.DiscreteAffine` (the finite-vector geometric-decay wrapper `r ^ n • x → 0` for `\|r\| < 1` and the affine-iteration convergence theorem `x_{n+1} = (1−α) • x_n + α • e → e` for `0 < α < 2`, with the closed form — all proved, stated at a general real normed space; the `sgt-gaps.md` item-2 consumer interface, opening backlog item 5's discrete-affine slice) |
 | Matrix updates | `Core.MatrixUpdates` (Woodbury, Sherman–Morrison) |
 
 Outward work must improve one of those interfaces or make a concrete, broadly

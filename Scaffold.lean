@@ -20,6 +20,7 @@ import Scaffold.Mathlib.GraphTheory.Heat
 import Scaffold.Mathlib.GraphTheory.Directed
 import Scaffold.Mathlib.GraphTheory.VariationalTransfer
 import Scaffold.Mathlib.GraphTheory.Dynamics
+import Scaffold.Mathlib.Dynamics.DiscreteAffine
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.ProjectionGap
@@ -96,7 +97,11 @@ hypothesis-graded symmetry and time-zero identity, plus the square-zero
 exponential collapse), the variational
 transfer consuming the congruence bridge
 (`GraphTheory.VariationalTransfer`), the event-driven
-frontier (`GraphTheory.Dynamics`), the perturbation bridge
+frontier (`GraphTheory.Dynamics`), the discrete-affine dynamics slice
+(`Dynamics.DiscreteAffine`, the `sgt-gaps.md` item-2 consumer
+interface: the finite-vector geometric-decay wrapper and the
+affine-iteration convergence theorem, all proved hard crust), the
+perturbation bridge
 (`Analysis.OperatorTheory.Perturbation.*`), the resolvent calculus
 (`Analysis.OperatorTheory.Resolvent`, proposal steps 0–1: the
 operator-norm bridge `‖M‖ ↔ max-abs eigenvalue` proved from the

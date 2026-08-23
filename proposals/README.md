@@ -29,7 +29,7 @@ drift apart.
 
 | Priority | Proposal | Why |
 | --- | --- | --- |
-| Medium | [Reversibility and the Heat Semigroup](reversibility-and-heat-semigroup.md) (Phase B only — the heat semigroup `e^{-tL}`) | **Phase A (reversibility) DELIVERED 2026-08-22** as pure hard crust in `GraphTheory.Stationary` (detailed balance in degree-measure and stationary-measure forms, the symmetrizability packaging `D * P` symmetric, and the regular uniform-measure corollary — zero new axioms, no new definitions; see the Delivered table). This row is now **Phase B only**: the heat semigroup `e^{-tL}` with semigroup/symmetry/mass-conservation/eigenmode-decay, upgraded from Low 2026-08-19 when backlog item 5's gate ("only when a named SGT consumer needs them") was recorded open for this instance (diffusion models and heat-kernel graph signatures as the named external consumer — an operator decision, not the proposal self-authorizing). Cheap and axiom-free — Mathlib's matrix-exponential API plus Scaffold's proved eigenbasis machinery cover every step. **Still gated on the operator decision the proposal itself records** (does this proposal count as the named consumer, or wait for the mixing-time program to ask for a continuous-time comparison?); an autonomous run must not start Phase B Lean work without it recorded there. |
+| High | [Reversibility and the Heat Semigroup](reversibility-and-heat-semigroup.md) (Phase B only — the heat semigroup `e^{-tL}`) | **Phase A (reversibility) DELIVERED 2026-08-22** as pure hard crust in `GraphTheory.Stationary` (detailed balance in degree-measure and stationary-measure forms, the symmetrizability packaging `D * P` symmetric, and the regular uniform-measure corollary — zero new axioms, no new definitions; see the Delivered table). **Phase B's operator-decision gate RESOLVED 2026-08-23, promoted Medium → High**: `sgt-gaps.md`, from the independent `spectral-proof` clean-sheet rewrite project, names this proposal's Phase B by file path as the one remaining Scaffold dependency it needs — a real external consumer, not the proposal naming itself (the bar the 2026-08-19 upgrade had not actually cleared). The exact interface `sgt-gaps.md` asks for (heat evolution on `laplacian A`; identity/semigroup; mass conservation; eigenmode decay with the connected-graph DC-limit consequence) is Steps 1–4 below verbatim — no proposal-scope change needed. Cheap and axiom-free — Mathlib's matrix-exponential API plus Scaffold's proved eigenbasis machinery cover every step. **Next action: Step 0's survey, then Steps 1–4 one per run** — no further authorization needed. |
 | Low — technical decision required | [Spielman–Srivastava Sparsification](spectral-graph-sparsification.md) (Phase B only — Foster's theorem, Phase A, is the separate High item above) | Not the "Medium" this row previously said — reviewed 2026-08-18 and found to cite a theorem, `Scaffold.Probability.Concentration.MatrixChernoff.matrix_chernoff_upper_lower`, that does not exist anywhere in this repository; `sampledLaplacian` is likewise undefined. This is not a citation fix — the entire sparsification guarantee currently rests on nothing. Three real paths forward are named in the proposal's own "Correction": survey whether the existing `matrix_bernstein` axiom's hypotheses can actually supply what's needed, admit a new carefully-scoped matrix-Chernoff axiom with its own leverage case, or attempt a from-scratch proof (likely needing Lieb's concavity theorem or Golden–Thompson, neither remotely available). None of the three is a routine Lean-implementation decision; an autonomous run should not begin any Phase B work under this proposal until one is chosen. |
 | Low — human decision required | [Clean-Room SGT Export](clean-room-sgt-export.md) | Needs patent counsel sign-off before any phase starts. Potentially the highest-leverage item in this directory overall, but not one an autonomous Lean-work run can act on. |
 | Low — human decision required | [Clean-Room SGT Lemma-to-Science Map](clean-room-sgt-lemma-science-map.md) | Supporting provisional review inventory for the export above (linked from its "Initial public boundary" section) — a declaration-level map of every theorem, axiom, and private proof helper in the `GraphTheory/Spectral.lean` export candidate to classical mathematics, reviewed 2026-08-18. Approves nothing on its own; the export's own counsel-sign-off gate still controls every action. Found unindexed here 2026-08-22 while auditing this table — same class of gap as `retire-the-mushy-center.md`'s 2026-08-18 fix below. |
@@ -101,22 +101,25 @@ combinatorial `Matrix.IsIrreducible` plus the Horn–Johnson 8.4.4
 theorem at the irreducible-case qualification level with **no**
 strict-dominance clause, QA'd with the mandated imprimitive-cycle
 refutation witness `strict_dominance_refuted_QA` fencing exactly that
-misstatement — see the Delivered table). **The Active priority table currently has no High
-rows, and with the Cheeger retirement (2026-08-23) and **Fiedler
-Phase B delivered the same day** — the proposal's recorded operator
-gate dissolved by the retirement (pure hard crust, zero new axioms;
-`cheeger_cut_existence`, the classical cut-existence corollary, is the
-retirement's first consumer — see the Delivered table) — the
-perturbation/SGT-core discharge program and its named application-ring
-follow-on are both COMPLETE.** The next autonomous run falls through to
-the remaining Medium rows by leverage: **approximate spectral
-projection** (Step 0 first) — with the PF consumers (irreducible
-stationary distributions, PageRank) unblocked as *new-proposal*
-candidates, each needing its own document per the one-step discipline.
-Reversibility Phase B still needs an operator decision. (Also repaired
-2026-08-22: the Active table's duplicated reversibility row, stale
-drift from the 2026-08-19 upgrade, removed — and the same day delivered
-directed-operators Steps 0+1, opening the directed axis.)
+misstatement — see the Delivered table). With the Cheeger retirement
+(2026-08-23) and **Fiedler Phase B delivered the same day** — the
+proposal's recorded operator gate dissolved by the retirement (pure hard
+crust, zero new axioms; `cheeger_cut_existence`, the classical
+cut-existence corollary, is the retirement's first consumer — see the
+Delivered table) — the perturbation/SGT-core discharge program and its
+named application-ring follow-on are both COMPLETE. **The Active
+priority table now has one High row: Reversibility Phase B, promoted
+2026-08-23 by a real external named consumer (`sgt-gaps.md`, the
+`spectral-proof` rewrite project) — the next autonomous run should
+pursue its Step 0 first**, per this file's own "How this is used"
+policy. After that, the remaining Medium rows by leverage:
+**approximate spectral projection** (Step 0 first) — with the PF
+consumers (irreducible stationary distributions, PageRank) unblocked as
+*new-proposal* candidates, each needing its own document per the
+one-step discipline. (Also repaired 2026-08-22: the Active table's
+duplicated reversibility row, stale drift from the 2026-08-19 upgrade,
+removed — and the same day delivered directed-operators Steps 0+1,
+opening the directed axis.)
 
 The electrical-flow program's delivery history, one step per run:
 step 0 (representation survey — no flow/circulation/divergence API in the pin;

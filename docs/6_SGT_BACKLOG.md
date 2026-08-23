@@ -163,6 +163,16 @@ than the proposal self-authorizing. Consensus maps, synchronization, and
 general graph semigroups remain gated; this opens only the heat-semigroup
 instance.
 
+*Gate strengthened 2026-08-23:* `sgt-gaps.md`, from the independent
+`spectral-proof` clean-sheet rewrite project, names
+`reversibility-and-heat-semigroup.md` Phase B by file path as the one
+remaining Scaffold dependency it needs, with the exact interface (heat
+evolution on `laplacian A`; identity/semigroup; mass conservation;
+eigenmode decay with the connected-graph DC-limit consequence) matching
+Phase B's Steps 1–4 verbatim. This is a real external named consumer,
+not the field-level acceptance the 2026-08-19 note recorded — promoted
+to High in `proposals/README.md`.
+
 ### 6. Thermodynamics / statistical mechanics (conditional)
 
 *Gated on item 1–2 stability:* entropy and reversibility interfaces,

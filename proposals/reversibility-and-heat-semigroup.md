@@ -2,8 +2,19 @@
 
 **Status:** Active — Phase A (reversibility/detailed balance, both of its
 steps) DELIVERED 2026-08-22 as pure hard crust in `GraphTheory.Stationary`
-(zero new axioms, no new definitions); Phase B (the heat semigroup)
-remains open behind its recorded operator-decision gate. Originally
+(zero new axioms, no new definitions). **Phase B's operator-decision gate
+is RESOLVED 2026-08-23, priority raised to High.** `sgt-gaps.md` — a
+document from the independent `spectral-proof` clean-sheet rewrite
+project, handed to this repository directly by the operator — names this
+proposal's Phase B by file path as the one remaining Scaffold dependency
+that rewrite needs, and lists the exact interface: heat evolution
+specialized to `laplacian A`; identity at time zero and the semigroup
+law; mass conservation (`onesVec` preservation); and eigenmode decay,
+including the connected-graph consequence that free diffusion leaves
+only the DC component in the limit. That is Steps 1–4 below verbatim —
+no proposal-scope change is needed, only authorization to proceed. This
+is a real external named consumer, not the proposal naming itself (the
+distinction "Why this axis" below was careful to preserve). Originally
 proposed 2026-08-18.
 
 Two independent phases, split because they sit on opposite sides of an
@@ -52,13 +63,19 @@ states:
   **delivered** in the same document (`docs/6_SGT_BACKLOG.md:22-54`), so
   the stated precondition is met. Nothing about Phase A requires an
   operator decision.
-- **Phase B's gate is explicitly conditional and not yet open.**
+- **Phase B's gate was conditional; it is now resolved.**
   `docs/6_SGT_BACKLOG.md:93-98` (item 5, "Graph-dynamical systems"):
   "*Only when a named SGT consumer needs them*: diffusion / heat flow
   `e^{-tL}`... The retained persistence package is a compatibility
-  example, not a roadmap driver." This proposal names a consumer — see
-  "Open next step" — but per this repository's own center-out policy,
-  naming one in a proposal is not the same as an operator adopting it.
+  example, not a roadmap driver." This proposal originally named itself
+  as the consumer, which this repository's own center-out policy
+  correctly does not treat as sufficient (naming one in a proposal is
+  not the same as an operator adopting it). **2026-08-23: `sgt-gaps.md`,
+  from the independent `spectral-proof` rewrite project, supplies the
+  real external consumer this gate requires** — see the Status line
+  above. The distinction the original text drew is exactly why this
+  update matters: this is a different project asking for this proposal's
+  Phase B by name, not this proposal asking for itself.
 
 Phase B is also independently attractive on cost grounds: unlike the
 discrete walk matrix `L_walk` (not symmetric for irregular graphs, so
@@ -218,9 +235,8 @@ claim beyond the inequality itself.
 - Survey Mathlib before each step per this repository's standing rule;
   update `docs/8_MATHLIB_COVERAGE_MAP.md` if the survey finds something
   that map missed.
-- Do not begin Phase B without the operator decision named below on
-  record — Phase A carries no such precondition and may start
-  immediately.
+- Phase B's operator-decision gate is resolved (see "Open next step");
+  an autonomous run may begin Step 0 without further authorization.
 
 ## Open next step
 
@@ -230,16 +246,15 @@ uniform-measure corollary composed from `transitionMatrix_symmetric`
 (the already-on-shelf theorem the pre-edit survey found), exactly the
 proposal's own "otherwise Step 1 subsumes it" branch.
 
-**Phase B needs one operator decision first, per `docs/6_SGT_BACKLOG.md`
-item 5's own gate:** whether this proposal — which names itself as a
-consumer, and needs none of `mixing-time-bound.md`'s still-open
-walk-eigenvalue-transfer step — counts as the "named SGT consumer" that
-gate requires, or whether that decision should wait for
-`mixing-time-bound.md` to reach a point where it explicitly asks for a
-continuous-time comparison. This is a scope call in the same spirit as
-`admit-perron-frobenius.md`'s axis-opening decision, not a routine
-backlog item; an autonomous run should not start Phase B Lean work
-without it recorded here.
+**Phase B is authorized. RESOLVED 2026-08-23** — see the Status line and
+"Why this axis" above: `sgt-gaps.md` (the `spectral-proof` rewrite
+project) names this exact Phase B by file path as its one remaining
+Scaffold dependency, satisfying `docs/6_SGT_BACKLOG.md` item 5's "named
+SGT consumer" gate with a real external requester rather than the
+proposal naming itself. **Next action: Step 0's survey** (already sketched
+above — confirm the exact Mathlib lemma names before Step 1 writes any
+statement), then Steps 1–4 in order, one step per run per the operating
+instructions below.
 
 ## Delivery record
 

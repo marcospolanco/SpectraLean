@@ -199,6 +199,19 @@ consumer's (`sgt-gaps.md`) four-item interface is fully discharged as
 hard crust; QA 1503 declarations total. Consensus maps,
 synchronization, and general graph semigroups remain gated as before.
 
+*Gate narrowly opened 2026-08-23/24 for discrete affine control
+specifically:* a second `sgt-gaps.md` request (item 2) names a
+finite-dimensional discrete-time convergence wrapper (`r^n → 0` lifted
+to finite vectors, plus a linear affine-iteration convergence theorem)
+as a requirement of the `spectral-proof` rewrite — see
+`proposals/discrete-affine-convergence.md`. This is narrower than
+general "consensus maps, synchronization": no graph adjacency structure
+appears in the request, and it is explicitly discrete-time, not the
+continuous-time ODE-trajectory case `icebox/lyapunov-stability-
+formalization-gap.md` already found unsupported. Graph-structured
+consensus dynamics, synchronization proper, and general graph semigroups
+remain gated; this opens only the discrete-affine-convergence instance.
+
 ### 6. Thermodynamics / statistical mechanics (conditional)
 
 *Gated on item 1–2 stability:* entropy and reversibility interfaces,

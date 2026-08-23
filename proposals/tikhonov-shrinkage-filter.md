@@ -1,14 +1,12 @@
 # Proposal: Tikhonov Regularization in the Laplacian Eigenbasis
 
-**Status:** **DELIVERED 2026-08-20** — all three build steps in one run
-(the proposal's own "may cover more than one if the first lands
-cleanly" clause), as pure hard crust in
-`Scaffold.Mathlib.GraphTheory.Tikhonov` + QA in
-`Scaffold/QA/SpectralGraph/Tikhonov_QA.lean`. Zero new axioms (count
-stays 12; `#print axioms` on all 18 public theorems reads only
-`propext, Classical.choice, Quot.sound`). Two recorded deviations from
-the sketch, both in Step 3's endpoint claims — see the delivery record.
-Original assessment text follows.
+**Status:** Original three build steps **DELIVERED 2026-08-20** (see
+below). **Phase 2 (the hard-filter limit) OPENED 2026-08-23/24, priority
+High** — a real external named consumer, `sgt-gaps.md` item 1 from the
+`spectral-proof` rewrite project, asks for the positive-eigenvalue
+limit of `tikhonovShrinkage`; see "Phase 2" near the end of this
+document for the full ask and build order. Original assessment text
+follows.
 
 **Assessment:** proposed 2026-08-19, priority **High**. Assistant's
 assessment of project direction, requested 2026-08-19, promoted from
@@ -207,3 +205,71 @@ instantiated in QA — `eigvecOf` entries are not kernel-computable on
 the fixture; its content is covered transitively by the two
 normal-equation pins. The unverified Shuman et al. citation stays
 unverified and out of committed docstrings.
+
+## Phase 2: The hard-filter limit (opened 2026-08-23/24, priority High)
+
+**Status:** Proposed — a real external named consumer, `sgt-gaps.md`
+item 1 (from the independent `spectral-proof` clean-sheet rewrite
+project), asks for the standard positive-eigenvalue limit of
+`tikhonovShrinkage`. Promoted straight to High in `proposals/README.md`:
+the same class of resolution as `reversibility-and-heat-semigroup.md`
+Phase B — a different project naming this exact interface by file path,
+not this proposal naming itself.
+
+**The ask, precisely (per `sgt-gaps.md`):** for `tikhonovShrinkage π lam
+:= π / (lam + π)` (`Tikhonov.lean:79`) with `0 < lam` fixed,
+
+```lean
+Filter.Tendsto (fun π : ℝ => tikhonovShrinkage π lam) (𝓝 0) (𝓝 0)
+```
+
+plus a finite spectral-sum/Parseval corollary: for a finite selected
+tail of modes each with `lam ≤ λᵢ` and `0 < lam`, the squared filtered
+coefficient energy of that tail tends to zero as `π → 0⁺` (or along an
+explicitly stated positive filter). **The requester is explicit that
+this must be stated as suppression of the selected positive-eigenvalue
+tail, not as convergence to an arbitrary two-sided band projector** —
+ordinary (low-pass) Tikhonov cannot erase modes below a band's lower
+endpoint, and the statement must not overclaim that it does.
+
+**Cost, surveyed:** the scalar limit itself is immediate —
+`tikhonovShrinkage π lam = π / (lam + π)` is a quotient of two
+continuous functions of `π` with the denominator `lam + π` continuous
+and nonzero at `π = 0` (equal to `lam > 0`), so `ContinuousAt` at `0`
+plus evaluation (`π / (lam + π) → 0 / lam = 0`) closes it via
+Mathlib's standard `Filter.Tendsto.div`/`ContinuousAt.tendsto`
+machinery — no new definitions, a few lines. The Parseval corollary
+composes this scalar limit with the already-proved
+`tikhonovShrinkage_le_one`/`_pos` bounds and the shelf's eigenbasis
+expansion (`eigvecOf_expansion_apply`, the same completeness fact
+`Heat.lean`'s spectral-sum proof already consumes) over a **finite**
+selected index set — `Finset.sum`/`Filter.Tendsto.finset_sum` over a
+fixed finite tail, not a limit of an infinite series, so no new
+convergence machinery is needed either.
+
+**Build order:**
+
+- **Step 1:** `tikhonovShrinkage_tendsto_zero` — the scalar limit above,
+  stated for fixed `0 < lam`.
+- **Step 2:** the tail-suppression corollary — for a `Finset` of modes
+  each satisfying `lam ≤ λᵢ`, the sum of squared filtered coefficients
+  `∑ i ∈ tail, (tikhonovShrinkage (λᵢ) π)² * cᵢ²` (or the natural
+  eigenbasis-coefficient form) tends to `0` as `π → 0⁺`, by
+  `Filter.Tendsto.finset_sum` over Step 1 composed at each fixed `λᵢ`
+  (each term individually `→ 0`, since `lam ≤ λᵢ` and the shrinkage
+  factor is monotone/bounded — reuse `tikhonovShrinkage_le_one`, do not
+  reprove monotonicity from scratch unless the exact form needs it).
+  **State the conclusion as tail suppression, per the requester's
+  explicit non-overclaim instruction** — do not phrase it as convergence
+  to a band projector.
+
+**QA:** a positive witness (a small fixture with a concrete `lam` and a
+two-mode tail, the filtered energy computed at a few `π` values
+decreasing toward `0`); a boundary/negative witness confirming the
+statement genuinely fails for a mode *below* `lam` (the low-pass
+argument load-bearing, not vacuous) — directly requested by
+`sgt-gaps.md`'s "must not be phrased as... an arbitrary two-sided band
+projector" instruction.
+
+**No new axioms; no proposal-scope change beyond this phase.** One step
+per run, per this repository's standing operating instructions.

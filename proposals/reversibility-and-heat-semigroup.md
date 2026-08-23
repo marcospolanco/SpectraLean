@@ -1,15 +1,19 @@
 # Proposal: Reversibility and the Heat Semigroup on the Graph Laplacian
 
-**Status:** COMPLETE — Phase A (reversibility/detailed balance, both of
-its steps) DELIVERED 2026-08-22 as pure hard crust in `GraphTheory.Stationary`
-(zero new axioms, no new definitions). **Phase B DELIVERED in full
-2026-08-23 across four runs, zero new axioms at every step (count stays
-9)**: Step 0 (survey) + Step 1 (definition, symmetry, identity at zero),
-Step 2 (the semigroup law), Step 3 (mass conservation), and Step 4
-(eigenmode decay + the connected-graph DC limit — the payoff statement;
-see the delivery record below) — all in `GraphTheory.Heat`. The external
-consumer's four-item interface (identity, semigroup law, mass
-conservation, eigenmode decay with the DC limit) is complete hard crust.
+**Status:** Phases A and B COMPLETE — Phase A (reversibility/detailed
+balance, both of its steps) DELIVERED 2026-08-22 as pure hard crust in
+`GraphTheory.Stationary` (zero new axioms, no new definitions). **Phase
+B DELIVERED in full 2026-08-23 across four runs, zero new axioms at
+every step (count stays 9)**: Step 0 (survey) + Step 1 (definition,
+symmetry, identity at zero), Step 2 (the semigroup law), Step 3 (mass
+conservation), and Step 4 (eigenmode decay + the connected-graph DC
+limit — the payoff statement; see the delivery record below) — all in
+`GraphTheory.Heat`. The external consumer's four-item interface
+(identity, semigroup law, mass conservation, eigenmode decay with the
+DC limit) is complete hard crust. **Phase C (the heat-flow derivative +
+remainder bound) OPENED 2026-08-23/24, priority High** — see "Phase C"
+near the end of this document; a second, more specific `sgt-gaps.md`
+request (item 3) on the same `heatKernel` Phase B just built.
 **Phase B's operator-decision gate was
 RESOLVED 2026-08-23, priority raised to High.** `sgt-gaps.md` — a
 document from the independent `spectral-proof` clean-sheet rewrite
@@ -712,3 +716,72 @@ re-score triggers logged in the radar). One records repair delivered
 alongside: the radar axis-5 *table row* and "Weakest axes" paragraph,
 which the 2026-08-22 mixing-time run had left stale at score 2.5 with
 the closed gap still named, were synced to the recorded 3.0 state.
+
+## Phase C: The heat-flow derivative and a first-order remainder bound (opened 2026-08-23/24, priority High)
+
+**Status:** Proposed — `sgt-gaps.md` item 3 (from `spectral-proof`),
+delivered after Phase B, so this is a second, more specific request on
+the interface Phase B just finished: "the standard analytic input for
+the rewrite's dissolution theorem." Promoted straight to High, same
+resolution class as Phase B and Tikhonov Phase 2.
+
+**The ask, precisely:** for `heatKernel A t := NormedSpace.exp ℝ
+(-(t • laplacian A))` (`Heat.lean:208`), the standard matrix-exponential
+calculus at time zero,
+
+```lean
+HasDerivAt (fun t : ℝ => heatKernel A t *ᵥ x) (-(laplacian A *ᵥ x)) 0
+```
+
+plus an explicit first-order remainder bound on a bounded interval
+(Euclidean norm or entrywise) — a semigroup-only equivalent is
+acceptable if it supports a Taylor/mean-value bound for an observable
+formed from boundary coordinates. **State symmetry/nonnegative-weight
+hypotheses only where mathematically needed** — the requester is
+explicit that lifecycle-leakage interpretation stays in `spectral-proof`,
+not here.
+
+**Cost, surveyed:** this repository already has the exact proof pattern
+for a vector-level `HasDerivAt` through a finite spectral sum —
+`Duhamel.lean:191`'s `heatApply_hasDerivAt`, proved by differentiating
+`∑ i, Real.exp (-s * eigvalOf M hM i) * (…)` termwise via
+`HasDerivAt.sum` and `HasDerivAt.exp`, exactly the shape
+`Heat.lean:605`'s `heatKernel_mulVec_eq_sum` already expands
+`heatKernel A t *ᵥ x` into. At `t = 0` every exponential factor is `1`
+and the sum collapses to `∑ i, −λᵢ (vᵢ ⬝ᵥ x) • vᵢ = −(laplacian A *ᵥ x)`
+by the shelf's own eigenbasis-expansion identity
+(`eigvecOf_expansion_apply`) applied to `laplacian A *ᵥ x` directly —
+the derivative-at-zero statement should not need `A.IsSymm` beyond what
+`heatKernel_mulVec_eq_sum` already assumes to exist. The remainder
+bound is the one genuinely new piece: a finite-sum Taylor/Lagrange
+estimate bounding `‖heatKernel A t *ᵥ x − x + t • (laplacian A *ᵥ x)‖`
+by a second-derivative bound on a compact interval — likely via
+`Real.exp`'s own quadratic remainder bound (`Real.abs_exp_sub_one_sub_id_le`
+or the pin's Taylor-series remainder API for `Real.exp`) applied
+termwise through the same finite eigenbasis sum, then summed with
+Cauchy–Schwarz for the Euclidean-norm form.
+
+**Build order:**
+
+- **Step 0:** survey the pin's exact `Real.exp` remainder/Taylor lemmas
+  (`Mathlib.Analysis.SpecialFunctions.Exp` and
+  `Mathlib.Analysis.Calculus.Taylor`) before committing to a statement
+  shape for the remainder bound.
+- **Step 1:** `heatKernel_mulVec_hasDerivAt_zero` — the derivative-at-zero
+  identity above, adapting `Duhamel.lean`'s termwise-sum technique to
+  `heatKernel_mulVec_eq_sum`.
+- **Step 2:** the first-order remainder bound on a bounded interval
+  `[0, T]`, in whichever norm Step 0's survey finds cleanest — entrywise
+  is likely cheaper than Euclidean and may be what the consumer actually
+  needs (state both if the entrywise form is nearly free once the
+  Euclidean one is proved).
+
+**QA:** a positive witness computing both the derivative and a concrete
+remainder bound on a small fixture at a specific `t`, cross-checked
+against `heatKernel`'s direct exponential-series value (the same
+cross-check pattern `Heat.lean`'s own QA already uses); a boundary
+witness showing the bound degrades as expected as `T` grows, so the
+"first-order" claim isn't accidentally global.
+
+**No new axioms; no proposal-scope change beyond this phase.** One step
+per run.

@@ -11,7 +11,14 @@
   `!![1,-1;1,-1]` is square-zero, which makes `heatKernel` computable
   in closed form at *every* time through the square-zero collapse
   `exp_neg_smul_eq_one_add_of_mul_self_eq_zero`), plus a disconnected
-  `Fin 3` fixture for the per-component no-leakage witness.
+  `Fin 3` fixture for the per-component no-leakage witness; Step 4
+  (eigenmode decay, the DC limit); Phase C Step 1 (the heat-flow
+  derivative at zero, two independent routes plus the infinitesimal
+  conservation cross-check); and Phase C Step 2 (the first-order
+  remainder bound: the K₂ eigenvalue inventory, the eigen-sum constant
+  `4`, the concrete-bound witness cross-checked against the closed-form
+  exponential value at two times, and the boundary-degradation witness
+  pinning the `t²` scaling and the `t = 1/2` window fence).
 
   All proofs are real Lean proofs (no `sorry`/`admit`). These are
   theorems, not axioms; QA checks the interfaces where the arithmetic
@@ -634,5 +641,404 @@ theorem heatKernel_edge_dc_raw_QA :
     funext i
     fin_cases i <;> norm_num
   · exact (hev t ht).symm
+
+/-!
+## The heat-flow derivative at zero (Phase C, Step 1)
+-/
+
+/-- **The derivative value on K₂, theorem route**: the flow of `![1, 3]`
+differentiates at `t = 0` to `![2, -2]` — the Phase C theorem instantiated
+on the symmetric fixture, the Laplacian action `L *ᵥ ![1,3] = ![-2,2]`
+supplied by the raw entrywise computation `edgeLaplacian_mulVec_dc`
+(already verified independent of every Phase C theorem). -/
+theorem heatKernel_edge_deriv_theorem_QA :
+    HasDerivAt (fun t : ℝ => heatKernel edgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ))
+      (![2, -2] : Fin 2 → ℝ) 0 := by
+  have h := heatKernel_mulVec_hasDerivAt_zero edgeAdj edgeAdj_isSymm
+    (![1, 3] : Fin 2 → ℝ)
+  rw [edgeLaplacian_mulVec_dc] at h
+  have hval : (-(![-2, 2] : Fin 2 → ℝ)) = ![2, -2] := by
+    funext i
+    fin_cases i <;> simp
+  rw [hval] at h
+  exact h
+
+set_option linter.unnecessarySeqFocus false in
+/-- **The derivative value on K₂, raw route**: the same statement through
+the Step-4 closed form `heatKernel edgeAdj t = 1 + ((e^{-2t} - 1)/2) • L`
+and scalar calculus only — `d/dt (e^{-2t} - 1)/2 |₀ = -1`, so the flow
+`x + c(t) • (L *ᵥ x)` differentiates to `0 + (-1) • (L *ᵥ x) = ![2,-2]`.
+Independent of the eigenbasis expansion, the entrywise derivative engine,
+and `hasDerivAt_pi` — a wrong sign, factor, or eigenvalue anywhere in the
+Phase C chain contradicts this computation (the closed form itself is the
+independently QA'd `heatKernel_edge_closed_QA`, collapse-route). -/
+theorem heatKernel_edge_deriv_raw_QA :
+    HasDerivAt (fun t : ℝ => heatKernel edgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ))
+      (![2, -2] : Fin 2 → ℝ) 0 := by
+  have hact : ∀ t : ℝ, heatKernel edgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ)
+      = (![1, 3] : Fin 2 → ℝ)
+        + ((Real.exp (-(2 * t)) - 1) / 2) • (![ -2, 2] : Fin 2 → ℝ) := by
+    intro t
+    by_cases ht : t = 0
+    · subst ht
+      rw [heatKernel_zero, Matrix.one_mulVec]
+      funext i
+      fin_cases i <;> simp [smul_eq_mul]
+    · rw [heatKernel_edge_closed_QA t ht, Matrix.add_mulVec, Matrix.one_mulVec,
+        Matrix.smul_mulVec_assoc, edgeLaplacian_mulVec_dc]
+  rw [funext hact]
+  have hc : HasDerivAt (fun t : ℝ => (Real.exp (-(2 * t)) - 1) / 2) (-1 : ℝ) 0 := by
+    have h0 : HasDerivAt (fun t : ℝ => 2 * t) (2 : ℝ) 0 := by
+      simpa using (hasDerivAt_id 0).const_mul (2 : ℝ)
+    have h1 : HasDerivAt (fun t : ℝ => -(2 * t)) (-2 : ℝ) 0 := by
+      simpa using h0.neg
+    have h2 : HasDerivAt (fun t : ℝ => Real.exp (-(2 * t))) (-2 : ℝ) 0 := by
+      simpa using h1.exp
+    have h3 : HasDerivAt (fun t : ℝ => Real.exp (-(2 * t)) - 1) (-2 : ℝ) 0 := by
+      simpa using h2.sub (hasDerivAt_const 0 (1 : ℝ))
+    simpa using h3.div_const 2
+  have hsum := (hasDerivAt_const 0 (![1, 3] : Fin 2 → ℝ)).add
+    (hc.smul_const (![ -2, 2] : Fin 2 → ℝ))
+  convert hsum using 1
+  funext i
+  fin_cases i <;> simp
+
+/-- **Infinitesimal mass conservation, theorem route**: the `onesVec` flow
+differentiates at `t = 0` to `0` — the Phase C theorem at the conserved
+vector, with the Laplacian kernel equation `laplacian_ones_in_kernel`
+collapsing the derivative. The infinitesimal counterpart of Step 3's
+`heatKernel_mulVec_onesVec`. -/
+theorem heatKernel_edge_deriv_conservation_QA :
+    HasDerivAt (fun t : ℝ => heatKernel edgeAdj t *ᵥ (onesVec : Fin 2 → ℝ)) 0 0 := by
+  have h := heatKernel_mulVec_hasDerivAt_zero edgeAdj edgeAdj_isSymm onesVec
+  rw [laplacian_ones_in_kernel] at h
+  simpa using h
+
+/-- **Infinitesimal mass conservation, conservation route**: the same
+statement from Step 3 alone — the flow is *constantly* `onesVec`, so its
+derivative is `0` with no eigenbasis, no expansion, and no Phase C input.
+Two routes to one derivative; a Phase C defect at the kernel mode breaks
+the theorem route but not this one. -/
+theorem heatKernel_edge_deriv_conservation_route2_QA :
+    HasDerivAt (fun t : ℝ => heatKernel edgeAdj t *ᵥ (onesVec : Fin 2 → ℝ)) 0 0 := by
+  rw [funext fun t => heatKernel_mulVec_onesVec edgeAdj t]
+  exact hasDerivAt_const 0 onesVec
+
+/-!
+## The first-order remainder bound (Phase C, Step 2)
+-/
+
+/-- The K₂ Laplacian's eigenvalues are nonnegative: PSD
+(`laplacian_psd` at the nonnegative symmetric fixture) read at each
+unit eigenvector through `quadForm_eigvecOf_self` — the per-index input
+to the eigenvalue inventory below (independent of any sort machinery). -/
+theorem edge_eigvalOf_nonneg (i : Fin 2) :
+    0 ≤ eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i := by
+  rw [← quadForm_eigvecOf_self (laplacian_symmetric edgeAdj edgeAdj_isSymm) i]
+  exact laplacian_psd edgeAdj edgeAdj_isSymm edgeAdj_nonneg _
+
+/-- The K₂ eigenvalues sum to the trace `2` (`eigvalOf_sum_eq_trace`
+at the raw entrywise trace `edgeLaplacian_trace`). -/
+theorem edge_eigvalOf_sum :
+    ∑ i : Fin 2, eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i
+      = 2 := by
+  rw [eigvalOf_sum_eq_trace]
+  exact edgeLaplacian_trace
+
+/-- The K₂ eigenvalues multiply to the determinant `0`
+(`det_eq_prod_eigenvalues` at the raw entrywise determinant
+`edgeLaplacian_det`). -/
+theorem edge_eigvalOf_prod :
+    ∏ i : Fin 2, eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i
+      = 0 := by
+  have hd0 := (isHermitian_of_isSymm
+    (laplacian_symmetric edgeAdj edgeAdj_isSymm)).det_eq_prod_eigenvalues
+  rw [edgeLaplacian_det] at hd0
+  exact hd0.symm
+
+/-- **The K₂ eigenvalue inventory, per vertex index**: every `eigvalOf`
+of the K₂ Laplacian is `0` or `2` — nonnegativity plus the trace sum
+and the vanishing product (some factor is `0`; the other must be `2`)
+— with both orderings covered. The per-index smallness window and the
+eigen-sum constant below read their cases from here. -/
+theorem edge_eigvalOf_cases (i : Fin 2) :
+    eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i = 0
+      ∨ eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i = 2 := by
+  have hsum := edge_eigvalOf_sum
+  have hprod := edge_eigvalOf_prod
+  obtain ⟨j₀, -, hj₀⟩ := Finset.prod_eq_zero_iff.1 hprod
+  rw [Fin.sum_univ_two] at hsum
+  fin_cases j₀
+  · have hz0 : eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) 0
+        = 0 := hj₀
+    have h1 : eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) 1
+        = 2 := by
+      have hn := edge_eigvalOf_nonneg 1
+      linarith
+    fin_cases i
+    · exact Or.inl hz0
+    · exact Or.inr h1
+  · have hz1 : eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) 1
+        = 0 := hj₀
+    have h0 : eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) 0
+        = 2 := by
+      have hn := edge_eigvalOf_nonneg 0
+      linarith
+    fin_cases i
+    · exact Or.inr h0
+    · exact Or.inl hz1
+
+/-- Some K₂ mode has eigenvalue exactly `2` (not both can be `0`: the
+trace is `2`) — the index the window-fence witness below reads. -/
+theorem edge_eigvalOf_exists_two :
+    ∃ i : Fin 2, eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i
+      = 2 := by
+  by_contra hcon
+  push_neg at hcon
+  have h0 : ∀ i : Fin 2,
+      eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i = 0 := by
+    intro i
+    rcases edge_eigvalOf_cases i with h | h
+    · exact h
+    · exact absurd h (hcon i)
+  have hsum := edge_eigvalOf_sum
+  rw [Fin.sum_univ_two, h0 0, h0 1] at hsum
+  norm_num at hsum
+
+/-- **The smallness window on K₂**: every time `s ∈ [0, 1/2]` meets the
+remainder bound's hypothesis `|s · λᵢ| ≤ 1` (both inventory cases
+compute: `|s · 0| = 0`, `|s · 2| = 2s ≤ 1`). The bound is usable on
+exactly `[0, 1/2]` on this fixture — and provably not beyond (the fence
+witness below). -/
+theorem edge_window (s : ℝ) (hs0 : 0 ≤ s) (hs : s ≤ 1/2) (i : Fin 2) :
+    |s * eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i| ≤ 1 := by
+  rcases edge_eigvalOf_cases i with h | h
+  · rw [h, mul_zero, abs_zero]
+    norm_num
+  · rw [h, abs_of_nonneg (mul_nonneg hs0 zero_le_two), mul_comm]
+    linarith
+
+/-- The K₂ Laplacian's coordinate action, both entries — the raw input
+to the mode-structure derivation below (rewritten on a fresh goal, so
+the eigenbasis terms never sit under the literal). -/
+theorem edgeLaplacian_mulVec_coords (v : Fin 2 → ℝ) :
+    (laplacian edgeAdj *ᵥ v) 0 = v 0 - v 1
+      ∧ (laplacian edgeAdj *ᵥ v) 1 = v 1 - v 0 := by
+  rw [edgeLaplacian_eq]
+  constructor <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two] <;> ring
+
+/-- **The K₂ eigenmode structure**: every eigenvector of the nonzero
+mode (eigenvalue `2`) is `c • ![1, -1]` with `2c² = 1` — the coordinate
+eigen-equation (`v 1 = -v 0`) plus the unit normalization
+(`eigvecOf_inner`). This is what makes the eigen-sum constant *exactly*
+computable: the mode's contribution is `λ² |v ⬝ᵥ x| |v a| =
+4 · 2|c| · |c| = 8c² = 4` regardless of the orientation sign `±`. -/
+theorem edge_eigvecOf_mode_two {i : Fin 2}
+    (hi : eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i = 2) :
+    ∃ c : ℝ, eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i
+        = c • (![1, -1] : Fin 2 → ℝ) ∧ 2 * c ^ 2 = 1 := by
+  have hev : laplacian edgeAdj *ᵥ (eigvecOf (laplacian edgeAdj)
+      (laplacian_symmetric edgeAdj edgeAdj_isSymm) i)
+      = (2 : ℝ) • (eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) := by
+    have h := (isHermitian_of_isSymm
+      (laplacian_symmetric edgeAdj edgeAdj_isSymm)).mulVec_eigenvectorBasis i
+    rw [show (isHermitian_of_isSymm
+        (laplacian_symmetric edgeAdj edgeAdj_isSymm)).eigenvalues i
+        = eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i from rfl,
+      hi] at h
+    exact h
+  have hc := (edgeLaplacian_mulVec_coords (eigvecOf (laplacian edgeAdj)
+    (laplacian_symmetric edgeAdj edgeAdj_isSymm) i)).1
+  have hc' : (2 : ℝ) * (eigvecOf (laplacian edgeAdj)
+        (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0
+      = (eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0
+        - (eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 1 := by
+    rw [← hc, hev]
+    simp
+  have hne : (eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 1
+      = -((eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0) := by
+    linarith
+  refine ⟨(eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0, ?_, ?_⟩
+  · funext k
+    fin_cases k <;> simp [hne]
+  · have hu := eigvecOf_inner (laplacian edgeAdj)
+      (laplacian_symmetric edgeAdj edgeAdj_isSymm) i i
+    simp only [if_pos rfl, if_true] at hu
+    rw [Fin.sum_univ_two] at hu
+    have hv1 : (eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 1
+          * (eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 1
+        = (eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0
+          * (eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0 := by
+      rw [hne]; ring
+    rw [pow_two]
+    linarith
+
+/-- The per-mode contribution at the λ = 2 mode: `4` exactly (the
+mode-structure computation — `8c² = 4` at `2c² = 1`). -/
+private theorem edge_remainder_somm (i : Fin 2) (h : eigvalOf (laplacian edgeAdj)
+    (laplacian_symmetric edgeAdj edgeAdj_isSymm) i = 2) :
+    (eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) ^ 2
+      * |Matrix.dotProduct (eigvecOf (laplacian edgeAdj)
+          (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) (![1, 3] : Fin 2 → ℝ)|
+      * |(eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0|
+      = 4 := by
+  obtain ⟨c, hc, hc2⟩ := edge_eigvecOf_mode_two h
+  rw [h, hc]
+  have hd : Matrix.dotProduct ((c • (![1, -1] : Fin 2 → ℝ))) (![1, 3] : Fin 2 → ℝ)
+      = -(2 * c) := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two, Pi.smul_apply, smul_eq_mul]
+    ring
+  have h0 : ((c • (![1, -1] : Fin 2 → ℝ)) : Fin 2 → ℝ) 0 = c := by simp
+  rw [hd, h0, abs_neg, abs_mul, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 2)]
+  have hcc : |c| * |c| = 1 / 2 := by
+    have habs : |c| * |c| = c * c := by
+      rw [← abs_mul, abs_of_nonneg (mul_self_nonneg c)]
+    rw [habs]
+    have h := hc2
+    rw [pow_two] at h
+    linarith
+  have hf : (2 : ℝ) ^ 2 * (2 * |c|) * |c| = 4 := by
+    have e1 : (2 * |c|) * |c| = 2 * (|c| * |c|) := by ring
+    have e2 : (2 : ℝ) ^ 2 * (2 * |c|) * |c|
+        = (2 : ℝ) ^ 2 * ((2 * |c|) * |c|) := by ring
+    rw [e2, e1, hcc]
+    norm_num
+  exact hf
+
+/-- **The eigen-sum constant on the fixture**: the remainder bound's
+spectral constant at `x = ![1, 3]`, observable `a = 0` is exactly `4`
+— the zero mode contributes `0`, the λ = 2 mode contributes `4`, and
+the trace pins exactly one mode at each value. Load-bearing: this is
+what turns the theorem's RHS into the concrete number `t² · 4` in the
+witnesses below (a wrong eigenvalue or normalization in the shelf's
+eigenbasis machinery would move it). -/
+theorem edge_remainder_sum_eq :
+    ∑ i : Fin 2, (eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) ^ 2
+      * |Matrix.dotProduct (eigvecOf (laplacian edgeAdj)
+          (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) (![1, 3] : Fin 2 → ℝ)|
+      * |(eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0|
+      = 4 := by
+  have hsum := edge_eigvalOf_sum
+  rw [Fin.sum_univ_two] at hsum
+  have hz : ∀ j : Fin 2, eigvalOf (laplacian edgeAdj)
+        (laplacian_symmetric edgeAdj edgeAdj_isSymm) j = 0 →
+      (eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) j) ^ 2
+        * |Matrix.dotProduct (eigvecOf (laplacian edgeAdj)
+            (laplacian_symmetric edgeAdj edgeAdj_isSymm) j) (![1, 3] : Fin 2 → ℝ)|
+        * |(eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) j) 0|
+      = 0 := by
+    intro j hj
+    rw [hj, zero_pow (by norm_num)]
+    ring
+  rcases edge_eigvalOf_cases 0 with e0 | e0 <;> rcases edge_eigvalOf_cases 1 with e1 | e1
+  · rw [e0, e1] at hsum; norm_num at hsum
+  · rw [Fin.sum_univ_two, hz 0 e0, edge_remainder_somm 1 e1]; norm_num
+  · rw [Fin.sum_univ_two, edge_remainder_somm 0 e0, hz 1 e1]; norm_num
+  · rw [e0, e1] at hsum; norm_num at hsum
+
+/-- **The concrete-bound witness, theorem route**: at `t = 1/2` (the
+window's endpoint) the first-order remainder at coordinate `0` of
+`x = ![1, 3]` on K₂ is at most `1` — the Phase C theorem instantiated
+with the window fact `edge_window`, the RHS eigen-sum evaluated to the
+concrete `(1/2)² · 4 = 1` through `edge_remainder_sum_eq`. A wrong
+constant anywhere in the theorem's `t²` or eigenvalue weights moves
+this number. -/
+theorem heatKernel_edge_remainder_bound_half_QA :
+    |(heatKernel edgeAdj (1/2) *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
+      - (![1, 3] : Fin 2 → ℝ) 0
+      + (1/2) * ((laplacian edgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0)|
+      ≤ 1 := by
+  have h := heatKernel_firstOrder_remainder_apply_le edgeAdj edgeAdj_isSymm
+    (![1, 3] : Fin 2 → ℝ) 0 (1/2) (edge_window (1/2) (by norm_num) (le_refl _))
+  rw [edge_remainder_sum_eq] at h
+  norm_num at h
+  exact h
+
+/-- **The raw remainder value, closed-form route** (at every nonzero
+time): through the independently QA'd closed form
+`heatKernel_edge_closed_QA` and hand arithmetic only — no eigenbasis,
+no `Real.abs_exp_sub_one_sub_id_le` — the coordinate-`0` remainder of
+`![1, 3]` on K₂ is exactly `1 - 2t - e^{-2t}`. The cross-check anchor:
+at `t = 1/2` this is `-e⁻¹`, at `t = 1/4` it is `1/2 - e^{-1/2}`. -/
+theorem heatKernel_edge_remainder_value_raw (t : ℝ) (ht : t ≠ 0) :
+    (heatKernel edgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
+      - (![1, 3] : Fin 2 → ℝ) 0
+      + t * ((laplacian edgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0)
+      = 1 - 2 * t - Real.exp (-(2 * t)) := by
+  rw [heatKernel_edge_closed_QA t ht, Matrix.add_mulVec, Matrix.one_mulVec,
+    Matrix.smul_mulVec_assoc, edgeLaplacian_mulVec_dc]
+  norm_num [Pi.add_apply, Pi.smul_apply, smul_eq_mul]
+  ring
+
+/-- **The composite cross-check at `t = 1/2`**: raw value `-e⁻¹` (closed
+form) inside the theorem's numeric bound `1` (eigen-sum route) —
+`e⁻¹ ≤ 1`, both sides pinned by unrelated computations. A wrong sign,
+factor, eigenvalue, or summation in either delivered chain (eigenbasis
+expansion + termwise exponential bound vs. rank-one-idempotent closed
+form) contradicts the other. -/
+theorem heatKernel_edge_remainder_cross_QA : Real.exp (-1 : ℝ) ≤ 1 := by
+  have h1 := heatKernel_edge_remainder_bound_half_QA
+  have hval : (heatKernel edgeAdj (1/2) *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
+      - (![1, 3] : Fin 2 → ℝ) 0
+      + (1/2) * ((laplacian edgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0)
+      = -(Real.exp (-1 : ℝ)) := by
+    have h := heatKernel_edge_remainder_value_raw (1/2) (by norm_num)
+    rw [h]
+    norm_num
+  rw [hval] at h1
+  rwa [abs_neg, abs_of_nonneg (Real.exp_nonneg (-1))] at h1
+
+/-- **The concrete bound at the interior point, interval route**: at
+`t = 1/4` on the window `[0, 1/2]`, the interval-packaged theorem gives
+the remainder bound `(1/4)² · 4 = 1/4` — the hypothesis-transfer step
+(`|t·λ| ≤ |T·λ| ≤ 1` at `0 ≤ t ≤ T`) exercised at concrete numerics. -/
+theorem heatKernel_edge_remainder_interval_QA :
+    |(heatKernel edgeAdj (1/4) *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
+      - (![1, 3] : Fin 2 → ℝ) 0
+      + (1/4) * ((laplacian edgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0)|
+      ≤ 1/4 := by
+  have h := heatKernel_firstOrder_remainder_interval edgeAdj edgeAdj_isSymm
+    (![1, 3] : Fin 2 → ℝ) 0 (T := 1/2) (t := 1/4)
+    (edge_window (1/2) (by norm_num) (le_refl _)) (by norm_num) (by norm_num)
+  rw [edge_remainder_sum_eq] at h
+  norm_num at h
+  exact h
+
+/-- **The boundary-degradation witness**: the bound's constants at the
+two times are `1` (at `t = 1/2`) and `1/4` (at `t = 1/4`) — halving the
+time quarters the bound, the `t²` scaling made numeric on both sides:
+each component is the *raw* closed-form remainder (`1/2 - e^{-1/2}` ≈
+0.107 and `e⁻¹` ≈ 0.368) inside the *theorem-derived* bound. A wrong
+power of `t` in the theorem (t¹ would give bounds `2` and `1/2`; t³
+would give `1/2` and `1/16`) contradicts at least one component — the
+"first-order" claim is thereby pinned as exactly quadratic, not
+accidentally weaker or stronger. -/
+theorem heatKernel_edge_remainder_degrades_QA :
+    |(1/2 : ℝ) - Real.exp (-(1/2 : ℝ))| ≤ 1/4
+      ∧ Real.exp (-(1 : ℝ)) ≤ 1 := by
+  constructor
+  · have hval := heatKernel_edge_remainder_value_raw (1/4) (by norm_num)
+    have hbound := heatKernel_edge_remainder_interval_QA
+    rw [hval] at hbound
+    have harg : (2 : ℝ) * (1/4) = 1/2 := by norm_num
+    rw [harg] at hbound
+    have hnum : (1 : ℝ) - 1/2 = 1/2 := by norm_num
+    rw [hnum] at hbound
+    exact hbound
+  · exact heatKernel_edge_remainder_cross_QA
+
+/-- **The window fence**: the smallness hypothesis provably *fails* at
+`t = 1` on K₂ — some mode has `|1 · 2| = 2 ≰ 1`. The remainder bound is
+genuinely local to `[0, 1/2]` on this fixture (usable exactly there per
+`edge_window`), so the first-order claim is not accidentally global. -/
+theorem heatKernel_edge_remainder_window_fenced_QA :
+    ¬ ∀ i : Fin 2, |(1 : ℝ)
+        * eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i| ≤ 1 := by
+  intro h
+  obtain ⟨i, hi⟩ := edge_eigvalOf_exists_two
+  have h1 := h i
+  rw [hi, one_mul] at h1
+  norm_num at h1
 
 end SpectralGraphTheory.QA

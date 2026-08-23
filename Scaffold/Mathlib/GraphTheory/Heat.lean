@@ -18,6 +18,10 @@ import Mathlib.Analysis.Normed.Algebra.MatrixExponential
 import Mathlib.Analysis.SpecificLimits.Normed
 import Mathlib.Analysis.Normed.Group.InfiniteSum
 import Mathlib.Analysis.SpecialFunctions.Exponential
+import Mathlib.Analysis.Calculus.Deriv.Add
+import Mathlib.Analysis.Calculus.Deriv.Mul
+import Mathlib.Analysis.Calculus.Deriv.Prod
+import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
 import Mathlib.Order.Filter.Tendsto
 
@@ -111,6 +115,33 @@ rank-one-idempotent collapse `exp_eq_one_add_of_mul_self_eq_smul`
 square-zero collapse's sibling — the closed form that makes the
 symmetric `K₂` fixture exactly evaluable at symbolic times).
 
+Phase C, Step 1 (the second `sgt-gaps.md` request on this module, the
+`spectral-proof` rewrite's dissolution-theorem input) delivers the
+heat-flow derivative at time zero:
+
+- `heatKernel_mulVec_hasDerivAt_zero`: the flow `t ↦ heatKernel A t *ᵥ x`
+  is differentiable at `t = 0` with derivative `-(laplacian A *ᵥ x)` —
+  the standard infinitesimal generator statement, `d/dt e^{-tL} x |₀ =
+  -L x`, in `HasDerivAt` form (vector-valued, the entrywise (Pi) norm
+  instances at `[Fintype V]`); the entrywise engine
+  `heatKernel_mulVec_apply_hasDerivAt_zero` is `Duhamel.lean`'s
+  `heatApply_hasDerivAt` technique (termwise `HasDerivAt.sum` +
+  `HasDerivAt.exp`) adapted to `heatKernel_mulVec_eq_sum`, and the
+  vector form is assembled from it by the pin's `hasDerivAt_pi`.
+
+Phase C, Step 2 (the quantitative half of the dissolution-theorem
+input) delivers the first-order remainder bound:
+
+- `heatKernel_firstOrder_remainder_apply_le`: on the smallness window
+  `|t · λᵢ| ≤ 1`, the flow deviates from its first-order Taylor
+  polynomial at zero by at most
+  `t² · ∑ᵢ λᵢ² |vᵢ ⬝ᵥ x| |vᵢ a|` at every coordinate `a` — the
+  entrywise (boundary-observable) form, per the Step-0 survey's
+  committed termwise route through the pin's
+  `Real.abs_exp_sub_one_sub_id_le`;
+- `heatKernel_firstOrder_remainder_interval`: the uniform form on
+  `[0, T]` whenever `T` itself meets the window.
+
 ## Scope notes (recorded before stating, 2026-08-23)
 
 - `t` ranges over all of ℝ by construction. For negative `t` this is
@@ -153,6 +184,24 @@ therefore establishes everything entrywise: the power bound
 `HasSum.map` push through the continuous additive action
 `N ↦ N *ᵥ v` — the same pattern the pin's own `Matrix.transpose_tsum`
 uses for its tsum commutation.
+
+## Phase C, Step-0 survey note (recorded before proving, 2026-08-23)
+
+The remainder-bound shape (Phase C Step 2, next run): the pin carries
+`Real.abs_exp_sub_one_sub_id_le` (`Mathlib/Data/Complex/Exponential.lean`,
+the `to_additive`-side real form at line 1211) — `|x| ≤ 1 →
+|Real.exp x - 1 - x| ≤ x ^ 2` — exactly the termwise quadratic
+remainder engine the proposal guessed, applied per eigenmode through
+`heatKernel_mulVec_eq_sum` at `|t * λᵢ| ≤ 1` and summed. The pin's
+`Analysis/Calculus/Taylor.lean` exists but the plain exponential bound
+above is strictly cheaper (no Taylor-coordinate plumbing). Elaboration
+trap recorded for the vector-valued statement: stating the derivative
+theorem's *proof* directly in vector form times out at `whnf` on a
+variable vertex type `V` (the `smul_const`/`HasDerivAt.sum` instance
+synthesis over `Pi` norms) — the delivered route proves the entrywise
+(scalar-valued) statement, Duhamel's own delivered shape, and assembles
+the vector form with the pin's `hasDerivAt_pi`
+(`Analysis/Calculus/Deriv/Prod.lean`).
 -/
 
 namespace SpectralGraphTheory
@@ -806,5 +855,255 @@ theorem heatKernel_mulVec_tendsto_atTop (A : WAdj (V := V)) (hA : A.IsSymm)
     rw [hprod, div_eq_inv_mul]
   rw [← hlim]
   simpa using htermi₀.add htail
+
+/-!
+## The heat semigroup, Phase C Step 1: the heat-flow derivative at zero
+-/
+
+/-- **The heat-flow derivative at zero, entrywise form** (Phase C Step 1):
+each coordinate of the flow `t ↦ heatKernel A t *ᵥ x` is differentiable at
+`t = 0` with derivative the corresponding coordinate of `-(laplacian A
+*ᵥ x)`. Route: `heatKernel_mulVec_eq_sum` turns the coordinate into the
+damped eigenbasis sum, differentiated termwise (`HasDerivAt.sum`,
+`HasDerivAt.exp`, the `Duhamel.lean` `heatApply_hasDerivAt` technique);
+at `t = 0` every factor is `1`, and the derivative sum re-expands to the
+coordinate of `-(L *ᵥ x)` by `eigvecOf_expansion_apply` with the pairing
+transfer `dotProduct_eigvecOf_mulVec` (`v i ⬝ᵥ (L *ᵥ x) = λ i (v i ⬝ᵥ x)`,
+self-adjointness in coordinates). `hA : A.IsSymm` is exactly what
+`heatKernel_mulVec_eq_sum` already assumes to exist — no more.
+
+QA: `Heat_QA.heatKernel_edge_deriv_theorem_QA` (numeric instantiation on
+K₂), `Heat_QA.heatKernel_edge_deriv_conservation_QA` (the `onesVec`
+infinitesimal-conservation cross-check). -/
+theorem heatKernel_mulVec_apply_hasDerivAt_zero (A : WAdj (V := V))
+    (hA : A.IsSymm) (x : V → ℝ) (a : V) :
+    HasDerivAt (fun t : ℝ => (heatKernel A t *ᵥ x) a)
+      (-((laplacian A *ᵥ x) a)) 0 := by
+  have hL := laplacian_symmetric A hA
+  have hfun : (fun t : ℝ => (heatKernel A t *ᵥ x) a)
+      = fun t : ℝ => ∑ i, Real.exp (-(t * eigvalOf (laplacian A) hL i))
+          * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+            * eigvecOf (laplacian A) hL i a) := by
+    funext t
+    rw [heatKernel_mulVec_eq_sum A hA t x, Finset.sum_apply]
+    exact Finset.sum_congr rfl fun i _ => by
+      rw [Pi.smul_apply, smul_eq_mul, mul_assoc]
+  rw [hfun]
+  have hterm : ∀ i : V, HasDerivAt
+      (fun t : ℝ => Real.exp (-(t * eigvalOf (laplacian A) hL i))
+          * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+            * eigvecOf (laplacian A) hL i a))
+      (Real.exp (-(0 * eigvalOf (laplacian A) hL i)) * (-(1 * eigvalOf (laplacian A) hL i))
+          * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+            * eigvecOf (laplacian A) hL i a)) 0 := by
+    intro i
+    have h0 : HasDerivAt (fun s : ℝ => -(s * eigvalOf (laplacian A) hL i))
+        (-(1 * eigvalOf (laplacian A) hL i)) 0 :=
+      ((hasDerivAt_id 0).mul_const (eigvalOf (laplacian A) hL i)).neg
+    exact (h0.exp).mul_const (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+      * eigvecOf (laplacian A) hL i a)
+  have hsum : HasDerivAt
+      (fun t : ℝ => ∑ i, Real.exp (-(t * eigvalOf (laplacian A) hL i))
+          * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+            * eigvecOf (laplacian A) hL i a))
+      (∑ i, Real.exp (-(0 * eigvalOf (laplacian A) hL i)) * (-(1 * eigvalOf (laplacian A) hL i))
+          * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+            * eigvecOf (laplacian A) hL i a)) 0 :=
+    HasDerivAt.sum fun i _ => hterm i
+  have hterm' : ∀ i : V, Real.exp (-(0 * eigvalOf (laplacian A) hL i))
+      * (-(1 * eigvalOf (laplacian A) hL i))
+      * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+        * eigvecOf (laplacian A) hL i a)
+      = -((Matrix.dotProduct (eigvecOf (laplacian A) hL i) (laplacian A *ᵥ x))
+        * eigvecOf (laplacian A) hL i a) := by
+    intro i
+    rw [dotProduct_eigvecOf_mulVec hL i x]
+    simp only [zero_mul, neg_zero, Real.exp_zero, one_mul]
+    ring
+  have hid : (∑ i, Real.exp (-(0 * eigvalOf (laplacian A) hL i))
+        * (-(1 * eigvalOf (laplacian A) hL i))
+        * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+          * eigvecOf (laplacian A) hL i a))
+      = -((laplacian A *ᵥ x) a) := by
+    calc (∑ i, Real.exp (-(0 * eigvalOf (laplacian A) hL i))
+          * (-(1 * eigvalOf (laplacian A) hL i))
+          * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+            * eigvecOf (laplacian A) hL i a))
+        = ∑ i, -((Matrix.dotProduct (eigvecOf (laplacian A) hL i) (laplacian A *ᵥ x))
+            * eigvecOf (laplacian A) hL i a) :=
+          Finset.sum_congr rfl fun i _ => hterm' i
+      _ = -∑ i, (Matrix.dotProduct (eigvecOf (laplacian A) hL i) (laplacian A *ᵥ x))
+            * eigvecOf (laplacian A) hL i a := Finset.sum_neg_distrib
+      _ = -((laplacian A *ᵥ x) a) := by
+            rw [eigvecOf_expansion_apply hL (laplacian A *ᵥ x) a]
+  rw [hid] at hsum
+  exact hsum
+
+/-- **The heat-flow derivative at zero, vector form** (Phase C Step 1,
+the `spectral-proof` rewrite's requested interface): the flow
+`t ↦ heatKernel A t *ᵥ x` is differentiable at `t = 0` with derivative
+`-(laplacian A *ᵥ x)` — the infinitesimal generator statement
+`d/dt e^{-tL} x |₀ = -L x`. Assembled from the entrywise engine by the
+pin's `hasDerivAt_pi` (vector-valued `HasDerivAt` at the entrywise (Pi)
+norm instances on `V → ℝ`, global at `[Fintype V]`).
+
+QA: `Heat_QA.heatKernel_edge_deriv_theorem_QA` /
+`heatKernel_edge_deriv_raw_QA` (two independent routes to the numeric
+derivative `![2, -2]` on K₂),
+`Heat_QA.heatKernel_edge_deriv_conservation_route2_QA` (the constant
+`onesVec` flow cross-check against Step 3's conservation). -/
+theorem heatKernel_mulVec_hasDerivAt_zero (A : WAdj (V := V)) (hA : A.IsSymm)
+    (x : V → ℝ) :
+    HasDerivAt (fun t : ℝ => heatKernel A t *ᵥ x)
+      (-(laplacian A *ᵥ x)) 0 :=
+  hasDerivAt_pi.2 fun a => heatKernel_mulVec_apply_hasDerivAt_zero A hA x a
+
+/-!
+## The heat semigroup, Phase C Step 2: the first-order remainder bound
+-/
+
+/-- **The first-order remainder bound, entrywise form** (Phase C Step 2):
+on the smallness window `|t · λᵢ| ≤ 1` (every eigenmode), the heat flow
+deviates from its first-order Taylor polynomial at zero by at most a
+quadratic term —
+`|(e^{-tL} x) a − x a + t (L x) a| ≤ t² · ∑ᵢ λᵢ² |vᵢ ⬝ᵥ x| |vᵢ a|`.
+
+The consumer-facing shape: `a` is an arbitrary coordinate (a boundary
+observable), and the constant `∑ᵢ λᵢ² |vᵢ ⬝ᵥ x| |vᵢ a|` is exactly the
+observable's weighted spectral content — the entrywise (coordinate)
+form is primary by the Step-0 survey (the Euclidean form would add
+Cauchy–Schwarz plumbing without new content; a `√n`-loss version can be
+adjoined later if a consumer names it).
+
+Route (all load-bearing on the Phase B eigenbasis expansion): the
+coordinate and the generator coordinate are both expanded over the
+proved orthonormal eigenbasis (`heatKernel_mulVec_eq_sum`,
+`eigvecOf_expansion_apply`, the self-adjoint pairing transfer
+`dotProduct_eigvecOf_mulVec` re-expanding `L *ᵥ x`'s coordinates to
+`λᵢ (vᵢ ⬝ᵥ x)`); the three sums combine termwise; and each mode's
+scalar remainder is bounded by the pin's
+`Real.abs_exp_sub_one_sub_id_le` (`|x| ≤ 1 → |eˣ − 1 − x| ≤ x²`, the
+Step-0 survey's committed engine) at `x := −(t · λᵢ)`. Hypotheses are
+minimal: `hA` is exactly what the expansion requires; *no*
+nonnegativity — the bound is per-mode and holds for any symmetric
+network, PSD or not.
+
+QA: `Heat_QA.heatKernel_edge_remainder_bound_half_QA` (the bound on K₂
+at `t = 1/2`, RHS evaluated to the concrete `1`),
+`Heat_QA.heatKernel_edge_remainder_cross_QA` (composite with the raw
+closed-form value `e⁻¹`), `Heat_QA.heatKernel_edge_remainder_degrades_QA`
+(the `t²` scaling at two times). -/
+theorem heatKernel_firstOrder_remainder_apply_le (A : WAdj (V := V))
+    (hA : A.IsSymm) (x : V → ℝ) (a : V) (t : ℝ)
+    (ht : ∀ i : V, |t * eigvalOf (laplacian A) (laplacian_symmetric A hA) i| ≤ 1) :
+    |(heatKernel A t *ᵥ x) a - x a + t * ((laplacian A *ᵥ x) a)|
+      ≤ t ^ 2 * ∑ i, (eigvalOf (laplacian A) (laplacian_symmetric A hA) i) ^ 2
+          * |Matrix.dotProduct (eigvecOf (laplacian A) (laplacian_symmetric A hA) i) x|
+          * |eigvecOf (laplacian A) (laplacian_symmetric A hA) i a| := by
+  have hL := laplacian_symmetric A hA
+  have hflow : (heatKernel A t *ᵥ x) a
+      = ∑ i, Real.exp (-(t * eigvalOf (laplacian A) hL i))
+          * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+            * eigvecOf (laplacian A) hL i a) := by
+    rw [heatKernel_mulVec_eq_sum A hA t x, Finset.sum_apply]
+    exact Finset.sum_congr rfl fun i _ => by
+      rw [Pi.smul_apply, smul_eq_mul, mul_assoc]
+  have hx : x a = ∑ i, Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+      * eigvecOf (laplacian A) hL i a := (eigvecOf_expansion_apply hL x a).symm
+  have hgen : (laplacian A *ᵥ x) a = ∑ i, eigvalOf (laplacian A) hL i
+      * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+        * eigvecOf (laplacian A) hL i a) := by
+    rw [← eigvecOf_expansion_apply hL (laplacian A *ᵥ x) a]
+    exact Finset.sum_congr rfl fun i _ => by
+      rw [dotProduct_eigvecOf_mulVec hL i x]; ring
+  have hlhs : (heatKernel A t *ᵥ x) a - x a + t * ((laplacian A *ᵥ x) a)
+      = ∑ i, (Real.exp (-(t * eigvalOf (laplacian A) hL i)) - 1
+            + t * eigvalOf (laplacian A) hL i)
+          * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+            * eigvecOf (laplacian A) hL i a) := by
+    rw [hflow, hx, hgen, Finset.mul_sum, ← Finset.sum_sub_distrib,
+      ← Finset.sum_add_distrib]
+    exact Finset.sum_congr rfl fun i _ => by ring
+  rw [hlhs]
+  calc |∑ i, (Real.exp (-(t * eigvalOf (laplacian A) hL i)) - 1
+          + t * eigvalOf (laplacian A) hL i)
+          * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+            * eigvecOf (laplacian A) hL i a)|
+      ≤ ∑ i, |(Real.exp (-(t * eigvalOf (laplacian A) hL i)) - 1
+            + t * eigvalOf (laplacian A) hL i)
+          * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+            * eigvecOf (laplacian A) hL i a)| :=
+          Finset.abs_sum_le_sum_abs _ _
+    _ ≤ ∑ i, (t * eigvalOf (laplacian A) hL i) ^ 2
+          * |Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+            * eigvecOf (laplacian A) hL i a| := by
+          refine Finset.sum_le_sum fun i _ => ?_
+          have h1 : |Real.exp (-(t * eigvalOf (laplacian A) hL i)) - 1
+              + t * eigvalOf (laplacian A) hL i|
+              ≤ (t * eigvalOf (laplacian A) hL i) ^ 2 := by
+            have h := Real.abs_exp_sub_one_sub_id_le
+              (x := -(t * eigvalOf (laplacian A) hL i))
+              (by rw [abs_neg]; exact ht i)
+            rw [show Real.exp (-(t * eigvalOf (laplacian A) hL i)) - 1
+                  - (-(t * eigvalOf (laplacian A) hL i))
+                = Real.exp (-(t * eigvalOf (laplacian A) hL i)) - 1
+                  + t * eigvalOf (laplacian A) hL i from by ring, neg_sq] at h
+            exact h
+          calc |(Real.exp (-(t * eigvalOf (laplacian A) hL i)) - 1
+                + t * eigvalOf (laplacian A) hL i)
+              * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+                * eigvecOf (laplacian A) hL i a)|
+              = |Real.exp (-(t * eigvalOf (laplacian A) hL i)) - 1
+                  + t * eigvalOf (laplacian A) hL i|
+                * |Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+                  * eigvecOf (laplacian A) hL i a| := abs_mul _ _
+            _ ≤ (t * eigvalOf (laplacian A) hL i) ^ 2
+                * |Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+                  * eigvecOf (laplacian A) hL i a| :=
+                  mul_le_mul_of_nonneg_right h1 (abs_nonneg _)
+    _ = t ^ 2 * ∑ i, (eigvalOf (laplacian A) hL i) ^ 2
+          * |Matrix.dotProduct (eigvecOf (laplacian A) hL i) x|
+          * |eigvecOf (laplacian A) hL i a| := by
+          have hterm : ∀ i : V, (t * eigvalOf (laplacian A) hL i) ^ 2
+              * |Matrix.dotProduct (eigvecOf (laplacian A) hL i) x
+                * eigvecOf (laplacian A) hL i a|
+              = t ^ 2 * ((eigvalOf (laplacian A) hL i) ^ 2
+                  * |Matrix.dotProduct (eigvecOf (laplacian A) hL i) x|
+                  * |eigvecOf (laplacian A) hL i a|) := by
+            intro i
+            rw [abs_mul]; ring
+          rw [Finset.sum_congr rfl fun i _ => hterm i, ← Finset.mul_sum]
+
+/-- **The first-order remainder bound on `[0, T]`** (Phase C Step 2, the
+interval packaging): if `T` itself meets the smallness window
+(`|T · λᵢ| ≤ 1` for every mode), then *every* `t ∈ [0, T]` obeys the
+entrywise remainder bound — the uniform-in-time form on a bounded
+interval, with the `t²` degradation explicit in the bound's constant.
+The hypothesis transfer is monotonicity (`|t · λ| = t |λ| ≤ T |λ| =
+|T · λ| ≤ 1` at `0 ≤ t ≤ T`); everything else is the core entrywise
+bound.
+
+QA: `Heat_QA.heatKernel_edge_remainder_interval_QA` (the `t = 1/4`,
+`T = 1/2` instance), `Heat_QA.heatKernel_edge_remainder_window_fenced_QA`
+(the window hypothesis provably fails at `t = 1` on K₂ — the bound is
+local, not global). -/
+theorem heatKernel_firstOrder_remainder_interval (A : WAdj (V := V))
+    (hA : A.IsSymm) (x : V → ℝ) (a : V) {T : ℝ}
+    (hT : ∀ i : V, |T * eigvalOf (laplacian A) (laplacian_symmetric A hA) i| ≤ 1)
+    {t : ℝ} (ht0 : 0 ≤ t) (htT : t ≤ T) :
+    |(heatKernel A t *ᵥ x) a - x a + t * ((laplacian A *ᵥ x) a)|
+      ≤ t ^ 2 * ∑ i, (eigvalOf (laplacian A) (laplacian_symmetric A hA) i) ^ 2
+          * |Matrix.dotProduct (eigvecOf (laplacian A) (laplacian_symmetric A hA) i) x|
+          * |eigvecOf (laplacian A) (laplacian_symmetric A hA) i a| := by
+  refine heatKernel_firstOrder_remainder_apply_le A hA x a t fun i => ?_
+  have hT0 : 0 ≤ T := ht0.trans htT
+  calc |t * eigvalOf (laplacian A) (laplacian_symmetric A hA) i|
+      = t * |eigvalOf (laplacian A) (laplacian_symmetric A hA) i| := by
+        rw [abs_mul, abs_of_nonneg ht0]
+    _ ≤ T * |eigvalOf (laplacian A) (laplacian_symmetric A hA) i| :=
+          mul_le_mul_of_nonneg_right htT (abs_nonneg _)
+    _ = |T * eigvalOf (laplacian A) (laplacian_symmetric A hA) i| := by
+        rw [abs_mul, abs_of_nonneg hT0]
+    _ ≤ 1 := hT i
 
 end SpectralGraphTheory

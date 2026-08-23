@@ -173,6 +173,32 @@ Phase B's Steps 1–4 verbatim. This is a real external named consumer,
 not the field-level acceptance the 2026-08-19 note recorded — promoted
 to High in `proposals/README.md`.
 
+*Delivery opened 2026-08-23:* Phase B Steps 0+1 delivered as pure hard
+crust in the new `GraphTheory.Heat` — the Step-0 survey (the pin's
+`MatrixExponential.lean` is purpose-built norm-free, so the semigroup
+step needs no ball/radius hypothesis the proposal's sketch feared) plus
+`heatKernel A t := NormedSpace.exp ℝ (-(t • laplacian A))` with
+symmetry under `A.IsSymm`, the hypothesis-free time-zero identity, and
+the square-zero exponential collapse; zero new axioms; QA with the exact
+closed form `e^{-L} = !![0,1;-1,2]` on the square-zero-Laplacian
+fixture, the symmetry hypothesis refuted-on-omission, and the sign
+witness.
+
+*COMPLETE 2026-08-23:* the heat-semigroup program finished in four
+zero-axiom runs — Step 2 (the hypothesis-free semigroup law through
+`Matrix.exp_add_of_commute`), Step 3 (mass conservation through the
+entrywise-built exponential-series convergence `expSeries_hasSum_exp`
+and the kernel-vector engine, with the per-component no-leakage
+witness), and Step 4 (the payoff: the eigenmode engine
+`exp_mulVec_eq_smul_of_mulVec_eq_smul` consuming Step 3's convergence
+at an eigenvector, mode decay `heatKernel A t *ᵥ vᵢ = e^{−t·λᵢ} • vᵢ`,
+the sorted-spectrum monotonicity, the eigenbasis expansion, and the
+connected-graph **DC limit** `heatKernel_mulVec_tendsto_atTop` — free
+diffusion leaves only the mean `((∑ x)/|V|) • onesVec`). The external
+consumer's (`sgt-gaps.md`) four-item interface is fully discharged as
+hard crust; QA 1503 declarations total. Consensus maps,
+synchronization, and general graph semigroups remain gated as before.
+
 ### 6. Thermodynamics / statistical mechanics (conditional)
 
 *Gated on item 1–2 stability:* entropy and reversibility interfaces,

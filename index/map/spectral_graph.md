@@ -637,6 +637,44 @@ module of the `Normalized`/`Spectral` interfaces (after `Stationary`):
 | `rayleigh_normalizedLaplacian_degreeSqrt` | normalized Rayleigh quotient `rayleigh L_sym (√D y) = (yᵀ L y) / ∑ deg i · y i²` — the irregular-graph variational interface |
 | `normalizedLaplacian_psd` | PSD transfers from `laplacian_psd` by un-stretching through `1/√D` |
 
+### `Scaffold.Mathlib.GraphTheory.Heat` (the heat semigroup)
+
+Opened 2026-08-23 as Phase B of
+`proposals/reversibility-and-heat-semigroup.md` — the Active priority
+table's single High row, its operator gate resolved by a real external
+named consumer (`sgt-gaps.md`, the independent `spectral-proof`
+rewrite project, which asks for heat evolution on `laplacian A`,
+identity/semigroup, mass conservation, and eigenmode decay — Steps 1–4
+of the proposal verbatim). **Steps 0–4 delivered — the proposal
+COMPLETE 2026-08-23** (survey; definition, symmetry, identity; the
+semigroup law; mass conservation; eigenmode decay + the connected-graph
+DC limit — the payoff statement). Pure hard crust, zero axioms;
+QA at `Scaffold/QA/SpectralGraph/Heat_QA.lean`.
+
+| Declaration | Content |
+|-------------|---------|
+| `heatKernel` | the matrix-level diffusion operator `heatKernel A t := NormedSpace.exp ℝ (-(t • laplacian A))`; total in `A` and `t` (negative `t` = the growing backward semigroup, documented) |
+| `heatKernel_isSymm` | `(heatKernel A t).IsSymm` under `A.IsSymm`, every `t` — `laplacian_symmetric` through `Matrix.IsSymm.smul`/`.neg` and the pin's `Matrix.IsSymm.exp` |
+| `heatKernel_zero` | `heatKernel A 0 = 1`, hypothesis-free (`zero_smul`/`neg_zero`/`NormedSpace.exp_zero`) |
+| `heatKernel_mul_heatKernel` | **the semigroup law** `heatKernel A s * heatKernel A t = heatKernel A (s + t)`, hypothesis-free (Step 2) — `Matrix.exp_add_of_commute` at the commuting negated scalar multiples, no ball/radius hypothesis (the survey's norm-free finding); the joined exponent reduced by `neg_add` + `add_smul` |
+| `hasSum_pi` | pin-gap Pi-HasSum assembler (entrywise `HasSum` → global `HasSum` for Pi codomains), from `Filter.tendsto_pi_nhds` + `Finset.sum_apply` — the pin has no such lemmas; consumed by the Step-3 series work |
+| `abs_pow_apply_le` | entrywise power bound `\|(M ^ n) i j\| ≤ (∑ p q, \|M p q\|) ^ n`, by `Matrix.mul_apply`-induction — the entire matrix-analysis input to the series summability, norm-free |
+| `summable_exp_term` | every entry of the exponential series is summable, by comparison with `B ^ n / n!` (`Real.summable_pow_div_factorial` + `Summable.of_norm_bounded`) |
+| `expSeries_hasSum_exp` | the exponential series converges to `NormedSpace.exp ℝ M` in the entrywise (Pi) topology — the matrix-level summability the pin's normed section does not provide at matrix type (Step 3's survey finding) |
+| `pow_mulVec_smul` | powers of a matrix act on an eigenvector by powers of the eigenvalue: `(M ^ n) *ᵥ v = (μ ^ n) • v` at `M *ᵥ v = μ • v` (Step 4) |
+| `exp_mulVec_eq_smul_of_mulVec_eq_smul` | **the eigenmode engine** (Step 4): `M *ᵥ v = μ • v → exp ℝ M *ᵥ v = Real.exp μ • v` — Step 3's `expSeries_hasSum_exp` pushed through the continuous action at an eigenvector, the scalar series summed by `NormedSpace.exp_series_hasSum_exp'` at ℝ (via `Real.exp_eq_exp_ℝ`) |
+| `exp_mulVec_eq_of_mulVec_eq_zero` | **mass conservation for kernel vectors**: `M *ᵥ v = 0 → exp ℝ M *ᵥ v = v` — the `μ = 0` case of the eigenmode engine (at unchanged statement) |
+| `heatKernel_mulVec_onesVec` | **mass conservation** (Step 3): `heatKernel A t *ᵥ onesVec = onesVec` at every time, hypothesis-free, through the shelf's `laplacian_ones_in_kernel` |
+| `exp_eq_one_add_of_mul_self_eq_zero` | general square-zero collapse `M * M = 0 → NormedSpace.exp ℝ M = 1 + M` (by `exp_eq_tsum` + `tsum_eq_sum` over `range 2`) — the closed-form evaluation handle |
+| `exp_neg_smul_eq_one_add_of_mul_self_eq_zero` | the every-time collapse `exp ℝ (-(t • M)) = 1 + -(t • M)` for `M * M = 0` (the exponent squares to `(t·t) • (M·M) = 0`) — makes QA fixtures exactly evaluable at symbolic times |
+| `exp_eq_one_add_of_mul_self_eq_smul` | **rank-one-idempotent collapse** (Step 4): `M * M = c • M → exp ℝ M = 1 + ((exp c − 1)/c) • M` (`c ≠ 0`) — the square-zero collapse's sibling; its scalar tail shifted by the pin's `hasSum_nat_add_iff'` (no plain tail-shift `HasSum` lemma at this pin), reassembled on `tsum_eq_zero_add` + `tsum_smul_const`; makes the symmetric K₂ fixture (L² = 2 • L) exactly evaluable at symbolic times |
+| `tendsto_exp_neg_mul_atTop` | the scalar decay-factor asymptotics: for `0 < μ`, `Real.exp (-(t * μ)) → 0` as `t → ∞` (`Real.tendsto_exp_atBot` at the linear escape) |
+| `heatKernel_mulVec_eigvecOf` | **eigenmode decay** (Step 4): every eigenbasis vector of `laplacian A` is an eigenvector of `heatKernel A t` at every time, with eigenvalue the mode's decay factor `e^{−t·λᵢ}` — the eigenmode engine at the eigenvector equation |
+| `heatKernel_decayFactor_antitone` | the proposal's named monotonicity: sorted `λᵢ ≤ λⱼ` and `t ≥ 0` ⇒ the mode-`j` factor ≤ the mode-`i` factor (higher frequencies dissipate at least as fast; `evals_sorted` + `Real.exp_le_exp`) |
+| `heatKernel_decayFactor_le_one` | PSD dissipation: on symmetric-nonnegative input every sorted eigenvalue is ≥ 0 (`evals_mem_eigvalOf` + `laplacian_psd`), so every mode factor is ≤ 1 at `t ≥ 0` |
+| `heatKernel_mulVec_eq_sum` | **the eigenbasis expansion** — the spectral-calculus identity in action form: `heatKernel A t *ᵥ x = ∑ᵢ e^{−t·λᵢ} (vᵢ ⬝ᵥ x) • vᵢ` over the proved orthonormal basis (`eigvecOf_expansion_apply` + `mulVecLin` linearity + the mode theorem) |
+| `heatKernel_mulVec_tendsto_atTop` | **the connected-graph DC limit — the payoff** (Step 4): the heat flow of any vector converges to its mean `((∑ j, x j)/\|V\|) • onesVec` — PSD, kernel-mode existence (`det L = 0` + `det_eq_prod_eigenvalues`), the kernel characterization (a second kernel mode would put two orthogonal unit vectors in one line), and finite-sum limit passage |
+
 ### `Scaffold.Mathlib.GraphTheory.Dynamics` (dynamic frontier)
 
 Real definitions: `TimeVaryingGraph`, `laplacianSequence`,

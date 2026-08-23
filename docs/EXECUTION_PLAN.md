@@ -6,107 +6,575 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**Fiedler Phase B — the certified conductance cut (run 1, 2026-08-23;
-`proposals/fiedler-partitioning.md` Phase B, whose recorded operator gate
-("run against the admitted Cheeger hard direction, or defer until it is
-proved") was **dissolved by the previous run's retirement**: the hard
-direction is now proved hard crust, so the deferral option completed and a
-Phase B run no longer adds trust surface — it composes proved theorems only
-(pure hard crust, zero new axioms; the count stays 9). Selected over
-`approximate-spectral-projection.md`'s Step-0 survey because it is (a) the
-first load-bearing consumer of the 2026-08-23 `cheeger_lower_bound`/
-`cheeger_sweep` retirement — the strategy's load-bearing-growth principle
-asks for exactly this; (b) a bounded increment from delivered shelf pieces;
-and (c) the closing step of a Medium proposal open since 2026-08-18, named
-by backlog item 4 as the application ring's first candidate): DELIVERED —
-the proposal is **COMPLETE** (Phase A 2026-08-18, Phase B 2026-08-23), QA
-1449 → 1457 (`Fiedler_QA` 57 → 65).**
-
-**Delivered:** in `GraphTheory.Cheeger` — **`cheegerConstant_attained`**
-(∃ `S₀` nonempty proper with `conductance S₀ = cheegerConstant`, by
-`Finset.exists_min_image` over the filtered powerset of nonempty proper
-subsets; no regularity hypothesis — the finiteness step that converts
-Cheeger's *inequality about an infimum* into a statement about an actual
-cut). In `GraphTheory.Fiedler` (a new Phase B section; the module now
-imports `Cheeger`) — **`fiedlerVector_rayleigh_regularNormalizedLaplacian`**
-(`R_{L_sym}(f) = lambda2 / d`: `rayleigh`'s nonzero branch, the
-quadratic-form transfer `quadForm (L_sym) = d⁻¹ • quadForm (L)`, the
-energy identity, unit norm, and `inv_mul_eq_div`) and the headline
-**`cheeger_cut_existence`**: on every connected `d`-regular graph,
-`∃ S` nonempty proper with `conductance A S ^ 2 ≤ 2 * lambda2 A / d` — the
-classical Cheeger cut-existence corollary, assembled from
-`cheeger_sweep` at the Fiedler vector (Phase A's
-`lambda2_pos_of_connected` supplying the orthogonality) composed with
-attainment, constants through `le_div_iff₀`/`div_le_iff₀`/`div_mul_cancel₀`.
-
-**Statement-shape deviation (recorded before stating, in the proposal and
-module docstring):** the sketch's sign-partition bound
-(`conductance (fiedlerPartition …) ≤ bound`) is **not certifiable from the
-Cheeger inequalities** — they bound the conductance *minimum*, and no
-λ₂-only upper bound on the sign half-space holds in general (the classical
-certificate is existential over the minimizer; algorithmic guarantees
-certify a *sweep* level set, never the bare sign cut). The certified object
-is the conductance-minimizing cut; the swept-level-set extraction is the
-recorded strengthening follow-on.
-
-**QA (`Fiedler_QA.lean`, Phase B section, 57 → 65 declarations; all on the
-`Variational_QA` `K₂` fixture):** `cheegerConstant (K₂) = 1` pinned **both
-directions** (≤ by the exhibited singleton cut computed from the
-definitions — boundary `1`, volumes `1`/`1`; ≥ by the card-count
-identification that every nonempty proper cut on `Fin 2` is a singleton);
-attainment instantiated at the pinned value; the **Rayleigh transfer
-cross-checked** against the independently pinned `lambda2 (K₂) = 2` (a
-defective `/d` normalization or quadratic-form transfer breaks the
-agreement); the certified cut **identified** (singleton) with its bound
-theorem-sourced, then displayed in numbers (`1 ≤ 4`); the connectivity
-hypothesis proved to hold on the fixture; and the **regularity
-refutation** — the `hd`-dropped form at `d = 100` (every other hypothesis
-holding on `K₂`) demands a cut of conductance squared `≤ 2·2/100 = 1/25`
-while every candidate is a singleton of conductance `1`: `1 ≤ 1/25` false.
-
-**Verification:** spike discipline followed (`wip/fiedlerB_spike.lean`
-green before transfer); `lake env lean` on both modules (Cheeger: only the
-documented pre-existing `unusedSectionVars` warning; Fiedler: zero errors,
-zero warnings) and on the QA file (zero errors, zero warnings); explicit
-`lake build` targets for all three ✔; `#print axioms` via
-`wip/fiedlerB_axcheck{,2}.lean` on the three new public theorems and all
-eight QA headlines — `propext, Classical.choice, Quot.sound` only; **full
-`lake build` ✔ (2250 targets, "Build completed successfully")**;
-`lint_axioms` (**9**, unchanged), `check_citations`,
-`check_markdown_links` pass; scoreboard regenerated (**1457/9/0**,
-idempotent under re-run). Records updated: the proposal (status header
-COMPLETE, the gate-dissolution record, the Phase B delivery record with
-the statement-shape deviation and the load-bearing chain),
-`proposals/README.md` (Medium row retired to the Delivered table; progress
-paragraph rewritten), README (1457, the certified-conductance corollary in
-the proved list, module-table row), the radar (axis 4 **held at 4.5** with
-the delivery recorded and the absent list updated — the swept-level-set
-certificate replaces the certified guarantee as the named gap; QA axis
-count synced 1449/39 → 1457/39, held at 4.0; the weakest-axes paragraph
-updated), the scoreboard (both Direct rows, the `lake build` row, lint
-row, a new interpretation bullet), backlog item 4 (Phase B delivered), the
-SGT index map (Fiedler section +3 rows + the Cheeger enabling-lemma note),
-the Chung source index (cut-existence corollary row + note), this plan,
-and the activity log. The worktree's prior-run uncommitted Step-1a/1b/1c
-deliveries preserved untouched; nothing committed.
-
-**Next milestone (open):** the remaining Medium rows by leverage —
-**approximate spectral projection** (`approximate-spectral-projection.md`
-— Step 0 first; it may legitimately conclude nothing is tractable at
-reasonable cost, a valid recorded outcome) and the **PF consumers**
+**None — approximate-spectral-projection Step 0 is DELIVERED (see the
+top delivered entry) and the proposal's own operating instructions
+gate its Step 1 to one shape per run, with 1a (the interface layer) as
+the recorded open next step. Next run: Step 1a — transfer the spike's
+four real lemmas plus the two priced shallow gaps (`natDegree T`, the
+growth lemma) into a new shelf module with the survey note and
+pin-technique record. Fallbacks in leverage order: the PF consumers
 (irreducible stationary distributions, PageRank) as new-proposal
-candidates, each needing its own document per the one-step discipline.
-Reversibility Phase B still needs its recorded operator decision. The
-**swept-level-set certified cut** (strengthening `cheeger_cut_existence`
-to an explicit Fiedler level set) is now also a named new-proposal
-candidate, needing a sweep-extraction lemma beyond the Cheeger
-inequalities themselves.
+candidates, each needing its own document per the one-step
+discipline.**
 
 ---
 
 ## Delivered milestones (most recent first)
 
-**Cheeger hard-direction Step 1c — median + assembly in `Cheeger.lean`,
+**Approximate spectral projection, Step 0 — the scoping survey;
+Lanczos/Kaniel–Paige cleared (run 1, 2026-08-23, run
+`20260823T132040Z-run-1`; `proposals/approximate-spectral-projection.md`,
+the top Medium row with the Active table holding no High rows, and both
+the heat-semigroup completion's next handoff and this plan's own
+recorded next milestone naming exactly this run): DELIVERED — zero shelf
+Lean changes (count stays 9, QA stays 1503), the deliverable being the
+survey record plus a green axiom-clean spike, exactly the Cheeger
+Step-0 precedent.**
+
+**Decision: the Lanczos/Kaniel–Paige shape is CLEARED** — the one
+tractable shape; Nyström deferred with its obstruction named
+(sampling-without-replacement matrix concentration absent from pin and
+shelf; `Matrix.pinv` absent from the pin), the Chebyshev-filter shape
+recorded as the natural second consumer of the same Chebyshev layer
+(its original gate — the then-undelivered band projectors — dissolved
+2026-08-20/21).
+
+**The survey's decisive findings (all recorded in the proposal's
+Step-0 record before any Step-1 authorization):**
+
+1. **The exact finite-`k` statement, existence form:** for symmetric
+   `M` with simple top eigenvalue `λ₁` (hypothesis form:
+   `λ₂`-bounds-every-non-top-eigenvalue + `λ₂ < λ₁`, guard QA'd by
+   refutation), unit `b = cos φ • u + sin φ • g` along the top
+   eigenvector, and `k ≥ 1`, the Krylov space `span{b, Mb, …, Mᵏ⁻¹b}`
+   contains nonzero `x` with `λ₁ − R_M(x) ≤ (λ₁ − λₙ) · tan²φ /
+   T_{k−1}(1+2γ)²` at `γ = (λ₁−λ₂)/(λ₂−λₙ)`. Statement-shape
+   decisions recorded: no sup (the Rayleigh–Ritz value is a corollary),
+   no tridiagonal Lanczos iteration (exact-arithmetic variational
+   content only), the Chebyshev value left explicit (the cosh growth
+   bound a non-vacuity corollary), and `λ`-names will differ (`λ₁` is
+   not a lexable Lean identifier — `λ` reserved).
+2. **Every proof dependency verified present** — shelf: the orthonormal
+   eigenbasis (`eigvecOf_inner`/`eigvecOf_complete`), the spectral
+   quadratic form `quadForm_eigvalOf`, Parseval `dotProduct_eigvecOf`,
+   the Rayleigh sandwich both ends
+   (`quadForm_le_evals_last`/`evals_first_mul_dotProduct_le_quadForm`),
+   `rayleigh`, `Heat.pow_mulVec_smul`; pin: `Polynomial.Chebyshev.T`
+   with `T_real_cos` (the whole band bound follows from it), the
+   `aeval`/monomial-sum layer. Shallow gaps priced: no
+   `Matrix.sum_mulVec` (4 lines), no `natDegree T = n` (~15), no cosh
+   growth lemma (~25, off the critical path).
+3. **The skeleton spike green and axiom-clean**
+   (`wip/asp_step0_spike.lean`, four declarations, every
+   `#print axioms` exactly `propext, Classical.choice, Quot.sound`):
+   the Chebyshev band bound `abs_T_eval_le_one` (real proof from
+   `T_real_cos` + `Real.cos_arccos` + `Real.cos_mem_Icc`), the
+   polynomial eigenvector action `aeval_mulVec_eq_eval_smul`
+   (consuming `Heat.pow_mulVec_smul`), Krylov membership
+   `aeval_mulVec_mem_krylovSpan`, and the full hypothesis-form
+   `kanielPaigeSkeleton` — the spectral layer enters as five *named*
+   discharge sites (`hp₁`, `horth`, `horthM`, `hbottom`, `hband`) and
+   the skeleton proves the exact bound composes from exactly those
+   plus the interface pieces. No mathematical obstruction surfaced at
+   any point — the tractability evidence.
+4. **The run's sharpest pin finding:** the shelf's SGT interface is
+   `V : Type` (Type 0), not `Type*` — working at `Type*` made
+   `rayleigh` and `Heat.pow_mulVec_smul` both fail with
+   postponed-instance stuck elaboration, and matching Type 0 dissolved
+   four apparent cross-module traps at once. Recorded in the proposal
+   with the full technique list (pin's `pow_succ`/`mul_pow`
+   orientations, `div_le_div_iff₀`, the `Finset.induction` binder
+   count, the dependent `Finset.sum_comm` signature, `nlinarith`'s
+   association-overload timeout and the `set`-abbreviation fix).
+
+**Step-1 decomposition authorized (the cleared shape only):** 1a the
+interface layer (~150–200 lines, low risk — everything already green
+in the spike); 1b the spectral discharge (~200–300, medium risk — the
+expansion plumbing on the shelf's own `quadForm_eigvalOf` pattern);
+1c statement + QA (~150–250 — the diagonal 3×3 two-route witness, the
+`k = 1` degenerate case, the `b = u` tightness witness, the `λ₁ = λ₂`
+guard refutation).
+
+**Verification:** `lake env lean wip/asp_step0_spike.lean` — zero
+errors, zero warnings; all four `#print axioms` the standard three.
+No shelf or QA module touched, so no module builds required beyond
+the spike's own elaboration against the built oleans;
+`lint_axioms` (9, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated unchanged
+(**1503/9/0**, idempotent). Records updated: the proposal (the full
+Step-0 record, status header, open-next-step → 1a),
+`proposals/README.md` (the Medium row), this plan, and the activity
+log. Nothing committed; the prior runs' uncommitted heat-semigroup
+delivery preserved untouched.
+
+**Next milestone (open):** **Step 1a — the interface layer**: the
+spike's four real lemmas plus the two priced shallow gaps into a new
+shelf module (`GraphTheory/Krylov.lean` or an appropriate section),
+with the module-level survey note. One run. Then 1b, then 1c.
+
+**Reversibility Phase B, Step 4 — eigenmode decay + the connected-graph
+DC limit, the payoff statement (run 1, 2026-08-23, run
+`20260823T112921Z-run-1`; `proposals/reversibility-and-heat-semigroup.md`
+Phase B at its recorded open next step — the Active table's single High
+row, so the priority-0 rule applied, and both the proposal's "Open next
+step" and the Step-3 delivery's next handoff named exactly this run):
+DELIVERED — pure hard crust, zero new axioms (count stays 9 at every
+Phase B step), QA 1482 → 1503 (`Heat_QA` 25 → 46); **the proposal is
+COMPLETE** and the external consumer's (`sgt-gaps.md`) four-item
+interface — heat evolution on `laplacian A`, identity + semigroup law,
+mass conservation, eigenmode decay with the DC-limit consequence — is
+fully discharged as hard crust. Radar axis 5 re-scored 3.5 → 4.0 (the
+named trigger).**
+
+**Delivered:** in `GraphTheory.Heat` — the **eigenmode engine**
+`exp_mulVec_eq_smul_of_mulVec_eq_smul` (`M *ᵥ v = μ • v → exp ℝ M *ᵥ v
+= Real.exp μ • v`), the load-bearing bridge the plan's Step-3 note
+required: its proof *is* Step 3's `expSeries_hasSum_exp` pushed through
+the continuous action `N ↦ N *ᵥ v` at an eigenvector (`HasSum.map`),
+each series term collapsed by the new power lemma `pow_mulVec_smul`,
+the remaining scalar series summed by the pin's
+`NormedSpace.exp_series_hasSum_exp'` at ℝ (identified with `Real.exp`
+through `Real.exp_eq_exp_ℝ` — the pin's normed-section lemma applies at
+the scalar level, no matrix-type transfer needed); Step 3's kernel
+engine re-derived as the `μ = 0` case **at unchanged statement**; the
+**rank-one-idempotent collapse** `exp_eq_one_add_of_mul_self_eq_smul`
+(`M * M = c • M → exp ℝ M = 1 + ((exp c − 1)/c) • M`, the square-zero
+collapse's sibling — its scalar tail shifted by the pin's
+topological-group `hasSum_nat_add_iff'`, the pin having *no* plain
+tail-shift `HasSum` lemma, then divided through `c` by a continuous
+additive map and reassembled on `tsum_eq_zero_add` +
+`tsum_smul_const`); `heatKernel_mulVec_eigvecOf` (eigenmode decay in
+mode form, every `t`); `heatKernel_decayFactor_antitone` (the
+proposal's named monotonicity) + `heatKernel_decayFactor_le_one` (PSD
+dissipation); the **eigenbasis expansion** `heatKernel_mulVec_eq_sum`
+(the spectral-calculus identity in action form over the proved
+orthonormal basis — the survey's recorded statement-shape decision: the
+expansion lives on `eigvecOf`/`eigvalOf`, where the machinery is, the
+sorted-spectrum statement stays scalar); the scalar
+`tendsto_exp_neg_mul_atTop`; and the payoff
+**`heatKernel_mulVec_tendsto_atTop`** — on connected symmetric
+nonnegative graphs, the heat flow of any vector converges to its mean
+`((∑ j, x j)/|V|) • onesVec` — assembled from PSD
+(`quadForm_eigvecOf_self` + `laplacian_psd`), kernel-mode existence
+via `det L = 0` (`Matrix.exists_mulVec_eq_zero_iff` at `onesVec`) +
+`det_eq_prod_eigenvalues` (the survey-selected route, shorter than the
+expansion argument), the kernel characterization
+`laplacian_kernel_eq_span_onesVec` with uniqueness-by-orthogonality
+(the Fiedler line-template: a second kernel mode would put two
+orthogonal unit vectors in one line), per-mode vanishing by
+`tendsto_exp_neg_mul_atTop`, and `tendsto_finset_sum` limit passage.
+
+**QA** (`Heat_QA.lean` 25 → 46): eigenmode decay on the symmetric K₂
+fixture by **two independent routes to one statement** —
+`heatKernel_edge_mode_engine_QA` (the engine at every time) vs
+`heatKernel_edge_mode_raw_QA` (the new closed form `heatKernel K₂ t =
+1 + ((e^{−2t} − 1)/2) • laplacian K₂` from the rank-one-idempotent
+collapse plus hand arithmetic — independent of the engine); the
+**engine⇄collapse cross-validation** at a nonzero eigenvalue (the
+all-ones `m2`: `exp m2 *ᵥ ![1,1] = e² • ![1,1]` derived both ways); the
+**K₂ Laplacian spectrum pinned `evals = [0, 2]`** from
+trace/determinant/sortedness (the Cheeger-QA pinning pattern at the
+combinatorial Laplacian) with the monotonicity theorem instantiated to
+`e^{−2} ≤ 1` reading both constants from the pin; and **the DC limit by
+two routes** (`heatKernel_edge_dc_theorem_QA` through the payoff
+theorem with the mean computed by hand vs `heatKernel_edge_dc_raw_QA`
+from the closed form's action `![2 − e^{−2t}, 2 + e^{−2t}]` tending to
+`![2,2]` through the scalar decay-factor lemma — independent of the
+theorem, the kernel characterization, PSD, and the eigenbasis).
+
+**Pin-specific technique notes (recorded for future runs):** the pin
+has no `HasSum.congr` (a private two-line funext wrapper `hasSum_of_eq`
+is the family transport); `hasSum_nat_add_iff'` is the only tail-shift
+and needs `Finset.sum_range_succ`/`sum_range_zero` to reduce its
+`range 1` sum (no `Finset.sum_range_1`); `NormedSpace.exp_eq_tsum` at
+matrix type rewrites into a beta-redex — follow with an explicit
+`show`; `Filter.Tendsto.congr` at this pin takes a pointwise `∀`
+equality, not an `EventuallyEq`; `rw` cannot rewrite under binders
+(use `simp only [theorem]` inside a `fun t => …`); scalar-literal
+statements default `2` to ℕ unless the vector is ascribed
+`(… : Fin 2 → ℝ)` and the scalar `(2 : ℝ)`; `div_mul_cancel₀` takes
+its value argument first; and `neg_pos` mis-elaborates (derive
+`0 < -μ` by `linarith`).
+
+**Verification:** spike first (`wip/heat_step4_spike.lean` green, all
+`#print axioms` the standard three; six rounds to green) then transfer;
+`lake env lean` on the module and the QA file — zero errors, zero
+warnings each; explicit `lake build` targets for both ✔;
+`#print axioms` via `wip/heat_step4_axcheck.lean` on all thirty-one
+new/rewritten declarations — `propext, Classical.choice, Quot.sound`
+only; **full `lake build` ✔ (2252 targets, "Build completed
+successfully", detached; no warnings in the changed modules)**;
+`lint_axioms` (**9**, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1503/9/0**,
+idempotent; `Heat_QA` 25 → 46). Records updated: the proposal (status
+header COMPLETE, the Step-4 delivery record with technique notes,
+open-next-step closed), `proposals/README.md` (the High row retired to
+the Delivered table, progress paragraph rewritten — the Active table
+holds no High rows), README (1503; the heat-semigroup sentence and
+module-table row gaining eigenmode decay and the DC limit), the radar
+(axis 5 **re-scored 3.5 → 4.0** — the named trigger fired, the
+continuous-time side now a closed capability family, the axis's only
+remaining absent category the ℓ² → TV conversion; QA axis count synced
+1482/40 → 1503/40, held at 4.0; a new assurance-log entry), the
+scoreboard (both Direct rows, the `lake build` row, lint row, a new
+interpretation bullet), the SGT index map (Heat section +10 declaration
+rows, status line → Steps 0–4 COMPLETE), this plan, and the activity
+log. Nothing committed; the prior runs' uncommitted Phase-B deliveries
+preserved untouched.
+
+**Next milestone (open):** the Medium rows by leverage — **approximate
+spectral projection** (`approximate-spectral-projection.md` — Step 0
+first; a legitimate recorded outcome is "not tractable at reasonable
+cost"). The PF consumers (irreducible stationary distributions,
+PageRank) are unblocked as new-proposal candidates, each needing its
+own document per the one-step discipline.
+
+---
+
+**Reversibility Phase B, Step 3 — mass conservation (run 1, 2026-08-23,
+run `20260823T092311Z-run-1`; `proposals/reversibility-and-heat-semigroup.md`
+Phase B at its recorded open next step — the Active table's single High
+row, so the priority-0 rule applies, and both the proposal's "Open next
+step" and the Step-2 delivery's next handoff name exactly this run):
+DELIVERED — pure hard crust, zero new axioms (count stays 9), QA
+1474 → 1482 (`Heat_QA` 17 → 25); the external consumer's three-item
+interface (identity + semigroup law + mass conservation) is now
+complete hard crust.**
+
+**Pre-edit survey findings (recorded before any statement):**
+
+- `NormedSpace.exp` at this pin is defined in the *topological-algebra*
+  section (`Exponential.lean`, variable line ~97: `[Field 𝕂] [Ring 𝔸]
+  [Algebra 𝕂 𝔸] [TopologicalSpace 𝔸] [TopologicalRing 𝔸] [T2Space 𝔸]`) —
+  no norm needed, which is exactly why `Heat.lean`'s statements elaborate
+  with the Pi topology on matrices (`Topology/Instances/Matrix.lean`
+  declares matrix instances by forwarding to the Pi ones). The normed
+  `expSeries_summable'` therefore does **not** apply at matrix type
+  without `letI`-ing `linftyOp` — and then its summability lives in the
+  linftyOp-induced topology, not the file-level Pi topology, with no
+  topology-equality lemma available. The summability-free square-zero
+  route of Step 1 does not generalize (the exponential terms are not
+  eventually zero).
+- The pin has **no Pi-type HasSum/Summable lemmas** (`hasSum_pi` /
+  `summable_pi` absent everywhere) and no finite↔countable interchange
+  except `tsum_sum` (per-index summability). `Matrix.transpose_tsum`
+  (`Topology/Instances/Matrix.lean`) shows the pin's own pattern for an
+  operation commuting with tsums: `HasSum.map` with a continuous
+  `AddMonoidHom`, plus a non-summable branch killed by
+  `tsum_eq_zero_of_not_summable` on both sides.
+- Route selected (entrywise, no `letI`, no norm instances on matrices):
+  (1) the entrywise power bound `|Mⁿ i j| ≤ Bⁿ` at `B = ∑ |M p q|`
+  (induction through `Matrix.mul_apply` +
+  `Finset.abs_sum_le_sum_abs`); (2) entrywise summability by comparison
+  with `Real.summable_pow_div_factorial` (`SpecificLimits/Normed.lean`
+  line 808) through `Summable.of_norm`; (3) a pin-gap helper
+  `hasSum_pi` (assembled from `tendsto_pi_nhds` + `Finset.sum_apply`)
+  applied twice; (4) `exp ℝ M = ∑' n!⁻¹ • Mⁿ` by the topological
+  `exp_eq_tsum`, closing `expSeries_hasSum_exp`; (5)
+  `HasSum.map` with the additive `· *ᵥ v` (`Matrix.add_mulVec`,
+  continuity entrywise through `continuous_finset_sum`/
+  `continuous_apply`); (6) collapse via `tsum_eq_sum` over `{0}` at
+  `mulVec_mulVec`-power annihilation. All names verified present in the
+  pin: `Matrix.{add,zero,one}_mulVec`, `smul_mulVec_assoc`,
+  `mulVec_mulVec` (simp), `Matrix.sum_apply`, `Matrix.mul_apply`,
+  `Finset.abs_sum_le_sum_abs`, `Summable.of_norm`,
+  `Real.summable_pow_div_factorial`, `tendsto_pi_nhds`,
+  `HasSum.map`/`HasSum.tsum_eq`, `tsum_eq_sum`.
+
+**Delivered:** in `GraphTheory.Heat`, a new Step-3 section — the
+pin-gap Pi-HasSum assembler `hasSum_pi`; the entrywise power bound
+`abs_pow_apply_le` (`|(M ^ n) i j| ≤ (∑ p q, |M p q|) ^ n`,
+`Matrix.mul_apply`-induction, the entire matrix-analysis input,
+norm-free); the entrywise summability `summable_exp_term` (comparison
+against `Real.summable_pow_div_factorial` through
+`Summable.of_norm_bounded`); the assembled convergence
+`expSeries_hasSum_exp` (the exponential series converges to
+`NormedSpace.exp ℝ M` in the entrywise/Pi topology — the content the
+pin's normed section does not provide at matrix type); the engine
+`exp_mulVec_eq_of_mulVec_eq_zero` (`M *ᵥ v = 0 → exp ℝ M *ᵥ v = v`:
+the continuous additive action pushes the HasSum through `HasSum.map`,
+and the pushed series collapses onto its `n = 0` term by `tsum_eq_sum`
+over `{0}` at `pow_add`-factorized power annihilation); and the
+headline **`heatKernel_mulVec_onesVec`** (`heatKernel A t *ᵥ onesVec =
+onesVec` at every time, hypothesis-free, through the shelf's
+`laplacian_ones_in_kernel` — `L *ᵥ 1 = 0` needs no symmetry since the
+Laplacian's row sums vanish identically). The module also gained the
+module-level Step-3 survey note and three imports
+(`Analysis.SpecificLimits.Normed`, `Analysis.Normed.Group.InfiniteSum`,
+`Order.Filter.Tendsto`).
+
+**QA** (`Heat_QA.lean` 17 → 25): conservation by **two independent
+routes to one statement** — `heatKernel_ones_conserved_asym_QA`
+(theorem route on the asymmetric fixture) vs
+`heatKernel_ones_conserved_raw_QA` (the closed form `!![1-t, t; -t, 1+t]`
+hand-multiplied onto `onesVec`, independent of the theorem); the raw
+kernel-instance check `asymLaplacian_mulVec_ones_raw_QA` (the exact
+instance of `laplacian_ones_in_kernel` the theorem consumes, verified
+independently); the symmetric-fixture instantiation (conservation not
+locked to the square-zero accident); the proposal's named
+**per-component no-leakage witness** on the new disconnected `Fin 3`
+fixture `disAdj` (edge `{0,1}` + isolated vertex `2`, encoded as an
+entrywise function because `Fin 3` cons-literals resist `simp`'s
+index-2 reduction at this pin): the `{0,1}`-component indicator checked
+`L`-harmonic raw from the definitions
+(`disLaplacian_mulVec_component_raw_QA`) then fixed by the engine at
+every time (`heatKernel_noLeakage_component_QA`), with the
+isolated-vertex indicator fixed too (`heatKernel_isolated_fixed_QA`) —
+heat provably does not cross components, so conservation is not
+accidentally vacuous on disconnected input; and the
+**kernel-hypothesis guard** `heatKernel_asym_not_fix_nonkernel_QA` (a
+non-kernel vector is provably *not* fixed: the exact kernel
+`!![0,1;-1,2]` sends `![1,0]` to `![0,-1]` — the hypothesis-free
+strengthening refuted with every other structural fact intact).
+
+**Pin-specific technique notes (recorded for future runs):** application
+binds tighter than `^` (`(M ^ n) i j` needs explicit parens);
+`pow_succ'` factors the wrong way at this pin (`a^(n+1) = a * a^n` —
+use `pow_add` + `pow_one` for `M^n * M`); `Filter.tendsto_congr` is
+namespaced under `Filter`; `Finset.sum_apply` takes the index first
+(`Finset.sum_apply x s f`); `Finset.sum_le_sum` needs `f`/`g` named
+arguments or the `OrderedAddCommMonoid` synthesis gets stuck behind a
+metavariable; `Finset.sum_le_sum_of_subset` is canonically-ordered-only
+(unusable over ℝ — singleton bounds go through `Finset.sum_insert`/
+`Finset.insert_erase` splitting + `le_add_of_nonneg_right`); and on the
+QA side, `Fin 3` cons-literals resist `simp`'s index-2 reduction,
+`fin_cases`' `⟨n, ⋯⟩`-form indices resist `rfl`, and kernel `decide`
+is blocked by `Real.decidableEq`'s classical path — the robust fixture
+encoding is an entrywise function
+(`Matrix.of fun i j => if … then 1 else 0`) with function-form
+indicators, which `simp`/`norm_num` reduce at `fin_cases` literals.
+
+**Verification:** spike first (`wip/heat_step3_spike.lean` green, all
+`#print axioms` the standard three; five rounds to green — the fixes
+were exactly the trap list above) then transfer; `lake env lean` on the
+module and the QA file — zero errors, zero warnings each; explicit
+`lake build` targets for both ✔; `#print axioms` via
+`wip/heat_step3_axcheck.lean` on all six new public and all eight new
+QA declarations — `propext, Classical.choice, Quot.sound` only; **full
+`lake build` ✔ (2252 targets, "Build completed successfully",
+detached)**; `lint_axioms` (**9**, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1482/9/0**,
+idempotent; `Heat_QA` 17 → 25). Records updated: the proposal (status
+header, the Step-3 delivery record with the technique notes,
+open-next-step → Step 4), `proposals/README.md` (High row + progress
+paragraph + Delivered row), README (1482; the heat-semigroup sentence
+and module-table row gaining mass conservation), the radar (axis 5
+**held at 3.5** with the Step-3 delivery recorded and the absent clause
+narrowed to Step 4 — the named re-score trigger; QA axis count synced
+1474/40 → 1482/40, held at 4.0), the scoreboard (both Direct rows, the
+`lake build` row, lint row, a new interpretation bullet), the SGT index
+map (Heat section +6 declaration rows, status line → Steps 0–3), this
+plan, and the activity log. Nothing committed; the prior runs'
+uncommitted Steps-0+1/Step-2 deliveries preserved untouched.
+
+**Next milestone (open):** **Reversibility Phase B Step 4** — eigenmode
+decay + the connected-graph DC limit, the proposal's payoff statement
+(the active-milestone section above records the selected scope). After
+Phase B completes: the remaining Medium rows by leverage (approximate
+spectral projection Step 0; the PF consumers as new-proposal
+candidates).
+
+**Reversibility Phase B, Step 2 — the semigroup property (run 1,
+2026-08-23; `proposals/reversibility-and-heat-semigroup.md` Phase B at
+its recorded open next step — the Active table's single High row, so the
+priority-0 rule applies, and both the proposal's "Open next step" and the
+Steps-0+1 delivery's next handoff name exactly this run): DELIVERED —
+pure hard crust, zero new axioms (count stays 9), QA 1467 → 1474
+(`Heat_QA` 10 → 17); the external consumer's two-item core interface
+("identity at time zero + semigroup law") is now complete hard crust.**
+
+**Delivered:** in `GraphTheory.Heat` — the semigroup law
+`heatKernel_mul_heatKernel` (`heatKernel A s * heatKernel A t =
+heatKernel A (s + t)`, **hypothesis-free**: no symmetry, no sign
+restriction on the times) through the pin's `Matrix.exp_add_of_commute`
+at the commuting pair `-(s • L)` / `-(t • L)` (scalar multiples of one
+matrix commute: `(s • L) * (t • L) = (s * t) • (L * L)` both ways via
+`Algebra.smul_mul_assoc`/`Algebra.mul_smul_comm`/`smul_smul`; the joined
+exponent reduced by `neg_add` + `add_smul`), **with no ball/radius
+hypothesis** — the Step-0 survey's norm-free finding holding exactly as
+recorded, re-verified against the pinned source this run; plus the
+every-time square-zero collapse
+`exp_neg_smul_eq_one_add_of_mul_self_eq_zero` (`exp ℝ (-(t • M)) =
+1 + -(t • M)` for `M * M = 0` — the Step-1 `t = 1` handle generalized to
+all times; the exponent squares to `(t * t) • (M * M) = 0`), the
+interface that makes QA exactly evaluable at symbolic times. **One
+transfer correction recorded (the spike's two-round shape, same as
+Step 1):** the sketch's `smul_add` reduction is `add_smul` at module
+level (different scalars, one matrix), and `rw` against
+`Matrix.exp_add_of_commute` needs a fully-ground `have` plus
+`simp only [heatKernel] at h ⊢` — the naive `rw [← Matrix.exp_add_of_
+commute _ _ hcomm]` leaves instance metavariables unassignable and
+fails keyed matching.
+
+**QA** (`Heat_QA.lean` 10 → 17): the semigroup law witnessed by **two
+independent routes to one closed-form statement** — the raw route
+(`heatKernel_asym_semigroup_raw_QA`: the fixture's closed forms
+`!![1-s, s; -s, 1+s]` and `!![1-t, t; -t, 1+t]` multiplied by hand
+through `Matrix.mul` on literals, every entry closed by `ring`,
+independent of the theorem) and the theorem route
+(`heatKernel_asym_semigroup_theorem_QA`: the law composed with one
+closed form) — a wrong time-combination constant anywhere in the
+delivered chain contradicts the hand computation; the **every-time
+closed form** `heatKernel asymAdj t = !![1-t, t; -t, 1+t]` for symbolic
+`t`; the **numeric instance** at `s = 2, t = 3` (`!![-4, 5; -5, 6]`);
+the **group property** `heatKernel asymAdj 1 * heatKernel asymAdj (-1)
+= 1` (forward-then-backward flow is the identity — the semigroup law
+composed with the time-zero identity, the consumer's two core interface
+items working together); and the **degenerate `t = 0` identities** on
+the symmetric K₂ fixture where no closed form exists (both orders).
+
+**Verification:** spike first (`wip/heat_step2_spike.lean` green, all
+`#print axioms` the standard three) then transfer; `lake env lean` on
+the module and the QA file — zero errors, zero warnings each; explicit
+`lake build` targets for both ✔; `#print axioms` via
+`wip/heat_step2_axcheck.lean` on both new public and all seven new QA
+declarations — `propext, Classical.choice, Quot.sound` only; **full
+`lake build` ✔ (2252 targets, "Build completed successfully",
+detached)**; `lint_axioms` (**9**, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1474/9/0**,
+idempotent; `Heat_QA` 10 → 17). Records updated: the proposal (status
+header, the Step-2 delivery record, open-next-step → Step 3),
+`proposals/README.md` (High row + progress paragraph + Delivered row),
+README (1474, the heat-semigroup sentence and module-table row gaining
+the semigroup law), the radar (axis 5 **held at 3.5** with the Step-2
+delivery recorded and the absent clause narrowed to Steps 3–4; QA axis
+count synced 1467/40 → 1474/40, held at 4.0), the scoreboard (both
+Direct rows, the `lake build` row, lint row, a new interpretation
+bullet), the SGT index map (Heat section +2 declaration rows, Steps
+0–2), this plan, and the activity log. Nothing committed; the
+prior run's uncommitted Steps-0+1 delivery preserved untouched.
+
+**Reversibility Phase B, Steps 0 + 1 — the graph heat semigroup:
+survey, then the definition with symmetry and identity (run 1, 2026-08-23;
+`proposals/reversibility-and-heat-semigroup.md` Phase B, the Active
+table's single High row — its operator-decision gate resolved 2026-08-23
+by `sgt-gaps.md`, the independent `spectral-proof` clean-sheet rewrite
+project, which names this exact Phase B by file path as its one remaining
+Scaffold dependency and lists the interface Steps 1–4 supply verbatim:
+heat evolution specialized to `laplacian A`, identity at time zero +
+semigroup law, `onesVec` preservation, eigenmode decay with the
+connected-graph DC-limit consequence. This is a real external consumer —
+the first High row since the table was instituted — so per the
+priority-0 rule it outranks every Medium row. Selected scope for this
+run: the Step-0 survey (record-before-proving, per the proposal) plus
+Step 1 — `heatKernel A t := NormedSpace.exp ℝ (-(t • laplacian A))`
+with symmetry (from the shelf's `laplacian_symmetric` through
+`Matrix.IsSymm.exp`) and `heatKernel A 0 = 1` (from `NormedSpace.exp_zero`),
+zero new axioms, per the proposal's own no-new-axioms mandate. The
+precedent for pairing a survey-only Step 0 with a small Step 1 is the
+directed-operators run of 2026-08-22.): DELIVERED — Steps 0+1 as pure
+hard crust in the new `GraphTheory.Heat`, zero new axioms (count stays
+9), QA 1457 → 1467 (`Heat_QA` a new file at 10).**
+
+**Pre-edit survey findings (Step 0, recorded before any statement):** the
+pinned Mathlib's
+`Mathlib/Analysis/Normed/Algebra/MatrixExponential.lean` is the exact
+surface the proposal sketched, and it is *purpose-built to be norm-free*:
+`Matrix.exp_add_of_commute` (line 120), `Matrix.isUnit_exp` (142),
+`Matrix.exp_neg` (166), `Matrix.exp_zsmul` (173), `Matrix.exp_conj`/
+`exp_conj'` (179/184) each `letI` the `linftyOp` norm *inside* their
+proofs, so no ball-membership or radius hypothesis reaches the caller —
+the proposal's `expSeries_radius_eq_top` worry does not arise at this
+pin. `Matrix.IsSymm.exp` (108) needs only `[Field 𝕂] [CommRing 𝔸]
+[TopologicalRing 𝔸] [Algebra 𝕂 𝔸] [T2Space 𝔸]` — for `Matrix V V ℝ` all
+instances are global (`Topology/Instances/Matrix.lean`: Pi topology,
+`Matrix.topologicalRing` at `[Fintype V]`, T2). One naming correction to
+the proposal sketch: there is no `Matrix.exp` declaration — the function
+is `NormedSpace.exp ℝ` used at matrix type (the Matrix-namespaced lemmas
+are wrappers), and the matrix-level `exp_add_of_commute` is reached as
+`Matrix.exp_add_of_commute` with entry-ring `NormedRing ℝ`/`NormedAlgebra
+ℝ ℝ`/`CompleteSpace ℝ` all global. For Step 1 only `Matrix.IsSymm.exp`
+and `NormedSpace.exp_zero` are consumed. The repo's `Perturbation.Duhamel`
+already carries a *vector-level* damped eigenbasis semigroup (`heatApply`,
+explicitly "no `Matrix.exp`") — a different object; a bridge to it is
+Step-4 business, not Step-1.
+
+**DELIVERED (same run):** the new `Scaffold/Mathlib/GraphTheory/Heat.lean`
+(namespace `SpectralGraphTheory`, zero new axioms — the proposal's own
+mandate; count stays 9) — `heatKernel A t := NormedSpace.exp ℝ
+(-(t • laplacian A))` (the external consumer's first interface item);
+`heatKernel_isSymm` (shelf `laplacian_symmetric` through
+`Matrix.IsSymm.smul`/`.neg` and the pin's `Matrix.IsSymm.exp`); the
+hypothesis-free `heatKernel_zero`; and the general square-zero collapse
+`exp_eq_one_add_of_mul_self_eq_zero` (`M * M = 0 → exp ℝ M = 1 + M`, by
+`exp_eq_tsum` + `tsum_eq_sum` over `range 2`). QA at
+`Scaffold/QA/SpectralGraph/Heat_QA.lean` (10 theorem declarations): the
+time-zero identity computed on both fixtures (hypothesis-free); symmetry
+through the theorem on K₂ with the hypothesis derived from the literal;
+the **exact closed form** `heatKernel asymAdj 1 = !![0, 1; -1, 2]` on the
+asymmetric fixture whose Laplacian `!![1,-1;1,-1]` is square-zero — the
+spike itself caught the first draft's wrong `(1,1)` entry, the failure
+mode numeric QA exists for; the **symmetry hypothesis
+refuted-on-omission** (entries `1 ≠ -1`, the fixture's `IsSymm` provably
+violated at the same pair); and the **sign witness** `e^{-L} ≠ e^{+L}`
+entrywise (`0 ≠ 2`).
+
+**Verification:** spike first (`wip/heat_spike.lean` green, all
+`#print axioms` the standard three) then transfer; `lake env lean` on the
+module and the QA file — zero errors, zero warnings each; explicit
+`lake build` targets for both ✔; `#print axioms` via `wip/heat_axcheck.lean`
+on all four public and all ten QA declarations — `propext,
+Classical.choice, Quot.sound` only; **full `lake build` ✔ (2252 targets
+(+2), "Build completed successfully", detached)**; `lint_axioms`
+(**9**, unchanged), `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated (**1467/9/0**, idempotent; `Heat_QA` a new file
+row at 10). Records updated: the proposal (status header, the Step-0
+survey record, the full Steps-0+1 delivery record, open-next-step →
+Step 2), `proposals/README.md` (High row + progress paragraph + Delivered
+row), README (1467, heat-semigroup in the proved list, module-table row),
+the radar (axis 5 **held at 3.5** with the delivery recorded and the
+absent clause updated — the definition layer, not the Steps-2–4
+statements; QA axis count synced 1457/39 → 1467/40, held at 4.0), the
+scoreboard (both Direct rows, the `lake build` row, lint row, a new
+interpretation bullet), the SGT index map (new Heat section), the
+coverage map (the matrix-exponential row: present and purpose-built
+norm-free), backlog item 5 (delivery-opened note), this plan, and the
+activity log. Nothing committed.
+
+**Next milestone (open):** **Reversibility Phase B Step 2** — the
+semigroup property `heatKernel A s * heatKernel A t = heatKernel A
+(s + t)` via `Matrix.exp_add_of_commute` at the commuting scalar
+multiples (`-(s • L)` and `-(t • L)` commute trivially; `neg_add` +
+`smul_add` reduce the exponent; the survey record above is why no ball
+hypothesis is needed), with QA (the semigroup law instantiated where
+both sides are exactly evaluable — the square-zero fixture and `t = 0`
+identities). Then Steps 3 (mass conservation through
+`laplacian_mulVec_ones`) and 4 (eigenmode decay + the DC limit), one per
+run per the proposal's operating instructions. After Phase B completes:
+the remaining Medium rows by leverage (approximate spectral projection
+Step 0; the PF consumers as new-proposal candidates).
+
+**Fiedler Phase B — the certified conductance cut (run 1, 2026-08-23;
+`proposals/fiedler-partitioning.md` Phase B, whose recorded operator gate
+was dissolved by the same day's `cheeger_lower_bound` retirement — pure
+hard crust, zero new axioms; the proposal is COMPLETE, QA 1449 → 1457).**
+In `GraphTheory.Cheeger`: `cheegerConstant_attained` (the conductance
+`sInf` realized as a minimum, no regularity hypothesis — the finiteness
+step converting Cheeger's inequality-about-an-infimum into a statement
+about an actual cut). In `GraphTheory.Fiedler` (new Phase B section,
+importing `Cheeger`): `fiedlerVector_rayleigh_regularNormalizedLaplacian`
+(`R_{L_sym}(f) = lambda2 / d`) and the headline `cheeger_cut_existence`:
+on every connected `d`-regular graph, `∃ S` nonempty proper with
+`conductance A S ^ 2 ≤ 2 * lambda2 A / d` — the classical Cheeger
+cut-existence corollary, assembled from `cheeger_sweep` at the Fiedler
+vector composed with attainment. **Statement-shape deviation recorded
+before stating:** the sketch's sign-partition bound is not certifiable
+from the Cheeger inequalities; the certified object is the conductance
+minimizer, the swept-level-set extraction the named follow-on. QA
+(`Fiedler_QA` 57 → 65, on K₂): `cheegerConstant (K₂) = 1` pinned both
+directions; the Rayleigh transfer cross-checked against the independently
+pinned `lambda2 (K₂) = 2`; the certified cut identified and its bound
+displayed (`1 ≤ 4`); and the regularity refutation (the `hd`-dropped form
+at `d = 100` demands `1 ≤ 1/25`, false). Verification: spike first
+(`wip/fiedlerB_spike.lean`); `lake env lean` on both modules and the QA
+file clean (Cheeger carrying only the documented pre-existing
+`unusedSectionVars` warning); explicit `lake build` targets ✔;
+`#print axioms` the standard three; **full `lake build` ✔ (2250
+targets)**; `lint_axioms` (**9**), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1457/9/0**).
+Records updated across the proposal, `proposals/README.md`, README,
+radar, scoreboard, backlog, both indexes, this plan, and the activity log;
+nothing committed.
 
 **Cheeger hard-direction Step 1c — median + assembly in `Cheeger.lean`,
 retiring `cheeger_lower_bound` (run 1, 2026-08-23;

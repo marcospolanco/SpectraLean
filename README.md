@@ -22,7 +22,7 @@ As of August 23, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 9 |
-| QA theorems/lemmas | 1457, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 1503, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is: **Perron–Frobenius for irreducible
 nonnegative matrices**
@@ -102,7 +102,7 @@ under value-based mode exclusion, and the closing χ² mixing bound
 `χ²(t, x) ≤ (λ*)^{2t} · ((π x)⁻¹ − 1)` on connected graphs under the
 rate hypothesis, its mode hypothesis *derived* from the connectivity
 kernel characterization of `L_sym` transferred through the proved
-congruence, not assumed) — are likewise proved. On the directed axis,
+congruence, not assumed) — are likewise proved. The **matrix-level heat semigroup** (`GraphTheory.Heat`, opened 2026-08-23 as Phase B of the external-consumer program `sgt-gaps.md` authorized: `heatKernel A t := NormedSpace.exp ℝ (-(t • laplacian A))` — the diffusion operator `e^{-tL}` — with symmetry under `A.IsSymm` through the pin's `Matrix.IsSymm.exp`, the hypothesis-free time-zero identity, the general square-zero exponential collapse `exp M = 1 + M`, **the semigroup law** `heatKernel A s * heatKernel A t = heatKernel A (s + t)` (Step 2, hypothesis-free, via `Matrix.exp_add_of_commute` at the commuting negated scalar multiples — the external consumer's "identity at time zero + semigroup law" pair complete hard crust), and **mass conservation** `heatKernel A t *ᵥ onesVec = onesVec` (Step 3, hypothesis-free, through the entrywise-built exponential-series convergence `expSeries_hasSum_exp` and the kernel-vector engine `exp_mulVec_eq_of_mulVec_eq_zero` — heat neither creates nor destroys total mass, and on disconnected input it provably does not cross components; QA exhibits both the two-route conservation witness and the per-component no-leakage witness), plus **eigenmode decay and the DC limit** (Step 4, closing Phase B as pure hard crust: the eigenmode engine `exp_mulVec_eq_smul_of_mulVec_eq_smul` consuming Step 3's convergence at an eigenvector — `heatKernel A t *ᵥ vᵢ = e^{−t·λᵢ} • vᵢ` at every time — with the sorted-spectrum decay monotonicity and PSD dissipation bound, the eigenbasis expansion `heatKernel_mulVec_eq_sum`, and the payoff **`heatKernel_mulVec_tendsto_atTop`**: on connected graphs, free diffusion leaves only the DC component — the heat flow of any vector converges to its mean `((∑ j, x j)/|V|) • onesVec`; QA witnesses mode decay and the DC limit each by two independent routes, cross-validates the engine against the rank-one-idempotent collapse at a nonzero eigenvalue, and pins the K₂ Laplacian spectrum `[0, 2]` from trace/determinant) — the external consumer's four-item interface complete as hard crust) is proved with zero axioms. On the directed axis,
 the **directed degree layer** (`GraphTheory.Directed`: the out-degree
 `outDeg` (definitionally the shelf's `deg` — the undirected shelf was
 carrying the out-degree walk operators symmetry-free all along), the
@@ -236,6 +236,7 @@ The near-term center is general SGT. Public modules currently cover:
 | Cuts and expansion | `GraphTheory.Cheeger`, `GraphTheory.Fiedler`, `GraphTheory.Expander` (edge weights, the centered-indicator decomposition, the Expander Mixing Lemma, and the Fiedler certified-conductance cut `cheeger_cut_existence`) |
 | Decidable spectral certificates | `GraphTheory.SpectralCertificates` (the ℚ specification checker with its soundness theorem, and the kernel-verifiable ℤ cross-multiplied twin with proved bridges) |
 | Electrical structure | `GraphTheory.Electrical`, `GraphTheory.ElectricalFlow`, `GraphTheory.Foster` |
+| Heat semigroup | `GraphTheory.Heat` (`heatKernel A t = e^{-tL}` on `laplacian A`: symmetry under `A.IsSymm`, identity at `t = 0`, the square-zero and rank-one-idempotent exponential collapses, the semigroup law `heatKernel A s * heatKernel A t = heatKernel A (s + t)`, mass conservation `heatKernel A t *ᵥ onesVec = onesVec` with its kernel-vector engine, eigenmode decay `heatKernel A t *ᵥ vᵢ = e^{−t·λᵢ} • vᵢ` with the decay monotonicity/dissipation bounds, the eigenbasis expansion, and the connected-graph DC limit `heatKernel_mulVec_tendsto_atTop`; Phase B Steps 1–4, program complete) |
 | Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized` (the similarity, eigenpair transfer, conjugated powers), `GraphTheory.Stationary`, `GraphTheory.Mixing` (the ℓ²-mixing proxy: stationary vector, walk law, density evolution, χ² distance, decay engine) |
 | Directed operators | `GraphTheory.Directed` (the degree layer `outDeg`/`inDeg`, directed handshaking, and the directed normalized Laplacian `I − ½(SAS + SAᵀS)` — symmetric hypothesis-free, agreeing with `normalizedLaplacian` on the symmetric cone — with the PSD-refutation calibration witness; the directed axis, program complete) |
 | Nonnegative-matrix spectral theory | `LinearAlgebra.PerronFrobenius` (`Matrix.IsIrreducible` via directed reachability; the admitted Perron–Frobenius theorem for irreducible nonnegative matrices — the directed axis' second spectral toolkit) |

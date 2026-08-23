@@ -16,6 +16,7 @@ import Scaffold.Mathlib.GraphTheory.RandomWalk
 import Scaffold.Mathlib.GraphTheory.Normalized
 import Scaffold.Mathlib.GraphTheory.Stationary
 import Scaffold.Mathlib.GraphTheory.Mixing
+import Scaffold.Mathlib.GraphTheory.Heat
 import Scaffold.Mathlib.GraphTheory.Directed
 import Scaffold.Mathlib.GraphTheory.VariationalTransfer
 import Scaffold.Mathlib.GraphTheory.Dynamics
@@ -88,7 +89,11 @@ bridge (`GraphTheory.Cheeger`), the Fiedler-vector interface (`GraphTheory.Fiedl
 the sign partition, and the algebraic-connectivity certificate),
 the random-walk interfaces (`GraphTheory.RandomWalk`), the general
 normalized Laplacian (`GraphTheory.Normalized`), the stationary
-structure consuming both (`GraphTheory.Stationary`), the variational
+structure consuming both (`GraphTheory.Stationary`), the heat semigroup
+(`GraphTheory.Heat`: Phase B, Step 1 of the reversibility/heat program —
+the matrix-level diffusion operator `heatKernel A t = e^{-tL}` with its
+hypothesis-graded symmetry and time-zero identity, plus the square-zero
+exponential collapse), the variational
 transfer consuming the congruence bridge
 (`GraphTheory.VariationalTransfer`), the event-driven
 frontier (`GraphTheory.Dynamics`), the perturbation bridge

@@ -1,0 +1,486 @@
+<title>Scaffold Transit Map</title>
+<style>
+  :root {
+    --paper: #E9EAE4;
+    --paper-raised: #F3F4EE;
+    --ink: #22282B;
+    --ink-soft: #4B5359;
+    --ink-faint: #7A817F;
+    --rule: #C3C9C1;
+    --rule-strong: #9AA39A;
+    --accent: #1F6F78;
+    --accent-soft: #DCE9E7;
+    --st-proved: #1D6B4A;
+    --st-axiom: #8A5A12;
+    --st-open: #4B5359;
+    --st-gated: #8A8378;
+    --st-progress: #6A3FA0;
+    --font-display: ui-sans-serif, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0E2A43;
+      --paper-raised: #123350;
+      --ink: #DCEEF5;
+      --ink-soft: #9FC3D6;
+      --ink-faint: #6E93A8;
+      --rule: #2A4F6B;
+      --rule-strong: #3C6A8C;
+      --accent: #6FE3FF;
+      --accent-soft: #17415B;
+      --st-proved: #4FE3B0;
+      --st-axiom: #FFC15E;
+      --st-open: #9FC3D6;
+      --st-gated: #7C8FA0;
+      --st-progress: #C9A6FF;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0E2A43;
+    --paper-raised: #123350;
+    --ink: #DCEEF5;
+    --ink-soft: #9FC3D6;
+    --ink-faint: #6E93A8;
+    --rule: #2A4F6B;
+    --rule-strong: #3C6A8C;
+    --accent: #6FE3FF;
+    --accent-soft: #17415B;
+    --st-proved: #4FE3B0;
+    --st-axiom: #FFC15E;
+    --st-open: #9FC3D6;
+    --st-gated: #7C8FA0;
+    --st-progress: #C9A6FF;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-display);
+    line-height: 1.45;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 28px 22px 60px; }
+
+  /* ---- title block ---- */
+  .titleblock {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px 32px;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 16px;
+    margin-bottom: 18px;
+  }
+  .titleblock h1 {
+    font-size: clamp(28px, 4vw, 40px);
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+  .titleblock .sub {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+    max-width: 62ch;
+  }
+  .stamp {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-align: right;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  .stamp b { color: var(--ink-soft); }
+
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 16px 0 22px;
+  }
+  .stat {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    border: 1px solid var(--rule-strong);
+    background: var(--paper-raised);
+    border-radius: 3px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+  }
+  .stat b { font-size: 15px; color: var(--ink); }
+  .stat .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
+
+  /* ---- legend ---- */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 10px 2px;
+    margin-bottom: 18px;
+  }
+  .legend .item { display: flex; align-items: center; gap: 6px; }
+  .legend svg { flex: none; overflow: visible; }
+
+  /* ---- layout: map + panel ---- */
+  .stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 880px) {
+    .stage { grid-template-columns: 1fr; }
+  }
+  .mapbox {
+    overflow-x: auto;
+    background: var(--paper-raised);
+    border: 1px solid var(--rule-strong);
+    border-radius: 4px;
+  }
+  #map { display: block; width: 100%; height: auto; min-width: 760px; }
+
+  .node-label { font-family: var(--font-mono); font-size: 12px; fill: var(--ink); }
+  .node-sub { font-family: var(--font-mono); font-size: 9.5px; fill: var(--ink-faint); }
+  .axis-title { font-family: var(--font-display); font-weight: 700; font-size: 14px; fill: var(--ink); letter-spacing: 0.02em; }
+  .axis-sub { font-family: var(--font-mono); font-size: 9.5px; fill: var(--ink-faint); }
+  .hub-title { font-family: var(--font-display); font-weight: 700; font-size: 16px; fill: var(--ink); }
+
+  .station { cursor: pointer; }
+  .station circle.ring { transition: r 0.12s ease, stroke-width 0.12s ease; }
+  .station:hover circle.ring { stroke-width: 3; }
+  .station:focus { outline: none; }
+  .station:focus circle.ring { stroke: var(--accent); stroke-width: 3; }
+
+  /* ---- detail panel ---- */
+  .panel {
+    background: var(--paper-raised);
+    border: 1px solid var(--rule-strong);
+    border-radius: 4px;
+    padding: 16px 16px 18px;
+    position: sticky;
+    top: 16px;
+    min-height: 220px;
+  }
+  .panel .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .panel h2 {
+    font-size: 19px;
+    margin: 0 0 8px;
+    text-wrap: balance;
+  }
+  .panel .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--rule-strong);
+    margin-bottom: 12px;
+  }
+  .panel .pill .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .panel p { font-size: 13.5px; color: var(--ink-soft); margin: 0 0 10px; }
+  .panel .axis-tag { font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); }
+  .panel .placeholder { font-size: 13.5px; color: var(--ink-faint); }
+
+  footer {
+    margin-top: 26px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--rule);
+    padding-top: 12px;
+  }
+  footer code { color: var(--ink-soft); }
+</style>
+
+<div class="wrap">
+  <div class="titleblock">
+    <div>
+      <h1>Scaffold Transit Map</h1>
+      <div class="sub">A hub-and-spoke reading of the spectral-graph-theory core and the five research axes it feeds — same metaphor as <code>wip/driving.md</code>, redrawn as data instead of an illustration so it can be redeployed as proofs land.</div>
+    </div>
+    <div class="stamp">as of commit <b id="stamp-sha">73ccbff</b><br>2026-08-24</div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+  <div class="stamp" id="repo-stamp" style="text-align:left; margin:-10px 0 18px;"></div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="stage">
+    <div class="mapbox">
+      <svg id="map" viewBox="0 0 1600 1080" role="img" aria-label="Hub-and-spoke map of Scaffold's spectral graph theory core and its five research axes, each theorem colored by proof status"></svg>
+    </div>
+    <div class="panel" id="panel">
+      <div class="eyebrow">Detail</div>
+      <p class="placeholder">Click any station or landmark to see its status and one-line note. This panel and the map are both drawn from the single data table at the top of this file's script — updating the map going forward means editing that table and republishing.</p>
+    </div>
+  </div>
+
+  <footer>
+    Source: <code>docs/scaffold_map.html</code> in the Scaffold repository. Rendered with inline SVG generated at load time from the embedded data table — no external libraries, no network calls. To update: edit <code>CORE</code>/<code>SPOKES</code> in the script below and redeploy.
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var STATUS = {
+    proved:   { label: "Proved (hard crust)",      color: "var(--st-proved)",   fill: true,  dash: null },
+    axiom:    { label: "Admitted axiom, cited",     color: "var(--st-axiom)",    fill: true,  dash: null },
+    progress: { label: "In progress",               color: "var(--st-progress)", fill: true,  dash: null },
+    open:     { label: "Proposed, authorized",      color: "var(--st-open)",     fill: false, dash: null },
+    gated:    { label: "Gated on a decision",       color: "var(--st-gated)",    fill: false, dash: "3,3" }
+  };
+
+  var CORE = {
+    id: "core",
+    label: "SGT CORE",
+    items: [
+      { name: "Courant–Fischer", status: "proved", note: "Rayleigh-quotient variational characterization of every eigenvalue." },
+      { name: "Cauchy Interlacing", status: "proved", note: "Principal-submatrix eigenvalues interlace the parent spectrum." },
+      { name: "Cheeger — easy direction", status: "proved", note: "φ ≤ √(2λ₂); retired from axiom 2026-08-18." },
+      { name: "Cheeger — hard direction", status: "proved", note: "φ²/2 ≤ λ₂; retired 2026-08-23, closing the perturbation-axiom discharge program." },
+      { name: "Weyl's Inequality", status: "proved", note: "Additive eigenvalue perturbation bound; retired 2026-08-20." },
+      { name: "Davis–Kahan sin Θ", status: "proved", note: "Invariant-subspace rotation bound; retired 2026-08-21." },
+      { name: "Thomson's Principle", status: "proved", note: "Variational characterization of effective resistance." },
+      { name: "Foster's Theorem", status: "proved", note: "∑ conductance·resistance = n − 1 over the spanning structure." }
+    ]
+  };
+
+  var SPOKES = [
+    {
+      id: "north", label: "BERNOULLI HEIGHTS", sub: "Probability & High-Dim Stats",
+      stations: [
+        { name: "Normalized Laplacians", status: "proved" },
+        { name: "Walk–Similarity Bridge", status: "proved" },
+        { name: "Spectral Gap Transfer", status: "proved" },
+        { name: "MCMC Mixing Time", status: "proved", note: "χ²(t,x) ≤ (λ*)^{2t}·((πx)⁻¹−1); program complete 2026-08-22." },
+        { name: "Subgaussian Tail Bound", status: "proved", note: "Hypotheses repaired, retired 2026-08-22." },
+        { name: "Finite Relative Entropy", status: "proved", note: "Gibbs' inequality both directions + entropy maximum." },
+        { name: "Matrix Concentration", status: "axiom", note: "Hoeffding / Bernstein / Azuma — admitted, cited, unretired." }
+      ]
+    },
+    {
+      id: "application", label: "APPLICATION RING", sub: "Consumers of the core",
+      stations: [
+        { name: "Fiedler Partitioning", status: "proved", note: "Certified conductance cut — first consumer of the Cheeger hard-direction retirement, 2026-08-23." }
+      ]
+    },
+    {
+      id: "east", label: "KURAMOTO JUNCTION", sub: "Dynamical Systems & Network Control",
+      stations: [
+        { name: "Perron–Frobenius", status: "axiom", note: "Irreducible nonnegative matrices; admitted 2026-08-22, no strict-dominance clause." },
+        { name: "Directed Operators", status: "proved", note: "directedNormalizedLaplacian; program complete 2026-08-22, zero new axioms." },
+        { name: "Heat Semigroup", status: "proved", note: "heatKernel; Phases A+B complete 2026-08-23 (identity, semigroup law, mass conservation, DC limit)." },
+        { name: "Heat — Phase C", status: "open", note: "Derivative at t=0 + first-order remainder bound; opened for the spectral-proof rewrite." },
+        { name: "Discrete Affine Convergence", status: "open", note: "Finite-vector geometric decay + affine-iteration convergence; new proposal, not the iceboxed ODE gap." },
+        { name: "Consensus & Sync.", status: "gated", note: "General graph semigroups remain gated pending a named consumer." }
+      ]
+    },
+    {
+      id: "south", label: "KIRCHHOFF FLATS", sub: "Statistical Physics & Disordered Systems",
+      stations: [
+        { name: "Electrical Flow", status: "proved" },
+        { name: "Effective Resistance", status: "proved" },
+        { name: "Dirichlet Energy", status: "proved" },
+        { name: "Weighted Matrix-Tree", status: "gated", note: "No named consumer yet — technical decision required." }
+      ]
+    },
+    {
+      id: "frontier", label: "OPEN FRONTIER", sub: "Surveyed, not yet built",
+      stations: [
+        { name: "Alon–Boppana Bound", status: "gated", note: "Step-0 survey complete — variational/Nilli route recommended, awaiting an operator decision." },
+        { name: "Approx. Spectral Projection", status: "progress", note: "Lanczos/Kaniel–Paige route cleared; Step 1a (interface layer) is next." }
+      ]
+    },
+    {
+      id: "southwest", label: "NEURIPS BAY", sub: "Machine Learning & Graph Signal Processing",
+      stations: [
+        { name: "Resolvent Calculus", status: "proved" },
+        { name: "Band Projectors", status: "proved" },
+        { name: "Tikhonov Filter", status: "proved" },
+        { name: "Tikhonov — Phase 2", status: "open", note: "Hard-filter limit + finite tail-suppression corollary; opened for the spectral-proof rewrite." },
+        { name: "Decidable Certificates", status: "proved" }
+      ]
+    },
+    {
+      id: "northwest", label: "STOC CITY", sub: "Theoretical CS & Algorithms",
+      stations: [
+        { name: "Leverage Scores", status: "gated" },
+        { name: "Matrix Chernoff Bridge", status: "gated", note: "The cited theorem does not exist anywhere in the repository — not a citation fix." },
+        { name: "Spielman–Srivastava", status: "gated", note: "Sparsification Phase B blocked on the Chernoff gap above." }
+      ]
+    }
+  ];
+
+  var svg = document.getElementById("map");
+  var NS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  var CX = 800, CY = 540;
+  var CORE_R = 108;
+  var STATION_GAP = 92;
+  var STATION_START = 210;
+
+  function dotVisual(g, status, r) {
+    var s = STATUS[status];
+    var c = el("circle", { class: "ring", r: r, stroke: s.color, "stroke-width": 2 });
+    if (s.fill) { c.setAttribute("fill", s.color); }
+    else { c.setAttribute("fill", "var(--paper-raised)"); }
+    if (s.dash) c.setAttribute("stroke-dasharray", s.dash);
+    g.appendChild(c);
+  }
+
+  function makeStation(x, y, item, side, axisId) {
+    var g = el("g", { class: "station", tabindex: "0", role: "button" });
+    var title = el("title", {});
+    title.textContent = item.name + " — " + STATUS[item.status].label;
+    g.appendChild(title);
+    dotVisual(g, item.status, 7);
+    var tx = x + (side >= 0 ? 12 : -12);
+    var anchor = side >= 0 ? "start" : "end";
+    var label = el("text", { class: "node-label", x: tx, y: y + 4, "text-anchor": anchor });
+    label.textContent = item.name;
+    g.appendChild(label);
+    g.addEventListener("click", function () { showDetail(item, axisId); });
+    g.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); showDetail(item, axisId); }
+    });
+    svg.appendChild(g);
+  }
+
+  // ---- hub ----
+  svg.appendChild(el("circle", { cx: CX, cy: CY, r: CORE_R, fill: "var(--accent-soft)", stroke: "var(--accent)", "stroke-width": 2 }));
+  var hubLabel = el("text", { class: "hub-title", x: CX, y: CY - 4, "text-anchor": "middle" });
+  hubLabel.textContent = CORE.label;
+  svg.appendChild(hubLabel);
+  var hubSub = el("text", { class: "axis-sub", x: CX, y: CY + 14, "text-anchor": "middle" });
+  hubSub.textContent = CORE.items.length + " proved landmarks";
+  svg.appendChild(hubSub);
+
+  var coreRingR = CORE_R + 46;
+  CORE.items.forEach(function (item, i) {
+    var a = (-90 + i * (360 / CORE.items.length)) * Math.PI / 180;
+    var x = CX + coreRingR * Math.cos(a);
+    var y = CY + coreRingR * Math.sin(a);
+    svg.appendChild(el("line", { x1: CX + CORE_R * Math.cos(a), y1: CY + CORE_R * Math.sin(a), x2: x, y2: y, stroke: "var(--accent)", "stroke-width": 1.5 }));
+    makeStation(x, y, item, Math.cos(a) >= 0 ? 1 : -1, "core");
+  });
+
+  // ---- spokes ----
+  var n = SPOKES.length;
+  SPOKES.forEach(function (spoke, i) {
+    var angleDeg = -90 + i * (360 / n);
+    var a = angleDeg * Math.PI / 180;
+    var dx = Math.cos(a), dy = Math.sin(a);
+    var px = -dy, py = dx; // perpendicular, for label offset
+    var side = dx >= 0 ? 1 : -1;
+
+    var lastR = STATION_START + (spoke.stations.length - 1) * STATION_GAP + 30;
+    var lineStartR = CORE_R + 12;
+    svg.appendChild(el("line", {
+      x1: CX + dx * lineStartR, y1: CY + dy * lineStartR,
+      x2: CX + dx * lastR, y2: CY + dy * lastR,
+      stroke: "var(--rule-strong)", "stroke-width": 3
+    }));
+
+    spoke.stations.forEach(function (item, j) {
+      var r = STATION_START + j * STATION_GAP;
+      var x = CX + dx * r, y = CY + dy * r;
+      makeStation(x, y, item, side, spoke.id);
+    });
+
+    // axis title beyond the last station
+    var tr = lastR + 26;
+    var tx = CX + dx * tr, ty = CY + dy * tr;
+    var titleAnchor = Math.abs(dx) < 0.35 ? "middle" : (side >= 0 ? "start" : "end");
+    var t1 = el("text", { class: "axis-title", x: tx, y: ty - 6, "text-anchor": titleAnchor });
+    t1.textContent = spoke.label;
+    svg.appendChild(t1);
+    var t2 = el("text", { class: "axis-sub", x: tx, y: ty + 10, "text-anchor": titleAnchor });
+    t2.textContent = spoke.sub;
+    svg.appendChild(t2);
+  });
+
+  // ---- panel ----
+  var panel = document.getElementById("panel");
+  function showDetail(item, axisId) {
+    var s = STATUS[item.status];
+    var axisLabel = axisId === "core" ? "SGT Core" : (function () {
+      var sp = SPOKES.filter(function (s) { return s.id === axisId; })[0];
+      return sp ? sp.label : "";
+    })();
+    panel.innerHTML =
+      '<div class="eyebrow">' + axisLabel + '</div>' +
+      '<h2>' + item.name + '</h2>' +
+      '<span class="pill" style="border-color:' + s.color + '"><span class="dot" style="background:' + s.color + '"></span>' + s.label + '</span>' +
+      '<p>' + (item.note || "No additional note recorded yet.") + '</p>';
+  }
+
+  // ---- legend ----
+  var legend = document.getElementById("legend");
+  Object.keys(STATUS).forEach(function (key) {
+    var s = STATUS[key];
+    var item = document.createElement("span");
+    item.className = "item";
+    var swatch = document.createElementNS(NS, "svg");
+    swatch.setAttribute("width", "14"); swatch.setAttribute("height", "14"); swatch.setAttribute("viewBox", "0 0 14 14");
+    var c = el("circle", { cx: 7, cy: 7, r: 5.5, stroke: s.color, "stroke-width": 2 });
+    c.setAttribute("fill", s.fill ? s.color : "none");
+    if (s.dash) c.setAttribute("stroke-dasharray", s.dash);
+    swatch.appendChild(c);
+    item.appendChild(swatch);
+    var txt = document.createElement("span");
+    txt.textContent = s.label;
+    item.appendChild(txt);
+    legend.appendChild(item);
+  });
+
+  // ---- stats ----
+  var all = CORE.items.slice();
+  SPOKES.forEach(function (sp) { all = all.concat(sp.stations); });
+  var counts = { proved: 0, axiom: 0, open: 0, gated: 0, progress: 0 };
+  all.forEach(function (it) { counts[it.status]++; });
+  var stats = document.getElementById("stats");
+  function addStat(label, value, color) {
+    var d = document.createElement("div");
+    d.className = "stat";
+    d.innerHTML = '<span class="dot" style="background:' + color + '"></span><b>' + value + '</b> ' + label;
+    stats.appendChild(d);
+  }
+  addStat("proved (hard crust)", counts.proved, "var(--st-proved)");
+  addStat("admitted axioms cited", counts.axiom, "var(--st-axiom)");
+  addStat("open / authorized", counts.open, "var(--st-open)");
+  addStat("in progress", counts.progress, "var(--st-progress)");
+  addStat("gated on a decision", counts.gated, "var(--st-gated)");
+  document.getElementById("repo-stamp").textContent =
+    "Repo-wide: 9 explicit axioms · 1503 QA declarations · 0 sorries";
+})();
+</script>

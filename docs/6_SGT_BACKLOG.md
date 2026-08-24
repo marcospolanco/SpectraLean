@@ -453,6 +453,45 @@ strict-dominance clause (QA's `strict_dominance_refuted_QA` exhibits
 the directed 2-cycle where the strengthening dies at `|−2| = 2 = r`).
 The item's named consumers — irreducible stationary distributions and
 PageRank — are now unblocked as separate follow-on proposals.
+*Fourth update (2026-08-24):* **the first named consumer delivered —
+`proposals/irreducible-stationary-distributions.md` complete (Steps
+0+1 in one run, zero new axioms): the new
+`GraphTheory.IrreducibleStationary` proves existence, uniqueness up
+to positive scale, the `∃!` packaging, and full support of the
+stationary distribution on every irreducible nonnegative walk —
+**conditional on `perron_frobenius`** through exactly two axiom
+applications (the eigenvalue-identification clause pinning the walk's
+Perron root to `1` at `onesVec`; the uniqueness clause), with the
+transposed root pinned by a bilinear pairing and the irreducibility
+transfer lemmas (`isIrreducible_transpose`,
+`walkTransitionMatrix_isIrreducible`) unconditional. QA (+94) carries
+the asymmetric-fixture identification, the symmetric-cone agreement
+with `stationaryVec`, and the reducibility fence (both hypothesis-free
+conclusions refuted in proved form). PageRank remains the second
+named consumer, needing its own document.
+*Fifth update (2026-08-24, same day):* **the second named consumer
+delivered — `proposals/pagerank-distributions.md` complete (Steps 0+1
+in one run, zero new axioms): the new `GraphTheory.PageRank` proves
+existence, the `∃!`, and full support of the PageRank distribution on
+reducible input — no irreducibility hypothesis anywhere — the Google
+matrix's teleportation floor `(1−α)·n⁻¹` making every entry positive
+so irreducibility is *derived* (`ReflTransGen.single` per pair), the
+delivered consumer layer composed at `G` through the general
+row-stochasticity bridge `walkTransitionMatrix M = M`, all three
+theorems conditional on `perron_frobenius` with zero new axiom
+contact.** QA (+89 by the generator metric, 1715 → 1804): the
+reducible two-edge fixture's uniform PageRank verified completely raw
+with the `∃!` join (on the fixture whose raw walk has two stationary
+distributions), the asymmetric star's `(4/9, 5/18, 5/18)` verified
+raw and provably distinct from the raw stationary, and both endpoint
+fences refuted in proved form (`α = 1` teleportation-removed, `α = -1`
+identity degeneration — row stochasticity surviving both, being
+α-free). The item's named-consumer program (irreducible stationary
+distributions, PageRank) is now fully delivered; what remains on the
+directed axis is mixing/rate work (gated on primitivity-shaped
+admissions — the axiom deliberately claims no strict dominance) and
+the magnetic-Laplacian slice (separate, per this item's own scope
+note).
 
 ### 9. Bounded-window ("band") Davis–Kahan (2026-08-21, opened by the Davis–Kahan Step-0/1 survey)
 

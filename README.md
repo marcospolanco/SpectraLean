@@ -16,13 +16,13 @@ revision](docs/5_QA_SCOREBOARD.md) rather than tracking `main`.
 
 ## Status
 
-As of August 23, 2026:
+As of August 24, 2026:
 
 | Check | Result |
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 9 |
-| QA theorems/lemmas | 1571, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 1804, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is: **Perron–Frobenius for irreducible
 nonnegative matrices**
@@ -31,7 +31,20 @@ Horn & Johnson Theorem 8.4.4 at the irreducible-case qualification
 level — no strict-dominance clause, with the imprimitive-cycle
 refutation witness `strict_dominance_refuted_QA` fencing exactly that
 misstatement — opening the directed axis' second spectral toolkit,
-absent from the pinned Mathlib); the scalar and matrix
+absent from the pinned Mathlib; its first theorem consumer delivered
+2026-08-24 as `GraphTheory.IrreducibleStationary` — existence,
+uniqueness-up-to-positive-scale, the `∃!` packaging, and full support
+of the stationary distribution on every irreducible nonnegative walk,
+conditional on that axiom alone, with the eigenvalue-identification
+and uniqueness clauses consumed structurally and the symmetric-cone
+`K₂` agreement with the combinatorial `stationaryVec` pinned in QA;
+its second delivered the same day as `GraphTheory.PageRank` — the
+teleportation-regularized Google matrix whose positive floor makes
+irreducibility *derived* rather than assumed, so existence, the
+`∃!`, and full support of the PageRank distribution hold on
+**reducible** input with no irreducibility hypothesis, likewise
+conditional on that axiom alone, with the damping window `[0, 1)`
+fenced at both endpoints in QA); the scalar and matrix
 concentration family (Hoeffding, Bernstein, Azuma — the subgaussian
 tail bound was retired 2026-08-22 by the Markov-route repair-and-retire
 of `proposals/prove-subgaussian-tail-bound.md`, whose Step 0 spike
@@ -124,7 +137,7 @@ the square-root-free symmetrized-adjacency pair `D_out − ½(A+Aᵀ)`;
 QA exhibits the calibration refutation — symmetric but **not PSD** on
 directed input, the quadratic form at `!![0,4;1,0]` evaluating to
 `−1/2 < 0`, so the positivity layer of the undirected toolkit does
-not transfer) are proved with zero axioms. The finite-distribution **entropy layer** (`InformationTheory.Entropy`: relative entropy `klDiv` and Shannon entropy `shannonEntropy` with the visible `p i = 0 ↦ 0` junk convention, Gibbs' inequality in both directions (`0 ≤ klDiv p q`, with equality exactly at `p = q`), the uniform bridge, the entropy maximum `shannonEntropy p ≤ log |V|` with equality exactly at uniform, and nonnegativity) is proved from the term-wise information inequality `log t ≤ t − 1` — the same textbook route as the pinned Mathlib strict-concavity machinery, with zero axioms. The **discrete-affine dynamics layer** (`Dynamics.DiscreteAffine`, the `sgt-gaps.md` item-2 consumer interface delivered 2026-08-23: the finite-vector geometric-decay wrapper `r ^ n • x → 0` for `|r| < 1` and the affine-iteration convergence theorem — `x_{n+1} = (1−α) • x_n + α • e` converges to `e` for `0 < α < 2`, via the closed form `x_n = (1−α)^n • (x_0 − e) + e` — both stated at a general real normed space) is likewise proved from pinned Mathlib lemmas with zero axioms, opening the discrete-affine slice of the graph-dynamics backlog item.
+not transfer) are proved with zero axioms. The finite-distribution **entropy layer** (`InformationTheory.Entropy`: relative entropy `klDiv` and Shannon entropy `shannonEntropy` with the visible `p i = 0 ↦ 0` junk convention, Gibbs' inequality in both directions (`0 ≤ klDiv p q`, with equality exactly at `p = q`), the uniform bridge, the entropy maximum `shannonEntropy p ≤ log |V|` with equality exactly at uniform, and nonnegativity) is proved from the term-wise information inequality `log t ≤ t − 1` — the same textbook route as the pinned Mathlib strict-concavity machinery, with zero axioms. The **discrete-affine dynamics layer** (`Dynamics.DiscreteAffine`, the `sgt-gaps.md` item-2 consumer interface delivered 2026-08-23: the finite-vector geometric-decay wrapper `r ^ n • x → 0` for `|r| < 1` and the affine-iteration convergence theorem — `x_{n+1} = (1−α) • x_n + α • e` converges to `e` for `0 < α < 2`, via the closed form `x_n = (1−α)^n • (x_0 − e) + e` — both stated at a general real normed space) is likewise proved from pinned Mathlib lemmas with zero axioms, opening the discrete-affine slice of the graph-dynamics backlog item. The **Krylov/Chebyshev interface layer** (`GraphTheory.Krylov`, the approximate-spectral-projection Step 1a delivered 2026-08-23: the real `krylovSpan` definition with polynomial-image membership, the polynomial-eigenaction transfer `p(M) v = p(μ) • v` through the heat module's power lemma, the pin-gap `sum_mulVec` push, the Chebyshev band bound `|T_n(x)| ≤ 1` on `[−1, 1]` with both Step-0-priced gaps closed — `natDegree (T ℝ n) = n` and `T_m(x) ≥ 1` at `x ≥ 1`, the latter through a conjunction engine that also proves index-monotonicity — and the hypothesis-form Kaniel–Paige skeleton carrying the five named spectral-layer discharge sites) is likewise proved with zero axioms. The **Kaniel–Paige spectral discharge** (the same program's Step 1b, delivered 2026-08-23: the general-eigenvector transfer `u ⬝ᵥ (p(M) g) = (u ⬝ᵥ g) · p(μ)` at any eigenvector, the eigenbasis component form with Parseval/quadratic-form resolution for polynomial images, the affine band map with its pins and degree, the unit decomposition `b = c • u + s • g` at `c² + s² = 1`, and the composite `kanielPaigeChebyshev` — the full Kaniel–Paige bound at the Chebyshev-composed band polynomial, every spectral site discharged from the eigenbasis-level band hypothesis) is likewise proved with zero axioms. The **Kaniel–Paige final statement** (the same program's Step 1c, delivered 2026-08-24, the proposal complete: `kanielPaige` — for symmetric `M` with unit top eigenvector, unit `b` with `u ⬝ᵥ b ≠ 0`, the band hypothesis, and `k ≥ 1`, the `k`-th Krylov space contains a nonzero vector within `(Ltop − Lbot) · tan²φ / T_{k−1}(1 + 2γ)²` of the top eigenvalue at `γ = (Ltop − Ltwo)/(Ltwo − Lbot)`, the decomposition internal and the bound in the classical gap form) is likewise proved with zero axioms, QA'd end-to-end on `diag(3,1,0)` with the bound expression-equal to the composite's `16/75`, the `k = 1` degenerate case, the `b = u` tightness at bound `0` attained, and the simple-top guard refuted on a top-multiplicity fixture.
 
 The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for
 current counts, verification commands, and limitations.
@@ -256,7 +269,10 @@ The near-term center is general SGT. Public modules currently cover:
 | Heat semigroup | `GraphTheory.Heat` (`heatKernel A t = e^{-tL}` on `laplacian A`: symmetry under `A.IsSymm`, identity at `t = 0`, the square-zero and rank-one-idempotent exponential collapses, the semigroup law `heatKernel A s * heatKernel A t = heatKernel A (s + t)`, mass conservation `heatKernel A t *ᵥ onesVec = onesVec` with its kernel-vector engine, eigenmode decay `heatKernel A t *ᵥ vᵢ = e^{−t·λᵢ} • vᵢ` with the decay monotonicity/dissipation bounds, the eigenbasis expansion, the connected-graph DC limit `heatKernel_mulVec_tendsto_atTop`, the heat-flow derivative at zero `heatKernel_mulVec_hasDerivAt_zero` (Phase C Step 1), and the first-order remainder bound `heatKernel_firstOrder_remainder_apply_le` with its `[0, T]` interval packaging (Phase C Step 2); **the program COMPLETE — Phases A, B, and C, zero axioms throughout**) |
 | Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized` (the similarity, eigenpair transfer, conjugated powers), `GraphTheory.Stationary`, `GraphTheory.Mixing` (the ℓ²-mixing proxy: stationary vector, walk law, density evolution, χ² distance, decay engine) |
 | Directed operators | `GraphTheory.Directed` (the degree layer `outDeg`/`inDeg`, directed handshaking, and the directed normalized Laplacian `I − ½(SAS + SAᵀS)` — symmetric hypothesis-free, agreeing with `normalizedLaplacian` on the symmetric cone — with the PSD-refutation calibration witness; the directed axis, program complete) |
+| Krylov methods and Chebyshev polynomials | `GraphTheory.Krylov` (the Lanczos/Kaniel–Paige program COMPLETE through Step 1c: the real `krylovSpan` definition, polynomial-eigenaction transfer `p(M)v = p(μ)•v`, degree-`<k` Krylov membership, `sum_mulVec`, the Chebyshev band bound `\|T_n(x)\| ≤ 1` on `[−1,1]`, `natDegree (T ℝ n) = n`, `T_m(x) ≥ 1` at `x ≥ 1`, the hypothesis-form Kaniel–Paige skeleton, the general-eigenvector transfer layer, the eigenbasis component form with Parseval/quadratic-form resolution identities, the affine band map with pins/degree/range/growth, the unit decomposition, the composite `kanielPaigeChebyshev` with every spectral site discharged, and the final statement `kanielPaige` — the classical bound in `tan²φ`/`γ` form, `u ⬝ᵥ b ≠ 0` the only starting-vector hypothesis) |
 | Nonnegative-matrix spectral theory | `LinearAlgebra.PerronFrobenius` (`Matrix.IsIrreducible` via directed reachability; the admitted Perron–Frobenius theorem for irreducible nonnegative matrices — the directed axis' second spectral toolkit) |
+| Irreducible stationary distributions | `GraphTheory.IrreducibleStationary` (the first Perron–Frobenius consumer, conditional on that axiom: the transposed Perron engine with the walk's root pinned to 1 through row-stochasticity, existence/`∃!`/full support of the stationary distribution on irreducible nonnegative walks, uniqueness up to positive scale; the unconditional irreducibility-transfer lemmas) |
+| PageRank | `GraphTheory.PageRank` (the second Perron–Frobenius consumer, conditional on that axiom: the teleportation-regularized Google matrix `G i j = α·P i j + (1−α)·n⁻¹`, whose positive floor makes irreducibility *derived* rather than assumed — existence, the `∃!`, and full support of the PageRank distribution on **reducible** input at any damping `α ∈ [0,1)`; the unconditional structural layer: the floor, irreducibility, α-free row stochasticity, and the general row-stochasticity bridge `walkTransitionMatrix M = M`) |
 | Perturbation | `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan,ProjectionGap,Duhamel}` |
 | Concentration | `Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*` |
 | Finite-distribution entropy | `InformationTheory.Entropy` (relative entropy and Shannon entropy, Gibbs' inequality, the entropy maximum — all proved) |

@@ -629,6 +629,75 @@ refutes PSD-ness of the new operator (the calibration boundary).
 | `directedNormalizedLaplacian_eq_normalizedLaplacian` | **the Step-3 acceptance bar:** `A.IsSymm → L_dir = normalizedLaplacian` — both halves coincide on the symmetric cone; every directed construction reduces to its undirected counterpart there |
 | `degreeSqrt_mul_directedNormalizedLaplacian_mul_degreeSqrt` | the square-root-free conjugate `√D L_dir √D = degreeMatrix A − ½(A + Aᵀ)` — the symmetrized adjacency at out-degree normalization; every quadratic-form statement transfers to this pair |
 
+### `Scaffold.Mathlib.GraphTheory.IrreducibleStationary` (irreducible stationary distributions — the first Perron–Frobenius consumer)
+
+The first *theorem* consumer of the admitted `perron_frobenius` axiom
+(delivered 2026-08-24, `proposals/irreducible-stationary-distributions.md`,
+Steps 0+1 in one run). The five stationary-distribution theorems are
+**conditional on that axiom** — Lean-checked deductions whose trust
+cost is the axiom's, never to be described as foundationally proved;
+the two transfer lemmas are unconditional. The derivation consumes the
+axiom's eigenvalue-identification clause (any nonnegative eigenvector's
+eigenvalue is the Perron root — pinning the walk's root to `1` through
+the shelf's row-stochasticity at `onesVec`) and its uniqueness clause
+structurally, with the transposed application's root pinned by the
+bilinear pairing through the pin's `Matrix.dotProduct_mulVec`/
+`Matrix.mulVec_transpose` — no charpoly, rootMultiplicity, or complex
+domination anywhere. QA at
+`Scaffold/QA/SpectralGraph/IrreducibleStationary_QA.lean` (94
+declarations: the asymmetric directed star with the hand value
+identified through the `∃!`, the symmetric-cone `K₂` agreement with
+`stationaryVec` through the shelf's detailed-balance chain, and the
+reducibility fence refuting the hypothesis-free `∃!` and
+scale-uniqueness conclusions).
+
+| Declaration | Content |
+|-------------|---------|
+| `isIrreducible_transpose` | strong connectivity is arc-reversal invariant: `M.IsIrreducible → Mᵀ.IsIrreducible` (unconditional; the private `ReflTransGen` flip induction behind it) |
+| `walkTransitionMatrix_isIrreducible` | positive row scaling preserves the support digraph: `A.IsIrreducible` + positive out-degrees → the walk matrix irreducible (unconditional; the private `ReflTransGen` congruence — the pin has `mono` for `ReflGen` only) |
+| `exists_walkPerronVector` | **the transposed Perron engine** (conditional): a strictly positive vector fixed by `Pᵀ *ᵥ ·`, unique up to positive scalars among nonzero nonnegative fixed vectors — the Perron vector of `Pᵀ` with the root computed to be `1` |
+| `exists_stationaryVec_of_irreducible` | **existence with full support** (conditional): a strictly positive, mass-one stationary distribution `π ᵥ* P = π` for every irreducible nonnegative walk — the directed-axis statement the undirected shelf cannot reach |
+| `stationaryVec_smul_of_irreducible` | **uniqueness up to positive scale** (conditional) among all nonzero nonnegative stationary vectors, the scale-free form |
+| `existsUnique_stationaryVec_of_irreducible` | **the textbook `∃!`** (conditional): exactly one nonnegative mass-one vector fixed by the walk, positivity derived rather than hypothesized |
+| `stationaryVec_pos_of_irreducible` | **full support** (conditional): every nonzero nonnegative stationary vector is strictly positive — no stationary distribution of an irreducible chain can vanish anywhere |
+
+### `Scaffold.Mathlib.GraphTheory.PageRank` (the teleportation-regularized walk — the second Perron–Frobenius consumer)
+
+The Google matrix `G i j = α * P i j + (1 - α) * (card V)⁻¹` (delivered
+2026-08-24, `proposals/pagerank-distributions.md`, Steps 0+1 in one
+run). The construction's content is the **teleportation floor**: every
+entry positive on the damping window `[0, 1)`, so irreducibility is
+*derived* rather than assumed and the delivered
+`IrreducibleStationary` layer composes at `G` through the general
+row-stochasticity bridge — extending the stationary theory to
+**reducible** input with no irreducibility hypothesis in any
+statement. The three PageRank theorems are **conditional on the
+`perron_frobenius` axiom** (no new axiom contact — the composition
+consumes the delivered layer); the nine structural declarations are
+unconditional. QA at
+`Scaffold/QA/SpectralGraph/PageRank_QA.lean` (89 declarations by the
+generator metric: the reducible two-edge fixture's uniform PageRank
+verified completely raw with the `∃!` join, the asymmetric star's
+`(4/9, 5/18, 5/18)` verified raw and provably distinct from the raw
+stationary, and both endpoint fences refuted in proved form —
+`α = 1` teleportation-removed, `α = -1` identity degeneration — with
+row stochasticity pinned intact at both).
+
+| Declaration | Content |
+|-------------|---------|
+| `googleMatrix` | the teleportation-regularized walk matrix, entry form `α * P i j + (1 - α) * (card V)⁻¹` (the Page–Brin damping construction; entry form for literal-index pinning) |
+| `googleMatrix_apply` | the entry-level interface every entry computation consumes |
+| `walkTransitionMatrix_nonneg` | the walk of a nonnegative positive-degree network is nonnegative (unconditional; the sign-pattern reading the floor consumes) |
+| `googleMatrix_nonneg` | nonnegativity on the damping window `[0, 1]` (unconditional; the consumer layer's `hnn` discharge) |
+| `googleMatrix_pos` | **the teleportation floor**: `0 < G i j` at every pair on `[0, 1)` with nonempty `V` — regardless of the input walk's support, reducibility, or asymmetry (unconditional; the `googleMatrix_isIrreducible` engine) |
+| `googleMatrix_row_sum` | row stochasticity, for **every** real `α` (affine — survives both fence endpoints where uniqueness dies; unconditional) |
+| `googleMatrix_deg_eq_one` | all degrees one — the consumer layer's positive-degree hypothesis discharged unconditionally |
+| `googleMatrix_isIrreducible` | **irreducibility derived, not assumed**: every pair one positive arc apart through the floor, `ReflTransGen.single` per pair — reducible input included (unconditional) |
+| `walkTransitionMatrix_eq_of_row_sum_one` | **the general bridge**: any row-stochastic matrix is its own walk transition matrix — the composition point for any row-stochastic consumer, the Google matrix the first (unconditional) |
+| `exists_pageRankVec` | **existence** (conditional on `perron_frobenius`): a strictly positive, mass-one `π ᵥ* G = π` for every nonnegative positive-degree network — reducible or not |
+| `existsUnique_pageRankVec` | **the `∃!`** (conditional): exactly one nonnegative stationary distribution of the Google walk, **no irreducibility hypothesis on the input** — the statement the raw walk cannot support on reducible input |
+| `pageRankVec_pos` | **full support** (conditional): every nonzero nonnegative vector fixed by `G` is strictly positive — even a vertex with no inbound walk arcs receives teleportation mass |
+
 ### `Scaffold.Mathlib.GraphTheory.VariationalTransfer` (variational consumer of the congruence bridge)
 
 All statements proved (2026-08-17), no axioms; the second consuming
@@ -728,6 +797,59 @@ chain (`Derived.ProjectorDrift.davisKahanTwoPoint`,
 `Derived.ProjectorDrift.eventStreamProjectorDrift`, which sums to a
 per-step bound if one is needed). See `docs/6_SGT_BACKLOG.md` for the
 retirement record.
+
+### `Scaffold.Mathlib.GraphTheory.Krylov` (Krylov methods, the Chebyshev layer, and the Kaniel–Paige spectral discharge)
+
+Steps 0–1c of the Lanczos/Kaniel–Paige program
+(`proposals/approximate-spectral-projection.md`, Steps 0, 1a, and 1b
+delivered 2026-08-23; Step 1c — the final statement — delivered
+2026-08-24, **the proposal COMPLETE**). The reusable pieces the
+cleared Kaniel–Paige shape is assembled from, the Step-1b spectral
+discharge that closes the skeleton's five named sites on the shelf's
+eigenbasis machinery, and the Step-1c final statement `kanielPaige`
+(the `tan²φ`/`γ` form, decomposition internal). All proved, zero
+axioms; the Saad §6 locator is carried by `kanielPaige`'s own
+docstring with the proposal's verify-against-the-physical-copy caveat
+(the proposal owns the statement). QA at
+`Scaffold/QA/SpectralGraph/Krylov_QA.lean` (two-route polynomial
+action and membership, the degree-guard refutation, the composed
+`natDegree_T` use, the full skeleton instantiation on a diagonal
+fixture, the band-map pins and transfer engines two-route, the
+composite `kanielPaigeChebyshev` instantiated on `diag(3,1,0)` with
+the band hypothesis derived from the eigen-equation and an independent
+raw route proving the true Krylov-witness gap strictly inside the
+delivered bound; and the Step-1c witnesses — the final form's bound
+proved expression-equal to the composite's `16/75`, the `k = 1`
+degenerate case at the plain Rayleigh-gap value, the `b = u`
+tightness with the bound attained at exactly `Ltop`, and the
+simple-top guard refuted on the top-multiplicity `diag(3,3,0)`
+fixture).
+
+| Declaration | Content |
+|-------------|---------|
+| `abs_T_eval_le_one` | the Chebyshev band bound `\|T_n(x)\| ≤ 1` on `[−1, 1]`, from the pin's `T_real_cos` |
+| `natDegree_T` | `(T ℝ (n : ℤ)).natDegree = n` — the Step-0-priced pin gap (two-step induction at `T_add_two`) |
+| `one_le_eval_T_of_one_le` | `1 ≤ T_m(x)` at `x ≥ 1` — the second priced gap, through the private index-monotonicity conjunction engine |
+| `sum_mulVec` | the `*ᵥ`-action distributes over Finset sums in the matrix argument (pin-gap helper) |
+| `krylovSpan` | the `k`-th Krylov space `span {b, Mb, …, Mᵏ⁻¹b}` — the variational object Rayleigh–Ritz optimizes over |
+| `scalar_mul_eq_smul` | `algebraMap ℝ (Matrix V V ℝ) a * M = a • M` (the action helper) |
+| `aeval_mulVec_eq_eval_smul` | polynomial-eigenaction transfer `p(M) *ᵥ v = p(μ) • v` at `M *ᵥ v = μ • v`, through `Heat.pow_mulVec_smul` |
+| `aeval_mulVec_mem_krylovSpan` | degree-`< k` polynomial images of `b` lie in `krylovSpan M b k` |
+| `kanielPaigeSkeleton` | the Kaniel–Paige bound in hypothesis form: from `b = c • u + s • g` and the five named spectral sites (`hp₁`, `horth`, `horthM`, `hbottom`, `hband`), the Krylov space contains nonzero `x` with `Ltop − R_M(x) ≤ (Ltop − Lbot) · s² / (c² Tv²)` |
+| `eigvec_dotProduct_mulVec` | self-adjointness transfer at any eigenvector: `u ⬝ᵥ (M *ᵥ y) = μ (u ⬝ᵥ y)` at `M *ᵥ u = μ • u` (not tied to `eigvecOf`) |
+| `eigvec_dotProduct_pow_mulVec` | the power transfer `u ⬝ᵥ (M ^ j *ᵥ g) = μ ^ j (u ⬝ᵥ g)` (transpose-power commutation at `IsSymm`) |
+| `eigvec_dotProduct_aeval_mulVec` | the polynomial transfer `u ⬝ᵥ (p(M) *ᵥ g) = (u ⬝ᵥ g) · p(μ)` — the `horth` engine at `u ⊥ g` |
+| `eigvecOf_dotProduct_aeval_mulVec` | the eigenbasis component form: the `i`-th eigencomponent of `p(M) y` is `p(μ i)` times that of `y` |
+| `dotProduct_aeval_mulVec_self` | Parseval for polynomial images: `‖p(M) y‖² = ∑ (p(μ i))² (v i ⬝ᵥ y)²` |
+| `quadForm_aeval_mulVec` | the quadratic-form resolution `xᵀ M x` of a polynomial image: `∑ μ i (p(μ i))² (v i ⬝ᵥ y)²` |
+| `bandMap` | the affine band map `w(λ) = (2λ − Ltwo − Lbot)/(Ltwo − Lbot)`, sending the spectral band onto `[−1, 1]` |
+| `bandMap_eval` / `bandMap_eval_bot` / `bandMap_eval_two` | the closed form and the endpoint pins `w(Lbot) = −1`, `w(Ltwo) = 1` |
+| `abs_bandMap_eval_le_one` | the band range: `\|w(μ)\| ≤ 1` on `[Lbot, Ltwo]` |
+| `one_le_bandMap_eval` | the growth pin `1 ≤ w(Ltop)` at `Ltwo ≤ Ltop` (the `hTv` route) |
+| `natDegree_bandMap` | `(bandMap Ltwo Lbot).natDegree = 1` (the affine side of `hdeg`) |
+| `exists_unit_decomposition` | unit `b` along unit `u`: `b = c • u + s • g` with `g ⊥ u`, `‖g‖² ≤ 1`, `c² + s² = 1` |
+| `kanielPaigeChebyshev` | **the spectral discharge complete**: at the Chebyshev-composed band polynomial `T_{k−1} ∘ w`, the full Kaniel–Paige bound with every spectral site discharged from the eigenbasis-level band hypothesis (out-of-band eigenvectors parallel to `u`) |
+| `kanielPaige` | **the final statement (Step 1c)**: the classical Kaniel–Paige bound at the Step-0 recorded shape — unit `b` with `u ⬝ᵥ b ≠ 0`, the decomposition internal, the bound phrased `(Ltop − Lbot) · tan²φ / T_{k−1}(1 + 2γ)²` at `γ = (Ltop − Ltwo)/(Ltwo − Lbot)`; composed from `kanielPaigeChebyshev` via `c = u ⬝ᵥ b`, `s² = 1 − c²`, `w(Ltop) = 1 + 2γ` |
 
 ## Applications
 

@@ -6,21 +6,487 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**None — discrete affine convergence is COMPLETE (delivered this run,
-both steps in one run per the proposal's own operating instruction;
-see the top delivered entry), and with it the Active priority table
-holds no High rows. Next run: the Medium rows by leverage —
-approximate spectral projection Step 1a (the interface layer, the
-recorded open next step of its Step-0 survey: the spike's four real
-lemmas plus the two priced shallow gaps into a new shelf module), then
-1b (spectral discharge) and 1c (statement + QA). The PF consumers
-(irreducible stationary distributions, PageRank) remain new-proposal
-candidates, each needing its own document per the one-step
-discipline.**
-
+**None — the pagerank-distributions proposal is COMPLETE (delivered
+this run; see the top delivered entry). The Active priority table
+holds no High rows and no Medium rows — every remaining row is a Low
+blocked on a human or technical decision an autonomous Lean-work run
+cannot make. Next run: fall through to the center-out SGT policy
+(`docs/1_STRATEGY.md`, `docs/6_SGT_BACKLOG.md`), the natural candidates
+on record — the Chebyshev-filter second consumer of the Krylov layer
+(the Krylov Step-0 survey's recorded natural follow-on, its own
+document), directed-axis mixing/rate work (gated on a
+primitivity-shaped admission — `perron_frobenius` deliberately claims
+no strict dominance), or a backlog-gated item.**
 ---
 
+
 ## Delivered milestones (most recent first)
+
+**PageRank — the second Perron–Frobenius consumer; the proposal
+COMPLETE, Steps 0+1 in one run (run 1, 2026-08-24, run
+`20260824T045932Z-run-1`; `proposals/pagerank-distributions.md`, new
+this run and added to the Active priority table as its only High row
+— the empty High/Medium queue's recorded handoff, backlog item 8's
+named second consumer, and the PF admission's own follow-on list):
+DELIVERED — zero new axioms (count stays 9), QA 1715 → 1804
+(`PageRank_QA` a new file at 89 by the generator metric); the
+directed axis' stationary theory now reaches **reducible** input,
+conditional on `perron_frobenius` exactly as the parent layer.**
+
+**Delivered:** the new `Scaffold/Mathlib/GraphTheory/PageRank.lean`
+(namespace `SpectralGraphTheory`; minimal imports IrreducibleStationary
++ Normalized; the umbrella importing it) — the nine unconditional
+structural declarations (`googleMatrix` + `_apply` entry form;
+`walkTransitionMatrix_nonneg`; `googleMatrix_nonneg`; **the
+teleportation floor `googleMatrix_pos`** — `0 < G i j` at every pair
+on `[0,1)` with nonempty `V` from the additive `(1−α)·(card V)⁻¹`
+alone; the α-free `googleMatrix_row_sum` (affine — survives both
+fence endpoints where uniqueness dies); `googleMatrix_deg_eq_one`;
+**`googleMatrix_isIrreducible`** — irreducibility *derived*, not
+assumed, one `ReflTransGen.single` per pair through the floor; and
+the general bridge `walkTransitionMatrix_eq_of_row_sum_one`) and the
+three axiom-**conditional** theorems `exists_pageRankVec`,
+`existsUnique_pageRankVec` (**no irreducibility hypothesis on the
+input** — the entire point), `pageRankVec_pos` — pure compositions
+of the same-day `IrreducibleStationary` layer at
+`M := googleMatrix A α`, every hypothesis derived structurally, the
+conclusion translated through the bridge; **zero new axiom contact**
+(the two axiom applications stay inside the delivered engine).
+
+**QA (+89):** all four mandated sections — (1) structural on the
+reducible two-edge fixture: all 16 entries pinned (`1/8`/`5/8`), the
+floor at a zero-support pair by theorem *and* raw route, row sums
+both routes, the bridge instantiated, irreducibility on input whose
+own irreducibility provably fails; (2) the reducible-input positive
+witness: uniform `(1/4,1/4,1/4,1/4)` verified **completely raw**
+with the `∃!` join `A4G_stationary_eq_uniform_QA` — on the very
+fixture whose raw walk has two stationary distributions (the
+imported fence); (3) the asymmetric star at `α = 1/2`: PageRank
+`(4/9, 5/18, 5/18)` verified raw, the join `A3G_eq_hand_QA`, and
+`pr3_ne_pi3_QA` — provably distinct from the raw stationary
+(teleportation shifts mass to the leaves); (4) both endpoint fences
+refuted in proved form, complementary: `α = 1` (`G = P` pinned
+entrywise, `∃!` refuted through the imported witnesses, exactly
+`hα2` isolated) and `α = -1` on `K₂` (`G = 1` pinned, two distinct
+stationary point masses, row stochasticity surviving, exactly `hα`
+isolated).
+
+**Verification:** spike first (`wip/pagerank_spike.lean` then
+`wip/pagerank_qa_spike.lean`, rounds to green — the fixes recorded in
+the proposal's pin-technique list: the annotated `∑ j : V` binder for
+constant summands; the constant sum built backwards through
+`Finset.mul_sum` (no ℕ-smul cast lemma at the pin); the `∃!`
+destructure's explicit grouping; `Fintype.card_pos` inside
+`Nat.cast_pos.mpr` stranding a `Fintype ?m` metavariable — isolate in
+a typed `have`; the `fin_cases` `Fin.mk`-index literal-lemma trap
+re-hit and worked around per the recorded techniques); `lake env lean`
+on the module and the QA file — zero errors, zero warnings each;
+explicit `lake build` targets both ✔; `#print axioms` via
+`wip/pagerank_axcheck.lean` on all 12 public + 85 QA declarations —
+the split exactly as specified (3 public + 6 QA theorems list
+`perron_frobenius` + the standard three; everything else, fences
+included, the standard three only); **full `lake build` ✔ (2258
+targets, +1, "Build completed successfully"; zero warnings in the
+changed modules)**; `lint_axioms` (**9**, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1804/9/0**,
+idempotent). Records updated: the proposal (status header COMPLETE,
+the full delivery record with the trap list and open follow-ons),
+`proposals/README.md` (the High row retired to the Delivered table;
+the progress paragraph rewritten — the table empty again), README
+(1804; the PF-axiom paragraph's second-consumer sentence, clearly
+marked conditional; the module-table row), the radar (QA axis synced
+1715/43 → 1804/44, held 4.0), the scoreboard (all four verification
+rows + a new interpretation bullet), the SGT index map (new section +
+12 declaration rows), backlog item 8 (the fifth update — the
+named-consumer program fully delivered), the umbrella, this plan, and
+the activity log. Nothing committed; the prior run's uncommitted
+deliveries and the untracked `docs/scaffold.jpeg` preserved
+untouched.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — the Chebyshev-filter second consumer (own
+document), directed-axis mixing/rate work (gated on primitivity), or
+a backlog-gated item.
+
+**Irreducible stationary distributions — the first Perron–Frobenius
+consumer; the proposal COMPLETE, Steps 0+1 in one run (run 1,
+2026-08-24, run `20260824T024831Z-run-1`;
+`proposals/irreducible-stationary-distributions.md`, added to the
+Active priority table this run as its only High row — the empty
+High/Medium queue's recorded handoff and backlog item 8's own
+"unblocked as separate follow-on proposals" note): DELIVERED — zero
+new axioms (count stays 9), QA 1621 → 1715
+(`IrreducibleStationary_QA` a new file at 94); the directed axis'
+first theorem, and the `perron_frobenius` axiom's first theorem
+consumer, **conditional on that axiom** exactly as the proposal
+specified.**
+
+**Delivered:** the new `Scaffold/Mathlib/GraphTheory/IrreducibleStationary.lean`
+(namespace `SpectralGraphTheory`; minimal imports PerronFrobenius +
+Normalized; the umbrella importing it) — the unconditional transfer
+lemmas `isIrreducible_transpose` (strong connectivity is
+arc-reversal invariant, through a private `ReflTransGen` head-induction
+flip) and `walkTransitionMatrix_isIrreducible` (positive row scaling
+preserves the support digraph, through a private `ReflTransGen`
+congruence — the pin has `mono` for `ReflGen` only), and the five
+axiom-conditional theorems: `exists_walkPerronVector` (the transposed
+Perron engine: a strictly positive vector fixed by `Pᵀ *ᵥ ·`, unique
+up to positive scale among nonzero nonnegative fixed vectors — the
+walk's Perron root pinned to `1` by the axiom's
+eigenvalue-identification clause at `onesVec` through the shelf's
+row-stochasticity, the transposed root by the bilinear pairing
+`v ⬝ᵥ (P *ᵥ u) = (Pᵀ *ᵥ v) ⬝ᵥ u` via the pin's
+`Matrix.dotProduct_mulVec`/`Matrix.mulVec_transpose` — no charpoly,
+no complex-domination clause anywhere),
+`exists_stationaryVec_of_irreducible` (existence with full support
+and normalization), `stationaryVec_smul_of_irreducible` (uniqueness
+up to positive scale among all nonzero nonnegative stationary
+vectors), `existsUnique_stationaryVec_of_irreducible` (the textbook
+`∃!` among nonnegative distributions, positivity derived), and
+`stationaryVec_pos_of_irreducible` (full support). Load-bearing per
+the strategy's falsifiability test: clauses 5 and 6 consumed
+structurally — a misstated either breaks the derivation loudly.
+
+**QA (+94):** all three proposal-mandated witnesses — (1) the
+asymmetric directed star `!![0,1,1; 1,0,0; 1,0,0]` on `Fin 3` (two
+vertices cannot carry an asymmetric irreducible walk): all four
+hypotheses hand-verified (irreducibility by nine explicit
+reachability certificates), walk entries pinned, the hand value
+`(1/2, 1/4, 1/4)` verified **completely raw** (all three predicates
+against pinned walk entries), and the load-bearing join
+`A3_stationary_eq_hand_QA`: every stationary distribution of the
+fixture, however produced, equals the hand value; (2) the
+symmetric-cone `K₂` agreement: `A2_stationary_eq_stationaryVec_QA`
+pins the PF-unique distribution *equal* to `stationaryVec`, the
+predicate supplied entirely by the shelf's detailed-balance chain
+(`stationaryVec_pos`/`sum_stationaryVec`/`walk_isStationary` flipped
+through `mulVec_transpose`) — two independent API paths to one value
+— with the combinatorial value computed through its own definition to
+`(1/2, 1/2)`; (3) the reducibility fence on two disjoint `Fin 4`
+edges: both witnesses' predicates verified raw with `hnn`/`hdeg`
+verified intact, the hypothesis-free `∃!` conclusion **refuted in
+proved form** (two distinct stationary distributions), and the
+hypothesis-free scale-uniqueness conclusion refuted on the same
+fixture (the scalar forced to `0` against its positivity); plus the
+full-support instantiation reading exactly the hand values.
+
+**Verification:** spike first (`wip/pfc_spike.lean`, four rounds to
+green — the surveyed route held verbatim; the fixes becoming the
+proposal's recorded trap list, the sharpest being: `first | exact`
+alternatives commit before embedded `by`-blocks are checked, so a
+structurally-applicable alternative with a failing embedded proof
+swallows the branch — the irreducibility proofs' arc-`have` +
+named-`exact` structure exists to defeat it; the scoreboard's
+declaration counter is ASCII-only, so unicode QA identifiers are
+silently uncounted — QA names stay ASCII (`pi3`/`pi4a`/`pi4b`), which
+moved the file's count 63 → 94; entry/degree lemmas at literal indices
+match `rw`/`simp only` freely but under `fin_cases` only
+`simp [lemma]` at predicate level — finite sums are evaluated through
+literal component lemmas assembled by `funext` + `fin_cases` +
+`exact`); `lake env lean` on the module and the QA file — zero
+errors, zero warnings each; explicit `lake build` targets both ✔;
+`#print axioms` via `wip/is_axcheck.lean` on all 7 public + 12
+representative QA declarations — the split exactly as specified (the
+5 axiom-consuming public theorems and 4 axiom-route QA theorems list
+`perron_frobenius` + the standard three; the transfer lemmas and every
+raw QA lemma only the standard three); **full `lake build` ✔ (2257
+targets, +1, "Build completed successfully"; zero warnings in the
+changed modules — the log's only Scaffold diagnostic the documented
+pre-existing unused-variable note in untouched
+`Derived/ProjectorDrift.lean`)**; `lint_axioms` (**9**, unchanged),
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+(**1715/9/0**, idempotent). Records updated: the proposal (status
+header COMPLETE, the full delivery record with the trap list and the
+open follow-ons — PageRank, the symmetric-connected→irreducible
+bridge, directed mixing gated on primitivity), `proposals/README.md`
+(the High row retired to the Delivered table; the progress paragraph
+rewritten — the table empty again), README (1715; the PF-axiom
+paragraph's first-consumer sentence, clearly marked conditional; the
+module-table row), the radar (QA axis synced 1621/42 → 1715/43, held
+4.0), the scoreboard (all four verification rows + a new
+interpretation bullet), the SGT index map (new section + 7 declaration
+rows), backlog item 8 (the fourth update recording the first named
+consumer delivered), the umbrella, this plan, and the activity log.
+Nothing committed; the prior run's uncommitted Krylov Step-1c
+delivery and the untracked `docs/scaffold.jpeg` preserved untouched.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — the PageRank consumer (own document), the
+Chebyshev-filter second consumer (own document), or a backlog-gated
+item.
+
+**Approximate spectral projection, Step 1c — the final statement + QA;
+the proposal COMPLETE (run 1, 2026-08-24, run `20260824T012049Z-run-1`;
+`proposals/approximate-spectral-projection.md` Step 1c, the leading
+Medium row of the Active priority table — which held no High rows —
+the Step-1b run's recorded next handoff, and the proposal's recorded
+open next step): DELIVERED — pure hard crust, zero new axioms (count
+stays 9), QA 1606 → 1621 (`Krylov_QA` 35 → 50).**
+
+**Delivered:** the new Step-1c section of
+`Scaffold/Mathlib/GraphTheory/Krylov.lean` — **`kanielPaige`**, the
+program's public mathematical statement at exactly the Step-0 recorded
+shape: unit `b` with `u ⬝ᵥ b ≠ 0` as the *only* starting-vector
+hypothesis (no hand-supplied `c`/`s`/`g` — the decomposition is
+internal via the 1b `exists_unit_decomposition`), the bound in the
+classical `tan²φ`/gap form `(Ltop − Lbot) · (1 − (u ⬝ᵥ b)²)/(u ⬝ᵥ b)² /
+T_{k−1}(1 + 2γ)²` at `γ = (Ltop − Ltwo)/(Ltwo − Lbot)` — composed from
+`kanielPaigeChebyshev` by exactly three identifications (`c = u ⬝ᵥ b`
+by orthogonality, `s² = 1 − c²` by the unit norm, `w(Ltop) = 1 + 2γ` by
+the band map's closed form at `congr 1` + `field_simp`). The Saad §6
+locator attaches to the statement's docstring with the proposal's
+clean-room verify-against-the-physical-copy caveat carried verbatim
+(the statement is proved, not admitted).
+
+**QA (+15):** the four witnesses the plan names — (1) the final-form
+instantiation on `diag(3,1,0)` at `k = 2` with the γ-form Chebyshev
+value `T₁(5) = 5` proved raw (`T_one`) *and* equal to the 1b
+composite's `(T₁ ∘ w)(3)`, the final bound **proved expression-equal
+to the composite's** (both `16/75` — a wrong `γ`-form or inverted
+`tan²φ` in the restatement breaks the equality), the raw true gap
+`32/241` strictly inside; (2) the `k = 1` degenerate case (`T₀ ≡ 1`
+pinned, bound = the plain Rayleigh-gap value `16/3`, the actual gap at
+the only Krylov direction computed raw `3 − 43/25 = 32/25 ≤ 16/3`);
+(3) the `b = u` tightness (bound `= 0`, the delivered witness's
+Rayleigh value pinned to exactly `Ltop` from both sides — theorem
+below, raw entrywise ceiling `3y₀² + y₁² ≤ 3(y₀²+y₁²+y₂²)` above);
+(4) the `λ₁ = λ₂` guard **refuted in proved form** on the new
+top-multiplicity fixture `diag(3,3,0)`: every eigenvalue `∈ {3, 0}`
+from the eigen-equation alone, the band `[14/5, 29/10]` containing
+neither so `hpar` itself is false (all three orthonormal eigenbasis
+vectors would be multiples of `e₁`; `t₀t₁ = 0` against `t₀² = t₁² =
+1`), and the hypothesis-free conclusion refuted with every *other*
+hypothesis verified — the `k = 1` Krylov space collapsed to the line
+`ℝ · b` by the span's own definition, every nonzero vector's Rayleigh
+value computed to exactly `8/3` by smul-linearity (not entrywise
+sums), so the true gap `1/3` provably exceeds the evaluated bound
+`1/4`.
+
+**Verification:** spike first (`wip/krylov1c_spike.lean`, several
+rounds to green, all `#print axioms` the standard three — the fixes
+becoming the 1c pin-technique record: `mul_div_cancel_left₀` strands
+on a `MulDivCancelClass` metavariable inside `rw`, use
+`rw [div_eq_iff h]; ring` on a standalone `have`; `zero_smul` not
+`smul_zero`; `simp [huu, hgu]` where an explicit dotProduct-smul chain
+strands on simp's own normalization; the `Fin 3` nested-if trap re-hit
+in dot-product sums — `simp [defs, Matrix.dotProduct,
+Fin.sum_univ_three]; norm_num`, plain `simp` deciding the index
+equalities); `lake env lean` on the module and the QA file — zero
+errors, zero warnings each; explicit `lake build` targets both ✔;
+`#print axioms` via `wip/krylov1c_axcheck.lean` on all 16 new
+declarations (1 public + 15 QA) — `propext, Classical.choice,
+Quot.sound` only; **full `lake build` ✔ (2256 targets, "Build
+completed successfully"; zero warnings in the changed modules — the
+log's only Scaffold diagnostic the documented pre-existing
+unused-variable note in untouched `Derived/ProjectorDrift.lean`)**;
+`lint_axioms` (**9**, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1621/9/0**,
+idempotent). Records updated: the proposal (status header COMPLETE,
+the Step-1c delivery record with pin-technique notes, open-next-step
+closed with the recorded follow-ons), `proposals/README.md` (the
+Medium row retired to the Delivered table; the progress paragraph
+rewritten — the table now holds no High and no Medium rows), README
+(1621; the proved-list sentence + module-table row), the radar (QA
+axis count synced 1606/42 → 1621/42, held 4.0), the scoreboard (all
+four verification rows, a new interpretation bullet, **and the
+pre-existing `-**PLACEHOLDER**-` editing artifact from the 1a run's
+bullet insertion repaired**), the SGT index map (+1 declaration row,
+the section status note → program COMPLETE), this plan, and the
+activity log. Nothing committed; the prior runs' uncommitted
+deliveries and the untracked `docs/scaffold.jpeg` preserved untouched.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — the Chebyshev-filter second consumer (own
+document), a PF-consumer proposal, or a backlog-gated item.
+
+**Approximate spectral projection, Step 1b — the spectral discharge
+(run 1, 2026-08-23, run `20260823T232953Z-run-1`;
+`proposals/approximate-spectral-projection.md` Step 1b, the leading
+Medium row of the Active priority table — which holds no High rows —
+the Step-1a run's recorded next handoff, and the proposal's recorded
+open next step): DELIVERED — pure hard crust, zero new axioms (count
+stays 9), QA 1590 → 1606 (`Krylov_QA` 19 → 35).**
+
+**Delivered:** the new `KrylovDischarge` section of
+`Scaffold/Mathlib/GraphTheory/Krylov.lean` — the **general-eigenvector
+transfer layer** (`eigvec_dotProduct_mulVec`, `_pow_mulVec`,
+`_aeval_mulVec`: `u ⬝ᵥ (p(M) g) = (u ⬝ᵥ g) · p(μ)` at any eigenvector
+— not tied to `eigvecOf`, discharging `horth`, with one
+self-adjointness instance closing `horthM`); the **eigenbasis
+component layer** (`eigvecOf_dotProduct_aeval_mulVec` plus the
+Parseval/quadratic-form resolution identities
+`dotProduct_aeval_mulVec_self`/`quadForm_aeval_mulVec` for polynomial
+images — the `hband`/`hbottom` engines); the **affine band map**
+(`bandMap Ltwo Lbot` with the closed-form eval, the endpoint pins
+`w(Lbot) = −1`/`w(Ltwo) = 1`, the range lemma `|w| ≤ 1` on the band,
+the growth pin `1 ≤ w(Ltop)`, and `natDegree = 1` — supplying
+`hp₁`/`hdeg`/`hTv` at `T_{k−1} ∘ w`); `exists_unit_decomposition`
+(unit `b` along unit `u`: `c² + s² = 1`, `g ⊥ u`, `‖g‖² ≤ 1`, no
+Cauchy–Schwarz needed — `1 − c²` is the residual's own squared norm);
+and the capstone **`kanielPaigeChebyshev`** — the full skeleton
+conclusion with every spectral site discharged from the
+eigenbasis-level band hypothesis. **The step's mathematical crux: the
+band/parallel dichotomy** — `hpar` states "every eigenvector at an
+eigenvalue outside `[Lbot, Ltwo]` is a multiple of `u`"; at `g ⊥ u`
+this forces every nonzero eigencomponent of `g` into the band (the
+multiplicity-2 shape `u = (v₁+v₂)/√2`, `g = (v₁−v₂)/√2` shows why the
+weaker "every eigenvector ⊥ u is in-band" form would *not* suffice),
+where `|T ∘ w| ≤ 1` caps the polynomial image's norm through Parseval
+and the band floor lower-bounds its form through `quadForm_eigvalOf`,
+termwise at `Finset.sum_le_sum`.
+
+**QA (+16):** the band-map pins **two routes** (theorems vs. the hand
+closed form `w(μ) = 2μ − 1`; the composed growth pair `1 ≤ w(3) = 5`);
+the self-adjointness transfer **two routes** at a non-basis
+eigenvector of the 2×2 fixture (`e₁ ⬝ᵥ (M ![3,−5]) = 6`, theorem vs.
+hand); the polynomial transfer **two routes** (`e₁ ⬝ᵥ p(M) ![1,−1] =
+5`, theorem vs. hand `p(M) = diagM² + 1`); and the centerpiece on the
+new 3×3 fixture `diag(3,1,0)` (entrywise-encoded per the recorded
+`Fin 3` cons-literal trap): **`diag310_hpar_QA` derives the band
+hypothesis from the eigen-equation alone** (below-band vacuous by unit
+norm; above-band forcing the band coordinates to vanish), **the
+composite instantiated end-to-end** at `b = (3e₁ + 4e₂)/5`, `k = 2`,
+with the bound value pinned `= 16/75` through `T₁(w(3)) = 5`, and the
+**independent raw route** — the actual Krylov witness `(3, 4/5, 0)`
+exhibited as the generator combination `2(Mb) − b` (membership by the
+span's own definition) with its Rayleigh value computed raw to
+`691/241`, so the true gap `32/241 ≈ 0.133` is *proved* strictly
+inside the delivered `16/75 ≈ 0.213`; plus the unit-decomposition
+instantiation with both content pins forced (`c = 3/5`, `s² = 16/25`).
+
+**Verification:** spike first (`wip/krylov1b_spike.lean` plus the
+`wip/krylov1b_iso.lean` isolation, several rounds to green — the fixes
+becoming the recorded trap list: `Polynomial.Chebyshev.T` must be
+written in full (`open Polynomial` does not reach it, and an
+unresolved `T` **silently auto-bounds a universe variable**, surfacing
+as "function expected at T"); `.comp` binds tighter than application
+(parenthesize the whole polynomial before it);
+`Matrix.dotProduct_sum` absent at the pin (a three-line second-slot
+helper); `⟨n,⋯⟩`-form `fin_cases` indices resist `rfl` while
+`norm_num` strands `¬⟨2,⋯⟩ = 0` conditions that plain `simp` decides —
+on `Fin 3`, entrywise fixtures closed by `simp [...] <;> norm_num`;
+`simpa [...] using h` robust against equation-splitting simp;
+`C_ne_zero` an iff; `pow_le_pow_left` deprecated for
+`pow_le_pow_left₀`; `X_comp` vs `comp_X` — the band-poly collapse
+needs the former; `omit ... in` before the docstring, and rejected for
+transfer chains that legitimately reach `DecidableEq`);
+`lake env lean` on the module and the QA file — zero errors, zero
+warnings each; explicit `lake build` targets both ✔; `#print axioms`
+via `wip/krylov1b_axcheck.lean` on all 14 new public theorems + the
+`bandMap` definition + all 16 new QA declarations — `propext,
+Classical.choice, Quot.sound` only; **full `lake build` ✔ (2256
+targets, "Build completed successfully"; zero warnings in the changed
+modules — the log's Scaffold-tree warnings are the documented
+pre-existing set in untouched modules)**; `lint_axioms` (**9**,
+unchanged), `check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**1606/9/0**, idempotent). Records updated: the proposal
+(status header, the full Step-1b delivery record with the trap list,
+open-next-step → 1c), `proposals/README.md` (the Medium row + the
+progress paragraph), README (1606; the proved-list sentence + module
+table row), the radar (QA axis synced 1590/42 → 1606/42, held 4.0),
+the scoreboard (all four verification rows, a new interpretation
+bullet), the SGT index map (+13 declaration rows, the section's status
+note), this plan, and the activity log. Nothing committed; the prior
+runs' uncommitted deliveries and the untracked `docs/scaffold.jpeg`
+preserved untouched.
+
+**Next milestone (open):** **Step 1c — the final statement + QA**:
+`kanielPaige` at the Step-0 recorded shape (unit `b`, `u ⬝ᵥ b ≠ 0`,
+the `tan²φ` form), composed from the delivered composite + the
+delivered decomposition; QA's remaining witnesses (the `k = 1`
+degenerate case recovering the plain Rayleigh gap, the `b = u`
+tightness at `tan φ = 0`, the `λ₁ = λ₂` guard refutation on a
+top-multiplicity fixture). One run, retiring the milestone.
+
+**Approximate spectral projection, Step 1a — the Krylov/Chebyshev
+interface layer (run 1, 2026-08-23, run `20260823T215632Z-run-1`;
+`proposals/approximate-spectral-projection.md` Step 1a, the leading
+Medium row of the Active priority table — which holds no High rows —
+the previous run's recorded next handoff, and the proposal's recorded
+open next step): DELIVERED — pure hard crust, zero new axioms (count
+stays 9), QA 1571 → 1590 (`Krylov_QA` a new file at 19).**
+
+**Delivered:** the new `Scaffold/Mathlib/GraphTheory/Krylov.lean`
+(namespace `SpectralGraphTheory`, at the shelf's `V : Type` interface
+per the Step-0 finding; the umbrella importing it) — the scalar
+Chebyshev layer (`abs_T_eval_le_one` unchanged from the spike; **both
+Step-0-priced shallow gaps closed**: `natDegree_T` by
+`Nat.twoStepInduction` + `natDegree_sub_eq_left_of_natDegree_lt`, and
+`one_le_eval_T_of_one_le` through the private conjunction engine
+`eval_T_pair_mono` — ordinary induction suffices, the recurrence's
+step needing nothing beyond the two previous conjunction instances,
+with index-monotonicity as the byproduct); the Krylov layer (`sum_mulVec`
+the priced pin-gap push; the real **`krylovSpan`** definition — the
+hardening over the spike's inlined span; `scalar_mul_eq_smul`;
+`aeval_mulVec_eq_eval_smul` through `Heat.pow_mulVec_smul`;
+`aeval_mulVec_mem_krylovSpan` restated at `krylovSpan`); and
+`kanielPaigeSkeleton` at the spike's exact hypothesis form, its five
+named discharge sites preserved verbatim as 1b's contract. The module
+docstring carries the survey note (pin gaps closed, the `V : Type`
+finding, the citation-boundary note: the Saad §6 citation stays with
+the proposal that owns the statement).
+
+**QA (+19, `Scaffold/QA/SpectralGraph/Krylov_QA.lean`):** raw
+Chebyshev pins (`T₂(0) = −1` endpoint; `T₃(1/2) = −1` *interior*
+band-bound equality through the two-step recurrence; `T₂(1/4) = −7/8`
+strict, the band instance composed with the raw value to `7/8 ≤ 1`);
+`natDegree` instances (5 and 0); the growth pair two-route (`1 ≤ T₂(2)`
+from the theorem, `T₂(2) = 7` raw — genuine growth, not a degenerate
+constant); `sum_mulVec` on concrete matrices; the polynomial action by
+**two independent routes** (transfer theorem vs. hand-computed
+`aeval diagM (X²+1) = diagM² + 1 = !![5,0;0,1]`) plus the annihilator
+`(X − 2)(diagM) *ᵥ e₁ = 0`; Krylov membership by two routes (theorem at
+`p = X` vs. generator-direct at `i = 1`); the **degree-guard
+refutation** (`M e₁ = e₂ ∉ krylovSpan M e₁ 1` — the hypothesis-free
+form false, `hdeg` load-bearing); the **composed-use witness**
+(`(aeval M (T ℝ 5)) *ᵥ e₁ ∈ krylovSpan M e₁ 6` with `hdeg` from
+`natDegree_T` alone — 1b's exact consumption pattern); and the **full
+skeleton instantiation** on `diagM = diag(2,0)`, `b = ½(e₁+e₂)`,
+`k = 1`, `p = 1` — all twelve hypotheses hand-discharged, the bound
+constant pinned `= 2`, the hidden witness's Rayleigh value pinned raw
+(`rayleigh diagM b = 1`), so the instantiated bound reads `2 − 1 = 1 ≤
+2` end-to-end.
+
+**Verification:** spike first (`wip/krylov1a_spike.lean` green, all
+`#print axioms` the standard three — the transfer fixes becoming the
+proposal's recorded trap list: `Nat.twoStepInduction`'s `more` case
+hands `P n` before `P (n+1)`; `leadingCoeff_eq_zero` cannot rewrite a
+`≠` directly — `rw [Ne, …]` first; `(T ℝ 5)` OfNat vs `(T ℝ ↑5)` cast
+are rw-incompatible though defeq; **the numeric-default trap's
+polynomial face** — an un-ascribed `C 1`/bare `X` in a *goal statement*
+elaborates the whole `aeval` at `ℕ[X]`, surfacing as display-identical
+`rw` failures until `pp.all` exposes it, and bare `2 • v` picks the
+ℕ-smul; cons-junk tails close robustly by `funext i; fin_cases i` +
+`norm_num [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]`);
+`lake env lean` on the module and the QA file — zero errors, zero
+warnings each; explicit `lake build` targets both ✔; `#print axioms`
+via `wip/krylov1a_axcheck.lean` on all 8 public theorems + the
+definition + all 19 QA declarations — `propext, Classical.choice,
+Quot.sound` only; **full `lake build` ✔ (2256 targets, +3, "Build
+completed successfully"; zero warnings in the changed modules — the
+log's only Scaffold diagnostic the documented pre-existing
+unused-variable note in untouched `Derived/ProjectorDrift.lean`)**;
+`lint_axioms` (**9**, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1590/9/0**,
+idempotent). Records updated: the proposal (status header, the full
+Step-1a delivery record with the trap list, open-next-step → 1b),
+`proposals/README.md` (the Medium row + the progress paragraph),
+README (1590; module-table row + proved-list sentence), the radar (QA
+axis count synced 1571/41 → 1590/42, held 4.0), the scoreboard (all
+four verification rows, a new interpretation bullet), the SGT index
+map (new Krylov section + 9 declaration rows), the umbrella, this
+plan, and the activity log. Nothing committed; the prior runs'
+uncommitted deliveries and the untracked `docs/scaffold.jpeg`
+preserved untouched.
+
+**Next milestone (open):** **Step 1b — the spectral discharge**: the
+eigenbasis-expansion layer (b's decomposition along the top
+eigenvector, `horth`/`horthM` through `IsSymm`, `hbottom` through the
+Rayleigh-sandwich mirror, `hband` through `quadForm_eigvalOf` + Parseval
++ `|T ∘ w| ≤ 1` on the band, `hp₁` through the affine band map
+`w(λ) = (2λ − λ₂ − λₙ)/(λ₂ − λₙ)` with `natDegree_T` +
+`natDegree_comp` supplying `hdeg`). One run. Then 1c (statement + QA,
+retiring the milestone).
 
 **Discrete affine convergence — the `sgt-gaps.md` item-2 consumer
 interface; the proposal COMPLETE (run 1, 2026-08-23, run

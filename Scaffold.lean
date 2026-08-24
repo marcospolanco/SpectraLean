@@ -14,10 +14,13 @@ import Scaffold.Mathlib.GraphTheory.Cheeger
 import Scaffold.Mathlib.GraphTheory.Fiedler
 import Scaffold.Mathlib.GraphTheory.RandomWalk
 import Scaffold.Mathlib.GraphTheory.Normalized
+import Scaffold.Mathlib.GraphTheory.IrreducibleStationary
+import Scaffold.Mathlib.GraphTheory.PageRank
 import Scaffold.Mathlib.GraphTheory.Stationary
 import Scaffold.Mathlib.GraphTheory.Mixing
 import Scaffold.Mathlib.GraphTheory.Heat
 import Scaffold.Mathlib.GraphTheory.Directed
+import Scaffold.Mathlib.GraphTheory.Krylov
 import Scaffold.Mathlib.GraphTheory.VariationalTransfer
 import Scaffold.Mathlib.GraphTheory.Dynamics
 import Scaffold.Mathlib.Dynamics.DiscreteAffine
@@ -89,7 +92,14 @@ its Cheeger
 bridge (`GraphTheory.Cheeger`), the Fiedler-vector interface (`GraphTheory.Fiedler`, Phase A: the vector,
 the sign partition, and the algebraic-connectivity certificate),
 the random-walk interfaces (`GraphTheory.RandomWalk`), the general
-normalized Laplacian (`GraphTheory.Normalized`), the stationary
+normalized Laplacian (`GraphTheory.Normalized`), the directed axis'
+stationary theory (`GraphTheory.IrreducibleStationary` — the first
+Perron–Frobenius consumer: existence, uniqueness, and full support of
+the stationary distribution on irreducible nonnegative walks,
+conditional on the axiom — and `GraphTheory.PageRank` — the second:
+the teleportation-regularized Google matrix whose positive floor makes
+irreducibility *derived* rather than assumed, extending the same
+stationary theory to reducible input, likewise conditional), the stationary
 structure consuming both (`GraphTheory.Stationary`), the heat semigroup
 (`GraphTheory.Heat`: Phase B, Step 1 of the reversibility/heat program —
 the matrix-level diffusion operator `heatKernel A t = e^{-tL}` with its

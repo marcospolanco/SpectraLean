@@ -45,6 +45,25 @@ form used by the event-driven persistence frontier.
   motivating use — see `docs/6_SGT_BACKLOG.md` for the retirement
   record.
 
+- `l2OpNorm_clusterProjector_sub_clusterProjector_le_two_of_symm`
+  (proved 2026-08-24, `proposals/cluster-projector-symmetric.md`): the
+  *both-gaps* difference shape at arbitrary eigenvalue sets —
+  `‖P_A(S) − P_B(T)‖ ≤ 2‖A − B‖/δ` under two-flank center/radius
+  separation with no rank hypothesis, the set twin of the window
+  symmetric form and this source's Theorem-statement lineage completed
+  to the set-valued cluster projectors. Route provenance only (the
+  statement is proved, not admitted).
+- `l2OpNorm_clusterProjector_mul_clusterProjector_le` /
+  `l2OpNorm_clusterProjector_sub_clusterProjector_le` (proved 2026-08-24,
+  `proposals/cluster-projector.md`): the set-form pair at
+  `GraphTheory.ClusterProjector`'s cluster projectors — the theorem
+  family's statements lifted from interval windows to arbitrary
+  eigenvalue sets, matching the cluster form this source's Theorem-statement
+  lineage is actually stated in; center/radius membership separation, the
+  difference form at equal rank. Route provenance only (the statements are
+  proved, not admitted); the YWS-literal *pairwise* set shape is a recorded
+  open follow-on, not claimed.
+
 ## See Also
 
 - [Perturbation map](../map/perturbation.md)

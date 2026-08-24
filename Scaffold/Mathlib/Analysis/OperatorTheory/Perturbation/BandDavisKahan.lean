@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -/
 import Scaffold.Mathlib.GraphTheory.PolyFilter
+import Scaffold.Mathlib.GraphTheory.ClusterProjector
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Duhamel
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.ProjectionGap
 
@@ -2074,5 +2075,575 @@ theorem l2OpNorm_bandProjector_sub_bandProjector_le_two_of_symm
       _ = 2 * ‖A - B‖ / δ := by ring
 
 end SymmetricForm
+
+
+/-! ## The set form — cluster projectors, no windows
+
+`proposals/cluster-projector.md` (the cluster/symmetric deliveries'
+recorded follow-on): the same commutator/shift engine re-run at
+`GraphTheory.ClusterProjector`'s set-valued projectors, with the
+hypotheses stated *between the clusters as sets* — A's cluster within
+`r` of `c`, B's cluster δ-far outside — and **no interior/boundary
+dichotomy**: the difference form reduces to the product form through the
+complement law `1 − Q_T = Q_{Tᶜ}` (a definition-level fact the window
+family lacks, which is why the window difference form needed its
+separate complement engine). The component action
+`eigvecOf_dotProduct_clusterProjector_mulVec` is the engine's only
+projector input, exactly as for bands. -/
+
+section SetForm
+
+variable {A B : Matrix V V ℝ}
+
+/-- **(F1, set form) compression:** the shifted action on A's
+cluster-filtered vector has norm at most `r * ‖y‖`, whenever every
+in-cluster eigenvalue of `A` lies within `r` of `c`. -/
+private theorem norm_pack_shift_clusterProjector_mulVec_le
+    (hA : A.IsSymm) (S : Set ℝ) (c r : ℝ) (hr : 0 ≤ r)
+    (hnear : ∀ i, eigvalOf A hA i ∈ S → |eigvalOf A hA i - c| ≤ r)
+    (y : V → ℝ) :
+    ‖pack ((A - c • 1) *ᵥ (clusterProjector A hA S *ᵥ y))‖
+      ≤ r * ‖pack y‖ := by
+  classical
+  have hcomp : ∀ i : V, Matrix.dotProduct (eigvecOf A hA i)
+      ((A - c • 1) *ᵥ (clusterProjector A hA S *ᵥ y))
+      = (eigvalOf A hA i - c)
+        * (if eigvalOf A hA i ∈ S then (1 : ℝ) else 0)
+        * Matrix.dotProduct (eigvecOf A hA i) y := by
+    intro i
+    simp only [Matrix.sub_mulVec, Matrix.dotProduct_sub,
+      dotProduct_eigvecOf_mulVec hA,
+      eigvecOf_dotProduct_clusterProjector_mulVec hA S i,
+      Matrix.smul_mulVec_assoc, Matrix.one_mulVec, Matrix.mulVec_smul,
+      Matrix.dotProduct_smul, smul_eq_mul, sub_mul]
+    ring
+  have hsq : ((A - c • 1) *ᵥ (clusterProjector A hA S *ᵥ y)) ⬝ᵥ
+      ((A - c • 1) *ᵥ (clusterProjector A hA S *ᵥ y))
+      ≤ r * r * (y ⬝ᵥ y) := by
+    have hterm : ∀ i : V,
+        (Matrix.dotProduct (eigvecOf A hA i)
+          ((A - c • 1) *ᵥ (clusterProjector A hA S *ᵥ y)))
+          * (Matrix.dotProduct (eigvecOf A hA i)
+          ((A - c • 1) *ᵥ (clusterProjector A hA S *ᵥ y)))
+        ≤ (r * r)
+          * (Matrix.dotProduct (eigvecOf A hA i) y
+            * Matrix.dotProduct (eigvecOf A hA i) y) := by
+      intro i
+      rw [hcomp i]
+      by_cases hband : eigvalOf A hA i ∈ S
+      · rw [if_pos hband, mul_one]
+        have habs := hnear i hband
+        obtain ⟨hl, hu⟩ := abs_le.mp habs
+        have hkey : (eigvalOf A hA i - c) * (eigvalOf A hA i - c)
+            ≤ r * r := by
+          have := sq_le_sq' hl hu
+          simpa [sq] using this
+        nlinarith [hkey, mul_self_nonneg
+          (Matrix.dotProduct (eigvecOf A hA i) y)]
+      · rw [if_neg hband]
+        have hzero : ((eigvalOf A hA i - c) * (0 : ℝ)
+            * Matrix.dotProduct (eigvecOf A hA i) y)
+            * ((eigvalOf A hA i - c) * (0 : ℝ)
+            * Matrix.dotProduct (eigvecOf A hA i) y) = 0 := by ring
+        rw [hzero]
+        exact mul_nonneg (mul_nonneg hr hr) (mul_self_nonneg _)
+    rw [dotProduct_eigvecOf hA ((A - c • 1) *ᵥ
+      (clusterProjector A hA S *ᵥ y)) ((A - c • 1) *ᵥ
+      (clusterProjector A hA S *ᵥ y))]
+    calc ∑ i : V, (Matrix.dotProduct (eigvecOf A hA i)
+          ((A - c • 1) *ᵥ (clusterProjector A hA S *ᵥ y)))
+          * (Matrix.dotProduct (eigvecOf A hA i)
+          ((A - c • 1) *ᵥ (clusterProjector A hA S *ᵥ y)))
+        ≤ ∑ i : V, (r * r)
+            * (Matrix.dotProduct (eigvecOf A hA i) y
+              * Matrix.dotProduct (eigvecOf A hA i) y) :=
+          Finset.sum_le_sum fun i _ => hterm i
+      _ = r * r * (y ⬝ᵥ y) := by
+          rw [show y ⬝ᵥ y = ∑ i, Matrix.dotProduct (eigvecOf A hA i) y
+              * Matrix.dotProduct (eigvecOf A hA i) y from
+            dotProduct_eigvecOf hA y y, ← Finset.mul_sum]
+  have hnn : 0 ≤ ‖pack ((A - c • 1) *ᵥ
+      (clusterProjector A hA S *ᵥ y))‖ := norm_nonneg _
+  have hnn' : 0 ≤ ‖pack y‖ := norm_nonneg _
+  have hsqrt : ‖pack ((A - c • 1) *ᵥ
+      (clusterProjector A hA S *ᵥ y))‖ ^ 2
+      ≤ (r * ‖pack y‖) ^ 2 := by
+    rw [mul_pow, norm_pack_sq, norm_pack_sq, pow_two]
+    exact hsq
+  have habs := abs_le_of_sq_le_sq hsqrt (mul_nonneg hr hnn')
+  rwa [abs_of_nonneg hnn] at habs
+
+/-- **Range invariance, set form:** the shifted cluster-filtered vector
+stays in the cluster's range — its out-of-cluster eigencomponents
+vanish, so the cluster projector fixes it. -/
+private theorem clusterProjector_mulVec_shift_self (hA : A.IsSymm)
+    (S : Set ℝ) (c : ℝ) (y : V → ℝ) :
+    clusterProjector A hA S *ᵥ
+      ((A - c • 1) *ᵥ (clusterProjector A hA S *ᵥ y))
+      = (A - c • 1) *ᵥ (clusterProjector A hA S *ᵥ y) := by
+  classical
+  refine eq_of_forall_dotProduct_eigvecOf_eq hA _ _ fun i => ?_
+  rw [eigvecOf_dotProduct_clusterProjector_mulVec hA S i]
+  have hcomp : Matrix.dotProduct (eigvecOf A hA i)
+      ((A - c • 1) *ᵥ (clusterProjector A hA S *ᵥ y))
+      = (eigvalOf A hA i - c)
+        * (if eigvalOf A hA i ∈ S then (1 : ℝ) else 0)
+        * Matrix.dotProduct (eigvecOf A hA i) y := by
+    simp only [Matrix.sub_mulVec, Matrix.dotProduct_sub,
+      dotProduct_eigvecOf_mulVec hA,
+      eigvecOf_dotProduct_clusterProjector_mulVec hA S i,
+      Matrix.smul_mulVec_assoc, Matrix.one_mulVec, Matrix.mulVec_smul,
+      Matrix.dotProduct_smul, smul_eq_mul, sub_mul]
+    ring
+  rw [hcomp]
+  by_cases hband : eigvalOf A hA i ∈ S
+  · rw [if_pos hband, one_mul]
+  · rw [if_neg hband]
+    ring
+
+/-- **(F2, set form) expansion:** for a vector fixed by B's cluster
+projector, the shifted action expands by at least `r + δ`, whenever
+every in-cluster eigenvalue of `B` lies at distance `≥ r + δ` from
+`c`. -/
+private theorem norm_pack_shift_apply_ge_of_mem (hB : B.IsSymm)
+    (T : Set ℝ) (c r δ : ℝ) (hrδ : 0 ≤ r + δ)
+    (hfar : ∀ j, eigvalOf B hB j ∈ T → r + δ ≤ |eigvalOf B hB j - c|)
+    (z : V → ℝ) (hz : clusterProjector B hB T *ᵥ z = z) :
+    (r + δ) * ‖pack z‖ ≤ ‖pack ((B - c • 1) *ᵥ z)‖ := by
+  classical
+  have hzcomp : ∀ j, Matrix.dotProduct (eigvecOf B hB j) z
+      = (if eigvalOf B hB j ∈ T then (1 : ℝ) else 0)
+        * Matrix.dotProduct (eigvecOf B hB j) z := by
+    intro j
+    calc Matrix.dotProduct (eigvecOf B hB j) z
+        = Matrix.dotProduct (eigvecOf B hB j)
+            (clusterProjector B hB T *ᵥ z) := by rw [hz]
+      _ = (if eigvalOf B hB j ∈ T then (1 : ℝ) else 0)
+          * Matrix.dotProduct (eigvecOf B hB j) z :=
+          eigvecOf_dotProduct_clusterProjector_mulVec hB T j z
+  have hcomp : ∀ j, Matrix.dotProduct (eigvecOf B hB j) ((B - c • 1) *ᵥ z)
+      = (eigvalOf B hB j - c)
+        * Matrix.dotProduct (eigvecOf B hB j) z := by
+    intro j
+    simp only [Matrix.sub_mulVec, Matrix.dotProduct_sub,
+      dotProduct_eigvecOf_mulVec hB,
+      Matrix.smul_mulVec_assoc, Matrix.one_mulVec, Matrix.mulVec_smul,
+      Matrix.dotProduct_smul, smul_eq_mul, sub_mul]
+  have hsum : (r + δ) * (r + δ) * (z ⬝ᵥ z)
+      ≤ ((B - c • 1) *ᵥ z) ⬝ᵥ ((B - c • 1) *ᵥ z) := by
+    have hsplit : (r + δ) * (r + δ) * (z ⬝ᵥ z)
+        = ∑ j, (r + δ) * (r + δ)
+          * (Matrix.dotProduct (eigvecOf B hB j) z
+            * Matrix.dotProduct (eigvecOf B hB j) z) := by
+      rw [dotProduct_eigvecOf hB z z, ← Finset.mul_sum]
+    rw [hsplit, dotProduct_eigvecOf hB ((B - c • 1) *ᵥ z)
+      ((B - c • 1) *ᵥ z)]
+    refine Finset.sum_le_sum fun j _ => ?_
+    rw [hcomp j, hzcomp j]
+    by_cases hband : eigvalOf B hB j ∈ T
+    · rw [if_pos hband, one_mul]
+      have habs := hfar j hband
+      have hkey : (r + δ) * (r + δ)
+          ≤ (eigvalOf B hB j - c) * (eigvalOf B hB j - c) :=
+        le_trans (mul_self_le_mul_self hrδ habs)
+          (le_of_eq (abs_mul_abs_self _))
+      nlinarith [hkey, mul_self_nonneg (Matrix.dotProduct (eigvecOf B hB j) z)]
+    · simp [hband]
+  have hnn : 0 ≤ ‖pack z‖ := norm_nonneg _
+  have hnn' : 0 ≤ ‖pack ((B - c • 1) *ᵥ z)‖ := norm_nonneg _
+  have hsqrt : ((r + δ) * ‖pack z‖) ^ 2
+      ≤ ‖pack ((B - c • 1) *ᵥ z)‖ ^ 2 := by
+    rw [mul_pow, norm_pack_sq, norm_pack_sq, pow_two]
+    exact hsum
+  have habs := abs_le_of_sq_le_sq hsqrt hnn'
+  rwa [abs_of_nonneg (mul_nonneg hrδ hnn)] at habs
+
+/-- The cluster projector's action is contractive (Parseval +
+component action: the filtered signal's squared norm is a sub-sum of
+the input's eigencomponent energy). -/
+private theorem norm_pack_clusterProjector_mulVec_le {M : Matrix V V ℝ}
+    (hM : M.IsSymm) (S : Set ℝ) (y : V → ℝ) :
+    ‖pack (clusterProjector M hM S *ᵥ y)‖ ≤ ‖pack y‖ := by
+  classical
+  have hsq : (clusterProjector M hM S *ᵥ y) ⬝ᵥ
+      (clusterProjector M hM S *ᵥ y) ≤ y ⬝ᵥ y := by
+    rw [dotProduct_eigvecOf hM (clusterProjector M hM S *ᵥ y)
+      (clusterProjector M hM S *ᵥ y), dotProduct_eigvecOf hM y y]
+    refine Finset.sum_le_sum fun i _ => ?_
+    rw [eigvecOf_dotProduct_clusterProjector_mulVec hM S i y]
+    by_cases hband : eigvalOf M hM i ∈ S
+    · rw [if_pos hband, one_mul]
+    · rw [if_neg hband, zero_mul, zero_mul]
+      exact mul_self_nonneg _
+  have habs : |‖pack (clusterProjector M hM S *ᵥ y)‖| ≤ ‖pack y‖ := by
+    refine abs_le_of_sq_le_sq ?_ (norm_nonneg _)
+    rw [norm_pack_sq, norm_pack_sq]
+    exact hsq
+  rwa [abs_of_nonneg (norm_nonneg _)] at habs
+
+/-- The shifted cluster commutation (the scalar shift commutes with
+everything). -/
+private theorem mulVec_clusterProjector_comm_shift {M : Matrix V V ℝ}
+    (hM : M.IsSymm) (S : Set ℝ) (c : ℝ) (u : V → ℝ) :
+    (M - c • 1) *ᵥ ((clusterProjector M hM S) *ᵥ u)
+      = (clusterProjector M hM S) *ᵥ ((M - c • 1) *ᵥ u) := by
+  have hL : (M - c • 1) *ᵥ (clusterProjector M hM S *ᵥ u)
+      = M *ᵥ (clusterProjector M hM S *ᵥ u)
+        - c • (clusterProjector M hM S *ᵥ u) := by
+    rw [Matrix.sub_mulVec, Matrix.smul_mulVec_assoc, Matrix.one_mulVec]
+  have hR : clusterProjector M hM S *ᵥ ((M - c • 1) *ᵥ u)
+      = clusterProjector M hM S *ᵥ (M *ᵥ u)
+        - c • (clusterProjector M hM S *ᵥ u) := by
+    simp only [Matrix.sub_mulVec, Matrix.mulVec_sub,
+      Matrix.smul_mulVec_assoc, Matrix.one_mulVec, Matrix.mulVec_smul]
+  rw [hL, hR, mulVec_clusterProjector_comm hM S u]
+
+/-- **Band Davis–Kahan, set form, product.** If `P_S` and `Q_T` are
+the cluster projectors of two symmetric matrices `A` and `B` at sets
+`S` and `T`, and there are `c, r` with every in-`S` eigenvalue of `A`
+within `r` of `c` and every in-`T` eigenvalue of `B` at distance at
+least `r + δ` from `c` — the hypotheses the algebraic engine actually
+consumes, stated between the clusters as sets — then
+
+`‖Q_T * P_S‖ ≤ ‖A - B‖ / δ`, constant 1.
+
+No interval structure is assumed of `S` or `T`: the clusters may be
+unions of intervals, scattered sets, anything. At `S = Set.Ioc a₁ b₁`
+and `T = Set.Ioc a₂ b₂` this specializes to the window product theorem
+above through `clusterProjector_eq_bandProjector`.
+
+Route provenance (the statement is proved, not admitted): the
+Vershynin/Davis–Kahan commutator-shift technique as in this module's
+window forms; the set statement shape is the cluster form of
+Yu–Wang–Samworth 2015 Theorem 1 (see `proposals/cluster-projector.md`).
+
+QA: `Scaffold/QA/Perturbation/ClusterProjector_QA.lean` — the
+non-interval difference witness and fence below, plus the interface
+witnesses in the same file. -/
+theorem l2OpNorm_clusterProjector_mul_clusterProjector_le
+    (hA : A.IsSymm) (hB : B.IsSymm) (S T : Set ℝ) (c r δ : ℝ)
+    (hδ : 0 < δ) (hr : 0 ≤ r)
+    (hnear : ∀ i, eigvalOf A hA i ∈ S → |eigvalOf A hA i - c| ≤ r)
+    (hfar : ∀ j, eigvalOf B hB j ∈ T → r + δ ≤ |eigvalOf B hB j - c|) :
+    ‖clusterProjector B hB T * clusterProjector A hA S‖
+      ≤ ‖A - B‖ / δ := by
+  classical
+  have hQidem := clusterProjector_idempotent B hB T
+  have hrδ : 0 ≤ r + δ := by linarith
+  have hpos : 0 < r + δ := by linarith
+  have hCnn : 0 ≤ (r * ‖clusterProjector B hB T
+      * clusterProjector A hA S‖ + ‖A - B‖) / (r + δ) :=
+    div_nonneg (add_nonneg (mul_nonneg hr (norm_nonneg _)) (norm_nonneg _))
+      (le_of_lt hpos)
+  have hmaster : ∀ y : V → ℝ,
+      ‖pack ((clusterProjector B hB T
+        * clusterProjector A hA S) *ᵥ y)‖
+        ≤ ((r * ‖clusterProjector B hB T
+          * clusterProjector A hA S‖ + ‖A - B‖) / (r + δ)) * ‖pack y‖ := by
+    intro y
+    have hzQ : clusterProjector B hB T *ᵥ
+        ((clusterProjector B hB T * clusterProjector A hA S) *ᵥ y)
+        = (clusterProjector B hB T * clusterProjector A hA S) *ᵥ y := by
+      calc clusterProjector B hB T *ᵥ
+          ((clusterProjector B hB T * clusterProjector A hA S) *ᵥ y)
+          = (clusterProjector B hB T
+              * (clusterProjector B hB T * clusterProjector A hA S)) *ᵥ y :=
+            Matrix.mulVec_mulVec y (clusterProjector B hB T)
+              (clusterProjector B hB T * clusterProjector A hA S)
+        _ = (clusterProjector B hB T * clusterProjector A hA S) *ᵥ y := by
+            rw [← Matrix.mul_assoc, hQidem]
+    have hF2 := norm_pack_shift_apply_ge_of_mem hB T c r δ hrδ hfar _ hzQ
+    have hsplit : (B - c • 1) *ᵥ
+        ((clusterProjector B hB T * clusterProjector A hA S) *ᵥ y)
+        = clusterProjector B hB T *ᵥ ((A - c • 1) *ᵥ
+            (clusterProjector A hA S *ᵥ y))
+          + clusterProjector B hB T *ᵥ ((B - A) *ᵥ
+            (clusterProjector A hA S *ᵥ y)) := by
+      have e1 : (B - c • 1) *ᵥ
+          ((clusterProjector B hB T * clusterProjector A hA S) *ᵥ y)
+          = (B - c • 1) *ᵥ (clusterProjector B hB T *ᵥ
+              (clusterProjector A hA S *ᵥ y)) := by
+        rw [Matrix.mulVec_mulVec, Matrix.mulVec_mulVec, ← Matrix.mul_assoc,
+          Matrix.mulVec_mulVec]
+      rw [e1, mulVec_clusterProjector_comm_shift hB T c
+        (clusterProjector A hA S *ᵥ y),
+        sub_one_mulVec_split c (clusterProjector A hA S *ᵥ y),
+        Matrix.mulVec_add]
+    have hT1 : ‖pack (clusterProjector B hB T *ᵥ ((A - c • 1) *ᵥ
+        (clusterProjector A hA S *ᵥ y)))‖
+        ≤ ‖clusterProjector B hB T * clusterProjector A hA S‖
+          * (r * ‖pack y‖) := by
+      have hw : clusterProjector A hA S *ᵥ ((A - c • 1) *ᵥ
+          (clusterProjector A hA S *ᵥ y))
+          = (A - c • 1) *ᵥ (clusterProjector A hA S *ᵥ y) :=
+        clusterProjector_mulVec_shift_self hA S c y
+      have hact : clusterProjector B hB T *ᵥ ((A - c • 1) *ᵥ
+          (clusterProjector A hA S *ᵥ y))
+          = (clusterProjector B hB T * clusterProjector A hA S) *ᵥ
+              ((A - c • 1) *ᵥ (clusterProjector A hA S *ᵥ y)) := by
+        conv_lhs => rw [← hw]
+        rw [Matrix.mulVec_mulVec]
+      rw [hact]
+      have h1 := l2OpNorm_mulVec_le (clusterProjector B hB T
+        * clusterProjector A hA S) ((A - c • 1) *ᵥ
+        (clusterProjector A hA S *ᵥ y))
+      have h2 := norm_pack_shift_clusterProjector_mulVec_le hA S c r hr
+        hnear y
+      calc ‖pack ((clusterProjector B hB T
+              * clusterProjector A hA S) *ᵥ
+              ((A - c • 1) *ᵥ (clusterProjector A hA S *ᵥ y)))‖
+          ≤ ‖clusterProjector B hB T * clusterProjector A hA S‖
+              * ‖pack ((A - c • 1) *ᵥ
+                  (clusterProjector A hA S *ᵥ y))‖ := h1
+        _ ≤ ‖clusterProjector B hB T * clusterProjector A hA S‖
+              * (r * ‖pack y‖) :=
+              mul_le_mul_of_nonneg_left h2 (norm_nonneg _)
+    have hT2 : ‖pack (clusterProjector B hB T *ᵥ ((B - A) *ᵥ
+        (clusterProjector A hA S *ᵥ y)))‖
+        ≤ ‖A - B‖ * ‖pack y‖ := by
+      have h1 := l2OpNorm_mulVec_le (B - A)
+        (clusterProjector A hA S *ᵥ y)
+      have h2 := norm_pack_clusterProjector_mulVec_le hA S y
+      have hkey : ‖pack (clusterProjector B hB T *ᵥ ((B - A) *ᵥ
+          (clusterProjector A hA S *ᵥ y)))‖
+          ≤ ‖pack ((B - A) *ᵥ (clusterProjector A hA S *ᵥ y))‖ :=
+        norm_pack_clusterProjector_mulVec_le hB T _
+      calc ‖pack (clusterProjector B hB T *ᵥ ((B - A) *ᵥ
+              (clusterProjector A hA S *ᵥ y)))‖
+          ≤ ‖pack ((B - A) *ᵥ (clusterProjector A hA S *ᵥ y))‖ := hkey
+        _ ≤ ‖B - A‖ * ‖pack (clusterProjector A hA S *ᵥ y)‖ := h1
+        _ ≤ ‖B - A‖ * ‖pack y‖ :=
+              mul_le_mul_of_nonneg_left h2 (norm_nonneg _)
+        _ = ‖A - B‖ * ‖pack y‖ := by rw [norm_sub_rev]
+    have hmid : (r + δ) * ‖pack ((clusterProjector B hB T
+        * clusterProjector A hA S) *ᵥ y)‖
+        ≤ (r * ‖clusterProjector B hB T * clusterProjector A hA S‖
+            + ‖A - B‖) * ‖pack y‖ := by
+      have hsplitnorm : ‖pack ((B - c • 1) *ᵥ
+          ((clusterProjector B hB T * clusterProjector A hA S) *ᵥ y))‖
+          ≤ (r * ‖clusterProjector B hB T * clusterProjector A hA S‖
+              + ‖A - B‖) * ‖pack y‖ := by
+        have hadd : ‖pack ((B - c • 1) *ᵥ
+            ((clusterProjector B hB T * clusterProjector A hA S) *ᵥ y))‖
+            ≤ ‖pack (clusterProjector B hB T *ᵥ ((A - c • 1) *ᵥ
+                (clusterProjector A hA S *ᵥ y)))‖
+              + ‖pack (clusterProjector B hB T *ᵥ ((B - A) *ᵥ
+                (clusterProjector A hA S *ᵥ y)))‖ := by
+          have hvec : pack ((B - c • 1) *ᵥ
+              ((clusterProjector B hB T * clusterProjector A hA S) *ᵥ y))
+              = pack (clusterProjector B hB T *ᵥ ((A - c • 1) *ᵥ
+                  (clusterProjector A hA S *ᵥ y)))
+                + pack (clusterProjector B hB T *ᵥ ((B - A) *ᵥ
+                  (clusterProjector A hA S *ᵥ y))) := by
+            rw [hsplit, pack_add]
+          rw [hvec]
+          exact norm_add_le _ _
+        calc ‖pack ((B - c • 1) *ᵥ ((clusterProjector B hB T
+                  * clusterProjector A hA S) *ᵥ y))‖
+            ≤ ‖pack (clusterProjector B hB T *ᵥ ((A - c • 1) *ᵥ
+                  (clusterProjector A hA S *ᵥ y)))‖
+              + ‖pack (clusterProjector B hB T *ᵥ ((B - A) *ᵥ
+                  (clusterProjector A hA S *ᵥ y)))‖ := hadd
+          _ ≤ (r * ‖clusterProjector B hB T
+                * clusterProjector A hA S‖ + ‖A - B‖) * ‖pack y‖ := by
+                have hsum2 := add_le_add hT1 hT2
+                calc ‖pack (clusterProjector B hB T *ᵥ ((A - c • 1) *ᵥ
+                        (clusterProjector A hA S *ᵥ y)))‖
+                      + ‖pack (clusterProjector B hB T *ᵥ ((B - A) *ᵥ
+                        (clusterProjector A hA S *ᵥ y)))‖
+                    ≤ (‖clusterProjector B hB T
+                        * clusterProjector A hA S‖
+                        * (r * ‖pack y‖)) + (‖A - B‖ * ‖pack y‖) := hsum2
+                  _ = (r * ‖clusterProjector B hB T
+                        * clusterProjector A hA S‖ + ‖A - B‖) * ‖pack y‖ := by ring
+      exact le_trans hF2 hsplitnorm
+    have h3 : ‖pack ((clusterProjector B hB T
+        * clusterProjector A hA S) *ᵥ y)‖
+        ≤ ((r * ‖clusterProjector B hB T * clusterProjector A hA S‖
+            + ‖A - B‖) / (r + δ)) * ‖pack y‖ := by
+      have hgoal : ‖pack ((clusterProjector B hB T
+          * clusterProjector A hA S) *ᵥ y)‖ * (r + δ)
+          ≤ (r * ‖clusterProjector B hB T * clusterProjector A hA S‖
+              + ‖A - B‖) * ‖pack y‖ := by
+        rw [mul_comm]
+        exact hmid
+      have h2 := (le_div_iff₀ hpos).2 hgoal
+      rw [div_mul_eq_mul_div]
+      exact h2
+    exact h3
+  have hpair : ∀ x y : V → ℝ,
+      |y ⬝ᵥ ((clusterProjector B hB T
+        * clusterProjector A hA S) *ᵥ x)|
+        ≤ ((r * ‖clusterProjector B hB T
+            * clusterProjector A hA S‖ + ‖A - B‖) / (r + δ))
+          * Real.sqrt (x ⬝ᵥ x) * Real.sqrt (y ⬝ᵥ y) := by
+    intro x y
+    have hcs : |y ⬝ᵥ ((clusterProjector B hB T
+        * clusterProjector A hA S) *ᵥ x)|
+        ≤ ‖pack y‖ * ‖pack ((clusterProjector B hB T
+          * clusterProjector A hA S) *ᵥ x)‖ := by
+      have h := abs_dotProduct_le y ((clusterProjector B hB T
+        * clusterProjector A hA S) *ᵥ x)
+      rwa [← norm_euclidean_eq_sqrt, ← norm_euclidean_eq_sqrt] at h
+    have hact := hmaster x
+    have hrew : ‖pack y‖ * (((r * ‖clusterProjector B hB T
+        * clusterProjector A hA S‖ + ‖A - B‖) / (r + δ))
+      * ‖pack x‖) = ((r * ‖clusterProjector B hB T
+        * clusterProjector A hA S‖ + ‖A - B‖) / (r + δ))
+      * Real.sqrt (x ⬝ᵥ x) * Real.sqrt (y ⬝ᵥ y) := by
+      rw [norm_euclidean_eq_sqrt, norm_euclidean_eq_sqrt]
+      ring
+    calc |y ⬝ᵥ ((clusterProjector B hB T
+            * clusterProjector A hA S) *ᵥ x)|
+        ≤ ‖pack y‖ * ‖pack ((clusterProjector B hB T
+          * clusterProjector A hA S) *ᵥ x)‖ := hcs
+      _ ≤ ‖pack y‖ * (((r * ‖clusterProjector B hB T
+              * clusterProjector A hA S‖ + ‖A - B‖) / (r + δ))
+          * ‖pack x‖) := mul_le_mul_of_nonneg_left hact (norm_nonneg _)
+      _ = ((r * ‖clusterProjector B hB T * clusterProjector A hA S‖
+            + ‖A - B‖) / (r + δ)) * Real.sqrt (x ⬝ᵥ x)
+            * Real.sqrt (y ⬝ᵥ y) := hrew
+  have hnorm := l2OpNorm_le_of_abs_dotProduct_le hCnn hpair
+  have hstep : (r + δ) * ‖clusterProjector B hB T
+      * clusterProjector A hA S‖
+      ≤ r * ‖clusterProjector B hB T * clusterProjector A hA S‖
+        + ‖A - B‖ := by
+    have h := (le_div_iff₀ hpos).1 hnorm
+    linarith
+  have hfinal : δ * ‖clusterProjector B hB T
+      * clusterProjector A hA S‖ ≤ ‖A - B‖ := by linarith
+  exact (le_div_iff₀ hδ).2 (by rw [mul_comm]; exact hfinal)
+
+/-- **Band Davis–Kahan, set form, difference (equal rank).** If the
+cluster projectors of `A` at `S` and `B` at `T` have equal rank, every
+in-`S` eigenvalue of `A` lies within `r` of `c`, and every
+*out-of-`T`* eigenvalue of `B` lies at distance at least `r + δ` from
+`c`, then the projectors are close:
+
+`‖P_A(S) - P_B(T)‖ ≤ ‖A - B‖ / δ`, constant 1.
+
+**No dichotomy, no interior case:** the equal-rank identity reduces the
+difference to the one-sided residual `‖(1 − Q_T) P_S‖`, the complement
+law `one_sub_clusterProjector` rewrites `1 − Q_T` as the cluster
+projector of `Tᶜ` — a definition-level fact unavailable to the window
+family — and the product form above applies. The out-of-`T` separation
+is the honest form of what the engine consumes; the YWS-literal
+*pairwise* set shape (no center/radius) is a recorded open follow-on
+(see the proposal: an out-of-`S` A-eigenvalue can sit inside `S`'s
+range, killing the interior-case trivial regime).
+
+QA: `Scaffold/QA/Perturbation/ClusterProjector_QA.lean` — the
+non-interval difference witness at exact-fit `c, r, δ`, the ε = 0
+attainment, and the `hfar` fence on the interior-gap configuration. -/
+theorem l2OpNorm_clusterProjector_sub_clusterProjector_le
+    (hA : A.IsSymm) (hB : B.IsSymm) (S T : Set ℝ) (c r δ : ℝ)
+    (hδ : 0 < δ) (hr : 0 ≤ r)
+    (hrank : (clusterProjector A hA S).rank
+      = (clusterProjector B hB T).rank)
+    (hnear : ∀ i, eigvalOf A hA i ∈ S → |eigvalOf A hA i - c| ≤ r)
+    (hfar : ∀ j, eigvalOf B hB j ∉ T → r + δ ≤ |eigvalOf B hB j - c|) :
+    ‖clusterProjector A hA S - clusterProjector B hB T‖
+      ≤ ‖A - B‖ / δ := by
+  classical
+  rw [l2OpNorm_sub_eq_of_rank_eq
+    (clusterProjector_symmetric A hA S)
+    (clusterProjector_idempotent A hA S)
+    (clusterProjector_symmetric B hB T)
+    (clusterProjector_idempotent B hB T) hrank,
+    one_sub_clusterProjector hB T]
+  refine l2OpNorm_clusterProjector_mul_clusterProjector_le hA hB S
+    (Tᶜ) c r δ hδ hr hnear ?_
+  intro j hj
+  exact hfar j ((Set.mem_compl_iff _ _).mp hj)
+
+/-- **Band Davis–Kahan, set form, two-sided difference (no rank
+hypothesis).** If `P_A(S)` and `P_B(T)` are the cluster projectors of
+two symmetric matrices at arbitrary eigenvalue sets, and *both*
+out-of-cluster flanks are δ-separated in the center/radius membership
+form — every in-`S` eigenvalue of `A` within `rS` of `cS` with every
+out-of-`T` eigenvalue of `B` at least `rS + δ` from `cS`, and every
+in-`T` eigenvalue of `B` within `rT` of `cT` with every out-of-`S`
+eigenvalue of `A` at least `rT + δ` from `cT` — then
+
+`‖P_A(S) - P_B(T)‖ ≤ 2 * ‖A - B‖ / δ`,
+
+with **no rank hypothesis anywhere**: the consumer states the two
+spectral separations and nothing else — no multiplicity counting. This
+is the Yu–Wang–Samworth Theorem 1 both-gaps shape at arbitrary
+eigenvalue sets (the set twin of
+`l2OpNorm_bandProjector_sub_bandProjector_le_two_of_symm`); on inputs
+where the equal-rank difference form above applies, that form gives the
+strictly better constant 1.
+
+The route is a pure composition, and the set form is *easier* than its
+window sibling: the ring identity
+`P - Q = (1 - Q) * P - Q * (1 - P)` reduces to the two one-sided
+residuals, the complement law `one_sub_clusterProjector` turns each
+into a cluster projector (`Q_{Tᶜ} * P_S` and `Q_T * Q_{Sᶜ}`), the
+delivered set-form product bound — which, unlike the window pairwise
+engine, carries **no** smallness regime — bounds each at its own
+argument order (the second moved under `l2OpNorm_transpose`; cluster
+projectors are symmetric), and **the constant 2 is exactly the
+resulting triangle inequality**, no hidden loss. When the clusters'
+ranks genuinely differ, both separations can still hold — the theorem
+is rank-free because nothing in this route ever touches rank.
+
+Statement-shape note: two center/radius pairs, one per cluster. A
+single common center would also drive the composition but excludes
+configurations where an out-of-`S` A-eigenvalue lies *between* the
+clusters (near neither's complement margin); the two-pair form is the
+honest minimal hypothesis set.
+
+QA: `Scaffold/QA/Perturbation/ClusterProjector_QA.lean` — the
+unequal-rank non-interval witness (the delivered equal-rank family's
+hypothesis exhibited failing), the ε = 0 attainment, and the two-sided
+fence isolating each separation flank. -/
+theorem l2OpNorm_clusterProjector_sub_clusterProjector_le_two_of_symm
+    (hA : A.IsSymm) (hB : B.IsSymm) (S T : Set ℝ) (cS rS cT rT δ : ℝ)
+    (hδ : 0 < δ) (hrS : 0 ≤ rS) (hrT : 0 ≤ rT)
+    (hnearS : ∀ i, eigvalOf A hA i ∈ S → |eigvalOf A hA i - cS| ≤ rS)
+    (hfarT : ∀ j, eigvalOf B hB j ∉ T → rS + δ ≤ |eigvalOf B hB j - cS|)
+    (hnearT : ∀ j, eigvalOf B hB j ∈ T → |eigvalOf B hB j - cT| ≤ rT)
+    (hfarS : ∀ i, eigvalOf A hA i ∉ S → rT + δ ≤ |eigvalOf A hA i - cT|) :
+    ‖clusterProjector A hA S - clusterProjector B hB T‖
+      ≤ 2 * ‖A - B‖ / δ := by
+  -- The first one-sided residual, as a cluster product
+  have h1 : ‖(1 - clusterProjector B hB T) * clusterProjector A hA S‖
+      ≤ ‖A - B‖ / δ := by
+    rw [one_sub_clusterProjector hB T]
+    refine l2OpNorm_clusterProjector_mul_clusterProjector_le hA hB S
+      (Tᶜ) cS rS δ hδ hrS hnearS ?_
+    intro j hj
+    exact hfarT j ((Set.mem_compl_iff _ _).mp hj)
+  -- The second one-sided residual, moved under the transpose
+  have h2 : ‖clusterProjector B hB T * (1 - clusterProjector A hA S)‖
+      ≤ ‖A - B‖ / δ := by
+    have hsymmA : (clusterProjector A hA (Sᶜ))ᵀ
+        = clusterProjector A hA (Sᶜ) :=
+      clusterProjector_symmetric A hA (Sᶜ)
+    have hsymmB : (clusterProjector B hB T)ᵀ
+        = clusterProjector B hB T :=
+      clusterProjector_symmetric B hB T
+    have htrans : clusterProjector B hB T * clusterProjector A hA (Sᶜ)
+        = (clusterProjector A hA (Sᶜ) * clusterProjector B hB T)ᵀ := by
+      rw [Matrix.transpose_mul, hsymmB, hsymmA]
+    rw [one_sub_clusterProjector hA S, htrans, l2OpNorm_transpose]
+    have h := l2OpNorm_clusterProjector_mul_clusterProjector_le hB hA T
+      (Sᶜ) cT rT δ hδ hrT hnearT
+      (fun i hi => hfarS i ((Set.mem_compl_iff _ _).mp hi))
+    rwa [norm_sub_rev] at h
+  -- The ring identity plus the triangle inequality: 2 is exactly it
+  calc ‖clusterProjector A hA S - clusterProjector B hB T‖
+      = ‖(1 - clusterProjector B hB T) * clusterProjector A hA S
+          - clusterProjector B hB T * (1 - clusterProjector A hA S)‖ :=
+        by rw [sub_eq_one_sub_mul_sub_mul_one_sub]
+    _ ≤ ‖(1 - clusterProjector B hB T) * clusterProjector A hA S‖
+        + ‖clusterProjector B hB T * (1 - clusterProjector A hA S)‖ :=
+          norm_sub_le _ _
+    _ ≤ ‖A - B‖ / δ + ‖A - B‖ / δ := add_le_add h1 h2
+    _ = 2 * ‖A - B‖ / δ := by ring
+
+end SetForm
+
 
 end Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation

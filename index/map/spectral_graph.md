@@ -6,7 +6,7 @@ conductance, Cheeger theory, interlacing, and event-driven dynamics.
 ## Status
 
 **Implemented and build-certified** (see the QA scoreboard):
-`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,SpectralCertificates,Tikhonov,Band,Cheeger,Mixing,Dynamics,Krylov,PolyFilter}`.
+`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,SpectralCertificates,Tikhonov,Band,ClusterProjector,Cheeger,Mixing,Dynamics,Krylov,PolyFilter}`.
 
 ## Modules and Declarations
 
@@ -384,6 +384,48 @@ the bare `V → ℝ` default norm is the sup norm and is not used).
 | `bandProjector_residual_dotProduct_eq_zero` | **the residual-orthogonality engine** `(x − B *ᵥ x) ⬝ᵥ (B *ᵥ z) = 0` — load-bearing on exactly the two Step-1 facts (symmetry moves the band across the dot product; idempotence collapses the band of the residual to zero) |
 | `bandProjector_toEuclidean_apply_eq_orthogonalProjection` | **the Hilbert-projection identification:** Mathlib's `orthogonalProjection` at `LinearMap.range (toEuclideanLin B)` maps the packaged signal to the packaged band-filtered signal — the SGT center's first consumption of `Analysis/InnerProductSpace/Projection.lean` (transport per the resolvent Step-0 precedent) |
 | `norm_sub_bandProjector_apply_le` | **the closest-point property:** `‖e x − e (B *ᵥ x)‖ ≤ ‖e x − e y‖` for every fixed point `y` of the band (equivalently every range member) — from `orthogonalProjection_minimal` + `ciInf_le`; the fixed-point hypothesis is load-bearing (the QA guard refutes the hypothesis-free form) |
+
+### `Scaffold.Mathlib.GraphTheory.ClusterProjector` (the set-valued spectral projector)
+
+The cluster projector (proposal `cluster-projector.md`, delivered
+2026-08-24 — the recorded follow-on of the band Davis–Kahan
+cluster/symmetric deliveries): the orthogonal projector onto the span
+of the eigenvectors whose eigenvalues lie in an **arbitrary set**
+`S ⊆ ℝ` — `clusterProjector M hM S = ∑_{λᵢ ∈ S} vᵢ vᵢᵀ` over the
+proved orthonormal eigenbasis. Pure hard crust, zero axioms. The object
+the interval-only shelf lacked: `spectralProjector` selects at `≤ c`,
+`bandProjector` at `(a, b]`, while the classical Davis–Kahan/YWS
+statements are set-based (a consumer wanting `P_{{|λ| ≥ 3}}` — two
+half-lines — had no object to name). The definition is total and
+**junk-free** (a set has no orientation, so none of the band family's
+`a ≤ b` guards reappear).
+
+Interface highlights, all proved from the Spectral eigenbasis algebra:
+the component action (the mirror of PolyFilter's band form, and the
+only projector input the set-form Davis–Kahan engine consumes); the
+**intersection product law** `P_S * P_T = P_{S ∩ T}` (the nestedness
+law's set twin; idempotence is its diagonal, disjoint-set orthogonality
+its empty-intersection case); the **complement law**
+`1 − P_S = P_{Sᶜ}` (a partition of the eigenbasis filter — the
+structural fact the window family lacks, where `1 − bandProjector` is
+not a band projector); mode selection (in-`S` fixed, out-of-`S`
+annihilated, guard-free); commutation with the carrier matrix; capture
+equality at sets; the **band agreement**
+`clusterProjector M hM (Set.Ioc a b) = bandProjector M hM a b` (the
+entire delivered band family is the interval-set special case); and the
+trace/rank supplier (rank = cardinality of the in-`S` eigenbasis
+filter, the exact `{0,1}`-spectrum route). The set-form Davis–Kahan
+pair consuming this interface lives in
+`Analysis.OperatorTheory.Perturbation.BandDavisKahan` (see the
+[Perturbation map](perturbation.md)).
+
+QA: `Scaffold/QA/Perturbation/ClusterProjector_QA.lean` — the
+non-interval pin `P_{{0,11}} = diag(1,0,1)` on the `diag(0,5,11)`
+fixture (a subspace no window expresses, reached through a four-lemma
+composition: capture, complement, band agreement, imported threshold
+pin), the interface witnesses, the non-interval difference instance at
+exact-fit data, the ε = 0 attainment, and the `hfar` fence on the
+interior-gap configuration.
 
 ### `Scaffold.Mathlib.GraphTheory.Cheeger`
 

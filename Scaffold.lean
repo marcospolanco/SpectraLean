@@ -22,6 +22,7 @@ import Scaffold.Mathlib.GraphTheory.Heat
 import Scaffold.Mathlib.GraphTheory.Directed
 import Scaffold.Mathlib.GraphTheory.Krylov
 import Scaffold.Mathlib.GraphTheory.PolyFilter
+import Scaffold.Mathlib.GraphTheory.ClusterProjector
 import Scaffold.Mathlib.GraphTheory.VariationalTransfer
 import Scaffold.Mathlib.GraphTheory.Dynamics
 import Scaffold.Mathlib.Dynamics.DiscreteAffine

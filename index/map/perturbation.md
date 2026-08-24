@@ -58,6 +58,22 @@ the algebraic commutator/shift route)
 | `l2OpNorm_mulVec_le` | proved | The vector action bound `‖M *ᵥ v‖ ≤ ‖M‖ ‖v‖` in the sqrt-of-dot-product packaging — the shelf gap landed with this module (absent from the pinned Mathlib; through the `cstar_norm_def` + `toEuclideanCLM` spine) | Mathlib C*-algebra norm transport |
 | `mulVec_bandProjector_comm` | proved | A self-adjoint matrix commutes with its own band projector at the vector level (the 2026-08-21 survey's spike-verified fact, landed here; componentwise through the eigenbasis) | standard |
 
+### Set-form Davis–Kahan (cluster projectors)
+
+**Module**: `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.BandDavisKahan`
+(the `SetForm` sections; delivered 2026-08-24, `proposals/cluster-projector.md`,
+extended the same day by `proposals/cluster-projector-symmetric.md` — the
+cluster/symmetric deliveries' recorded follow-ons; all proved,
+zero axioms — the commutator/shift engine re-run at
+`GraphTheory.ClusterProjector`'s set-valued projectors, the component
+action its only projector input)
+
+| Declaration | Kind | Description | Source |
+|-------------|------|-------------|--------|
+| `l2OpNorm_clusterProjector_mul_clusterProjector_le` | proved | **The set-form product bound:** `‖Q_T * P_S‖ ≤ ‖A − B‖/δ` at constant 1 when every in-`S` eigenvalue of `A` lies within `r` of `c` and every in-`T` eigenvalue of `B` lies at distance ≥ `r + δ` from `c` — the hypotheses the algebraic engine actually consumes, stated between the clusters as sets; no interval structure assumed of `S` or `T` | [Vershynin, HDP 2018, Thm 4.1.15–4.1.16 (route)](../sources/vershynin_hdp.md); set statement shape: Davis–Kahan 1970 / YWS 2015 Thm 1 cluster form (see [Davis & Kahan 1970](../sources/davis_kahan_1970.md)) |
+| `l2OpNorm_clusterProjector_sub_clusterProjector_le` | proved | **The set-form difference bound (equal rank):** `‖P_A(S) − P_B(T)‖ ≤ ‖A − B‖/δ` at constant 1, same `hnear`, with every *out-of-`T`* eigenvalue of `B` at distance ≥ `r + δ` from `c` — **no dichotomy, no interior case**: the equal-rank identity reduces to the one-sided residual, the complement law `1 − Q_T = Q_{Tᶜ}` (a definition-level fact the window family lacks) replaces the window form's separate complement engine, and the product form applies at `Tᶜ` | same; the consumed identity: Kato Ch. I §4 (`Perturbation/ProjectionGap.lean`) |
+| `l2OpNorm_clusterProjector_sub_clusterProjector_le_two_of_symm` | proved | **The two-sided set-form difference bound (no rank hypothesis):** `‖P_A(S) − P_B(T)‖ ≤ 2‖A − B‖/δ` under *both-flank* separation with two center/radius pairs (A's in-`S` cluster within `rS` of `cS` with B's out-of-`T` cluster ≥ `rS + δ` from `cS`; B's in-`T` cluster within `rT` of `cT` with A's out-of-`S` cluster ≥ `rT + δ` from `cT`) — the YWS Theorem 1 both-gaps shape at arbitrary eigenvalue sets, **no multiplicity counting anywhere**; a pure composition (ring identity + complement law at both residuals + `l2OpNorm_transpose`, the constant 2 exactly the triangle inequality — the set product bound's unconditional hypotheses make the window form's regime split unnecessary) | [Davis & Kahan 1970](../sources/davis_kahan_1970.md) (both-gaps set-cluster form; the window twin: YWS 2015 Thm 1, operator-norm variant) |
+
 ### The Duhamel Bound (Davis–Kahan Step 1, component 2)
 
 **Module**: `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Duhamel`

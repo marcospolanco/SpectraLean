@@ -6,22 +6,222 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**None — the band-davis-kahan-symmetric proposal is COMPLETE (delivered
-this run; see the top delivered entry). The Active priority table
-again holds no High rows and no Medium rows — every remaining row is
-a Low blocked on a human or technical decision an autonomous Lean-work
-run cannot make. Next run: fall through to the center-out SGT policy
-(`docs/1_STRATEGY.md`, `docs/6_SGT_BACKLOG.md`); the natural
-candidates on record — directed-axis mixing/rate work (gated on a
-primitivity-shaped admission — `perron_frobenius` deliberately claims
-no strict dominance), a set-valued (non-interval) cluster projector
-(its own definition + proposal, per the cluster/symmetric proposals'
-recorded follow-ons), and any named consumer that prices the wide-band
-minimax filter designs.**
+**None — the cluster-projector-symmetric proposal is COMPLETE (delivered
+this run; see the top delivered entry). The Active priority table again
+holds no High rows and no Medium rows — every remaining row is a Low
+blocked on a human or technical decision an autonomous Lean-work run
+cannot make. Next run: fall through to the center-out SGT policy
+(`docs/1_STRATEGY.md`, `docs/6_SGT_BACKLOG.md`); the standing candidates
+on record are unchanged — directed-axis mixing/rate work (gated on a
+primitivity-shaped admission — `perron_frobenius` deliberately claims no
+strict dominance), the YWS-literal *pairwise* set shape (honestly
+blocked per `proposals/cluster-projector.md` Step 0: an out-of-`S`
+A-eigenvalue can sit inside `S`'s range, and whether the shape is true
+at all is open to this repo), and any named consumer that prices the
+wide-band minimax filter designs.**
 ---
 
 
 ## Delivered milestones (most recent first)
+
+**Cluster-projector symmetric form — the two-sided rank-free constant-2
+set-form difference theorem; the proposal COMPLETE, Steps 0+1 in one run
+(run 1, 2026-08-24, run `20260824T175747Z-run-1`;
+`proposals/cluster-projector-symmetric.md`, new this run and selected
+per the empty High/Medium queue as the cluster-projector delivery's
+recorded open follow-on — "the two-sided rank-free constant-2 *set*
+form composes from the delivered pair but was not re-derived here"; the
+two alternative candidates gated on decisions a run cannot make):
+DELIVERED — pure hard crust, zero new axioms (count stays 9; `#print
+axioms` via `wip/cps_axcheck.lean` on the new public theorem + all 18
+new QA declarations: `propext, Classical.choice, Quot.sound` only,
+every one). QA 1953 → 1971 (`ClusterProjector_QA` 28 → 46). The
+set-valued difference family is complete: product/difference/symmetric
+all at arbitrary eigenvalue sets, matching the window family's full
+shape.**
+
+**Delivered:** the new SetForm theorem of
+`Scaffold/Mathlib/Analysis/OperatorTheory/Perturbation/BandDavisKahan.lean`
+(**no new imports**) —
+`l2OpNorm_clusterProjector_sub_clusterProjector_le_two_of_symm`:
+`‖P_A(S) − P_B(T)‖ ≤ 2‖A−B‖/δ` under both-flank center/radius
+membership separation at **two** center/radius pairs (`cS rS` for A's
+`S`-cluster, `cT rT` for B's `T`-cluster; statement-shape decision
+recorded before stating: a single common center would exclude the QA's
+own unequal-rank witness, where an out-of-`S` A-eigenvalue sits between
+the clusters), **no rank hypothesis anywhere** — the YWS both-gaps
+dimension-freeness at sets. The proof is the priced four-step
+composition: the ring identity `P − Q = (I−Q)P − Q(I−P)` (the module's
+own private lemma), the complement law `1 − Q_T = Q_{Tᶜ}` at both
+residuals, the delivered set-form product bound at both argument orders
+(the second moved under `l2OpNorm_transpose`; `clusterProjector_symmetric`'s
+`IsSymm` proofs bridged to transpose equations by typed `have`s), and
+the triangle inequality — **the constant 2 is exactly that triangle,
+with no case split anywhere** (the window sibling needed a private
+rank-free pairwise engine plus a trivial-regime split because its
+product bound carries `‖A−B‖ < δ`; the set product bound is
+unconditional, and that the set route is *easier* is the delivery's
+structural finding).
+
+**QA (+18):** all four proposal-mandated sections — (1) the
+**unequal-rank non-interval witness** `S = {0,5}` rank 2 on `clusterA`
+vs `T = {5}` rank 1 on `bm` (the delivered equal-rank family's
+hypothesis exhibited failing on the covered fixture through the rank
+supplier), both flanks discharged at `cS = 5/2, rS = 5/2, cT = 5,
+rT = 0, δ = 1/2` — the two-pair shape load-bearing (the out-of-`S`
+eigenvalue `11` sits between the clusters; no single center covers both
+flanks at any radius) — theorem bound `≤ 4` via the imported
+`normABm_le` against the independent raw lower `1` at `e₀` (two new
+entrywise pins: `P_A({0,5}) = diag(1,1,0)` composing from the exported
+`bandClusterA_eq`; `P_bm({5}) = diag(0,1,0)` through the extracted
+threshold pair `spBm_four`/`spBm_six`, the latter the two-mode pin at
+the second fixture); (2) the ε = 0 attainment through the new theorem
+with both flanks genuinely discharged; (3) the **two-sided fence** on
+the interior-gap configuration — both `hnear` sides verified, *each*
+`hfar` side refuted in proved form at its own interior eigenvalue (the
+recorded obstruction configuration itself; `cpQA_fence_hfar_fails`
+reused + the new `cpsQA_fence_hfarS_fails`), the hypothesis-free
+conclusion refuted at the imported raw lower norm `≥ 1`, the isolation
+collected — the two-sidedness itself exercised; (4) the ring-identity
+coherence witness pinned entrywise, independent of the private lemma.
+
+**Verification:** the module's theorem green after one fix (the
+`rw [l2OpNorm_transpose]` cannot fire unless the transpose is already
+syntactically present — the durable structure is an explicit
+transpose-equation `have`); the QA after two rounds whose seven
+first-pass errors were all one trap — this pin's `le_abs` disjunct
+order `b ≤ a ∨ b ≤ -b` with `norm_num` on a false arithmetic goal
+normalizing it to a bare `⊢ False` (the display that looks like a
+missing contradiction is a wrong-disjunct sign error), plus the
+norm-carrying `norm_num at h` over-unfold fixed by explicit RHS
+rewrites; `lake env lean` on both modules — zero errors, zero warnings
+each; explicit `lake build` targets both ✔ (2193/2193, 2198/2198);
+`#print axioms` via `wip/cps_axcheck.lean` on all 19 new declarations —
+the standard three only; **full `lake build` ✔ (2261 targets, "Build
+completed successfully"; zero warnings in the changed modules — the
+log's Scaffold-tree diagnostics the documented pre-existing set, the
+docPrime notes upstream Mathlib package replay notes)**; `lint_axioms`
+(**9**, unchanged), `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated (**1971/9/0**, idempotent). Records updated: the
+proposal (status header COMPLETE, the delivery record with the
+pin-technique list and open follow-ons), `proposals/README.md` (the
+High row retired to the Delivered table; the progress paragraph), README
+(1971; the Perturbation row's symmetric-set sentence), the radar (QA
+axis synced 1953/50 → 1971/50, held 4.0), the scoreboard (five
+verification rows + a new interpretation bullet),
+`index/map/perturbation.md` (the section note + declaration row),
+`index/sources/davis_kahan_1970.md` (the both-gaps-at-sets mapping
+row), this plan, and the activity log. Nothing committed; the prior
+runs' uncommitted deliveries preserved untouched.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — the standing gated candidates (primitivity-shaped
+admission for directed mixing; the honestly-blocked pairwise set shape;
+a named consumer pricing the wide-band minimax filter designs), or a
+fresh center-out candidate per `docs/6_SGT_BACKLOG.md`.
+
+**Cluster projector — the set-valued spectral projector and its
+Davis–Kahan pair; the proposal COMPLETE, Steps 0+1 in one run (run 1,
+2026-08-24, run `20260824T161014Z-run-1`;
+`proposals/cluster-projector.md`, new this run and selected per the
+empty High/Medium queue's recorded handoff — the cluster/symmetric
+deliveries' own recorded follow-on, requiring "its own definition +
+proposal" exactly as delivered; the two alternative candidates gated
+on decisions a run cannot make): DELIVERED — pure hard crust, zero new
+axioms (count stays 9; `#print axioms` via `wip/cp_axcheck.lean` on
+all 18 public module + 2 set-form + 27 public QA declarations:
+`propext, Classical.choice, Quot.sound` only, every one). QA
+1925 → 1953 (`ClusterProjector_QA` a new Perturbation-domain file at
+28). The projector shelf's interval constraint is gone: consumers
+state clusters as sets.**
+
+**Delivered:** the new `Scaffold/Mathlib/GraphTheory/ClusterProjector.lean`
+(namespace `SpectralGraphTheory`; minimal imports Spectral + Band; the
+umbrella importing it) — the definition
+`clusterProjector M hM S := ∑_{λᵢ ∈ S} vᵢvᵢᵀ` (classical decidability,
+**junk-free** — a set has no orientation, so none of the band family's
+`a ≤ b` guards reappear) with the full interface: the component action
+(the mirror of PolyFilter's band form), the **intersection product
+law** `P_S * P_T = P_{S ∩ T}` by the *action* route (component action +
+basis injectivity + column extraction — load-bearing on the interface
+itself rather than an entrywise expansion), idempotence (its diagonal),
+disjoint-set orthogonality (its empty intersection), guard-free mode
+selection, commutation, capture at sets, the **complement law**
+`1 − P_S = P_{Sᶜ}` — the structural fact the window family lacks
+(`1 − bandProjector` is not a band projector; this is why the window
+difference form needed its separate six-lemma complement engine and
+the set form does not), the **band agreement**
+`clusterProjector (Set.Ioc a b) = bandProjector a b` (the entire
+delivered band family is the interval-set special case), and the
+trace/rank supplier (the `rank_bandProjector_eq_card` route). Plus the
+new `SetForm` sections of
+`Scaffold/Mathlib/Analysis/OperatorTheory/Perturbation/BandDavisKahan.lean`
+(+1 import: ClusterProjector): the commutator/shift engine re-run at
+membership filters — the **set-form product bound**
+`‖Q_T * P_S‖ ≤ ‖A−B‖/δ` and, at equal rank, the **set-form difference
+bound** `‖P_A(S) − P_B(T)‖ ≤ ‖A−B‖/δ` under center/radius membership
+separation — **no dichotomy, no interior case**: the equal-rank
+identity reduces to the one-sided residual and the complement law
+rewrites `1 − Q_T = Q_{Tᶜ}` into the product form's own shape. The
+YWS-literal *pairwise* set shape is recorded as honestly blocked with
+its obstruction named.
+
+**QA (+28):** all four proposal-mandated sections — (1) the
+**non-interval witness**: `P_{{0,11}} = diag(1,0,1)` on the imported
+`diag(0,5,11)` fixture (a subspace NO window expresses) through a
+four-lemma composition (capture at sets, the complement partition, the
+singleton pin, the imported threshold pin), with the
+idempotence/action/disjointness instantiations and four rank counts
+(2/1/2/2) through the trace route; (2) the **non-interval difference
+instance** on the new fixture `diag(−1,5,11)` at exact-fit
+`c = 11/2, r = 11/2, δ = 1` — the theorem bound `≤ ‖A−B‖/1 ≤ 1` (norm
+via the max-abs-eigenvalue bridge at the diagonal difference) joined
+with the raw lower `1 ≤ ‖P−Q‖` at `e₀`, both projectors and the
+difference pinned entrywise; (3) the ε = 0 attainment at singleton
+clusters with the out-of-`T` separation genuinely discharged; (4) the
+**`hfar` fence on the interior-gap configuration** — the recorded
+obstruction itself (an out-of-`T` eigenvalue inside A's cluster range
+at distance `11/2 < 11/2 + 1/2` from `c`) exercised as a hypothesis
+fence with ranks equal 2 = 2, `hnear` verified, the hypothesis-free
+conclusion refuted at norm ≥ 1, and the isolation collected.
+
+**Verification:** the definition/interface elaborated green after the
+filter-instance hygiene was worked out (the sharpest recorded trap:
+`Finset.filter` at set-membership elaborates under different
+`DecidablePred` instances in definition-unfolded goals versus
+`classical`-tactic proofs, so filter-equality rewrites fail on
+definition-unfolded filters — the durable fix is the action idiom for
+projector proofs and trace-lemma-sourced count pins, both now recorded
+in the proposal's pin-technique list; QA-side: simp's normNum fails on
+negative real literals and on `abs` goals — explicit
+`abs_le`/`le_abs`/`linarith` closes, and entrywise matrix goals need
+`simp` (which decides Fin-index ites) before `norm_num`);
+`lake env lean` on all three modules — zero errors, zero warnings each
+(ClusterProjector's olean built first); explicit `lake build` targets
+all ✔ (2010/2010, 2193/2193, 2198/2198); `#print axioms` via
+`wip/cp_axcheck.lean` on all 47 accessible declarations — the standard
+three only; **full `lake build` ✔ (2261 targets, "Build completed
+successfully"; zero warnings in the changed modules)**; `lint_axioms`
+(**9**, unchanged), `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated (**1953/9/0**, idempotent by md5). Records
+updated: the proposal (status header COMPLETE, the full delivery
+record with the pin-technique list and the honestly-blocked follow-on),
+`proposals/README.md` (the Delivered row; the progress paragraph — the
+table empty again), README (1953; the cluster-projector module-table
+row; the Perturbation row's set-form sentence), the radar (QA axis
+synced 1925/49 → 1953/50, held 4.0), the scoreboard (all four
+verification rows + a new interpretation bullet),
+`index/map/spectral_graph.md` (the module-list line + the new
+section), `index/map/perturbation.md` (the set-form section + 2
+declaration rows), `index/sources/davis_kahan_1970.md` (the set-form
+mapping row), the umbrella `Scaffold.lean`, this plan, and the activity
+log. Nothing committed; the prior runs' deliveries preserved untouched.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — directed-axis mixing/rate work (gated on
+primitivity), the pairwise set shape (honestly blocked; needs
+eigenvalue-flow machinery), or a named consumer pricing the wide-band
+minimax filter designs.
 
 **Band Davis–Kahan symmetric form — the two-sided (both-separations)
 constant-2 difference theorem without rank equality; the proposal

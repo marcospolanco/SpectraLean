@@ -387,11 +387,25 @@ evaluation, and the one-kernel-index count against
 corollaries (`leverageScore`, `sum_leverageScore_eq_two`) defining the
 sparsification-facing importance-sampling object; QA on `K₃`/`K₄`/`P₃`/
 star witnesses the ordered-pair double-counting factor (`4 ≠ 2`,
-`6 ≠ 3`) exactly as the proposal's calibration demands. The family's
-remaining items are unchanged: the definiteness residual
-`R u v = 0 ↔ u = v`, the resistance metric (triangle inequality),
+`6 ≠ 3`) exactly as the proposal's calibration demands. **The
+resistance-metric residuals delivered (2026-08-24):** the family's two
+named non-gated residuals are proved in `GraphTheory.Electrical`
+(`proposals/resistance-metric.md`, zero new axioms) — the **maximum
+principle** for unit-demand potentials (`min (f u) (f v) ≤ f x ≤
+max (f u) (f v)` by diffusion-form propagation + walk induction),
+`effectiveResistance_pos_of_ne` / `effectiveResistance_eq_zero_iff`
+(the definiteness residual `R u v = 0 ↔ u = v`, via the Dirichlet bound
+at the indicator `e u`), and `effectiveResistance_le_add` (the
+**triangle inequality** — the polarization cross term closed by the
+maximum principle; the eigenbasis route provably yields only the
+root-triangle, recorded in the proposal's Step 0). With nonnegativity,
+symmetry, and self-distance, `effectiveResistance` is now a genuine
+metric on every connected network (the classical resistance distance);
+QA carries the equality case on the 3-path (`2 = 1 + 1`), the strict
+case on `K₃`, and one signed fixture fencing the nonnegativity
+hypothesis across all three theorems. The family's remaining items are:
 Matrix–Tree, and Kirchhoff network theorems beyond the conservation
-bridge — the last two still gated on a named consumer.
+bridge — both still gated on a named consumer.
 
 ### 8. Directed and asymmetric graph operators (2026-08-19, axis newly opened)
 

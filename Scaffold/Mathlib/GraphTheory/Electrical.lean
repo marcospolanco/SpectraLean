@@ -6,10 +6,17 @@
   Effective resistance for weighted graphs, defined by the potential
   equation it solves rather than by a pseudoinverse, per
   `proposals/electrical-structure-crust.md` step 5 (delivered
-  2026-08-18, after the step-4 solvability hinge landed), and the
+  2026-08-18, after the step-4 solvability hinge landed), the
   one-sided Dirichlet bound of step 6 (delivered 2026-08-18): every
   test potential of positive energy lower-bounds the resistance,
-  `(f u − f v)² / quadForm (laplacian A) f ≤ effectiveResistance A u v`.
+  `(f u − f v)² / quadForm (laplacian A) f ≤ effectiveResistance A u v`,
+  and the resistance-metric residuals of backlog item 7 (delivered
+  2026-08-24, `proposals/resistance-metric.md`): the maximum principle
+  for unit-demand potentials, the definiteness residual
+  `R u v = 0 ↔ u = v`, and the triangle inequality `R u w ≤ R u v +
+  R v w` — the last two laws, with nonnegativity, symmetry, and
+  self-distance, making the resistance a metric on every connected
+  network.
 
   The definition is the classical electrical one: `r` is the effective
   resistance between `u` and `v` when one unit of current injected at
@@ -363,5 +370,233 @@ theorem effectiveResistance_ge_sq_div_quadForm (A : WAdj (V := V))
   have hcs := laplacian_cauchy_schwarz A hA hnonneg f g
   rw [hc, hE] at hcs
   rwa [div_le_iff₀' hpos]
+
+/-!
+## The resistance metric (backlog item 7's named residuals)
+
+`effectiveResistance_pos_of_ne` / `effectiveResistance_eq_zero_iff`
+(the definiteness residual `R u v = 0 ↔ u = v`) and
+`effectiveResistance_le_add` (the triangle inequality) — together with
+the proved nonnegativity, symmetry, and self-distance laws above, these
+complete the four metric laws, making `effectiveResistance` a genuine
+metric on every connected network with symmetric nonnegative weights
+(the classical "resistance distance": Doyle–Snell 1984 §3.5 for the
+potential route, Gutman–Xiao 2004 for the metric statement — route
+provenance only; locators carry the standing
+verify-against-physical-copy caveat).
+
+The mathematical crux is the **maximum principle** for unit-demand
+potentials (`laplacian_mulVec_eq_single_sub_single_le_max` and its min
+sibling): a potential solving `L *ᵥ f = e u − e v` takes every value
+between its boundary values `f v` and `f u`. The eigenbasis route
+cannot replace it: there `R(u,v) = ‖z_u − z_v‖²` in the `1/√λ`-weighted
+eigenbasis, and the Euclidean triangle on the `z`-vectors yields only
+the *root*-triangle `√R(u,w) ≤ √R(u,v) + √R(v,w)` — the cross term is
+exactly what the sharp triangle must cancel, and the cancellation *is*
+the maximum principle (`proposals/resistance-metric.md` Step 0 records
+this route comparison). Proof: at a max-point outside `{u, v}` the
+diffusion form `∑ j, A x j * (f x − f j) = 0` (`laplacian_mulVec_apply`)
+is a sum of nonnegative terms, so each vanishes and the max value
+propagates across every positive-weight edge; a walk induction then
+floods the connected graph, contradicting `f u ≠ f v`. This is the
+kernel-characterization argument (`eq_of_supportGraph_walk`) run at an
+inequality — an error in the diffusion form, the support-graph walk
+machinery, or the existence theorem breaks these proofs rather than
+passing beside them.
+-/
+
+/-- **The maximum principle, top half.** Every potential `f` solving the
+unit-demand equation `L *ᵥ f = e u − e v` on a connected network with
+symmetric nonnegative weights takes no value above its boundary
+maximum: `f x ≤ max (f u) (f v)` for every vertex `x`. The proof is the
+diffusion-form propagation: at a global max-point `x₀` outside the
+boundary `{u, v}`, `∑ j, A x₀ j * (f x₀ − f j) = 0` is a sum of
+nonnegative terms, so every positive-weight neighbor carries the same
+max value; walk induction floods the graph, so a max strictly above
+both boundary values would force `f` constant and contradict the
+nonzero demand. Load-bearing on `laplacian_mulVec_apply` (the diffusion
+form) and on the `supportGraph` walk machinery. -/
+theorem laplacian_mulVec_eq_single_sub_single_le_max
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (hconn : (supportGraph A hA).Connected) {u v : V}
+    {f : V → ℝ} (hf : (laplacian A).mulVec f
+      = Pi.single u (1 : ℝ) - Pi.single v (1 : ℝ)) (x : V) :
+    f x ≤ max (f u) (f v) := by
+  haveI : Nonempty V := ⟨u⟩
+  obtain ⟨x₀, hx₀⟩ := Finite.exists_max f
+  by_contra hcon
+  have hmax : max (f u) (f v) < f x₀ :=
+    (lt_of_not_le hcon).trans_le (hx₀ x)
+  have hclaim : ∀ (s y : V) (w : (supportGraph A hA).Walk s y),
+      f s = f x₀ → (f y = f x₀ ∨ f u = f x₀ ∨ f v = f x₀) := by
+    intro s y w
+    induction w with
+    | nil => exact fun h => Or.inl h
+    | @cons a b c hadj wrest ih =>
+      intro hs
+      rcases eq_or_ne a u with rfl | hau
+      · exact Or.inr (Or.inl hs)
+      rcases eq_or_ne a v with rfl | hav
+      · exact Or.inr (Or.inr hs)
+      have hLa : (laplacian A).mulVec f a = 0 := by
+        rw [hf]
+        simp [Pi.single_apply, hau, hav]
+      rw [laplacian_mulVec_apply A f a] at hLa
+      have hterms := (Finset.sum_eq_zero_iff_of_nonneg
+        (fun j _ => mul_nonneg (hnonneg a j)
+          (sub_nonneg.2 (by rw [hs]; exact hx₀ j)))).1 hLa
+      rcases mul_eq_zero.1 (hterms b (Finset.mem_univ b)) with h0 | h1
+      · exact absurd h0 (ne_of_gt (supportGraph_adj.1 hadj).2)
+      · exact ih (by rw [← sub_eq_zero.1 h1, hs])
+  obtain ⟨w⟩ := hconn x₀ u
+  rcases hclaim x₀ u w rfl with h | h | h
+  · exact absurd h ((lt_of_le_of_lt (le_max_left (f u) (f v)) hmax).ne)
+  · exact absurd h ((lt_of_le_of_lt (le_max_left (f u) (f v)) hmax).ne)
+  · exact absurd h ((lt_of_le_of_lt (le_max_right (f u) (f v)) hmax).ne)
+
+/-- **The maximum principle, min half.** Every potential solving the
+unit-demand equation takes no value below its boundary minimum:
+`min (f u) (f v) ≤ f x`. This is the max half applied to `−f`, whose
+demand negates and swaps the boundary pair — no second propagation
+argument is needed. -/
+theorem laplacian_mulVec_eq_single_sub_single_min_le
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (hconn : (supportGraph A hA).Connected) {u v : V}
+    {f : V → ℝ} (hf : (laplacian A).mulVec f
+      = Pi.single u (1 : ℝ) - Pi.single v (1 : ℝ)) (x : V) :
+    min (f u) (f v) ≤ f x := by
+  have hfn : (laplacian A).mulVec (-f)
+      = Pi.single v (1 : ℝ) - Pi.single u (1 : ℝ) := by
+    rw [← Matrix.mulVecLin_apply, map_neg, Matrix.mulVecLin_apply, hf,
+      neg_sub]
+  have key := laplacian_mulVec_eq_single_sub_single_le_max
+    A hA hnonneg hconn (u := v) (v := u) hfn x
+  rcases le_max_iff.1 key with h | h
+  · exact min_le_iff.2 (Or.inr (by simp only [Pi.neg_apply] at h; linarith))
+  · exact min_le_iff.2 (Or.inl (by simp only [Pi.neg_apply] at h; linarith))
+
+/-- **Positivity off the diagonal:** on a connected network with
+symmetric nonnegative weights, distinct vertices have strictly positive
+resistance. The witness test potential is the indicator `e u` itself:
+its energy is `quadForm L e u = deg A u − A u u = ∑_{j ≠ u} A u j`,
+positive because connectivity gives `u` a positive-weight off-diagonal
+neighbor (the first edge of any walk to `v ≠ u`), and its voltage
+difference is `1`; the one-sided Dirichlet bound then gives
+`1 / (∑_{j ≠ u} A u j) ≤ R u v`. Load-bearing on
+`effectiveResistance_ge_sq_div_quadForm` — a misstated bound or energy
+computation breaks this immediately. -/
+theorem effectiveResistance_pos_of_ne (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hnonneg : ∀ i j, 0 ≤ A i j) (hconn : (supportGraph A hA).Connected)
+    {u v : V} (huv : u ≠ v) : 0 < effectiveResistance A u v := by
+  have hnb : ∃ j : V, j ≠ u ∧ 0 < A u j := by
+    obtain ⟨w⟩ := hconn u v
+    induction w with
+    | nil => exact absurd rfl huv
+    | @cons a b c hadj wrest ih =>
+      exact ⟨b, (supportGraph_adj.1 hadj).1.symm, (supportGraph_adj.1 hadj).2⟩
+  obtain ⟨j, hju, hjpos⟩ := hnb
+  have hE : quadForm (laplacian A) (Pi.single u (1 : ℝ)) = deg A u - A u u := by
+    rw [quadForm, Matrix.dotProduct_comm, Matrix.dotProduct_single, mul_one]
+    simp [laplacian, degreeMatrix, deg]
+  have hsum : ∑ k ∈ Finset.univ.erase u, A u k + A u u = ∑ k, A u k :=
+    Finset.sum_erase_add _ _ (Finset.mem_univ u)
+  have hle : A u j ≤ ∑ k ∈ Finset.univ.erase u, A u k :=
+    Finset.single_le_sum (fun k _ => hnonneg u k)
+      (Finset.mem_erase.2 ⟨hju, Finset.mem_univ j⟩)
+  have hEpos : 0 < deg A u - A u u := by rw [deg]; linarith
+  have hu1 : (Pi.single u (1 : ℝ) : V → ℝ) u = 1 := by
+    rw [Pi.single_apply, if_pos rfl]
+  have hv0 : (Pi.single u (1 : ℝ) : V → ℝ) v = 0 := by
+    rw [Pi.single_apply, if_neg (Ne.symm huv)]
+  have hD := effectiveResistance_ge_sq_div_quadForm A hA hnonneg hconn u v
+    (Pi.single u (1 : ℝ)) (by rw [hE]; exact hEpos)
+  rw [hu1, hv0, sub_zero, one_pow, hE] at hD
+  exact lt_of_lt_of_le (one_div_pos.2 hEpos) hD
+
+/-- **The definiteness residual:** on a connected network with symmetric
+nonnegative weights, `effectiveResistance A u v = 0` exactly on the
+diagonal — the last law distinguishing a metric from a pseudometric.
+Forward: `u ≠ v` forces positivity
+(`effectiveResistance_pos_of_ne`). Backward: `effectiveResistance_self`.
+Together with `_nonneg`, `_symm`, and `_le_add` this completes the four
+metric laws. (A `MetricSpace` instance is deliberately not registered:
+the vertex type is global and the laws hold only under the connectedness
+hypothesis — packaging it is a recorded follow-on, not a gap in what is
+claimed.) -/
+theorem effectiveResistance_eq_zero_iff (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hnonneg : ∀ i j, 0 ≤ A i j) (hconn : (supportGraph A hA).Connected)
+    {u v : V} :
+    effectiveResistance A u v = 0 ↔ u = v := by
+  constructor
+  · intro h
+    by_contra huv
+    have := effectiveResistance_pos_of_ne A hA hnonneg hconn huv
+    linarith
+  · intro he
+    subst he
+    exact effectiveResistance_self A u
+
+/-- **The triangle inequality:** on a connected network with symmetric
+nonnegative weights, `R u w ≤ R u v + R v w` — the sharp form that makes
+`effectiveResistance` a metric (the resistance distance). The assembly:
+`h := f + g` solves the `e u − e w` demand when `f` solves `e u − e v`
+and `g` solves `e v − e w`, so by the energy identities
+`R(u,w) = quadForm L h = R(u,v) + R(v,w) + 2 * (f ⬝ᵥ L *ᵥ g)` (the
+polarization `quadForm_laplacian_sub_smul` at `t = −1`), and the cross
+term is `f v − f w ≤ 0` by the maximum principle — the new mathematical
+content, which the eigenbasis route provably cannot supply (only the
+root-triangle). The degenerate cases `u = v` close through
+`effectiveResistance_self`. Load-bearing on the existence theorem, the
+solution-level energy identity, the reciprocity-based polarization, the
+agreement theorem, positivity, and both confinement halves at once. -/
+theorem effectiveResistance_le_add (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hnonneg : ∀ i j, 0 ≤ A i j) (hconn : (supportGraph A hA).Connected)
+    (u v w : V) :
+    effectiveResistance A u w
+      ≤ effectiveResistance A u v + effectiveResistance A v w := by
+  obtain ⟨f, hf⟩ :=
+    exists_laplacian_mulVec_eq_single_sub_single A hA hnonneg hconn u v
+  obtain ⟨g, hg⟩ :=
+    exists_laplacian_mulVec_eq_single_sub_single A hA hnonneg hconn v w
+  have hRuv : effectiveResistance A u v = f u - f v :=
+    effectiveResistance_eq A hA hnonneg hconn ⟨f, hf, rfl⟩
+  have hRvw : effectiveResistance A v w = g v - g w :=
+    effectiveResistance_eq A hA hnonneg hconn ⟨g, hg, rfl⟩
+  have hh : (laplacian A).mulVec (f + g)
+      = Pi.single u (1 : ℝ) - Pi.single w (1 : ℝ) := by
+    rw [← Matrix.mulVecLin_apply, map_add, Matrix.mulVecLin_apply,
+      Matrix.mulVecLin_apply, hf, hg, sub_add_sub_cancel]
+  have hRuw : effectiveResistance A u w = (f + g) u - (f + g) w :=
+    effectiveResistance_eq A hA hnonneg hconn ⟨f + g, hh, rfl⟩
+  have hvec : f + g = f - (-1 : ℝ) • g := by funext i; simp
+  have hcross : Matrix.dotProduct f (laplacian A *ᵥ g) = f v - f w := by
+    rw [hg, Matrix.dotProduct_sub, Matrix.dotProduct_single,
+      Matrix.dotProduct_single, mul_one, mul_one]
+  have hexp := quadForm_laplacian_sub_smul A hA f g (-1 : ℝ)
+  have e1 : quadForm (laplacian A) f = f u - f v :=
+    quadForm_laplacian_eq_sub_of_mulVec_eq_single_sub_single A hf
+  have e2 : quadForm (laplacian A) g = g v - g w :=
+    quadForm_laplacian_eq_sub_of_mulVec_eq_single_sub_single A hg
+  have e3 : quadForm (laplacian A) (f + g) = (f + g) u - (f + g) w :=
+    quadForm_laplacian_eq_sub_of_mulVec_eq_single_sub_single A hh
+  have key : quadForm (laplacian A) (f - (-1 : ℝ) • g)
+      = (f u - f v) + (g v - g w) + 2 * (f v - f w) := by
+    rw [hexp, hcross, e1, e2]; ring
+  rw [← hvec] at key
+  simp only [Pi.add_apply] at e3
+  rw [← hRuv, ← hRvw] at key
+  rcases eq_or_ne u v with rfl | huv
+  · rw [effectiveResistance_self]; linarith
+  · have hmin : min (f u) (f v) ≤ f w :=
+      laplacian_mulVec_eq_single_sub_single_min_le A hA hnonneg hconn hf w
+    have hpos : 0 < f u - f v := by
+      rw [← hRuv]; exact effectiveResistance_pos_of_ne A hA hnonneg hconn huv
+    have hvw : f v ≤ f w := by
+      rcases min_le_iff.1 hmin with h | h
+      · linarith
+      · exact h
+    rw [hRuw]
+    simp only [Pi.add_apply]
+    linarith
 
 end SpectralGraphTheory

@@ -178,6 +178,11 @@ value exists — the fallback's firing is QA-witnessed, not hidden).
 | `quadForm_laplacian_sub_smul` | polarization: `quadForm L (f − t • g)` expands with cross term `f ⬝ᵥ L *ᵥ g` (reciprocity collapses the mixed terms) |
 | `laplacian_cauchy_schwarz` | **semidefinite Cauchy–Schwarz:** `(f ⬝ᵥ L g)² ≤ quadForm L f * quadForm L g`, no connectivity hypothesis (proposal step 6, 2026-08-18) |
 | `effectiveResistance_ge_sq_div_quadForm` | **one-sided Dirichlet bound:** `(f u − f v)² / quadForm L f ≤ R u v` for any test potential of positive energy (proposal step 6, 2026-08-18) |
+| `laplacian_mulVec_eq_single_sub_single_le_max` | **maximum principle, top half:** every unit-demand potential satisfies `f x ≤ max (f u) (f v)` — diffusion-form propagation + walk induction (proposal `resistance-metric.md`, 2026-08-24) |
+| `laplacian_mulVec_eq_single_sub_single_min_le` | **maximum principle, min half:** `min (f u) (f v) ≤ f x` — the max half at the negated demand |
+| `effectiveResistance_pos_of_ne` | **positivity off the diagonal:** `u ≠ v → 0 < R u v` — the Dirichlet bound at the indicator `e u` (energy `∑_{j≠u} A u j > 0` by connectivity) |
+| `effectiveResistance_eq_zero_iff` | **definiteness residual:** `R u v = 0 ↔ u = v` on connected networks — the law distinguishing a metric from a pseudometric |
+| `effectiveResistance_le_add` | **triangle inequality:** `R u w ≤ R u v + R v w` — with nonnegativity/symmetry/self-distance, the fourth metric law; the polarization cross term `f v − f w ≤ 0` closed by the maximum principle |
 
 ### `Scaffold.Mathlib.GraphTheory.ElectricalFlow` (electrical flows, Kirchhoff conservation, flow energy, Thomson's principle, Rayleigh monotonicity, capacity reinforcement)
 

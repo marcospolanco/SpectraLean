@@ -22,7 +22,7 @@ As of August 24, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 9 |
-| QA theorems/lemmas | 1971, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 1999, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is: **Perron–Frobenius for irreducible
 nonnegative matrices**
@@ -73,7 +73,13 @@ projector identity plus the vector-level heat-semigroup FTC assembly,
 **equal-rank projector identity** `‖P − Q‖ = ‖(I−Q)P‖`, the **Duhamel
 bound** `‖(I−Q)P‖ ≤ ‖E‖/(b−a)`, the derived `davisKahanTwoPoint`
 (now fully hard crust), Woodbury/Sherman–Morrison, the
-electrical crust, Foster's theorem, the Expander Mixing Lemma, the
+electrical crust, Foster's theorem, and the **resistance metric**
+(delivered 2026-08-24: the maximum principle for unit-demand
+potentials, the definiteness residual `R u v = 0 ↔ u = v`, and the
+triangle inequality `R u w ≤ R u v + R v w` — with nonnegativity,
+symmetry, and self-distance, `effectiveResistance` is a genuine metric
+on every connected network, the classical resistance distance), the
+Expander Mixing Lemma, the
 certificate-soundness layer (`lambda2_le_of_certificate`), the
 operator-norm/resolvent bridge (`l2OpNorm_eq_max_abs_evals`, the resolvent
 identity, the resolvent norm/Lipschitz bounds, and the resolvent-map
@@ -265,7 +271,7 @@ The near-term center is general SGT. Public modules currently cover:
 | Variational spectra | Courant–Fischer, Rayleigh, Cauchy interlacing (in `Spectral`) |
 | Cuts and expansion | `GraphTheory.Cheeger`, `GraphTheory.Fiedler`, `GraphTheory.Expander` (edge weights, the centered-indicator decomposition, the Expander Mixing Lemma, and the Fiedler certified-conductance cut `cheeger_cut_existence`) |
 | Decidable spectral certificates | `GraphTheory.SpectralCertificates` (the ℚ specification checker with its soundness theorem, and the kernel-verifiable ℤ cross-multiplied twin with proved bridges) |
-| Electrical structure | `GraphTheory.Electrical`, `GraphTheory.ElectricalFlow`, `GraphTheory.Foster` |
+| Electrical structure | `GraphTheory.Electrical` (effective resistance by the potential equation, the one-sided Dirichlet bound, and the resistance metric — maximum principle, definiteness `R u v = 0 ↔ u = v`, triangle inequality), `GraphTheory.ElectricalFlow`, `GraphTheory.Foster` |
 | Heat semigroup | `GraphTheory.Heat` (`heatKernel A t = e^{-tL}` on `laplacian A`: symmetry under `A.IsSymm`, identity at `t = 0`, the square-zero and rank-one-idempotent exponential collapses, the semigroup law `heatKernel A s * heatKernel A t = heatKernel A (s + t)`, mass conservation `heatKernel A t *ᵥ onesVec = onesVec` with its kernel-vector engine, eigenmode decay `heatKernel A t *ᵥ vᵢ = e^{−t·λᵢ} • vᵢ` with the decay monotonicity/dissipation bounds, the eigenbasis expansion, the connected-graph DC limit `heatKernel_mulVec_tendsto_atTop`, the heat-flow derivative at zero `heatKernel_mulVec_hasDerivAt_zero` (Phase C Step 1), and the first-order remainder bound `heatKernel_firstOrder_remainder_apply_le` with its `[0, T]` interval packaging (Phase C Step 2); **the program COMPLETE — Phases A, B, and C, zero axioms throughout**) |
 | Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized` (the similarity, eigenpair transfer, conjugated powers), `GraphTheory.Stationary`, `GraphTheory.Mixing` (the ℓ²-mixing proxy: stationary vector, walk law, density evolution, χ² distance, decay engine) |
 | Directed operators | `GraphTheory.Directed` (the degree layer `outDeg`/`inDeg`, directed handshaking, and the directed normalized Laplacian `I − ½(SAS + SAᵀS)` — symmetric hypothesis-free, agreeing with `normalizedLaplacian` on the symmetric cone — with the PSD-refutation calibration witness; the directed axis, program complete) |

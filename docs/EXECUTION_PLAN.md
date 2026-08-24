@@ -6,8 +6,8 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**None — the cluster-projector-symmetric proposal is COMPLETE (delivered
-this run; see the top delivered entry). The Active priority table again
+**None — the resistance-metric proposal is COMPLETE (delivered this
+run; see the top delivered entry). The Active priority table again
 holds no High rows and no Medium rows — every remaining row is a Low
 blocked on a human or technical decision an autonomous Lean-work run
 cannot make. Next run: fall through to the center-out SGT policy
@@ -18,11 +18,109 @@ strict dominance), the YWS-literal *pairwise* set shape (honestly
 blocked per `proposals/cluster-projector.md` Step 0: an out-of-`S`
 A-eigenvalue can sit inside `S`'s range, and whether the shape is true
 at all is open to this repo), and any named consumer that prices the
-wide-band minimax filter designs.**
+wide-band minimax filter designs. Backlog item 7's remaining electrical
+items (Matrix–Tree, Kirchhoff network theorems) stay gated on a named
+consumer.**
 ---
 
-
 ## Delivered milestones (most recent first)
+
+**Resistance metric — the maximum principle, the definiteness residual,
+and the triangle inequality; backlog item 7's two named non-gated
+residuals; the proposal COMPLETE, Steps 0+1 in one run (run 1,
+2026-08-24, run `20260824T192530Z-run-1`;
+`proposals/resistance-metric.md`, new this run and selected per the
+empty High/Medium queue by the center-out policy — the standing handoff
+candidates gated or honestly blocked while backlog item 7 names exactly
+these two residuals as the electrical family's remaining unblocked
+work): DELIVERED — pure hard crust, zero new axioms (count stays 9;
+`#print axioms` via `wip/rm_axcheck.lean` on all 5 public + 28 QA
+declarations: `propext, Classical.choice, Quot.sound` only, every one).
+QA 1971 → 1999 (`ResistanceMetric_QA` a new file at 28). With the
+proved nonnegativity, symmetry, and self-distance laws,
+`effectiveResistance` is now a genuine metric on every connected
+network — the classical resistance distance.**
+
+**Delivered:** the new "resistance metric" section of
+`Scaffold/Mathlib/GraphTheory/Electrical.lean` (**no new imports, no
+umbrella change**) — `laplacian_mulVec_eq_single_sub_single_le_max`
+(the **maximum principle**, top half: at a max-point outside `{u, v}`
+the diffusion form is a sum of nonnegative terms, so the max value
+propagates across every positive-weight edge and a walk induction
+floods the connected graph — the kernel-characterization argument run
+at an inequality, stated over the walk's *start* so cons-peeling
+works), `laplacian_mulVec_eq_single_sub_single_min_le` (the min half at
+the negated demand), `effectiveResistance_pos_of_ne` (the one-sided
+Dirichlet bound at the indicator `e u`: energy
+`∑_{j≠u} A u j > 0` from the first cons-edge of any walk to `v`,
+voltage difference `1`), `effectiveResistance_eq_zero_iff` (the
+definiteness residual), and `effectiveResistance_le_add` (the
+**triangle inequality**: the `f + g` demand-superposition, the
+polarization `quadForm_laplacian_sub_smul` at `t = −1`, the cross term
+`f v − f w ≤ 0` closed by min-confinement + positivity, degenerate
+cases through `effectiveResistance_self`). The Step-0 survey's decisive
+finding is priced into the route: the eigenbasis route yields only the
+**root**-triangle (`R` is a squared Euclidean distance there; the cross
+term is what the sharp form must cancel), so the maximum principle is
+the mathematical crux, not a convenience.
+
+**QA (+28):** all four proposal-mandated sections — (1) the **equality
+case** on the 3-path: the new edge witnesses pin `R(0,1) = R(1,2) = 1`,
+joined with the imported `R(0,2) = 2` as the identity `2 = 1 + 1` (any
+proof route with a slack constant dies there), plus the degenerate
+`v = u` instantiation exercising the theorem's self-distance branch;
+(2) the **strict case** on `K₃` through the imported Foster pins
+(`2/3 < 4/3`); (3) the confinement/definiteness positive witnesses at
+the actual unit-current potential `![2,1,0]` — both confinement halves
+instantiated at every vertex, the interior value pinned strictly
+between the boundary values, the `iff` consumed off-diagonal
+(`R 0 2 ≠ 0` through the forward direction) and on the diagonal; (4)
+the **signed fence** — `![0,1,1;1,0,−1;1,−1,0]` (symmetric, support
+graph the connected path `1—0—2`, NOT nonnegative, entrywise-if
+definition per the `Foster_QA` vecTail note): in-file solution-shape
+analysis (`f 1 = f 0`, `f 2 = f 0 − 1` for the `e₀ − e₁` demand, via
+the diffusion-form row lemmas) pins the values through the junk-free
+branch (`dif_pos` + shape, the shelf's uniqueness needing the
+nonnegativity that fails) — `R(0,1) = 0` at distinct vertices
+(**definiteness refuted in proved form**), `R(0,2) = 0`, `R(2,1) = −2`,
+the **triangle refuted** at `¬(0 ≤ 0 + (−2))`, and **confinement
+refuted for every solution** at the interior vertex — with `hA` and
+`hconn` verified on the fixture, exactly `hnonneg` isolated for all
+three theorems at once.
+
+**Verification:** the module elaborated green after one structural fix
+(the walk-induction claim stated over the walk's start — cons-peeling
+peels the front edge, so the invariant must be `f s = M → …` not a
+statement about the fixed endpoint); the QA after several rounds whose
+recurring fixes are recorded in the proposal's pin-technique list (the
+`Pi.single`-family ascription trap; `(-f) x` as a function-negation
+atom to `linarith`; one rewrite lemma per hypothesis; the matrix
+notation vecTail leftover; `Finset.sum_erase_add`/`single_le_sum`
+signatures at this pin); `lake env lean` on the module and the QA file
+— zero errors, zero warnings each; explicit `lake build` targets both ✔
+(2009/2009, 2015/2015); `#print axioms` via `wip/rm_axcheck.lean` on
+all 33 declarations — the standard three only; **full `lake build` ✔
+(2261 targets, "Build completed successfully"; zero warnings in the
+changed modules)**; `lint_axioms` (**9**, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1999/9/0**,
+idempotent). Records updated: the proposal (status header COMPLETE +
+the delivery record with the pin-technique list and priced follow-ons),
+`proposals/README.md` (the Delivered row; the progress paragraph),
+README (1999; the status paragraph's resistance-metric clause; the
+module-table row), the radar (QA axis synced 1971/50 → 1999/51 and the
+axis-6 delivery sentence, both held), the scoreboard (all four
+verification rows + the interpretation bullet),
+`index/map/spectral_graph.md` (5 declaration rows), backlog item 7 (the
+delivery update), this plan, and the activity log. Nothing committed;
+the prior runs' uncommitted deliveries preserved untouched.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — the standing gated candidates (primitivity-shaped
+admission for directed mixing; the honestly-blocked pairwise set shape;
+a named consumer pricing the wide-band minimax filter designs), the
+priced resistance-metric follow-ons (the `MetricSpace` packaging, gated
+on a consumer naming what it unlocks), or a fresh center-out candidate
+per `docs/6_SGT_BACKLOG.md`.
 
 **Cluster-projector symmetric form — the two-sided rank-free constant-2
 set-form difference theorem; the proposal COMPLETE, Steps 0+1 in one run

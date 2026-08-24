@@ -6,7 +6,7 @@ spectral stability.
 ## Status
 
 **Implemented and build-certified** (see the QA scoreboard):
-`Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan}`.
+`Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan,BandDavisKahan}`.
 
 ## Implemented Modules
 
@@ -33,6 +33,30 @@ the additive window from the Courant–Fischer engine composed with the proved
 | Declaration | Kind | Description | Source |
 |-------------|------|-------------|--------|
 | `davis_kahan_sin_theta` | **proved theorem** (retired from axiom 2026-08-21 — the Duhamel/exponential-integral route; `#print axioms` reads only the three standard axioms) | Projector rotation `≤ ‖E‖/δ` under the two-cluster separation `λ_{k+1}(A+E) - λ_k(A) ≥ δ` (single-pair form, the YWS Theorem 1 operator-norm variant at the bottom cluster — locator corrected 2026-08-21, see the source index); proof: three-way tie split consuming the equal-rank identity and the Duhamel bound below, plus Weyl and the `≤ 1` endpoint for the tied cases | [Davis & Kahan 1970](../sources/davis_kahan_1970.md) |
+
+### Band Davis–Kahan (bounded windows)
+
+**Module**: `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.BandDavisKahan`
+(delivered 2026-08-24, `proposals/band-davis-kahan.md`, backlog item 9;
+the difference form added the same day by
+`proposals/band-davis-kahan-difference.md`; all proved, zero axioms —
+the algebraic commutator/shift route)
+
+| Declaration | Kind | Description | Source |
+|-------------|------|-------------|--------|
+| `l2OpNorm_bandProjector_mul_bandProjector_le_of_lt` | proved | The bounded-window Davis–Kahan product bound: `B`'s band `(a₂, b₂]` strictly above `A`'s `(a₁, b₁]` (`b₁ + δ ≤ a₂`) ⇒ `‖Q * P‖ ≤ ‖A − B‖ / δ`, constant 1, no rank hypothesis, no sorted-spectrum index — the band-projector sibling of `davis_kahan_sin_theta` | [Vershynin, HDP 2018, Thm 4.1.15–4.1.16 (route)](../sources/vershynin_hdp.md); classical statement Davis–Kahan 1970 / YWS 2015 Thm 1 (see [Davis & Kahan 1970](../sources/davis_kahan_1970.md)) |
+| `l2OpNorm_bandProjector_mul_bandProjector_le_of_gt` | proved | The mirror orientation: `B`'s band strictly below `A`'s (`b₂ + δ ≤ a₁`) ⇒ the same product bound | same |
+| `l2OpNorm_bandProjector_sub_bandProjector_le` | proved | **The difference (sin Θ) form:** equal-rank band projectors with B's out-of-window eigenvalues δ-away from A's window closure `[a₁, b₁]` ⇒ `‖P_A − P_B‖ ≤ ‖A − B‖ / δ`, constant 1 — the subspace-distance shape, through the equal-rank gap identity `l2OpNorm_sub_eq_of_rank_eq` (its first consumer) plus the engine re-run at the complement projector `1 − Q` | [Davis & Kahan 1970 / YWS 2015 Thm 1 (operator-norm difference shape)](../sources/davis_kahan_1970.md); the consumed identity: Kato, *Perturbation Theory for Linear Operators*, 2nd ed., 1976, Ch. I §4 (cited in `Perturbation/ProjectionGap.lean`) |
+| `l2OpNorm_bandProjector_sub_bandProjector_le_of_mem` | proved | The interval-margin corollary: B's window containing A's with δ-margin (`a₂ + δ ≤ a₁`, `b₁ + δ ≤ b₂`) discharges the eigenvalue-level separation | same |
+| `l2OpNorm_bandProjector_sub_bandProjector_le_of_pairwise` | proved | **The cluster form:** the same difference bound under *pairwise* separation — every eigenvalue of `B` outside its window δ-away from every eigenvalue of `A` inside its window, the literal YWS Theorem 1 δ — strictly weaker than the closure separation (interior B-eigenvalues covered: handled in-proof by a projector-free Parseval expansion at the eigenvector forcing `δ ≤ ‖A − B‖`, boundary ones by the engine at the cluster-range center/radius) | [YWS 2015 Theorem 1 (the pairwise mixed separation at constant 1)](../sources/davis_kahan_1970.md) |
+| `l2OpNorm_bandProjector_sub_bandProjector_le_two_of_symm` | proved | **The symmetric form:** both out-of-window flanks δ-separated pairwise (B-out vs A-in *and* A-out vs B-in) ⇒ `‖P_A − P_B‖ ≤ 2‖A − B‖/δ` with **no rank hypothesis** — the YWS both-gaps dimension-freeness; 2 is exactly the triangle inequality at `P − Q = (I−Q)P − Q(I−P)`, the rank-free pairwise product bound instantiated at both argument orders (the engine's 4th/5th consumers), the right action moved by `l2OpNorm_transpose`; when ranks differ `δ ≤ ‖A − B‖` is forced in-proof (the honest trivial-regime degradation) | [YWS 2015 Theorem 1 (the both-gaps variants at constant 2; the pairwise-separation analog)](../sources/davis_kahan_1970.md) |
+| `l2OpNorm_transpose` | proved | **Transpose invariance** of the ℓ² operator norm (`‖Mᵀ‖ = ‖M‖`), by two pairing-characterization applications; absent from the pinned Mathlib and the shelf before the symmetric form — any consumer that bounds a right action while the engine states the left action needs it | standard |
+| `bandProjector_eq_of_forall_mem_iff` | proved | **Capture equality:** two (non-junk) windows selecting the same eigenvalues give the same band projector — the cluster is a window-mod-class, not a window; the window-existence argument's transfer step | standard |
+| `bandProjector_eq_zero_of_forall_not_mem` | proved | The empty-cluster corner: a non-junk window selecting no eigenvalue gives the zero projector | standard |
+| `rank_bandProjector_eq_card` | proved | **The rank supplier:** a band projector's rank is exactly the count of in-band eigenvalues (via trace — a symmetric idempotent's spectrum lies in `{0,1}` exactly); makes the difference form's equal-rank hypothesis checkable | standard |
+| `trace_spectralProjector_eq_card` / `trace_bandProjector_eq_card` | proved | The trace parents of the rank supplier (each outer product contributes its unit eigenvector's squared diagonal) | standard |
+| `l2OpNorm_mulVec_le` | proved | The vector action bound `‖M *ᵥ v‖ ≤ ‖M‖ ‖v‖` in the sqrt-of-dot-product packaging — the shelf gap landed with this module (absent from the pinned Mathlib; through the `cstar_norm_def` + `toEuclideanCLM` spine) | Mathlib C*-algebra norm transport |
+| `mulVec_bandProjector_comm` | proved | A self-adjoint matrix commutes with its own band projector at the vector level (the 2026-08-21 survey's spike-verified fact, landed here; componentwise through the eigenbasis) | standard |
 
 ### The Duhamel Bound (Davis–Kahan Step 1, component 2)
 
@@ -116,8 +140,11 @@ completing the resolvent program).
 A distinct *bounded-window* Davis–Kahan theorem (both clusters finite,
 provable by pure algebra against `GraphTheory.Band` — see
 `docs/6_SGT_BACKLOG.md` item 9 and `index/sources/vershynin_hdp.md`'s
-Chapter 4 note) is recorded as a future opportunity, not the same
-statement as `davis_kahan_sin_theta` and not part of its retirement.
+Chapter 4 note) was delivered 2026-08-24 in both forms: the product
+bound (`proposals/band-davis-kahan.md`) and the difference/sin-Θ form
+(`proposals/band-davis-kahan-difference.md`, the section above). It is
+not the same statement as `davis_kahan_sin_theta` and was not part of
+its retirement.
 
 ## Applications
 

@@ -527,6 +527,58 @@ invariance of a band under the shifted operator) is a prerequisite, per
 this backlog's own admission rule. Not authorized to start inside a
 Davis–Kahan Step-1/2 run — it needs its own proposal entry.
 
+**DELIVERED 2026-08-24** (`proposals/band-davis-kahan.md` complete,
+Steps 0+1 in one run; zero new axioms, count stays 9): the new
+`Analysis.OperatorTheory.Perturbation.BandDavisKahan` proves
+`l2OpNorm_bandProjector_mul_bandProjector_le_of_lt` / `_of_gt` —
+`‖Q * P‖ ≤ ‖A − B‖ / δ` for the band projectors of two symmetric
+matrices on δ-separated windows, constant 1, by the survey's algebraic
+commutator/shift route (no integral, no sorting, no rank counting). The
+Step-0 survey verified the shelf (PolyFilter's band component action,
+Spectral's Parseval/eigenaction, Duhamel's pairing engine, Band's
+idempotence/action all present) and priced two gaps, both landed: the
+vector action bound `l2OpNorm_mulVec_le` (absent from the pinned
+Mathlib) and the operator↔band-projector vector commutation (the
+2026-08-21 survey's spike-verified fact, previously unlanded). The
+proof's mathematical content, worked through in the proposal before any
+Lean: the *r-cancellation* — the naive single-shift assembly strands
+the window spread `+ r` (exactly the recorded catch that kills the
+technique at the half-line form), and the rescue is range invariance of
+`A`'s band under the shifted operator, bounding the compressed term by
+`r · ‖Q * P‖ · ‖y‖` so the `r` cancels. Load-bearing on four delivered
+layers at once (Band, Spectral, PolyFilter, Duhamel). QA (+20,
+`Perturbation/BandDavisKahan_QA.lean`): the rotated 2×2 witness with
+`‖Q * P‖` pinned from below by `1/√10` completely independently of the
+theorem (eigenbasis resolution, eigen-equation direction constraints,
+no `eigvecOf` value assumed) against the delivered `3/4` upper bound;
+the ε = 0 commuting case attained exactly; the overlapping-window fence
+refuted in proved form with every `hsep`-shaped hypothesis exhibited
+impossible; the mirror orientation at δ = 1/2. *The recorded follow-on
+— the difference form — was delivered later the same day (see the
+update below), closing this item's named program.*
+
+**Difference form DELIVERED 2026-08-24** (`proposals/
+band-davis-kahan-difference.md` complete, Steps 0+1 in one run; zero
+new axioms, count stays 9; QA +21, `BandDavisKahanDiff_QA` a new file,
+total 1873): the *sin-Θ* (subspace-distance) form
+`l2OpNorm_bandProjector_sub_bandProjector_le` / `_le_of_mem` —
+`‖P_A(a₁,b₁] − P_B(a₂,b₂]‖ ≤ ‖A − B‖ / δ` at constant 1 for equal-rank
+band projectors under one-sided eigenvalue separation (B's
+out-of-window eigenvalues δ-away from A's window closure), the
+interval-margin corollary covering contained windows. **The
+equal-rank identity `ProjectionGap.l2OpNorm_sub_eq_of_rank_eq` —
+delivered 2026-08-21 as "the Davis–Kahan Step-1 component" but never
+until now consumed — carries its first weight** (the falsifiability
+principle's exact use case), the engine re-runs at the complement
+projector `1 − Q` (F1 and range invariance reused verbatim; the new
+fact is the complement expansion), and a public rank supplier
+`rank_bandProjector_eq_card` (rank = in-band eigenvalue count, via
+trace and the exact `{0,1}` spectrum of a symmetric idempotent) makes
+the rank hypothesis checkable. What remains on this axis: the
+eigenvalue-cluster-separated generalization (closer to YWS Theorem 1's
+literal shape) and the two-sided symmetric-gap form — recorded
+follow-ons, not gaps in what is claimed.
+
 ## Standing decisions
 
 - Coverage is assessed on the [SGT Radar](7_SGT_RADAR.md); scores move

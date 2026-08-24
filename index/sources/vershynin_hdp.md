@@ -44,22 +44,25 @@ Matrix concentration from this chapter is covered through the Tropp 2012
 source (see `tropp_tail_bounds.md`); the Chapter 5 matrix statements are
 not separately admitted.
 
-### Chapter 4: Matrix Perturbation Theory (route reference, not an axiom source)
+### Chapter 4: Matrix Perturbation Theory (route reference for a *proved* theorem)
 
-Not currently mapped to any Scaffold declaration. Recorded 2026-08-21 as
-a *route reference* discovered during the Davis–Kahan Step-0/1 survey
-(`proposals/discharge-perturbation-axioms.md`): Thm 4.1.15
-(eigenvector-angle Davis–Kahan) and Thm 4.1.16 (spectral-projection
-Davis–Kahan) are a textbook packaging of a commutator/shift proof
-technique, distinct from the Davis & Kahan 1970 / Yu–Wang–Samworth 2015
-route already cited for `davis_kahan_sin_theta`
-(`index/sources/davis_kahan_1970.md`). The technique proves a
-*bounded-window* Davis–Kahan statement, not the half-line threshold form
-Scaffold's axiom states — see the survey record and
-`docs/6_SGT_BACKLOG.md` item 9 for the precise scope and why it does not
-substitute for the existing axiom's retirement. Do not cite this chapter
-for `davis_kahan_sin_theta` itself; it would be the source for a future,
-separate band-form theorem only.
+Mapped 2026-08-24 to a proved declaration: Thm 4.1.15–4.1.16 are the
+textbook packaging of the commutator/shift proof technique behind
+`Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.`
+`l2OpNorm_bandProjector_mul_bandProjector_le_of_lt` / `_of_gt`
+(`Perturbation/BandDavisKahan.lean`, proposal `proposals/band-davis-kahan.md`,
+backlog item 9): the bounded-window Davis–Kahan product bound
+`‖Q * P‖ ≤ ‖A − B‖ / δ` for δ-separated band projectors — **a proved
+theorem, not an axiom; the locator is route provenance only** (carried
+with the standing caveat that locator numbers are to be confirmed
+against a physical or publisher copy, not invented here). The chapter
+is still *not* a source for `davis_kahan_sin_theta` itself — the
+half-line threshold form that statement uses is the Davis & Kahan 1970
+/ Yu–Wang–Samworth 2015 Theorem 1 route
+(`index/sources/davis_kahan_1970.md`), proved since 2026-08-21 by the
+Duhamel route; the two are genuinely different theorems and neither
+substitutes for the other (see the survey record in
+`proposals/discharge-perturbation-axioms.md`).
 
 ## Notes
 

@@ -6,21 +6,517 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**None — the pagerank-distributions proposal is COMPLETE (delivered
+**None — the band-davis-kahan-symmetric proposal is COMPLETE (delivered
 this run; see the top delivered entry). The Active priority table
-holds no High rows and no Medium rows — every remaining row is a Low
-blocked on a human or technical decision an autonomous Lean-work run
-cannot make. Next run: fall through to the center-out SGT policy
-(`docs/1_STRATEGY.md`, `docs/6_SGT_BACKLOG.md`), the natural candidates
-on record — the Chebyshev-filter second consumer of the Krylov layer
-(the Krylov Step-0 survey's recorded natural follow-on, its own
-document), directed-axis mixing/rate work (gated on a
+again holds no High rows and no Medium rows — every remaining row is
+a Low blocked on a human or technical decision an autonomous Lean-work
+run cannot make. Next run: fall through to the center-out SGT policy
+(`docs/1_STRATEGY.md`, `docs/6_SGT_BACKLOG.md`); the natural
+candidates on record — directed-axis mixing/rate work (gated on a
 primitivity-shaped admission — `perron_frobenius` deliberately claims
-no strict dominance), or a backlog-gated item.**
+no strict dominance), a set-valued (non-interval) cluster projector
+(its own definition + proposal, per the cluster/symmetric proposals'
+recorded follow-ons), and any named consumer that prices the wide-band
+minimax filter designs.**
 ---
 
 
 ## Delivered milestones (most recent first)
+
+**Band Davis–Kahan symmetric form — the two-sided (both-separations)
+constant-2 difference theorem without rank equality; the proposal
+COMPLETE, Steps 0+1 in one run (run 1, 2026-08-24, run
+`20260824T141936Z-run-1`; `proposals/band-davis-kahan-symmetric.md`,
+new this run and added to the Active priority table as its only High
+row — the empty High/Medium queue's recorded handoff, the cluster-form
+delivery's own first recorded follow-on, and the only named candidate
+not gated on a decision a run cannot make): DELIVERED — pure hard
+crust, zero new axioms (count stays 9; `#print axioms` via
+`wip/bdks_axcheck.lean` on both new public + all 17 public QA
+declarations: the standard three only, every one). QA 1908 → 1925
+(`BandDavisKahanSymm_QA` a new Perturbation-domain file at 17 by the
+generator metric). The delivered difference family's rank obligation
+is now optional: consumers holding both pairwise separations state
+nothing about multiplicities.**
+
+**Delivered:** the new `SymmetricForm` sections of
+`Scaffold/Mathlib/Analysis/OperatorTheory/Perturbation/BandDavisKahan.lean`
+(**no new imports**) — the public interface lemma
+**`l2OpNorm_transpose`** (`‖Mᵀ‖ = ‖M‖` — absent from the pinned
+Mathlib and the shelf; two pairing-characterization applications
+around `Matrix.dotProduct_mulVec`/`vecMul_transpose`/`dotProduct_comm`,
+closed by `abs_dotProduct_le` + the module's own `l2OpNorm_mulVec_le`)
+and the headline
+**`l2OpNorm_bandProjector_sub_bandProjector_le_two_of_symm`**
+(`‖P_A − P_B‖ ≤ 2‖A − B‖/δ` when *both* out-of-window flanks are
+δ-separated pairwise — the YWS both-gaps dimension-freeness with **no
+rank hypothesis anywhere**). **The route, exactly the proposal's
+worked-through assembly:** the case split at `δ/2 ≤ ‖A−B‖` (trivial
+regime via `l2OpNorm_sub_le_one_of_isSymm_idempotent`); in the
+contentful regime the private rank-free pairwise product bound
+`l2OpNorm_one_sub_bandProjector_mul_bandProjector_le_pairwise` — the
+cluster theorem's dichotomy/shrink/engine body minus the identity
+conversion, factored once — instantiates at **both argument orders**
+(the complement engine's 4th and 5th consumers; the empty-cluster
+corner is `P = 0`, not a rank transfer), the ring identity
+`P − Q = (I−Q)P − Q(I−P)` plus the transpose move assembles, and
+**the constant 2 is exactly that triangle inequality** — no hidden
+loss; when ranks genuinely differ, `δ ≤ ‖A − B‖` is forced in-proof
+(the honest degradation). One committed-statement correction
+recorded: `hsepAB`'s inner hypothesis restated in the family's
+conjunction shape over the draft's two-arrow form (a one-line
+eta-expansion bridges it to the engine).
+
+**QA (+17, on the *public* cluster fixtures — no new Fin 3 machinery
+needed):** (1) the **unequal-rank rank-free witness** — `clusterA`
+window `(−1,6]` (rank 2) vs `clusterB` window `(3/2,3]` (rank 1),
+both separations discharged on the pinned spectra, ranks pinned 2 ≠ 1
+through the supplier (the delivered family's hypothesis exhibited
+failing on the covered fixture), raw norm ≥ 1 at `e₀` (B's band action
+vanishing through the in-file eigen-equation support pin + component
+action + public expansion), bound ≤ 2·7/(1/2) = 28; plus the constant
+comparison on the equal-rank rotated fixture (delivered ≤ 1, new ≤ 2,
+raw `√(1/10)`); (2) the ε = 0 attainment at genuinely distinct
+windows, cross-checked by the imported `bdkc_zeroE_raw`; (3) the
+**`hsepAB`-isolated fence** — `Q = 1` through `bandProjector_eq_one`,
+`(P − 1) *ᵥ e₁ = −e₁` raw, the hypothesis-free conclusion refuted at
+A = B, `hsepBA` provably vacuous-holding — the mirror of the cluster
+QA's fence, so both separation sides are now isolated across the QA
+family; (4) the **decomposition-coherence witness** — `(I−Q)P *ᵥ e₀`
+and `Q(I−P) *ᵥ e₀` computed from imported pins, joined with the
+imported raw difference action.
+
+**Verification:** the module's engine ran green on its first complete
+pass (two elaboration rounds only, both in QA — the recurring fixes
+recorded in the proposal's pin-technique list: `rw ... at` on
+conjunction hypotheses silently normalizes them — use `linarith [h,
+jin.2]` with inline projections and goal-side per-component rewrites;
+`div_le_div_right` deprecated to an iff; `norm_num` does not evaluate
+fractional `|9/4|`; `‖0‖` needs `norm_zero` in the chain);
+`lake env lean` on the module and the QA file — zero errors, zero
+warnings each; explicit `lake build` targets both ✔; `#print axioms`
+via `wip/bdks_axcheck.lean` on all 19 accessible declarations —
+`propext, Classical.choice, Quot.sound` only; **full `lake build` ✔
+(2260 targets, +1 for the new QA module, "Build completed
+successfully"; zero warnings in the changed modules)**; `lint_axioms`
+(**9**, unchanged), `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated (**1925/9/0**, idempotent). Records updated:
+the proposal (status header COMPLETE, the full delivery record with
+the statement correction and pin-technique list, open follow-ons),
+`proposals/README.md` (the Delivered row; the High row retired; the
+progress paragraph rewritten — the table empty again), README (1925;
+the Perturbation module-table row), the radar (QA axis synced
+1908/48 → 1925/49, held 4.0), the scoreboard (all four verification
+rows + a new interpretation bullet), `index/map/perturbation.md` (the
+symmetric-form rows + 2 declarations), `index/sources/davis_kahan_1970.md`
+(the both-gaps mapping row), this plan, and the activity log. Nothing
+committed; the prior runs' uncommitted deliveries and the untracked
+`docs/scaffold.jpeg` preserved untouched.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — directed-axis mixing/rate work (gated on
+primitivity), a set-valued cluster projector (own definition +
+proposal), or a named consumer pricing the wide-band minimax filter
+designs.
+
+**Band Davis–Kahan cluster form — the eigenvalue-cluster-separated
+(pairwise, YWS-Theorem-1-literal) difference theorem, strictly
+generalizing the delivered difference form; the proposal COMPLETE,
+Steps 0+1 in one run (run 1, 2026-08-24, run `20260824T122219Z-run-1`;
+`proposals/band-davis-kahan-cluster.md`, new this run and selected per
+the previous run's recorded next handoff — the delivered difference
+theorem's own first-named follow-on; the two alternative candidates
+gated on decisions a run cannot make): DELIVERED — pure hard crust,
+zero new axioms (count stays 9; `#print axioms` via
+`wip/bdkc_axcheck.lean` on all 3 public + 37 QA declarations: the
+standard three only, every one). QA 1873 → 1908
+(`BandDavisKahanCluster_QA` a new Perturbation-domain file at 35 by
+the generator metric). The closure-separated difference theorem is now
+a special case: the pairwise hypothesis is strictly weaker and covers
+configurations the closure form provably cannot reach.**
+
+**Delivered:** new `ClusterForm` sections of
+`Scaffold/Mathlib/Analysis/OperatorTheory/Perturbation/BandDavisKahan.lean`
+(**no new imports** — the survey found every consumed declaration
+already on shelf) — the headline
+`l2OpNorm_bandProjector_sub_bandProjector_le_of_pairwise`
+(`‖P_A(a₁,b₁] − P_B(a₂,b₂]‖ ≤ ‖A − B‖ / δ` at constant 1 under
+*pairwise* separation: every eigenvalue of B outside its window
+δ-away from every eigenvalue of A inside its window — the literal YWS
+Theorem 1 δ) plus the public capture-equality lemma
+`bandProjector_eq_of_forall_mem_iff` (two non-junk windows selecting
+the same eigenvalues give the same projector — with window guards
+recorded as a committed-statement correction: the unguarded iff-form
+is false at reversed junk windows) and the empty-cluster zero lemma
+`bandProjector_eq_zero_of_forall_not_mem`. **The route's two new
+mathematical facts:** the interior case (a B-eigenvalue strictly
+inside A's cluster range, in a gap) forces every A-eigenvalue δ-away
+from it, and the eigenvector equation gives `δ ≤ ‖(A−μI)v‖ =
+‖(A−B)v‖ ≤ ‖A−B‖` — a projector-free Parseval expansion (F2 with all
+components alive) consuming **no Weyl/`evals` bridge**, closing the
+trivial regime through `‖P−Q‖ ≤ 1`; the boundary case shrinks A's
+window to the cluster range through capture-equality and re-runs the
+private complement engine at the cluster-range center/radius, where
+the expansion side needs *exactly* the range separation with no slack
+(the recorded `+ r` stranding is why the core takes arbitrary `c, r`
+— its third load-bearing consumer).
+
+**QA (+35):** all four proposal-mandated sections: (1) the **interior
+witness** on the new Fin 3 fixtures `diag(0,5,11)` (window `(−1,6]`,
+cluster `{0,5}`) vs `diag(1,2,4)` (window `(0,3]`, cluster `{1,2}`) at
+δ = 1 — the closure-separation shape **refuted in proved form**
+(`7 ≤ 4` false at the interior 4-mode) while the pairwise hypothesis
+discharges, both band projectors pinned entrywise to `diag(1,1,0)`
+through an in-file Fin 3 spectral layer (distinct-entry diagonals
+force eigenvector support onto single coordinates; orthonormality
+forces eigenvalue classes to be singletons), the raw distance exactly
+`0` joined with the theorem bound `≤ ‖A−B‖ ≤ 7`; (2) the rotated
+two-route witness at the sibling's fixture (bound `≤ 1` against the
+imported raw `√(1/10)`); (3) the ε = 0 attainment at genuinely
+distinct windows `(−1,2]` vs `(−1/2,5/2]` through the new
+capture-equality lemma; (4) the **separation fence** refuted in proved
+form (`‖diag(1,−1)‖ ≥ 1 > 0` at A = B) with ranks 1 = 1 and every
+guard verified — exactly `hsep` isolated, the mirror of the sibling's
+rank fence.
+
+**Verification:** developed in-place in the module (the sibling's
+precedent); the elaboration rounds' fixes recorded in the proposal's
+pin-technique list (the rw-with-embedded-`by` term trap;
+`Finset.min'_le`'s membership-built Nonempty bridged by `congrArg` +
+`proof_irrel`; `← sub_mul` for factoring; the `Pi.single` column route
+for matrix-from-action equality; `hλ` unparseable because λ is the
+lambda keyword; rw auto-closing `le_refl`-trivial branches;
+`Finset.sum_eq_single` for literal-free supported-inner products
+immune to the `Fin.mk` display trap; one algebra slip — `r + δ` vs
+`λmax + δ` — caught by `ring` at elaboration); `lake env lean` on the
+module and the QA file — zero errors, zero warnings each; explicit
+`lake build` targets both ✔ (2192/2192, 2196/2196); `#print axioms`
+via `wip/bdkc_axcheck.lean` on all 40 declarations — `propext,
+Classical.choice, Quot.sound` only; **full `lake build` ✔ (2260
+targets, +1 for the new QA module, "Build completed successfully";
+zero warnings in the changed modules)**; `lint_axioms` (**9**,
+unchanged), `check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**1908/9/0**, idempotent). Records updated: the proposal
+(status header COMPLETE, the full delivery record with the
+pin-technique list and open follow-ons), `proposals/README.md` (the
+Delivered row; the progress paragraph rewritten — the table empty
+again), README (1908; the Perturbation module-table row; the status
+paragraph's cluster sentence), the radar (QA axis synced 1873/47 →
+1908/48, held 4.0), the scoreboard (all four verification rows + a
+new interpretation bullet), `index/map/perturbation.md` (the
+cluster-form rows + 3 declarations), `index/sources/davis_kahan_1970.md`
+(the YWS-Theorem-1-literal mapping row), this plan, and the activity
+log. Nothing committed; the prior runs' uncommitted deliveries and
+the untracked `docs/scaffold.jpeg` preserved untouched.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — the two-sided symmetric-gap constant-2 form (own
+document), directed-axis mixing/rate work (gated on primitivity), or a
+named consumer pricing the wide-band minimax filter designs.
+
+**Band Davis–Kahan difference form — the sin-Θ (subspace-distance)
+theorem for band projectors; the equal-rank identity's first consumer;
+the proposal COMPLETE, Steps 0+1 in one run (run 1, 2026-08-24, run
+`20260824T102440Z-run-1`; `proposals/band-davis-kahan-difference.md`,
+new this run and selected per the previous run's recorded next
+handoff — the delivered product theorem's own open follow-on, with the
+two alternative candidates gated on decisions a run cannot make):
+DELIVERED — pure hard crust, zero new axioms (count stays 9; `#print
+axioms` via `wip/bdkd_axcheck.lean` on all 5 public + 21 QA
+declarations: the standard three only, every one). QA 1852 → 1873
+(`BandDavisKahanDiff_QA` a new Perturbation-domain file at 21). The
+delivered-but-never-consumed equal-rank identity
+`ProjectionGap.l2OpNorm_sub_eq_of_rank_eq` now carries weight, exactly
+the falsifiability principle's use case.**
+
+**Delivered:** new sections of
+`Scaffold/Mathlib/Analysis/OperatorTheory/Perturbation/BandDavisKahan.lean`
+(one new import: ProjectionGap; no umbrella change — the module was
+already imported) — the headline pair
+`l2OpNorm_bandProjector_sub_bandProjector_le` /
+`_le_of_mem`:
+`‖P_A(a₁,b₁] − P_B(a₂,b₂]‖ ≤ ‖A − B‖ / δ` at **constant 1** for
+equal-rank band projectors under one-sided eigenvalue separation (B's
+out-of-window eigenvalues δ-away from A's window closure `[a₁, b₁]`;
+the margin corollary `a₂ + δ ≤ a₁`, `b₁ + δ ≤ b₂` discharges it for
+contained windows) — the classical Davis–Kahan / YWS-Thm-1
+operator-norm difference shape. **The route:** the equal-rank identity
+reduces the difference to `‖(I − Q_B) · P_A‖`, and the
+commutator/shift engine re-runs verbatim at the complement projector
+`Q' = 1 − Q_band(B)` (F1 compression and range invariance reused
+unchanged; the master inequality and r-cancellation transfer as-is;
+the one genuinely new mathematical fact is the **complement
+expansion** — `Q'`-fixed vectors have vanishing in-band components
+(from `Q_band *ᵥ z = 0`, extracted by `sub_sub_cancel`), so Parseval
+leaves exactly the out-of-band modes the separation bounds). The
+bounded A-window is load-bearing exactly as in the product form; the
+complement window's unboundedness is harmless (the expansion side
+needs only separation, never a containment radius — the precise sense
+in which the difference form is *easier* than the half-line product
+form the Duhamel route had to work for). Plus the public **rank
+supplier** `rank_bandProjector_eq_card` (rank = in-band eigenvalue
+count via trace, through the exact `{0,1}` spectrum of a symmetric
+idempotent — the new private `eigvalOf_isSymm_idempotent_sq`, apply
+`S² = S` to the eigen-equation; the shelf's membership lemma gives
+only `[0,1]`, which cannot identify count-nonzero with trace) with
+its trace parents — making the equal-rank hypothesis *checkable*
+rather than merely statable.
+
+**QA (+21):** all four proposal-mandated sections on the reused
+fixtures (`diag13` and the rotated `bdkB` from `BandDavisKahan_QA` by
+QA-to-QA import): (1) the positive two-route witness — the rank
+equality *supplied through the new supplier* (counts 1 = 1 from the
+pinned spectra), separation at δ = 3/4, theorem bound `≤ 1` against
+the raw lower `1/√10` (the window-parametric, sign-independent
+eigenbasis resolution `Q *ᵥ e₀ = ![9/10, −3/10]` from the `(3,−1)`
+direction and the `9/10`/`1/10` coordinate squares, no `eigvecOf`
+value assumed), plus the **identity-coherence witness** `bdkd_coherence`
+pinning `((I−Q)·P) *ᵥ e₀ = (P−Q) *ᵥ e₀` by two independent raw routes —
+the consumed identity's content exhibited numerically; (2) the ε = 0
+attainment (A = B, identical windows, separation genuinely holding at
+δ = 1/2 via the out-of-window eigenvalue 3) with the independent zero
+pin; (3) the margin-corollary instance at B's window `(−2, 3]`, δ = 1
+(bound `≤ 3/4` vs raw `1/√10`); (4) the **rank fence** `bdkd_rank_fence`
+— A = B = diag13, windows `(3/2, 5/2]` (empty, rank 0) vs `(5/2, 7/2]`
+(occupied, rank 1), every other hypothesis verified (`hlo` at
+`1 ≤ 5/2 → 1 ≤ 3/2 − 1/2` exact, `hhi` vacuous), the hypothesis-free
+conclusion `‖P − Q‖ ≤ 0` refuted with the norm lower-bounded by `1`
+at `e₁` — and `bdkd_fence_only_rank_fails` proving the rank equality
+the *only* failing hypothesis (exactly `hrank` isolated).
+
+**Verification:** developed in-place in the module (the private
+helpers are inaccessible to a separate spike file — the deliberate
+cost of the same-module decision, repaid by the engine compiling green
+on its first complete pass); the rounds' fixes recorded in the
+proposal's pin-technique list (the scalar-position `sub_smul`/`mul_smul`
+trap; `sub_mul` being left-subtraction at this pin; the
+`Fin.mk`-index typed-`have` bridge; iterative `simp only` for
+coefficient cleanup after `if_pos`/`if_neg`; `rw` rewriting only the
+first-matched instantiation, so two `norm_euclidean_eq_sqrt` rewrites
+where two different packed vectors occur); `lake env lean` on the
+module and the QA file — zero errors, zero warnings each; explicit
+`lake build` targets both ✔ (2192/2192, 2195/2195); `#print axioms`
+via `wip/bdkd_axcheck.lean` on all 26 declarations — `propext,
+Classical.choice, Quot.sound` only; **full `lake build` ✔ (2260
+targets, +1 for the new QA module, "Build completed successfully";
+zero warnings in the changed modules)**; `lint_axioms` (**9**,
+unchanged), `check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**1873/9/0**, idempotent). Records updated: the proposal
+(status header COMPLETE, the full delivery record with the
+pin-technique list and open follow-ons), `proposals/README.md` (the
+Delivered row; the progress paragraph rewritten — the table empty
+again), README (1873; the Perturbation module-table row), the radar
+(QA axis synced 1852/46 → 1873/47, held 4.0), the scoreboard (all
+four verification rows + a new interpretation bullet + the previous
+product-form bullet de-staled), `index/map/perturbation.md` (the
+section extended + 5 declaration rows + the Deferred-Work note
+de-staled), `index/sources/davis_kahan_1970.md` (the difference-form
+mapping row), backlog item 9 (the difference-form delivery closing the
+named program), this plan, and the activity log. Nothing committed;
+the prior runs' uncommitted deliveries and the untracked
+`docs/scaffold.jpeg` preserved untouched.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — the eigenvalue-cluster-separated generalization of
+the difference form (own document), directed-axis mixing/rate work
+(gated on primitivity), or a named consumer pricing the wide-band
+minimax filter designs.
+
+**Band Davis–Kahan — backlog item 9, the bounded-window perturbation
+theorem for band projectors; the proposal COMPLETE, Steps 0+1 in one
+run (run 1, 2026-08-24, run `20260824T081731Z-run-1`;
+`proposals/band-davis-kahan.md`, new this run and added to the Active
+priority table as its only High row — the empty High/Medium queue's
+recorded handoff, the backlog's own named candidate, and the
+Davis–Kahan Step-0/1 survey's named follow-on): DELIVERED — pure hard
+crust, zero new axioms (count stays 9; `#print axioms` via
+`wip/bdk_axcheck.lean` on all 5 public + 20 QA declarations: the
+standard three only, every one). QA 1832 → 1852
+(`BandDavisKahan_QA` a new Perturbation-domain file at 20). The Band
+module has its first perturbation-theory consumer and the perturbation
+area its first Band composition; the PolyFilter component-action
+interface is a two-consumer interface.**
+
+**Delivered:** the new
+`Scaffold/Mathlib/Analysis/OperatorTheory/Perturbation/BandDavisKahan.lean`
+(minimal imports PolyFilter + Duhamel; the umbrella importing it) —
+the headline pair `l2OpNorm_bandProjector_mul_bandProjector_le_of_lt` /
+`_of_gt`: `‖Q * P‖ ≤ ‖A − B‖ / δ` for the band projectors of two
+symmetric matrices on δ-separated windows `(a₁, b₁]`/`(a₂, b₂]`
+(interval separation `b₁ + δ ≤ a₂` or `b₂ + δ ≤ a₁`; the center/radius
+instantiation `c = (a₁+b₁)/2`, `r = (b₁−a₁)/2` discharged inside by
+interval arithmetic), constant 1, no rank hypothesis, no sorted-spectrum
+index — by the survey's algebraic commutator/shift route. **The proof's
+mathematical content is the r-cancellation**: the naive single-shift
+assembly strands `+ r` (the recorded catch that kills the technique at
+the half-line window — which is why this and `davis_kahan_sin_theta`
+are genuinely different theorems), and the rescue is *range invariance*
+(`(A − cI) *ᵥ (P *ᵥ y)` stays in `P`'s range), bounding the compressed
+term by `r · ‖Q * P‖ · ‖y‖` so the `r` cancels algebraically:
+`(r+δ)‖(Q*P)*ᵥy‖ ≤ (r‖QP‖ + ‖A−B‖)‖y‖` for all `y`, transported
+through Duhamel's pairing engine to `δ ‖QP‖ ≤ ‖A−B‖`. Load-bearing on
+four delivered layers at once (Band's idempotence and eigenbasis
+action, Spectral's Parseval and eigenaction, PolyFilter's band
+component action, Duhamel's pairing/norm engine). Both Step-0-priced
+shelf gaps landed as public interface lemmas: `l2OpNorm_mulVec_le`
+(the vector action bound in the sqrt-packaging, absent from the pinned
+Mathlib — through `cstar_norm_def` + `toEuclideanCLM` +
+`le_opNorm`) and `mulVec_bandProjector_comm` (the 2026-08-21 survey's
+spike-verified commutation, previously unlanded; componentwise through
+the eigenbasis).
+
+**QA (+20):** all four proposal-mandated sections on the rotated
+fixture `bdkB = !![1, 3/4; 3/4, 3]` (spectrum `{3/4, 13/4}` from trace
+`4`/determinant `39/16`, the Band_QA pinning idiom) against `diag13`
+reused from `Band_QA` (QA-to-QA import): (1) the positive witness —
+raw lower `√(1/10) ≤ ‖Q * P‖` completely independently of the theorem
+(`bdk_QPe0_sq`: the filtered action resolved through B's eigenbasis
+with per-index band membership from the pinned spectrum and the
+surviving coordinate square from the eigen-equation direction
+constraint `v j 1 = 3 · v j 0` + unit norm — no `eigvecOf` value
+assumed; the norm lower bound through the delivered `l2OpNorm_mulVec_le`
+at `e₀`) joined with the theorem's upper bound `≤ 3/4` (the
+perturbation norm bounded via the pairing engine's swap trick); (2)
+the ε = 0 attainment (disjoint windows on `A = B = diag13`: the
+theorem reads `≤ 0`, the norm `= 0` attained, cross-checked by Band's
+disjoint-band product law); (3) the fence — identical windows: the
+hypothesis-free conclusion **refuted in proved form** (`P * P` = the
+nonzero projector `diag(1,0)`, norm `≥ 1` through the action bound,
+RHS `= 0`) with every `hsep`-shaped hypothesis exhibited impossible —
+the separation exercised as a fence, not decoration; (4) the mirror
+`_of_gt` orientation at δ = 1/2 with the same two-route pattern at
+`e₁` (bottom-mode constraint `v0 = −(3 · v1)`).
+
+**Verification:** spike first (`wip/bdk_spike.lean`, several rounds to
+green — the fixes recorded in the proposal's delivery record as the
+pin-technique list: `mulVec_mulVec` takes the vector first and fires
+on the first-unified instance; explicit calc steps with fully-applied
+arguments to avoid whnf timeouts; norm_num evaluates the ite band
+conditions; `le_div_iff₀` both projection directions; the Fin 2
+eta-expansion and `linear_combination`-coefficient techniques re-hit
+QA-side); `lake env lean` on the module and the QA file — zero errors,
+zero warnings each; explicit `lake build` targets both ✔; `#print
+axioms` via `wip/bdk_axcheck.lean` on all 25 declarations — `propext,
+Classical.choice, Quot.sound` only; **full `lake build` ✔ (2260
+targets, +1, "Build completed successfully"; zero warnings in the
+changed modules)**; `lint_axioms` (**9**, unchanged), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**1852/9/0**,
+idempotent). Records updated: the proposal (status header COMPLETE,
+the delivery record with the trap list and the priced follow-ons),
+`proposals/README.md` (the High row retired to the Delivered table;
+the progress paragraph rewritten — the table empty again), README
+(1852; the proved-list sentence; the module-table row), the radar (QA
+axis synced 1832/45 → 1852/46, held 4.0), the scoreboard (all four
+verification rows + a new interpretation bullet),
+`index/sources/vershynin_hdp.md` (Chapter 4 note: route reference →
+the delivered mapping), `index/map/perturbation.md` (new section + 4
+declaration rows), backlog item 9 (DELIVERED note with the recorded
+follow-on), the umbrella `Scaffold.lean`, this plan, and the activity
+log. Nothing committed; the prior runs' uncommitted deliveries and
+the untracked `docs/scaffold.jpeg` preserved untouched.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — the band Davis–Kahan *difference* form (own
+document, consuming the delivered equal-rank identity), directed-axis
+mixing/rate work (gated on primitivity), or a backlog-gated item.
+
+**PolyFilter band projection — the Chebyshev layer's second consumer;
+the proposal COMPLETE, Steps 0+1 in one run (run 1, 2026-08-24, run
+`20260824T064113Z-run-1`; `proposals/polyfilter-band-projection.md`,
+new this run and added to the Active priority table as its only High
+row — the empty High/Medium queue's recorded handoff, first-named
+candidate in all three records, and the Krylov Step-0 survey's own
+named follow-on): DELIVERED — pure hard crust, zero new axioms (count
+stays 9; `#print axioms` on all 7 public + 30 QA declarations via
+`wip/polyfilter_axcheck.lean`: the standard three only), QA 1804 →
+1832 (`PolyFilter_QA` a new file at 28 by the generator metric); the
+Krylov Chebyshev scalar layer is now a *two-consumer* layer and the
+Band module has its first approximation-theory consumer.**
+
+**Delivered:** the new `Scaffold/Mathlib/GraphTheory/PolyFilter.lean`
+(namespace `SpectralGraphTheory`; minimal imports Band + Krylov +
+Resolvent; the umbrella importing it) — the two component-action
+interface lemmas (`eigvecOf_dotProduct_spectralProjector_mulVec`,
+`eigvecOf_dotProduct_bandProjector_mulVec` — the
+`dotProduct_eigvecOf_mulVec` mirrors at the two projectors, the band
+one's `a ≤ b` guard load-bearing for the indicator form and documented
+as such: the total definition is the *negated* band at `a > b`), the
+**transfer theorem** `aeval_sub_bandProjector_l2OpNorm_le` at exactly
+the Step-0 committed hypothesis-form shape (per-eigenvalue filter
+quality in, operator norm out), the power instantiation
+`powFilter_l2OpNorm_le` (ε = `(t/c)^d`), `chebyshevFilter` + its
+closed-form eval lemma, and the **Chebyshev-damped instantiation**
+`chebyshevFilter_l2OpNorm_le` (ε = `1/T_d(w(Ltop))`), consuming
+`abs_T_eval_le_one`, `one_le_eval_T_of_one_le`, `bandMap` and three of
+its four pins — the second consumer of the same scalar layer that
+carried Kaniel–Paige. **The survey's decisive structural finding cashed
+out in the proof: no eigenvalues of the difference matrix are computed
+anywhere** — the Resolvent upper-bridge route (per-mode component
+identities + Parseval + `opNorm_le_bound`/`cstar_norm_def`) resolves
+the difference's *action* through the eigenbasis. Load-bearing by the
+falsifiability test: the transfer theorem consumes the exact shapes of
+four delivered layers at once (Krylov's polynomial transfer, the Band
+eigenbasis action, Spectral's Parseval, the Resolvent spine) — a
+misstatement in any one breaks it loudly.
+
+**QA (+28):** all four proposal-mandated sections on the `diag13`
+fixture **reused from `Band_QA`** (the QA-to-QA import precedent — the
+spectral analysis, eigenvalue membership, and threshold-projector pins
+already proved): (1) exact recovery — the affine filter `(X−1)/2`
+drives the engine to `‖p(M) − B_{1,3}‖ = 0`, theorem route (ε = 0 +
+`norm_nonneg`) and raw route (both sides pinned entrywise to
+`diag(0,1)`, one by the matrix homomorphism laws, one by the
+threshold-projector pins); (2) the power filter at `t = 1`, `c = 3`,
+every `d` — instantiation, the ε constant **attained** at the low mode
+(`p.eval 1 = (1/3)^d`), and the filtered action on the low mode
+cross-checked by an independent raw route through the generic
+eigenvector action (`![1,0]` an eigenvector by literal computation,
+not by the spectral theorem's choice); (3) the Chebyshev-damped filter
+at `Lbot = 1`, `t = 2`, `Ltop = 3` — the raw Chebyshev pins `T₁(3) =
+3`, `T₂(3) = 17`, `T₁(−1) = −1`, instantiations at `d = 1` (ε = 1/3)
+and `d = 2` (ε = 1/17) with the damped values at both modes pinned (ε
+attained at the low mode), and the **rate comparison** `1/17 < (2/3)²
+= 4/9` — the two instantiations of one engine compared at a single
+gap; (4) the fence — the constant filter `1` (perfect in-band) has its
+out-of-band quality hypothesis **refuted** at the low mode, and the
+hypothesis-free conclusion refuted in proved form (`‖1 − B_{2,3}‖ ≥ 1
+> 1/2`, the norm lower-bounded through the fixed unit vector by the
+`abs_eigvalOf_le_l2OpNorm` vector technique — no eigenvalue of the
+difference computed).
+
+**Verification:** spike first (`wip/polyfilter_spike.lean` — the
+transfer engine green on its first complete compile; the fixes
+becoming the proposal's recorded trap list, the sharpest being the
+`rw`-order-vs-syntactic-appearance interaction at the negated band
+conditions — typed `have`s per condition, the PageRank technique —
+and the `ℤ`-cast trap's QA face: the module's `(d : ℤ)` instantiated
+at literals produces natCast forms the pin's `T_one`/`T_two` cannot
+`rw` with — state QA pins in the natCast spelling and bridge with
+`push_cast`; the numeric-default trap re-hit at the statement level
+(`(1/3)^d` needs `((1:ℝ)/3)^d`)); `lake env lean` on the module and
+the QA file — zero errors, zero warnings each; explicit `lake build`
+targets both ✔; `#print axioms` via `wip/polyfilter_axcheck.lean` on
+all 37 declarations — `propext, Classical.choice, Quot.sound` only;
+**full `lake build` ✔ (2259 targets, +1, "Build completed
+successfully"; zero warnings in the changed modules)**; `lint_axioms`
+(**9**, unchanged), `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated (**1832/9/0**, idempotent). Records updated:
+the proposal (status header COMPLETE, the full delivery record with
+the trap list and the priced follow-ons), `proposals/README.md` (the
+High row retired to the Delivered table; the progress paragraph
+rewritten — the table empty again), README (1832; the status
+paragraph's polyfilter sentence; the module-table row), the radar (QA
+axis synced 1804/44 → 1832/45, held 4.0), the scoreboard (all three
+verification rows + a new interpretation bullet), the SGT index map
+(new section + 7 declaration rows, the module-list line), the
+umbrella, this plan, and the activity log. Nothing committed; the
+prior runs' uncommitted deliveries and the untracked
+`docs/scaffold.jpeg` preserved untouched.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — directed-axis mixing/rate work (gated on
+primitivity), backlog item 9's band Davis–Kahan (own proposal + Step
+0), or a named consumer pricing the wide-band minimax filter designs.
 
 **PageRank — the second Perron–Frobenius consumer; the proposal
 COMPLETE, Steps 0+1 in one run (run 1, 2026-08-24, run

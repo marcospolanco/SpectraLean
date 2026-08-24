@@ -21,11 +21,13 @@ import Scaffold.Mathlib.GraphTheory.Mixing
 import Scaffold.Mathlib.GraphTheory.Heat
 import Scaffold.Mathlib.GraphTheory.Directed
 import Scaffold.Mathlib.GraphTheory.Krylov
+import Scaffold.Mathlib.GraphTheory.PolyFilter
 import Scaffold.Mathlib.GraphTheory.VariationalTransfer
 import Scaffold.Mathlib.GraphTheory.Dynamics
 import Scaffold.Mathlib.Dynamics.DiscreteAffine
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan
+import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.BandDavisKahan
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.ProjectionGap
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Duhamel
 import Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent
@@ -110,9 +112,15 @@ transfer consuming the congruence bridge
 frontier (`GraphTheory.Dynamics`), the discrete-affine dynamics slice
 (`Dynamics.DiscreteAffine`, the `sgt-gaps.md` item-2 consumer
 interface: the finite-vector geometric-decay wrapper and the
-affine-iteration convergence theorem, all proved hard crust), the
-perturbation bridge
-(`Analysis.OperatorTheory.Perturbation.*`), the resolvent calculus
+        affine-iteration convergence theorem, all proved hard crust), the
+        perturbation bridge
+        (`Analysis.OperatorTheory.Perturbation.*`, including the
+        bounded-window Davis–Kahan theorem
+        `Perturbation.BandDavisKahan`: the product bound
+        `‖Q * P‖ ≤ ‖A − B‖ / δ` for δ-separated band projectors of two
+        symmetric matrices, proved by the algebraic commutator/shift
+        route — the band-projector sibling of the half-line
+        `davis_kahan_sin_theta`), the resolvent calculus
 (`Analysis.OperatorTheory.Resolvent`, proposal steps 0–1: the
 operator-norm bridge `‖M‖ ↔ max-abs eigenvalue` proved from the
 eigenbasis machinery after the C*-algebra thread was found

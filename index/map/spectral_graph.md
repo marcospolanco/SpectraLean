@@ -6,7 +6,7 @@ conductance, Cheeger theory, interlacing, and event-driven dynamics.
 ## Status
 
 **Implemented and build-certified** (see the QA scoreboard):
-`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,SpectralCertificates,Tikhonov,Band,Cheeger,Mixing,Dynamics}`.
+`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,SpectralCertificates,Tikhonov,Band,Cheeger,Mixing,Dynamics,Krylov,PolyFilter}`.
 
 ## Modules and Declarations
 
@@ -850,6 +850,34 @@ fixture).
 | `exists_unit_decomposition` | unit `b` along unit `u`: `b = c • u + s • g` with `g ⊥ u`, `‖g‖² ≤ 1`, `c² + s² = 1` |
 | `kanielPaigeChebyshev` | **the spectral discharge complete**: at the Chebyshev-composed band polynomial `T_{k−1} ∘ w`, the full Kaniel–Paige bound with every spectral site discharged from the eigenbasis-level band hypothesis (out-of-band eigenvectors parallel to `u`) |
 | `kanielPaige` | **the final statement (Step 1c)**: the classical Kaniel–Paige bound at the Step-0 recorded shape — unit `b` with `u ⬝ᵥ b ≠ 0`, the decomposition internal, the bound phrased `(Ltop − Lbot) · tan²φ / T_{k−1}(1 + 2γ)²` at `γ = (Ltop − Ltwo)/(Ltwo − Lbot)`; composed from `kanielPaigeChebyshev` via `c = u ⬝ᵥ b`, `s² = 1 − c²`, `w(Ltop) = 1 + 2γ` |
+
+### `Scaffold.Mathlib.GraphTheory.PolyFilter` (polynomial filters and band projection — the Chebyshev layer's second consumer)
+
+`proposals/polyfilter-band-projection.md`, Steps 0+1 delivered 2026-08-24
+(zero new axioms). The matrix-level functional calculus behind the
+Krylov Step-0 survey's recorded filter shape
+`‖p_d(M) − bandProjector M hM a b‖₂ ≤ ε(d, gaps)`: a filter-agnostic
+transfer engine (per-eigenvalue filter quality in, operator-norm bound
+out — no eigenvalues of the difference computed anywhere) plus the two
+classical top-eigenspace instantiations, the second of which makes the
+Krylov Chebyshev scalar layer a *two-consumer* layer. QA at
+`Scaffold/QA/SpectralGraph/PolyFilter_QA.lean` (on the `diag13`
+fixture reused from `Band_QA`: exact-projector recovery through an
+affine filter at ε = 0 by theorem and raw routes, the power and
+Chebyshev ε constants *attained* at the out-mode, the power-vs-
+Chebyshev rate comparison `1/17 < 4/9`, and the out-of-band
+filter-quality hypothesis refuted in proved form with the norm
+lower-bounded at `1 > 1/2` through the vector the difference fixes).
+
+| Declaration | Content |
+|-------------|---------|
+| `eigvecOf_dotProduct_spectralProjector_mulVec` | the threshold projector's component action `v i ⬝ᵥ (P_c *ᵥ y) = χ_{λ i ≤ c} (v i ⬝ᵥ y)` (the `dotProduct_eigvecOf_mulVec` mirror at the projector, through symmetry + the delivered eigenbasis action) |
+| `eigvecOf_dotProduct_bandProjector_mulVec` | the band projector's component action — in-band modes pass, out-of-band modes annihilate; the `a ≤ b` guard load-bearing for the indicator form (at `a > b` the total definition is the negated band) |
+| `aeval_sub_bandProjector_l2OpNorm_le` | **the transfer theorem**: within `ε` of `1` at every in-band eigenvalue and of `0` at every out-of-band one ⇒ `‖p(M) − B_{a,b}‖ ≤ ε` — Krylov's polynomial transfer, the band component action, Parseval, and the Resolvent `opNorm_le_bound`/`cstar_norm_def` spine held in one statement (load-bearing on all four) |
+| `powFilter_l2OpNorm_le` | the power filter: spectrum in `[0, c]`, band `(t, c]` top-only ⇒ `‖(M/c)^d − B_{t,c}‖ ≤ (t/c)^d` — the power-method rate, attained at out-modes |
+| `chebyshevFilter` | the damped Chebyshev filter `T_d ∘ w / T_d(w(Ltop))` at the Krylov layer's affine band map `w = bandMap t Lbot` |
+| `chebyshevFilter_eval` | the filter's closed form: `p(μ) = T_d(w(μ)) / T_d(w(Ltop))` |
+| `chebyshevFilter_l2OpNorm_le` | **the Chebyshev-damped instantiation** (the Chebyshev layer's second consumer: `abs_T_eval_le_one`, `one_le_eval_T_of_one_le`, `bandMap` and its pins): spectrum in `[Lbot, Ltop]`, top-only band ⇒ `‖T_d(w(M))/T_d(w(Ltop)) − B_{t,Ltop}‖ ≤ 1/T_d(w(Ltop))` — the damped-iteration rate, strictly better than power in the small-gap regime |
 
 ## Applications
 

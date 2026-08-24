@@ -146,7 +146,25 @@ retirement; pure hard crust, assembled from the proved sweep lemma at
 the Fiedler vector, attainment of the conductance minimum, and the
 Rayleigh transfer — the certificate is existential over the minimizer,
 with the *swept-level-set* extraction the named strengthening
-follow-on); walk mixing through the transition spectrum.
+follow-on); **Phase C delivered 2026-08-24**
+(`proposals/sweep-cut-extraction.md`, zero new axioms) —
+`fiedler_sweep_cut`, the swept-level-set extraction itself: the
+certified cut is now an *explicit closed superlevel or sublevel set of
+the Fiedler vector* (the object the spectral-partitioning sweep
+returns) at the same `conductance S² ≤ 2 λ₂ / d` constant, proved
+through the new Cheeger-module pair `sweep_level_extract` (per-part
+attainment over the finitely many positive values of `y²`, the
+covering fact that every closed superlevel set equals one at an
+attained value, and a non-strict layer-cake integration cloned from
+`coarea_core`'s own proof, closed by Component A) and
+`cheeger_sweep_cut` (the median assembly; the same constant 2 as
+`cheeger_sweep` with the witness explicit — a strengthening of the
+sweep lemma itself, load-bearing on the whole Step-1a/1b/1c chain).
+QA (+22): the family characterized at two orthogonal `C₄` vectors (one
+sweep-optimal, one honestly not), the per-part extraction forced
+through its level-membership iff, the orthogonality fence refuted in
+proved form on the constant vector, and the `K₂` Fiedler-value family
+characterization; walk mixing through the transition spectrum.
 
 ### 5. Graph-dynamical systems (conditional)
 

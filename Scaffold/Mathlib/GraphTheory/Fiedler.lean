@@ -50,11 +50,15 @@ difference from the proposal's Phase B sketch, recorded before stating:
 the sketch wrote `conductance (fiedlerPartition …) ≤ [bound]` — the
 *sign* half-space — but the Cheeger inequalities bound the conductance
 *minimum*, and no λ₂-only upper bound on the sign cut's conductance
-holds in general (certifying a specific Fiedler *level set* — the
-sweep-extraction statement — is a strictly stronger, separately scoped
-follow-on). The delivered existential certificate is over the
+holds in general. The delivered existential certificate is over the
 conductance minimizer, with the bound running through the Fiedler
-vector's Rayleigh quotient.
+vector's Rayleigh quotient. **Phase C (the swept-level-set extraction,
+delivered 2026-08-24, `proposals/sweep-cut-extraction.md`) closes
+exactly that recorded gap**: `fiedler_sweep_cut` certifies an explicit
+*Fiedler level set* — a closed superlevel or sublevel set of the
+Fiedler vector — at the same `2 * lambda2 / d` constant, through the
+Cheeger module's `cheeger_sweep_cut` (the median assembly of
+`sweep_level_extract`).
 
 QA: `Scaffold/QA/SpectralGraph/Fiedler_QA.lean` — the `K₂` fixture
 (partition pinned to one of the two singleton halves through the
@@ -453,5 +457,59 @@ theorem cheeger_cut_existence (A : WAdj (V := V)) (hA : A.IsSymm)
         mul_le_mul_of_nonneg_right h2 hdpos.le
     _ = 2 * lambda2 A hA hcard := by
         rw [div_mul_eq_mul_div, div_mul_cancel₀ _ hdpos.ne']; ring
+
+/-!
+## Phase C: the swept cut (the Fiedler level-set extraction)
+
+`proposals/sweep-cut-extraction.md` (delivered 2026-08-24, pure hard
+crust): the *swept-level-set extraction* this module's header recorded
+as the strictly stronger follow-on of the Phase B certificate. Where
+`cheeger_cut_existence` exhibits the non-constructive conductance
+minimizer, `fiedler_sweep_cut` exhibits an explicit **swept Fiedler
+level set** — a closed superlevel or sublevel set of the Fiedler
+vector, the object the classical spectral-partitioning sweep returns.
+-/
+
+/-- **Phase C: the swept Fiedler cut.** On every connected `d`-regular
+graph with symmetric nonnegative weights there is a nonempty proper
+vertex set which is a **closed superlevel or sublevel set of the
+Fiedler vector** (`∃ t, ∀ i, i ∈ S ↔ t ≤ fiedlerVector i`, or the
+sublevel mirror) with
+
+`conductance A S ^ 2 ≤ 2 * lambda2 A hA hcard / d`.
+
+This is the algorithm-facing strengthening of Phase B's
+`cheeger_cut_existence`: the certificate is now the cut the sweep
+actually returns, at the same constant. Composition:
+`cheeger_sweep_cut` (the same day's Cheeger-module median assembly)
+at `x := fiedlerVector`, discharged with `fiedlerVector_ne_zero`,
+`fiedlerVector_ortho_onesVec` (at `lambda2_pos_of_connected`), and the
+Phase B Rayleigh transfer `fiedlerVector_rayleigh_regularNormalizedLaplacian`.
+
+Trust level: hard crust; nothing axiom-backed.
+
+QA: `SpectralGraphTheory.QA.k2_sweep_cut_QA` in
+`Scaffold/QA/SpectralGraph/Fiedler_QA.lean` identifies the extracted
+cut on `K₂` (through the Fiedler antisymmetry pins) as one of the two
+singletons, computes its conductance `1`, and cross-checks it against
+the pinned `cheegerConstant (K₂) = 1` — the sweep is exact there. -/
+theorem fiedler_sweep_cut (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hnn : ∀ i j, 0 ≤ A i j) (d : ℝ) (hd : ∀ i, deg A i = d) (hdpos : 0 < d)
+    (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected) :
+    ∃ S : Finset V, S.Nonempty ∧ Sᶜ.Nonempty ∧
+      ((∃ t : ℝ, ∀ i, i ∈ S ↔ t ≤ fiedlerVector A hA hcard i) ∨
+        (∃ t : ℝ, ∀ i, i ∈ S ↔ fiedlerVector A hA hcard i ≤ t)) ∧
+      conductance A S ^ 2 ≤ 2 * lambda2 A hA hcard / d := by
+  obtain ⟨S, hS, hSc, hfam, hle⟩ := cheeger_sweep_cut A hA hnn d hd hdpos
+    (fiedlerVector_ne_zero A hA hcard)
+    (fiedlerVector_ortho_onesVec A hA hcard
+      (lambda2_pos_of_connected A hA hnn hcard hconn))
+  refine ⟨S, hS, hSc, hfam, ?_⟩
+  rw [fiedlerVector_rayleigh_regularNormalizedLaplacian A hA hcard d
+    hd hdpos] at hle
+  rw [show (2 * lambda2 A hA hcard / d)
+    = 2 * (lambda2 A hA hcard / d) from by ring]
+  exact hle
 
 end SpectralGraphTheory

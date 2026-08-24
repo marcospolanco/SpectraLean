@@ -1598,4 +1598,678 @@ theorem cheegerConstant_attained (A : WAdj (V := V))
   exact le_antisymm hle
     (conductance_ge_cheegerConstant A hnonneg S₀ hS₀ne hS₀c)
 
+/-!
+### The sweep extraction (proved)
+
+`proposals/sweep-cut-extraction.md`, delivered 2026-08-24 as pure hard
+crust (zero new axioms): the *algorithm-facing* strengthening of the
+Cheeger hard direction. `cheeger_sweep` bounds the conductance
+**infimum**; the theorems below exhibit an explicit **swept level set**
+— the object the classical spectral-partitioning sweep actually
+returns — at the same constant:
+
+- `sweep_level_extract` (per part): for any `y` whose nonempty closed
+  superlevel sets at positive levels are all minority-side (exactly
+  `coarea_core`'s hypothesis), some closed superlevel set `S = {i :
+  t ≤ y i ^ 2}` of `y ^ 2` at a positive level attains
+  `conductance A S ^ 2 ≤ E'(y) / (d * ∑ y i ^ 2)`.
+
+- `cheeger_sweep_cut` (median assembly): for any `x ⊥ 1`, `x ≠ 0`,
+  some closed superlevel or sublevel set `S` of `x` itself satisfies
+  `conductance A S ^ 2 ≤ 2 * R_{L_sym}(x)` — the same constant as
+  `cheeger_sweep` (`φ_min ^ 2 / 2 ≤ R`), with the witness explicit.
+
+The extraction route replaces the textbook averaging-by-pigeonhole
+(which needs a *strict* integral inequality) with **attainment**: the
+boundary-to-size ratio is minimized over the finitely many positive
+values of `y ^ 2` (`Finset.exists_min_image`); every closed superlevel
+set equals one at an attained value (its own least dominating value,
+by `Finset.min'`); the resulting per-level bound is non-strict, so the
+layer-cake integration is a structural clone of `coarea_core`'s own
+proof. Composed with Component A (`core_sum_abs_sq_sub_sq`) and the
+minority conductance conversion, the chain loses nothing against the
+Step-1c per-part bound — indeed `sweep_level_extract` *implies* the
+per-part statement, since the level set's conductance bounds the
+Cheeger constant from below.
+
+The named consumer is the spectral-partitioning algorithm interface
+(`GraphTheory.Fiedler.fiedler_sweep_cut`, the Phase C instantiation at
+the Fiedler vector): a consumer that wants *the cut the sweep returns*,
+not an existence statement over the non-constructive conductance
+minimizer of `cheeger_cut_existence`.
+-/
+
+section SweepExtraction
+
+omit [Fintype V] [DecidableEq V] in
+/-- Level-set conversion for the positive part at a positive level: a
+closed superlevel set of `(x − m)⁺ ^ 2` at level `t > 0` is exactly a
+closed superlevel set of `x` at level `m + √t`. Private to the sweep
+extraction. -/
+theorem mem_of_posPart_sq {x : V → ℝ} {m t : ℝ} (ht : 0 < t) (i : V) :
+    (t ≤ (max (x i - m) 0) ^ 2) ↔ (m + Real.sqrt t ≤ x i) := by
+  constructor
+  · intro h
+    rcases lt_or_le (x i) m with hx | hx
+    · exfalso
+      rw [max_eq_right (by linarith : x i - m ≤ 0)] at h
+      norm_num at h
+      linarith
+    · rw [max_eq_left (by linarith : 0 ≤ x i - m)] at h
+      have hs : Real.sqrt t ≤ Real.sqrt ((x i - m) ^ 2) :=
+        Real.sqrt_le_sqrt h
+      rw [Real.sqrt_sq (by linarith : 0 ≤ x i - m)] at hs
+      linarith
+  · intro h
+    have hxm : 0 ≤ x i - m := by
+      have := Real.sqrt_nonneg t
+      linarith
+    rw [max_eq_left hxm]
+    have h1 : Real.sqrt t ≤ x i - m := by
+      have := Real.sqrt_nonneg t
+      linarith
+    have h2 : |Real.sqrt t| ≤ |x i - m| := by
+      rw [abs_of_nonneg (Real.sqrt_nonneg t), abs_of_nonneg hxm]
+      exact h1
+    calc t = Real.sqrt t ^ 2 := (Real.sq_sqrt ht.le).symm
+      _ = |Real.sqrt t| ^ 2 := by rw [abs_of_nonneg (Real.sqrt_nonneg t)]
+      _ ≤ |x i - m| ^ 2 := by exact pow_le_pow_left₀ (abs_nonneg _) h2 2
+      _ = (x i - m) ^ 2 := by rw [abs_of_nonneg hxm]
+
+omit [Fintype V] [DecidableEq V] in
+/-- Level-set conversion for the negative part at a positive level: a
+closed superlevel set of `(m − x)⁺ ^ 2` at level `t > 0` is exactly a
+closed sublevel set of `x` at level `m − √t`. Private to the sweep
+extraction. -/
+theorem mem_of_negPart_sq {x : V → ℝ} {m t : ℝ} (ht : 0 < t) (i : V) :
+    (t ≤ (max (m - x i) 0) ^ 2) ↔ (x i ≤ m - Real.sqrt t) := by
+  constructor
+  · intro h
+    rcases lt_or_le m (x i) with hx | hx
+    · exfalso
+      rw [max_eq_right (by linarith : m - x i ≤ 0)] at h
+      norm_num at h
+      linarith
+    · rw [max_eq_left (by linarith : 0 ≤ m - x i)] at h
+      have hs : Real.sqrt t ≤ Real.sqrt ((m - x i) ^ 2) :=
+        Real.sqrt_le_sqrt h
+      rw [Real.sqrt_sq (by linarith : 0 ≤ m - x i)] at hs
+      linarith
+  · intro h
+    have hxm : 0 ≤ m - x i := by
+      have := Real.sqrt_nonneg t
+      linarith
+    rw [max_eq_left hxm]
+    have h1 : Real.sqrt t ≤ m - x i := by
+      have := Real.sqrt_nonneg t
+      linarith
+    have h2 : |Real.sqrt t| ≤ |m - x i| := by
+      rw [abs_of_nonneg (Real.sqrt_nonneg t), abs_of_nonneg hxm]
+      exact h1
+    calc t = Real.sqrt t ^ 2 := (Real.sq_sqrt ht.le).symm
+      _ = |Real.sqrt t| ^ 2 := by rw [abs_of_nonneg (Real.sqrt_nonneg t)]
+      _ ≤ |m - x i| ^ 2 := by exact pow_le_pow_left₀ (abs_nonneg _) h2 2
+      _ = (m - x i) ^ 2 := by rw [abs_of_nonneg hxm]
+
+section L1
+
+open MeasureTheory intervalIntegral
+
+/-- **The per-part sweep extraction.** For any `y : V → ℝ` whose
+nonempty closed superlevel sets `{i : t ≤ y i ^ 2}` at positive levels
+are all minority-side (`2 * |S_t| ≤ Fintype.card V` — exactly
+`coarea_core`'s hypothesis), with `0 < ∑ i, y i ^ 2`, there is a
+positive level `t` whose closed superlevel set `S = {i : t ≤ y i ^ 2}`
+is nonempty, proper, and satisfies
+
+`conductance A S ^ 2 ≤ E'(y) / (d * ∑ i, y i ^ 2)`
+
+where `E'(y) = ∑ i j, A i j * (y i - y j) ^ 2` is the ordered Dirichlet
+double sum. This is the *explicit* sweep-cut object: the level set the
+spectral-partitioning sweep would return, with the same per-part
+constant the Step-1c chain gives for the infimum (`hardDirection_perPart`
+follows from this, since the exhibited set's conductance bounds
+`cheegerConstant` from below).
+
+Route (recorded in `proposals/sweep-cut-extraction.md`): attainment
+replaces averaging — the boundary-to-size ratio is minimized over the
+finitely many positive values of `y ^ 2`; every closed superlevel set
+at a positive level equals one at an attained value (its least
+dominating value); the per-level bound is non-strict, so the
+layer-cake integration is `coarea_core`'s own proof pattern (mass and
+pair layer-cakes, the `t = 0` endpoint absorbed a.e.), closed by
+Component A (`core_sum_abs_sq_sub_sq`) and the minority conductance
+conversion (`min (vol S) (vol Sᶜ) = d * |S|`).
+
+Statement-shape notes: no `2 ≤ Fintype.card V` hypothesis (minority at
+a nonempty level forces it); the level-set membership is stated as an
+iff so consumers get the sweep family membership, not just any set.
+
+QA: `SpectralGraphTheory.QA.sweep_extract_cycle_QA` in
+`Scaffold/QA/SpectralGraph/Cheeger_QA.lean` forces the extracted set to
+`{0}` on `C₄` at `y = ![1, 0, 0, 0]` and pins its conductance to `1`
+against the theorem bound `E'(y) / (d * M) = 4 / 2 = 2`. -/
+theorem sweep_level_extract (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnn : ∀ i j, 0 ≤ A i j) (d : ℝ) (hd : ∀ i, deg A i = d) (hdpos : 0 < d)
+    (y : V → ℝ) (hy : ∀ t : ℝ, 0 < t →
+      2 * (Finset.univ.filter (fun i => t ≤ y i ^ 2)).card ≤ Fintype.card V)
+    (hM : 0 < ∑ i, y i ^ 2) :
+    ∃ S : Finset V, ∃ t : ℝ, 0 < t ∧ (∀ i, i ∈ S ↔ t ≤ y i ^ 2) ∧
+      S.Nonempty ∧ Sᶜ.Nonempty ∧
+      conductance A S ^ 2
+        ≤ (∑ i, ∑ j, A i j * (y i - y j) ^ 2) / (d * ∑ i, y i ^ 2) := by
+  classical
+  have himg : ∀ i : V, y i ^ 2 ∈ Finset.univ.image (fun i => y i ^ 2) :=
+    fun i => Finset.mem_image_of_mem _ (Finset.mem_univ i)
+  have hy2 : ∀ i, 0 ≤ y i ^ 2 := fun i => sq_nonneg _
+  obtain ⟨i₀, hi₀⟩ : ∃ i : V, 0 < y i ^ 2 := by
+    by_contra hcon
+    push_neg at hcon
+    have hz : ∑ i, y i ^ 2 = 0 :=
+      Finset.sum_eq_zero fun i _ => le_antisymm (hcon i) (hy2 i)
+    linarith
+  -- the attained positive values, with the minimal boundary-to-size ratio
+  have hFne : ((Finset.univ.image (fun i => y i ^ 2)).filter
+    (fun c => 0 < c)).Nonempty :=
+    ⟨y i₀ ^ 2, Finset.mem_filter.2 ⟨himg i₀, hi₀⟩⟩
+  obtain ⟨cstar, hcstarmem, hcstarmin⟩ := Finset.exists_min_image
+    ((Finset.univ.image (fun i => y i ^ 2)).filter (fun c => 0 < c))
+    (fun c : ℝ => boundary A (Finset.univ.filter (fun i => c ≤ y i ^ 2))
+      / ((Finset.univ.filter (fun i => c ≤ y i ^ 2)).card : ℝ)) hFne
+  have hcstarimg : cstar ∈ Finset.univ.image (fun i => y i ^ 2) :=
+    (Finset.mem_filter.1 hcstarmem).1
+  have hcstarpos : 0 < cstar := (Finset.mem_filter.1 hcstarmem).2
+  obtain ⟨iw, hiw⟩ : ∃ i : V, y i ^ 2 = cstar := by
+    rw [Finset.mem_image] at hcstarimg
+    obtain ⟨i, -, hi⟩ := hcstarimg
+    exact ⟨i, hi⟩
+  set Sstar : Finset V := Finset.univ.filter (fun i => cstar ≤ y i ^ 2) with hSstar
+  have hSmem : ∀ i, i ∈ Sstar ↔ cstar ≤ y i ^ 2 := by
+    intro i
+    rw [hSstar]; exact Finset.mem_filter.trans (by simp)
+  have hSstarne : Sstar.Nonempty :=
+    ⟨iw, (hSmem iw).2 (le_of_eq hiw.symm)⟩
+  have hcardstar : 0 < Sstar.card := Finset.card_pos.2 hSstarne
+  have hcardposF : ∀ c ∈ (Finset.univ.image (fun i => y i ^ 2)).filter
+      (fun c => 0 < c),
+      0 < (Finset.univ.filter (fun i => c ≤ y i ^ 2)).card := by
+    intro c hc
+    have h1 := (Finset.mem_filter.1 hc).1
+    rw [Finset.mem_image] at h1
+    obtain ⟨i, -, hi⟩ := h1
+    exact Finset.card_pos.2 ⟨i, Finset.mem_filter.2
+      ⟨Finset.mem_univ i, le_of_eq hi.symm⟩⟩
+  -- the per-member multiplicative bound from minimality
+  have hper : ∀ c ∈ (Finset.univ.image (fun i => y i ^ 2)).filter
+      (fun c => 0 < c),
+      (boundary A Sstar / (Sstar.card : ℝ))
+        * ((Finset.univ.filter (fun i => c ≤ y i ^ 2)).card : ℝ)
+      ≤ boundary A (Finset.univ.filter (fun i => c ≤ y i ^ 2)) := by
+    intro c hc
+    have h := hcstarmin c hc
+    rw [div_le_div_iff₀ (Nat.cast_pos.2 hcardstar)
+      (Nat.cast_pos.2 (hcardposF c hc))] at h
+    rw [div_mul_eq_mul_div, div_le_iff₀ (Nat.cast_pos.2 hcardstar)]
+    exact h
+  -- the covering fact: every closed superlevel set at a positive level is
+  -- one at an attained (positive) value
+  have hcover : ∀ t : ℝ, 0 < t →
+      (boundary A Sstar / (Sstar.card : ℝ))
+        * ((Finset.univ.filter (fun i => t ≤ y i ^ 2)).card : ℝ)
+      ≤ boundary A (Finset.univ.filter (fun i => t ≤ y i ^ 2)) := by
+    intro t ht
+    rcases (Finset.univ.filter (fun i => t ≤ y i ^ 2)).eq_empty_or_nonempty
+      with hE | hNE
+    · rw [hE]
+      have hb : boundary A (∅ : Finset V) = 0 := by simp [boundary]
+      rw [hb]
+      simp
+    · obtain ⟨j, hj⟩ := hNE
+      have hGne : ((Finset.univ.image (fun i => y i ^ 2)).filter
+          (fun c => t ≤ c)).Nonempty :=
+        ⟨y j ^ 2, Finset.mem_filter.2 ⟨himg j, (Finset.mem_filter.1 hj).2⟩⟩
+      obtain ⟨c', hc'mem, hc'le⟩ :
+          ∃ c' : ℝ, c' ∈ (Finset.univ.image (fun i => y i ^ 2)).filter
+              (fun c => t ≤ c)
+            ∧ ∀ c ∈ (Finset.univ.image (fun i => y i ^ 2)).filter
+                (fun c => t ≤ c), c' ≤ c :=
+        ⟨((Finset.univ.image (fun i => y i ^ 2)).filter
+            (fun c => t ≤ c)).min' hGne,
+          Finset.min'_mem _ hGne,
+          fun c hc => Finset.min'_le _ c hc⟩
+      have hc't : t ≤ c' := (Finset.mem_filter.1 hc'mem).2
+      have hc'F : c' ∈ (Finset.univ.image (fun i => y i ^ 2)).filter
+          (fun c => 0 < c) :=
+        Finset.mem_filter.2 ⟨(Finset.mem_filter.1 hc'mem).1,
+          lt_of_lt_of_le ht hc't⟩
+      have hSetEq : (Finset.univ.filter (fun i => t ≤ y i ^ 2))
+          = Finset.univ.filter (fun i => c' ≤ y i ^ 2) := by
+        apply Finset.ext
+        intro i
+        constructor
+        · intro hit
+          refine Finset.mem_filter.2 ⟨Finset.mem_univ i, hc'le _ ?_⟩
+          exact Finset.mem_filter.2 ⟨himg i, (Finset.mem_filter.1 hit).2⟩
+        · intro hic
+          exact Finset.mem_filter.2 ⟨Finset.mem_univ i,
+            le_trans hc't ((Finset.mem_filter.1 hic).2)⟩
+      rw [hSetEq]
+      exact hper c' hc'F
+  -- the layer-cake integration (a clone of coarea_core's proof)
+  obtain ⟨R, hRdef⟩ : ∃ R : ℝ, R = ∑ i, y i ^ 2 + 1 := ⟨_, rfl⟩
+  have hRpos : 0 ≤ R := by
+    rw [hRdef]
+    have hsumnn : 0 ≤ ∑ i, y i ^ 2 := Finset.sum_nonneg fun i _ => hy2 i
+    linarith
+  have hcR : ∀ i, y i ^ 2 ≤ R := by
+    intro i
+    have hle := Finset.single_le_sum (fun i (_ : i ∈ Finset.univ) => hy2 i)
+      (Finset.mem_univ i)
+    rw [hRdef]
+    linarith
+  have hintL : IntervalIntegrable (fun t =>
+      (2 * (boundary A Sstar / (Sstar.card : ℝ)))
+        * ∑ i, indicatorLE (y i ^ 2) t) volume 0 R := by
+    have hsum : IntervalIntegrable
+        (fun t => ∑ i, indicatorLE (y i ^ 2) t) volume 0 R := by
+      have h := IntervalIntegrable.sum (Finset.univ : Finset V)
+        (f := fun i t => indicatorLE (y i ^ 2) t)
+        (fun i _ => intervalIntegrable_indicatorLE (y i ^ 2) 0 R)
+      have hfun : (fun t => ∑ i, indicatorLE (y i ^ 2) t)
+          = ∑ i : V, (fun t => indicatorLE (y i ^ 2) t) := by
+        funext t
+        rw [Finset.sum_apply]
+      rw [hfun]
+      exact h
+    exact intervalIntegrable_const_mul _ hsum
+  have hintR : IntervalIntegrable (fun t => ∑ p : V × V,
+      A p.1 p.2 * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|)
+      volume 0 R := by
+    have h := IntervalIntegrable.sum (Finset.univ : Finset (V × V))
+      (f := fun p t => A p.1 p.2
+        * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|)
+      (fun p _ => intervalIntegrable_const_mul _
+        (((intervalIntegrable_indicatorLE (y p.1 ^ 2) 0 R).sub
+          (intervalIntegrable_indicatorLE (y p.2 ^ 2) 0 R)).abs))
+    have hfun : (fun t => ∑ p : V × V, A p.1 p.2
+        * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|)
+        = ∑ p : V × V, (fun t => A p.1 p.2
+          * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|) := by
+      funext t
+      rw [Finset.sum_apply]
+    rw [hfun]
+    exact h
+  have hmass : ∫ t in (0:ℝ)..R, ∑ i, indicatorLE (y i ^ 2) t
+      = ∑ i, y i ^ 2 := by
+    rw [intervalIntegral.integral_finset_sum
+      (fun i _ => intervalIntegrable_indicatorLE (y i ^ 2) 0 R)]
+    exact Finset.sum_congr rfl fun i _ => integral_indicatorLE (hy2 i) (hcR i)
+  have hint : ∫ t in (0:ℝ)..R, ∑ p : V × V, A p.1 p.2
+        * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|
+      = ∑ p : V × V, ∫ t in (0:ℝ)..R, A p.1 p.2
+        * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t| :=
+    intervalIntegral.integral_finset_sum
+      (fun p _ => intervalIntegrable_const_mul _
+        (((intervalIntegrable_indicatorLE (y p.1 ^ 2) 0 R).sub
+          (intervalIntegrable_indicatorLE (y p.2 ^ 2) 0 R)).abs))
+  have hpair : ∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2|
+      = ∫ t in (0:ℝ)..R, ∑ p : V × V, A p.1 p.2
+          * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t| := by
+    rw [hint, ← Fintype.sum_prod_type'
+      (fun i j => A i j * |y i ^ 2 - y j ^ 2|)]
+    exact Finset.sum_congr rfl fun p _ => by
+      rw [intervalIntegral.integral_const_mul,
+        integral_abs_indicatorLE_sub (hy2 p.1) (hy2 p.2)
+          (max_le (hcR p.1) (hcR p.2))]
+  -- the a.e. per-level bound
+  have hne : {t : ℝ | t ≠ 0} ∈ MeasureTheory.ae volume := by
+    rw [MeasureTheory.mem_ae_iff]; simp [Real.volume_singleton]
+  have hae : ∀ᵐ t ∂(volume.restrict (Set.Icc 0 R)),
+      (2 * (boundary A Sstar / (Sstar.card : ℝ)))
+        * ∑ i, indicatorLE (y i ^ 2) t
+      ≤ ∑ p : V × V, A p.1 p.2
+          * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t| := by
+    rw [MeasureTheory.ae_restrict_iff' measurableSet_Icc]
+    filter_upwards [hne] with t ht
+    intro htI
+    have h0t : 0 < t := lt_of_le_of_ne htI.1 (Ne.symm ht)
+    have h1 : ∑ i, indicatorLE (y i ^ 2) t
+        = ((Finset.univ.filter (fun i => t ≤ y i ^ 2)).card : ℝ) :=
+      sum_indicatorLE_eq_card_filter (fun i => y i ^ 2) t
+    have h2 : ∑ i, ∑ j, A i j * |indicatorLE (y i ^ 2) t
+          - indicatorLE (y j ^ 2) t|
+        = 2 * boundary A (Finset.univ.filter (fun i => t ≤ y i ^ 2)) :=
+      sum_pairAbs_eq_two_boundary A hA y t _
+        (fun i => Finset.mem_filter.trans (by simp))
+    rw [← Fintype.sum_prod_type'
+      (fun i j => A i j * |indicatorLE (y i ^ 2) t
+        - indicatorLE (y j ^ 2) t|)] at h2
+    have h3 := hcover t h0t
+    rw [h1, h2]
+    linarith
+  have hint2r : 2 * (boundary A Sstar / (Sstar.card : ℝ)) * ∑ i, y i ^ 2
+      ≤ ∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2| := by
+    calc 2 * (boundary A Sstar / (Sstar.card : ℝ)) * ∑ i, y i ^ 2
+        = (2 * (boundary A Sstar / (Sstar.card : ℝ)))
+            * ∫ t in (0:ℝ)..R, ∑ i, indicatorLE (y i ^ 2) t := by rw [hmass]
+      _ = ∫ t in (0:ℝ)..R, (2 * (boundary A Sstar / (Sstar.card : ℝ)))
+            * ∑ i, indicatorLE (y i ^ 2) t :=
+          (intervalIntegral.integral_const_mul _ _).symm
+      _ ≤ ∫ t in (0:ℝ)..R, ∑ p : V × V, A p.1 p.2
+            * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t| :=
+          intervalIntegral.integral_mono_ae_restrict hRpos hintL hintR hae
+      _ = ∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2| := hpair.symm
+  -- the conductance conversion (minority makes the volume the small side)
+  have hminor : 2 * Sstar.card ≤ Fintype.card V := hy cstar hcstarpos
+  have hcardle : Sstar.card ≤ Sstarᶜ.card := by
+    have h1 : Sstar.card + Sstarᶜ.card = Fintype.card V :=
+      Finset.card_add_card_compl Sstar
+    omega
+  have hScne : Sstarᶜ.Nonempty := by
+    rcases Sstarᶜ.eq_empty_or_nonempty with hE | hNE
+    · exfalso
+      have hz : Sstarᶜ.card = 0 := by rw [hE]; simp
+      omega
+    · exact hNE
+  have hminvol : min (vol A Sstar) (vol A Sstarᶜ)
+      = d * (Sstar.card : ℝ) := by
+    rw [vol_eq_of_regular A d hd Sstar, vol_eq_of_regular A d hd Sstarᶜ,
+      min_eq_left (mul_le_mul_of_nonneg_left
+        (by exact_mod_cast hcardle) hdpos.le)]
+  -- Component A composition and the final algebra
+  have hcomp := core_sum_abs_sq_sub_sq A hA hnn y
+  rw [sum_deg_mul_eq_of_regular A d hd y] at hcomp
+  have hbnn : 0 ≤ boundary A Sstar := boundary_nonneg A hnn Sstar
+  have hk' : 0 ≤ (Sstar.card : ℝ) := Nat.cast_nonneg _
+  have hkne : (Sstar.card : ℝ) ≠ 0 := ne_of_gt (Nat.cast_pos.2 hcardstar)
+  have hrnn : 0 ≤ boundary A Sstar / (Sstar.card : ℝ) :=
+    div_nonneg hbnn hk'
+  have hLnn : 0 ≤ 2 * (boundary A Sstar / (Sstar.card : ℝ)) * ∑ i, y i ^ 2 :=
+    mul_nonneg (mul_nonneg (by norm_num) hrnn) hM.le
+  have hTVnn : 0 ≤ ∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2| :=
+    Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ =>
+      mul_nonneg (hnn i j) (abs_nonneg _)
+  have habs : abs (2 * (boundary A Sstar / (Sstar.card : ℝ)) * ∑ i, y i ^ 2)
+      ≤ abs (∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2|) := by
+    rw [abs_of_nonneg hLnn, abs_of_nonneg hTVnn]
+    exact hint2r
+  have hTVsq : (2 * (boundary A Sstar / (Sstar.card : ℝ)) * ∑ i, y i ^ 2) ^ 2
+      ≤ (∑ i, ∑ j, A i j * (y i - y j) ^ 2) * (4 * (d * ∑ i, y i ^ 2)) :=
+    le_trans (sq_le_sq.mpr habs) hcomp
+  have hkey : (boundary A Sstar / (Sstar.card : ℝ))
+      * ((boundary A Sstar / (Sstar.card : ℝ)) * ∑ i, y i ^ 2)
+      ≤ d * ∑ i, ∑ j, A i j * (y i - y j) ^ 2 := by
+    have h4 : (boundary A Sstar / (Sstar.card : ℝ) * ∑ i, y i ^ 2) ^ 2
+        ≤ (∑ i, ∑ j, A i j * (y i - y j) ^ 2) * (d * ∑ i, y i ^ 2) := by
+      nlinarith [hTVsq]
+    have hring : (boundary A Sstar / (Sstar.card : ℝ) * ∑ i, y i ^ 2) ^ 2
+        = ((boundary A Sstar / (Sstar.card : ℝ))
+            * ((boundary A Sstar / (Sstar.card : ℝ)) * ∑ i, y i ^ 2))
+          * ∑ i, y i ^ 2 := by
+      ring
+    rw [hring] at h4
+    nlinarith [h4, hM]
+  have hkey' : (boundary A Sstar) ^ 2 * ∑ i, y i ^ 2
+      ≤ d * (∑ i, ∑ j, A i j * (y i - y j) ^ 2) * (Sstar.card : ℝ) ^ 2 := by
+    have h1 : (boundary A Sstar) ^ 2 * ∑ i, y i ^ 2
+        = (boundary A Sstar / (Sstar.card : ℝ))
+          * ((boundary A Sstar / (Sstar.card : ℝ)) * ∑ i, y i ^ 2)
+          * (Sstar.card : ℝ) * (Sstar.card : ℝ) := by
+      field_simp [hkne]
+      ring
+    have h2 : d * (∑ i, ∑ j, A i j * (y i - y j) ^ 2) * (Sstar.card : ℝ) ^ 2
+        = (d * ∑ i, ∑ j, A i j * (y i - y j) ^ 2)
+          * (Sstar.card : ℝ) * (Sstar.card : ℝ) := by
+      ring
+    rw [h1, h2]
+    exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hkey hk') hk'
+  refine ⟨Sstar, cstar, hcstarpos, hSmem, hSstarne, hScne, ?_⟩
+  have hcond : conductance A Sstar
+      = boundary A Sstar / (d * (Sstar.card : ℝ)) := by
+    rw [conductance, hminvol]
+  rw [hcond, div_pow, div_le_div_iff₀ (pow_pos (mul_pos hdpos
+    (Nat.cast_pos.2 hcardstar)) 2) (mul_pos hdpos hM)]
+  calc (boundary A Sstar) ^ 2 * (d * ∑ i, y i ^ 2)
+      = ((boundary A Sstar) ^ 2 * ∑ i, y i ^ 2) * d := by
+        ring
+    _ ≤ (d * ∑ i, ∑ j, A i j * (y i - y j) ^ 2) * (Sstar.card : ℝ) ^ 2 * d :=
+        mul_le_mul_of_nonneg_right hkey' hdpos.le
+    _ = (∑ i, ∑ j, A i j * (y i - y j) ^ 2) * (d * (Sstar.card : ℝ)) ^ 2 := by
+        ring
+
+end L1
+
+/-- **The sweep-cut theorem (median assembly).** For any `x ⊥ 1`,
+`x ≠ 0` on a `d`-regular graph of positive degree, there is a
+nonempty proper cut which is a **closed superlevel or sublevel set of
+`x` itself** — a member of the sweep family the spectral-partitioning
+algorithm actually enumerates — with
+
+`conductance A S ^ 2 ≤ 2 * rayleigh (regularNormalizedLaplacian A d) x`.
+
+Same constant as `cheeger_sweep` (which bounds the *infimum* over all
+cuts), but the witness is explicit: a swept level set of the test
+vector. Route: the median split (`exists_median`,
+`minority_posPart`/`minority_negPart` supply `sweep_level_extract`'s
+hypothesis verbatim for both parts), the product test selecting which
+part's extraction to run (with degenerate single-part cases when the
+other part vanishes), the fused contraction
+(`sum_edgeWeight_sq_posPart_add_sq_negPart_le`), the norm split
+(`median_parts_norm`), and the Step-1a normalization
+(`rayleigh_regularNormalizedLaplacian_eq`). The level membership of the
+extracted part-sets converts to `x`-level sets through
+`mem_of_posPart_sq`/`mem_of_negPart_sq` at the offset `√t`.
+
+Trust level: hard crust; nothing axiom-backed. The strengthened
+Cheeger cut-existence statement (an existential over this same sweep
+family at the Fiedler vector) is
+`GraphTheory.Fiedler.fiedler_sweep_cut`.
+
+QA: `SpectralGraphTheory.QA.sweep_cut_cycle_QA`,
+`SpectralGraphTheory.QA.sweep_cut_cycle_optimal_QA`, and
+`SpectralGraphTheory.QA.sweep_cut_orth_dropped_refuted_QA` in
+`Scaffold/QA/SpectralGraph/Cheeger_QA.lean`. -/
+theorem cheeger_sweep_cut (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnn : ∀ i j, 0 ≤ A i j) (d : ℝ) (hd : ∀ i, deg A i = d) (hdpos : 0 < d)
+    {x : V → ℝ} (hx0 : x ≠ 0) (horth : Matrix.dotProduct x onesVec = 0) :
+    ∃ S : Finset V, S.Nonempty ∧ Sᶜ.Nonempty ∧
+      ((∃ t : ℝ, ∀ i, i ∈ S ↔ t ≤ x i) ∨ (∃ t : ℝ, ∀ i, i ∈ S ↔ x i ≤ t)) ∧
+      conductance A S ^ 2 ≤ 2 * rayleigh (regularNormalizedLaplacian A d) x := by
+  obtain ⟨m, hup, hlow⟩ := exists_median x
+  have hyu : ∀ t : ℝ, 0 < t →
+      2 * (Finset.univ.filter (fun i => t ≤ (max (x i - m) 0) ^ 2)).card
+        ≤ Fintype.card V := fun t ht => minority_posPart hup t ht
+  have hyv : ∀ t : ℝ, 0 < t →
+      2 * (Finset.univ.filter (fun i => t ≤ (max (m - x i) 0) ^ 2)).card
+        ≤ Fintype.card V := fun t ht => minority_negPart hlow t ht
+  have hMunn : 0 ≤ ∑ i, (max (x i - m) 0) ^ 2 :=
+    Finset.sum_nonneg fun i _ => sq_nonneg _
+  have hMvnn : 0 ≤ ∑ i, (max (m - x i) 0) ^ 2 :=
+    Finset.sum_nonneg fun i _ => sq_nonneg _
+  have hfused := sum_edgeWeight_sq_posPart_add_sq_negPart_le A hnn m x
+  have hnormsplit := median_parts_norm (m := m) horth
+  have hdotne : Matrix.dotProduct x x ≠ 0 := by
+    intro h
+    apply hx0
+    funext i
+    have hsum2 : ∑ j, x j * x j = 0 := by simpa [Matrix.dotProduct] using h
+    have hmem := (Finset.sum_eq_zero_iff_of_nonneg
+      (fun j _ => mul_self_nonneg (x j))).1 hsum2 i (Finset.mem_univ i)
+    exact mul_self_eq_zero.mp hmem
+  have hdotsum : Matrix.dotProduct x x = ∑ i, x i ^ 2 := by
+    simp only [Matrix.dotProduct, pow_two]
+  have hdotpos : 0 < Matrix.dotProduct x x := by
+    rcases lt_or_ge 0 (Matrix.dotProduct x x) with h | h
+    · exact h
+    · exfalso
+      have hE : Matrix.dotProduct x x = 0 :=
+        le_antisymm h (by
+          simp only [Matrix.dotProduct]
+          exact Finset.sum_nonneg fun j _ => mul_self_nonneg _)
+      exact hdotne hE
+  have hR := rayleigh_regularNormalizedLaplacian_eq A hA d hd hdpos.ne' hx0
+  have htwoR : 2 * rayleigh (regularNormalizedLaplacian A d) x
+      = (∑ i, ∑ j, A i j * (x i - x j) ^ 2) / (d * Matrix.dotProduct x x) := by
+    rw [hR]
+    field_simp [hdpos.ne', hdotne]
+    ring
+  -- the shared numeric chain
+  have hchain : ∀ yu yv : V → ℝ,
+      ((∑ i, ∑ j, A i j * (yu i - yu j) ^ 2) * (∑ i, yv i ^ 2)
+        ≤ (∑ i, ∑ j, A i j * (yv i - yv j) ^ 2) * (∑ i, yu i ^ 2)) →
+      0 < ∑ i, yu i ^ 2 → 0 ≤ ∑ i, yv i ^ 2 →
+      Matrix.dotProduct x x ≤ ∑ i, yu i ^ 2 + ∑ i, yv i ^ 2 →
+      ((∑ i, ∑ j, A i j * (yu i - yu j) ^ 2)
+        + ∑ i, ∑ j, A i j * (yv i - yv j) ^ 2)
+        ≤ ∑ i, ∑ j, A i j * (x i - x j) ^ 2 →
+      (∑ i, ∑ j, A i j * (yu i - yu j) ^ 2) / (d * ∑ i, yu i ^ 2)
+        ≤ 2 * rayleigh (regularNormalizedLaplacian A d) x := by
+    intro yu yv hprod hMyu hMvnn hsplit hfus
+    have hEunn : 0 ≤ ∑ i, ∑ j, A i j * (yu i - yu j) ^ 2 :=
+      Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ =>
+        mul_nonneg (hnn i j) (sq_nonneg _)
+    have hEvnn : 0 ≤ ∑ i, ∑ j, A i j * (yv i - yv j) ^ 2 :=
+      Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ =>
+        mul_nonneg (hnn i j) (sq_nonneg _)
+    have hMunn : 0 ≤ ∑ i, yu i ^ 2 := le_of_lt hMyu
+    have hs1 : (∑ i, ∑ j, A i j * (yu i - yu j) ^ 2) / (d * ∑ i, yu i ^ 2)
+        ≤ ((∑ i, ∑ j, A i j * (yu i - yu j) ^ 2)
+            + ∑ i, ∑ j, A i j * (yv i - yv j) ^ 2)
+          / (d * (∑ i, yu i ^ 2 + ∑ i, yv i ^ 2)) := by
+      rw [div_le_div_iff₀ (mul_pos hdpos hMyu)
+        (mul_pos hdpos (by linarith : (0:ℝ)
+          < ∑ i, yu i ^ 2 + ∑ i, yv i ^ 2))]
+      calc (∑ i, ∑ j, A i j * (yu i - yu j) ^ 2)
+            * (d * (∑ i, yu i ^ 2 + ∑ i, yv i ^ 2))
+          = d * ((∑ i, ∑ j, A i j * (yu i - yu j) ^ 2) * (∑ i, yu i ^ 2)
+            + (∑ i, ∑ j, A i j * (yu i - yu j) ^ 2) * (∑ i, yv i ^ 2)) := by
+            ring
+        _ ≤ d * ((∑ i, ∑ j, A i j * (yu i - yu j) ^ 2) * (∑ i, yu i ^ 2)
+            + (∑ i, ∑ j, A i j * (yv i - yv j) ^ 2) * (∑ i, yu i ^ 2)) :=
+            mul_le_mul_of_nonneg_left
+              (add_le_add_left hprod _) hdpos.le
+        _ = ((∑ i, ∑ j, A i j * (yu i - yu j) ^ 2)
+            + ∑ i, ∑ j, A i j * (yv i - yv j) ^ 2)
+          * (d * ∑ i, yu i ^ 2) := by
+            ring
+    have hs2 : ((∑ i, ∑ j, A i j * (yu i - yu j) ^ 2)
+            + ∑ i, ∑ j, A i j * (yv i - yv j) ^ 2)
+          / (d * (∑ i, yu i ^ 2 + ∑ i, yv i ^ 2))
+        ≤ (∑ i, ∑ j, A i j * (x i - x j) ^ 2)
+          / (d * Matrix.dotProduct x x) := by
+      rw [div_le_div_iff₀ (mul_pos hdpos (by linarith : (0:ℝ)
+          < ∑ i, yu i ^ 2 + ∑ i, yv i ^ 2))
+        (mul_pos hdpos hdotpos)]
+      have h1 : ((∑ i, ∑ j, A i j * (yu i - yu j) ^ 2)
+            + ∑ i, ∑ j, A i j * (yv i - yv j) ^ 2) * Matrix.dotProduct x x
+          ≤ ((∑ i, ∑ j, A i j * (yu i - yu j) ^ 2)
+            + ∑ i, ∑ j, A i j * (yv i - yv j) ^ 2)
+          * (∑ i, yu i ^ 2 + ∑ i, yv i ^ 2) :=
+        mul_le_mul_of_nonneg_left hsplit (add_nonneg hEunn hEvnn)
+      have h2 : ((∑ i, ∑ j, A i j * (yu i - yu j) ^ 2)
+            + ∑ i, ∑ j, A i j * (yv i - yv j) ^ 2)
+          * (∑ i, yu i ^ 2 + ∑ i, yv i ^ 2)
+          ≤ (∑ i, ∑ j, A i j * (x i - x j) ^ 2)
+          * (∑ i, yu i ^ 2 + ∑ i, yv i ^ 2) :=
+        mul_le_mul_of_nonneg_right hfus (add_nonneg hMunn hMvnn)
+      calc ((∑ i, ∑ j, A i j * (yu i - yu j) ^ 2)
+            + ∑ i, ∑ j, A i j * (yv i - yv j) ^ 2)
+            * (d * Matrix.dotProduct x x)
+          = d * (((∑ i, ∑ j, A i j * (yu i - yu j) ^ 2)
+            + ∑ i, ∑ j, A i j * (yv i - yv j) ^ 2) * Matrix.dotProduct x x) := by
+            ring
+        _ ≤ d * (((∑ i, ∑ j, A i j * (yu i - yu j) ^ 2)
+            + ∑ i, ∑ j, A i j * (yv i - yv j) ^ 2)
+          * (∑ i, yu i ^ 2 + ∑ i, yv i ^ 2)) :=
+            mul_le_mul_of_nonneg_left h1 hdpos.le
+        _ ≤ d * ((∑ i, ∑ j, A i j * (x i - x j) ^ 2)
+          * (∑ i, yu i ^ 2 + ∑ i, yv i ^ 2)) :=
+            mul_le_mul_of_nonneg_left h2 hdpos.le
+        _ = (∑ i, ∑ j, A i j * (x i - x j) ^ 2)
+          * (d * (∑ i, yu i ^ 2 + ∑ i, yv i ^ 2)) := by
+            ring
+    rw [htwoR]
+    exact hs1.trans hs2
+  have hdot_split : Matrix.dotProduct x x
+      ≤ ∑ i, (max (x i - m) 0) ^ 2 + ∑ i, (max (m - x i) 0) ^ 2 := by
+    rw [hdotsum]; exact hnormsplit
+  -- the case tree
+  by_cases hMyu : 0 < ∑ i, (max (x i - m) 0) ^ 2
+  · by_cases hMyv : 0 < ∑ i, (max (m - x i) 0) ^ 2
+    · by_cases hprod : (∑ i, ∑ j, A i j
+            * ((max (x i - m) 0) - (max (x j - m) 0)) ^ 2)
+          * (∑ i, (max (m - x i) 0) ^ 2)
+          ≤ (∑ i, ∑ j, A i j
+            * ((max (m - x i) 0) - (max (m - x j) 0)) ^ 2)
+          * (∑ i, (max (x i - m) 0) ^ 2)
+      · -- both parts positive, the product test picks the positive part
+        obtain ⟨S, t, ht, hSmem, hSne, hScne, hcond⟩ :=
+          sweep_level_extract A hA hnn d hd hdpos (fun i => max (x i - m) 0)
+            hyu hMyu
+        refine ⟨S, hSne, hScne, Or.inl ⟨m + Real.sqrt t, fun i => ?_⟩, ?_⟩
+        · rw [hSmem i]
+          exact mem_of_posPart_sq ht i
+        · exact le_trans hcond (hchain (fun i => max (x i - m) 0)
+            (fun i => max (m - x i) 0) hprod hMyu hMvnn hdot_split hfused)
+      · -- both parts positive, the product test picks the negative part
+        obtain ⟨S, t, ht, hSmem, hSne, hScne, hcond⟩ :=
+          sweep_level_extract A hA hnn d hd hdpos (fun i => max (m - x i) 0)
+            hyv hMyv
+        refine ⟨S, hSne, hScne, Or.inr ⟨m - Real.sqrt t, fun i => ?_⟩, ?_⟩
+        · rw [hSmem i]
+          exact mem_of_negPart_sq ht i
+        · refine le_trans hcond (hchain (fun i => max (m - x i) 0)
+            (fun i => max (x i - m) 0) ?_ hMyv hMunn ?_
+            (by rw [add_comm]; exact hfused))
+          · exact le_of_not_le hprod
+          · rw [hdotsum]
+            rw [add_comm]
+            exact hnormsplit
+    · -- Mv = 0: the positive part alone carries the norm
+      have hMv0 : ∑ i, (max (m - x i) 0) ^ 2 = 0 :=
+        le_antisymm (le_of_not_gt hMyv) hMvnn
+      have hEvnn : 0 ≤ ∑ i, ∑ j, A i j
+          * ((max (m - x i) 0) - (max (m - x j) 0)) ^ 2 :=
+        Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ =>
+          mul_nonneg (hnn i j) (sq_nonneg _)
+      obtain ⟨S, t, ht, hSmem, hSne, hScne, hcond⟩ :=
+          sweep_level_extract A hA hnn d hd hdpos (fun i => max (x i - m) 0)
+            hyu hMyu
+      refine ⟨S, hSne, hScne, Or.inl ⟨m + Real.sqrt t, fun i => ?_⟩, ?_⟩
+      · rw [hSmem i]
+        exact mem_of_posPart_sq ht i
+      · refine le_trans hcond (hchain (fun i => max (x i - m) 0)
+          (fun i => max (m - x i) 0) ?_ hMyu hMvnn hdot_split hfused)
+        rw [hMv0, mul_zero]
+        exact mul_nonneg hEvnn hMunn
+  · -- Mu = 0, so Mv > 0 by the norm split
+    have hMu0 : ∑ i, (max (x i - m) 0) ^ 2 = 0 :=
+      le_antisymm (le_of_not_gt hMyu) hMunn
+    have hMvpos : 0 < ∑ i, (max (m - x i) 0) ^ 2 := by
+      have h1 : (0:ℝ) ≤ ∑ i, (max (m - x i) 0) ^ 2 := hMvnn
+      have h2 : ∑ i, x i ^ 2 ≤ 0 + ∑ i, (max (m - x i) 0) ^ 2 := by
+        simpa [hMu0] using hnormsplit
+      have h3 : 0 < ∑ i, x i ^ 2 := by rw [← hdotsum]; exact hdotpos
+      linarith
+    have hEunn : 0 ≤ ∑ i, ∑ j, A i j
+        * ((max (x i - m) 0) - (max (x j - m) 0)) ^ 2 :=
+      Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ =>
+        mul_nonneg (hnn i j) (sq_nonneg _)
+    obtain ⟨S, t, ht, hSmem, hSne, hScne, hcond⟩ :=
+          sweep_level_extract A hA hnn d hd hdpos (fun i => max (m - x i) 0)
+            hyv hMvpos
+    refine ⟨S, hSne, hScne, Or.inr ⟨m - Real.sqrt t, fun i => ?_⟩, ?_⟩
+    · rw [hSmem i]
+      exact mem_of_negPart_sq ht i
+    · refine le_trans hcond (hchain (fun i => max (m - x i) 0)
+        (fun i => max (x i - m) 0) ?_ hMvpos hMunn ?_
+        (by rw [add_comm]; exact hfused))
+      · rw [hMu0, mul_zero]
+        exact mul_nonneg hEunn hMvnn
+      · rw [hdotsum]
+        rw [add_comm]
+        exact hnormsplit
+
+end SweepExtraction
+
 end SpectralGraphTheory

@@ -851,3 +851,226 @@ theorem cut_existence_regular_dropped_refuted_QA :
   norm_num at hle
 
 end FiedlerPhaseB
+
+/-!
+## Phase C witnesses: the swept Fiedler cut on `K₂`
+
+`fiedler_sweep_cut` (delivered 2026-08-24,
+`proposals/sweep-cut-extraction.md`) exercised on the `K₂` fixture: the
+returned cut identified through the Fiedler value pins (every nonempty
+proper cut on `Fin 2` is a singleton; the *sweep family* itself is
+characterized to be exactly the two singletons through the antisymmetry
+pins), its conductance computed to `1` raw, the theorem bound cross-
+checked against the pinned `lambda2 (K₂) = 2`, and the optimality tie
+`conductance S = cheegerConstant (K₂) = 1` — the sweep is exact on
+`K₂`.
+-/
+
+section FiedlerPhaseC
+
+/-- **The swept cut, identified and theorem-sourced.** On `K₂` the cut
+whose existence `fiedler_sweep_cut` guarantees is a singleton (every
+nonempty proper cut on `Fin 2` is), its conductance is the computed
+`1`, and its bound is exactly the theorem's conclusion
+(`1 ≤ 2 · 2 / 1 = 4`). -/
+theorem k2_sweep_cut_QA :
+    ∃ S : Finset (Fin 2), S.Nonempty ∧ Sᶜ.Nonempty ∧
+      ((∃ t : ℝ, ∀ i, i ∈ S ↔ t ≤ fiedlerVector k2Adj k2Adj_symmetric
+            (le_refl 2) i) ∨
+        (∃ t : ℝ, ∀ i, i ∈ S ↔ fiedlerVector k2Adj k2Adj_symmetric
+            (le_refl 2) i ≤ t)) ∧
+      conductance k2Adj S = 1 ∧
+      conductance k2Adj S ^ 2
+        ≤ 2 * lambda2 k2Adj k2Adj_symmetric (le_refl 2) / 1 := by
+  obtain ⟨S, hS, hSc, hfam, hle⟩ :=
+    fiedler_sweep_cut k2Adj k2Adj_symmetric k2Adj_nonneg 1 k2Adj_deg
+      (by norm_num) (le_refl 2) k2Adj_supportGraph_connected_QA
+  obtain ⟨i, hi⟩ := k2Adj_cuts_singleton hS hSc
+  subst hi
+  refine ⟨{i}, Finset.singleton_nonempty i, hSc, hfam,
+    k2Adj_conductance_singleton_QA i, hle⟩
+
+/-- **The sweep family of the `K₂` Fiedler vector:** any nonempty
+proper closed superlevel or sublevel set of the Fiedler vector is one
+of the two singletons — the sign of the Fiedler entry decides which.
+This pins the family constraint itself (on an eigenvector with equal
+entries the family would be *empty*, and no theorem of this shape
+could hold), through the antisymmetry and nonvanishing pins. -/
+theorem k2_sweep_family_QA (S : Finset (Fin 2)) (hS : S.Nonempty)
+    (hSc : Sᶜ.Nonempty)
+    (hfam : (∃ t : ℝ, ∀ i, i ∈ S ↔ t ≤ fiedlerVector k2Adj k2Adj_symmetric
+            (le_refl 2) i) ∨
+      (∃ t : ℝ, ∀ i, i ∈ S ↔ fiedlerVector k2Adj k2Adj_symmetric
+            (le_refl 2) i ≤ t)) :
+    S = ({0} : Finset (Fin 2)) ∨ S = ({1} : Finset (Fin 2)) := by
+  classical
+  have hanti : fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 1
+      = -fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 0 :=
+    k2_fiedler_antisymm_QA
+  have hv0 : fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 0 ≠ 0 :=
+    k2_fiedler_zero_ne_QA
+  rcases hfam with ⟨t, ht⟩ | ⟨t, ht⟩
+  · by_cases hpos : fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 0 < 0
+    · -- values (-b, b), b > 0
+      have h1pos : 0 < fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 1 := by
+        rw [hanti]
+        linarith
+      by_cases hA : t ≤ fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 0
+      · exfalso
+        have h0 : (0 : Fin 2) ∈ S := (ht 0).2 hA
+        have h1 : (1 : Fin 2) ∈ S := (ht 1).2 (by
+          rw [hanti]; linarith)
+        have hEq : S = Finset.univ := Finset.eq_univ_iff_forall.2 (by
+          intro i
+          fin_cases i
+          · exact h0
+          · exact h1)
+        rw [hEq] at hSc
+        simp at hSc
+      · by_cases hB : t ≤ fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 1
+        · refine Or.inr ?_
+          have h1 : (1 : Fin 2) ∈ S := (ht 1).2 hB
+          have h0 : (0 : Fin 2) ∉ S := fun hc => hA ((ht 0).1 hc)
+          apply Finset.ext
+          intro i
+          fin_cases i
+          · simp [h0]
+          · simp [h1]
+        · exfalso
+          have h0 : (0 : Fin 2) ∉ S := fun hc => hA ((ht 0).1 hc)
+          have h1 : (1 : Fin 2) ∉ S := fun hc => hB ((ht 1).1 hc)
+          have hEq : S = ∅ := Finset.eq_empty_iff_forall_not_mem.2 (by
+            intro i hi
+            fin_cases i
+            · exact h0 hi
+            · exact h1 hi)
+          rw [hEq] at hS
+          simp at hS
+    · -- values (a, -a), a > 0
+      have hpos' : 0 < fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 0 := by
+        by_contra hc
+        push_neg at hc
+        exact hv0 (le_antisymm hc (le_of_not_gt hpos))
+      have h1neg : fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 1 < 0 := by
+        rw [hanti]
+        linarith
+      by_cases hA : t ≤ fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 1
+      · exfalso
+        have h0 : (0 : Fin 2) ∈ S := (ht 0).2 (by
+          rw [show fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 0
+              = -fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 1 from
+            by rw [hanti]; ring]
+          linarith)
+        have h1 : (1 : Fin 2) ∈ S := (ht 1).2 hA
+        have hEq : S = Finset.univ := Finset.eq_univ_iff_forall.2 (by
+          intro i
+          fin_cases i
+          · exact h0
+          · exact h1)
+        rw [hEq] at hSc
+        simp at hSc
+      · by_cases hB : t ≤ fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 0
+        · refine Or.inl ?_
+          have h0 : (0 : Fin 2) ∈ S := (ht 0).2 hB
+          have h1 : (1 : Fin 2) ∉ S := fun hc => hA ((ht 1).1 hc)
+          apply Finset.ext
+          intro i
+          fin_cases i
+          · simp [h0]
+          · simp [h1]
+        · exfalso
+          have h0 : (0 : Fin 2) ∉ S := fun hc => hB ((ht 0).1 hc)
+          have h1 : (1 : Fin 2) ∉ S := fun hc => hA ((ht 1).1 hc)
+          have hEq : S = ∅ := Finset.eq_empty_iff_forall_not_mem.2 (by
+            intro i hi
+            fin_cases i
+            · exact h0 hi
+            · exact h1 hi)
+          rw [hEq] at hS
+          simp at hS
+  · by_cases hpos : fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 0 < 0
+    · -- values (-b, b), b > 0
+      have h1pos : 0 < fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 1 := by
+        rw [hanti]
+        linarith
+      by_cases hA : fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 1 ≤ t
+      · exfalso
+        have h0 : (0 : Fin 2) ∈ S := (ht 0).2 (by
+          rw [show fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 0
+              = -fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 1 from
+            by rw [hanti]; ring]
+          linarith)
+        have h1 : (1 : Fin 2) ∈ S := (ht 1).2 hA
+        have hEq : S = Finset.univ := Finset.eq_univ_iff_forall.2 (by
+          intro i
+          fin_cases i
+          · exact h0
+          · exact h1)
+        rw [hEq] at hSc
+        simp at hSc
+      · by_cases hB : fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 0 ≤ t
+        · refine Or.inl ?_
+          have h0 : (0 : Fin 2) ∈ S := (ht 0).2 hB
+          have h1 : (1 : Fin 2) ∉ S := fun hc => hA ((ht 1).1 hc)
+          apply Finset.ext
+          intro i
+          fin_cases i
+          · simp [h0]
+          · simp [h1]
+        · exfalso
+          have h0 : (0 : Fin 2) ∉ S := fun hc => hB ((ht 0).1 hc)
+          have h1 : (1 : Fin 2) ∉ S := fun hc => hA ((ht 1).1 hc)
+          have hEq : S = ∅ := Finset.eq_empty_iff_forall_not_mem.2 (by
+            intro i hi
+            fin_cases i
+            · exact h0 hi
+            · exact h1 hi)
+          rw [hEq] at hS
+          simp at hS
+    · -- values (a, -a), a > 0
+      have hpos' : 0 < fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 0 := by
+        by_contra hc
+        push_neg at hc
+        exact hv0 (le_antisymm hc (le_of_not_gt hpos))
+      by_cases hA : fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 0 ≤ t
+      · exfalso
+        have h0 : (0 : Fin 2) ∈ S := (ht 0).2 hA
+        have h1 : (1 : Fin 2) ∈ S := (ht 1).2 (by
+          rw [hanti]; linarith)
+        have hEq : S = Finset.univ := Finset.eq_univ_iff_forall.2 (by
+          intro i
+          fin_cases i
+          · exact h0
+          · exact h1)
+        rw [hEq] at hSc
+        simp at hSc
+      · by_cases hB : fiedlerVector k2Adj k2Adj_symmetric (le_refl 2) 1 ≤ t
+        · refine Or.inr ?_
+          have h1 : (1 : Fin 2) ∈ S := (ht 1).2 hB
+          have h0 : (0 : Fin 2) ∉ S := fun hc => hA ((ht 0).1 hc)
+          apply Finset.ext
+          intro i
+          fin_cases i
+          · simp [h0]
+          · simp [h1]
+        · exfalso
+          have h0 : (0 : Fin 2) ∉ S := fun hc => hA ((ht 0).1 hc)
+          have h1 : (1 : Fin 2) ∉ S := fun hc => hB ((ht 1).1 hc)
+          have hEq : S = ∅ := Finset.eq_empty_iff_forall_not_mem.2 (by
+            intro i hi
+            fin_cases i
+            · exact h0 hi
+            · exact h1 hi)
+          rw [hEq] at hS
+          simp at hS
+
+/-- **The sweep is exact on `K₂`:** the identified cut's conductance
+equals the pinned Cheeger constant — the swept cut is an optimal cut
+here, while the theorem only certifies the `2 λ₂ / d = 4` bound. -/
+theorem k2_sweep_optimal_QA :
+    ∃ S : Finset (Fin 2), conductance k2Adj S = 1
+      ∧ conductance k2Adj S = cheegerConstant k2Adj := by
+  obtain ⟨S, -, -, -, h1, -⟩ := k2_sweep_cut_QA
+  exact ⟨S, h1, by rw [h1, k2_cheegerConstant_eq_one_QA]⟩
+
+end FiedlerPhaseC

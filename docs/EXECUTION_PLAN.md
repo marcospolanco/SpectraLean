@@ -6,7 +6,7 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**None — the resistance-metric proposal is COMPLETE (delivered this
+**None — the sweep-cut-extraction proposal is COMPLETE (delivered this
 run; see the top delivered entry). The Active priority table again
 holds no High rows and no Medium rows — every remaining row is a Low
 blocked on a human or technical decision an autonomous Lean-work run
@@ -15,15 +15,110 @@ cannot make. Next run: fall through to the center-out SGT policy
 on record are unchanged — directed-axis mixing/rate work (gated on a
 primitivity-shaped admission — `perron_frobenius` deliberately claims no
 strict dominance), the YWS-literal *pairwise* set shape (honestly
-blocked per `proposals/cluster-projector.md` Step 0: an out-of-`S`
-A-eigenvalue can sit inside `S`'s range, and whether the shape is true
-at all is open to this repo), and any named consumer that prices the
-wide-band minimax filter designs. Backlog item 7's remaining electrical
-items (Matrix–Tree, Kirchhoff network theorems) stay gated on a named
-consumer.**
+blocked per `proposals/cluster-projector.md` Step 0), and any named
+consumer that prices the wide-band minimax filter designs. The
+sweep-cut proposal's priced follow-ons (the computable sweep
+enumeration, gated on a consumer; the irregular conductance shape) stay
+gated. Backlog item 7's remaining electrical items (Matrix–Tree,
+Kirchhoff network theorems) stay gated on a named consumer.**
 ---
 
 ## Delivered milestones (most recent first)
+
+**Sweep-cut extraction — the explicit Fiedler level-set cut; backlog
+item 4's named strengthening and the Fiedler module header's own
+recorded follow-on; the proposal COMPLETE, Steps 0+1 in one run (run 1,
+2026-08-24, run `20260824T210106Z-run-1`;
+`proposals/sweep-cut-extraction.md`, new this run and selected per the
+empty High/Medium queue by the center-out policy — the standing handoff
+candidates gated or honestly blocked while the backlog and module
+header name exactly this strengthening): DELIVERED — pure hard crust,
+zero new axioms (count stays 9; `#print axioms` via
+`wip/sweep_axcheck.lean` on all 5 public + 22 QA declarations:
+`propext, Classical.choice, Quot.sound` only, every one). QA
+1999 → 2021 (+22 across `Cheeger_QA`/`Fiedler_QA`, no new file). The
+certified Cheeger cut is now an *explicit swept Fiedler level set* —
+the object the spectral-partitioning algorithm actually returns.**
+
+**Delivered:** the new `SweepExtraction` section of
+`Scaffold/Mathlib/GraphTheory/Cheeger.lean` (**no new imports**) —
+`mem_of_posPart_sq`/`mem_of_negPart_sq` (the level-set conversions: a
+superlevel set of `(x−m)⁺²` at `t > 0` *is* a closed superlevel set of
+`x` at `m + √t`, and dually), **`sweep_level_extract`** (the per-part
+extraction: for any `y` with minority closed superlevel sets — exactly
+`coarea_core`'s hypothesis — some level set `S = {i : t ≤ y i²}` at a
+positive `t` attains `conductance S² ≤ E'(y)/(d·M)`, by attainment
+over the finitely many positive values of `y²`
+(`Finset.exists_min_image`), the covering fact that every closed
+superlevel set equals one at an attained value (`Finset.min'`), and a
+non-strict layer-cake integration cloned from `coarea_core`'s own
+proof, closed by Component A), and **`cheeger_sweep_cut`** (the median
+assembly: for any `x ⊥ 1 ≠ 0`, a closed superlevel or sublevel set of
+`x` itself with `conductance S² ≤ 2·R_{L_sym}(x)` — *the same constant
+as `cheeger_sweep`* with the witness an explicit member of the sweep
+family; the median parts supply L1's hypothesis verbatim, the product
+test picks the part, and the fused contraction + norm split + Step-1a
+normalization close). Plus the new Phase C section of
+`Scaffold/Mathlib/GraphTheory/Fiedler.lean`: **`fiedler_sweep_cut`** —
+on every connected `d`-regular graph, a closed superlevel or sublevel
+set of the Fiedler vector with `conductance S² ≤ 2·lambda2/d`, the
+algorithm-facing strengthening of `cheeger_cut_existence` composed
+through the Phase B Rayleigh bridge. The module header's recorded
+follow-on sentence is updated to point at the delivered theorem.
+
+**QA (+22):** all five proposal-mandated witnesses — (1) the L1
+extracted set *forced* to `{0}` on `C₄` at `cycPos = ![1,0,0,0]` by
+the level-membership iff (the subset route), conductance `1` raw
+against bound `4/(2·1) = 2`; (2) the L2 family characterized at
+`cycSweepX` (`{0}`/`{2}`/`{0,1,3}`/`{1,2,3}`, all conductance `1`,
+honestly inside bound `2·R = 2`, *not* the global optimum `1/2`); (3)
+at `cycX2 = ![1,1,−1,−1]` the family is exactly the two dominant
+halves and the swept cut **ties the exhaustively computed global
+optimum** `1/2` — the two fixtures marking both ends of the sweep's
+quality range; (4) the **orthogonality fence refuted in proved form**
+at `x = onesVec` (Rayleigh `0`; the constant vector's sweep family has
+no nonempty proper member at all, so the hypothesis-free conclusion is
+false for *every* candidate); (5) on `K₂` the swept cut identified as
+a singleton of conductance `1`, the swept family characterized through
+the Fiedler antisymmetry pins (an equal-entries eigenvector would make
+the family *empty* — no theorem of this shape could hold), and the
+optimality tie `conductance S = cheegerConstant (K₂) = 1`.
+
+**Verification:** spike first (`wip/sweep_spike.lean`, several rounds
+to green; the fixes recorded in the proposal's pin-technique list —
+`Finset.exists_min'` absent at the pin, the two-step filtered-image
+destructuring, `Fintype.sum_prod_type'`'s at-hypothesis direction, the
+abs-form `sq_le_sq`, `min`-stranded `norm_num` divisions, the
+literal-facts-at-variable-index trap closed by
+`eq_univ_iff_forall`/`eq_empty_iff_forall_not_mem`, and
+`add_pos`/`hS.elim` replacements); `lake env lean` on both public
+modules and both QA files — zero errors, zero warnings each (the
+Cheeger module's one line-44 linter note verified present at HEAD);
+explicit `lake build` targets all ✔ (2189/2189, 2194/2194, 2196/2196);
+`#print axioms` via `wip/sweep_axcheck.lean` on all 27 accessible
+declarations — the standard three only; **full `lake build` ✔ (2261
+targets, "Build completed successfully")**; `lint_axioms` (**9**,
+unchanged), `check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**2021/9/0**, idempotent). Records updated: the proposal
+(status header COMPLETE + the delivery record with the pin-technique
+list and priced follow-ons), `proposals/README.md` (the Delivered row;
+the progress paragraph), README (2021; the status paragraph's
+sweep-extraction clause; the module-table row), the radar (QA axis
+synced 1999/51 → 2021/51 and the axis-4 Phase C delivery sentence,
+both held), the scoreboard (four verification rows + the
+interpretation bullet), `index/map/spectral_graph.md` (3 declaration
+rows + the Phase A–C header), backlog item 4 (the Phase C delivery),
+the Fiedler module header, this plan, and the activity log. Nothing
+committed; the prior runs' uncommitted deliveries preserved untouched.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — the standing gated candidates (primitivity-shaped
+admission for directed mixing; the honestly-blocked pairwise set
+shape; a named consumer pricing the wide-band minimax filter designs),
+the sweep-cut proposal's priced follow-ons (the computable sweep
+enumeration, gated on a consumer naming what it unlocks; the irregular
+conductance shape), or a fresh center-out candidate per
+`docs/6_SGT_BACKLOG.md`.
 
 **Resistance metric — the maximum principle, the definiteness residual,
 and the triangle inequality; backlog item 7's two named non-gated

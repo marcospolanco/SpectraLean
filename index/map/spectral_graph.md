@@ -456,6 +456,8 @@ Real definitions: `regularNormalizedLaplacian`, `cutTestVector`.
 | `hardDirection_perPart` | theorem (2026-08-23, hard-direction Step 1c) | the per-part bound `φ²·d·∑ y i² ≤ E'(y)` — `coarea_core` (below) composed with Component A (above) through the regularity bridge, the zero-norm case discharged by nonnegativity; QA pins `1 ≤ 2` on `K₂` at the Step-1b equality fixture | [Chung](../sources/chung_spectral_graph.md) |
 | `posPart_add_negPart_sq`, `median_parts_norm` | theorem (2026-08-23, hard-direction Step 1c) | the norm split: pointwise `(x−m)⁺² + (m−x)⁺² = (x−m)²`, summed with `∑ x = 0` to `∑(x−m)⁺² + ∑(m−x)⁺² = ∑x² + n·m² ≥ ∑x²`; QA pins the exact `+4m²` remainder at `m = 0, 1` on `![1,−1,3,−3]` | [Chung](../sources/chung_spectral_graph.md) |
 | `cheeger_sweep` | theorem (2026-08-23, hard-direction Step 1c) | **the sweep lemma**: `φ²/2 ≤ R_{L_sym}(x)` for every nonzero `x ⊥ 1` — median split, per-part bounds summed through the Step-1a fused contraction, the norm split, and the `E'/(2d‖x‖²)` normalization (exact constant budget); QA on `K₂` (`1/2 ≤ 2`, against the pinned `λ₂`) and on `C₄` at `d = 2` (`φ²/2 ≤ 1/8 < 1 = R`) | [Chung](../sources/chung_spectral_graph.md) |
+| `sweep_level_extract` | theorem (2026-08-24, `proposals/sweep-cut-extraction.md`) | **the per-part sweep extraction**: for `y` with minority closed superlevel sets (exactly `coarea_core`'s hypothesis), some level set `S = {i : t ≤ y i²}` at a positive `t` attains `conductance S² ≤ E'(y)/(d·M)` — attainment over the finitely many positive values of `y²` (`Finset.exists_min_image`), the covering fact (every closed superlevel set equals one at an attained value, `Finset.min'`), a non-strict layer-cake integration cloned from `coarea_core`, and Component A; QA forces the extracted set to `{0}` on `C₄` through the level-membership iff, conductance `1` against bound `4/2 = 2` | [Chung](../sources/chung_spectral_graph.md) |
+| `cheeger_sweep_cut` | theorem (2026-08-24, `proposals/sweep-cut-extraction.md`) | **the sweep-cut theorem (median assembly)**: for any `x ⊥ 1`, `x ≠ 0`, a closed superlevel or sublevel set of `x` itself satisfies `conductance S² ≤ 2·R_{L_sym}(x)` — the same constant as `cheeger_sweep` with the witness an explicit member of the sweep family (the median parts supply `sweep_level_extract`'s hypothesis verbatim; the product test picks the part, degenerate single-part cases included; the fused contraction, norm split, and Step-1a normalization close). QA characterizes the family at `cycSweepX` (best swept cut `1` within bound `2`, not optimal) and `cycX2` (swept cut ties the global optimum `1/2`), and refutes the orthogonality-dropped form on the constant vector (empty family) | [Chung](../sources/chung_spectral_graph.md) |
 
 Statement-shape correction (2026-08-18): through 2026-08-17 both axioms
 stated the spectral side as `lambda2 (regularNormalizedLaplacian A d)`,
@@ -482,7 +484,7 @@ correction (the priced hand Fubini exists in the pin as
 drops (`hynonneg`, `hcard`). With both directions proved, the Chung
 source's rows are all proved theorems.
 
-### `Scaffold.Mathlib.GraphTheory.Fiedler` (Fiedler vector, Phases A and B)
+### `Scaffold.Mathlib.GraphTheory.Fiedler` (Fiedler vector, Phases A–C)
 
 The Fiedler-vector interface — proposal `fiedler-partitioning.md`
 Phase A (2026-08-18), all proved, no axioms. Real definitions:
@@ -507,6 +509,7 @@ importing `Cheeger`): the certified conductance cut, pure hard crust.
 | `fiedlerPartition_nonempty`, `fiedlerPartition_ne_univ` | connectivity corollaries: a genuine bipartition |
 | `fiedlerVector_rayleigh_regularNormalizedLaplacian` | **Phase B bridge:** `R_{L_sym}(f) = lambda2 / d` (unit norm × the quadratic-form transfer × the energy identity) |
 | `cheeger_cut_existence` | **Phase B, the certified conductance cut:** on every connected `d`-regular graph, `∃ S` nonempty proper with `conductance S ^ 2 ≤ 2 · lambda2 / d` — the classical Cheeger cut-existence corollary, composed from the proved sweep lemma at the Fiedler vector + `cheegerConstant_attained` (the sign cut itself is not certifiable from `lambda2` alone; the swept-level-set extraction is the named follow-on) |
+| `fiedler_sweep_cut` | **Phase C (2026-08-24, `proposals/sweep-cut-extraction.md`), the swept Fiedler cut:** on every connected `d`-regular graph, a *closed superlevel or sublevel set of the Fiedler vector* (the object the spectral-partitioning sweep returns, not the non-constructive minimizer) satisfies `conductance S ^ 2 ≤ 2 · lambda2 / d` — `cheeger_sweep_cut` at the Fiedler vector through the Phase B Rayleigh bridge; QA identifies the cut on `K₂` (singleton, conductance `1` = the pinned `cheegerConstant` — the sweep is exact there) and characterizes the swept family through the antisymmetry pins |
 
 `GraphTheory.Cheeger` additionally carries Phase B's enabling lemma:
 `cheegerConstant_attained` (the conductance `sInf` realized as a

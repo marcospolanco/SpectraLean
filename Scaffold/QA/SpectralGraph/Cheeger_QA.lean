@@ -1236,4 +1236,531 @@ theorem cheeger_lower_bound_edge_QA :
 
 end HardDirectionStep1c
 
+/-!
+## Sweep-extraction witnesses (`proposals/sweep-cut-extraction.md`)
+
+The swept-level-set extraction (`sweep_level_extract` and
+`cheeger_sweep_cut`, proved 2026-08-24 in `GraphTheory.Cheeger`)
+exercised on the `C₄` fixture: the per-part extraction's returned set
+*forced* through its level-membership iff, the assembled sweep family
+characterized at two orthogonal test vectors (at `cycX2` the swept cut
+ties the global optimum `1/2`; at `cycSweepX` the best swept cut is
+`1`, honestly inside the bound `2`), and the orthogonality hypothesis
+refuted on the constant vector — whose sweep family has no nonempty
+proper member at all, so the hypothesis-free conclusion is false for
+*every* set, not merely uncertified.
+-/
+
+section SweepExtractionQA
+
+/-- Conductance of either singleton on `C₄`: boundary `2` over the
+minority volume `2`. -/
+theorem cyc_conductance_single (i : Fin 4) :
+    conductance cycleAdj4 {i} = 1 := by
+  have hb : boundary cycleAdj4 {i} = 2 := by
+    fin_cases i
+    · exact cyc_boundary_0
+    · exact cyc_boundary_1
+    · exact cyc_boundary_2
+    · exact cyc_boundary_3
+  have hv : vol cycleAdj4 {i} = 2 := by
+    rw [vol, Finset.sum_singleton, cycleAdj4_deg i]
+  have hvc : vol cycleAdj4 ({i} : Finset (Fin 4))ᶜ = 6 := by
+    have h := vol_compl cycleAdj4 {i}
+    rw [hv, cyc_vol_univ] at h
+    linarith
+  rw [conductance, hb, hv, hvc, min_eq_left (by linarith : (2 : ℝ) ≤ 6)]
+  rw [div_self two_ne_zero]
+
+/-- Conductance of the adjacent pair `{2, 3}` on `C₄`. -/
+theorem cyc_conductance_23 :
+    conductance cycleAdj4 ({2, 3} : Finset (Fin 4)) = 1 / 2 := by
+  have hv : vol cycleAdj4 ({2, 3} : Finset (Fin 4)) = 4 := by
+    rw [vol]; simp [cycleAdj4_deg]; norm_num
+  have hvc : vol cycleAdj4 ({2, 3} : Finset (Fin 4))ᶜ = 4 := by
+    have h := vol_compl cycleAdj4 ({2, 3} : Finset (Fin 4))
+    rw [hv, cyc_vol_univ] at h
+    linarith
+  rw [conductance, cyc_boundary_23, hv, hvc, min_eq_left (le_refl (4 : ℝ))]
+  norm_num
+
+/-- Conductance of the triple `{0, 1, 3}` on `C₄`: boundary `2` over
+the minority (complement) volume `2`. -/
+theorem cyc_conductance_013 :
+    conductance cycleAdj4 ({0, 1, 3} : Finset (Fin 4)) = 1 := by
+  have hv : vol cycleAdj4 ({0, 1, 3} : Finset (Fin 4)) = 6 := by
+    rw [vol]; simp [cycleAdj4_deg]; norm_num
+  have hvc : vol cycleAdj4 ({0, 1, 3} : Finset (Fin 4))ᶜ = 2 := by
+    have h := vol_compl cycleAdj4 ({0, 1, 3} : Finset (Fin 4))
+    rw [hv, cyc_vol_univ] at h
+    linarith
+  rw [conductance, cyc_boundary_013, hv, hvc,
+    min_eq_right (by linarith : (2 : ℝ) ≤ 6)]
+  rw [div_self two_ne_zero]
+
+/-- Conductance of the triple `{1, 2, 3}` on `C₄`. -/
+theorem cyc_conductance_123 :
+    conductance cycleAdj4 ({1, 2, 3} : Finset (Fin 4)) = 1 := by
+  have hv : vol cycleAdj4 ({1, 2, 3} : Finset (Fin 4)) = 6 := by
+    rw [vol]; simp [cycleAdj4_deg]; norm_num
+  have hvc : vol cycleAdj4 ({1, 2, 3} : Finset (Fin 4))ᶜ = 2 := by
+    have h := vol_compl cycleAdj4 ({1, 2, 3} : Finset (Fin 4))
+    rw [hv, cyc_vol_univ] at h
+    linarith
+  rw [conductance, cyc_boundary_123, hv, hvc,
+    min_eq_right (by linarith : (2 : ℝ) ≤ 6)]
+  rw [div_self two_ne_zero]
+
+/-- **The sweep family of `cycSweepX`** (values `1, 0, -1, 0`): every
+nonempty proper closed superlevel or sublevel set is one of the four
+pinned cuts — each of conductance `1`. -/
+theorem cycSweepX_family (S : Finset (Fin 4)) (hS : S.Nonempty)
+    (hSc : Sᶜ.Nonempty)
+    (hfam : (∃ t : ℝ, ∀ i, i ∈ S ↔ t ≤ cycSweepX i) ∨
+      (∃ t : ℝ, ∀ i, i ∈ S ↔ cycSweepX i ≤ t)) :
+    S = ({0} : Finset (Fin 4)) ∨ S = ({2} : Finset (Fin 4))
+      ∨ S = ({0, 1, 3} : Finset (Fin 4)) ∨ S = ({1, 2, 3} : Finset (Fin 4)) := by
+  rcases hfam with ⟨t, ht⟩ | ⟨t, ht⟩
+  · by_cases hA : t ≤ cycSweepX 2
+    · exfalso
+      have hA' : t ≤ -1 := by rw [← cycSweepX_val_two]; exact hA
+      have h0 : (0 : Fin 4) ∈ S := by
+        refine (ht 0).2 ?_
+        rw [cycSweepX_val_zero]; linarith
+      have h1 : (1 : Fin 4) ∈ S := by
+        refine (ht 1).2 ?_
+        rw [cycSweepX_val_one]; linarith
+      have h2 : (2 : Fin 4) ∈ S := (ht 2).2 hA
+      have h3 : (3 : Fin 4) ∈ S := by
+        refine (ht 3).2 ?_
+        rw [cycSweepX_val_three]; linarith
+      have hEq : S = Finset.univ := Finset.eq_univ_iff_forall.2 (by
+        intro i
+        fin_cases i
+        · exact h0
+        · exact h1
+        · exact h2
+        · exact h3)
+      rw [hEq] at hSc
+      exact absurd hSc (by simp)
+    · by_cases hB : t ≤ cycSweepX 1
+      · refine Or.inr (Or.inr (Or.inl ?_))
+        have hB' : t ≤ 0 := by rw [← cycSweepX_val_one]; exact hB
+        have h0 : (0 : Fin 4) ∈ S := by
+          refine (ht 0).2 ?_
+          rw [cycSweepX_val_zero]; linarith
+        have h1 : (1 : Fin 4) ∈ S := (ht 1).2 hB
+        have h3 : (3 : Fin 4) ∈ S := by
+          refine (ht 3).2 ?_
+          rw [cycSweepX_val_three]; linarith
+        have h2 : (2 : Fin 4) ∉ S := fun hc => hA ((ht 2).1 hc)
+        apply Finset.ext
+        intro i
+        fin_cases i
+        · simp [h0]
+        · simp [h1]
+        · simp [h2]
+        · simp [h3]
+      · by_cases hC : t ≤ cycSweepX 0
+        · refine Or.inl ?_
+          have h0 : (0 : Fin 4) ∈ S := (ht 0).2 hC
+          have h1 : (1 : Fin 4) ∉ S := fun hc => hB ((ht 1).1 hc)
+          have h2 : (2 : Fin 4) ∉ S := fun hc => hA ((ht 2).1 hc)
+          have h3 : (3 : Fin 4) ∉ S := fun hc => hB ((ht 3).1 hc)
+          apply Finset.ext
+          intro i
+          fin_cases i
+          · simp [h0]
+          · simp [h1]
+          · simp [h2]
+          · simp [h3]
+        · exfalso
+          have h0 : (0 : Fin 4) ∉ S := fun hc => hC ((ht 0).1 hc)
+          have h1 : (1 : Fin 4) ∉ S := fun hc => hB ((ht 1).1 hc)
+          have h2 : (2 : Fin 4) ∉ S := fun hc => hA ((ht 2).1 hc)
+          have h3 : (3 : Fin 4) ∉ S := fun hc => hB ((ht 3).1 hc)
+          have hEq : S = ∅ := Finset.eq_empty_iff_forall_not_mem.2 (by
+            intro i hi
+            fin_cases i
+            · exact h0 hi
+            · exact h1 hi
+            · exact h2 hi
+            · exact h3 hi)
+          rw [hEq] at hS
+          simp at hS
+  · by_cases hA : cycSweepX 0 ≤ t
+    · exfalso
+      have hA' : 1 ≤ t := by rw [← cycSweepX_val_zero]; exact hA
+      have h0 : (0 : Fin 4) ∈ S := (ht 0).2 hA
+      have h1 : (1 : Fin 4) ∈ S := by
+        refine (ht 1).2 ?_
+        rw [cycSweepX_val_one]; linarith
+      have h2 : (2 : Fin 4) ∈ S := by
+        refine (ht 2).2 ?_
+        rw [cycSweepX_val_two]; linarith
+      have h3 : (3 : Fin 4) ∈ S := by
+        refine (ht 3).2 ?_
+        rw [cycSweepX_val_three]; linarith
+      have hEq : S = Finset.univ := Finset.eq_univ_iff_forall.2 (by
+        intro i
+        fin_cases i
+        · exact h0
+        · exact h1
+        · exact h2
+        · exact h3)
+      rw [hEq] at hSc
+      exact absurd hSc (by simp)
+    · by_cases hB : cycSweepX 1 ≤ t
+      · refine Or.inr (Or.inr (Or.inr ?_))
+        have hB' : 0 ≤ t := by rw [← cycSweepX_val_one]; exact hB
+        have h1 : (1 : Fin 4) ∈ S := (ht 1).2 hB
+        have h2 : (2 : Fin 4) ∈ S := by
+          refine (ht 2).2 ?_
+          rw [cycSweepX_val_two]; linarith
+        have h3 : (3 : Fin 4) ∈ S := by
+          refine (ht 3).2 ?_
+          rw [cycSweepX_val_three]; linarith
+        have h0 : (0 : Fin 4) ∉ S := fun hc => hA ((ht 0).1 hc)
+        apply Finset.ext
+        intro i
+        fin_cases i
+        · simp [h0]
+        · simp [h1]
+        · simp [h2]
+        · simp [h3]
+      · by_cases hC : cycSweepX 2 ≤ t
+        · refine Or.inr (Or.inl ?_)
+          have h2 : (2 : Fin 4) ∈ S := (ht 2).2 hC
+          have h0 : (0 : Fin 4) ∉ S := fun hc => hA ((ht 0).1 hc)
+          have h1 : (1 : Fin 4) ∉ S := fun hc => hB ((ht 1).1 hc)
+          have h3 : (3 : Fin 4) ∉ S := fun hc => hB ((ht 3).1 hc)
+          apply Finset.ext
+          intro i
+          fin_cases i
+          · simp [h0]
+          · simp [h1]
+          · simp [h2]
+          · simp [h3]
+        · exfalso
+          have h0 : (0 : Fin 4) ∉ S := fun hc => hA ((ht 0).1 hc)
+          have h1 : (1 : Fin 4) ∉ S := fun hc => hB ((ht 1).1 hc)
+          have h2 : (2 : Fin 4) ∉ S := fun hc => hC ((ht 2).1 hc)
+          have h3 : (3 : Fin 4) ∉ S := fun hc => hB ((ht 3).1 hc)
+          have hEq : S = ∅ := Finset.eq_empty_iff_forall_not_mem.2 (by
+            intro i hi
+            fin_cases i
+            · exact h0 hi
+            · exact h1 hi
+            · exact h2 hi
+            · exact h3 hi)
+          rw [hEq] at hS
+          simp at hS
+
+theorem cycX2_ne_zero : cycX2 ≠ 0 := by
+  intro h
+  have h0 : (cycX2 : Fin 4 → ℝ) 0 = 0 := congrFun h 0
+  simp [cycX2] at h0
+
+theorem cycX2_dot : Matrix.dotProduct cycX2 cycX2 = 4 := by
+  simp [Matrix.dotProduct, Fin.sum_univ_four, cycX2]; norm_num
+
+/-- The Rayleigh quotient of `cycX2` (`d = 2`): `16 / (2 · 2 · 4) = 1`
+through the Step-1a normalization and the pinned energy `16`. -/
+theorem cycX2_rayleigh :
+    rayleigh (regularNormalizedLaplacian cycleAdj4 2) cycX2 = 1 := by
+  rw [rayleigh_regularNormalizedLaplacian_eq cycleAdj4 cycleAdj4_isSymm 2
+    cycleAdj4_deg (by norm_num) cycX2_ne_zero, cycX2_E', cycX2_dot]
+  norm_num
+
+/-- **The sweep family of `cycX2`** (values `1, 1, -1, -1`): the
+nonempty proper members are exactly the two dominant halves. -/
+theorem cycX2_family (S : Finset (Fin 4)) (hS : S.Nonempty)
+    (hSc : Sᶜ.Nonempty)
+    (hfam : (∃ t : ℝ, ∀ i, i ∈ S ↔ t ≤ cycX2 i) ∨
+      (∃ t : ℝ, ∀ i, i ∈ S ↔ cycX2 i ≤ t)) :
+    S = ({0, 1} : Finset (Fin 4)) ∨ S = ({2, 3} : Finset (Fin 4)) := by
+  rcases hfam with ⟨t, ht⟩ | ⟨t, ht⟩
+  · by_cases hA : t ≤ cycX2 2
+    · exfalso
+      have hA' : t ≤ -1 := by rw [← show cycX2 2 = -1 by rfl]; exact hA
+      have h0 : (0 : Fin 4) ∈ S := by
+        refine (ht 0).2 ?_
+        rw [show cycX2 0 = 1 by rfl]; linarith
+      have h1 : (1 : Fin 4) ∈ S := by
+        refine (ht 1).2 ?_
+        rw [show cycX2 1 = 1 by rfl]; linarith
+      have h2 : (2 : Fin 4) ∈ S := (ht 2).2 hA
+      have h3 : (3 : Fin 4) ∈ S := by
+        refine (ht 3).2 ?_
+        rw [show cycX2 3 = -1 by rfl]; linarith
+      have hEq : S = Finset.univ := Finset.eq_univ_iff_forall.2 (by
+        intro i
+        fin_cases i
+        · exact h0
+        · exact h1
+        · exact h2
+        · exact h3)
+      rw [hEq] at hSc
+      exact absurd hSc (by simp)
+    · by_cases hB : t ≤ cycX2 0
+      · refine Or.inl ?_
+        have h0 : (0 : Fin 4) ∈ S := (ht 0).2 hB
+        have h1 : (1 : Fin 4) ∈ S := (ht 1).2 (by
+          rw [show cycX2 1 = cycX2 0 from rfl]; exact hB)
+        have h2 : (2 : Fin 4) ∉ S := fun hc => hA ((ht 2).1 hc)
+        have h3 : (3 : Fin 4) ∉ S := fun hc => hA ((ht 3).1 hc)
+        apply Finset.ext
+        intro i
+        fin_cases i
+        · simp [h0]
+        · simp [h1]
+        · simp [h2]
+        · simp [h3]
+      · exfalso
+        have h0 : (0 : Fin 4) ∉ S := fun hc => hB ((ht 0).1 hc)
+        have h1 : (1 : Fin 4) ∉ S := fun hc => hB ((ht 1).1 hc)
+        have h2 : (2 : Fin 4) ∉ S := fun hc => hA ((ht 2).1 hc)
+        have h3 : (3 : Fin 4) ∉ S := fun hc => hA ((ht 3).1 hc)
+        have hEq : S = ∅ := Finset.eq_empty_iff_forall_not_mem.2 (by
+          intro i hi
+          fin_cases i
+          · exact h0 hi
+          · exact h1 hi
+          · exact h2 hi
+          · exact h3 hi)
+        rw [hEq] at hS
+        simp at hS
+  · by_cases hA : cycX2 0 ≤ t
+    · exfalso
+      have hA' : 1 ≤ t := by rw [← show cycX2 0 = 1 by rfl]; exact hA
+      have h0 : (0 : Fin 4) ∈ S := (ht 0).2 hA
+      have h1 : (1 : Fin 4) ∈ S := by
+        refine (ht 1).2 ?_
+        rw [show cycX2 1 = 1 by rfl]; linarith
+      have h2 : (2 : Fin 4) ∈ S := by
+        refine (ht 2).2 ?_
+        rw [show cycX2 2 = -1 by rfl]; linarith
+      have h3 : (3 : Fin 4) ∈ S := by
+        refine (ht 3).2 ?_
+        rw [show cycX2 3 = -1 by rfl]; linarith
+      have hEq : S = Finset.univ := Finset.eq_univ_iff_forall.2 (by
+        intro i
+        fin_cases i
+        · exact h0
+        · exact h1
+        · exact h2
+        · exact h3)
+      rw [hEq] at hSc
+      exact absurd hSc (by simp)
+    · by_cases hB : cycX2 2 ≤ t
+      · refine Or.inr ?_
+        have h2 : (2 : Fin 4) ∈ S := (ht 2).2 hB
+        have h3 : (3 : Fin 4) ∈ S := (ht 3).2 (by
+          rw [show cycX2 3 = cycX2 2 from rfl]; exact hB)
+        have h0 : (0 : Fin 4) ∉ S := fun hc => hA ((ht 0).1 hc)
+        have h1 : (1 : Fin 4) ∉ S := fun hc => hA ((ht 1).1 hc)
+        apply Finset.ext
+        intro i
+        fin_cases i
+        · simp [h0]
+        · simp [h1]
+        · simp [h2]
+        · simp [h3]
+      · exfalso
+        have h0 : (0 : Fin 4) ∉ S := fun hc => hA ((ht 0).1 hc)
+        have h1 : (1 : Fin 4) ∉ S := fun hc => hA ((ht 1).1 hc)
+        have h2 : (2 : Fin 4) ∉ S := fun hc => hB ((ht 2).1 hc)
+        have h3 : (3 : Fin 4) ∉ S := fun hc => hB ((ht 3).1 hc)
+        have hEq : S = ∅ := Finset.eq_empty_iff_forall_not_mem.2 (by
+          intro i hi
+          fin_cases i
+          · exact h0 hi
+          · exact h1 hi
+          · exact h2 hi
+          · exact h3 hi)
+        rw [hEq] at hS
+        simp at hS
+
+/-- **`cheeger_sweep_cut` instantiated at `cycSweepX`:** whatever set
+the theorem returns lies in the characterized family, hence has
+conductance exactly `1`, and the theorem bound reads `1 ≤ 2 · R = 2`
+against the pinned `R = 1` (`cycSweepX_rayleigh`). The swept cut here
+is *not* the global optimum (`1/2`, the adjacent pairs) — the theorem
+honestly does not promise that. -/
+theorem sweep_cut_cycle_QA :
+    ∃ S : Finset (Fin 4), S.Nonempty ∧ Sᶜ.Nonempty ∧
+      ((∃ t : ℝ, ∀ i, i ∈ S ↔ t ≤ cycSweepX i) ∨
+        (∃ t : ℝ, ∀ i, i ∈ S ↔ cycSweepX i ≤ t)) ∧
+      conductance cycleAdj4 S = 1 ∧
+      conductance cycleAdj4 S ^ 2
+        ≤ 2 * rayleigh (regularNormalizedLaplacian cycleAdj4 2) cycSweepX := by
+  obtain ⟨S, hS, hSc, hfam, hle⟩ :=
+    cheeger_sweep_cut cycleAdj4 cycleAdj4_isSymm cycleAdj4_nonneg 2
+      cycleAdj4_deg (by norm_num) cycSweepX_ne_zero cycSweepX_orth
+  rcases cycSweepX_family S hS hSc hfam with h | h | h | h
+  · exact ⟨S, hS, hSc, hfam, by rw [h]; exact cyc_conductance_single 0, hle⟩
+  · exact ⟨S, hS, hSc, hfam, by rw [h]; exact cyc_conductance_single 2, hle⟩
+  · exact ⟨S, hS, hSc, hfam, by rw [h]; exact cyc_conductance_013, hle⟩
+  · exact ⟨S, hS, hSc, hfam, by rw [h]; exact cyc_conductance_123, hle⟩
+
+/-- The bound in numbers: `1 = conductance S ^ 2 ≤ 2 · 1 = 2 · R`, both
+endpoints independently pinned. -/
+theorem sweep_cut_cycle_numeric_QA :
+    ∃ S : Finset (Fin 4), conductance cycleAdj4 S ^ 2 = 1 ∧ (1 : ℝ) ≤ 2 * 1 := by
+  obtain ⟨S, -, -, -, h1, h2⟩ := sweep_cut_cycle_QA
+  have h3 : conductance cycleAdj4 S ^ 2 = 1 := by rw [h1]; norm_num
+  rw [cycSweepX_rayleigh] at h2
+  rw [h3] at h2
+  exact ⟨S, h3, h2⟩
+
+/-- **`cheeger_sweep_cut` instantiated at `cycX2`, where the sweep is
+optimal:** the returned set lies in the two-member family, hence has
+conductance exactly `1/2` — *tied with the exhaustively computed best
+cut* `cyc_conductance_01` — against the honest bound `2 · R = 2`. The
+theorem does not promise optimality; this fixture exhibits it anyway,
+marking the tight end of the family's quality range. -/
+theorem sweep_cut_cycle_optimal_QA :
+    ∃ S : Finset (Fin 4), S.Nonempty ∧ Sᶜ.Nonempty ∧
+      ((∃ t : ℝ, ∀ i, i ∈ S ↔ t ≤ cycX2 i) ∨
+        (∃ t : ℝ, ∀ i, i ∈ S ↔ cycX2 i ≤ t)) ∧
+      conductance cycleAdj4 S = 1 / 2 ∧
+      conductance cycleAdj4 S ^ 2
+        ≤ 2 * rayleigh (regularNormalizedLaplacian cycleAdj4 2) cycX2 := by
+  obtain ⟨S, hS, hSc, hfam, hle⟩ :=
+    cheeger_sweep_cut cycleAdj4 cycleAdj4_isSymm cycleAdj4_nonneg 2
+      cycleAdj4_deg (by norm_num) cycX2_ne_zero (by
+        simp [Matrix.dotProduct, onesVec, Fin.sum_univ_four, cycX2])
+  rcases cycX2_family S hS hSc hfam with h | h
+  · exact ⟨S, hS, hSc, hfam, by rw [h]; exact cyc_conductance_01, hle⟩
+  · exact ⟨S, hS, hSc, hfam, by rw [h]; exact cyc_conductance_23, hle⟩
+
+/-- **The orthogonality fence (proved refutation).** Dropping `x ⊥ 1`,
+the hypothesis-free conclusion at the constant vector `onesVec` (whose
+Rayleigh quotient is `0`, so the bound demanded is `conductance ≤ 0`)
+is false for *every* candidate: the constant vector's sweep family has
+no nonempty proper member at all — superlevels and sublevels alike
+degenerate to `univ` or `∅`. Exactly `horth` isolated. -/
+theorem sweep_cut_orth_dropped_refuted_QA :
+    ¬ (∃ S : Finset (Fin 4), S.Nonempty ∧ Sᶜ.Nonempty ∧
+      ((∃ t : ℝ, ∀ i, i ∈ S ↔ t ≤ onesVec i) ∨
+        (∃ t : ℝ, ∀ i, i ∈ S ↔ onesVec i ≤ t)) ∧
+      conductance cycleAdj4 S ^ 2
+        ≤ 2 * rayleigh (regularNormalizedLaplacian cycleAdj4 2) onesVec) := by
+  rintro ⟨S, hS, hSc, hfam, -⟩
+  have hone : ∀ i : Fin 4, onesVec i = 1 := fun i => rfl
+  rcases hfam with ⟨t, ht⟩ | ⟨t, ht⟩
+  · by_cases h : t ≤ 1
+    · have hEq : S = Finset.univ := Finset.eq_univ_iff_forall.2 (by
+        intro i
+        exact (ht i).2 (by rw [hone i]; exact h))
+      rw [hEq] at hSc
+      simp at hSc
+    · have hEq : S = ∅ := Finset.eq_empty_iff_forall_not_mem.2 (by
+        intro i hi
+        exact h ((ht i).1 hi))
+      rw [hEq] at hS
+      simp at hS
+  · by_cases h : 1 ≤ t
+    · have hEq : S = Finset.univ := Finset.eq_univ_iff_forall.2 (by
+        intro i
+        exact (ht i).2 (by rw [hone i]; exact h))
+      rw [hEq] at hSc
+      simp at hSc
+    · have hEq : S = ∅ := Finset.eq_empty_iff_forall_not_mem.2 (by
+        intro i hi
+        exact h ((ht i).1 hi))
+      rw [hEq] at hS
+      simp at hS
+
+/-- Test function for the per-part extraction: the positive part of
+`cycSweepX` at the median `0`. -/
+def cycPos : Fin 4 → ℝ := ![1, 0, 0, 0]
+
+theorem cycPos_sq (i : Fin 4) :
+    cycPos i ^ 2 = if i = 0 then 1 else 0 := by
+  fin_cases i <;> simp [cycPos]
+
+theorem cycPos_minority : ∀ t : ℝ, 0 < t →
+    2 * (Finset.univ.filter (fun i => t ≤ cycPos i ^ 2)).card
+      ≤ Fintype.card (Fin 4) := by
+  intro t ht
+  have hsub : (Finset.univ.filter (fun i => t ≤ cycPos i ^ 2))
+      ⊆ ({0} : Finset (Fin 4)) := by
+    intro i hi
+    by_cases h0 : i = 0
+    · simp [h0]
+    · exfalso
+      have hc := (Finset.mem_filter.1 hi).2
+      rw [cycPos_sq i, if_neg h0] at hc
+      linarith
+  have hcard := Finset.card_le_card hsub
+  simp at hcard
+  rw [Fintype.card_fin]
+  omega
+
+theorem cycPos_M : ∑ i, cycPos i ^ 2 = 1 := by
+  simp [Fin.sum_univ_four, cycPos]
+
+theorem cycPos_E' :
+    ∑ i, ∑ j, cycleAdj4 i j * (cycPos i - cycPos j) ^ 2 = 4 := by
+  simp only [Fin.sum_univ_four, cycleAdj4, cycPos]; norm_num
+
+/-- **`sweep_level_extract` instantiated at `cycPos`:** the level
+membership iff *forces* the extracted set — the filter is a subset of
+`{0}` (the sole positive value), and nonemptiness rules out `∅`, so the
+returned cut is pinned, its conductance computed to `1` raw, and the
+theorem bound reads `1 ≤ 4 / (2 · 1) = 2`. -/
+theorem sweep_extract_cycle_QA :
+    ∃ S : Finset (Fin 4), ∃ t : ℝ, 0 < t ∧
+      (∀ i, i ∈ S ↔ t ≤ cycPos i ^ 2) ∧
+      S.Nonempty ∧ Sᶜ.Nonempty ∧
+      conductance cycleAdj4 S = 1 ∧
+      conductance cycleAdj4 S ^ 2
+        ≤ (∑ i, ∑ j, cycleAdj4 i j * (cycPos i - cycPos j) ^ 2)
+          / (2 * ∑ i, cycPos i ^ 2) := by
+  obtain ⟨S, t, ht, hmem, hS, hSc, hcond⟩ :=
+    sweep_level_extract cycleAdj4 cycleAdj4_isSymm cycleAdj4_nonneg 2
+      cycleAdj4_deg (by norm_num) cycPos cycPos_minority
+      (by rw [cycPos_M]; norm_num)
+  rcases le_or_lt t 1 with h1 | h1
+  · have hsub : S ⊆ ({0} : Finset (Fin 4)) := by
+      intro i hi
+      by_cases h0 : i = 0
+      · simp [h0]
+      · exfalso
+        have hc := (hmem i).1 hi
+        rw [cycPos_sq i, if_neg h0] at hc
+        linarith
+    rcases Finset.subset_singleton_iff.1 hsub with hE | hE
+    · rw [hE] at hS
+      simp at hS
+    · exact ⟨S, t, ht, hmem, hS, hSc, by rw [hE]; exact cyc_conductance_single 0,
+        hcond⟩
+  · exfalso
+    have hsub : S ⊆ (∅ : Finset (Fin 4)) := by
+      intro i hi
+      exfalso
+      have hc := (hmem i).1 hi
+      rw [cycPos_sq i] at hc
+      by_cases h0 : i = 0
+      · rw [if_pos h0] at hc
+        exact h1.not_le hc
+      · rw [if_neg h0] at hc
+        linarith
+    rw [Finset.subset_empty.1 hsub] at hS
+    simp at hS
+
+/-- The per-part bound in numbers: `1 = conductance S ^ 2 ≤ 4 / 2`,
+both endpoints independently computed. -/
+theorem sweep_extract_cycle_numeric_QA :
+    ∃ S : Finset (Fin 4), conductance cycleAdj4 S ^ 2 = 1
+      ∧ (1 : ℝ) ≤ 4 / (2 * 1) := by
+  obtain ⟨S, -, -, -, -, -, h1, h2⟩ := sweep_extract_cycle_QA
+  rw [cycPos_E', cycPos_M] at h2
+  have h3 : conductance cycleAdj4 S ^ 2 = 1 := by rw [h1]; norm_num
+  rw [h3] at h2
+  exact ⟨S, h3, h2⟩
+
+end SweepExtractionQA
+
 end SpectralGraphTheory.QA

@@ -121,6 +121,24 @@ sparsest-cut statement shapes; cut/measure duality interfaces used by
 local algorithms. Each variant must name the algorithm consumer that
 needs it before admission.
 
+*Update (2026-08-25):* **the irregular (volume-weighted) Cheeger *upper*
+bound delivered** (`proposals/irregular-cheeger-variational-transfer.md`
+Steps 0+1, found committed-but-unindexed and pursued per priority item
+0; zero new axioms): `cheeger_upper_bound_normalized` —
+`secondEval (normalizedLaplacian A) ≤ 2 * cheegerConstant A` on
+arbitrary symmetric nonnegative positive-degree graphs, no regularity
+and no connectivity — through the degree-stretched cut indicator
+`√D · cutTestVector` (orthogonality to the true kernel vector `√D · 1`
+by a volume identity needing no regularity), the new general-kernel
+`secondEval_le_rayleigh_of_ker`, and the `VariationalTransfer`
+congruence engine's first theorem consumers; QA 2067 → 2152 on the
+genuinely-irregular `P₃` fixture with an independent eigenpair spectral
+route and both hypothesis fences. The Step-0 verdict: definitions were
+already volume-general, only the inequality was new. The irregular
+*hard* direction (`φ²/2 ≤ λ₂` in the volume-weighted measure — the
+volume-weighted coarea/median re-derivation) is the item's priced
+follow-on program.
+
 *Unlocks:* cut-based algorithm interfaces; localization results that
 consume random-walk returns.
 

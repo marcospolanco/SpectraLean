@@ -214,6 +214,43 @@ theorem degreeSqrt_mul_normalizedLaplacian_mul_degreeSqrt
     Matrix.mul_one, hkey, degreeSqrt_mul_degreeSqrt A
       (fun i => le_of_lt (hd i)), laplacian]
 
+/-- The left-multiplied congruence: `L_sym √D = (1/√D) L`, the identity
+through which the normalized Laplacian's kernel is located — multiply the
+combinatorial kernel equation by `1/√D`. -/
+theorem normalizedLaplacian_mul_degreeSqrt (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) :
+    normalizedLaplacian A * degreeSqrt A
+      = degreeInvSqrt A * laplacian A := by
+  have h1 : degreeInvSqrt A * (degreeSqrt A * normalizedLaplacian A
+      * degreeSqrt A)
+      = normalizedLaplacian A * degreeSqrt A := by
+    rw [show degreeSqrt A * normalizedLaplacian A * degreeSqrt A
+        = degreeSqrt A * (normalizedLaplacian A * degreeSqrt A) from
+        Matrix.mul_assoc _ _ _]
+    rw [← Matrix.mul_assoc, degreeInvSqrt_mul_degreeSqrt A hd,
+      Matrix.one_mul]
+  rw [← degreeSqrt_mul_normalizedLaplacian_mul_degreeSqrt A hd, h1]
+
+/-- **The kernel vector of the normalized Laplacian is the stretched
+constant `√D · onesVec`, not `onesVec`.** This is the structural fact
+that separates the irregular from the regular variational picture: on a
+genuinely irregular graph `L_sym *ᵥ onesVec ≠ 0`, so the delivered
+`secondEval_le_rayleigh` (orthogonality to `onesVec`) cannot express
+Cheeger-type test-vector arguments, while this vector can. Proof: the
+left-multiplied congruence moves the combinatorial row-sum identity
+(`laplacian_ones_in_kernel`) across the degree scaling. First consumer:
+the irregular Cheeger upper bound
+(`GraphTheory.VariationalTransfer.cheeger_upper_bound_normalized`,
+2026-08-25). -/
+theorem normalizedLaplacian_mulVec_degreeSqrt_onesVec (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) :
+    normalizedLaplacian A *ᵥ (degreeSqrt A *ᵥ onesVec) = 0 := by
+  have h1 : (normalizedLaplacian A * degreeSqrt A) *ᵥ onesVec = 0 := by
+    rw [normalizedLaplacian_mul_degreeSqrt A hd, ← Matrix.mulVec_mulVec,
+      laplacian_ones_in_kernel A, Matrix.mulVec_zero]
+  rw [Matrix.mulVec_mulVec]
+  exact h1
+
 /-- Agreement with the regular cone: on a `d`-regular graph with
 positive degree, the general normalized Laplacian *is*
 `regularNormalizedLaplacian A d` (the two normalizations coincide

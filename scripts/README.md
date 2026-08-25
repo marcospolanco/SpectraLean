@@ -8,6 +8,7 @@ These scripts maintain documentation and policy metadata; they do not replace Le
 | `check_markdown_links.py` | Check repository-local links in active Markdown documentation. |
 | `lint_axioms.py` | Report axiom placement and index-coverage issues. |
 | `check_citations.py` | Check public axioms for the required citation-comment form. |
+| `check_build_completeness.py` | Fail if any `Scaffold/**/*.lean` source has a missing or mtime-stale `.olean` artifact — run after every full `lake build` (a successful exit alone does not certify on-disk sources). |
 | `zquota` | Query Z.ai quota and provide an automation-safe start gate. |
 | `opencode-pursue` | Run or resume bounded non-interactive pursuit sessions with GLM-5.3 at high reasoning effort. |
 | `io.github.marcospolanco.scaffold-pursue.plist` | Per-user macOS LaunchAgent template for hourly quota-aware pursuit. |

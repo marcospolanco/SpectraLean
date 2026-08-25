@@ -717,6 +717,17 @@ theorem vol_nonneg (A : WAdj (V := V)) (hnonneg : ∀ i j, 0 ≤ A i j)
     (S : Finset V) : 0 ≤ vol A S :=
   Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ => hnonneg i j
 
+omit [DecidableEq V] in
+/-- A nonempty vertex set has positive volume when every degree is
+positive — the regularity-free positivity replacement for
+`vol_pos_of_regular`, consumed by the irregular Cheeger upper bound
+(`GraphTheory.VariationalTransfer`) among others. -/
+theorem vol_pos_of_pos_deg (A : WAdj (V := V)) (hd : ∀ i, 0 < deg A i)
+    {S : Finset V} (hS : S.Nonempty) : 0 < vol A S := by
+  obtain ⟨i, hi⟩ := hS
+  exact Finset.sum_pos' (fun j _ => le_of_lt (hd j))
+    ⟨i, hi, hd i⟩
+
 theorem boundary_nonneg (A : WAdj (V := V)) (hnonneg : ∀ i j, 0 ≤ A i j)
     (S : Finset V) : 0 ≤ boundary A S :=
   Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ => hnonneg i j
@@ -1345,13 +1356,53 @@ theorem evals_first_mul_dotProduct_le_quadForm {M : Matrix V V ℝ} (hM : M.IsSy
   exact Finset.sum_le_sum fun i _ =>
     mul_le_mul_of_nonneg_right (evals_first_le_eigvalOf hM hcard i) (sq_nonneg _)
 
+/-- **General-kernel orthogonality.** For any symmetric matrix and any
+kernel vector `w` (`M *ᵥ w = 0`), eigenvectors at nonzero eigenvalues are
+orthogonal to `w`. Proof: Parseval on the pair `(v i, M *ᵥ w)`, with the
+eigenaction resolved and the kernel equation killing the left side. The
+`onesVec` instance below adds only the specialization `w = onesVec`; the
+general form is what operators with a non-constant kernel vector — the
+normalized Laplacian `L_sym` of an irregular graph, whose kernel is
+spanned by `√D · onesVec` — consume for variational statements
+(`secondEval_le_rayleigh_of_ker`). -/
+theorem eigvecOf_ortho_of_mulVec_eq_zero {M : Matrix V V ℝ}
+    (hM : M.IsSymm) {w : V → ℝ} (hker : M *ᵥ w = 0) {i : V}
+    (hne : eigvalOf M hM i ≠ 0) :
+    Matrix.dotProduct (eigvecOf M hM i) w = 0 := by
+  -- Parseval on the pair (v i, M *ᵥ w), with the eigenaction resolved
+  have hparseval : Matrix.dotProduct (eigvecOf M hM i) (M *ᵥ w)
+      = ∑ j : V, Matrix.dotProduct (eigvecOf M hM j) (eigvecOf M hM i)
+        * (eigvalOf M hM j
+          * Matrix.dotProduct (eigvecOf M hM j) w) := by
+    rw [dotProduct_eigvecOf hM (eigvecOf M hM i) (M *ᵥ w)]
+    simp only [dotProduct_eigvecOf_mulVec hM]
+  rw [hker, Matrix.dotProduct_zero] at hparseval
+  -- the sum collapses to the i-term by orthonormality
+  have hvanish : ∀ j ∈ (Finset.univ : Finset V), j ≠ i →
+      (Matrix.dotProduct (eigvecOf M hM j) (eigvecOf M hM i)
+        * (eigvalOf M hM j
+          * Matrix.dotProduct (eigvecOf M hM j) w)) = 0 := by
+    intro j _ hj
+    have hij : eigvecOf M hM j ⬝ᵥ eigvecOf M hM i = 0 := by
+      simpa [Matrix.dotProduct, if_neg hj] using eigvecOf_inner M hM j i
+    rw [hij, zero_mul]
+  rw [Finset.sum_eq_single i hvanish (fun hni =>
+    absurd (Finset.mem_univ i) hni)] at hparseval
+  -- the i-term is (v i ⬝ᵥ v i) * (μ i * (v i ⬝ᵥ w)) = μ i * (v i ⬝ᵥ w)
+  have hii : Matrix.dotProduct (eigvecOf M hM i)
+      (eigvecOf M hM i) = 1 := by
+    simpa [Matrix.dotProduct] using eigvecOf_inner M hM i i
+  rw [hii, one_mul] at hparseval
+  exact (mul_eq_zero.1 hparseval.symm).resolve_left hne
+
 /-- Generic form: for any symmetric matrix whose kernel contains
 `onesVec` (`M *ᵥ onesVec = 0`), eigenvectors at nonzero eigenvalues are
 orthogonal to `onesVec`. Proof: Parseval on the pair `(v i, M *ᵥ
 onesVec)`, with the eigenaction resolved and the kernel equation killing
 the left side. Used by `secondEval_variational` for general operators
 (normalized Laplacians in particular); the Laplacian instance below is
-the special case `M = laplacian A`. -/
+the special case `M = laplacian A`. Instance of the generic
+`eigvecOf_ortho_of_mulVec_eq_zero` at `w = onesVec`. -/
 theorem eigvecOf_ortho_onesVec_of_mulVec_eq_zero {M : Matrix V V ℝ}
     (hM : M.IsSymm) (hker : M *ᵥ onesVec = 0) {i : V}
     (hne : eigvalOf M hM i ≠ 0) :
@@ -2065,6 +2116,184 @@ theorem secondEval_le_rayleigh {M : Matrix V V ℝ} (hM : M.IsSymm)
     exact Finset.sum_pos' (fun j _ => mul_self_nonneg _)
       ⟨i, Finset.mem_univ _, mul_self_pos.2 hi⟩
   exact div_nonneg (hpsd y) hypos.le
+
+/-- **General-kernel Rayleigh domination** (the consumer form of the
+Courant–Fischer principle at an arbitrary kernel vector): every nonzero
+test vector orthogonal to a *nonzero kernel vector* `w` of a PSD
+symmetric matrix bounds the second sorted eigenvalue from above,
+`secondEval ≤ R(x)`.
+
+The delivered `secondEval_le_rayleigh` is the `w = onesVec` instance,
+sufficient for every operator whose kernel contains the constants (the
+combinatorial and regular-normalized Laplacians). Operators with a
+non-constant kernel vector need this general form: the symmetric
+normalized Laplacian `L_sym = 1 − D^{-1/2} A D^{-1/2}` of an *irregular*
+graph is killed by `√D · onesVec`, not by `onesVec`, and the irregular
+Cheeger upper bound (`GraphTheory.VariationalTransfer`, 2026-08-25) is
+its first consumer.
+
+Proof (the `secondEval_variational` Step-1 argument re-run at `w`): the
+eigenbasis expansion of the PSD kernel equation confines `w`'s
+eigencomponents to the zero eigenspace (`eigvecOf_ortho_of_mulVec_eq_zero`);
+when some eigenvalue is below `λ₂` it is the unique zero-eigenvalue index,
+`w`'s expansion is supported there, and `x ⊥ w` kills exactly that
+eigencomponent of `x`; otherwise every eigenvalue dominates `λ₂`. Either
+way the spectral resolution of the quadratic form (`quadForm_eigvalOf`)
+plus Parseval gives `λ₂ · (x ⬝ᵥ x) ≤ xᵀ M x`.
+
+QA: exercised on genuinely irregular input by
+`Scaffold/QA/SpectralGraph/IrregularCheeger_QA.lean` (the P₃ eigenpair
+witness pins `secondEval (L_sym) ≤ 1` through this lemma at a vector
+*not* orthogonal to `onesVec`), and fenced by the PSD-drop refutation
+there (`icvQ_psd_fence`: `diag(−1, 0)` with `w = e₁`, `x = e₀` makes the
+hypothesis-free conclusion `0 ≤ −1` false). -/
+theorem secondEval_le_rayleigh_of_ker {M : Matrix V V ℝ} (hM : M.IsSymm)
+    (hpsd : ∀ x : V → ℝ, 0 ≤ quadForm M x) {w : V → ℝ} (hwne : w ≠ 0)
+    (hker : M *ᵥ w = 0) (hcard : 2 ≤ Fintype.card V) {x : V → ℝ}
+    (hx0 : x ≠ 0) (hxorth : Matrix.dotProduct x w = 0) :
+    secondEval M hM hcard ≤ rayleigh M x := by
+  have hstep1 : ∀ x : V → ℝ, x ≠ 0 →
+      Matrix.dotProduct x w = 0 →
+      secondEval M hM hcard ≤ rayleigh M x := by
+    intro x hx0 hxorth
+    have hDpos : 0 < Matrix.dotProduct x x := by
+      obtain ⟨i, hi⟩ : ∃ i, x i ≠ 0 := by
+        by_contra hcon
+        push_neg at hcon
+        exact hx0 (funext hcon)
+      exact Finset.sum_pos' (fun j _ => mul_self_nonneg _)
+        ⟨i, Finset.mem_univ _, mul_self_pos.2 hi⟩
+    -- the key nonnegativity: ∑ i, (μ i − λ₂) (v i ⬝ᵥ x)² ≥ 0
+    have hkey : 0 ≤ ∑ i, (eigvalOf M hM i - secondEval M hM hcard)
+        * (Matrix.dotProduct (eigvecOf M hM i) x) ^ 2 := by
+      by_cases hex : ∃ i₀ : V,
+          eigvalOf M hM i₀ < secondEval M hM hcard
+      · obtain ⟨i₀, hi₀⟩ := hex
+        have hmunn_i₀ : 0 ≤ eigvalOf M hM i₀ := by
+          have h := hpsd (eigvecOf M hM i₀)
+          rw [quadForm_eigvecOf_self hM i₀] at h
+          exact h
+        have hL2pos : 0 < secondEval M hM hcard :=
+          lt_of_le_of_lt hmunn_i₀ hi₀
+        -- w has a nonzero eigencomponent; its eigenvalue is 0
+        obtain ⟨j₀, hj₀c⟩ : ∃ j : V,
+            Matrix.dotProduct (eigvecOf M hM j) w ≠ 0 := by
+          by_contra hcon
+          push_neg at hcon
+          apply hwne
+          funext a
+          have hsum := eigvecOf_expansion_apply hM w a
+          simp [hcon] at hsum
+          exact hsum.symm
+        have hj0mu : eigvalOf M hM j₀ = 0 := by
+          by_contra hmu
+          exact hj₀c (eigvecOf_ortho_of_mulVec_eq_zero hM hker hmu)
+        have hL2evals : secondEval M hM hcard
+            = evals hM ⟨1, by omega⟩ := rfl
+        -- j₀ = i₀, since two distinct indices cannot both be below λ₂
+        have hj₀ : j₀ = i₀ := by
+          by_contra hne
+          have hmax := evals_one_le_max_of_ne hM hcard i₀ j₀
+            (fun h' => hne h'.symm)
+          rw [← hL2evals] at hmax
+          have hbelow : max (eigvalOf M hM i₀)
+              (eigvalOf M hM j₀) < secondEval M hM hcard := by
+            rw [hj0mu]
+            exact max_lt hi₀ hL2pos
+          exact absurd hmax (not_le.2 hbelow)
+        -- every other index dominates λ₂
+        have hge : ∀ k : V, k ≠ i₀ →
+            secondEval M hM hcard ≤ eigvalOf M hM k := by
+          intro k hk
+          by_contra hlt
+          push_neg at hlt
+          have hmax := evals_one_le_max_of_ne hM hcard i₀ k hk.symm
+          rw [← hL2evals] at hmax
+          exact absurd hmax (not_le.2 (max_lt hi₀ hlt))
+        -- the coefficient of x along v i₀ vanishes
+        have hc₀ : Matrix.dotProduct (eigvecOf M hM i₀) x = 0 := by
+          -- every other index has positive eigenvalue, hence ⊥ w
+          have hmupos : ∀ j : V, j ≠ i₀ →
+              eigvalOf M hM j ≠ 0 := by
+            intro j hj hzero
+            have hle := hge j hj
+            rw [hzero] at hle
+            exact absurd hle (not_le.2 hL2pos)
+          -- so the expansion of w is supported only at i₀
+          have hexp : ∀ a : V, w a
+              = Matrix.dotProduct (eigvecOf M hM i₀) w
+                * eigvecOf M hM i₀ a := by
+            intro a
+            have hsum : ∑ j, Matrix.dotProduct
+                (eigvecOf M hM j) w
+                * eigvecOf M hM j a = w a :=
+              eigvecOf_expansion_apply hM w a
+            rw [Finset.sum_eq_single i₀ (fun j _ hj => by
+              have hzero := eigvecOf_ortho_of_mulVec_eq_zero hM hker
+                (hmupos j hj)
+              rw [hzero, zero_mul])
+              (fun hni => absurd (Finset.mem_univ i₀) hni)] at hsum
+            exact hsum.symm
+          have hdne : Matrix.dotProduct (eigvecOf M hM i₀)
+              w ≠ 0 := by
+            rw [← hj₀]
+            exact hj₀c
+          -- 0 = x ⬝ᵥ w = d * (x ⬝ᵥ v i₀) with d ≠ 0
+          have hprod : Matrix.dotProduct (eigvecOf M hM i₀)
+              w * Matrix.dotProduct x
+              (eigvecOf M hM i₀) = 0 := by
+            have hx1 : Matrix.dotProduct x
+                (fun a => Matrix.dotProduct
+                    (eigvecOf M hM i₀) w
+                  * eigvecOf M hM i₀ a) = 0 :=
+              (congrArg (Matrix.dotProduct x) (funext hexp)).symm.trans
+                hxorth
+            have hcalc : Matrix.dotProduct x
+                (fun a => Matrix.dotProduct
+                    (eigvecOf M hM i₀) w
+                  * eigvecOf M hM i₀ a)
+                = Matrix.dotProduct (eigvecOf M hM i₀) w
+                  * Matrix.dotProduct x
+                    (eigvecOf M hM i₀) := by
+              simp only [Matrix.dotProduct]
+              rw [Finset.mul_sum]
+              exact Finset.sum_congr rfl fun a _ => by ring
+            rw [← hcalc]
+            exact hx1
+          rw [Matrix.dotProduct_comm]
+          exact (mul_eq_zero.1 hprod).resolve_left hdne
+        -- assemble: the i₀-term vanishes, every other term is nonnegative
+        rw [← Finset.add_sum_erase (Finset.univ : Finset V)
+          (fun i => (eigvalOf M hM i - secondEval M hM hcard)
+            * (Matrix.dotProduct (eigvecOf M hM i) x) ^ 2)
+          (Finset.mem_univ i₀), hc₀, zero_pow two_ne_zero, mul_zero,
+          zero_add]
+        exact Finset.sum_nonneg fun k hk =>
+          mul_nonneg (sub_nonneg.2 (hge k (Finset.mem_erase.1 hk).1))
+            (sq_nonneg _)
+      · -- no eigenvalue below λ₂: every term is nonnegative
+        refine Finset.sum_nonneg fun k _ => mul_nonneg ?_ (sq_nonneg _)
+        by_contra hlt
+        push_neg at hlt
+        exact hex ⟨k, by linarith⟩
+    -- conclude λ₂ ≤ R(x) from the spectral resolution and Parseval
+    have hQge : secondEval M hM hcard * Matrix.dotProduct x x
+        ≤ quadForm M x := by
+      rw [quadForm_eigvalOf hM x, dotProduct_eigvecOf hM x x,
+        ← sub_nonneg, Finset.mul_sum, ← Finset.sum_sub_distrib]
+      rw [Finset.sum_congr rfl fun i _ => show
+        (eigvalOf M hM i
+            * (Matrix.dotProduct (eigvecOf M hM i) x) ^ 2
+          - secondEval M hM hcard
+            * (Matrix.dotProduct (eigvecOf M hM i) x
+              * Matrix.dotProduct (eigvecOf M hM i) x))
+        = (eigvalOf M hM i - secondEval M hM hcard)
+          * (Matrix.dotProduct (eigvecOf M hM i) x) ^ 2 from
+        by ring]
+      exact hkey
+    rw [rayleigh, if_neg hx0]
+    exact (le_div_iff₀ hDpos).2 hQge
+  exact hstep1 x hx0 hxorth
 
 /-- **Variational (Courant–Fischer) characterization of the algebraic
 connectivity — proved, no axioms.** For symmetric nonnegative weights,

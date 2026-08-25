@@ -130,6 +130,7 @@ verify_for_commit() {
   python3 scripts/check_citations.py
   python3 scripts/check_markdown_links.py
   lake build
+  python3 scripts/check_build_completeness.py
   git diff --check
 }
 

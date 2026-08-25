@@ -6,21 +6,177 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**None open — the queue is empty at this boundary.** The last
-completed milestone is the Magnetic Laplacian first slice (see the
-delivered record below); its standing handoff and the
-`proposals/README.md` Active priority table (no High, no Medium —
-every remaining row a Low blocked on a human or technical decision)
-leave the next autonomous run at the center-out SGT policy
-(`docs/1_STRATEGY.md`, `docs/6_SGT_BACKLOG.md`): the directed-axis
-*rate* layer (gated on a separate admission + a named consumer), the
-magnetic *spectral* layer (eigenvalues of `M`, magnetic Cheeger —
-gated on a consumer naming a bound), a named consumer pricing the
-wide-band minimax filter designs, the sweep-cut priced follow-ons, or
-a fresh center-out candidate per the backlog.
+**None open — the queue is empty at this boundary.** The last completed
+milestone is the irregular-Cheeger delivery (see the delivered record
+below); its standing handoff and the `proposals/README.md` Active
+priority table (no High, no Medium — every remaining row a Low blocked
+on a human or technical decision) leave the next autonomous run at the
+center-out SGT policy (`docs/1_STRATEGY.md`, `docs/6_SGT_BACKLOG.md`):
+the irregular-Cheeger *hard* direction (the volume-weighted
+coarea/median program the delivery priced), the newly-observed
+untracked `proposals/expander-independence-number-bound.md` (header
+Medium-High; appeared mid-run, left untouched by this run — the next
+run should triage it per the unindexed-proposal precedent), the
+directed-axis *rate* layer (gated on a separate admission + a named
+consumer), the magnetic *spectral* layer (gated on a consumer naming a
+bound), a named consumer pricing the wide-band minimax filter designs,
+or a fresh center-out candidate per the backlog.
 ------
 
 ## Delivered milestones (most recent first)
+
+**Irregular Cheeger easy direction — the volume-weighted upper bound on
+arbitrary positive-degree graphs; `GraphTheory.VariationalTransfer`'s
+first theorem consumers; the proposal COMPLETE for the easy direction,
+Steps 0+1 in one run (run 1, 2026-08-25, run `20260825T045222Z-run-1`;
+`proposals/irregular-cheeger-variational-transfer.md`, found committed
+since `6cb2f20` but never indexed in the Active priority table — the
+same unindexed-proposal gap class documented twice in that table's
+history — indexed at the boundary and pursued per priority item 0):
+DELIVERED — pure hard crust, zero new axioms (count stays 10;
+`#print axioms` via `wip/icv_axcheck.lean` on all 36 new declarations
+— 10 public + 26 QA headline: exactly `propext, Classical.choice,
+Quot.sound`, every one). QA 2067 → 2152 (`IrregularCheeger_QA` a new
+file at 85 by the generator metric). The standing "regular graphs only"
+caveat on the Cheeger upper bound is gone, and the never-consumed
+`VariationalTransfer` module — built for exactly this consumer — now
+carries three.**
+
+**Delivered:** `cheeger_upper_bound_normalized` (in
+`VariationalTransfer.lean`, no new modules, no umbrella change):
+`secondEval (normalizedLaplacian A) ≤ 2 * cheegerConstant A` for
+symmetric nonnegative positive-degree `A` with `2 ≤ card V` — no
+regularity, no connectivity; the regular family recovered on the cone
+through `normalizedLaplacian_eq_regularNormalizedLaplacian`. The
+route: the degree-stretched cut indicator `√D *ᵥ cutTestVector A S`
+(orthogonality to the true kernel vector `√D · onesVec` by the volume
+identity `vol S · vol Sᶜ − vol Sᶜ · vol S = 0`, *no regularity*), the
+one genuinely new engine lemma `secondEval_le_rayleigh_of_ker`
+(`Spectral.lean`; the general-kernel Rayleigh domination — the
+delivered onesVec form provably cannot express the route, QA pins
+`dotProduct z onesVec = 2 − √2 ≠ 0`), the kernel-vector layer
+`normalizedLaplacian_mul_degreeSqrt`/`normalizedLaplacian_mulVec_degreeSqrt_onesVec`
+(`Normalized.lean`), and the same Rayleigh quotient `boundary · vol V /
+(vol S · vol Sᶜ)` as the regular family with closing arithmetic
+verbatim. Supporting: `eigvecOf_ortho_of_mulVec_eq_zero`,
+`vol_pos_of_pos_deg` (Spectral).
+
+**QA (+85):** all four proposal-mandated sections — the genuinely
+irregular `P₃` fixture (degrees 1, 2, 1): conductance by hand (all six
+cuts `1`, constant `1`), the test-vector layer entrywise (orthogonality
+by theorem and raw arithmetic; norm `12` by two routes; energy `16` by
+**three** independent routes), the spectral side bounded *independently*
+through the eigenpair witness `![1, 0, -1]` (`λ₂ ≤ 1`, strictly stronger
+than the theorem's `≤ 2` — non-circular) and through the theorem's own
+test vector (`≤ 4/3`); the discrimination witness; the `K₂` tight
+regular recovery (`2 ≤ 2 · 1`); two proved fences — PSD-drop on the
+engine (`diag(−1, 0)`: `0 ≤ −1` false, exactly `hpsd`) and degree-drop
+on the headline (all-zero adjacency: `λ₂ = 1 > 0 = 2 · cheegerConstant`,
+exactly `hd`).
+
+**Verification:** spike first (`wip/icv_spike.lean`, the whole route
+green before any module touched); `lake env lean` zero errors/warnings
+on all three public modules and the QA file; explicit `lake build`
+targets ✔ (QA 2193/2193); **full `lake build` ✔ (2264 targets, "Build
+completed successfully") followed immediately by
+`check_build_completeness.py` — 104/104 fresh, 0 stale, 0 missing,
+exit 0** (the mandatory post-build fence); `lint_axioms` (10),
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+(**2152/10/0**, idempotent by md5). Records updated: the proposal
+(status header + Step-0 record + delivery record with the
+pin-technique list and priced follow-ons), `proposals/README.md` (the
+High row retired to Delivered; the progress paragraph), README (2152;
+the status paragraph's irregular clause; the module-table row), the
+radar (QA axis 2067/53 → 2152/54 held 4.0; axis-4's irregular-easy
+clause, held 4.5 — the hard direction keeps half the statement
+regular-only), the scoreboard (two verification rows),
+`index/map/spectral_graph.md` (the VT section's second table + the
+Spectral/Normalized engine rows), backlog item 3 (the update), this
+plan, and the activity log. Nothing committed; the prior runs'
+uncommitted deliveries preserved untouched, and the mid-run-appeared
+untracked `proposals/expander-independence-number-bound.md` left as
+found.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — the irregular-Cheeger *hard* direction (the
+delivery's own priced follow-on), triaging the newly-observed untracked
+`expander-independence-number-bound.md`, the standing gated candidates
+(directed-axis rate; magnetic spectral; a consumer pricing the
+wide-band minimax filter designs), or a fresh center-out candidate per
+`docs/6_SGT_BACKLOG.md`.
+------
+
+## Delivered milestones (most recent first)
+
+**Build-completeness verification — `scripts/check_build_completeness.py`,
+the reconciliation fence making "lake build completed successfully"
+falsifiable; `proposals/verify-build-completeness.md` (found untracked
+and unindexed at run start, its own header marked **High** — indexed
+into the Active priority table at that boundary and pursued per
+priority item 0); the proposal COMPLETE, Steps 0+1 in one run (run 1,
+2026-08-25, run `20260825T032035Z-run-1`): DELIVERED — no Lean, no
+axioms, no QA declarations; the most-repeated verification step in
+every delivery entry no longer rests on an assumption the incident
+proved false. And the fence earned its keep on its very first run: 8
+live findings on the real tree, including two never-built QA modules
+and a genuine never-rebuilt content edit.**
+
+**Delivered:** `scripts/check_build_completeness.py` (enumerate the
+root umbrella plus every `Scaffold/**/*.lean`, exclude ignored
+scratch, require a fresh `.lake/build/lib/**/<module>.olean` per
+source — MISSING or mtime-STALE (nanosecond compare) fail nonzero
+with every offender listed; exits 0/1/2 for complete/incomplete/
+operational; `--root` for arbitrary trees; no Lean invocation, no
+lakefile parsing, no Lake-internals re-implementation — the trace
+files hold only a Lake-internal UInt64 `depHash`). Two decisive
+toolchain experiments calibrated the semantics and are recorded in
+the docstring: a content-changed source is rebuilt/rewritten by an
+explicit target, but a pure `touch` of an up-to-date source is a
+no-op (Lake's up-to-date check is content-hash based) — hence STALE
+fails closed with an always-terminating remediation (direct rebuild;
+else remove the gitignored derived artifact and rebuild once to force
+re-elaboration). **Live findings on run 1:** MISSING —
+`ProjectionGap_QA.lean` (586 lines) and `Expander_QA.lean` (1,181
+lines), both artifact-less, both elaborating clean once built, plus
+`Mathlib/Core.lean` (an unimported 2-line legacy re-export shim from
+the initial commit); STALE — `Dynamics_QA.lean` (a **genuine
+never-rebuilt content edit**: source 08-20, artifact 08-18 — the
+incident class caught live), `Mixing_QA.lean`, `SpectralCertificates_QA.lean`
+(the same class), and `Subgaussian.lean`/`Entropy_QA.lean` (benign
+byte-identical roundtrips, remediated by the documented
+artifact-removal route, re-elaborating both). Every remediation was a
+real elaboration, so all 103 sources have now been elaborated as-is.
+**Ladder wiring, all five documented locations:** `AGENTS.md` §
+Verification, `scripts/opencode-pursue`'s `verify_for_commit` (after
+`lake build`, so `--commit` fails closed), `scripts/README.md`,
+`docs/2_ARCHITECTURE.md` §10, and the `docs/AGENT_ACTIVITY.md` format
+block (entries claiming a verified full build must record the check
+passing immediately after the build they cite).
+
+**Verification:** the acceptance-bar regression suite in a synthetic
+mini-tree — the incident reconstruction (a three-error
+`Magnetic_QA.lean` with no artifact) flagged MISSING at exit 1;
+explicit-mtime STALE flagged with both timestamps; fresh umbrella +
+module counted; `wip/` excluded (5 counted, not 6); usage/bad-root
+exit 2; the healed tree exits 0 (documented in the proposal's delivery
+record rather than committed as a fixture, per its own either/or).
+Full ladder on the real tree in the mandated order: `lake build` ✔ →
+**completeness 103/103 fresh, 0 stale, 0 missing, exit 0** →
+`lint_axioms` (10 axioms, no issues), `check_citations`,
+`check_markdown_links` pass, scoreboard idempotent (md5-stable).
+Records updated: the proposal (COMPLETE + delivery record),
+`proposals/README.md` (the High row added at the boundary, then
+retired to Delivered; the progress paragraph), `AGENTS.md`,
+`scripts/opencode-pursue`, `scripts/README.md`,
+`docs/2_ARCHITECTURE.md`, the activity-log format block, this plan,
+and the activity log. Nothing committed.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — the directed-axis *rate* layer (gated on a
+separate admission + a named consumer), the magnetic *spectral* layer
+(gated on a consumer naming a bound), a named consumer pricing the
+wide-band minimax filter designs, the sweep-cut priced follow-ons, or
+a fresh center-out candidate per `docs/6_SGT_BACKLOG.md`.
 
 **Magnetic Laplacian first slice — the directed-native Hermitian
 operator, its energy identity, PSD, and gauge characterization; the

@@ -267,6 +267,9 @@ proved, zero axioms.
 | `quadForm_add` / `quadForm_add_sub_eq` / `quadForm_degreeMatrix` | generic matrix algebra consumed by the sandwich: quadratic forms are additive in the matrix; **polarization** — the difference of the quadratic form at `x + y` and `x − y` isolates `4 • (x ⬝ᵥ (M *ᵥ y))` for symmetric `M` (symmetry load-bearing: it folds the `y ⬝ᵥ (M *ᵥ x)` half onto the `x ⬝ᵥ (M *ᵥ y)` half); and the degree matrix's form is the degree-weighted sum of squares |
 | `quadForm_add_quadForm_laplacian` | **the `d`-regular identity:** `xᵀAx + xᵀLx = d • ‖x‖²` — the quadratic form of `A + L = D`; regularity only, no looplessness (the Step 0 sketch's `hloop` found unnecessary and dropped — a recorded statement-shape strengthening) |
 | `lambda2_mul_dotProduct_le_quadForm` | the variational lower bound in multiplication form: `λ₂ • ‖x‖² ≤ xᵀLx` on `x ⊥ onesVec` (the center's `secondEval_le_rayleigh` multiplied out; zero vector handled so consumers never case-split) |
+| `eigvecOf_ortho_of_mulVec_eq_zero` | general-kernel orthogonality: eigenvectors at nonzero eigenvalues are ⊥ any kernel vector `w` (2026-08-25; the onesVec form's general-`w` parent) |
+| `secondEval_le_rayleigh_of_ker` | **general-kernel Rayleigh domination** (2026-08-25): `secondEval ≤ R(x)` for every nonzero `x ⊥ w` at a nonzero kernel vector `w` of a PSD symmetric matrix — the delivered `secondEval_le_rayleigh` is the `w = onesVec` instance; first consumer the irregular Cheeger upper bound |
+| `vol_pos_of_pos_deg` | a nonempty set has positive volume under positive degrees (2026-08-25; the regularity-free replacement for `vol_pos_of_regular`) |
 | `abs_quadForm_le_of_ortho_onesVec` | **the operator bound on `1⊥` (Step 2 bridge):** `\|xᵀAx\| ≤ μ ‖x‖²` under the Laplacian-spectrum hypothesis `μ ≥ max \|d − λ₂(L)\| \|d − λ_max(L)\|` — the Rayleigh sandwich (lower bound + the generic top domination + the `d`-regular identity; load-bearing on all three) |
 | `quadForm_bilinear_sq_le_of_ortho_onesVec` | **the sharp bilinear bound:** `(x ⬝ᵥ (A *ᵥ y))² ≤ μ² ‖x‖² ‖y‖²` on `1⊥ × 1⊥`, by the scaling trick (`√Y•x ± √X•y` through polarization; `a² = Y, b² = X` attains the AM–GM equality, so the product form carries no slack) |
 | `dotProduct_centeredIndicator_self` | the variance identity `‖centeredIndicator S‖² = \|S\|(|V|−\|S\|)/\|V\|` — the geometric factor of the mixing bound |
@@ -555,6 +558,8 @@ All statements proved (2026-08-17), no axioms:
 | `degreeSqrt_mul_degreeInvSqrt`, `degreeInvSqrt_mul_degreeSqrt` | the diagonal factors are inverse (positive degrees) |
 | `normalizedLaplacian_symmetric` | symmetry for symmetric `A` |
 | `degreeSqrt_mul_normalizedLaplacian_mul_degreeSqrt` | congruence `√D L_sym √D = laplacian A` |
+| `normalizedLaplacian_mul_degreeSqrt` | the left-multiplied congruence `L_sym √D = (1/√D) L` (2026-08-25) |
+| `normalizedLaplacian_mulVec_degreeSqrt_onesVec` | **the kernel vector is `√D · onesVec`, not `onesVec`** (2026-08-25) — the structural fact separating the irregular variational picture; consumed by `cheeger_upper_bound_normalized` |
 | `normalizedLaplacian_eq_regularNormalizedLaplacian` | agreement with the regular cone |
 | `walkTransitionMatrix`, `walkLaplacian` | definitions: general walk form `D⁻¹A`, `I − D⁻¹A` |
 | `walkTransitionMatrix_row_sum` | row-stochasticity on irregular graphs (positive degrees) |
@@ -835,7 +840,12 @@ gaps in what is claimed.
 ### `Scaffold.Mathlib.GraphTheory.VariationalTransfer` (variational consumer of the congruence bridge)
 
 All statements proved (2026-08-17), no axioms; the second consuming
-module of the `Normalized`/`Spectral` interfaces (after `Stationary`):
+module of the `Normalized`/`Spectral` interfaces (after `Stationary`).
+**Since 2026-08-25 the module also hosts its own docstring-named
+irregular-Cheeger consumer (proposal
+`irregular-cheeger-variational-transfer.md`, the module's first theorem
+consumers anywhere): the volume-weighted easy direction and its
+degree-stretched cut-test-vector layer** — see the second table.
 
 | Declaration | Content |
 |-------------|---------|
@@ -846,6 +856,20 @@ module of the `Normalized`/`Spectral` interfaces (after `Stationary`):
 | `degreeSqrt_mulVec_ne_zero` | the stretch preserves nonzero vectors (positive degrees) |
 | `rayleigh_normalizedLaplacian_degreeSqrt` | normalized Rayleigh quotient `rayleigh L_sym (√D y) = (yᵀ L y) / ∑ deg i · y i²` — the irregular-graph variational interface |
 | `normalizedLaplacian_psd` | PSD transfers from `laplacian_psd` by un-stretching through `1/√D` |
+
+The irregular Cheeger upper bound (2026-08-25, proved, zero axioms;
+supports: `secondEval_le_rayleigh_of_ker` in `Spectral.lean` — the
+general-kernel Rayleigh domination — and
+`normalizedLaplacian_mulVec_degreeSqrt_onesVec` in `Normalized.lean`,
+the kernel vector):
+
+| Declaration | Content |
+|-------------|---------|
+| `dotProduct_degreeSqrt_mulVec_cutTestVector` | **the volume identity, hypothesis-free**: `⬝(√D x, √D 1) = 0` for the cut indicator `x` — `vol S · vol Sᶜ − vol Sᶜ · vol S = 0`, the orthogonality the regular proof obtained from `vol_eq_of_regular`, exact in the weighted measure |
+| `dotProduct_degreeSqrt_mulVec_cutTestVector_self` | the weighted norm `⬝(√D x, √D x) = vol S · vol Sᶜ · vol V` |
+| `degreeSqrt_mulVec_cutTestVector_ne_zero` | the stretched cut indicator of a nonempty proper cut is nonzero (positive degrees) |
+| `rayleigh_normalizedLaplacian_degreeSqrt_cutTestVector` | the Rayleigh quotient `boundary · vol V / (vol S · vol Sᶜ)` — the *same* value the regular family computes |
+| `cheeger_upper_bound_normalized` | **the irregular easy direction**: `secondEval (normalizedLaplacian A) ≤ 2 * cheegerConstant A` for symmetric nonnegative positive-degree `A` with `2 ≤ card V` — no regularity, no connectivity; the regular `cheeger_upper_bound` recovered on the cone through `normalizedLaplacian_eq_regularNormalizedLaplacian` |
 
 ### `Scaffold.Mathlib.GraphTheory.Heat` (the heat semigroup)
 

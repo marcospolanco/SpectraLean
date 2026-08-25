@@ -22,7 +22,7 @@ As of August 25, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 10 |
-| QA theorems/lemmas | 2067, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 2152, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is: **Perron–Frobenius for irreducible
 nonnegative matrices**
@@ -82,7 +82,17 @@ median-split route of
 `proposals/discharge-perturbation-axioms.md` — the Cauchy–Schwarz core
 and fused contraction, the interval-integral co-area core, and the
 median/level-set/assembly layer closing through the variational
-characterization; explicit axioms 10 → 9), and the **Fiedler
+characterization; explicit axioms 10 → 9), the **irregular
+(volume-weighted) easy direction** `cheeger_upper_bound_normalized`
+(2026-08-25, `proposals/irregular-cheeger-variational-transfer.md`:
+`secondEval (normalizedLaplacian A) ≤ 2 * cheegerConstant A` on
+arbitrary symmetric nonnegative positive-degree graphs — no regularity,
+no connectivity — through the degree-stretched cut indicator
+`√D · cutTestVector` (orthogonal to the true kernel vector `√D · 1` by
+a volume identity that needs no regularity), the new general-kernel
+`secondEval_le_rayleigh_of_ker`, and the `VariationalTransfer`
+congruence engine's first theorem consumers; the same Rayleigh quotient
+as the regular family with the closing arithmetic verbatim), and the **Fiedler
 certified-conductance corollary** `cheeger_cut_existence` (2026-08-23:
 on every connected `d`-regular graph a nonempty proper cut exists with
 `conductance S ^ 2 ≤ 2 · lambda2 / d` — the cut-existence form of
@@ -300,7 +310,7 @@ The near-term center is general SGT. Public modules currently cover:
 | --- | --- |
 | Graphs and Laplacians | `GraphTheory.Spectral`, `GraphTheory.SimpleGraphAdapter` |
 | Variational spectra | Courant–Fischer, Rayleigh, Cauchy interlacing (in `Spectral`) |
-| Cuts and expansion | `GraphTheory.Cheeger`, `GraphTheory.Fiedler`, `GraphTheory.Expander` (edge weights, the centered-indicator decomposition, the Expander Mixing Lemma, the Fiedler certified-conductance cut `cheeger_cut_existence`, and the swept-level-set extraction `cheeger_sweep_cut`/`fiedler_sweep_cut`) |
+| Cuts and expansion | `GraphTheory.Cheeger`, `GraphTheory.Fiedler`, `GraphTheory.Expander` (edge weights, the centered-indicator decomposition, the Expander Mixing Lemma, the Fiedler certified-conductance cut `cheeger_cut_existence`, the swept-level-set extraction `cheeger_sweep_cut`/`fiedler_sweep_cut`, and the irregular volume-weighted easy direction `cheeger_upper_bound_normalized` through `GraphTheory.VariationalTransfer`'s degree-stretched cut-test-vector layer) |
 | Decidable spectral certificates | `GraphTheory.SpectralCertificates` (the ℚ specification checker with its soundness theorem, and the kernel-verifiable ℤ cross-multiplied twin with proved bridges) |
 | Electrical structure | `GraphTheory.Electrical` (effective resistance by the potential equation, the one-sided Dirichlet bound, and the resistance metric — maximum principle, definiteness `R u v = 0 ↔ u = v`, triangle inequality), `GraphTheory.ElectricalFlow`, `GraphTheory.Foster` |
 | Heat semigroup | `GraphTheory.Heat` (`heatKernel A t = e^{-tL}` on `laplacian A`: symmetry under `A.IsSymm`, identity at `t = 0`, the square-zero and rank-one-idempotent exponential collapses, the semigroup law `heatKernel A s * heatKernel A t = heatKernel A (s + t)`, mass conservation `heatKernel A t *ᵥ onesVec = onesVec` with its kernel-vector engine, eigenmode decay `heatKernel A t *ᵥ vᵢ = e^{−t·λᵢ} • vᵢ` with the decay monotonicity/dissipation bounds, the eigenbasis expansion, the connected-graph DC limit `heatKernel_mulVec_tendsto_atTop`, the heat-flow derivative at zero `heatKernel_mulVec_hasDerivAt_zero` (Phase C Step 1), and the first-order remainder bound `heatKernel_firstOrder_remainder_apply_le` with its `[0, T]` interval packaging (Phase C Step 2); **the program COMPLETE — Phases A, B, and C, zero axioms throughout**) |

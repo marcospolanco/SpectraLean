@@ -89,6 +89,14 @@ python3 scripts/lint_axioms.py
 python3 scripts/check_citations.py
 python3 scripts/check_markdown_links.py
 lake build
+python3 scripts/check_build_completeness.py
 ```
+
+`check_build_completeness.py` runs after every full `lake build`: a
+"Build completed successfully" exit does not by itself certify every
+on-disk source (an interrupted run once left a broken QA file that the
+full build passed over silently). The script fails nonzero if any
+`Scaffold/**/*.lean` source has a missing or mtime-stale `.olean`
+artifact; its docstring records the calibrated remediation.
 
 For Lean changes, directly build or elaborate every changed module and its closest QA consumer; do not rely only on the umbrella target.

@@ -142,7 +142,9 @@ An emergency removal is appropriate for a materially false statement, an inconsi
 
 ## 10. Toolchain and verification
 
-The repository pins Lean and Mathlib in `lean-toolchain` and `lakefile.lean`. The default build, direct module checks, QA placeholder scan, axiom lint, citation check, and Markdown link check measure different properties and must be reported separately.
+The repository pins Lean and Mathlib in `lean-toolchain` and `lakefile.lean`. The default build, direct module checks, QA placeholder scan, axiom lint, citation check, Markdown link check, and build-completeness reconciliation measure different properties and must be reported separately.
+
+A full `lake build` exit status alone does not certify every on-disk source: the default target builds the umbrella's import closure, so a file merely present on disk (an interrupted run's fresh draft) is silently outside the checked set. `scripts/check_build_completeness.py` runs after every full build and fails nonzero when any `Scaffold/**/*.lean` source has a missing or mtime-stale `.olean` artifact; its docstring records the remediation calibrated against Lake's content-hash up-to-date semantics.
 
 The generated [QA scoreboard](5_QA_SCOREBOARD.md) is the authority for current counts and recorded check results.
 

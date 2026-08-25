@@ -28,7 +28,22 @@
   - one existing definition recovered as a calculus instance:
     `spectralCalc_indicator_eq_spectralProjector` — the shelf's
     `spectralProjector` is the calculus at the indicator of `(· ≤ c)`;
-  - the calculus identity `spectralCalc_id`.
+  - the calculus identity `spectralCalc_id`;
+  - the first *consumer* reconciliation (2026-08-25): the Tikhonov
+    minimizer of `GraphTheory.Tikhonov` is the calculus at the
+    shrinkage function (`tikhonovMinimizer_eq_spectralCalc_mulVec`),
+    with the normal equation re-derived through the generic calculus
+    algebra (`add_smul_one_mul_spectralCalc_tikhonovShrinkage`) —
+    a second, eigenbasis-free route to a delivered statement;
+  - the second consumer reconciliation (2026-08-25, later the same
+    day): the heat semigroup of `GraphTheory.Heat` is the calculus at
+    the exponential family (`heatKernel_eq_spectralCalc_exp`) — a
+    genuine reconciliation of two independently built proof stacks
+    (the entrywise exponential-series machinery behind
+    `heatKernel_mulVec_eq_sum` against Mathlib's `cfc`), with the
+    semigroup law re-derived through the calculus algebra
+    (`heatKernel_mul_heatKernel_of_spectralCalc`) as the second,
+    eigenbasis-free route to `Heat.lean`'s `heatKernel_mul_heatKernel`.
 
   What this module is NOT (and must never be described as):
   - NOT a re-proof of the finite-dimensional spectral theorem —
@@ -59,6 +74,7 @@
 
 import Scaffold.Mathlib.GraphTheory.Spectral
 import Scaffold.Mathlib.GraphTheory.Tikhonov
+import Scaffold.Mathlib.GraphTheory.Heat
 import Mathlib.LinearAlgebra.Matrix.HermitianFunctionalCalculus
 
 open scoped BigOperators Matrix
@@ -209,5 +225,233 @@ theorem spectralCalc_id (M : Matrix V V ℝ) (hM : M.IsSymm) :
       Function.comp_apply, ha x, hb x, hm x]
     ring
   rw [hMab]
+
+/-!
+## Recovered instances: the Tikhonov filter
+
+The first consumer reconciliation
+(`proposals/hermitian-calculus-consumer-tikhonov-heat.md`, 2026-08-25):
+the Tikhonov smoothing filter — delivered 2026-08-20 as an
+*eigenbasis* construction in `GraphTheory.Tikhonov` — is the
+functional calculus at the shrinkage function `π ↦ π/(λ+π)`. The
+equality is an identity of definitions (the bridge's action form was
+stated in exactly the minimizer's filter-sum shape), and the
+substantive layer is the normal equation *re-derived through the
+generic calculus algebra* (`cfc_mul`, `cfc_add_const`, `cfc_congr`
+through `Matrix.IsHermitian.cfc_eq`) — a proof route that never
+touches the shelf's eigenbasis machinery, giving two independent
+routes to the same nontrivial statement. Per the proposal's
+non-goals, `Tikhonov.lean` stays exactly as delivered; these theorems
+are additive.
+-/
+
+/-- **Every function is continuous on a matrix's real spectrum** —
+the finite-spectrum fact that supplies the `ContinuousOn` hypotheses
+of Mathlib's generic functional-calculus lemmas. The auto-param
+`cfc_cont_tac` runs `fun_prop`, which cannot discharge these for
+spectral-data functions (e.g. `tikhonovShrinkage π`, continuous only
+off `λ = -π`), so calculus consumers pass this supplier explicitly. -/
+theorem continuousOn_of_finite_real_spectrum {M : Matrix V V ℝ}
+    (f : ℝ → ℝ) : ContinuousOn f (spectrum ℝ M) := by
+  rw [continuousOn_iff_continuous_restrict]
+  exact continuous_of_discreteTopology
+
+/-- `algebraMap ℝ (Matrix V V ℝ) π` is the scalar matrix `π • 1`
+(entrywise; the two forms differ only in the `diagonal` packaging). -/
+private theorem algebraMap_matrix_eq_smul_one {π : ℝ} :
+    algebraMap ℝ (Matrix V V ℝ) π = π • (1 : Matrix V V ℝ) := by
+  ext i j
+  rw [Matrix.algebraMap_matrix_apply]
+  by_cases h : i = j
+  · subst h
+    simp [Matrix.smul_apply, Matrix.one_apply]
+  · simp [h, Matrix.smul_apply, Matrix.one_apply]
+
+/-- **The Tikhonov minimizer is the functional calculus at the
+shrinkage function** — the bridge's falsifiability test at a real
+consumer: `x* = f(L) *ᵥ y` with `f = tikhonovShrinkage π`, i.e. the
+eigenbasis-defined minimizer of `Tikhonov.lean` and the calculus
+wrapper at `fun λ => π / (λ + π)` are the same vector.
+Hypothesis-free: symmetry only enters through the eigenbasis both
+sides share, and the identity holds at every `π` (at degenerate `π`
+hitting `-λ_k` both sides carry the same junk values — the calculus
+evaluates `f` exactly at the eigenvalues). A wrong calculus
+specialization, a mismatched eigenbasis convention, or a wrong
+minimizer formula breaks this equality loudly. -/
+theorem tikhonovMinimizer_eq_spectralCalc_mulVec (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (π : ℝ) (y : V → ℝ) :
+    tikhonovMinimizer A hA π y
+      = spectralCalc (laplacian A) (laplacian_symmetric A hA)
+          (tikhonovShrinkage π) *ᵥ y := by
+  funext a
+  rw [spectralCalc_mulVec_apply]
+  rfl
+
+/-- **The normal equation through the calculus algebra** (the
+substantive reconciliation layer): `(L + π•1) * f(L) = π • 1` at
+`f = tikhonovShrinkage π`, i.e. the Tikhonov filter is `π` times the
+resolvent of `L + π•1` — *re-derived here through Mathlib's generic
+continuous-functional-calculus algebra* (`cfc_mul`, `cfc_add_const`,
+`cfc_congr`, `cfc_const` after `Matrix.IsHermitian.cfc_eq`), a route
+independent of the shelf's eigenbasis expansion that carries the
+delivered `tikhonovMinimizer_add_smul_one_mulVec`. The mathematical
+content is that `tikhonovShrinkage π · (λ + π) = π` *on the
+spectrum*: PSD makes every spectral point nonnegative, so `0 < π`
+keeps the division non-junk there, and `cfc_congr` promotes the
+pointwise identity to the operator identity. The `0 < π` hypothesis
+is load-bearing: at `π = -λ` for a spectral `λ` the shrinkage is the
+junk `0` at that point and the identity fails (the QA fence exhibits
+this on `K₂` at `π = -2`). -/
+theorem add_smul_one_mul_spectralCalc_tikhonovShrinkage
+    (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnonneg : ∀ i j, 0 ≤ A i j) {π : ℝ} (hπ : 0 < π) :
+    (laplacian A + π • (1 : Matrix V V ℝ))
+      * spectralCalc (laplacian A) (laplacian_symmetric A hA)
+          (tikhonovShrinkage π)
+      = π • (1 : Matrix V V ℝ) := by
+  have hL : (laplacian A).IsSymm := laplacian_symmetric A hA
+  have hherm : Matrix.IsHermitian (laplacian A) := isHermitian_of_isSymm hL
+  have hsa : IsSelfAdjoint (laplacian A) := hherm
+  -- PSD: every real spectral point of the Laplacian is nonnegative
+  have hspec : ∀ x ∈ spectrum ℝ (laplacian A), 0 ≤ x := by
+    intro x hx
+    rw [Matrix.IsHermitian.eigenvalues_eq_spectrum_real] at hx
+    obtain ⟨i, hi⟩ := hx
+    rw [← hi]
+    exact eigvalOf_laplacian_nonneg A hA hnonneg i
+  have hcont : ∀ f : ℝ → ℝ, ContinuousOn f (spectrum ℝ (laplacian A)) :=
+    fun f => continuousOn_of_finite_real_spectrum f
+  -- the additive layer: the calculus at `λ ↦ λ + π` is `L + π • 1`
+  have h1 : cfc (fun x => x + π) (laplacian A)
+      = laplacian A + π • (1 : Matrix V V ℝ) := by
+    rw [cfc_add_const π (fun x => x) (laplacian A) (hcont _),
+      cfc_id' ℝ (laplacian A) hsa, algebraMap_matrix_eq_smul_one]
+  -- the multiplicative layer, assembled at the wrapper
+  rw [show spectralCalc (laplacian A) hL (tikhonovShrinkage π)
+      = cfc (tikhonovShrinkage π) (laplacian A) from by
+      show (isHermitian_of_isSymm hL).cfc _ = _
+      rw [← Matrix.IsHermitian.cfc_eq]]
+  conv_lhs => rw [← h1]
+  rw [← cfc_mul (fun x => x + π) (tikhonovShrinkage π) (laplacian A)
+    (hcont _) (hcont _),
+    cfc_congr (f := fun x => (fun x => x + π) x * tikhonovShrinkage π x)
+      (g := fun _ => π) (by
+        intro x hx
+        have hxnn := hspec x hx
+        have hnz : x + π ≠ 0 := by linarith
+        show (x + π) * tikhonovShrinkage π x = π
+        rw [tikhonovShrinkage, mul_div_cancel₀ _ hnz]),
+    cfc_const π (laplacian A) hsa, algebraMap_matrix_eq_smul_one]
+
+/-!
+## Recovered instances: the heat semigroup
+
+The second consumer reconciliation
+(`proposals/hermitian-calculus-consumer-tikhonov-heat.md`, the Heat
+half, 2026-08-25): the heat semigroup — delivered 2026-08-23 through
+`NormedSpace.exp` and a from-scratch entrywise exponential-series
+machinery in `GraphTheory.Heat` — is the functional calculus at the
+exponential family `x ↦ e^{-t·x}`. Unlike the Tikhonov half (whose
+equality was an identity of definitions), this reconciliation carries
+genuine mathematical content: the two sides were built by independent
+proof stacks — the series engine of `Heat.lean` (entrywise summability,
+eigenvector action, eigenbasis expansion) against Mathlib's continuous
+functional calculus — and their agreement is, in effect, the spectral
+mapping theorem for `exp` at real-symmetric matrices. The substantive
+second layer mirrors the Tikhonov delivery: the semigroup law
+re-derived through the generic calculus algebra (`cfc_mul`/`cfc_congr`
+at `Real.exp_add`), a second route to `Heat.lean`'s
+`heatKernel_mul_heatKernel` (which used `Matrix.exp_add_of_commute`).
+Per the proposal's non-goals, `Heat.lean` stays exactly as delivered;
+these theorems are additive.
+-/
+
+/-- **Matrices are their actions** (on finite index types): two real
+matrices are equal whenever their `mulVec` actions agree on every
+vector. The reconciliation tool for action-level equality theorems:
+entries are recovered by acting on the coordinate units
+`Pi.single j 1`. -/
+theorem matrix_eq_of_forall_mulVec_eq (M N : Matrix V V ℝ)
+    (h : ∀ x : V → ℝ, M *ᵥ x = N *ᵥ x) : M = N := by
+  ext i j
+  have hj := h (Pi.single j (1 : ℝ))
+  have hM : (M *ᵥ Pi.single j (1 : ℝ)) i = M i j := by
+    simp [Matrix.mulVec, Matrix.dotProduct, Pi.single_apply]
+  have hN : (N *ᵥ Pi.single j (1 : ℝ)) i = N i j := by
+    simp [Matrix.mulVec, Matrix.dotProduct, Pi.single_apply]
+  rw [← hM, ← hN]
+  exact congrFun hj i
+
+/-- **The heat kernel is the functional calculus at the exponential
+family** — the bridge's falsifiability test at its second real
+consumer: `heatKernel A t = f(L)` with `f = (x ↦ e^{-t·x})`, i.e. the
+matrix-exponential definition (`NormedSpace.exp ℝ (-(t • laplacian
+A))`, built through `Heat.lean`'s from-scratch entrywise series
+machinery) and the calculus wrapper at the scalar exponential are the
+same operator. A genuine reconciliation, not an identity of
+definitions: the two sides carry independent proofs
+(`heatKernel_mulVec_eq_sum` — the series engine — against
+`spectralCalc_mulVec_apply` — Mathlib's `cfc`), joined at exactly the
+same filter-sum shape. Symmetry enters only through the eigenbasis
+both sides share; a wrong calculus specialization, a mismatched
+eigenbasis convention, or a wrong series engine breaks this equality
+loudly. -/
+theorem heatKernel_eq_spectralCalc_exp (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (t : ℝ) :
+    heatKernel A t = spectralCalc (laplacian A) (laplacian_symmetric A hA)
+      (fun x => Real.exp (-(t * x))) := by
+  refine matrix_eq_of_forall_mulVec_eq _ _ fun x => ?_
+  funext a
+  rw [heatKernel_mulVec_eq_sum A hA t x,
+    spectralCalc_mulVec_apply (laplacian A) (laplacian_symmetric A hA)
+      (fun x => Real.exp (-(t * x))) x a]
+  simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
+
+/-- **The calculus semigroup at the exponential family**: the calculus
+at `x ↦ e^{-s·x}` times the calculus at `x ↦ e^{-t·x}` is the calculus
+at `x ↦ e^{-(s+t)·x}` — proved through Mathlib's generic
+continuous-functional-calculus algebra (`cfc_mul`, then `cfc_congr`
+promoting the pointwise `Real.exp_add` identity from the spectrum), a
+route that never touches an eigenbasis. This is the calculus-algebra
+mirror of `Matrix.exp_add_of_commute`. -/
+theorem spectralCalc_exp_mul (M : Matrix V V ℝ) (hM : M.IsSymm)
+    (s t : ℝ) :
+    spectralCalc M hM (fun x => Real.exp (-(s * x)))
+        * spectralCalc M hM (fun x => Real.exp (-(t * x)))
+      = spectralCalc M hM (fun x => Real.exp (-((s + t) * x))) := by
+  have hc : ∀ f : ℝ → ℝ, ContinuousOn f (spectrum ℝ M) :=
+    fun f => continuousOn_of_finite_real_spectrum f
+  have hf : ∀ c : ℝ, spectralCalc M hM (fun x => Real.exp (-(c * x)))
+      = cfc (fun x => Real.exp (-(c * x))) M := by
+    intro c
+    show (isHermitian_of_isSymm hM).cfc _ = _
+    rw [Matrix.IsHermitian.cfc_eq]
+  rw [hf s, hf t, hf (s + t),
+    ← cfc_mul (fun x => Real.exp (-(s * x))) (fun x => Real.exp (-(t * x))) M
+      (hc _) (hc _),
+    cfc_congr (f := fun x => Real.exp (-(s * x)) * Real.exp (-(t * x)))
+      (g := fun x => Real.exp (-((s + t) * x))) (by
+        intro x _
+        show Real.exp (-(s * x)) * Real.exp (-(t * x))
+          = Real.exp (-((s + t) * x))
+        rw [← Real.exp_add]
+        congr 1
+        ring)]
+
+/-- **The semigroup law through the calculus** (the substantive
+reconciliation layer): flowing for time `s` then `t` equals flowing for
+`s + t`, re-derived by composing the equality theorem with the
+calculus-algebra semigroup — a second, eigenbasis-free route to
+`Heat.lean`'s `heatKernel_mul_heatKernel` (the `Matrix.exp_add_of_
+commute` route). Unlike that theorem this route requires `A.IsSymm`
+(the calculus side needs the Hermitian structure); the hypothesis-free
+original remains the primary statement, and this corollary witnesses
+that the two proof technologies agree. -/
+theorem heatKernel_mul_heatKernel_of_spectralCalc (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (s t : ℝ) :
+    heatKernel A s * heatKernel A t = heatKernel A (s + t) := by
+  rw [heatKernel_eq_spectralCalc_exp A hA s,
+    heatKernel_eq_spectralCalc_exp A hA t, spectralCalc_exp_mul,
+    ← heatKernel_eq_spectralCalc_exp A hA (s + t)]
 
 end SpectralGraphTheory

@@ -1066,12 +1066,39 @@ matrix" notions (`spectralProjector`/`bandProjector`, PolyFilter,
 | `dotProduct_eigvecOf_spectralCalc_mulVec` | the coefficient bridge consuming `GraphTheory.Tikhonov.dotProduct_eigvecOf_filter` verbatim: the shelf's arbitrary-filter expansion and the calculus agree coefficient-by-coefficient |
 | `spectralCalc_indicator_eq_spectralProjector` | the recovery: at the indicator of `(· ≤ c)` the calculus returns exactly the shelf's hand-built `spectralProjector M hM c` — the proof the bridge is real rather than decorative |
 | `spectralCalc_id` | the calculus identity `spectralCalc M hM id = M` |
+| `continuousOn_of_finite_real_spectrum` | every function is continuous on a matrix's (finite) real spectrum, via `Finite.instDiscreteTopology` — the `ContinuousOn` supplier Mathlib's generic CFC lemmas need (`cfc_cont_tac`'s `fun_prop` cannot discharge spectrum-restricted continuity of spectral-data functions) |
+| `tikhonovMinimizer_eq_spectralCalc_mulVec` | **the first consumer recovered** (2026-08-25, `proposals/hermitian-calculus-consumer-tikhonov-heat.md`): `x* = f(L) *ᵥ y` at `f = tikhonovShrinkage π`, hypothesis-free — the eigenbasis-defined minimizer IS the calculus at `π ↦ π/(λ+π)` |
+| `add_smul_one_mul_spectralCalc_tikhonovShrinkage` | the normal equation through the calculus algebra: `(L + π•1) * f(L) = π • 1` under PSD + `0 < π`, proved via Mathlib's generic CFC (`cfc_add_const`/`cfc_id'`/`cfc_mul`/`cfc_congr`/`cfc_const`) — an eigenbasis-free route to a statement the shelf had only through the eigenbasis expansion |
+| `matrix_eq_of_forall_mulVec_eq` | the action-equality helper: two real matrices are equal when their `mulVec` actions agree on every vector (entries recovered at the coordinate units `Pi.single j 1`) — the reconciliation tool for action-level equality theorems |
+| `heatKernel_eq_spectralCalc_exp` | **the second consumer recovered** (2026-08-25, the Heat half, completing the consumer stub): `heatKernel A t = spectralCalc (laplacian A) hL (fun x => Real.exp (-(t * x)))` — a genuine reconciliation of two independent proof stacks (`Heat.lean`'s entrywise exponential-series engine vs Mathlib's `cfc`), in effect the spectral mapping theorem for `exp` at real-symmetric matrices |
+| `spectralCalc_exp_mul` | the calculus semigroup at the exponential family: `f_s(M) * f_t(M) = f_{s+t}(M)` via `cfc_mul` + `cfc_congr` promoting pointwise `Real.exp_add` from the spectrum — the calculus-algebra mirror of `Matrix.exp_add_of_commute`, eigenbasis-free |
+| `heatKernel_mul_heatKernel_of_spectralCalc` | the semigroup law through the calculus: composing the equality theorem with `spectralCalc_exp_mul`, a second proof technology for `Heat.lean`'s hypothesis-free `heatKernel_mul_heatKernel` (this route needs `A.IsSymm`; the original remains primary) |
 
 The complex half needs no second wrapper (Mathlib's `cfc` is stated
 for any `RCLike 𝕜`; complex-Hermitian consumers — the magnetic
 Laplacian's `magneticLaplacian_isHermitian` — use it at `𝕜 = ℂ`
 directly, confirmed elaborating by the QA file's `fcM2c_cfc_id`
 witness).
+
+The first consumer reconciliation (the "Recovered instances" section,
+2026-08-25, the Tikhonov half of the consumer stub): `Tikhonov.lean`
+stays exactly as delivered; the rows above are additive. QA Section E
+pins the reconciliation numerically on the `Tikhonov_QA` K₂ fixture
+(two constructions, one number: the calculus routes `![1,0]` to the
+hand-solved `![2/3, 1/3]`), exhibits the normal equation by two
+independent routes, and fences the `0 < π` hypothesis with the
+`π = -2` junk-division refutation.
+
+The second consumer reconciliation (later the same day, the Heat
+half — the stub complete): `Heat.lean` likewise stays exactly as
+delivered. QA Section F pins this reconciliation doubly-routed on the
+same K₂ fixture (the closed form `!![(1±e^{-2t})/2]` by Mathlib's
+`cfc` through the equality theorem vs by the series engine with the
+sign-free outer-product pins — two independent proof stacks, one
+matrix; the semigroup at times `1, 2` by the calculus route vs the
+commute route plus a raw closed-form product check) and fences
+nontriviality (`heatKernel K₂ 1 ≠ 1`: diffusion provably moves mass,
+refuting any constant-collapse reading).
 
 ## Applications
 

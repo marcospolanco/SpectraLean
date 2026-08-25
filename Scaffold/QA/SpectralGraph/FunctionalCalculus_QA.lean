@@ -40,6 +40,34 @@
      matrix, at the identity function — the Step-0 API-split verdict's
      artifact, unblocking the gated magnetic-Laplacian consumer.
 
+  5. **The Tikhonov reconciliation** (Section E, 2026-08-25,
+      `proposals/hermitian-calculus-consumer-tikhonov-heat.md`): on the
+      `Tikhonov_QA` `K₂` fixture, the calculus at `tikhonovShrinkage 1`
+      pinned to `!![2/3, 1/3; 1/3, 2/3]` entrywise sign-free (the
+      master lemma `fc_lapK2_calc` at arbitrary `f`), the minimizer
+      reconciliation witnessed numerically (the calculus routes
+      `![1,0]` to the hand-solved `![2/3, 1/3]`), the normal equation
+      by two independent routes (calculus algebra vs the pinned
+      hand-solved system) plus a raw matrix-arithmetic check, the
+      kernel-mode action instantiation, and the **fence** at `π = -2`:
+      the junk shrinkage at the spectral point `2 = -π` makes the
+      hypothesis-free normal equation provably false.
+
+  6. **The Heat reconciliation** (Section F, 2026-08-25, the Heat half
+      of the same proposal): on the same `K₂` fixture, the heat kernel
+      through the equality theorem is the closed form
+      `!![(1±e^{-2t})/2]` — computed by **two independent routes**
+      (Mathlib's `cfc` through the equality theorem vs the
+      `Heat.lean` series engine `heatKernel_mulVec_eq_sum` with the
+      Section-E sign-free outer-product pins), the semigroup law at
+      times `1, 2` by **two independent routes** (the new
+      calculus-algebra semigroup vs the delivered
+      `heatKernel_mul_heatKernel` commute route) plus a raw
+      closed-form product check, the time-zero identity through the
+      calculus, eigenmode decay through the calculus action interface
+      (both modes), and the **nontriviality fence**: the kernel at
+      `t = 1` is provably not the identity — diffusion moves mass.
+
   QA never proves, validates, or certifies any axiom: this file
   contains no `sorry`/`admit`, and the bridge it exercises consumes
   none (Mathlib's calculus is proved upstream).
@@ -50,6 +78,7 @@
 
 import Scaffold.Mathlib.GraphTheory.FunctionalCalculus
 import Scaffold.QA.SpectralGraph.Band_QA
+import Scaffold.QA.SpectralGraph.Tikhonov_QA
 import Mathlib.LinearAlgebra.Matrix.HermitianFunctionalCalculus
 
 open scoped BigOperators Matrix
@@ -459,5 +488,599 @@ theorem fcM2c_cfc_id :
     fcM2c_herm.cfc (fun x => x) = fcM2c := by
   rw [← Matrix.IsHermitian.cfc_eq]
   exact cfc_id' ℝ fcM2c fcM2c_herm
+
+/-!
+## Section E: the Tikhonov reconciliation (the first consumer)
+
+`proposals/hermitian-calculus-consumer-tikhonov-heat.md` (2026-08-25):
+the eigenbasis-defined Tikhonov minimizer is the calculus at the
+shrinkage function `π ↦ π/(λ+π)`. All witnesses live on the
+`Tikhonov_QA` `K₂` fixture (`adjK2`, Laplacian spectrum `{0, 2}`,
+hand-solved minimizer `![2/3, 1/3]` at `π = 1`, signal `![1, 0]`), so
+the calculus instance is pinned against a value computed by plain
+Gaussian elimination in an earlier, independent delivery.
+-/
+
+section TikhonovReconciliation
+
+open Scaffold.Mathlib.GraphTheory.Tikhonov.QA
+
+/-- The kernel-mode eigenvector's squared first coordinate: constancy
+plus unit norm forces `1/2`. -/
+theorem fc_lapK2_sq_zero {i : Fin 2}
+    (hi : eigvalOf (laplacian adjK2) lapK2_symmetric i = 0) :
+    eigvecOf (laplacian adjK2) lapK2_symmetric i 0
+      * eigvecOf (laplacian adjK2) lapK2_symmetric i 0 = 1 / 2 := by
+  have hEq := lapK2_eigvecOf_eq_of_eq_zero hi
+  have hnorm := eigvecOf_inner (laplacian adjK2) lapK2_symmetric i i
+  rw [if_pos rfl] at hnorm
+  simp only [Matrix.dotProduct, Fin.sum_univ_two] at hnorm
+  rw [← hEq] at hnorm
+  linarith
+
+/-- **Kernel-mode outer products are sign-free**: a constant unit
+eigenvector contributes `1/2` to every entry of the eigenbasis
+expansion — no basis-orientation sign survives. -/
+theorem fc_lapK2_outer_zero {i : Fin 2}
+    (hi : eigvalOf (laplacian adjK2) lapK2_symmetric i = 0) (a b : Fin 2) :
+    eigvecOf (laplacian adjK2) lapK2_symmetric i a
+      * eigvecOf (laplacian adjK2) lapK2_symmetric i b = 1 / 2 := by
+  have hEq := lapK2_eigvecOf_eq_of_eq_zero hi
+  have hsq := fc_lapK2_sq_zero hi
+  fin_cases a <;> fin_cases b
+  · exact hsq
+  · show eigvecOf (laplacian adjK2) lapK2_symmetric i 0
+        * eigvecOf (laplacian adjK2) lapK2_symmetric i 1 = 1 / 2
+    rw [← hEq]
+    exact hsq
+  · show eigvecOf (laplacian adjK2) lapK2_symmetric i 1
+        * eigvecOf (laplacian adjK2) lapK2_symmetric i 0 = 1 / 2
+    rw [← hEq]
+    exact hsq
+  · show eigvecOf (laplacian adjK2) lapK2_symmetric i 1
+        * eigvecOf (laplacian adjK2) lapK2_symmetric i 1 = 1 / 2
+    rw [← hEq]
+    exact hsq
+
+/-- The `λ = 2` eigenvector is anticonstant (its two coordinates are
+negatives of each other) — from the eigen-action at coordinate `0`. -/
+theorem fc_lapK2_anticonst {i : Fin 2}
+    (hi : eigvalOf (laplacian adjK2) lapK2_symmetric i = 2) :
+    eigvecOf (laplacian adjK2) lapK2_symmetric i 1
+      = -eigvecOf (laplacian adjK2) lapK2_symmetric i 0 := by
+  have hev := lapK2_mulVec_eigvecOf i
+  rw [hi] at hev
+  have h0 := congrFun hev 0
+  simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+    Pi.smul_apply, smul_eq_mul] at h0
+  rw [show laplacian adjK2 0 0 = (1 : ℝ) from by simp [lapK2_apply],
+      show laplacian adjK2 0 1 = (-1 : ℝ) from by simp [lapK2_apply]] at h0
+  simp only [one_mul, neg_mul, one_mul] at h0
+  linarith
+
+/-- The `λ = 2` eigenvector's squared first coordinate is `1/2`
+(anticonstancy plus unit norm). -/
+theorem fc_lapK2_sq_two {i : Fin 2}
+    (hi : eigvalOf (laplacian adjK2) lapK2_symmetric i = 2) :
+    eigvecOf (laplacian adjK2) lapK2_symmetric i 0
+      * eigvecOf (laplacian adjK2) lapK2_symmetric i 0 = 1 / 2 := by
+  have hanti := fc_lapK2_anticonst hi
+  have hnorm := eigvecOf_inner (laplacian adjK2) lapK2_symmetric i i
+  rw [if_pos rfl] at hnorm
+  simp only [Matrix.dotProduct, Fin.sum_univ_two] at hnorm
+  rw [hanti] at hnorm
+  nlinarith [hnorm]
+
+/-- **`λ = 2` outer products are sign-determined**: `+1/2` on the
+diagonal, `-1/2` off it (both basis-orientation signs cancel). -/
+theorem fc_lapK2_outer_two {i : Fin 2}
+    (hi : eigvalOf (laplacian adjK2) lapK2_symmetric i = 2) (a b : Fin 2) :
+    eigvecOf (laplacian adjK2) lapK2_symmetric i a
+      * eigvecOf (laplacian adjK2) lapK2_symmetric i b
+      = if a = b then 1 / 2 else -(1 / 2) := by
+  have hanti := fc_lapK2_anticonst hi
+  have hsq := fc_lapK2_sq_two hi
+  fin_cases a <;> fin_cases b
+  · rw [if_pos rfl]
+    exact hsq
+  · show eigvecOf (laplacian adjK2) lapK2_symmetric i 0
+        * eigvecOf (laplacian adjK2) lapK2_symmetric i 1
+        = if (0 : Fin 2) = 1 then 1 / 2 else -(1 / 2)
+    rw [hanti, if_neg (by decide)]
+    linear_combination -hsq
+  · show eigvecOf (laplacian adjK2) lapK2_symmetric i 1
+        * eigvecOf (laplacian adjK2) lapK2_symmetric i 0
+        = if (1 : Fin 2) = 0 then 1 / 2 else -(1 / 2)
+    rw [hanti, if_neg (by decide)]
+    linear_combination -hsq
+  · show eigvecOf (laplacian adjK2) lapK2_symmetric i 1
+        * eigvecOf (laplacian adjK2) lapK2_symmetric i 1
+        = if (1 : Fin 2) = 1 then 1 / 2 else -(1 / 2)
+    rw [hanti, if_pos rfl]
+    linear_combination hsq
+
+/-- **The calculus on the `K₂` Laplacian, entrywise and sign-free**:
+for any `f`, `f(L)` is the `±`-mixture `((f 0 ± f 2))/2` — the
+kernel mode contributing `f 0 / 2` everywhere, the `λ = 2` mode
+`± f 2 / 2`. No basis-orientation choice enters at any point (the
+`fc_lapK2_outer_*` pins are sign-free). -/
+theorem fc_lapK2_calc (f : ℝ → ℝ) :
+    spectralCalc (laplacian adjK2) lapK2_symmetric f
+      = !![(f 0 + f 2) / 2, (f 0 - f 2) / 2; (f 0 - f 2) / 2, (f 0 + f 2) / 2] := by
+  have hsum00 : eigvalOf (laplacian adjK2) lapK2_symmetric 0 = 0 →
+      eigvalOf (laplacian adjK2) lapK2_symmetric 1 = 0 → False := by
+    intro h0 h1
+    have hs := lapK2_eigvalOf_sum
+    simp only [Fin.sum_univ_two] at hs
+    rw [h0, h1] at hs
+    norm_num at hs
+  have hsum22 : eigvalOf (laplacian adjK2) lapK2_symmetric 0 = 2 →
+      eigvalOf (laplacian adjK2) lapK2_symmetric 1 = 2 → False := by
+    intro h0 h1
+    have hs := lapK2_eigvalOf_sum
+    simp only [Fin.sum_univ_two] at hs
+    rw [h0, h1] at hs
+    norm_num at hs
+  have hcase : (eigvalOf (laplacian adjK2) lapK2_symmetric 0 = 0 ∧
+        eigvalOf (laplacian adjK2) lapK2_symmetric 1 = 2) ∨
+      (eigvalOf (laplacian adjK2) lapK2_symmetric 0 = 2 ∧
+        eigvalOf (laplacian adjK2) lapK2_symmetric 1 = 0) := by
+    rcases lapK2_eigvalOf_two 0 with e0 | e0
+    · rcases lapK2_eigvalOf_two 1 with e1 | e1
+      · exact (hsum00 e0 e1).elim
+      · exact Or.inl ⟨e0, e1⟩
+    · rcases lapK2_eigvalOf_two 1 with e1 | e1
+      · exact Or.inr ⟨e0, e1⟩
+      · exact (hsum22 e0 e1).elim
+  ext a b
+  rw [spectralCalc_apply (laplacian adjK2) lapK2_symmetric f a b]
+  fin_cases a <;> fin_cases b
+  · -- entry (0,0)
+    show (∑ i, f (eigvalOf (laplacian adjK2) lapK2_symmetric i)
+          * eigvecOf (laplacian adjK2) lapK2_symmetric i 0
+          * eigvecOf (laplacian adjK2) lapK2_symmetric i 0)
+      = ((f 0 + f 2) / 2)
+    simp only [Fin.sum_univ_two]
+    rcases hcase with ⟨e0, e1⟩ | ⟨e0, e1⟩
+    · have oz := fc_lapK2_outer_zero e0 0 0
+      have ot := fc_lapK2_outer_two e1 0 0
+      rw [if_pos rfl] at ot
+      rw [e0, e1, mul_assoc, oz, mul_assoc, ot]
+      ring
+    · have ot := fc_lapK2_outer_two e0 0 0
+      have oz := fc_lapK2_outer_zero e1 0 0
+      rw [if_pos rfl] at ot
+      rw [e0, e1, mul_assoc, ot, mul_assoc, oz]
+      ring
+  · -- entry (0,1)
+    show (∑ i, f (eigvalOf (laplacian adjK2) lapK2_symmetric i)
+          * eigvecOf (laplacian adjK2) lapK2_symmetric i 0
+          * eigvecOf (laplacian adjK2) lapK2_symmetric i 1)
+      = ((f 0 - f 2) / 2)
+    simp only [Fin.sum_univ_two]
+    rcases hcase with ⟨e0, e1⟩ | ⟨e0, e1⟩
+    · have oz := fc_lapK2_outer_zero e0 0 1
+      have ot := fc_lapK2_outer_two e1 0 1
+      rw [if_neg (by decide)] at ot
+      rw [e0, e1, mul_assoc, oz, mul_assoc, ot]
+      ring
+    · have ot := fc_lapK2_outer_two e0 0 1
+      have oz := fc_lapK2_outer_zero e1 0 1
+      rw [if_neg (by decide)] at ot
+      rw [e0, e1, mul_assoc, ot, mul_assoc, oz]
+      ring
+  · -- entry (1,0)
+    show (∑ i, f (eigvalOf (laplacian adjK2) lapK2_symmetric i)
+          * eigvecOf (laplacian adjK2) lapK2_symmetric i 1
+          * eigvecOf (laplacian adjK2) lapK2_symmetric i 0)
+      = ((f 0 - f 2) / 2)
+    simp only [Fin.sum_univ_two]
+    rcases hcase with ⟨e0, e1⟩ | ⟨e0, e1⟩
+    · have oz := fc_lapK2_outer_zero e0 1 0
+      have ot := fc_lapK2_outer_two e1 1 0
+      rw [if_neg (by decide)] at ot
+      rw [e0, e1, mul_assoc, oz, mul_assoc, ot]
+      ring
+    · have ot := fc_lapK2_outer_two e0 1 0
+      have oz := fc_lapK2_outer_zero e1 1 0
+      rw [if_neg (by decide)] at ot
+      rw [e0, e1, mul_assoc, ot, mul_assoc, oz]
+      ring
+  · -- entry (1,1)
+    show (∑ i, f (eigvalOf (laplacian adjK2) lapK2_symmetric i)
+          * eigvecOf (laplacian adjK2) lapK2_symmetric i 1
+          * eigvecOf (laplacian adjK2) lapK2_symmetric i 1)
+      = ((f 0 + f 2) / 2)
+    simp only [Fin.sum_univ_two]
+    rcases hcase with ⟨e0, e1⟩ | ⟨e0, e1⟩
+    · have oz := fc_lapK2_outer_zero e0 1 1
+      have ot := fc_lapK2_outer_two e1 1 1
+      rw [if_pos rfl] at ot
+      rw [e0, e1, mul_assoc, oz, mul_assoc, ot]
+      ring
+    · have ot := fc_lapK2_outer_two e0 1 1
+      have oz := fc_lapK2_outer_zero e1 1 1
+      rw [if_pos rfl] at ot
+      rw [e0, e1, mul_assoc, ot, mul_assoc, oz]
+      ring
+
+/-- **The Tikhonov calculus instance on `K₂`, pinned**: at `π = 1`
+the filter matrix is `!![2/3, 1/3; 1/3, 2/3]` — the shrinkage factors
+`1` (kernel) and `1/3` (`λ = 2`) mixed sign-free. -/
+theorem fc_lapK2_tikhonov_calc :
+    spectralCalc (laplacian adjK2) lapK2_symmetric (tikhonovShrinkage 1)
+      = !![2 / 3, 1 / 3; 1 / 3, 2 / 3] := by
+  rw [fc_lapK2_calc]
+  norm_num [tikhonovShrinkage]
+
+/-- **The reconciliation witnessed numerically**: through the equality
+theorem and the pinned filter matrix, the calculus routes the signal
+`![1, 0]` to `![2/3, 1/3]` — exactly the hand-solved Gaussian value
+that `Tikhonov_QA.tik_K2_eq` pinned for the eigenbasis minimizer in
+the original delivery. Two constructions, one number. -/
+theorem fc_lapK2_reconcile :
+    tikhonovMinimizer adjK2 adjK2_symmetric 1 ![1, 0] = ![2 / 3, 1 / 3] := by
+  rw [tikhonovMinimizer_eq_spectralCalc_mulVec, fc_lapK2_tikhonov_calc]
+  funext a
+  fin_cases a <;>
+    simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      Matrix.tail_cons, Matrix.of_apply] <;>
+    norm_num
+
+/-- **The normal equation, calculus route**: composing the equality
+theorem with the matrix-level calculus normal equation (and the
+`mulVec` conversions) re-derives
+`tikhonovMinimizer_add_smul_one_mulVec`'s exact statement through
+Mathlib's calculus algebra — no eigenbasis expansion anywhere in the
+chain. -/
+theorem fc_lapK2_normal_calculus :
+    (laplacian adjK2 + (1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))
+      *ᵥ tikhonovMinimizer adjK2 adjK2_symmetric 1 ![1, 0]
+      = (1 : ℝ) • ![1, 0] := by
+  have hM := add_smul_one_mul_spectralCalc_tikhonovShrinkage adjK2
+    adjK2_symmetric adjK2_nonneg (by norm_num : (0 : ℝ) < 1)
+  -- entrywise associativity (the pin has no matrix-level mulVec
+  -- associativity lemma in the needed orientation)
+  have hassoc : (laplacian adjK2 + (1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))
+      *ᵥ (spectralCalc (laplacian adjK2) lapK2_symmetric
+          (tikhonovShrinkage 1) *ᵥ ![1, 0])
+      = ((laplacian adjK2 + (1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))
+      * spectralCalc (laplacian adjK2) lapK2_symmetric
+          (tikhonovShrinkage 1)) *ᵥ ![1, 0] := by
+    funext a
+    simp only [Matrix.mulVec, Matrix.dotProduct, Matrix.mul_apply,
+      Finset.sum_mul, Finset.mul_sum]
+    rw [Finset.sum_comm]
+    exact Finset.sum_congr rfl fun j _ =>
+      Finset.sum_congr rfl fun k _ => by ring
+  rw [tikhonovMinimizer_eq_spectralCalc_mulVec adjK2 adjK2_symmetric 1 ![1, 0],
+    hassoc, hM, Matrix.smul_mulVec_assoc, Matrix.one_mulVec]
+
+/-- **The normal equation, hand route**: the same statement through
+`Tikhonov_QA`'s pinned minimizer and hand-solved system — the two
+routes to one statement, both proved, independently. -/
+theorem fc_lapK2_normal_hand :
+    (laplacian adjK2 + (1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))
+      *ᵥ tikhonovMinimizer adjK2 adjK2_symmetric 1 ![1, 0]
+      = (1 : ℝ) • ![1, 0] := by
+  rw [tik_K2_eq]
+  exact normal_K2
+
+/-- **The raw independent check of the calculus normal equation on
+`K₂`**: `(L + 1•1) * f(L) = 1` by literal matrix arithmetic on the
+pinned filter matrix and the pinned Laplacian entries — no theorem
+consumed except the entry pins. -/
+theorem fc_lapK2_normal_raw :
+    (laplacian adjK2 + (1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))
+      * spectralCalc (laplacian adjK2) lapK2_symmetric (tikhonovShrinkage 1)
+      = (1 : Matrix (Fin 2) (Fin 2) ℝ) := by
+  rw [fc_lapK2_tikhonov_calc]
+  ext a b
+  fin_cases a <;> fin_cases b <;>
+    simp [Matrix.mul_apply, lapK2_apply, Fin.sum_univ_two] <;>
+    norm_num
+
+/-- **The kernel-mode action instantiation**: the filter fixes the
+kernel eigenvector exactly (factor `1` at `λ = 0`) — mean
+preservation seen through the calculus action interface. -/
+theorem fc_lapK2_kernel_action {i : Fin 2}
+    (hi : eigvalOf (laplacian adjK2) lapK2_symmetric i = 0) :
+    spectralCalc (laplacian adjK2) lapK2_symmetric (tikhonovShrinkage 1)
+      *ᵥ eigvecOf (laplacian adjK2) lapK2_symmetric i
+      = eigvecOf (laplacian adjK2) lapK2_symmetric i := by
+  have hone : tikhonovShrinkage 1 0 = 1 :=
+    (tikhonovShrinkage_eq_one_iff (by norm_num : (1 : ℝ) ≠ 0)).mpr rfl
+  rw [spectralCalc_mulVec_eigvecOf, hi, hone, one_smul]
+
+/-- The junk shrinkage values at `π = -2`: at the spectral point
+`λ = 2 = -π` the factor is the junk `0`; at `λ = 0` it is exactly
+`1`. These are the values that break the normal equation off the PSD
+regime. -/
+theorem fc_lapK2_shrink_neg_two_zero : tikhonovShrinkage (-2 : ℝ) 0 = 1 := by
+  norm_num [tikhonovShrinkage]
+
+theorem fc_lapK2_shrink_neg_two_two : tikhonovShrinkage (-2 : ℝ) 2 = 0 := by
+  norm_num [tikhonovShrinkage]
+
+/-- **The fence: the filter matrix at `π = -2`** (computed through
+the sign-free master lemma): the junk factor `0` at `λ = 2` kills the
+anticonstant mode, leaving the pure kernel average `1/2` in every
+entry. -/
+theorem fc_lapK2_fence_matrix :
+    spectralCalc (laplacian adjK2) lapK2_symmetric (tikhonovShrinkage (-2))
+      = !![1 / 2, 1 / 2; 1 / 2, 1 / 2] := by
+  rw [fc_lapK2_calc]
+  norm_num [fc_lapK2_shrink_neg_two_zero, fc_lapK2_shrink_neg_two_two]
+
+/-- **The fence: the hypothesis-free normal equation is false.** At
+`π = -2` (a spectral point of `K₂`'s Laplacian, `2 = -π`), the
+product `(L + π•1) * f(L)` is the all-`(-1)` matrix, not `(-2) • 1`:
+the junk division at the spectral point breaks the pointwise identity
+`shrink π λ · (λ + π) = π` exactly there. The `0 < π` hypothesis of
+`add_smul_one_mul_spectralCalc_tikhonovShrinkage` (through PSD) is
+load-bearing, not decorative. -/
+theorem fc_lapK2_fence_not_normal :
+    ¬ ((laplacian adjK2 + (-2 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))
+      * spectralCalc (laplacian adjK2) lapK2_symmetric
+          (tikhonovShrinkage (-2))
+      = (-2 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ)) := by
+  intro hcon
+  have h01 := congrFun (congrFun hcon 0) 1
+  rw [fc_lapK2_fence_matrix] at h01
+  simp only [Matrix.mul_apply, Matrix.add_apply, Matrix.smul_apply,
+    Matrix.one_apply, Fin.sum_univ_two, Matrix.cons_val_zero,
+    Matrix.cons_val_one, Matrix.head_cons, Matrix.tail_cons,
+    Matrix.of_apply, lapK2_apply] at h01
+  norm_num at h01
+
+end TikhonovReconciliation
+
+/-!
+## Section F: the Heat reconciliation (the second consumer)
+
+The Heat half of `proposals/hermitian-calculus-consumer-tikhonov-heat.md`
+(2026-08-25): the matrix-exponential heat kernel is the calculus at the
+exponential family. All witnesses live on the same `Tikhonov_QA` `K₂`
+fixture (`adjK2`, Laplacian spectrum `{0, 2}`) as Section E, so the two
+consumer reconciliations are pinned against one shared, independently
+delivered eigenbasis. The two routes under test are genuinely
+independent proof stacks: Mathlib's `cfc` (via the equality theorem)
+against the `Heat.lean` entrywise exponential-series engine — the
+reconciliation the parent proposal's Step-0 pricing predicted would
+carry mathematical content.
+-/
+
+section HeatReconciliation
+
+open Scaffold.Mathlib.GraphTheory.Tikhonov.QA
+
+/-- **The calculus on the `K₂` Laplacian at the exponential family,
+entrywise and sign-free** (the Section-E master lemma instantiated at
+`f = (x ↦ e^{-t·x})`): the decay factors `1` (kernel) and `e^{-2t}`
+(`λ = 2`) mixed sign-free into `!![(1 ± e^{-2t})/2]`. -/
+theorem fc_heat_K2_calc (t : ℝ) :
+    spectralCalc (laplacian adjK2) lapK2_symmetric (fun x => Real.exp (-(t * x)))
+      = !![(1 + Real.exp (-(2 * t))) / 2, (1 - Real.exp (-(2 * t))) / 2;
+           (1 - Real.exp (-(2 * t))) / 2, (1 + Real.exp (-(2 * t))) / 2] := by
+  have h0 : Real.exp (-(t * (0 : ℝ))) = 1 := by simp
+  have h2 : Real.exp (-(t * (2 : ℝ))) = Real.exp (-(2 * t)) := by congr 1; ring
+  rw [fc_lapK2_calc]
+  simp only [h0, h2]
+
+/-- **Route 1 — the calculus route**: through the equality theorem
+`heatKernel_eq_spectralCalc_exp`, the matrix-exponential heat kernel is
+the closed form `!![(1 ± e^{-2t})/2]` at every time. This is the `cfc`
+side of the reconciliation. -/
+theorem fc_heat_K2_calculus_route (t : ℝ) :
+    heatKernel adjK2 t
+      = !![(1 + Real.exp (-(2 * t))) / 2, (1 - Real.exp (-(2 * t))) / 2;
+           (1 - Real.exp (-(2 * t))) / 2, (1 + Real.exp (-(2 * t))) / 2] := by
+  rw [heatKernel_eq_spectralCalc_exp adjK2 adjK2_symmetric t, fc_heat_K2_calc]
+
+/-- **Route 2 — the series-engine route**: the same closed form, at the
+action level on the signal `![1, 0]`, computed from
+`heatKernel_mulVec_eq_sum` (`Heat.lean`'s entrywise exponential-series
+machinery — no `cfc` anywhere) and the Section-E sign-free
+outer-product pins. Two independent proof stacks, one vector. -/
+theorem fc_heat_K2_series_route (t : ℝ) :
+    heatKernel adjK2 t *ᵥ (![1, 0] : Fin 2 → ℝ)
+      = ![(1 + Real.exp (-(2 * t))) / 2, (1 - Real.exp (-(2 * t))) / 2] := by
+  have hsum00 : eigvalOf (laplacian adjK2) lapK2_symmetric 0 = 0 →
+      eigvalOf (laplacian adjK2) lapK2_symmetric 1 = 0 → False := by
+    intro h0 h1
+    have hs := lapK2_eigvalOf_sum
+    simp only [Fin.sum_univ_two] at hs
+    rw [h0, h1] at hs
+    norm_num at hs
+  have hsum22 : eigvalOf (laplacian adjK2) lapK2_symmetric 0 = 2 →
+      eigvalOf (laplacian adjK2) lapK2_symmetric 1 = 2 → False := by
+    intro h0 h1
+    have hs := lapK2_eigvalOf_sum
+    simp only [Fin.sum_univ_two] at hs
+    rw [h0, h1] at hs
+    norm_num at hs
+  have hcase : (eigvalOf (laplacian adjK2) lapK2_symmetric 0 = 0 ∧
+        eigvalOf (laplacian adjK2) lapK2_symmetric 1 = 2) ∨
+      (eigvalOf (laplacian adjK2) lapK2_symmetric 0 = 2 ∧
+        eigvalOf (laplacian adjK2) lapK2_symmetric 1 = 0) := by
+    rcases lapK2_eigvalOf_two 0 with e0 | e0
+    · rcases lapK2_eigvalOf_two 1 with e1 | e1
+      · exact (hsum00 e0 e1).elim
+      · exact Or.inl ⟨e0, e1⟩
+    · rcases lapK2_eigvalOf_two 1 with e1 | e1
+      · exact Or.inr ⟨e0, e1⟩
+      · exact (hsum22 e0 e1).elim
+  have hdot : ∀ i : Fin 2,
+      Matrix.dotProduct (eigvecOf (laplacian adjK2) lapK2_symmetric i)
+        (![1, 0] : Fin 2 → ℝ)
+      = eigvecOf (laplacian adjK2) lapK2_symmetric i 0 := by
+    intro i
+    simp only [Matrix.dotProduct, Fin.sum_univ_two, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.head_cons, Matrix.tail_cons, mul_one,
+      mul_zero, add_zero]
+  have hz : Real.exp (-(t * (0 : ℝ))) = 1 := by simp
+  have ht : Real.exp (-(t * (2 : ℝ))) = Real.exp (-(2 * t)) := by congr 1; ring
+  funext a
+  rw [heatKernel_mulVec_eq_sum adjK2 adjK2_symmetric t (![1, 0] : Fin 2 → ℝ)]
+  simp only [hdot, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
+  fin_cases a
+  · show (∑ i, Real.exp (-(t * eigvalOf (laplacian adjK2) lapK2_symmetric i))
+          * eigvecOf (laplacian adjK2) lapK2_symmetric i 0
+          * eigvecOf (laplacian adjK2) lapK2_symmetric i 0)
+        = ((1 + Real.exp (-(2 * t))) / 2)
+    simp only [Fin.sum_univ_two]
+    rcases hcase with ⟨e0, e1⟩ | ⟨e0, e1⟩
+    · have oz := fc_lapK2_outer_zero e0 0 0
+      have ot := fc_lapK2_outer_two e1 0 0
+      rw [if_pos rfl] at ot
+      rw [e0, e1, hz, ht, mul_assoc, oz, mul_assoc, ot]
+      ring
+    · have ot := fc_lapK2_outer_two e0 0 0
+      have oz := fc_lapK2_outer_zero e1 0 0
+      rw [if_pos rfl] at ot
+      rw [e0, e1, hz, ht, mul_assoc, ot, mul_assoc, oz]
+      ring
+  · show (∑ i, Real.exp (-(t * eigvalOf (laplacian adjK2) lapK2_symmetric i))
+          * eigvecOf (laplacian adjK2) lapK2_symmetric i 0
+          * eigvecOf (laplacian adjK2) lapK2_symmetric i 1)
+        = ((1 - Real.exp (-(2 * t))) / 2)
+    simp only [Fin.sum_univ_two]
+    rcases hcase with ⟨e0, e1⟩ | ⟨e0, e1⟩
+    · have oz := fc_lapK2_outer_zero e0 0 1
+      have ot := fc_lapK2_outer_two e1 0 1
+      rw [if_neg (by decide)] at ot
+      rw [e0, e1, hz, ht, mul_assoc, oz, mul_assoc, ot]
+      ring
+    · have ot := fc_lapK2_outer_two e0 0 1
+      have oz := fc_lapK2_outer_zero e1 0 1
+      rw [if_neg (by decide)] at ot
+      rw [e0, e1, hz, ht, mul_assoc, ot, mul_assoc, oz]
+      ring
+
+/-- **The semigroup through the calculus route** (the substantive
+reconciliation layer at QA scale): flowing `1` then `2` equals flowing
+`3`, through the equality theorem pair and the calculus-algebra
+semigroup — no eigenbasis, no `Matrix.exp_add_of_commute`. -/
+theorem fc_heat_K2_semigroup_calculus :
+    heatKernel adjK2 1 * heatKernel adjK2 2 = heatKernel adjK2 3 := by
+  rw [heatKernel_mul_heatKernel_of_spectralCalc adjK2 adjK2_symmetric 1 2]
+  norm_num
+
+/-- **The semigroup through the delivered commute route**: the same
+statement through `Heat.lean`'s hypothesis-free
+`heatKernel_mul_heatKernel` (`Matrix.exp_add_of_commute`). Two
+independent proof technologies, one semigroup law. -/
+theorem fc_heat_K2_semigroup_commute :
+    heatKernel adjK2 1 * heatKernel adjK2 2 = heatKernel adjK2 3 := by
+  rw [heatKernel_mul_heatKernel adjK2 1 2]
+  norm_num
+
+/-- **The semigroup pinned to the number both routes deliver**: the
+product at times `1, 2` is the closed form at time `3` — entries
+`(1 ± e^{-6})/2` with `e^{-2}·e^{-4} = e^{-6}` waiting inside. -/
+theorem fc_heat_K2_semigroup_pin :
+    heatKernel adjK2 1 * heatKernel adjK2 2
+      = !![(1 + Real.exp (-(6 : ℝ))) / 2, (1 - Real.exp (-(6 : ℝ))) / 2;
+           (1 - Real.exp (-(6 : ℝ))) / 2, (1 + Real.exp (-(6 : ℝ))) / 2] := by
+  rw [fc_heat_K2_semigroup_calculus, fc_heat_K2_calculus_route]
+  norm_num
+
+/-- **The raw closed-form product check** (no heat or calculus theorems
+consumed): `CF(1) * CF(2) = CF(3)` by literal matrix arithmetic, the
+only scalar input being `Real.exp_add` at `e^{-2}·e^{-4} = e^{-6}` —
+the closed-form family closes under multiplication, independently of
+how any of its members were computed. -/
+theorem fc_heat_K2_semigroup_raw :
+    (!![(1 + Real.exp (-(2 : ℝ))) / 2, (1 - Real.exp (-(2 : ℝ))) / 2;
+        (1 - Real.exp (-(2 : ℝ))) / 2, (1 + Real.exp (-(2 : ℝ))) / 2]
+        : Matrix (Fin 2) (Fin 2) ℝ)
+      * !![(1 + Real.exp (-(4 : ℝ))) / 2, (1 - Real.exp (-(4 : ℝ))) / 2;
+        (1 - Real.exp (-(4 : ℝ))) / 2, (1 + Real.exp (-(4 : ℝ))) / 2]
+      = !![(1 + Real.exp (-(6 : ℝ))) / 2, (1 - Real.exp (-(6 : ℝ))) / 2;
+        (1 - Real.exp (-(6 : ℝ))) / 2, (1 + Real.exp (-(6 : ℝ))) / 2] := by
+  have h24 : Real.exp (-(2 : ℝ)) * Real.exp (-(4 : ℝ)) = Real.exp (-(6 : ℝ)) := by
+    rw [← Real.exp_add]
+    norm_num
+  ext a b
+  rw [Matrix.mul_apply, Fin.sum_univ_two]
+  fin_cases a <;> fin_cases b
+  · show (1 + Real.exp (-(2 : ℝ))) / 2 * ((1 + Real.exp (-(4 : ℝ))) / 2)
+        + (1 - Real.exp (-(2 : ℝ))) / 2 * ((1 - Real.exp (-(4 : ℝ))) / 2)
+        = (1 + Real.exp (-(6 : ℝ))) / 2
+    linear_combination h24 / 2
+  · show (1 + Real.exp (-(2 : ℝ))) / 2 * ((1 - Real.exp (-(4 : ℝ))) / 2)
+        + (1 - Real.exp (-(2 : ℝ))) / 2 * ((1 + Real.exp (-(4 : ℝ))) / 2)
+        = (1 - Real.exp (-(6 : ℝ))) / 2
+    linear_combination -(h24) / 2
+  · show (1 - Real.exp (-(2 : ℝ))) / 2 * ((1 + Real.exp (-(4 : ℝ))) / 2)
+        + (1 + Real.exp (-(2 : ℝ))) / 2 * ((1 - Real.exp (-(4 : ℝ))) / 2)
+        = (1 - Real.exp (-(6 : ℝ))) / 2
+    linear_combination -(h24) / 2
+  · show (1 - Real.exp (-(2 : ℝ))) / 2 * ((1 - Real.exp (-(4 : ℝ))) / 2)
+        + (1 + Real.exp (-(2 : ℝ))) / 2 * ((1 + Real.exp (-(4 : ℝ))) / 2)
+        = (1 + Real.exp (-(6 : ℝ))) / 2
+    linear_combination h24 / 2
+
+/-- **Time zero through the calculus**: the equality theorem at `t = 0`
+collapses to the identity matrix — the calculus preserves the
+delivered `heatKernel_zero`, the two constructions agreeing at the
+semigroup unit. -/
+theorem fc_heat_K2_zero_calculus :
+    heatKernel adjK2 0 = (1 : Matrix (Fin 2) (Fin 2) ℝ) := by
+  rw [fc_heat_K2_calculus_route]
+  ext a b
+  fin_cases a <;> fin_cases b <;>
+    simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      Matrix.tail_cons, Matrix.of_apply, Matrix.one_apply] <;>
+    norm_num [Real.exp_zero]
+
+/-- **The DC mode is fixed** (eigenmode decay through the calculus
+action interface, kernel mode): the calculus at the exponential family
+acts as the identity on the constant mode — mean preservation seen
+through `cfc`, mirroring Section E's kernel action. -/
+theorem fc_heat_K2_kernel_action {i : Fin 2} (t : ℝ)
+    (hi : eigvalOf (laplacian adjK2) lapK2_symmetric i = 0) :
+    spectralCalc (laplacian adjK2) lapK2_symmetric (fun x => Real.exp (-(t * x)))
+      *ᵥ eigvecOf (laplacian adjK2) lapK2_symmetric i
+      = eigvecOf (laplacian adjK2) lapK2_symmetric i := by
+  rw [spectralCalc_mulVec_eigvecOf, hi]
+  have h1 : Real.exp (-(t * (0 : ℝ))) = 1 := by simp
+  rw [h1, one_smul]
+
+/-- **The anticonstant mode decays** (eigenmode decay through the
+calculus action interface, `λ = 2` mode): the calculus damps the
+oscillating mode by exactly `e^{-2t}` — the calculus-side mirror of
+the delivered series-route `heatKernel_mulVec_eigvecOf`. -/
+theorem fc_heat_K2_mode_two_action {i : Fin 2} (t : ℝ)
+    (hi : eigvalOf (laplacian adjK2) lapK2_symmetric i = 2) :
+    spectralCalc (laplacian adjK2) lapK2_symmetric (fun x => Real.exp (-(t * x)))
+      *ᵥ eigvecOf (laplacian adjK2) lapK2_symmetric i
+      = Real.exp (-(2 * t)) • eigvecOf (laplacian adjK2) lapK2_symmetric i := by
+  rw [spectralCalc_mulVec_eigvecOf, hi]
+  have h2 : Real.exp (-(t * (2 : ℝ))) = Real.exp (-(2 * t)) := by rw [mul_comm]
+  rw [h2]
+
+/-- **The nontriviality fence**: the heat kernel at `t = 1` is provably
+not the identity — entry `(0, 1)` is `(1 - e^{-2})/2 > 0` since
+`e^{-2} < 1`. Diffusion moves mass (while conserving it, per the
+delivered `heatKernel_mulVec_onesVec`). This refutes, in proved form,
+any degenerate reading of the equality theorem that collapses the
+exponential family to a constant — e.g. a junk calculus evaluating
+`f` only at the kernel eigenvalue `0` would return exactly `1`. -/
+theorem fc_heat_K2_not_one :
+    heatKernel adjK2 1 ≠ (1 : Matrix (Fin 2) (Fin 2) ℝ) := by
+  intro hcon
+  have h01 := congrFun (congrFun hcon 0) 1
+  rw [fc_heat_K2_calculus_route] at h01
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+    Matrix.tail_cons, Matrix.of_apply, Matrix.one_apply] at h01
+  norm_num at h01
+  have hlt : Real.exp (-(2 : ℝ)) < 1 := by
+    have := Real.exp_lt_exp.mpr (by norm_num : -(2 : ℝ) < (0 : ℝ))
+    rwa [Real.exp_zero] at this
+  linarith
+
+end HeatReconciliation
 
 end SpectralGraphTheory.QA

@@ -7,24 +7,219 @@ holds the append-only narrative.
 ## Active milestone
 
 **None open — the queue is empty at this boundary.** The last
-completed milestone is the Hermitian-functional-calculus-bridge
-delivery (see the delivered record below); its standing handoff and
-the `proposals/README.md` Active priority table (no High, no Medium —
-every remaining row a Low blocked on a human or technical decision)
-leave the next autonomous run at the center-out SGT policy
-(`docs/1_STRATEGY.md`, `docs/6_SGT_BACKLOG.md`): the two now-unblocked
-bridge consumer stubs (`hermitian-calculus-consumer-tikhonov-heat.md`
-— Tikhonov *or* Heat recovered as a calculus instance, the smaller
-reconciliation gap Tikhonov's; `hermitian-calculus-consumer-magnetic.md`
-— the magnetic heat propagator, its complex-half precondition
-discharged by this delivery's QA witness — each needing its own
-indexing-and-pursuit decision per the one-shape-per-proposal
-discipline), the irregular-Cheeger *hard* direction (the priced
-volume-weighted coarea/median program), the directed-axis *rate* layer
-(gated on a separate admission + a named consumer), the magnetic
-*spectral* layer (gated on a consumer naming a bound), a named
-consumer pricing the wide-band minimax filter designs, or a fresh
-center-out candidate per the backlog.
+completed milestone is the Heat-as-calculus-instance delivery below
+(the consumer stub is now complete, both halves delivered); the
+`proposals/README.md` Active priority table holds no High and no
+Medium (every remaining row a Low blocked on a human or technical
+decision), leaving the next autonomous run at the center-out SGT
+policy (`docs/1_STRATEGY.md`, `docs/6_SGT_BACKLOG.md`) with the
+natural candidates now named in `proposals/README.md`'s closing
+paragraph: the **magnetic heat propagator** (the second bridge
+consumer stub, `exp` of the delivered `magneticLaplacian` as the
+complex calculus at `e^{-tλ}` — its complex-half precondition
+discharged by the bridge delivery's QA witness `fcM2c_cfc_id`, now
+the top candidate with the Tikhonov/Heat stub complete), the
+**resolvent identity** `f(L) = π • (L + π•1)⁻¹` under invertibility
+(one `cfc_inv` step from the delivered normal equation — a priced
+follow-on of the now-complete stub), the irregular-Cheeger *hard*
+direction (the priced volume-weighted coarea/median program), the
+directed-axis *rate* layer (gated on a separate admission + a named
+consumer), the magnetic *spectral* layer (gated on a consumer naming
+a bound), a named consumer pricing the wide-band minimax filter
+designs, or a fresh center-out candidate per the backlog.
+------
+
+## Delivered milestones (most recent first)
+
+**Heat recovered as a functional-calculus instance — the bridge's
+falsifiability test at its second consumer, and the reconciliation
+with genuine mathematical content; the consumer stub COMPLETE, both
+halves delivered; `proposals/hermitian-calculus-consumer-tikhonov-heat.md`,
+the Heat half (run 1, 2026-08-25, run `20260825T163517Z-run-1`; the
+Tikhonov sibling's own priced follow-on, selected per the empty
+High/Medium queue by the center-out policy as the top natural
+candidate named in all three standing handoffs — the one-per-delivery
+rule's indexing-and-pursuit decision made and recorded in this plan's
+active-milestone block at the boundary): DELIVERED — pure hard crust,
+zero new axioms (count stays 10; `#print axioms` via
+`wip/heatcfc_axcheck.lean` on all 15 new declarations — 4 public +
+11 QA: exactly `propext, Classical.choice, Quot.sound`, every one).
+QA 2205 → 2216 (+11 in `FunctionalCalculus_QA.lean`'s Section F, no
+new file).**
+
+**Delivered:** the "Recovered instances: the heat semigroup" section
+of `GraphTheory/FunctionalCalculus.lean` (`Heat.lean` untouched per
+the stub's non-goals; one new import — Heat, no cycle; no umbrella
+change): the action-equality helper `matrix_eq_of_forall_mulVec_eq`
+(matrices are their `mulVec` actions; entries recovered at
+`Pi.single j 1`), the headline `heatKernel_eq_spectralCalc_exp`
+(`heatKernel A t = spectralCalc (laplacian A) hL (fun x =>
+Real.exp (-(t * x)))` under `A.IsSymm` — the two sides built by
+independent proof stacks: `Heat.lean`'s from-scratch entrywise
+exponential-series machinery against Mathlib's `cfc`, joined at the
+shared filter-sum shape — in effect the spectral mapping theorem for
+`exp` at real-symmetric matrices, the reconciliation the parent
+proposal's Step-0 pricing predicted would carry content where
+Tikhonov's was an identity of definitions), and the substantive
+second layer `spectralCalc_exp_mul` (the semigroup at the exponential
+family through the generic calculus algebra: `cfc_mul` then
+`cfc_congr` promoting pointwise `Real.exp_add` from the spectrum,
+eigenbasis-free) composed into `heatKernel_mul_heatKernel_of_spectralCalc`
+(a second proof technology for `Heat.lean`'s hypothesis-free
+`heatKernel_mul_heatKernel`, the `Matrix.exp_add_of_commute` route;
+docstring records honestly that this route needs `A.IsSymm` where the
+original does not).
+
+**QA (+11, Section F on the same `Tikhonov_QA` K₂ fixture as Section
+E — the two consumer reconciliations pinned against one shared,
+independently delivered eigenbasis):** the closed form
+`!![(1±e^{-2t})/2]` by **two independent routes**
+(`fc_heat_K2_calculus_route` through the equality theorem + the
+Section-E master lemma vs `fc_heat_K2_series_route` through
+`heatKernel_mulVec_eq_sum` + the sign-free outer-product pins — no
+`cfc` anywhere on that route); the semigroup at times `1, 2` by
+**two independent routes** (`_calculus` through the new chain vs
+`_commute` through the delivered law) plus `_pin` (both deliver the
+entries `(1±e^{-6})/2`) and `_raw` (the literal closed-form product
+check, `Real.exp_add` the only scalar input); time zero preserved
+through the calculus; eigenmode decay through the calculus action
+interface at both modes (the calculus-side mirror of the series-route
+`heatKernel_mulVec_eigvecOf`); and the **nontriviality fence**
+`fc_heat_K2_not_one` — `heatKernel K₂ 1 ≠ 1`, entry `(1 - e^{-2})/2
+> 0` since `Real.exp_lt_exp` gives `e^{-2} < 1`: diffusion provably
+moves mass, refuting any degenerate constant-collapse reading of the
+equality theorem.
+
+**Verification:** spike first (`wip/heatcfc_spike.lean` +
+`wip/heatcfc_qa_spike.lean`, the full routes green before any module
+touched — the catches recorded in the proposal's delivery record:
+`Real.exp_add`'s direction at this pin needs `← Real.exp_add` for
+the product-to-sum step; the `fin_cases` redex trap in the raw
+product lemma closed by `Matrix.mul_apply`/`Fin.sum_univ_two`
+pre-rewrites plus per-branch definitional `show`s at numeral indices,
+plus a factor-2 correction in the off-diagonal `linear_combination`
+certificates); `lake env lean` zero errors/warnings on both changed
+files; explicit `lake build` targets ✔ (module 2309/2309, QA
+2313/2313); `#print axioms` via `wip/heatcfc_axcheck.lean` on all 15
+— the standard three only; **full `lake build` ✔ (2385 targets,
+"Build completed successfully") immediately followed by
+`check_build_completeness.py` — 106/106 fresh, 0 stale, 0 missing,
+exit 0**; `lint_axioms` (10), `check_citations`, `check_markdown_links`
+pass; scoreboard regenerated (**2216/10/0**, idempotent by md5).
+Records updated: the proposal (both-halves COMPLETE header + the Heat
+delivery record with the pin-technique findings and post-Heat priced
+follow-ons), `proposals/README.md` (the Delivered row extended to
+both halves; the progress paragraph; the natural-candidates closing
+paragraph now headed by the magnetic heat propagator), README (2216;
+the status-paragraph bridge clause and the FunctionalCalculus
+module-table row extended to the second consumer), the radar (QA axis
+synced 2205/55 → 2216/55, held 4.0), the scoreboard (two verification
+rows + the interpretation bullet), `index/map/spectral_graph.md`
+(+4 declaration rows + the second-consumer reconciliation paragraph),
+this plan, and the activity log. Nothing committed; the prior runs'
+uncommitted deliveries preserved untouched.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — the magnetic heat propagator (the second consumer
+stub, now the top named candidate), the resolvent identity (the
+consumer stub's priced follow-on), the irregular-Cheeger *hard*
+direction, the standing gated candidates (directed-axis rate; magnetic
+spectral; a consumer pricing the wide-band minimax filter designs), or
+a fresh center-out candidate per `docs/6_SGT_BACKLOG.md`.
+------
+
+## Delivered milestones (most recent first)
+
+**Tikhonov recovered as a functional-calculus instance — the first
+bridge consumer; `proposals/hermitian-calculus-consumer-tikhonov-heat.md`,
+the Tikhonov half COMPLETE, Steps 0+1 in one run (run 1, 2026-08-25,
+run `20260825T145722Z-run-1`; the first of the two consumer stubs the
+previous delivery unblocked, its gate satisfied and its
+Tikhonov-vs-Heat choice discharged by the parent proposal's recorded
+Step-0 pricing — "the smaller reconciliation gap is Tikhonov's"):
+DELIVERED — pure hard crust, zero new axioms (count stays 10;
+`#print axioms` via `wip/tikcfc_axcheck.lean` on all 19 new
+declarations — 3 public + 16 QA: exactly `propext, Classical.choice,
+Quot.sound`, every one). QA 2189 → 2205 (+16 in
+`FunctionalCalculus_QA.lean`'s Section E, no new file).**
+
+**Delivered:** the "Recovered instances" section of
+`GraphTheory/FunctionalCalculus.lean` (`Tikhonov.lean` untouched per
+the stub's non-goals; no new imports, no umbrella change):
+`continuousOn_of_finite_real_spectrum` (the `ContinuousOn` supplier on
+the finite real spectrum, via `Finite.instDiscreteTopology` — the
+helper every future generic-CFC consumer needs, since `cfc_cont_tac`'s
+`fun_prop` cannot discharge spectrum-restricted continuity of
+spectral-data functions), the headline
+`tikhonovMinimizer_eq_spectralCalc_mulVec` (`x* = f(L) *ᵥ y` at
+`f = tikhonovShrinkage π`, **hypothesis-free**, the proof the
+definition identity the parent pricing predicted — the bridge's action
+form was stated in exactly the minimizer's filter-sum shape), and the
+substantive second layer
+`add_smul_one_mul_spectralCalc_tikhonovShrinkage` — the normal
+equation `(L + π•1) * f(L) = π • 1` **re-derived through Mathlib's
+generic CFC algebra** (`cfc_add_const`/`cfc_id'`/`cfc_mul`/`cfc_congr`/
+`cfc_const`, reached through `Matrix.IsHermitian.cfc_eq`; the
+pointwise `shrink π λ · (λ+π) = π` promoted from the spectrum by
+`cfc_congr`, PSD + `0 < π` keeping the division non-junk at spectral
+points) — an eigenbasis-free route to a statement the shelf had only
+through the eigenbasis expansion: two routes, one nontrivial
+statement.
+
+**QA (+16, Section E on the `Tikhonov_QA` K₂ fixture):** the sign-free
+structure pins (kernel outer products all `1/2`; `λ = 2` outer
+products `±1/2` — no basis-orientation choice surviving anywhere); the
+arbitrary-`f` master entrywise lemma `fc_lapK2_calc`
+(`f(L) = !![(f 0+f 2)/2, (f 0−f 2)/2; …]`); the calculus instance
+pinned to `!![2/3, 1/3; 1/3, 2/3]` at `π = 1`; **the reconciliation
+witnessed numerically** — through the equality theorem the calculus
+routes `![1,0]` to `![2/3, 1/3]`, exactly the hand-solved Gaussian
+value `tik_K2_eq` pinned in the original Tikhonov delivery (two
+constructions, one number); the normal equation by **two independent
+routes** (`fc_lapK2_normal_calculus` through the public chain vs
+`fc_lapK2_normal_hand` through the pinned hand-solved system) plus a
+raw matrix-arithmetic check; the kernel-mode action instantiation
+(factor exactly `1`); and the **fence at `π = -2`** — the junk
+shrinkage `0` at the spectral point `2 = -π` drives `f(L)` to the pure
+kernel average and the hypothesis-free normal equation is refuted in
+proved form at the `(-1) ≠ 0` entry: `0 < π` load-bearing.
+
+**Verification:** spike first (`wip/tikcfc_spike.lean` +
+`wip/tikcfc_qa_spike.lean`, the full routes green before any module
+touched; the recurring fixes recorded in the proposal's
+pin-technique list — the `IsSelfAdjoint`-ascription requirement for
+generic-CFC rewrites, `mul_div_cancel₀`'s order,
+`Matrix.algebraMap_matrix_apply` entrywise, the `fin_cases` beta-redex
+`show`s, raw-product outer pins); `lake env lean` zero errors/warnings
+on both changed files; explicit `lake build` targets ✔ (2301/2301,
+2305/2305); `#print axioms` via `wip/tikcfc_axcheck.lean` on all 19 —
+the standard three only; **full `lake build` ✔ (2385 targets, "Build
+completed successfully") immediately followed by
+`check_build_completeness.py` — 106/106 fresh, 0 stale, 0 missing,
+exit 0** (a mid-verification `touch` tripped the STALE fence exactly
+as calibrated; remediated by the documented artifact-removal +
+re-elaboration route before the recorded build); `lint_axioms` (10),
+`check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**2205/10/0**, idempotent by md5). Records updated: the
+proposal (COMPLETE header + delivery record with the pin-technique
+list and priced follow-ons — the Heat sibling, the resolvent identity,
+the general-symmetric normal equation), `proposals/README.md` (the
+Delivered row; the progress paragraph; the natural-candidates closing
+paragraph now headed by the Heat half), README (2205; the
+FunctionalCalculus module-table row's consumer clause), the radar (QA
+axis synced 2189/55 → 2205/55, held 4.0), the scoreboard (two
+verification rows + the interpretation bullet),
+`index/map/spectral_graph.md` (the FunctionalCalculus section: +3
+declaration rows + the reconciliation paragraph), this plan, and the
+activity log. Nothing committed.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — the **Heat half** of the consumer stub (its own
+authorized follow-on), the magnetic heat propagator (the second
+consumer stub), the irregular-Cheeger *hard* direction, the standing
+gated candidates (directed-axis rate; magnetic spectral; a consumer
+pricing the wide-band minimax filter designs), or a fresh center-out
+candidate per `docs/6_SGT_BACKLOG.md`.
 ------
 
 ## Delivered milestones (most recent first)

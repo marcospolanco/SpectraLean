@@ -6,24 +6,209 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**None open — the queue is empty at this boundary.** The last completed
-milestone is the irregular-Cheeger delivery (see the delivered record
-below); its standing handoff and the `proposals/README.md` Active
-priority table (no High, no Medium — every remaining row a Low blocked
-on a human or technical decision) leave the next autonomous run at the
-center-out SGT policy (`docs/1_STRATEGY.md`, `docs/6_SGT_BACKLOG.md`):
-the irregular-Cheeger *hard* direction (the volume-weighted
-coarea/median program the delivery priced), the newly-observed
-untracked `proposals/expander-independence-number-bound.md` (header
-Medium-High; appeared mid-run, left untouched by this run — the next
-run should triage it per the unindexed-proposal precedent), the
-directed-axis *rate* layer (gated on a separate admission + a named
-consumer), the magnetic *spectral* layer (gated on a consumer naming a
-bound), a named consumer pricing the wide-band minimax filter designs,
-or a fresh center-out candidate per the backlog.
+**None open — the queue is empty at this boundary.** The last
+completed milestone is the Hermitian-functional-calculus-bridge
+delivery (see the delivered record below); its standing handoff and
+the `proposals/README.md` Active priority table (no High, no Medium —
+every remaining row a Low blocked on a human or technical decision)
+leave the next autonomous run at the center-out SGT policy
+(`docs/1_STRATEGY.md`, `docs/6_SGT_BACKLOG.md`): the two now-unblocked
+bridge consumer stubs (`hermitian-calculus-consumer-tikhonov-heat.md`
+— Tikhonov *or* Heat recovered as a calculus instance, the smaller
+reconciliation gap Tikhonov's; `hermitian-calculus-consumer-magnetic.md`
+— the magnetic heat propagator, its complex-half precondition
+discharged by this delivery's QA witness — each needing its own
+indexing-and-pursuit decision per the one-shape-per-proposal
+discipline), the irregular-Cheeger *hard* direction (the priced
+volume-weighted coarea/median program), the directed-axis *rate* layer
+(gated on a separate admission + a named consumer), the magnetic
+*spectral* layer (gated on a consumer naming a bound), a named
+consumer pricing the wide-band minimax filter designs, or a fresh
+center-out candidate per the backlog.
 ------
 
 ## Delivered milestones (most recent first)
+
+**Hermitian functional-calculus bridge — the Scaffold–Mathlib
+consolidation layer for "a function of a symmetric matrix"; the
+proposal COMPLETE, Steps 0+1 (all of 1–3) in one run (run 1,
+2026-08-25, run `20260825T125600Z-run-1`;
+`proposals/hermitian-functional-calculus-bridge.md`, one of the three
+untracked Hermitian-calculus proposals left by the previous run's
+standing handoff — triaged per that handoff: the two consumer
+documents are gated stubs blocked on this bridge's Steps 1–3 and
+stayed out of scope; the bridge itself is Medium in its own header and
+its own gating condition, an Active table empty of higher rows, was
+satisfied — indexed into the Active table this run and pursued):
+DELIVERED — pure hard crust, zero new axioms (count stays 10;
+`#print axioms` via `wip/hfc_axcheck.lean` on all 25 audited
+declarations — 7 public + 18 QA: exactly `propext, Classical.choice,
+Quot.sound`, every one — zero contact with any of the ten admitted
+axioms, machine-checked, as the acceptance bar demands). QA
+2173 → 2189 (`FunctionalCalculus_QA` a new file at 16 by the generator
+metric).**
+
+**Step 0 verdict (recorded before any shelf Lean, in both the
+execution plan and the proposal):** (1) ONE `cfc` definition covers
+real-symmetric and complex-Hermitian via `[RCLike 𝕜]` — no API split
+to bridge, one thin real wrapper suffices and complex consumers use
+`cfc` at `𝕜 = ℂ` directly; (2) `Matrix.IsHermitian.cfc` takes a bare
+`ℝ → ℝ` function with NO continuity hypothesis (finite spectrum), so
+discontinuous-at-a-point filters cannot collide with the domain; (3)
+eigenbasis reconciliation is free — `eigvecOf`/`eigvalOf` ARE Mathlib's
+`eigenvectorBasis`/`eigenvalues` coerced. One provenance repair: the
+proposal's "Assessed from" placed `dotProduct_eigvecOf_filter` in
+`Spectral.lean`; it lives in `Tikhonov.lean:194`.
+
+**Delivered:** the new `Scaffold/Mathlib/GraphTheory/FunctionalCalculus.lean`
+(namespace `SpectralGraphTheory`; minimal imports Spectral + Tikhonov +
+Mathlib's `HermitianFunctionalCalculus`; the umbrella importing it) —
+`spectralCalc` (the thin wrapper), `spectralCalc_apply` (the entry
+form — the falsifiability anchor), `spectralCalc_mulVec_apply` (the
+action form = the shelf's filter-sum vector),
+`spectralCalc_mulVec_eigvecOf` (the hypothesis-free eigenvector
+action), `dotProduct_eigvecOf_spectralCalc_mulVec` (the coefficient
+bridge consuming the Tikhonov workhorse verbatim — Step 3's literal
+statement), `spectralCalc_indicator_eq_spectralProjector` (the
+recovery of the hand-built projector as a calculus instance), and
+`spectralCalc_id`. The module docstring carries the proposal's three
+mandated NOT-clauses (not a spectral-theorem re-proof, not an
+axiom-retirement path, not a Krylov/Chebyshev replacement).
+
+**QA (+16):** all three mandated obligations — (A) two API paths to
+one value on the reused `diag13` fixture (`fc_diag13_calc` for
+arbitrary `f` from the entry form + Band_QA's pins, sign-free
+summands; the projector route through the recovery theorem; both
+pinned to `!![1,0;0,0]`; the f-dependence fence `3 ≠ 9`), (B) the
+non-basis eigenvector action (`fc_action_add` generically at
+`v_i + v_j`; the `![1,1]` action by two independent routes), (C) the
+repeated-eigenvalue boundary on `2 • 1` (`f(2•1) = f 2 • 1` by two
+genuinely independent routes — entry form + completeness with no basis
+choice anywhere, raw unitary conjugation with no completeness
+anywhere) — plus (D) the complex-half elaboration witness
+`fcM2c_cfc_id` (`cfc` at `𝕜 = ℂ` through the generic `cfc_id'`),
+discharging the gated magnetic consumer's Step-0 precondition with an
+artifact.
+
+**Verification:** spike first (`wip/hfc_spike.lean` + `wip/hfc_cx.lean`,
+several rounds to green before any module touched); `lake env lean`
+zero errors/warnings on both modules; explicit `lake build` targets ✔
+(2301/2301, 2304/2304); **full `lake build` ✔ (2385 targets, "Build
+completed successfully"; the +~120-target jump over the previous 2264
+is the previously-unbuilt Mathlib CFC closure pulled by the new
+import, not new Scaffold surface) immediately followed by
+`check_build_completeness.py` — 106/106 fresh, 0 stale, 0 missing,
+exit 0**; `lint_axioms` (10), `check_citations`, `check_markdown_links`
+pass; scoreboard regenerated (**2189/10/0**, idempotent by md5).
+Records updated: the proposal (COMPLETE header + Step-0 verdict +
+delivery record with the pin-technique list and priced follow-ons),
+`proposals/README.md` (the Medium row retired to Delivered; the
+progress paragraph), README (2189; the status-paragraph bridge clause;
+the module-table row), the radar (QA axis synced 2173/54 → 2189/55,
+held 4.0), the scoreboard (the verification row),
+`index/map/spectral_graph.md` (the FunctionalCalculus section + 7
+declaration rows), the coverage map (the cross-reference sentence),
+the umbrella `Scaffold.lean`, this plan, and the activity log. Nothing
+committed; the prior runs' uncommitted deliveries preserved untouched.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — the two now-unblocked bridge consumer stubs (each
+needing its own indexing-and-pursuit decision), the irregular-Cheeger
+*hard* direction, the standing gated candidates (directed-axis rate;
+magnetic spectral; a consumer pricing the wide-band minimax filter
+designs), or a fresh center-out candidate per `docs/6_SGT_BACKLOG.md`.
+------
+
+**Hoffman-type independence bound — the Expander Mixing Lemma's first
+theorem consumer; the proposal COMPLETE, Steps 0+1 in one run (run 1,
+2026-08-25, run `20260825T064753Z-run-1`;
+`proposals/expander-independence-number-bound.md`, found committed in
+`4e60ce6` but never indexed — the same unindexed-proposal gap class
+documented twice in the Active table's history — triaged per the
+previous run's explicit standing handoff, header marked Medium-High,
+indexed as the table's only High row, pursued per priority item 0):
+DELIVERED — pure hard crust, zero new axioms (count stays 10;
+`#print axioms` via `wip/hoffman_axcheck.lean` on all 26 new
+declarations — 4 public + 22 QA: exactly `propext, Classical.choice,
+Quot.sound`, every one). QA 2152 → 2173 (+21 in `Expander_QA.lean`'s
+new Step-5 section, no new file). The strategy's load-bearing-growth
+principle executed verbatim: 24 declarations of proved discrepancy
+machinery with zero theorem consumers now carry weight.**
+
+**Delivered:** section 8 of `GraphTheory/Expander.lean` (no new
+imports, no umbrella change): `IsIndependentSet` (diagonal-inclusive —
+the Step-0 verdict-1 reading that collapses the internal cut weight,
+defined natively over `WAdj`/`Finset` since the pinned Mathlib has no
+independence-number machinery),
+`edgeWeight_self_eq_zero_of_isIndependentSet` (the one-line collapse),
+`deg_eq_zero_of_isIndependentSet_univ` (the whole-graph corner fence
+lemma), and the headline `hoffman_independence_bound`:
+`(S.card : ℝ) ≤ μ * (Fintype.card V : ℝ) / (d + μ)` for every
+independent set of a symmetric nonnegative `d`-regular positive-degree
+network at exactly the mixing lemma's own `μ` hypothesis — the lemma
+instantiated at `T = S`, `Real.sqrt_mul_self` at the perfect square,
+`div_le_iff₀`/`div_mul_cancel₀` clearing `n`, `nlinarith` cancelling
+`|S|` (the `|S| = 0` degenerate case closed as `0 ≤ μn/(d+μ)`),
+`le_div_iff₀` + `linear_combination` dividing by `d + μ > 0` with zero
+coefficient slack. **Both Step-0 verdicts delivered as proved facts:**
+`0 < d` is NOT free (the `2×2` zero-adjacency fence verifies every
+other hypothesis *including* independence of `univ` and `μ = 0` exact
+via eigen-action spectrum pins, refuting the division-form conclusion
+`2 ≤ 0` — `hd` exactly isolated), and the whole-graph corner is a real
+fence (`2 = 0` refuted through the corner lemma on the
+all-degrees-`2` `C₄`).
+
+**QA (+21):** all four proposal-mandated obligations — (1) both
+classical tight cases **attained with equality** at the Step-4-exact
+`μ` pins: `C₄`'s opposite pair `2 = 2·4/(2+2)` (the bipartite
+Hoffman-equality regime) and `K₃`'s singleton `1 = 1·3/(2+1)` (the
+clique regime, the bound pinning the maximum independent set exactly
+on the least-expanding fixture), `hμ` discharged from the file's own
+pins rather than assumed; (2) the `∅` degenerate instance and the
+whole-graph fence pair; (3) the independence hypothesis isolated
+(every other hypothesis verified on `C₄`, conclusion refuted at
+`univ`, the collapse mechanism pinned blocked — internal cut weights
+`8 ≠ 0` and `2 ≠ 0`, the half set's conclusion holding numerically
+being exactly why the fence lives at the mechanism); (4) the `d = 0`
+fence with its full isolation collection.
+
+**Verification:** spike first (`wip/hoffman_spike.lean`, several
+rounds to green before any module touched; the recurring fixes are the
+proposal's pin-technique list); `lake env lean` on both changed
+modules — zero errors, zero warnings each; explicit `lake build`
+targets ✔ (module 2009/2009, QA 2010/2010); `#print axioms` via
+`wip/hoffman_axcheck.lean` on all 26 new declarations — the standard
+three only; **full `lake build` ✔ (2264 targets, "Build completed
+successfully") immediately followed by `check_build_completeness.py` —
+104/104 fresh, 0 stale, 0 missing, exit 0** (the mandatory post-build
+fence); `lint_axioms` (10), `check_citations`, `check_markdown_links`
+pass (re-run after the record sweep); scoreboard regenerated
+(**2173/10/0**, idempotent by md5). Records updated: the proposal
+(status header COMPLETE + the delivery record with the Step-0
+verdicts, pin-technique list, and priced follow-ons),
+`proposals/README.md` (the High row retired to Delivered; the progress
+paragraph), README (2173; the status paragraph's Hoffman clause; the
+module-table row), the radar (QA axis synced 2152/54 → 2173/54 held
+4.0; the axis-4 Hoffman clause held 4.5; plus two factual repairs:
+the axiom-minimization row-head's stale 9 → 10 and the trend chain's
+missing 2026-08-24 up-step, and item 3's stale "admitted Cheeger lower
+bound" → proved), the scoreboard (all five verification rows + the
+interpretation bullet), `index/map/spectral_graph.md` (the Expander
+section header + 4 declaration rows), backlog item 3 (the delivery
+update + the same Cheeger-hard staleness repair), this plan, and the
+activity log. Nothing committed; the prior runs' uncommitted
+deliveries preserved untouched, and the mid-run-appeared untracked
+Hermitian-calculus proposals plus the coverage-map's matching edit
+left as found (not this run's artifacts; triage recorded above).
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — triaging the three untracked Hermitian-calculus
+proposals (this run's observation, the unindexed-proposal precedent),
+the irregular-Cheeger *hard* direction, the standing gated candidates
+(directed-axis rate; magnetic spectral; a consumer pricing the
+wide-band minimax filter designs), or a fresh center-out candidate per
+`docs/6_SGT_BACKLOG.md`.
+------
 
 **Irregular Cheeger easy direction — the volume-weighted upper bound on
 arbitrary positive-degree graphs; `GraphTheory.VariationalTransfer`'s

@@ -49,6 +49,19 @@
     instance with a derived `μ ≤ 2` (test vector, per-edge estimate,
     PSD), attained with equality on the alternating cut
     `({0,2,4}, {0,2,4})`.
+  - *Step 5: the Hoffman independence bound against the exact `μ`
+    pins.* `C₄`'s opposite pair and `K₃`'s singleton both *attain* the
+    bound with equality at the Step-4-exact `μ` (the bipartite and
+    clique tight cases); the `∅` degenerate instance applies; and four
+    fences exercise the hypothesis surface — the whole-graph corner
+    (independence of `univ` refuted on the all-degrees-`2` fixture
+    through the deg-univ corner lemma), the independence hypothesis
+    isolated with the conclusion refuted at `univ` (internal cut weight
+    `8 ≠ 0`, the collapse mechanism blocked), and the `d = 0` fence on
+    the `2×2` zero adjacency where every other hypothesis *including*
+    independence of `univ` is verified (the whole spectrum pinned zero
+    through the eigen-action) yet the division-form conclusion
+    `|univ| ≤ 0·n/(0+0) = 0` is refuted — `0 < d` is load-bearing.
 
   Fixtures are declared under fresh names rather than imported from
   sibling QA modules: QA modules are built independently and must not
@@ -1177,5 +1190,268 @@ theorem expC6_eml_alternating_sharp_QA :
     rw [h, Real.sqrt_mul_self (by norm_num : (0:ℝ) ≤ 9)]
   rw [expC6_ew_alternating_QA, hs]
   norm_num
+
+/-!
+## Step 5: the Hoffman-type independence bound — `C₄` and `K₃` attain
+the bound with equality; the four fences
+
+The mixing lemma's first theorem consumer
+(`hoffman_independence_bound`, proposal
+`expander-independence-number-bound.md`). The two fixtures mark the two
+classical tight cases: the bipartite one (`C₄`, whose largest
+independent set exhausts the bound — Hoffman equality is exactly the
+bipartite regime) and the clique one (`K₃`, where the maximum
+independent set is a singleton and the bound pins it). Both are
+evaluated against the exact `μ` pins of Step 4, not assumed bounds, and
+both *attain* the bound with equality — the theorem is not vacuous on
+either end of the expansion spectrum.
+-/
+
+/-- The opposite pair `{0, 2}` is independent on `C₄`: no cycle edge
+joins the two vertices (and the diagonal is zero). -/
+theorem expC4_indep_02_QA : IsIndependentSet expCycleAdj4 {0, 2} := by
+  intro i hi j hj
+  simp only [Finset.mem_insert, Finset.mem_singleton] at hi hj
+  rcases hi with rfl | rfl <;> rcases hj with rfl | rfl <;>
+    simp [expCycleAdj4]
+
+/-- **The Hoffman bound instantiated on `C₄`'s opposite pair**, at the
+exact `μ = 2` of Step 4 (through the derived hypothesis
+`expC4_mu_le_two_QA`). -/
+theorem expC4_hoffman_02_QA :
+    (({0, 2} : Finset (Fin 4)).card : ℝ)
+      ≤ 2 * (Fintype.card (Fin 4) : ℝ) / (2 + 2) :=
+  hoffman_independence_bound expCycleAdj4 expCycleAdj4_isSymm
+    expC4_nonneg_QA 2 expCycleAdj4_deg (by norm_num) (by decide) 2
+    expC4_mu_le_two_QA {0, 2} expC4_indep_02_QA
+
+/-- **Tightness: the bound is *attained with equality* on `C₄`** —
+both sides independently compute to `2` (the cardinality by `decide`,
+the bound `μn/(d+μ) = 2·4/(2+2)` by arithmetic). The bipartite tight
+case of the classical Hoffman bound. -/
+theorem expC4_hoffman_attained_QA :
+    (({0, 2} : Finset (Fin 4)).card : ℝ) = 2
+      ∧ 2 * (Fintype.card (Fin 4) : ℝ) / (2 + 2) = 2 := by
+  have hcard : ({0, 2} : Finset (Fin 4)).card = 2 := by decide
+  refine ⟨by exact_mod_cast hcard, ?_⟩
+  norm_num
+
+/-- Any singleton is independent on `K₃`: only the diagonal entry is
+in play, and it is zero. -/
+theorem expK3_indep_0_QA : IsIndependentSet expK3Adj {0} := by
+  intro i hi j hj
+  simp only [Finset.mem_singleton] at hi hj
+  rcases hi with rfl; rcases hj with rfl
+  rw [expK3Adj_apply]
+  norm_num
+
+/-- **The Hoffman bound instantiated on `K₃`'s singleton**, at the
+exact `μ = 1` of Step 4. -/
+theorem expK3_hoffman_0_QA :
+    (({0} : Finset (Fin 3)).card : ℝ)
+      ≤ 1 * (Fintype.card (Fin 3) : ℝ) / (2 + 1) :=
+  hoffman_independence_bound expK3Adj expK3Adj_isSymm
+    expK3Adj_nonneg_QA 2 expK3Adj_deg (by norm_num) (by decide) 1
+    expK3_mu_le_one_QA {0} expK3_indep_0_QA
+
+/-- **Tightness: the bound is *attained with equality* on `K₃`** —
+`α(K₃) = 1 = 1·3/(2+1)`. The clique tight case: the bound pins the
+maximum independent set exactly even on the least-expanding fixture. -/
+theorem expK3_hoffman_attained_QA :
+    (({0} : Finset (Fin 3)).card : ℝ) = 1
+      ∧ 1 * (Fintype.card (Fin 3) : ℝ) / (2 + 1) = 1 := by
+  have hcard : ({0} : Finset (Fin 3)).card = 1 := by decide
+  have hfin : (Fintype.card (Fin 3) : ℝ) = 3 := by simp
+  rw [hfin]
+  refine ⟨by exact_mod_cast hcard, by norm_num⟩
+
+/-- **The degenerate `∅` instance**: the empty set is independent
+vacuously and the theorem applies, the bound evaluating to `2` against
+cardinality `0`. -/
+theorem expC4_hoffman_empty_QA :
+    ((Finset.empty : Finset (Fin 4)).card : ℝ)
+      ≤ 2 * (Fintype.card (Fin 4) : ℝ) / (2 + 2) :=
+  hoffman_independence_bound expCycleAdj4 expCycleAdj4_isSymm
+    expC4_nonneg_QA 2 expCycleAdj4_deg (by norm_num) (by decide) 2
+    expC4_mu_le_two_QA ∅ (fun _ hi => absurd hi (Finset.not_mem_empty _))
+
+/-- **The whole-graph fence.** Were `univ` independent on `C₄`, the
+deg-univ corner lemma (`deg_eq_zero_of_isIndependentSet_univ`) would
+force every degree to `0`; on the all-degrees-`2` fixture that is
+refuted in proved form. The Hoffman corner "an independent set covering
+the whole graph forces `d = 0`" is exercised, not avoided. -/
+theorem expC4_univ_fence_QA
+    (h : IsIndependentSet expCycleAdj4 Finset.univ) : False := by
+  have h0 := deg_eq_zero_of_isIndependentSet_univ expCycleAdj4 h 0
+  rw [expCycleAdj4_deg] at h0
+  norm_num at h0
+
+/-- **The independence hypothesis is load-bearing: the conclusion is
+refuted at `univ`** on the same fixture where every other hypothesis
+holds — `4 ≤ 2·4/(2+2) = 2` is false. The derivation's first step (the
+`edgeWeight A S S = 0` collapse) genuinely fails there: the raw total
+weight is `8` (`exp_ew_univ_QA`), not `0`; and even on the half set
+`{0,1}` — where the conclusion happens to hold numerically — the
+mechanism witness `exp_ew_01_01_QA` pins the internal cut weight at
+`2 ≠ 0`, so the collapse is blocked rather than merely unused. -/
+theorem expC4_hoffman_conclusion_fails_univ_QA :
+    ¬ (((Finset.univ : Finset (Fin 4)).card : ℝ)
+      ≤ 2 * (Fintype.card (Fin 4) : ℝ) / (2 + 2)) := by
+  simp only [Finset.card_univ, Fintype.card_fin]
+  norm_num
+
+/-- **Fence isolation**: on `C₄` with `S = univ`, every hypothesis of
+the Hoffman bound is verified — positive degree, cardinality, the exact
+`μ = 2` spectral hypothesis — except independence, which is refuted,
+and the hypothesis-free conclusion is refuted. Exactly `hind` is
+isolated. -/
+theorem expC4_hoffman_fence_isolation_QA :
+    (0 < (2:ℝ)) ∧ (2 ≤ Fintype.card (Fin 4)) ∧
+      (max |2 - lambda2 expCycleAdj4 expCycleAdj4_isSymm (by norm_num)|
+          |2 - evals (laplacian_symmetric expCycleAdj4 expCycleAdj4_isSymm)
+              ⟨Fintype.card (Fin 4) - 1, by decide⟩| ≤ 2) ∧
+      ¬ IsIndependentSet expCycleAdj4 Finset.univ ∧
+      ¬ (((Finset.univ : Finset (Fin 4)).card : ℝ)
+        ≤ 2 * (Fintype.card (Fin 4) : ℝ) / (2 + 2)) := by
+  refine ⟨by norm_num, by decide, expC4_mu_le_two_QA,
+    fun h => expC4_univ_fence_QA h,
+    expC4_hoffman_conclusion_fails_univ_QA⟩
+
+/-!
+### The `d = 0` fence: the `2×2` zero adjacency
+
+The Step-0 question "is `0 < d` free?" answered in proved form: on the
+zero adjacency every *other* hypothesis of the Hoffman bound holds —
+`μ = 0` exactly (the whole spectrum is zero), independence of `univ`
+included — yet the hypothesis-free division-form conclusion reads
+`|univ| ≤ 0·n/(0+0) = 0`, refuted. The `hd : 0 < d` hypothesis is
+load-bearing; this fixture is why it exists.
+-/
+
+/-- Adjacency of the empty graph on `Fin 2`: the `d = 0` fence fixture. -/
+def expZeroAdj2 : Matrix (Fin 2) (Fin 2) ℝ :=
+  Matrix.of !![0, 0; 0, 0]
+
+theorem expZeroAdj2_apply (i j : Fin 2) : expZeroAdj2 i j = 0 := by
+  fin_cases i <;> fin_cases j <;> rfl
+
+theorem expZeroAdj2_isSymm : expZeroAdj2.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  rw [expZeroAdj2_apply, expZeroAdj2_apply]
+
+theorem expZeroAdj2_nonneg_QA : ∀ i j, 0 ≤ expZeroAdj2 i j := by
+  intro i j
+  rw [expZeroAdj2_apply]
+
+theorem expZeroAdj2_deg (i : Fin 2) : deg expZeroAdj2 i = 0 := by
+  rw [deg]
+  exact Finset.sum_eq_zero fun j _ => expZeroAdj2_apply i j
+
+theorem expZeroAdj2_indep_univ : IsIndependentSet expZeroAdj2 Finset.univ :=
+  fun i _ j _ => expZeroAdj2_apply i j
+
+/-- The Laplacian of the zero adjacency is the zero matrix,
+entrywise. -/
+theorem expZeroAdj2_laplacian_apply (i j : Fin 2) :
+    laplacian expZeroAdj2 i j = 0 := by
+  by_cases h : i = j
+  · subst h
+    show (degreeMatrix expZeroAdj2 - expZeroAdj2) i i = 0
+    rw [Matrix.sub_apply, degreeMatrix_diagonal, expZeroAdj2_apply,
+      expZeroAdj2_deg]
+    norm_num
+  · show (degreeMatrix expZeroAdj2 - expZeroAdj2) i j = 0
+    rw [Matrix.sub_apply, degreeMatrix_off_diagonal expZeroAdj2 h,
+      expZeroAdj2_apply]
+    norm_num
+
+/-- Every eigenvalue of the zero Laplacian is zero: the eigen-action at
+a unit eigenvector reads `0 = λ • v` with `v ≠ 0`, so `λ = 0`. -/
+theorem expZeroAdj2_eigvalOf_eq_zero (i : Fin 2) :
+    eigvalOf (laplacian expZeroAdj2)
+      (laplacian_symmetric expZeroAdj2 expZeroAdj2_isSymm) i = 0 := by
+  have hev : (laplacian expZeroAdj2) *ᵥ
+      (eigvecOf (laplacian expZeroAdj2)
+        (laplacian_symmetric expZeroAdj2 expZeroAdj2_isSymm) i)
+      = eigvalOf (laplacian expZeroAdj2)
+          (laplacian_symmetric expZeroAdj2 expZeroAdj2_isSymm) i •
+        (eigvecOf (laplacian expZeroAdj2)
+          (laplacian_symmetric expZeroAdj2 expZeroAdj2_isSymm) i) :=
+    (isHermitian_of_isSymm
+      (laplacian_symmetric expZeroAdj2 expZeroAdj2_isSymm)).mulVec_eigenvectorBasis i
+  have hvv : Matrix.dotProduct
+      (eigvecOf (laplacian expZeroAdj2)
+        (laplacian_symmetric expZeroAdj2 expZeroAdj2_isSymm) i)
+      (eigvecOf (laplacian expZeroAdj2)
+        (laplacian_symmetric expZeroAdj2 expZeroAdj2_isSymm) i) = 1 := by
+    simpa using eigvecOf_inner (laplacian expZeroAdj2)
+      (laplacian_symmetric expZeroAdj2 expZeroAdj2_isSymm) i i
+  have hv0 : (eigvecOf (laplacian expZeroAdj2)
+      (laplacian_symmetric expZeroAdj2 expZeroAdj2_isSymm) i) ≠ 0 := by
+    intro h
+    rw [h] at hvv
+    simp at hvv
+  have hlv : (laplacian expZeroAdj2) *ᵥ
+      (eigvecOf (laplacian expZeroAdj2)
+        (laplacian_symmetric expZeroAdj2 expZeroAdj2_isSymm) i) = 0 := by
+    funext k
+    simp [Matrix.mulVec, expZeroAdj2_laplacian_apply]
+  rw [hlv] at hev
+  rcases smul_eq_zero.mp hev.symm with h | h
+  · exact h
+  · exact absurd h hv0
+
+/-- Both endpoints of the sorted zero-Laplacian spectrum are zero: every
+sorted entry is some eigenbasis eigenvalue (`evals_mem_eigvalOf`). -/
+theorem expZeroAdj2_evals_eq_zero (k : Fin (Fintype.card (Fin 2))) :
+    evals (laplacian_symmetric expZeroAdj2 expZeroAdj2_isSymm) k = 0 := by
+  obtain ⟨i, hi⟩ := evals_mem_eigvalOf
+    (laplacian_symmetric expZeroAdj2 expZeroAdj2_isSymm) k
+  rw [hi]
+  exact expZeroAdj2_eigvalOf_eq_zero i
+
+/-- **`μ = 0` exactly on the zero fixture**: both `|0 − λ₂|` and
+`|0 − λ_max|` are pinned zero, so the spectral hypothesis holds at
+`μ = 0`. -/
+theorem expZeroAdj2_mu_eq_zero_QA :
+    max |(0:ℝ) - lambda2 expZeroAdj2 expZeroAdj2_isSymm (by decide)|
+        |(0:ℝ) - evals (laplacian_symmetric expZeroAdj2 expZeroAdj2_isSymm)
+            ⟨Fintype.card (Fin 2) - 1, by decide⟩| = 0 := by
+  have h1 : lambda2 expZeroAdj2 expZeroAdj2_isSymm (by decide) = 0 :=
+    expZeroAdj2_evals_eq_zero ⟨1, by decide⟩
+  have h2 : evals (laplacian_symmetric expZeroAdj2 expZeroAdj2_isSymm)
+      ⟨Fintype.card (Fin 2) - 1, by decide⟩ = 0 :=
+    expZeroAdj2_evals_eq_zero ⟨Fintype.card (Fin 2) - 1, by decide⟩
+  rw [h1, h2]
+  norm_num
+
+/-- **The `d = 0` refutation**: the hypothesis-free division-form
+conclusion `|univ| ≤ 0·n/(0+0)` is false — the right side is `0` and
+`|univ| = 2`. -/
+theorem expZeroAdj2_conclusion_fails_QA :
+    ¬ (((Finset.univ : Finset (Fin 2)).card : ℝ)
+      ≤ (0:ℝ) * (Fintype.card (Fin 2) : ℝ) / ((0:ℝ) + 0)) := by
+  simp only [Finset.card_univ, Fintype.card_fin]
+  norm_num
+
+/-- **`d = 0` fence isolation**: on the zero adjacency every hypothesis
+of the Hoffman bound except `hd : 0 < d` is verified — symmetry,
+nonnegativity, regularity at `d = 0`, cardinality, the spectral
+hypothesis at `μ = 0`, and independence of the candidate set itself —
+while the hypothesis-free conclusion is refuted. Exactly the
+positive-degree hypothesis is isolated: the division form cannot hold
+without it. -/
+theorem expZeroAdj2_fence_isolation_QA :
+    expZeroAdj2.IsSymm ∧ (∀ i j, 0 ≤ expZeroAdj2 i j) ∧
+      (∀ i, deg expZeroAdj2 i = 0) ∧ (2 ≤ Fintype.card (Fin 2)) ∧
+      (max |(0:ℝ) - lambda2 expZeroAdj2 expZeroAdj2_isSymm (by decide)|
+          |(0:ℝ) - evals (laplacian_symmetric expZeroAdj2 expZeroAdj2_isSymm)
+              ⟨Fintype.card (Fin 2) - 1, by decide⟩| ≤ 0) ∧
+      IsIndependentSet expZeroAdj2 Finset.univ ∧
+      ¬ (((Finset.univ : Finset (Fin 2)).card : ℝ)
+        ≤ (0:ℝ) * (Fintype.card (Fin 2) : ℝ) / ((0:ℝ) + 0)) := by
+  refine ⟨expZeroAdj2_isSymm, expZeroAdj2_nonneg_QA, expZeroAdj2_deg,
+    by decide, le_of_eq expZeroAdj2_mu_eq_zero_QA,
+    expZeroAdj2_indep_univ, expZeroAdj2_conclusion_fails_QA⟩
 
 end SpectralGraphTheory.QA

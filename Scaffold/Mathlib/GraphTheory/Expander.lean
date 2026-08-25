@@ -9,6 +9,14 @@
   the Expander Mixing Lemma itself — the bridge between Laplacian
   spectral gaps and combinatorial pseudorandomness.
 
+  Step 3 of the proposal (2026-08-25, delivered by
+  `proposals/expander-independence-number-bound.md`): the mixing lemma's
+  first theorem consumer — the Hoffman-type independence bound
+  `|S| ≤ μ • |V| / (d + μ)` for every independent set, at exactly the
+  lemma's own spectral hypothesis. The lemma's exact `μ`-bound shape is
+  load-bearing in the consumer: a misstated endpoint or constant breaks
+  the corollary rather than passing beside it.
+
   `edgeWeight A S T = ∑ i ∈ S, ∑ j ∈ T, A i j` is the total weight of the
   ordered `(S, T)` cut. Its interface facts: the matrix form
   `indicatorVec S ⬝ᵥ (A *ᵥ indicatorVec T)` (the bilinear identity every
@@ -722,5 +730,123 @@ theorem expander_mixing_lemma (A : WAdj (V := V)) (hsymm : A.IsSymm)
   rw [edgeWeight_eq_regular_add_centered A hsymm d hreg S T,
     add_sub_cancel_left]
   exact sqrt_assembly hn hsnn htnn hsn htn hμpos hcross
+
+/-!
+## 8. Independent sets and the Hoffman bound (the mixing lemma's first
+theorem consumer)
+-/
+
+/-- **Independent set** of a weighted adjacency: no weight at all within
+the set — `A i j = 0` for every ordered pair `(i, j) ∈ S × S`,
+self-loops included (the looped-graph reading: a looped vertex is never
+in an independent set, and the pinned Mathlib `SimpleGraph` adapter
+lands here since simple adjacencies carry zero diagonal). This is
+exactly the reading under which the cut weight `edgeWeight A S S`
+collapses to zero — the one fact the Hoffman bound below consumes.
+Defined natively over the shelf's `WAdj`/`Finset` conventions (the
+pinned Mathlib has no independence-number machinery), matching how every
+other combinatorial predicate in this shelf is built. -/
+def IsIndependentSet (A : WAdj (V := V)) (S : Finset V) : Prop :=
+  ∀ i ∈ S, ∀ j ∈ S, A i j = 0
+
+omit [Fintype V] [DecidableEq V] in
+/-- An independent set carries no internal cut weight: every term of
+the double sum vanishes. -/
+theorem edgeWeight_self_eq_zero_of_isIndependentSet
+    (A : WAdj (V := V)) (S : Finset V)
+    (hind : IsIndependentSet A S) : edgeWeight A S S = 0 := by
+  rw [edgeWeight]
+  exact Finset.sum_eq_zero fun i hi =>
+    Finset.sum_eq_zero fun j hj => hind i hi j hj
+
+omit [DecidableEq V] in
+/-- **The whole-graph corner.** If the entire vertex set is independent
+then every row of `A` vanishes, so every degree is `0` — under
+`d`-regularity the network is `d = 0`. A positive-degree graph provably
+cannot cover itself with an independent set; this is the fence that
+keeps the Hoffman bound's `0 < d` corner honest rather than merely
+dividing by zero behind it. -/
+theorem deg_eq_zero_of_isIndependentSet_univ
+    (A : WAdj (V := V))
+    (h : IsIndependentSet A Finset.univ) (i : V) : deg A i = 0 := by
+  rw [deg]
+  exact Finset.sum_eq_zero fun j _ => h i (Finset.mem_univ i) j (Finset.mem_univ j)
+
+/-- **The Hoffman-type independence bound** (proposal
+`expander-independence-number-bound.md`, Step 1; the classical ratio
+bound — Hoffman, standardly cited via Brouwer–Haemers, *Spectra of
+Graphs*, and delivered in the mixing-lemma corollary form of
+[AC]/[HLW]/[V] above).
+
+For a symmetric, nonnegative, `d`-regular network with positive degree,
+every independent set `S` satisfies the classical ratio bound
+`|S| ≤ μ • |V| / (d + μ)`, where `μ` is exactly the Expander Mixing
+Lemma's spectral-discrepancy hypothesis (bounding both
+`|d − λ₂(L)|` and `|d − λ_max(L)|`). Since the bound holds for *every*
+independent set, it bounds the independence number `α(A) := max |S|`
+— pinned Mathlib has no independence-number machinery, so the per-set
+form is the statement consumers get.
+
+Statement-shape notes (the proposal's Step-0 verdicts, in proof):
+- `0 < d` is an explicit hypothesis and is **load-bearing**, not free:
+  on the all-zero adjacency every other hypothesis holds (there
+  `λ₂ = λ_max = 0`, so `μ = 0`) and any nonempty set is independent,
+  but the division-form conclusion would read `|S| ≤ 0·n/(0+0) = 0` —
+  false. The QA fence on the `2×2` zero adjacency pins exactly this.
+- The proof only consumes `0 < d` through `0 < d + μ`, so a consumer
+  holding `d = 0 < μ` may still take the trivial bound `|S| ≤ |V|`.
+
+Proof: instantiate the mixing lemma at `T = S`; independence collapses
+`edgeWeight A S S` to `0` (`edgeWeight_self_eq_zero_of_isIndependentSet`),
+the square root is a perfect square (`Real.sqrt_mul_self` at the
+nonnegative `|S| • (|V| − |S|)`), the deviation inequality becomes
+`d|S|²/n ≤ μ|S|(|V|−|S|)/n`; clear the positive `n`, cancel the positive
+`|S|` (the `|S| = 0` degenerate case closes as `0 ≤ μn/(d+μ)`), and
+divide by `d + μ > 0`. Every spectral hypothesis is the mixing lemma's
+own — the interesting content is entirely already-proved hard crust;
+the exact hypothesis shape of `expander_mixing_lemma` is load-bearing
+here, which is the point of the delivery. -/
+theorem hoffman_independence_bound (A : WAdj (V := V)) (hsymm : A.IsSymm)
+    (hnn : ∀ i j, 0 ≤ A i j) (d : ℝ) (hreg : ∀ i, deg A i = d)
+    (hd : 0 < d) (hcard : 2 ≤ Fintype.card V) (μ : ℝ)
+    (hμ : max |d - lambda2 A hsymm hcard|
+          |d - evals (laplacian_symmetric A hsymm)
+              ⟨Fintype.card V - 1, by omega⟩| ≤ μ)
+    (S : Finset V) (hind : IsIndependentSet A S) :
+    (S.card : ℝ) ≤ μ * (Fintype.card V : ℝ) / (d + μ) := by
+  have hn : (0:ℝ) < (Fintype.card V : ℝ) := by
+    exact_mod_cast (by omega : 0 < Fintype.card V)
+  have hsnn : 0 ≤ (S.card : ℝ) := Nat.cast_nonneg _
+  have hsn : (S.card : ℝ) ≤ (Fintype.card V : ℝ) := by
+    exact_mod_cast Finset.card_le_card (Finset.subset_univ S)
+  have hsns : 0 ≤ (Fintype.card V : ℝ) - (S.card : ℝ) := sub_nonneg.2 hsn
+  have hμpos : 0 ≤ μ := le_trans (abs_nonneg _) (le_trans (le_max_left _ _) hμ)
+  have hew : edgeWeight A S S = 0 :=
+    edgeWeight_self_eq_zero_of_isIndependentSet A S hind
+  have hmix := expander_mixing_lemma A hsymm hnn d hreg hcard μ hμ S S
+  rw [hew, zero_sub, abs_neg,
+    abs_of_nonneg (div_nonneg (mul_nonneg (mul_nonneg hd.le hsnn) hsnn) hn.le)] at hmix
+  have hsq : (S.card : ℝ) * (S.card : ℝ)
+      * ((Fintype.card V : ℝ) - (S.card : ℝ))
+      * ((Fintype.card V : ℝ) - (S.card : ℝ))
+      = ((S.card : ℝ) * ((Fintype.card V : ℝ) - (S.card : ℝ)))
+        * ((S.card : ℝ) * ((Fintype.card V : ℝ) - (S.card : ℝ))) := by ring
+  rw [hsq, Real.sqrt_mul_self (mul_nonneg hsnn hsns)] at hmix
+  rcases Nat.eq_zero_or_pos S.card with h0 | hpos
+  · have hc : (S.card : ℝ) = 0 := by exact_mod_cast h0
+    have hdm : (0:ℝ) < d + μ := by linarith
+    rw [hc]
+    exact div_nonneg (mul_nonneg hμpos hn.le) hdm.le
+  · have hspos : (0:ℝ) < (S.card : ℝ) := by exact_mod_cast hpos
+    have hstep1 : d * (S.card : ℝ) * (S.card : ℝ)
+        ≤ μ * ((S.card : ℝ) * ((Fintype.card V : ℝ) - (S.card : ℝ))) := by
+      have h := (div_le_iff₀ hn).mp hmix
+      rwa [div_mul_cancel₀ _ hn.ne'] at h
+    have hstep2 : d * (S.card : ℝ)
+        ≤ μ * ((Fintype.card V : ℝ) - (S.card : ℝ)) := by
+      nlinarith [hstep1]
+    have hdm : (0:ℝ) < d + μ := by linarith
+    rw [le_div_iff₀ hdm]
+    linear_combination hstep2
 
 end SpectralGraphTheory

@@ -254,8 +254,10 @@ Laplacian-convention decision and the ℚ-`decide` spike with the integer
 cross-multiplied fallback — was completed and recorded in the proposal
 on 2026-08-19 immediately before this module): the combinatorial
 edge-weight and discrepancy core, and the Expander Mixing Lemma itself
-delivered the same day through the Rayleigh-sandwich route. All
-proved, zero axioms.
+delivered the same day through the Rayleigh-sandwich route. Section 8
+(2026-08-25, `proposals/expander-independence-number-bound.md`) adds
+the lemma's first theorem consumer: the Hoffman-type independence
+bound. All proved, zero axioms.
 
 | Declaration | Content |
 |-------------|---------|
@@ -274,6 +276,10 @@ proved, zero axioms.
 | `quadForm_bilinear_sq_le_of_ortho_onesVec` | **the sharp bilinear bound:** `(x ⬝ᵥ (A *ᵥ y))² ≤ μ² ‖x‖² ‖y‖²` on `1⊥ × 1⊥`, by the scaling trick (`√Y•x ± √X•y` through polarization; `a² = Y, b² = X` attains the AM–GM equality, so the product form carries no slack) |
 | `dotProduct_centeredIndicator_self` | the variance identity `‖centeredIndicator S‖² = \|S\|(|V|−\|S\|)/\|V\|` — the geometric factor of the mixing bound |
 | `expander_mixing_lemma` | **the Expander Mixing Lemma (headline):** `\|e(S,T) − d•\|S\|•\|T\|/\|V\|\| ≤ μ • √(\|S\|\|T\|(|V|−\|S\|)(|V|−\|T\|))/\|V\|` on symmetric, nonnegative, `d`-regular networks with the Laplacian-spectrum hypothesis — the classical discrepancy bridge between algebraic spectral gaps and combinatorial pseudorandomness (Alon–Chung 1988; Hoory–Linial–Wigderson 2006 §2; Vadhan 2012 §4), at the Step 0 restated `√` signature with squaring only inside the proof |
+| `IsIndependentSet` | **independent set** of a weighted adjacency (2026-08-25, the Hoffman proposal's Step 0 verdict 1): `∀ i ∈ S, ∀ j ∈ S, A i j = 0` — no weight within the set, self-loops included (the looped-graph reading; exactly what collapses `edgeWeight A S S`); defined natively over `WAdj`/`Finset` since the pinned Mathlib has no independence-number machinery |
+| `edgeWeight_self_eq_zero_of_isIndependentSet` | the collapse: an independent set's internal cut weight is `0` (one `Finset.sum_eq_zero`) — the single mixing-lemma fact the Hoffman bound consumes |
+| `deg_eq_zero_of_isIndependentSet_univ` | **the whole-graph corner fence:** independence of the entire vertex set forces every degree to `0` — under regularity the network is `d = 0`; a positive-degree graph provably cannot cover itself with an independent set |
+| `hoffman_independence_bound` | **the Hoffman ratio bound (headline, the mixing lemma's first theorem consumer; 2026-08-25):** `\|S\| ≤ μ • \|V\| / (d + μ)` for every independent set of a symmetric nonnegative `d`-regular network with positive degree, at exactly the mixing lemma's `μ` hypothesis — the classical bound (Hoffman; Brouwer–Haemers, *Spectra of Graphs*, in the mixing-lemma corollary form of the module's [AC]/[HLW]/[V] citations); `0 < d` is an explicit load-bearing hypothesis (the zero-adjacency fence in QA), consumed only through `0 < d + μ`; per-set form since no independence-number API exists at the pin — bounding every independent set bounds the independence number |
 
 
 ### `Scaffold.Mathlib.GraphTheory.SpectralCertificates` (proof-carrying λ₂ upper-bound certificates)
@@ -1036,6 +1042,36 @@ lower-bounded at `1 > 1/2` through the vector the difference fixes).
 | `chebyshevFilter` | the damped Chebyshev filter `T_d ∘ w / T_d(w(Ltop))` at the Krylov layer's affine band map `w = bandMap t Lbot` |
 | `chebyshevFilter_eval` | the filter's closed form: `p(μ) = T_d(w(μ)) / T_d(w(Ltop))` |
 | `chebyshevFilter_l2OpNorm_le` | **the Chebyshev-damped instantiation** (the Chebyshev layer's second consumer: `abs_T_eval_le_one`, `one_le_eval_T_of_one_le`, `bandMap` and its pins): spectrum in `[Lbot, Ltop]`, top-only band ⇒ `‖T_d(w(M))/T_d(w(Ltop)) − B_{t,Ltop}‖ ≤ 1/T_d(w(Ltop))` — the damped-iteration rate, strictly better than power in the small-gap regime |
+
+### `Scaffold.Mathlib.GraphTheory.FunctionalCalculus` (the Hermitian functional-calculus bridge)
+
+The Scaffold–Mathlib bridge proposal's Steps 1–3 (2026-08-25,
+`proposals/hermitian-functional-calculus-bridge.md`): Mathlib's proved
+continuous functional calculus
+(`Matrix.IsHermitian.cfc`, `Mathlib/LinearAlgebra/Matrix/
+HermitianFunctionalCalculus.lean`) exposed at the shelf's
+real-symmetric convention and tied to the shelf's own hand-built
+spectral-filter machinery. Not a re-proof of the spectral theorem, not
+a path to retiring any axiom, not a Krylov/Chebyshev replacement — the
+consolidation layer the four hand-built "function of a symmetric
+matrix" notions (`spectralProjector`/`bandProjector`, PolyFilter,
+`heatKernel`, `tikhonovShrinkage`) can now be stated against.
+
+| Declaration | Content |
+|-------------|---------|
+| `spectralCalc` | the thin wrapper `spectralCalc M hM f := (isHermitian_of_isSymm hM).cfc f` — Mathlib's calculus consumed, not rebuilt; bare `ℝ → ℝ` functions admissible (finite spectrum), no continuity hypothesis |
+| `spectralCalc_apply` | the entry form / falsifiability anchor: `f(M) a b = ∑ i, f (eigvalOf M hM i) * eigvecOf M hM i a * eigvecOf M hM i b` — the calculus and the eigenbasis filter sum are the same operator entrywise |
+| `spectralCalc_mulVec_apply` | the action form: `f(M) *ᵥ y` is exactly the filtered signal `∑ i, f (λᵢ) (vᵢ ⬝ᵥ y) • vᵢ` of the graph-signal-processing expansion |
+| `spectralCalc_mulVec_eigvecOf` | the eigenvector action, hypothesis-free: `f(M) *ᵥ vₖ = f (eigvalOf M hM k) • vₖ` — the load-bearing bridge every calculus consumer needs |
+| `dotProduct_eigvecOf_spectralCalc_mulVec` | the coefficient bridge consuming `GraphTheory.Tikhonov.dotProduct_eigvecOf_filter` verbatim: the shelf's arbitrary-filter expansion and the calculus agree coefficient-by-coefficient |
+| `spectralCalc_indicator_eq_spectralProjector` | the recovery: at the indicator of `(· ≤ c)` the calculus returns exactly the shelf's hand-built `spectralProjector M hM c` — the proof the bridge is real rather than decorative |
+| `spectralCalc_id` | the calculus identity `spectralCalc M hM id = M` |
+
+The complex half needs no second wrapper (Mathlib's `cfc` is stated
+for any `RCLike 𝕜`; complex-Hermitian consumers — the magnetic
+Laplacian's `magneticLaplacian_isHermitian` — use it at `𝕜 = ℂ`
+directly, confirmed elaborating by the QA file's `fcM2c_cfc_id`
+witness).
 
 ## Applications
 

@@ -110,8 +110,9 @@ Radar axis 5 re-scored 3.0 → 3.5 (the mixing statement's own landing).
 *Have:* `vol`, `boundary`, `conductance`, `cheegerConstant`
 (volume-based), the **proved** Cheeger upper bound (easy direction,
 `cheeger_upper_bound`, retired from axiom 2026-08-18 with the
-`cutTestVector` interface), the admitted Cheeger lower bound (hard
-direction) for regular graphs; cut duality delivered 2026-08-17
+`cutTestVector` interface), the **proved** Cheeger lower bound (hard
+direction `cheeger_lower_bound`, retired from axiom 2026-08-23 by the
+median-split route) for regular graphs; cut duality delivered 2026-08-17
 (`vol_compl`, `boundary_compl`, `conductance_compl`, degenerate-cut
 guards — proved; cuts are partition-valued, the interface sweep cuts
 and sparsest-cut shapes assume).
@@ -138,6 +139,26 @@ already volume-general, only the inequality was new. The irregular
 *hard* direction (`φ²/2 ≤ λ₂` in the volume-weighted measure — the
 volume-weighted coarea/median re-derivation) is the item's priced
 follow-on program.
+
+*Update (2026-08-25, later the same day):* **the Hoffman-type
+independence bound delivered** (`proposals/expander-independence-number-bound.md`
+Steps 0+1, found committed-but-unindexed and pursued per the standing
+handoff's triage instruction; zero new axioms):
+`hoffman_independence_bound` — `|S| ≤ μ·n/(d+μ)` for every independent
+set of a symmetric nonnegative `d`-regular positive-degree network, at
+exactly `expander_mixing_lemma`'s own `μ` hypothesis. The mixing lemma
+(24 declarations of proved discrepancy machinery, zero theorem
+consumers until now) now carries weight — the load-bearing-growth
+principle executed on this item. The new `IsIndependentSet`
+(diagonal-inclusive, the reading that collapses the internal cut
+weight), the collapse lemma, and the deg-univ corner fence live in
+`Expander.lean` §8; QA +21 in `Expander_QA.lean` Step 5 with both
+classical tight cases attained with equality (`C₄`'s bipartite pair
+`2 = 2·4/(2+2)`, `K₃`'s clique singleton `1 = 1·3/(2+1)`) at the exact
+Ramanujan-pinned `μ`, the whole-graph and non-independent fences, and
+the `d = 0` zero-adjacency isolation proving `0 < d` load-bearing. The
+spectral-diameter EML corollary remains the item's gated follow-on
+(needs a named consumer per its own proposal).
 
 *Unlocks:* cut-based algorithm interfaces; localization results that
 consume random-walk returns.

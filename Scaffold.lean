@@ -16,6 +16,7 @@ import Scaffold.Mathlib.GraphTheory.RandomWalk
 import Scaffold.Mathlib.GraphTheory.Normalized
 import Scaffold.Mathlib.GraphTheory.IrreducibleStationary
 import Scaffold.Mathlib.GraphTheory.PageRank
+import Scaffold.Mathlib.GraphTheory.DirectedMixing
 import Scaffold.Mathlib.GraphTheory.Stationary
 import Scaffold.Mathlib.GraphTheory.Mixing
 import Scaffold.Mathlib.GraphTheory.Heat
@@ -33,6 +34,7 @@ import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.ProjectionGap
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Duhamel
 import Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent
 import Scaffold.Mathlib.LinearAlgebra.PerronFrobenius
+import Scaffold.Mathlib.LinearAlgebra.PrimitiveConvergence
 import Scaffold.Mathlib.Probability.Concentration.Scalar.Subgaussian
 import Scaffold.Mathlib.Probability.Concentration.Scalar.Hoeffding
 import Scaffold.Mathlib.Probability.Concentration.Scalar.Bernstein

@@ -748,6 +748,45 @@ row stochasticity pinned intact at both).
 | `existsUnique_pageRankVec` | **the `∃!`** (conditional): exactly one nonnegative stationary distribution of the Google walk, **no irreducibility hypothesis on the input** — the statement the raw walk cannot support on reducible input |
 | `pageRankVec_pos` | **full support** (conditional): every nonzero nonnegative vector fixed by `G` is strictly positive — even a vertex with no inbound walk arcs receives teleportation mass |
 
+### `Scaffold.Mathlib.GraphTheory.DirectedMixing` (the PageRank power iteration — the first primitive-power-convergence consumer)
+
+The directed axis' first convergence theorem (delivered 2026-08-24,
+`proposals/primitive-power-convergence.md`, Steps 0+1 in one run). The
+delivered PageRank layer proved the stationary theory (existence,
+`∃!`, full support, all conditional on `perron_frobenius`) while its
+own statement-shapes section recorded that power iteration "needs
+strict spectral dominance, which the axiom deliberately does not
+claim" — this module discharges that recorded obligation at the
+convergence level: the teleportation floor makes the Google matrix
+strictly positive hence **primitive at `k = 1`** (aperiodicity
+derived, never assumed), so the power iteration converges and the
+PageRank distribution is *computable*. The three convergence theorems
+are **conditional on `primitive_power_tendsto` alone** — no
+`perron_frobenius` contact (`#print axioms`-verified): producing `π`
+needs PF, concluding convergence does not, the two trust costs
+independent. QA at `Scaffold/QA/SpectralGraph/DirectedMixing_QA.lean`
+(30 declarations by the generator metric: the reducible-fixture
+positive witness with the limit pinned to the raw-verified uniform
+value and the second iterate computed raw at `3/16 < 1/4`; the
+periodicity refutation — the directed 2-cycle nonnegative,
+row-stochastic, irreducible, with verified stationary distribution,
+its power action provably having no limit at all, exactly `hprim`
+isolated; and the `onesVec` coherence join deriving `π ⬝ᵥ 1 = 1` from
+the axiom against the raw sum).
+
+| Declaration | Content |
+|-------------|---------|
+| `googleMatrix_isPrimitive` | the Google matrix is primitive on `[0, 1)` — `isPrimitive_of_pos` at the teleportation floor; strictly stronger than the delivered irreducibility (unconditional) |
+| `pageRank_powerIteration` | **the classical PageRank algorithm as a theorem** (conditional on `primitive_power_tendsto` alone): `(G ^ t) *ᵥ x → (π ⬝ᵥ x) • 1` at any nonnegative mass-one stationary `π` — of which the delivered `∃!` says there is exactly one |
+| `pageRank_entrywise_tendsto` | the `t`-step transition probability `(G ^ t) i j → π j`, independent of the start (conditional, same axiom alone) |
+| `pageRank_walk_tendsto` | the Markov-chain mixing first slice: `ν ᵥ* (G ^ t) → π` for every start summing to one, entrywise topology (conditional, same axiom alone; rates out of scope) |
+| `googleMatrix_pow_mulVec_onesVec` | powers of the Google matrix fix `onesVec` — the mass bookkeeping translation (unconditional; the QA coherence join's other half) |
+
+The admission's own module is
+`Scaffold.Mathlib.LinearAlgebra.PrimitiveConvergence` (the axiom,
+`Matrix.IsPrimitive`, and the unconditional transfer layer — see the
+[Linear Algebra map](linear_algebra.md)).
+
 ### `Scaffold.Mathlib.GraphTheory.VariationalTransfer` (variational consumer of the congruence bridge)
 
 All statements proved (2026-08-17), no axioms; the second consuming

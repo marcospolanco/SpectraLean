@@ -520,10 +520,39 @@ fences refuted in proved form (`α = 1` teleportation-removed, `α = -1`
 identity degeneration — row stochasticity surviving both, being
 α-free). The item's named-consumer program (irreducible stationary
 distributions, PageRank) is now fully delivered; what remains on the
-directed axis is mixing/rate work (gated on primitivity-shaped
-admissions — the axiom deliberately claims no strict dominance) and
-the magnetic-Laplacian slice (separate, per this item's own scope
-note).
+directed axis is rate work (see the next update) and the
+magnetic-Laplacian slice (separate, per this item's own scope note).
+*Sixth update (2026-08-24, same day):* **the primitivity gate opened
+by admission and the mixing first slice delivered —
+`proposals/primitive-power-convergence.md` complete (Steps 0+1 in one
+run, one new axiom, count 9 → 10):** the admitted
+`LinearAlgebra.PrimitiveConvergence.primitive_power_tendsto` (Horn &
+Johnson §8.5 at the row-stochastic specialization — powers of a
+primitive row-stochastic matrix converge entrywise to the rank-one
+stationary projector `(Pᵗ) *ᵥ x → (π ⬝ᵥ x) • 1`, given-π form, no
+rate), with the unconditional transfer layer (`Matrix.IsPrimitive` as
+H&J's positive-power definition, primitivity from positivity,
+primitivity → irreducibility by the entry-of-power walk decomposition)
+and its first consumer — the new `GraphTheory.DirectedMixing`:
+`googleMatrix_isPrimitive` (the teleportation floor makes the Google
+matrix primitive at `k = 1`, aperiodicity *derived* — strictly
+stronger than the delivered irreducibility) and
+**`pageRank_powerIteration`**, the classical PageRank algorithm as a
+theorem, closing the loop with the same day's existence/`∃!` layer
+(the distribution is unique *and* computable), plus the entrywise
+column and walk-evolution forms. All conditional on the new axiom
+**alone** — `#print axioms` verifies zero `perron_frobenius` contact.
+QA (+30, 2021 → 2051, `DirectedMixing_QA` a new file): the reducible
+fixture's limit pinned to the raw-verified uniform value with the
+second iterate computed raw at `3/16 < 1/4`; the **2-cycle
+periodicity refutation** — nonnegative, row-stochastic, *irreducible*,
+stationary verified, powers provably without any limit, exactly
+`hprim` isolated (the convergence-form mirror of
+`strict_dominance_refuted_QA`); and the `onesVec` coherence join.
+What remains on the directed mixing axis is the *rate* layer
+(geometric rates need the complex spectral theory of non-symmetric
+matrices — a separate future admission gated on a named consumer) and
+the magnetic-Laplacian slice.
 
 ### 9. Bounded-window ("band") Davis–Kahan (2026-08-21, opened by the Davis–Kahan Step-0/1 survey)
 

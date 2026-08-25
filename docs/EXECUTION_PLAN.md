@@ -6,24 +6,125 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**None — the sweep-cut-extraction proposal is COMPLETE (delivered this
-run; see the top delivered entry). The Active priority table again
-holds no High rows and no Medium rows — every remaining row is a Low
-blocked on a human or technical decision an autonomous Lean-work run
-cannot make. Next run: fall through to the center-out SGT policy
-(`docs/1_STRATEGY.md`, `docs/6_SGT_BACKLOG.md`); the standing candidates
-on record are unchanged — directed-axis mixing/rate work (gated on a
-primitivity-shaped admission — `perron_frobenius` deliberately claims no
-strict dominance), the YWS-literal *pairwise* set shape (honestly
-blocked per `proposals/cluster-projector.md` Step 0), and any named
-consumer that prices the wide-band minimax filter designs. The
-sweep-cut proposal's priced follow-ons (the computable sweep
-enumeration, gated on a consumer; the irregular conductance shape) stay
-gated. Backlog item 7's remaining electrical items (Matrix–Tree,
-Kirchhoff network theorems) stay gated on a named consumer.**
----
+**Magnetic Laplacian first slice — the directed-native Hermitian
+operator, its energy identity, PSD, and gauge characterization (run 1,
+2026-08-25, run `20260825T001310Z-run-1`;
+`proposals/magnetic-laplacian.md`, new this run and selected per the
+empty High/Medium Active priority table by the center-out policy —
+the execution plan's own standing handoff names it as one of the two
+candidates not gated on an admission or a named consumer: backlog
+item 8's scope note reserves it as a "further, separate slice" and the
+strategy's 2026-08-19 scope decision names magnetic Laplacians as a
+legitimate SGT-center extension on the ordinary leverage test; the
+alternative open candidates are all gated). Leverage: the shelf's
+first complex-valued object opens the directed axis' third spectral
+toolkit — the named external consumer in backlog item 8 is "directed
+community detection via the magnetic Laplacian", whose mathematical
+core is exactly the energy/gauge layer being delivered; every theorem
+is pure finite algebra (sums, conjugates, `Complex.normSq`) with zero
+admissions and no complex spectral theorem needed at this slice.
+Next action: spike the sesquilinear-form realness lemma and the
+energy identity's sum re-indexing in `wip/mag_spike.lean`, then land
+`GraphTheory/Magnetic.lean` (definition + Hermitian hypothesis-free +
+energy + PSD + gauge `iff` + the Θ = 0/zero-flux cone agreements) and
+`Magnetic_QA.lean` (positive/asymmetric witnesses, the frustrated vs
+consistent-flux kernel pair, the nonnegativity fence), then
+verification and records.**
+------
 
 ## Delivered milestones (most recent first)
+
+**Primitive power convergence — the directed mixing gate opened by
+admission; the PageRank power iteration; the proposal COMPLETE, Steps
+0+1 in one run (run 1, 2026-08-24, run `20260824T224813Z-run-1`;
+`proposals/primitive-power-convergence.md`, new this run and selected
+per the empty High/Medium queue by the center-out policy — the
+standing handoff's one named candidate whose gate a run *can* clear,
+the PageRank module's own statement-shapes section recording power
+iteration as exactly this separate future obligation): DELIVERED —
+**one new axiom (count 9 → 10, the first *convergence* axiom: Horn &
+Johnson §8.5 at the row-stochastic specialization, given-π form, no
+rate)**; QA 2021 → 2051 (`DirectedMixing_QA` a new file at 30). The
+directed axis' first convergence theorem, and the loop with the
+delivered PageRank layer closed: the distribution is unique
+(conditional on `perron_frobenius`) *and computable* (conditional on
+the new axiom alone — `#print axioms` verifies **zero
+`perron_frobenius` contact** in every conditional theorem).**
+
+**Delivered:** the new
+`Scaffold/Mathlib/LinearAlgebra/PrimitiveConvergence.lean` —
+`Matrix.IsPrimitive` (H&J's positive-power definition verbatim), the
+admitted `primitive_power_tendsto` (`(P ^ t) *ᵥ x → (π ⬝ᵥ x) • 1` at
+any nonnegative mass-one stationary `π ᵥ* P = π`; row-stochastic
+carrier matching the shelf's bridge convention), and the unconditional
+transfer layer: `isPrimitive_of_pos` (k = 1),
+`reachable_of_pow_pos` + `isIrreducible_of_isPrimitive` (an entry of
+a positive power is a sum over walks, so positivity yields a
+positive-weight path — load-bearing on `Matrix.IsIrreducible`'s exact
+combinatorial shape), `pow_mulVec_one`, and the generic conditional
+corollaries `primitive_entrywise_tendsto` (columns of `Pᵗ` → `π`) and
+`primitive_vecMul_tendsto` (`ν ᵥ* Pᵗ → π`; the private finite-sum
+tendsto induction, the pin having no tendsto-sum lemma). Plus the new
+`Scaffold/Mathlib/GraphTheory/DirectedMixing.lean` —
+`googleMatrix_isPrimitive` (the teleportation floor is primitivity:
+*aperiodicity* derived, strictly stronger than the delivered
+irreducibility), **`pageRank_powerIteration`** (the classical
+algorithm as a theorem), `pageRank_entrywise_tendsto`,
+`pageRank_walk_tendsto`, and `googleMatrix_pow_mulVec_onesVec`.
+
+**QA (+30):** all three proposal-mandated sections — (A) the positive
+witness on the reducible fixture: primitivity by theorem route with a
+raw floor spot-check, the power iteration at `e₀` with the limit
+coefficient pinned raw to the uniform value `1/4`, the second iterate
+computed completely raw at `3/16 < 1/4` (the sequence visibly in
+motion toward its limit), the entrywise form at a zero-support pair,
+and the walk form at the non-uniform start `![1/2, 1/2, 0, 0]`; (B)
+the **periodicity refutation**: `P₂ = !![0,1;1,0]` nonnegative,
+row-stochastic, *and irreducible* (all proved) with the uniform
+distribution verified stationary raw, `P2_not_primitive` (every power
+is `1` or `P₂`, both with zero entries), and `P2_no_limit` (the
+even/odd subsequences are constantly `e₀`/`e₁` — no limit exists for
+any candidate), with `P2_fence_isolation` collecting every other axiom
+hypothesis as *verified* — exactly `hprim` isolated, simultaneously
+documenting why `perron_frobenius`'s no-dominance scope was the
+honest call; (C) the coherence join: the unconditional
+`onesVec`-fixing of the powers against the axiom's limit *derives*
+the mass fact `π ⬝ᵥ 1 = 1`, cross-checked against the raw sum. One
+drafted QA declaration removed as inert (an equality-of-proofs join —
+rfl by proof irrelevance; documented in-file why no such lemma can
+carry content).
+
+**Verification:** spike first (`wip/ppc_spike.lean`, several rounds
+to green; the recurring fixes recorded in the proposal's
+pin-technique list); `lake env lean` on both public modules and the
+QA file — zero errors, zero warnings each; explicit `lake build`
+targets all ✔ (1736/1736, 2195/2195, 2201/2201); `#print axioms` via
+`wip/ppc_axcheck.lean` on all 35 declarations — the split exactly as
+specified (unconditional: the standard three; convergence theorems:
+`+ primitive_power_tendsto`; no `perron_frobenius` anywhere); **full
+`lake build` ✔ (2263 targets, +2, "Build completed successfully")**;
+`lint_axioms` (**10**), `check_citations`, `check_markdown_links`
+pass; scoreboard regenerated (**2051/10/0**, idempotent). Records
+updated: the proposal (status header COMPLETE + the delivery record
+with the pin-technique list and priced follow-ons),
+`proposals/README.md` (the Delivered row; the progress paragraph),
+README (2051; the status paragraph's convergence-layer clause; two
+module-table rows), the coverage map (the PF row's primitive-limit
+sentence), the radar (QA axis synced 2021/51 → 2051/52, held 4.0),
+the scoreboard (four verification rows + the interpretation bullet),
+`index/sources/horn_johnson_matrix_analysis.md` (§8.5 row + notes),
+`index/map/linear_algebra.md` (status + declaration rows + consumers
+de-staled), `index/map/spectral_graph.md` (the DirectedMixing
+section), backlog item 8 (the sixth update), the umbrella
+`Scaffold.lean`, this plan, and the activity log. Nothing committed;
+the prior runs' uncommitted deliveries preserved untouched.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — the directed-axis *rate* layer (gated on a
+separate admission + a named consumer), the magnetic-Laplacian slice,
+a named consumer pricing the wide-band minimax filter designs, the
+sweep-cut priced follow-ons, or a fresh center-out candidate per
+`docs/6_SGT_BACKLOG.md`.
 
 **Sweep-cut extraction — the explicit Fiedler level-set cut; backlog
 item 4's named strengthening and the Fiedler module header's own

@@ -16,13 +16,13 @@ revision](docs/5_QA_SCOREBOARD.md) rather than tracking `main`.
 
 ## Status
 
-As of August 24, 2026:
+As of August 25, 2026:
 
 | Check | Result |
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
-| Explicit cited axioms | 9 |
-| QA theorems/lemmas | 2051, with no `sorry` or `admit` under `Scaffold/` |
+| Explicit cited axioms | 10 |
+| QA theorems/lemmas | 2067, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is: **Perron–Frobenius for irreducible
 nonnegative matrices**
@@ -57,7 +57,18 @@ makes the Google matrix primitive at `k = 1`, so the PageRank power
 iteration converges — existence, uniqueness, and now *computability*
 of the PageRank distribution, the convergence theorems conditional on
 the new axiom alone with `#print axioms` verifying **zero
-`perron_frobenius` contact**); the scalar and matrix
+`perron_frobenius` contact**); the directed axis' third spectral
+toolkit, the **magnetic Laplacian** (delivered 2026-08-25 as
+`GraphTheory.Magnetic`, `proposals/magnetic-laplacian.md`: the
+shelf's first complex Hermitian object — `M := D_sym −
+½(A∘e^{iΘ} + (A∘e^{iΘ})ᴴ)` with real possibly-asymmetric weights and
+arbitrary phases, Hermitian hypothesis-free by the Hermitian-part
+convention; the magnetic energy identity, PSD on nonnegative weights,
+the balanced-potential gauge characterization of the kernel — a
+frustrated cycle forces it trivial, flux localization at form level
+with no complex spectral theorem anywhere — and the zero-phase
+agreement with the complexified classical Laplacian; all proved hard
+crust); the scalar and matrix
 concentration family (Hoeffding, Bernstein, Azuma — the subgaussian
 tail bound was retired 2026-08-22 by the Markov-route repair-and-retire
 of `proposals/prove-subgaussian-tail-bound.md`, whose Step 0 spike
@@ -301,6 +312,7 @@ The near-term center is general SGT. Public modules currently cover:
 | Irreducible stationary distributions | `GraphTheory.IrreducibleStationary` (the first Perron–Frobenius consumer, conditional on that axiom: the transposed Perron engine with the walk's root pinned to 1 through row-stochasticity, existence/`∃!`/full support of the stationary distribution on irreducible nonnegative walks, uniqueness up to positive scale; the unconditional irreducibility-transfer lemmas) |
 | PageRank | `GraphTheory.PageRank` (the second Perron–Frobenius consumer, conditional on that axiom: the teleportation-regularized Google matrix `G i j = α·P i j + (1−α)·n⁻¹`, whose positive floor makes irreducibility *derived* rather than assumed — existence, the `∃!`, and full support of the PageRank distribution on **reducible** input at any damping `α ∈ [0,1)`; the unconditional structural layer: the floor, irreducibility, α-free row stochasticity, and the general row-stochasticity bridge `walkTransitionMatrix M = M`) |
 | Directed mixing | `GraphTheory.DirectedMixing` (the first `primitive_power_tendsto` consumer and the directed axis' first convergence theorem: `googleMatrix_isPrimitive` — the floor makes the Google matrix primitive at `k = 1`, aperiodicity derived never assumed — and **`pageRank_powerIteration`**, the classical PageRank algorithm as a theorem, `(G ^ t) *ᵥ x → (π ⬝ᵥ x) • 1`, plus the entrywise column form and the walk-evolution form `ν ᵥ* Gᵗ → π`; all conditional on the new axiom **alone** — no `perron_frobenius` contact, the two trust costs independent; no rate, entrywise topology) |
+| Magnetic Laplacian | `GraphTheory.Magnetic` (the shelf's first complex Hermitian object and the directed axis' third spectral toolkit: `magneticLaplacian A Θ = D_sym − ½(W + Wᴴ)` with `W = A∘e^{iΘ}` entrywise — Hermitian by construction **hypothesis-free** for any real possibly-asymmetric weights and any phases, the single-`W` classical form *derived* on the symmetric/antisymmetric cone; the **magnetic energy identity** `x*Mx = ½ ∑ A_uv \|x_u − e^{iΘ_uv} x_v\|²` (hypothesis-free), PSD on nonnegative weights, the **balanced-potential gauge characterization** `x*Mx = 0 ↔ x_u = e^{iΘ_uv} x_v` on every positive edge (a frustrated cycle forces the kernel trivial — spectral localization of flux at form level, no eigenvalue machinery), and the zero-phase agreement with the complexified classical Laplacian of the symmetrized weights; all proved, zero axioms) |
 | Cluster projector | `GraphTheory.ClusterProjector` (the set-valued spectral projector `clusterProjector M hM S := ∑_{λᵢ ∈ S} vᵢvᵢᵀ` onto an arbitrary eigenvalue set — the object the interval-only shelf lacked; the intersection product law `P_S * P_T = P_{S ∩ T}`, the complement law `1 − P_S = P_{Sᶜ}` (the structural fact the window family lacks), guard-free mode selection, the band agreement `clusterProjector (Set.Ioc a b) = bandProjector a b`, and the trace/rank supplier — all proved, zero axioms) |
 | Perturbation | `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan,BandDavisKahan,ProjectionGap,Duhamel}` (the band-Davis–Kahan family, the first three forms 2026-08-24 and the **symmetric form** the same day: the bounded-window **product** bound `‖Q * P‖ ≤ ‖A − B‖ / δ` for δ-separated band projectors by the algebraic commutator/shift route; the **difference** (sin-Θ) form `‖P_A − P_B‖ ≤ ‖A − B‖ / δ` at constant 1 for equal-rank band projectors under one-sided eigenvalue separation — the equal-rank gap identity's first consumer, with the public rank supplier `rank_bandProjector_eq_card` making the rank hypothesis checkable; the **cluster form** at *pairwise* separation — the literal YWS Theorem 1 δ, strictly weaker hypotheses, interior B-eigenvalues handled in-proof; and the **symmetric form** — both out-of-window flanks δ-separated at constant 2 with **no rank hypothesis anywhere** (the YWS both-gaps dimension-freeness; 2 is exactly the triangle inequality at `P − Q = (I−Q)P − Q(I−P)`, the engine run at both argument orders, with the new public `l2OpNorm_transpose` moving the right action under the swapped bound); and the **set form** (`SetForm` sections, 2026-08-24, `proposals/cluster-projector.md`) — the same engine at `GraphTheory.ClusterProjector`'s set-valued projectors: the product bound and the equal-rank difference bound at center/radius membership separation between the clusters as **arbitrary eigenvalue sets** (no interval structure; the difference form needing no dichotomy because the complement law `1 − Q_T = Q_{Tᶜ}` replaces the window family's separate complement engine), completed the same day by the **two-sided rank-free constant-2 set form** `l2OpNorm_clusterProjector_sub_clusterProjector_le_two_of_symm` (`proposals/cluster-projector-symmetric.md`: `‖P_A(S) − P_B(T)‖ ≤ 2‖A−B‖/δ` under both-flank separation at two center/radius pairs, no multiplicity counting anywhere — a pure composition whose constant 2 is exactly the triangle inequality at the ring decomposition, the set family matching the window family's full shape) |
 | Concentration | `Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*` |

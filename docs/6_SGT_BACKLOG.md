@@ -552,7 +552,32 @@ stationary verified, powers provably without any limit, exactly
 What remains on the directed mixing axis is the *rate* layer
 (geometric rates need the complex spectral theory of non-symmetric
 matrices — a separate future admission gated on a named consumer) and
-the magnetic-Laplacian slice.
+the magnetic-Laplacian slice. *Seventh update (2026-08-25):* **that
+slice delivered — `proposals/magnetic-laplacian.md` complete (Steps
+0+1, zero new axioms): the new `GraphTheory.Magnetic` is the shelf's
+first complex-valued object and the directed axis' third spectral
+toolkit** — `magneticLaplacian A Θ := D_sym − ½(W + Wᴴ)` with
+`W := A ∘ e^{iΘ}` entrywise, **Hermitian by construction
+hypothesis-free** for any real possibly-asymmetric weights and any
+phases (the Crucoli–Pérez–Bungert–Van Mieghem directed convention;
+the single-`W` classical form derived on the symmetric/antisymmetric
+cone), with the **magnetic energy identity** (hypothesis-free),
+PSD on nonnegative weights, the **balanced-potential gauge
+characterization** `x*Mx = 0 ↔ x_u = e^{iΘ_uv} x_v` on positive edges
+(a frustrated cycle forces the kernel trivial — flux localization at
+form level, no complex spectral theorem anywhere), and the zero-phase
+agreement with the complexified classical Laplacian (the join with
+the real shelf). QA (+16, 2051 → 2067, `Magnetic_QA` a new file): the
+asymmetric-flux conjugate-pair entries and energy pin, the
+frustrated-vs-consistent kernel pair (the triangle vs `K₂` at the
+same `π` flux — the characterization exhibited discriminating), the
+classical bridge, and the nonnegativity fence (symmetric signed input
+refutes PSD, exactly `hA` isolated). The named external consumer
+("directed community detection via the magnetic Laplacian") now has
+its mathematical core on the shelf; the complex spectral layer
+(eigenvalues of `M`, magnetic Cheeger, synchronization functionals)
+is the priced follow-on when a consumer names a bound. What remains
+on the directed axis is the *rate* layer and that spectral layer.
 
 ### 9. Bounded-window ("band") Davis–Kahan (2026-08-21, opened by the Davis–Kahan Step-0/1 survey)
 

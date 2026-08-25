@@ -6,34 +6,111 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**Magnetic Laplacian first slice — the directed-native Hermitian
-operator, its energy identity, PSD, and gauge characterization (run 1,
-2026-08-25, run `20260825T001310Z-run-1`;
-`proposals/magnetic-laplacian.md`, new this run and selected per the
-empty High/Medium Active priority table by the center-out policy —
-the execution plan's own standing handoff names it as one of the two
-candidates not gated on an admission or a named consumer: backlog
-item 8's scope note reserves it as a "further, separate slice" and the
-strategy's 2026-08-19 scope decision names magnetic Laplacians as a
-legitimate SGT-center extension on the ordinary leverage test; the
-alternative open candidates are all gated). Leverage: the shelf's
-first complex-valued object opens the directed axis' third spectral
-toolkit — the named external consumer in backlog item 8 is "directed
-community detection via the magnetic Laplacian", whose mathematical
-core is exactly the energy/gauge layer being delivered; every theorem
-is pure finite algebra (sums, conjugates, `Complex.normSq`) with zero
-admissions and no complex spectral theorem needed at this slice.
-Next action: spike the sesquilinear-form realness lemma and the
-energy identity's sum re-indexing in `wip/mag_spike.lean`, then land
-`GraphTheory/Magnetic.lean` (definition + Hermitian hypothesis-free +
-energy + PSD + gauge `iff` + the Θ = 0/zero-flux cone agreements) and
-`Magnetic_QA.lean` (positive/asymmetric witnesses, the frustrated vs
-consistent-flux kernel pair, the nonnegativity fence), then
-verification and records.**
+**None open — the queue is empty at this boundary.** The last
+completed milestone is the Magnetic Laplacian first slice (see the
+delivered record below); its standing handoff and the
+`proposals/README.md` Active priority table (no High, no Medium —
+every remaining row a Low blocked on a human or technical decision)
+leave the next autonomous run at the center-out SGT policy
+(`docs/1_STRATEGY.md`, `docs/6_SGT_BACKLOG.md`): the directed-axis
+*rate* layer (gated on a separate admission + a named consumer), the
+magnetic *spectral* layer (eigenvalues of `M`, magnetic Cheeger —
+gated on a consumer naming a bound), a named consumer pricing the
+wide-band minimax filter designs, the sweep-cut priced follow-ons, or
+a fresh center-out candidate per the backlog.
 ------
 
 ## Delivered milestones (most recent first)
 
+**Magnetic Laplacian first slice — the directed-native Hermitian
+operator, its energy identity, PSD, and gauge characterization; the
+proposal COMPLETE, Steps 0+1 across two runs (run 1
+`20260825T001310Z-run-1` drafted the module+QA and recorded Step 0
+but was interrupted before verification; continuation
+`20260825T021040Z-run-1` verified, fixed, wired, and recorded;
+`proposals/magnetic-laplacian.md`): DELIVERED — pure hard crust, zero
+new axioms (count stays 10; `#print axioms` via `wip/mag_axcheck.lean`
+on all 39 accessible declarations: `propext, Classical.choice,
+Quot.sound` only, every one). QA 2051 → 2067 (`Magnetic_QA` a new file
+at 16 by the generator metric, 30 declarations total). The shelf's
+first complex-valued object and the directed axis' third spectral
+toolkit: the named external consumer in backlog item 8 ("directed
+community detection via the magnetic Laplacian") now has its
+mathematical core — the energy/gauge layer — on the shelf.**
+
+**Delivered:** the new `Scaffold/Mathlib/GraphTheory/Magnetic.lean`
+(namespace `SpectralGraphTheory`; minimal imports Directed + Spectral;
+the umbrella importing it) — `symDeg`/`magneticMatrix`/
+`magneticLaplacian` (`M := D_sym − ½(W + Wᴴ)`, `W := A ∘ e^{iΘ}`
+entrywise; the Crucoli–Pérez–Bungert–Van Mieghem directed convention),
+`hermQuadForm` (the sesquilinear `quadForm` analogue), and: Hermitian
+**hypothesis-free** (`magneticLaplacian_isHermitian` — the
+Hermitian-part convention's structural payoff, the
+`directedNormalizedLaplacian` precedent; `magneticMatrix_isHermitian`
+the cone lemma), the action interface `magneticLaplacian_mulVec_apply`,
+**the magnetic energy identity** `magnetic_energy` (hypothesis-free;
+diagonal split into out-/in-degree halves, cross sums matched termwise
+and swap-conjugated), realness (`magnetic_energy_real`,
+`magneticQuadForm_im_eq_zero`), **PSD**
+(`magneticQuadForm_re_nonneg`), **the balanced-potential gauge
+characterization** `magneticQuadForm_eq_zero_iff` (`x*Mx = 0 ↔ x_u =
+e^{iΘ_uv} x_v` on positive edges — a frustrated cycle forces the
+kernel trivial, flux localization at form level with no complex
+spectral theorem anywhere), and the cone agreements
+(`magneticLaplacian_zero_phase_apply[_of_isSymm]` — at Θ = 0 the
+complexified classical Laplacian of the symmetrized weights, on
+symmetric `A` of `laplacian A` itself; `magneticLaplacian_eq_single` —
+the classical single-`W` form derived on the symmetric/antisymmetric
+cone).
+
+**QA (+16):** all four proposal-mandated sections — (A) the
+asymmetric-flux fixture: `W`'s raw entries `−2`/`I`, the operator's
+conjugate-pair off-diagonals `1 ± I/2` (Hermitian verified on directed
+input), the energy identity pinned at `5` at `![1,1]`, the zero-phase
+agreement entrywise against the mapped `laplacian`, the cone
+single-`W` form at the `π`-flux pair; (B) the **frustrated-vs-
+consistent kernel pair** — the one-`π`-edge triangle's kernel forced
+trivial through the gauge conditions (with the positive-definiteness
+corollary) against `K₂` at the same flux keeping the antipodal
+potential `![1,−1]` in the kernel (the iff's reverse direction,
+cross-checked by the raw vanishing energy); (C) the classical bridge —
+constants in the zero-phase kernel, the antipodal vector outside it at
+energy exactly `4` (the flux is what moved the kernel); (D) the
+**nonnegativity fence** — symmetric signed input refutes PSD in proved
+form at `−1 < 0`, exactly `hA` isolated.
+
+**Verification (continuation run):** the module elaborated green as
+drafted (`lake env lean`, zero diagnostics); the QA's three first-pass
+errors fixed in place (two redundant `match` alternatives; one false
+numeric pin — the zero-phase energy stated `2` where `norm_num`
+correctly forced the true `4`, the numeric-QA failure mode doing its
+job) and re-elaborated green; explicit `lake build` targets ✔ (module;
+QA 2192/2192); **full root `lake build` ✔ (2264 targets, +1 for the
+new module, "Build completed successfully"; zero warnings in the
+changed modules — the log's only Scaffold diagnostics the documented
+pre-existing set)**; `#print axioms` via `wip/mag_axcheck.lean` on all
+39 accessible declarations — the standard three only; `lint_axioms`
+(**10**, unchanged), `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated (**2067/10/0**, idempotent). Records updated:
+the proposal (status header COMPLETE + the delivery record with the
+pin-technique list and priced follow-ons), `proposals/README.md` (the
+Delivered row; the progress paragraph and natural-candidates note —
+the magnetic slice retired to delivered, the *spectral* layer the new
+gated candidate), README (2067; the axiom-count cell's stale 9 → 10
+factual fix; the status paragraph's magnetic clause; the module-table
+row), the radar (QA axis synced 2051/52 → 2067/53, held 4.0), the
+scoreboard (four verification rows + the interpretation bullet),
+`index/map/spectral_graph.md` (the Magnetic section + 15 declaration
+rows), backlog item 8 (the seventh update), the umbrella
+`Scaffold.lean`, this plan, and the activity log. Nothing committed;
+the prior runs' uncommitted deliveries preserved untouched.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — the directed-axis *rate* layer (gated on a
+separate admission + a named consumer), the magnetic *spectral* layer
+(gated on a consumer naming a bound), a named consumer pricing the
+wide-band minimax filter designs, the sweep-cut priced follow-ons, or
+a fresh center-out candidate per `docs/6_SGT_BACKLOG.md`.
 **Primitive power convergence — the directed mixing gate opened by
 admission; the PageRank power iteration; the proposal COMPLETE, Steps
 0+1 in one run (run 1, 2026-08-24, run `20260824T224813Z-run-1`;

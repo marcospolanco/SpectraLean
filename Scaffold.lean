@@ -21,6 +21,7 @@ import Scaffold.Mathlib.GraphTheory.Stationary
 import Scaffold.Mathlib.GraphTheory.Mixing
 import Scaffold.Mathlib.GraphTheory.Heat
 import Scaffold.Mathlib.GraphTheory.Directed
+import Scaffold.Mathlib.GraphTheory.Magnetic
 import Scaffold.Mathlib.GraphTheory.Krylov
 import Scaffold.Mathlib.GraphTheory.PolyFilter
 import Scaffold.Mathlib.GraphTheory.ClusterProjector
@@ -105,7 +106,13 @@ conditional on the axiom — and `GraphTheory.PageRank` — the second:
 the teleportation-regularized Google matrix whose positive floor makes
 irreducibility *derived* rather than assumed, extending the same
 stationary theory to reducible input, likewise conditional), the stationary
-structure consuming both (`GraphTheory.Stationary`), the heat semigroup
+structure consuming both (`GraphTheory.Stationary`), the magnetic
+Laplacian (`GraphTheory.Magnetic`: the shelf's first complex Hermitian
+object — the directed-native `D_sym − ½(W + Wᴴ)` operator, Hermitian by
+construction hypothesis-free, with the magnetic energy identity, PSD on
+nonnegative weights, the balanced-potential gauge characterization of
+the kernel, and the zero-phase/symmetric-cone agreements with the
+classical Laplacian, all proved), the heat semigroup
 (`GraphTheory.Heat`: Phase B, Step 1 of the reversibility/heat program —
 the matrix-level diffusion operator `heatKernel A t = e^{-tL}` with its
 hypothesis-graded symmetry and time-zero identity, plus the square-zero

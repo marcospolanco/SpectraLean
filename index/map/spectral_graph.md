@@ -787,6 +787,51 @@ The admission's own module is
 `Matrix.IsPrimitive`, and the unconditional transfer layer — see the
 [Linear Algebra map](linear_algebra.md)).
 
+### `Scaffold.Mathlib.GraphTheory.Magnetic` (the magnetic Laplacian — the directed-native Hermitian operator)
+
+The directed axis' third spectral toolkit (delivered 2026-08-25,
+`proposals/magnetic-laplacian.md`, backlog item 8's reserved "further,
+separate slice" per that item's own scope note) and the shelf's first
+complex-valued object: the **magnetic Laplacian**
+`magneticLaplacian A Θ := D_sym − ½(W + Wᴴ)` with `W := A ∘ e^{iΘ}`
+entrywise (the Crucoli–Pérez–Bungert–Van Mieghem directed convention;
+route provenance in the module docstring — the statements are proved,
+not admitted). Real possibly-asymmetric weights `A` and arbitrary real
+phases `Θ`; **Hermitian by construction, hypothesis-free** (the
+Hermitian-part convention, the `directedNormalizedLaplacian` precedent
+— the single-`W` classical form is *derived* on the
+`A.IsSymm ∧ Θᵀ = −Θ` cone). All statements below are proved, zero
+axioms. QA at `Scaffold/QA/SpectralGraph/Magnetic_QA.lean` (16
+declarations by the generator metric, 30 total: the asymmetric-flux
+fixture pinning the hypothesis-free content on genuinely directed
+input with genuinely complex phases; the frustrated-vs-consistent
+kernel pair — one `π`-flux edge forces the triangle's kernel trivial
+while leaving `K₂`'s antipodal phase potential in the kernel; the
+classical bridge at zero phase; the nonnegativity fence refuting PSD
+on symmetric signed input with exactly `hA` isolated).
+
+| Declaration | Content |
+|-------------|---------|
+| `symDeg` | the symmetrized degree `½(outDeg + inDeg)` — the fan-in/fan-out split the energy identity's diagonal demands |
+| `magneticMatrix` | `W := A ∘ e^{iΘ}` entrywise — the phase-weighted complex adjacency, defined for any real `A` and any real `Θ` |
+| `magneticLaplacian` | `M := D_sym − ½(W + Wᴴ)` — the magnetic Laplacian at the Hermitian-part convention |
+| `hermQuadForm` | the sesquilinear quadratic form `∑ i, conj (x i) * (M *ᵥ x) i` — the complex analogue of the shelf's `quadForm` |
+| `magneticMatrix_isHermitian` | `Wᴴ = W` on the symmetric/antisymmetric cone (the cone lemma behind `magneticLaplacian_eq_single`) |
+| `magneticLaplacian_isHermitian` | **Hermitian, hypothesis-free** — any real weights, any phases; the convention's structural payoff |
+| `magneticLaplacian_mulVec_apply` | the entry action: symmetrized degree minus the conjugate-paired phase couplings (interface lemma; the energy identity's engine) |
+| `magnetic_energy` | **the magnetic energy identity, hypothesis-free**: `x*Mx = ½ ∑ A_uv \|x_u − e^{iΘ_uv} x_v\|²` — the finite-algebra Dirichlet principle of the magnetic program |
+| `magnetic_energy_real` | the real-coerced form: the quadratic form *is* the real energy sum |
+| `magneticQuadForm_im_eq_zero` | the form is real-valued (the identity at the imaginary coordinate) |
+| `magneticQuadForm_re_nonneg` | **PSD** on nonnegative weights (every edge energy nonnegative; the nonnegativity hypothesis load-bearing — the QA signed fence) |
+| `magneticQuadForm_eq_zero_iff` | **the balanced-potential gauge characterization**: `x*Mx = 0 ↔ x_u = e^{iΘ_uv} x_v` on every positive edge — a frustrated cycle forces the kernel trivial (flux localization at form level, no eigenvalue machinery) |
+| `magneticLaplacian_zero_phase_apply` | at `Θ = 0`: the complexified classical Laplacian of the symmetrized weights, entrywise (loops included, no case analysis) |
+| `magneticLaplacian_zero_phase_apply_of_isSymm` | on symmetric `A`: the complexified `laplacian A` itself — the join with the real shelf |
+| `magneticLaplacian_eq_single` | on the `A.IsSymm ∧ Θᵀ = −Θ` cone: `M = D_sym,ℂ − W` — the classical single-`W` magnetic Laplacian, derived not assumed |
+
+Eigenvalue, magnetic-Cheeger, and synchronization statements are priced
+follow-ons in the proposal (the pin has Hermitian spectral theory), not
+gaps in what is claimed.
+
 ### `Scaffold.Mathlib.GraphTheory.VariationalTransfer` (variational consumer of the congruence bridge)
 
 All statements proved (2026-08-17), no axioms; the second consuming

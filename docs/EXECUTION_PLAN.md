@@ -6,27 +6,58 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**None open — the queue is empty at this boundary.** The last
-completed milestone is the Heat-as-calculus-instance delivery below
-(the consumer stub is now complete, both halves delivered); the
-`proposals/README.md` Active priority table holds no High and no
-Medium (every remaining row a Low blocked on a human or technical
-decision), leaving the next autonomous run at the center-out SGT
-policy (`docs/1_STRATEGY.md`, `docs/6_SGT_BACKLOG.md`) with the
-natural candidates now named in `proposals/README.md`'s closing
-paragraph: the **magnetic heat propagator** (the second bridge
-consumer stub, `exp` of the delivered `magneticLaplacian` as the
-complex calculus at `e^{-tλ}` — its complex-half precondition
-discharged by the bridge delivery's QA witness `fcM2c_cfc_id`, now
-the top candidate with the Tikhonov/Heat stub complete), the
-**resolvent identity** `f(L) = π • (L + π•1)⁻¹` under invertibility
-(one `cfc_inv` step from the delivered normal equation — a priced
-follow-on of the now-complete stub), the irregular-Cheeger *hard*
-direction (the priced volume-weighted coarea/median program), the
-directed-axis *rate* layer (gated on a separate admission + a named
-consumer), the magnetic *spectral* layer (gated on a consumer naming
-a bound), a named consumer pricing the wide-band minimax filter
-designs, or a fresh center-out candidate per the backlog.
+**Magnetic heat propagator — the bridge's first complex consumer;
+`proposals/hermitian-calculus-consumer-magnetic.md`, a gated stub whose
+gate is NOW SATISFIED (the bridge's Steps 1–3 delivered 2026-08-25; the
+complex-Hermitian half confirmed elaborating by that delivery's QA
+witness `fcM2c_cfc_id`); run 1, 2026-08-25, run `20260825T180957Z-run-1`.
+Selected per the empty High/Medium Active table by the center-out
+policy as the top natural candidate named in all three standing
+handoffs; per the one-per-delivery rule, the indexing-and-pursuit
+decision is recorded here at the boundary.** The ask (the proposal's
+own words): the operator via the calculus wrapper (`f(t) = e^{-tM}` of
+the delivered `magneticLaplacian`, hypothesis-free Hermitian input, at
+𝕜 = ℂ through Mathlib's `RCLike`-generic `cfc` — no second wrapper per
+the bridge's Step-0 verdict), its eigenvector action at the complex
+eigenbasis, and one QA fixture on a small directed graph with nonzero
+phase checked against a hand computation, two-independent-routes
+discipline. Non-goals honored: no magnetic Cheeger, no synchronization
+functionals, no eigenvalue-gap statements.
+
+**Planned public layer** (a new section of
+`GraphTheory/FunctionalCalculus.lean`, `Magnetic.lean` untouched per
+the consumer pattern; one new import — Magnetic, no cycle): the general
+RCLike eigen-action lemma `cfc_mulVec_of_mulVec_eq_smul` (if
+`M *ᵥ x = (μ : 𝕜) • x` at a Hermitian `M` and real `μ`, then
+`hM.cfc f *ᵥ x = (f μ : 𝕜) • x` — proved by pure matrix algebra
+through the unitary diagonalization `Uᴴ * M * U = diag λ` and the
+support-transfer of the diagonal action, NO eigenspace-completeness
+machinery; this is the load-bearing interface every complex consumer
+needs and Mathlib's CFC file lacks it); `magneticHeat` (the
+propagator, hypothesis-free); its entry form (the falsifiability
+anchor, the complex mirror of `spectralCalc_apply`); the consumer
+action `magneticHeat_mulVec_of_eigen`; the basis action
+`magneticHeat_mulVec_eigenvectorBasis`; `magneticHeat_zero` (t = 0 ⇒ 1
+via `cfc_const_one`); and the semigroup
+`magneticHeat_mul_magneticHeat` through the generic calculus algebra
+(`cfc_mul`/`cfc_congr` at `Real.exp_add` — the complex instantiation
+of the delivered `spectralCalc_exp_mul` technology, needing a complex
+spectrum-continuity supplier). **QA**: a new
+`Scaffold/QA/SpectralGraph/MagneticCalculus_QA.lean` — the flux pair
+`K₂` at antisymmetric phase π/2 (M = !![1, −I; I, 1], genuinely
+complex Hermitian on directed-compatible input), the kernel vector
+![I, 1] cross-checked against the delivered gauge characterization,
+the frustrated mode ![I, −1] at λ = 2, the propagator's closed form
+`!![(1+q)/2, I(1−q)/2; −I(1−q)/2, (1+q)/2]` at `q = e^{-2t}` derived
+on the calculus route (action theorem + spanning recovery) and
+verified by raw matrix arithmetic (the independent second route), the
+diffusion fence (`magneticHeat … 1 ≠ 1`), time-zero, and — budget
+permitting — the zero-phase join to the delivered real
+`heatKernel` (the magnetic propagator at Θ = 0 degenerating to the
+classical semigroup's complexification). Zero new axioms planned (pure
+hard crust; `#print axioms` audit on every new declaration). Spike
+first in `wip/`; the prior runs' uncommitted deliveries preserved
+untouched.
 ------
 
 ## Delivered milestones (most recent first)

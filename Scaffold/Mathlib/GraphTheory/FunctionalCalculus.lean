@@ -44,6 +44,17 @@
     semigroup law re-derived through the calculus algebra
     (`heatKernel_mul_heatKernel_of_spectralCalc`) as the second,
     eigenbasis-free route to `Heat.lean`'s `heatKernel_mul_heatKernel`.
+  - the first complex consumer (2026-08-25,
+    `proposals/hermitian-calculus-consumer-magnetic.md`): the magnetic
+    heat propagator `magneticHeat A Θ t` — the calculus of the
+    delivered `magneticLaplacian` at `x ↦ e^{-t·x}`, through Mathlib's
+    `RCLike`-generic `cfc` at 𝕜 = ℂ directly (no second wrapper, per
+    the bridge's Step-0 verdict) — with the general eigen-action
+    engine `cfc_mulVec_eq_smul_of_mulVec_eq_smul` (the calculus acts
+    at eigenvalues on EVERY eigenvector, proved by pure matrix
+    algebra through unitary diagonalization; Mathlib's calculus file
+    has no such lemma), the entry form, the action interfaces, time
+    zero, and the semigroup law through the generic calculus algebra.
 
   What this module is NOT (and must never be described as):
   - NOT a re-proof of the finite-dimensional spectral theorem —
@@ -75,9 +86,10 @@
 import Scaffold.Mathlib.GraphTheory.Spectral
 import Scaffold.Mathlib.GraphTheory.Tikhonov
 import Scaffold.Mathlib.GraphTheory.Heat
+import Scaffold.Mathlib.GraphTheory.Magnetic
 import Mathlib.LinearAlgebra.Matrix.HermitianFunctionalCalculus
 
-open scoped BigOperators Matrix
+open scoped BigOperators Matrix ComplexConjugate
 
 namespace SpectralGraphTheory
 
@@ -453,5 +465,239 @@ theorem heatKernel_mul_heatKernel_of_spectralCalc (A : WAdj (V := V))
   rw [heatKernel_eq_spectralCalc_exp A hA s,
     heatKernel_eq_spectralCalc_exp A hA t, spectralCalc_exp_mul,
     ← heatKernel_eq_spectralCalc_exp A hA (s + t)]
+
+/-!
+## The magnetic heat propagator: the first complex consumer
+
+The bridge's first genuinely complex consumer
+(`proposals/hermitian-calculus-consumer-magnetic.md`, 2026-08-25, its
+gate satisfied by the bridge delivery and the QA witness
+`fcM2c_cfc_id`): the magnetic heat propagator of the delivered
+`GraphTheory.Magnetic.magneticLaplacian` — the calculus at the
+exponential family `x ↦ e^{-t·x}`, through Mathlib's `RCLike`-generic
+`cfc` at 𝕜 = ℂ directly (per the bridge's Step-0 verdict, no second
+wrapper is added; `magneticLaplacian_isHermitian` is hypothesis-free,
+so the propagator is defined for ANY real weights — asymmetric
+included — and ANY phases).
+
+The load-bearing general engine is `cfc_mulVec_eq_smul_of_mulVec_eq_
+smul`: the calculus acts at eigenvalues on EVERY eigenvector — not
+just the chosen basis — proved by pure matrix algebra through the
+unitary diagonalization (the shifted eigenvector equation transfers
+to the diagonal side, where support at the eigenvalue is read off
+entrywise), with no eigenspace-completeness machinery anywhere.
+Mathlib's calculus file has no such lemma; every complex consumer of
+the calculus needs it. Per the proposal's non-goals,
+`Magnetic.lean` stays exactly as delivered, there is no magnetic
+Cheeger/synchronization content here, and all statements are proved.
+-/
+
+variable {𝕜 : Type} [RCLike 𝕜] {n : Type} [Fintype n] [DecidableEq n]
+
+/-- **The calculus acts at eigenvalues on every eigenvector.** If the
+Hermitian matrix `M` has `M *ᵥ x = (μ : 𝕜) • x` at a real eigenvalue
+`μ`, then the continuous functional calculus acts on `x` as the
+scalar `f μ` — for ANY eigenvector, not just the eigenbasis the
+calculus was built from. The proof is pure matrix algebra through the
+unitary diagonalization `Uᴴ * M * U = diagonal λ`: the shifted
+equation `(M − μ) *ᵥ x = 0` transfers to `(λ − μ) *ᵥ (Uᴴ x) = 0`, so
+`Uᴴ x` is supported at the indices with `λ i = μ`, where the
+calculus's diagonal acts as `f μ`; no eigenspace-completeness
+machinery is needed. This is the interface every downstream consumer
+of the complex calculus needs (Mathlib's
+`HermitianFunctionalCalculus.lean` does not provide it). -/
+theorem cfc_mulVec_eq_smul_of_mulVec_eq_smul {M : Matrix n n 𝕜}
+    (hM : M.IsHermitian) {x : n → 𝕜} {μ : ℝ}
+    (hx : M *ᵥ x = ((μ : ℝ) : 𝕜) • x) (f : ℝ → ℝ) :
+    hM.cfc f *ᵥ x = ((f μ : ℝ) : 𝕜) • x := by
+  classical
+  have hdiag := hM.star_mul_self_mul_eq_diagonal
+  have hUst : (hM.eigenvectorUnitary : Matrix n n 𝕜)
+      * star (hM.eigenvectorUnitary : Matrix n n 𝕜) = 1 :=
+    Matrix.mem_unitaryGroup_iff.mp (hM.eigenvectorUnitary).2
+  have hstU : star (hM.eigenvectorUnitary : Matrix n n 𝕜)
+      * (hM.eigenvectorUnitary : Matrix n n 𝕜) = 1 :=
+    Matrix.mem_unitaryGroup_iff'.mp (hM.eigenvectorUnitary).2
+  have hshift : (M - ((μ : ℝ) : 𝕜) • (1 : Matrix n n 𝕜)) *ᵥ x = 0 := by
+    rw [Matrix.sub_mulVec, Matrix.smul_mulVec_assoc, Matrix.one_mulVec, hx,
+      sub_self]
+  have hsmul : star (hM.eigenvectorUnitary : Matrix n n 𝕜)
+      * (((μ : ℝ) : 𝕜) • (1 : Matrix n n 𝕜))
+      * (hM.eigenvectorUnitary : Matrix n n 𝕜)
+      = ((μ : ℝ) : 𝕜) • (1 : Matrix n n 𝕜) := by
+    rw [Matrix.mul_smul, mul_one, Matrix.smul_mul, hstU]
+  have hkey : Matrix.diagonal (RCLike.ofReal ∘ hM.eigenvalues)
+      - ((μ : ℝ) : 𝕜) • (1 : Matrix n n 𝕜)
+      = star (hM.eigenvectorUnitary : Matrix n n 𝕜)
+        * (M - ((μ : ℝ) : 𝕜) • (1 : Matrix n n 𝕜))
+        * (hM.eigenvectorUnitary : Matrix n n 𝕜) := by
+    rw [Matrix.mul_sub, Matrix.sub_mul, hsmul, hdiag]
+  have hxy : (hM.eigenvectorUnitary : Matrix n n 𝕜) *ᵥ
+      ((star (hM.eigenvectorUnitary : Matrix n n 𝕜)) *ᵥ x) = x := by
+    rw [Matrix.mulVec_mulVec, hUst, Matrix.one_mulVec]
+  have hy0 : (Matrix.diagonal (RCLike.ofReal ∘ hM.eigenvalues)
+      - ((μ : ℝ) : 𝕜) • (1 : Matrix n n 𝕜))
+      *ᵥ ((star (hM.eigenvectorUnitary : Matrix n n 𝕜)) *ᵥ x) = 0 := by
+    have hreg : (star (hM.eigenvectorUnitary : Matrix n n 𝕜)
+        * (M - ((μ : ℝ) : 𝕜) • (1 : Matrix n n 𝕜))
+        * (hM.eigenvectorUnitary : Matrix n n 𝕜))
+        *ᵥ ((star (hM.eigenvectorUnitary : Matrix n n 𝕜)) *ᵥ x)
+        = (star (hM.eigenvectorUnitary : Matrix n n 𝕜))
+          *ᵥ ((M - ((μ : ℝ) : 𝕜) • (1 : Matrix n n 𝕜)) *ᵥ x) := by
+      rw [← Matrix.mulVec_mulVec, hxy, ← Matrix.mulVec_mulVec]
+    rw [hkey, hreg, hshift, Matrix.mulVec_zero]
+  have hentry : ∀ i, (((hM.eigenvalues i : ℝ) : 𝕜)
+      * ((star (hM.eigenvectorUnitary : Matrix n n 𝕜)) *ᵥ x) i
+      - ((μ : ℝ) : 𝕜) * ((star (hM.eigenvectorUnitary : Matrix n n 𝕜)) *ᵥ x) i)
+      = 0 := by
+    intro i
+    have h := congrFun hy0 i
+    rw [Matrix.sub_mulVec, Pi.sub_apply, Matrix.mulVec_diagonal,
+      Matrix.smul_mulVec_assoc, Matrix.one_mulVec, Function.comp_apply,
+      Pi.smul_apply, smul_eq_mul, Pi.zero_apply] at h
+    exact h
+  have hsupp : ∀ i, ((star (hM.eigenvectorUnitary : Matrix n n 𝕜)) *ᵥ x) i ≠ 0
+      → hM.eigenvalues i = μ := fun i hne => by
+    have h1 := hentry i
+    rw [sub_eq_zero] at h1
+    exact RCLike.ofReal_injective (mul_right_cancel₀ hne h1)
+  show ((hM.eigenvectorUnitary : Matrix n n 𝕜)
+      * Matrix.diagonal (RCLike.ofReal ∘ f ∘ hM.eigenvalues)
+      * star (hM.eigenvectorUnitary : Matrix n n 𝕜)) *ᵥ x = _
+  rw [← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec]
+  have hdiagF : Matrix.diagonal (RCLike.ofReal ∘ f ∘ hM.eigenvalues) *ᵥ
+      ((star (hM.eigenvectorUnitary : Matrix n n 𝕜)) *ᵥ x)
+      = ((f μ : ℝ) : 𝕜) • ((star (hM.eigenvectorUnitary : Matrix n n 𝕜)) *ᵥ x) := by
+    funext i
+    rw [Matrix.mulVec_diagonal]
+    simp only [Function.comp_apply, Pi.smul_apply, smul_eq_mul]
+    by_cases hz : ((star (hM.eigenvectorUnitary : Matrix n n 𝕜)) *ᵥ x) i = 0
+    · rw [hz]; ring
+    · rw [hsupp i hz]
+  rw [hdiagF, Matrix.mulVec_smul, hxy]
+
+variable {V : Type} [Fintype V] [DecidableEq V]
+
+/-- **The magnetic heat propagator** — the bridge's first complex
+consumer: the functional calculus of the magnetic Laplacian at the
+exponential family `x ↦ e^{-t·x}`,
+`e^{-t·M(A,Θ)} := (magneticLaplacian_isHermitian A Θ).cfc …` — the
+complex analogue of `Heat.lean`'s `heatKernel`, built by consuming
+Mathlib's `RCLike`-generic calculus at 𝕜 = ℂ directly (no second
+wrapper, per the bridge's Step-0 verdict). Hypothesis-free by the
+magnetic Laplacian's structural Hermiticity: defined for ANY real
+weights (asymmetric included) and ANY phases. The semigroup of the
+phase-frustrated diffusion; see `magneticHeat_mulVec_of_eigen` for the
+action and `magneticHeat_mul_magneticHeat` for the semigroup law. -/
+noncomputable def magneticHeat (A : Matrix V V ℝ) (Θ : Matrix V V ℝ) (t : ℝ) :
+    Matrix V V ℂ :=
+  (magneticLaplacian_isHermitian A Θ).cfc (fun x => Real.exp (-(t * x)))
+
+/-- **Entry form of the magnetic heat propagator** — the complex
+mirror of `spectralCalc_apply` and the falsifiability anchor: the
+propagator is entrywise the complex-eigenbasis filter sum with
+exponentially damped weights. A wrong calculus specialization or a
+mismatched complex-eigenbasis convention breaks this equality loudly. -/
+theorem magneticHeat_apply (A : Matrix V V ℝ) (Θ : Matrix V V ℝ) (t : ℝ)
+    (a b : V) :
+    magneticHeat A Θ t a b
+      = ∑ i, ((Real.exp (-(t * (magneticLaplacian_isHermitian A Θ).eigenvalues i)) : ℂ)
+          * (magneticLaplacian_isHermitian A Θ).eigenvectorUnitary a i
+          * conj ((magneticLaplacian_isHermitian A Θ).eigenvectorUnitary b i)) := by
+  show (((magneticLaplacian_isHermitian A Θ).cfc
+      fun x => Real.exp (-(t * x))) a b) = _
+  rw [Matrix.IsHermitian.cfc, Matrix.mul_apply]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [Matrix.mul_diagonal, Matrix.star_apply, Complex.star_def]
+  simp only [Function.comp_apply]
+  ac_rfl
+
+/-- **The propagator acts at eigenvalues on every eigenvector of the
+magnetic Laplacian** — the consumer action interface: any eigenvector
+of `M(A, Θ)` at a real eigenvalue `μ` is an eigenvector of the
+propagator at the decay factor `e^{-t·μ}`. The balanced-potential
+kernel modes are invariant (`e⁰ = 1`); every other mode decays. This
+is `cfc_mulVec_eq_smul_of_mulVec_eq_smul` at the exponential family,
+and it holds for arbitrary directed weights and phases (Hermiticity
+is structural). -/
+theorem magneticHeat_mulVec_of_eigen (A : Matrix V V ℝ) (Θ : Matrix V V ℝ)
+    {x : V → ℂ} {μ : ℝ}
+    (hx : magneticLaplacian A Θ *ᵥ x = ((μ : ℝ) : ℂ) • x) (t : ℝ) :
+    magneticHeat A Θ t *ᵥ x
+      = ((Real.exp (-(t * μ)) : ℝ) : ℂ) • x :=
+  cfc_mulVec_eq_smul_of_mulVec_eq_smul _ hx _
+
+/-- **The basis action**: the propagator acts on Mathlib's complex
+eigenbasis vectors of the magnetic Laplacian with the decay factors
+`e^{-t·μᵢ}` — the proposal's literal ask, as a corollary of the
+arbitrary-eigenvector action at `mulVec_eigenvectorBasis`. -/
+theorem magneticHeat_mulVec_eigenvectorBasis (A : Matrix V V ℝ)
+    (Θ : Matrix V V ℝ) (t : ℝ) (j : V) :
+    magneticHeat A Θ t *ᵥ
+      ⇑((magneticLaplacian_isHermitian A Θ).eigenvectorBasis j)
+      = ((Real.exp (-(t * (magneticLaplacian_isHermitian A Θ).eigenvalues j)) : ℝ) : ℂ)
+        • ⇑((magneticLaplacian_isHermitian A Θ).eigenvectorBasis j) := by
+  refine magneticHeat_mulVec_of_eigen A Θ ?_ t
+  have h := (magneticLaplacian_isHermitian A Θ).mulVec_eigenvectorBasis j
+  rw [h]
+  funext i
+  rw [Pi.smul_apply, Pi.smul_apply, smul_eq_mul, Complex.real_smul]
+
+/-- **Every function is continuous on any matrix's real spectrum** —
+the `𝕜`-generic supplier behind the calculus-algebra layer (the
+complex-spectrum sibling of
+`continuousOn_of_finite_real_spectrum`; the spectrum of ANY square
+matrix over an `RCLike` field is finite, so every real function is
+continuous on it). -/
+theorem continuousOn_of_finite_spectrum {M : Matrix n n 𝕜} (f : ℝ → ℝ) :
+    ContinuousOn f (spectrum ℝ M) := by
+  rw [continuousOn_iff_continuous_restrict]
+  exact continuous_of_discreteTopology
+
+/-- **Time zero**: flowing for zero time is the identity — the
+calculus at the constant-one function, through the generic
+calculus algebra. -/
+theorem magneticHeat_zero (A : Matrix V V ℝ) (Θ : Matrix V V ℝ) :
+    magneticHeat A Θ 0 = 1 := by
+  have hf : (fun x => Real.exp (-((0 : ℝ) * x))) = fun _ => 1 :=
+    funext fun x => by simp [Real.exp_zero]
+  unfold magneticHeat
+  rw [hf]
+  have hsa : IsSelfAdjoint (magneticLaplacian A Θ) :=
+    magneticLaplacian_isHermitian A Θ
+  have hcfc := Matrix.IsHermitian.cfc_eq (f := fun _ => (1 : ℝ))
+    (A := magneticLaplacian A Θ) (magneticLaplacian_isHermitian A Θ)
+  rw [← hcfc, cfc_const (1 : ℝ) (magneticLaplacian A Θ) hsa, map_one]
+
+/-- **The semigroup law through the complex calculus algebra**:
+flowing for time `s` then `t` equals flowing for `s + t` — proved
+through Mathlib's generic continuous-functional-calculus algebra
+(`cfc_mul`, then `cfc_congr` promoting the pointwise `Real.exp_add`
+identity from the spectrum), the complex instantiation of the
+delivered `spectralCalc_exp_mul` technology; no eigenbasis anywhere. -/
+theorem magneticHeat_mul_magneticHeat (A : Matrix V V ℝ) (Θ : Matrix V V ℝ)
+    (s t : ℝ) :
+    magneticHeat A Θ s * magneticHeat A Θ t = magneticHeat A Θ (s + t) := by
+  have hsa : IsSelfAdjoint (magneticLaplacian A Θ) :=
+    magneticLaplacian_isHermitian A Θ
+  have hc : ∀ f : ℝ → ℝ,
+      ContinuousOn f (spectrum ℝ (magneticLaplacian A Θ)) :=
+    fun f => continuousOn_of_finite_spectrum f
+  have hf : ∀ c : ℝ, magneticHeat A Θ c
+      = cfc (fun x => Real.exp (-(c * x))) (magneticLaplacian A Θ) := by
+    intro c
+    unfold magneticHeat
+    rw [Matrix.IsHermitian.cfc_eq]
+  rw [hf s, hf t, hf (s + t),
+    ← cfc_mul (fun x => Real.exp (-(s * x))) (fun x => Real.exp (-(t * x)))
+      (magneticLaplacian A Θ) (hc _) (hc _),
+    cfc_congr (f := fun x => Real.exp (-(s * x)) * Real.exp (-(t * x)))
+      (g := fun x => Real.exp (-((s + t) * x))) (by
+      intro x _
+      show Real.exp (-(s * x)) * Real.exp (-(t * x))
+        = Real.exp (-((s + t) * x))
+      rw [← Real.exp_add]
+      congr 1
+      ring)]
 
 end SpectralGraphTheory

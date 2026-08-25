@@ -30,6 +30,15 @@ the `lake build` it cites (see `proposals/verify-build-completeness.md`
 for the incident that made this mandatory: a full build once printed
 "Build completed successfully" over a three-error QA file).
 
+## 2026-08-25T18:09:57Z — Magnetic heat propagator in delivery: the bridge's first complex consumer
+
+**Run:** `20260825T180957Z-run-1`  
+**Session:** `ses_fc5e9a9cfffeFnvgiHYSs8gayf`  
+**Status:** in-progress  
+**Milestone:** `proposals/hermitian-calculus-consumer-magnetic.md` — a gated stub whose gate is now satisfied (the bridge's Steps 1–3 delivered 2026-08-25, the complex-Hermitian half confirmed by QA witness `fcM2c_cfc_id`); selected per the empty High/Medium Active table by the center-out policy as the top natural candidate named in all three standing handoffs, the one-per-delivery indexing-and-pursuit decision recorded in the execution plan at the boundary. Deliverable: the magnetic heat propagator `e^{-tM}` of the delivered `magneticLaplacian` at 𝕜 = ℂ through Mathlib's `RCLike`-generic `cfc` (no second wrapper, per the bridge's Step-0 verdict), its eigenvector action at the complex eigenbasis, and one QA fixture on the flux pair `K₂` at antisymmetric phase π/2 checked against a hand computation — two independent routes. The substantive general lemma: `cfc_mulVec_of_mulVec_eq_smul` (calculus action at ANY eigenvector, by pure matrix algebra through unitary diagonalization — no completeness machinery). Zero new axioms planned. Spike first in `wip/magcfc_spike.lean`; the prior runs' uncommitted deliveries preserved untouched.
+
+**Next:** spike green → the FunctionalCalculus magnetic section + the new `MagneticCalculus_QA.lean` → full verification ladder → records.
+
 ## 2026-08-25T17:29:12Z — Heat-as-calculus-instance delivered: the spectral-mapping reconciliation plus the calculus-side semigroup; the consumer stub COMPLETE, both halves
 
 **Run:** `20260825T163517Z-run-1`  

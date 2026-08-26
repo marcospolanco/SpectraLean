@@ -6,7 +6,7 @@ conductance, Cheeger theory, interlacing, and event-driven dynamics.
 ## Status
 
 **Implemented and build-certified** (see the QA scoreboard):
-`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,SpectralCertificates,Tikhonov,Band,ClusterProjector,Cheeger,Mixing,Dynamics,Krylov,PolyFilter}`.
+`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,SpectralCertificates,Tikhonov,Band,ClusterProjector,Cheeger,Mixing,Dynamics,Krylov,PolyFilter,Multiway}`.
 
 ## Modules and Declarations
 
@@ -271,7 +271,12 @@ bound. All proved, zero axioms.
 | `lambda2_mul_dotProduct_le_quadForm` | the variational lower bound in multiplication form: `λ₂ • ‖x‖² ≤ xᵀLx` on `x ⊥ onesVec` (the center's `secondEval_le_rayleigh` multiplied out; zero vector handled so consumers never case-split) |
 | `eigvecOf_ortho_of_mulVec_eq_zero` | general-kernel orthogonality: eigenvectors at nonzero eigenvalues are ⊥ any kernel vector `w` (2026-08-25; the onesVec form's general-`w` parent) |
 | `secondEval_le_rayleigh_of_ker` | **general-kernel Rayleigh domination** (2026-08-25): `secondEval ≤ R(x)` for every nonzero `x ⊥ w` at a nonzero kernel vector `w` of a PSD symmetric matrix — the delivered `secondEval_le_rayleigh` is the `w = onesVec` instance; first consumer the irregular Cheeger upper bound |
+| `secondEval_variational_of_ker` | **general-kernel Courant–Fischer, sInf form** (2026-08-25/26): `secondEval = sInf {R(x) : x ≠ 0, x ⊥ w}` at a nonzero kernel vector `w` of a PSD symmetric matrix — the hard half is `secondEval_le_rayleigh_of_ker` reused verbatim; the new witness half produces an orthogonal candidate at both `0 < λ₂` and the `λ₂ = 0` double bottom; first consumer the irregular Cheeger hard direction `cheeger_lower_bound_normalized` (whose operator is killed by `√D·1`, not `1`) |
 | `vol_pos_of_pos_deg` | a nonempty set has positive volume under positive degrees (2026-08-25; the regularity-free replacement for `vol_pos_of_regular`) |
+| `evals_le_of_card_eigvalOf_le` | **the order-statistics↔counting bridge** (2026-08-26, the multiway engine): if at least `k+1` eigenbasis eigenvalues are ≤ `t`, then the `k`-th sorted entry is ≤ `t` — the shelf previously had only the two endpoint instances (`evals_first_le_eigvalOf`, `eigvalOf_le_evals_last`); proved by induction on the sorted list; first consumer the general-k subspace engine below |
+| `evals_le_of_linearIndependent` | **the general-k subspace Rayleigh–Ritz engine** (2026-08-26, the multiway engine): a `k`-dimensional linearly independent family whose every combination satisfies `quadForm ≤ t · ‖·‖²` certifies `evals ⟨k−1⟩ ≤ t` — no PSD, no kernel hypothesis; the `k−1` smallest-eigenvalue eigenvectors impose at most `k−1` constraints on the combination space, so a nonzero survivor exists (`LinearMap.ker_ne_bot_of_finrank_lt`), and its eigen-expansion contradicts the bound strictly; the delivered `k = 2` engines are its constraint-form specializations; first consumer `cheeger_upper_bound_multiway` |
+| `evals_sum_eq_trace` | the sorted spectrum sums to the trace (2026-08-26, the multiway QA spin-off — the trace-pinning technique at the sorted API) |
+| `exists_eigvalOf_eq_of_mulVec_eq_smul` | an exhibited eigenvector at `μ` lands some eigenbasis eigenvalue at `μ` (2026-08-26, the multiway QA spin-off — the eigenvalue-witness bridge QA uses to pin spectra without computing them) |
 | `abs_quadForm_le_of_ortho_onesVec` | **the operator bound on `1⊥` (Step 2 bridge):** `\|xᵀAx\| ≤ μ ‖x‖²` under the Laplacian-spectrum hypothesis `μ ≥ max \|d − λ₂(L)\| \|d − λ_max(L)\|` — the Rayleigh sandwich (lower bound + the generic top domination + the `d`-regular identity; load-bearing on all three) |
 | `quadForm_bilinear_sq_le_of_ortho_onesVec` | **the sharp bilinear bound:** `(x ⬝ᵥ (A *ᵥ y))² ≤ μ² ‖x‖² ‖y‖²` on `1⊥ × 1⊥`, by the scaling trick (`√Y•x ± √X•y` through polarization; `a² = Y, b² = X` attains the AM–GM equality, so the product form carries no slack) |
 | `dotProduct_centeredIndicator_self` | the variance identity `‖centeredIndicator S‖² = \|S\|(|V|−\|S\|)/\|V\|` — the geometric factor of the mixing bound |
@@ -467,6 +472,13 @@ Real definitions: `regularNormalizedLaplacian`, `cutTestVector`.
 | `cheeger_sweep` | theorem (2026-08-23, hard-direction Step 1c) | **the sweep lemma**: `φ²/2 ≤ R_{L_sym}(x)` for every nonzero `x ⊥ 1` — median split, per-part bounds summed through the Step-1a fused contraction, the norm split, and the `E'/(2d‖x‖²)` normalization (exact constant budget); QA on `K₂` (`1/2 ≤ 2`, against the pinned `λ₂`) and on `C₄` at `d = 2` (`φ²/2 ≤ 1/8 < 1 = R`) | [Chung](../sources/chung_spectral_graph.md) |
 | `sweep_level_extract` | theorem (2026-08-24, `proposals/sweep-cut-extraction.md`) | **the per-part sweep extraction**: for `y` with minority closed superlevel sets (exactly `coarea_core`'s hypothesis), some level set `S = {i : t ≤ y i²}` at a positive `t` attains `conductance S² ≤ E'(y)/(d·M)` — attainment over the finitely many positive values of `y²` (`Finset.exists_min_image`), the covering fact (every closed superlevel set equals one at an attained value, `Finset.min'`), a non-strict layer-cake integration cloned from `coarea_core`, and Component A; QA forces the extracted set to `{0}` on `C₄` through the level-membership iff, conductance `1` against bound `4/2 = 2` | [Chung](../sources/chung_spectral_graph.md) |
 | `cheeger_sweep_cut` | theorem (2026-08-24, `proposals/sweep-cut-extraction.md`) | **the sweep-cut theorem (median assembly)**: for any `x ⊥ 1`, `x ≠ 0`, a closed superlevel or sublevel set of `x` itself satisfies `conductance S² ≤ 2·R_{L_sym}(x)` — the same constant as `cheeger_sweep` with the witness an explicit member of the sweep family (the median parts supply `sweep_level_extract`'s hypothesis verbatim; the product test picks the part, degenerate single-part cases included; the fused contraction, norm split, and Step-1a normalization close). QA characterizes the family at `cycSweepX` (best swept cut `1` within bound `2`, not optimal) and `cycX2` (swept cut ties the global optimum `1/2`), and refutes the orthogonality-dropped form on the constant vector (empty family) | [Chung](../sources/chung_spectral_graph.md) |
+| `vol_le_vol_of_subset`, `vol_empty` | theorem (2026-08-25/26, `VolumeHardDirection`) | volume arithmetic: monotonicity along subset and the empty-set collapse — the volume replacements for the cardinality steps of the regular chain | [Chung](../sources/chung_spectral_graph.md) |
+| `exists_median_vol` | theorem (2026-08-25/26, `VolumeHardDirection`) | **the volume median**: a level `t` with `vol {y² > t} ≤ vol V/2` and `vol V/2 ≤ vol {y² ≥ t}` — the same maximizing-vertex/minimal-member Finset argument as `exists_median` with `vol` replacing `card`; pure Finset arithmetic, no sorting; QA pins and forces the returned volume median of P₃'s cut vector into its computed interval | [Chung](../sources/chung_spectral_graph.md) |
+| `boundary_ge_of_minority_vol` | theorem (2026-08-25/26, `VolumeHardDirection`) | minority conductance at volume strength: `cheegerConstant A · vol S ≤ boundary A S` for nonempty minority `S` (`vol S ≤ vol V/2`) — where the regular proof needed `vol_eq_of_regular` to collapse into cardinality, here `min (vol S) (vol Sᶜ) = vol S` is pure `vol_compl` arithmetic; QA fences the minority-dropped form at the full vertex set of `K₂` | [Chung](../sources/chung_spectral_graph.md) |
+| `sum_deg_mul_indicatorLE_eq_vol`, `sum_pairAbs_ge_vol` | theorem (2026-08-25/26, `VolumeHardDirection`) | the degree-weighted mass side of the layer cake: the level-set volume dictionary (`∑ deg · 1_{t ≤ g i} = vol {t ≤ g i}`) and the per-level co-area bound at volume strength | [Chung](../sources/chung_spectral_graph.md) |
+| `coarea_core_vol` | theorem (2026-08-25/26, `VolumeHardDirection`) | **the degree-weighted layer-cake core**: `φ · ∑ deg i · y i² ≤ ∑ i j, A i j \|y i² − y j²\|` for any `y` whose nonempty closed superlevel sets at positive levels are volume-minority — the `indicatorLE` integrability layer reused with the threshold integral, the boundary inequality at volume strength, the `t = 0` failure point absorbed measure-theoretically; QA pins the equality on `K₂` (both sides `2` at `![1,0]`) and fences the minority hypothesis | [Chung](../sources/chung_spectral_graph.md) |
+| `hardDirection_perPart_vol` | theorem (2026-08-25/26, `VolumeHardDirection`) | the per-part bound at volume strength `φ² · ∑ deg i · y i² ≤ E'(y)` — the regular family's Cauchy–Schwarz core (`core_sum_abs_sq_sub_sq`, *already stated degree-weighted*) and fused contraction (nonnegative weights only) consumed **verbatim**, no regularity bridge anywhere; QA pins the instance on `K₂` raw | [Chung](../sources/chung_spectral_graph.md) |
+| `minority_posPart_vol`, `minority_negPart_vol`, `median_parts_norm_vol` | theorem (2026-08-25/26, `VolumeHardDirection`) | the median-part level-set inclusions at volume strength (supplying `coarea_core_vol`'s minority hypothesis from the volume median's two counts) and the weighted norm split carrying the full degree-weighted norm | [Chung](../sources/chung_spectral_graph.md) |
 
 Statement-shape correction (2026-08-18): through 2026-08-17 both axioms
 stated the spectral side as `lambda2 (regularNormalizedLaplacian A d)`,
@@ -877,6 +889,92 @@ the kernel vector):
 | `rayleigh_normalizedLaplacian_degreeSqrt_cutTestVector` | the Rayleigh quotient `boundary · vol V / (vol S · vol Sᶜ)` — the *same* value the regular family computes |
 | `cheeger_upper_bound_normalized` | **the irregular easy direction**: `secondEval (normalizedLaplacian A) ≤ 2 * cheegerConstant A` for symmetric nonnegative positive-degree `A` with `2 ≤ card V` — no regularity, no connectivity; the regular `cheeger_upper_bound` recovered on the cone through `normalizedLaplacian_eq_regularNormalizedLaplacian` |
 
+The irregular Cheeger **lower** bound (2026-08-25/26, proved, zero
+axioms — the proposal's deferred hard half delivered, completing the
+volume-weighted pair; supports: the `VolumeHardDirection` section of
+`Cheeger.lean` — the volume median, the degree-weighted coarea core,
+the weighted norm split — and `secondEval_variational_of_ker` in
+`Spectral.lean`, the general-kernel sInf engine):
+
+| Declaration | Content |
+|-------------|---------|
+| `dotProduct_degreeSqrt_mulVec_mixed` | the general weighted inner product: `⬝(√D x, √D y) = ∑ deg i · x i · y i` (hypothesis-free at `0 ≤ deg`) |
+| `dotProduct_degreeSqrt_mulVec_onesVec` | the irregular variational constraint: `√D x ⊥ √D·1` iff `x` has degree-weighted zero sum — the constraint the irregular `sInf` set imposes on the un-stretched vector |
+| `cheeger_sweep_normalized` | **the irregular sweep lemma (hard direction at test-vector level)**: every nonzero degree-weighted zero-sum `f` has `φ²/2 ≤ R_{L_sym}(√D f)` — the volume median routes both median parts to their volume-minority sides, the per-part bounds sum through the regular family's already-degree-weighted fused contraction, the weighted norm split carries the full norm, and `rayleigh_normalizedLaplacian_degreeSqrt` normalizes |
+| `cheeger_lower_bound_normalized` | **the irregular hard direction (headline)**: `cheegerConstant A ^ 2 / 2 ≤ secondEval (normalizedLaplacian A)` on exactly the easy direction's hypotheses — `secondEval_variational_of_ker` at the true kernel vector `√D·1` reduces the spectral claim to the sweep lemma; the sInf set's nonemptiness witnessed by the easy direction's own cut test vector (one test object, both directions of the pair) |
+| `cheeger_sweep_cut_normalized` | **the irregular sweep-cut theorem (median assembly, 2026-08-26)**: every nonzero degree-weighted zero-sum `f` has a nonempty proper *closed superlevel or sublevel cut of `f` itself* with `conductance A S ^ 2 ≤ 2 · R_{L_sym}(√D f)` — `sweep_level_extract_vol` per part (the volume median feeding its minority hypothesis verbatim), the product test with degenerate single-part cases, the fused contraction verbatim, the weighted norm split, and the `2 · R = E'/∑ deg f²` normalization; exactly the hard direction's constraint shape (no regularity, no connectivity, no cardinality); QA forces the family on the pair's shared `P₃` cut test vector (`1 ≤ 8/3` at the pinned `R = 4/3`), the `K₂` recovery (`1 ≤ 4` at `R = 2`), and the zero-sum fence (`f = ![1,2]`: `1 ≤ 2/5` refuted for every swept candidate) |
+
+The connectivity transfer (2026-08-26, proved, zero axioms — the
+irregular family's own priced follow-on; supports: the electrical
+program's `laplacian_mulVec_eq_zero_iff_exists_const` in `Spectral.lean`
+and the general-kernel engine `secondEval_le_rayleigh_of_ker`):
+
+| Declaration | Content |
+| --- | --- |
+| `degreeSqrt_mul_normalizedLaplacian` | the left-multiplied congruence `√D · L_sym = L · D^{-1/2}` — the identity through which the normalized kernel is located |
+| `normalizedLaplacian_mulVec_degreeSqrt_of_laplacian_mulVec_eq_zero` | the kernel-cone lift: a combinatorial kernel vector stretches into the normalized kernel |
+| `normalizedLaplacian_mulVec_eq_zero_iff` | **the kernel characterization**: on connected input, `L_sym *ᵥ x = 0 ↔ x ∈ span(√D · onesVec)` — the stretched-constant line |
+| `secondEval_normalizedLaplacian_pos_of_connected` | **Fiedler's certificate, normalized form**: connected ⇒ `0 < λ₂ (L_sym)` (PSD + sorted + multiplicity pin + orthonormality, the mirror of `lambda2_pos_of_connected`) |
+| `secondEval_normalizedLaplacian_eq_zero_of_not_connected` | the disconnected converse: `λ₂ = 0` exactly, via the component indicator and Gram–Schmidt against `√D·1` through `secondEval_le_rayleigh_of_ker` |
+| `secondEval_normalizedLaplacian_pos_iff_connected` | **the packaged equivalence**: `0 < λ₂ (L_sym) ↔ connected` — algebraic connectivity *is* connectivity in the volume-weighted world |
+| `cheegerConstant_pos_of_connected` | **the Cheeger consumer corollary**: `0 < cheegerConstant A` on connected irregular graphs — `0 < λ₂ ≤ 2φ` through the delivered easy direction |
+
+The volume-weighted sweep extraction (2026-08-26, proved, zero axioms —
+the irregular family's own port of the regular 2026-08-24
+`sweep-cut-extraction` delivery; supports: the `VolumeHardDirection`
+layer consumed a second time and the fused contraction verbatim):
+
+| Declaration | Content |
+| --- | --- |
+| `sweep_level_extract_vol` | **the per-part sweep extraction, volume form** (`Cheeger.lean`'s `VolumeSweepExtraction` section): for `y` with volume-minority closed superlevel sets and `0 < ∑ deg y²`, a positive level `t` with `S = {i : t ≤ y²}` nonempty, proper, and `conductance S² ≤ E'(y)/∑ deg y²` — the attainment route at the `boundary / vol` ratio (the card denominator replaced by the level set's volume), the degree-weighted layer-cake cloned from `coarea_core_vol`'s proof, Component A already degree-weighted, and the minority-volume conversion by pure `vol_compl` arithmetic; QA forces the extracted set to `{0}` on `P₃` through the level-membership iff, conductance `1` against bound `2/1` |
+
+The irregular Fiedler instantiation (2026-08-26, proved, zero axioms — the
+family's algorithm-facing capstone, the standing handoff's named bounded
+candidate; supports: the delivered connectivity transfer `0 < λ₂`
+supplying the orthogonality hinge, the sweep family's constraint shape,
+the `degreeSqrt/degreeInvSqrt` cancellation, and
+`quadForm_eigvecOf_self`):
+
+| Declaration | Content |
+| --- | --- |
+| `fiedlerIndexNormalized`, `fiedlerIndexNormalized_eigvalOf` | the eigenbasis index of `L_sym` carrying `secondEval`, and the interface fact that the chosen index's eigenvalue *is* `λ₂ (L_sym)` (the `Fiedler.lean` pattern at the operator the irregular world uses) |
+| `fiedlerVectorNormalized`, `fiedlerVectorNormalized_eigen` | the normalized Fiedler vector (the unit eigenvector at `λ₂`) with the eigenvector equation `L_sym *ᵥ u = λ₂ • u` |
+| `fiedlerVectorNormalized_dot_self`, `fiedlerVectorNormalized_ne_zero`, `fiedlerVectorNormalized_quadForm` | unit norm (orthonormal eigenbasis), nonvanishing, and the energy identity `quadForm L_sym u = λ₂` |
+| `fiedlerVectorNormalized_rayleigh` | `R_{L_sym}(u) = λ₂` — the spectral side of the sweep bound, where `2 * R_{L_sym}(√D f)` closes to `2 * λ₂` |
+| `fiedlerVectorNormalized_ortho_degreeSqrt_onesVec` | **the orthogonality hinge**: under `0 < λ₂` (connectivity's exact entry point), `u ⊥ √D·1` by `eigvecOf_ortho_of_mulVec_eq_zero` at the true kernel vector |
+| `fiedlerSweepVector` | **the sweep vector**: the `D^{-1/2}` pullback of the Fiedler vector — the vector the spectral-partitioning algorithm actually sorts, the generalized eigenfunction of `(L, D)` at `λ₂` |
+| `fiedlerSweepVector_degreeSqrt_mulVec`, `fiedlerSweepVector_ne_zero` | the stretch cancellation `√D f = u` and nonvanishing (conjugation by invertible `1/√D`) |
+| `fiedlerSweepVector_sum_deg_eq_zero` | **the constraint conversion**: the sweep vector is degree-weighted zero-sum — the sweep family's own hypothesis, obtained from the eigen-hinge through the degree-weighted pairing identity rather than assumed |
+| `fiedler_sweep_cut_normalized` | **the headline**: on every connected symmetric nonnegative positive-degree graph with `2 ≤ card V`, an explicit nonempty proper closed superlevel/sublevel cut of the sweep vector itself with `conductance S² ≤ 2 λ₂ (L_sym)` — the regular family's own `fiedler_sweep_cut` constant `2λ₂/d` on the cone; QA pins `λ₂ (L_sym P₃) = 1` *exactly* (the new `≥ 1` side a `2 x₁²` sum-of-squares through the sInf engine), instantiates on both fixtures at independent pins, and fences the connectivity mechanism on the disconnected fixture (a kernel eigenvector provably violates the hinge at the pinned `λ₂ = 0`) |
+
+### `Scaffold.Mathlib.GraphTheory.Multiway` (the higher-order Cheeger easy direction)
+
+Delivered 2026-08-26 (`proposals/multiway-expansion.md`, COMPLETE —
+the every-family form plus its ρ_k partition-minimum packaging follow-on
+delivered the same day; proved, zero axioms — radar axis 4 raised to
+5.0 at the pre-recorded trigger when the packaging closed the easy
+half's classical statement form; supports: `laplacian_quadForm`,
+the eigenbasis expansion/Parseval layer, the irregular family's
+congruence bridge `quadForm_laplacian_eq_quadForm_normalizedLaplacian`
++ `dotProduct_degreeSqrt_mulVec`, `vol_pos_of_pos_deg`, and the two
+new k-general engine pieces in `Spectral.lean` above):
+
+| Declaration | Content |
+| --- | --- |
+| `partIndicator`, `partIndicator_of_mem`, `partIndicator_of_not_mem` | the plain `{0,1}`-valued indicator of a vertex set and its entry lemmas — the *uncentered* part indicators are the multiway test family (the Step-0 verdict: no centering anywhere; the k = 2 family's constraint is replaced by the subspace engine's dimension count) |
+| `quadForm_laplacian_partIndicator` | **the per-part energy identity**: `quadForm (laplacian A) (partIndicator S) = boundary A S` — the k = 2 family's `cutTestVector` energy identity at the indicator level, for arbitrary part counts; load-bearing on `laplacian_quadForm` |
+| `multiwayCombination`, `multiwayCombination_of_mem`, `multiwayCombination_eq_zero` | the part combination `∑ᵢ cᵢ · 1_{Sᵢ}` — the multiway test family's general member — with the disjoint-family reading lemmas (a member of part `i₀` reads exactly `c i₀`; off all parts, `0`) |
+| `dotProduct_degreeSqrt_mulVec_multiwayCombination` | the weighted-norm identity `‖√D · ∑ cᵢ1_{Sᵢ}‖² = ∑ cᵢ² · vol(Sᵢ)` — disjointness makes the weighted sum read each part's volume exactly once |
+| `laplacian_quadForm_multiwayCombination_le` | **the cross-part absorption lemma (the theorem's engine)**: `xᵀLx ≤ 2 · ∑ cᵢ² · boundary(Sᵢ)` for every combination — a linear combination's re-introduced cross-part energy is *absorbed*, not eliminated, each crossing pair bounded pointwise by `(a−b)² ≤ 2a² + 2b²`; the headline's constant 2 is exactly this absorption constant; QA pins it at *equality* on the K₂ and C₄ fixtures |
+| `cheeger_upper_bound_multiway` | **the multiway Cheeger easy direction (headline)**: `evals (L_sym) ⟨k−1⟩ ≤ 2 · maxᵢ boundary(Sᵢ)/vol(Sᵢ)` for every family of nonempty pairwise-disjoint vertex sets on every symmetric nonnegative positive-degree graph (`1 ≤ k ≤ card V`) — the *every-family form*: any concrete disjoint family certifies, no partition-space minimum is taken (the ρ_k packaging is a priced follow-on); the delivered irregular pair is the `k = 2` instance; route provenance Lee–Gharan–Trevisan (STOC 2012 / JAMS 2014, the λ_k ≤ 2ρ_k half) — provenance only, the statement is proved |
+| `cheeger_upper_bound_multiway_conductance` | the conductance form at `2 ≤ k` (every complement nonempty, `boundary/vol ≤ boundary/min vol volᶜ = conductance` termwise) — the k-way generalization of `cheeger_upper_bound_normalized`'s conductance shape |
+| `IsMultiwayPartition` | the k-way partition predicate (nonempty, pairwise disjoint, covering) — the structure the every-family form deliberately did not need; the ρ_k minimum ranges over it (2026-08-26, the packaging follow-on) |
+| `maxPartConductance`, `maxPartConductance_const`, `finset_univ_sup'_eq_sSup_range` | the maximum part conductance as `sSup` of range (the `k = 0` junk documented), the constant-family evaluation, and the join to the delivered theorems' `sup'` statement shapes |
+| `multiwayExpansion`, `multiwayExpansion_le` | **ρ_k, the multiway expansion constant**: the `sInf` over k-way partitions of the maximum part conductance (the `k > card V` `sInf ∅ = 0` junk documented, hypothesis-gated), with the `csInf` bound at finiteness-supplied `BddBelow` — the classical object of the higher-order Cheeger easy direction |
+| `exists_isMultiwayPartition_eq_multiwayExpansion` | **attainment over the finite partition space**: the ρ_k infimum is realized by an actual k-way partition (`Set.Nonempty.csInf_mem` at the value set's finiteness — a subset of the range over the Fintype of families); the packaging's only new content |
+| `cheeger_upper_bound_multiway_rhoK` | **the ρ_k form of the easy direction**: `evals (L_sym) ⟨k−1⟩ ≤ 2 · multiwayExpansion A k` at `2 ≤ k ≤ card V` with a partition — the classical Lee–Gharan–Trevisan statement form, the every-family theorem consumed at the attained minimizer, no new engine; QA pins `ρ₂(C₄) = 1/2` exact (forced by the theorem joined to the independently pinned `λ₂ = 1`, the minimum beating the diagonal partition's `1`) and the empty-set junk fence at `k > card V` |
+| `exists_isMultiwayPartition_of_le_card` | the existence supplier: k-way partitions exist whenever `1 ≤ k ≤ card V` (an injection's singletons with the complement absorbed into the last part) — discharges the `hex` hypothesis in the common case |
+
 ### `Scaffold.Mathlib.GraphTheory.Heat` (the heat semigroup)
 
 Opened 2026-08-23 as Phase B of
@@ -1073,6 +1171,11 @@ matrix" notions (`spectralProjector`/`bandProjector`, PolyFilter,
 | `heatKernel_eq_spectralCalc_exp` | **the second consumer recovered** (2026-08-25, the Heat half, completing the consumer stub): `heatKernel A t = spectralCalc (laplacian A) hL (fun x => Real.exp (-(t * x)))` — a genuine reconciliation of two independent proof stacks (`Heat.lean`'s entrywise exponential-series engine vs Mathlib's `cfc`), in effect the spectral mapping theorem for `exp` at real-symmetric matrices |
 | `spectralCalc_exp_mul` | the calculus semigroup at the exponential family: `f_s(M) * f_t(M) = f_{s+t}(M)` via `cfc_mul` + `cfc_congr` promoting pointwise `Real.exp_add` from the spectrum — the calculus-algebra mirror of `Matrix.exp_add_of_commute`, eigenbasis-free |
 | `heatKernel_mul_heatKernel_of_spectralCalc` | the semigroup law through the calculus: composing the equality theorem with `spectralCalc_exp_mul`, a second proof technology for `Heat.lean`'s hypothesis-free `heatKernel_mul_heatKernel` (this route needs `A.IsSymm`; the original remains primary) |
+| `add_smul_one_mul_spectralCalc_tikhonovShrinkage_of_forall_add_ne_zero` | **the general-symmetric normal equation** (2026-08-25, the resolvent-identity delivery's priced follow-on): merely symmetric `M` under spectrum-avoidance `x + π ≠ 0` gives `(M + π•1) * f(M) = π • 1` — no PSD, no `0 < π`; the delivered PSD statement is derived from this parent, shape unchanged |
+| `spectralCalc_tikhonovShrinkage_eq_smul_inv_of_forall_add_ne_zero` | the general-symmetric **resolvent identity, calculus route**: `f(M) = π • (M + π•1)⁻¹` under avoidance alone, through Mathlib's `cfc_inv` + `Matrix.nonsing_inv_eq_ring_inverse` at the additive layer `cfc (x+π) = M + π•1` — no matrix inverse, determinant, or cancellation lemma anywhere |
+| `spectralCalc_tikhonovShrinkage_eq_smul_inv` | **the headline, matrix-algebra route**: under PSD + `0 < π`, `f(L) = π • (L + π•1)⁻¹` — a three-layer load-bearing join (the normal equation + the shelf resolvent program's spectral-gap-free `isUnit_det_add_smul_one_of_quadForm_nonneg`, its first calculus consumer, + `laplacian_psd`, closed by `nonsing_inv_mul_cancel_left`) |
+| `spectralCalc_tikhonovShrinkage_eq_smul_inv'` | the same statement by the calculus route (the general identity instantiated): two proof technologies, one statement — the divergence-falsifier pattern |
+| `tikhonovMinimizer_eq_smul_inv_mulVec` | the consumer corollary: `x* = π • ((L + π•1)⁻¹ *ᵥ y)` — the textbook Tikhonov shifted-inverse solve as a shelf theorem |
 
 The complex half needs no second wrapper (Mathlib's `cfc` is stated
 for any `RCLike 𝕜`; complex-Hermitian consumers — the magnetic
@@ -1088,6 +1191,18 @@ pins the reconciliation numerically on the `Tikhonov_QA` K₂ fixture
 hand-solved `![2/3, 1/3]`), exhibits the normal equation by two
 independent routes, and fences the `0 < π` hypothesis with the
 `π = -2` junk-division refutation.
+
+The resolvent-identity delivery (2026-08-25, the consumer stub's two
+priced follow-ons — the family closed): the Tikhonov filter IS `π`
+times the shifted inverse, and the shelf's Aug-19 resolvent program
+(`Analysis/OperatorTheory/Resolvent.lean`) gains its first
+functional-calculus consumer — its spectral-gap-free invertibility
+supplier `isUnit_det_add_smul_one_of_quadForm_nonneg` carries the
+headline's determinant hypothesis. QA Section G pins both routes to
+one concrete matrix (joined to Section E's calculus instance and the
+hand-solved Gaussian), and fences the `π = -2` degeneration with the
+avoidance failure proved spectral — both junk surfaces (shrinkage
+division, singular inverse) colliding in one refuted entry.
 
 The second consumer reconciliation (later the same day, the Heat
 half — the stub complete): `Heat.lean` likewise stays exactly as

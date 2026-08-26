@@ -122,7 +122,7 @@ sparsest-cut statement shapes; cut/measure duality interfaces used by
 local algorithms. Each variant must name the algorithm consumer that
 needs it before admission.
 
-*Update (2026-08-25):* **the irregular (volume-weighted) Cheeger *upper*
+*Update (2026-08-25/26):* **the irregular (volume-weighted) Cheeger *upper*
 bound delivered** (`proposals/irregular-cheeger-variational-transfer.md`
 Steps 0+1, found committed-but-unindexed and pursued per priority item
 0; zero new axioms): `cheeger_upper_bound_normalized` —
@@ -135,10 +135,117 @@ by a volume identity needing no regularity), the new general-kernel
 congruence engine's first theorem consumers; QA 2067 → 2152 on the
 genuinely-irregular `P₃` fixture with an independent eigenpair spectral
 route and both hypothesis fences. The Step-0 verdict: definitions were
-already volume-general, only the inequality was new. The irregular
-*hard* direction (`φ²/2 ≤ λ₂` in the volume-weighted measure — the
-volume-weighted coarea/median re-derivation) is the item's priced
-follow-on program.
+already volume-general, only the inequality was new.
+
+*Update (2026-08-25/26, the priced follow-on program delivered):* **the
+irregular Cheeger *hard* direction delivered — the full volume-weighted
+pair complete** (the same proposal's deferred half, opened by run
+`20260825T221207Z-run-1`, verified and recorded by continuation
+`20260826T010711Z-run-1`; zero new axioms):
+`cheeger_lower_bound_normalized` —
+`cheegerConstant A ^ 2 / 2 ≤ secondEval (normalizedLaplacian A)` on
+exactly the easy direction's hypotheses — through the `VolumeHardDirection`
+machinery in `Cheeger.lean` (the volume median, the degree-weighted
+coarea core, the weighted norm split; the regular family's
+Cauchy–Schwarz core and fused contraction already degree-weighted and
+consumed verbatim), the new general-kernel sInf engine
+`secondEval_variational_of_ker` in `Spectral.lean`, and the sweep
+lemma + headline in `VariationalTransfer.lean`. QA 2249 → 2280 with the
+P₃ headline joined to the easy delivery's independently pinned spectral
+bracket, the K₂ regular recovery, and the minority/nonnegativity fences.
+**Update (2026-08-26, follow-on):** the connectivity transfer
+delivered (zero new axioms): the kernel characterization
+`normalizedLaplacian_mulVec_eq_zero_iff` (`ker L_sym = span √D·1` on
+connected input), the Fiedler mirror
+`secondEval_normalizedLaplacian_pos_of_connected`, the disconnected
+converse, the packaged equivalence
+`secondEval_normalizedLaplacian_pos_iff_connected`
+(`0 < λ₂(L_sym) ↔ connected`), and the consumer corollary
+`cheegerConstant_pos_of_connected` (`0 < φ` on connected irregular
+graphs, joined to the delivered easy direction) — all in
+`GraphTheory.VariationalTransfer`'s new connectivity-transfer section;
+QA +50 in `IrregularCheeger_QA` (the P₃/K₂ positive joins to existing
+independent pins, the disconnected two-edge negative witness with
+`λ₂ = 0` by two independent routes, and the `hconn`/`hnn` fences in
+proved form — the signed fixture is *connected*, isolating `hnn`
+exactly). **Update (2026-08-26, follow-on):** the volume-weighted
+*sweep-cut extraction* delivered (zero new axioms):
+`sweep_level_extract_vol` (the per-part attainment route at the
+`boundary / vol` ratio in `Cheeger.lean`'s new `VolumeSweepExtraction`
+section — the explicit witness level set with
+`conductance S² ≤ E'(y)/∑ deg y²`, the degree-weighted layer-cake a
+clone of `coarea_core_vol`'s proof) and `cheeger_sweep_cut_normalized`
+(the median assembly in `VariationalTransfer.lean`: every nonzero
+degree-weighted zero-sum `f` carries a swept nonempty proper cut at
+`conductance² ≤ 2 · R_{L_sym}(√D f)` — the irregular pair now returns
+*the cut the spectral-partitioning sweep returns*, with no regularity,
+connectivity, or cardinality hypothesis); QA +10 (2330 → 2340) with the
+witness forced on irregular input, the shared cut test vector consumed
+by both directions *and* the sweep, and the zero-sum fence in proved
+form. *Update (2026-08-26, follow-on):* the **irregular Fiedler instantiation** delivered (zero new
+axioms): `fiedler_sweep_cut_normalized` in `VariationalTransfer.lean`'s
+new Fiedler-instantiation section — the normalized Fiedler interface
+(`fiedlerIndexNormalized`/`fiedlerVectorNormalized`) plus the
+`D^{-1/2}` pullback `fiedlerSweepVector`, composed with the delivered
+sweep extraction so that on every connected symmetric nonnegative
+positive-degree graph an explicit closed superlevel/sublevel cut of the
+sweep vector itself satisfies `conductance S² ≤ 2 λ₂ (L_sym)` — the
+family's algorithm-facing capstone at exactly the regular family's
+`2λ₂/d` cone constant; the degree-weighted zero-sum constraint obtained
+from the eigen-orthogonality hinge (`0 < λ₂` by the connectivity
+transfer — connectivity's exact entry point). QA +9 (2340 → 2349) with
+the exact pin `λ₂ (L_sym P₃) = 1` (new `≥ 1` sum-of-squares side), both
+fixture instances at independent pins, the pullback hinge raw at the
+concrete eigenpair, and the connectivity mechanism fenced on the
+disconnected fixture. *Update (2026-08-26, later):* **the multiway easy
+direction delivered** (`proposals/multiway-expansion.md`, COMPLETE, zero
+new axioms; QA 2349 → 2422, `MultiwayCheeger_QA` a new file at 73 by
+the generator metric). The Step-0 verdict dissolved both previously
+priced obstructions at the every-family statement form: no
+partition-space attainment is needed (any disjoint family certifies),
+and cross-part energy is *absorbed* pointwise by `(a−b)² ≤ 2a² + 2b²` at
+constant exactly 2 — not eliminated (the centering concern was an
+artifact of reusing the k = 2 kernel-based engine). Delivered: the
+order-statistics↔counting bridge `evals_le_of_card_eigvalOf_le` and the
+general-k subspace Rayleigh–Ritz engine `evals_le_of_linearIndependent`
+(both k-general, in `Spectral.lean`, with the QA spin-offs
+`evals_sum_eq_trace` and `exists_eigvalOf_eq_of_mulVec_eq_smul`), plus
+the application layer in the new `Multiway.lean` — the indicator energy
+identity `quadForm_laplacian_partIndicator`, the absorption lemma
+`laplacian_quadForm_multiwayCombination_le`, and the headlines
+`cheeger_upper_bound_multiway` / `cheeger_upper_bound_multiway_conductance`:
+`evals (L_sym) ⟨k−1⟩ ≤ 2 · maxᵢ boundary(Sᵢ)/vol(Sᵢ)` (resp. at
+conductance) for every disjoint nonempty k-family on every symmetric
+nonnegative positive-degree graph. QA at all six obligations: the tight
+equalities at `k = n` on K₂ (`2 = 2·1`, both forms) and the
+all-rational C₄ (`λ₄ = 2 = 2·1`, the alternating-vector + trace-`4`
+pin), the P₃ non-covering family at `k = 2` (certificates from a
+family that provably does not cover), the P₃ `k = 3` singleton
+partition with `λ₃ = 2` pinned by trace arithmetic + the raw
+eigenvector `![1, −√2, 1]`, the `k = 1` zero-constraint edge, and the
+C₄ cyclic-pair **overlap fence** — every other hypothesis verified,
+disjointness refuted, the dropped conclusion refuted at `2 > 1`.
+**The item's remaining residue:** the multiway *hard* direction (λ_k
+from below, higher-order Cheeger from above) — multi-run, gated on a
+named consumer. *Update (2026-08-26, latest):* **the ρ_k
+partition-minimum packaging delivered** (the multiway delivery's own
+top priced follow-on, pure hard crust, zero new axioms; QA 2422 →
+2444): `IsMultiwayPartition` + `maxPartConductance` +
+`multiwayExpansion A k := sInf` over the k-way partitions, attainment
+over the finite partition space (`Set.Nonempty.csInf_mem` at the value
+set's finiteness — the every-family form made this a pure attainment
+task, no new engine), the `k ≤ card V` existence supplier, and the
+headline `cheeger_upper_bound_multiway_rhoK` — the classical
+`λ_k ≤ 2ρ_k` statement form, the every-family theorem consumed at the
+attained minimizer. QA made attainment falsifiable: the star instance
+`ρ₂(C₄) = 1/2` *exact* (the adjacent-pair witness above, the headline
+joined to the independently pinned `λ₂ (L_sym C₄) = 1` below — the `≤`
+side by the counting bridge at two raw eigenvectors, the `≥` side by
+the `(x₀+x₂)²` sum-of-squares through `secondEval_variational_of_ker`),
+the minimum provably beating the diagonal partition's `1`, and the
+empty-set junk fence `ρ₃(K₂) = sInf ∅ = 0` (no 3-partition of two
+vertices exists) proving partition-existence load-bearing. Radar axis 4
+raised 4.5 → 5.0 at the pre-recorded trigger.
 
 *Update (2026-08-25, later the same day):* **the Hoffman-type
 independence bound delivered** (`proposals/expander-independence-number-bound.md`

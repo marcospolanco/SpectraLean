@@ -10,9 +10,17 @@ and the spectral gap of its normalized Laplacian.
 For `d`-regular graphs the symmetric normalized Laplacian
 `L_sym = I - D^{-1/2} A D^{-1/2}` reduces to `1 - d⁻¹ • A`, so the
 inequalities can be stated with Scaffold's matrix-first API without a
-matrix square root. The general irregular statement is future work: it
-requires positive-definite degree matrices and a matrix square root
-(`Matrix.posSqrt` is not available in the pinned Mathlib).
+matrix square root. The irregular statements are now delivered too:
+the easy direction and the hard direction both hold on arbitrary
+symmetric nonnegative positive-degree graphs
+(`GraphTheory.VariationalTransfer.cheeger_upper_bound_normalized` /
+`.cheeger_lower_bound_normalized`, 2026-08-25), with the hard
+direction's volume-weighted machinery — the volume median, the
+degree-weighted co-area core, the per-part bound, the weighted norm
+split — in the `VolumeHardDirection` section below, built on the
+diagonal-only square roots of `GraphTheory.Normalized`; the family's
+sweep extraction (the explicit witness level set) in the
+`VolumeSweepExtraction` section (2026-08-26).
 
 Source:
 - Chung, F. R. K., "Spectral Graph Theory", CBMS Regional Conference
@@ -1548,6 +1556,836 @@ theorem cheeger_lower_bound (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
   exact cheeger_sweep A hA hnonneg d hd hdpos hx0 horth
 
 end Step1c
+
+/-!
+### The volume-weighted (irregular) hard direction machinery (proved)
+
+The machinery of the irregular Cheeger *hard* direction
+(`proposals/irregular-cheeger-variational-transfer.md`'s priced deferred
+half, delivered 2026-08-25/26; the headline
+`GraphTheory.VariationalTransfer.cheeger_lower_bound_normalized` lives
+beside its easy-direction sibling). On arbitrary symmetric nonnegative
+*positive-degree* graphs — no `d`-regularity, no connectivity — the
+regular section's chain re-derived in the volume-weighted measure.
+
+The Step-0 survey's decisive findings, recorded before this Lean was
+written: (1) Component A (`core_sum_abs_sq_sub_sq`) is *already stated
+degree-weighted* and the fused contraction
+(`sum_edgeWeight_sq_posPart_add_sq_negPart_le`) needs only nonnegative
+weights, so both are consumed by the irregular chain verbatim; (2) at
+volume strength the minority-conductance step gets *cleaner* —
+`min (vol S) (vol Sᶜ) = vol S` is pure volume arithmetic
+(`vol_compl`), where the regular `boundary_ge_of_minority` needed
+`vol_eq_of_regular` to collapse into cardinality; (3) the genuinely new
+objects are the volume median, the degree-weighted layer-cake mass
+side, and the weighted norm split below.
+
+QA: the whole family is pinned on the `P₃`/`K₂` fixtures of
+`Scaffold/QA/SpectralGraph/IrregularCheeger_QA.lean`'s hard-direction
+section (the coarea equality pin, the median and norm-split instances,
+the per-part pin, and the minority-hypothesis fence).
+-/
+
+section VolumeHardDirection
+
+open MeasureTheory intervalIntegral
+
+/-- Volume is monotone for nonnegative weights (needs the weights:
+volume is a sum of degrees, and degrees are row sums). -/
+theorem vol_le_vol_of_subset (A : WAdj (V := V)) (hnn : ∀ i j, 0 ≤ A i j)
+    {S T : Finset V} (h : S ⊆ T) : vol A S ≤ vol A T := by
+  have hsd := Finset.sum_sdiff (f := deg A) h
+  have hdeg : ∀ i ∈ T \ S, (0 : ℝ) ≤ deg A i :=
+    fun i _ => Finset.sum_nonneg fun j _ => hnn i j
+  have hnn' : 0 ≤ ∑ i in T \ S, deg A i := Finset.sum_nonneg hdeg
+  show ∑ i in S, deg A i ≤ ∑ i in T, deg A i
+  linarith
+
+omit [DecidableEq V] in
+theorem vol_empty (A : WAdj (V := V)) : vol A (∅ : Finset V) = (0 : ℝ) :=
+  Finset.sum_empty
+
+omit [DecidableEq V] in
+/-- **A volume-weighted median exists on every finite weighted value
+multiset**: there is `m` with at most half the total volume strictly
+above and at most half strictly below. The regular `exists_median`'s
+maximizing-vertex / minimal-member argument with `vol` in place of
+`card`: `T := {i : 2·vol{j : f i < f j} ≤ vol V}` is nonempty at a
+maximizing vertex (its strict upper set is empty), and a `T`-member of
+minimal value works — otherwise the (volume-)majority strict lower
+level set's maximizer would itself lie in `T` below the minimum. Pure
+Finset arithmetic; no sorting.
+
+QA: `SpectralGraphTheory.QA.ichv_median_pin_QA` forces the returned
+volume median of a three-value irregular vector into its computed
+interval. -/
+theorem exists_median_vol (A : WAdj (V := V)) (hnn : ∀ i j, 0 ≤ A i j)
+    (f : V → ℝ) :
+    ∃ m : ℝ,
+      2 * vol A (Finset.univ.filter (fun i => m < f i))
+        ≤ vol A (Finset.univ : Finset V)
+        ∧ 2 * vol A (Finset.univ.filter (fun i => f i < m))
+          ≤ vol A (Finset.univ : Finset V) := by
+  classical
+  have hVnn : 0 ≤ vol A (Finset.univ : Finset V) := vol_nonneg A hnn _
+  rcases isEmpty_or_nonempty V with hEmpty | hNE
+  · have hcard0 : Fintype.card V = 0 := Fintype.card_eq_zero
+    have huniv : (Finset.univ : Finset V) = ∅ := by
+      have h : (Finset.univ : Finset V).card = 0 := by
+        rw [Finset.card_univ, hcard0]
+      exact Finset.card_eq_zero.1 h
+    refine ⟨0, ?_, ?_⟩
+    · rw [huniv, Finset.filter_empty, vol_empty]; linarith
+    · rw [huniv, Finset.filter_empty, vol_empty]; linarith
+  obtain ⟨imax0⟩ := hNE
+  obtain ⟨imax, -, himax⟩ :=
+    Finset.exists_max_image (Finset.univ : Finset V) f
+      ⟨imax0, Finset.mem_univ imax0⟩
+  have hempty : (Finset.univ.filter (fun j => f imax < f j)) = ∅ :=
+    Finset.filter_eq_empty_iff.2 fun j hj => not_lt.2 (himax j hj)
+  have hcardmax : 2 * vol A (Finset.univ.filter (fun j => f imax < f j))
+      ≤ vol A (Finset.univ : Finset V) := by
+    rw [hempty, vol_empty]; linarith
+  obtain ⟨i₀, hi₀, hi₀min⟩ := Finset.exists_min_image
+    (Finset.univ.filter (fun i =>
+      2 * vol A (Finset.univ.filter (fun j => f i < f j))
+        ≤ vol A (Finset.univ : Finset V)))
+    f ⟨imax, Finset.mem_filter.2 ⟨Finset.mem_univ imax, hcardmax⟩⟩
+  have hi₀cond := (Finset.mem_filter.1 hi₀).2
+  refine ⟨f i₀, hi₀cond, ?_⟩
+  by_contra hcon
+  push_neg at hcon
+  have hSne : (Finset.univ.filter (fun i => f i < f i₀)).Nonempty := by
+    rcases Finset.eq_empty_or_nonempty
+      (Finset.univ.filter (fun i => f i < f i₀)) with hE | hNE'
+    · rw [hE, vol_empty] at hcon; linarith
+    · exact hNE'
+  obtain ⟨i₁, hi₁S, hi₁max⟩ := Finset.exists_max_image
+    (Finset.univ.filter (fun i => f i < f i₀)) f hSne
+  have hsub : (Finset.univ.filter (fun j => f i₁ < f j))
+      ⊆ (Finset.univ.filter (fun i => f i < f i₀))ᶜ := by
+    intro j hj
+    rw [Finset.mem_compl]
+    by_contra hjlow
+    have hup := (Finset.mem_filter.1 hj).2
+    have hlow := (Finset.mem_filter.1 hjlow).2
+    have hmax := hi₁max j hjlow
+    linarith
+  have hcardle : 2 * vol A (Finset.univ.filter (fun j => f i₁ < f j))
+      ≤ vol A (Finset.univ : Finset V) := by
+    have h1 : vol A (Finset.univ.filter (fun j => f i₁ < f j))
+        ≤ vol A ((Finset.univ.filter (fun i => f i < f i₀))ᶜ) :=
+      vol_le_vol_of_subset A hnn hsub
+    have h2 := vol_compl A (Finset.univ.filter (fun i => f i < f i₀))
+    have h3 : vol A (Finset.univ.filter (fun i => f i < f i₀))
+        ≤ vol A (Finset.univ : Finset V) :=
+      vol_le_vol_of_subset A hnn (Finset.subset_univ _)
+    linarith
+  have hi₁T : i₁ ∈ Finset.univ.filter (fun i =>
+      2 * vol A (Finset.univ.filter (fun j => f i < f j))
+        ≤ vol A (Finset.univ : Finset V)) :=
+    Finset.mem_filter.2 ⟨Finset.mem_univ i₁, hcardle⟩
+  have hmin := hi₀min i₁ hi₁T
+  have hlow := (Finset.mem_filter.1 hi₁S).2
+  linarith
+
+/-- **Minority conductance, volume form.** On a positive-degree graph
+with nonnegative weights, a nonempty set occupying at most half the
+total volume has boundary at least `φ * vol S`. Where the regular
+`boundary_ge_of_minority` needed `vol_eq_of_regular` to collapse into
+cardinality, here `min (vol S) (vol Sᶜ) = vol S` is pure volume
+arithmetic (`vol_compl`); the complement's nonemptiness is the volume
+positivity of a nonempty set at positive degrees.
+
+QA: the minority-hypothesis fence refuting the hypothesis-free form on
+the full vertex set of `K₂` lives at
+`SpectralGraphTheory.QA.ichv_boundary_minority_fence_QA`. -/
+theorem boundary_ge_of_minority_vol (A : WAdj (V := V))
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i) {S : Finset V}
+    (hS : S.Nonempty) (hv : 2 * vol A S ≤ vol A (Finset.univ : Finset V)) :
+    cheegerConstant A * vol A S ≤ boundary A S := by
+  have hvolS : 0 < vol A S := vol_pos_of_pos_deg A hd hS
+  have hVC := vol_compl A S
+  have hScne : Sᶜ.Nonempty := by
+    rcases Finset.eq_empty_or_nonempty Sᶜ with hE | hNE
+    · exfalso
+      have hle : vol A S ≤ vol A Sᶜ := by linarith
+      rw [hE, vol_empty] at hle
+      linarith
+    · exact hNE
+  have hφ := conductance_ge_cheegerConstant A hnn S hS hScne
+  have hmin : min (vol A S) (vol A Sᶜ) = vol A S := by
+    refine min_eq_left ?_
+    linarith
+  have hcond : conductance A S = boundary A S / min (vol A S) (vol A Sᶜ) := rfl
+  rw [hcond, hmin] at hφ
+  have hkey := (le_div_iff₀ hvolS).1 hφ
+  linarith
+
+omit [DecidableEq V] in
+/-- The degree-weighted layer-cake level mass: the weighted sum of the
+level indicators is the level set's volume. -/
+theorem sum_deg_mul_indicatorLE_eq_vol (A : WAdj (V := V)) (g : V → ℝ)
+    (t : ℝ) :
+    ∑ i, deg A i * indicatorLE (g i) t
+      = vol A (Finset.univ.filter (fun i => t ≤ g i)) := by
+  have h1 : ∀ i : V, deg A i * indicatorLE (g i) t
+      = if t ≤ g i then deg A i else 0 := by
+    intro i
+    rcases le_or_lt t (g i) with h | h
+    · rw [indicatorLE_of_le h, if_pos h, mul_one]
+    · rw [indicatorLE_of_lt h, if_neg (by linarith), mul_zero]
+  rw [Finset.sum_congr rfl fun i _ => h1 i]
+  show (∑ i : V, if t ≤ g i then deg A i else 0)
+      = ∑ i in Finset.filter (fun i => t ≤ g i) Finset.univ, deg A i
+  rw [Finset.sum_filter]
+
+/-- **The per-level co-area bound, volume form.** At every positive
+level, the minority-volume conductance bound controls the weighted
+total variation of the level indicators. -/
+theorem sum_pairAbs_ge_vol (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (y : V → ℝ) (hy : ∀ t : ℝ, 0 < t →
+      2 * vol A (Finset.univ.filter (fun i => t ≤ y i ^ 2))
+        ≤ vol A (Finset.univ : Finset V))
+    (t : ℝ) (ht : 0 < t) :
+    2 * (cheegerConstant A
+        * vol A (Finset.univ.filter (fun i => t ≤ y i ^ 2)))
+      ≤ ∑ i, ∑ j, A i j * |indicatorLE (y i ^ 2) t
+        - indicatorLE (y j ^ 2) t| := by
+  have hSm : ∀ i, i ∈ Finset.univ.filter (fun i => t ≤ y i ^ 2) ↔ t ≤ y i ^ 2 := by
+    intro i
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+  rw [sum_pairAbs_eq_two_boundary A hA y t _ hSm]
+  rcases (Finset.univ.filter (fun i => t ≤ y i ^ 2)).eq_empty_or_nonempty
+    with hE | hNE
+  · rw [hE, vol_empty]
+    have hb0 : boundary A (∅ : Finset V) = 0 := by simp [boundary]
+    rw [hb0]
+    simp
+  · have hbd := boundary_ge_of_minority_vol A hnn hd hNE (hy t ht)
+    linarith
+
+/-- **The co-area core of the irregular Cheeger hard direction**: for
+any `y : V → ℝ` whose nonempty closed superlevel sets `{i : t ≤ y i ^ 2}`
+(`0 < t`) are all volume-minority-side,
+
+`2 * (φ * ∑ i, deg A i * y i ^ 2) ≤ ∑ i j, A i j * |y i ^ 2 - y j ^ 2|`.
+
+The degree-weighted layer cake: the mass side integrates
+`∑ deg · 1_{y² ≥ t}` (the level sets' volumes) instead of the plain
+indicator count, so `R` bounds the *unweighted* `y i ^ 2` while the
+mass accumulates degree-weighted. Route otherwise identical to
+`coarea_core`: both sides are layer-cake integrals over `[0, R]`,
+interchange by `intervalIntegral.integral_finset_sum`, per-level
+inequality by `sum_pairAbs_ge_vol`, and the `t = 0` failure point
+absorbed measure-theoretically.
+
+QA: the equality pin on `K₂` (both sides `2` at `y = ![1, 0]`) and the
+minority-hypothesis refutation live at `SpectralGraphTheory.QA.ichv_coarea_edge_eq_QA`
+and `SpectralGraphTheory.QA.ichv_coarea_minority_fence_QA`. -/
+theorem coarea_core_vol (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (y : V → ℝ) (hy : ∀ t : ℝ, 0 < t →
+      2 * vol A (Finset.univ.filter (fun i => t ≤ y i ^ 2))
+        ≤ vol A (Finset.univ : Finset V)) :
+    2 * (cheegerConstant A * ∑ i, deg A i * y i ^ 2)
+      ≤ ∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2| := by
+  classical
+  have hy2 : ∀ i, 0 ≤ y i ^ 2 := fun i => sq_nonneg _
+  obtain ⟨R, hRdef⟩ : ∃ R : ℝ, R = ∑ i, y i ^ 2 + 1 := ⟨_, rfl⟩
+  have hRpos : 0 ≤ R := by
+    rw [hRdef]
+    have hsumnn : 0 ≤ ∑ i, y i ^ 2 :=
+      Finset.sum_nonneg fun i _ => hy2 i
+    linarith
+  have hcR : ∀ i, y i ^ 2 ≤ R := by
+    intro i
+    have hle := Finset.single_le_sum
+      (fun i (_ : i ∈ Finset.univ) => hy2 i)
+      (Finset.mem_univ i)
+    rw [hRdef]
+    linarith
+  -- integrability of both mono sides
+  have hintL : IntervalIntegrable (fun t =>
+      (2 * cheegerConstant A) * ∑ i, deg A i * indicatorLE (y i ^ 2) t)
+      volume 0 R := by
+    have hsum : IntervalIntegrable
+        (fun t => ∑ i, deg A i * indicatorLE (y i ^ 2) t) volume 0 R := by
+      have h := IntervalIntegrable.sum (Finset.univ : Finset V)
+        (f := fun i t => deg A i * indicatorLE (y i ^ 2) t)
+        (fun i _ => intervalIntegrable_const_mul _
+          (intervalIntegrable_indicatorLE (y i ^ 2) 0 R))
+      have hfun : (fun t => ∑ i, deg A i * indicatorLE (y i ^ 2) t)
+          = ∑ i : V, (fun t => deg A i * indicatorLE (y i ^ 2) t) := by
+        funext t
+        rw [Finset.sum_apply]
+      rw [hfun]
+      exact h
+    exact intervalIntegrable_const_mul _ hsum
+  have hintR : IntervalIntegrable (fun t => ∑ p : V × V,
+      A p.1 p.2 * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|)
+      volume 0 R := by
+    have h := IntervalIntegrable.sum (Finset.univ : Finset (V × V))
+      (f := fun p t => A p.1 p.2
+        * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|)
+      (fun p _ => intervalIntegrable_const_mul _
+        (((intervalIntegrable_indicatorLE (y p.1 ^ 2) 0 R).sub
+          (intervalIntegrable_indicatorLE (y p.2 ^ 2) 0 R)).abs))
+    have hfun : (fun t => ∑ p : V × V, A p.1 p.2
+        * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|)
+        = ∑ p : V × V, (fun t => A p.1 p.2
+          * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|) := by
+      funext t
+      rw [Finset.sum_apply]
+    rw [hfun]
+    exact h
+  -- the degree-weighted mass layer-cake
+  have hmass : ∫ t in (0:ℝ)..R, ∑ i, deg A i * indicatorLE (y i ^ 2) t
+      = ∑ i, deg A i * y i ^ 2 := by
+    rw [intervalIntegral.integral_finset_sum
+      (fun i _ => intervalIntegrable_const_mul _
+        (intervalIntegrable_indicatorLE (y i ^ 2) 0 R))]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [intervalIntegral.integral_const_mul,
+      integral_indicatorLE (hy2 i) (hcR i)]
+  -- the pair layer-cake
+  have hint : ∫ t in (0:ℝ)..R, ∑ p : V × V, A p.1 p.2
+        * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|
+      = ∑ p : V × V, ∫ t in (0:ℝ)..R, A p.1 p.2
+        * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t| :=
+    intervalIntegral.integral_finset_sum
+      (fun p _ => intervalIntegrable_const_mul _
+        (((intervalIntegrable_indicatorLE (y p.1 ^ 2) 0 R).sub
+          (intervalIntegrable_indicatorLE (y p.2 ^ 2) 0 R)).abs))
+  have hpair : ∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2|
+      = ∫ t in (0:ℝ)..R, ∑ p : V × V, A p.1 p.2
+          * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t| := by
+    rw [hint, ← Fintype.sum_prod_type'
+      (fun i j => A i j * |y i ^ 2 - y j ^ 2|)]
+    exact Finset.sum_congr rfl fun p _ => by
+      rw [intervalIntegral.integral_const_mul,
+        integral_abs_indicatorLE_sub (hy2 p.1) (hy2 p.2)
+          (max_le (hcR p.1) (hcR p.2))]
+  -- the ae mono (the t = 0 endpoint is the only failure point)
+  have hne : {t : ℝ | t ≠ 0} ∈ MeasureTheory.ae volume := by
+    rw [MeasureTheory.mem_ae_iff]; simp [Real.volume_singleton]
+  have hae : ∀ᵐ t ∂(volume.restrict (Set.Icc 0 R)),
+      (2 * cheegerConstant A) * ∑ i, deg A i * indicatorLE (y i ^ 2) t
+        ≤ ∑ p : V × V, A p.1 p.2
+          * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t| := by
+    rw [MeasureTheory.ae_restrict_iff' measurableSet_Icc]
+    filter_upwards [hne] with t ht
+    intro htI
+    have h0t : 0 < t := lt_of_le_of_ne htI.1 (Ne.symm ht)
+    have hper := sum_pairAbs_ge_vol A hA hnn hd y hy t h0t
+    rw [← sum_deg_mul_indicatorLE_eq_vol A (fun i => y i ^ 2) t] at hper
+    rw [← Fintype.sum_prod_type'
+      (fun i j => A i j * |indicatorLE (y i ^ 2) t
+        - indicatorLE (y j ^ 2) t|)] at hper
+    linarith
+  calc 2 * (cheegerConstant A * ∑ i, deg A i * y i ^ 2)
+      = (2 * cheegerConstant A) * ∑ i, deg A i * y i ^ 2 := by ring
+    _ = (2 * cheegerConstant A)
+        * ∫ t in (0:ℝ)..R, ∑ i, deg A i * indicatorLE (y i ^ 2) t := by
+          rw [hmass]
+    _ = ∫ t in (0:ℝ)..R, (2 * cheegerConstant A)
+        * ∑ i, deg A i * indicatorLE (y i ^ 2) t :=
+        (intervalIntegral.integral_const_mul _ _).symm
+    _ ≤ ∫ t in (0:ℝ)..R, ∑ p : V × V,
+          A p.1 p.2 * |indicatorLE (y p.1 ^ 2) t
+            - indicatorLE (y p.2 ^ 2) t| :=
+        intervalIntegral.integral_mono_ae_restrict hRpos hintL hintR hae
+    _ = ∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2| := hpair.symm
+
+/-- **Per-part bound of the irregular hard-direction chain** (the volume
+form of `hardDirection_perPart`): for any `y` whose closed superlevel
+sets at positive levels are volume-minority-side,
+`φ ^ 2 * (∑ i, deg A i * y i ^ 2) ≤ E'(y)`. The Step-1a Cauchy–Schwarz
+core `core_sum_abs_sq_sub_sq` is *already degree-weighted* and is
+consumed verbatim — no regularity bridge
+(`sum_deg_mul_eq_of_regular`) anywhere.
+
+QA: `SpectralGraphTheory.QA.ichv_perPart_edge_QA` pins the instance on
+`K₂` (both sides computed raw). -/
+theorem hardDirection_perPart_vol (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i) (y : V → ℝ)
+    (hy : ∀ t : ℝ, 0 < t →
+      2 * vol A (Finset.univ.filter (fun i => t ≤ y i ^ 2))
+        ≤ vol A (Finset.univ : Finset V)) :
+    cheegerConstant A ^ 2 * (∑ i, deg A i * y i ^ 2)
+      ≤ ∑ i, ∑ j, A i j * (y i - y j) ^ 2 := by
+  have hWnn : 0 ≤ ∑ i, deg A i * y i ^ 2 :=
+    Finset.sum_nonneg fun i _ =>
+      mul_nonneg (le_of_lt (hd i)) (sq_nonneg _)
+  have hEnn : 0 ≤ ∑ i, ∑ j, A i j * (y i - y j) ^ 2 :=
+    Finset.sum_nonneg fun i _ =>
+      Finset.sum_nonneg fun j _ => mul_nonneg (hnn i j) (sq_nonneg _)
+  rcases eq_or_ne (∑ i, deg A i * y i ^ 2) 0 with h0 | h0
+  · rw [h0, mul_zero]
+    exact hEnn
+  · have hco := coarea_core_vol A hA hnn hd y hy
+    have hcs := core_sum_abs_sq_sub_sq A hA hnn y
+    have hTVnn : 0 ≤ ∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2| :=
+      Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ =>
+        mul_nonneg (hnn i j) (abs_nonneg _)
+    have hc0 : 0 ≤ 2 * (cheegerConstant A * ∑ i, deg A i * y i ^ 2) :=
+      mul_nonneg (by norm_num)
+        (mul_nonneg (cheegerConstant_nonneg A hnn) hWnn)
+    have hsq : (2 * (cheegerConstant A * ∑ i, deg A i * y i ^ 2)) ^ 2
+        ≤ (∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2|) ^ 2 := by
+      have h1 := mul_le_mul hco hco hc0 hTVnn
+      rw [sq, sq]
+      exact h1
+    have hcomb : (2 * (cheegerConstant A * ∑ i, deg A i * y i ^ 2)) ^ 2
+        ≤ (∑ i, ∑ j, A i j * (y i - y j) ^ 2)
+          * (4 * ∑ i, deg A i * y i ^ 2) :=
+        le_trans hsq hcs
+    have hprod : 0 < 4 * ∑ i, deg A i * y i ^ 2 := by
+      refine mul_pos (by norm_num) ?_
+      exact lt_of_le_of_ne hWnn (Ne.symm h0)
+    have hring : (2 * (cheegerConstant A * ∑ i, deg A i * y i ^ 2)) ^ 2
+        = 4 * (∑ i, deg A i * y i ^ 2)
+            * (cheegerConstant A ^ 2 * ∑ i, deg A i * y i ^ 2) := by
+      ring
+    rw [hring] at hcomb
+    have hfinal : 4 * (∑ i, deg A i * y i ^ 2)
+          * (cheegerConstant A ^ 2 * ∑ i, deg A i * y i ^ 2)
+        ≤ 4 * (∑ i, deg A i * y i ^ 2)
+            * (∑ i, ∑ j, A i j * (y i - y j) ^ 2) := by
+      rw [mul_comm (4 * ∑ i, deg A i * y i ^ 2)
+        (∑ i, ∑ j, A i j * (y i - y j) ^ 2)]
+      exact hcomb
+    exact le_of_mul_le_mul_left hfinal hprod
+
+/-- The positive part's closed superlevel sets at positive levels are
+volume-minority-side, from the volume median's upper count. -/
+theorem minority_posPart_vol {A : WAdj (V := V)} (hnnA : ∀ i j, 0 ≤ A i j)
+    {f : V → ℝ} {m : ℝ}
+    (hup : 2 * vol A (Finset.univ.filter (fun i => m < f i))
+      ≤ vol A (Finset.univ : Finset V))
+    (t : ℝ) (ht : 0 < t) :
+    2 * vol A (Finset.univ.filter (fun i => t ≤ (max (f i - m) 0) ^ 2))
+      ≤ vol A (Finset.univ : Finset V) := by
+  have h1 : vol A (Finset.univ.filter (fun i => t ≤ (max (f i - m) 0) ^ 2))
+      ≤ vol A (Finset.univ.filter (fun i => m < f i)) :=
+    vol_le_vol_of_subset A hnnA (posPart_superlevel_subset t ht)
+  linarith
+
+/-- The negative part's closed superlevel sets at positive levels are
+volume-minority-side, from the volume median's lower count. -/
+theorem minority_negPart_vol {A : WAdj (V := V)} (hnnA : ∀ i j, 0 ≤ A i j)
+    {f : V → ℝ} {m : ℝ}
+    (hlow : 2 * vol A (Finset.univ.filter (fun i => f i < m))
+      ≤ vol A (Finset.univ : Finset V))
+    (t : ℝ) (ht : 0 < t) :
+    2 * vol A (Finset.univ.filter (fun i => t ≤ (max (m - f i) 0) ^ 2))
+      ≤ vol A (Finset.univ : Finset V) := by
+  have h1 : vol A (Finset.univ.filter (fun i => t ≤ (max (m - f i) 0) ^ 2))
+      ≤ vol A (Finset.univ.filter (fun i => f i < m)) :=
+    vol_le_vol_of_subset A hnnA (negPart_superlevel_subset t ht)
+  linarith
+
+/-- **Norm split, volume form.** For `f` with degree-weighted zero sum,
+the two median parts jointly carry at least the full degree-weighted
+squared norm — the `m² · vol V` remainder is nonnegative (the volume
+form of `median_parts_norm`: `∑ deg f² + m² · vol V`, the weighted
+zero sum killing the cross term).
+
+QA: `SpectralGraphTheory.QA.ichv_norm_split_pin_QA` pins the exact
+identity (remainder visible) on the `P₃` median of the QA fixture. -/
+theorem median_parts_norm_vol (A : WAdj (V := V)) (hnn : ∀ i j, 0 ≤ A i j)
+    {f : V → ℝ} {m : ℝ}
+    (horth : ∑ i, deg A i * f i = 0) :
+    ∑ i, deg A i * f i ^ 2
+      ≤ ∑ i, deg A i * (max (f i - m) 0) ^ 2
+        + ∑ i, deg A i * (max (m - f i) 0) ^ 2 := by
+  have hVnn : 0 ≤ vol A (Finset.univ : Finset V) := vol_nonneg A hnn _
+  have h1 : ∀ i : V, deg A i * (max (f i - m) 0) ^ 2
+        + deg A i * (max (m - f i) 0) ^ 2
+        = deg A i * f i ^ 2 - 2 * m * (deg A i * f i) + m ^ 2 * deg A i := by
+    intro i
+    rw [← mul_add, posPart_add_negPart_sq]
+    ring
+  have hcross : ∑ i, 2 * m * (deg A i * f i)
+      = 2 * m * ∑ i, deg A i * f i := by
+    rw [Finset.mul_sum]
+  have hm2 : ∑ i, m ^ 2 * deg A i
+      = m ^ 2 * vol A (Finset.univ : Finset V) := by
+    unfold vol
+    rw [Finset.mul_sum]
+  have hsplit : (∑ i, deg A i * (max (f i - m) 0) ^ 2
+      + ∑ i, deg A i * (max (m - f i) 0) ^ 2)
+      = ∑ i, deg A i * f i ^ 2 + m ^ 2 * vol A (Finset.univ : Finset V) := by
+    rw [← Finset.sum_add_distrib, Finset.sum_congr rfl (fun i _ => h1 i),
+      Finset.sum_add_distrib, Finset.sum_sub_distrib, hcross, horth,
+      mul_zero, sub_zero, hm2]
+  have hm2v : 0 ≤ m ^ 2 * vol A (Finset.univ : Finset V) :=
+    mul_nonneg (sq_nonneg m) hVnn
+  rw [hsplit]
+  linarith
+
+end VolumeHardDirection
+
+/-!
+### The volume-weighted sweep extraction (proved)
+
+The volume form of the `SweepExtraction` section below (the irregular
+family's analogue of `proposals/sweep-cut-extraction.md`'s per-part
+theorem, 2026-08-26): where `sweep_level_extract` exhibits an explicit
+closed superlevel set of `y ^ 2` at a positive level with
+`conductance A S ^ 2 ≤ E'(y) / (d * ∑ y i ^ 2)` on regular input,
+`sweep_level_extract_vol` does the same on arbitrary positive-degree
+input with the degree-weighted denominator
+`conductance A S ^ 2 ≤ E'(y) / (∑ i, deg A i * y i ^ 2)` — the
+per-part bound the `VolumeHardDirection` chain gives for the
+conductance *infimum*, now attained at an explicit swept level set.
+
+Route: attainment replaces averaging exactly as in the regular case —
+the `boundary / vol` ratio (card denominator replaced by the level
+set's volume) is minimized over the finitely many positive values of
+`y ^ 2`; every closed superlevel set at a positive level equals one at
+an attained value; the per-level bound is non-strict, so the
+degree-weighted layer-cake integration is `coarea_core_vol`'s own
+proof pattern; Component A (`core_sum_abs_sq_sub_sq`, already
+degree-weighted) closes; and the minority-volume conversion makes
+`min (vol S) (vol Sᶜ) = vol S` pure `vol_compl` arithmetic.
+
+The named consumer is `GraphTheory.VariationalTransfer.
+cheeger_sweep_cut_normalized` (the irregular median assembly) — a
+consumer that wants *the cut the spectral-partitioning sweep returns*
+on irregular input, not a bound on the conductance infimum.
+-/
+
+section VolumeSweepExtraction
+
+open MeasureTheory intervalIntegral
+
+/-- **The per-part sweep extraction, volume form.** For any `y : V → ℝ`
+whose nonempty closed superlevel sets `{i : t ≤ y i ^ 2}` at positive
+levels are all volume-minority-side (`2 * vol S_t ≤ vol V` — exactly
+`coarea_core_vol`'s hypothesis), with positive degree-weighted mass
+`0 < ∑ i, deg A i * y i ^ 2`, there is a positive level `t` whose
+closed superlevel set `S = {i : t ≤ y i ^ 2}` is nonempty, proper, and
+satisfies
+
+`conductance A S ^ 2 ≤ E'(y) / (∑ i, deg A i * y i ^ 2)`
+
+where `E'(y) = ∑ i j, A i j * (y i - y j) ^ 2`. This is the explicit
+sweep-cut object on irregular input: the level set the
+spectral-partitioning sweep would return, with the same per-part
+constant the `VolumeHardDirection` chain gives for the infimum
+(`hardDirection_perPart_vol`'s content, now attained at a witness
+level set).
+
+Route (the regular `sweep_level_extract`'s attainment argument at the
+`boundary / vol` ratio): the ratio is minimized over the finitely many
+positive values of `y ^ 2`; every closed superlevel set at a positive
+level equals one at an attained value (its least dominating value);
+the per-level bound is non-strict, so the degree-weighted layer-cake
+integration is a structural clone of `coarea_core_vol`'s proof (mass
+and pair layer-cakes, the `t = 0` endpoint absorbed a.e.), closed by
+Component A (`core_sum_abs_sq_sub_sq`, already degree-weighted) and
+the minority-volume conductance conversion (`min (vol S) (vol Sᶜ) =
+vol S` by `vol_compl` — no `vol_eq_of_regular` anywhere).
+
+Statement-shape notes: no `2 ≤ Fintype.card V` hypothesis (minority at
+a nonempty level forces the complement nonempty); the level-set
+membership is stated as an iff so consumers get the sweep family
+membership, not just any set.
+
+QA: `SpectralGraphTheory.QA.vsc_extract_p3_QA` in
+`Scaffold/QA/SpectralGraph/IrregularCheeger_QA.lean` forces the
+extracted set on the `P₃` fixture at `y = ![1, 0, 0]` (degrees
+`1, 2, 1`) and pins its conductance to `1` against the theorem bound
+`E'(y) / ∑ deg y² = 4 / 3`. -/
+theorem sweep_level_extract_vol (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i) (y : V → ℝ)
+    (hy : ∀ t : ℝ, 0 < t →
+      2 * vol A (Finset.univ.filter (fun i => t ≤ y i ^ 2))
+        ≤ vol A (Finset.univ : Finset V))
+    (hM : 0 < ∑ i, deg A i * y i ^ 2) :
+    ∃ S : Finset V, ∃ t : ℝ, 0 < t ∧ (∀ i, i ∈ S ↔ t ≤ y i ^ 2) ∧
+      S.Nonempty ∧ Sᶜ.Nonempty ∧
+      conductance A S ^ 2
+        ≤ (∑ i, ∑ j, A i j * (y i - y j) ^ 2) / (∑ i, deg A i * y i ^ 2) := by
+  classical
+  have himg : ∀ i : V, y i ^ 2 ∈ Finset.univ.image (fun i => y i ^ 2) :=
+    fun i => Finset.mem_image_of_mem _ (Finset.mem_univ i)
+  have hy2 : ∀ i, 0 ≤ y i ^ 2 := fun i => sq_nonneg _
+  obtain ⟨i₀, hi₀⟩ : ∃ i : V, 0 < y i ^ 2 := by
+    by_contra hcon
+    push_neg at hcon
+    have hsum : ∑ i, deg A i * y i ^ 2 ≤ 0 :=
+      Finset.sum_nonpos fun i _ =>
+        mul_nonpos_of_nonneg_of_nonpos (le_of_lt (hd i)) (hcon i)
+    linarith
+  -- the attained positive values, with the minimal boundary-to-volume ratio
+  have hFne : ((Finset.univ.image (fun i => y i ^ 2)).filter
+    (fun c => 0 < c)).Nonempty :=
+    ⟨y i₀ ^ 2, Finset.mem_filter.2 ⟨himg i₀, hi₀⟩⟩
+  obtain ⟨cstar, hcstarmem, hcstarmin⟩ := Finset.exists_min_image
+    ((Finset.univ.image (fun i => y i ^ 2)).filter (fun c => 0 < c))
+    (fun c : ℝ => boundary A (Finset.univ.filter (fun i => c ≤ y i ^ 2))
+      / vol A (Finset.univ.filter (fun i => c ≤ y i ^ 2))) hFne
+  have hcstarimg : cstar ∈ Finset.univ.image (fun i => y i ^ 2) :=
+    (Finset.mem_filter.1 hcstarmem).1
+  have hcstarpos : 0 < cstar := (Finset.mem_filter.1 hcstarmem).2
+  obtain ⟨iw, hiw⟩ : ∃ i : V, y i ^ 2 = cstar := by
+    rw [Finset.mem_image] at hcstarimg
+    obtain ⟨i, -, hi⟩ := hcstarimg
+    exact ⟨i, hi⟩
+  set Sstar : Finset V := Finset.univ.filter (fun i => cstar ≤ y i ^ 2) with hSstar
+  have hSmem : ∀ i, i ∈ Sstar ↔ cstar ≤ y i ^ 2 := by
+    intro i
+    rw [hSstar]; exact Finset.mem_filter.trans (by simp)
+  have hSstarne : Sstar.Nonempty :=
+    ⟨iw, (hSmem iw).2 (le_of_eq hiw.symm)⟩
+  have hvstar : 0 < vol A Sstar := vol_pos_of_pos_deg A hd hSstarne
+  have hvposF : ∀ c ∈ (Finset.univ.image (fun i => y i ^ 2)).filter
+      (fun c => 0 < c),
+      0 < vol A (Finset.univ.filter (fun i => c ≤ y i ^ 2)) := by
+    intro c hc
+    have h1 := (Finset.mem_filter.1 hc).1
+    rw [Finset.mem_image] at h1
+    obtain ⟨i, -, hi⟩ := h1
+    exact vol_pos_of_pos_deg A hd ⟨i, Finset.mem_filter.2
+      ⟨Finset.mem_univ i, le_of_eq hi.symm⟩⟩
+  -- the per-member multiplicative bound from minimality
+  have hper : ∀ c ∈ (Finset.univ.image (fun i => y i ^ 2)).filter
+      (fun c => 0 < c),
+      (boundary A Sstar / vol A Sstar)
+        * vol A (Finset.univ.filter (fun i => c ≤ y i ^ 2))
+      ≤ boundary A (Finset.univ.filter (fun i => c ≤ y i ^ 2)) := by
+    intro c hc
+    have h := hcstarmin c hc
+    rw [div_le_div_iff₀ hvstar (hvposF c hc)] at h
+    rw [div_mul_eq_mul_div, div_le_iff₀ hvstar]
+    exact h
+  -- the covering fact: every closed superlevel set at a positive level is
+  -- one at an attained (positive) value
+  have hcover : ∀ t : ℝ, 0 < t →
+      (boundary A Sstar / vol A Sstar)
+        * vol A (Finset.univ.filter (fun i => t ≤ y i ^ 2))
+      ≤ boundary A (Finset.univ.filter (fun i => t ≤ y i ^ 2)) := by
+    intro t ht
+    rcases (Finset.univ.filter (fun i => t ≤ y i ^ 2)).eq_empty_or_nonempty
+      with hE | hNE
+    · rw [hE]
+      have hb : boundary A (∅ : Finset V) = 0 := by simp [boundary]
+      have hv : vol A (∅ : Finset V) = 0 := vol_empty A
+      rw [hb, hv]
+      simp
+    · obtain ⟨j, hj⟩ := hNE
+      have hGne : ((Finset.univ.image (fun i => y i ^ 2)).filter
+          (fun c => t ≤ c)).Nonempty :=
+        ⟨y j ^ 2, Finset.mem_filter.2 ⟨himg j, (Finset.mem_filter.1 hj).2⟩⟩
+      obtain ⟨c', hc'mem, hc'le⟩ :
+          ∃ c' : ℝ, c' ∈ (Finset.univ.image (fun i => y i ^ 2)).filter
+              (fun c => t ≤ c)
+            ∧ ∀ c ∈ (Finset.univ.image (fun i => y i ^ 2)).filter
+                (fun c => t ≤ c), c' ≤ c :=
+        ⟨((Finset.univ.image (fun i => y i ^ 2)).filter
+            (fun c => t ≤ c)).min' hGne,
+          Finset.min'_mem _ hGne,
+          fun c hc => Finset.min'_le _ c hc⟩
+      have hc't : t ≤ c' := (Finset.mem_filter.1 hc'mem).2
+      have hc'F : c' ∈ (Finset.univ.image (fun i => y i ^ 2)).filter
+          (fun c => 0 < c) :=
+        Finset.mem_filter.2 ⟨(Finset.mem_filter.1 hc'mem).1,
+          lt_of_lt_of_le ht hc't⟩
+      have hSetEq : (Finset.univ.filter (fun i => t ≤ y i ^ 2))
+          = Finset.univ.filter (fun i => c' ≤ y i ^ 2) := by
+        apply Finset.ext
+        intro i
+        constructor
+        · intro hit
+          refine Finset.mem_filter.2 ⟨Finset.mem_univ i, hc'le _ ?_⟩
+          exact Finset.mem_filter.2 ⟨himg i, (Finset.mem_filter.1 hit).2⟩
+        · intro hic
+          exact Finset.mem_filter.2 ⟨Finset.mem_univ i,
+            le_trans hc't ((Finset.mem_filter.1 hic).2)⟩
+      rw [hSetEq]
+      exact hper c' hc'F
+  -- the layer-cake integration (the degree-weighted mass side)
+  obtain ⟨R, hRdef⟩ : ∃ R : ℝ, R = ∑ i, y i ^ 2 + 1 := ⟨_, rfl⟩
+  have hRpos : 0 ≤ R := by
+    rw [hRdef]
+    have hsumnn : 0 ≤ ∑ i, y i ^ 2 := Finset.sum_nonneg fun i _ => hy2 i
+    linarith
+  have hcR : ∀ i, y i ^ 2 ≤ R := by
+    intro i
+    have hle := Finset.single_le_sum (fun i (_ : i ∈ Finset.univ) => hy2 i)
+      (Finset.mem_univ i)
+    rw [hRdef]
+    linarith
+  have hintL : IntervalIntegrable (fun t =>
+      (2 * (boundary A Sstar / vol A Sstar))
+        * ∑ i, deg A i * indicatorLE (y i ^ 2) t) volume 0 R := by
+    have hsum : IntervalIntegrable
+        (fun t => ∑ i, deg A i * indicatorLE (y i ^ 2) t) volume 0 R := by
+      have h := IntervalIntegrable.sum (Finset.univ : Finset V)
+        (f := fun i t => deg A i * indicatorLE (y i ^ 2) t)
+        (fun i _ => intervalIntegrable_const_mul _
+          (intervalIntegrable_indicatorLE (y i ^ 2) 0 R))
+      have hfun : (fun t => ∑ i, deg A i * indicatorLE (y i ^ 2) t)
+          = ∑ i : V, (fun t => deg A i * indicatorLE (y i ^ 2) t) := by
+        funext t
+        rw [Finset.sum_apply]
+      rw [hfun]
+      exact h
+    exact intervalIntegrable_const_mul _ hsum
+  have hintR : IntervalIntegrable (fun t => ∑ p : V × V,
+      A p.1 p.2 * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|)
+      volume 0 R := by
+    have h := IntervalIntegrable.sum (Finset.univ : Finset (V × V))
+      (f := fun p t => A p.1 p.2
+        * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|)
+      (fun p _ => intervalIntegrable_const_mul _
+        (((intervalIntegrable_indicatorLE (y p.1 ^ 2) 0 R).sub
+          (intervalIntegrable_indicatorLE (y p.2 ^ 2) 0 R)).abs))
+    have hfun : (fun t => ∑ p : V × V, A p.1 p.2
+        * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|)
+        = ∑ p : V × V, (fun t => A p.1 p.2
+          * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|) := by
+      funext t
+      rw [Finset.sum_apply]
+    rw [hfun]
+    exact h
+  have hmass : ∫ t in (0:ℝ)..R, ∑ i, deg A i * indicatorLE (y i ^ 2) t
+      = ∑ i, deg A i * y i ^ 2 := by
+    rw [intervalIntegral.integral_finset_sum
+      (fun i _ => intervalIntegrable_const_mul _
+        (intervalIntegrable_indicatorLE (y i ^ 2) 0 R))]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [intervalIntegral.integral_const_mul,
+      integral_indicatorLE (hy2 i) (hcR i)]
+  have hint : ∫ t in (0:ℝ)..R, ∑ p : V × V, A p.1 p.2
+        * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t|
+      = ∑ p : V × V, ∫ t in (0:ℝ)..R, A p.1 p.2
+        * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t| :=
+    intervalIntegral.integral_finset_sum
+      (fun p _ => intervalIntegrable_const_mul _
+        (((intervalIntegrable_indicatorLE (y p.1 ^ 2) 0 R).sub
+          (intervalIntegrable_indicatorLE (y p.2 ^ 2) 0 R)).abs))
+  have hpair : ∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2|
+      = ∫ t in (0:ℝ)..R, ∑ p : V × V, A p.1 p.2
+          * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t| := by
+    rw [hint, ← Fintype.sum_prod_type'
+      (fun i j => A i j * |y i ^ 2 - y j ^ 2|)]
+    exact Finset.sum_congr rfl fun p _ => by
+      rw [intervalIntegral.integral_const_mul,
+        integral_abs_indicatorLE_sub (hy2 p.1) (hy2 p.2)
+          (max_le (hcR p.1) (hcR p.2))]
+  -- the a.e. per-level bound
+  have hne : {t : ℝ | t ≠ 0} ∈ MeasureTheory.ae volume := by
+    rw [MeasureTheory.mem_ae_iff]; simp [Real.volume_singleton]
+  have hae : ∀ᵐ t ∂(volume.restrict (Set.Icc 0 R)),
+      (2 * (boundary A Sstar / vol A Sstar))
+        * ∑ i, deg A i * indicatorLE (y i ^ 2) t
+      ≤ ∑ p : V × V, A p.1 p.2
+          * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t| := by
+    rw [MeasureTheory.ae_restrict_iff' measurableSet_Icc]
+    filter_upwards [hne] with t ht
+    intro htI
+    have h0t : 0 < t := lt_of_le_of_ne htI.1 (Ne.symm ht)
+    have h1 : ∑ i, deg A i * indicatorLE (y i ^ 2) t
+        = vol A (Finset.univ.filter (fun i => t ≤ y i ^ 2)) :=
+      sum_deg_mul_indicatorLE_eq_vol A (fun i => y i ^ 2) t
+    have h2 : ∑ i, ∑ j, A i j * |indicatorLE (y i ^ 2) t
+          - indicatorLE (y j ^ 2) t|
+        = 2 * boundary A (Finset.univ.filter (fun i => t ≤ y i ^ 2)) :=
+      sum_pairAbs_eq_two_boundary A hA y t _
+        (fun i => Finset.mem_filter.trans (by simp))
+    rw [← Fintype.sum_prod_type'
+      (fun i j => A i j * |indicatorLE (y i ^ 2) t
+        - indicatorLE (y j ^ 2) t|)] at h2
+    have h3 := hcover t h0t
+    rw [h1, h2]
+    linarith
+  have hint2r : 2 * (boundary A Sstar / vol A Sstar)
+      * ∑ i, deg A i * y i ^ 2
+      ≤ ∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2| := by
+    calc 2 * (boundary A Sstar / vol A Sstar) * ∑ i, deg A i * y i ^ 2
+        = (2 * (boundary A Sstar / vol A Sstar))
+            * ∫ t in (0:ℝ)..R, ∑ i, deg A i * indicatorLE (y i ^ 2) t := by
+              rw [hmass]
+      _ = ∫ t in (0:ℝ)..R, (2 * (boundary A Sstar / vol A Sstar))
+            * ∑ i, deg A i * indicatorLE (y i ^ 2) t :=
+          (intervalIntegral.integral_const_mul _ _).symm
+      _ ≤ ∫ t in (0:ℝ)..R, ∑ p : V × V, A p.1 p.2
+            * |indicatorLE (y p.1 ^ 2) t - indicatorLE (y p.2 ^ 2) t| :=
+          intervalIntegral.integral_mono_ae_restrict hRpos hintL hintR hae
+      _ = ∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2| := hpair.symm
+  -- the conductance conversion (minority makes the volume the small side)
+  have hminor : 2 * vol A Sstar ≤ vol A (Finset.univ : Finset V) :=
+    hy cstar hcstarpos
+  have hScne : Sstarᶜ.Nonempty := by
+    rcases Sstarᶜ.eq_empty_or_nonempty with hE | hNE
+    · exfalso
+      have hVC := vol_compl A Sstar
+      rw [hE, vol_empty A] at hVC
+      have hle : vol A Sstar ≤ 0 := by linarith
+      linarith
+    · exact hNE
+  have hminvol : min (vol A Sstar) (vol A Sstarᶜ)
+      = vol A Sstar := by
+    have hVC := vol_compl A Sstar
+    refine min_eq_left ?_
+    linarith
+  -- Component A composition and the final algebra
+  have hcomp := core_sum_abs_sq_sub_sq A hA hnn y
+  have hbnn : 0 ≤ boundary A Sstar := boundary_nonneg A hnn Sstar
+  have hrv : 0 ≤ boundary A Sstar / vol A Sstar :=
+    div_nonneg hbnn (le_of_lt hvstar)
+  have hMnn : 0 ≤ ∑ i, deg A i * y i ^ 2 := le_of_lt hM
+  have hTVnn : 0 ≤ ∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2| :=
+    Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ =>
+      mul_nonneg (hnn i j) (abs_nonneg _)
+  have hLnn : 0 ≤ 2 * (boundary A Sstar / vol A Sstar)
+      * ∑ i, deg A i * y i ^ 2 :=
+    mul_nonneg (mul_nonneg (by norm_num) hrv) hMnn
+  have habs : abs (2 * (boundary A Sstar / vol A Sstar)
+      * ∑ i, deg A i * y i ^ 2)
+      ≤ abs (∑ i, ∑ j, A i j * |y i ^ 2 - y j ^ 2|) := by
+    rw [abs_of_nonneg hLnn, abs_of_nonneg hTVnn]
+    exact hint2r
+  have hTVsq : (2 * (boundary A Sstar / vol A Sstar)
+      * ∑ i, deg A i * y i ^ 2) ^ 2
+      ≤ (∑ i, ∑ j, A i j * (y i - y j) ^ 2)
+        * (4 * ∑ i, deg A i * y i ^ 2) :=
+    le_trans (sq_le_sq.mpr habs) hcomp
+  have hring : (2 * (boundary A Sstar / vol A Sstar)
+      * ∑ i, deg A i * y i ^ 2) ^ 2
+      = 4 * (∑ i, deg A i * y i ^ 2)
+        * ((boundary A Sstar / vol A Sstar) ^ 2
+          * ∑ i, deg A i * y i ^ 2) := by
+    ring
+  have hring2 : (∑ i, ∑ j, A i j * (y i - y j) ^ 2)
+      * (4 * ∑ i, deg A i * y i ^ 2)
+      = 4 * (∑ i, deg A i * y i ^ 2)
+        * (∑ i, ∑ j, A i j * (y i - y j) ^ 2) := by
+    ring
+  rw [hring, hring2] at hTVsq
+  have hkey : (boundary A Sstar / vol A Sstar) ^ 2
+      * ∑ i, deg A i * y i ^ 2
+      ≤ ∑ i, ∑ j, A i j * (y i - y j) ^ 2 :=
+    le_of_mul_le_mul_left hTVsq (by
+      exact mul_pos (by norm_num) hM)
+  refine ⟨Sstar, cstar, hcstarpos, hSmem, hSstarne, hScne, ?_⟩
+  have hcond : conductance A Sstar
+      = boundary A Sstar / vol A Sstar := by
+    rw [conductance, hminvol]
+  rw [hcond, div_pow,
+    div_le_div_iff₀ (pow_pos hvstar 2) hM]
+  calc (boundary A Sstar) ^ 2 * (∑ i, deg A i * y i ^ 2)
+      = ((boundary A Sstar / vol A Sstar) ^ 2
+          * ∑ i, deg A i * y i ^ 2) * (vol A Sstar) ^ 2 := by
+        field_simp
+    _ ≤ (∑ i, ∑ j, A i j * (y i - y j) ^ 2) * (vol A Sstar) ^ 2 :=
+        mul_le_mul_of_nonneg_right hkey (sq_nonneg _)
+
+end VolumeSweepExtraction
 
 /-!
 ### The conductance minimum is attained (proved)

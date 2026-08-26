@@ -54,6 +54,15 @@ carry the design:
   trivial (form-level positive definiteness — *spectral localization of
   flux* with no complex spectral theorem anywhere).
 
+* **The kernel at the action level**
+  (`magneticLaplacian_mulVec_eq_zero_iff`, added 2026-08-26 with the
+  signed-graph program, `proposals/signed-graphs-balance.md`): the
+  gauge characterization promoted from form level to the kernel — on
+  nonnegative weights, `M *ᵥ x = 0 ↔ x_u = e^{iΘ_uv} x_v` on every
+  positive edge, the missing half being pure row algebra at unit
+  modulus. This is the statement shape the signed-graph balance
+  theorem consumes at the π-flux.
+
 At zero phase the operator is the complexified classical Laplacian of
 the symmetrized weights (`magneticLaplacian_zero_phase_apply`) — on
 symmetric `A`, of `laplacian A` itself: the join with the real shelf.
@@ -420,6 +429,99 @@ theorem magneticQuadForm_eq_zero_iff (A : Matrix V V ℝ) (Θ : Matrix V V ℝ)
       have hn : Complex.normSq (x u - Complex.exp (Complex.I * Θ u v) * x v) = 0 := by
         rw [hx, Complex.normSq_zero]
       field_simp [hn]
+
+/-!
+## The kernel at the action level
+
+The gauge characterization above is stated at *form* level. This section
+promotes it to the kernel (action) level — the interface consumers of
+the magnetic kernel theorem need: `M *ᵥ x = 0` iff the potential is
+aligned with the edge fluxes. The missing half is pure row algebra at
+unit modulus (the phase `e^{iθ}` cancels against its inverse — `exp` is
+never zero); the form half is the delivered iff.
+-/
+
+omit [DecidableEq V] in
+/-- The quadratic form vanishes on the kernel, hypothesis-free: the
+form is a pairing with the action. -/
+theorem hermQuadForm_eq_zero_of_mulVec_eq_zero (M : Matrix V V ℂ) (x : V → ℂ)
+    (h : M *ᵥ x = 0) : hermQuadForm M x = 0 := by
+  rw [hermQuadForm, h]
+  simp
+
+/-- Conjugate pairing of a unit phase: `conj (e^{i t}) · e^{i t} = 1`,
+the finite-algebra unit-modulus fact (the exponential's series
+conjugates termwise). -/
+theorem conj_exp_I_mul_exp_I (t : ℝ) :
+    conj (Complex.exp (Complex.I * (t : ℂ))) * Complex.exp (Complex.I * (t : ℂ))
+      = 1 := by
+  have h0 : conj (Complex.I * (t : ℂ)) + Complex.I * (t : ℂ) = 0 := by
+    simp only [map_mul, Complex.conj_ofReal, Complex.conj_I]
+    ring
+  rw [← Complex.exp_conj, ← Complex.exp_add, h0, Complex.exp_zero]
+
+/-- Every aligned potential is killed by the magnetic Laplacian — pure
+row algebra, hypothesis-free on the weights: each row's coupling term
+`A uv · e^{iΘuv} · x v` collapses to `A uv · x u` by the alignment
+(its inverse), and the conjugate transposed term likewise through the
+unit-modulus pairing. -/
+theorem magneticLaplacian_mulVec_eq_zero_of_forall_exp_mul_eq
+    (A : Matrix V V ℝ) (Θ : Matrix V V ℝ) (x : V → ℂ)
+    (halign : ∀ u v, A u v ≠ 0 →
+      x u = Complex.exp (Complex.I * (Θ u v : ℂ)) * x v) :
+    magneticLaplacian A Θ *ᵥ x = 0 := by
+  have h1 : ∀ u : V, ∑ j, magneticMatrix A Θ u j * x j
+      = ((outDeg A u : ℝ) : ℂ) * x u := by
+    intro u
+    have hterm : ∑ j, magneticMatrix A Θ u j * x j
+        = ∑ j, ((A u j : ℝ) : ℂ) * x u := by
+      refine Finset.sum_congr rfl fun j _ => ?_
+      by_cases h : A u j = 0
+      · simp [magneticMatrix, h]
+      · simp only [magneticMatrix]
+        rw [mul_assoc, ← halign u j h]
+    rw [hterm, ← Finset.sum_mul, ← Complex.ofReal_sum]
+    rfl
+  have h2 : ∀ u : V, ∑ j, conj (magneticMatrix A Θ j u) * x j
+      = ((inDeg A u : ℝ) : ℂ) * x u := by
+    intro u
+    have hterm : ∑ j, conj (magneticMatrix A Θ j u) * x j
+        = ∑ j, ((A j u : ℝ) : ℂ) * x u := by
+      refine Finset.sum_congr rfl fun j _ => ?_
+      by_cases h : A j u = 0
+      · simp [magneticMatrix, h]
+      · have hj : x j = Complex.exp (Complex.I * (Θ j u : ℂ)) * x u := halign j u h
+        have hu1 := conj_exp_I_mul_exp_I (Θ j u)
+        rw [hj, show conj (magneticMatrix A Θ j u)
+            = ((A j u : ℝ) : ℂ) * conj (Complex.exp (Complex.I * (Θ j u : ℂ))) from by
+            rw [magneticMatrix]; simp only [map_mul, Complex.conj_ofReal]]
+        linear_combination ((A j u : ℝ) : ℂ) * x u * hu1
+    rw [hterm, ← Finset.sum_mul, ← Complex.ofReal_sum]
+    rfl
+  funext u
+  rw [magneticLaplacian_mulVec_apply, h1 u, h2 u]
+  show (((outDeg A u + inDeg A u) / 2 : ℝ) : ℂ) * x u
+    - (1 / 2 : ℂ) * (((outDeg A u : ℝ) : ℂ) * x u + ((inDeg A u : ℝ) : ℂ) * x u) = 0
+  push_cast
+  ring
+
+/-- **The magnetic kernel characterization**: on nonnegative weights,
+`M(A, Θ) *ᵥ x = 0` exactly when `x` is a phase potential aligned with
+the edge fluxes (`x u = e^{iΘ u v} · x v` on every positive edge). The
+delivered form-level gauge iff, promoted to the kernel by the row
+algebra above — *spectral localization of flux* at operator level: a
+frustrated cycle (nonintegral total flux) forces the kernel trivial.
+This is the exact statement shape the signed-graph balance theorem
+consumes at the π-flux. -/
+theorem magneticLaplacian_mulVec_eq_zero_iff (A : Matrix V V ℝ)
+    (Θ : Matrix V V ℝ) (hA : ∀ u v, 0 ≤ A u v) (x : V → ℂ) :
+    magneticLaplacian A Θ *ᵥ x = 0
+      ↔ ∀ u v, A u v ≠ 0 →
+        x u = Complex.exp (Complex.I * (Θ u v : ℂ)) * x v :=
+  ⟨fun hker u v huv =>
+    (magneticQuadForm_eq_zero_iff A Θ x hA).1
+      (hermQuadForm_eq_zero_of_mulVec_eq_zero _ x hker) u v huv,
+    magneticLaplacian_mulVec_eq_zero_of_forall_exp_mul_eq A Θ x⟩
 
 /-!
 ## Cone agreements

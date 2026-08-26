@@ -6,58 +6,739 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**Magnetic heat propagator — the bridge's first complex consumer;
-`proposals/hermitian-calculus-consumer-magnetic.md`, a gated stub whose
-gate is NOW SATISFIED (the bridge's Steps 1–3 delivered 2026-08-25; the
-complex-Hermitian half confirmed elaborating by that delivery's QA
-witness `fcM2c_cfc_id`); run 1, 2026-08-25, run `20260825T180957Z-run-1`.
+**Signed graphs — the balance theorem via the magnetic π-flux bridge,
+plus the switching similarity** (`proposals/signed-graphs-balance.md`,
+new this run; run 1, 2026-08-26, run `20260826T194844Z-run-1`).
 Selected per the empty High/Medium Active table by the center-out
-policy as the top natural candidate named in all three standing
-handoffs; per the one-per-delivery rule, the indexing-and-pursuit
-decision is recorded here at the boundary.** The ask (the proposal's
-own words): the operator via the calculus wrapper (`f(t) = e^{-tM}` of
-the delivered `magneticLaplacian`, hypothesis-free Hermitian input, at
-𝕜 = ℂ through Mathlib's `RCLike`-generic `cfc` — no second wrapper per
-the bridge's Step-0 verdict), its eigenvector action at the complex
-eigenbasis, and one QA fixture on a small directed graph with nonzero
-phase checked against a hand computation, two-independent-routes
-discipline. Non-goals honored: no magnetic Cheeger, no synchronization
-functionals, no eigenvalue-gap statements.
+policy as a fresh graph-model-axis candidate: radar axis 1 (at 3.5)
+names **signed-graph theory** as an absent category, and the standing
+handoff names the graph-model axis among the lowest-scored frontiers.
+The axis row's other absent clause ("directed graphs") is stale —
+directed operators were delivered 2026-08-22 and the magnetic
+Laplacian 2026-08-25 under backlog item 8 — to be repaired with this
+delivery's record sweep.
 
-**Planned public layer** (a new section of
-`GraphTheory/FunctionalCalculus.lean`, `Magnetic.lean` untouched per
-the consumer pattern; one new import — Magnetic, no cycle): the general
-RCLike eigen-action lemma `cfc_mulVec_of_mulVec_eq_smul` (if
-`M *ᵥ x = (μ : 𝕜) • x` at a Hermitian `M` and real `μ`, then
-`hM.cfc f *ᵥ x = (f μ : 𝕜) • x` — proved by pure matrix algebra
-through the unitary diagonalization `Uᴴ * M * U = diag λ` and the
-support-transfer of the diagonal action, NO eigenspace-completeness
-machinery; this is the load-bearing interface every complex consumer
-needs and Mathlib's CFC file lacks it); `magneticHeat` (the
-propagator, hypothesis-free); its entry form (the falsifiability
-anchor, the complex mirror of `spectralCalc_apply`); the consumer
-action `magneticHeat_mulVec_of_eigen`; the basis action
-`magneticHeat_mulVec_eigenvectorBasis`; `magneticHeat_zero` (t = 0 ⇒ 1
-via `cfc_const_one`); and the semigroup
-`magneticHeat_mul_magneticHeat` through the generic calculus algebra
-(`cfc_mul`/`cfc_congr` at `Real.exp_add` — the complex instantiation
-of the delivered `spectralCalc_exp_mul` technology, needing a complex
-spectrum-continuity supplier). **QA**: a new
-`Scaffold/QA/SpectralGraph/MagneticCalculus_QA.lean` — the flux pair
-`K₂` at antisymmetric phase π/2 (M = !![1, −I; I, 1], genuinely
-complex Hermitian on directed-compatible input), the kernel vector
-![I, 1] cross-checked against the delivered gauge characterization,
-the frustrated mode ![I, −1] at λ = 2, the propagator's closed form
-`!![(1+q)/2, I(1−q)/2; −I(1−q)/2, (1+q)/2]` at `q = e^{-2t}` derived
-on the calculus route (action theorem + spanning recovery) and
-verified by raw matrix arithmetic (the independent second route), the
-diffusion fence (`magneticHeat … 1 ≠ 1`), time-zero, and — budget
-permitting — the zero-phase join to the delivered real
-`heatKernel` (the magnetic propagator at Θ = 0 degenerating to the
-classical semigroup's complexification). Zero new axioms planned (pure
-hard crust; `#print axioms` audit on every new declaration). Spike
-first in `wip/`; the prior runs' uncommitted deliveries preserved
+**SGT-leverage rationale.** This is the strategy's load-bearing-growth
+principle executed on the magnetic program: a *signing* `s : V → V →
+{±1}` of a symmetric nonnegative network is exactly a magnetic
+potential at the π-flux (`e^{iΘ} = ±1`), so the delivered
+`magnetic_energy` identity becomes the signed Dirichlet energy and the
+delivered gauge characterization becomes **Harary balance** —
+`IsBalanced A s ↔ ∃ x ≠ 0, L_σ *ᵥ x = 0` on connected input (balance
+⟺ switching ⟺ kernel nontrivial; frustration ⟺ positive definite). A
+wrong `magnetic_energy` or `magneticQuadForm_eq_zero_iff` breaks the
+signed energy/kernel theorems: the magnetic module (delivered
+2026-08-25, QA-consumed only) carries weight from a second theorem
+family. The switching similarity `diag(g) · L_σ · diag(g) = laplacian A`
+(make the magnetic delivery's diagonal-gauge idea a real-matrix
+theorem) with eigenpair transfer is the classical "balanced ⟹
+spectrally unsigned" fact, the second consumer layer.
+
+**Plan.** Step 0 (this record): carrier `V → V → ℝ` with explicit ±1
+and loop-unsigned hypotheses, matrix-first, no new type; the π-flux
+join; kernel characterization via the magnetic gauge route; the
+walk-collapse (supportGraph Walk induction, the electrical program's
+pattern). Step 1: a new section of `Magnetic.lean` (the kernel at
+action level: aligned → `M *ᵥ x = 0` row algebra, composed with the
+delivered form-level iff), the new `GraphTheory/Signed.lean`
+(`signedAdj`/`signedLaplacian`, the magnetic join theorem, the signed
+energy identity, kernel ↔ aligned, the balance iff headline, positive
+definiteness under frustration, the switching similarity + eigenpair
+transfer), QA in a new `Signed_QA.lean` (balanced path, frustrated
+triangle, the disconnected conclusion-level fence, the loop-sign
+fence, the switching-agreement and eigentransfer pins at the
+independently known path spectrum), then the record sweep (radar axis
+1, README, scoreboard, index map, the coverage map's graph-model row
+if stale). Zero new axioms; spike first in `wip/sg_spike.lean`; prior
+runs' uncommitted deliveries preserved untouched.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The ρ_k partition-minimum packaging — the classical λ_k ≤ 2ρ_k
+statement form at the delivered every-family certificate;
+`proposals/multiway-expansion.md` (the follow-on delivery record),
+run 1, 2026-08-26, run `20260826T181445Z-run-1`; selected per the
+empty High/Medium Active table by the center-out policy as the
+standing handoff's named top candidate (the multiway hard direction
+stays gated on a named consumer): DELIVERED — pure hard crust, zero
+new axioms (count stays 10; `#print axioms` via `wip/rho_axcheck.lean`
+on all 34 audited declarations — 9 public + 25 QA: exactly `propext,
+Classical.choice, Quot.sound`, every one). QA 2422 → 2444 (+22 in
+`MultiwayCheeger_QA.lean`, the file 73 → 95 by the generator
+metric). Radar axis 4 raised 4.5 → 5.0 at the pre-recorded trigger
+(the ρ_k packaging OR the multiway hard direction).**
+
+**Delivered** (a new "The ρ_k packaging: the partition minimum"
+section of `GraphTheory/Multiway.lean`; no new imports, no umbrella
+change): `IsMultiwayPartition` (nonempty, pairwise disjoint, covering
+— the partition predicate the every-family form deliberately did not
+need), `maxPartConductance` (the `sSup` of the part-conductance range;
+`k = 0` the documented junk value), `finset_univ_sup'_eq_sSup_range`
+(the join to the delivered theorems' `sup'` statement shapes — ℝ's
+conditional completeness rules out `iSup` syntax, so the packaged
+definition is `sSup`-based with the bridge proved once),
+`maxPartConductance_const`, `multiwayExpansion A k := sInf` over the
+k-way partitions' maxima (the classical ρ_k / k-way expansion
+constant; `k > card V` the documented `sInf ∅ = 0` junk,
+hypothesis-gated), `multiwayExpansion_le` (the `csInf` bound at
+finiteness-supplied `BddBelow`), **attainment**
+`exists_isMultiwayPartition_eq_multiwayExpansion` (`Set.Nonempty.csInf_mem`
+at the value set's finiteness — a subset of the range over the
+Fintype of k-part families; attainment is the packaging's *only* new
+content, exactly as priced), the headline **`cheeger_upper_bound_multiway_rhoK`**
+(`evals (L_sym) ⟨k−1⟩ ≤ 2 · multiwayExpansion A k` at `2 ≤ k ≤ card V`
+with a partition — the classical Lee–Gharan–Trevisan statement form,
+the every-family conductance theorem consumed at the attained
+minimizer, no new engine), and the existence supplier
+`exists_isMultiwayPartition_of_le_card` (injection `Fin k ↪ V` via
+`Function.Embedding.nonempty_of_card_le` + complement-absorbing last
+part, discharging the headline's `hex` in the common case).
+
+**QA (+22), non-circular:** the C₄ second-eigenvalue pin **λ₂ (L_sym
+C₄) = 1 with both sides independent** — `≤ 1` by the counting bridge
+`evals_le_of_card_eigvalOf_le` at the kernel witness `√D·1` (through
+the shelf supplier `normalizedLaplacian_mulVec_degreeSqrt_onesVec`)
+and the raw-entrywise mode `![1,0,−1,0]` at `1`, two distinct
+eigenbasis indices; `≥ 1` by the sInf engine
+`secondEval_variational_of_ker` at `√D·1` with the entrywise
+quadratic-form identity `xᵀL_sym x = ∑xᵢ² − (x₀+x₂)(x₁+x₃)` (every
+constraint-set Rayleigh quotient is `‖x‖² + (x₀+x₂)² / ‖x‖² ≥ 1`;
+nonemptiness witnessed by the mode at Rayleigh exactly `1`); the
+star instance **ρ₂(C₄) = 1/2 exact** (the adjacent-pair partition
+witness above, the headline joined to the pinned λ₂ below — a broken
+attainment, a wrong constant, or a wrong minimum breaks the
+equality); **the minimum is not vacuous** (`ρ₂ = 1/2 < 1 =
+maxPartConductance` at the diagonal partition, conductance `4/4 = 1`
+computed raw — attainment exercised, not decorated); `ρ₂(K₂) = 1` and
+`ρ₃(P₃) = 1` at the pre-existing independent top-eigenvalue pins
+(with the P₃ singleton-conductance pins `2/min(2,2)`, `1/min(1,3)`
+computed raw); the **empty-set junk fence** — no 3-partition of two
+vertices exists (a chosen point per part is an injection `Fin 3 ↪
+Fin 2`), so `ρ₃(K₂) = sInf ∅ = 0` (`Real.sInf_empty`, the junk
+convention the subgaussian repair documents) — partition-existence
+load-bearing, not decorative; and the supplier instance at `3 ≤ 4`.
+
+**Verification:** spike first (`wip/rho_spike.lean`, module side and
+QA side iterated to zero errors/warnings before any module touched;
+technique findings recorded in the proposal's delivery record — the
+`sSup`-of-range shape forced by ℝ's conditional completeness,
+`csInf_le`'s `BddBelow` from finiteness, `le_csInf` taking
+nonemptiness, `Set.Nonempty.csInf_mem` for attainment, the
+`disjoint_insert`/`disjoint_singleton` argument-order pair, the
+namespace-reopening trap (a second `namespace
+SpectralGraphTheory.MultiwayQA` inside a still-open
+`SpectralGraphTheory` lands declarations in the *doubled* namespace),
+and `sup'`-H-witnesses blocking `rw` across statements — bounds
+derived by `le_trans` at one's own H instead); `lake env lean` —
+zero errors/zero warnings on both changed modules; explicit `lake
+build` targets ✔ (module 2191/2191, QA 2192/2192; the axcheck hit
+the stale-olean trap once — unknown QA identifiers until the explicit
+QA-target rebuild, the documented remediation); `#print axioms` via
+`wip/rho_axcheck.lean` — the standard three only, all 34; **full
+`lake build` ✔ (2385/2386, "Build completed successfully")
+immediately followed by `check_build_completeness.py` — 109/109
+fresh, 0 stale, 0 missing, exit 0**; `lint_axioms` (10, no issues),
+`check_citations`, `check_markdown_links` pass after the record
+sweep; scoreboard regenerated idempotent (**2444/10/0**, md5-stable).
+Records updated: the proposal (the follow-on delivery record + the
+status header), `proposals/README.md` (the Delivered row; the
+natural-candidates paragraph), README (2444; the status-paragraph
+clause; the module-table clause; the radar-snapshot table synced),
+the radar (QA axis synced 2422 → 2444 across 57 modules; axis 4
+raised 4.5 → 5.0 at the pre-recorded trigger with the reason
+amended in place), the scoreboard (four verification rows + the
+interpretation bullet), the index map (the Multiway section's six
+new rows + the intro clause), backlog item 3 (the delivery update;
+the residue narrowed to the hard direction alone), the module and
+QA docstrings, this plan, and the activity log. Nothing committed;
+the prior runs' uncommitted deliveries preserved untouched.
+
+**Next milestone (open):** see the Active milestone block above.
+
+------
+
+## Delivered milestones (most recent first)
+
+**Multiway expansion — the higher-order Cheeger easy direction's
+every-family form; `proposals/multiway-expansion.md` (new this
+delivery, COMPLETE); opened by run 1, 2026-08-26, run
+`20260826T083858Z-run-1` (the Step-0 verdict in the proposal before any
+shelf Lean, plus the full spike `wip/mw_spike.lean`), landed by
+continuation `20260826T133118Z-run-1` (engine, application layer,
+headlines, QA, scoreboard regeneration — session ended before
+verification), verified and recorded by continuation
+`20260826T165654Z-run-1`; selected per the empty High/Medium Active
+table by the center-out policy as the standing handoff's named top
+candidate, priced as a multi-run program whose Step-0 dissolved both
+obstructions and collapsed it to one delivery: DELIVERED — pure hard
+crust, zero new axioms (count stays 10; `#print axioms` via
+`wip/mw_axcheck.lean` on all 33 audited declarations — 15 public + 18
+QA: exactly `propext, Classical.choice, Quot.sound`, every one,
+re-run by the closing run after the final source state). QA
+2349 → 2422 (+73, `MultiwayCheeger_QA` a new file).**
+
+**Delivered:** (1) the k-general engine in `Spectral.lean` — the
+order-statistics↔counting bridge `evals_le_of_card_eigvalOf_le` (the
+shelf had only the two endpoint instances), the general-k subspace
+Rayleigh–Ritz engine `evals_le_of_linearIndependent` (a k-dimensional
+linearly independent family whose every combination satisfies
+`quadForm ≤ t · ‖·‖²` certifies `evals ⟨k−1⟩ ≤ t` — no PSD, no kernel
+hypothesis; the k−1 smallest-eigenvalue eigenvectors impose at most k−1
+constraints, so a nonzero survivor exists by
+`LinearMap.ker_ne_bot_of_finrank_lt`), plus the QA-support spin-offs
+`evals_sum_eq_trace` and `exists_eigvalOf_eq_of_mulVec_eq_smul` (the
+eigenvalue-witness bridge QA uses to pin spectra without computing
+them); (2) the new `GraphTheory/Multiway.lean` (umbrella import; no
+other module touched) — `partIndicator`/`multiwayCombination` (the
+plain *uncentered* part indicators — the Step-0 verdict: no centering
+anywhere), the per-part energy identity
+`quadForm_laplacian_partIndicator` (`xᵀLx = boundary`, load-bearing on
+`laplacian_quadForm`), the weighted-norm identity, the absorption lemma
+`laplacian_quadForm_multiwayCombination_le` (`xᵀLx ≤ 2 ∑ cᵢ²
+boundary(Sᵢ)` — each crossing pair pointwise at `(a−b)² ≤ 2a² + 2b²`;
+the theorem's constant 2 is exactly this absorption constant), and the
+headlines `cheeger_upper_bound_multiway` / `_conductance`
+(`evals (L_sym) ⟨k−1⟩ ≤ 2 · maxᵢ boundary(Sᵢ)/vol(Sᵢ)`, resp.
+conductance at `2 ≤ k`, for every disjoint nonempty k-family on every
+symmetric nonnegative positive-degree graph — the every-family form:
+no partition-space attainment, no ρ_k minimum; the delivered irregular
+pair is the k = 2 instance); (3) QA at the proposal's six obligations —
+the tight k = n equalities on K₂ (`2 = 2·1`, both forms, against the
+raw anti-aligned-eigenvector pin) and the all-rational C₄ (`λ₄ = 2
+= 2·1` by alternating vector + trace-`4`), the P₃ non-covering family
+(the every-family scope exercised), the P₃ k = 3 singleton partition
+with `λ₃ = 2` pinned by trace arithmetic + the raw eigenvector
+`![1, −√2, 1]` through the new spin-off bridges, the k = 1
+zero-constraint edge, absorption pinned at *equality* on both fixtures,
+and the C₄ cyclic-pair **overlap fence** — every other hypothesis
+verified (φ = 1/2 each, raw), disjointness provably failing, the
+dropped conclusion refuted at `2 > 1`.
+
+**Verification (the closing run, from scratch):** `lake env lean` —
+zero errors on `Spectral.lean` (8 warnings, all pre-existing in HEAD;
+the new engine block adds none), `Multiway.lean`, and the QA file (zero
+warnings); explicit `lake build` targets ✔ (the three changed modules);
+`#print axioms` via `wip/mw_axcheck.lean` — the standard three only,
+all 33; **full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 109/109 fresh, 0 stale, 0 missing,
+exit 0**; `lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass after the record sweep; scoreboard
+regenerated idempotent (**2422/10/0**, md5-stable). Records updated:
+the proposal (COMPLETE header + delivery record with technique notes),
+`proposals/README.md` (the Delivered row; the natural-candidates
+paragraph re-ranked), README (2422; the status-paragraph clause; the
+module-table clause), the radar (QA axis synced 2349 → 2422 across 57
+modules; axis 4's multiway clause — held 4.5 with the explicit
+protocol reason and the named 5.0 trigger), the scoreboard (two
+verification rows + the interpretation bullet), the index map (the
+Multiway section + 4 engine rows + the status line), backlog item 3
+(the delivery update + the re-priced residue), this plan, and the
+activity log (the continuation run's terminal entry — left unwritten
+by its session — plus this run's). Nothing committed; the prior runs'
+uncommitted deliveries preserved untouched.
+
+**Next milestone (open):** see the Active milestone block above.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The irregular Fiedler instantiation — the irregular Cheeger family's
+algorithm-facing capstone, `cheeger_sweep_cut_normalized` at its first
+eigenvector input;
+`proposals/irregular-cheeger-variational-transfer.md` (the follow-on
+delivery record), run 1, 2026-08-26, run `20260826T064300Z-run-1`;
+selected per the empty High/Medium Active table by the center-out
+policy as the standing handoff's named *bounded* candidate (the other
+named candidate, multiway expansion, priced — in this plan's prior
+Active block — as a multi-run program this run deliberately did not
+start): DELIVERED — pure hard crust, zero new axioms (count stays 10;
+`#print axioms` via `wip/ifc_axcheck.lean` on all 23 audited
+declarations — 14 public + 9 QA: exactly `propext, Classical.choice,
+Quot.sound`, every one). QA 2340 → 2349 (+9 in
+`IrregularCheeger_QA.lean`).**
+
+**Delivered** (a new "The irregular Fiedler instantiation" section of
+`GraphTheory/VariationalTransfer.lean`; no new imports, no umbrella
+change): the normalized-Laplacian Fiedler interface
+(`fiedlerIndexNormalized`/`fiedlerIndexNormalized_eigvalOf` — the
+`Fiedler.lean` pattern at `L_sym`; `fiedlerVectorNormalized` with the
+eigen equation, unit norm, nonvanishing, `quadForm`/`rayleigh` both
+`λ₂`) and the sweep vector `fiedlerSweepVector := degreeInvSqrt A *ᵥ u`
+(the `D^{-1/2}` pullback — the generalized eigenfunction of `(L, D)`
+at `λ₂`, the vector the spectral-partitioning algorithm actually
+sorts), with the stretch cancellation `√D f = u`
+(`degreeSqrt_mul_degreeInvSqrt`), nonvanishing, and the **constraint
+conversion** `fiedlerSweepVector_sum_deg_eq_zero`: the sweep family's
+own hypothesis `∑ i, deg A i * f i = 0` *obtained* from the
+eigen-orthogonality hinge `eigvecOf_ortho_of_mulVec_eq_zero` at the
+true kernel vector `√D·1` (`0 < λ₂` from the delivered connectivity
+transfer — connectivity's exact entry point) rather than assumed. The
+headline **`fiedler_sweep_cut_normalized`**: on every connected
+symmetric nonnegative positive-degree graph with `2 ≤ card V`, an
+explicit nonempty proper closed superlevel/sublevel cut **of the sweep
+vector itself** with `conductance A S ^ 2 ≤ 2 * λ₂ (L_sym)` — the
+classical `√(2λ₂)` scale, exactly the regular family's
+`fiedler_sweep_cut` constant `2 lambda2 / d` on the regular cone.
+Load-bearing joins: the constraint shape (an unweighted zero-sum shape
+would fail the sweep hypothesis), the stretch cancellation and
+`fiedlerVectorNormalized_rayleigh` (the spectral side closes at the
+eigenvector, not at any hand-built test vector), and the
+connectivity-supplied gap.
+
+**QA (+9):** the exact pin `icPathAdj_secondEval_eq_one` — `λ₂ (L_sym
+P₃) = 1`, the new `≥ 1` side (`icPathAdj_secondEval_ge_one`) by the
+`2 x₁²` sum-of-squares through `secondEval_variational_of_ker` (the
+sInf set's nonemptiness witnessed by the concrete eigenpair
+`![1, 0, -1]` at Rayleigh exactly `1`; the `≤ 1` eigenpair side
+predates the whole Fiedler family — non-circular, and the family's
+Cheeger bracket on `P₃` collapses to `1/2 ≤ 1 ≤ 2`); the instances
+`ifc_p3_instance_QA` (at the exact pin and the exhaustive
+all-cuts-are-`1` pin) and `ifc_edge_instance_QA` (at the pinned
+classical `λ₂ = 2`, singleton conductance `1 ≤ 4`); the pullback
+algebra raw at the concrete eigenpair (`ifc_pullback_cancel_raw_QA`,
+`ifc_pullback_zero_sum_raw_QA` — the latter through the public pairing
+identity joined to the file's independent orthogonality pin); and the
+connectivity mechanism fenced (`ifc_disc_hinge_fence_QA` with the
+block-indicator kernel witness and the degree pins): on the
+disconnected fixture `λ₂ = 0` (the file's two-route pin) and a nonzero
+kernel eigenvector of `L_sym` pairs to `2 ≠ 0` with `√D·1` —
+kernel-ness provably does not supply the hinge (the conclusion-level
+statement is not falsifiable there, since a kernel vector's sweep may
+find a conductance-`0` component cut — the fence lives at the
+mechanism, exactly where the hypothesis enters).
+
+**Verification:** spike first (`wip/ifc_spike.lean` + QA spike
+`wip/ifc_qa_spike.lean`, the full routes green before any module
+touched; technique findings recorded in the proposal's delivery
+record: the scoped `Matrix` notation in standalone files; `le_csInf`
+taking the set's nonemptiness in this pin — witnessed by the concrete
+eigenpair, itself a meaningful pin; the matrix-literal/degree
+evaluation recipe; `Real.sqrt_ne_zero'.mpr`; `linear_combination` for
+`√2`-comm rearrangements; unary-minus shaping in scalar lemmas; the
+stale-olean rebuild-before-axcheck trap hit once and remediated by the
+explicit QA target); `lake env lean` zero errors/zero warnings on both
+changed modules; explicit `lake build` targets ✔ (module 2190/2190,
+QA 2193/2193); `#print axioms` on all 23 — the standard three only,
+re-run after the final source state; **full `lake build` ✔ (2384/2385,
+"Build completed successfully") immediately followed by
+`check_build_completeness.py` — 107/107 fresh, 0 stale, 0 missing,
+exit 0**; `lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**2349/10/0**,
+idempotent by md5). Records updated: the proposal (the follow-on
+marked delivered + the Fiedler-instantiation delivery record with
+technique findings), `proposals/README.md` (the Delivered row; the
+natural-candidates paragraph re-ranked with multiway's multi-run
+pricing), README (2349; the module-table clause), the radar (QA axis
+synced 2340 → 2349; the axis-4 Fiedler-instantiation clause, held 4.5
+with the protocol reason), the scoreboard (two verification rows + the
+interpretation bullet), `index/map/spectral_graph.md` (the
+Fiedler-instantiation section + 9 declaration rows), backlog item 3
+(the update + the multiway pricing), the module and QA docstrings,
+this plan, and the activity log. Nothing committed; the prior runs'
+uncommitted deliveries preserved untouched.
+
+**Next milestone (open):** see the Active milestone block above.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The volume-weighted sweep-cut extraction — the irregular Cheeger
+pair's explicit witness level set, the regular family's attainment
+route ported to the volume measure;
+`proposals/irregular-cheeger-variational-transfer.md` (the follow-on
+delivery record), run 1, 2026-08-26, run `20260826T045752Z-run-1`;
+selected per the empty High/Medium Active table by the center-out
+policy as the top natural candidate named in the standing handoff:
+DELIVERED — pure hard crust, zero new axioms (count stays 10;
+`#print axioms` via `wip/vsc_axcheck.lean` on all 13 audited
+declarations — 2 public + 11 QA: exactly `propext, Classical.choice,
+Quot.sound`, every one). QA 2330 → 2340 (+10 in
+`IrregularCheeger_QA.lean`, the file 166 → 176).**
+
+**Delivered** (two new sections, no new modules, no new imports, no
+umbrella change): `sweep_level_extract_vol` — `Cheeger.lean`'s new
+`VolumeSweepExtraction` section: for any `y` whose nonempty closed
+superlevel sets at positive levels are volume-minority-side with
+positive degree-weighted mass, a positive level `t` whose closed
+superlevel set `S = {i : t ≤ y i ^ 2}` is nonempty, proper, and
+satisfies `conductance A S ^ 2 ≤ E'(y) / ∑ i, deg A i * y i ^ 2` — the
+regular extraction's attainment route (`Finset.exists_min_image`) at
+the `boundary / vol` ratio (card denominator replaced by the level
+set's volume, positivity from `vol_pos_of_pos_deg` at the attained
+witness), the degree-weighted layer-cake integration a structural
+clone of `coarea_core_vol`'s own proof (`sum_deg_mul_indicatorLE_eq_vol`
+the mass side, `sum_pairAbs_eq_two_boundary` the pair side), closed by
+the already-degree-weighted Component A `core_sum_abs_sq_sub_sq` and
+the minority-volume conversion `min (vol S) (vol Sᶜ) = vol S` (pure
+`vol_compl` arithmetic — no `vol_eq_of_regular` anywhere); no `2 ≤
+card V` hypothesis (minority at a nonempty level forces the complement
+nonempty). And `cheeger_sweep_cut_normalized` —
+`VariationalTransfer.lean`'s new irregular-sweep-cut section, placed
+with the family: every nonzero degree-weighted zero-sum `f` has a
+nonempty proper closed superlevel or sublevel cut of `f` itself — a
+member of the sweep family the spectral-partitioning algorithm
+actually enumerates — with `conductance A S ^ 2 ≤ 2 * R_{L_sym}(√D
+f)`: the volume median feeding the extraction's hypothesis verbatim
+for both parts (`minority_{pos,neg}Part_vol`), the product test with
+degenerate single-part cases, the fused contraction
+(`sum_edgeWeight_sq_posPart_add_sq_negPart_le`) and weighted norm
+split (`median_parts_norm_vol`) consumed verbatim, the closing
+normalization `2 * R_{L_sym}(√D f) = E'(f) / ∑ deg f²`, and the
+`mem_of_{pos,neg}Part_sq` level conversions at the offset `√t` —
+exactly the hard direction's own constraint shape. **The whole
+delivered `VolumeHardDirection` layer is consumed a second time; it
+now carries weight from two theorem families.**
+
+**QA (+10):** the extraction witness *forced* on the genuinely
+irregular `P₃` fixture at `y = ![1, 0, 0]` (the level-membership iff
+pins the returned set to `{0}`, conductance `1` from the file's
+exhaustive-cut pin, the bound `1 ≤ 2/1` both sides computed raw); the
+sweep instances on the pair's shared `P₃` cut test vector (the family
+characterization proved in-instance — `{0}` superlevel, `{1, 2}`
+sublevel the only nonempty proper members — so `1 ≤ 8/3` at the
+independently pinned `R = 4/3`: one test object now consumed by both
+Cheeger directions *and* the sweep) and on `K₂` (`1 ≤ 4` at the pinned
+`R = 2`, both family members characterized); and the degree-weighted
+zero-sum fence in proved form (`f = ![1, 2]` on `K₂`: `∑ deg · f = 3
+≠ 0`, exactly two nonempty proper swept members each of conductance
+`1`, the demanded bound `1 ≤ 2 * (1/5)` with `R = 1/5` computed raw —
+refuted for *every* candidate, `horth` isolated exactly).
+
+**Verification:** spike first (`wip/vsc_spike.lean`, both routes green
+before any module touched — the per-part extraction on its first
+elaboration after one tactic trim; technique findings recorded in the
+proposal's delivery record: the
+`Fin.exists_eq_zero_or_eq_one_or_eq_two` name gap closed by a local
+`fin_cases` clone, entry-fact lemmas replacing depth-2 matrix-literal
+`simp only` reductions inside inline `linarith` blocks, `▸`-direction
+equality transports at `Fin` cases, and `laplacian_quadForm` needing
+its proof argument explicit in `rw`); `lake env lean` zero
+errors/zero warnings on both changed public modules and the QA file;
+explicit `lake build` targets ✔ (module 2190/2190, QA 2193/2193);
+`#print axioms` on all 13 — the standard three only, re-run after the
+final source state; **full `lake build` ✔ (2384/2385, "Build completed
+successfully") immediately followed by `check_build_completeness.py`
+— the fence earned its keep again mid-verification (the QA docstring
+edit after its last target build left the artifact STALE under a
+passing full build; the documented remediation — the explicit QA
+target's real 2193-target re-elaboration, then a fresh full build —
+closed it): 107/107 fresh, 0 stale, 0 missing, exit 0**;
+`lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**2340/10/0**,
+idempotent by md5). Records updated: the proposal (the follow-on
+marked delivered + the sweep-extraction delivery record),
+`proposals/README.md` (the Delivered row; the natural-candidates
+paragraph re-ranked), README (2340; the status-paragraph sweep clause;
+the module-table clause), the radar (QA axis synced 2330 → 2340; the
+axis-4 sweep-extraction clause, held 4.5 with the protocol reason),
+the scoreboard (two verification rows + the interpretation bullet),
+`index/map/spectral_graph.md` (the VT table row, the extraction
+section + row), backlog item 3 (the update), both module docstrings
+and the QA header, this plan, and the activity log. Nothing committed;
+the prior runs' uncommitted deliveries preserved untouched.
+
+**Next milestone (open):** see the Active milestone block above.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The connectivity transfer — `0 < λ₂(L_sym) ↔ connected`; the
+irregular-Cheeger delivery's top priced follow-on;
+`proposals/irregular-cheeger-variational-transfer.md` (follow-on
+delivery record), run 1, 2026-08-26, run `20260826T024528Z-run-1`;
+selected per the empty High/Medium Active table by the center-out
+policy as the top natural candidate named in the standing handoff:
+DELIVERED — pure hard crust, zero new axioms (count stays 10;
+`#print axioms` via `wip/ctc_axcheck.lean` on all 31 audited
+declarations — 7 public + 24 QA: exactly `propext, Classical.choice,
+Quot.sound`, every one). QA 2280 → 2330 (+50 in
+`IrregularCheeger_QA.lean`, the file 116 → 166).**
+
+**Delivered** (a new "The connectivity transfer" section of
+`GraphTheory/VariationalTransfer.lean`; no new imports, no umbrella
+change): the algebra layer (`degreeSqrt_mul_normalizedLaplacian` — the
+left-multiplied congruence `√D · L_sym = L · D^{-1/2}` — and the
+kernel-cone lift
+`normalizedLaplacian_mulVec_degreeSqrt_of_laplacian_mulVec_eq_zero`),
+**the kernel characterization**
+`normalizedLaplacian_mulVec_eq_zero_iff` (on connected input the
+normalized kernel is exactly the stretched-constant line — the
+proposal's named "natural entry" now in iff form, consuming the
+electrical program's `laplacian_mulVec_eq_zero_iff_exists_const`), the
+**Fiedler mirror** `secondEval_normalizedLaplacian_pos_of_connected`
+(the combinatorial `lambda2_pos_of_connected`'s normalized analogue:
+PSD pin + sorted + the double-bottom multiplicity pin +
+orthonormality contradiction), the **disconnected converse**
+`secondEval_normalizedLaplacian_eq_zero_of_not_connected` (component
+indicator → combinatorial kernel → cone lift → Gram–Schmidt against
+`√D·1` → the delivered `secondEval_le_rayleigh_of_ker` + PSD → `λ₂ =
+0` exactly), the **packaged equivalence**
+`secondEval_normalizedLaplacian_pos_iff_connected` (algebraic
+connectivity *is* connectivity in the volume-weighted world), and the
+**Cheeger consumer corollary** `cheegerConstant_pos_of_connected`
+(`0 < λ₂ ≤ 2φ` through the delivered easy direction — the pair's
+positivity content made explicit on connected irregular graphs).
+
+**QA (+50):** the P₃ positive instance joined to the file's
+independent eigenpair bracket (`0 < λ₂ ≤ 1`, non-circular); the K₂
+instance joined to the pinned exact `λ₂ = 2` and the corollary joins
+(`0 < φ` against pinned `φ = 1` on both fixtures); the kernel iff both
+directions on genuinely irregular input (span membership forced to
+`c = 1`; `onesVec ∉ ker` through the iff); the **disconnected
+two-edge negative witness** with `λ₂ = 0` by **two independent
+routes** (the theorem; and raw kernel witness + Gram–Schmidt + engine,
+no connectivity statement anywhere); the **`hconn` fence** in proved
+form; and the **`hnn` fence on a connected signed fixture**
+(`0,2,2;2,0,-1;2,-1,0`) — at the kernel characterization (raw kernel
+vector off the stretched line) and at the headline (the engine with a
+fixture-specific squares PSD supplier `xᵀLx = (x₀−x₁−x₂)²`: the
+shelf's `normalizedLaplacian_psd` needs `hnn`, the engine does not —
+`hnn` isolated exactly where it enters).
+
+**Verification:** spike first (`wip/ctc_spike.lean` + QA spike, full
+routes green before any module touched; technique findings recorded in
+the proposal's delivery record — the protected `Reachable.refl/trans`
+constructors, `mul_inv_cancel₀`'s shape, the secondEval `show`-unfold,
+the stale-olean rebuild-before-QA trap hit once and remediated, and
+if-ladder fixture definitions replacing depth-2 matrix-literal entry
+computation); `lake env lean` zero errors/zero warnings on both
+changed modules; explicit `lake build` targets ✔ (2190/2190, 2193/
+2193); `#print axioms` on all 31 — the standard three only; **full
+`lake build` ✔ (2384/2385 targets, "Build completed successfully")
+immediately followed by `check_build_completeness.py` — 107/107 fresh,
+0 stale, 0 missing, exit 0**; `lint_axioms` (10, no issues),
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+(**2330/10/0**, idempotent by md5). Records updated: the proposal (the
+follow-on marked delivered + the delivery record),
+`proposals/README.md` (the natural-candidates paragraph re-ranked),
+README (2330; the module-table clause), the radar (QA axis synced
+2280 → 2330; the axis-3 connectivity-transfer clause), the scoreboard
+(two verification rows + the review date), `index/map/spectral_graph.md`
+(the section + 7 declaration rows), backlog item 3 (the update), this
+plan, and the activity log. Nothing committed; the prior runs'
+uncommitted deliveries preserved untouched.
+
+**Next milestone (open):** see the Active milestone block above.
+
+------
+
+
+
+**Irregular Cheeger hard direction — the volume-weighted coarea/median
+program, the proposal COMPLETE (both halves);
+`proposals/irregular-cheeger-variational-transfer.md`, opened by run 1
+2026-08-25 (`20260825T221207Z-run-1` — intent, Step-0 survey, and the
+full Lean drafted before the session was interrupted), verified,
+checked, and recorded by continuation run `20260826T010711Z-run-1`;
+selected per the empty High/Medium Active table by the center-out
+policy as the top natural candidate named in the standing handoff:
+DELIVERED — pure hard crust, zero new axioms (count stays 10;
+`#print axioms` via `wip/ich_axcheck.lean` on all 40 audited
+declarations — 16 public + 24 QA: exactly `propext, Classical.choice,
+Quot.sound`, every one). QA 2249 → 2280 (+31 in
+`IrregularCheeger_QA.lean`, the file 85 → 116).**
+
+**Delivered:** `cheeger_lower_bound_normalized` —
+`cheegerConstant A ^ 2 / 2 ≤ secondEval (normalizedLaplacian A)` on
+arbitrary symmetric nonnegative positive-degree graphs with
+`2 ≤ card V` (no regularity, no connectivity, exactly the easy
+direction's hypotheses — **the full Cheeger pair now holds in the
+volume-weighted measure on every positive-degree weighted graph**):
+(1) the `VolumeHardDirection` section of `Cheeger.lean` — the volume
+arithmetic (`vol_le_vol_of_subset`, `vol_empty`), the volume median
+`exists_median_vol` (the same maximizing-vertex/minimal-member Finset
+argument with `vol` replacing `card`), minority conductance at volume
+strength `boundary_ge_of_minority_vol` (where `min (vol S) (vol Sᶜ) =
+vol S` is pure `vol_compl` arithmetic, no `vol_eq_of_regular`), the
+degree-weighted mass side, the layer-cake core `coarea_core_vol`, the
+per-part bound `hardDirection_perPart_vol` (the Step-0 finding holding:
+the regular family's `core_sum_abs_sq_sub_sq` and fused contraction
+are already degree-weighted and consumed verbatim — no regularity
+bridge anywhere), the minority parts, and the weighted norm split;
+(2) the general-kernel sInf engine `secondEval_variational_of_ker` in
+`Spectral.lean` (Courant–Fischer at an arbitrary kernel vector `w` —
+the delivered `secondEval_le_rayleigh_of_ker` reused as its hard half,
+the new witness half producing an orthogonal candidate at both
+`0 < λ₂` and the `λ₂ = 0` double bottom; every future irregular
+consumer, whose operator is killed by `√D·1` not `1`, shares it);
+(3) `VariationalTransfer.lean` (one new import — Cheeger, acyclic):
+`dotProduct_degreeSqrt_mulVec_mixed`/`_onesVec` (the irregular
+variational constraint: `√D x ⊥ √D·1` iff `x` has degree-weighted zero
+sum), `cheeger_sweep_normalized` (the hard direction at test-vector
+level), and the headline. **QA (+31):** the P₃ volume-median pins
+(pinned and *forced*), the K₂ coarea equality raw and as a theorem
+instance, the sweep on K₂ (`1/2 ≤ 2` against the pinned `λ₂ = 2`) and
+on P₃'s cut test vector (`1/2 ≤ 4/3` — the same object the easy
+direction consumed; one test object, both bounds of the pair), the
+headline **joined to the easy delivery's independently pinned spectral
+bracket** (`φ²/2 = 1/2 ≤ λ₂` with the eigenpair-witness `λ₂ ≤ 1` —
+non-circular), the K₂ regular recovery at `λ₂ = 2` raw, and the
+proved-form fences: minority-drop at the full vertex set (coarea and
+boundary lemmas), nonnegativity-drop on the headline (signed adjacency
+`!![2,−1;−1,2]]`, `cheegerConstant = −1`, exactly `hnn` isolated).
+
+**Verification:** `lake env lean` — zero errors/zero warnings on all
+three public modules and the QA file; `#print axioms` via
+`wip/ich_axcheck.lean` on all 40 — the standard three only; **full
+`lake build` ✔ (2385 targets, "Build completed successfully")
+immediately followed by `check_build_completeness.py` — 107/107 fresh,
+0 stale, 0 missing, exit 0**; `lint_axioms` (10, no issues),
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+(**2280/10/0**, idempotent by md5). Records updated: the proposal
+(status header both-halves COMPLETE + the hard-direction delivery
+record), `proposals/README.md` (the Delivered row; the
+natural-candidates paragraph re-ranked), README (2280; the
+status-paragraph hard-direction clause; the module-table row; the
+radar-snapshot table synced to the current scores — a factual repair,
+it had drifted since August 22), the radar (axis 4's hard-direction
+clause and the retired absent category, held 4.5 with the honest
+protocol reason; the QA axis synced 2249 → 2280; the review date), the
+scoreboard (two verification rows + the interpretation bullet), the
+index map (the `VolumeHardDirection` rows, the
+`secondEval_variational_of_ker` engine row, and the
+hard-direction table under the VariationalTransfer section), backlog
+item 3 (the delivery update), this plan, and the activity log.
+Nothing committed; the prior runs' uncommitted deliveries preserved
 untouched.
+
+**Next milestone (open):** see the Active milestone block above.
+
+------
+
+## Delivered milestones (most recent first)
+
+**Resolvent identity + general-symmetric avoidance layer — the
+consumer stub's two priced follow-ons, the bridge-consumer family
+closed; `proposals/hermitian-calculus-consumer-tikhonov-heat.md`,
+run 1, 2026-08-25, run `20260825T203027Z-run-1`; selected per the
+empty High/Medium Active table by the center-out policy as the top
+remaining unblocked bridge follow-on named in the standing handoff
+(and this run first closed the prior run's records gap — the
+magnetic delivery's terminal activity entry and plan retirement,
+both left unwritten when that session exited after committing
+`fac3019`): DELIVERED — pure hard crust, zero new axioms (count
+stays 10; `#print axioms` via `wip/resid_axcheck.lean` on all 17
+audited declarations — 6 public + 11 QA: exactly `propext,
+Classical.choice, Quot.sound`, every one). QA 2238 → 2249 (+11 in
+`FunctionalCalculus_QA.lean`'s Section G, no new file).**
+
+**Delivered:** the new "The resolvent identity" section of
+`GraphTheory/FunctionalCalculus.lean` (one new import — Resolvent,
+no cycle; `Tikhonov.lean` untouched): the *general-symmetric normal
+equation* `add_smul_one_mul_spectralCalc_tikhonovShrinkage_of_forall_
+add_ne_zero` (merely symmetric `M` under spectrum-avoidance
+`x + π ≠ 0`; the delivered PSD statement re-derived from it, shape
+unchanged), the *general-symmetric resolvent identity* by the
+calculus route (`cfc_inv` + `Matrix.nonsing_inv_eq_ring_inverse` at
+the additive layer — no determinant anywhere), the headline
+`spectralCalc_tikhonovShrinkage_eq_smul_inv` (`f(L) = π • (L + π•1)⁻¹`)
+by the matrix-algebra route — a three-layer load-bearing join
+consuming the Aug-19 resolvent program's
+`isUnit_det_add_smul_one_of_quadForm_nonneg` (its first
+FunctionalCalculus consumer) with `laplacian_psd` — the
+same-statement second route `'`, and the consumer corollary
+`tikhonovMinimizer_eq_smul_inv_mulVec` (`x* = π • ((L+πI)⁻¹ *ᵥ y)`,
+the textbook shifted-inverse solve). **QA (+11, Section G on the
+shared K₂ fixture):** the raw inverse `!![2/3,1/3;1/3,2/3]]`, both
+routes pinned to that same matrix (joined to Section E's calculus
+instance), the minimizer three-way join to the hand-solved Gaussian
+`tik_K2_eq`, the supplier witnessed (`det = 3`), and the two fences
+at the `π = -2` degeneration — the avoidance failure *proved
+spectral* (`2 = -π` exhibited as an eigenvalue), the singular
+inverse pinned to junk zero, the identity refuted at `1/2 ≠ 0`
+(`hπ`/`havoid` exactly isolated per theorem).
+
+**Verification:** spike first (`wip/resid_spike.lean`, all routes
+green before any module touched; the catches recorded in the
+delivery record — section-scoped QA opens, the explicit
+`IsHermitian` argument at concrete types for the spectrum rewrite,
+`Matrix.inv_eq_right_inv`'s single-hypothesis shape, the entrywise
+smul-slide, the stale-olean rebuild-before-QA-spike trap);
+`lake env lean` zero errors/warnings on both changed files; explicit
+`lake build` targets ✔ (module 2327/2327, QA 2331/2331);
+`#print axioms` on all 17 — the standard three only; **full
+`lake build` ✔ (2384/2385 targets, "Build completed successfully")
+immediately followed by `check_build_completeness.py` — 107/107
+fresh, 0 stale, 0 missing, exit 0** (re-run after the final
+docstring edits, same result); `lint_axioms` (10),
+`check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**2249/10/0**, idempotent by md5). Records updated: the
+proposal (delivery record + family-closed pricing), the prior
+magnetic run's terminal records (this run), `proposals/README.md`
+(the Delivered row; the progress paragraph; the natural-candidates
+paragraph — the family closed, irregular-Cheeger hard now the top
+named candidate), README (2249; the status-paragraph clause; the
+module-table row), the radar (QA row synced 2216 → 2249 across 56
+modules, repairing the stale count the magnetic delivery left), the
+scoreboard (two verification rows + the interpretation bullet),
+`index/map/spectral_graph.md` (+5 declaration rows + the delivery
+paragraph), the module docstring, this plan, and the activity log.
+Nothing committed.
+
+**Next milestone (open):** the center-out policy with an empty
+High/Medium queue — the **irregular-Cheeger hard direction** (the
+delivered easy direction's own priced follow-on: the volume-weighted
+coarea/median program for `φ²/2 ≤ λ₂`), the standing gated
+candidates (directed-axis rate; magnetic spectral, each gated on a
+named consumer), a named consumer pricing the wide-band minimax
+filter designs, or a fresh center-out candidate per
+`docs/6_SGT_BACKLOG.md`.
+------
+
+## Delivered milestones (most recent first)
+
+**Magnetic heat propagator — the bridge's first complex consumer;
+`proposals/hermitian-calculus-consumer-magnetic.md` COMPLETE; run 1,
+2026-08-25, run `20260825T180957Z-run-1`; DELIVERED and committed as
+`fac3019` (the session exited after committing but before appending
+its terminal activity entry and retiring this plan's Active block —
+both records closed by the next run, `20260825T203027Z-run-1`, on the
+evidence below; no source gap resulted, the commit itself carries the
+verification record): DELIVERED — pure hard crust, zero new axioms
+(count stays 10; `#print axioms` via `wip/magcfc_axcheck.lean` on all
+30 audited declarations — 8 public + 22 accessible QA: exactly
+`propext, Classical.choice, Quot.sound`, every one). QA
+2216 → 2238 (`MagneticCalculus_QA` a new file).**
+
+**Delivered** (a new section of `GraphTheory/FunctionalCalculus.lean`;
+`Magnetic.lean` untouched per the consumer pattern; one new import —
+Magnetic): `magneticHeat A Θ t` — the calculus of the delivered
+`magneticLaplacian` at `x ↦ e^{-t·x}` through Mathlib's
+`RCLike`-generic `cfc` at 𝕜 = ℂ directly, hypothesis-free for any
+directed weights and phases; the substantive general lemma
+**`cfc_mulVec_eq_smul_of_mulVec_eq_smul`** — the calculus acts at
+eigenvalues on EVERY eigenvector, proved by pure matrix algebra
+through the unitary diagonalization `Uᴴ * M * U = diagonal λ` with no
+eigenspace-completeness machinery (Mathlib's CFC file lacks it; every
+downstream complex consumer needs it); the entry form, the
+arbitrary-eigenvector action, the basis action (the proposal's literal
+ask), time zero, and the semigroup through the generic calculus
+algebra. QA +22: the flux pair `K₂` at antisymmetric phase π/2 with
+the closed form `½!![1+q, I(1−q); −I(1−q), 1+q]]` at `q = e^{-2t}`
+derived on the calculus route and verified by raw matrix arithmetic,
+the gauge-characterization cross-check, the diffusion fence
+(`magneticHeat … 1 ≠ 1`), and the zero-phase join to the delivered
+real `heatKernel`.
+
+**Verification (recorded in the delivery commit and the scoreboard
+rows dated 2026-08-25):** full `lake build` ✔ (2385 targets)
+immediately followed by `check_build_completeness.py` — 107/107
+fresh, 0 stale, 0 missing, exit 0; `lint_axioms` (10),
+`check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (2238/10/0). Records updated in that commit: the proposal
+(COMPLETE header + delivery record), `proposals/README.md` (the
+Delivered row + the progress paragraph naming the resolvent identity
+the top remaining unblocked follow-on), README (2238), the scoreboard,
+`index/map/spectral_graph.md`, this plan, and the activity log's
+in-progress entry.
+
+**Next milestone (selected):** the resolvent identity (the active
+block above) — this delivery's own recorded next candidate.
 ------
 
 ## Delivered milestones (most recent first)

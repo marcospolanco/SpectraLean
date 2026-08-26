@@ -1083,4 +1083,204 @@ theorem fc_heat_K2_not_one :
 
 end HeatReconciliation
 
+/-!
+## Section G: the resolvent identity on `K₂`
+
+The consumer stub's priced follow-on (2026-08-25): the Tikhonov filter
+*is* `π • (L + π•1)⁻¹`, witnessed on the same `K₂` fixture as
+Sections E/F by two independent routes — the matrix-algebra route
+(through the shelf resolvent program's invertibility supplier, its
+first functional-calculus consumer) and the calculus route (through
+`cfc_inv`) — pinned to the same concrete matrix as Section E's
+eigenbasis instance, joined to the hand-solved Gaussian minimizer, and
+fenced at the `π = -2` degeneration where both the shrinkage division
+and the shifted inverse go junk.
+-/
+
+section ResolventIdentity
+
+open Scaffold.Mathlib.GraphTheory.Tikhonov.QA
+open Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent
+
+/-- Avoidance at `π = 1` holds on `K₂`: every spectral point is `0` or
+`2` (Section E's eigenvalue pins), so `x + 1` is `1` or `3`. This is
+the general-symmetric theorems' hypothesis in the PSD regime. -/
+theorem fc_res_lapK2_avoid_one :
+    ∀ x ∈ spectrum ℝ (laplacian adjK2), x + 1 ≠ 0 := by
+  intro x hx
+  rw [Matrix.IsHermitian.eigenvalues_eq_spectrum_real
+    (isHermitian_of_isSymm lapK2_symmetric)] at hx
+  obtain ⟨i, hi⟩ := hx
+  have hi' : eigvalOf (laplacian adjK2) lapK2_symmetric i = x := hi
+  rw [← hi']
+  rcases lapK2_eigvalOf_two i with h | h
+  · rw [h]; norm_num
+  · rw [h]; norm_num
+
+/-- Avoidance at `π = -2` **fails**, and the failure is spectral:
+`2 = -π` is an eigenvalue of `K₂`'s Laplacian — proved here, not
+asserted, so the fence below exhibits the exact broken hypothesis. -/
+theorem fc_res_lapK2_avoid_neg2_fails :
+    ¬ ∀ x ∈ spectrum ℝ (laplacian adjK2), x + (-2 : ℝ) ≠ 0 := by
+  intro h
+  have hex : ∃ i, eigvalOf (laplacian adjK2) lapK2_symmetric i = 2 := by
+    rcases lapK2_eigvalOf_two 0 with h0 | h0
+    · rcases lapK2_eigvalOf_two 1 with h1 | h1
+      · exfalso
+        have hs := lapK2_eigvalOf_sum
+        simp only [Fin.sum_univ_two] at hs
+        rw [h0, h1] at hs
+        norm_num at hs
+      · exact ⟨1, h1⟩
+    · exact ⟨0, h0⟩
+  obtain ⟨i, hi⟩ := hex
+  have h2 : (2 : ℝ) ∈ spectrum ℝ (laplacian adjK2) := by
+    rw [Matrix.IsHermitian.eigenvalues_eq_spectrum_real
+      (isHermitian_of_isSymm lapK2_symmetric)]
+    exact ⟨i, hi⟩
+  exact h 2 h2 (by norm_num)
+
+/-- The shifted Laplacian at `π = 1` and its raw inverse: `L + 1•1 =
+!![2, -1; -1, 2]` with determinant `3`, so the inverse is
+`!![2/3, 1/3; 1/3, 2/3]` — computed by the right-inverse criterion on
+literal matrix arithmetic, no theorem about Laplacians involved. -/
+theorem fc_res_K2_inv :
+    (laplacian adjK2 + (1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))⁻¹
+      = !![2 / 3, 1 / 3; 1 / 3, 2 / 3] := by
+  have hshift : laplacian adjK2
+      + (1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ) = !![2, -1; -1, 2] := by
+    ext i j
+    simp only [Matrix.add_apply, Matrix.smul_apply, Matrix.one_apply,
+      lapK2_apply]
+    fin_cases i <;> fin_cases j <;> norm_num
+  rw [hshift]
+  refine Matrix.inv_eq_right_inv ?_
+  ext i j
+  fin_cases i <;> fin_cases j
+  <;> norm_num [Matrix.mul_apply, Fin.sum_univ_two, Matrix.one_apply]
+
+/-- **Route A pinned**: the headline (matrix-algebra route — the
+normal equation plus the shelf resolvent program's invertibility
+supplier) delivers `π • (L + π•1)⁻¹` at `π = 1`, and the raw inverse
+of the previous lemma makes it the concrete matrix
+`!![2/3, 1/3; 1/3, 2/3]` — *the same matrix Section E pinned for the
+calculus instance* `fc_lapK2_tikhonov_calc` via the sign-free master
+lemma: three constructions, one operator. -/
+theorem fc_res_K2_routeA_pin :
+    spectralCalc (laplacian adjK2) lapK2_symmetric (tikhonovShrinkage 1)
+      = !![2 / 3, 1 / 3; 1 / 3, 2 / 3] := by
+  rw [spectralCalc_tikhonovShrinkage_eq_smul_inv adjK2 adjK2_symmetric
+    adjK2_nonneg (by norm_num : (0 : ℝ) < 1), one_smul, fc_res_K2_inv]
+
+/-- **Route B pinned**: the general-symmetric identity (calculus route
+— `cfc_inv` through the additive layer, no matrix inverse or
+determinant anywhere) instantiated at the same fixture through the
+proved avoidance of `fc_res_lapK2_avoid_one` delivers the same
+concrete matrix. The two proof technologies agree on one number; a
+wrong `cfc_inv` specialization, a wrong junk-inverse alignment
+(`Matrix.nonsing_inv_eq_ring_inverse`), or a wrong additive layer
+breaks this pin while route A stands. -/
+theorem fc_res_K2_routeB_pin :
+    spectralCalc (laplacian adjK2) lapK2_symmetric (tikhonovShrinkage 1)
+      = !![2 / 3, 1 / 3; 1 / 3, 2 / 3] := by
+  rw [spectralCalc_tikhonovShrinkage_eq_smul_inv_of_forall_add_ne_zero
+    _ _ fc_res_lapK2_avoid_one, one_smul, fc_res_K2_inv]
+
+/-- The invertibility supplier witnessed: through the shelf resolvent
+program's spectral-gap-free theorem (form-PSD plus `0 < π`), with no
+eigenvalue computed. -/
+theorem fc_res_K2_det_unit_supplier :
+    IsUnit (laplacian adjK2
+      + (1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ)).det :=
+  isUnit_det_add_smul_one_of_quadForm_nonneg
+    (laplacian_psd adjK2 adjK2_symmetric adjK2_nonneg)
+    (by norm_num : (0 : ℝ) < 1)
+
+/-- The same determinant, raw: the shift is `!![2, -1; -1, 2]]` with
+determinant exactly `3` — the supplier's conclusion checked by literal
+arithmetic. -/
+theorem fc_res_K2_det_eq_three :
+    (laplacian adjK2 + (1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ)).det = 3 := by
+  have hshift : laplacian adjK2
+      + (1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ) = !![2, -1; -1, 2] := by
+    ext i j
+    simp only [Matrix.add_apply, Matrix.smul_apply, Matrix.one_apply,
+      lapK2_apply]
+    fin_cases i <;> fin_cases j <;> norm_num
+  rw [hshift]
+  norm_num [Matrix.det_fin_two]
+
+/-- **The minimizer in resolvent form, and its numeric value**: the
+consumer corollary exhibits `x* = π • ((L + π•1)⁻¹ *ᵥ y)` — the
+textbook shifted-inverse solve — and at `y = ![1, 0]` the raw inverse
+of `fc_res_K2_inv` routes it to `![2/3, 1/3]`, exactly the hand-solved
+Gaussian value `tik_K2_eq` pinned in the original Tikhonov delivery
+(and Section E's `fc_lapK2_reconcile`). Two constructions of the
+minimizer, one number. -/
+theorem fc_res_K2_minimizer_pin :
+    (1 : ℝ) • ((laplacian adjK2
+        + (1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))⁻¹ *ᵥ ![1, 0])
+      = ![2 / 3, 1 / 3] := by
+  rw [one_smul, fc_res_K2_inv]
+  funext a
+  fin_cases a
+  · simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      Matrix.tail_cons, Matrix.of_apply]
+    norm_num
+  · simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      Matrix.tail_cons, Matrix.of_apply]
+    norm_num
+
+theorem fc_res_K2_minimizer :
+    tikhonovMinimizer adjK2 adjK2_symmetric 1 ![1, 0]
+      = (1 : ℝ) • ((laplacian adjK2
+          + (1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))⁻¹ *ᵥ ![1, 0]) :=
+  tikhonovMinimizer_eq_smul_inv_mulVec adjK2 adjK2_symmetric adjK2_nonneg
+    (by norm_num : (0 : ℝ) < 1) ![1, 0]
+
+/-- The singular case at `π = -2`: the shifted Laplacian
+`!![-1, -1; -1, -1]]` has determinant `0`, so the matrix inverse is
+the junk zero matrix (`Ring.inverse 0 = 0` through `Matrix.inv_def`). -/
+theorem fc_res_K2_singular_inv :
+    (laplacian adjK2
+      + (-2 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))⁻¹ = 0 := by
+  have hmat : laplacian adjK2
+      + (-2 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ) = !![-1, -1; -1, -1] := by
+    ext i j
+    simp only [Matrix.add_apply, Matrix.smul_apply, Matrix.one_apply,
+      lapK2_apply]
+    fin_cases i <;> fin_cases j <;> norm_num
+  rw [hmat, Matrix.inv_def]
+  norm_num [Matrix.det_fin_two, Ring.inverse_zero]
+
+/-- **The fence: the resolvent identity is false at `π = -2`.** Both
+junk surfaces collide at the degeneration: the filter matrix is the
+pure kernel average `!![1/2, 1/2; 1/2, 1/2]]` (Section E's
+`fc_lapK2_fence_matrix` — the shrinkage is the junk `0` at the
+spectral point `2 = -π`), while `(-2) • (L - 2•1)⁻¹` is `0` (the
+singular inverse of the previous lemma). Entry `(0, 0)`: `1/2 ≠ 0`.
+For the headline `spectralCalc_tikhonovShrinkage_eq_smul_inv` this
+isolates exactly `hπ` (symmetry and nonnegativity hold on `K₂`,
+`¬(0 < -2)` by `norm_num`); for the general
+`..._of_forall_add_ne_zero` it isolates exactly the avoidance
+hypothesis (symmetry holds; `fc_res_lapK2_avoid_neg2_fails` proves the
+failure spectral). The delivered normal-equation fence
+`fc_lapK2_fence_not_normal` fences the general *normal equation's*
+only other hypothesis the same way. -/
+theorem fc_res_K2_fence_not_inv :
+    ¬ (spectralCalc (laplacian adjK2) lapK2_symmetric (tikhonovShrinkage (-2))
+      = (-2 : ℝ)
+          • (laplacian adjK2
+              + (-2 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))⁻¹) := by
+  intro hcon
+  have h00 := congrFun (congrFun hcon 0) 0
+  rw [fc_lapK2_fence_matrix, fc_res_K2_singular_inv] at h00
+  simp only [Matrix.smul_apply, Matrix.zero_apply, smul_zero,
+    Matrix.cons_val_zero, Matrix.head_cons, Matrix.of_apply] at h00
+  norm_num at h00
+
+end ResolventIdentity
+
 end SpectralGraphTheory.QA

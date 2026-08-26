@@ -217,3 +217,101 @@ identity `f(L) = π • (L + π•1)⁻¹` under invertibility (one `cfc_inv`
 step from the delivered normal equation); the general-symmetric
 normal equation (spectrum-avoidance hypothesis in place of PSD +
 `π > 0`).
+
+## Delivery record, the resolvent identity + general-symmetric layer (2026-08-25, run `20260825T203027Z-run-1`)
+
+**Delivered, pure hard crust, zero new axioms (count stays 10;
+`#print axioms` via `wip/resid_axcheck.lean` on all 17 audited
+declarations — 6 public + 11 QA — reads exactly `propext,
+Classical.choice, Quot.sound`, every one). QA 2238 → 2249 (+11 in
+`FunctionalCalculus_QA.lean`'s Section G, no new file). Both priced
+follow-ons of the consumer stub in one coherent slice: the resolvent
+identity with the general-symmetric avoidance layer it rides on.**
+
+**Delivered** (the new "The resolvent identity" section of
+`GraphTheory/FunctionalCalculus.lean`; one new import — Resolvent, no
+cycle, already on the umbrella; `Tikhonov.lean` untouched):
+
+1. `add_smul_one_mul_spectralCalc_tikhonovShrinkage_of_forall_add_ne_zero`
+   — the **general-symmetric normal equation**: merely symmetric `M`,
+   hypothesis `∀ x ∈ spectrum ℝ M, x + π ≠ 0` (the priced
+   spectrum-avoidance class), conclusion `(M + π•1) * f(M) = π • 1`.
+   The proof is the delivered PSD proof's body with `hnz` supplied by
+   avoidance instead of nonnegativity+positivity — the generalization
+   the pricing predicted. The delivered PSD statement
+   (`add_smul_one_mul_spectralCalc_tikhonovShrinkage`) is now
+   *derived* from it (statement shape unchanged; the PSD regime
+   supplies avoidance through the spectrum-nonnegativity pins).
+2. `spectralCalc_tikhonovShrinkage_eq_smul_inv_of_forall_add_ne_zero`
+   — the **general-symmetric resolvent identity, calculus route**:
+   `f(M) = π • (M + π•1)⁻¹` under avoidance alone, through Mathlib's
+   `cfc_inv` + `Matrix.nonsing_inv_eq_ring_inverse` at the additive
+   layer `cfc (x + π) = M + π•1`, with `cfc_mul`/`cfc_const`/`cfc_congr`
+   supplying the scalar and pointwise layers. No matrix inverse,
+   determinant, or cancellation lemma anywhere.
+3. `spectralCalc_tikhonovShrinkage_eq_smul_inv` — the **headline at
+   the Laplacian consumer, matrix-algebra route**: PSD + `0 < π` ⇒
+   `f(L) = π • (L + π•1)⁻¹`. A three-layer load-bearing join: the
+   normal equation, the Aug-19 resolvent program's
+   `isUnit_det_add_smul_one_of_quadForm_nonneg` (its first
+   FunctionalCalculus consumer — `Analysis/OperatorTheory/Resolvent.lean`
+   now carries weight from a second module), and `laplacian_psd`,
+   closed by `Matrix.nonsing_inv_mul_cancel_left` and the entrywise
+   smul-slide `M * (π • 1) = π • M`.
+4. `spectralCalc_tikhonovShrinkage_eq_smul_inv'` — the same statement by
+   the calculus route (the general identity instantiated; avoidance
+   supplied from PSD): **two proof technologies, one statement**, the
+   divergence-falsifier pattern of the Heat delivery.
+5. `tikhonovMinimizer_eq_smul_inv_mulVec` — the **consumer
+   corollary**: `x* = π • ((L + π•1)⁻¹ *ᵥ y)`, the textbook Tikhonov
+   shifted-inverse solve as a shelf theorem.
+
+**QA (+11, Section G on the shared `Tikhonov_QA` `K₂` fixture):** the
+raw inverse `(L + 1•1)⁻¹ = !![2/3,1/3;1/3,2/3]` by the right-inverse
+criterion on literal arithmetic; **both routes pinned to that same
+matrix** (`fc_res_K2_routeA_pin` through the headline,
+`fc_res_K2_routeB_pin` through the general identity + the proved
+avoidance helper `fc_res_lapK2_avoid_one` — a wrong `cfc_inv`
+specialization or junk-inverse misalignment breaks B while A stands);
+the invertibility supplier witnessed two ways (through the shelf
+theorem with no eigenvalue computed; raw `det = 3`); the **minimizer
+three-way join** (`fc_res_K2_minimizer` + `_pin` routing the resolvent
+form to `![2/3,1/3]`, the same number as the hand-solved Gaussian
+`tik_K2_eq` and Section E's `fc_lapK2_reconcile`); and the **two
+fences at the `π = -2` degeneration**: the avoidance failure *proved
+spectral* (`fc_res_lapK2_avoid_neg2_fails` exhibits `2 = -π` as an
+eigenvalue via the trace/eigenvalue pins), the singular shifted
+inverse pinned to the junk zero matrix, and the identity refuted at
+the `1/2 ≠ 0` entry (`fc_res_K2_fence_not_inv`) — isolating exactly
+`hπ` for the headline (symmetry/nonnegativity hold on `K₂`) and
+exactly avoidance for the general theorem (symmetry holds); the
+delivered `fc_lapK2_fence_not_normal` fences the general normal
+equation's remaining hypothesis the same way.
+
+**Verification:** spike first (`wip/resid_spike.lean`, all routes
+green before any module touched; the catches: the QA file's
+section-scoped `open Tikhonov.QA` must be repeated per section, the
+`spectrum`-lemma rewrite wants its explicit `IsHermitian` argument at
+concrete types, `Matrix.inv_eq_right_inv` takes one hypothesis at this
+pin, matrices are not a `CommMagma` so the smul-slide is entrywise,
+and the QA spike must run after rebuilding the public module's olean —
+the stale-olean trap the Heat delivery already recorded); `lake env
+lean` zero errors/warnings on both changed files; explicit `lake
+build` targets ✔ (module 2327/2327, QA 2331/2331); `#print axioms`
+via `wip/resid_axcheck.lean` on all 17 — the standard three only;
+**full `lake build` ✔ (2384/2385 targets, "Build completed
+successfully") immediately followed by `check_build_completeness.py`
+— 107/107 fresh, 0 stale, 0 missing, exit 0**; `lint_axioms` (10),
+`check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**2249/10/0**, idempotent by md5). Records updated: this
+delivery record, `proposals/README.md`, README (2249; the
+FunctionalCalculus module-table row), the radar (QA axis synced), the
+scoreboard (two verification rows + the interpretation bullet),
+`index/map/spectral_graph.md`, the execution plan, and the activity
+log.
+
+**Priced follow-ons (post-resolvent):** the last named follow-on of
+this stub's family — none; the bridge-consumer queue is closed. The
+center-out queue's standing candidates remain: the irregular-Cheeger
+*hard* direction, the standing gated candidates (directed-axis rate;
+magnetic spectral), or a fresh candidate per `docs/6_SGT_BACKLOG.md`.

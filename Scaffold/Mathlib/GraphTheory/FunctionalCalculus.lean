@@ -34,7 +34,14 @@
     shrinkage function (`tikhonovMinimizer_eq_spectralCalc_mulVec`),
     with the normal equation re-derived through the generic calculus
     algebra (`add_smul_one_mul_spectralCalc_tikhonovShrinkage`) —
-    a second, eigenbasis-free route to a delivered statement;
+    a second, eigenbasis-free route to a delivered statement; the
+    priced follow-on **resolvent identity** (2026-08-25): the filter
+    is `π • (L + π•1)⁻¹` — the headline by the matrix-algebra route
+    through the shelf resolvent program's invertibility supplier, the
+    strictly more general calculus route (`cfc_inv`, merely-symmetric
+    input under spectrum-avoidance), the general-symmetric normal
+    equation as the shared parent, and the consumer corollary
+    `x* = π • ((L + π•1)⁻¹ *ᵥ y)`;
   - the second consumer reconciliation (2026-08-25, later the same
     day): the heat semigroup of `GraphTheory.Heat` is the calculus at
     the exponential family (`heatKernel_eq_spectralCalc_exp`) — a
@@ -87,9 +94,11 @@ import Scaffold.Mathlib.GraphTheory.Spectral
 import Scaffold.Mathlib.GraphTheory.Tikhonov
 import Scaffold.Mathlib.GraphTheory.Heat
 import Scaffold.Mathlib.GraphTheory.Magnetic
+import Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent
 import Mathlib.LinearAlgebra.Matrix.HermitianFunctionalCalculus
 
 open scoped BigOperators Matrix ComplexConjugate
+open Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent
 
 namespace SpectralGraphTheory
 
@@ -299,6 +308,79 @@ theorem tikhonovMinimizer_eq_spectralCalc_mulVec (A : WAdj (V := V))
   rw [spectralCalc_mulVec_apply]
   rfl
 
+
+/-!
+## The resolvent identity
+
+The priced follow-ons of the Tikhonov reconciliation
+(`proposals/hermitian-calculus-consumer-tikhonov-heat.md`, 2026-08-25):
+the filter `f(L)` at `f = tikhonovShrinkage π` *is* `π` times the
+matrix inverse of the shifted Laplacian — the textbook Tikhonov form
+`x* = π • (L + π•1)⁻¹ y` — under the *spectrum-avoidance* hypothesis
+(`x + π ≠ 0` on the real spectrum) that replaces PSD + `0 < π` when
+the underlying matrix is merely symmetric. Two independent proof
+technologies deliver the same statement: the *matrix-algebra route*
+(the normal equation plus the shelf resolvent program's
+spectral-gap-free invertibility supplier,
+`isUnit_det_add_smul_one_of_quadForm_nonneg` in
+`Analysis/OperatorTheory/Resolvent.lean` — its first
+functional-calculus consumer) and the *calculus route* (Mathlib's
+`cfc_inv` through the additive layer `cfc (x + π) = M + π•1`).
+-/
+
+/-- The wrapper is Mathlib's `cfc` — the conversion idiom shared by
+the resolvent-identity proofs (private to keep the public surface at
+the wrapper). -/
+private theorem spectralCalc_eq_cfc (M : Matrix V V ℝ) (hM : M.IsSymm)
+    (f : ℝ → ℝ) : spectralCalc M hM f = cfc f M := by
+  show (isHermitian_of_isSymm hM).cfc f = _
+  rw [← Matrix.IsHermitian.cfc_eq]
+
+/-- The entrywise smul-slide `M * (π • 1) = π • M` (matrices are not a
+`CommMagma`, so the slide is entrywise; the sum collapses at the
+`one_apply` diagonal). -/
+private theorem mul_smul_one_eq_smul (M : Matrix V V ℝ) (π : ℝ) :
+    M * (π • (1 : Matrix V V ℝ)) = π • M := by
+  ext i j
+  simp only [Matrix.mul_apply, Matrix.smul_apply, Matrix.one_apply,
+    smul_ite, smul_eq_mul, mul_one, smul_zero,
+    mul_ite, mul_one, mul_zero]
+  simp
+  ring
+
+/-- **The general-symmetric normal equation** (the priced follow-on:
+spectrum-avoidance in place of PSD + `0 < π`): for a merely symmetric
+`M`, if `x + π ≠ 0` at every real spectral point then
+`(M + π•1) * f(M) = π • 1` at `f = tikhonovShrinkage π`. No
+nonnegativity anywhere: avoidance is exactly what keeps the shrinkage
+division non-junk at the spectral points, and nothing else enters.
+The hypothesis is load-bearing — at a spectral `x = -π` the junk
+shrinkage `0` breaks the pointwise identity there (the QA fence on
+`K₂`'s Laplacian at `π = -2`, where the spectral point `2 = -π`
+drives the conclusion false while symmetry holds). -/
+theorem add_smul_one_mul_spectralCalc_tikhonovShrinkage_of_forall_add_ne_zero
+    (M : Matrix V V ℝ) (hM : Matrix.IsSymm M) {π : ℝ}
+    (havoid : ∀ x ∈ spectrum ℝ M, x + π ≠ 0) :
+    (M + π • (1 : Matrix V V ℝ)) * spectralCalc M hM (tikhonovShrinkage π)
+      = π • (1 : Matrix V V ℝ) := by
+  have hsa : IsSelfAdjoint M := isHermitian_of_isSymm hM
+  have hcont : ∀ f : ℝ → ℝ, ContinuousOn f (spectrum ℝ M) :=
+    fun f => continuousOn_of_finite_real_spectrum f
+  have h1 : cfc (fun x => x + π) M
+      = M + π • (1 : Matrix V V ℝ) := by
+    rw [cfc_add_const π (fun x => x) M (hcont _),
+      cfc_id' ℝ M hsa, algebraMap_matrix_eq_smul_one]
+  rw [show spectralCalc M hM (tikhonovShrinkage π)
+      = cfc (tikhonovShrinkage π) M from spectralCalc_eq_cfc M hM _]
+  conv_lhs => rw [← h1]
+  rw [← cfc_mul (fun x => x + π) (tikhonovShrinkage π) M (hcont _) (hcont _),
+    cfc_congr (f := fun x => (fun x => x + π) x * tikhonovShrinkage π x)
+      (g := fun _ => π) (by
+        intro x hx
+        show (x + π) * tikhonovShrinkage π x = π
+        rw [tikhonovShrinkage, mul_div_cancel₀ _ (havoid x hx)]),
+    cfc_const π M hsa, algebraMap_matrix_eq_smul_one]
+
 /-- **The normal equation through the calculus algebra** (the
 substantive reconciliation layer): `(L + π•1) * f(L) = π • 1` at
 `f = tikhonovShrinkage π`, i.e. the Tikhonov filter is `π` times the
@@ -313,7 +395,13 @@ keeps the division non-junk there, and `cfc_congr` promotes the
 pointwise identity to the operator identity. The `0 < π` hypothesis
 is load-bearing: at `π = -λ` for a spectral `λ` the shrinkage is the
 junk `0` at that point and the identity fails (the QA fence exhibits
-this on `K₂` at `π = -2`). -/
+this on `K₂` at `π = -2`).
+
+Since the resolvent-identity delivery (2026-08-25) this statement is
+derived from its strictly more general parent
+`add_smul_one_mul_spectralCalc_tikhonovShrinkage_of_forall_add_ne_zero`
+(no PSD, no `0 < π` — only spectrum-avoidance `x + π ≠ 0`), which the
+PSD regime supplies; the statement above is unchanged. -/
 theorem add_smul_one_mul_spectralCalc_tikhonovShrinkage
     (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
     (hnonneg : ∀ i j, 0 ≤ A i j) {π : ℝ} (hπ : 0 < π) :
@@ -321,39 +409,127 @@ theorem add_smul_one_mul_spectralCalc_tikhonovShrinkage
       * spectralCalc (laplacian A) (laplacian_symmetric A hA)
           (tikhonovShrinkage π)
       = π • (1 : Matrix V V ℝ) := by
-  have hL : (laplacian A).IsSymm := laplacian_symmetric A hA
-  have hherm : Matrix.IsHermitian (laplacian A) := isHermitian_of_isSymm hL
-  have hsa : IsSelfAdjoint (laplacian A) := hherm
-  -- PSD: every real spectral point of the Laplacian is nonnegative
   have hspec : ∀ x ∈ spectrum ℝ (laplacian A), 0 ≤ x := by
     intro x hx
     rw [Matrix.IsHermitian.eigenvalues_eq_spectrum_real] at hx
     obtain ⟨i, hi⟩ := hx
     rw [← hi]
     exact eigvalOf_laplacian_nonneg A hA hnonneg i
-  have hcont : ∀ f : ℝ → ℝ, ContinuousOn f (spectrum ℝ (laplacian A)) :=
+  exact add_smul_one_mul_spectralCalc_tikhonovShrinkage_of_forall_add_ne_zero
+    (laplacian A) (laplacian_symmetric A hA)
+    (fun x hx => by have hxnn := hspec x hx; linarith)
+
+
+/-- **The general-symmetric resolvent identity, calculus route**: for a
+merely symmetric `M` with `x + π ≠ 0` on the real spectrum, the
+Tikhonov filter is `π` times the inverse of the shifted matrix,
+`f(M) = π • (M + π•1)⁻¹` — proved through Mathlib's calculus algebra
+alone: the additive layer `cfc (x + π) = M + π•1`, the inverse layer
+`cfc_inv` (the calculus of `x ↦ (x + π)⁻¹` is the ring inverse of the
+calculus of `x ↦ x + π`), the scalar layer `cfc_mul`/`cfc_const`, and
+the pointwise `π/(x+π) = π (x+π)⁻¹` promoted off the spectrum by
+`cfc_congr`. Avoidance appears twice, once per junk surface (the
+shrinkage division and the inverse) — the matrix inverse is total but
+junk at singular input, and `Matrix.nonsing_inv_eq_ring_inverse` is
+what aligns the junk conventions. -/
+theorem spectralCalc_tikhonovShrinkage_eq_smul_inv_of_forall_add_ne_zero
+    (M : Matrix V V ℝ) (hM : Matrix.IsSymm M) {π : ℝ}
+    (havoid : ∀ x ∈ spectrum ℝ M, x + π ≠ 0) :
+    spectralCalc M hM (tikhonovShrinkage π)
+      = π • (M + π • (1 : Matrix V V ℝ))⁻¹ := by
+  have hsa : IsSelfAdjoint M := isHermitian_of_isSymm hM
+  have hcont : ∀ f : ℝ → ℝ, ContinuousOn f (spectrum ℝ M) :=
     fun f => continuousOn_of_finite_real_spectrum f
-  -- the additive layer: the calculus at `λ ↦ λ + π` is `L + π • 1`
-  have h1 : cfc (fun x => x + π) (laplacian A)
-      = laplacian A + π • (1 : Matrix V V ℝ) := by
-    rw [cfc_add_const π (fun x => x) (laplacian A) (hcont _),
-      cfc_id' ℝ (laplacian A) hsa, algebraMap_matrix_eq_smul_one]
-  -- the multiplicative layer, assembled at the wrapper
-  rw [show spectralCalc (laplacian A) hL (tikhonovShrinkage π)
-      = cfc (tikhonovShrinkage π) (laplacian A) from by
-      show (isHermitian_of_isSymm hL).cfc _ = _
-      rw [← Matrix.IsHermitian.cfc_eq]]
-  conv_lhs => rw [← h1]
-  rw [← cfc_mul (fun x => x + π) (tikhonovShrinkage π) (laplacian A)
-    (hcont _) (hcont _),
-    cfc_congr (f := fun x => (fun x => x + π) x * tikhonovShrinkage π x)
-      (g := fun _ => π) (by
-        intro x hx
-        have hxnn := hspec x hx
-        have hnz : x + π ≠ 0 := by linarith
-        show (x + π) * tikhonovShrinkage π x = π
-        rw [tikhonovShrinkage, mul_div_cancel₀ _ hnz]),
-    cfc_const π (laplacian A) hsa, algebraMap_matrix_eq_smul_one]
+  have h1 : cfc (fun x => x + π) M
+      = M + π • (1 : Matrix V V ℝ) := by
+    rw [cfc_add_const π (fun x => x) M (hcont _),
+      cfc_id' ℝ M hsa, algebraMap_matrix_eq_smul_one]
+  calc spectralCalc M hM (tikhonovShrinkage π)
+      = cfc (tikhonovShrinkage π) M := spectralCalc_eq_cfc M hM _
+    _ = cfc (fun x => π * ((x + π)⁻¹)) M := by
+        rw [cfc_congr (f := tikhonovShrinkage π)
+          (g := fun x => π * ((x + π)⁻¹)) (by
+            intro x hx
+            show tikhonovShrinkage π x = π * ((x + π)⁻¹)
+            rw [tikhonovShrinkage, div_eq_inv_mul, mul_comm])]
+    _ = cfc (fun _ => π) M * cfc (fun x => ((fun x => x + π) x)⁻¹) M := by
+        rw [← cfc_mul (fun _ => π) (fun x => (x + π)⁻¹) M (hcont _) (hcont _)]
+    _ = cfc (fun _ => π) M * Ring.inverse (cfc (fun x => x + π) M) := by
+        rw [cfc_inv (fun x => x + π) M havoid (hcont _)]
+    _ = algebraMap ℝ (Matrix V V ℝ) π
+          * Ring.inverse (M + π • (1 : Matrix V V ℝ)) := by
+        rw [cfc_const π M hsa, h1]
+    _ = π • (M + π • (1 : Matrix V V ℝ))⁻¹ := by
+        rw [Matrix.nonsing_inv_eq_ring_inverse, ← Algebra.smul_def]
+
+/-- **The resolvent identity at the Laplacian consumer** — the
+headline, matrix-algebra route: for symmetric nonnegative weights and
+`0 < π`, the Tikhonov filter of the Laplacian is `π` times the
+shifted inverse, `f(L) = π • (L + π•1)⁻¹`. The proof consumes three
+delivered layers at once: the normal equation above, the shelf
+resolvent program's spectral-gap-free invertibility supplier
+(`isUnit_det_add_smul_one_of_quadForm_nonneg` — PSD at the form level
+plus `0 < π` makes the shift nonsingular, no eigenvalue gap), and
+`laplacian_psd`; the last step is the left-cancellation
+`A⁻¹ * (A * B) = B`. This is the classical Tikhonov regularized
+solution's operator; the `0 < π` hypothesis is load-bearing (the QA
+fence at `π = -2` exhibits the shifted Laplacian singular and the
+conclusion false). -/
+theorem spectralCalc_tikhonovShrinkage_eq_smul_inv
+    (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnonneg : ∀ i j, 0 ≤ A i j) {π : ℝ} (hπ : 0 < π) :
+    spectralCalc (laplacian A) (laplacian_symmetric A hA) (tikhonovShrinkage π)
+      = π • (laplacian A + π • (1 : Matrix V V ℝ))⁻¹ := by
+  have hL : (laplacian A).IsSymm := laplacian_symmetric A hA
+  have hinv : IsUnit (laplacian A + π • (1 : Matrix V V ℝ)).det :=
+    isUnit_det_add_smul_one_of_quadForm_nonneg
+      (laplacian_psd A hA hnonneg) hπ
+  calc spectralCalc (laplacian A) hL (tikhonovShrinkage π)
+      = (laplacian A + π • (1 : Matrix V V ℝ))⁻¹ *
+          ((laplacian A + π • (1 : Matrix V V ℝ)) *
+            spectralCalc (laplacian A) hL (tikhonovShrinkage π)) :=
+        (Matrix.nonsing_inv_mul_cancel_left _ _ hinv).symm
+    _ = (laplacian A + π • (1 : Matrix V V ℝ))⁻¹ * (π • (1 : Matrix V V ℝ)) := by
+        rw [add_smul_one_mul_spectralCalc_tikhonovShrinkage A hA hnonneg hπ]
+    _ = π • (laplacian A + π • (1 : Matrix V V ℝ))⁻¹ :=
+        mul_smul_one_eq_smul _ π
+
+/-- **The same statement by the calculus route** — the two-technology
+agreement as a shelf fact: instantiating the general-symmetric
+identity at the Laplacian (avoidance supplied from PSD + `0 < π`)
+re-derives the headline above through `cfc_inv` and the calculus
+algebra, with no matrix inverse, determinant, or cancellation lemma
+anywhere in the chain. A divergence between the two routes would
+surface here as two provable, contradictory statements. -/
+theorem spectralCalc_tikhonovShrinkage_eq_smul_inv'
+    (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnonneg : ∀ i j, 0 ≤ A i j) {π : ℝ} (hπ : 0 < π) :
+    spectralCalc (laplacian A) (laplacian_symmetric A hA) (tikhonovShrinkage π)
+      = π • (laplacian A + π • (1 : Matrix V V ℝ))⁻¹ := by
+  have hspec : ∀ x ∈ spectrum ℝ (laplacian A), 0 ≤ x := by
+    intro x hx
+    rw [Matrix.IsHermitian.eigenvalues_eq_spectrum_real] at hx
+    obtain ⟨i, hi⟩ := hx
+    rw [← hi]
+    exact eigvalOf_laplacian_nonneg A hA hnonneg i
+  exact spectralCalc_tikhonovShrinkage_eq_smul_inv_of_forall_add_ne_zero
+    (laplacian A) (laplacian_symmetric A hA)
+    (fun x hx => by have hxnn := hspec x hx; linarith)
+
+/-- **The Tikhonov minimizer in resolvent form** — the consumer
+corollary: `x* = π • ((L + π•1)⁻¹ *ᵥ y)`, the textbook Tikhonov
+regularized solution (the eigenbasis-defined minimizer of
+`Tikhonov.lean` equals the shifted-inverse solve). Composed from the
+delivered equality theorem and the headline above; PSD + `0 < π`
+inherited verbatim. -/
+theorem tikhonovMinimizer_eq_smul_inv_mulVec (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (hnonneg : ∀ i j, 0 ≤ A i j) {π : ℝ}
+    (hπ : 0 < π) (y : V → ℝ) :
+    tikhonovMinimizer A hA π y
+      = π • ((laplacian A + π • (1 : Matrix V V ℝ))⁻¹ *ᵥ y) := by
+  rw [tikhonovMinimizer_eq_spectralCalc_mulVec A hA π y,
+    spectralCalc_tikhonovShrinkage_eq_smul_inv A hA hnonneg hπ,
+    Matrix.smul_mulVec_assoc]
 
 /-!
 ## Recovered instances: the heat semigroup

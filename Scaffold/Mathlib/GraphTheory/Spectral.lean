@@ -2295,6 +2295,206 @@ theorem secondEval_le_rayleigh_of_ker {M : Matrix V V ℝ} (hM : M.IsSymm)
     exact (le_div_iff₀ hDpos).2 hQge
   exact hstep1 x hx0 hxorth
 
+/-- **Courant–Fischer at an arbitrary kernel vector** (the sInf form):
+for a symmetric PSD matrix with a nonzero kernel vector `w` on at least
+two vertices, the second sorted eigenvalue is the infimum of the Rayleigh
+quotients over the nonzero vectors orthogonal to `w`.
+
+The delivered `secondEval_variational` is the `w = onesVec` instance
+(sufficient for every operator whose kernel contains the constants);
+`secondEval_le_rayleigh_of_ker` above is this theorem's hard half —
+every element of the constraint set dominates `λ₂` — and is reused
+verbatim as Step 1. The new content is the witness half (Step 2): when
+`0 < λ₂` the eigenvector at the second sorted entry is orthogonal to
+`w` through `eigvecOf_ortho_of_mulVec_eq_zero`, and when `λ₂ = 0` a
+kernel vector orthogonal to `w` is produced from the double bottom of
+the sorted spectrum (`exists_ne_eigvalOf_of_evals_head_eq`) by the same
+cross combination the onesVec proof uses. First consumer: the irregular
+Cheeger hard direction (`GraphTheory.VariationalTransfer`, 2026-08-25/26),
+whose operator `normalizedLaplacian A` is killed by `√D · onesVec`, not
+by the constants, on every irregular graph.
+
+QA: the headline consumer's instance is pinned on the genuinely
+irregular `P₃` fixture and the regular recovery on `K₂` in
+`Scaffold/QA/SpectralGraph/IrregularCheeger_QA.lean`. -/
+theorem secondEval_variational_of_ker {M : Matrix V V ℝ} (hM : M.IsSymm)
+    (hpsd : ∀ x : V → ℝ, 0 ≤ quadForm M x) {w : V → ℝ} (hwne : w ≠ 0)
+    (hker : M *ᵥ w = 0) (hcard : 2 ≤ Fintype.card V) :
+    secondEval M hM hcard =
+      sInf {r : ℝ | ∃ x : V → ℝ, x ≠ 0 ∧ Matrix.dotProduct x w = 0 ∧
+        rayleigh M x = r} := by
+  classical
+  have hmunn : ∀ i : V, 0 ≤ eigvalOf M hM i := by
+    intro i
+    have h := hpsd (eigvecOf M hM i)
+    rw [quadForm_eigvecOf_self hM i] at h
+    exact h
+  have hvv : ∀ i : V, Matrix.dotProduct (eigvecOf M hM i)
+      (eigvecOf M hM i) = 1 := by
+    intro i
+    simpa [Matrix.dotProduct] using eigvecOf_inner M hM i i
+  have hvne : ∀ i : V, eigvecOf M hM i ≠ 0 := by
+    intro i h
+    have h1 := hvv i
+    rw [h, Matrix.dotProduct_zero] at h1
+    exact zero_ne_one h1
+  obtain ⟨u, v, huv⟩ : ∃ u v : V, u ≠ v := by
+    have h1 : 1 < (Finset.univ : Finset V).card := by
+      rw [Finset.card_univ]
+      omega
+    obtain ⟨a, b, -, -, hab⟩ := Finset.one_lt_card_iff.1 h1
+    exact ⟨a, b, hab⟩
+  -- the constraint set is nonempty: a two-point cross combination
+  have hSne : {r : ℝ | ∃ x : V → ℝ, x ≠ 0 ∧ Matrix.dotProduct x w = 0 ∧
+      rayleigh M x = r}.Nonempty := by
+    obtain ⟨a, hane⟩ : ∃ a : V, w a ≠ 0 := by
+      by_contra hcon
+      push_neg at hcon
+      exact hwne (funext hcon)
+    obtain ⟨b, habne⟩ : ∃ b : V, a ≠ b := by
+      rcases eq_or_ne a u with h | h
+      · exact ⟨v, by rw [h]; exact huv⟩
+      · exact ⟨u, h⟩
+    refine ⟨rayleigh M (Pi.single a (w b) - Pi.single b (w a) : V → ℝ), ?_⟩
+    show ∃ x : V → ℝ, x ≠ 0 ∧ Matrix.dotProduct x w = 0 ∧
+      rayleigh M x = rayleigh M (Pi.single a (w b) - Pi.single b (w a) : V → ℝ)
+    refine ⟨Pi.single a (w b) - Pi.single b (w a), ?_, ?_, rfl⟩
+    · rcases eq_or_ne (w b) 0 with hwb | hwb
+      · intro h
+        have h1 : (Pi.single a (w b) - Pi.single b (w a) : V → ℝ) b = 0 :=
+          congrFun h b
+        simp [Pi.sub_apply, Pi.single_apply, habne, hwb] at h1
+        exact hane h1
+      · intro h
+        have h1 : (Pi.single a (w b) - Pi.single b (w a) : V → ℝ) a = 0 :=
+          congrFun h a
+        simp [Pi.sub_apply, Pi.single_apply, Ne.symm habne, hwb] at h1
+    · rw [Matrix.sub_dotProduct, Matrix.single_dotProduct,
+        Matrix.single_dotProduct]
+      ring
+  -- Step 1: every element of the set dominates the second sorted entry
+  have hstep1 : ∀ x : V → ℝ, x ≠ 0 →
+      Matrix.dotProduct x w = 0 →
+      secondEval M hM hcard ≤ rayleigh M x :=
+    fun x hx0 hxorth =>
+      secondEval_le_rayleigh_of_ker hM hpsd hwne hker hcard hx0 hxorth
+  -- Step 2: some element of the set is at most λ₂
+  have hSbdd : BddBelow {r : ℝ | ∃ x : V → ℝ, x ≠ 0 ∧
+      Matrix.dotProduct x w = 0 ∧ rayleigh M x = r} :=
+    ⟨secondEval M hM hcard, fun r hr => by
+      obtain ⟨x, hx0, hxorth, hrx⟩ := hr
+      rw [← hrx]
+      exact hstep1 x hx0 hxorth⟩
+  have hortho_pair : ∀ i j : V, i ≠ j →
+      Matrix.dotProduct (eigvecOf M hM i)
+        (eigvecOf M hM j) = 0 := by
+    intro i j hij
+    simpa [Matrix.dotProduct, hij] using eigvecOf_inner M hM i j
+  have hmemupper : ∃ r ∈ {r : ℝ | ∃ x : V → ℝ, x ≠ 0 ∧
+      Matrix.dotProduct x w = 0 ∧ rayleigh M x = r},
+      r ≤ secondEval M hM hcard := by
+    have hL2nn : 0 ≤ secondEval M hM hcard := by
+      obtain ⟨i, hi⟩ := evals_mem_eigvalOf hM ⟨1, by omega⟩
+      have hL2evals : secondEval M hM hcard
+          = evals hM ⟨1, by omega⟩ := rfl
+      rw [hL2evals, hi]
+      exact hmunn i
+    rcases eq_or_lt_of_le hL2nn with h0 | hpos
+    · -- λ₂ = 0: a kernel vector ⊥ w exists, from the double bottom
+      have he01 : evals hM ⟨1, by omega⟩ = 0 := by
+        have hL2evals : secondEval M hM hcard
+            = evals hM ⟨1, by omega⟩ := rfl
+        rw [← hL2evals]
+        exact h0.symm
+      have hev01 : evals hM ⟨0, by omega⟩ = evals hM ⟨1, by omega⟩ := by
+        have h1 : evals hM ⟨0, by omega⟩ ≤ evals hM ⟨1, by omega⟩ :=
+          evals_sorted hM (Fin.le_def.2 (Nat.le_succ 0))
+        have h2 : 0 ≤ evals hM ⟨0, by omega⟩ := by
+          obtain ⟨i, hi⟩ := evals_mem_eigvalOf hM ⟨0, by omega⟩
+          rw [hi]
+          exact hmunn i
+        rw [he01] at h1 ⊢
+        exact le_antisymm h1 h2
+      obtain ⟨i₁, i₂, hne, hmu1, hmu2⟩ :=
+        exists_ne_eigvalOf_of_evals_head_eq hM hcard hev01
+      rw [he01] at hmu1 hmu2
+      have hev₁ : M *ᵥ eigvecOf M hM i₁ = 0 := by
+        have h : M *ᵥ eigvecOf M hM i₁
+            = eigvalOf M hM i₁ • eigvecOf M hM i₁ :=
+          (isHermitian_of_isSymm hM).mulVec_eigenvectorBasis i₁
+        rw [hmu1, zero_smul] at h
+        exact h
+      have hev₂ : M *ᵥ eigvecOf M hM i₂ = 0 := by
+        have h : M *ᵥ eigvecOf M hM i₂
+            = eigvalOf M hM i₂ • eigvecOf M hM i₂ :=
+          (isHermitian_of_isSymm hM).mulVec_eigenvectorBasis i₂
+        rw [hmu2, zero_smul] at h
+        exact h
+      by_cases hortho1 : Matrix.dotProduct (eigvecOf M hM i₁) w = 0
+      · refine ⟨rayleigh M (eigvecOf M hM i₁),
+          ⟨eigvecOf M hM i₁, hvne i₁, hortho1, rfl⟩, ?_⟩
+        rw [rayleigh, if_neg (hvne i₁), quadForm, hev₁,
+          Matrix.dotProduct_zero, zero_div]
+        exact h0.le
+      · -- cross combination: orthogonal to w and in the kernel
+        refine ⟨rayleigh M
+            (Matrix.dotProduct (eigvecOf M hM i₂) w
+              • eigvecOf M hM i₁
+              - Matrix.dotProduct (eigvecOf M hM i₁) w
+                • eigvecOf M hM i₂),
+          ⟨_, ?_, ?_, rfl⟩, ?_⟩
+        · intro h
+          have h2 : Matrix.dotProduct (eigvecOf M hM i₂)
+              (Matrix.dotProduct (eigvecOf M hM i₂) w
+                • eigvecOf M hM i₁
+                - Matrix.dotProduct (eigvecOf M hM i₁) w
+                  • eigvecOf M hM i₂) = 0 := by
+            rw [h, Matrix.dotProduct_zero]
+          rw [Matrix.dotProduct_sub, Matrix.dotProduct_smul,
+            Matrix.dotProduct_smul, smul_eq_mul, smul_eq_mul,
+            hortho_pair i₂ i₁ (Ne.symm hne), hvv i₂, mul_zero] at h2
+          simp at h2
+          exact absurd (by linarith) hortho1
+        · rw [Matrix.sub_dotProduct, Matrix.smul_dotProduct,
+            Matrix.smul_dotProduct, smul_eq_mul, smul_eq_mul]
+          ring
+        · have hLw : M *ᵥ
+              (Matrix.dotProduct (eigvecOf M hM i₂) w
+                • eigvecOf M hM i₁
+                - Matrix.dotProduct (eigvecOf M hM i₁) w
+                  • eigvecOf M hM i₂) = 0 := by
+            rw [Matrix.mulVec_sub, Matrix.mulVec_smul, Matrix.mulVec_smul,
+              hev₁, hev₂, smul_zero, smul_zero, sub_zero]
+          rw [rayleigh]
+          split
+          · exact h0.le
+          · rw [quadForm, hLw, Matrix.dotProduct_zero, zero_div]
+            exact h0.le
+    · -- 0 < λ₂: the eigenvector at the second sorted entry is ⊥ w
+      obtain ⟨i₂, hi₂⟩ := evals_mem_eigvalOf hM ⟨1, by omega⟩
+      have hmui2 : eigvalOf M hM i₂
+          = secondEval M hM hcard := by
+        have hL2evals : secondEval M hM hcard
+            = evals hM ⟨1, by omega⟩ := rfl
+        rw [hL2evals]
+        exact hi₂.symm
+      refine ⟨secondEval M hM hcard,
+        ⟨eigvecOf M hM i₂, hvne i₂,
+          eigvecOf_ortho_of_mulVec_eq_zero hM hker
+            (by rw [hmui2]; exact ne_of_gt hpos),
+          ?_⟩, le_refl _⟩
+      rw [rayleigh, if_neg (hvne i₂), quadForm_eigvecOf_self, hvv i₂,
+        div_one]
+      exact hmui2
+  -- assemble both sides
+  refine le_antisymm ?_ ?_
+  · refine le_csInf hSne ?_
+    rintro r ⟨x, hx0, hxorth, hrx⟩
+    rw [← hrx]
+    exact hstep1 x hx0 hxorth
+  · obtain ⟨r, hrmem, hrle⟩ := hmemupper
+    exact le_trans (csInf_le hSbdd hrmem) hrle
+
 /-- **Variational (Courant–Fischer) characterization of the algebraic
 connectivity — proved, no axioms.** For symmetric nonnegative weights,
 `λ₂` is the infimum of the Laplacian Rayleigh quotient over nonzero
@@ -2760,6 +2960,184 @@ theorem evals_min_max {M : Matrix V V ℝ} (hM : M.IsSymm)
     (csInf_le hbdd hmem)
 
 end CourantFischer
+
+section OrderStatistics
+
+/-!
+### Order statistics and the subspace Rayleigh–Ritz engine
+
+Two bridges between counting eigenbasis eigenvalues and bounding sorted
+spectrum entries, plus the general-`k` subspace Rayleigh–Ritz engine.
+Stated for arbitrary symmetric matrices (no graph structure, no
+positivity, no kernel hypothesis) — the multiway-Cheeger family's
+linear-algebra layer (`GraphTheory.Multiway`, delivered 2026-08-26), and
+the layer every future `k`-way or interlacing-shaped statement consumes.
+Both proofs ride the delivered Courant–Fischer machinery: the counting
+bridge contraposes the strict multiplicity pin
+(`card_filter_eigvalOf_lt_evals_le`), and the subspace engine composes
+the competitor direction (`exists_ne_mem_rayleigh_ge_of_finrank_eq`)
+with the span-dimension and span-membership bridges.
+-/
+
+/-- Range-indexed `getD` sum helper (private): the range sum of a list's
+in-range entries is its list sum. -/
+private theorem sum_range_getD_eq_sum (L : List ℝ) :
+    ∑ k ∈ Finset.range L.length, L.getD k 0 = L.sum := by
+  induction L with
+  | nil => simp
+  | cons a L ih =>
+    have hlen : List.length (a :: L) = List.length L + 1 := rfl
+    rw [hlen, Finset.sum_range_succ']
+    simp only [List.getD_cons_zero, List.getD_cons_succ]
+    rw [ih, List.sum_cons]
+    ring
+
+/-- **Order statistics ↔ counting.** If at least `k+1` eigenbasis
+eigenvalues are `≤ t`, the `k`-th sorted entry is `≤ t`: otherwise the
+strict sub-level set at `evals ⟨k⟩` would contain the `≤ t` set,
+exceeding the `k`-element bound of `card_filter_eigvalOf_lt_evals_le`.
+Together with the two endpoint instances
+(`evals_first_le_eigvalOf`, `eigvalOf_le_evals_last`) this is the
+counting form of "the sorted spectrum and the eigenbasis listing carry
+the same multiset" at every index. The shelf previously had only the
+two endpoint instances; the middle indices are new.
+
+QA: pinned on the `P₃`/`C₄` fixtures of
+`Scaffold/QA/SpectralGraph/MultiwayCheeger_QA.lean` (through the
+subspace engine and the headline below). -/
+theorem evals_le_of_card_eigvalOf_le {M : Matrix V V ℝ} (hM : M.IsSymm)
+    {t : ℝ} {k : ℕ} (hk : k < Fintype.card V)
+    (hcard : k + 1 ≤ (Finset.univ.filter (fun i => eigvalOf M hM i ≤ t)).card) :
+    evals hM ⟨k, hk⟩ ≤ t := by
+  by_contra hgt
+  have hsub : (Finset.univ.filter (fun i => eigvalOf M hM i ≤ t))
+      ⊆ (Finset.univ.filter (fun i => eigvalOf M hM i < evals hM ⟨k, hk⟩)) := by
+    intro i hi
+    have h1 := (Finset.mem_filter.1 hi).2
+    refine Finset.mem_filter.2 ⟨Finset.mem_univ _, ?_⟩
+    exact lt_of_le_of_lt h1 (lt_of_not_ge hgt)
+  have h1 := Finset.card_le_card hsub
+  have h2 := card_filter_eigvalOf_lt_evals_le hM ⟨k, hk⟩
+  have h2' : (⟨k, hk⟩ : Fin (Fintype.card V)).val = k := rfl
+  omega
+
+/-- **General-`k` subspace Rayleigh–Ritz engine.** A `k`-dimensional
+test family on whose every combination `quadForm ≤ t · ‖·‖²` certifies
+`evals ⟨k−1⟩ ≤ t`: the delivered Courant–Fischer competitor direction
+exhibits, in the family's span (dimension `k` by linear independence), a
+nonzero vector at Rayleigh quotient at least `evals ⟨k−1⟩`, and the
+combination hypothesis bounds that quotient by `t`. No PSD and no
+kernel hypothesis — the constraint is carried entirely by the test
+family, which is what `k`-way statements need: their natural test
+objects (part indicators) are *not* orthogonal to any fixed kernel
+vector for `k > 2`. The delivered `k = 2` engines
+(`secondEval_le_rayleigh_of_ker`, `secondEval_variational_of_ker`) are
+the kernel-constrained specializations.
+
+QA: exercised on every headline instance of
+`Scaffold/QA/SpectralGraph/MultiwayCheeger_QA.lean` (K₂, P₃, C₄, at
+`k = 1, 2, 3, 4`), with the `k = 1` zero-constraint edge instance
+pinned explicitly. -/
+theorem evals_le_of_linearIndependent {M : Matrix V V ℝ} (hM : M.IsSymm)
+    {k : ℕ} (hk1 : 1 ≤ k) (hkc : k ≤ Fintype.card V)
+    {g : Fin k → (V → ℝ)} (hgi : LinearIndependent ℝ g) {t : ℝ}
+    (hbnd : ∀ c : Fin k → ℝ, quadForm M (∑ i, c i • g i)
+        ≤ t * Matrix.dotProduct (∑ i, c i • g i) (∑ i, c i • g i)) :
+    evals hM ⟨k - 1, by omega⟩ ≤ t := by
+  classical
+  obtain ⟨x, hxW, hx0, hge⟩ :=
+    exists_ne_mem_rayleigh_ge_of_finrank_eq hM ⟨k - 1, by omega⟩
+      (Submodule.span ℝ (Set.range g))
+      (by
+        show Module.finrank ℝ (Submodule.span ℝ (Set.range g)) = (k - 1) + 1
+        rw [finrank_span_eq_card hgi]
+        simp
+        omega)
+  obtain ⟨c, hc⟩ := (mem_span_range_iff_exists_fun ℝ).1 hxW
+  have hxc : x = ∑ i, c i • g i := hc.symm
+  have hb := hbnd c
+  have hx0' : (∑ i, c i • g i) ≠ 0 := by rw [← hxc]; exact hx0
+  have hDpos' : 0 < Matrix.dotProduct (∑ i, c i • g i) (∑ i, c i • g i) := by
+    rw [← hxc]
+    exact dotProduct_self_pos hx0
+  refine hge.trans ?_
+  rw [hxc, rayleigh, if_neg hx0', div_le_iff₀ hDpos']
+  exact hb
+
+/-- **Trace at the sorted API.** The sum of the sorted-spectrum entries
+is the trace: sorting permutes the eigenvalue multiset (sums agree),
+and the eigenbasis sum is the trace (`eigvalOf_sum_eq_trace`). This is
+the trace-pinning technique the computational eigenvalue QA documents,
+lifted from the eigenbasis listing to the sorted spectrum — consumers
+can pin whole spectra from trace arithmetic plus per-entry bounds
+without computing an eigenvector basis.
+
+QA: the `P₃` `λ₃` pin in
+`Scaffold/QA/SpectralGraph/MultiwayCheeger_QA.lean` derives the exact
+value `λ₃ = 2` from this lemma plus the pinned `λ₂ = 1`, PSD
+nonnegativity, and an independent eigenvector witness. -/
+theorem evals_sum_eq_trace {M : Matrix V V ℝ} (hM : M.IsSymm) :
+    ∑ i, evals hM i = M.trace := by
+  set m : Multiset ℝ := (Finset.univ : Finset V).val.map (eigvalOf M hM) with hm
+  set L : List ℝ := Multiset.sort (fun a b => a ≤ b) m with hLdef
+  have hlen : L.length = Fintype.card V := by
+    rw [hLdef, Multiset.length_sort, hm, Multiset.card_map, Finset.card_val,
+      Finset.card_univ]
+  have hgetD : ∑ i : Fin (Fintype.card V), evals hM i
+      = ∑ i : Fin (Fintype.card V), L.getD (i : ℕ) 0 :=
+    Finset.sum_congr rfl fun i _ => by
+      rw [List.getD_eq_getElem L (d := 0) (n := (i : ℕ)) (by
+        have hi : (i : ℕ) < L.length := by rw [hlen]; exact i.isLt
+        omega)]
+      rfl
+  rw [hgetD, Fin.sum_univ_eq_sum_range (fun k => L.getD k 0), ← hlen,
+    sum_range_getD_eq_sum]
+  have hcoe : (L : Multiset ℝ) = m := by rw [hLdef, Multiset.sort_eq]
+  have hLm : L.sum = m.sum := by
+    have h1 : (L : Multiset ℝ).sum = m.sum := by rw [hcoe]
+    have h2 : L.sum = (L : Multiset ℝ).sum := rfl
+    rw [h2, h1]
+  rw [hLm]
+  rw [← Finset.sum_eq_multiset_sum (s := (Finset.univ : Finset V))
+      (f := eigvalOf M hM)]
+  exact eigvalOf_sum_eq_trace M hM
+
+/-- **The eigenvalue-witness bridge.** If `x ≠ 0` satisfies the
+eigenvector equation `M *ᵥ x = μ • x`, some eigenbasis eigenvalue equals
+`μ`: the eigenbasis is complete (`dotProduct_eigvecOf`), so a nonzero
+`x` has a nonzero eigencomponent, and the eigenaction
+(`dotProduct_eigvecOf_mulVec`) forces that component's eigenvalue to
+agree with `μ`. QA and downstream consumers use this to *exhibit*
+spectral values from hand-checkable eigenvectors without computing the
+eigenvalue listing — composed with `eigvalOf_le_evals_last` it gives
+lower bounds on the top sorted entry, and with
+`evals_first_le_eigvalOf` upper bounds on the bottom entry.
+
+QA: every independent spectral pin in
+`Scaffold/QA/SpectralGraph/MultiwayCheeger_QA.lean` (`λ₃ (P₃) = 2` at
+`![1, -√2, 1]`, `λ₄ (C₄) = 2` at `![1, 0, -1, 0]`) goes through this
+bridge. -/
+theorem exists_eigvalOf_eq_of_mulVec_eq_smul {M : Matrix V V ℝ} (hM : M.IsSymm)
+    {x : V → ℝ} {μ : ℝ} (hx : x ≠ 0) (hxμ : M *ᵥ x = μ • x) :
+    ∃ i : V, eigvalOf M hM i = μ := by
+  by_contra hcon
+  push_neg at hcon
+  have key : ∀ i : V, Matrix.dotProduct (eigvecOf M hM i) x = 0 := by
+    intro i
+    have h1 : Matrix.dotProduct (eigvecOf M hM i) (M *ᵥ x)
+        = Matrix.dotProduct (eigvecOf M hM i) (μ • x) := by rw [hxμ]
+    rw [dotProduct_eigvecOf_mulVec hM i x, Matrix.dotProduct_smul, smul_eq_mul] at h1
+    have h2 : (eigvalOf M hM i - μ) * Matrix.dotProduct (eigvecOf M hM i) x = 0 := by
+      linear_combination h1
+    rcases mul_eq_zero.1 h2 with h | h
+    · exact absurd (sub_eq_zero.1 h) (hcon i)
+    · exact h
+  have hzero : Matrix.dotProduct x x = 0 := by
+    rw [dotProduct_eigvecOf hM x x]
+    exact Finset.sum_eq_zero fun i _ => by rw [key i, mul_zero]
+  exact hx (Matrix.dotProduct_self_eq_zero.1 hzero)
+
+end OrderStatistics
 
 /-!
 ## 6. Event-driven adjacency updates

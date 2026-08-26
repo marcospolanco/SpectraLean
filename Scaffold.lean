@@ -27,6 +27,8 @@ import Scaffold.Mathlib.GraphTheory.PolyFilter
 import Scaffold.Mathlib.GraphTheory.ClusterProjector
 import Scaffold.Mathlib.GraphTheory.FunctionalCalculus
 import Scaffold.Mathlib.GraphTheory.VariationalTransfer
+import Scaffold.Mathlib.GraphTheory.Multiway
+import Scaffold.Mathlib.GraphTheory.Signed
 import Scaffold.Mathlib.GraphTheory.Dynamics
 import Scaffold.Mathlib.Dynamics.DiscreteAffine
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl
@@ -112,8 +114,17 @@ Laplacian (`GraphTheory.Magnetic`: the shelf's first complex Hermitian
 object — the directed-native `D_sym − ½(W + Wᴴ)` operator, Hermitian by
 construction hypothesis-free, with the magnetic energy identity, PSD on
 nonnegative weights, the balanced-potential gauge characterization of
-the kernel, and the zero-phase/symmetric-cone agreements with the
-classical Laplacian, all proved), the heat semigroup
+the kernel now promoted to the kernel-at-action-level
+(`magneticLaplacian_mulVec_eq_zero_iff`), and the
+zero-phase/symmetric-cone agreements with the classical Laplacian, all
+proved), the signed-graph slice (`GraphTheory.Signed`: the signed
+Laplacian `D − A_σ` at a `{±1}` signing, the magnetic π-flux join, the
+signed Dirichlet energy identity derived from the delivered
+`magnetic_energy`, the kernel characterization, the **Harary balance
+theorem in kernel form** `IsBalanced A s ↔ ∃ x ≠ 0, L_σ *ᵥ x = 0` on
+connected input, positive definiteness under frustration, and the
+switching similarity `diag(g) · L_σ · diag(g) = laplacian A` with
+two-way eigenpair transfer, all proved), the heat semigroup
 (`GraphTheory.Heat`: Phase B, Step 1 of the reversibility/heat program —
 the matrix-level diffusion operator `heatKernel A t = e^{-tL}` with its
 hypothesis-graded symmetry and time-zero identity, plus the square-zero

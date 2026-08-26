@@ -120,7 +120,14 @@ and sparsest-cut shapes assume).
 *Plan:* edge-boundary and uniform-weight variants of conductance;
 sparsest-cut statement shapes; cut/measure duality interfaces used by
 local algorithms. Each variant must name the algorithm consumer that
-needs it before admission.
+needs it before admission. **The Alon–Boppana bound for d-regular
+graphs** (`proposals/alon-boppana-bound.md`) — adopted 2026-08-26,
+operator decision recorded in that proposal's own Gate section per its
+"closes the field's most conspicuous gap next to the existing
+Cheeger/expander toolkit" case; the diameter-dependent single-graph
+form via Route A (Nilli's variational/test-vector method, reusing
+`secondEval_variational` as its entire linear-algebra engine), Step 0's
+tree-ball spike authorized to begin at any time.
 
 *Update (2026-08-25/26):* **the irregular (volume-weighted) Cheeger *upper*
 bound delivered** (`proposals/irregular-cheeger-variational-transfer.md`

@@ -1,10 +1,13 @@
 # Proposal: The Alon–Boppana Bound for d-Regular Graphs
 
-**Status:** Proposed — Step 0 survey only, requested 2026-08-22. Authorizes
-no Lean changes, axiom admissions, document rewrites beyond this file, or
-external publication. Written up to the same standard as
+**Status:** **ADOPTED 2026-08-26** (see the Gate section below for the
+recorded decision) — Step 0's tree-ball spike and Step 1 onward are
+authorized. Originally proposed 2026-08-22 as a Step 0 survey only,
+written up to the same standard as
 [`weighted-matrix-tree-theorem.md`](weighted-matrix-tree-theorem.md) — a
 costed candidate for an operator decision, not a self-authorizing plan.
+That survey's route recommendation (Route A) and build order stand
+unchanged by adoption; only the Gate has moved.
 
 ## Clean-room boundary
 
@@ -236,7 +239,16 @@ above — not an unqualified asymptotic claim.
   (mirrors this repo's standing pattern of a hypothesis-necessity
   refutation, e.g. `strict_dominance_refuted_QA`).
 
-## Gate — this needs an operator decision, not routine backlog treatment
+## Gate — ADOPTED 2026-08-26
+
+**Operator decision recorded:** adopted. The "closes the field's most
+conspicuous gap next to the existing Cheeger/expander toolkit" case
+below is accepted as sufficient; `docs/6_SGT_BACKLOG.md` item 3 has been
+updated the same day to name this candidate. Step 0's tree-ball spike
+and Step 1 onward may begin under the Operating Instructions below.
+
+The rest of this section is kept verbatim as the record of what was
+decided and why.
 
 Same class of gate as `weighted-matrix-tree-theorem.md`, one step stronger:
 that proposal could at least point to `docs/6_SGT_BACKLOG.md` item 7
@@ -270,10 +282,9 @@ edit is itself part of the decision, not a routine documentation update.
 
 ## Open next step
 
-Blocked on the Gate above, not on any technical prerequisite. Step 0's
-tree-ball spike (see "Build order") may be done at any time at no
-commitment cost, but Step 1 should not begin until an operator adopts this
-proposal, names a consumer, or explicitly accepts the
-"closes the field's most conspicuous gap" case above as sufficient — the
-same kind of judgment call `admit-perron-frobenius.md` and
-`prove-courant-fischer.md` originally needed.
+**Unblocked (2026-08-26).** Step 0's tree-ball spike is the immediate
+next action (see "Build order"): spike Route A's tree-ball hypothesis on
+a small concrete fixture (`Fin 5`–`Fin 10`) to get a real cost estimate
+for stating "the radius-`r` ball around `v` is a tree" in Scaffold's
+fixed-`V` idiom, before Step 1 (d-regularity and the constant-eigenvector
+fact) begins.

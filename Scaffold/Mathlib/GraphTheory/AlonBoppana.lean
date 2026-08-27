@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -/
 import Scaffold.Mathlib.GraphTheory.Spectral
+import Scaffold.Mathlib.GraphTheory.Cheeger
 import Mathlib.Combinatorics.SimpleGraph.Metric
 import Mathlib.Combinatorics.SimpleGraph.Diam
 
@@ -35,6 +36,20 @@ the classical error shape `alonBoppana_nilli_classical` and the
 diameter bookkeeping `alonBoppana_diam_ge` (`k + 1 ≤ ⌊diam/2⌋`, the
 honest hypothesis-side reading of `O(1/⌊diam/2⌋)` — the tree-ball
 hypothesis is never derived from the diameter).
+
+**The expansion ceiling** (delivered 2026-08-27,
+`proposals/ramanujan-expansion-ceiling.md`): the program's first
+theorem consumer — `ramanujan_expansion_ceiling` composes
+`alonBoppana_nilli_classical` with `Cheeger.lean`'s proved
+`cheeger_lower_bound` through the new engine pieces
+`secondEval_smul_of_pos` (exact positive scaling, `Spectral.lean`)
+and the operator identity `smul_one_sub_eq_smul_regularNormalizedLapla
+cian` (`d • 1 − A = d • L_sym` under regularity), yielding the
+textbook ceiling `cheegerConstant A ≤ √(2 (1 − 2√(d−1)/d +
+2√(d−1)/(d (k+1))))`. Obstruction scope only: the statement bounds how
+good an expander any graph satisfying the hypotheses can be; it says
+nothing about the ceiling being tight or attained (that is the
+separate Ramanujan-graph construction program).
 
 **Step 1** (delivered 2026-08-26): the d-regularity interface in
 Scaffold's own idiom, reusing `Cheeger.lean`'s `d : ℝ` hypothesis
@@ -1705,5 +1720,159 @@ theorem alonBoppana_nilli_classical {d k : ℕ} {x y u v : V}
   linarith
 
 end Packaging
+
+/-!
+## The expansion ceiling — the Alon–Boppana × Cheeger composition
+
+`proposals/ramanujan-expansion-ceiling.md` (delivered 2026-08-27):
+the program's capstone paired with the delivered Cheeger hard
+direction, producing the field's actual textbook payoff sentence — an
+explicit numerical ceiling on how good an expander any d-regular graph
+satisfying Alon–Boppana's hypotheses can be. The two source theorems
+live on linearly related operators (`d • 1 − A` vs
+`regularNormalizedLaplacian A d`); the join is the exact scaling
+engine `secondEval_smul_of_pos` plus one operator identity.
+
+Scope (a hard acceptance-bar item of the proposal, not a style note):
+this is the obstruction/ceiling direction only. Nothing here says the
+ceiling is *tight* or *attained* by any graph or family — that is the
+separate Ramanujan-graph construction/existence program, and no
+delivery record, docstring, or summary may describe this result as
+showing tightness.
+-/
+section ExpansionCeiling
+
+variable {A : WAdj (V := V)} {hA : A.IsSymm}
+
+/-- Under `d`-regularity with `d ≠ 0`, the shifted adjacency operator
+of the Alon–Boppana statements IS the positive-scaled
+regular-normalized Laplacian of the Cheeger statements:
+`d • 1 − A = d • L_sym`. The half of the identity not already on file
+(`smul_regularNormalizedLaplacian` covers `d • L_sym = laplacian A`)
+is that the degree matrix of a regular graph is `d • 1`. -/
+theorem smul_one_sub_eq_smul_regularNormalizedLaplacian {d : ℕ}
+    (hd : IsDRegular A ((d : ℕ) : ℝ)) (hdne : ((d : ℕ) : ℝ) ≠ 0) :
+    ((d : ℕ) : ℝ) • (1 : Matrix V V ℝ) - A
+      = ((d : ℕ) : ℝ) • regularNormalizedLaplacian A ((d : ℕ) : ℝ) := by
+  rw [smul_regularNormalizedLaplacian A ((d : ℕ) : ℝ) hd hdne,
+    show laplacian A = degreeMatrix A - A from rfl]
+  congr 1
+  ext i j
+  by_cases hij : i = j
+  · subst hij
+    have hdi : degreeMatrix A i i = ((d : ℕ) : ℝ) := by
+      rw [degreeMatrix_diagonal, hd i]
+    simp [hdi]
+  · rw [Matrix.smul_apply, smul_eq_mul, Matrix.one_apply, if_neg hij,
+      degreeMatrix_off_diagonal _ hij]
+    simp
+
+/-- **The Ramanujan expansion ceiling** — the Alon–Boppana bound
+composed with the Cheeger hard direction into an explicit ceiling on
+expansion quality: under exactly `alonBoppana_nilli_classical`'s
+hypotheses,
+`cheegerConstant A ≤ √(2 (1 − 2√(d−1)/d + 2√(d−1)/(d (k+1))))`.
+
+This is the sentence every spectral graph theory course states
+immediately after proving Alon–Boppana: no d-regular graph satisfying
+these hypotheses can have conductance above this explicit value — the
+expansion-obstruction half of the textbook picture. It is *not* a
+tightness or attainment claim (see the section scope note).
+
+Route (mechanical, two compositions): the operator identity
+transports the Alon–Boppana upper bound on
+`secondEval (d • 1 − A)` onto `d • L_sym` (`secondEval_congr`);
+`secondEval_smul_of_pos` divides out the `d`, bounding
+`secondEval L_sym` by `1 − 2√(d−1)/d + 2√(d−1)/(d (k+1))`; the Cheeger
+hard direction `cheegerConstant² / 2 ≤ secondEval L_sym` chains below
+it, and `Real.sqrt_le_sqrt` at the nonnegative Cheeger constant takes
+the root. Every hypothesis of both source theorems is carried
+unchanged; `h01` implies Cheeger's `hnonneg` by cases.
+
+QA: `Scaffold/QA/SpectralGraph/AlonBoppana_QA.lean`'s
+`abC8_ceiling_instance` (the C₈ instance at `k = 0`, the ceiling
+evaluating numerically to `√2`), `abC8_cheegerConstant_le_quarter`
+(the fixture's actual Cheeger constant pinned `≤ 1/4` by the exhibited
+half-set cut — the ceiling holds with strict slack, non-vacuous, never
+tight), and `abC8_ceiling_improves_arith` (the two-`k` improvement as
+arithmetic on the statement's own constants at `d = 2`). -/
+theorem ramanujan_expansion_ceiling {d k : ℕ} {x y u v : V}
+    (h01 : ∀ i j, A i j = 0 ∨ 1 ≤ A i j)
+    (hd : IsDRegular A ((d : ℕ) : ℝ))
+    (hxy : x ≠ y) (hedge : A x y ≠ 0) (huv : u ≠ v) (hedge2 : A u v ≠ 0)
+    (hconn : (supportGraph A hA).Connected)
+    (hfar : (k + 1) + (k + 1) < distEdge A hA x y u v)
+    (hd1 : 1 < d) (htb1 : IsTreeBall A hA x y d (k + 1))
+    (htb2 : IsTreeBall A hA u v d (k + 1))
+    (hcard : 2 ≤ Fintype.card V) :
+    cheegerConstant A ≤ Real.sqrt (2 * (1 - 2 * Real.sqrt ((d - 1 : ℕ) : ℝ)
+        / ((d : ℕ) : ℝ)
+      + 2 * Real.sqrt ((d - 1 : ℕ) : ℝ)
+        / (((d : ℕ) : ℝ) * ((k : ℝ) + 1)))) := by
+  have hnn : ∀ i j, 0 ≤ A i j := by
+    intro i j
+    rcases h01 i j with h | h
+    · rw [h]
+    · exact le_trans (by norm_num : (0 : ℝ) ≤ 1) h
+  have hdreal : ∀ i, deg A i = ((d : ℕ) : ℝ) := hd
+  have hdpos : (0 : ℝ) < ((d : ℕ) : ℝ) :=
+    Nat.cast_pos.2 (by omega)
+  have hLsym := regularNormalizedLaplacian_symmetric A hA ((d : ℕ) : ℝ)
+  -- the Alon–Boppana side, transported onto the `d • L_sym` spelling
+  have hAB0 := alonBoppana_nilli_classical h01 hd hxy hedge huv hedge2 hconn
+    hfar hd1 htb1 htb2 hcard
+  have hop := smul_one_sub_eq_smul_regularNormalizedLaplacian hd hdpos.ne'
+  have hbridge : secondEval (((d : ℕ) : ℝ) • (1 : Matrix V V ℝ) - A)
+      (smul_one_sub_isSymm hA ((d : ℕ) : ℝ)) hcard
+      = secondEval (((d : ℕ) : ℝ) • regularNormalizedLaplacian A ((d : ℕ) : ℝ))
+        (smul_isSymm hLsym ((d : ℕ) : ℝ)) hcard :=
+    secondEval_congr _ _ hop hcard
+  rw [hbridge] at hAB0
+  have hsc : secondEval (((d : ℕ) : ℝ) • regularNormalizedLaplacian A ((d : ℕ) : ℝ))
+      (smul_isSymm hLsym ((d : ℕ) : ℝ)) hcard
+      = ((d : ℕ) : ℝ) * secondEval (regularNormalizedLaplacian A ((d : ℕ) : ℝ))
+          hLsym hcard :=
+    secondEval_smul_of_pos hLsym
+      (regularNormalizedLaplacian_psd A hA hnn ((d : ℕ) : ℝ) hdreal hdpos)
+      (regularNormalizedLaplacian_mulVec_onesVec A ((d : ℕ) : ℝ) hdreal
+        hdpos.ne') hcard hdpos
+  rw [hsc] at hAB0
+  -- the Cheeger side
+  have hch := cheeger_lower_bound A hA hnn ((d : ℕ) : ℝ) hdreal hdpos hcard
+  have hk1 : ((k : ℝ) + 1) ≠ 0 := by
+    have : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg _
+    linarith
+  set s := Real.sqrt ((d - 1 : ℕ) : ℝ)
+  -- φ² ≤ 2 * (the ceiling's radicand)
+  have h2 : cheegerConstant A ^ 2 ≤ 2 * (1 - 2 * s / ((d : ℕ) : ℝ)
+      + 2 * s / (((d : ℕ) : ℝ) * ((k : ℝ) + 1))) := by
+    have h2lam : 2 * secondEval (regularNormalizedLaplacian A ((d : ℕ) : ℝ))
+        hLsym hcard
+        ≤ 2 * (((d : ℕ) : ℝ) - 2 * s + 2 * s / ((k : ℝ) + 1))
+          / ((d : ℕ) : ℝ) := by
+      rw [le_div_iff₀ hdpos]
+      calc 2 * secondEval (regularNormalizedLaplacian A ((d : ℕ) : ℝ)) hLsym hcard
+            * ((d : ℕ) : ℝ)
+          = 2 * (((d : ℕ) : ℝ) * secondEval
+              (regularNormalizedLaplacian A ((d : ℕ) : ℝ)) hLsym hcard) := by
+              ring
+        _ ≤ 2 * (((d : ℕ) : ℝ) - 2 * s + 2 * s / ((k : ℝ) + 1)) :=
+            mul_le_mul_of_nonneg_left hAB0 (by norm_num)
+    have hsplit : cheegerConstant A ^ 2
+        = 2 * (cheegerConstant A ^ 2 / 2) := by field_simp
+    have hident : 2 * (((d : ℕ) : ℝ) - 2 * s + 2 * s / ((k : ℝ) + 1))
+        / ((d : ℕ) : ℝ)
+        = 2 * (1 - 2 * s / ((d : ℕ) : ℝ)
+          + 2 * s / (((d : ℕ) : ℝ) * ((k : ℝ) + 1))) := by
+      field_simp
+      ring
+    rw [hsplit, ← hident]
+    exact le_trans (mul_le_mul_of_nonneg_left hch (by norm_num)) h2lam
+  -- take the square root
+  have hφnn : 0 ≤ cheegerConstant A := cheegerConstant_nonneg A hnn
+  rw [← Real.sqrt_sq hφnn]
+  exact Real.sqrt_le_sqrt h2
+
+end ExpansionCeiling
 
 end SpectralGraphTheory

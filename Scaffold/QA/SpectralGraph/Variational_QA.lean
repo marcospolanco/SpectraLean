@@ -17,7 +17,13 @@
     once from trace/determinant/sortedness and once through the
     theorem from the independently computed Rayleigh side;
   - the disconnected instantiation `λ₂ = 0` on two disjoint edges;
-  - the upper value pin `λ₂ ≤ 1` on the three-vertex path.
+  - the upper value pin `λ₂ ≤ 1` on the three-vertex path;
+  - the positive-scaling lemma `secondEval_smul_of_pos` (2026-08-27,
+    the Ramanujan expansion ceiling program): `secondEval (3 • L) = 6`
+    by two independent routes (raw trace/determinant/sortedness vs
+    the lemma joined to `λ₂ = 2`), plus the negative-`c` fence
+    refuting the conclusion at `c = -1` where the `0 < c` hypothesis
+    fails.
 
   All proofs are real Lean proofs (no `sorry`/`admit`). QA does not
   prove the characterization; it checks its interface and falsifies
@@ -403,6 +409,183 @@ theorem edge_lambda2_variational_transfer_QA :
     k2_set_sInf_eq_two]
 
 end EdgeK2
+
+/-!
+### The positive-scaling lemma on `K₂`: two routes to `6`, and the
+negative-`c` fence
+
+`secondEval_smul_of_pos` (delivered 2026-08-27 with the Ramanujan
+expansion ceiling program) pinned two ways at `c = 3`: the raw route
+(trace `3 · 2 = 6`, determinant `3² · 0 = 0`, sortedness — the sorted
+spectrum is `[0, 6]`) against the theorem route (the lemma joined to
+the on-file `λ₂(K₂) = 2`). A wrong scaling constant (a `c²`, a `c + 1`)
+breaks exactly one route's agreement with the other. The fence at
+`c = -1`: the sorted spectrum of `-L` is `[-2, 0]`, second entry `0 ≠
+-2`, so the conclusion is refuted where the `0 < c` hypothesis fails
+— the hypothesis is load-bearing, not decorative.
+-/
+
+section ScalingK2
+
+/-- Sorted two-point pin at a nonnegative sum with a zero entry: the
+top entry is the sum (a zero entry at the top forces the sum itself
+to zero). Generalizes the file's `two_point_pin_pos` beyond the
+literal `2`. -/
+private theorem two_point_pin_top {s : ℝ} (hs0 : 0 ≤ s) {l : List ℝ}
+    (h2 : l.length = 2) (hs : l.Sorted (fun a b => a ≤ b))
+    (hsum : l.sum = s) (hprod : l.prod = 0) :
+    l.get ⟨1, by omega⟩ = s := by
+  match l with
+  | a :: b :: [] =>
+    have hmono : a ≤ b := by
+      have h := hs.rel_get_of_lt (show (0 : Fin 2) < 1 by decide)
+      simpa using h
+    simp only [List.sum_cons, List.sum_nil, add_zero, List.prod_cons,
+      List.prod_nil, mul_one] at hsum hprod
+    show b = s
+    rcases eq_zero_or_eq_zero_of_mul_eq_zero hprod with h0 | h1
+    · rw [h0, zero_add] at hsum; exact hsum
+    · rw [h1] at hmono hsum ⊢
+      rw [add_zero] at hsum
+      have hsle : s ≤ 0 := by linarith
+      have hseq : s = 0 := le_antisymm hsle hs0
+      linarith
+
+/-- Sorted two-point pin at a *negative* sum with a zero entry: the
+top entry is the zero (the other entry carries the negative sum below
+it, or sortedness is violated). The fence companion of
+`two_point_pin_top`. -/
+private theorem two_point_pin_top_zero {s : ℝ} (hs0 : s < 0) {l : List ℝ}
+    (h2 : l.length = 2) (hs : l.Sorted (fun a b => a ≤ b))
+    (hsum : l.sum = s) (hprod : l.prod = 0) :
+    l.get ⟨1, by omega⟩ = 0 := by
+  match l with
+  | a :: b :: [] =>
+    have hmono : a ≤ b := by
+      have h := hs.rel_get_of_lt (show (0 : Fin 2) < 1 by decide)
+      simpa using h
+    simp only [List.sum_cons, List.sum_nil, add_zero, List.prod_cons,
+      List.prod_nil, mul_one] at hsum hprod
+    show b = 0
+    rcases eq_zero_or_eq_zero_of_mul_eq_zero hprod with h0 | h1
+    · rw [h0, zero_add] at hsum
+      rw [h0] at hmono
+      have hblt : b < 0 := by rw [hsum]; exact hs0
+      linarith
+    · exact h1
+
+/-- The raw route: the sorted spectrum of `3 • L(K₂)` is `[0, 6]` by
+trace (`3 · 2`), determinant (`3² · 0`), and sortedness — independent
+of the scaling lemma. -/
+theorem k2_secondEval_smul_three_raw :
+    secondEval ((3 : ℝ) • laplacian k2Adj)
+      (smul_isSymm (laplacian_symmetric k2Adj k2Adj_symmetric) 3)
+      (le_refl 2) = 6 := by
+  have hL := laplacian_symmetric k2Adj k2Adj_symmetric
+  have hSL := smul_isSymm hL 3
+  have hlen : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm hSL).eigenvalues))).length = 2 := by
+    rw [Multiset.length_sort, Multiset.card_map]; simp
+  have hsorted : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm hSL).eigenvalues))).Sorted
+        (fun a b => a ≤ b) :=
+    Multiset.sort_sorted _ _
+  have hsum : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm hSL).eigenvalues))).sum = 6 := by
+    have htr : ∑ i : Fin 2, eigvalOf ((3 : ℝ) • laplacian k2Adj) hSL i = 6 := by
+      rw [eigvalOf_sum_eq_trace, Matrix.trace_smul, k2_laplacian_trace]
+      norm_num
+    rw [← Multiset.sum_coe, Multiset.sort_eq, ← Finset.sum_eq_multiset_sum]
+    exact htr
+  have hprod : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm hSL).eigenvalues))).prod = 0 := by
+    have hd0 : (((3 : ℝ) • laplacian k2Adj)).det = 0 := by
+      rw [Matrix.det_smul, k2_laplacian_det]
+      norm_num
+    have hd : ∏ i : Fin 2,
+        ((isHermitian_of_isSymm hSL).eigenvalues i) = 0 := by
+      have hd0' := (isHermitian_of_isSymm hSL).det_eq_prod_eigenvalues
+      rw [hd0] at hd0'
+      exact hd0'.symm
+    rw [← Multiset.prod_coe, Multiset.sort_eq, ← Finset.prod_eq_multiset_prod]
+    exact hd
+  show (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm hSL).eigenvalues))).get ⟨1, by omega⟩ = 6
+  exact two_point_pin_top (by norm_num) hlen hsorted hsum hprod
+
+/-- The theorem route: `secondEval_smul_of_pos` joined to the on-file
+`λ₂(K₂) = 2`. The two routes to `6` share no mechanism — a wrong
+scaling constant breaks exactly one. -/
+theorem k2_secondEval_smul_three_thm :
+    secondEval ((3 : ℝ) • laplacian k2Adj)
+      (smul_isSymm (laplacian_symmetric k2Adj k2Adj_symmetric) 3)
+      (le_refl 2) = 6 := by
+  have hL := laplacian_symmetric k2Adj k2Adj_symmetric
+  have hL2 : secondEval (laplacian k2Adj) hL (le_refl 2) = 2 :=
+    k2_lambda2_eq_two
+  rw [secondEval_smul_of_pos hL
+    (laplacian_psd k2Adj k2Adj_symmetric k2Adj_nonneg)
+    (laplacian_ones_in_kernel k2Adj) (le_refl 2) (by norm_num), hL2]
+  norm_num
+
+/-- The negative-`c` fence: at `c = -1` the scaling conclusion is
+refuted — the sorted spectrum of `-L(K₂)` is `[-2, 0]`, second entry
+`0 ≠ -2 = -1 · 2`. The `0 < c` hypothesis of
+`secondEval_smul_of_pos` is load-bearing. -/
+theorem k2_secondEval_smul_neg_fence_QA :
+    secondEval ((-1 : ℝ) • laplacian k2Adj)
+      (smul_isSymm (laplacian_symmetric k2Adj k2Adj_symmetric) (-1))
+      (le_refl 2)
+      ≠ (-1 : ℝ) * secondEval (laplacian k2Adj)
+      (laplacian_symmetric k2Adj k2Adj_symmetric) (le_refl 2) := by
+  have hL := laplacian_symmetric k2Adj k2Adj_symmetric
+  have hSL := smul_isSymm hL (-1)
+  have hlen : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm hSL).eigenvalues))).length = 2 := by
+    rw [Multiset.length_sort, Multiset.card_map]; simp
+  have hsorted : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm hSL).eigenvalues))).Sorted
+        (fun a b => a ≤ b) :=
+    Multiset.sort_sorted _ _
+  have hsum : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm hSL).eigenvalues))).sum = -2 := by
+    have htr : ∑ i : Fin 2, eigvalOf ((-1 : ℝ) • laplacian k2Adj) hSL i = -2 := by
+      rw [eigvalOf_sum_eq_trace, Matrix.trace_smul, k2_laplacian_trace]
+      norm_num
+    rw [← Multiset.sum_coe, Multiset.sort_eq, ← Finset.sum_eq_multiset_sum]
+    exact htr
+  have hprod : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm hSL).eigenvalues))).prod = 0 := by
+    have hd0 : (((-1 : ℝ) • laplacian k2Adj)).det = 0 := by
+      rw [Matrix.det_smul, k2_laplacian_det]
+      norm_num
+    have hd : ∏ i : Fin 2,
+        ((isHermitian_of_isSymm hSL).eigenvalues i) = 0 := by
+      have hd0' := (isHermitian_of_isSymm hSL).det_eq_prod_eigenvalues
+      rw [hd0] at hd0'
+      exact hd0'.symm
+    rw [← Multiset.prod_coe, Multiset.sort_eq, ← Finset.prod_eq_multiset_prod]
+    exact hd
+  have hval : secondEval ((-1 : ℝ) • laplacian k2Adj) hSL (le_refl 2) = 0 := by
+    show (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm hSL).eigenvalues))).get ⟨1, by omega⟩ = 0
+    exact two_point_pin_top_zero (by norm_num) hlen hsorted hsum hprod
+  have hL2 : secondEval (laplacian k2Adj) hL (le_refl 2) = 2 :=
+    k2_lambda2_eq_two
+  rw [hval, hL2]
+  norm_num
+
+end ScalingK2
 
 /-!
 ### Disconnected graph: `λ₂ = 0`, through the theorem

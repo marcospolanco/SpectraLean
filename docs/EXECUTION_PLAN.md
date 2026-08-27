@@ -6,36 +6,259 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**Sparsification Step 1, Slice 2 — the deterministic SS algebra** (the
-Active priority table's top High row,
-`proposals/spectral-sparsification-via-leverage-scores.md`, its named
-next action); run 1, 2026-08-27, run `20260827T161958Z-run-1`.
+None — see the delivered milestone below and the standing handoff.
+The Ramanujan Expansion Ceiling row (the Active table's only High)
+was **delivered this run** and retired to the Delivered table; with
+no High rows remaining, the next run falls through to the
+Medium-High/Medium rows per priority item 0.
 
-**Leverage rationale:** this slice is the deterministic core the
-`matrix_bernstein` consumer assembly (Slice 3) consumes — the
-Spielman–Srivastava sampling matrices, their pointwise bound, and the
-variance statistic — and it retires the Step-0 record's named residual
-risk (the `R = 1/q` / `‖Σ‖ ≤ 1/q` classical constants, asserted from
-the classical argument until now) by proving them. Design decisions
-already priced and being implemented: the edge-vector family in
-eigen-coordinates (the `Foster.lean` spectral machinery's native
-representation — no matrix pseudoinverse or square root is ever
-formed), ordered-pair indexing with the honest `1/√2` normalization
-(so `∑_e v_e ⊗ v_e = Π_{im L}` holds exactly and the sampling space is
-the plain delivered `bernPMF` at `ι = V × V` — zero new probability
-infrastructure), and the Finding-A guard baked into the summand
-definition (saturated edges contribute the zero matrix; zero-leverage
-pairs are absorbed by the zero rank-one outer product, so centering
-holds unconditionally in `q > 0`). Zero new axioms; spike first
-(`wip/ss2_spike.lean`).
+------
 
-**Next action:** prove the four named pieces — the rank-one algebra
-and norm bound (`‖v ⊗ v‖ ≤ v ⬝ v`), the bilinear Dirichlet identity,
-`∑_{u,v} v_e ⊗ v_e = imageProjector` with the projector's algebra and
-`‖Π‖ ≤ 1`, and the guarded summand family with `‖X_e ω‖ ≤ 1/q`,
-`∫ X_e = 0`, `∑_e ∫ X_e * X_e = Σ`, and the headline `‖Σ‖ ≤ 1/q` —
-plus a QA file with K₂ fixtures and the junk-value fences; then the
-records sweep.
+## Delivered milestones (most recent first)
+
+**The Ramanujan Expansion Ceiling — `AlonBoppana.lean`'s first theorem
+consumer, the Alon–Boppana obstruction composed with the Cheeger hard
+direction; `proposals/ramanujan-expansion-ceiling.md` (the Active
+table's only High row); run 1, 2026-08-27, run `20260827T220230Z-run-1`;
+DELIVERED — pure hard crust, zero new axioms (count stays 10;
+`#print axioms` via `wip/ram_axcheck.lean` on all 13 audited
+declarations — 5 module + 8 QA: exactly `propext, Classical.choice,
+Quot.sound`, every one — the ceiling consumes two *proved* theorems,
+so the whole chain is unconditional). QA 2659 → 2666 (+7 theorem
+declarations; the `abC8_half` cut fixture is a `def`).**
+
+**Delivered** in three pieces: (1) the engine in `Spectral.lean`'s
+`Lambda2Variational` section — **`secondEval_smul_of_pos`** (the
+exact positive-scaling lemma by the variational route: both sides
+through `secondEval_variational`, the constraint set of `c • M` as
+the positive-scaled image, `sInf` commuting by the two-direction
+ping-pong; PSD + kernel hypotheses exactly what both shelf Laplacians
+carry; the hypothesis-free generalization stays priced — the pin has
+no `eigenvalues_smul`/`charpoly_smul` and no consumer has named it),
+`smul_isSymm`, and **`secondEval_congr`** (proof irrelevance across
+equal operator spellings — the robust route around the
+motive-not-type-correct trap of rewriting matrix equalities under
+proof-carrying applications); (2) the composition in
+`AlonBoppana.lean`'s new `ExpansionCeiling` section (the file gains
+the `Cheeger` import — no cycle): the operator identity
+`smul_one_sub_eq_smul_regularNormalizedLaplacian` (`d • 1 − A =
+d • L_sym` under regularity) and the headline
+**`ramanujan_expansion_ceiling`** — `cheegerConstant A ≤
+√(2 (1 − 2√(d−1)/d + 2√(d−1)/(d (k+1))))` at exactly the
+Alon–Boppana hypothesis stack, both source theorems consumed verbatim
+with `h01 → hnonneg` the only bridge; (3) the QA —
+`Variational_QA.lean`'s `ScalingK2` section (the K₂ two-route scaling
+pin: raw trace/determinant/sortedness `[0, 6]` vs the lemma joined to
+the on-file `λ₂ = 2`, a wrong constant breaking exactly one route;
+the negative-`c` fence: sorted spectrum `[-2, 0]`, `0 ≠ -2`, the
+`0 < c` hypothesis load-bearing) and `AlonBoppana_QA.lean`'s Step 6
+(the C₈ ceiling instance evaluating numerically to `√2` at `k = 0`;
+the fixture's actual `φ ≤ 1/4` by the exhibited half-set cut through
+`conductance_ge_cheegerConstant` — the independent cut-level route,
+non-vacuous with strict slack `1/4 < √2`, never tight; the two-`k`
+improvement pinned as arithmetic on the statement's own constants at
+`d = 2`, with the honest C₈-hosts-only-`k = 0` note per the on-file
+`abC8_far_fence`). Step 0's three checks answered from source
+evidence and recorded in the proposal before any shelf Lean
+(`IsDRegular` definitionally Cheeger's `hd`; the scaling lemma absent
+from shelf and pin, the variational route cheapest; `h01 → hnonneg`
+by `Or.elim`). Obstruction scope only — the hard acceptance-bar item:
+no tightness or attainment claim anywhere.
+
+**Verification:** spike first (`wip/ram_spike.lean`, every piece to
+zero errors/warnings before any shelf Lean; technique findings
+recorded in the proposal's delivery record — `λ` is the `fun`
+keyword and breaks identifiers; the proof-arg-carrying-application
+rewrite trap and its `secondEval_congr` dissolution;
+`Matrix.smul_mulVec_assoc`'s direction; `mem_lowerBounds.1` for
+`BddBelow` destructuring; def-rewrites needing the `show … from rfl`
+equation form; the `Real.sqrt_lt_sqrt` argument order;
+`norm_num`'s in-`√` evaluation at `d = 2` leaving `1 < √2`; Finset
+literals behaving at width 8 where matrix literals do not; the
+stale-olen recurrence at the import boundary); `lake env lean` on all
+four touched files — zero errors, warnings exactly at the
+pre-existing baselines (Spectral's 8, Variational_QA's 7;
+AlonBoppana and its QA clean); explicit `lake build` targets ✔ (all
+four); `#print axioms` — the standard three only, all 13; **full
+`lake build` ✔ (2400/2401, "Build completed successfully")
+immediately followed by `check_build_completeness.py` — 119/119
+fresh, 0 stale, 0 missing, exit 0**; `lint_axioms` (10, no issues),
+`check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**2666/10/0**). Records updated: the proposal (COMPLETE
+header + the delivery record), `proposals/README.md` (the High row
+retired to the Delivered table; the Active table now has no High
+rows), README (2666; the module-table clause), the radar (axis 4's
+evidence clause with the score held at 5.0 per protocol — a
+composition of two counted families plus one engine piece, not a new
+theorem family; the QA axis synced 2659 → 2666), the scoreboard (a
+verification row + the interpretation bullet), backlog item 3 (the
+ceiling clause), the index map (the ExpansionCeiling + scaling-engine
+sections, 5 rows), this plan, and the activity log. Nothing committed;
+the prior runs' uncommitted Slice-3 delivery preserved untouched.
+
+**Remaining risk:** none blocking. The priced follow-ons are recorded
+in the proposal: the hypothesis-free general scaling lemma (needs
+eigenvalue-multiset machinery the pin lacks — no named consumer), a
+`k = 1`-hosting fixture (C₁₂) for instance-level two-`k` QA, and the
+asymptotic family corollary (a named d-regular family with
+`diam → ∞` — the Alon–Boppana proposal's own deferred item).
+
+**Next milestone (open):** the Active table has no High rows — per
+priority item 0 fall through to the Medium-High/Medium rows
+(empirical-stationary-distribution Step 0 — its i.i.d.-sampling
+prerequisite is delivered; the sampled-Laplacian quadratic-form
+consumer; the Fiedler-subspace Davis–Kahan Step-0 check) or the
+sparsification follow-ons.
+
+------
+
+## Delivered milestones (most recent first)
+
+**Records repair + Sparsification Step 1, Slice 3 — the assembly +
+QA, Step 1 COMPLETE and the program's strategic aim met
+(`matrix_bernstein`'s first real theorem consumer); the Active
+priority table's then-top High row
+(`proposals/spectral-sparsification-via-leverage-scores.md`); run 1,
+2026-08-27, run `20260827T193452Z-run-1`; DELIVERED — zero new axioms
+(count stays 10; `#print axioms` via `wip/ss3_axcheck.lean` on all 43
+audited declarations: 39 — the 14 new module declarations and 25 of 27
+QA — exactly `propext, Classical.choice, Quot.sound`; the two Derived
+tails and their two QA interface pins carry `matrix_bernstein`,
+honestly reported). QA 2632 → 2659 (+27, the new
+`Scaffold/QA/Derived/SparsificationTail_QA.lean`).**
+
+**Records repair (first, this run):** the committed Slice-2 delivery
+(`d6e62a9`) had exited post-commit before its terminal activity entry
+and this plan's Active-block retirement (the recurring records-gap
+pattern, fifth instance) — re-verified from scratch (direct
+elaboration of both Slice-2 files at zero errors/zero warnings, the
+72-declaration axcheck re-read against the committed state), terminal
+entry appended, stale block retired, and a delivered-milestone record
+written in below.
+
+**Slice 3 delivered** in three pieces: `GraphTheory/Sparsification.lean`'s
+new sections (the transfer helpers, the action bound
+`l2OpNorm_mulVec_dotProduct_le`, the symmetry-free norm→form transfer
+`abs_quadForm_le_of_l2OpNorm_le`, the sampled operator `ssSampled`
+with the *exact pointwise* deviation identity `ssSampled ω − Π_{im L}
+= ∑_e X_e ω` — the saturation guard mirrored as a deterministic
+weight, no null-event caveats — and the Bool-valued summand shape
+closing `h_meas`/`h_indep` through the Slice-1 transfer layer); the
+new `Scaffold/Derived/SparsificationTail.lean` (umbrella import
+added) with **`sparsification_norm_tail`** — `μ {‖S(ω) − Π‖ ≥ t} ≤
+2 d exp(−t²/(2/q + 2t/(3q)))` at the *proved* constants, Finding B's
+`Fintype.equivFin` + `Equiv.sum_comp` transport, no connectivity
+hypothesis — and **`sparsification_quadForm_tail`** (the additive
+eigen-coordinate pullback); and the QA (the deviation identity pinned
+at K₂ all-true with every piece visible, the deviation norm `= 1 =
+1/q` tight both sides, the transfer bound attained with equality,
+`quadForm_imageProjector_eq`'s first consumer, both tails' interface
+instances, the nonempty-event witness, and the two-sided connectivity
+content — the disconnected budget fence beside the connectivity-free
+positive). One mid-run build repair: `quadForm_sub` already existed
+in AlonBoppana (a different notion) — renamed `quadForm_sub_matrix`
+with consumers updated.
+
+**Verification:** spike first (`wip/ss3_spike.lean`, all three pieces
+in one file, zero errors/warnings before any shelf Lean; technique
+findings recorded in the proposal's Slice-3 record — beta-redex
+spelling mirroring for axiom-instantiation rewrites, `Equiv.sum_comp`
+direction, `Real.exp_le_exp` iff, reserved `Π` identifier, nlinarith
+certificates, the stale-olen recurrence); `lake env lean` zero
+errors/zero warnings on all three changed/new files; explicit `lake
+build` targets ✔ (2159/2159, 2165/2165, 2166/2166); **full `lake
+build` ✔ (2400/2401, "Build completed successfully") immediately
+followed by `check_build_completeness.py` — 119/119 fresh, 0 stale, 0
+missing, exit 0**; `lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**2659/10/0**).
+Records updated: the proposal (status header — Step 1 COMPLETE with
+priced follow-ons — + the Slice-3 delivery record with technique
+findings), `proposals/README.md` (the High row downgraded to
+Medium-follow-ons with the delivery clause; the Ramanujan row now the
+table's only High), README (2659; the Sparsification row extended and
+the SparsificationTail row added), the radar (QA axis synced 2632 →
+2659 across 62 modules), the scoreboard (two verification rows + the
+interpretation bullet), the backlog (the Slice-3 clause), the index
+map (the Sparsification + SparsificationTail sections — 21 rows,
+closing the inherited gap that Slice 2's declarations had never been
+indexed), this plan, and the activity log. Nothing committed; the
+prior runs' uncommitted deliveries preserved untouched.
+
+**Remaining risk:** none blocking. The priced follow-ons (the
+multiplicative `(1±ε)` refinement on `im Π`-coordinate vectors, the
+`q ~ log n/ε²` budget corollary, the graph-vector Laplacian form) and
+the Slice-2 set-aside (`ssVariance K₂ 1 = rankOne v_(0,1)` exact
+matrix value) are recorded in the proposal. The QA interface pins for
+the axiom-conditional tails depend on `matrix_bernstein` by design —
+that is the honest structure, not leakage.
+
+**Next milestone (open):** per priority item 0 — the **Ramanujan
+Expansion Ceiling** High row (a light, mechanical composition of
+`alonBoppana_nilli_classical` + `cheeger_lower_bound` plus one small
+`secondEval` scaling lemma — gives `AlonBoppana.lean` its first
+theorem consumer); otherwise the Medium-High/Medium rows
+(empirical-stationary-distribution Step 0 — its i.i.d.-space
+prerequisite is delivered; the sampled-Laplacian quadratic-form
+consumer; the Fiedler-subspace Davis–Kahan Step-0 check) or the
+sparsification follow-ons.
+
+------
+
+## Delivered milestones (most recent first)
+
+**Sparsification Step 1, Slice 2 — the deterministic SS algebra; the
+Active priority table's top High row
+(`proposals/spectral-sparsification-via-leverage-scores.md`); run 1,
+2026-08-27, run `20260827T161958Z-run-1` (committed as part of
+`d6e62a9`; records gap closed retrospectively by run
+`20260827T193452Z-run-1` after the delivery session exited
+post-commit pre-records — the recurring records-gap pattern, fifth
+instance); DELIVERED — pure hard crust, zero new axioms (count stays
+10; `#print axioms` via `wip/ss2_axcheck.lean` on all 72 audited
+declarations — 48 public module + 24 public QA: exactly `propext,
+Classical.choice, Quot.sound`, every one; re-verified against the
+committed state by the closing run). QA 2609 → 2632 (+23, the new
+`Scaffold/QA/SpectralGraph/Sparsification_QA.lean`).**
+
+**Delivered** in the new `Scaffold/Mathlib/GraphTheory/Sparsification.lean`
+(imports Foster, Resolvent, BernoulliProduct; umbrella import added):
+the rank-one algebra with the norm bound `‖v vᵀ‖ ≤ v ⬝ᵥ v`, the
+polarized bilinear Dirichlet identity, the eigen-coordinate edge
+vectors `ssEdgeVec` with `‖v_e‖² = w_e R_eff/2` and the Foster budget
+corollary `∑_{u,v} ‖v_e‖² = card V − 1`, the image projector
+`imageProjector` with `trace = card V − 1` and the exact projector
+identity `∑_e v_e v_eᵀ = Π_{im L}`, the Bernoulli second moment
+`E[(δ/p − 1)²] = (1−p)/p`, and the Finding-A-guarded sampling design
+(`ssProb`/`ssDelta`/`ssSummand`/`ssMeasure`) with all three
+`matrix_bernstein` clause lemmas *proved* at the classical constants
+(`∫ X_e = 0` connectivity-free, `‖X_e ω‖ ≤ 1/q` uniformly, `∑_e ∫
+X_e X_e = Σ` and `‖Σ‖ ≤ 1/q`) — retiring the Step-0 record's named
+residual risk. Full delivery record with technique findings in the
+proposal's Slice-2 section; QA with the two-route budget pin, the
+two-sided rank-one norm identity, the exact variance coefficient, and
+the Finding-A and `q = 0` fences.
+
+**Verification (by the delivery session; re-verified from scratch by
+the closing run):** spike first (`wip/ss2_spike.lean`, zero
+errors/warnings before any shelf Lean); `lake env lean` zero
+errors/zero warnings on both new shelf files; explicit `lake build`
+targets ✔ (2159/2159 module, 2160/2160 QA); `#print axioms` all 72 at
+the standard three; full `lake build` ✔ (2399/2400) followed by
+`check_build_completeness.py` — 117/117 fresh, 0 stale, 0 missing,
+exit 0; `lint_axioms` (10), `check_citations`, `check_markdown_links`
+pass; scoreboard regenerated (2632/10/0). The closing run re-ran the
+direct elaborations and the axcheck against the committed state and
+this run's end-of-run full build + completeness cover the rest.
+
+**Remaining risk:** Slice 3 (assembly + the proposal's three QA
+obligations) — Finding B's `Fin n` edge-enumeration transport, the
+norm-event → quadratic-form transfer through the eigen-coordinate
+pullback (the statement decision of how `xᵀL̃x` relates to the
+eigen-coordinate quadratic form), and the `q`-budget error-shape
+calculus. One QA residual recorded in the proposal: the exact matrix
+value `ssVariance K₂ 1 = rankOne v_(0,1)` was set aside
+(elaboration-quirk cost disproportionate to its QA value; the scalar
+coefficient pin carries the falsification content).
 
 ------
 

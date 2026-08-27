@@ -18,7 +18,7 @@ import Mathlib.Data.Matrix.Notation
 import Mathlib.Combinatorics.SimpleGraph.Metric
 
 /-!
-# QA for `GraphTheory.AlonBoppana` (Steps 1–5)
+# QA for `GraphTheory.AlonBoppana` (Steps 1–6)
 
 QA obligations for the Alon–Boppana program's first three steps
 (`proposals/alon-boppana-bound.md`): instances of the top-eigenvalue
@@ -201,6 +201,17 @@ a gap recorded from this delivery's spike.
   `secondEval (2•1 − C₈) ≤ (2·6 − 8)/6 = 2/3` — strictly stronger
   than both theorem routes' `≤ 1`, by an independent vector through
   the same engine.
+
+## Step 6: the expansion ceiling (`ramanujan_expansion_ceiling`)
+
+The Alon–Boppana capstone composed with Cheeger's hard direction
+(`proposals/ramanujan-expansion-ceiling.md`): the C₈ ceiling instance
+evaluating numerically to `√2` at `k = 0`, the fixture's actual
+Cheeger constant pinned `≤ 1/4` by the exhibited half-set cut (the
+independent cut-level route — the ceiling holds with strict slack,
+non-vacuous, never tight), and the two-`k` improvement as arithmetic
+on the statement's own constants with the honest note that `C₈` hosts
+only `k = 0` (the Step-5 far fence). See the Step-6 section below.
 -/
 
 open scoped BigOperators Matrix
@@ -2493,5 +2504,140 @@ theorem abC8_intWitness_secondEval_le :
     abC8_quadForm_abW8] at heng
   norm_num at heng ⊢
   exact heng
+
+/-!
+## Step 6: the expansion ceiling — the Alon–Boppana × Cheeger
+composition on `C₈`
+
+`ramanujan_expansion_ceiling` (delivered 2026-08-27,
+`proposals/ramanujan-expansion-ceiling.md`): the program's capstone
+composed with the proved `cheeger_lower_bound` into the textbook
+ceiling on expansion quality. The obligations:
+
+- **The ceiling instance** (`abC8_ceiling_instance`): on `C₈` at
+  `k = 0` the composed bound evaluates numerically to `√2` — the
+  honest weak-at-small-`k` reading (the error term `2√1/(2·1) = 1`
+  dominates the content exactly where the qualification trap says it
+  must; cf. Step 5's `abC8_nilli_classical_instance` reading
+  `2 − 2 + 2 = 2`).
+- **The non-vacuity join** (`abC8_cheegerConstant_le_quarter`): the
+  fixture's actual Cheeger constant is pinned `≤ 1/4` by the exhibited
+  half-set cut (boundary `2`, volumes `8 = 8`, conductance `2/8`)
+  through `conductance_ge_cheegerConstant` — an independent,
+  cut-level route agreeing with the ceiling, which therefore holds
+  with strict slack (`1/4 < √2`): non-vacuous, and never claimed
+  tight (the proposal's hard acceptance-bar item).
+- **The two-`k` improvement pin** (`abC8_ceiling_improves_arith`):
+  at `d = 2` the ceiling expression is strictly smaller at `k = 1`
+  (`1`) than at `k = 0` (`√2`) — arithmetic on the statement's own
+  constants. `C₈` itself hosts only `k = 0`: the Step-5 far fence
+  proved `distEdge = 3 < 4`, so `k = 1` fails `hfar` there and no
+  `C₈` edge pair reaches `distEdge ≥ 5` (the maximum cross-distance
+  on an 8-cycle is `3`). A larger fixture hosting `k = 1` (C₁₂:
+  twelve-vertex level oracles plus four ≥ 5 cross-distance
+  refutations) is priced as a follow-on, not built here.
+-/
+
+section Step6
+
+/-- The half-set cut of `C₈`: `{0, 1, 2, 3}` against `{4, 5, 6, 7}`,
+two crossing edges, volumes `8 = 8`. -/
+def abC8_half : Finset (Fin 8) := {0, 1, 2, 3}
+
+theorem abC8_half_compl : abC8_halfᶜ = {4, 5, 6, 7} := by
+  ext i
+  fin_cases i <;> simp [abC8_half]
+
+private theorem abC8_sum_half {f : Fin 8 → ℝ} :
+    ∑ j ∈ abC8_half, f j = f 0 + f 1 + f 2 + f 3 := by
+  simp [abC8_half]
+  ring
+
+private theorem abC8_sum_half_compl {f : Fin 8 → ℝ} :
+    ∑ j ∈ abC8_halfᶜ, f j = f 4 + f 5 + f 6 + f 7 := by
+  simp [abC8_half_compl]
+  ring
+
+/-- **The ceiling instance on `C₈` at `k = 0`**: the composed bound
+`cheegerConstant C₈ ≤ √(2 (1 − 2√1/2 + 2√1/2))` evaluates numerically
+to `cheegerConstant C₈ ≤ √2` — the full stack (Alon–Boppana's
+classical shape, the operator identity, the scaling engine, Cheeger's
+hard direction, the root) on the program's fixture. -/
+theorem abC8_ceiling_instance :
+    cheegerConstant abC8 ≤ Real.sqrt 2 := by
+  have h := ramanujan_expansion_ceiling (A := abC8) (hA := abC8_isSymm)
+    (d := 2) (k := 0) abC8_h01 abC8_isDRegular
+    (x := 0) (y := 1) (u := 4) (v := 5) (by decide)
+    (by rw [show abC8 0 1 = 1 from rfl]; norm_num) (by decide)
+    (by rw [show abC8 4 5 = 1 from rfl]; norm_num)
+    abC8_supportGraph_connected abC8_far01 (by norm_num)
+    (isTreeBall_one_of_connected abC8_supportGraph_connected (by decide) 2)
+    (isTreeBall_one_of_connected abC8_supportGraph_connected (by decide) 2)
+    (by decide)
+  norm_num at h
+  exact h
+
+/-- **The fixture's actual Cheeger constant is at most `1/4`**: the
+half-set cut has boundary `2` (the crossing entries `(0,7)` and
+`(3,4)`), volumes `8 = 8`, hence conductance `2/8 = 1/4`, and the
+Cheeger constant is the infimum over such cuts. Joined to
+`abC8_ceiling_instance`, the ceiling holds with strict slack
+(`1/4 < √2`): a genuine finite constraint, never a tightness claim. -/
+theorem abC8_cheegerConstant_le_quarter : cheegerConstant abC8 ≤ 1 / 4 := by
+  have e04 : abC8 0 4 = 0 := rfl
+  have e05 : abC8 0 5 = 0 := rfl
+  have e06 : abC8 0 6 = 0 := rfl
+  have e07 : abC8 0 7 = 1 := rfl
+  have e14 : abC8 1 4 = 0 := rfl
+  have e15 : abC8 1 5 = 0 := rfl
+  have e16 : abC8 1 6 = 0 := rfl
+  have e17 : abC8 1 7 = 0 := rfl
+  have e24 : abC8 2 4 = 0 := rfl
+  have e25 : abC8 2 5 = 0 := rfl
+  have e26 : abC8 2 6 = 0 := rfl
+  have e27 : abC8 2 7 = 0 := rfl
+  have e34 : abC8 3 4 = 1 := rfl
+  have e35 : abC8 3 5 = 0 := rfl
+  have e36 : abC8 3 6 = 0 := rfl
+  have e37 : abC8 3 7 = 0 := rfl
+  have hne : abC8_half.Nonempty := by
+    refine ⟨0, by decide⟩
+  have hnec : abC8_halfᶜ.Nonempty := by
+    refine ⟨4, by simp [abC8_half_compl]⟩
+  have hc := conductance_ge_cheegerConstant abC8 abC8_nonneg abC8_half hne hnec
+  have hbd : boundary abC8 abC8_half = 2 := by
+    rw [boundary]
+    simp only [abC8_sum_half, abC8_sum_half_compl, e04, e05, e06, e07, e14,
+      e15, e16, e17, e24, e25, e26, e27, e34, e35, e36, e37]
+    norm_num
+  have hv : vol abC8 abC8_half = 8 := by
+    rw [vol, abC8_sum_half]
+    simp only [abC8_deg_two]
+    norm_num
+  have hvc : vol abC8 abC8_halfᶜ = 8 := by
+    rw [vol, abC8_sum_half_compl]
+    simp only [abC8_deg_two]
+    norm_num
+  rw [conductance, hbd, hv, hvc] at hc
+  norm_num at hc
+  exact hc
+
+/-- **The two-`k` improvement, as arithmetic on the statement's own
+constants at `d = 2`**: the ceiling expression is strictly smaller at
+`k = 1` than at `k = 0` (`1 < √2`) — the `O(1/(k+1))` error term is
+the entire gap at `d = 2`, and it shrinks. `C₈` itself hosts only
+`k = 0` (`abC8_far_fence`: `distEdge = 3 < 4`); a `k = 1`-hosting
+fixture is priced as a follow-on. -/
+theorem abC8_ceiling_improves_arith :
+    Real.sqrt (2 * (1 - 2 * Real.sqrt ((2 - 1 : ℕ) : ℝ) / 2
+        + 2 * Real.sqrt ((2 - 1 : ℕ) : ℝ) / (2 * ((1 : ℝ) + 1))))
+    < Real.sqrt (2 * (1 - 2 * Real.sqrt ((2 - 1 : ℕ) : ℝ) / 2
+        + 2 * Real.sqrt ((2 - 1 : ℕ) : ℝ) / (2 * ((0 : ℝ) + 1)))) := by
+  simp only [Nat.reduceSub, Nat.cast_one, Real.sqrt_one]
+  norm_num
+  rw [show (1 : ℝ) = Real.sqrt 1 from Real.sqrt_one.symm]
+  exact Real.sqrt_lt_sqrt (by norm_num : (0 : ℝ) ≤ 1) (by norm_num : (1 : ℝ) < 2)
+
+end Step6
 
 end SpectralGraphTheory.QA

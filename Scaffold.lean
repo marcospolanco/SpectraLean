@@ -52,6 +52,7 @@ import Scaffold.Mathlib.GraphTheory.Sparsification
 import Scaffold.Mathlib.InformationTheory.Entropy
 import Scaffold.Derived.EventStream
 import Scaffold.Derived.ProjectorDrift
+import Scaffold.Derived.SparsificationTail
 
 /-!
 # Scaffold library root

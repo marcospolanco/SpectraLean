@@ -17,16 +17,21 @@ import Scaffold.Mathlib.GraphTheory.Foster
 import Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent
 import Scaffold.Mathlib.Probability.BernoulliProduct
 /-!
-# The deterministic Spielman–Srivastava algebra (sparsification Step 1,
-Slice 2)
+# The deterministic Spielman–Srivastava algebra (sparsification Steps 1,
+Slices 2–3)
 
 The deterministic core of leverage-score sparsification
 (`proposals/spectral-sparsification-via-leverage-scores.md`, the Active
 priority table's top High row): the rank-one sampling matrices, their
 pointwise norm bound, and the variance statistic — every piece the
-`matrix_bernstein` assembly (Slice 3) consumes, at the classical
+`matrix_bernstein` assembly consumes, at the classical
 Spielman–Srivastava constants `R = 1/q` and `‖Σ‖ ≤ 1/q`, here *proved*
-rather than asserted (retiring the Step-0 survey's named residual risk).
+rather than asserted (retiring the Step-0 survey's named residual risk)
+— plus, since Slice 3, the sampled operator `ssSampled` with its *exact*
+pointwise deviation identity against the image projector, the
+norm→quadratic-form transfer `|xᵀ M x| ≤ ‖M‖ (x ⬝ᵥ x)`, and the
+Bool-valued summand shape closing the measurability and independence
+clauses through the Slice-1 transfer layer.
 
 Design decisions (recorded in the proposal's Step-0 delivery):
 
@@ -43,12 +48,20 @@ Design decisions (recorded in the proposal's Step-0 delivery):
   the missed outcome `δ_e = 0` (refuted in QA). Zero-leverage pairs
   (loops, non-edges) are absorbed by their zero rank-one factor, so
   centering holds with no connectivity hypothesis.
+- **The deterministic sampled weight (Slice 3).** At saturated pairs the
+  sampled operator takes the pair's rank-one term with weight exactly
+  `1` (a pair sampled with probability one is not random), so the
+  deviation identity `ssSampled ω − Π_{im L} = ∑_e X_e ω` holds for
+  *every* outcome, not merely almost surely.
 
-Everything here is proved; this module adds no axioms. QA:
-`Scaffold/QA/SpectralGraph/Sparsification_QA.lean`.
+Everything here is proved; this module adds no axioms. The axiom-backed
+tail theorems consuming `matrix_bernstein` live in
+`Scaffold/Derived/SparsificationTail.lean`. QA:
+`Scaffold/QA/SpectralGraph/Sparsification_QA.lean` and
+`Scaffold/QA/Derived/SparsificationTail_QA.lean`.
 -/
 
-open MeasureTheory
+open MeasureTheory ProbabilityTheory
 open Scaffold.Mathlib.Probability.BernoulliProduct
 open scoped BigOperators Matrix Matrix.L2OpNorm
 
@@ -1011,6 +1024,198 @@ theorem l2OpNorm_ssVariance_le (q : ℝ) (hq : 0 < q) (hnn : ∀ i j, 0 ≤ A i 
   · linarith
 
 end Sampling
+
+/-! ## The quadratic-form transfer helpers
+
+The `Slice-3` assembly's deterministic transfer layer: the linearity of
+`quadForm` and the norm→form domination `‖M‖ ≤ t → |xᵀ M x| ≤ t (x ⬝ᵥ x)`
+(Cauchy–Schwarz on the action form plus a local dot-product route to the
+C*-norm action bound — no symmetry hypothesis needed). -/
+
+omit [DecidableEq V] in
+theorem quadForm_add (P Q : Matrix V V ℝ) (x : V → ℝ) :
+    quadForm (P + Q) x = quadForm P x + quadForm Q x := by
+  simp only [quadForm, Matrix.add_mulVec, Matrix.dotProduct_add]
+
+omit [DecidableEq V] in
+theorem quadForm_sub_matrix (P Q : Matrix V V ℝ) (x : V → ℝ) :
+    quadForm (P - Q) x = quadForm P x - quadForm Q x := by
+  simp only [quadForm, Matrix.sub_mulVec, Matrix.dotProduct_sub]
+
+omit [DecidableEq V] in
+theorem quadForm_smul (c : ℝ) (M : Matrix V V ℝ) (x : V → ℝ) :
+    quadForm (c • M) x = c * quadForm M x := by
+  simp only [quadForm, Matrix.smul_mulVec_assoc, Matrix.dotProduct_smul, smul_eq_mul]
+
+omit [DecidableEq V] in
+private theorem norm_euclidean_sq (x : V → ℝ) :
+    ‖(WithLp.equiv 2 (V → ℝ)).symm x‖ ^ 2 = x ⬝ᵥ x := by
+  have hin : (inner ((WithLp.equiv 2 (V → ℝ)).symm x :
+      EuclideanSpace ℝ V) ((WithLp.equiv 2 (V → ℝ)).symm x)) = x ⬝ᵥ x := by
+    rw [EuclideanSpace.inner_eq_star_dotProduct]; simp
+  rw [← real_inner_self_eq_norm_sq, hin]
+
+/-- **The operator-norm action bound in dot-product form**:
+`(M x) ⬝ᵥ (M x) ≤ ‖M‖² (x ⬝ᵥ x)` — the C*-norm spine at exactly the
+generality the transfer needs (a local route to the BandDavisKahan
+action bound `l2OpNorm_mulVec_le`, avoiding the heavy perturbation
+import in this module's dependency footprint). -/
+theorem l2OpNorm_mulVec_dotProduct_le (M : Matrix V V ℝ) (x : V → ℝ) :
+    (M *ᵥ x) ⬝ᵥ (M *ᵥ x) ≤ ‖M‖ * ‖M‖ * (x ⬝ᵥ x) := by
+  have h := ContinuousLinearMap.le_opNorm
+    ((Matrix.toEuclideanCLM (𝕜 := ℝ) M :
+      EuclideanSpace ℝ V →L[ℝ] EuclideanSpace ℝ V))
+    ((WithLp.equiv 2 (V → ℝ)).symm x)
+  rw [Matrix.toEuclideanCLM_piLp_equiv_symm, ← Matrix.cstar_norm_def] at h
+  have h' : ‖(WithLp.equiv 2 (V → ℝ)).symm (M *ᵥ x)‖
+      ≤ ‖M‖ * ‖(WithLp.equiv 2 (V → ℝ)).symm x‖ := h
+  have h1 := norm_euclidean_sq (M *ᵥ x)
+  have h2 := norm_euclidean_sq x
+  rw [pow_two] at h1 h2
+  calc (M *ᵥ x) ⬝ᵥ (M *ᵥ x)
+      = ‖(WithLp.equiv 2 (V → ℝ)).symm (M *ᵥ x)‖
+        * ‖(WithLp.equiv 2 (V → ℝ)).symm (M *ᵥ x)‖ := h1.symm
+    _ ≤ (‖M‖ * ‖(WithLp.equiv 2 (V → ℝ)).symm x‖)
+        * (‖M‖ * ‖(WithLp.equiv 2 (V → ℝ)).symm x‖) :=
+        mul_le_mul h' h' (norm_nonneg _) (by positivity)
+    _ = ‖M‖ * ‖M‖ * (x ⬝ᵥ x) := by rw [← h2]; ring
+
+/-- **The norm→quadratic-form transfer**: a spectral-norm bound
+dominates the quadratic form uniformly, `|xᵀ M x| ≤ t (x ⬝ᵥ x)` — the
+eigen-coordinate pullback step of the `Slice-3` assembly (no symmetry
+hypothesis needed: any square real matrix obeys it). -/
+theorem abs_quadForm_le_of_l2OpNorm_le {M : Matrix V V ℝ} {t : ℝ}
+    (ht : ‖M‖ ≤ t) (x : V → ℝ) :
+    |quadForm M x| ≤ t * (x ⬝ᵥ x) := by
+  have hcs := dotProduct_sq_le x (M *ᵥ x)
+  have hact := l2OpNorm_mulVec_dotProduct_le M x
+  have ht0 : 0 ≤ t := (norm_nonneg M).trans ht
+  have hmn : ‖M‖ * ‖M‖ ≤ t * t := by
+    have hnonneg : 0 ≤ t + ‖M‖ := by linarith [norm_nonneg M]
+    have hprod : (t - ‖M‖) * (t + ‖M‖) ≥ 0 := by nlinarith [ht, hnonneg]
+    have hring : (t - ‖M‖) * (t + ‖M‖) = t * t - ‖M‖ * ‖M‖ := by ring
+    linarith [hprod, hring]
+  have hxnn : 0 ≤ x ⬝ᵥ x := dotProduct_self_nonneg x
+  have hstep1 : (x ⬝ᵥ (M *ᵥ x)) * (x ⬝ᵥ (M *ᵥ x))
+      ≤ (x ⬝ᵥ x) * (‖M‖ * ‖M‖ * (x ⬝ᵥ x)) :=
+    hcs.trans (mul_le_mul_of_nonneg_left hact hxnn)
+  have hstep2 : (x ⬝ᵥ x) * (‖M‖ * ‖M‖ * (x ⬝ᵥ x))
+      ≤ (t * (x ⬝ᵥ x)) * (t * (x ⬝ᵥ x)) := by
+    have hring : (x ⬝ᵥ x) * (‖M‖ * ‖M‖ * (x ⬝ᵥ x))
+        = (‖M‖ * ‖M‖) * ((x ⬝ᵥ x) * (x ⬝ᵥ x)) := by ring
+    have hring' : (t * (x ⬝ᵥ x)) * (t * (x ⬝ᵥ x))
+        = (t * t) * ((x ⬝ᵥ x) * (x ⬝ᵥ x)) := by ring
+    rw [hring, hring']
+    exact mul_le_mul_of_nonneg_right hmn (mul_nonneg hxnn hxnn)
+  have key : quadForm M x ^ 2 ≤ (t * (x ⬝ᵥ x)) ^ 2 := by
+    rw [pow_two, pow_two]
+    exact hstep1.trans hstep2
+  have htabs : 0 ≤ t * (x ⬝ᵥ x) :=
+    mul_nonneg (norm_nonneg M |>.trans ht) hxnn
+  exact abs_le_of_sq_le_sq key htabs
+
+/-! ## The sampled operator (Step 1, Slice 3: the deterministic core)
+
+The Spielman–Srivastava sampled operator and the *exact* deviation
+identity connecting it to the centered summand family — the
+deterministic half of the assembly; the axiom-backed tail theorems live
+in `Scaffold/Derived/SparsificationTail.lean`. -/
+
+section Sampled
+
+variable (A : WAdj (V := V)) (hA : A.IsSymm)
+
+/-- The sampling weight of the ordered pair `e` at outcome `ω`:
+`1` at saturated pairs — the deterministic guard, a pair sampled with
+probability one contributes its rank-one term unconditionally, exactly
+as the expectation requires — and the inverse-probability reweighting
+`δ_e(ω)/p_e` otherwise (junk `0` at zero-leverage pairs, whose rank-one
+factor is the zero matrix anyway). -/
+noncomputable def ssWeight (q : ℝ) (e : V × V) (ω : (V × V) → Bool) : ℝ :=
+  if ssProb A hA q e = 1 then 1 else ssDelta e ω / ssProb A hA q e
+
+/-- **The sampled (sparsified) operator in eigen-coordinates**:
+`∑_e g_e(ω) • (v_e v_eᵀ)` — the Spielman–Srivastava sampled matrix at
+the design probabilities, saturated pairs taken deterministically. Its
+expectation is the image projector. -/
+noncomputable def ssSampled (q : ℝ) (ω : (V × V) → Bool) : Matrix V V ℝ :=
+  ∑ e : V × V, (ssWeight A hA q e ω) • rankOne (ssEdgeVec A hA e.1 e.2)
+
+/-- **The exact deviation identity**: the sampled operator minus the
+image projector is the centered summand sum, *pointwise in `ω`* — the
+identity that transfers the concentration inequality's norm event to
+the sampled operator with no null-event caveats (the deterministic
+guard makes it hold at every outcome, including the measure-zero
+ones). -/
+theorem ssSampled_sub_imageProjector (hnn : ∀ i j, 0 ≤ A i j) (q : ℝ)
+    (ω : (V × V) → Bool) :
+    ssSampled A hA q ω - imageProjector A hA
+      = ∑ e : V × V, ssSummand A hA q e ω := by
+  have hper : ∀ e : V × V, ssWeight A hA q e ω
+        • rankOne (ssEdgeVec A hA e.1 e.2)
+        - rankOne (ssEdgeVec A hA e.1 e.2) = ssSummand A hA q e ω := by
+    intro e
+    by_cases hp : ssProb A hA q e = 1
+    · have h1 : ssWeight A hA q e ω = 1 := if_pos hp
+      have h2 : ssSummand A hA q e ω = 0 := if_pos hp
+      rw [h1, h2, one_smul, sub_self]
+    · have h1 : ssWeight A hA q e ω = ssDelta e ω / ssProb A hA q e := if_neg hp
+      have h2 : ssSummand A hA q e ω
+          = (ssDelta e ω / ssProb A hA q e - 1)
+            • rankOne (ssEdgeVec A hA e.1 e.2) := if_neg hp
+      rw [h1, h2, sub_smul, one_smul]
+  rw [ssSampled, ← sum_rankOne_ssEdgeVec A hA hnn, ← Finset.sum_sub_distrib]
+  exact Finset.sum_congr rfl fun e _ => hper e
+
+theorem ssSampled_isSymm (hnn : ∀ i j, 0 ≤ A i j) (q : ℝ)
+    (ω : (V × V) → Bool) : (ssSampled A hA q ω).IsSymm := by
+  have hEq : ssSampled A hA q ω
+      = (∑ e : V × V, ssSummand A hA q e ω) + imageProjector A hA := by
+    rw [← ssSampled_sub_imageProjector A hA hnn q ω, sub_add_cancel]
+  rw [hEq]
+  exact Matrix.IsSymm.ext fun i j => by
+    rw [Matrix.add_apply, Matrix.add_apply,
+      (isSymm_finset_sum _ fun e => ssSummand_isSymm A hA q e ω).apply i j,
+      (imageProjector_isSymm A hA).apply i j]
+
+/-- The summand as a function of the single coordinate `ω e`: the
+Bool-valued shape that closes the measurability and independence
+clauses of the matrix-concentration interface through the Slice-1
+transfer layer verbatim. -/
+noncomputable def ssSummandBool (q : ℝ) (e : V × V) (b : Bool) : Matrix V V ℝ :=
+  if ssProb A hA q e = 1 then 0
+  else ((if b then (1 : ℝ) else 0) / ssProb A hA q e - 1)
+    • rankOne (ssEdgeVec A hA e.1 e.2)
+
+theorem ssSummand_eq_ssSummandBool (q : ℝ) (e : V × V) (ω : (V × V) → Bool) :
+    ssSummand A hA q e ω = ssSummandBool A hA q e (ω e) := rfl
+
+theorem ssSummand_fun_eq (q : ℝ) (e : V × V) :
+    (fun ω : (V × V) → Bool => ssSummand A hA q e ω)
+      = fun ω : (V × V) → Bool => ssSummandBool A hA q e (ω e) :=
+  funext fun ω => ssSummand_eq_ssSummandBool A hA q e ω
+
+/-- The `h_meas` clause of `matrix_bernstein` at this design: every
+summand is `StronglyMeasurable` at the `Matrix.L2OpNorm` topology
+(a finite-range function of one coordinate). -/
+theorem stronglyMeasurable_ssSummand (q : ℝ) (e : V × V) :
+    StronglyMeasurable fun ω : (V × V) → Bool => ssSummand A hA q e ω := by
+  rw [ssSummand_fun_eq]
+  exact stronglyMeasurable_coord_matrix _ _
+
+/-- The `h_indep` clause of `matrix_bernstein` at this design: distinct
+ordered pairs give independent summands (both factor through distinct
+coordinates of the product-Bernoulli space). -/
+theorem indepFun_ssSummand (q : ℝ) (hq : 0 ≤ q) {e e' : V × V} (hee : e ≠ e') :
+    IndepFun (fun ω : (V × V) → Bool => ssSummand A hA q e ω)
+      (fun ω : (V × V) → Bool => ssSummand A hA q e' ω)
+      (ssMeasure A hA q hq) := by
+  rw [ssSummand_fun_eq, ssSummand_fun_eq]
+  exact indepFun_coord_matrix (fun e => ssProb A hA q e)
+    (fun e => ssProb_nonneg A hA q hq e) (fun e => ssProb_le_one A hA q e)
+    (ssSummandBool A hA q e) (ssSummandBool A hA q e') hee
+
+end Sampled
 
 end SpectralGraphTheory
 

@@ -197,6 +197,28 @@ than the theorem routes' `≤ 1`, fully raw arithmetic). With Steps
 needs a named d-regular family with `diam → ∞` and stays a Plan
 entry until one is named.
 
+*Update (2026-08-27, the expansion ceiling delivered):* **the
+Alon–Boppana theorem has its first theorem consumer — the composition
+with the Cheeger hard direction** (run `20260827T220230Z-run-1`,
+`proposals/ramanujan-expansion-ceiling.md`; zero new axioms; QA +7,
+2659 → 2666). `GraphTheory/AlonBoppana.lean`'s new `ExpansionCeiling`
+section: `ramanujan_expansion_ceiling` —
+`cheegerConstant A ≤ √(2 (1 − 2√(d−1)/d + 2√(d−1)/(d (k+1))))` under
+exactly `alonBoppana_nilli_classical`'s hypotheses, the textbook
+ceiling on expansion quality — through the operator identity
+`smul_one_sub_eq_smul_regularNormalizedLaplacian` (`d • 1 − A =
+d • L_sym` under regularity) and two new engine pieces in
+`Spectral.lean` (`secondEval_smul_of_pos`, the exact positive-scaling
+lemma by the variational route; `secondEval_congr`, the
+proof-irrelevance bridge across equal operator spellings). Obstruction
+scope only — the ceiling says nothing about tightness or attainment
+(the separate Ramanujan-graph construction program); the QA pins
+non-vacuity as strict slack on C₈ (`φ ≤ 1/4` by the exhibited
+half-set cut, against the `k = 0` ceiling `√2`). The engine's
+hypothesis-free generalization (`secondEval_smul` for arbitrary
+symmetric `M`) stays priced: the pin has no
+`eigenvalues_smul`/`charpoly_smul`, and no consumer has named it.
+
 *Update (2026-08-27, Steps 3b + 4 delivered):* **the energy half and
 the two-vector orthogonalization are shelf facts — the program has its
 first eigenvalue-level statement** (runs `20260827T052400Z-run-1` and
@@ -743,6 +765,28 @@ eigen-coordinate edge vectors with `‖v_e‖² = w_e R_eff/2` and
 Finding-A-guarded sampling family with `∫ X_e = 0` (no connectivity
 hypothesis), `‖X_e ω‖ ≤ 1/q` uniformly, `∑_e ∫ X_e X_e = Σ`, and
 `‖Σ‖ ≤ 1/q` — the classical constants now proved rather than asserted.
+
+**Sparsification Step 1, Slice 3 delivered (2026-08-27, the same
+proposal — Step 1 COMPLETE, the program's payoff: `matrix_bernstein`'s
+first real theorem consumer; zero new axioms consumed beyond that one,
+QA 2632 → 2659):** `GraphTheory/Sparsification.lean`'s Slice-3
+sections (the sampled operator `ssSampled` with the *exact pointwise*
+deviation identity `ssSampled ω − Π_{im L} = ∑_e X_e ω` — the
+deterministic saturation guard, no null-event caveats; the
+symmetry-free norm→form transfer `‖M‖ ≤ t → |xᵀMx| ≤ t (x ⬝ᵥ x)`; the
+Bool-valued summand shape closing `h_meas`/`h_indep` through the
+Slice-1 transfer layer) and the new `Derived/SparsificationTail.lean`
+— **`sparsification_norm_tail`**: `μ {‖S(ω) − Π_{im L}‖ ≥ t} ≤
+2 d exp(−t²/(2/q + 2t/(3q)))` at the *proved* constants `R = 1/q`,
+`‖Σ‖ ≤ 1/q`, Finding B's `Fin n` transport via `Fintype.equivFin` +
+`Equiv.sum_comp`, no connectivity hypothesis — plus
+`sparsification_quadForm_tail` (the additive eigen-coordinate
+pullback). Conditional on `matrix_bernstein`, reported honestly in
+`#print axioms` (the two tails and their two QA interface pins the
+only bernstein-bearing declarations of the 43 audited); the
+multiplicative `(1±ε)` refinement on `im Π`-coordinate vectors and
+the `q ~ log n/ε²` budget corollary remain priced follow-ons in the
+proposal.
 The assembly (Finding B's `Fin n` transport, the quadratic-form
 transfer) and the proposal's three QA obligations remain Slice 3.
 

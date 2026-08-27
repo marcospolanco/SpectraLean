@@ -2117,6 +2117,155 @@ theorem secondEval_le_rayleigh {M : Matrix V V ℝ} (hM : M.IsSymm)
       ⟨i, Finset.mem_univ _, mul_self_pos.2 hi⟩
   exact div_nonneg (hpsd y) hypos.le
 
+/-!
+### Positive scaling and congruence of the second eigenvalue
+
+Two interface lemmas for composing spectral statements across
+linearly related operators: exact scaling under positive scalar
+multiplication (the variational route — the constraint set scales, and
+a positive-scaled image has the scaled infimum), and invariance under
+matrix equality at possibly-different symmetry proofs (proof
+irrelevance). Delivered for the Ramanujan expansion ceiling
+(`GraphTheory.AlonBoppana`), where they join the Alon–Boppana bound on
+`d • 1 − A` to the Cheeger hard direction on
+`regularNormalizedLaplacian A d` — two spellings of the same operator.
+-/
+
+omit [Fintype V] [DecidableEq V] in
+/-- A scalar multiple of a symmetric matrix is symmetric. -/
+theorem smul_isSymm {M : Matrix V V ℝ} (hM : M.IsSymm) (c : ℝ) :
+    (c • M).IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  simp only [Matrix.transpose_apply, Matrix.transpose_smul, Matrix.smul_apply,
+    smul_eq_mul]
+  rw [hM.apply i j]
+
+omit [DecidableEq V] in
+private theorem quadForm_smul_var (c : ℝ) (M : Matrix V V ℝ) (x : V → ℝ) :
+    quadForm (c • M) x = c * quadForm M x := by
+  simp only [quadForm, Matrix.mulVec, Matrix.dotProduct, Matrix.smul_apply,
+    smul_eq_mul, Finset.mul_sum]
+  exact Finset.sum_congr rfl fun i _ =>
+    Finset.sum_congr rfl fun j _ => by ring
+
+omit [DecidableEq V] in
+private theorem rayleigh_smul_of_ne (c : ℝ) (M : Matrix V V ℝ) {x : V → ℝ}
+    (hx0 : x ≠ 0) : rayleigh (c • M) x = c * rayleigh M x := by
+  rw [rayleigh, if_neg hx0, rayleigh, if_neg hx0, quadForm_smul_var,
+    mul_div_assoc']
+
+private theorem sInf_image_mul_pos {S : Set ℝ} {c : ℝ} (hc : 0 < c)
+    (hS : S.Nonempty) (hB : BddBelow S) :
+    sInf ((fun r => c * r) '' S) = c * sInf S := by
+  have hne : ((fun r => c * r) '' S).Nonempty := hS.image _
+  have hB' : BddBelow ((fun r => c * r) '' S) := by
+    obtain ⟨m, hm⟩ := hB
+    refine ⟨c * m, ?_⟩
+    rintro _ ⟨r, hr, rfl⟩
+    exact mul_le_mul_of_nonneg_left (mem_lowerBounds.1 hm r hr) hc.le
+  refine le_antisymm ?_ ?_
+  · have hd : ∀ r ∈ S, sInf ((fun r => c * r) '' S) ≤ c * r := fun r hr =>
+      csInf_le hB' ⟨r, hr, rfl⟩
+    have hd2 : ∀ r ∈ S, sInf ((fun r => c * r) '' S) / c ≤ r := fun r hr =>
+      (div_le_iff₀ hc).2 ((hd r hr).trans_eq (mul_comm _ _))
+    have hlow := le_csInf hS hd2
+    exact ((div_le_iff₀ hc).1 hlow).trans_eq (mul_comm _ _)
+  · refine le_csInf hne ?_
+    rintro _ ⟨r, hr, rfl⟩
+    exact mul_le_mul_of_nonneg_left (csInf_le hB hr) hc.le
+
+private theorem constraintSet_nonempty_var (M : Matrix V V ℝ)
+    (hcard : 2 ≤ Fintype.card V) :
+    {r : ℝ | ∃ x : V → ℝ, x ≠ 0 ∧ Matrix.dotProduct x onesVec = 0 ∧
+      rayleigh M x = r}.Nonempty := by
+  obtain ⟨u, v, huv⟩ : ∃ u v : V, u ≠ v := by
+    have h1 : 1 < (Finset.univ : Finset V).card := by
+      rw [Finset.card_univ]; omega
+    obtain ⟨a, b, -, -, hab⟩ := Finset.one_lt_card_iff.1 h1
+    exact ⟨a, b, hab⟩
+  refine ⟨rayleigh M (Pi.single u 1 - Pi.single v 1 : V → ℝ), ?_⟩
+  refine ⟨Pi.single u 1 - Pi.single v 1, ?_, ?_, rfl⟩
+  · intro h
+    have h1 : (Pi.single u 1 - Pi.single v 1 : V → ℝ) u = 0 := congrFun h u
+    simp [Pi.sub_apply, Pi.single_apply, huv] at h1
+  · simp only [Matrix.dotProduct, onesVec, Pi.sub_apply, mul_one,
+      Finset.sum_sub_distrib]
+    have hpu : ∀ w : V, ∑ i, Pi.single w (1 : ℝ) i = 1 := fun w => by simp
+    rw [hpu u, hpu v, sub_self]
+
+omit [DecidableEq V] in
+private theorem constraintSet_bddBelow_var {M : Matrix V V ℝ}
+    (hpsd : ∀ x : V → ℝ, 0 ≤ quadForm M x) :
+    BddBelow {r : ℝ | ∃ x : V → ℝ, x ≠ 0 ∧ Matrix.dotProduct x onesVec = 0 ∧
+      rayleigh M x = r} :=
+  ⟨0, by
+    rintro r ⟨x, hx0, -, rfl⟩
+    rw [rayleigh, if_neg hx0]
+    exact div_nonneg (hpsd x) (by
+      simp only [Matrix.dotProduct]
+      exact Finset.sum_nonneg fun j _ => mul_self_nonneg _)⟩
+
+/-- **The second sorted eigenvalue scales exactly under positive scalar
+multiplication** (the variational route): on a PSD symmetric operator
+whose kernel contains `onesVec`,
+`secondEval (c • M) = c * secondEval M` for every `0 < c`.
+
+Proof route: rewrite both sides through `secondEval_variational`; the
+constraint set of `c • M` is the positive-scaled image of `M`'s
+(`rayleigh (c • M) x = c * rayleigh M x` away from the junk vector),
+and a positively-scaled image's infimum is the scaled infimum. The
+PSD + kernel hypotheses are exactly what both Laplacian operators on
+the shelf carry (`laplacian_psd`/`laplacian_ones_in_kernel`,
+`regularNormalizedLaplacian_psd`/`regularNormalizedLaplacian_mulVec_
+onesVec`); the hypothesis-free generalization for arbitrary symmetric
+`M` would need eigenvalue-multiset scaling machinery the pinned
+Mathlib does not provide (`eigenvalues_smul`/`charpoly_smul` are
+absent) and stays future work with a named consumer.
+
+Consumed by the Ramanujan expansion ceiling in `GraphTheory.AlonBoppana`
+(`d • 1 − A` joined to `d • regularNormalizedLaplacian A d`).
+
+QA: `Scaffold/QA/SpectralGraph/Variational_QA.lean`'s
+`k2_secondEval_smul_three_raw` / `k2_secondEval_smul_three_thm`
+(two independent routes to `secondEval (3 • L(K₂)) = 6`) and the
+negative-`c` fence `k2_secondEval_smul_neg_fence_QA`. -/
+theorem secondEval_smul_of_pos {M : Matrix V V ℝ} (hM : M.IsSymm)
+    (hpsd : ∀ x : V → ℝ, 0 ≤ quadForm M x) (hker : M *ᵥ onesVec = 0)
+    (hcard : 2 ≤ Fintype.card V) {c : ℝ} (hc : 0 < c) :
+    secondEval (c • M) (smul_isSymm hM c) hcard
+      = c * secondEval M hM hcard := by
+  have hs := smul_isSymm hM c
+  have hpsd' : ∀ x : V → ℝ, 0 ≤ quadForm (c • M) x := fun x => by
+    rw [quadForm_smul_var]; exact mul_nonneg hc.le (hpsd x)
+  have hker' : (c • M) *ᵥ onesVec = 0 := by
+    rw [Matrix.smul_mulVec_assoc, hker, smul_zero]
+  rw [secondEval_variational hs hpsd' hker' hcard,
+      secondEval_variational hM hpsd hker hcard]
+  have hset : {r : ℝ | ∃ x : V → ℝ, x ≠ 0 ∧ Matrix.dotProduct x onesVec = 0 ∧
+      rayleigh (c • M) x = r}
+      = (fun r => c * r) '' {r : ℝ | ∃ x : V → ℝ, x ≠ 0 ∧
+          Matrix.dotProduct x onesVec = 0 ∧ rayleigh M x = r} := by
+    ext r
+    constructor
+    · rintro ⟨x, hx0, hxorth, rfl⟩
+      exact ⟨_, ⟨x, hx0, hxorth, rfl⟩, (rayleigh_smul_of_ne c M hx0).symm⟩
+    · rintro ⟨s, ⟨x, hx0, hxorth, rfl⟩, hs⟩
+      exact ⟨x, hx0, hxorth, by rw [rayleigh_smul_of_ne c M hx0]; exact hs⟩
+  rw [hset]
+  exact sInf_image_mul_pos hc (constraintSet_nonempty_var M hcard)
+    (constraintSet_bddBelow_var hpsd)
+
+/-- `secondEval` respects matrix equality at possibly-different
+symmetry proofs: the `hM` argument is a proof, and proofs of the same
+proposition are definitionally equal (proof irrelevance). This is the
+bridge for composing spectral statements stated at different — but
+equal — operator spellings. -/
+theorem secondEval_congr {M₁ M₂ : Matrix V V ℝ} (hM₁ : M₁.IsSymm)
+    (hM₂ : M₂.IsSymm) (h : M₁ = M₂) (hcard : 2 ≤ Fintype.card V) :
+    secondEval M₁ hM₁ hcard = secondEval M₂ hM₂ hcard := by
+  subst h
+  rfl
+
 /-- **General-kernel Rayleigh domination** (the consumer form of the
 Courant–Fischer principle at an arbitrary kernel vector): every nonzero
 test vector orthogonal to a *nonzero kernel vector* `w` of a PSD

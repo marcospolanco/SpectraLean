@@ -1081,6 +1081,30 @@ the honest classical statement forms.
 | `alonBoppana_nilli` | Alon–Boppana Step 5 | **The capstone**: `secondEval (d•1 − A) ≤ d − (1 + 2k√(d−1))/(k+1)` at `ρ = √((d−1)⁻¹)` — Alon–Boppana's `2√(d−1)` barrier with the error explicit |
 | `alonBoppana_nilli_classical` | Alon–Boppana Step 5 | The classical error shape `≤ d − 2√(d−1) + 2√(d−1)/(k+1)` — the single-graph form of `λ₂ ≥ 2√(d−1) − O(1/⌊diam/2⌋)` |
 
+### `Scaffold.Mathlib.GraphTheory.AlonBoppana` (the expansion ceiling)
+
+The program's first theorem consumer (2026-08-27,
+`proposals/ramanujan-expansion-ceiling.md` COMPLETE): the capstone
+composed with the proved Cheeger hard direction into the textbook
+ceiling on expansion quality — obstruction scope only, no tightness
+claim.
+
+| Declaration | Area | Description |
+| --- | --- | --- |
+| `smul_one_sub_eq_smul_regularNormalizedLaplacian` | Expansion ceiling | The operator identity joining the two families' spellings: `d • 1 − A = d • regularNormalizedLaplacian A d` under regularity and `d ≠ 0` (Cheeger's `smul_regularNormalizedLaplacian` plus the `degreeMatrix = d • 1` half) |
+| `ramanujan_expansion_ceiling` | Expansion ceiling | **The headline**: `cheegerConstant A ≤ √(2 (1 − 2√(d−1)/d + 2√(d−1)/(d (k+1))))` under exactly `alonBoppana_nilli_classical`'s hypotheses — the Alon–Boppana upper bound chained below the Cheeger hard direction through the scaling engine; consumed `cheeger_lower_bound` (its first cross-module AlonBoppana-side consumer) |
+
+### `Scaffold.Mathlib.GraphTheory.Spectral` (positive scaling — the expansion ceiling's engine)
+
+Two interface lemmas delivered with the expansion ceiling (2026-08-27)
+for composing spectral statements across linearly related operators.
+
+| Declaration | Area | Description |
+| --- | --- | --- |
+| `smul_isSymm` | Spectral engine | A scalar multiple of a symmetric matrix is symmetric |
+| `secondEval_smul_of_pos` | Spectral engine | **Exact positive scaling** (the variational route): `secondEval (c • M) = c * secondEval M` for `0 < c` on a PSD symmetric operator with `onesVec` in the kernel — the constraint set of `c • M` is the positive-scaled image and `sInf` commutes; first consumer the expansion ceiling |
+| `secondEval_congr` | Spectral engine | Matrix equality respected at possibly-different symmetry proofs (proof irrelevance) — the robust bridge around the motive-not-type-correct trap of rewriting matrix equalities under proof-carrying applications |
+
 ### `Scaffold.Mathlib.GraphTheory.Heat` (the heat semigroup)
 
 Opened 2026-08-23 as Phase B of
@@ -1320,6 +1344,51 @@ matrix; the semigroup at times `1, 2` by the calculus route vs the
 commute route plus a raw closed-form product check) and fences
 nontriviality (`heatKernel K₂ 1 ≠ 1`: diffusion provably moves mass,
 refuting any constant-collapse reading).
+
+### `Scaffold.Mathlib.GraphTheory.Sparsification` (leverage-score sparsification, Steps 1 Slices 2–3 — the deterministic core)
+
+The deterministic Spielman–Srivastava algebra
+(`proposals/spectral-sparsification-via-leverage-scores.md`, the
+program completed through Slice 3 on 2026-08-27): every input the
+`matrix_bernstein` assembly consumes, at the classical constants
+`R = 1/q` and `‖Σ‖ ≤ 1/q` proved rather than asserted — plus the
+sampled operator and its exact pointwise deviation identity.
+
+| Declaration | Area | Description |
+| --- | --- | --- |
+| `rankOne` / `rankOne_mulVec` / `rankOne_quadForm` / `rankOne_mul_self` / `rankOne_isSymm` / `rankOne_neg` | Sparsification Slice 2 | The rank-one outer product and its algebra (action, quadratic form, idempotence `(v⊗v)² = ‖v‖²(v⊗v)`, symmetry, evenness) |
+| `dotProduct_sq_le` / `dotProduct_self_nonneg` / `dotProduct_self_pos_of_ne_zero` | Sparsification Slice 2 | Squared Cauchy–Schwarz in plain dot-product form (through the Euclidean inner product) and the definiteness facts |
+| `l2OpNorm_rankOne_le` | Sparsification Slice 2 | **The rank-one operator-norm bound** `‖v vᵀ‖ ≤ v ⬝ᵥ v` (per-eigenvalue Rayleigh quotients at unit eigenvectors) |
+| `laplacian_dirichlet_bilinear` | Sparsification Slice 2 | Polarized Dirichlet form: `∑∑ A ΔxΔy = 2 x ⬝ᵥ (L *ᵥ y)` |
+| `eigvalOf_laplacian_nonneg` | Sparsification Slice 2 | Laplacian eigenvalues nonnegative on nonnegative symmetric input (PSD at the eigenvector) |
+| `ssEdgeVec` / `ssEdgeVec_self` / `ssEdgeVec_swap` / `ssEdgeVec_dotProduct_self` / `sum_ssEdgeVec_dotProduct_self` | Sparsification Slice 2 | **The SS edge vectors in eigen-coordinates** (`√(w/2)·(v_k u − v_k v)/√λ_k`, zero-eigenvalue entries dropped; no pseudoinverse or matrix square root), with `‖v_e‖² = w_e R_eff/2` and the Foster budget corollary `∑_{u,v} ‖v_e‖² = card V − 1` |
+| `imageProjector` / `imageProjector_mul_self` / `l2OpNorm_imageProjector_le` / `trace_imageProjector_eq` / `quadForm_imageProjector_le` / `quadForm_imageProjector_eq` | Sparsification Slice 2 | The eigen-coordinate projector onto `im L`: idempotent, `‖Π‖ ≤ 1`, `trace = card V − 1` (connected), Rayleigh domination, and `qF(Π) x = ∑_e (x ⬝ᵥ v_e)²` |
+| `sum_rankOne_ssEdgeVec` | Sparsification Slice 2 | **The projector identity**: `∑_e v_e v_eᵀ = Π_{im L}` *exactly* (the ordered-pair `1/√2` halving absorbing the double count) |
+| `integral_bern_center_sq` | Sparsification Slice 2 | The Bernoulli second moment `E[(δ/p − 1)²] = (1−p)/p`, linearized through the first moment |
+| `ssProb` / `ssDelta` / `ssSummand` / `ssMeasure` / `ssVariance` | Sparsification Slice 2 | The Finding-A-guarded sampling design on the Slice-1 `bernPMF` at `ι = V × V`: probabilities `min 1 (q‖v_e‖²)`, indicators, guarded summands, the measure, and the variance statistic |
+| `integral_ssSummand_eq_zero` | Sparsification Slice 2 | **Centering** `∫ X_e = 0` with *no connectivity hypothesis* (zero-leverage pairs absorbed by the zero rank-one factor; saturated by the guard) |
+| `ssSummand_l2OpNorm_le` | Sparsification Slice 2 | **Boundedness** `‖X_e ω‖ ≤ 1/q` for every outcome (the classical `R = 1/q`, uniformity via the guard) |
+| `integral_ssSummand_mul_self` / `sum_integral_ssSummand_mul_self` / `l2OpNorm_ssVariance_le` | Sparsification Slice 2 | **The variance statistic**: `∑_e ∫ X_e X_e = Σ` and the headline `‖Σ‖ ≤ 1/q` (eigenvalue route) |
+| `quadForm_add` / `quadForm_sub_matrix` / `quadForm_smul` | Sparsification Slice 3 | Quadratic-form linearity in the matrix argument |
+| `l2OpNorm_mulVec_dotProduct_le` | Sparsification Slice 3 | The operator-norm action bound in dot-product form: `(M x) ⬝ᵥ (M x) ≤ ‖M‖² (x ⬝ᵥ x)` (local route to the C*-norm spine) |
+| `abs_quadForm_le_of_l2OpNorm_le` | Sparsification Slice 3 | **The norm→form transfer** `‖M‖ ≤ t → |xᵀMx| ≤ t (x ⬝ᵥ x)` — symmetry-free (C–S on the action form) |
+| `ssWeight` / `ssSampled` | Sparsification Slice 3 | The deterministic sampled weight (the saturation guard as weight `1`) and **the sampled operator** `∑_e g_e(ω) • (v_e v_eᵀ)` |
+| `ssSampled_sub_imageProjector` | Sparsification Slice 3 | **The exact deviation identity**: `ssSampled ω − Π_{im L} = ∑_e X_e ω` *pointwise in ω* (no null-event caveats) |
+| `ssSummandBool` / `ssSummand_eq_ssSummandBool` / `ssSummand_fun_eq` | Sparsification Slice 3 | The Bool-valued summand shape (a finite-range function of one coordinate) |
+| `stronglyMeasurable_ssSummand` / `indepFun_ssSummand` | Sparsification Slice 3 | The `h_meas` and `h_indep` clauses of `matrix_bernstein` at this design, through the Slice-1 transfer layer |
+
+### `Scaffold.Derived.SparsificationTail` (leverage-score sparsification, Slice 3 — the axiom-backed assembly)
+
+The program's payoff: `matrix_bernstein`'s first real theorem consumer
+(2026-08-27). Both declarations are **conditional on the
+`matrix_bernstein` axiom** (Tropp 2012, Theorem 1.1) — every
+hypothesis clause is proved hard crust, the tail inequality itself is
+axiom-backed, and `#print axioms` reports the dependency.
+
+| Declaration | Area | Description |
+| --- | --- | --- |
+| `sparsification_norm_tail` | Sparsification Slice 3 (axiom-conditional) | **The SS deviation tail**: `μ {‖S(ω) − Π_{im L}‖ ≥ t} ≤ 2 d exp(−t²/(2/q + 2t/(3q)))` at the proved constants `R = 1/q`, `‖Σ‖ ≤ 1/q`; Finding B's `Fin n` transport via `Fintype.equivFin` + `Equiv.sum_comp`; no connectivity hypothesis |
+| `sparsification_quadForm_tail` | Sparsification Slice 3 (axiom-conditional) | **The quadratic-form tail**: the same bound for the failure of `|xᵀ S x − xᵀ Π x| ≤ t (x ⬝ᵥ x)` for every vector — the additive eigen-coordinate pullback of the norm event |
 
 ## Applications
 

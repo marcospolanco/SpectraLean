@@ -8,12 +8,19 @@ zero new axioms (the delivery record below). **Step 1, Slice 2 (the
 deterministic SS algebra) DELIVERED 2026-08-27** —
 `Scaffold/Mathlib/GraphTheory/Sparsification.lean` +
 `Scaffold/QA/SpectralGraph/Sparsification_QA.lean`, pure hard crust,
-zero new axioms (the delivery record below). **Next action: Step 1,
-Slice 3 — assembly + QA**: apply `matrix_bernstein` at `t = ε` on the
-delivered summand family (Finding B's `Fin n` edge transport), transfer
-the norm event to the quadratic-form statement through the
-eigen-coordinate pullback, and discharge this proposal's three QA
-obligations. This document authorizes no axiom admissions, commits, or
+zero new axioms (the delivery record below). **Step 1, Slice 3 (the
+assembly + QA) DELIVERED 2026-08-27 — Step 1 COMPLETE, and with it the
+program's strategic aim: `matrix_bernstein`'s first real theorem
+consumer** — `Scaffold/Derived/SparsificationTail.lean` (the two
+axiom-conditional tail theorems) + the `Sparsification.lean` Slice-3
+deterministic sections +
+`Scaffold/QA/Derived/SparsificationTail_QA.lean` (the delivery record
+below; the tails are conditional on `matrix_bernstein` and reported as
+such — never described as foundationally proved). **Remaining priced
+follow-ons (not blocking):** the multiplicative `(1±ε)` refinement on
+`im Π`-coordinate vectors (from the additive transfer), and the
+`q ~ log n/ε²` budget corollary (choosing `q` to drive the bound below
+`δ`). This document authorizes no axiom admissions, commits, or
 external publication on its own.
 
 ## The correction this proposal is built on
@@ -505,3 +512,148 @@ attempted and set aside — the four-term ordered-pair sum computation
 fights elaboration quirks disproportionate to its QA value; the scalar
 coefficient pin `c_(0,1) = 1/2` + the two-sided rank-one norm identity
 carry the same falsification content.
+
+---
+
+## Step-1 Slice-3 delivery record (2026-08-27, run `20260827T193452Z-run-1`)
+
+**DELIVERED — Step 1 COMPLETE; the program's strategic aim met:
+`matrix_bernstein` now has a real theorem consumer** (the axiom count
+stays 10 — the point was consuming one, not adding; `#print axioms` via
+`wip/ss3_axcheck.lean` on all 43 audited declarations: the 14 new
+module declarations and 25 of the 27 QA declarations read exactly
+`propext, Classical.choice, Quot.sound`; the **two Derived tails and
+their two QA interface pins read `propext, Classical.choice,
+Quot.sound, matrix_bernstein`** — the conditional structure reported
+honestly, never disguised as unconditional). QA 2632 → **2659** (+27,
+the new `Scaffold/QA/Derived/SparsificationTail_QA.lean`, the Derived
+QA domain's third file).
+
+**Delivered, deterministic half** — `GraphTheory/Sparsification.lean`'s
+two new sections (no new imports; the file's "adds no axioms" character
+preserved):
+
+- the quadratic-form transfer helpers `quadForm_add` /
+  `quadForm_sub_matrix` (the name `quadForm_sub` was already taken by
+  AlonBoppana's vector-pair expansion — the umbrella caught the clash)
+  / `quadForm_smul`;
+- the action bound **`l2OpNorm_mulVec_dotProduct_le`**
+  (`(M x) ⬝ᵥ (M x) ≤ ‖M‖² (x ⬝ᵥ x)`) — a local dot-product route to the
+  C*-norm spine (`toEuclideanCLM` + `cstar_norm_def`, the same two
+  rewrites as BandDavisKahan's `l2OpNorm_mulVec_le`, kept local to
+  avoid the heavy perturbation import);
+- **the norm→form transfer `abs_quadForm_le_of_l2OpNorm_le`**
+  (`‖M‖ ≤ t → |xᵀMx| ≤ t (x ⬝ᵥ x)`, symmetry-free: Cauchy–Schwarz on
+  the action form `x ⬝ᵥ (M *ᵥ x)`) — the eigen-coordinate pullback
+  step;
+- the sampled design: **`ssWeight`** (`1` at saturated pairs — the
+  deterministic guard: a pair sampled with probability one is not
+  random — and `δ_e/p_e` otherwise; junk `0` at zero-leverage pairs,
+  whose rank-one factor is zero anyway) and **`ssSampled`**
+  (`∑_e g_e(ω) • (v_e v_eᵀ)`), with
+- **the exact deviation identity `ssSampled_sub_imageProjector`**:
+  `ssSampled ω − Π_{im L} = ∑_e X_e ω` *pointwise in ω* — the
+  statement decision that makes the norm-event transfer exact at every
+  outcome (no null-event caveats, the guard mirrored into the sampled
+  object), per-pair `(g_e − 1) • (v_e v_eᵀ) = X_e ω`;
+- the Bool-valued summand shape **`ssSummandBool`** with
+  `ssSummand e ω = F_e (ω e)` by `rfl`, closing
+  **`stronglyMeasurable_ssSummand`** (the `h_meas` clause) and
+  **`indepFun_ssSummand`** (the `h_indep` clause) through the Slice-1
+  transfer layer verbatim (`stronglyMeasurable_coord_matrix`,
+  `indepFun_coord_matrix`).
+
+**Delivered, axiom-conditional half** — the new
+`Scaffold/Derived/SparsificationTail.lean` (umbrella import added;
+the three-layer architecture's Derived home, following the
+`eventStreamTail` precedent of proved-steps-plus-axiom-backed-theorem):
+
+- **`sparsification_norm_tail`**: on the product-Bernoulli sampling
+  space at budget `q > 0`, `μ {‖S(ω) − Π_{im L}‖ ≥ t} ≤
+  2 d exp(−t²/(2/q + 2t/(3q)))` — the classical Spielman–Srivastava
+  deviation tail at the *proved* constants (Slice 2's `R = 1/q` and
+  `‖Σ‖ ≤ 1/q` substituted into the axiom's exact exponential, the
+  substitution's monotonicity proved: `t = 0` collapses, `t > 0` runs
+  the positive-denominator `div_le_div_iff₀` route). Finding B's
+  `Fin n` transport is `Fintype.equivFin` + `Equiv.sum_comp` — the
+  sum, the event set, and the variance statistic all reconciled along
+  it, with beta-redex spellings mirrored where the axiom's
+  instantiation leaves them. **No connectivity hypothesis** — centering
+  is connectivity-free by the Slice-2 design, so the tail holds on
+  disconnected input too (fenced in QA on both sides).
+- **`sparsification_quadForm_tail`**: the same bound for the failure
+  set of the uniform additive quadratic-form approximation
+  `|xᵀ S(ω) x − xᵀ Π x| ≤ t (x ⬝ᵥ x)` for every vector — the
+  eigen-coordinate pullback (set inclusion into the norm event +
+  `measure_mono`; the nonzero-vector case by the transfer lemma, the
+  zero vector excluded by `0 < 0` falsity).
+
+**QA (+27, the K₂ fixture plus the zero-graph fixture):** the deviation
+identity pinned at the all-true outcome with every piece visible (the
+four-ordered-pair evaluation `0 + (v_e v_eᵀ) + (v_e v_eᵀ) + 0` — the
+guard's junk-zero at loop pairs, the reweighting `δ/p = 2`, the swap
+`rankOne (−v) = rankOne v`); **the deviation norm `= 1 = 1/q` exactly**
+(tight both sides — the lower side through the eigenvector witness, so
+the classical bound's constant is *attained* at a real outcome);
+`quadForm_imageProjector_eq`'s first consumer (`qF(Π) v = 1/2` by the
+four-pair evaluation); `qF(S) v = 1` (deviation on top of projector);
+**the transfer lemma tight with equality** (`|qF(S)v − qF(Π)v| =
+t·(v⬝v) = 1/2`, plus the same instance through the theorem); both tails'
+interface instances; the nonempty-event witness (the all-true outcome
+is in the `t = 1` event); and the two-sided connectivity content on the
+zero graph — **the disconnected fence** (leverage budget `0 ≠ card − 1`
+on two components: connectivity load-bearing exactly at the Foster
+budget, per its own scope note) beside **the connectivity-free
+positive** (the deviation identically zero there — the tail theorem
+needs no connectivity anywhere).
+
+**Technique findings (the spike's iteration record, `wip/ss3_spike.lean`):**
+`Equiv.sum_comp`'s direction is `∑ i, g (e i) = ∑ i, g i` (no `.symm`
+when transporting from `Fin n` to the product); instantiating the axiom
+with `X := fun i ω => …` leaves *beta-redexes* in its conclusion —
+`(fun i ω => …) i ω` — so any `rw` against `hmain` must mirror that
+spelling (state the reindexed lemmas in the redex form, proved from the
+reduced forms by defeq `fun ω => hsum ω`); `Matrix.dotProduct_sub` vs
+`sub_smul`/`smul_sub` naming (the goal-side application determines which);
+`Π` is a reserved identifier character like `λ`/`Σ` (`hΠ` breaks parsing
+— use `hProj`); `Real.exp_le_exp` is an iff in this pin (`.mpr`);
+`nlinarith` cannot square an inequality without the nonneg facts as
+explicit hypotheses — give it `(t - m) * (t + m) ≥ 0` certificates or
+`calc` chains; `mul_le_mul`'s argument order defeats `apply … <;>`
+(plain `nlinarith [ht, norm_nonneg M]` is more robust for `m² ≤ t²`);
+private file-local lemmas (`isSymm_finset_sum`) are invisible to a
+sibling file — the Derived module's `ssSampled_isSymm` lives in
+Sparsification.lean for exactly that reason; and the stale-olean trap
+recurred (the Derived file saw the pre-edit module until the explicit
+target rebuild).
+
+**Verification:** spike first (`wip/ss3_spike.lean` — the module
+additions, the Derived tails, and the QA in one file, iterated to zero
+errors/zero warnings before any shelf Lean); `lake env lean` zero
+errors/zero warnings on all three changed/new files; explicit `lake
+build` targets ✔ (2159/2159 module — the name-clash rename rebuilt,
+2165/2165 derived, 2166/2166 QA); `#print axioms` via
+`wip/ss3_axcheck.lean` — 39 of 43 at the standard three, exactly the
+two Derived tails and their two QA interface pins carrying
+`matrix_bernstein`; **full `lake build` ✔ (2400/2401, "Build completed
+successfully") immediately followed by `check_build_completeness.py` —
+119/119 fresh, 0 stale, 0 missing, exit 0**; `lint_axioms` (10, no
+issues), `check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**2659/10/0**). One build repair mid-run: the umbrella
+caught `SpectralGraphTheory.quadForm_sub` already declared in
+AlonBoppana.lean (a different, vector-pair notion) — renamed here to
+`quadForm_sub_matrix` with all consumers updated.
+
+**Remaining risk / priced follow-ons:** the additive eigen-coordinate
+form is the delivered statement; the *multiplicative* `(1±ε)`
+refinement on `im Π`-coordinate vectors (vectors supported on
+nonzero-eigenvalue coordinates, where `qF(Π) x = x ⬝ᵥ x`) and the
+`q ~ log n/ε²` budget corollary (driving the bound below `δ`) are
+one-slice follow-ons on the delivered base. The recorded Slice-2
+set-aside (`ssVariance K₂ 1 = rankOne v_(0,1)` exact matrix value)
+stands. The proposal's draft statement's *graph-vector* multiplicative
+form (`xᵀL̃x` vs `xᵀLx` for Laplacians rather than eigen-coordinate
+operators) would additionally need the sampled *Laplacian* object and
+its form-level correspondence — a further priced follow-on, recorded
+here so the next run does not mistake the additive eigen-coordinate
+form for it.

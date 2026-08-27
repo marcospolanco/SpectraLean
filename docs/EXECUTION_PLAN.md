@@ -6,14 +6,36 @@ holds the append-only narrative.
 
 ## Active milestone
 
-None — see the delivered milestone below and the standing handoff. The
-Active priority table's top High row (sparsification via leverage
-scores) has its **Step 1, Slice 1 DELIVERED** (the sampling-space
-module; record below); its named next action is **Step 1, Slice 2 —
-the deterministic SS algebra** (the rank-one norm bound, the
-Finding-A-guarded sampling matrices, the variance PSD bound `‖Σ‖ ≤
-1/q`, and `∑_e v_e ⊗ v_e = Π_{im L}`). The Medium-High/Medium rows
-are unchanged.
+**Sparsification Step 1, Slice 2 — the deterministic SS algebra** (the
+Active priority table's top High row,
+`proposals/spectral-sparsification-via-leverage-scores.md`, its named
+next action); run 1, 2026-08-27, run `20260827T161958Z-run-1`.
+
+**Leverage rationale:** this slice is the deterministic core the
+`matrix_bernstein` consumer assembly (Slice 3) consumes — the
+Spielman–Srivastava sampling matrices, their pointwise bound, and the
+variance statistic — and it retires the Step-0 record's named residual
+risk (the `R = 1/q` / `‖Σ‖ ≤ 1/q` classical constants, asserted from
+the classical argument until now) by proving them. Design decisions
+already priced and being implemented: the edge-vector family in
+eigen-coordinates (the `Foster.lean` spectral machinery's native
+representation — no matrix pseudoinverse or square root is ever
+formed), ordered-pair indexing with the honest `1/√2` normalization
+(so `∑_e v_e ⊗ v_e = Π_{im L}` holds exactly and the sampling space is
+the plain delivered `bernPMF` at `ι = V × V` — zero new probability
+infrastructure), and the Finding-A guard baked into the summand
+definition (saturated edges contribute the zero matrix; zero-leverage
+pairs are absorbed by the zero rank-one outer product, so centering
+holds unconditionally in `q > 0`). Zero new axioms; spike first
+(`wip/ss2_spike.lean`).
+
+**Next action:** prove the four named pieces — the rank-one algebra
+and norm bound (`‖v ⊗ v‖ ≤ v ⬝ v`), the bilinear Dirichlet identity,
+`∑_{u,v} v_e ⊗ v_e = imageProjector` with the projector's algebra and
+`‖Π‖ ≤ 1`, and the guarded summand family with `‖X_e ω‖ ≤ 1/q`,
+`∫ X_e = 0`, `∑_e ∫ X_e * X_e = Σ`, and the headline `‖Σ‖ ≤ 1/q` —
+plus a QA file with K₂ fixtures and the junk-value fences; then the
+records sweep.
 
 ------
 

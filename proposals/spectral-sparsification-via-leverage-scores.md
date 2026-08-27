@@ -4,11 +4,17 @@
 survey record below). **Step 1, Slice 1 (the sampling-space module)
 DELIVERED 2026-08-27** — `Scaffold/Mathlib/Probability/BernoulliProduct.lean`
 + `Scaffold/QA/Probability/BernoulliProduct_QA.lean`, pure hard crust,
+zero new axioms (the delivery record below). **Step 1, Slice 2 (the
+deterministic SS algebra) DELIVERED 2026-08-27** —
+`Scaffold/Mathlib/GraphTheory/Sparsification.lean` +
+`Scaffold/QA/SpectralGraph/Sparsification_QA.lean`, pure hard crust,
 zero new axioms (the delivery record below). **Next action: Step 1,
-Slice 2 — the deterministic SS algebra** (the rank-one norm bound, the
-Finding-A-guarded sampling matrices, the variance PSD bound `‖Σ‖ ≤
-1/q`, and `∑_e v_e ⊗ v_e = Π_{im L}`). This document authorizes no
-axiom admissions, commits, or external publication on its own.
+Slice 3 — assembly + QA**: apply `matrix_bernstein` at `t = ε` on the
+delivered summand family (Finding B's `Fin n` edge transport), transfer
+the norm event to the quadratic-form statement through the
+eigen-coordinate pullback, and discharge this proposal's three QA
+obligations. This document authorizes no axiom admissions, commits, or
+external publication on its own.
 
 ## The correction this proposal is built on
 
@@ -368,3 +374,134 @@ statement decision with the centering clause shape it must fit already
 delivered (`integral_coord_center_smul`); Finding B's `Fin n` edge
 transport belongs to Slice 3's assembly; the `R = 1/q` / `‖Σ‖ ≤ 1/q`
 constants remain classical values owned by Slice 2.
+
+---
+
+## Step-1 Slice-2 delivery record (2026-08-27, run `20260827T161958Z-run-1`)
+
+**DELIVERED — pure hard crust, zero new axioms** (count stays 10;
+`#print axioms` via `wip/ss2_axcheck.lean` on all 72 audited
+declarations — 48 public module + 24 public QA: exactly `propext,
+Classical.choice, Quot.sound`, every one; zero contact with any
+admitted axiom). QA 2609 → **2632** (+23, the new
+`Scaffold/QA/SpectralGraph/Sparsification_QA.lean`).
+
+**Delivered** in the new
+`Scaffold/Mathlib/GraphTheory/Sparsification.lean` (namespace
+`SpectralGraphTheory`; imports Foster, Resolvent, BernoulliProduct;
+umbrella import added):
+
+- **the rank-one algebra**: `rankOne` (the pinned Mathlib has no
+  `outerProduct` at plain-function generality), its action
+  `rankOne_mulVec`, quadratic form `rankOne_quadForm`, idempotence
+  `rankOne_mul_self`, symmetry, `rankOne_neg`, the squared
+  Cauchy–Schwarz `dotProduct_sq_le` (through the Euclidean inner
+  product — the slice's only C–S), and **the norm bound
+  `l2OpNorm_rankOne_le`** (`‖v vᵀ‖ ≤ v ⬝ᵥ v`, per-eigenvalue Rayleigh
+  quotients at unit eigenvectors via `l2OpNorm_le_of_abs_eigvalOf_le`);
+- **the polarized bilinear Dirichlet identity**
+  `laplacian_dirichlet_bilinear` (`∑∑ A ΔxΔy = 2 xᵀLy` — polarization
+  of `laplacian_quadForm` at `x+y`, the cross-symmetry through raw
+  double sums);
+- **the eigen-coordinate edge-vector family** `ssEdgeVec`
+  (`√(w/2)·(v_k u − v_k v)/√λ_k`, zero-eigenvalue entries dropped — the
+  Foster spectral machinery's own representation; no matrix
+  pseudoinverse or square root anywhere), with `ssEdgeVec_self`,
+  `ssEdgeVec_swap`, **`ssEdgeVec_dotProduct_self`** (`‖v_e‖² =
+  w_e R_eff/2` — the ordered-pair half-share, through
+  `effectiveResistance_eq_sum_eigbasis` verbatim), and **the Foster
+  budget corollary** `sum_ssEdgeVec_dotProduct_self` (`∑_{u,v} ‖v_e‖² =
+  card V − 1`);
+- **the image projector** `imageProjector` (the eigen-coordinate form
+  of `Π_{im L}`) with `Π² = Π`, `‖Π‖ ≤ 1`, the Rayleigh domination
+  `quadForm Π x ≤ x ⬝ x`, **the trace identity
+  `trace Π = card V − 1`** (through `card_filter_eigvalOf_laplacian_eq_zero`),
+  and **the projector identity `sum_rankOne_ssEdgeVec`**
+  (`∑_{u,v} v_e v_eᵀ = Π` *exactly* — the `1/√2` halving absorbing the
+  ordered-pair double count, entrywise through the bilinear Dirichlet
+  identity at two eigenvectors plus the orthonormality `δ_kl`);
+- **the Bernoulli second moment** `integral_bern_center_sq`
+  (`E[(δ/p − 1)²] = (1−p)/p`), linearized through the delivered first
+  moment (`δ² = δ` pointwise) — no measure-level enumeration;
+- **the Finding-A-guarded sampling design** on the Slice-1 space
+  (`ssProb := min 1 (q‖v_e‖²)`, `ssDelta`, `ssSummand` with the
+  saturation guard, `ssMeasure` = the delivered `bernPMF` at
+  `ι = V × V`), and the three `matrix_bernstein` clause lemmas at the
+  classical constants, now **proved rather than asserted** (retiring
+  the Step-0 record's named residual risk):
+  **`integral_ssSummand_eq_zero`** (`∫ X_e = 0` with no connectivity
+  or nonnegativity hypothesis — zero-leverage pairs are absorbed by
+  their zero rank-one factor; saturated pairs by the guard; the rest
+  close through `integral_coord_center_smul` verbatim),
+  **`ssSummand_l2OpNorm_le`** (`‖X_e ω‖ ≤ 1/q` for *every* outcome —
+  the uniformity Finding A demanded), **`integral_ssSummand_mul_self`**
+  + **`sum_integral_ssSummand_mul_self`** (`∑_e ∫ X_e X_e = Σ`, the
+  axiom's exact statistic shape, through the rank-one idempotence), and
+  **the headline `l2OpNorm_ssVariance_le`** (`‖Σ‖ ≤ 1/q`: coefficients
+  `c_e ≤ 1/q` with the junk value at zero-leverage pairs landing
+  exactly right, the residual rank-one sum *exactly* the projector, and
+  the projector's Rayleigh form dominated by `x ⬝ x`; eigenvalue route
+  — every eigenvector's Rayleigh quotient lies in `[0, 1/q]`).
+
+**QA (+23, the `K₂` fixture):** the leverage budget by two independent
+routes (the Foster corollary `∑ ‖v_e‖² = 1` vs the raw four-ordered-pair
+enumeration `1/2 + 1/2 + 0 + 0`); the rank-one norm identity pinned
+two-sided at a concrete vector (`‖![1,2]![1,2]ᵀ‖ = 5`, the lower side
+through the eigenvector witness `v` itself — the same mechanism that
+pins the `K₂` edge vector's norm `1/2` below); the projector trace
+`= 1`; the centering and bound instances at `q = 1`; the exact variance
+coefficient `c_(0,1) = 1/2` at `p = min 1 (1·1/2) = 1/2`; and three
+proved fences — **the Finding-A fence** (the *unguarded* saturated
+summand's norm `1/2` refutes the bound `≤ 1/q = 1/4` at the missed
+outcome: the guard is load-bearing, not decorative), **the `q = 0`
+fence** (every probability junk-zero through `min 1 0 = 0`, and the
+conclusion refuted at `1/0 = 0`), and the saturation-guard instance
+(the summand identically zero at `q = 4`).
+
+**Technique findings (the spike's iteration record, for Slice 3):**
+proof arguments are match-relevant — `eigvalOf (laplacian A) hL` with a
+local `hL` does NOT match the def-spelled
+`eigvalOf (laplacian A) (laplacian_symmetric A hA)` that `simp only
+[ssSummand/ssEdgeVec]`-unfolding produces (proof irrelevance is not
+reducible defeq for simp/rw matching) — spell the def form everywhere a
+lemma's output must meet a def's unfolding; `λ` and `Σ` are reserved or
+invalid identifier characters (`hλpos`/`hΣ` break parsing — use `hμpos`/
+`hSum`); `rw [← h]` with `h : √x * √x = x` rewrites every `x` in the
+goal (including *inside* other `√x`) — reorganize numerators by an
+explicit ring-fact first and rewrite `h` *forward*; `Finset.sum_div`
+exists in this pin but `Finset.mul_sum` must be instantiated explicitly
+to avoid HO-pattern metavar failures at `∑ (c * f i)`; `norm_num` on
+matrix-smul goals misbehaves (it can turn a coefficient computation
+into a bogus `R = 0`) — keep norm_num on scalar goals and close smul
+identities by explicit coefficient rewrites; `•` binds tighter than
+`*` (`a * b • M` parses as `a * (b • M)`) — parenthesize
+`((a * b) • M)` in statements; `integral_smul_const` (not
+`integral_const_mul`) is the matrix-integral workhorse;
+`le_div_iff` is deprecated for `le_div_iff₀`; pair literals in QA
+statements need `(e : Fin 2 × Fin 2)` ascription beside a numeral `q`
+argument or the elements default to `ℕ`.
+
+**Verification:** spike first (`wip/ss2_spike.lean` — the full module
+plus the QA section, iterated to zero errors/zero warnings before any
+shelf Lean; the catch record is the technique-findings paragraph);
+`lake env lean` zero errors/zero warnings on both new shelf files;
+explicit `lake build` targets ✔ (2159/2159 module, 2160/2160 QA);
+`#print axioms` via `wip/ss2_axcheck.lean` — the standard three only,
+all 72; **full `lake build` ✔ (2399/2400, "Build completed
+successfully") immediately followed by `check_build_completeness.py` —
+117/117 fresh, 0 stale, 0 missing, exit 0**; `lint_axioms` (10, no
+issues), `check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**2632/10/0**).
+
+**Remaining risk:** Slice 3 (assembly + the proposal's three QA
+obligations) remains: Finding B's `Fin n` edge-enumeration transport
+(cheap, `Fintype.equivFin`-style), the norm-event → quadratic-form
+transfer through the eigen-coordinate pullback (the statement decision
+of how `xᵀL̃x` relates to the eigen-coordinate quadratic form — the
+conjugation `y = eigenbasisᵀ x`), and the `q`-budget error-shape
+calculus. One QA residual recorded: the exact matrix value
+`ssVariance K₂ 1 = rankOne v_(0,1)` (hence `‖Σ‖ = 1/2` exactly) was
+attempted and set aside — the four-term ordered-pair sum computation
+fights elaboration quirks disproportionate to its QA value; the scalar
+coefficient pin `c_(0,1) = 1/2` + the two-sided rank-one norm identity
+carry the same falsification content.

@@ -4890,3 +4890,10 @@ untouched; nothing committed.
 **Remaining risk:** Slices 2–3 of the sparsification program remain (the deterministic SS algebra with Finding A's saturation-guard statement decision and the `R = 1/q` / `‖Σ‖ ≤ 1/q` constants; then the assembly with Finding B's `Fin n` edge transport and the three proposal QA obligations). The matrix-codomain layer is now proved, so Slice 2's remaining risk is purely the deterministic bounds.
 
 **Next handoff:** per priority item 0 — sparsification **Step 1, Slice 2** (the deterministic SS algebra); otherwise the Medium-High/Medium rows — the empirical-stationary-distribution Step 0 is now cheaper again (its i.i.d.-space prerequisite is *delivered*, `bernPMF` + `indepFun_coord` being exactly its sampling object), the sampled-Laplacian quadratic-form consumer, the Fiedler-subspace Davis–Kahan Step-0 check.
+
+## 2026-08-27T16:19:58Z — Sparsification Step 1 Slice 2 in delivery: the deterministic SS algebra
+
+**Run:** `20260827T161958Z-run-1`  
+**Session:** `ses_fbc04c987fferE0kJOYsJY7C3A`  
+**Status:** in-progress  
+**Milestone:** the Active priority table's top High row's named next action — **Step 1, Slice 2: the deterministic SS algebra** (`proposals/spectral-sparsification-via-leverage-scores.md`): the rank-one norm bound `‖v ⊗ v‖ ≤ v ⬝ v`, the Finding-A-guarded sampling matrices on the delivered Bernoulli space, the variance statistic, and the projector identity `∑_e v_e ⊗ v_e = Π_{im L}` (eigen-coordinate form), retiring the Step-0 record's named residual risk (the `R = 1/q` / `‖Σ‖ ≤ 1/q` classical constants, proved rather than asserted) and the headline `‖Σ‖ ≤ 1/q`. Design: ordered-pair indexing with `1/√2` normalization (the delivered `bernPMF` at `ι = V × V` is the sampling space verbatim; `∑ v_e ⊗ v_e = Π` exactly), zero new axioms, spike first (`wip/ss2_spike.lean`). SGT leverage: the deterministic core `matrix_bernstein`'s first structural consumer (Slice 3) assembles from exactly these pieces.

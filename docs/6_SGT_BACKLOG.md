@@ -731,8 +731,20 @@ first concrete probability space (the independent-Bernoulli product on
 the cylinder measures, `∫ δ_e ∂μ = p e`, and the matrix-codomain
 transfer layer — the clause machinery the eventual `matrix_bernstein`
 consumer (the leverage-score sparsifier, Slices 2–3) and the
-empirical-stationary-distribution proposal both need. The sampled
-sparsifier itself remains Slices 2–3 of that proposal.
+empirical-stationary-distribution proposal both need.
+
+**Sparsification Step 1, Slice 2 delivered (2026-08-27, the same
+proposal; pure hard crust, zero new axioms, QA 2609 → 2632):**
+`GraphTheory/Sparsification.lean` — the deterministic SS algebra, every
+input the `matrix_bernstein` assembly (Slice 3) consumes: the rank-one
+norm bound `‖v vᵀ‖ ≤ v ⬝ᵥ v`, the bilinear Dirichlet identity, the
+eigen-coordinate edge vectors with `‖v_e‖² = w_e R_eff/2` and
+`∑ v_e v_eᵀ = Π_{im L}` exactly, the Bernoulli second moment, and the
+Finding-A-guarded sampling family with `∫ X_e = 0` (no connectivity
+hypothesis), `‖X_e ω‖ ≤ 1/q` uniformly, `∑_e ∫ X_e X_e = Σ`, and
+`‖Σ‖ ≤ 1/q` — the classical constants now proved rather than asserted.
+The assembly (Finding B's `Fin n` transport, the quadratic-form
+transfer) and the proposal's three QA obligations remain Slice 3.
 
 ### 8. Directed and asymmetric graph operators (2026-08-19, axis newly opened)
 

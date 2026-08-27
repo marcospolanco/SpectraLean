@@ -1,14 +1,24 @@
 # Proposal: The Alon–Boppana Bound for d-Regular Graphs
 
-**Status:** ADOPTED 2026-08-26 (see the Gate section below for the
-recorded decision) — **Step 0 delivered 2026-08-26 (the tree-ball
-spike, verdict recorded under "Build order" below), Step 1
-delivered 2026-08-26 (the d-regularity interface), Step 2
+**Status: COMPLETE 2026-08-27.** ADOPTED 2026-08-26 (see the Gate
+section below for the recorded decision) — Step 0 delivered 2026-08-26
+(the tree-ball spike, verdict recorded under "Build order" below),
+Step 1 delivered 2026-08-26 (the d-regularity interface), Step 2
 delivered 2026-08-26 (the tree-ball interface at module level;
-delivery record at the end of this document), and Step 3's first
+delivery record at the end of this document), Step 3's first
 sub-slice delivered 2026-08-27 (the radial test vector and its
-normalization; delivery record at the end of this document); the
-energy half of Step 3 is next.**
+normalization; delivery record at the end of this document), Step 3's
+second sub-slice delivered 2026-08-27 (the energy half — the numerator;
+delivery record at the end of this document), Step 4 delivered
+2026-08-27 (the two-vector orthogonalization and the Courant–Fischer
+application; delivery record at the end of this document), and
+**Step 5 delivered 2026-08-27 (the diameter-dependent single-graph
+statement — the program's capstone `alonBoppana_nilli` plus the
+classical error shape, the far-apart-to-diameter bridge, and both
+priced Step-4 QA residuals; delivery record at the end of this
+document). All five steps delivered as pure hard crust, zero new
+axioms.** The deferred items below (the asymptotic family form; Route
+B's walk-counting layer) remain deferred exactly as recorded.
 Originally proposed 2026-08-22 as a Step 0 survey only, written up to
 the same standard as
 [`weighted-matrix-tree-theorem.md`](weighted-matrix-tree-theorem.md) —
@@ -341,15 +351,361 @@ edit is itself part of the decision, not a routine documentation update.
 
 ## Open next step
 
-**Step 3b** (the energy half of the crux: the numerator
-`⟨ρ^{lev}, A ρ^{lev}⟩` — the radial vector's adjacency quadratic form
-computed against `IsTreeBall`'s level equations, the level-Lipschitz
-property of `levE` along edges (`|lev u − lev v| ≤ 1` for adjacent
-`u, v`) its likely first lemma — closing the Rayleigh quotient's
-`2√(d−1) − O(1/k)` shape when divided by the delivered
-`radialVec_dotProduct_self`) — one step per this proposal's operating
-instructions, with its own likely sub-decomposition. Steps 0, 1, 2,
-and 3a are delivered (see the records above and below).
+None — the program is **complete** (Steps 0, 1, 2, 3a, 3b, 4, and 5
+all delivered; see the delivery records below). The remaining items on
+this document's own record stay as recorded: the asymptotic family
+form is a corollary awaiting a *named family* of d-regular graphs
+with `diam → ∞` (not supplied here), and Route B's walk-counting
+layer stays the explicitly-not-attempted alternative. Natural
+follow-on candidates live in `docs/6_SGT_BACKLOG.md` item 3, not in
+this proposal.
+
+
+---
+
+## Delivery record — Step 5 (the diameter-dependent statement; program complete), 2026-08-27
+
+**Run:** `20260827T105501Z-run-1` · **Result:** DELIVERED, pure hard
+crust, zero new axioms (count stays 10; `#print axioms` via
+`wip/ab5_axcheck.lean` on all 13 audited declarations — 5 public
+module + 8 public QA, the private helpers covered transitively —
+reads exactly `propext, Classical.choice, Quot.sound`, every one).
+QA +9 (`AlonBoppana_QA.lean`'s Step-5 section; 2576 → 2585 by the
+generator metric).
+
+**Delivered** in `Scaffold/Mathlib/GraphTheory/AlonBoppana.lean`'s new
+`Packaging` section (one import added —
+`Mathlib.Combinatorics.SimpleGraph.Diam`, which `Metric` does not
+reach transitively):
+
+- **`mul_sqrt_inv_eq_sqrt`** — the `√` plumbing:
+  `x * √(x⁻¹) = √x`, hypothesis-free (`Real.sqrt_inv` then
+  `Real.div_sqrt` — both junk-safe at `x ≤ 0`, where both sides are
+  `0`), so the d-regular-tree decay factor `ρ = √((d−1)⁻¹)` pairs
+  with the growth factor `(d−1)` to the spectral radius `√(d−1)`.
+- **`distEdge_le_diam`** — the far-apart-to-diameter bridge, the
+  piece Step 2 priced and deferred as blocked
+  (`dist_le_diam` needs an `ediam ≠ ⊤` supplier): on finite connected
+  input, `exists_edist_eq_ediam_of_finite` exhibits the `ediam`
+  supremum at an actual vertex pair, where connectivity
+  (`edist_ne_top_iff_reachable`) closes it; the four cross-endpoint
+  distances each apply `dist_le_diam` and `omega` assembles the min.
+- **`alonBoppana_diam_ge`** — the honest diameter bookkeeping:
+  `2 (k+1) + 1 ≤ diam` under the far-apart hypothesis, i.e.
+  `k + 1 ≤ ⌊diam/2⌋`. Deliberately hypothesis-side: the diameter
+  bounds the *range* of usable `k` (the error decreases in `k`); it
+  never supplies the tree-ball hypothesis — the qualification trap's
+  reading, per this proposal's own warning section.
+- **`alonBoppana_nilli`** — the capstone:
+  `secondEval (d•1 − A) ≤ d − (1 + 2k√(d−1))/(k+1)` at
+  `ρ := √((d−1)⁻¹)`, consuming `twoEdgeVec_secondEval_le` verbatim
+  (the `IsDRegular` `d : ℝ` / `IsTreeBall` `d : ℕ` join already
+  carried by that interface) with the quotient converted by the
+  plumbing lemma and one `field_simp` factorization. As `k → ∞` this
+  is Alon–Boppana's `2√(d−1)` barrier, error explicit.
+- **`alonBoppana_nilli_classical`** — the classical error shape
+  `≤ d − 2√(d−1) + 2√(d−1)/(k+1)` (weaker by exactly `1/(k+1)`,
+  stated at the shape the literature quotes), pure field arithmetic
+  from the capstone.
+
+**QA** (the Step-5 section of `AlonBoppana_QA.lean`): the **C₈
+capstone instance** at `k = 0` (`secondEval (2•1 − C₈) ≤ 2 − 1 = 1` —
+the same number as Step 4's instance, now through the `√` packaging,
+`√1 = 1` by `norm_num`); the **classical-shape instance** (`≤ 2 − 2 +
+2 = 2` — the honest weak-at-small-`k` reading: at the smallest usable
+radius the error term swallows the content, exactly the qualification
+trap the proposal documents); the **diameter instance**
+(`3 ≤ diam (supportGraph C₈)` through the bridge — C₈'s actual
+diameter is `4`); the **loop-pair orthogonality fence** (the priced
+Step-4 residual, on the new `abP3L` fixture — P₃ plus a loop at
+vertex 2, whose support graph provably equals `abP3`'s since
+`supportGraph_adj` demands distinct endpoints): the genuine edge's
+one-level tree ball holds, the loop's level-0 class is `{2}` (card
+`1 ≠ 2 (d−1)⁰`), so `IsTreeBall` fails and the orthogonality
+conclusion fails with it (`⟨![1, 1, −1], onesVec⟩ = 1 ≠ 0`) —
+`twoEdgeVec_dotProduct_onesVec`'s `htb2` isolated exactly where it
+enters; and the **independent engine route at the integer witness**
+(the other priced residual): the globally supported
+`![1, 1, 0, −1, −1, −1, 0, 1]` is orthogonal to `onesVec` (raw),
+has squared norm `6` (raw) and adjacency quadratic form `8` (raw —
+the support-`{0,1,3,4,5,7}`²-filtered double sum, every one of the 36
+`abC8` entries by `rfl`), so `secondEval_le_rayleigh` at this witness
+gives `secondEval (2•1 − C₈) ≤ (2·6 − 8)/6 = 2/3` — strictly stronger
+than both theorem routes' `≤ 1`, through a structurally different
+vector.
+
+**Verification:** spike first (`wip/ab5_spike.lean`, module side and
+QA side iterated to zero errors/warnings before any shelf Lean); `lake
+env lean` zero errors/zero warnings on both changed files; explicit
+`lake build` targets ✔ (2011/2011 module, 2012/2012 QA — the
+stale-olean remediation applied once before the QA elaboration);
+`#print axioms` — the standard three only, all 13; **full `lake
+build` ✔ (2389/2390, "Build completed successfully") immediately
+followed by `check_build_completeness.py` — 113/113 fresh, 0 stale, 0
+missing, exit 0**; `lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass after the record sweep; scoreboard
+regenerated (**2585/10/0**).
+
+**Technique findings for downstream runs** (recorded from spike
+failures): `Real.sqrt_inv` is hypothesis-free and `Real.div_sqrt`
+likewise (`x / √x = √x`, junk-safe) — so
+`x * √(x⁻¹) = √x` needs no positivity case-split
+(`rw [Real.sqrt_inv, ← div_eq_mul_inv, Real.div_sqrt]`); Mathlib's
+`SimpleGraph.dist_le_diam` takes the `ediam ≠ ⊤` supply as an
+explicit hypothesis, and the finite-attainment route
+(`exists_edist_eq_ediam_of_finite` + `edist_ne_top_iff_reachable`) is
+the cheap supplier on connected `Fintype` input — the Step-2 blocker
+dissolved in six lines; `simp` on a `dist`-shaped goal *rewrites the
+goal into* the `dist_eq_zero_iff_eq_or_not_reachable` disjunction and
+stalls on connected input (close the `z = x → dist = 0` direction by
+`subst` + `exact SimpleGraph.dist_self`, never `simp`); ℕ-min
+`min a a = a` is `min_self`, not `min_id`; the if-table route for
+vector values on `Fin 8` needs the table stated in the *filter's*
+shape (`if z ∈ S then _ else 0`, `S` an explicit insert-literal —
+`simp` cannot unfold a named `Finset` def unless it is in the simp
+set), with per-case proofs by kernel `rfl` (the decidable
+if-conditions and `vecCons` entries both reduce); kernel `rfl` does
+NOT evaluate ℝ arithmetic (`(1:ℝ) * (1:ℝ) = 1` is not `rfl` — Cauchy
+quotients), which is why the entry-have + `norm_num` recipe exists;
+`norm_num` normalizes casts inside proof arguments, and `linarith`
+then still sees different atoms — close such goals by `norm_num at h ⊢`
+then `exact h` (proof-irrelevance absorbs the proof-argument
+differences); and `Finset.sum_subset`-shaped outer filters must be
+introduced as type-ascribed `have`s (a bare `rw [Finset.sum_subset
+...]` leaves an unresolved set metavariable and fails).
+
+**Program-level closing note.** Every step of Route A landed as pure
+hard crust against the proved `secondEval_variational` engine, zero
+axioms, exactly as the 2026-08-22 survey priced it. The two deferred
+items (the asymptotic family corollary, Route B) stay deferred.
+
+---
+
+## Delivery record — Step 4 (the two-vector orthogonalization), 2026-08-27
+
+**Run:** `20260827T072423Z-run-1` · **Result:** DELIVERED, pure hard
+crust, zero new axioms (count stays 10; `#print axioms` via
+`wip/ab4_axcheck.lean` on all 34 audited declarations — 17 public
+module + 17 public QA, the private helpers covered transitively —
+reads exactly `propext, Classical.choice, Quot.sound`, every one).
+QA +16 (`AlonBoppana_QA.lean`'s Step-4 section; 2560 → 2576 by the
+generator metric).
+
+**Delivered** in `Scaffold/Mathlib/GraphTheory/AlonBoppana.lean`'s new
+`TwoEdge` section (no new imports, no umbrella change):
+
+- **`radialVec_sum_eq`** — the equal-mass lemma: under `IsTreeBall`,
+  the radial vector's total mass reduces level-by-level to
+  `∑_{j≤k} 2 (d−1)^j ρ^j` — a function of `(d, ρ, k)` only, so the
+  two edges' vectors have *equal* mass and their difference is
+  orthogonal to `onesVec` with no regularity hypothesis at the
+  interface level.
+- **`twoEdgeVec`** with `twoEdgeVec_apply`,
+  **`twoEdgeVec_dotProduct_onesVec`** (= 0 under the two tree balls),
+  **`twoEdgeVec_dotProduct_self`** (= `4 (k+1)` under disjoint
+  radius-`k` balls — the two 3a denominators add, the cross support
+  vanishes by `radialVec_dotProduct_eq_zero_of_disjoint`),
+  `twoEdgeVec_ne_zero`.
+- **`radialVec_cross_dotProduct_eq_zero`** — the cross-edge
+  elimination `⟨f₁, A f₂⟩ = 0` under disjoint radius-`(k+1)` balls:
+  a support edge from a radius-`k` vertex of ball 1 lands its head at
+  radius `≤ k+1` of ball 1 (3b's own `levE_le_levE_add_one_of_adj`
+  — the Lipschitz lemma's first downstream consumer), and the two
+  radius-`(k+1)` balls are disjoint — `levE_cross_adj_eq_zero` is
+  the False-extractor. **This is where the far-apart threshold
+  `(k+1) + (k+1) < distEdge` enters**, at its exact constant.
+- **`dotProduct_mulVec_symm`** (the symmetric-matrix swap
+  `⟨a, A b⟩ = ⟨b, A a⟩`, by the honest double-sum reindexing +
+  `hA.apply`) and **`quadForm_sub`** (`xᵀA(f−g)x = xᵀAfx − 2⟨f, A g⟩
+  + xᵀAgx`) — general algebra, consumed by the numerator bound and
+  by QA's decomposition route.
+- **`twoEdgeVec_quadForm_ge`** — the doubled numerator
+  `2·(2 + 4k(d−1)ρ) ≤ xᵀAx` (each 3b bound + the eliminated cross),
+  and **`twoEdgeVec_rayleigh_ge`** — the same `(2+4k(d−1)ρ)/(2(k+1))`
+  quotient as the single vector (the doubling cancels).
+- The engine layer — **`smul_one_sub_isSymm`**,
+  **`smul_one_sub_mulVec_onesVec`** (`(d•1 − A) *ᵥ onesVec = 0` from
+  Step 1's eigen-equation), **`quadForm_smul_one_sub`**
+  (`xᵀ(d•1−A)x = d‖x‖² − xᵀAx`) — and the headline
+  **`twoEdgeVec_secondEval_le`**:
+  `secondEval (d•1 − A) ≤ d − (2+4k(d−1)ρ)/(2(k+1))` through
+  `secondEval_le_rayleigh` (PSD from Step 1's AM–GM domination,
+  kernel from the eigen-equation, orthogonality from the equal-mass
+  lemma) — **the program's first eigenvalue-level statement**.
+
+**QA** (the Step-4 section): the **C₈ antipodal-pair positive** —
+orthogonality both routes (raw `4−4 = 0` by per-vertex enumeration at
+the two value oracles — the `(4, 5)` oracle `radial45_val` new, level
+1 pinned to `{3, 6}` by adjacency-level facts — vs the theorem);
+the **norm `8 = 4(k+1)`** by the theorem through the delivered
+antipodal disjointness; the **numerator raw by decomposition**
+(`Q(g) = 8` from the 3b pin `Q(f₁) = 6`, its `(4,5)` mirror `6`, and
+the cross `⟨f₁, A f₂⟩ = 2` — the two cross edges `(2,3)`/`(6,7)` —
+joined by `quadForm_sub`); the **`hfar` fence** at `k = 1` (both
+radius-2 tree balls genuine, `distEdge = 3 < 4`, numerator refuted at
+`8 < 12` while the norm identity survives — the `(k+1)`-threshold
+isolated exactly); the **P₃ overlap fence** (norm identity refuted at
+`2 ≠ 4`, ball disjointness isolated); and the **headline instance**
+`secondEval (2•1 − abC8) ≤ 2 − 1` at `k = 0`, `IsDRegular abC8 2`
+(row sums by rfl-verified entries).
+
+**Verification:** spike first (`wip/ab4_spike.lean` — module side
+and QA side iterated to zero errors/zero warnings before any shelf
+Lean); `lake env lean` zero errors/zero warnings on both changed
+files; explicit `lake build` targets ✔ (2010/2010 module, QA);
+`#print axioms` — the standard three only, all 34; **full `lake
+build` ✔ (2388/2389, "Build completed successfully") immediately
+followed by `check_build_completeness.py` — 113/113 fresh, 0 stale,
+0 missing, exit 0**; `lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated idempotent
+(**2576/10/0**).
+
+**Technique findings for downstream steps** (recorded from spike
+failures): `include hA in` re-includes the section variable with its
+original *implicit* binder — for explicit passing declare a local
+`(hA : A.IsSymm)` binder instead; `rw` with an equation about a
+definition's application (e.g. `abC8 0 0 = 0`) **unfolds the
+definition throughout the goal** (motive construction), so later
+equation rewrites miss — use `simp only [e0, …]` with have-equations;
+`fin_cases` on a bound variable replaces it by the `(fun i => i)
+⟨k, ⋯⟩` wrapper — enumerate instead by `rcases (show i = 0 ∨ … by
+fin_cases i; all_goals simp_all) with rfl | …` so haves stated at
+plain OfNat literals match; `norm_num`/`omega` cannot decide
+Fin-literal if-conditions (`(3 : Fin 8) = 4 ∨ …`) — prove the
+¬-condition haves by `simp` and rewrite `if_neg`, or state per-vertex
+value lemmas rather than if-forms (the P₃ levE oracles are point
+lemmas for exactly this reason); in this pin `Matrix.mulVec_one` is
+the *row-sum* form and the identity action is `Matrix.one_mulVec`
+(`(c • M) *ᵥ v = c • (M *ᵥ v)` is `Matrix.smul_mulVec_assoc`);
+`div_le_div_iff` is deprecated to `div_le_div_iff₀`, and
+`mul_div_cancel₀` here has shape `b * (a / b) = a` — for `(c*D)/D = c`
+use `field_simp`; a `have`-bound walk is still opaque to `rfl` on its
+`length` (the Step-0 finding, hit again) — inline the walk in
+`SimpleGraph.dist_le`; `Finset.disjoint_right.1 hdis hb₂ hb₁ : False`
+takes the two membership proofs with the element implicit; and
+width-8 row sums evaluate by `Fin.sum_univ_eight` + per-entry
+rfl-haves + `simp only […]` + `norm_num`, where plain `simp [abC8]`
+and `norm_num [abC8]` both stop at the recorded vecCons opacity.
+
+**Remaining QA (named, bounded):** the loop-pair orthogonality fence
+(the P₃ pair `(0, 1)`/`(2, 2)`: `IsTreeBall` fails at the loop's
+one-element level 0 and `⟨g, 1⟩ = 1 ≠ 0` — fixtures and the value
+oracles now on file) and an independent engine route to the headline's
+conclusion (the integer witness `![1, 1, 0, −1, −1, −1, 0, 1]` with
+`R_A = 8/6 = 4/3 ≥ 1`, `R_{2•1−A} = 2/3 ≤ 1` — computed, not yet
+formalized). Either fits Step 5's run alongside the packaging.
+
+---
+
+## Delivery record — Step 3, sub-slice 3b (the energy half: the numerator), 2026-08-27
+
+**Run:** `20260827T052400Z-run-1` · **Result:** DELIVERED, pure hard
+crust, zero new axioms (count stays 10; `#print axioms` via
+`wip/ab3b_axcheck.lean` on all 19 audited declarations — 8 public +
+11 QA, the private helpers covered transitively — reads exactly
+`propext, Classical.choice, Quot.sound`, every one). QA +11
+(`AlonBoppana_QA.lean` extended with the Step-3b section; 2549 → 2560
+by the generator metric).
+
+**Delivered** in `Scaffold/Mathlib/GraphTheory/AlonBoppana.lean`'s new
+`Energy` section (no new imports, no umbrella change):
+
+- **`levE_le_levE_add_one_of_adj`** — the BFS level function is
+  1-Lipschitz along support-graph edges, from a junk-safe adjacency
+  triangle (`dist_le_dist_add_one_of_adj`, private: in the reachable
+  regime a shortest-walk prefix, in the junk regime a contraposed
+  reachability) applied at both endpoints and collapsed by `omega` at
+  the min.
+- **`exists_levE_parent`** — the parent lemma: every vertex at level
+  `≥ 1` has a support-adjacent neighbor exactly one level down
+  (`exists_pred_of_one_le_dist`, private: the head of a shortest walk
+  to the min-attaining endpoint, the level equality closed by
+  Lipschitz from both sides). **No connectivity hypothesis** — this is
+  the spike's answer to the recorded hard piece: the cardinality
+  equations give level sizes, not edge counts, so the numerator is
+  harvested *from below*, one parent edge per interior vertex, and a
+  lower bound is all the variational route needs. No strengthening of
+  `IsTreeBall` was required.
+- **`interiorE`** (levels `1..k`, level 0 excluded) with
+  `interiorE_zero`, `interiorE_succ_union`, and the **interior
+  level-sum bridge `sum_interiorE_eq_sum_levels`**
+  (`sum_ballE_eq_sum_levels`'s pattern at the parent-carrying part of
+  the ball, summed over `Finset.Ico 1 (k+1)`).
+- **`radialVec_quadForm_ge`** — the headline numerator bound
+  `2 + 4 k (d−1) ρ ≤ quadForm A (radialVec …)`, under the existing
+  `IsTreeBall` at radius `k+1` plus a `0`-or-`≥ 1` weight discipline
+  (`∀ i j, A i j = 0 ∨ 1 ≤ A i j` — each parent edge weighs at least
+  `1`), distinct endpoints `x ≠ y`, a genuine edge `A x y ≠ 0`,
+  `1 < d`, the normalization `ρ^2 = ((d−1:ℕ):ℝ)⁻¹`, and `0 ≤ ρ`. The
+  proof harvests a pairwise-disjoint selection of nonnegative terms of
+  the double sum — both orders of the endpoint edge, both orders of
+  every interior vertex's parent edge — and collapses each level's
+  `2 (d−1)^j ρ^{2j−1}` to exactly `2 (d−1) ρ` (the same
+  growth-cancels-decay arithmetic as the 3a denominator, at odd
+  powers).
+- **`radialVec_rayleigh_ge`** — the Rayleigh-quotient corollary
+  joining the numerator bound to the delivered
+  `radialVec_dotProduct_self`: `(2 + 4 k (d−1) ρ) / (2 (k+1)) ≤
+  rayleigh A (radialVec …)` — Nilli's `(1 + 2 k √(d−1)) / (k+1)`
+  before the Step-5 `√` packaging. The exact interface Step 4
+  consumes.
+
+**QA** (the Step-3b section of `AlonBoppana_QA.lean`): the **C₈
+numerator pin, tight at equality** — `abC8_radial_quadForm_eq_six`
+computes `xᵀAx = 6` by enumeration (the radius-1 ball's four
+restricted row sums `(2, 2, 1, 1)` weighted by indicator entries,
+every matrix entry by `rfl`, no theorem input) against
+`abC8_radial_energy_thm` reading `2 + 4·1·1·1 = 6` through
+`abC8_isTreeBall` — the routes share no mechanism and the bound is
+*attained* (every harvested term visible in the raw number: the
+edge's `2` plus the four level-1 parent edges' `4`); the **`k = 0`
+pair** both routes (`2 ≤ 2`; `isTreeBall_one_of_connected`'s second
+consumer); the **Rayleigh instance** `6/4 ≤ R`; and **three
+hypothesis fences**, one per new hypothesis: the **P₃ pseudo-edge**
+(`abP3_pseudoEdge_fence`, `hedge` isolated — every other hypothesis
+holds at `k = 0`, `d = 2`, `ρ = 1`; the test vector is the indicator
+of `{0, 2}`, spans no edge, numerator `0 < 2`), the **half-weight
+edge** (`abHalfK2_fractional_fence`, `h01` isolated — numerator
+`1/2 + 1/2 = 1 < 2`: a parent edge of fractional weight is exactly
+what the from-below harvest cannot price), and the **one-vertex loop
+with unreachable partner** (`abLoop2_loop_fence`, `hxy` isolated —
+the junk-zero vertex fills the level-0 cardinality equation so
+`IsTreeBall` *genuinely holds*, and the numerator is the loop's
+single ordered contribution `1 < 2`: distinct endpoints are what make
+the selection's `(x, y)` and `(y, x)` two different ordered pairs).
+
+**Verification:** spike first (`wip/ab3b_spike.lean` — module side
+and QA side iterated to zero errors/zero warnings before any shelf
+Lean); `lake env lean` zero errors/zero warnings on the module and
+the QA file; explicit `lake build` targets ✔ (2010/2010, 2011/2011);
+`#print axioms` — the standard three only, all 19; **full `lake
+build` ✔ (2388/2389, "Build completed successfully") immediately
+followed by `check_build_completeness.py` — 113/113 fresh, 0 stale, 0
+missing, exit 0**; `lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass after the record sweep; scoreboard
+regenerated idempotent (**2560/10/0**, md5-stable).
+
+**Technique findings for downstream steps** (recorded from spike
+failures): `choose` in this pin turns *hypothesis binders* into
+function arguments — package the choice statement with the hypothesis
+inside the ∃-body (`∃ p, (1 ≤ levE z → …)`) and destructure the
+conjunction per use, or the parent function takes the hypothesis as
+an argument; `Finset.sum_le_sum_of_subset_of_nonneg` takes `∀ i ∈ t,
+i ∉ s → 0 ≤ f i` (the `i ∉ s` matters when giving the lemma a
+standalone `have` — ascribe the full statement so the Finsets infer);
+`Finset.disjoint_right.mpr` takes the *second* set's membership first
+and the ¬-side as a `q ∈ s → False` function — `fun q hq2 hq1 => by`
+binds membership-then-membership through the ¬-function's unfolding;
+`rw [Finset.sum_insert …]`'s residual associativity needs an explicit
+`ring` (rw does not auto-close `a + (b + (c + d)) = a + b + c + d`);
+an unparenthesized `∑ x ∈ s, body` does not scope a body placed on
+the *next line* (parenthesize multi-line summands); `div_le_div_right`
+is deprecated to an iff (`div_le_div_iff_of_pos_right hc : a/c ≤ b/c
+↔ a ≤ b` — use `.2`); `radialVec_dotProduct_self`'s `2 * (k+1)`
+elaborates as `2 * ((k:ℝ) + 1)`, so consumers' denominators should be
+stated in that exact shape for `rw` to match; and
+`radVec_of_mem_ballE`'s `ρ` is not inferable from the ball membership
+alone (pass `(ρ := ρ)`).
 
 ---
 

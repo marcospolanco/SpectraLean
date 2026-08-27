@@ -7,15 +7,405 @@ holds the append-only narrative.
 ## Active milestone
 
 None — see the delivered milestone below and the standing handoff. The
-Active priority table's High rows: **Alon–Boppana Steps 0–3a delivered
-as of this run** (Step 3b — the energy half of the Rayleigh quotient,
-the numerator `⟨ρ^{lev}, A ρ^{lev}⟩` against `IsTreeBall`'s level
-equations, with the level-Lipschitz property of `levE` along edges its
-likely first lemma — is next, one sub-slice per the proposal's
-operating instructions); **sparsification via leverage scores** (its
-Step-0 survey — verifying `matrix_bernstein`'s clause set supports
-the leverage-score argument — remains the other High row and is a
-self-contained survey-sized run). Medium-High/Medium rows unchanged.
+Active priority table's top High row (sparsification via leverage
+scores) has its **Step 1, Slice 1 DELIVERED** (the sampling-space
+module; record below); its named next action is **Step 1, Slice 2 —
+the deterministic SS algebra** (the rank-one norm bound, the
+Finding-A-guarded sampling matrices, the variance PSD bound `‖Σ‖ ≤
+1/q`, and `∑_e v_e ⊗ v_e = Π_{im L}`). The Medium-High/Medium rows
+are unchanged.
+
+------
+
+## Delivered milestones (most recent first)
+
+**Sparsification Step 1, Slice 1 — the sampling-space module; the
+Active priority table's top High row (`proposals/spectral-sparsification-via-leverage-scores.md`),
+its named next action; run 1, 2026-08-27, run `20260827T142209Z-run-1`;
+DELIVERED — pure hard crust, zero new axioms (count stays 10;
+`#print axioms` via `wip/ss1_axcheck.lean` on all 42 audited
+declarations — 18 public module + 24 public QA: exactly `propext,
+Classical.choice, Quot.sound`, every one). QA 2585 → 2609 (+24, the
+new `Scaffold/QA/Probability/BernoulliProduct_QA.lean`, the
+`Probability` QA domain's first file).**
+
+**Delivered** in the new
+`Scaffold/Mathlib/Probability/BernoulliProduct.lean` (umbrella import
+added): the Step-0 spike's proved blueprint promoted — `bernPMF` (the
+product-Bernoulli PMF on `ι → Bool`), the marginals
+`sum_coord_mul`/`sum_coord2_mul`, the cylinder measures `toMeasure_cyl`,
+pairwise `IndepFun` of coordinates **`indepFun_coord`**, the scalar
+centering **`integral_delta`** (`∫ δ_e ∂μ = p e`) — **plus the
+Step-0 record's named residual risk retired: the matrix-codomain
+transfer layer, Lean-untried until this run, now proved**
+(`stronglyMeasurable_coord_matrix` via Mathlib's
+`StronglyMeasurable.of_finite` — the topology-only `h_meas` route;
+`measurable_coord_matrix` at the shelf's matrix pi σ-algebra;
+`indepFun_coord_matrix` — the `IndepFun.comp` transfer; and the
+centering integrals `integral_coord_smul` /
+**`integral_coord_center_smul`** — the exact `h_mean` clause shape
+`∫ ((δ_e/p_e) − 1) • M ∂μ = 0` at `p e ≠ 0`). This is the shelf's
+first concrete probability space, cross-listed for the
+empirical-stationary-distribution Medium-High row's identical
+i.i.d.-sampling prerequisite, and the gate on `matrix_bernstein`'s
+first structural consumer (Slice 3).
+
+**QA (+24, the `Fin 2 → Bool` four-atom fixture at `p = ![1/2, 1/3]`,
+the atom enumeration as the independent raw route):** the four
+joint-mass values raw; total mass `1` by two independent routes (the
+∑-∏ theorem vs raw enumeration); the marginal and three
+cylinder-measure pins; **independence pinned numerically through
+`indepFun_coord`** (the intersection measure splits as
+`1/2 · 2/3 = 1/3`, joined to the cylinder pins); `∫ δ_1 = 1/3` by two
+routes; the matrix-layer clause instances at a concrete
+`!![1,2;3,4]` family; the matrix centering pins; and **two proved
+fences** — the `[0,1]` bounds load-bearing for the mass normalization
+(`p = ![2]` sums to `2 ≠ 1`), and the `p e ≠ 0` centering hypothesis
+**refuted at the junk value** (`p = ![0]`: the "centered" integrand
+evaluates through `0/0 = 0` to the constant `−M`, so the integral is
+`−M ≠ 0` — the conclusion fails, not merely the hypothesis).
+
+**Verification:** spike first (`wip/ss1_spike.lean` — the full module
+plus the QA section, both sides to zero errors/warnings before any
+shelf Lean; technique findings recorded in the proposal's delivery
+record — `ENNReal.ofReal_mul`'s single side condition vs
+`ofReal_add`'s two; `congr 1; norm_num` for `ofReal`-equalities; the
+rw-position requirement for merge lemmas; the L2OpNorm
+`CompleteSpace` probe; the global `MeasurableSpace.pi` instance
+dropping the spike's local one; `omit ... in` before docstrings; the
+`congrFun`-witness route for atom disequalities at no pi
+`DecidableEq`; scalar-type ascription in `(1/2) • M` statements);
+`lake env lean` zero errors/zero warnings on both new files; explicit
+`lake build` targets ✔ (2042/2042, 2043/2043); `#print axioms` — the
+standard three only, all 42; **full `lake build` ✔ (2388→2398/2399,
+"Build completed successfully") immediately followed by
+`check_build_completeness.py` — 115/115 fresh, 0 stale, 0 missing,
+exit 0**; `lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**2609/10/0** —
+the regeneration also repaired the generated-metrics block, which the
+uncommitted prior deliveries had left at the committed 2549 while
+their verification rows were swept; the working-tree count is now
+truthful). Records updated: the proposal (status header + Slice-1
+delivery record with technique findings + next action → Slice 2),
+`proposals/README.md` (the High row's next action → Slice 2), README
+(2609; the module-table row), the radar (QA axis synced 2585 → 2609
+across 60 modules; axis 7's sampling-space clause, score held at 4.0
+with the protocol reason), the scoreboard (two verification rows +
+the repaired metrics block), backlog item 7 (the delivery clause),
+the index map (the Sampling Spaces section + 13 declaration rows),
+this plan, and the activity log. Nothing committed; the prior runs'
+uncommitted Alon–Boppana Step-3b/4/5 deliveries preserved untouched.
+
+**Remaining risk:** Slices 2–3 (the deterministic SS algebra, then
+the assembly + QA) remain; Finding A's saturation guard is now a
+Slice-2 statement decision with the centering-clause shape it must
+fit already delivered; Finding B's `Fin n` edge transport belongs to
+Slice 3; the `R = 1/q` / `‖Σ‖ ≤ 1/q` constants are classical values
+Slice 2 owns.
+
+**Next milestone (open):** per priority item 0 — sparsification
+**Step 1, Slice 2** (the deterministic SS algebra); otherwise the
+Medium-High/Medium rows (empirical-stationary-distribution Step 0 —
+now cheaper again, its i.i.d.-space prerequisite is *delivered*; the
+sampled-Laplacian quadratic-form consumer; the Fiedler-subspace
+Davis–Kahan Step-0 check against the delivered Band family).
+
+------
+
+## Delivered milestones (most recent first)
+
+**Sparsification Step 0 — the matrix-Bernstein clause-set survey;
+`proposals/spectral-sparsification-via-leverage-scores.md` (the Active
+table's top High row); run 1, 2026-08-27, run
+`20260827T123751Z-run-1`; selected per priority item 0 as the row's
+named next action: DELIVERED — a verdict-plus-spike run, **zero shelf
+Lean touched** (QA count unchanged at 2585, axiom count unchanged at
+10; `wip/ss0_spike.lean`, 316 lines, is the evidence artifact:
+`lake env lean` **zero errors / zero warnings**, exit 0).**
+
+**Verdict: tractable.** Every clause of `matrix_bernstein` has a
+discharge route at the classical Spielman–Srivastava design. The
+proposal's three named checks, each closed against shelf + pinned-
+Mathlib evidence: (1) *centering and boundedness* — the Bochner
+centering arithmetic **spike-proved end to end** (`integral_delta`:
+`∫ δ_e ∂μ = p e` through `PMF.integral_eq_sum`, the one-coordinate
+marginal, and the `≠ ⊤`-guarded `← ENNReal.toReal_sum`); the bounded-
+ness value is the classical `R = 1/q`, its deterministic input the
+rank-one bound `‖v ⊗ v‖ ≤ ‖v‖²` with two named shelf routes — plus
+**two interface findings**: the uniform `∀ ω` in `h_bound` forces a
+saturation guard into the Step-1 summand design (a saturated edge's
+`δ_e = 0` outcome would violate the bound *pointwise*), and the `Fin n`
+summand indexing needs an edge-enumeration transport; (2) *the
+leverage normalization* — `Foster.lean`'s `(∑ᵢ∑ⱼ A i j · R i j)/2 =
+card V − 1` IS the unordered-pair budget identity the sampling
+consumes; the shelf's `leverageScore` needs only a thin `(n−1)`
+rescaling; connectivity load-bearing exactly as QA fence 3 expects;
+(3) *the infrastructure* — **it did not exist**: no concrete
+probability measure anywhere in the shelf, and no pinned-Mathlib lemma
+supplies coordinate independence on a product measure — so the spike
+**builds and proves it**: the space `ι → Bool` at the product
+σ-algebra, the product PMF `bernPMF` via `PMF.ofFinset` with total
+mass by the `Finset.sum_prod_piFinset` ∑-∏ swap, the one-/two-
+coordinate marginals (`sum_coord_mul`/`sum_coord2_mul` through the
+`coordG1`/`coordG2` atom defs), cylinder measures, and the headline
+**`indepFun_coord`** — pairwise `IndepFun` of coordinate projections,
+the exact shape the `h_indep` clause needs. The matrix-codomain layer
+has source-confirmed routes (not spiked): `SimpleFunc.ofFinite` +
+`SimpleFunc.stronglyMeasurable` (topology-only — the right route at
+the shelf's hand-rolled matrix σ-algebra precisely because no
+BorelSpace bridge exists in the pin), `measurable_pi_iff` entrywise,
+and the `IndepFun.comp` transfer with `measurable_of_bool`.
+
+**Priced decomposition recorded in the proposal:** Slice 1 the
+sampling-space module (deliberately its own slice — the empirical-
+stationary-distribution Medium-High row needs the same i.i.d.-sampling
+object; cross-proposal leverage named), Slice 2 the deterministic SS
+algebra (rank-one norm bound, guarded sampling matrices, the variance
+PSD bound `‖Σ‖ ≤ 1/q`, the `∑ v_e⊗v_e = Π_{im L}` identity), Slice 3
+assembly + the three QA obligations. Technique findings recorded for
+Step 1 (the free-`p` autoBound trap behind every *stuck `Fintype ?m`*
+failure; `rw` not rewriting under `∑` binders; HO-pattern metavar
+failures at lambda arguments; `Finset.mul_prod_erase` vs `prod_erase`;
+`PMF.toMeasure_apply`'s explicit `(p) (s)`; the `toReal_sum` side
+condition).
+
+**Verification:** spike `lake env lean wip/ss0_spike.lean` — zero
+errors / zero warnings, exit 0 (iterated to green over the session;
+the catch record is the proposal's technique-findings paragraph).
+No shelf module changed, so the build surface is untouched; the
+records sweep (proposal status header + Step-0 delivery record,
+`proposals/README.md` High row → Step-1 next action, the OLD
+`spectral-graph-sparsification.md` Phase-B blocker note corrected per
+the acceptance bar — recording the successor document and the
+`Matrix/Bernstein.lean` fact, this plan, the activity log) verified
+by `lint_axioms` (10, no issues), `check_citations`, and
+`check_markdown_links` after the sweep. Nothing committed; the prior
+runs' uncommitted Alon–Boppana Step-4/5 deliveries preserved
+untouched.
+
+**Remaining risk:** the matrix-codomain layer and Slice 2's
+deterministic bounds are confirmed-route but untried in Lean; the
+`R = 1/q` / `‖Σ‖ ≤ 1/q` constants are asserted from the classical
+argument, not spike arithmetic (Slice 2 owns them); Finding A's guard
+decision shapes the Step-1 statement.
+
+**Next milestone (open):** per priority item 0 — sparsification
+**Step 1, Slice 1** (the sampling-space module; spike blueprint on
+file); otherwise the Medium-High/Medium rows
+(empirical-stationary-distribution Step 0 — now cheaper, its
+i.i.d.-space prerequisite is spike-priced; the sampled-Laplacian
+quadratic-form consumer; the Fiedler-subspace Davis–Kahan Step-0
+check against the delivered Band family).
+
+**The Alon–Boppana bound, Step 5 — the diameter-dependent single-graph
+statement; the program COMPLETE; `proposals/alon-boppana-bound.md`
+(Gate ADOPTED 2026-08-26); run 1, 2026-08-27, run
+`20260827T105501Z-run-1`; selected per priority item 0 as the Active
+table's adopted High row's named next action (with the two QA
+residuals the Step-4 delivery priced for this run): DELIVERED — pure
+hard crust, zero new axioms (count stays 10; `#print axioms` via
+`wip/ab5_axcheck.lean` on all 13 audited declarations — 5 public
+module + 8 public QA: exactly `propext, Classical.choice, Quot.sound`,
+every one). QA 2576 → 2585 (+9, the Step-5 section of
+`AlonBoppana_QA.lean`).**
+
+**Delivered** in `GraphTheory/AlonBoppana.lean`'s new `Packaging`
+section (one import added — `Mathlib.Combinatorics.SimpleGraph.Diam`):
+the `√` plumbing **`mul_sqrt_inv_eq_sqrt`** (`x·√(x⁻¹) = √x`
+hypothesis-free, junk-safe at `x ≤ 0`), the far-apart-to-diameter
+bridge **`distEdge_le_diam`** (the Step-2 priced `ediam ≠ ⊤` blocker
+dissolved: `exists_edist_eq_ediam_of_finite` exhibits the supremum at
+a vertex pair, connectivity's `edist_ne_top_iff_reachable` closes),
+the honest diameter bookkeeping **`alonBoppana_diam_ge`**
+(`2(k+1)+1 ≤ diam`, i.e. `k+1 ≤ ⌊diam/2⌋` — hypothesis-side only,
+the tree-ball hypothesis never derived from the diameter, per the
+proposal's own qualification-trap warning), the capstone
+**`alonBoppana_nilli`** — `secondEval (d•1 − A) ≤ d −
+(1 + 2k√(d−1))/(k+1)` at `ρ = √((d−1)⁻¹)`, consuming
+`twoEdgeVec_secondEval_le` verbatim (the `IsDRegular` `d : ℝ` /
+`IsTreeBall` `d : ℕ` join already carried by that interface) — and
+the classical error shape **`alonBoppana_nilli_classical`** (`≤ d −
+2√(d−1) + 2√(d−1)/(k+1)`, the single-graph `λ₂ ≥ 2√(d−1) −
+O(1/⌊diam/2⌋)` form in Laplacian clothing).
+
+**QA (+9):** the C₈ capstone instance (`secondEval (2•1 − C₈) ≤ 2 −
+1 = 1` through the `√` packaging — the same number as Step 4's
+instance, non-circularly reached); the classical-shape instance
+(`≤ 2 − 2 + 2 = 2` — the honest weak-at-small-`k` reading, the error
+term swallowing the content exactly where the qualification trap
+demands); the diameter instance (`3 ≤ diam (supportGraph C₈)`);
+the **loop-pair fence** (the priced residual 1, on the new `abP3L`
+fixture — P₃ plus a loop, whose support graph provably equals
+`abP3`'s: the loop's level-0 class is `{2}` of card `1 ≠ 2`, so
+`IsTreeBall` fails and the two-vector orthogonality fails with it at
+`⟨![1,1,−1], onesVec⟩ = 1 ≠ 0`); and the **independent engine route
+at the integer witness** (the priced residual 2: the globally
+supported `![1,1,0,−1,−1,−1,0,1]`, orthogonal raw, squared norm `6`
+raw, quadratic form `8` raw by the support-filtered double sum with
+all 36 entries by `rfl`, gives `secondEval (2•1 − C₈) ≤ 2/3` —
+strictly stronger than both theorem routes' `≤ 1`, through a
+structurally different vector).
+
+**Verification:** spike first (`wip/ab5_spike.lean`, both sides to
+zero errors/warnings before any shelf Lean; the technique findings
+recorded in the proposal's delivery record); `lake env lean` zero
+errors/zero warnings on both changed files; explicit `lake build`
+targets ✔ (2011/2011 module, 2012/2012 QA — the stale-olean
+remediation applied once before the QA elaboration); `#print axioms`
+— the standard three only, all 13; **full `lake build` ✔ (2389/2390)
+immediately followed by `check_build_completeness.py` — 113/113
+fresh, 0 stale, 0 missing, exit 0**; `lint_axioms` (10, no issues),
+`check_citations`, `check_markdown_links` pass after the record
+sweep; scoreboard regenerated idempotent (**2585/10/0**, md5-stable).
+Records updated: the proposal (status header COMPLETE + Step-5
+delivery record with technique findings + open-next-step → none),
+`proposals/README.md` (the High row retired to the Delivered table;
+the sparsification High row promoted to the table's top row with the
+named next action; the stale "Active table remains empty" snapshot
+annotated as historical), README (2585; the status-paragraph Steps-4–5
+clauses — including the Step-4 clause the Step-4 run had left covered
+only in the module table; the module-table row now reads program
+COMPLETE), the radar (QA axis synced 2576 → 2585; axis 4's evidence
+gains the Alon–Boppana clause — the theorem has landed, the axis's
+Have column now closes both directions of the expansion–spectrum
+relationship), the scoreboard (two verification rows + the
+interpretation bullet + the header date), backlog item 3 (the
+program-closure update), the index map (the Packaging section + 5
+declaration rows), the module and QA docstrings, this plan, and the
+activity log. Nothing committed; prior runs' deliveries preserved
+untouched.
+
+**Remaining risk:** none for this program — all five steps delivered
+as pure hard crust and the proposal records COMPLETE. The deferred
+items stay deferred on its own record (the asymptotic family
+corollary needs a named d-regular family with `diam → ∞`; Route B's
+walk-counting layer was never attempted). Program-level residue
+noted for future QA if ever wanted: C₈'s diameter is provably `≥ 3`
+(QA) and known to be `4` classically, but the exact pin `= 4` was not
+needed for any statement and stays unformalized.
+
+**Next milestone (open):** per priority item 0 — the sparsification
+High row's **Step-0 survey** (verify `matrix_bernstein`'s clause set
+against the leverage-score sampling argument); otherwise the
+Medium-High/Medium rows (empirical-stationary-distribution Step 0;
+the sampled-Laplacian quadratic-form consumer; the Fiedler-subspace
+Davis–Kahan Step-0 check against the delivered Band family).
+
+------
+
+**The Alon–Boppana bound, Step 4 — the two-vector orthogonalization
+and the Courant–Fischer application, the program's first
+eigenvalue-level statement; `proposals/alon-boppana-bound.md` (Gate
+ADOPTED 2026-08-26); run 1, 2026-08-27, run `20260827T072423Z-run-1`;
+selected per priority item 0 as the Active table's adopted High row's
+named next action: DELIVERED — pure hard crust, zero new axioms (count
+stays 10; `#print axioms` via `wip/ab4_axcheck.lean` on all 34 audited
+declarations — 17 public module + 17 public QA: exactly `propext,
+Classical.choice, Quot.sound`, every one). QA 2560 → 2576 (+16, the
+Step-4 section of `AlonBoppana_QA.lean`).**
+
+**Delivered** in `GraphTheory/AlonBoppana.lean`'s new `TwoEdge`
+section (no new imports, no umbrella change): the equal-mass lemma
+**`radialVec_sum_eq`** (under `IsTreeBall` both edges' radial vector
+masses reduce to the same function of `(d, ρ, k)` — so
+**`twoEdgeVec`** is orthogonal to `onesVec` with no regularity at the
+interface level), the norm identity **`twoEdgeVec_dotProduct_self`**
+(`4 (k+1)` on disjoint radius-`k` balls — the two 3a denominators
+add), the cross-edge elimination **`radialVec_cross_dotProduct_eq_zero`**
+(consuming 3b's own level-Lipschitz lemma — its first downstream
+consumer — plus `(k+1)+(k+1) < distEdge` disjointness, the far-apart
+theorem's first theorem consumer beyond disjointness), the expansion
+algebra (`dotProduct_mulVec_symm`, `quadForm_sub`), the doubled
+numerator bound with its Rayleigh form, the engine layer at
+`M = d•1 − A` (PSD and kernel from the Step-1 facts), and the headline
+**`twoEdgeVec_secondEval_le`** — `secondEval (d•1 − A) ≤ d −
+(2 + 4k(d−1)ρ)/(2(k+1))` through `secondEval_le_rayleigh`.
+
+**QA (+16):** the C₈ antipodal-pair positive — orthogonality by two
+routes (raw `4−4` per-vertex enumeration vs the theorem; the `(4,5)`
+value oracle and level-1 pin `{3,6}` new), the norm `8 = 4(k+1)` by
+the theorem, the numerator raw by decomposition (`8 = 6 + 6 − 2·2`,
+the cross's two cross edges explicit), the **`hfar` fence** at `k = 1`
+(`8 < 12`, both radius-2 tree balls genuine, the norm identity
+surviving — the far-apart threshold isolated at its exact constant),
+the **P₃ overlap fence** (`2 ≠ 4`, ball disjointness isolated), and
+the **headline instance** `secondEval (2•1 − abC8) ≤ 1`.
+
+**Verification:** spike first (`wip/ab4_spike.lean`, both sides to
+zero errors/warnings before any shelf Lean); `lake env lean` zero
+errors/zero warnings on both changed files; explicit `lake build`
+targets ✔; `#print axioms` — the standard three only, all 34; **full
+`lake build` ✔ (2388/2389) immediately followed by
+`check_build_completeness.py` — 113/113 fresh, 0 stale, 0 missing,
+exit 0**; `lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated idempotent
+(**2576/10/0**). Records updated: the proposal (status header +
+Step-4 delivery record with technique findings + open-next-step →
+Step 5), `proposals/README.md` (the High row's next action → Step 5),
+README (2576; the module-table clause), the radar (QA axis synced
+2560 → 2576), the scoreboard, backlog item 3, the index map, the
+module and QA docstrings, this plan, and the activity log. Nothing
+committed; prior runs' deliveries preserved untouched.
+
+**Remaining risk:** Step 5 (the diameter-dependent statement) is the
+program's last step — the far-apart-to-diameter bridge was priced and
+deferred in Step 2 (`dist_le_diam` needs an `edism ≠ ⊤` supplier);
+the `d`-join and `√` packaging are recorded as its content. Two named
+QA residuals (the loop-pair orthogonality fence; an independent engine
+route at the integer witness) are priced with fixtures on file.
+
+**Next milestone (open):** per priority item 0 — Alon–Boppana
+**Step 5**, or the sparsification High row's Step-0 survey; otherwise
+the Medium-High/Medium rows.
+
+------
+
+**The Alon–Boppana bound, Step 3 sub-slice 3b — the energy half of the
+Rayleigh quotient, Nilli's numerator; `proposals/alon-boppana-bound.md`
+(Gate ADOPTED 2026-08-26); run 1, 2026-08-27, run
+`20260827T052400Z-run-1` (records closed by run
+`20260827T072423Z-run-1` after the delivery session exited
+post-sweep pre-terminal, the records-gap pattern's fourth instance);
+selected per priority item 0 as the Active table's adopted High row's
+named next action: DELIVERED — pure hard crust, zero new axioms (count
+stays 10; `#print axioms` via `wip/ab3b_axcheck.lean` on all 19 audited
+declarations — 8 public + 11 QA: exactly `propext, Classical.choice,
+Quot.sound`, every one; re-verified against the final source state by
+the closing run). QA 2549 → 2560 (+11, the Step-3b section of
+`AlonBoppana_QA.lean`).**
+
+**Delivered** in `GraphTheory/AlonBoppana.lean`'s `Energy` section:
+`levE_le_levE_add_one_of_adj` (the BFS level function 1-Lipschitz along
+support-graph edges, junk-safe), `exists_levE_parent` (the parent
+lemma — every level-`≥ 1` vertex has a support-adjacent neighbor exactly
+one level down, no connectivity hypothesis; the from-below harvest that
+dissolved the recorded "level sizes, not edge counts" obstruction
+without strengthening `IsTreeBall`), `interiorE` with its algebra and
+the interior level-sum bridge, the headline **`radialVec_quadForm_ge`**
+(`2 + 4 k (d−1) ρ ≤ xᵀAx` under the existing `IsTreeBall` plus a
+0-or-`≥ 1` weight discipline, distinct endpoints, a genuine edge), and
+the Rayleigh corollary **`radialVec_rayleigh_ge`** joining it to the
+3a denominator — Nilli's quotient before the Step-5 `√` packaging. QA:
+the C₈ numerator pin tight at equality (raw `6` vs the theorem's
+`2 + 4·1·1·1 = 6`), the `k = 0` pair, and three hypothesis fences
+(`hedge` at the P₃ pseudo-edge, `h01` at the half-weight edge, `hxy` at
+the one-vertex loop whose junk-zero partner keeps `IsTreeBall` honest).
+
+**Verification:** re-run from scratch by the closing run — `lake env
+lean` zero errors/zero warnings on both changed files; explicit
+`#print axioms` all 19 standard-three; full `lake build` ✔ followed by
+`check_build_completeness.py` 113/113 fresh, 0 stale, 0 missing, exit
+0; `lint_axioms`, `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated **2560/10/0** (the closing run's regeneration
+also repaired the delivery session's stale generated-metrics block,
+left at 2549/2026-08-26 by its verification-row-only sweep). Full
+delivery record with technique findings in the proposal; records swept
+(README, radar, scoreboard, backlog, index map, `proposals/README.md`
+next action → Step 4).
+
+**Remaining risk:** Step 4 (the two-vector orthogonalization) and Step
+5 (the diameter-dependent statement) remain; the `IsDRegular`-to-
+`IsTreeBall` `d`-join and the `√` packaging stay deferred to Step 5.
 
 ------
 

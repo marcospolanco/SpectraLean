@@ -171,6 +171,57 @@ wrap-around negative (`IsTreeBall` fails at radius 3 — the
 qualification trap's witness), and the threshold-tightness fence (at
 exactly `r + s` the balls provably intersect).
 
+*Update (2026-08-27, Step 5 delivered — the program COMPLETE):*
+**Alon–Boppana is a shelf theorem** (run `20260827T105501Z-run-1`;
+zero new axioms; QA +9, 2576 → 2585). The `Packaging` section of
+`GraphTheory/AlonBoppana.lean`: the `√` plumbing
+`mul_sqrt_inv_eq_sqrt` (`x·√(x⁻¹) = √x`, hypothesis-free), the
+**far-apart-to-diameter bridge `distEdge_le_diam`** (the Step-2
+priced `ediam ≠ ⊤` blocker dissolved: finiteness-attainment
+`exists_edist_eq_ediam_of_finite` + connectivity's
+`edist_ne_top_iff_reachable`), the honest diameter bookkeeping
+**`alonBoppana_diam_ge`** (`2(k+1)+1 ≤ diam`, i.e. `k+1 ≤ ⌊diam/2⌋`,
+hypothesis-side only — the tree-ball hypothesis is never derived from
+the diameter), the capstone **`alonBoppana_nilli`** —
+`secondEval (d•1 − A) ≤ d − (1 + 2k√(d−1))/(k+1)` at
+`ρ = √((d−1)⁻¹)`, Alon–Boppana's `2√(d−1)` barrier with the error
+explicit — and the classical error shape
+**`alonBoppana_nilli_classical`** (`≤ d − 2√(d−1) + 2√(d−1)/(k+1)`).
+Both priced QA residuals delivered: the loop-pair fence (a loop's
+level-0 class has one element; `IsTreeBall` fails and the two-vector
+orthogonality fails with it) and the independent engine route at the
+integer witness (`secondEval (2•1 − C₈) ≤ 2/3`, strictly stronger
+than the theorem routes' `≤ 1`, fully raw arithmetic). With Steps
+0–5 all pure hard crust, this item's Alon–Boppana candidate is
+**closed**; the natural follow-on (the asymptotic family corollary)
+needs a named d-regular family with `diam → ∞` and stays a Plan
+entry until one is named.
+
+*Update (2026-08-27, Steps 3b + 4 delivered):* **the energy half and
+the two-vector orthogonalization are shelf facts — the program has its
+first eigenvalue-level statement** (runs `20260827T052400Z-run-1` and
+`20260827T072423Z-run-1`; zero new axioms; QA +11 then +16, 2549 →
+2560 → 2576). Step 3b's `Energy` section: the level-Lipschitz lemma
+`levE_le_levE_add_one_of_adj`, the parent lemma `exists_levE_parent`
+(the from-below harvest dissolving the "level sizes, not edge counts"
+obstruction without strengthening `IsTreeBall`), the interior
+level-sum bridge, the numerator bound `radialVec_quadForm_ge`
+(`2 + 4k(d−1)ρ ≤ xᵀAx`), and the Rayleigh corollary. Step 4's
+`TwoEdge` section: the equal-mass lemma `radialVec_sum_eq` (both
+balls' vector masses the same function of `(d, ρ, k)`, so
+`twoEdgeVec := radialVec(x,y) − radialVec(u,v)` is orthogonal to
+`onesVec`), the norm identity `4 (k+1)` on disjoint radius-`k` balls,
+the cross-edge elimination through the level-Lipschitz lemma at the
+exact far-apart threshold `(k+1)+(k+1) < distEdge`, and the headline
+**`twoEdgeVec_secondEval_le`** — `secondEval (d•1 − A) ≤ d −
+(2 + 4k(d−1)ρ)/(2(k+1))` through `secondEval_le_rayleigh` at
+`M = d•1 − A`. Remaining: **Step 5 only** — the
+far-apart-to-diameter bridge, the `d : ℝ`/`d : ℕ` join, the `√`
+packaging, and the honest diameter-dependent single-graph statement
+(plus two named QA residuals: the loop-pair orthogonality fence and an
+independent engine route at the integer witness — both priced and
+fixtures on file).
+
 *Update (2026-08-27, Step 3's first sub-slice delivered):* **the
 radial test vector exists on the shelf with its normalization computed
 exactly** (run `20260827T012700Z-run-1`; zero new axioms, QA +10,
@@ -193,6 +244,34 @@ consumer). **Next: Step 3b** (the energy half — the numerator
 `⟨ρ^{lev}, A ρ^{lev}⟩` against the level equations, the
 level-Lipschitz property of `levE` along edges its likely first
 lemma) per the proposal's one-step-per-run instruction.
+
+*Update (2026-08-27, Step 3's second sub-slice delivered):* **the
+energy half is shelf fact — Nilli's Rayleigh quotient now has both
+halves** (run `20260827T052400Z-run-1`; zero new axioms, QA +11,
+2549 → 2560). The `Energy` section of `GraphTheory/AlonBoppana.lean`:
+the level-Lipschitz lemma `levE_le_levE_add_one_of_adj` (junk-safe
+adjacency triangle at both endpoints), **the parent lemma
+`exists_levE_parent`** — every level-`≥ 1` vertex has a
+support-adjacent neighbor exactly one level down, no connectivity
+hypothesis — whose from-below harvest dissolves the recorded
+"cardinality equations give level sizes, not edge counts" obstruction
+*without* strengthening `IsTreeBall`; the interior `interiorE` with
+its level-sum bridge; **the numerator bound `radialVec_quadForm_ge`**
+`2 + 4 k (d−1) ρ ≤ xᵀAx` under the existing tree-ball predicate plus
+a `0`-or-`≥ 1` weight discipline, distinct endpoints, and a genuine
+edge (both orders of the endpoint edge plus both orders of every
+interior vertex's parent edge, the per-level growth cancelling the
+decay); and **the Rayleigh corollary `radialVec_rayleigh_ge`**
+`(2 + 4 k (d−1) ρ) / (2 (k+1)) ≤ R` — Nilli's quotient before the
+Step-5 `√` packaging, the exact interface Step 4 consumes. QA: the C₈
+numerator pin **tight at equality** (raw `6` vs the theorem's `2 +
+4·1·1·1 = 6`, no shared mechanism), the `k = 0` pair, the Rayleigh
+instance, and three fences isolating the three new hypotheses (the P₃
+pseudo-edge `hedge`, the half-weight edge `h01`, the one-vertex loop
+`hxy` whose junk-zero partner keeps `IsTreeBall` honest).
+**Next: Step 4** (the two-vector orthogonalization at two far-apart
+edges through `ballE_disjoint_of_lt_distEdge` and
+`radialVec_rayleigh_ge`, concluding via `secondEval_variational`).
 
 *Update (2026-08-25/26):* **the irregular (volume-weighted) Cheeger *upper*
 bound delivered** (`proposals/irregular-cheeger-variational-transfer.md`
@@ -642,6 +721,18 @@ case on `K₃`, and one signed fixture fencing the nonnegativity
 hypothesis across all three theorems. The family's remaining items are:
 Matrix–Tree, and Kirchhoff network theorems beyond the conservation
 bridge — both still gated on a named consumer.
+
+**Sparsification Step 1, Slice 1 delivered (2026-08-27,
+`proposals/spectral-sparsification-via-leverage-scores.md` — the
+superseding document for Phase B; pure hard crust, zero new axioms,
+QA 2585 → 2609):** `Probability/BernoulliProduct.lean` — the shelf's
+first concrete probability space (the independent-Bernoulli product on
+`ι → Bool`), with the marginals, pairwise `IndepFun` of coordinates,
+the cylinder measures, `∫ δ_e ∂μ = p e`, and the matrix-codomain
+transfer layer — the clause machinery the eventual `matrix_bernstein`
+consumer (the leverage-score sparsifier, Slices 2–3) and the
+empirical-stationary-distribution proposal both need. The sampled
+sparsifier itself remains Slices 2–3 of that proposal.
 
 ### 8. Directed and asymmetric graph operators (2026-08-19, axis newly opened)
 

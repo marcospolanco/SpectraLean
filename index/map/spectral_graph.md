@@ -1019,7 +1019,7 @@ new k-general engine pieces in `Spectral.lean` above):
 | `cheeger_upper_bound_multiway_rhoK` | **the ρ_k form of the easy direction**: `evals (L_sym) ⟨k−1⟩ ≤ 2 · multiwayExpansion A k` at `2 ≤ k ≤ card V` with a partition — the classical Lee–Gharan–Trevisan statement form, the every-family theorem consumed at the attained minimizer, no new engine; QA pins `ρ₂(C₄) = 1/2` exact (forced by the theorem joined to the independently pinned `λ₂ = 1`, the minimum beating the diagonal partition's `1`) and the empty-set junk fence at `k > card V` |
 | `exists_isMultiwayPartition_of_le_card` | the existence supplier: k-way partitions exist whenever `1 ≤ k ≤ card V` (an injection's singletons with the complement absorbed into the last part) — discharges the `hex` hypothesis in the common case |
 
-### `Scaffold.Mathlib.GraphTheory.AlonBoppana` (the Alon–Boppana program, Steps 1–3a)
+### `Scaffold.Mathlib.GraphTheory.AlonBoppana` (the Alon–Boppana program, Steps 1–4)
 
 Opened 2026-08-26 (`proposals/alon-boppana-bound.md`, ADOPTED by
 operator decision that day — the program delivering the lower
@@ -1052,6 +1052,34 @@ Nilli's Rayleigh quotient):
 | `radialVec_apply` / `radialVec_of_mem_ballE` / `radialVec_eq_zero_of_not_mem_ballE` / `radialVec_left` / `radialVec_ne_zero` | the radial vector's interface: the entry form, the pure level power on the ball, vanishing outside (support = `ballE`), the always-`1` left-endpoint seed, and nonvanishing at every radius and every `ρ` |
 | `sum_ballE_eq_sum_levels` | **the layer-cake sum bridge**: any function summed over the radius-`k` edge ball equals its level-by-level sum — `ballE_card_eq_sum`'s summation form at a function rather than a count (the squared norm is level-constant but not constant) |
 | `radialVec_dotProduct_self` | **the squared-norm identity**: `⟨ρ^{lev}, ρ^{lev}⟩ = 2 (k + 1)` exactly, under `IsTreeBall` at radius `k+1` and `ρ ^ 2 = ((d−1 : ℕ) : ℝ)⁻¹` — per level, the geometric growth `2 (d−1)^j` cancels the vector's decay `ρ^{2j}` to exactly `2` (`pow_mul`/`mul_pow`/`mul_inv_cancel₀`); the denominator of Nilli's Rayleigh quotient and the first theorem consumer of the Step-2 level machinery; `1 < d` load-bearing at the cancellation (at `d = 1`, `ρ = 0` is junk-admissible through `0⁻¹ = 0` while the truncated counts die — QA fences it at K₂ with the squared norm `2 ≠ 4`); QA pins the C₈ value `4` by two independent routes (theorem vs raw per-vertex enumeration) and the `k = 0` pair both routes (`isTreeBall_one_of_connected`'s first consumer) |
+| `levE_le_levE_add_one_of_adj` | **the level-Lipschitz lemma** (Step 3's second sub-slice, 2026-08-27): the BFS level function moves by at most `1` along any support-graph edge (`levE u ≤ levE v + 1`), from a junk-safe adjacency triangle (`dist_le_dist_add_one_of_adj`, private — shortest-walk prefix in the reachable regime, contraposed reachability in the junk regime) applied at both endpoints and collapsed by `omega` at the min |
+| `exists_levE_parent` | **the parent lemma**: every vertex at level `≥ 1` has a support-adjacent neighbor exactly one level down (`∃ p, 0 < A z p ∧ levE p + 1 = levE z`), no connectivity hypothesis — the min-attaining endpoint's shortest-walk predecessor (`exists_pred_of_one_le_dist`, private) with the level equality closed by Lipschitz from both sides; the from-below harvest edge of the energy bound, dissolving the "level sizes, not edge counts" obstruction without strengthening `IsTreeBall` |
+| `interiorE` / `interiorE_zero` / `interiorE_succ_union` / `sum_interiorE_eq_sum_levels` | the interior of the radius-`k` edge ball (levels `1..k`, level 0 excluded — the parent-carrying vertices) with its algebra and the interior level-sum bridge (`sum_ballE_eq_sum_levels`'s pattern at `Finset.Ico 1 (k+1)`) |
+| `radialVec_quadForm_ge` | **the energy half of Nilli's Rayleigh quotient — the numerator bounded from below** (the Step-3b headline): `2 + 4 k (d−1) ρ ≤ quadForm A (radialVec …)` under the existing `IsTreeBall` at radius `k+1` plus the `0`-or-`≥ 1` weight discipline (`∀ i j, A i j = 0 ∨ 1 ≤ A i j` — every parent edge weighs at least `1`), distinct endpoints, a genuine edge `A x y ≠ 0`, `1 < d`, the normalization, and `0 ≤ ρ`; the proof harvests a pairwise-disjoint selection of nonnegative terms of the double sum (both orders of the endpoint edge, both orders of every interior vertex's parent edge) and collapses each level's `2 (d−1)^j ρ^{2j−1}` to exactly `2 (d−1) ρ`; QA pins it **tight at equality** on C₈ (raw `6` = the theorem's `2 + 4·1·1·1`) with three fences isolating `hedge` (the P₃ pseudo-edge), `h01` (the half-weight edge), and `hxy` (the loop whose junk-zero partner keeps `IsTreeBall` honest) |
+| `radialVec_rayleigh_ge` | **the Rayleigh-quotient corollary**: `(2 + 4 k (d−1) ρ) / (2 (k+1)) ≤ rayleigh A (radialVec …)` — the numerator bound joined to the delivered denominator identity through `div_le_div_iff_of_pos_right`; Nilli's `(1 + 2 k √(d−1)) / (k+1)` before the Step-5 `√` packaging, the exact interface Step 4's orthogonalization consumes |
+
+| `radialVec_sum_eq` | Alon–Boppana Step 4 | The equal-mass lemma: the radial vector's total mass is a function of `(d, ρ, k)` only under `IsTreeBall` |
+| `twoEdgeVec` / `twoEdgeVec_dotProduct_onesVec` | Alon–Boppana Step 4 | Nilli's two-edge difference vector, orthogonal to `onesVec` by the equal-mass lemma |
+| `twoEdgeVec_dotProduct_self` / `twoEdgeVec_ne_zero` | Alon–Boppana Step 4 | The squared norm `4 (k+1)` on disjoint radius-`k` balls (the two 3a denominators add) |
+| `radialVec_dotProduct_eq_zero_of_disjoint` / `radialVec_cross_dotProduct_eq_zero` / `levE_cross_adj_eq_zero` | Alon–Boppana Step 4 | Cross-support and cross-edge dot products vanish; the cross-edge elimination runs 3b's level-Lipschitz lemma at the far-apart threshold |
+| `dotProduct_mulVec_symm` / `quadForm_sub` | Alon–Boppana Step 4 | Symmetric-matrix swap and difference-vector quadratic-form expansion (general algebra) |
+| `twoEdgeVec_quadForm_ge` / `twoEdgeVec_rayleigh_ge` | Alon–Boppana Step 4 | The doubled numerator bound `2·(2 + 4k(d−1)ρ)` and its Rayleigh-quotient form |
+| `smul_one_sub_isSymm` / `smul_one_sub_mulVec_onesVec` / `quadForm_smul_one_sub` | Alon–Boppana Step 4 | The engine layer at `M = d•1 − A`: symmetry, kernel (Step-1 eigen-equation), and the shifted quadratic form |
+| `twoEdgeVec_secondEval_le` | Alon–Boppana Step 4 | **The headline**: `secondEval (d•1 − A) ≤ d − (2 + 4k(d−1)ρ)/(2(k+1))` through `secondEval_le_rayleigh` — the program's first eigenvalue-level statement |
+
+### `Scaffold.Mathlib.GraphTheory.AlonBoppana` (the Alon–Boppana program, Step 5 — the diameter-dependent packaging)
+
+The program's capstone step (2026-08-27, `proposals/alon-boppana-bound.md`
+COMPLETE): the `√` packaging, the far-apart-to-diameter bridge, and
+the honest classical statement forms.
+
+| Declaration | Area | Description |
+| --- | --- | --- |
+| `mul_sqrt_inv_eq_sqrt` | Alon–Boppana Step 5 | The `√` plumbing: `x·√(x⁻¹) = √x` hypothesis-free (`Real.sqrt_inv`/`Real.div_sqrt`, junk-safe) |
+| `distEdge_le_diam` | Alon–Boppana Step 5 | **The far-apart-to-diameter bridge**: `distEdge ≤ diam` on finite connected input (finiteness-attainment + `edist_ne_top_iff_reachable` supplying the `ediam ≠ ⊤` that Mathlib's `dist_le_diam` demands) |
+| `alonBoppana_diam_ge` | Alon–Boppana Step 5 | The honest diameter bookkeeping: the far-apart hypothesis forces `2(k+1)+1 ≤ diam`, i.e. `k+1 ≤ ⌊diam/2⌋` — hypothesis-side only, the tree-ball constraint never derived from the diameter |
+| `alonBoppana_nilli` | Alon–Boppana Step 5 | **The capstone**: `secondEval (d•1 − A) ≤ d − (1 + 2k√(d−1))/(k+1)` at `ρ = √((d−1)⁻¹)` — Alon–Boppana's `2√(d−1)` barrier with the error explicit |
+| `alonBoppana_nilli_classical` | Alon–Boppana Step 5 | The classical error shape `≤ d − 2√(d−1) + 2√(d−1)/(k+1)` — the single-graph form of `λ₂ ≥ 2√(d−1) − O(1/⌊diam/2⌋)` |
 
 ### `Scaffold.Mathlib.GraphTheory.Heat` (the heat semigroup)
 

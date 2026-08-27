@@ -1,9 +1,14 @@
 # Proposal: Spectral Sparsification via Leverage-Score Sampling — Reopening the Blocked Phase B
 
-**Status:** Proposed; **priority:** High. This document authorizes no Lean
-changes, axiom admissions, commits, or external publication on its own —
-Step 0 (the survey below) must land and be confirmed before Step 1 begins,
-per the one-step discipline.
+**Status:** Step 0 **DELIVERED 2026-08-27 — verdict: tractable** (the
+survey record below). **Step 1, Slice 1 (the sampling-space module)
+DELIVERED 2026-08-27** — `Scaffold/Mathlib/Probability/BernoulliProduct.lean`
++ `Scaffold/QA/Probability/BernoulliProduct_QA.lean`, pure hard crust,
+zero new axioms (the delivery record below). **Next action: Step 1,
+Slice 2 — the deterministic SS algebra** (the rank-one norm bound, the
+Finding-A-guarded sampling matrices, the variance PSD bound `‖Σ‖ ≤
+1/q`, and `∑_e v_e ⊗ v_e = Π_{im L}`). This document authorizes no
+axiom admissions, commits, or external publication on its own.
 
 ## The correction this proposal is built on
 
@@ -128,3 +133,238 @@ per the survey precedent (approximate spectral projection Step 0).
 [Grow the Crust Through Electrical Structure](electrical-structure-crust.md),
 [Spectral Graph Sparsification (Phase A, delivered)](spectral-graph-sparsification.md),
 `docs/6_SGT_BACKLOG.md`, `docs/7_SGT_RADAR.md` axes 6 & 7.
+
+---
+
+## Step-0 delivery record (2026-08-27, run `20260827T123751Z-run-1`)
+
+**Verdict: tractable.** Every clause of `matrix_bernstein` has a
+discharge route at the classical Spielman–Srivastava design, and the
+riskiest plumbing — which no shelf file and no pinned-Mathlib lemma
+supplied — is now *proved* on the survey spike `wip/ss0_spike.lean`
+(316 lines, `lake env lean` zero errors / zero warnings; a throwaway
+verdict artifact, not shelf code). The proposal's three named checks:
+
+**(1) Centering and boundedness at the natural `R` — close, with two
+interface findings.** The clause set read from source:
+`h_meas : StronglyMeasurable` (references only the codomain *topology*
+— the L2OpNorm scoped instance, not any σ-algebra, so no BorelSpace
+bridge is needed), `h_indep : pairwise IndepFun`, `h_herm`,
+`h_mean : ∀ i, ∫ ω, X i ω ∂μ = 0` (a Bochner integral at the
+L2OpNorm normed-space instance — consumers must `open scoped
+Matrix.L2OpNorm` for instance coherence), `h_bound : ∀ i ω, ‖X i ω‖ ≤ R`
+(**unconditional in `ω`** — see finding A), and the variance statistic
+`Σ = ∑ i, ∫ ω, X i ω * X i ω ∂μ` in exactly the classical form.
+
+- *Finding A (the material one): the uniform `∀ ω` in `h_bound` forces a
+  saturation guard into the summand design.* At `p_e = min(1, q ℓ_e) =
+  1` the Bernoulli space still contains `δ_e = 0` outcomes, where the
+  raw `Z_e = (δ_e/p_e − 1)(v_e ⊗ v_e)` has norm `ℓ_e`, not `≤ 1/q` —
+  the bound would fail *pointwise*, not merely a.s. The Step-1 family
+  must therefore build the guard in (`X_e := if p_e = 1 then 0 else
+  (δ_e/p_e − 1) • (v_e ⊗ v_e)`; a identically-zero summand is centered,
+  bounded, Hermitian, and independent trivially) or index only the
+  unsaturated edges. Recorded as a statement-shape decision Step 1 must
+  make explicitly.
+- *Finding B:* the axiom indexes summands by `Fin n`, so the edge family
+  needs an enumeration transport (`Fintype.equivFin`-style). Cheap, but
+  it is plumbing the draft statement shape does not yet have.
+- The centering arithmetic is spike-proved end to end at the scalar
+  codomain (`integral_delta`: `∫ δ_e ∂μ = p e`, through
+  `PMF.integral_eq_sum`, the one-coordinate marginal, and the
+  `≠ ⊤`-guarded `← ENNReal.toReal_sum`); the matrix codomain follows by
+  `Finset.sum_smul`-style linearity. `∫ X_e = 0` then needs `p_e ≠ 0` —
+  true for unsaturated edges at `ℓ_e > 0` (positive weight, connected,
+  `effectiveResistance` positive — Step 1 must consume this).
+- The boundedness *value* is the classical `R = 1/q` at `p_e = q ℓ_e`;
+  its deterministic input is the rank-one bound `‖v ⊗ v‖ ≤ ‖v‖²`, for
+  which the shelf has two plausible routes (`l2OpNorm_le_of_abs_eigvalOf_le`
+  + the eigen-action identity `(v ⊗ v)x = (v ⬝ x) v`, or the
+  BandDavisKahan `l2OpNorm_mulVec_le`). Priced as Step-1 work; not
+  spiked.
+
+**(2) The leverage normalization — closes.** `Foster.lean` already
+proves `(∑ i, ∑ j, A i j * effectiveResistance A i j) / 2 = card V − 1`
+— *exactly* the unordered-pair sampling-budget identity (total
+leverage `n − 1`) that `p_e = q ℓ_e` consumes. The shelf's
+`leverageScore` is the `(n−1)`-normalized ordered-pair convention
+(`sum_leverageScore_eq_two` : `∑ᵢⱼ ℓ̃ = 2`); a thin rescaling lemma
+(divide by `n − 1`, or read Foster's identity directly) is the only
+prerequisite — priced trivial. Connectivity is load-bearing
+(`effectiveResistance` is junk off connected components, documented at
+the definition), which is QA obligation 3's fence.
+
+**(3) The measurability/independence infrastructure — did not exist
+anywhere; the spike builds it.** The shelf's only concrete measure-level
+work is constant-sequence QA; the event-stream consumers take their
+hypotheses abstractly. Searched: the pinned Mathlib's
+`Independence/Basic` has only π-system machinery, `Kernel.lean` no
+`Measure.pi` route — no lemma supplies coordinate independence on a
+product measure. The spike's construction (all proved, green): the
+space `Ω := ι → Bool` at the product σ-algebra
+(`@MeasurableSpace.pi` over `Bool`'s canonical one); the product PMF
+`bernPMF` via `PMF.ofFinset` with total mass by the ∑-∏ swap
+(`Finset.sum_prod_piFinset`); the one- and two-coordinate marginals
+`sum_coord_mul` / `sum_coord2_mul` (through the `coordG1`/`coordG2`
+if-family defs — see technique notes); cylinder measures `toMeasure_cyl`;
+**`indepFun_coord`** — pairwise `IndepFun` of the coordinate
+projections, the exact shape `h_indep` needs; and `integral_delta`
+above. The matrix-codomain layer has confirmed source-verified routes
+but was not spiked: `StronglyMeasurable` for finite-range matrix
+functions via `SimpleFunc.ofFinite` + `SimpleFunc.stronglyMeasurable`
+(which requires only `[TopologicalSpace β]` — no BorelSpace, which
+matters because the shelf's `Basic.lean` matrix σ-algebra is a
+hand-rolled pi instance, not a registered BorelSpace); `Measurable` at
+that instance via `measurable_pi_iff` entrywise; the transfer
+`IndepFun.comp` with `measurable_of_bool` (every function out of `Bool`
+is measurable — `Bool.instMeasurableSingletonClass` + `Set.toFinite`).
+
+**The three-slice decomposition Step 1+ should follow:**
+
+1. **Slice 1 — the sampling-space module** (shelf Lean; the spike is its
+   blueprint): promote `bernPMF`, the marginals, `indepFun_coord`, the
+   matrix-layer transfer, and the centering integrals into a focused
+   module (e.g. `Probability/BernoulliProduct.lean`) with QA. This is
+   deliberately its own slice because a *second* Active-table row needs
+   the same object: the empirical-stationary-distribution proposal's
+   Step 0 asks exactly for an i.i.d.-sampling measure space over
+   repeated finite walks.
+2. **Slice 2 — the deterministic SS algebra**: the rank-one norm bound,
+   the guarded sampling matrices, the variance PSD bound `‖Σ‖ ≤ 1/q`,
+   and the identity `∑_e v_e ⊗ v_e = Π_{im L}` (the eigbasis machinery
+   already in `Foster.lean`'s orbit).
+3. **Slice 3 — assembly + QA**: apply `matrix_bernstein` at `t = ε`,
+   transfer the norm event to the quadratic-form statement through the
+   `L^{†/2}` pullback, and discharge this proposal's three QA
+   obligations.
+
+**Technique findings for Step 1 (the spike's iteration record):** bind
+`p` explicitly in every theorem signature — a free `p` gets auto-bound
+and silently breaks section-instance inclusion (the one *stuck
+`Fintype ?m`* class of failures); `rw` cannot rewrite under a `∑`
+binder — restructure as `Finset.sum_congr` tactic blocks or
+pre-stated haves (`simp only [lemma]` goes under binders; `rw` does
+not); higher-order-pattern unification fails when a lemma argument is a
+lambda (`sum_coord2_mul ... _ _` leaves metavars) — pass `F`/`G`
+explicitly or make the family an atom `def` (`coordG1`/`coordG2` exist
+for exactly this); the ∑-split lemma is `Finset.mul_prod_erase` (`f a *
+∏_{s.erase a} = ∏_s`), *not* `Finset.prod_erase` (that is the
+erase-a-value-1-point lemma); `PMF.toMeasure_apply` takes `(p) (s)
+(hs)` — the PMF and the set are explicit section variables;
+`ENNReal.toReal_sum` carries a `∀ i ∈ s, f i ≠ ⊤` side goal (supply via
+`ENNReal.prod_lt_top` + `ENNReal.ofReal_lt_top`); `Set.Finite.
+measurableSet` with `Set.toFinite` is the every-subset-of-`Bool` route;
+`stronglyMeasurable_iff_measurable` needs a `BorelSpace` codomain and
+is *not* the route at the matrix σ-algebra — `SimpleFunc.ofFinite` is.
+
+**Residual risk:** the matrix-codomain layer and the deterministic
+Slice-2 bounds are confirmed-route but untried in Lean; Finding A's
+guard decision shapes the Step-1 statement and must be made there. The
+`q`-budget constants (`R = 1/q`, `‖Σ‖ ≤ 1/q`) are classical values the
+survey asserts from the SS argument, not spike-verified arithmetic —
+Slice 2 owns them.
+
+---
+
+## Step-1 Slice-1 delivery record (2026-08-27, run `20260827T142209Z-run-1`)
+
+**DELIVERED — pure hard crust, zero new axioms** (count stays 10;
+`#print axioms` via `wip/ss1_axcheck.lean` on all 42 audited
+declarations — 18 public module + 24 public QA: exactly `propext,
+Classical.choice, Quot.sound`, every one; zero contact with any
+admitted axiom). QA 2585 → **2609** (+24, the new
+`Scaffold/QA/Probability/BernoulliProduct_QA.lean`; the new
+`Probability` QA domain first appears in the scoreboard).
+
+**Delivered** in the new
+`Scaffold/Mathlib/Probability/BernoulliProduct.lean` (namespace
+`Scaffold.Mathlib.Probability.BernoulliProduct`; minimal imports —
+the two PMF files, `Independence.Basic`, `SetIntegral`,
+`CStarAlgebra.Matrix`, and the shelf's `Concentration/Matrix/Basic`
+for the matrix σ-algebra; umbrella import added):
+
+- the spike's blueprint promoted: `bern`/`jointMass`/`bernPMF` (with
+  `sum_bern_eq_one`, `sum_jointMass_eq_one`, `bernPMF_apply`,
+  `jointMass_ne_top`), the marginals `sum_coord_mul`/
+  `sum_coord2_mul` (the `coordG1`/`coordG2` atom defs kept private),
+  `toMeasure_cyl`, `indepFun_coord`, `integral_delta`,
+  `measurable_coord`;
+- **the Step-0 residual risk retired — the matrix-codomain layer,
+  Lean-untried until this run, now proved**:
+  `stronglyMeasurable_coord_matrix` (the `h_meas` clause at the
+  L2OpNorm topology — Mathlib's `StronglyMeasurable.of_finite`, the
+  topology-only route; the hand-rolled `SimpleFunc.ofFinite` plan was
+  unnecessary because Mathlib already ships the finite-domain lemma),
+  `measurable_coord_matrix` (the same at the shelf's matrix pi
+  σ-algebra, by composition with `measurable_of_finite` out of
+  `Bool`), `indepFun_coord_matrix` (the `IndepFun.comp` transfer —
+  the `h_indep` clause at the matrix codomain), and the centering
+  integrals `integral_coord_smul` (`∫ (δ_e : ℝ) • M ∂μ = p e • M`,
+  through `integral_smul_const` joined to `integral_delta`) and
+  `integral_coord_center_smul` (`∫ ((δ_e / p e) − 1) • M ∂μ = 0` at
+  `p e ≠ 0` — the exact `h_mean` clause shape for the unguarded
+  rank-one summand).
+
+**QA (+24, the `Fin 2 → Bool` four-atom fixture at `p = ![1/2, 1/3]`
+with the atom enumeration as the independent raw route):** the four
+joint-mass values raw; **total mass `1` by two independent routes**
+(the ∑-∏ theorem vs raw four-atom enumeration, no swap machinery);
+the marginal pin; three cylinder-measure pins (`1/3`, `2/3`, `1/2`);
+**independence pinned numerically through `indepFun_coord`** (the
+intersection measure splits as `1/2 · 2/3 = 1/3`, joined to the two
+cylinder pins — a wrong joint mass breaks the product form);
+**`∫ δ_1 = 1/3` by two routes** (the theorem vs `PMF.integral_eq_sum`
+raw enumeration); the matrix-layer interfaces instantiated at a
+concrete `!![1,2;3,4]` family; the matrix centering pins
+(`∫ (δ_0) • M = (1/2) • M`; the centered-affine zero at `p 1 ≠ 0`);
+and **two fences** — the `[0,1]` bounds load-bearing for the mass
+normalization (`p = ![2]` on `Fin 1` sums to `2 ≠ 1`, the clamp
+visible), and **the `p e ≠ 0` centering hypothesis refuted at the
+junk value** (`p = ![0]`: the "centered" integrand evaluates through
+`0 / 0 = 0` to the constant `−M`, so the integral is `−M ≠ 0` —
+the conclusion fails, not merely the hypothesis).
+
+**Technique findings (the spike's iteration record, for Slice 2):**
+`ENNReal.ofReal_mul` takes **one** side condition (`ofReal_add` takes
+two — the mismatch behind every "function expected at
+`ENNReal.ofReal_mul ?m`" failure); `ofReal`-equality goals close by
+`congr 1; norm_num` (no norm_num ENNReal extension exists) and the
+merge lemmas must be applied in **rw position with the pattern
+present** (term-mode application leaves metavariable-typed side
+goals); the matrix `CompleteSpace` resolves at the L2OpNorm scoped
+instance (probe-verified before use — `integral_smul_const` needs
+it); `Integral.of_finite` discharges every integrability side goal on
+this space; `MeasurableSpace.pi` is already a global Mathlib instance
+(the spike's `local instance` was shadowing — dropped in the shelf
+module); `omit [inst] in` must precede the docstring (a docstring
+demands the declaration keyword immediately after); no pi
+`DecidableEq` instance exists in the pin — atom-disequality side
+conditions need `congrFun`-at-an-index witnesses (`fin_cases x <;>
+simp [h]` under a `funext`); matrix-literal `(1/2) • M` statements
+need the scalar type ascribed `((1:ℝ)/2)` or the smul elaborates at
+`ℕ`; `p12 0 = 1/2` is `rfl` but `rwa` still fails on
+instance-sensitive integrals — `simpa only [p12, Matrix.cons_val_zero]`
+is the robust join.
+
+**Verification:** spike first (`wip/ss1_spike.lean` — the full module
+plus the QA section, both sides iterated to zero errors/zero warnings
+before any shelf Lean); `lake env lean` zero errors/zero warnings on
+the module and the QA file; explicit `lake build` targets ✔
+(2042/2042 module, 2043/2043 QA); `#print axioms` — the standard
+three only, all 42; **full `lake build` ✔ (2398/2399, "Build
+completed successfully") immediately followed by
+`check_build_completeness.py` — 115/115 fresh, 0 stale, 0 missing,
+exit 0**; `lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**2609/10/0** —
+this regeneration also repaired the generated-metrics block, which
+the uncommitted prior deliveries had left at the committed
+2549/2026-08-26 while their verification rows were swept: the
+working-tree count is now truthful at 2609 = the Step-5 run's true
+2585 + this delivery's 24).
+
+**Remaining risk:** Slices 2–3 (the deterministic SS algebra and the
+assembly) are next; Finding A's saturation guard is now a Slice-2
+statement decision with the centering clause shape it must fit already
+delivered (`integral_coord_center_smul`); Finding B's `Fin n` edge
+transport belongs to Slice 3's assembly; the `R = 1/q` / `‖Σ‖ ≤ 1/q`
+constants remain classical values owned by Slice 2.

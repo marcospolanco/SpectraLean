@@ -40,6 +40,32 @@ axiom boundary in the 2026-08-17 concentration repair.
 | `bernstein_bounded_variance` | axiom | Bounded variance form | Wainwright Thm 2.15 |
 | `bernstein_iid` | proved | Common-variance specialization | Vershynin Cor 2.8.3 |
 
+## Sampling Spaces
+
+### Bernoulli Product Space
+
+**Module**: `Scaffold.Mathlib.Probability.BernoulliProduct` (delivered
+2026-08-27, `proposals/spectral-sparsification-via-leverage-scores.md`
+Step 1 Slice 1; all proved, zero axioms — the shelf's first concrete
+probability space, and the i.i.d.-sampling prerequisite the
+empirical-stationary-distribution proposal names)
+
+| Declaration | Kind | Description |
+|-------------|------|-------------|
+| `bern` | definition | Per-coordinate Bernoulli mass; junk outside `[0,1]` via the `ofReal` clamp |
+| `jointMass` | definition | The joint product mass |
+| `bernPMF` | definition | The product-Bernoulli PMF on `ι → Bool`; `[0,1]` hypotheses load-bearing (fenced in QA) |
+| `sum_coord_mul` | proved | The one-coordinate marginal (the product structure's arithmetic core) |
+| `sum_coord2_mul` | proved | The two-coordinate marginal (independence's arithmetic core) |
+| `indepFun_coord` | proved | Pairwise `IndepFun` of coordinate projections — the `h_indep` clause shape |
+| `toMeasure_cyl` | proved | Coordinate-cylinder measures are Bernoulli masses |
+| `integral_delta` | proved | `∫ δ_e ∂μ = p e` — the scalar `h_mean` core |
+| `stronglyMeasurable_coord_matrix` | proved | The `h_meas` clause at the L2OpNorm topology (topology-only route) |
+| `measurable_coord_matrix` | proved | The `h_meas` clause at the shelf's matrix product σ-algebra |
+| `indepFun_coord_matrix` | proved | The `h_indep` clause at the matrix codomain |
+| `integral_coord_smul` | proved | `∫ (δ_e) • M = p e • M` — the matrix centering building block |
+| `integral_coord_center_smul` | proved | `∫ ((δ_e / p e) − 1) • M = 0` at `p e ≠ 0` — the `h_mean` clause shape |
+
 ## Matrix Concentration
 
 All statements are over the spectral norm (`Matrix.L2OpNorm`), the

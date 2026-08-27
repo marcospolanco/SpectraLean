@@ -101,6 +101,19 @@ decision.
 
 Companion to [Strategy](../docs/1_STRATEGY.md), [Traction Plan](../docs/traction-plan.md), [SGT Backlog](../docs/6_SGT_BACKLOG.md), [SGT Radar](../docs/7_SGT_RADAR.md) axes 6 (Electrical) & 7 (Algorithms/Randomness), and (companion to Phase A only — see Correction above) [Grow the Crust Through Electrical Structure](electrical-structure-crust.md), whose "Foster's theorem — removed" decision this proposal's Phase A reopens with a named reason. `Scaffold/Mathlib/Probability/Concentration/MatrixChernoff.lean` does not exist; do not treat it as a citable dependency for Phase B.
 
+**Correction (2026-08-27, the Step-0 survey of the superseding
+proposal):** the sentence above is stale twice over, and both defects
+belong to the path-literal check it was built from. (1) The blocker is
+resolved: `Scaffold/Mathlib/Probability/Concentration/Matrix/Bernstein.lean`
+exists, is imported by the umbrella, and carries `matrix_bernstein` —
+Tropp's matrix Bernstein inequality — which is the concentration result
+Phase B's sampling argument needs (matrix *Chernoff* was never the
+right name for it). (2) Phase B has an actual successor document,
+[`spectral-sparsification-via-leverage-scores.md`](spectral-sparsification-via-leverage-scores.md),
+whose Step-0 survey (2026-08-27) verified the clause-set compatibility
+on a working spike (`wip/ss0_spike.lean`): tractable. Do not restart
+Phase B from this file's own framing; work from the successor.
+
 ---
 
 ## Clean-room boundary

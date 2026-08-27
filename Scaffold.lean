@@ -47,6 +47,7 @@ import Scaffold.Mathlib.Probability.Concentration.Matrix.Basic
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Hoeffding
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Bernstein
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Azuma
+import Scaffold.Mathlib.Probability.BernoulliProduct
 import Scaffold.Mathlib.InformationTheory.Entropy
 import Scaffold.Derived.EventStream
 import Scaffold.Derived.ProjectorDrift

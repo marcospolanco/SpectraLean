@@ -6,55 +6,273 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**Signed graphs — the balance theorem via the magnetic π-flux bridge,
-plus the switching similarity** (`proposals/signed-graphs-balance.md`,
-new this run; run 1, 2026-08-26, run `20260826T194844Z-run-1`).
-Selected per the empty High/Medium Active table by the center-out
-policy as a fresh graph-model-axis candidate: radar axis 1 (at 3.5)
-names **signed-graph theory** as an absent category, and the standing
-handoff names the graph-model axis among the lowest-scored frontiers.
-The axis row's other absent clause ("directed graphs") is stale —
-directed operators were delivered 2026-08-22 and the magnetic
-Laplacian 2026-08-25 under backlog item 8 — to be repaired with this
-delivery's record sweep.
-
-**SGT-leverage rationale.** This is the strategy's load-bearing-growth
-principle executed on the magnetic program: a *signing* `s : V → V →
-{±1}` of a symmetric nonnegative network is exactly a magnetic
-potential at the π-flux (`e^{iΘ} = ±1`), so the delivered
-`magnetic_energy` identity becomes the signed Dirichlet energy and the
-delivered gauge characterization becomes **Harary balance** —
-`IsBalanced A s ↔ ∃ x ≠ 0, L_σ *ᵥ x = 0` on connected input (balance
-⟺ switching ⟺ kernel nontrivial; frustration ⟺ positive definite). A
-wrong `magnetic_energy` or `magneticQuadForm_eq_zero_iff` breaks the
-signed energy/kernel theorems: the magnetic module (delivered
-2026-08-25, QA-consumed only) carries weight from a second theorem
-family. The switching similarity `diag(g) · L_σ · diag(g) = laplacian A`
-(make the magnetic delivery's diagonal-gauge idea a real-matrix
-theorem) with eigenpair transfer is the classical "balanced ⟹
-spectrally unsigned" fact, the second consumer layer.
-
-**Plan.** Step 0 (this record): carrier `V → V → ℝ` with explicit ±1
-and loop-unsigned hypotheses, matrix-first, no new type; the π-flux
-join; kernel characterization via the magnetic gauge route; the
-walk-collapse (supportGraph Walk induction, the electrical program's
-pattern). Step 1: a new section of `Magnetic.lean` (the kernel at
-action level: aligned → `M *ᵥ x = 0` row algebra, composed with the
-delivered form-level iff), the new `GraphTheory/Signed.lean`
-(`signedAdj`/`signedLaplacian`, the magnetic join theorem, the signed
-energy identity, kernel ↔ aligned, the balance iff headline, positive
-definiteness under frustration, the switching similarity + eigenpair
-transfer), QA in a new `Signed_QA.lean` (balanced path, frustrated
-triangle, the disconnected conclusion-level fence, the loop-sign
-fence, the switching-agreement and eigentransfer pins at the
-independently known path spectrum), then the record sweep (radar axis
-1, README, scoreboard, index map, the coverage map's graph-model row
-if stale). Zero new axioms; spike first in `wip/sg_spike.lean`; prior
-runs' uncommitted deliveries preserved untouched.
+None — see the delivered milestone below and the standing handoff. The
+Active priority table's High rows: **Alon–Boppana Steps 0–2 delivered
+as of this run** (Step 3 — the radial test vector and its Rayleigh
+quotient, the proposal's priced crux — is next, one step per the
+proposal's operating instructions); **sparsification via leverage
+scores** (its Step-0 survey — verifying `matrix_bernstein`'s clause
+set supports the leverage-score argument — remains the other High row
+and is a self-contained survey-sized run). Medium-High/Medium rows
+unchanged.
 
 ------
 
 ## Delivered milestones (most recent first)
+
+**The Alon–Boppana bound, Step 2 — the tree-ball interface at module
+level; `proposals/alon-boppana-bound.md` (Gate ADOPTED 2026-08-26);
+run 1, 2026-08-26, run `20260826T232419Z-run-1`; selected per
+priority item 0 as the Active table's adopted High row's named next
+action from Steps 0+1 (the sparsification High row's next action
+remains a Step-0 survey that may re-scope it): DELIVERED — pure hard
+crust, zero new axioms (count stays 10; `#print axioms` via
+`wip/ab2_axcheck.lean` on all 38 audited declarations — 18 public +
+20 QA: exactly `propext, Classical.choice, Quot.sound`, every one).
+QA 2520 → 2539 (+19, the Step-2 section of `AlonBoppana_QA.lean`).**
+
+**Delivered** in `GraphTheory/AlonBoppana.lean`'s new `TreeBall`
+section (one import added — `Mathlib.Combinatorics.SimpleGraph.Metric`,
+the Step-0 verdict's explicit-import requirement): the Step-0
+verdict's definitions promoted from per-fixture to module level
+(`levE`/`levClass`/`ballE` — BFS levels of an edge against
+`SimpleGraph.dist` on `supportGraph`), the junk-zero-honest level-0
+iff `levE_eq_zero_iff` with its connected amortization
+`levE_eq_zero_iff_of_connected` + `levClass_zero_eq`/`_card` (the
+`j = 0` cardinality equation free of regularity;
+`isTreeBall_one_of_connected`), the **tree-ball predicate `IsTreeBall`**
+(level `j` carries exactly `2 (d−1)^j` vertices for `j < k` — the
+working form Nilli's Rayleigh computation consumes, never a structural
+tree-ness predicate), the ball algebra (`ballE_mem_iff`, `ballE_zero`,
+`ballE_mono`, `levClass_pairwise_disjoint`, `ballE_succ_union`) with
+the **layer-cake cardinality bridge `ballE_card_eq_sum`** (ball card =
+geometric level sum, by induction at the pairwise-disjoint levels —
+the Step-3 test vector's normalization input), and the far-apart
+condition `distEdge` + **`ballE_disjoint_of_lt_distEdge`** (every
+cross-endpoint distance exceeding `r + s` makes the balls disjoint,
+by the connected triangle inequality at all four endpoint pairings —
+the Step-4 orthogonalization's load-bearing separation input).
+
+**QA (+19):** the **C₈ full-hypothesis positive** — the tree-ball
+instance `IsTreeBall abC8 .. 0 1 2 2` (level 1 pinned to exactly
+`{2, 7}` by adjacency-level facts only), the antipodal disjointness
+through the far-apart theorem at four cross distances ≥ 3 each proved
+by **short-walk exhaustion** (`dist_le_two_cases_of_connected`: a
+connected distance ≤ 2 is a self, an adjacency, or a common neighbor,
+each refuted by rfl-verified entries — only *lower* bounds are ever
+needed, so no walk witnesses at all), and the layer-cake cardinality
+by **two independent routes** (direct set enumeration
+`ballE .. 1 = {0, 1, 2, 7}` via the neighbor lemmas vs the
+geometric-sum theorem through the tree-ball instance); the **C₄
+wrap-around negative** `¬ IsTreeBall abC4 .. 2 3` (level 2 demanded at
+2 vertices and provably empty — the qualification trap's QA witness,
+in place before the theorem it guards); and the
+**threshold-tightness fence** (near-antipodal balls at min
+cross-distance exactly `r + s` provably intersect at vertex `2` — the
+strict inequality of the disjointness theorem load-bearing).
+
+**Verification:** spike first (`wip/ab2_spike.lean`, module side and
+QA side iterated to zero errors/zero warnings before any shelf Lean;
+technique findings recorded in the proposal's delivery record — the
+`vecCons`-at-`Fin`-literal-column-≥4 opacity to `simp`/`norm_num`
+with the `rfl`-evaluation route (`abC8_entries`), `simp only [levE]`
+normalizing `min` to an `omega`-invisible `⊓` (use `unfold`), `omega`'s
+inability to refute `Fin`-literal disjunctions (split the iff and
+`decide` the false side), the `(fun i => i) ⟨k, ⋯⟩`-wrapper mismatch
+from `fin_cases`-built rfl substitutions (state enumerations as named
+plain-literal `show`s and `subst`), and the metavariable-headed-`Adj`
+anonymous-constructor failure (term-typed adjacency facts)); `lake
+env lean` zero errors/zero warnings on both changed files; explicit
+`lake build` targets ✔ (2010/2010, 2011/2011); `#print axioms` — the
+standard three only, all 38; **full `lake build` ✔ (2388/2389, "Build
+completed successfully") immediately followed by
+`check_build_completeness.py` — 113/113 fresh, 0 stale, 0 missing,
+exit 0**; `lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass after the record sweep; scoreboard
+regenerated idempotent (**2539/10/0**, md5-stable). **This run also
+repaired a latent name typo in the uncommitted Step-1 QA file**
+(`Finset.sum_univ_two` → `Fin.sum_univ_two`, a nonexistent constant
+caught by this run's direct elaboration — the failure class
+`check_build_completeness.py` guards). Records updated: the proposal
+(status header + Step-2 delivery record with technique findings +
+open-next-step → Step 3), `proposals/README.md` (the High row's next
+action → Step 3), the scoreboard (two verification rows + the
+interpretation bullet), the radar (QA axis synced 2520 → 2539), the
+index map (the AlonBoppana section's Step-2 rows), backlog item 3
+(the Steps 0–2 update), README (2539; the module-table clause), the
+module and QA docstrings, this plan, and the activity log. Nothing
+committed; the prior runs' uncommitted deliveries preserved
+untouched.
+
+**Remaining risk:** the program is 0–2 of 5 steps — the theorem
+itself is Steps 3–5 (Step 3, the radial test vector and its Rayleigh
+quotient, is the priced crux and will likely need sub-decomposition
+across runs per the proposal's own operating instructions). C₈'s
+2-regularity is structurally evident but not cheaply computable at
+`Fin 8` (row sums hit the recorded `vecCons` opacity), so Step 3 must
+not assume it is; the `IsDRegular`-to-`IsTreeBall` `d`-join
+(`d : ℝ` vs `d : ℕ`) is deliberately deferred to the Step-3–5
+packaging. The diameter bridge (far-apart ⟹ large `SimpleGraph.diam`)
+was priced and dropped this run: `dist_le_diam` needs an `edism ≠ ⊤`
+supplier with no cheap route in this pin — it belongs to Step 5,
+where the diameter-dependent statement is formulated. Q₃/K₃,₃ (the
+not-full/not-far-apart theorem-shaped witnesses) remain Steps 3–5
+QA. The inherited signed-graphs index-map gap stands.
+
+**Next milestone (open):** per priority item 0 — Alon–Boppana
+**Step 3** (the radial test vector `ρ^{lev}` on `ballE` and its
+Rayleigh quotient — one step per run per the proposal's operating
+instructions), or the sparsification High row's Step-0 survey;
+otherwise the Medium-High/Medium rows (empirical-stationary-
+distribution Step 0; the sampled-Laplacian quadratic-form consumer;
+the Fiedler-subspace Davis–Kahan Step-0 check against the delivered
+Band family).
+
+**The Alon–Boppana bound, Steps 0+1 — the tree-ball spike priced and
+the d-regularity interface delivered; `proposals/alon-boppana-bound.md`
+(Gate ADOPTED 2026-08-26, commit `d86e181`); run 1, 2026-08-26, run
+`20260826T215003Z-run-1`; selected per priority item 0 as the Active
+table's top High row (the operator's explicit adoption, all
+dependencies surveyed proved, zero new axioms needed, a named next
+action — over the sparsification High row, whose next action is a
+Step-0 survey that may re-scope it): DELIVERED — pure hard crust,
+zero new axioms (count stays 10; `#print axioms` via
+`wip/ab_axcheck.lean` on all 22 audited declarations — 4 public +
+18 QA: exactly `propext, Classical.choice, Quot.sound`, every one).
+QA 2506 → 2520 (+14, `AlonBoppana_QA` a new file).**
+
+**Step 0 (the spike, `wip/ab_spike.lean`):** the tree-ball hypothesis
+prices as **BFS level-cardinality equations** `#{z | levE z = j} =
+2 (d−1)^j` against `SimpleGraph.dist` on `supportGraph` (`levE` =
+min-distance-to-edge-endpoints, `levClass`/`ballE` the filter forms —
+ball `Disjoint` is the far-apart condition), *not* a tree-ness
+predicate. Unit cost: one distance value per vertex-level pair
+(adjacency/self one-liners vs. walk-witness chases — the walk must be
+inline in `dist_le`, pre-named Adj `have`s, since a `have`-bound walk
+is opaque to `rfl` on its `length`); connectivity amortizes all
+reachability refutations into one lemma; the `dist` junk-zero trap
+(reachable-`0`) recorded as the Steps 2–3 guard;
+`Mathlib.Combinatorics.SimpleGraph.Metric` needs an explicit import.
+Honest negative fixtures identified: Q₃ (levels not full), K₃,₃
+(edges not far) — the qualification trap's QA witnesses; C₈ the
+smallest full-hypothesis cycle. **Verdict recorded in the proposal.**
+
+**Step 1 (the delivery):** the new focused
+`GraphTheory/AlonBoppana.lean` (imports `Spectral` only; umbrella
+import added; the program's home for Steps 2–5): `IsDRegular` (the
+shelf's `d : ℝ` hypothesis idiom, no new machinery),
+`adjacency_mulVec_onesVec` (`A *ᵥ onesVec = d • onesVec`, row-sum
+only), the **AM–GM row-sum domination** `quadForm_le_of_isDRegular`
+(`xᵀAx ≤ d ‖x‖²` — entrywise AM–GM multiplied through nonnegative
+weights, the symmetric double sum's halves both `d‖x‖²` via the row-
+and column-sum degree identities; `hnn` load-bearing, fenced), and
+the **top-eigenvalue identification** `evals_last_eq_of_isDRegular`
+(`evals ⟨last⟩ = d` from both sides — the `onesVec` eigenvalue
+witness through `exists_eigvalOf_eq_of_mulVec_eq_smul` +
+`eigvalOf_le_evals_last`, and domination at the unit eigenvector
+through `quadForm_eigvecOf_self` + `evals_mem_eigvalOf`; load-bearing
+on the sorted-spectrum API at its extremes). QA (+14): the C₄/K₂
+instances joined to raw entrywise eigen-equation pins (no theorem
+input), the **P₃ non-regularity fence** (the constant vector provably
+not an adjacency eigenvector for any `c` — `IsDRegular` load-bearing
+at the interface's own witness), and the **hnn fence** (the signed
+`!![1,−1;−1,1]]` is symmetric and *0-regular* — every hypothesis but
+`hnn` — with domination refuted at `![1,0]`, `1 > 0`).
+
+**Verification:** spike first (`wip/ab_spike.lean` — module side, QA
+side, and the tree-ball pricing all green before any shelf Lean; the
+technique findings recorded in the proposal's delivery record: the
+pin's swapped `Finset.mul_sum`/`sum_mul` naming, `pow_two`'s
+direction, the double-`← Finset.sum_div` assembly, and `onesVec ≠ 0`
+at `1 ≤ card V`); `lake env lean` zero errors/zero warnings on both
+new files; explicit `lake build` targets ✔ (2009/2009, 2010/2010);
+`#print axioms` — the standard three only, all 22; **full `lake
+build` ✔ (2387/2388, "Build completed successfully") immediately
+followed by `check_build_completeness.py` — 113/113 fresh, 0 stale,
+0 missing, exit 0**; `lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass after the record sweep; scoreboard
+regenerated idempotent (**2520/10/0**, md5-stable). Records updated:
+the proposal (Step-0 verdict + Step-1 delivery record + status
+header), `proposals/README.md` (the High row's next action → Step 2),
+README (2520; the status-paragraph clause; the module-table row), the
+radar (QA axis synced 2506 → 2520 across 59 modules), the scoreboard
+(the verification row + the interpretation bullet), the index map
+(the AlonBoppana section + 4 declaration rows), backlog item 3 (the
+Steps 0+1 update), the module and QA docstrings, this plan, and the
+activity log. **Also this run, first: closed the prior signed-graphs
+run's records gap** (its terminal activity entry + this plan's
+Active-block retirement — the run had committed its full delivery in
+`7ca544b` including scoreboard/radar/backlog/README/index/proposal
+records, exiting before the terminal entry; this run re-confirmed its
+93-declaration axiom audit against the committed state and closed
+both records on that evidence — the recurring records-gap pattern,
+third instance). Nothing committed; the prior runs' uncommitted
+deliveries preserved untouched.
+
+**Remaining risk:** the Alon–Boppana program is 0+1 of 5 steps — the
+diameter-dependent theorem itself (Steps 2–5) is future runs; this
+delivery's statements are interface-level, and their QA pins are
+small-fixture (the theorem-shaped witnesses are Steps 3–5 work per
+the proposal's own QA plan). One record gap inherited and flagged:
+the signed-graphs delivery (`7ca544b`) is missing its index-map
+section (`index/map/spectral_graph.md` has no `Signed` rows — its
+117-line index diff covered only the irregular/multiway deliveries);
+repairing it is a bounded records task for the next run touching the
+index map. The radar's axis scores deliberately unchanged (Step 1 is
+interface work; the axis claim moves when the theorem lands).
+
+**Next milestone (open):** per priority item 0 — Alon–Boppana
+**Step 2** (the `levE`/`levClass` module-level definitions and the
+tree-ball predicate per the Step-0 verdict, one step per run), or the
+sparsification High row's Step-0 survey; otherwise the Medium-High/
+Medium rows (empirical-stationary-distribution Step 0; the sampled-
+Laplacian quadratic-form consumer; the Fiedler-subspace
+Davis–Kahan Step-0 check against the delivered Band family).
+
+------
+
+## Delivered milestones (most recent first)
+
+**Signed graphs — the balance theorem via the magnetic π-flux bridge,
+plus the switching similarity; `proposals/signed-graphs-balance.md`,
+run 1, 2026-08-26, run `20260826T194844Z-run-1` (committed as part of
+`7ca544b`; records closed retrospectively by run
+`20260826T215003Z-run-1` after the session exited post-commit):
+DELIVERED — pure hard crust, zero new axioms (count stays 10;
+`#print axioms` via `wip/sg_axcheck.lean` on all 93 audited
+declarations — 32 public (28 `Signed.lean` + 4 `Magnetic.lean`'s new
+kernel section) + 61 QA: exactly `propext, Classical.choice,
+Quot.sound`, every one; re-confirmed by the closing run against the
+committed state). QA 2444 → 2506 (+62, `Signed_QA` a new file).**
+
+Delivered: the new `GraphTheory/Signed.lean` — `signedAdj`/
+`signedLaplacian` (`D − A_σ` at a `{±1}` signing `s`, loop-unsigned
+by balance itself), `IsBalanced` (switching existence), `signFlux`
+(the π-flux potential), the entrywise magnetic join
+`magneticLaplacian_signFlux_apply`, the signed Dirichlet energy
+identity **derived from the delivered `magnetic_energy`** (the
+load-bearing join; real and complex forms), the row-sum identity, the
+kernel↔alignment characterization, the walk collapse to a switching
+function, the **Harary balance headline**
+`isBalanced_iff_exists_ne_zero_mulVec_eq_zero` (on connected symmetric
+nonnegative input), positive definiteness under frustration
+(`quadForm_pos_of_ne_zero_of_not_isBalanced`), and the switching
+similarity `diagonal_mul_signedLaplacian_mul_diagonal` with two-way
+eigenpair transfer; plus `Magnetic.lean`'s kernel-at-action-level
+section (`magneticLaplacian_mulVec_eq_zero_iff`). QA: the balanced
+path (iff both directions, kernel pinned to the switching, energy
+pins real+complex), the frustrated triangle (`¬IsBalanced` proved from
+the switching equations, kernel trivial two routes), the disconnected
+conclusion-level fence, the negative-loop boundary, the `hnn`
+mechanism fence, the switching/eigen-transfer pins at the independent
+path eigenpair. Records (in `7ca544b`): scoreboard (two verification
+rows + interpretation bullet; full build ✔ 2386/2387 + completeness
+111/111), radar axis 1 (signed category occupied), backlog, README,
+index map, the proposal COMPLETE; the terminal activity entry and
+this plan's retirement closed by the next run. Nothing further
+committed by the closing run.
+
+------
 
 **The ρ_k partition-minimum packaging — the classical λ_k ≤ 2ρ_k
 statement form at the delivered every-family certificate;

@@ -29,6 +29,7 @@ import Scaffold.Mathlib.GraphTheory.FunctionalCalculus
 import Scaffold.Mathlib.GraphTheory.VariationalTransfer
 import Scaffold.Mathlib.GraphTheory.Multiway
 import Scaffold.Mathlib.GraphTheory.Signed
+import Scaffold.Mathlib.GraphTheory.AlonBoppana
 import Scaffold.Mathlib.GraphTheory.Dynamics
 import Scaffold.Mathlib.Dynamics.DiscreteAffine
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl
@@ -124,7 +125,15 @@ signed Dirichlet energy identity derived from the delivered
 theorem in kernel form** `IsBalanced A s ↔ ∃ x ≠ 0, L_σ *ᵥ x = 0` on
 connected input, positive definiteness under frustration, and the
 switching similarity `diag(g) · L_σ · diag(g) = laplacian A` with
-two-way eigenpair transfer, all proved), the heat semigroup
+two-way eigenpair transfer, all proved), the Alon–Boppana program's
+d-regularity interface (`GraphTheory.AlonBoppana`, Step 1 of the
+adopted proposal: `IsDRegular`, the constant-eigenvector fact
+`A *ᵥ onesVec = d • onesVec`, the AM–GM row-sum domination
+`xᵀAx ≤ d · ‖x‖²`, and the top-eigenvalue identification
+`evals ⟨last⟩ = d` from both sides — the lower companion to the
+Cheeger/expander toolkit, with the tree-ball test-vector steps 2–5
+gated on the proposal's one-step-per-run instruction), the heat
+semigroup
 (`GraphTheory.Heat`: Phase B, Step 1 of the reversibility/heat program —
 the matrix-level diffusion operator `heatKernel A t = e^{-tL}` with its
 hypothesis-graded symmetry and time-zero identity, plus the square-zero

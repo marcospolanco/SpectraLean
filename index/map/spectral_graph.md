@@ -975,6 +975,34 @@ new k-general engine pieces in `Spectral.lean` above):
 | `cheeger_upper_bound_multiway_rhoK` | **the ρ_k form of the easy direction**: `evals (L_sym) ⟨k−1⟩ ≤ 2 · multiwayExpansion A k` at `2 ≤ k ≤ card V` with a partition — the classical Lee–Gharan–Trevisan statement form, the every-family theorem consumed at the attained minimizer, no new engine; QA pins `ρ₂(C₄) = 1/2` exact (forced by the theorem joined to the independently pinned `λ₂ = 1`, the minimum beating the diagonal partition's `1`) and the empty-set junk fence at `k > card V` |
 | `exists_isMultiwayPartition_of_le_card` | the existence supplier: k-way partitions exist whenever `1 ≤ k ≤ card V` (an injection's singletons with the complement absorbed into the last part) — discharges the `hex` hypothesis in the common case |
 
+### `Scaffold.Mathlib.GraphTheory.AlonBoppana` (the Alon–Boppana program, Steps 1–2)
+
+Opened 2026-08-26 (`proposals/alon-boppana-bound.md`, ADOPTED by
+operator decision that day — the program delivering the lower
+companion to the Cheeger/expander toolkit via Nilli's two-edge
+variational method; both delivered steps are proved, zero axioms, and
+Step 1 supports the shelf's sorted-spectrum API at its extremes —
+`exists_eigvalOf_eq_of_mulVec_eq_smul`, `eigvalOf_le_evals_last`,
+`evals_mem_eigvalOf`, `quadForm_eigvecOf_self`; the radial test-vector
+steps 3–5 are future runs, with the Step-0 spike `wip/ab_spike.lean`
+having priced the level-cardinality idiom and the Step-2 delivery
+realizing it at module level — `Mathlib.Combinatorics.SimpleGraph.Metric`
+imported explicitly per the spike's verdict):
+
+| Declaration | Content |
+| --- | --- |
+| `IsDRegular` | d-regularity as a per-graph hypothesis in the shelf's `d : ℝ` idiom (every row sum equals `d`) — the `Cheeger.lean` `regularNormalizedLaplacian A d` pattern, no new regularity machinery |
+| `adjacency_mulVec_onesVec` | the constant-eigenvector fact: `A *ᵥ onesVec = d • onesVec` under `IsDRegular A d` — a row-sum computation, hypothesis-free beyond regularity; the interface's own witness, fenced by QA at P₃ (provably not an eigenvector there) |
+| `quadForm_le_of_isDRegular` | **AM–GM row-sum domination**: `xᵀAx ≤ d · (x ⬝ᵥ x)` on symmetric nonnegative d-regular input — entrywise AM–GM multiplied through nonnegative weights, the symmetric double sum's halves both `d ‖x‖²` (row-sum and column-sum degree identities); `hnn` load-bearing (QA refutes at the signed 0-regular `!![1,-1;-1,1]]`) |
+| `evals_last_eq_of_isDRegular` | **the top adjacency eigenvalue of a d-regular graph is `d`** — `evals hA ⟨card−1⟩ = d`, from both sides: the eigenvalue witness at `onesVec` (`exists_eigvalOf_eq_of_mulVec_eq_smul` + `eigvalOf_le_evals_last`) and domination at the unit eigenvector (`quadForm_eigvecOf_self` + `evals_mem_eigvalOf`); QA instances on C₄ (`= 2`) and K₂ (`= 1`) joined to raw entrywise eigen-equation pins |
+| `levE` / `levClass` / `ballE` | **the Step-0 verdict's BFS-level machinery at module level** (Step 2, 2026-08-26): the level of `z` from the edge `(x, y)` (min of the two endpoint distances on `supportGraph`), the level classes, and the closed radius filter — the test vector's support and the far-apart condition's operands |
+| `levE_eq_zero_iff` / `levE_eq_zero_iff_of_connected` | the junk-zero-honest level-0 form (the `dist` trap stated, not hidden: level 0 collects the endpoints *and* every unreachable vertex) and its connected amortization (level 0 is exactly the two distinct endpoints — one connectivity hypothesis discharges every reachability refutation, the spike's promised unit-cost amortization) |
+| `levClass_zero_eq` / `levClass_zero_card` / `isTreeBall_one_of_connected` | level 0 is exactly the endpoint pair on connected input at distinct endpoints — the `j = 0` cardinality equation free of regularity; the one-level tree-ball predicate holds at every `d` |
+| `IsTreeBall` | **the tree-ball predicate**, exactly as the Step-0 verdict priced it: level `j` carries exactly `2 (d−1)^j` vertices for every `j < k` — the count of the infinite d-regular tree around an edge; the cardinality-equation form Nilli's Rayleigh computation consumes, never a structural tree-ness predicate; QA: the C₈ instance at `d = 2, k = 2` (levels 0/1 full) and the C₄ wrap-around refutation at `k = 3` (level 2 demanded nonempty, provably empty) |
+| `ballE_mem_iff` / `ballE_zero` / `ballE_mono` / `levClass_pairwise_disjoint` / `ballE_succ_union` | the ball algebra: membership as a two-sided endpoint bound, the radius-0 identification with the level-0 class, radius monotonicity, pairwise-disjoint level classes (a vertex has one level), and the layer-cake decomposition of radius `r+1` |
+| `ballE_card_eq_sum` | **the layer-cake cardinality bridge**: under `IsTreeBall` at radius `k+1`, the ball of radius `k` has exactly the geometric level sum `∑_{j ≤ k} 2 (d−1)^j` — the Step-3 test vector's normalization input; QA pins it two independent routes on C₈ (set enumeration vs the theorem, one number) |
+| `distEdge` / `ballE_disjoint_of_lt_distEdge` | **the far-apart condition**: the least cross-endpoint graph distance, and the theorem that every cross distance exceeding `r + s` makes the two edge-balls disjoint (the connected triangle inequality at all four endpoint pairings) — the Step-4 orthogonalization's load-bearing separation input; QA: the antipodal C₈ instance (four rfl-verified cross distances ≥ 3) and the threshold-tightness fence (at exactly `r + s` the balls provably intersect) |
+
 ### `Scaffold.Mathlib.GraphTheory.Heat` (the heat semigroup)
 
 Opened 2026-08-23 as Phase B of

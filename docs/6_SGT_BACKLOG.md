@@ -126,8 +126,53 @@ operator decision recorded in that proposal's own Gate section per its
 "closes the field's most conspicuous gap next to the existing
 Cheeger/expander toolkit" case; the diameter-dependent single-graph
 form via Route A (Nilli's variational/test-vector method, reusing
-`secondEval_variational` as its entire linear-algebra engine), Step 0's
-tree-ball spike authorized to begin at any time.
+`secondEval_variational` as its entire linear-algebra engine).
+
+*Update (2026-08-26, Steps 0+1 delivered):* **the program's Step 0
+(tree-ball spike) priced and Step 1 (the d-regularity interface)
+delivered** (`proposals/alon-boppana-bound.md`, run
+`20260826T215003Z-run-1`; zero new axioms, QA +14 in the new
+`AlonBoppana_QA.lean`, 2506 → 2520). The new
+`GraphTheory/AlonBoppana.lean`: `IsDRegular` (the shelf's `d : ℝ`
+hypothesis idiom), the constant-eigenvector fact
+`adjacency_mulVec_onesVec`, the AM–GM row-sum domination
+`quadForm_le_of_isDRegular` (`xᵀAx ≤ d ‖x‖²`; `hnn` load-bearing,
+fenced), and **the top-eigenvalue identification
+`evals_last_eq_of_isDRegular`** (`evals ⟨last⟩ = d` from both sides —
+eigenvalue witness + unit-eigenvector domination; load-bearing on the
+sorted-spectrum API at its extremes; instances on C₄/K₂ at raw pins).
+Step 0's verdict: the tree-ball hypothesis discharges as **BFS
+level-cardinality equations** `#{z | dist (z, e) = j} = 2 (d−1)^j`
+against `SimpleGraph.dist` on `supportGraph` (the `levE`/`levClass`/
+`ballE` idiom; `Mathlib.Combinatorics.SimpleGraph.Metric` needs an
+explicit import at Steps 2–3) — unit cost one distance value per
+vertex-level pair (adjacency/self one-liners; j-step values need a
+pre-named-Adj walk witness inline in `dist_le` — a `have`-bound walk
+is opaque to `rfl` — plus the 0/1 refutations), connectivity
+amortizing every reachability refutation into one lemma; Q₃ and K₃,₃
+identified as the honest not-full/not-far negative fixtures.
+
+*Update (2026-08-26, Step 2 delivered):* **the tree-ball interface is
+now module-level shelf fact** (run `20260826T232419Z-run-1`; zero new
+axioms, QA +19, 2520 → 2539). `GraphTheory/AlonBoppana.lean`'s new
+`TreeBall` section realizes the Step-0 verdict verbatim: `levE`/
+`levClass`/`ballE`, the junk-zero-honest level-0 iff and its
+connected amortization, the **`IsTreeBall` cardinality predicate**
+(level `j` exactly `2 (d−1)^j` vertices for `j < k`), the ball algebra
+with the **layer-cake bridge `ballE_card_eq_sum`** (ball card =
+geometric level sum — the Step-3 test vector's normalization input),
+and `distEdge` + **`ballE_disjoint_of_lt_distEdge`** (the far-apart
+condition, four-pairing triangle inequality — the Step-4
+orthogonalization's separation input). QA: the C₈ full-hypothesis
+positive (tree-ball instance at the antipodal edge, disjoint antipodal
+balls at four rfl-verified cross distances ≥ 3 proved by short-walk
+exhaustion, layer-cake cardinality by two independent routes), the C₄
+wrap-around negative (`IsTreeBall` fails at radius 3 — the
+qualification trap's witness), and the threshold-tightness fence (at
+exactly `r + s` the balls provably intersect). **Next: Step 3** (the
+radial test vector `ρ^{lev}` on `ballE` and its Rayleigh quotient —
+the priced crux, likely needing sub-decomposition) per the proposal's
+one-step-per-run instruction.
 
 *Update (2026-08-25/26):* **the irregular (volume-weighted) Cheeger *upper*
 bound delivered** (`proposals/irregular-cheeger-variational-transfer.md`

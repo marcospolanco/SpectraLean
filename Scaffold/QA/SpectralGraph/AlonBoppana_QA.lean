@@ -18,14 +18,16 @@ import Mathlib.Data.Matrix.Notation
 import Mathlib.Combinatorics.SimpleGraph.Metric
 
 /-!
-# QA for `GraphTheory.AlonBoppana` (Steps 1–2)
+# QA for `GraphTheory.AlonBoppana` (Steps 1–3)
 
-QA obligations for the Alon–Boppana program's first two steps
+QA obligations for the Alon–Boppana program's first three steps
 (`proposals/alon-boppana-bound.md`): instances of the top-eigenvalue
 identification at raw, independently computed pins, the two
 hypothesis-necessity fences the proposal's QA plan asks of every
-statement in this program, and — Step 2 — the tree-ball interface's
-positive instance, negative witness, and tightness fence.
+statement in this program, — Step 2 — the tree-ball interface's
+positive instance, negative witness, and tightness fence, and —
+Step 3 (first slice) — the radial test vector's normalization pinned
+by two independent routes and fenced at the `d = 1` degeneracy.
 
 ## Step 1: the d-regularity interface
 
@@ -74,10 +76,35 @@ positive instance, negative witness, and tightness fence.
   `ballE_disjoint_of_lt_distEdge` is load-bearing: weakening it to
   `≤` would make the theorem false.
 
+## Step 3: the radial test vector's normalization
+
+- **The C₈ squared-norm pin by two independent routes** at `k = 1`
+  (`ρ = 1`, `d = 2`): `abC8_radial_norm_raw` computes
+  `⟨ρ^{lev}, ρ^{lev}⟩ = 4` by per-vertex enumeration — every vertex of
+  the pinned radius-1 ball `{0, 1, 2, 7}` carries `1`, every vertex
+  outside carries `0`, the indicator sum is the set's card by `decide`
+  — while `abC8_radial_norm_thm` obtains the same number from
+  `radialVec_dotProduct_self` through `abC8_isTreeBall`. A wrong level
+  count, a wrong level power, or a wrong normalization constant breaks
+  exactly one of the two routes.
+- **The `k = 0` pair** (`abC8_radial_norm_k_zero`, `..._raw`): the
+  same two routes at the degenerate radius, exercising the theorem's
+  `k + 1`-form hypothesis through `isTreeBall_one_of_connected` — that
+  Step-2 lemma's first consumer — against the raw enumeration at the
+  level-0 pair `{0, 1}`.
+- **The `d = 1` degeneracy fence** (`abK2_radial_d1_fence`): every
+  input of `radialVec_dotProduct_self` except `1 < d` holds on K₂ at
+  `d = 1`, `ρ = 0` — the normalization hypothesis is *junk-satisfiable*
+  there because `0⁻¹ = 0` in ℝ — and the identity fails: the vector is
+  `![1, 1]` (level 0 carries `ρ^0 = 1` even at `ρ = 0`), so the
+  squared norm is `2`, not `2 (k+1) = 4`. `hd1` is load-bearing
+  exactly at the cancellation step the module docstring names.
+
 The theorem-shaped witnesses of the proposal's QA plan (a spectral
 value near `2√(d−1)`; Q₃'s not-full levels and K₃,₃'s not-far-apart
-edges at the eventual theorem's own hypotheses) are Steps 3–5 work:
-they pin `λ₂`-vs-`2√(d−1)` itself, which needs the theorem. Fixture
+edges at the eventual theorem's own hypotheses) are the remaining
+Step-3 slices' and Steps 4–5's work: they pin `λ₂`-vs-`2√(d−1)`
+itself, which needs the energy half and the orthogonalization. Fixture
 entries at `Fin 8` are evaluated by `rfl` (`abC8_entries`) —
 `simp`/`norm_num` cannot chew `vecCons` at `Fin`-literal columns ≥ 4,
 a gap recorded from this delivery's spike.
@@ -673,6 +700,245 @@ the geometric sum `∑_{j ≤ 1} 2 (2−1)^j = 4`. -/
 theorem abC8_ballE_card_layer_cake :
     (ballE abC8 abC8_isSymm 0 1 1).card = 4 := by
   rw [ballE_card_eq_sum abC8_isTreeBall]
+  norm_num
+
+/-! ## Step 3: the radial test vector's normalization — two routes, one number -/
+
+/-- Level 0 of the C₈ edge `(0, 1)` is exactly `{0, 1}`, in iff form —
+the raw route's membership oracle (from the general connected
+level-0 identity). -/
+private theorem abC8_levE_zero_iff (z : Fin 8) :
+    levE abC8 abC8_isSymm 0 1 z = 0 ↔ z = 0 ∨ z = 1 := by
+  constructor
+  · intro h
+    have hm : z ∈ levClass abC8 abC8_isSymm 0 1 0 := by
+      simp only [levClass, Finset.mem_filter, Finset.mem_univ, true_and]
+      exact h
+    rw [levClass_zero_eq abC8_supportGraph_connected (by decide)] at hm
+    simpa using hm
+  · intro h
+    have hm : z ∈ levClass abC8 abC8_isSymm 0 1 0 := by
+      rw [levClass_zero_eq abC8_supportGraph_connected (by decide)]
+      simpa using h
+    simpa only [levClass, Finset.mem_filter, Finset.mem_univ, true_and] using hm
+
+/-- Level 1 of the C₈ edge `(0, 1)` is exactly `{2, 7}`, in iff form —
+the raw route's membership oracle (from the Step-2 pin). -/
+private theorem abC8_levE_one_iff (z : Fin 8) :
+    levE abC8 abC8_isSymm 0 1 z = 1 ↔ z = 2 ∨ z = 7 := by
+  constructor
+  · intro h
+    have hm : z ∈ levClass abC8 abC8_isSymm 0 1 1 := by
+      simp only [levClass, Finset.mem_filter, Finset.mem_univ, true_and]
+      exact h
+    rw [abC8_levClass_one_eq] at hm
+    simp only [Finset.mem_insert, Finset.not_mem_empty, or_false] at hm
+    rcases hm with h' | h'
+    · exact Or.inr h'
+    · exact Or.inl h'
+  · intro h
+    have hm : z ∈ levClass abC8 abC8_isSymm 0 1 1 := by
+      rw [abC8_levClass_one_eq]
+      simp only [Finset.mem_insert, Finset.not_mem_empty, or_false]
+      rcases h with h' | h'
+      · exact Or.inr h'
+      · exact Or.inl h'
+    simpa only [levClass, Finset.mem_filter, Finset.mem_univ, true_and] using hm
+
+/-- **Route 1 (raw)**: the squared norm of the radial test vector on
+C₈ at `k = 1`, `ρ = 1`, computed by per-vertex enumeration — every
+vertex of the radius-1 ball `{0, 1, 2, 7}` carries `ρ^{lev} ·
+ρ^{lev} = 1`, every vertex outside carries `0`, and the indicator sum
+is the set's card `4` by `decide`. No theorem input: the memberships
+come from the level iff oracles, the arithmetic from `decide`. -/
+theorem abC8_radial_norm_raw :
+    Matrix.dotProduct (radialVec abC8 abC8_isSymm 0 1 1 1)
+      (radialVec abC8 abC8_isSymm 0 1 1 1) = 4 := by
+  have hin : ∀ z : Fin 8, z = 0 ∨ z = 1 ∨ z = 2 ∨ z = 7 →
+      levE abC8 abC8_isSymm 0 1 z ≤ 1 := by
+    intro z h
+    rcases h with rfl | rfl | rfl | rfl
+    · exact ((abC8_levE_zero_iff 0).2 (Or.inl rfl)).le.trans (Nat.zero_le 1)
+    · exact ((abC8_levE_zero_iff 1).2 (Or.inr rfl)).le.trans (Nat.zero_le 1)
+    · exact ((abC8_levE_one_iff 2).2 (Or.inl rfl)).le
+    · exact ((abC8_levE_one_iff 7).2 (Or.inr rfl)).le
+  have hout : ∀ z : Fin 8, z ≠ 0 → z ≠ 1 → z ≠ 2 → z ≠ 7 →
+      2 ≤ levE abC8 abC8_isSymm 0 1 z := by
+    intro z h0 h1 h2 h7
+    rcases Nat.eq_zero_or_pos (levE abC8 abC8_isSymm 0 1 z) with h | h
+    · rcases (abC8_levE_zero_iff z).1 h with h' | h'
+      · exact absurd h' h0
+      · exact absurd h' h1
+    · rcases (show levE abC8 abC8_isSymm 0 1 z = 1 ∨
+          2 ≤ levE abC8 abC8_isSymm 0 1 z by omega) with h' | h'
+      · rcases (abC8_levE_one_iff z).1 h' with h'' | h''
+        · exact absurd h'' h2
+        · exact absurd h'' h7
+      · exact h'
+  have hfilt : ∀ z : Fin 8,
+      radialVec abC8 abC8_isSymm 0 1 1 1 z * radialVec abC8 abC8_isSymm 0 1 1 1 z
+        = if z ∈ insert 7 (insert 2 (insert 1 (insert 0 (∅ : Finset (Fin 8)))))
+          then (1:ℝ) else 0 := by
+    intro z
+    by_cases hz : z ∈ insert 7 (insert 2 (insert 1 (insert 0 (∅ : Finset (Fin 8)))))
+    · rw [if_pos hz]
+      have hle : levE abC8 abC8_isSymm 0 1 z ≤ 1 := by
+        simp only [Finset.mem_insert, Finset.not_mem_empty, or_false] at hz
+        rcases hz with rfl | rfl | rfl | rfl
+        · exact ((abC8_levE_one_iff 7).2 (Or.inr rfl)).le
+        · exact ((abC8_levE_one_iff 2).2 (Or.inl rfl)).le
+        · exact ((abC8_levE_zero_iff 1).2 (Or.inr rfl)).le.trans (Nat.zero_le 1)
+        · exact ((abC8_levE_zero_iff 0).2 (Or.inl rfl)).le.trans (Nat.zero_le 1)
+      simp only [radialVec, if_pos hle, one_pow, one_mul]
+    · rw [if_neg hz]
+      have hn0 : z ≠ 0 := fun h => hz (by simp [h])
+      have hn1 : z ≠ 1 := fun h => hz (by simp [h])
+      have hn2 : z ≠ 2 := fun h => hz (by simp [h])
+      have hn7 : z ≠ 7 := fun h => hz (by simp [h])
+      have h2 := hout z hn0 hn1 hn2 hn7
+      simp only [radialVec, if_neg (show ¬ levE abC8 abC8_isSymm 0 1 z ≤ 1 by omega),
+        zero_mul]
+  simp only [Matrix.dotProduct]
+  rw [Finset.sum_congr rfl fun z _ => hfilt z]
+  have heq : ∑ z : Fin 8,
+      (if z ∈ insert 7 (insert 2 (insert 1 (insert 0 (∅ : Finset (Fin 8)))))
+        then (1:ℝ) else 0)
+      = ∑ z ∈ insert 7 (insert 2 (insert 1 (insert 0 (∅ : Finset (Fin 8))))), (1:ℝ) :=
+    (Finset.sum_subset (Finset.subset_univ _)
+      (fun z _ hz => if_neg hz)).symm
+  rw [heq, Finset.sum_const, nsmul_eq_mul, mul_one]
+  have hcard :
+      (insert 7 (insert 2 (insert 1 (insert 0 (∅ : Finset (Fin 8)))))).card = 4 := by
+    decide
+  rw [hcard]
+  norm_num
+
+/-- **Route 2 (theorem)**: the same number from the squared-norm
+identity through the C₈ tree-ball instance — `2 (k+1) = 4` at `k = 1`,
+`d = 2`, `ρ = 1`. The two routes share no mechanism: a wrong level
+count, level power, or normalization constant breaks exactly one. -/
+theorem abC8_radial_norm_thm :
+    Matrix.dotProduct (radialVec abC8 abC8_isSymm 0 1 1 1)
+      (radialVec abC8 abC8_isSymm 0 1 1 1) = 4 := by
+  have h := radialVec_dotProduct_self (d := 2) (x := 0) (y := 1) (ρ := 1) (k := 1)
+    (by norm_num) abC8_isTreeBall (by norm_num)
+  norm_num at h
+  linarith
+
+/-- Nonvanishing on the fixture, from the endpoint seed. -/
+theorem abC8_radial_ne_zero :
+    radialVec abC8 abC8_isSymm 0 1 1 1 ≠ 0 :=
+  radialVec_ne_zero 0 1 1 1
+
+/-! ### The k = 0 pair — `isTreeBall_one_of_connected`'s first consumer -/
+
+theorem abC8_radial_norm_k_zero :
+    Matrix.dotProduct (radialVec abC8 abC8_isSymm 0 1 1 0)
+      (radialVec abC8 abC8_isSymm 0 1 1 0) = 2 := by
+  have h := radialVec_dotProduct_self (d := 2) (x := 0) (y := 1) (ρ := 1) (k := 0)
+    (by norm_num) (isTreeBall_one_of_connected abC8_supportGraph_connected
+      (by decide) 2) (by norm_num)
+  norm_num at h
+  linarith
+
+theorem abC8_radial_norm_k_zero_raw :
+    Matrix.dotProduct (radialVec abC8 abC8_isSymm 0 1 1 0)
+      (radialVec abC8 abC8_isSymm 0 1 1 0) = 2 := by
+  have hfilt : ∀ z : Fin 8,
+      radialVec abC8 abC8_isSymm 0 1 1 0 z * radialVec abC8 abC8_isSymm 0 1 1 0 z
+        = if z ∈ insert 1 (insert 0 (∅ : Finset (Fin 8))) then (1:ℝ) else 0 := by
+    intro z
+    by_cases hz : z ∈ insert 1 (insert 0 (∅ : Finset (Fin 8)))
+    · rw [if_pos hz]
+      have hd : z = 0 ∨ z = 1 := by
+        simp only [Finset.mem_insert, Finset.not_mem_empty, or_false] at hz
+        rcases hz with h' | h'
+        · exact Or.inr h'
+        · exact Or.inl h'
+      rcases hd with rfl | rfl
+      · simp only [radialVec, if_pos (((abC8_levE_zero_iff 0).2 (Or.inl rfl)).le),
+          one_pow, one_mul]
+      · simp only [radialVec, if_pos (((abC8_levE_zero_iff 1).2 (Or.inr rfl)).le),
+          one_pow, one_mul]
+    · rw [if_neg hz]
+      have hne : ¬ (levE abC8 abC8_isSymm 0 1 z ≤ 0) := by
+        intro hle
+        have h0 := (abC8_levE_zero_iff z).1 (by omega)
+        rcases h0 with h' | h'
+        · exact hz (by simp [h'])
+        · exact hz (by simp [h'])
+      simp only [radialVec, if_neg hne, zero_mul]
+  simp only [Matrix.dotProduct]
+  rw [Finset.sum_congr rfl fun z _ => hfilt z]
+  have heq : ∑ z : Fin 8,
+      (if z ∈ insert 1 (insert 0 (∅ : Finset (Fin 8))) then (1:ℝ) else 0)
+      = ∑ z ∈ insert 1 (insert 0 (∅ : Finset (Fin 8))), (1:ℝ) :=
+    (Finset.sum_subset (Finset.subset_univ _)
+      (fun z _ hz => if_neg hz)).symm
+  rw [heq, Finset.sum_const, nsmul_eq_mul, mul_one]
+  have hcard : (insert 1 (insert 0 (∅ : Finset (Fin 8)))).card = 2 := by decide
+  rw [hcard]
+  norm_num
+
+/-! ### The K₂ d = 1 degeneracy fence -/
+
+theorem abK2_supportGraph_connected :
+    (supportGraph abK2 abK2_isSymm).Connected := by
+  have hfrom0 : ∀ v : Fin 2, (supportGraph abK2 abK2_isSymm).Reachable 0 v := by
+    intro v
+    fin_cases v
+    · exact ⟨SimpleGraph.Walk.nil⟩
+    · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 1)
+        (supportGraph_adj.2 ⟨by decide, by simp [abK2]⟩) SimpleGraph.Walk.nil⟩
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  exact ⟨0, hfrom0⟩
+
+/-- Every K₂ vertex is an endpoint of the edge `(0, 1)`: both levels
+are `0`. -/
+theorem abK2_levE_zero (z : Fin 2) : levE abK2 abK2_isSymm 0 1 z = 0 := by
+  fin_cases z
+  · simp [levE]
+  · simp [levE]
+
+theorem abK2_levClass_one_empty :
+    levClass abK2 abK2_isSymm 0 1 1 = ∅ := by
+  refine Finset.eq_empty_of_forall_not_mem fun z hz => ?_
+  simp only [levClass, Finset.mem_filter, Finset.mem_univ] at hz
+  have := abK2_levE_zero z
+  omega
+
+/-- The tree-ball predicate holds on K₂ at `d = 1`, radius `2`: level
+0 is the endpoint pair, level 1 is demanded empty (`2 (1−1)¹ = 0`) and
+is empty — every vertex is an endpoint. -/
+theorem abK2_isTreeBall_d1 : IsTreeBall abK2 abK2_isSymm 0 1 1 2 := by
+  intro j hj
+  rcases (show j = 0 ∨ j = 1 by omega) with rfl | rfl
+  · rw [levClass_zero_card abK2_supportGraph_connected (by decide)]
+    norm_num
+  · rw [abK2_levClass_one_empty]
+    simp
+
+/-- **The `d = 1` fence**: every input of `radialVec_dotProduct_self`
+except `1 < d` holds on K₂ at `d = 1`, `ρ = 0` — the normalization
+hypothesis is *junk-satisfiable* there because `0⁻¹ = 0` in ℝ — and the
+identity fails: the vector is `![1, 1]` (level 0 carries `ρ^0 = 1`
+even at `ρ = 0`), so the squared norm is `2`, not `2 (k+1) = 4`. `hd1`
+is load-bearing exactly at the cancellation step (`mul_inv_cancel₀`)
+the module docstring names. -/
+theorem abK2_radial_d1_fence :
+    IsTreeBall abK2 abK2_isSymm 0 1 1 2 ∧
+      (0 : ℝ) ^ 2 = ((1 - 1 : ℕ) : ℝ)⁻¹ ∧
+      Matrix.dotProduct (radialVec abK2 abK2_isSymm 0 1 0 1)
+        (radialVec abK2 abK2_isSymm 0 1 0 1) = 2 := by
+  refine ⟨abK2_isTreeBall_d1, by norm_num, ?_⟩
+  simp only [Matrix.dotProduct, Fin.sum_univ_two]
+  have f0 : radialVec abK2 abK2_isSymm 0 1 0 1 0 = 1 := by
+    have h0 : levE abK2 abK2_isSymm 0 1 0 = 0 := abK2_levE_zero 0
+    simp [radialVec, h0]
+  have f1 : radialVec abK2 abK2_isSymm 0 1 0 1 1 = 1 := by
+    have h0 : levE abK2 abK2_isSymm 0 1 1 = 0 := abK2_levE_zero 1
+    simp [radialVec, h0]
+  rw [f0, f1]
   norm_num
 
 end SpectralGraphTheory.QA

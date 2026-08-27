@@ -853,7 +853,51 @@ on symmetric signed input with exactly `hA` isolated).
 
 Eigenvalue, magnetic-Cheeger, and synchronization statements are priced
 follow-ons in the proposal (the pin has Hermitian spectral theory), not
-gaps in what is claimed.
+gaps in what is claimed. With the signed-graph delivery
+(2026-08-26, `proposals/signed-graphs-balance.md`) the module also
+carries the gauge characterization at **kernel action level**:
+`magneticLaplacian_mulVec_eq_zero_iff` — `M *ᵥ x = 0 ↔ x_u = e^{iΘ_uv} x_v`
+on every positive edge of connected nonnegative input (the delivered
+form-level `magneticQuadForm_eq_zero_iff` promoted to the kernel by
+pure row algebra at unit modulus), the join the signed Harary theorem
+consumes.
+
+### `Scaffold.Mathlib.GraphTheory.Signed` (signed graphs — balance via the magnetic π-flux)
+
+The signed-graph slice of the graph-model axis (delivered 2026-08-26,
+`proposals/signed-graphs-balance.md`; section added retrospectively by
+run `20260827T012700Z-run-1` — the delivery's own commit `7ca544b`
+had covered only the irregular/multiway index rows, a records gap
+flagged at the time and closed here): a `{±1}` signing `s` of a
+symmetric network's edges, the **signed Laplacian** `D − A_σ`, and the
+classical Harary balance theory joined to the delivered magnetic
+program at the π-flux. All statements proved, zero new axioms — the
+load-bearing join is the energy identity being *derived from* the
+delivered `magnetic_energy`, so a defect in the magnetic shelf breaks
+the signed theorems. QA at
+`Scaffold/QA/SpectralGraph/Signed_QA.lean` (62 declarations by the
+generator metric: the balanced path's iff both directions with the
+kernel pinned raw to the switching, the frustrated triangle with
+`¬IsBalanced` proved from the switching equations, the disconnected
+conclusion-level fence, the negative-loop and `hnn` mechanism fences,
+and the switching/eigen-transfer pins at an independently verified
+eigenpair).
+
+| Declaration | Content |
+| --- | --- |
+| `signedAdj` / `signedLaplacian` | the signed adjacency `A_σ = s ∘ A` and the signed Laplacian `D − A_σ` at a `{±1}` signing — loop-unsigned by balance itself (no separate loop-sign convention; a negative self-loop auto-frustrates, QA-witnessed) |
+| `IsBalanced` | Harary balance as switching existence: `∃ g : V → {±1}, g_u · s_uv · g_v = 1` on every positive edge |
+| `signFlux` / `complex_exp_I_mul_signFlux` / `magneticLaplacian_signFlux_apply` | the π-flux potential of a signing and the entrywise magnetic join `magneticLaplacian A (signFlux s) = (signedLaplacian A s : ℂ)` — the bridge the whole slice crosses |
+| `signedLaplacian_quadForm` / `hermQuadForm_signedLaplacian` | the **signed Dirichlet energy identity** `xᵀL_σx = ½ ∑ A_uv \|x_u − s_uv x_v\|²` (real and complex forms), *derived from* the delivered `magnetic_energy` — the load-bearing join |
+| `signedLaplacian_mulVec_apply` / `signedLaplacian_mulVec_eq_zero_iff_aligned` | the row-sum identity and the kernel↔edge-alignment characterization (`L_σ *ᵥ x = 0 ↔ x_v = s_uv x_u` on every positive edge) |
+| `walk_sign` / `exists_switching_of_aligned` | the walk collapse: a walk's signed product telescopes, so an aligned vector *is* a `{±1}` switching on each component |
+| `isBalanced_iff_exists_ne_zero_mulVec_eq_zero` | **the Harary balance theorem in kernel form**: on connected symmetric nonnegative input, `IsBalanced A s ↔ ∃ x ≠ 0, L_σ *ᵥ x = 0` — balance is exactly solvability of the signed Laplacian |
+| `quadForm_pos_of_ne_zero_of_not_isBalanced` | positive definiteness under frustration: on a connected unbalanced signed network the signed Laplacian is strictly positive definite |
+| `diagonal_mul_signedLaplacian_mul_diagonal` / `switchVec` family / `signedLaplacian_eq_diagonal_mul_laplacian_mul_diagonal` | **the switching similarity**: `diag(g) · L_σ · diag(g) = laplacian A` when `g` switches `s` to all-positive, with `switchVec` the conjugating action and the two-way eigenpair transfer (`signedLaplacian_mulVec_switchVec` / `laplacian_mulVec_switchVec`) — the balanced signed spectrum is the unsigned spectrum |
+
+The multiset-level spectrum equality, signed Cheeger, and
+frustration-index theory are priced follow-ons in the proposal, gated
+on named consumers.
 
 ### `Scaffold.Mathlib.GraphTheory.VariationalTransfer` (variational consumer of the congruence bridge)
 
@@ -975,7 +1019,7 @@ new k-general engine pieces in `Spectral.lean` above):
 | `cheeger_upper_bound_multiway_rhoK` | **the ρ_k form of the easy direction**: `evals (L_sym) ⟨k−1⟩ ≤ 2 · multiwayExpansion A k` at `2 ≤ k ≤ card V` with a partition — the classical Lee–Gharan–Trevisan statement form, the every-family theorem consumed at the attained minimizer, no new engine; QA pins `ρ₂(C₄) = 1/2` exact (forced by the theorem joined to the independently pinned `λ₂ = 1`, the minimum beating the diagonal partition's `1`) and the empty-set junk fence at `k > card V` |
 | `exists_isMultiwayPartition_of_le_card` | the existence supplier: k-way partitions exist whenever `1 ≤ k ≤ card V` (an injection's singletons with the complement absorbed into the last part) — discharges the `hex` hypothesis in the common case |
 
-### `Scaffold.Mathlib.GraphTheory.AlonBoppana` (the Alon–Boppana program, Steps 1–2)
+### `Scaffold.Mathlib.GraphTheory.AlonBoppana` (the Alon–Boppana program, Steps 1–3a)
 
 Opened 2026-08-26 (`proposals/alon-boppana-bound.md`, ADOPTED by
 operator decision that day — the program delivering the lower
@@ -983,11 +1027,13 @@ companion to the Cheeger/expander toolkit via Nilli's two-edge
 variational method; both delivered steps are proved, zero axioms, and
 Step 1 supports the shelf's sorted-spectrum API at its extremes —
 `exists_eigvalOf_eq_of_mulVec_eq_smul`, `eigvalOf_le_evals_last`,
-`evals_mem_eigvalOf`, `quadForm_eigvecOf_self`; the radial test-vector
-steps 3–5 are future runs, with the Step-0 spike `wip/ab_spike.lean`
-having priced the level-cardinality idiom and the Step-2 delivery
-realizing it at module level — `Mathlib.Combinatorics.SimpleGraph.Metric`
-imported explicitly per the spike's verdict):
+`evals_mem_eigvalOf`, `quadForm_eigvecOf_self`; the Step-0 spike
+`wip/ab_spike.lean` priced the level-cardinality idiom and the Step-2
+delivery realized it at module level —
+`Mathlib.Combinatorics.SimpleGraph.Metric` imported explicitly per the
+spike's verdict — and Step 3's first sub-slice (2026-08-27) delivered
+the radial test vector with its normalization, the denominator of
+Nilli's Rayleigh quotient):
 
 | Declaration | Content |
 | --- | --- |
@@ -1002,6 +1048,10 @@ imported explicitly per the spike's verdict):
 | `ballE_mem_iff` / `ballE_zero` / `ballE_mono` / `levClass_pairwise_disjoint` / `ballE_succ_union` | the ball algebra: membership as a two-sided endpoint bound, the radius-0 identification with the level-0 class, radius monotonicity, pairwise-disjoint level classes (a vertex has one level), and the layer-cake decomposition of radius `r+1` |
 | `ballE_card_eq_sum` | **the layer-cake cardinality bridge**: under `IsTreeBall` at radius `k+1`, the ball of radius `k` has exactly the geometric level sum `∑_{j ≤ k} 2 (d−1)^j` — the Step-3 test vector's normalization input; QA pins it two independent routes on C₈ (set enumeration vs the theorem, one number) |
 | `distEdge` / `ballE_disjoint_of_lt_distEdge` | **the far-apart condition**: the least cross-endpoint graph distance, and the theorem that every cross distance exceeding `r + s` makes the two edge-balls disjoint (the connected triangle inequality at all four endpoint pairings) — the Step-4 orthogonalization's load-bearing separation input; QA: the antipodal C₈ instance (four rfl-verified cross distances ≥ 3) and the threshold-tightness fence (at exactly `r + s` the balls provably intersect) |
+| `radialVec` | **Nilli's radial test vector** (Step 3's first sub-slice, 2026-08-27): on the radius-`k` ball of the edge, the value `ρ ^ levE z` — constant per BFS level, `0` outside — with the d-regular-tree normalization carried by consumers as the hypothesis `ρ ^ 2 = ((d−1 : ℕ) : ℝ)⁻¹` (the `√` plumbing deliberately left to the Step-5 packaging, where the `IsDRegular` `d : ℝ` join also lives) |
+| `radialVec_apply` / `radialVec_of_mem_ballE` / `radialVec_eq_zero_of_not_mem_ballE` / `radialVec_left` / `radialVec_ne_zero` | the radial vector's interface: the entry form, the pure level power on the ball, vanishing outside (support = `ballE`), the always-`1` left-endpoint seed, and nonvanishing at every radius and every `ρ` |
+| `sum_ballE_eq_sum_levels` | **the layer-cake sum bridge**: any function summed over the radius-`k` edge ball equals its level-by-level sum — `ballE_card_eq_sum`'s summation form at a function rather than a count (the squared norm is level-constant but not constant) |
+| `radialVec_dotProduct_self` | **the squared-norm identity**: `⟨ρ^{lev}, ρ^{lev}⟩ = 2 (k + 1)` exactly, under `IsTreeBall` at radius `k+1` and `ρ ^ 2 = ((d−1 : ℕ) : ℝ)⁻¹` — per level, the geometric growth `2 (d−1)^j` cancels the vector's decay `ρ^{2j}` to exactly `2` (`pow_mul`/`mul_pow`/`mul_inv_cancel₀`); the denominator of Nilli's Rayleigh quotient and the first theorem consumer of the Step-2 level machinery; `1 < d` load-bearing at the cancellation (at `d = 1`, `ρ = 0` is junk-admissible through `0⁻¹ = 0` while the truncated counts die — QA fences it at K₂ with the squared norm `2 ≠ 4`); QA pins the C₈ value `4` by two independent routes (theorem vs raw per-vertex enumeration) and the `k = 0` pair both routes (`isTreeBall_one_of_connected`'s first consumer) |
 
 ### `Scaffold.Mathlib.GraphTheory.Heat` (the heat semigroup)
 

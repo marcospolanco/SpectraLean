@@ -17,7 +17,8 @@ import Scaffold.Mathlib.GraphTheory.Spectral
 import Mathlib.Combinatorics.SimpleGraph.Metric
 
 /-!
-# Alon–Boppana, Steps 1–2: the d-regularity interface and the tree-ball
+# Alon–Boppana, Steps 1–3: the d-regularity interface, the tree-ball,
+# and the radial test vector
 
 The home module of the Alon–Boppana program
 (`proposals/alon-boppana-bound.md`, adopted 2026-08-26): the lower
@@ -80,12 +81,37 @@ tree-ness predicate:
   inequality at all four endpoint pairings) — the load-bearing
   separation input of Step 4's orthogonalization.
 
-Steps 3–5 (the radial test vector, the two-vector
-orthogonalization, and the diameter-dependent single-graph statement)
-are future steps per the proposal's one-step-per-run instruction. The
-`Mathlib.Combinatorics.SimpleGraph.Metric` import is the Step-0
-verdict's explicit-import requirement (`Spectral.lean`'s transitive
-imports do not reach `SimpleGraph.dist`).
+**Step 3, first slice** (this delivery — the proposal prices Step 3 for
+sub-decomposition across runs; this is the vector + normalization
+half):
+
+* `radialVec` — the radial test vector: on the radius-`k` edge ball,
+  the value `ρ ^ levE z` (constant per BFS level, `0` outside), with
+  the d-regular-tree normalization carried as the consumer hypothesis
+  `ρ ^ 2 = ((d − 1 : ℕ) : ℝ)⁻¹` so the `√` plumbing stays in the
+  eventual packaging.
+* `radialVec_apply`/`radialVec_of_mem_ballE`/
+  `radialVec_eq_zero_of_not_mem_ballE`/`radialVec_left`/
+  `radialVec_ne_zero` — the entry, support, and nonvanishing
+  interface (the value at the left endpoint is always `1`).
+* `sum_ballE_eq_sum_levels` — the **layer-cake sum bridge** (any
+  function summed over the ball equals its level-by-level sum), the
+  summation form of `ballE_card_eq_sum`.
+* `radialVec_dotProduct_self` — **the squared-norm identity**
+  `⟨ρ^{lev}, ρ^{lev}⟩ = 2 (k + 1)` under `IsTreeBall` at radius `k+1`:
+  the geometric growth of full levels cancels the geometric decay of
+  the vector, per level, to exactly `2`. This is the denominator of
+  Nilli's Rayleigh quotient, computed exactly — the first theorem
+  consumer of the Step-2 level machinery. `1 < d` is load-bearing at
+  the cancellation (`mul_inv_cancel₀`); at `d = 1` the identity
+  genuinely fails (QA fences it at K₂).
+
+Steps 3b–5 (the energy/numerator half of the Rayleigh quotient, the
+two-vector orthogonalization, and the diameter-dependent single-graph
+statement) are future steps per the proposal's one-step-per-run
+instruction. The `Mathlib.Combinatorics.SimpleGraph.Metric` import is
+the Step-0 verdict's explicit-import requirement (`Spectral.lean`'s
+transitive imports do not reach `SimpleGraph.dist`).
 
 Everything in this module is proved; no axiom is admitted. The
 eventual theorem's statement must respect the proposal's
@@ -109,7 +135,13 @@ balls, the layer-cake cardinality by two independent routes), the C₄
 wrap-around negative (`IsTreeBall` fails at radius 3 — level 2
 demanded nonempty and empty), and the threshold-tightness fence (the
 near-antipodal balls at min cross-distance exactly `r + s` provably
-intersect).
+intersect). Step 3: the C₈ squared-norm pin `4 = 2 (k+1)` by two
+independent routes (the identity through `abC8_isTreeBall` vs raw
+per-vertex enumeration through the level-0/level-1 memberships), the
+`k = 0` pair (the theorem at `isTreeBall_one_of_connected` vs raw),
+and the K₂ `d = 1` degeneracy fence (every input but `1 < d` holds at
+`ρ = 0` — junk-admissible through `0⁻¹ = 0` — and the identity fails
+at `2 ≠ 4`).
 -/
 
 open scoped BigOperators Matrix
@@ -490,5 +522,164 @@ theorem ballE_disjoint_of_lt_distEdge (x y u v : V) (r s : ℕ)
       omega
 
 end TreeBall
+
+/-!
+## Step 3: the radial test vector and its normalization
+-/
+
+section RadialVector
+
+variable {A : WAdj (V := V)} {hA : A.IsSymm}
+
+/-- The radial test vector of Nilli's two-edge method (Step 3): on the
+radius-`k` ball of the edge `(x, y)`, the value `ρ ^ levE z` — constant
+per BFS level, decaying by the factor `ρ` per level — and `0` outside
+the ball. At the d-regular-tree normalization
+`ρ ^ 2 = ((d − 1 : ℕ) : ℝ)⁻¹` (carried by consumers as a hypothesis, so
+the `√` plumbing stays in the eventual packaging), each level of a
+full ball contributes equally to the squared norm — the identity
+`radialVec_dotProduct_self` below — which is what makes the
+Rayleigh-quotient computation of the remaining Step-3 slices come out
+at a `k`-independent scale. -/
+noncomputable def radialVec (A : WAdj (V := V)) (hA : A.IsSymm)
+    (x y : V) (ρ : ℝ) (k : ℕ) : V → ℝ :=
+  fun z => if levE A hA x y z ≤ k then ρ ^ (levE A hA x y z) else 0
+
+omit [DecidableEq V] in
+omit [Fintype V] in
+/-- Entry form of the radial test vector — the falsifiability anchor. -/
+theorem radialVec_apply (x y : V) (ρ : ℝ) (k : ℕ) (z : V) :
+    radialVec A hA x y ρ k z
+      = if levE A hA x y z ≤ k then ρ ^ (levE A hA x y z) else 0 := rfl
+
+omit [DecidableEq V] in
+/-- On the ball, the radial test vector is the pure level power. -/
+theorem radialVec_of_mem_ballE {x y : V} {ρ : ℝ} {k : ℕ} {z : V}
+    (hz : z ∈ ballE A hA x y k) :
+    radialVec A hA x y ρ k z = ρ ^ (levE A hA x y z) := by
+  have hz' : levE A hA x y z ≤ k := by
+    simp only [ballE, Finset.mem_filter, Finset.mem_univ, true_and] at hz
+    exact hz
+  simp only [radialVec, if_pos hz']
+
+omit [DecidableEq V] in
+/-- Outside the ball, the radial test vector vanishes — its support is
+exactly `ballE`. -/
+theorem radialVec_eq_zero_of_not_mem_ballE {x y : V} {ρ : ℝ} {k : ℕ} {z : V}
+    (hz : z ∉ ballE A hA x y k) :
+    radialVec A hA x y ρ k z = 0 := by
+  have hz' : ¬ (levE A hA x y z ≤ k) := by
+    intro hle
+    exact hz (Finset.mem_filter.2 ⟨Finset.mem_univ z, hle⟩)
+  simp only [radialVec, if_neg hz']
+
+omit [DecidableEq V] in
+omit [Fintype V] in
+/-- The left endpoint carries the value `1` at every radius and every
+`ρ` — the always-on seed of the nonvanishing statement. -/
+theorem radialVec_left (x y : V) (ρ : ℝ) (k : ℕ) :
+    radialVec A hA x y ρ k x = 1 := by
+  have h0 : levE A hA x y x = 0 := by simp [levE]
+  simp only [radialVec, h0, if_pos (Nat.zero_le k), pow_zero]
+
+omit [DecidableEq V] in
+omit [Fintype V] in
+/-- The radial test vector is nonzero at every radius and every `ρ`:
+its value at the left endpoint is `1`. -/
+theorem radialVec_ne_zero (x y : V) (ρ : ℝ) (k : ℕ) :
+    radialVec A hA x y ρ k ≠ 0 := by
+  intro h
+  have h1 := congrFun h x
+  rw [radialVec_left] at h1
+  simp at h1
+
+/-- **The layer-cake sum bridge**: any function summed over the
+radius-`k` edge ball equals its sum over the levels `0..k` — the
+summation form of `ballE_card_eq_sum`, at a function rather than a
+count. The test vector's squared norm is a level-constant function, so
+this is the bridge its normalization computation consumes. -/
+theorem sum_ballE_eq_sum_levels (g : V → ℝ) (x y : V) (k : ℕ) :
+    ∑ z ∈ ballE A hA x y k, g z
+      = ∑ j ∈ Finset.range (k + 1), ∑ z ∈ levClass A hA x y j, g z := by
+  induction k with
+  | zero =>
+      rw [ballE_zero]
+      simp [Finset.range_one]
+  | succ k ih =>
+      have hdis : Disjoint (ballE A hA x y k) (levClass A hA x y (k + 1)) :=
+        Finset.disjoint_right.mpr fun a ha => by
+          simp only [levClass, Finset.mem_filter] at ha
+          intro hb
+          simp only [ballE, Finset.mem_filter] at hb
+          have h1 := ha.2
+          have h2 := hb.2
+          omega
+      rw [ballE_succ_union, Finset.sum_union hdis, Finset.range_succ,
+        Finset.sum_insert (by simp), ih]
+      ac_rfl
+
+/-- **The radial test vector's squared norm is `2 (k + 1)`** — the
+normalization identity of Nilli's method: under the full-level
+hypothesis `IsTreeBall` at radius `k + 1` and the d-regular-tree
+normalization `ρ ^ 2 = ((d − 1 : ℕ) : ℝ)⁻¹`, every level `j ≤ k`
+carries `2 (d−1)^j` vertices of value-squared `ρ^{2j}`, and the two
+geometric factors cancel per level to exactly `2` — the growth of the
+levels against the decay of the vector. This is the denominator of the
+Rayleigh quotient of the remaining Step-3 slices and Step 4, computed
+exactly through `ballE_card_eq_sum`'s level machinery (via the sum
+bridge `sum_ballE_eq_sum_levels`). `1 < d` is load-bearing at the
+cancellation step (`mul_inv_cancel₀`): at `d = 1` the truncated
+`(d−1)^j` kills the level counts while `ρ = 0` remains
+junk-admissible (`0⁻¹ = 0` in ℝ), and the identity genuinely fails —
+fenced in QA at K₂. -/
+theorem radialVec_dotProduct_self {d k : ℕ} {ρ : ℝ} {x y : V}
+    (hd1 : 1 < d) (htb : IsTreeBall A hA x y d (k + 1))
+    (hrho : ρ ^ 2 = ((d - 1 : ℕ) : ℝ)⁻¹) :
+    Matrix.dotProduct (radialVec A hA x y ρ k) (radialVec A hA x y ρ k)
+      = 2 * (k + 1) := by
+  have hcast_ne : ((d - 1 : ℕ) : ℝ) ≠ 0 := by
+    exact mod_cast (show (d - 1 : ℕ) ≠ 0 by omega)
+  simp only [Matrix.dotProduct]
+  have hzero : ∀ z : V, z ∉ ballE A hA x y k →
+      radialVec A hA x y ρ k z * radialVec A hA x y ρ k z = 0 := by
+    intro z hz
+    rw [radialVec_eq_zero_of_not_mem_ballE hz, zero_mul]
+  have hsplit :
+      ∑ z : V, radialVec A hA x y ρ k z * radialVec A hA x y ρ k z
+        = ∑ z ∈ ballE A hA x y k,
+            radialVec A hA x y ρ k z * radialVec A hA x y ρ k z := by
+    rw [Finset.sum_subset (Finset.subset_univ _) fun z _ hz => hzero z hz]
+  rw [hsplit, sum_ballE_eq_sum_levels]
+  have hInner : ∀ j ∈ Finset.range (k + 1),
+      (∑ z ∈ levClass A hA x y j,
+        radialVec A hA x y ρ k z * radialVec A hA x y ρ k z) = 2 := by
+    intro j hj
+    have hjk : j ≤ k := by
+      simp only [Finset.mem_range] at hj
+      omega
+    have hval : ∀ z ∈ levClass A hA x y j,
+        radialVec A hA x y ρ k z * radialVec A hA x y ρ k z
+          = ρ ^ (2 * j) := by
+      intro z hz
+      simp only [levClass, Finset.mem_filter, Finset.mem_univ, true_and] at hz
+      have hmem : z ∈ ballE A hA x y k := by
+        simp only [ballE, Finset.mem_filter, Finset.mem_univ, true_and]
+        omega
+      rw [radialVec_of_mem_ballE hmem, hz]
+      have h2j : 2 * j = j + j := by omega
+      rw [h2j, ← pow_add]
+    rw [Finset.sum_congr rfl (fun z hz => hval z hz), Finset.sum_const,
+      htb j (by omega), nsmul_eq_mul]
+    have hc : ((2 * (d - 1) ^ j : ℕ) : ℝ) = 2 * ((d - 1 : ℕ) : ℝ) ^ j := by
+      push_cast
+      ring
+    rw [hc, pow_mul ρ 2 j, hrho, mul_assoc, ← mul_pow,
+      mul_inv_cancel₀ hcast_ne, one_pow, mul_one]
+  rw [Finset.sum_congr rfl hInner, Finset.sum_const, Finset.card_range,
+    nsmul_eq_mul]
+  push_cast
+  ring
+
+end RadialVector
 
 end SpectralGraphTheory

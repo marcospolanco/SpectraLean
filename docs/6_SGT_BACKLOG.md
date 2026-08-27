@@ -169,10 +169,30 @@ balls at four rfl-verified cross distances ≥ 3 proved by short-walk
 exhaustion, layer-cake cardinality by two independent routes), the C₄
 wrap-around negative (`IsTreeBall` fails at radius 3 — the
 qualification trap's witness), and the threshold-tightness fence (at
-exactly `r + s` the balls provably intersect). **Next: Step 3** (the
-radial test vector `ρ^{lev}` on `ballE` and its Rayleigh quotient —
-the priced crux, likely needing sub-decomposition) per the proposal's
-one-step-per-run instruction.
+exactly `r + s` the balls provably intersect).
+
+*Update (2026-08-27, Step 3's first sub-slice delivered):* **the
+radial test vector exists on the shelf with its normalization computed
+exactly** (run `20260827T012700Z-run-1`; zero new axioms, QA +10,
+2539 → 2549). The `RadialVector` section of
+`GraphTheory/AlonBoppana.lean`: `radialVec` (Nilli's `ρ^{lev}` on the
+radius-`k` edge ball, `0` outside, the d-regular-tree normalization
+`ρ² = ((d−1:ℕ):ℝ)⁻¹` carried as a hypothesis), the
+entry/support/nonvanishing interface, the layer-cake sum bridge
+`sum_ballE_eq_sum_levels`, and **the squared-norm identity
+`radialVec_dotProduct_self`** — `⟨ρ^{lev}, ρ^{lev}⟩ = 2 (k+1)`
+exactly under `IsTreeBall`, the geometric growth of full levels
+cancelling the vector's decay per level: the Rayleigh quotient's
+denominator, the first theorem consumer of the Step-2 level machinery.
+`1 < d` load-bearing at the `mul_inv_cancel₀` cancellation (at `d = 1`
+the hypothesis set is junk-satisfiable at `ρ = 0` through `0⁻¹ = 0`
+and the identity fails — fenced at K₂, `2 ≠ 4`). QA: the C₈ pin `4`
+by two independent routes (theorem vs raw per-vertex enumeration) and
+the `k = 0` pair both routes (`isTreeBall_one_of_connected`'s first
+consumer). **Next: Step 3b** (the energy half — the numerator
+`⟨ρ^{lev}, A ρ^{lev}⟩` against the level equations, the
+level-Lipschitz property of `levE` along edges its likely first
+lemma) per the proposal's one-step-per-run instruction.
 
 *Update (2026-08-25/26):* **the irregular (volume-weighted) Cheeger *upper*
 bound delivered** (`proposals/irregular-cheeger-variational-transfer.md`

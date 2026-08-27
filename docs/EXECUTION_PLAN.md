@@ -7,14 +7,126 @@ holds the append-only narrative.
 ## Active milestone
 
 None — see the delivered milestone below and the standing handoff. The
-Active priority table's High rows: **Alon–Boppana Steps 0–2 delivered
-as of this run** (Step 3 — the radial test vector and its Rayleigh
-quotient, the proposal's priced crux — is next, one step per the
-proposal's operating instructions); **sparsification via leverage
-scores** (its Step-0 survey — verifying `matrix_bernstein`'s clause
-set supports the leverage-score argument — remains the other High row
-and is a self-contained survey-sized run). Medium-High/Medium rows
-unchanged.
+Active priority table's High rows: **Alon–Boppana Steps 0–3a delivered
+as of this run** (Step 3b — the energy half of the Rayleigh quotient,
+the numerator `⟨ρ^{lev}, A ρ^{lev}⟩` against `IsTreeBall`'s level
+equations, with the level-Lipschitz property of `levE` along edges its
+likely first lemma — is next, one sub-slice per the proposal's
+operating instructions); **sparsification via leverage scores** (its
+Step-0 survey — verifying `matrix_bernstein`'s clause set supports
+the leverage-score argument — remains the other High row and is a
+self-contained survey-sized run). Medium-High/Medium rows unchanged.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The Alon–Boppana bound, Step 3 sub-slice 3a — the radial test vector
+and its normalization; `proposals/alon-boppana-bound.md` (Gate ADOPTED
+2026-08-26); run 1, 2026-08-27, run `20260827T012700Z-run-1`; selected
+per priority item 0 as the Active table's adopted High row's named next
+action (Step 3 priced by the proposal itself for sub-decomposition;
+this run took the vector + normalization half — the other High row,
+sparsification, stays a Step-0 survey that may re-scope it): DELIVERED
+— pure hard crust, zero new axioms (count stays 10; `#print axioms`
+via `wip/ab3_axcheck.lean` on all 18 audited declarations — 8 public +
+10 QA, the two private QA level-oracle helpers covered transitively:
+exactly `propext, Classical.choice, Quot.sound`, every one). QA
+2539 → 2549 (+10, the Step-3 section of `AlonBoppana_QA.lean`).**
+
+**Delivered** in `GraphTheory/AlonBoppana.lean`'s new `RadialVector`
+section (no new imports, no umbrella change): **`radialVec A hA x y ρ
+k`** — Nilli's radial test vector, the value `ρ ^ levE z` per BFS level
+on the radius-`k` edge ball and `0` outside, the d-regular-tree
+normalization carried by consumers as the hypothesis
+`ρ ^ 2 = ((d − 1 : ℕ) : ℝ)⁻¹` (the `√` plumbing deliberately deferred
+to the Step-5 packaging with the `IsDRegular` `d : ℝ` join); the
+interface (`radialVec_apply`, `radialVec_of_mem_ballE`,
+`radialVec_eq_zero_of_not_mem_ballE`, `radialVec_left` — the
+always-`1` endpoint seed, `radialVec_ne_zero`); **the layer-cake sum
+bridge `sum_ballE_eq_sum_levels`** (`ballE_card_eq_sum`'s summation
+form at a function); and the headline **`radialVec_dotProduct_self`** —
+`⟨ρ^{lev}, ρ^{lev}⟩ = 2 (k + 1)` exactly under `IsTreeBall` at radius
+`k+1`: per level, the geometric growth `2 (d−1)^j` cancels the
+vector's decay `ρ^{2j}` to exactly `2` — **the denominator of Nilli's
+Rayleigh quotient and the first theorem consumer of the Step-2 level
+machinery** (load-bearing growth: a wrong `levE`, `ballE` shape, or
+`IsTreeBall` equation breaks the identity's type or truth). `1 < d` is
+load-bearing at the `mul_inv_cancel₀` cancellation.
+
+**QA (+10):** the **C₈ squared-norm pin `4 = 2 (k+1)` by two
+independent routes** — the theorem through `abC8_isTreeBall` vs raw
+per-vertex enumeration at the level-membership oracles
+(`abC8_levE_zero_iff`/`abC8_levE_one_iff`, derived from the delivered
+`levClass_zero_eq`/`abC8_levClass_one_eq`; the indicator sum the set's
+card by `decide`) — the routes share no mechanism; the **`k = 0` pair
+both routes** (the theorem at `isTreeBall_one_of_connected` — that
+Step-2 lemma's first consumer); and the **K₂ `d = 1` degeneracy fence**
+(the tree-ball predicate holds at `d = 1` — level 1 demanded empty and
+empty — the normalization hypothesis is *junk-satisfiable* at `ρ = 0`
+through `0⁻¹ = 0`, and the vector is `![1, 1]` at squared norm
+`2 ≠ 2 (1+1) = 4`: `hd1` isolated exactly at the cancellation).
+
+**Verification:** spike first (`wip/ab3_spike.lean`, module side and
+QA side iterated to zero errors/zero warnings before any shelf Lean;
+technique findings recorded in the proposal's Step-3a delivery record
+— the `mul_assoc`-before-`← mul_pow` reassociation at the `2`-headed
+per-level product, `nsmul_eq_mul` as the root ℕ-smul converter where
+`Nat.smul_one` does not exist, the named-`have` requirement for
+`Finset.sum_subset`'s zero function, `intro`-then-`rcases` for
+disjunct patterns, the reverse-order `simp` flattening of nested
+`Finset.mem_insert`, and `.le` on an equation rewriting at the
+equation's own constant); `lake env lean` zero errors/zero warnings on
+the module and the QA file; explicit `lake build` targets ✔ (2010/2010,
+2011/2011 — the QA elaboration hit the recorded stale-olean trap once
+before the module-target rebuild); `#print axioms` — the standard
+three only, all 18; **full `lake build` ✔ (2388/2389, "Build completed
+successfully") immediately followed by `check_build_completeness.py` —
+113/113 fresh, 0 stale, 0 missing, exit 0** (the run hit the mtime
+half of the documented staleness remediation once — a `touch`-and-replay
+left an artifact older than source; the artifact-removal rebuild closed
+it); `lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass after the record sweep; scoreboard
+regenerated idempotent (**2549/10/0**, md5-stable). Records updated:
+the proposal (status header + Step-3a delivery record with technique
+findings + open-next-step → Step 3b), `proposals/README.md` (the High
+row's next action → Step 3b), README (**2549** — this sweep also
+repaired the committed README's stale Step-1-era count and clauses,
+left behind by the Step-2 commit; the status-paragraph and module-table
+clauses now cover Steps 1–3a), the radar (QA axis synced 2520 → 2549
+with the same drift repair noted), the scoreboard (two verification
+rows + the interpretation bullet), the index map (the AlonBoppana
+section's Step-3 rows **plus the inherited signed-graphs gap closed**
+— the `GraphTheory.Signed` section that the `7ca544b` commit had
+omitted, flagged as a bounded records task by the Step-1 run and
+delivered here per the standing handoff), backlog item 3 (the Step-3a
+update + next → Step 3b), the module and QA docstrings, this plan, and
+the activity log. Nothing committed; the prior runs' deliveries
+preserved untouched.
+
+**Remaining risk:** the program is 0–3a of 5 steps — the theorem itself
+needs the energy half (Step 3b), the two-vector orthogonalization
+(Step 4), and the diameter-dependent statement (Step 5). The energy
+half's known hard piece is the neighbor-counting structure: the
+cardinality equations alone give level sizes, not the level-to-level
+edge counts Nilli's numerator consumes, so Step 3b must either count
+enough edges from below (each level-`j` vertex has a parent at level
+`j−1`) or strengthen `IsTreeBall` — a decision its own spike should
+price. C₈'s 2-regularity remains structurally evident but not cheaply
+computable at `Fin 8` (the recorded `vecCons` opacity), so no Step-3b
+QA should assume it; the `IsDRegular`-to-`IsTreeBall` `d`-join stays
+deferred to the Step-5 packaging; the diameter bridge belongs to Step
+5. Q₃/K₃,₃ (the theorem-shaped negative witnesses) remain Steps 3b–5
+QA.
+
+**Next milestone (open):** per priority item 0 — Alon–Boppana
+**Step 3b** (the energy half — the numerator `⟨ρ^{lev}, A ρ^{lev}⟩`
+against the level equations; likely its own sub-decomposition, one
+sub-slice per run), or the sparsification High row's Step-0 survey;
+otherwise the Medium-High/Medium rows (empirical-stationary-
+distribution Step 0; the sampled-Laplacian quadratic-form consumer;
+the Fiedler-subspace Davis–Kahan Step-0 check against the delivered
+Band family).
 
 ------
 

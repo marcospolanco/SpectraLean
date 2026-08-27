@@ -3,9 +3,12 @@
 **Status:** ADOPTED 2026-08-26 (see the Gate section below for the
 recorded decision) — **Step 0 delivered 2026-08-26 (the tree-ball
 spike, verdict recorded under "Build order" below), Step 1
-delivered 2026-08-26 (the d-regularity interface), and Step 2
+delivered 2026-08-26 (the d-regularity interface), Step 2
 delivered 2026-08-26 (the tree-ball interface at module level;
-delivery record at the end of this document); Step 3 is next.**
+delivery record at the end of this document), and Step 3's first
+sub-slice delivered 2026-08-27 (the radial test vector and its
+normalization; delivery record at the end of this document); the
+energy half of Step 3 is next.**
 Originally proposed 2026-08-22 as a Step 0 survey only, written up to
 the same standard as
 [`weighted-matrix-tree-theorem.md`](weighted-matrix-tree-theorem.md) —
@@ -338,16 +341,114 @@ edit is itself part of the decision, not a routine documentation update.
 
 ## Open next step
 
-**Step 3** (the radial test vector and its Rayleigh quotient — the
-crux; `f` supported on `ballE`, constant `ρ^{lev}` per level with
-`ρ = 1/√(d−1)`, its well-definedness and nonvanishing, and the
-quotient computation consuming `IsTreeBall`'s equations through the
-delivered layer-cake bridge `ballE_card_eq_sum`) — one step per this
-proposal's operating instructions, with its own likely
-sub-decomposition. Steps 0, 1, and 2 are delivered (see the records
-above and below).
+**Step 3b** (the energy half of the crux: the numerator
+`⟨ρ^{lev}, A ρ^{lev}⟩` — the radial vector's adjacency quadratic form
+computed against `IsTreeBall`'s level equations, the level-Lipschitz
+property of `levE` along edges (`|lev u − lev v| ≤ 1` for adjacent
+`u, v`) its likely first lemma — closing the Rayleigh quotient's
+`2√(d−1) − O(1/k)` shape when divided by the delivered
+`radialVec_dotProduct_self`) — one step per this proposal's operating
+instructions, with its own likely sub-decomposition. Steps 0, 1, 2,
+and 3a are delivered (see the records above and below).
 
 ---
+
+## Delivery record — Step 3, sub-slice 3a (the radial test vector and its normalization), 2026-08-27
+
+**Run:** `20260827T012700Z-run-1` · **Result:** DELIVERED, pure hard
+crust, zero new axioms (count stays 10; `#print axioms` via
+`wip/ab3_axcheck.lean` on all 18 audited declarations — 8 public +
+10 QA, the two private QA level-oracle helpers covered transitively —
+reads exactly `propext, Classical.choice, Quot.sound`, every one). QA
++10 (`AlonBoppana_QA.lean` extended with the Step-3 section; 2539 →
+2549 by the generator metric).
+
+**Delivered** in `Scaffold/Mathlib/GraphTheory/AlonBoppana.lean`'s new
+`RadialVector` section (no new imports, no umbrella change):
+
+- **`radialVec A hA x y ρ k`** — Nilli's radial test vector: on the
+  radius-`k` ball of the edge `(x, y)`, the value `ρ ^ levE z`
+  (constant per BFS level, decaying by `ρ` per level), `0` outside.
+  The d-regular-tree normalization is carried by consumers as the
+  hypothesis `ρ ^ 2 = ((d − 1 : ℕ) : ℝ)⁻¹` — the `√` plumbing stays in
+  the Step-5 packaging, exactly where the join to `IsDRegular`'s
+  `d : ℝ` idiom is already deferred.
+- The interface: `radialVec_apply` (entry form),
+  `radialVec_of_mem_ballE`/`radialVec_eq_zero_of_not_mem_ballE`
+  (support = `ballE`), `radialVec_left` (the left endpoint always
+  carries `1`), `radialVec_ne_zero` (nonvanishing at every radius and
+  every `ρ`).
+- **`sum_ballE_eq_sum_levels`** — the layer-cake sum bridge: any
+  function summed over the radius-`k` ball equals its level-by-level
+  sum. The summation form of `ballE_card_eq_sum` (same
+  `ballE_succ_union` + pairwise-disjoint induction), stated at a
+  function because the squared norm is level-constant but not
+  constant.
+- **`radialVec_dotProduct_self`** — the headline normalization
+  identity: `⟨ρ^{lev}, ρ^{lev}⟩ = 2 (k + 1)` exactly, under
+  `IsTreeBall` at radius `k+1` and `ρ ^ 2 = ((d−1 : ℕ) : ℝ)⁻¹`. The
+  proof is the per-level collapse `2 (d−1)^j · ρ^{2j} = 2` (geometric
+  growth against geometric decay, via `pow_mul` + `mul_pow` +
+  `mul_inv_cancel₀`), summed over `k + 1` levels through the bridge.
+  **The denominator of Nilli's Rayleigh quotient, computed exactly** —
+  the first theorem consumer of the Step-2 level machinery, and
+  load-bearing growth in the strategy's sense: a wrong `levE`, a wrong
+  `ballE` filter shape, or a wrong `IsTreeBall` equation breaks the
+  identity's type or truth. `1 < d` is load-bearing at exactly the
+  cancellation step (at `d = 1`, `ρ = 0` is junk-admissible through
+  `0⁻¹ = 0` while `(d−1)^j` kills the counts — QA fences it below).
+
+**QA** (the Step-3 section of `AlonBoppana_QA.lean`): the **C₈
+squared-norm pin by two independent routes** at `k = 1`, `ρ = 1`,
+`d = 2` — `abC8_radial_norm_raw` computes `4` by per-vertex
+enumeration (the level-0/level-1 membership oracles
+`abC8_levE_zero_iff`/`abC8_levE_one_iff` derived from the delivered
+`levClass_zero_eq`/`abC8_levClass_one_eq`, the indicator sum the
+set's card by `decide`) while `abC8_radial_norm_thm` obtains the same
+number through the identity at `abC8_isTreeBall` — the routes share no
+mechanism; the **`k = 0` pair** (the theorem at
+`isTreeBall_one_of_connected` — that Step-2 lemma's first consumer —
+vs raw enumeration at the level-0 pair, `2 = 2 (0+1)`); the K₂
+**`d = 1` degeneracy fence** `abK2_radial_d1_fence` (the tree-ball
+predicate holds at `d = 1` — level 1 demanded empty and empty, via
+`abK2_levE_zero`: both vertices are endpoints — the normalization
+hypothesis holds at `ρ = 0` through `0⁻¹ = 0`, and the vector is
+`![1, 1]` at squared norm `2 ≠ 2 (1+1) = 4`: `hd1` isolated exactly
+where the module docstring names it).
+
+**Verification:** spike first (`wip/ab3_spike.lean` — module side and
+QA side iterated to zero errors/zero warnings before any shelf Lean);
+`lake env lean` zero errors/zero warnings on the module and the QA
+file; explicit `lake build` targets ✔ (2010/2010, 2011/2011);
+`#print axioms` — the standard three only, all 18; **full `lake
+build` ✔ (2388/2389, "Build completed successfully") immediately
+followed by `check_build_completeness.py` — 113/113 fresh, 0 stale,
+0 missing, exit 0** (the run hit the mtime half of the documented
+staleness remediation once — a `touch`-and-replay left an artifact
+mtime older than source; the artifact-removal rebuild closed it);
+`lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass after the record sweep; scoreboard
+regenerated idempotent (**2549/10/0**, md5-stable).
+
+**Technique findings for downstream steps** (recorded from spike
+failures): the `2 * a^j * b^j` per-level product needs an explicit
+`mul_assoc` *before* `← mul_pow` (the reversed rewrite searches the
+right-associated shape and the `2`-headed product is
+left-associated); `nsmul_eq_mul` (root, `Mathlib.Data.Nat.Cast`)
+converts `Finset.sum_const`'s ℕ-smul to multiplication where
+`Nat.smul_one` does not exist; `Finset.sum_subset`'s zero-function
+argument should be pre-proved as a named `have` (an inline `by rw`
+leaves metavariable-headed membership that unifies with the wrong
+side); `intro z (rfl | rfl | …)` is not syntax — `intro z h` then
+`rcases h`; `simp` flattens nested `Finset.mem_insert` in *reverse*
+insertion order, so iff-helper statements should convert with explicit
+`rcases` rather than `simpa` when the disjunct order matters; and
+`.le` on an equation rewrites at the equation's own constant (a
+`levE = 0` fact gives `≤ 0`, not `≤ 1` — thread with
+`.le.trans (Nat.zero_le 1)` or `omega`).
+
+---
+
 
 ## Delivery record — Step 2 (the tree-ball interface), 2026-08-26
 

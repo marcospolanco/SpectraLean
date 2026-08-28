@@ -1421,6 +1421,25 @@ edge-perturbation design with every repaired-axiom clause proved
 | `perturbEdgeLap` / `perturbEdgeLap_posSemidef` / `laplacian_edgeAdj_eq_perturbEdgeLap` | Edge perturbation | The single-edge Laplacian block and its PSD at nonnegative weights |
 | `perturbSummand` / `perturbSummand_mul_self` / `perturbSummand_sq_le` | Edge perturbation | The centered Bernoulli summand `(δ_e − p_e) • L_e` and the **semidefinite bound `X_e² ⪯ L_e²`** — the axiom's `h_bound` clause, sign-free, load-bearing only on `p ∈ [0, 1]` |
 | `stronglyMeasurable_perturbSummand` / `indepFun_perturbSummand` | Edge perturbation | The `h_meas`/`h_indep` clauses through BernoulliProduct's matrix transfer layer |
+| `perturbAdj` / `perturbWeight` / `perturbWeight_isSymm` | Edge perturbation | **(2026-08-28, the pipeline delivery) the random weight-space perturbation** — the summed centered single-edge adjacencies, symmetric for every outcome |
+| `perturbWeight_apply_of_ne` / `perturbWeight_apply_diag` | Edge perturbation | The entry formulas: off the diagonal the two ordered pairs on `{i, j}` contribute; on the diagonal one (no double count) |
+| `laplacian_perturbWeight` | Edge perturbation | **The packaging identity** `laplacian (perturbWeight A p ω) = ∑ₑ perturbSummand A p e ω` — the concentration → stability pipeline's deterministic hinge, through `laplacian_sum`/`laplacian_smul` (delivered the same day in `Spectral.lean`, retiring the sparsification program's recorded engine prerequisite) |
+
+### `Scaffold.Derived.EdgePerturbationDrift` (the concentration → subspace-stability pipeline — 2026-08-28)
+
+The first join of the two most recent center deliveries:
+high-probability Fiedler rotation under the centered Bernoulli edge
+design, in the `eventStreamProjectorDrift` inclusion idiom. Both
+declarations are **conditional on the `matrix_hoeffding` axiom via the
+tail alone**; the Davis–Kahan side, the kernel identification, the
+packaging identity, and the Weyl separation discharge are proved. The
+separation is stated against the *base* graph's deterministic gap —
+no per-outcome spectral hypothesis.
+
+| Declaration | Area | Description |
+| --- | --- | --- |
+| `edgePerturbation_fiedlerSubspace_drift` | Fiedler stability | At `t + δ ≤ λ₃(A) − λ₂(A)`: `μ{‖P(A+E_ω) − P(A)‖ ≥ t/δ} ≤ 2 d exp(−t²/(2‖∑ₑ L_e²‖))` — the bottom-2 subspace (the Fiedler cluster on a connected base) under random edge resampling |
+| `edgePerturbation_fiedlerLine_drift` | Fiedler stability | The payoff: the same tail for the Fiedler *line* itself, under the per-outcome nonnegativity/connectivity design constraints the kernel identification needs (both hold universally at `p_{ij} + p_{ji} ≤ 1` on positive-weight pairs); QA pins the closed-form instance `6 exp(−1/24)` on the three-path at `p ≡ ¼` |
 
 ### `Scaffold.Derived.SparsificationTail` (leverage-score sparsification, Slice 3 — the axiom-backed assembly)
 

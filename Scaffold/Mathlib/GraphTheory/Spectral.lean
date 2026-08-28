@@ -161,6 +161,48 @@ theorem laplacian_add (A E : WAdj (V := V)) :
       degreeMatrix_off_diagonal E h, Matrix.add_apply]
     ring
 
+omit [DecidableEq V] in
+/-- The degree of a scaled adjacency: degrees scale. -/
+theorem deg_smul (c : ℝ) (M : WAdj (V := V)) (i : V) :
+    deg (c • M) i = c * deg M i := by
+  simp only [deg, Matrix.smul_apply, smul_eq_mul, Finset.mul_sum]
+
+/-- **The Laplacian of a scaled adjacency is the scaled Laplacian** —
+the second half of the Laplacian's linearity package (with
+`laplacian_add` above), through which summed sampling designs transport.
+The recorded prerequisite of the sampled-graph packaging identity
+(`proposals/spectral-sparsification-via-leverage-scores.md`, priced
+follow-on), first consumed by `EdgePerturbation.laplacian_perturbWeight`
+(the centered-Bernoulli edge design's packaging identity). -/
+theorem laplacian_smul (c : ℝ) (M : WAdj (V := V)) :
+    laplacian (c • M) = c • laplacian M := by
+  ext i j
+  by_cases h : i = j
+  · subst h
+    show degreeMatrix (c • M) i i - (c • M) i i
+      = c * (degreeMatrix M i i - M i i)
+    rw [degreeMatrix_diagonal, degreeMatrix_diagonal, deg_smul]
+    simp only [Matrix.smul_apply, smul_eq_mul]
+    ring
+  · show degreeMatrix (c • M) i j - (c • M) i j
+      = c * (degreeMatrix M i j - M i j)
+    rw [degreeMatrix_off_diagonal (c • M) h, degreeMatrix_off_diagonal M h]
+    simp only [Matrix.smul_apply, smul_eq_mul]
+    ring
+
+/-- **The Laplacian of a finite sum of adjacencies is the sum of the
+Laplacians** — induction at `laplacian_add`/`laplacian_zero`. With
+`laplacian_smul` this is the full linearity package through which a
+randomly sampled graph's Laplacian is transported into its
+summed-blocks spelling (the tail theorems control). -/
+theorem laplacian_sum {ι : Type*} (s : Finset ι) (f : ι → WAdj (V := V)) :
+    laplacian (∑ i ∈ s, f i) = ∑ i ∈ s, laplacian (f i) := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp [laplacian_zero]
+  | insert hx ih =>
+      rw [Finset.sum_insert hx, Finset.sum_insert hx, laplacian_add, ih]
+
 /-- The degree of `i` is the row sum, so every Laplacian row sums to zero;
 the all-ones vector is in the kernel of every Laplacian. No symmetry is
 required: this is the row-sum identity. -/

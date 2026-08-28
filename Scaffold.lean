@@ -56,6 +56,7 @@ import Scaffold.Derived.EventStream
 import Scaffold.Derived.ProjectorDrift
 import Scaffold.Derived.SparsificationTail
 import Scaffold.Derived.EdgePerturbationTail
+import Scaffold.Derived.EdgePerturbationDrift
 import Scaffold.Derived.EmpiricalStationary
 
 /-!

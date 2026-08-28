@@ -367,3 +367,21 @@ iceboxed with the specific obstruction recorded.
 [Fiedler Partitioning (delivered)](fiedler-partitioning.md),
 [Discharge Perturbation Axioms (Davis–Kahan delivery record)](discharge-perturbation-axioms.md),
 `docs/7_SGT_RADAR.md` axis 4.
+
+### Companion consumer delivered: the concentration → subspace-stability pipeline (2026-08-28)
+
+The named companion follow-on — composing these stability theorems
+with a concentration tail — was **delivered the same day** by run
+`20260828T132541Z-run-1` as `Derived/EdgePerturbationDrift.lean`'s
+`edgePerturbation_fiedlerSubspace_drift` /
+`edgePerturbation_fiedlerLine_drift` (composing
+`fiedlerLine_stability`/`fiedlerSubspace_stability` with
+`edgePerturbation_norm_tail`, the matrix-Hoeffding consumer, through
+the packaging identity `laplacian (perturbWeight A p ω) = ∑ₑ
+perturbSummand`; conditional on `matrix_hoeffding` via the tail alone,
+with the Davis–Kahan side and this program's kernel identification
+proved). See the matrix-Hoeffding proposal's follow-on delivery record
+for the full account. This makes `fiedlerLine_stability` load-bearing
+inside a probability bound — the Fiedler program's kernel
+characterization ecosystem now exercises its content under a *random*
+perturbation.

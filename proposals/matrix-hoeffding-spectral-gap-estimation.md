@@ -260,15 +260,102 @@ first run, as designed).
 
 ### Residuals and priced follow-ons
 
-- The sampled-graph packaging (`∑_e (δ_e − p_e) • L_e` rewritten as
+- ~~The sampled-graph packaging (`∑_e (δ_e − p_e) • L_e` rewritten as
   `laplacian (sampledAdj ω) − laplacian (expectedAdj)` through
   `laplacian_smul`/`laplacian_sum` — the latter two engine lemmas are
   not yet on the shelf) is the natural next slice; the theorem's meaning
   currently rests on `laplacian_edgeAdj` identifying the blocks as
-  single-edge Laplacians.
+  single-edge Laplacians.~~ **DELIVERED 2026-08-28** (run
+  `20260828T132541Z-run-1`) — the follow-on delivery record below.
 - The uniform (sup-over-x / existential-x) quadratic-form form —
   `sparsification_quadForm_tail`'s event shape — is an alternative
   packaging of the same bound.
 - The `2 d` dimension prefactor is not tightened to the matrix-martingale
   golden factor anywhere in this family (a Tropp-source-level question,
   not a repair).
+
+### Follow-on delivery record: the concentration → subspace-stability pipeline (2026-08-28, run `20260828T132541Z-run-1`)
+
+The standing handoff's named next candidate after this delivery — the
+first join of the two most recent center deliveries — **DELIVERED**:
+`Derived/EdgePerturbationDrift.lean`'s
+`edgePerturbation_fiedlerSubspace_drift` and
+`edgePerturbation_fiedlerLine_drift` compose `fiedlerLine_stability` /
+`fiedlerSubspace_stability` (2026-08-28) with `edgePerturbation_norm_tail`
+(this proposal) in the `eventStreamProjectorDrift` inclusion idiom:
+`μ{‖Fiedler rotation at ω‖ ≥ t/δ} ≤ 2 d exp(−t²/(2‖∑ₑ L_e²‖))`
+whenever the base graph's gap satisfies `t + δ ≤ λ₃ − λ₂`. One interface
+improvement over the precedent: the separation is discharged
+per-outcome from the *deterministic base gap* via the proved
+`weyl_inequality` on the tail event's complement (the helper
+`separation_of_norm_lt`), so the drift theorems carry **no per-outcome
+spectral hypothesis** — `eventStreamProjectorDrift`'s `hgap` is a
+per-outcome hypothesis by contrast.
+
+The priced follow-on above landed as the pipeline's deterministic
+hinge: `Spectral.lean`'s `laplacian_smul`/`laplacian_sum` (with
+`deg_smul`; delivered here, exactly the two engine lemmas the residual
+named) and `EdgePerturbation.lean`'s `perturbWeight` — the random
+*weight-space* perturbation `∑_e (δ_e − p_e) • edgeAdj_e` with entry
+formulas (off-diagonal: the two ordered pairs on `{i, j}`; diagonal:
+one, no double count) — satisfying the **packaging identity**
+`laplacian (perturbWeight A p ω) = ∑_e perturbSummand A p e ω`, the
+route through which the tail's Laplacian-level norm bound reaches the
+graph-level perturbation the Davis–Kahan side consumes.
+
+**QA +20 (2765 → 2785, `EdgePerturbation_QA.lean`'s drift section):** the
+packaging identity pinned by two independent routes on K₂ (raw
+weight-space arithmetic `perturbWeight = epK2 → laplacian = v vᵀ` vs
+the design route through the identity theorem joined to the existing
+`epK2_perturbSum_allTrue` — a wrong `laplacian_sum`/`laplacian_smul`
+breaks exactly one); the three-path variance statistic exact
+(`∑ₑ L_e² = 4 • L(P₃)` through the rank-one squares, `‖·‖ = 12` through
+the pinned `λ₃ = 3` at the `l2OpNorm_eq_max_abs_evals` bridge — the K₂
+`= 8` pin's ordered-pair bookkeeping checked on a two-edge graph); the
+per-outcome stack at `p ≡ ¼` (entry formula with survival factor
+`½ + δ_{ij} + δ_{ji}`, nonnegativity, and support-graph equality —
+every edge survives in every outcome, the path's connectivity
+load-bearing at every corner of the outcome space); and the
+**closed-form Fiedler-line drift instance** `μ{‖rotation‖ ≥ 1} ≤
+6 exp(−1/24)` (gap discharge `1 + 1 ≤ 3 − 1` through the two exact
+spectrum pins).
+
+**Verification:** spike first (`wip/csd_spike.lean`, every piece to
+zero errors/warnings before any shelf edit); `lake env lean` zero
+errors on all four touched files (Spectral at exactly its pre-existing
+8-warning baseline); explicit `lake build` targets ✔; `#print axioms`
+via `wip/csd_axcheck.lean` on all 29 audited declarations — 27 at the
+standard three, exactly the two Derived drift theorems and the
+drift-QA instance carrying `matrix_hoeffding` alone (the honest
+conditional structure); **full `lake build` ✔ (2405/2406) immediately
+followed by `check_build_completeness.py` — after the documented
+single-module mtime remediation, 127/127 fresh, 0 stale, 0 missing,
+exit 0**; `lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated idempotent
+(**2785/10/0**); **map freshness exit 0** after the stats-stamp sync
+(the check caught the 2765 → 2785 drift on first run, as designed).
+
+**Technique findings** (the spike's catch record): `fin_cases`-produced
+`⟨k, ⋯⟩` constructor literals block both `rw` matching (lemma
+instantiated at numeral `0 : Fin n` does not match `⟨0, ⋯⟩`
+syntactically) and simp's evaluation of `Fin.val`-cast if-conditions —
+the robust replacement is the disjunction-substitution idiom
+`rcases (hfin : ∀ k : Fin n, k = 0 ∨ … ∨ k = n-1) i with rfl | … | rfl`
+(proved by `fin_cases` on a *disjunctive* goal, where it works), which
+substitutes genuine numerals; hypotheses with implicit `{i}{j}` binders
+before explicit ones must be passed by name (`(hij := h)`) or the proof
+lands in the first explicit slot; the positional-argument trap also
+strikes numeric binders between proofs (a missing `δ : ℝ` value makes
+`one_pos` land in a `Prop`-shaped slot with a confusing "numerals are
+data" error); `simp (config := {decide := true})` is the working tool
+for if-conditions at `Fin n × Fin n` numerals that plain `simp` leaves
+half-normalized (`Prod.zero_default` canonicalizes `(0,0)` to the
+product numeral, breaking `if_neg (by decide …)` patterns while the
+goal still displays them as pairs); `Matrix.transpose_smul` (not
+`smul_transpose`); `mul_le_mul_of_nonneg_right` + `linarith` where
+`mul_nonpos` does not exist in this pin; `rw` with a `≤`-hypothesis is
+a category error — `lt_of_le_of_lt` is the route; `Fin.ext (by simp)`
+for the top-index conversion in `l2OpNorm_eq_max_abs_evals`; and the
+stale-olen recurrence at every import boundary.
+
+**Status: the follow-on delivered; this proposal remains COMPLETE.**

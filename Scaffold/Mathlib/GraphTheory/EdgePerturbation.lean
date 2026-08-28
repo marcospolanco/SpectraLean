@@ -24,11 +24,20 @@
      matrix layer, Hermitianity is rank-one symmetry, and the semidefinite
      bound `X_e² ⪯ L_e²` reduces to the interval `(δ_e − p_e)² ≤ 1` — no
      hypothesis on the weight matrix `A` at all (the design is sign-free:
-     squares of symmetric matrices are positive semidefinite).
+     squares of symmetric matrices are positive semidefinite);
+  4. the weight-space perturbation `perturbWeight` (the summed centered
+     single-edge adjacencies, with its entry formulas) and the packaging
+     identity `laplacian (perturbWeight A p ω) = ∑ₑ perturbSummand A p e ω`
+     — the deterministic hinge of the concentration → subspace-stability
+     pipeline (`Derived/EdgePerturbationDrift.lean`), joining the
+     graph-level perturbation to the Laplacian-level blocks the tail
+     controls.
 
   The axiom-backed tail theorems live in `Scaffold/Derived/
-  EdgePerturbationTail.lean`; QA in `Scaffold/QA/Derived/
-  EdgePerturbation_QA.lean`.
+  EdgePerturbationTail.lean`; the concentration → subspace-stability
+  pipeline (the composed high-probability Fiedler drift) in
+  `Scaffold/Derived/EdgePerturbationDrift.lean`; QA in
+  `Scaffold/QA/Derived/EdgePerturbation_QA.lean`.
 -/
 
 import Scaffold.Mathlib.GraphTheory.Sparsification
@@ -267,5 +276,137 @@ theorem indepFun_perturbSummand (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 1
     (G := fun b => ((if b then (1 : ℝ) else 0) - p e') • perturbEdgeLap A e') hee
 
 end Design
+
+/-! ## 4. The weight-space perturbation and the packaging identity -/
+
+section WeightSpace
+
+variable (A : WAdj (V := V)) (p : (V × V) → ℝ)
+
+/-- The single-edge *adjacency* summand of the design: the centered
+Bernoulli coefficient times the single-edge graph. -/
+def perturbAdj (A : WAdj (V := V)) (p : (V × V) → ℝ) (e : V × V)
+    (ω : (V × V) → Bool) : Matrix V V ℝ :=
+  ((if ω e then (1 : ℝ) else 0) - p e) • edgeAdj e.1 e.2 (A e.1 e.2)
+
+omit [Fintype V] in
+theorem perturbAdj_isSymm (A : WAdj (V := V)) (p : (V × V) → ℝ) (e : V × V)
+    (ω : (V × V) → Bool) : (perturbAdj A p e ω).IsSymm := by
+  show (perturbAdj A p e ω)ᵀ = perturbAdj A p e ω
+  rw [perturbAdj, Matrix.transpose_smul]
+  exact congrArg (((if ω e then (1 : ℝ) else 0) - p e) • ·)
+    (edgeAdj_isSymm e.1 e.2 (A e.1 e.2)).eq
+
+/-- **The random weight-space perturbation** of the design: the summed
+centered single-edge adjacencies. Its Laplacian is exactly the summed
+centered edge-Laplacian blocks the tail controls
+(`laplacian_perturbWeight`) — the bridge through which graph-level
+consumers (the Fiedler-line drift theorem) read the tail's norm bound as
+a perturbation of the Laplacian operator. -/
+def perturbWeight (A : WAdj (V := V)) (p : (V × V) → ℝ)
+    (ω : (V × V) → Bool) : Matrix V V ℝ :=
+  ∑ e : V × V, perturbAdj A p e ω
+
+theorem perturbWeight_isSymm (A : WAdj (V := V)) (p : (V × V) → ℝ)
+    (ω : (V × V) → Bool) : (perturbWeight A p ω).IsSymm := by
+  show (perturbWeight A p ω)ᵀ = perturbWeight A p ω
+  rw [perturbWeight, Matrix.transpose_sum]
+  exact Finset.sum_congr rfl
+    fun e _ => (perturbAdj_isSymm A p e ω).eq
+
+/-- **The entry formula of the weight-space perturbation, off the
+diagonal**: only the two ordered pairs on `{i, j}` contribute. -/
+theorem perturbWeight_apply_of_ne (A : WAdj (V := V)) (p : (V × V) → ℝ)
+    (ω : (V × V) → Bool) {i j : V} (hij : i ≠ j) :
+    perturbWeight A p ω i j
+      = ((if ω (i, j) then (1 : ℝ) else 0) - p (i, j)) * A i j
+        + ((if ω (j, i) then (1 : ℝ) else 0) - p (j, i)) * A j i := by
+  classical
+  have hterm : ∀ e : V × V, (perturbAdj A p e ω) i j
+      = if e = (i, j) then ((if ω (i, j) then (1 : ℝ) else 0) - p (i, j)) * A i j
+        else if e = (j, i) then ((if ω (j, i) then (1 : ℝ) else 0) - p (j, i)) * A j i
+        else 0 := by
+    intro e
+    unfold perturbAdj
+    by_cases h1 : e = (i, j)
+    · subst h1
+      have hee : edgeAdj i j (A i j) i j = A i j := by
+        rw [edgeAdj_apply]; simp
+      simp only [Matrix.smul_apply, smul_eq_mul, hee]
+      simp
+    · by_cases h2 : e = (j, i)
+      · subst h2
+        have hee : edgeAdj j i (A j i) i j = A j i := by
+          rw [edgeAdj_apply]; simp [hij]
+        simp only [Matrix.smul_apply, smul_eq_mul, hee]
+        simp [hij, Ne.symm hij]
+      · simp only [Matrix.smul_apply, smul_eq_mul, edgeAdj_apply]
+        rw [if_neg (fun h : i = e.1 ∧ j = e.2 => h1 (Prod.ext h.1.symm h.2.symm)),
+            if_neg (fun h : i = e.2 ∧ j = e.1 => h2 (Prod.ext h.2.symm h.1.symm)),
+            mul_zero, if_neg h1, if_neg h2]
+  have hcoll : ∑ e ∈ (Finset.univ : Finset (V × V)), perturbAdj A p e ω i j
+      = ∑ e ∈ ({(i, j), (j, i)} : Finset (V × V)), perturbAdj A p e ω i j := by
+    refine (Finset.sum_subset (Finset.subset_univ _) ?_).symm
+    intro e _ he
+    rw [Finset.mem_insert, Finset.mem_singleton] at he
+    rw [hterm e, if_neg (fun h => he (Or.inl h)),
+      if_neg (fun h => he (Or.inr h))]
+  rw [perturbWeight, Matrix.sum_apply, hcoll, Finset.sum_insert (by
+      intro h
+      simp only [Finset.mem_singleton, Prod.mk.injEq] at h
+      exact hij h.1), Finset.sum_singleton, hterm (i, j), hterm (j, i)]
+  have hne1 : ¬((i, j) = (j, i)) := fun h => hij (congrArg Prod.fst h)
+  have hne2 : ¬((j, i) = (i, j)) := fun h => hij (congrArg Prod.fst h).symm
+  simp [hne1, hne2]
+
+/-- **The entry formula on the diagonal**: a single ordered pair
+contributes (no double count). -/
+theorem perturbWeight_apply_diag (A : WAdj (V := V)) (p : (V × V) → ℝ)
+    (ω : (V × V) → Bool) (i : V) :
+    perturbWeight A p ω i i
+      = ((if ω (i, i) then (1 : ℝ) else 0) - p (i, i)) * A i i := by
+  classical
+  have hterm : ∀ e : V × V, (perturbAdj A p e ω) i i
+      = if e = (i, i) then ((if ω (i, i) then (1 : ℝ) else 0) - p (i, i)) * A i i
+        else 0 := by
+    intro e
+    unfold perturbAdj
+    simp only [Matrix.smul_apply, smul_eq_mul, edgeAdj_apply]
+    by_cases h1 : i = e.1 ∧ i = e.2
+    · have he : e = (i, i) := Prod.ext h1.1.symm h1.2.symm
+      subst he
+      simp
+    · rw [if_neg h1, if_neg (fun h : i = e.2 ∧ i = e.1 => h1 ⟨h.2, h.1⟩),
+        mul_zero]
+      have hne : e ≠ (i, i) := by
+        intro h
+        exact h1 ⟨by rw [h], by rw [h]⟩
+      rw [if_neg hne]
+  have hcoll : ∑ e ∈ (Finset.univ : Finset (V × V)), perturbAdj A p e ω i i
+      = ∑ e ∈ ({(i, i)} : Finset (V × V)), perturbAdj A p e ω i i := by
+    refine (Finset.sum_subset (Finset.subset_univ _) ?_).symm
+    intro e _ he
+    rw [hterm e]
+    rw [Finset.mem_singleton] at he
+    rw [if_neg he]
+  rw [perturbWeight, Matrix.sum_apply, hcoll, Finset.sum_singleton,
+    hterm (i, i)]
+  simp
+
+/-- **The packaging identity**: the Laplacian of the random
+weight-space perturbation is exactly the summed centered edge-Laplacian
+blocks the tail controls — the concentration → stability pipeline's
+deterministic hinge, through the Laplacian's linearity package
+(`laplacian_sum`, `laplacian_smul`) and the single-edge join
+(`laplacian_edgeAdj_eq_perturbEdgeLap`). -/
+theorem laplacian_perturbWeight (A : WAdj (V := V)) (p : (V × V) → ℝ)
+    (ω : (V × V) → Bool) :
+    laplacian (perturbWeight A p ω) = ∑ e : V × V, perturbSummand A p e ω := by
+  rw [perturbWeight, laplacian_sum]
+  refine Finset.sum_congr rfl fun e _ => ?_
+  rw [perturbAdj, laplacian_smul, laplacian_edgeAdj_eq_perturbEdgeLap]
+  rfl
+
+end WeightSpace
 
 end SpectralGraphTheory

@@ -6,27 +6,117 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**The concentration → subspace-stability pipeline** — the standing
-handoff's named next candidate (both ends delivered: `fiedlerLine_stability`
-2026-08-28, `edgePerturbation_norm_tail` 2026-08-28), selected per
-priority item 0 fall-through — the Active table has no High rows and no
-open Medium rows other than priced follow-ons. **Leverage:** the two
-most recent center deliveries have never been joined; the composition
-(high-probability Fiedler-line rotation under random edge resampling)
-is exactly the `eventStreamProjectorDrift` idiom at the new
-Bernoulli-edge design, makes the Fiedler program's kernel-characterization
-ecosome load-bearing under a *random* perturbation for the first time,
-and retires the priced `laplacian_smul`/`laplacian_sum` engine follow-on
-on the way (the sampled-graph packaging identity's named prerequisite).
-Zero new axioms (conditional on `matrix_hoeffding` via the tail alone).
-**Next action:** spike the engine + packaging identity + the two drift
-statements and the P₃ QA instance (`wip/csd_spike.lean`), then deliver
-`Spectral.lean` engine lemmas, `EdgePerturbation.lean` design layer
-(`perturbWeight` + the identity `laplacian (perturbWeight A p ω) = ∑ₑ
-perturbSummand`), the new `Derived/EdgePerturbationDrift.lean`
-(`edgePerturbation_fiedlerSubspace_drift` with Weyl-discharged
-separation; `edgePerturbation_fiedlerLine_drift` with the connectivity
-stack), and the QA section in `EdgePerturbation_QA.lean`.
+None — see the delivered milestone below and the standing handoff. The
+concentration → subspace-stability pipeline (the standing handoff's
+named candidate) was **delivered this run** together with its engine
+prerequisite (`laplacian_smul`/`laplacian_sum`, the sparsification
+program's recorded follow-on) and the packaging identity; the Active
+priority table retains no High rows and only priced follow-ons.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The concentration → subspace-stability pipeline — the first join of
+the two most recent center deliveries, `fiedlerLine_stability` ∘
+`edgePerturbation_norm_tail`; the standing handoff's named next
+candidate (priority item 0 fall-through, no High rows); run 1,
+2026-08-28, run `20260828T132541Z-run-1`; DELIVERED — zero new axioms
+(count stays 10; `#print axioms` via `wip/csd_axcheck.lean` on all 29
+audited declarations: 10 engine/design + 17 hard-crust QA exactly
+`propext, Classical.choice, Quot.sound`; exactly the two Derived drift
+theorems and the drift-QA instance honestly carrying `matrix_hoeffding`
+alone — the honest conditional structure, the Davis–Kahan side proved).
+QA 2765 → 2785 (+20, `EdgePerturbation_QA.lean`'s new drift section).**
+
+**Delivered** in three pieces: (1) the deterministic hinge —
+`Spectral.lean`'s linearity package `deg_smul`/`laplacian_smul`/
+`laplacian_sum` (the sampled-graph packaging identity's recorded engine
+prerequisite, retired) and `EdgePerturbation.lean`'s new weight-space
+layer: `perturbAdj`/`perturbWeight` (the random *weight-space*
+perturbation, symmetric every outcome) with entry formulas off-diagonal
+(the two ordered pairs on `{i,j}`) and diagonal (one, no double count),
+and the **packaging identity**
+`laplacian_perturbWeight : laplacian (perturbWeight A p ω) = ∑ₑ
+perturbSummand A p e ω`; (2) the new `Derived/EdgePerturbationDrift.lean`
+— `edgePerturbation_fiedlerSubspace_drift` and the payoff
+`edgePerturbation_fiedlerLine_drift`: `μ{‖Fiedler rotation at ω‖ ≥ t/δ}
+≤ 2 d exp(−t²/(2‖∑ₑ L_e²‖))` whenever the *base* graph's gap satisfies
+`t + δ ≤ λ₃ − λ₂` — the `eventStreamProjectorDrift` inclusion idiom at
+the new design, with one interface improvement over the precedent: the
+separation is discharged per-outcome from the deterministic base gap by
+the proved Weyl on the tail event's complement (private
+`separation_of_norm_lt`), so no per-outcome spectral hypothesis
+remains; the line variant's per-outcome nonnegativity/connectivity
+constraints are documented design constraints (both hold universally at
+`p_{ij} + p_{ji} ≤ 1` on positive-weight pairs); (3) the QA — the
+packaging identity pinned by **two independent routes** on K₂ (raw
+weight-space arithmetic vs the design route through the identity theorem
+joined to the existing pin — a wrong `laplacian_sum`/`laplacian_smul`
+breaks exactly one), the three-path variance statistic exact
+(`∑ₑ L_e² = 4 • L(P₃)`, `‖·‖ = 12` through the pinned λ₃ = 3 at the
+`l2OpNorm_eq_max_abs_evals` bridge — the K₂ `= 8` bookkeeping checked on
+a two-edge graph), the per-outcome stack at p ≡ ¼ (entry formula with
+survival factor `½ + δ_{ij} + δ_{ji}`, nonnegativity, **support-graph
+equality** — every edge survives in every outcome), and the
+**closed-form Fiedler-line drift instance** `μ{‖rotation‖ ≥ 1} ≤
+6 exp(−1/24)` (gap discharge `1 + 1 ≤ 3 − 1` through the two exact
+spectrum pins).
+
+**Verification:** spike first (`wip/csd_spike.lean`, all four pieces
+iterated to zero errors/warnings before any shelf edit; technique
+findings recorded in the matrix-Hoeffding proposal's follow-on delivery
+record — the `fin_cases`-produced `⟨k, ⋯⟩` constructor literals block rw
+matching and simp's `Fin.val`-cast evaluation, the robust
+disjunction-substitution idiom `rcases hfin i with rfl | … | rfl` at
+genuine numerals, the `(hij := …)` named-argument requirement for
+implicit-binder lemmas, the positional-numeric-binder trap in theorem
+instantiation, `simp (config := {decide := true})` for product-numeral
+if-conditions, `Matrix.transpose_smul`'s name, `lt_of_le_of_lt` for
+`≤`-hypotheses, `Fin.ext (by simp)` for the top-index conversion);
+`lake env lean` zero errors on all four touched files (Spectral at
+exactly its pre-existing 8-warning baseline, the others clean on their
+new sections); explicit `lake build` targets ✔ (Spectral,
+EdgePerturbation, EdgePerturbationDrift, the QA module); `#print
+axioms` exactly as designed; **full `lake build` ✔ (2405/2406)
+immediately followed by `check_build_completeness.py` — after the
+documented single-module mtime remediation, 127/127 fresh, 0 stale, 0
+missing, exit 0**; `lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated idempotent
+(**2785/10/0**); **map freshness exit 0** after the stats-stamp sync
+(the check caught the 2765 → 2785 drift on first run, as designed).
+Records updated: the matrix-Hoeffding proposal (the sampled-graph
+packaging follow-on struck through + the follow-on delivery record with
+technique findings), the Fiedler proposal (the companion-consumer
+note), README (2785; the module-table row), the radar (QA axis synced,
+score held at 4.0 per protocol — a composition of counted families plus
+the linearity engine, not a new theorem family), the scoreboard
+(verification row + interpretation bullet), the backlog (item 4's
+pipeline clause), the index map (the EdgePerturbation weight-space rows
++ the EdgePerturbationDrift section), this plan, and the activity log.
+Nothing committed; the prior runs' uncommitted deliveries preserved
+untouched.
+
+**Remaining risk:** none blocking on the pipeline. The recorded priced
+follow-ons stand: the uniform/existential-x quadratic-form packaging of
+the edge-perturbation tail, the matrix-martingale golden-factor
+question (source-level), the sparsification/empirical-stationary
+follow-ons, and a `t/δ`-sharpened interface (the current statement
+bounds `≥ t/δ` against a `t`-norm tail; a `s/(γ−s)`-shaped statement
+mirroring `eventStreamProjectorDrift` exactly would consume the gap
+inline — priced, not owed).
+
+**Next milestone (open):** **mid-run commit notice — the operator's
+`c9b730d` (13:59:57Z, ~35 minutes into this run) added a HIGH row to
+the Active table: "Lint Every Axiom Signature for a Missing
+Degenerate-Corner Guard"
+(`proposals/lint-axiom-degenerate-corner-guards.md`), plus the Medium
+companion "Audit `perron_frobenius`/`primitive_power_tendsto` for the
+degenerate-cardinality hazard."** This run's selection at 13:25Z was
+made when the table verifiably had no High rows; the next run pursues
+the High linter row per priority item 0, then the Medium audit, then
+the priced follow-ons (empirical-stationary Step 2, the sparsification
+`(1±ε)`/budget corollaries, a third concentration-axiom consumer).
 
 ------
 

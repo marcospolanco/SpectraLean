@@ -472,7 +472,20 @@ base and perturbed graphs — through the common-kernel identification
 `initialProjector_laplacian_zero_eq_of_connected` (every connected
 Laplacian carries the same index-0 projector; uniqueness-by-fixed-space
 plus the connectivity-free fixed-space iff), making the program
-complete); **Phase B delivered 2026-08-23**
+complete; and **the concentration → subspace-stability pipeline
+delivered 2026-08-28** (run `20260828T132541Z-run-1`:
+`Derived.EdgePerturbationDrift`'s
+`edgePerturbation_fiedlerSubspace_drift`/
+`edgePerturbation_fiedlerLine_drift` — high-probability Fiedler
+rotation under the centered Bernoulli edge design, composing
+`fiedlerLine_stability` with `edgePerturbation_norm_tail` through the
+packaging identity `laplacian (perturbWeight A p ω) = ∑ₑ
+perturbSummand` and the new Laplacian linearity package
+`laplacian_smul`/`laplacian_sum`, with the separation discharged from
+the base graph's deterministic gap by the proved Weyl on the tail
+event's complement — conditional on `matrix_hoeffding` via the tail
+alone; see the matrix-Hoeffding proposal's follow-on delivery record));
+**Phase B delivered 2026-08-23**
 — `cheeger_cut_existence`, the classical Cheeger cut-existence
 certificate: on every connected `d`-regular graph a nonempty proper
 `S` exists with `conductance S ^ 2 ≤ 2 · lambda2 / d` (the recorded

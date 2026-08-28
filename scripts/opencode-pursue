@@ -126,6 +126,8 @@ latest_activity_status() {
 verify_for_commit() {
   git diff --check
   python3 scripts/generate_qa_scoreboard.py
+  # lint_axioms includes the degenerate-corner guard check with its
+  # per-axiom allowlist (proposals/lint-axiom-degenerate-corner-guards.md)
   python3 scripts/lint_axioms.py
   python3 scripts/check_citations.py
   python3 scripts/check_markdown_links.py

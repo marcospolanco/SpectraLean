@@ -7,11 +7,166 @@ holds the append-only narrative.
 ## Active milestone
 
 None — see the delivered milestone below and the standing handoff. The
-concentration → subspace-stability pipeline (the standing handoff's
-named candidate) was **delivered this run** together with its engine
-prerequisite (`laplacian_smul`/`laplacian_sum`, the sparsification
-program's recorded follow-on) and the packaging identity; the Active
-priority table retains no High rows and only priced follow-ons.
+PF-family degenerate-corner audit (the Active table's last open Medium
+row) was **delivered this run**; the table's remaining rows are
+follow-ons-only (sparsification, empirical-stationary Step 2 gated on
+a consumer) and Low human-decision items.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The PF-family degenerate-corner audit —
+`proposals/audit-perron-frobenius-family-degenerate-corner.md` (the
+Active priority table's only open Medium row, the delivered linter
+run's named next handoff; pursued per priority item 0); run 1,
+2026-08-28, run `20260828T165900Z-run-1`; DELIVERED — zero axiom
+changes (count stays 10; neither `perron_frobenius` nor
+`primitive_power_tendsto` moved — the repair branch of the proposal's
+scope never opened), QA 2785 → 2800 (+15).**
+
+**Delivered** as four pieces: (1) **the two Step-0 verdicts**, proved
+unconditionally in QA — `perron_frobenius_hex_unsat_card_zero_QA`
+(`PerronFrobenius_QA.lean`'s new audit section: at
+`Fintype.card V = 0`, `False` from `hex : ∃ i j, 0 < A i j` alone —
+`Fintype.card_eq_zero_iff` → `IsEmpty V` → `isEmptyElim` on the
+witness) and `mass_one_unsat_card_zero_QA`
+(`DirectedMixing_QA.lean`'s new Section D: `False` from
+`hπsum : ∑ i, π i = 1` alone — `Finset.univ_eq_empty` +
+`Finset.sum_empty` give the empty sum `0` against `1`); each axiom's
+hypothesis set therefore has *no instantiation* at the degenerate
+dimension — safe by unsatisfiability, structurally unlike the matrix
+trio's failure, and now kernel-checked rather than docstring-asserted.
+(2) **The `card V = 1` adjacent corners** (scope item 2): at
+`Fin 1`/`!![1]`, `perron_frobenius_S1_QA` pins the axiom instance to
+the hand Perron data — root exactly `1` derived from the
+eigen-equation on the unknown witness, the simplicity clause exactly
+the hand `rootMultiplicity 1 = 1` (`S1_charpoly_QA` by
+`Matrix.det_fin_one` + `Matrix.charmatrix_apply_eq`;
+`S1_rootMultiplicity_QA` by `rootMultiplicity_X_sub_C_self`) — and
+`P1_singleton_hand_QA` proves the primitive limit shape *without* the
+axiom (the constant sequence, `!![1]^t = 1`, the limit vector the
+start itself) beside the non-vacuous axiom instance
+`P1_singleton_axiom_QA`. (3) **The allowlist upgrade** (scope item 3):
+both provisional entries in `scripts/lint_axioms.py` replaced with
+Lean-confirmed entries citing the theorem names; `lint_axioms` exit 0
+with both findings reported allowlisted-confirmed. (4) **Records**:
+the proposal (COMPLETE header + verdict section with the exact Lean
+arguments + technique findings + delivery record), the linter
+proposal's residual struck through as resolved,
+`proposals/README.md` (the Medium row retired + the Delivered-table
+row), the index map's usage-patterns corner note, README (2800), the
+radar QA axis (2800, score held at 4.0 per protocol — audit records
+and corner fixtures, not a new theorem family), the scoreboard
+(verification rows + interpretation bullet), the map stats stamps,
+this plan, and the activity log.
+
+**Verification:** spike first (`wip/pfa_spike.lean`, all four pieces
+to zero errors/warnings before any shelf edit; the live
+unsatisfiability arguments elaborated against the actual axioms);
+`lake env lean` zero errors/zero warnings on both touched QA modules;
+explicit `lake build` targets ✔ (2202/2202); `#print axioms` via
+`wip/pfa_axcheck.lean` on all seven new declarations — the two
+verdict lemmas and three hand pins exactly `propext,
+Classical.choice, Quot.sound`, the two singleton instances carrying
+exactly their named axiom (the honest conditional structure); **full
+`lake build` ✔ ("Build completed successfully") immediately followed
+by `check_build_completeness.py` — 127/127 fresh, 0 stale, 0 missing,
+exit 0**; `lint_axioms` exit 0 (10 axioms, both findings
+allowlisted-confirmed); `check_citations`, `check_markdown_links`
+pass; scoreboard regenerated idempotent (**2800/10/0**); **map
+freshness exit 0** (mandatory — this delivery changes a proposal's
+status header; stamps synced 2785 → 2800 first). Nothing committed;
+the prior runs' uncommitted deliveries preserved untouched.
+
+**Remaining risk:** none owed by the proposal — its honesty note
+stands as the recorded residual: the audit cleared the
+degenerate-cardinality mechanism only, not either axiom's mathematical
+content (a wrong constant or strictness mismatch elsewhere would need
+its own Step 0 if ever suspected; none is). The mechanical
+signature-visible half stays enforced by `lint_axioms.py` on every
+admission, with no provisional entries remaining.
+
+**Next milestone (open):** the Active table has no High rows and no
+open Medium rows — fall through to the center-out policy: the priced
+follow-ons on record (the empirical-stationary Step 2 still gated on
+a consumer pricing the bias-term shape; the sparsification
+`(1±ε)`/budget corollaries; a third concentration-axiom consumer; the
+uniform/existential-x quadratic-form packaging; the `t/δ`-sharpened
+drift interface), or the next load-bearing gap `docs/6_SGT_BACKLOG.md`
+names.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The axiom degenerate-corner guard linter —
+`proposals/lint-axiom-degenerate-corner-guards.md` (the Active priority
+table's only High row, added by the operator mid-run at 13:59Z and
+pursued per priority item 0); run 1, 2026-08-28, run
+`20260828T154318Z-run-1`; DELIVERED — no Lean, no axioms, no QA change
+(counts stay 2785/10/0).**
+
+**Delivered** as `check_degenerate_corner_guards` folded into
+`scripts/lint_axioms.py`'s `main()` — every existing ladder invocation
+runs it with no new command — with two finding kinds exactly per the
+ask: a `Fintype`-carried index type (`Matrix V …`/`V →`/
+`Fintype.card V`) with no visible `Nonempty` guard, and a `Measure`
+argument with no `IsProbabilityMeasure`/`IsFiniteMeasure`/total-mass
+guard. The signature model: bracket-matched binder parsing,
+namespace-scoped `variable` tracking mirroring Lean's name-mention
+inclusion (six of the ten axioms carry their measure guard in a
+`variable` line, not in the declaration), Unicode-aware identifiers.
+The per-(axiom, kind) allowlist landed with provisional entries for
+exactly the two anticipated findings (`perron_frobenius`'s `hex`
+argument, `primitive_power_tendsto`'s `hπsum` empty-sum argument), each
+naming its reasoning as docstring-level and pointing at the companion
+audit for the Lean-confirmed verdict. The literal `Fin n` scoping
+decision (not flagged; degeneracy signature-visible) is recorded in the
+tool's docstring.
+
+**Verification:** the acceptance-bar fixture set (`wip/axlint_fixtures.py`
++ `wip/axlint_probe.py`, preserved in the proposal's delivery record) —
+pre-repair `matrix_hoeffding` and `hoeffding_lemma` reconstructed
+verbatim from `a1e59ac~1` both flag; guard-recognition (inline
+instance, hypothesis form, `IsFiniteMeasure`, `m Set.univ = 1`),
+namespace-scope (a guard inside a closed namespace cannot leak past its
+`end`), allowlist-expiry (removal re-flags exactly the entry's axiom),
+and transitive-inclusion (an index type entering only via
+`variable {B : Matrix V V ℝ}`) fences all pass; the first fixture run
+caught the scanner blind to Greek identifiers (`μ`, `Ω`) — the
+false-silence failure mode the acceptance bar weights against — before
+delivery. Real tree: all ten axioms scanned at correct positions,
+exactly the PF pair allowlisted, exit 0, deterministic. `lint_axioms`
+exit 0, `check_citations`, `check_markdown_links` pass; scoreboard
+regeneration idempotent (2785/10/0, no Lean touched — no `lake build`
+run this run, the Lean tree's last verified state remains the prior
+run's full build + 127/127 completeness); **map freshness exit 0**
+(mandatory — this delivery changes a proposal's status header; the
+check confirmed no drift). Ladder wiring at all five
+`check_build_completeness.py` locations plus the admission-time rules
+(`docs/2_ARCHITECTURE.md` §5/§10, `governance/CONTRIBUTING.md`'s
+checklist, `AGENTS.md`, `scripts/README.md`, `opencode-pursue`, the
+activity-log format block's new axiom-admission rule). Records updated:
+the proposal (DELIVERED header + full delivery record with the fixture
+list), `proposals/README.md` (the High row retired + the Delivered-table
+row), this plan, and the activity log. Nothing committed; the prior
+runs' uncommitted deliveries preserved untouched.
+
+**Remaining risk:** none blocking on the check. The two allowlist
+entries are provisional by design; the literal `Fin n` scoping decision
+is the known, recorded under-flag edge. Both resolve through the
+companion audit or a future incident, per the recorded decision note.
+
+**Next milestone (open):** per priority item 0 — the Active table's
+**Medium** row: the PF-family degenerate-corner audit
+(`proposals/audit-perron-frobenius-family-degenerate-corner.md`), whose
+Lean-verified verdicts upgrade the two provisional allowlist entries
+(its own scope item 3 names exactly this handoff). Then the priced
+follow-ons (empirical-stationary Step 2, the sparsification
+`(1±ε)`/budget corollaries, a third concentration-axiom consumer, the
+uniform/existential-x quadratic-form packaging, the `t/δ`-sharpened
+drift interface).
 
 ------
 

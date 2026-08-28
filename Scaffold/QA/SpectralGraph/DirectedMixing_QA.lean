@@ -38,6 +38,14 @@ QA-to-QA import precedent):
   `x = onesVec`, limit uniqueness forces the limit coefficient
   `(π ⬝ᵥ onesVec)` to be `1` — cross-checked against the raw
   computation of `∑ i, π i` (the two routes to the same mass fact).
+- **Section D** (the degenerate-cardinality audit,
+  `proposals/audit-perron-frobenius-family-degenerate-corner.md`,
+  2026-08-28): at `Fintype.card V = 0` the axiom's mass-one hypothesis
+  is unsatisfiable (`mass_one_unsat_card_zero_QA` — safe by
+  unsatisfiability, no guard needed); at the singleton `Fin 1` /
+  `!![1]` every hypothesis is satisfiable and the axiom's limit is
+  the hand-provable constant sequence (`P1_singleton_hand_QA` / the
+  axiom instance `P1_singleton_axiom_QA`).
 -/
 open scoped Matrix Topology
 
@@ -282,5 +290,100 @@ theorem dmQA_coherence_join :
 theorem dmQA_coherence_raw : (u4 ⬝ᵥ (onesVec : Fin 4 → ℝ)) = 1 := by
   simp only [Matrix.dotProduct, onesVec, mul_one]
   exact u4_sum_QA
+
+/-! ## Section D: the degenerate-cardinality audit
+(`proposals/audit-perron-frobenius-family-degenerate-corner.md`,
+2026-08-28). The two corners the hazard class names for
+`primitive_power_tendsto`: at `Fintype.card V = 0` the mass-one
+hypothesis is *unsatisfiable* (the empty sum is `0`, so the axiom's
+hypothesis set has no instantiation there — safe by unsatisfiability,
+not by a guard); at the singleton `Fin 1` / `!![1]` every hypothesis
+is satisfiable and the axiom's limit is pinned by hand as the constant
+sequence (trivial satisfiability breaks no clause). -/
+
+/-- **The empty-cardinality verdict (no axiom contact).** At
+`Fintype.card V = 0` the axiom's `hπsum : ∑ i, π i = 1` hypothesis is
+unsatisfiable — the empty sum is `0` — so the axiom's hypothesis set
+has **no instantiation at the degenerate dimension**: the corner is
+safe by unsatisfiability, not by a `Nonempty V` guard. This theorem is
+the Lean-confirmed verdict behind `scripts/lint_axioms.py`'s allowlist
+entry for `primitive_power_tendsto` (provisional until this audit
+landed). -/
+theorem mass_one_unsat_card_zero_QA {V : Type} [Fintype V]
+    (hV : Fintype.card V = 0) (π : V → ℝ) (hπsum : ∑ i, π i = 1) : False := by
+  rw [Fintype.card_eq_zero_iff] at hV
+  letI : IsEmpty V := hV
+  rw [Finset.univ_eq_empty, Finset.sum_empty] at hπsum
+  norm_num at hπsum
+
+/-- The singleton fixture: the identity `!![1]` on `Fin 1`, with the
+constant-one stationary vector — every hypothesis of
+`primitive_power_tendsto` satisfiable at the corner where `hπsum`
+becomes trivial. -/
+noncomputable def P1 : Matrix (Fin 1) (Fin 1) ℝ := !![1]
+
+theorem P1_eq_one : P1 = 1 := by
+  apply Matrix.ext
+  intro i j
+  fin_cases i; fin_cases j
+  simp [P1, Matrix.one_apply]
+
+theorem P1_nonneg : ∀ i j, 0 ≤ P1 i j := by
+  intro i j
+  fin_cases i; fin_cases j
+  simp [P1]
+
+theorem P1_row_sum (i : Fin 1) : ∑ j, P1 i j = 1 := by
+  fin_cases i
+  simp [P1, Fin.sum_univ_one]
+
+theorem P1_primitive : P1.IsPrimitive := by
+  refine ⟨1, by norm_num, ?_⟩
+  intro i j
+  fin_cases i; fin_cases j
+  simp [pow_one, P1]
+
+theorem u1_nonneg : ∀ i, 0 ≤ (1 : Fin 1 → ℝ) i := by intro i; simp
+
+theorem u1_sum : ∑ i, (1 : Fin 1 → ℝ) i = 1 := by
+  simp [Fin.sum_univ_one]
+
+theorem u1_stationary : (1 : Fin 1 → ℝ) ᵥ* P1 = 1 := by
+  funext j
+  fin_cases j
+  simp [Matrix.vecMul, Matrix.dotProduct, Fin.sum_univ_one, P1]
+
+/-- **Singleton hand pin (no axiom).** The axiom's conclusion shape at
+the singleton, proved unconditionally: the power sequence is constant
+(the identity's powers are the identity) and the limit vector is the
+start itself (`(π ⬝ᵥ x) • 1 = x` on one coordinate). The statement the
+axiom concludes here is genuinely true — established without it. -/
+theorem P1_singleton_hand_QA (x : Fin 1 → ℝ) :
+    Filter.Tendsto (fun t : ℕ => P1 ^ t *ᵥ x)
+      Filter.atTop (𝓝 (((1 : Fin 1 → ℝ) ⬝ᵥ x) • (1 : Fin 1 → ℝ))) := by
+  have hconst : (fun t : ℕ => P1 ^ t *ᵥ x) = fun _ : ℕ => x := by
+    funext t
+    rw [P1_eq_one, one_pow, Matrix.one_mulVec]
+  have hlim : (((1 : Fin 1 → ℝ) ⬝ᵥ x) • (1 : Fin 1 → ℝ)) = x := by
+    have hd : ((1 : Fin 1 → ℝ) ⬝ᵥ x) = x 0 := by
+      simp only [Matrix.dotProduct, Pi.one_apply, one_mul, Fin.sum_univ_one]
+    rw [hd]
+    funext i
+    fin_cases i
+    simp
+  rw [hconst, hlim]
+  exact tendsto_const_nhds
+
+/-- **Singleton axiom instance (conditional on
+`primitive_power_tendsto`).** The axiom applied at the corner where its
+mass-one hypothesis is trivially satisfiable: the instance is
+non-vacuous there, and — joined with the hand pin above — its
+conclusion is the hand-provable constant-sequence limit, so trivial
+satisfiability breaks no clause of the statement. -/
+theorem P1_singleton_axiom_QA (x : Fin 1 → ℝ) :
+    Filter.Tendsto (fun t : ℕ => P1 ^ t *ᵥ x)
+      Filter.atTop (𝓝 (((1 : Fin 1 → ℝ) ⬝ᵥ x) • (1 : Fin 1 → ℝ))) :=
+  Scaffold.LinearAlgebra.primitive_power_tendsto P1 P1_nonneg P1_row_sum
+    P1_primitive u1_nonneg u1_sum u1_stationary x
 
 end Scaffold.QA.SpectralGraph

@@ -59,6 +59,15 @@ column convergence, the row-action walk form).
   `primitive_power_tendsto` hypothesis verified on the same fixture —
   exactly `hprim` isolated). Convergence statements need primitivity,
   never mere irreducibility.
+- The degenerate-cardinality corners are audited and safe (2026-08-28,
+  `proposals/audit-perron-frobenius-family-degenerate-corner.md`): at
+  `Fintype.card V = 0` neither axiom is instantiable — `hex`
+  (`perron_frobenius_hex_unsat_card_zero_QA`) and `hπsum`
+  (`mass_one_unsat_card_zero_QA`, DirectedMixing_QA Section D) are
+  each unsatisfiable there, proved unconditionally — so no `Nonempty
+  V` guard is needed; at `Fin 1` both instantiate with conclusions
+  pinned to hand data (`perron_frobenius_S1_QA`,
+  `P1_singleton_axiom_QA`).
 
 ## Named Consumers
 

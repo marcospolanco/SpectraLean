@@ -1,6 +1,87 @@
 # Proposal: Audit `perron_frobenius` and `primitive_power_tendsto` for the Degenerate-Cardinality Hazard
 
-**Status:** Proposed 2026-08-28.
+**Status:** **COMPLETE 2026-08-28** (run `20260828T165900Z-run-1`) —
+both axioms **confirmed safe by Lean-verified unsatisfiability at the
+degenerate dimension** (Step 0 below), both `card V = 1` adjacent
+corners spot-checked satisfiable with conclusions pinned to hand data
+(scope item 2), the two provisional linter allowlist entries upgraded
+to cite the unconditional Lean proofs (scope item 3), **zero axiom
+changes** (count stays 10; no hypothesis of either axiom moved). The
+honesty note below stands unchanged and load-bearing: this audit
+cleared the degenerate-cardinality mechanism only.
+
+## The verdicts (the exact Lean arguments, not restated docstrings)
+
+**`perron_frobenius` — SAFE at `Fintype.card V = 0`, by
+unsatisfiability of `hex`.** Proved unconditionally as
+`Scaffold.LinearAlgebra.QA.perron_frobenius_hex_unsat_card_zero_QA`
+(`Scaffold/QA/LinearAlgebra/PerronFrobenius_QA.lean`): from
+`hV : Fintype.card V = 0` and any `A : Matrix V V ℝ` and
+`hex : ∃ i j, 0 < A i j`, derive `False` — `Fintype.card_eq_zero_iff`
+turns `hV` into `IsEmpty V`, the existential supplies `i : V`, and
+`isEmptyElim i` closes. `#print axioms`: exactly `propext,
+Classical.choice, Quot.sound`. The axiom's hypothesis set therefore
+has *no instantiation* at the empty dimension — structurally the same
+safe outcome the structural read predicted, but now checked by the
+kernel rather than asserted by a docstring.
+
+**`primitive_power_tendsto` — SAFE at `Fintype.card V = 0`, by
+unsatisfiability of `hπsum`.** Proved unconditionally as
+`Scaffold.QA.SpectralGraph.mass_one_unsat_card_zero_QA`
+(`Scaffold/QA/SpectralGraph/DirectedMixing_QA.lean`, Section D): from
+`hV : Fintype.card V = 0` and any `π : V → ℝ` and
+`hπsum : ∑ i, π i = 1`, derive `False` — the `IsEmpty V` from
+`Fintype.card_eq_zero_iff` makes `Finset.univ = ∅`
+(`Finset.univ_eq_empty`), so the sum is `0` (`Finset.sum_empty`)
+against `1`. `#print axioms`: the standard three only.
+
+**The `card V = 1` adjacent corners (scope item 2) — both
+satisfiable, no clause broken:**
+
+- `perron_frobenius` at `Fin 1` / `!![1]` (`perron_frobenius_S1_QA`):
+  every hypothesis is satisfiable (`hex` witnesses at the single
+  diagonal entry — the corner where it becomes *trivially*
+  satisfiable), and the axiom instance's conclusion pins exactly to
+  the hand Perron data: the root is `1` (derived from the
+  eigen-equation on the axiom's unknown witness `x`:
+  `1 * x 0 = r * x 0` with `x 0 > 0`), the simplicity clause reads
+  exactly the hand-pinned `rootMultiplicity 1 (X − C 1) = 1`
+  (`S1_charpoly_QA` via `Matrix.det_fin_one` +
+  `Matrix.charmatrix_apply_eq`; `S1_rootMultiplicity_QA` via
+  `Polynomial.rootMultiplicity_X_sub_C_self`) — the clause the scope
+  item named as the risk — and the Perron direction is the constant
+  one. `#print axioms`: `perron_frobenius` + the standard three, the
+  honest conditional structure of an axiom-consumed pin.
+- `primitive_power_tendsto` at `Fin 1` / `!![1]` (`P1_singleton_hand_QA`
+  + `P1_singleton_axiom_QA`): every hypothesis is satisfiable
+  (row-sum `1`, primitivity at `k = 1`, the constant-one stationary
+  vector with mass one — `hπsum` trivially satisfiable at the
+  singleton), and the axiom's conclusion shape is proved *by hand,
+  no axiom*: the power sequence is constant (`!![1] = 1` so `P^t = 1`)
+  and the limit vector `((π ⬝ᵥ x) • 1)` *is* the start `x` on one
+  coordinate. The axiom instance is non-vacuous there and concludes
+  a hand-provable statement. `#print axioms`: the hand pin standard
+  three only; the instance carries `primitive_power_tendsto` alone.
+
+**Technique findings** (the spike `wip/pfa_spike.lean`, iterated to
+zero errors/warnings before any shelf edit): the pinned Mathlib's
+`Fin 1` sum lemma is `Fin.sum_univ_one` (not `Finset.`); a one-shot
+`rw [Matrix.charpoly, Matrix.det_fin_one, …]` chain misbehaves where
+the step-by-step sequence elaborates cleanly (the singleton-charpoly
+route is four separate rewrites); `rw [Subsingleton.elim i j]` closes
+`ReflTransGen` goals outright via its post-`rfl`, so a trailing
+`exact …refl` errors goalless; `linear_combination` needs `S1 0 0`
+normalized to `1` first (`rwa [S1_00] at h0`) since it treats the
+entry as an atom.
+
+## Allowlist upgrade (scope item 3 — done)
+
+`scripts/lint_axioms.py`'s two provisional entries are replaced by
+Lean-confirmed entries citing the exact theorem names above
+(`perron_frobenius_hex_unsat_card_zero_QA`,
+`mass_one_unsat_card_zero_QA`) and the singleton checks;
+`python3 scripts/lint_axioms.py` exits 0 with both findings reported
+as allowlisted-confirmed rather than provisional.
 
 ## The obligation this discharges
 
@@ -125,3 +206,37 @@ general clean bill of health for either axiom.
   own documentation already records "no rate, Π topology" as an honest
   scope boundary; this proposal does not touch that boundary either
   direction.
+
+## Delivery record (2026-08-28, run `20260828T165900Z-run-1`)
+
+Delivered per the scope above, with the verdicts recorded in the
+section above. Files: `Scaffold/QA/LinearAlgebra/
+PerronFrobenius_QA.lean` (+3 theorems, +1 def: the empty-card verdict,
+`S1_charpoly_QA`, `S1_rootMultiplicity_QA`,
+`perron_frobenius_S1_QA`, fixture `S1`) and
+`Scaffold/QA/SpectralGraph/DirectedMixing_QA.lean` Section D
+(+10 theorems, +1 def: the empty-card verdict, the `P1`/`u1`
+hypothesis stack, the hand pin, the axiom instance). Zero changes to
+either axiom file — the audit's outcome was "both safe," so the
+repair branch (scope item 4) never opened.
+
+**Verification:** spike first (`wip/pfa_spike.lean`, all pieces to
+zero errors/warnings before any shelf edit; the live unsatisfiability
+arguments elaborated against the actual axioms); `lake env lean` zero
+errors/zero warnings on both touched QA modules; explicit `lake
+build` of both QA targets (2202/2202, "Build completed successfully");
+`#print axioms` via `wip/pfa_axcheck.lean` on all seven new
+declarations — the two verdict lemmas, the three hand pins exactly
+`propext, Classical.choice, Quot.sound`, the two singleton instances
+carrying exactly their named axiom; `lint_axioms` exit 0 with the
+upgraded entries; full `lake build` + `check_build_completeness.py`,
+`check_citations`, `check_markdown_links`, scoreboard regeneration,
+and map freshness recorded in the run's activity entry. QA count
+moves by the generator metric (2785 → 2800); the scoreboard and map
+stats stamps were synced and re-checked.
+
+**Honest residual:** the audit cleared the degenerate-cardinality
+hazard class only, per the honesty note; the mechanical
+signature-visible half of that class (and the measure-mass class)
+remains enforced by `lint_axioms.py` on every admission. No further
+residual is claimed or owed by this proposal.

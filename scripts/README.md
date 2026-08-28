@@ -6,7 +6,7 @@ These scripts maintain documentation and policy metadata; they do not replace Le
 | --- | --- |
 | `generate_qa_scoreboard.py` | Regenerate source-derived counts in `docs/5_QA_SCOREBOARD.md`. |
 | `check_markdown_links.py` | Check repository-local links in active Markdown documentation. |
-| `lint_axioms.py` | Report axiom placement and index-coverage issues. |
+| `lint_axioms.py` | Report axiom placement and index-coverage issues, and run the degenerate-corner guard check: flag every `Scaffold/Mathlib` axiom whose signature carries a `Fintype`-carried index type or a `Measure` argument with no visible guard, unless the script's allowlist records why the corner is accepted (run it before a new axiom lands; settle the allowlist entry at admission time). |
 | `check_citations.py` | Check public axioms for the required citation-comment form. |
 | `check_build_completeness.py` | Fail if any `Scaffold/**/*.lean` source has a missing or mtime-stale `.olean` artifact — run after every full `lake build` (a successful exit alone does not certify on-disk sources). |
 | `check_scaffold_map_freshness.py` | Fail if the transit map's two data tables (`scripts/generate_scaffold_map_svg.py` and `docs/scaffold_map.html`) disagree with each other, with the QA scoreboard's generated numbers, or with a cited proposal's own `**Status:**` line — a delivery that changes a proposal's status header is not verified until this passes (the pre-commit hook runs it report-only). |

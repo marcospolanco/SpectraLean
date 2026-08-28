@@ -108,4 +108,14 @@ that changes a proposal's status header is not verified until it
 passes. The pre-commit hook runs it report-only; this ladder step is
 the blocking enforcement.
 
+`lint_axioms.py` includes the degenerate-corner guard check
+(`proposals/lint-axiom-degenerate-corner-guards.md`): every
+`Scaffold/Mathlib` axiom whose signature carries a `Fintype`-carried
+matrix/vector index type with no visible `Nonempty` guard, or a
+`Measure` argument with no visible probability/finite-measure/total-
+mass guard, is flagged unless the script's per-axiom allowlist records
+why the corner is accepted. A new axiom admission should settle its
+allowlist entry deliberately at admission time, not at the next lint
+pass.
+
 For Lean changes, directly build or elaborate every changed module and its closest QA consumer; do not rely only on the umbrella target.

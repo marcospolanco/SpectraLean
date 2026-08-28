@@ -1,6 +1,14 @@
 # Proposal: Lint Every Axiom Signature for a Missing Degenerate-Corner Guard
 
-**Status:** Proposed 2026-08-28.
+**Status:** DELIVERED 2026-08-28 (run `20260828T154318Z-run-1`) — the
+check, its allowlist mechanism, the acceptance-bar fixtures, and the
+ladder wiring; no Lean, no axioms, no QA declarations. First-run output
+on the post-repair tree: exactly the two anticipated findings
+(`perron_frobenius`, `primitive_power_tendsto`), both carrying
+provisional allowlist entries whose Lean-confirmed verdicts are the
+companion audit's job
+(`audit-perron-frobenius-family-degenerate-corner.md`, the Active
+table's Medium row). See the delivery record at the end of this file.
 
 ## The incident this responds to
 
@@ -137,3 +145,134 @@ allowlist decision is made once, deliberately, at admission time.
   flags everything with no allowlist yet is still strictly more honest
   than no check at all, and is expected as this proposal's own
   first-run output).
+
+## Delivery record (2026-08-28, run `20260828T154318Z-run-1`)
+
+**The check.** `scripts/lint_axioms.py` gained
+`check_degenerate_corner_guards(root='.')`, folded into `main()` so
+every existing ladder invocation of `lint_axioms.py` runs it with no
+new command to remember. Two finding kinds, exactly per the ask:
+
+- `index-type-guard`: a type variable bound as `Type`/`Type*`/`Sort`
+  that carries a `Fintype` instance, used in the effective signature as
+  `Matrix V …`, a vector index `V →`, or a `Fintype.card V` prefactor,
+  with no `Nonempty V` anywhere in the effective binders (instance or
+  hypothesis form both recognized).
+- `measure-guard`: a `Measure`-typed argument the declaration actually
+  uses, with no `IsProbabilityMeasure`/`IsFiniteMeasure` instance or
+  `m univ = 1`-style total-mass equation on that same measure.
+
+Unallowlisted findings exit 1 with the mandated message shape
+(`file:line: axiom NAME has a … — confirm the degenerate corner is
+either guarded or genuinely harmless (hypothesis-unsatisfiable) and
+record which`); allowlisted findings print as visible `Allowlisted:`
+notes recording the reason, never silently.
+
+**The signature model** (the parser approximates the elaborator, and
+the approximations are recorded in the module docstring):
+
+- Binders are parsed by bracket matching, not regex splitting, so
+  multi-name groups (`{a v : ℝ}`) and anonymous instances
+  (`[Nonempty V]`) work; `axiom` declarations span to the first blank
+  line or next top-level command.
+- `variable`/`variables` lines are tracked with namespace/section
+  scoping — a variable inside a closed `namespace` dies at its `end`
+  and cannot leak a guard past it (fenced below). This matters because
+  six of the ten axioms carry their measure guard in a `variable`
+  line, not in the declaration: Lean includes `{μ : Measure Ω}
+  [IsProbabilityMeasure μ]` only when the declaration mentions `μ`, and
+  the checker mirrors that name-mention inclusion (plus transitive
+  inclusion through included binders' types, so an index type entering
+  only through `variable {B : Matrix V V ℝ}` still triggers — probed).
+- Identifiers are matched Unicode-aware: the first fixture run caught
+  the scanner blind to Greek identifiers (`μ`, `Ω`, `ν`, `π`) under a
+  Latin `[A-Za-z_]` pattern — the measure check could not see `μ` at
+  all, i.e. exactly the false-silence failure mode the acceptance bar
+  weights against, caught by the acceptance bar's own fixture before
+  delivery.
+
+**Scoping decision, recorded in the tool** (docstring): literal
+sample-index binders `Fin n → _` over a visible `{n : ℕ}` are
+deliberately not flagged — their degeneracy (`n = 0`) is named in the
+signature itself, both incident repairs concerned abstract index types
+whose emptiness the signature hides, and the proposal's acceptance bar
+expects only the PF pair to flag post-repair. Extending the pattern
+with the `Fin n` shape and its guard set (`0 < n`, `NeZero n`,
+`Nonempty (Fin n)`) is a one-regex change with this note as the record
+of the decision.
+
+**The allowlist** (`ALLOWLIST` in the script): per-(axiom, kind) entries
+recording why each accepted corner is safe. Two provisional entries
+landed with the check — `perron_frobenius` (the `hex` witness argument)
+and `primitive_power_tendsto` (the `hπsum` empty-sum argument), each
+naming its reasoning as docstring-level and pointing at the companion
+audit for the Lean-confirmed verdict; the audit's scope item 3 upgrades
+them. Entries are load-bearing (removal re-flags — fenced) and are to
+be *removed* when an axiom acquires a real guard, so the guard, not the
+entry, is what silences the finding.
+
+**Acceptance-bar fixtures** (`wip/axlint_fixtures.py`, gitignored
+scratch; the list is preserved here):
+
+1. Pre-repair `matrix_hoeffding` reconstructed verbatim from
+   `a1e59ac~1` (no `[Nonempty V]`) → flagged, and nothing else in that
+   file flags. ✔ (this is the fixture that exposed the Greek-identifier
+   blindness on the sibling case)
+2. Pre-repair `hoeffding_lemma` reconstructed verbatim from
+   `a1e59ac~1` (variable block `{μ : Measure Ω}` with no probability
+   instance anywhere) → flagged. ✔
+3. Post-repair tree: the matrix trio and `hoeffding_lemma` do not flag
+   (guards recognized — inline for the trio and `hoeffding_lemma`,
+   variable-line for the other five measure axioms); exactly the PF
+   pair allowlisted; exit 0. ✔
+4. Guard-recognition fences: `[Nonempty W]` inline and `(hW : Nonempty
+   W)` hypothesis both silence; `Matrix W W ℂ` (complex phrasing) and a
+   `Fintype.card`-prefactor vector axiom with no guard both flag;
+   `IsFiniteMeasure` and `m Set.univ = 1` guards recognized; an
+   unguarded measure flags; a measure the declaration never mentions
+   does not falsely trigger. ✔
+5. Namespace-scope fence: `[Nonempty T]` inside a closed inner
+   namespace must NOT silence an axiom after its `end` → still flags. ✔
+6. Allowlist-expiry fence: removing `perron_frobenius`'s entry re-flags
+   exactly it. ✔
+7. Transitive-inclusion probe (`wip/axlint_probe.py`): an index type
+   entering only through a variable binder's type
+   (`variable {B : Matrix V V ℝ}`) still triggers. ✔
+
+**Ladder wiring:** the check rides the existing
+`python3 scripts/lint_axioms.py` invocation everywhere, and the five
+documented ladder locations now name it — `AGENTS.md` § Verification,
+`scripts/opencode-pursue`'s `verify_for_commit` (comment), and
+`docs/AGENT_ACTIVITY.md`'s format block gained the check plus the new
+admission-time rule (any entry reporting a new axiom admission must
+record the check passing with the admission's allowlist decision);
+`docs/2_ARCHITECTURE.md` §10 gained its paragraph and §5's hazard
+checklist gained the mechanical-nudge sentence (run before an axiom
+lands; settle the allowlist entry once, at admission time);
+`scripts/README.md`'s row extended; `governance/CONTRIBUTING.md`'s
+Axiom Addition checklist gained its line.
+
+**Verification:** `python3 scripts/lint_axioms.py` exit 0 with exactly
+the two `Allowlisted:` notes, deterministic across runs; the fixture
+runner and transitive probe exit 0; `check_citations`,
+`check_markdown_links` pass; scoreboard regeneration idempotent
+(2785/10/0 unchanged — no Lean source touched, so no `lake build` was
+run this run; the Lean tree's last verified state remains the prior
+run's full build + 127/127 completeness); `check_scaffold_map_freshness`
+exit 0 (mandatory — this delivery changes a proposal's status header;
+the linter proposal is not a map station source, and the check
+confirmed no drift). All ten axioms verified scanned at their correct
+`file:line` positions.
+
+**Residuals:** ~~the two allowlist entries are provisional by design;
+upgrading them to Lean-confirmed verdicts (or repairs) is the companion
+audit proposal's scope items 1–3, which is the Active table's next
+actionable row.~~ **Resolved 2026-08-28, run `20260828T165900Z-run-1`:
+the companion audit (`audit-perron-frobenius-family-degenerate-
+corner.md`) confirmed both axioms safe by Lean-verified
+unsatisfiability and upgraded both entries to cite the unconditional
+QA proofs (`perron_frobenius_hex_unsat_card_zero_QA`,
+`mass_one_unsat_card_zero_QA`); no entry remains provisional.** The
+parser's elaborator approximation is documented,
+not exact — over-flagging is the accepted direction, and the `Fin n`
+scoping decision above is the known, recorded under-flag edge.

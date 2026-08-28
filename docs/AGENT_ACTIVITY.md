@@ -37,6 +37,14 @@ proposal's status header must also record
 that made this mandatory: the pre-commit hook re-rendered the map on
 every commit while its hand-maintained data tables drifted for days).
 
+Since 2026-08-28, any entry reporting a **new axiom admission** must
+record `python3 scripts/lint_axioms.py` passing with the admitted axiom
+settled against the degenerate-corner guard check — guarded, or
+allowlisted with the reason recorded in the script at admission time
+(see `proposals/lint-axiom-degenerate-corner-guards.md`: both axiom
+repairs of that week had the missing-guard half of their defect visible
+in the signature alone).
+
 Since 2026-08-28: **`README.md`'s "Recent highlights" list and "What's
 here" table entries stay to one line each — a module name and a single
 clause, no dates, step numbers, or proof-technique detail.** This
@@ -5321,3 +5329,214 @@ untouched; nothing committed.
 **Remaining risk:** none blocking. Priced follow-ons recorded in the proposal: the uniform/existential-x quadratic-form packaging, the `s/(γ−s)`-shaped interface consuming the gap inline (mirroring `eventStreamProjectorDrift` exactly), and the matrix-martingale golden-factor question (source-level).
 
 **Next handoff:** **mid-run commit notice — the operator landed `c9b730d` (2026-08-28T13:59:57Z, ~35 minutes into this run), committing the prior runs' deliveries and adding two new Active-table rows: a HIGH row ("Lint Every Axiom Signature for a Missing Degenerate-Corner Guard", `proposals/lint-axiom-degenerate-corner-guards.md`) and a Medium row ("Audit `perron_frobenius` and `primitive_power_tendsto` for the Degenerate-Cardinality Hazard").** This run selected its milestone at 13:25Z when the table verifiably had no High rows (the selection is recorded above); the next run MUST pursue the High linter row per priority item 0 — same tooling profile as the delivered `verify-build-completeness`/`verify-scaffold-map-freshness` ladder steps. After it: the Medium Perron–Frobenius audit, then the priced follow-ons (empirical-stationary Step 2's bias-term shape, the sparsification `(1±ε)`/budget corollaries, a third concentration-axiom consumer).
+
+## 2026-08-28T15:49:30Z — Axiom degenerate-corner guard linter (in progress)
+
+**Run:** `20260828T154318Z-run-1`  
+**Session:** `ses_fb6f5cdd9ffejS258jmMlGeAk9`  
+**Status:** in-progress  
+**Milestone:** `proposals/lint-axiom-degenerate-corner-guards.md` — the
+Active priority table's only **High** row (added by the operator mid-run
+at 13:59Z, recorded in the prior run's mid-run notice; pursued per
+priority item 0). Deliverable: a degenerate-corner guard check in
+`scripts/lint_axioms.py` that flags every axiom whose signature carries
+a `Fintype`-carried matrix/vector index type with no visible `Nonempty`
+guard, or a `Measure` argument with no visible
+`IsProbabilityMeasure`/`IsFiniteMeasure`/total-mass guard, with a
+per-(axiom, kind) allowlist that records *why* each flagged axiom is
+accepted — the loud state, never silence. Both of this week's axiom
+repairs had exactly this gap visible in the signature with zero proof
+effort needed to see it. Leverage: priority-order items 3/4 (trust
+surface) at the admission boundary itself; same tooling profile as the
+delivered `check_build_completeness.py` / `check_scaffold_map_freshness.py`
+ladder steps. No Lean, no axioms, no QA declarations.
+
+**Next action:** implement the signature parser (multi-line `axiom`
+declarations; namespace-scoped `variable` tracking, since six of the ten
+axioms carry their measure guard in a `variable` line — Lean includes it
+only when the declaration mentions `μ`), the two finding kinds, the
+provisional allowlist entries for the anticipated `perron_frobenius` /
+`primitive_power_tendsto` findings (Lean-confirmed verdicts are the
+Medium companion audit's job), the acceptance-bar fixtures against the
+`a1e59ac~1` pre-repair signatures, and the ladder wiring at the five
+documented locations.
+
+## 2026-08-28T15:56:54Z — Axiom degenerate-corner guard linter delivered (terminal)
+
+**Run:** `20260828T154318Z-run-1`  
+**Session:** `ses_fb6f5cdd9ffejS258jmMlGeAk9`  
+**Status:** completed  
+**Milestone (delivered):** `proposals/lint-axiom-degenerate-corner-guards.md`
+(the Active priority table's only **High** row) — the degenerate-corner
+guard check in `scripts/lint_axioms.py`, its per-(axiom, kind)
+allowlist, the acceptance-bar fixtures, and the ladder wiring. **No
+Lean, no axioms, no QA declarations; counts stay 2785/10/0.**
+
+**Changes:** `check_degenerate_corner_guards` folded into
+`lint_axioms.py`'s `main()` (every existing ladder invocation runs it —
+no new command to forget) with the two finding kinds the incidents
+dictated: a `Fintype`-carried index type (`Matrix V …`/`V →`/
+`Fintype.card V`) with no visible `Nonempty` guard, and a `Measure`
+argument with no `IsProbabilityMeasure`/`IsFiniteMeasure`/total-mass
+guard. The signature model approximates the elaborator as little as
+possible: bracket-matched binder parsing (multi-name and anonymous
+groups), namespace-scoped `variable` tracking with Lean's name-mention
+inclusion semantics (six of the ten axioms carry their measure guard in
+a `variable` line, not in the declaration), transitive inclusion
+through included binders' types, and Unicode-aware identifiers — the
+acceptance bar's own first fixture run caught the scanner blind to
+Greek identifiers (`μ`, `Ω`: the measure check could not see `μ` at
+all, i.e. exactly the weighted false-silence failure mode) before
+delivery. The allowlist landed with provisional entries for exactly
+the two anticipated findings (`perron_frobenius`'s `hex` argument,
+`primitive_power_tendsto`'s `hπsum` empty-sum argument), each naming
+its reasoning as docstring-level and pointing at the companion audit
+for the Lean-confirmed verdict; entries are load-bearing (removal
+re-flags, fenced) and are to be removed when an axiom acquires a real
+guard. The literal `Fin n` sample-index scoping decision is recorded in
+the tool's docstring, not silent. Ladder wiring at all five
+`check_build_completeness.py` locations plus the admission-time rules:
+`AGENTS.md` § Verification, `scripts/opencode-pursue`'s
+`verify_for_commit`, `scripts/README.md`, `docs/2_ARCHITECTURE.md` §10
+(its paragraph) and §5 (the hazard checklist's mechanical-nudge
+sentence), `governance/CONTRIBUTING.md`'s Axiom Addition checklist, and
+this log's format block (a new rule: any entry reporting a new axiom
+admission must record the check passing with the admission's allowlist
+decision).
+
+**Decisive commands and outcomes:** `python3 wip/axlint_fixtures.py` —
+all fixtures pass, after the Greek-identifier repair; the fixture set:
+pre-repair `matrix_hoeffding` and `hoeffding_lemma` reconstructed
+verbatim from `a1e59ac~1` both flag (the historical incidents
+reproduced); guard-recognition fences (inline `[Nonempty W]`, hypothesis
+`(hW : Nonempty W)`, `[IsFiniteMeasure m]`, `m Set.univ = 1` all
+silence; `Matrix W W ℂ` and a `Fintype.card`-prefactor axiom with no
+guard both flag; an unused measure variable does not falsely trigger);
+the namespace-scope fence (a guard inside a closed namespace cannot
+leak past its `end` — the under-flag direction); the allowlist-expiry
+fence (removing `perron_frobenius`'s entry re-flags exactly it); and
+`wip/axlint_probe.py`'s transitive-inclusion probe (an index type
+entering only via `variable {B : Matrix V V ℝ}` still triggers). Real
+tree: `python3 scripts/lint_axioms.py` exit 0, deterministic, with
+exactly the two `Allowlisted:` notes; all ten axioms verified scanned
+at their correct `file:line` positions (`wip/axlint_dump.py`);
+`check_citations`, `check_markdown_links` pass; scoreboard regeneration
+idempotent (**2785/10/0** — no Lean source touched, so no `lake build`
+was run this run; the Lean tree's last verified state remains the prior
+run's full build + 127/127 build-completeness); **map freshness exit 0**
+(mandatory — this delivery changes a proposal's status header; the
+linter proposal is not a map station source, and the check confirmed no
+drift); `bash .git/hooks/pre-commit` exit 0 (nothing staged, freshness
+report-only channel green); `git status` — exactly the milestone's ten
+intended files.
+
+**Remaining risk:** none blocking on the check. The two allowlist
+entries are provisional by design — upgrading them to Lean-confirmed
+verdicts (or repairs) is the companion audit's scope items 1–3 — and
+the `Fin n` scoping decision is the known, recorded under-flag edge
+(one documented regex away if a future `n`-prefactor axiom breaks at
+`n = 0`).
+
+**Next handoff:** per priority item 0 — the Active table's **Medium**
+row: `proposals/audit-perron-frobenius-family-degenerate-corner.md`
+(Lean-verified Step-0 verdicts for `perron_frobenius` and
+`primitive_power_tendsto` at `card V = 0`, the `card V = 1`
+spot-checks, then upgrading this delivery's two provisional allowlist
+entries per its scope item 3); then the priced follow-ons
+(empirical-stationary Step 2, the sparsification `(1±ε)`/budget
+corollaries, a third concentration-axiom consumer, the
+uniform/existential-x quadratic-form packaging, the `t/δ`-sharpened
+drift interface).
+
+## 2026-08-28T17:03:58Z — PF-family degenerate-corner audit started
+
+**Run:** `20260828T165900Z-run-1`  
+**Session:** `ses_fb6b1c779ffetwkHLQEEvU7yYe`  
+**Status:** in-progress  
+**Milestone:** `proposals/audit-perron-frobenius-family-degenerate-corner.md`
+(the Active table's only open Medium row, the delivered linter run's
+named next handoff) — Lean-verify the degenerate-cardinality safety of
+`perron_frobenius` and `primitive_power_tendsto` (Step 0: derive
+`False` from `hex` / `hπsum` alone at `Fintype.card V = 0`; spot-check
+`card V = 1`), then upgrade the two provisional linter allowlist
+entries to Lean-confirmed verdicts. Trust-surface repair, no new
+breadth; zero axioms expected to change.
+
+## 2026-08-28T17:21:58Z — PF-family degenerate-corner audit delivered: both axioms safe by Lean-verified unsatisfiability (terminal)
+
+**Run:** `20260828T165900Z-run-1`  
+**Session:** `ses_fb6b1c779ffetwkHLQEEvU7yYe`  
+**Status:** completed  
+**Milestone (delivered):**
+`proposals/audit-perron-frobenius-family-degenerate-corner.md` (the
+Active table's only open Medium row, the delivered linter run's named
+next handoff) — **COMPLETE with zero axiom changes (count stays 10;
+neither `perron_frobenius` nor `primitive_power_tendsto` moved — the
+proposal's repair branch never opened). QA 2785 → 2800 (+15).**
+
+**Changes:** (1) **Step 0 verdicts, proved unconditionally in QA** —
+`perron_frobenius_hex_unsat_card_zero_QA` (new audit section of
+`PerronFrobenius_QA.lean`: at `Fintype.card V = 0`, `False` from
+`hex` alone — `Fintype.card_eq_zero_iff` → `IsEmpty V` →
+`isEmptyElim` on the witness; an empty index type supplies no `i`)
+and `mass_one_unsat_card_zero_QA` (new Section D of
+`DirectedMixing_QA.lean`: `False` from `hπsum : ∑ i, π i = 1` alone —
+the empty sum is `0`). Each axiom's hypothesis set has *no
+instantiation* at the degenerate dimension: safe by unsatisfiability,
+structurally unlike the matrix trio (whose hypotheses all stayed
+satisfiable while the conclusion's prefactor collapsed) — and now
+kernel-checked rather than docstring-asserted, which was the entire
+point of the audit: the same shape of prose reasoning is what let the
+matrix trio's bug sit. (2) **The `card V = 1` adjacent corners**
+(scope item 2): at `Fin 1`/`!![1]`, `perron_frobenius_S1_QA` pins the
+axiom instance to the hand Perron data (root exactly `1` from the
+eigen-equation on the unknown witness; the simplicity clause — the one
+the scope item named as the risk — exactly the hand
+`rootMultiplicity 1 = 1` via `S1_charpoly_QA`/
+`S1_rootMultiplicity_QA`), and `P1_singleton_hand_QA` proves the
+primitive limit shape *without* the axiom (constant sequence) beside
+the non-vacuous instance `P1_singleton_axiom_QA`. (3) **The allowlist
+upgrade** (scope item 3): both provisional `lint_axioms.py` entries
+replaced with Lean-confirmed entries citing the theorem names; the
+linter proposal's residual struck through as resolved. (4) **Records**:
+the proposal (COMPLETE header, verdict section with the exact Lean
+arguments, technique findings, delivery record), `proposals/README.md`
+(row retired + Delivered-table row), the index map's corner note,
+README (2800), the radar QA axis (score held 4.0 — audit records, not
+a new theorem family), the scoreboard (verification rows +
+interpretation bullet), the map stamps, the execution plan, this log.
+
+**Verification:** spike first (`wip/pfa_spike.lean`, zero
+errors/warnings before any shelf edit; the unsatisfiability arguments
+elaborated live against the actual axioms); `lake env lean` zero
+errors/zero warnings on both touched QA modules; explicit `lake
+build` targets ✔ (2202/2202); `#print axioms` via `wip/pfa_axcheck.lean`
+on all seven new declarations — the two verdict lemmas and three hand
+pins exactly `propext, Classical.choice, Quot.sound`, the two
+singleton instances carrying exactly their named axiom; **full `lake
+build` ✔ immediately followed by `check_build_completeness.py` —
+127/127 fresh, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (10
+axioms, both findings allowlisted-confirmed, none provisional);
+`check_citations`, `check_markdown_links` pass; scoreboard
+regenerated idempotent (**2800/10/0**); **map freshness exit 0**
+(mandatory — this delivery changes a proposal's status header; stamps
+synced 2785 → 2800 before the check, which then confirmed no drift).
+Nothing committed; prior runs' uncommitted deliveries preserved
+untouched.
+
+**Remaining risk:** none owed by the proposal. Its honesty note
+stands as the recorded residual: the audit cleared the
+degenerate-cardinality mechanism only, not either axiom's mathematical
+content — a wrong constant or strictness mismatch elsewhere would need
+its own Step 0 if ever suspected (none is). The
+signature-visible half of the hazard class stays mechanically enforced
+by `lint_axioms.py` on every admission.
+
+**Next handoff:** the Active table has no High rows and no open
+Medium rows — fall through to the center-out policy: the priced
+follow-ons on record (empirical-stationary Step 2 gated on a consumer
+pricing the bias-term shape; the sparsification `(1±ε)`/budget
+corollaries; a third concentration-axiom consumer; the
+uniform/existential-x quadratic-form packaging; the `t/δ`-sharpened
+drift interface), or the next load-bearing gap
+`docs/6_SGT_BACKLOG.md` names.

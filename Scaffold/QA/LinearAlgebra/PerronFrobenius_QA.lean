@@ -47,6 +47,17 @@
   theorems, not axioms; QA checks the interface where the arithmetic is
   evaluated. QA does not prove the axiom.
 
+  2026-08-28, the degenerate-cardinality audit
+  (`proposals/audit-perron-frobenius-family-degenerate-corner.md`):
+  at `Fintype.card V = 0` the axiom's `hex` hypothesis is unsatisfiable
+  (`perron_frobenius_hex_unsat_card_zero_QA` — the Lean-confirmed
+  verdict behind the lint-axiom allowlist entry), and at the singleton
+  `Fin 1` / `!![1]` every hypothesis is satisfiable with the conclusion
+  pinned to the hand Perron data
+  (`perron_frobenius_S1_QA` — root exactly `1`, simplicity exactly the
+  hand `rootMultiplicity 1 = 1`). Neither degenerate corner breaks the
+  axiom; no guard is needed.
+
   Scoreboard: ../QA_SCOREBOARD.md
 -/
 
@@ -585,5 +596,79 @@ theorem D_axiom_domination_QA : Complex.abs (Complex.ofReal (-2)) ≤ 2 := by
       simp
     exact hdom _ m
   · exact absurd h (by linarith)
+
+/-! ### The degenerate-cardinality audit
+(`proposals/audit-perron-frobenius-family-degenerate-corner.md`,
+delivered 2026-08-28) -/
+
+/-- **The empty-cardinality verdict (no axiom contact).** At
+`Fintype.card V = 0` the axiom's `hex : ∃ i j, 0 < A i j` hypothesis
+is unsatisfiable — an empty index type supplies no witness `i` — so
+the axiom's hypothesis set has **no instantiation at the degenerate
+dimension**: the corner is safe by unsatisfiability, not by a
+`Nonempty V` guard. This theorem is the Lean-confirmed verdict behind
+`scripts/lint_axioms.py`'s allowlist entry for `perron_frobenius`
+(the entry was provisional until this audit landed). -/
+theorem perron_frobenius_hex_unsat_card_zero_QA {V : Type} [Fintype V]
+    (hV : Fintype.card V = 0) (A : Matrix V V ℝ)
+    (hex : ∃ i j, 0 < A i j) : False := by
+  rw [Fintype.card_eq_zero_iff] at hV
+  obtain ⟨i, -, -⟩ := hex
+  exact isEmptyElim i
+
+/-- The singleton fixture: the identity `!![1]` on `Fin 1` —
+irreducible by reflexivity, the one corner where `hex` is *trivially*
+satisfiable (the single diagonal entry witnesses it). -/
+def S1 : Matrix (Fin 1) (Fin 1) ℝ := !![1]
+
+theorem S1_00 : S1 0 0 = 1 := rfl
+
+theorem S1_charpoly_QA : S1.charpoly = (X - C (1:ℝ)) := by
+  rw [Matrix.charpoly]
+  rw [Matrix.det_fin_one]
+  rw [Matrix.charmatrix_apply_eq]
+  rw [S1_00]
+
+/-- The simplicity clause at the 1-dimensional space, pinned by hand:
+the multiplicity of the root `1` in `X − 1` is exactly `1`. -/
+theorem S1_rootMultiplicity_QA :
+    Polynomial.rootMultiplicity 1 S1.charpoly = 1 := by
+  rw [S1_charpoly_QA]
+  exact Polynomial.rootMultiplicity_X_sub_C_self
+
+/-- **Singleton instance (axiom-consumed).** At `Fin 1` / `!![1]`
+every hypothesis of `perron_frobenius` is satisfiable, and the axiom's
+conclusion pins to the hand data: the Perron root is exactly `1`
+(derived from the eigen-equation on the unknown witness, `x 0 = r * x 0`
+with `x 0 > 0`), the simplicity clause reads exactly the hand-pinned
+      `rootMultiplicity 1 = 1` of `S1_rootMultiplicity_QA`, and the Perron
+      direction is the constant one. Trivial satisfiability of `hex` at the
+singleton breaks no conclusion clause. `#print axioms` lists
+`perron_frobenius` (plus the standard three) — the honest conditional
+structure of an axiom-consumed pin. -/
+theorem perron_frobenius_S1_QA :
+    ∃ x : Fin 1 → ℝ, (∀ i, 0 < x i) ∧ S1 *ᵥ x = (1:ℝ) • x ∧
+      Polynomial.rootMultiplicity 1 S1.charpoly = 1 ∧
+      ∃ c : ℝ, 0 < c ∧ x = c • (1 : Fin 1 → ℝ) := by
+  obtain ⟨r, x, hr, hx, hevec, hmult, -, -, -⟩ :=
+    perron_frobenius S1 (fun i j => by fin_cases i; fin_cases j; simp [S1])
+      (fun i j => by rw [Subsingleton.elim i j])
+      ⟨0, 0, by simp [S1]⟩
+  have he0 : (1:ℝ) * x 0 = r * x 0 := by
+    have h0 := congrFun hevec 0
+    simp only [Matrix.mulVec, Matrix.dotProduct, Pi.smul_apply, smul_eq_mul,
+      Fin.sum_univ_one] at h0
+    rwa [S1_00] at h0
+  have hx0 : x 0 ≠ 0 := ne_of_gt (hx 0)
+  have hr1 : r = 1 := by
+    have hz : (1 - r) * x 0 = 0 := by linear_combination he0
+    rcases mul_eq_zero.mp hz with h | h
+    · linarith
+    · exact absurd h hx0
+  subst hr1
+  exact ⟨x, hx, hevec, hmult, x 0, hx 0, by
+    funext i
+    fin_cases i
+    simp [Pi.smul_apply, smul_eq_mul, mul_one]⟩
 
 end Scaffold.LinearAlgebra.QA

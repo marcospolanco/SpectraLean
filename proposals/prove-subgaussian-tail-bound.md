@@ -299,6 +299,16 @@ execution plan / activity log.
 ### Adjacent hazard recorded (not addressed — a named residual for the
 remaining concentration axioms' own Step 0s)
 
+**Followed up 2026-08-28:** see
+`proposals/audit-scalar-concentration-integrability-hazard.md`, which
+opens the Step 0 this note asked for on `hoeffding_inequality`,
+`bernstein_inequality`, `bernstein_bounded_variance`, and the same-file
+`hoeffding_lemma`. That proposal's structural read found three of the
+four already carry `[IsProbabilityMeasure μ]` plus bounded+measurable
+hypotheses that likely rule out both mechanisms below; `hoeffding_lemma`
+carries neither guard and is the priority spike. Not yet Lean-verified
+as of that proposal's own filing.
+
 The junk-integral mechanism is not specific to this axiom.
 `hoeffding_inequality` and `bernstein_inequality` state their
 centering/mean hypotheses as Bochner integrals over an *unconstrained*

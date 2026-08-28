@@ -847,8 +847,17 @@ pullback). Conditional on `matrix_bernstein`, reported honestly in
 `#print axioms` (the two tails and their two QA interface pins the
 only bernstein-bearing declarations of the 43 audited); the
 multiplicative `(1±ε)` refinement on `im Π`-coordinate vectors and
-the `q ~ log n/ε²` budget corollary remain priced follow-ons in the
-proposal.
+the `q ~ log n/ε²` budget corollary **were delivered 2026-08-28**
+(run `20260828T183001Z-run-1`: `sparsification_multiplicative_tail` —
+the field-standard "S is a (1±ε)-sparsifier" shape on the cone, via
+the engine lemma `quadForm_imageProjector_eq_of_mulVec_eq` — and
+`sparsification_multiplicative_budget`, the
+`q ≥ (8/3)·log(2d/δ)/ε²` sample-complexity corollary at the exact
+Tropp constant; zero new axioms, QA 2800 → 2808 with the cone fence
+proving the `im Π` restriction load-bearing — the un-guarded pointwise
+claim refuted at the all-false outcome; see the proposal's follow-on
+delivery record). The graph-vector Laplacian multiplicative form (the
+sampled-Laplacian object) remains the one priced follow-on.
 The assembly (Finding B's `Fin n` transport, the quadratic-form
 transfer) and the proposal's three QA obligations remain Slice 3.
 

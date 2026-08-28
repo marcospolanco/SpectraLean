@@ -22,7 +22,7 @@ As of August 27, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 10 |
-| QA theorems/lemmas | 2800, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 2808, with no `sorry` or `admit` under `Scaffold/` |
 
 Recent highlights (full per-run history in
 [`docs/AGENT_ACTIVITY.md`](docs/AGENT_ACTIVITY.md); per-result detail in each
@@ -191,7 +191,7 @@ The near-term center is general SGT. Public modules currently cover:
 | Cluster projector | `GraphTheory.ClusterProjector` — the spectral projector onto an arbitrary eigenvalue set |
 | Perturbation | `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan,BandDavisKahan,ProjectionGap,Duhamel}` — Weyl's inequality, Davis–Kahan sin Θ, and the band/cluster projector-stability family |
 | Concentration | `Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*` |
-| Spectral sparsification | `GraphTheory.Sparsification`, `Derived.SparsificationTail`, `Probability.BernoulliProduct` — leverage-score sampling; `matrix_bernstein`'s first real theorem consumer |
+| Spectral sparsification | `GraphTheory.Sparsification`, `Derived.SparsificationTail`, `Probability.BernoulliProduct` — leverage-score sampling; `matrix_bernstein`'s first real theorem consumer; the `(1±ε)` sparsifier tail with its `q ~ log n/ε²` budget |
 | Edge-perturbation concentration | `GraphTheory.EdgePerturbation`, `Derived.EdgePerturbationTail` — centered Bernoulli edge-Laplacian perturbations; `matrix_hoeffding`'s first theorem consumer |
 | Concentration → subspace-stability pipeline | `Derived.EdgePerturbationDrift` — high-probability Fiedler-subspace and Fiedler-line rotation under random edge resampling (`edgePerturbation_fiedlerLine_drift`), composing `fiedlerLine_stability` with `edgePerturbation_norm_tail` through the packaging identity `laplacian (perturbWeight A p ω) = ∑ₑ perturbSummand` and the Laplacian linearity package (`laplacian_smul`/`laplacian_sum`) |
 | Empirical stationary distribution | `Probability.IIDProduct`, `Derived.EmpiricalStationary` — `hoeffding_empirical`'s first theorem consumer |

@@ -16,11 +16,13 @@ axiom-conditional tail theorems) + the `Sparsification.lean` Slice-3
 deterministic sections +
 `Scaffold/QA/Derived/SparsificationTail_QA.lean` (the delivery record
 below; the tails are conditional on `matrix_bernstein` and reported as
-such — never described as foundationally proved). **Remaining priced
-follow-ons (not blocking):** the multiplicative `(1±ε)` refinement on
-`im Π`-coordinate vectors (from the additive transfer), and the
-`q ~ log n/ε²` budget corollary (choosing `q` to drive the bound below
-`δ`). This document authorizes no axiom admissions, commits, or
+such — never described as foundationally proved). **The two priced
+follow-ons DELIVERED 2026-08-28** (run `20260828T183001Z-run-1`, the
+follow-on delivery record below): the multiplicative `(1±ε)`
+refinement `sparsification_multiplicative_tail` and the
+`q ~ log n/ε²` budget corollary `sparsification_multiplicative_budget`
+— the field-standard sparsifier sentence on the delivered base, zero
+new axioms. This document authorizes no axiom admissions, commits, or
 external publication on its own.
 
 ## The correction this proposal is built on
@@ -644,16 +646,107 @@ caught `SpectralGraphTheory.quadForm_sub` already declared in
 AlonBoppana.lean (a different, vector-pair notion) — renamed here to
 `quadForm_sub_matrix` with all consumers updated.
 
-**Remaining risk / priced follow-ons:** the additive eigen-coordinate
+**Remaining risk / priced follow-ons:** ~~the additive eigen-coordinate
 form is the delivered statement; the *multiplicative* `(1±ε)`
 refinement on `im Π`-coordinate vectors (vectors supported on
 nonzero-eigenvalue coordinates, where `qF(Π) x = x ⬝ᵥ x`) and the
 `q ~ log n/ε²` budget corollary (driving the bound below `δ`) are
-one-slice follow-ons on the delivered base. The recorded Slice-2
-set-aside (`ssVariance K₂ 1 = rankOne v_(0,1)` exact matrix value)
-stands. The proposal's draft statement's *graph-vector* multiplicative
-form (`xᵀL̃x` vs `xᵀLx` for Laplacians rather than eigen-coordinate
-operators) would additionally need the sampled *Laplacian* object and
-its form-level correspondence — a further priced follow-on, recorded
-here so the next run does not mistake the additive eigen-coordinate
-form for it.
+one-slice follow-ons on the delivered base.~~ **Both DELIVERED
+2026-08-28** (the follow-on delivery record below). The recorded
+Slice-2 set-aside (`ssVariance K₂ 1 = rankOne v_(0,1)` exact matrix
+value) stands. The proposal's draft statement's *graph-vector*
+multiplicative form (`xᵀL̃x` vs `xᵀLx` for Laplacians rather than
+eigen-coordinate operators) would additionally need the sampled
+*Laplacian* object and its form-level correspondence — a further priced
+follow-on, recorded here so the next run does not mistake the
+eigen-coordinate form for it.
+
+## Follow-on delivery record: the `(1±ε)` multiplicative refinement + the budget corollary (2026-08-28, run `20260828T183001Z-run-1`)
+
+The proposal's two priced one-slice follow-ons, **DELIVERED** in one
+run as zero new axioms (count stays 10; `#print axioms` via
+`wip/ssmult_axcheck.lean` on all eleven audited declarations: the
+engine lemma and six hard-crust QA lemmas exactly `propext,
+Classical.choice, Quot.sound`; the two Derived theorems and their two
+QA interface pins honestly carrying `matrix_bernstein` alone — the
+same conditional structure as the delivered tails). QA 2800 → 2808
+(+8, the new `(1±ε)` section of `SparsificationTail_QA.lean`).
+
+**(1) The engine piece** — `quadForm_imageProjector_eq_of_mulVec_eq`
+(`Sparsification.lean`'s Projector section, pure hard crust): at every
+`im Π`-coordinate vector the projector's quadratic form is exactly the
+squared norm. This is the identity that makes the multiplicative
+reading *legitimate* — off the cone the zero-eigenvalue coordinates'
+mass is dropped and the conversion is unsound, so the cone hypothesis
+is load-bearing, not decorative (fenced in QA, below). It completes the
+projector's quadratic-form interface beside `quadForm_imageProjector_
+nonneg` / `_le` / `_eq` (the sum form).
+
+**(2) `sparsification_multiplicative_tail`** (`Derived/
+SparsificationTail.lean`) — the field-standard statement shape: the
+failure of the two-sided bound `(1−ε)(x ⬝ᵥ x) ≤ xᵀ S(ω) x ≤
+(1+ε)(x ⬝ᵥ x)` over vectors the image projector fixes obeys the same
+exponential tail — a `measure_mono` from the delivered additive tail
+at `t = ε`: on the cone `qF(Π) x = x ⬝ᵥ x` (the engine lemma), so each
+disjunct yields `|qF(S) x − qF(Π) x| > ε (x ⬝ᵥ x)` with the sign
+resolved by the disjunct itself. Any `0 < ε` (no upper guard — the
+statement only weakens as `ε` grows).
+
+**(3) `sparsification_multiplicative_budget`** — the sample-complexity
+sentence: at `0 < ε ≤ 1` and `0 < δ`, budget
+`q ≥ (8/3)·log(2 card V/δ)/ε²` drives the multiplicative failure
+measure below `δ`. The `8/3` is exact, not decorated: the Tropp
+exponent `ε²/(2/q + 2ε/(3q))` equals `qε²/(2 + 2ε/3)`, the
+denominator is at most `8/3` on the stated regime, and the hypothesis
+rearranges to `log(2d/δ) ≤ 3qε²/8` — so the exponent dominates the
+log, `exp(−E) ≤ δ/(2d)` by `Real.exp_log`, and the `2d` prefactor
+cancels. Note the corollary holds at *every* `δ > 0` including
+`δ > 2d` (then `log(2d/δ) < 0` and the budget hypothesis is weak, but
+the chain still closes — the exponent is positive regardless).
+
+**QA (the new `(1±ε)` section, +8):** the edge vector's **im-Π
+membership proved order-independently** (at a zero-eigenvalue basis
+index the edge vector's own definition vanishes, so both sides are
+zero; elsewhere the projector is the identity — no `eigvalOf` ordering
+assumption anywhere, so the fact survives any eigenbasis choice); the
+**engine identity's first instance** joined to the existing four-pair
+pin of the same `1/2`; the **tight `ε = 1` two-sided instance** (the
+upper bound attained with equality, consistent with the deviation norm
+being exactly `1 = 1/q` at the all-true outcome); **failure-event
+nonemptiness at `ε = 1/2`** with hand values (`qF(S) v = 1 >
+(3/2)(1/2) = 3/4`); the **cone fence** — at the all-false outcome
+nothing is sampled (`S = 0` proved: both cross-pair weights are
+`δ/p = 0`, the loops' rank-one factors the zero matrix), and the
+un-guarded pointwise claim is *refuted* there (`(1/2)·2 = 1 > 0 =
+qF(S) ones`): the `im Π` restriction is exactly what the engine lemma
+needs; and the **two interface pins** (the tail at `q = 1`,
+`ε = 1/2`; the budget at `ε = δ = 1/2`, `q = 100`, with the hypothesis
+`(8/3)·log 8/(1/4) ≤ 100` discharged by `log 8 ≤ 300/32` from
+`Real.add_one_le_exp` — `8 = 7 + 1 ≤ exp 7 ≤ exp 9.375`).
+
+**Technique findings (this pin's Mathlib):** the numerals in a
+`Real.log` argument do not rewrite by `rw` across cast spellings
+(`↑(Fintype.card (Fin 2))` vs `(2 : ℝ)`) — evaluate the argument first
+(`hcard` by `simp`, then a `norm_num` identity for the arithmetic
+inside), and normalize the constant prefactor by an explicit
+`field_simp; ring` identity before `linarith` (it treats
+`(8/3)·log 8/(1/2)^2` as an opaque nonlinear atom). `Real.log_le_iff_
+le_exp` is this pin's spelling (`log_le_iff` does not resolve).
+`Real.exp_neg` rewrites *forward* (`exp(−x) = (exp x)⁻¹`); the reverse
+pattern match fails. `positivity` cannot use variable positivity
+hypotheses (`0 < δ`, `0 < card V`) — those comparisons need explicit
+`div_pos`/`mul_pos` terms.
+
+**Verification:** spike first (`wip/ssmult_spike.lean`, all pieces
+iterated to zero errors/warnings before any shelf edit); `lake env
+lean` zero errors/zero warnings on all three touched modules; explicit
+`lake build` targets ✔ (2159/2159, 2165/2165, 2166/2166); `#print
+axioms` exactly as designed (above); **full `lake build` ✔
+(2405/2406) immediately followed by `check_build_completeness.py` —
+127/127 fresh, 0 stale, 0 missing, exit 0**; `lint_axioms` (10, both
+findings allowlisted-confirmed), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**2808/10/0**).
+
+**Remaining priced follow-on (not started):** the *graph-vector*
+multiplicative form above (the sampled-Laplacian object and its
+form-level correspondence).

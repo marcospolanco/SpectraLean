@@ -446,6 +446,21 @@ theorem quadForm_imageProjector_le (x : V → ℝ) :
     exact mul_self_nonneg _
   · rw [if_neg h, one_mul]
 
+/-- **The projector's quadratic form on its own image is the squared
+norm** — at every `im Π`-coordinate vector (`Π *ᵥ x = x`, i.e. `x`
+supported on the nonzero-eigenvalue coordinates) the two agree exactly.
+This is the identity that converts an additive quadratic-form deviation
+bound into the multiplicative `(1±ε)` sparsifier reading: on the cone,
+`xᵀ S x = xᵀ Π x + xᵀ (S − Π) x` with the first term `x ⬝ᵥ x`. The
+companion bounds `quadForm_imageProjector_nonneg` / `_le` hold at every
+vector; equality characterizes the cone (off it the form drops the
+zero-eigenvalue coordinates' mass). -/
+theorem quadForm_imageProjector_eq_of_mulVec_eq (x : V → ℝ)
+    (hx : imageProjector A hA *ᵥ x = x) :
+    quadForm (imageProjector A hA) x = x ⬝ᵥ x := by
+  show x ⬝ᵥ (imageProjector A hA *ᵥ x) = x ⬝ᵥ x
+  rw [hx]
+
 theorem l2OpNorm_imageProjector_le : ‖imageProjector A hA‖ ≤ 1 := by
   have hsymm := imageProjector_isSymm A hA
   refine Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent.l2OpNorm_le_of_abs_eigvalOf_le

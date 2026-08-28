@@ -1,14 +1,20 @@
 /-
   SparsificationTail_QA.lean
 
-  QA for `Scaffold.Derived.SparsificationTail` (the assembly slice of the
-  leverage-score sparsification program, Step 1 Slice 3): the K₂ fixtures
+  QA for `Scaffold.Derived.SparsificationTail` (the assembly slice of
+  the leverage-score sparsification program, Step 1 Slice 3): the K₂ fixtures
   pin the exact deviation identity, its norm at the classical constant
   `1 = 1/q`, the tight norm→quadratic-form transfer, and both tail
   theorems' interface instances; the fences isolate the connectivity
   hypothesis of the Foster budget (refuted on a disconnected graph,
   alongside the connectivity-free positive on the same fixture) and the
-  nonempty-event side of the tail bound.
+  nonempty-event side of the tail bound. The `(1±ε)` section pins the
+  multiplicative refinement: the edge vector's order-independent `im Π`
+  membership, the engine identity, the tight ε = 1 two-sided instance,
+  failure-event nonemptiness at ε = 1/2, the *un-guarded pointwise
+  refutation* at the all-false outcome (the cone hypothesis is
+  load-bearing), and both new theorems' interface instances (the
+  budget's `log 8 ≤ 300/32` discharged from `add_one_le_exp`).
 
   Falsification content, per the load-bearing-growth policy:
 
@@ -309,6 +315,183 @@ theorem norm_event_nonempty_K2 :
         - imageProjector spK2 spK2_isSymm‖ ≥ 1} := by
   simp only [Set.mem_setOf_eq]
   rw [ssSampled_deviation_norm_K2]
+
+/-! ## The `(1±ε)` multiplicative refinement (the follow-on delivery) -/
+
+/-- **The edge vector is `im Π`-coordinate**: the projector fixes it —
+proved *order-independently* (at a zero-eigenvalue basis index the edge
+vector's entry vanishes by its own definition, so both sides are `0`;
+elsewhere the projector acts as the identity). No K₂ spectrum pin is
+needed, so the fact survives any eigenbasis ordering. -/
+theorem imageProjector_mulVec_ssEdgeVec_K2 :
+    imageProjector spK2 spK2_isSymm *ᵥ
+      (ssEdgeVec spK2 spK2_isSymm 0 1)
+      = ssEdgeVec spK2 spK2_isSymm 0 1 := by
+  funext k
+  have hstep : (imageProjector spK2 spK2_isSymm *ᵥ
+      (ssEdgeVec spK2 spK2_isSymm 0 1)) k
+      = (if eigvalOf (laplacian spK2)
+            (laplacian_symmetric spK2 spK2_isSymm) k = 0
+          then (0 : ℝ) else 1)
+        * ssEdgeVec spK2 spK2_isSymm 0 1 k := by
+    simp [imageProjector, Matrix.mulVec, Matrix.diagonal, Matrix.dotProduct,
+      Finset.sum_ite_eq]
+  rw [hstep]
+  by_cases h : eigvalOf (laplacian spK2)
+      (laplacian_symmetric spK2 spK2_isSymm) k = 0
+  · rw [if_pos h]
+    have hv : ssEdgeVec spK2 spK2_isSymm 0 1 k = 0 := by simp [ssEdgeVec, h]
+    rw [hv, mul_zero]
+  · rw [if_neg h, one_mul]
+
+/-- **The engine lemma's first instance**: at the edge vector the
+projector's quadratic form is exactly the squared norm — `1/2 = 1/2`,
+joined to the existing independent pin of the same value by the
+four-pair route (`quadForm_imageProjector_K2`). -/
+theorem quadForm_imageProjector_eq_of_mulVec_K2 :
+    quadForm (imageProjector spK2 spK2_isSymm)
+        (ssEdgeVec spK2 spK2_isSymm 0 1)
+      = ssEdgeVec spK2 spK2_isSymm 0 1
+          ⬝ᵥ ssEdgeVec spK2 spK2_isSymm 0 1 :=
+  quadForm_imageProjector_eq_of_mulVec_eq spK2 spK2_isSymm _
+    imageProjector_mulVec_ssEdgeVec_K2
+
+/-- **The tight `(1±ε)` instance at `ε = 1`**: at the all-true outcome
+both multiplicative bounds hold at the edge vector — and the upper side
+is *attained with equality* (`qF(S) v = 1 = (1+1)·(1/2)`), consistent
+with the deviation norm being exactly `1 = 1/q` there (the transfer is
+tight, as `transfer_tight_K2` records). -/
+theorem multiplicative_bounds_tight_K2 :
+    (1 - (1 : ℝ)) * (ssEdgeVec spK2 spK2_isSymm 0 1
+        ⬝ᵥ ssEdgeVec spK2 spK2_isSymm 0 1)
+      ≤ quadForm (ssSampled spK2 spK2_isSymm 1 (fun _ => true))
+          (ssEdgeVec spK2 spK2_isSymm 0 1)
+    ∧ quadForm (ssSampled spK2 spK2_isSymm 1 (fun _ => true))
+          (ssEdgeVec spK2 spK2_isSymm 0 1)
+      ≤ (1 + (1 : ℝ)) * (ssEdgeVec spK2 spK2_isSymm 0 1
+          ⬝ᵥ ssEdgeVec spK2 spK2_isSymm 0 1) := by
+  rw [quadForm_ssSampled_K2, ssEdgeVec_dot_K2]
+  norm_num
+
+/-- **The failure event is real**: at `ε = 1/2` the all-true outcome is
+in the multiplicative failure event, witnessed by the edge vector —
+`qF(S) v = 1 > (3/2)·(1/2) = 3/4`, the hand value. -/
+theorem multiplicative_event_nonempty_K2 :
+    (fun _ => true) ∈ {ω : (Fin 2 × Fin 2) → Bool |
+      ∃ x : Fin 2 → ℝ, imageProjector spK2 spK2_isSymm *ᵥ x = x ∧
+        ((1 - 1 / 2) * (x ⬝ᵥ x)
+            > quadForm (ssSampled spK2 spK2_isSymm 1 ω) x ∨
+          quadForm (ssSampled spK2 spK2_isSymm 1 ω) x
+            > (1 + 1 / 2) * (x ⬝ᵥ x))} := by
+  simp only [Set.mem_setOf_eq]
+  refine ⟨ssEdgeVec spK2 spK2_isSymm 0 1,
+    imageProjector_mulVec_ssEdgeVec_K2, Or.inr ?_⟩
+  rw [quadForm_ssSampled_K2, ssEdgeVec_dot_K2]
+  norm_num
+
+/-! ### The cone fence: the `im Π` restriction is load-bearing -/
+
+/-- **At the all-false outcome nothing is sampled**: `S = 0` — both
+cross-pair weights are `δ/p = 0` (the `δ`'s vanish), and the loop pairs'
+rank-one factors are the zero matrix whatever the junk coefficient. -/
+theorem ssSampled_allFalse_K2 :
+    ssSampled spK2 spK2_isSymm 1 (fun _ => false) = 0 := by
+  have hw01 : ssWeight spK2 spK2_isSymm 1 ((0, 1) : Fin 2 × Fin 2)
+      (fun _ => false) = 0 := by
+    have hp : ssProb spK2 spK2_isSymm 1 ((0, 1) : Fin 2 × Fin 2)
+        = 1 / 2 := by rw [ssProb_K2_01]; norm_num
+    have hne : ssProb spK2 spK2_isSymm 1 ((0, 1) : Fin 2 × Fin 2) ≠ 1 := by
+      rw [hp]; norm_num
+    rw [ssWeight, if_neg hne, hp, ssDelta]
+    norm_num
+  have hw10 : ssWeight spK2 spK2_isSymm 1 ((1, 0) : Fin 2 × Fin 2)
+      (fun _ => false) = 0 := by
+    have hp : ssProb spK2 spK2_isSymm 1 ((1, 0) : Fin 2 × Fin 2)
+        = 1 / 2 := by rw [ssProb_K2_10]; norm_num
+    have hne : ssProb spK2 spK2_isSymm 1 ((1, 0) : Fin 2 × Fin 2) ≠ 1 := by
+      rw [hp]; norm_num
+    rw [ssWeight, if_neg hne, hp, ssDelta]
+    norm_num
+  have hloop : ∀ u : Fin 2,
+      ssWeight spK2 spK2_isSymm 1 (u, u) (fun _ => false)
+        • rankOne (ssEdgeVec spK2 spK2_isSymm u u) = 0 := by
+    intro u
+    rw [ssEdgeVec_self, rankOne_zero_eq, smul_zero]
+  have h01 : ssWeight spK2 spK2_isSymm 1 ((0, 1) : Fin 2 × Fin 2)
+        (fun _ => false)
+        • rankOne (ssEdgeVec spK2 spK2_isSymm 0 1) = 0 := by
+    rw [hw01, zero_smul]
+  have h10 : ssWeight spK2 spK2_isSymm 1 ((1, 0) : Fin 2 × Fin 2)
+        (fun _ => false)
+        • rankOne (ssEdgeVec spK2 spK2_isSymm 1 0) = 0 := by
+    rw [hw10, zero_smul]
+  rw [ssSampled, Fintype.sum_prod_type]
+  simp only [Fin.sum_univ_two, hloop, h01, h10, add_zero, zero_add]
+
+/-- **The un-guarded pointwise claim is false** — the cone hypothesis
+fenced: at the all-false outcome *no* quadratic form is positive, so
+the multiplicative lower bound fails at `onesVec`
+(`(1/2)·2 = 1 > 0 = qF(S) ones`). The tail's `im Π` restriction is
+what makes the multiplicative reading sound; without it the statement
+is refuted at a real outcome. -/
+theorem multiplicative_guard_fence_K2 :
+    ¬ (∀ x : Fin 2 → ℝ, (1 - 1 / 2) * (x ⬝ᵥ x)
+        ≤ quadForm (ssSampled spK2 spK2_isSymm 1 (fun _ => false)) x) := by
+  intro h
+  have h1 := h (fun _ => (1 : ℝ))
+  rw [ssSampled_allFalse_K2, quadForm, Matrix.zero_mulVec,
+    Matrix.dotProduct_zero] at h1
+  norm_num at h1
+
+/-! ### The two new theorems' interface instances -/
+
+/-- **The multiplicative tail instantiated at `K₂`** (interface pin,
+`q = 1`, `ε = 1/2`; the event side is nonempty by the exact pin above). -/
+theorem multiplicative_tail_K2 :
+    ssMeasure spK2 spK2_isSymm 1 (by norm_num : (0 : ℝ) ≤ 1)
+        {ω | ∃ x : Fin 2 → ℝ, imageProjector spK2 spK2_isSymm *ᵥ x = x ∧
+          ((1 - 1 / 2) * (x ⬝ᵥ x)
+              > quadForm (ssSampled spK2 spK2_isSymm 1 ω) x ∨
+            quadForm (ssSampled spK2 spK2_isSymm 1 ω) x
+              > (1 + 1 / 2) * (x ⬝ᵥ x))}
+      ≤ ENNReal.ofReal (2 * ((Fintype.card (Fin 2) : ℝ))
+        * Real.exp (-((1 / 2 : ℝ) ^ 2) / (2 / 1 + 2 * (1 / 2) / (3 * 1)))) :=
+  sparsification_multiplicative_tail spK2 spK2_isSymm spK2_nonneg 1 one_pos
+    (1 / 2) (by norm_num)
+
+/-- **The budget corollary instantiated at `K₂`** (interface pin,
+`ε = 1/2`, `δ = 1/2`, `q = 100`): the budget hypothesis
+`(8/3)·log 8/(1/4) ≤ 100` is discharged by `log 8 ≤ 300/32` (itself
+from `add_one_le_exp` at `224/32` — `8 = 7 + 1 ≤ exp 7 ≤ exp 9.375`),
+driving the failure measure to `≤ 1/2`. -/
+theorem budget_tail_K2 :
+    ssMeasure spK2 spK2_isSymm 100 (by norm_num : (0 : ℝ) ≤ 100)
+        {ω | ∃ x : Fin 2 → ℝ, imageProjector spK2 spK2_isSymm *ᵥ x = x ∧
+          ((1 - 1 / 2) * (x ⬝ᵥ x)
+              > quadForm (ssSampled spK2 spK2_isSymm 100 ω) x ∨
+            quadForm (ssSampled spK2 spK2_isSymm 100 ω) x
+              > (1 + 1 / 2) * (x ⬝ᵥ x))}
+      ≤ ENNReal.ofReal (1 / 2) := by
+  have hlog8 : Real.log (8 : ℝ) ≤ 300 / 32 := by
+    rw [Real.log_le_iff_le_exp (by norm_num)]
+    calc (8 : ℝ) = 224 / 32 + 1 := by norm_num
+      _ ≤ Real.exp (224 / 32) := Real.add_one_le_exp _
+      _ ≤ Real.exp (300 / 32) := Real.exp_le_exp.mpr (by norm_num)
+  have hbudget : (8 / 3) * Real.log (2 * ((Fintype.card (Fin 2) : ℝ)) / (1 / 2))
+        / (1 / 2) ^ 2 ≤ 100 := by
+    have hcard : ((Fintype.card (Fin 2) : ℝ)) = 2 := by simp
+    rw [hcard]
+    have h8 : (2 : ℝ) * 2 / (1 / 2) = 8 := by norm_num
+    rw [h8]
+    have hnorm : (8 / 3 : ℝ) * Real.log 8 / (1 / 2) ^ 2
+        = (32 / 3) * Real.log 8 := by
+      field_simp
+      ring
+    rw [hnorm]
+    linarith [hlog8]
+  exact sparsification_multiplicative_budget spK2 spK2_isSymm spK2_nonneg
+    (1 / 2) (by norm_num) (by norm_num) (1 / 2) (by norm_num) 100
+    (by norm_num : (0 : ℝ) < 100) hbudget
 
 /-! ## The disconnected fence (obligation 3) -/
 

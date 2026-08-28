@@ -7,10 +7,102 @@ holds the append-only narrative.
 ## Active milestone
 
 None — see the delivered milestone below and the standing handoff. The
-PF-family degenerate-corner audit (the Active table's last open Medium
-row) was **delivered this run**; the table's remaining rows are
-follow-ons-only (sparsification, empirical-stationary Step 2 gated on
-a consumer) and Low human-decision items.
+sparsification `(1±ε)` multiplicative refinement + budget corollary
+(the standing handoff's top named fall-through candidate) were
+**delivered this run**; the Active table now holds only the gated
+empirical-stationary Step 2 row and Low human-decision items.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The sparsification `(1±ε)` multiplicative refinement + the
+`q ~ log n/ε²` budget corollary —
+`proposals/spectral-sparsification-via-leverage-scores.md` (the
+proposal's own two priced one-slice follow-ons, the standing handoff's
+named fall-through candidate — no High rows, no open Medium rows, the
+empirical-stationary Step 2 consumer-gated); run 1, 2026-08-28, run
+`20260828T183001Z-run-1`; DELIVERED — zero new axioms (count stays 10;
+`#print axioms` via `wip/ssmult_axcheck.lean` on all eleven audited
+declarations: the engine lemma and six hard-crust QA lemmas exactly
+`propext, Classical.choice, Quot.sound`; the two Derived theorems and
+their two QA interface pins honestly carrying `matrix_bernstein` alone
+— the same conditional structure as the delivered tails). QA
+2800 → 2808 (+8, `SparsificationTail_QA.lean`'s new `(1±ε)` section).**
+
+**Delivered** in three pieces: (1) **the engine piece** —
+`quadForm_imageProjector_eq_of_mulVec_eq` (`Sparsification.lean`'s
+Projector section, pure hard crust): at every `im Π`-coordinate vector
+the projector's quadratic form is exactly the squared norm — the
+identity that makes the multiplicative reading *legitimate* (off the
+cone the zero-eigenvalue mass is dropped and the conversion is
+unsound — fenced in QA), completing the projector's quadratic-form
+interface beside `_nonneg`/`_le`/`_eq`. (2) **The two Derived
+theorems**: `sparsification_multiplicative_tail` — the field-standard
+"S is a (1±ε)-sparsifier" shape, the failure of the two-sided
+`(1−ε)(x ⬝ᵥ x) ≤ xᵀ S(ω) x ≤ (1+ε)(x ⬝ᵥ x)` over vectors the image
+projector fixes obeying the same exponential tail (a `measure_mono`
+from the delivered additive tail at `t = ε`; any `0 < ε`, no upper
+guard) — and `sparsification_multiplicative_budget` — at
+`0 < ε ≤ 1`, `0 < δ`, budget `q ≥ (8/3)·log(2 card V/δ)/ε²` drives the
+failure measure below `δ`, the `8/3` exact (the Tropp exponent
+`ε²/(2/q+2ε/(3q)) = qε²/(2+2ε/3) ≥ 3qε²/8 ≥ log(2d/δ)`, closed by
+`Real.exp_log`; holds at every `δ > 0`, `δ > 2d` included — no case
+split). (3) **QA (+8)**: the edge vector's *order-independent* im-Π
+membership (at a zero-eigenvalue basis index the edge vector's own
+definition vanishes — no `eigvalOf` ordering assumption), the
+engine-identity instance joined to the existing four-pair pin, the
+tight `ε = 1` two-sided instance (upper bound attained with equality),
+failure-event nonemptiness at hand values (`1 > 3/4`), the **cone
+fence** (at the all-false outcome nothing is sampled — `S = 0` proved
+— and the un-guarded pointwise claim is *refuted* at `onesVec`:
+`(1/2)·2 = 1 > 0`), and both interface pins (the budget's
+`(8/3)·log 8/(1/4) ≤ 100` discharged by `log 8 ≤ 300/32` from
+`Real.add_one_le_exp`).
+
+**Verification:** spike first (`wip/ssmult_spike.lean`, all pieces
+iterated to zero errors/warnings before any shelf edit; technique
+findings recorded in the proposal's follow-on delivery record — the
+`Real.log`-argument numeral/cast rewrite trap, the explicit
+`field_simp; ring` prefactor normalization before `linarith`, the
+pin's `log_le_iff_le_exp` spelling, forward-only `exp_neg`, and
+`positivity`'s blindness to variable hypotheses); `lake env lean`
+zero errors/zero warnings on all three touched modules; explicit
+`lake build` targets ✔ (2159/2159, 2165/2165, 2166/2166); `#print
+axioms` exactly as designed; **full `lake build` ✔ (2405/2406)
+immediately followed by `check_build_completeness.py` — 127/127
+fresh, 0 stale, 0 missing, exit 0**; `lint_axioms` (10, both findings
+allowlisted-confirmed), `check_citations`, `check_markdown_links`
+pass; scoreboard regenerated idempotent (**2808/10/0**); **map
+freshness exit 0** after the stats-stamp sync (mandatory — this
+delivery changes a proposal's status header) and the pre-commit hook
+end-to-end exit 0. Records updated: the proposal (status header + the
+follow-on delivery record with technique findings + the residual
+struck through), `proposals/README.md` (the Active row retired to the
+Delivered table; the superseded Phase-B row's pointer fixed), README
+(2808; one module-table clause), the radar (QA axis synced, score
+held at 4.0 per protocol — a packaging of the already-counted
+sparsification family plus its engine lemma, not a new theorem
+family), the scoreboard (verification row + interpretation bullet),
+the backlog (item 7's follow-on clause), the index map (the engine
+row + the two theorem rows + the module blurb), this plan, and the
+activity log. Nothing committed; prior runs' uncommitted deliveries
+preserved untouched.
+
+**Remaining risk:** none owed by the proposal. The one remaining
+priced follow-on (not started): the *graph-vector* multiplicative form
+(`xᵀL̃x` vs `xᵀLx` for Laplacians rather than eigen-coordinate
+operators) — needs the sampled-Laplacian object and its form-level
+correspondence, priced in the proposal's Slice-3 record so no run
+mistakes the eigen-coordinate form for it.
+
+**Next milestone (open):** the Active table's only actionable row is
+the empirical-stationary Step 2, still gated on a consumer pricing the
+bias-term shape; otherwise the priced follow-ons on record (a third
+concentration-axiom consumer — e.g. the uniform/existential-x
+quadratic-form packaging of the edge-perturbation tail, or the
+`t/δ`-sharpened drift interface), or the next load-bearing gap
+`docs/6_SGT_BACKLOG.md` names.
 
 ------
 

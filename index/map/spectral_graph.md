@@ -1390,6 +1390,7 @@ sampled operator and its exact pointwise deviation identity.
 | `eigvalOf_laplacian_nonneg` | Sparsification Slice 2 | Laplacian eigenvalues nonnegative on nonnegative symmetric input (PSD at the eigenvector) |
 | `ssEdgeVec` / `ssEdgeVec_self` / `ssEdgeVec_swap` / `ssEdgeVec_dotProduct_self` / `sum_ssEdgeVec_dotProduct_self` | Sparsification Slice 2 | **The SS edge vectors in eigen-coordinates** (`√(w/2)·(v_k u − v_k v)/√λ_k`, zero-eigenvalue entries dropped; no pseudoinverse or matrix square root), with `‖v_e‖² = w_e R_eff/2` and the Foster budget corollary `∑_{u,v} ‖v_e‖² = card V − 1` |
 | `imageProjector` / `imageProjector_mul_self` / `l2OpNorm_imageProjector_le` / `trace_imageProjector_eq` / `quadForm_imageProjector_le` / `quadForm_imageProjector_eq` | Sparsification Slice 2 | The eigen-coordinate projector onto `im L`: idempotent, `‖Π‖ ≤ 1`, `trace = card V − 1` (connected), Rayleigh domination, and `qF(Π) x = ∑_e (x ⬝ᵥ v_e)²` |
+| `quadForm_imageProjector_eq_of_mulVec_eq` | Sparsification follow-on (2026-08-28) | **The cone identity**: at every `im Π`-coordinate vector (`Π *ᵥ x = x`), `qF(Π) x = x ⬝ᵥ x` — the piece that converts the additive quadratic-form tail into the multiplicative `(1±ε)` sparsifier reading; equality fails off the cone (the zero-eigenvalue mass is dropped), fenced at `K₂` in QA |
 | `sum_rankOne_ssEdgeVec` | Sparsification Slice 2 | **The projector identity**: `∑_e v_e v_eᵀ = Π_{im L}` *exactly* (the ordered-pair `1/√2` halving absorbing the double count) |
 | `integral_bern_center_sq` | Sparsification Slice 2 | The Bernoulli second moment `E[(δ/p − 1)²] = (1−p)/p`, linearized through the first moment |
 | `ssProb` / `ssDelta` / `ssSummand` / `ssMeasure` / `ssVariance` | Sparsification Slice 2 | The Finding-A-guarded sampling design on the Slice-1 `bernPMF` at `ι = V × V`: probabilities `min 1 (q‖v_e‖²)`, indicators, guarded summands, the measure, and the variance statistic |
@@ -1444,15 +1445,20 @@ no per-outcome spectral hypothesis.
 ### `Scaffold.Derived.SparsificationTail` (leverage-score sparsification, Slice 3 — the axiom-backed assembly)
 
 The program's payoff: `matrix_bernstein`'s first real theorem consumer
-(2026-08-27). Both declarations are **conditional on the
+(2026-08-27). The declarations are **conditional on the
 `matrix_bernstein` axiom** (Tropp 2012, Theorem 1.1) — every
 hypothesis clause is proved hard crust, the tail inequality itself is
-axiom-backed, and `#print axioms` reports the dependency.
+axiom-backed, and `#print axioms` reports the dependency. The
+2026-08-28 follow-ons add the multiplicative `(1±ε)` sparsifier shape
+and its `q ~ log n/ε²` budget corollary on the same conditional
+structure.
 
 | Declaration | Area | Description |
 | --- | --- | --- |
 | `sparsification_norm_tail` | Sparsification Slice 3 (axiom-conditional) | **The SS deviation tail**: `μ {‖S(ω) − Π_{im L}‖ ≥ t} ≤ 2 d exp(−t²/(2/q + 2t/(3q)))` at the proved constants `R = 1/q`, `‖Σ‖ ≤ 1/q`; Finding B's `Fin n` transport via `Fintype.equivFin` + `Equiv.sum_comp`; no connectivity hypothesis |
 | `sparsification_quadForm_tail` | Sparsification Slice 3 (axiom-conditional) | **The quadratic-form tail**: the same bound for the failure of `|xᵀ S x − xᵀ Π x| ≤ t (x ⬝ᵥ x)` for every vector — the additive eigen-coordinate pullback of the norm event |
+| `sparsification_multiplicative_tail` | Sparsification follow-on (axiom-conditional, 2026-08-28) | **The `(1±ε)` sparsifier tail** — the field-standard statement shape: the failure of the two-sided bound `(1−ε)(x ⬝ᵥ x) ≤ xᵀ S(ω) x ≤ (1+ε)(x ⬝ᵥ x)` over `im Π`-coordinate vectors obeys the same exponential tail (the additive tail at `t = ε`, legitimate on the cone by the engine identity) |
+| `sparsification_multiplicative_budget` | Sparsification follow-on (axiom-conditional, 2026-08-28) | **The sample-complexity corollary**: at `0 < ε ≤ 1`, `0 < δ`, budget `q ≥ (8/3)·log(2 card V/δ)/ε²` drives the multiplicative failure measure below `δ` — the classical `q ~ log n/ε²` sentence at the exact Tropp exponent constant |
 
 ## Applications
 

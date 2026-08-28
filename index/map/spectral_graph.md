@@ -1376,10 +1376,12 @@ refuting any constant-collapse reading).
 
 The deterministic Spielman–Srivastava algebra
 (`proposals/spectral-sparsification-via-leverage-scores.md`, the
-program completed through Slice 3 on 2026-08-27): every input the
-`matrix_bernstein` assembly consumes, at the classical constants
-`R = 1/q` and `‖Σ‖ ≤ 1/q` proved rather than asserted — plus the
-sampled operator and its exact pointwise deviation identity.
+program completed through Slice 3 on 2026-08-27 and the follow-ons on
+2026-08-28): every input the `matrix_bernstein` assembly consumes, at
+the classical constants `R = 1/q` and `‖Σ‖ ≤ 1/q` proved rather than
+asserted — plus the sampled operator with its exact pointwise deviation
+identity, and (the graph-vector follow-on) the transport, claim A, and
+the sampled Laplacian with its form-level correspondence.
 
 | Declaration | Area | Description |
 | --- | --- | --- |
@@ -1391,6 +1393,11 @@ sampled operator and its exact pointwise deviation identity.
 | `ssEdgeVec` / `ssEdgeVec_self` / `ssEdgeVec_swap` / `ssEdgeVec_dotProduct_self` / `sum_ssEdgeVec_dotProduct_self` | Sparsification Slice 2 | **The SS edge vectors in eigen-coordinates** (`√(w/2)·(v_k u − v_k v)/√λ_k`, zero-eigenvalue entries dropped; no pseudoinverse or matrix square root), with `‖v_e‖² = w_e R_eff/2` and the Foster budget corollary `∑_{u,v} ‖v_e‖² = card V − 1` |
 | `imageProjector` / `imageProjector_mul_self` / `l2OpNorm_imageProjector_le` / `trace_imageProjector_eq` / `quadForm_imageProjector_le` / `quadForm_imageProjector_eq` | Sparsification Slice 2 | The eigen-coordinate projector onto `im L`: idempotent, `‖Π‖ ≤ 1`, `trace = card V − 1` (connected), Rayleigh domination, and `qF(Π) x = ∑_e (x ⬝ᵥ v_e)²` |
 | `quadForm_imageProjector_eq_of_mulVec_eq` | Sparsification follow-on (2026-08-28) | **The cone identity**: at every `im Π`-coordinate vector (`Π *ᵥ x = x`), `qF(Π) x = x ⬝ᵥ x` — the piece that converts the additive quadratic-form tail into the multiplicative `(1±ε)` sparsifier reading; equality fails off the cone (the zero-eigenvalue mass is dropped), fenced at `K₂` in QA |
+| `ssTransport` / `imageProjector_mulVec_ssTransport` / `quadForm_laplacian_eq_ssTransport` | Sparsification follow-on (2026-08-28) | **The eigen-coordinate transport** `c(x)_k = √λ_k (x ⬝ᵥ q_k)` — on the `im Π` cone *by construction* and `L`-isometric (`xᵀLx = ‖c(x)‖²` via the spectral resolution); the mechanism that removes the cone restriction from the graph-vector sparsifier statement (nonnegativity load-bearing — junk-zero `√` at nonpositive spectra, fenced in QA) |
+| `ssTransport_dot_ssEdgeVec` | Sparsification follow-on (2026-08-28) | **Claim A**: `c(x) ⬝ᵥ v_e = √(w_e/2)(x u − x v)` at positive pairs — the kernel-eigenvector constancy (`eq_of_laplacian_mulVec_eq_zero_of_pos_weight`) doing the load-bearing work |
+| `ssEdgeDiff` / `dotProduct_ssEdgeDiff` | Sparsification follow-on (2026-08-28) | The vertex-space edge-difference vector and its pairing identity `x ⬝ᵥ (e_u − e_v) = x u − x v` |
+| `ssWeight_nonneg` / `ssLaplacian` / `ssLaplacian_isSymm` / `quadForm_ssLaplacian_nonneg` | Sparsification follow-on (2026-08-28) | **The sampled Laplacian** `∑_e (g_e/2 · w_e) • rankOne (e_u − e_v)` — the SS object in graph coordinates: symmetric, PSD, expected to be `laplacian A` |
+| `quadForm_ssLaplacian_eq` | Sparsification follow-on (2026-08-28) | **The form-level correspondence**: `xᵀL̃(ω)x = c(x)ᵀ S(ω) c(x)` for every vector and every outcome (claim A squared at positive pairs; junk-zero corners at nonpositive weights) — the deterministic heart of the graph-vector tail |
 | `sum_rankOne_ssEdgeVec` | Sparsification Slice 2 | **The projector identity**: `∑_e v_e v_eᵀ = Π_{im L}` *exactly* (the ordered-pair `1/√2` halving absorbing the double count) |
 | `integral_bern_center_sq` | Sparsification Slice 2 | The Bernoulli second moment `E[(δ/p − 1)²] = (1−p)/p`, linearized through the first moment |
 | `ssProb` / `ssDelta` / `ssSummand` / `ssMeasure` / `ssVariance` | Sparsification Slice 2 | The Finding-A-guarded sampling design on the Slice-1 `bernPMF` at `ι = V × V`: probabilities `min 1 (q‖v_e‖²)`, indicators, guarded summands, the measure, and the variance statistic |
@@ -1459,6 +1466,8 @@ structure.
 | `sparsification_quadForm_tail` | Sparsification Slice 3 (axiom-conditional) | **The quadratic-form tail**: the same bound for the failure of `|xᵀ S x − xᵀ Π x| ≤ t (x ⬝ᵥ x)` for every vector — the additive eigen-coordinate pullback of the norm event |
 | `sparsification_multiplicative_tail` | Sparsification follow-on (axiom-conditional, 2026-08-28) | **The `(1±ε)` sparsifier tail** — the field-standard statement shape: the failure of the two-sided bound `(1−ε)(x ⬝ᵥ x) ≤ xᵀ S(ω) x ≤ (1+ε)(x ⬝ᵥ x)` over `im Π`-coordinate vectors obeys the same exponential tail (the additive tail at `t = ε`, legitimate on the cone by the engine identity) |
 | `sparsification_multiplicative_budget` | Sparsification follow-on (axiom-conditional, 2026-08-28) | **The sample-complexity corollary**: at `0 < ε ≤ 1`, `0 < δ`, budget `q ≥ (8/3)·log(2 card V/δ)/ε²` drives the multiplicative failure measure below `δ` — the classical `q ~ log n/ε²` sentence at the exact Tropp exponent constant |
+| `sparsification_graph_tail` | Sparsification follow-on (axiom-conditional, 2026-08-28) | **The graph-vector `(1±ε)` tail** — the textbook sentence: `(1−ε)xᵀLx ≤ xᵀL̃(ω)x ≤ (1+ε)xᵀLx` failing only on a set of the bound's measure, for *every* graph vector with no `im Π` restriction (the transport is on-cone by construction; the isometry and form correspondence transfer the delivered additive tail verbatim) |
+| `sparsification_graph_budget` | Sparsification follow-on (axiom-conditional, 2026-08-28) | **The graph-vector budget corollary**: the same `q ≥ (8/3)·log(2d/δ)/ε²` sentence driving the graph-form failure measure below `δ` (numeric core factored as `sparsification_budget_core`) |
 
 ## Applications
 

@@ -51,6 +51,11 @@ axioms` reports the dependency honestly.
   corollary — at `0 < ε ≤ 1`, budget `q ≥ (8/3)·log(2d/δ)/ε²` drives the
   multiplicative failure measure below `δ` (the classical
   `q ~ log n/ε²` sentence, at the Tropp exponent's exact constant).
+- `sparsification_graph_tail` / `sparsification_graph_budget`: the
+  *graph-vector* form — the textbook sentence `xᵀL̃(ω)x` vs `xᵀLx` for
+  every graph vector with **no `im Π` restriction** (the transport is on
+  the cone by construction), same tail and same budget through the
+  shelf's form correspondence `quadForm_ssLaplacian_eq`.
 
 The `Fin n` summand transport (the Step-0 Finding B) is
 `Fintype.equivFin` + `Equiv.sum_comp`; the sum, event, and variance
@@ -348,5 +353,132 @@ theorem sparsification_multiplicative_budget [Nonempty V]
         mul_le_mul_of_nonneg_left hexp (by positivity)
     _ = δ := by
       field_simp
+
+/-- **The graph-vector multiplicative sparsifier tail** — the
+Spielman–Srivastava statement in its textbook form: with the same
+exponential bound, outside a set of the bound's measure the sampled
+Laplacian quadratic-form-approximates the base Laplacian *multiplicatively
+for every graph vector*,
+
+`(1−ε) xᵀLx ≤ xᵀL̃(ω) x ≤ (1+ε) xᵀLx` for all `x`,
+
+with **no `im Π` cone restriction**: the transport `c(x)` is on the cone
+by construction, the transport isometry identifies `xᵀLx` with `‖c(x)‖²`,
+and the form correspondence identifies `xᵀL̃x` with `cᵀS c` — so the
+additive tail at `t = ε` transfers verbatim (each failure disjunct is a
+failure of `|cᵀSc − cᵀΠc| ≤ ε‖c‖²`). CONDITIONAL ON THE
+`matrix_bernstein` AXIOM (Tropp, FoCM 2012, Theorem 1.1, via the
+delivered additive tail). -/
+theorem sparsification_graph_tail [Nonempty V] (hnn : ∀ i j, 0 ≤ A i j)
+    (q : ℝ) (hq : 0 < q) (ε : ℝ) (hε : 0 < ε) :
+    ssMeasure A hA q hq.le
+        {ω | ∃ x : V → ℝ, (1 - ε) * quadForm (laplacian A) x
+            > quadForm (ssLaplacian A hA q ω) x ∨
+          quadForm (ssLaplacian A hA q ω) x
+            > (1 + ε) * quadForm (laplacian A) x}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) *
+        Real.exp (-(ε ^ 2) / (2 / q + 2 * ε / (3 * q)))) := by
+  refine le_trans (measure_mono ?_)
+    (sparsification_quadForm_tail A hA hnn q hq ε hε.le)
+  rintro ω ⟨x, hdisj⟩
+  simp only [Set.mem_setOf_eq]
+  refine ⟨ssTransport A hA x, ?_⟩
+  have hIso := quadForm_laplacian_eq_ssTransport A hA hnn x
+  have hP := quadForm_imageProjector_eq_of_mulVec_eq A hA (ssTransport A hA x)
+    (imageProjector_mulVec_ssTransport A hA x)
+  have hCorr := quadForm_ssLaplacian_eq A hA hnn q ω x
+  rw [hIso] at hdisj
+  rw [hCorr] at hdisj
+  have h3 : (0 : ℝ) ≤ ssTransport A hA x ⬝ᵥ ssTransport A hA x := dotProduct_self_nonneg _
+  have h4 : (0 : ℝ) ≤ ε * (ssTransport A hA x ⬝ᵥ ssTransport A hA x) := mul_nonneg hε.le h3
+  have hgoal : |quadForm (ssSampled A hA q ω) (ssTransport A hA x)
+      - quadForm (imageProjector A hA) (ssTransport A hA x)|
+      = |quadForm (ssSampled A hA q ω) (ssTransport A hA x)
+        - ssTransport A hA x ⬝ᵥ ssTransport A hA x| := by rw [hP]
+  rcases hdisj with hlow | hhigh
+  · have h2 : ssTransport A hA x ⬝ᵥ ssTransport A hA x
+        - quadForm (ssSampled A hA q ω) (ssTransport A hA x)
+        > ε * (ssTransport A hA x ⬝ᵥ ssTransport A hA x) := by
+      have hring : (1 - ε) * (ssTransport A hA x ⬝ᵥ ssTransport A hA x)
+          = ssTransport A hA x ⬝ᵥ ssTransport A hA x - ε * (ssTransport A hA x ⬝ᵥ ssTransport A hA x) := by ring
+      linarith
+    rw [hgoal, abs_of_nonpos (by linarith), neg_sub]
+    exact h2
+  · have h2 : quadForm (ssSampled A hA q ω) (ssTransport A hA x)
+        - ssTransport A hA x ⬝ᵥ ssTransport A hA x > ε * (ssTransport A hA x ⬝ᵥ ssTransport A hA x) := by
+      have hring : (1 + ε) * (ssTransport A hA x ⬝ᵥ ssTransport A hA x)
+          = ssTransport A hA x ⬝ᵥ ssTransport A hA x + ε * (ssTransport A hA x ⬝ᵥ ssTransport A hA x) := by ring
+      linarith
+    rw [hgoal, abs_of_nonneg (by linarith)]
+    exact h2
+
+/-- The numeric core of both budget corollaries: the Tropp exponent at
+`t = ε` is at least `3qε²/8`, so the budget `q ≥ (8/3)·log(2d/δ)/ε²`
+drives `2d·exp(−ε²/(2/q + 2ε/(3q)))` below `δ` (the `8/3` exact; holds
+at every `δ > 0`, `δ > 2d` included). -/
+private theorem sparsification_budget_core {d ε δ q : ℝ} (hd : 0 < d) (hε : 0 < ε)
+    (hε1 : ε ≤ 1) (hδ : 0 < δ) (hq : 0 < q)
+    (hb : (8 / 3) * Real.log (2 * d / δ) / ε ^ 2 ≤ q) :
+    2 * d * Real.exp (-(ε ^ 2) / (2 / q + 2 * ε / (3 * q))) ≤ δ := by
+  have hlog : Real.log (2 * d / δ) ≤ 3 * q * ε ^ 2 / 8 := by
+    rw [le_div_iff₀ (by norm_num : (0 : ℝ) < 8)]
+    have hε2 : 0 < ε ^ 2 := by positivity
+    have hbx := (div_le_iff₀ hε2).mp hb
+    nlinarith [hbx]
+  have hE : 3 * q * ε ^ 2 / 8 ≤ ε ^ 2 / (2 / q + 2 * ε / (3 * q)) := by
+    have h1 : ε ^ 2 / (2 / q + 2 * ε / (3 * q)) = ε ^ 2 * q / (2 + 2 * ε / 3) := by
+      field_simp
+      ring
+    have h23 : (0 : ℝ) < 2 + 2 * ε / 3 := by nlinarith [hε]
+    have h3 : 2 + 2 * ε / 3 = (2 * 3 + 2 * ε) / 3 := by
+      field_simp
+    rw [h1, div_le_div_iff₀ (by norm_num : (0 : ℝ) < 8) h23, h3,
+      ← mul_div_assoc, div_le_iff₀ (by norm_num : (0 : ℝ) < 3)]
+    have hnn1 : (0 : ℝ) ≤ 1 - ε := by linarith
+    have hc : (0 : ℝ) ≤ q * (ε * ε) * (1 - ε) :=
+      mul_nonneg (mul_nonneg hq.le (mul_nonneg hε.le hε.le)) hnn1
+    nlinarith [hc]
+  have hchain : Real.log (2 * d / δ)
+      ≤ ε ^ 2 / (2 / q + 2 * ε / (3 * q)) := le_trans hlog hE
+  have hexp : Real.exp (-(ε ^ 2) / (2 / q + 2 * ε / (3 * q)))
+      ≤ δ / (2 * d) := by
+    have hpos : 0 < 2 * d / δ := div_pos (mul_pos two_pos hd) hδ
+    have h1 : Real.exp (-(ε ^ 2) / (2 / q + 2 * ε / (3 * q)))
+        ≤ Real.exp (-Real.log (2 * d / δ)) := by
+      rw [neg_div]
+      exact Real.exp_le_exp.mpr (neg_le_neg hchain)
+    have h2 : Real.exp (-Real.log (2 * d / δ)) = δ / (2 * d) := by
+      rw [Real.exp_neg, Real.exp_log hpos, inv_eq_one_div]
+      field_simp
+    rw [h2] at h1
+    exact h1
+  calc (2 : ℝ) * d * Real.exp (-(ε ^ 2) / (2 / q + 2 * ε / (3 * q)))
+      ≤ 2 * d * (δ / (2 * d)) :=
+        mul_le_mul_of_nonneg_left hexp (by positivity)
+    _ = δ := by
+        field_simp
+
+/-- **The graph-vector budget corollary** — the sample-complexity
+sentence for the textbook form: at `0 < ε ≤ 1`, `0 < δ`, budget
+`q ≥ (8/3)·log(2d/δ)/ε²` (with `d = card V`) drives the probability of
+the graph-vector multiplicative failure below `δ`. CONDITIONAL ON THE
+`matrix_bernstein` AXIOM (the graph tail above, evaluated through the
+shared numeric core). -/
+theorem sparsification_graph_budget [Nonempty V] (hnn : ∀ i j, 0 ≤ A i j)
+    (ε : ℝ) (hε : 0 < ε) (hε1 : ε ≤ 1)
+    (δ : ℝ) (hδ : 0 < δ) (q : ℝ) (hq : 0 < q)
+    (hqbudget : (8 / 3) * Real.log (2 * (Fintype.card V : ℝ) / δ)
+      / ε ^ 2 ≤ q) :
+    ssMeasure A hA q hq.le
+        {ω | ∃ x : V → ℝ, (1 - ε) * quadForm (laplacian A) x
+            > quadForm (ssLaplacian A hA q ω) x ∨
+          quadForm (ssLaplacian A hA q ω) x
+            > (1 + ε) * quadForm (laplacian A) x}
+      ≤ ENNReal.ofReal δ := by
+  refine le_trans (sparsification_graph_tail A hA hnn q hq ε hε) ?_
+  refine ENNReal.ofReal_le_ofReal ?_
+  have hdpos : (0 : ℝ) < (Fintype.card V : ℝ) := by
+    exact_mod_cast Fintype.card_pos
+  exact sparsification_budget_core hdpos hε hε1 hδ hq hqbudget
 
 end Scaffold.Derived.SparsificationTail

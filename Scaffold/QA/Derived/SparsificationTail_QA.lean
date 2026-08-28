@@ -14,7 +14,11 @@
   failure-event nonemptiness at ε = 1/2, the *un-guarded pointwise
   refutation* at the all-false outcome (the cone hypothesis is
   load-bearing), and both new theorems' interface instances (the
-  budget's `log 8 ≤ 300/32` discharged from `add_one_le_exp`).
+  budget's `log 8 ≤ 300/32` discharged from `add_one_le_exp`). The
+  graph-vector section pins the textbook form on the sampled Laplacian
+  (raw pins, a two-route correspondence join, the tight `ε = 1`
+  instance) and fences the transport engines' nonnegativity hypothesis
+  on a signed fixture with a nonpositive spectrum.
 
   Falsification content, per the load-bearing-growth policy:
 
@@ -556,5 +560,306 @@ theorem deviation_zero_disconnected :
     ext i j
     simp [imageProjector, eigvalOf_laplacian_zero]
   rw [hS, hProj, sub_zero]
+
+/-! ## The graph-vector form (the follow-on delivery)
+
+The textbook sentence: `xᵀL̃(ω)x` vs `xᵀLx` for every graph vector, no
+`im Π` restriction — the transport is on the cone by construction.
+Pins: the raw Laplacian energy `4` and the raw sampled-Laplacian form
+`8` (per-pair `A`-arithmetic), the transport isometry instance, the
+correspondence joined by two independent routes (the raw `8` against
+the sampled operator's own evaluation through the claim-A dot values),
+the tight `ε = 1` instance (`8 = 2·4` attained), failure-event
+nonemptiness at `ε = 1/2`, both interface pins, and the **signed-fixture
+fences** — one fixture (`A = !![0,−2,1; −2,0,−2; 1,−2,0]`,
+`L = −rankOne ![1,−2,1]`) refuting the transport isometry (`−36 < 0`) and
+claim A (junk-zero transport against `√(1/2) ≠ 0`) when `hnn` is
+dropped: nonnegativity is load-bearing on both new engines. -/
+
+/-- Local copy of the sum-split helper (private in the module). -/
+private theorem quadForm_finset_sum {V : Type} [Fintype V] {ι : Type} [Fintype ι]
+    [DecidableEq ι] (M : ι → Matrix V V ℝ) (x : V → ℝ) :
+    quadForm (∑ i, M i) x = ∑ i, quadForm (M i) x := by
+  have hadd : ∀ P Q : Matrix V V ℝ,
+      quadForm (P + Q) x = quadForm P x + quadForm Q x := by
+    intro P Q
+    show x ⬝ᵥ ((P + Q) *ᵥ x) = x ⬝ᵥ (P *ᵥ x) + x ⬝ᵥ (Q *ᵥ x)
+    rw [Matrix.add_mulVec, Matrix.dotProduct_add]
+  induction (Finset.univ : Finset ι) using Finset.induction_on with
+  | empty => simp [quadForm]
+  | @insert a s ha ih =>
+      rw [Finset.sum_insert ha, Finset.sum_insert ha, hadd, ih]
+
+/-- The graph-vector fixture `x = e₀ − e₁`. -/
+def spx : Fin 2 → ℝ := ![1, -1]
+
+theorem quadForm_laplacian_K2 :
+    quadForm (laplacian spK2) spx = 4 := by
+  rw [laplacian_quadForm spK2 spK2_isSymm spx]
+  simp only [Fin.sum_univ_two, spK2, spx]
+  norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+theorem ssTransport_iso_K2 :
+    ssTransport spK2 spK2_isSymm spx ⬝ᵥ ssTransport spK2 spK2_isSymm spx
+      = 4 := by
+  rw [← quadForm_laplacian_eq_ssTransport spK2 spK2_isSymm spK2_nonneg spx,
+    quadForm_laplacian_K2]
+
+theorem ssWeight_K2_01 :
+    ssWeight spK2 spK2_isSymm 1 ((0, 1) : Fin 2 × Fin 2) (fun _ => true) = 2 := by
+  have hp : ssProb spK2 spK2_isSymm 1 ((0, 1) : Fin 2 × Fin 2) = 1 / 2 := by
+    rw [ssProb_K2_01]; norm_num
+  have hne : ssProb spK2 spK2_isSymm 1 ((0, 1) : Fin 2 × Fin 2) ≠ 1 := by
+    rw [hp]; norm_num
+  rw [ssWeight, if_neg hne, hp]
+  simp [ssDelta]
+
+theorem ssWeight_K2_10 :
+    ssWeight spK2 spK2_isSymm 1 ((1, 0) : Fin 2 × Fin 2) (fun _ => true) = 2 := by
+  have hp : ssProb spK2 spK2_isSymm 1 ((1, 0) : Fin 2 × Fin 2) = 1 / 2 := by
+    rw [ssProb_K2_10]; norm_num
+  have hne : ssProb spK2 spK2_isSymm 1 ((1, 0) : Fin 2 × Fin 2) ≠ 1 := by
+    rw [hp]; norm_num
+  rw [ssWeight, if_neg hne, hp]
+  simp [ssDelta]
+
+/-- **The raw sampled-Laplacian pin**: `xᵀL̃x = 8` by the per-pair
+evaluation of the definition (weights `2` at the two cross pairs,
+coefficient `W/2 · A`, differences `2`), pure `A`-arithmetic. -/
+theorem quadForm_ssLaplacian_K2 :
+    quadForm (ssLaplacian spK2 spK2_isSymm 1 (fun _ => true)) spx = 8 := by
+  rw [ssLaplacian, quadForm_finset_sum, Fintype.sum_prod_type]
+  have hloop : ∀ u : Fin 2,
+      quadForm ((ssWeight spK2 spK2_isSymm 1 (u, u) (fun _ => true) / 2
+          * spK2 u u) • rankOne (ssEdgeDiff u u)) spx = 0 := by
+    intro u
+    have h0 : spK2 u u = 0 := by fin_cases u <;> simp [spK2]
+    simp only [h0, mul_zero, zero_smul]
+    simp [quadForm]
+  have t01 : quadForm ((ssWeight spK2 spK2_isSymm 1 ((0, 1) : Fin 2 × Fin 2)
+        (fun _ => true) / 2 * spK2 0 1) • rankOne (ssEdgeDiff 0 1)) spx = 4 := by
+    rw [quadForm_smul, rankOne_quadForm, dotProduct_ssEdgeDiff, ssWeight_K2_01]
+    norm_num [spK2, spx, Matrix.cons_val_zero, Matrix.head_cons]
+  have t10 : quadForm ((ssWeight spK2 spK2_isSymm 1 ((1, 0) : Fin 2 × Fin 2)
+        (fun _ => true) / 2 * spK2 1 0) • rankOne (ssEdgeDiff 1 0)) spx = 4 := by
+    rw [quadForm_smul, rankOne_quadForm, dotProduct_ssEdgeDiff, ssWeight_K2_10]
+    norm_num [spK2, spx, Matrix.cons_val_zero, Matrix.head_cons]
+  simp only [Fin.sum_univ_two, hloop, t01, t10]
+  norm_num
+
+/-- **The correspondence instance** (theorem route). -/
+theorem ssLaplacian_corr_K2 :
+    quadForm (ssLaplacian spK2 spK2_isSymm 1 (fun _ => true)) spx
+      = quadForm (ssSampled spK2 spK2_isSymm 1 (fun _ => true))
+          (ssTransport spK2 spK2_isSymm spx) :=
+  quadForm_ssLaplacian_eq spK2 spK2_isSymm spK2_nonneg 1 _ spx
+
+theorem sqrt_half_mul_two : Real.sqrt ((1 : ℝ) / 2) * 2 = Real.sqrt 2 := by
+  have h1 : Real.sqrt ((1 : ℝ) / 2) = 1 / Real.sqrt 2 := by
+    rw [Real.sqrt_div (show (0 : ℝ) ≤ 1 by norm_num) 2, Real.sqrt_one]
+  rw [h1, div_mul_eq_mul_div, one_mul,
+    div_eq_iff (by positivity : (Real.sqrt (2 : ℝ)) ≠ 0)]
+  exact (Real.mul_self_sqrt (by norm_num)).symm
+
+theorem ssTransport_dot_ssEdgeVec_K2_01 :
+    ssTransport spK2 spK2_isSymm spx ⬝ᵥ ssEdgeVec spK2 spK2_isSymm 0 1
+      = Real.sqrt 2 := by
+  have h := ssTransport_dot_ssEdgeVec spK2 spK2_isSymm spK2_nonneg
+    (by simp [spK2] : (0 : ℝ) < spK2 0 1) spx
+  rw [h]
+  have hA : spK2 0 1 = 1 := by simp [spK2]
+  have hdx : spx 0 - spx 1 = 2 := by
+    norm_num [spx, Matrix.cons_val_zero, Matrix.head_cons]
+  rw [hA, hdx, sqrt_half_mul_two]
+
+theorem ssTransport_dot_ssEdgeVec_K2_10 :
+    ssTransport spK2 spK2_isSymm spx ⬝ᵥ ssEdgeVec spK2 spK2_isSymm 1 0
+      = -(Real.sqrt 2) := by
+  rw [ssEdgeVec_swap]
+  rw [Matrix.dotProduct_neg, ssTransport_dot_ssEdgeVec_K2_01]
+
+/-- **The second route**: `qF(S) c = 8` through the sampled operator's
+own definition with the claim-A dot values — independent of the
+correspondence theorem. -/
+theorem quadForm_ssSampled_ssTransport_K2 :
+    quadForm (ssSampled spK2 spK2_isSymm 1 (fun _ => true))
+        (ssTransport spK2 spK2_isSymm spx) = 8 := by
+  rw [ssSampled, quadForm_finset_sum, Fintype.sum_prod_type]
+  have hloop : ∀ u : Fin 2,
+      quadForm ((ssWeight spK2 spK2_isSymm 1 (u, u) (fun _ => true))
+        • rankOne (ssEdgeVec spK2 spK2_isSymm u u))
+        (ssTransport spK2 spK2_isSymm spx) = 0 := by
+    intro u
+    rw [ssEdgeVec_self]
+    simp only [rankOne_zero_eq, smul_zero]
+    simp [quadForm]
+  have t01 : quadForm ((ssWeight spK2 spK2_isSymm 1 ((0, 1) : Fin 2 × Fin 2)
+        (fun _ => true)) • rankOne (ssEdgeVec spK2 spK2_isSymm 0 1))
+        (ssTransport spK2 spK2_isSymm spx) = 4 := by
+    rw [quadForm_smul, rankOne_quadForm, ssWeight_K2_01,
+      ssTransport_dot_ssEdgeVec_K2_01]
+    have hs : (Real.sqrt 2) * (Real.sqrt 2) = 2 := by
+      exact Real.mul_self_sqrt (by norm_num)
+    rw [sq, hs]
+    norm_num
+  have t10 : quadForm ((ssWeight spK2 spK2_isSymm 1 ((1, 0) : Fin 2 × Fin 2)
+        (fun _ => true)) • rankOne (ssEdgeVec spK2 spK2_isSymm 1 0))
+        (ssTransport spK2 spK2_isSymm spx) = 4 := by
+    rw [quadForm_smul, rankOne_quadForm, ssWeight_K2_10,
+      ssTransport_dot_ssEdgeVec_K2_10]
+    have hs : (-(Real.sqrt 2)) * (-(Real.sqrt 2)) = 2 := by
+      rw [neg_mul_neg]
+      exact Real.mul_self_sqrt (by norm_num)
+    rw [sq, hs]
+    norm_num
+  simp only [Fin.sum_univ_two, hloop, t01, t10]
+  norm_num
+
+/-- **The tight `ε = 1` graph instance**: the raw pins give
+`xᵀL̃x = 8 = (1+1)·4 = (1+ε)xᵀLx` attained with equality — a pure-data
+join falsifying wrong constants in either definition. -/
+theorem graph_bounds_tight_K2 :
+    (1 - (1 : ℝ)) * quadForm (laplacian spK2) spx
+        ≤ quadForm (ssLaplacian spK2 spK2_isSymm 1 (fun _ => true)) spx
+    ∧ quadForm (ssLaplacian spK2 spK2_isSymm 1 (fun _ => true)) spx
+      ≤ (1 + (1 : ℝ)) * quadForm (laplacian spK2) spx := by
+  rw [quadForm_ssLaplacian_K2, quadForm_laplacian_K2]
+  norm_num
+
+/-- **The failure event is real** at `ε = 1/2`: `8 > (3/2)·4 = 6`. -/
+theorem graph_event_nonempty_K2 :
+    (fun _ => true) ∈ {ω : (Fin 2 × Fin 2) → Bool |
+      ∃ x : Fin 2 → ℝ, (1 - 1 / 2) * quadForm (laplacian spK2) x
+          > quadForm (ssLaplacian spK2 spK2_isSymm 1 ω) x ∨
+        quadForm (ssLaplacian spK2 spK2_isSymm 1 ω) x
+          > (1 + 1 / 2) * quadForm (laplacian spK2) x} := by
+  simp only [Set.mem_setOf_eq]
+  refine ⟨spx, Or.inr ?_⟩
+  rw [quadForm_ssLaplacian_K2, quadForm_laplacian_K2]
+  norm_num
+
+/-- **The graph tail instantiated at `K₂`** (interface pin). -/
+theorem graph_tail_K2 :
+    ssMeasure spK2 spK2_isSymm 1 (by norm_num : (0 : ℝ) ≤ 1)
+        {ω : (Fin 2 × Fin 2) → Bool |
+          ∃ x : Fin 2 → ℝ, (1 - 1 / 2) * quadForm (laplacian spK2) x
+              > quadForm (ssLaplacian spK2 spK2_isSymm 1 ω) x ∨
+            quadForm (ssLaplacian spK2 spK2_isSymm 1 ω) x
+              > (1 + 1 / 2) * quadForm (laplacian spK2) x}
+      ≤ ENNReal.ofReal (2 * ((Fintype.card (Fin 2) : ℝ))
+        * Real.exp (-((1 / 2 : ℝ) ^ 2) / (2 / 1 + 2 * (1 / 2) / (3 * 1)))) :=
+  sparsification_graph_tail spK2 spK2_isSymm spK2_nonneg 1 one_pos
+    (1 / 2) (by norm_num)
+
+/-- **The graph budget instantiated at `K₂`** (interface pin, `ε = δ = 1/2`,
+`q = 100`; the budget hypothesis discharged by `log 8 ≤ 300/32`). -/
+theorem graph_budget_K2 :
+    ssMeasure spK2 spK2_isSymm 100 (by norm_num : (0 : ℝ) ≤ 100)
+        {ω : (Fin 2 × Fin 2) → Bool |
+          ∃ x : Fin 2 → ℝ, (1 - 1 / 2) * quadForm (laplacian spK2) x
+              > quadForm (ssLaplacian spK2 spK2_isSymm 100 ω) x ∨
+            quadForm (ssLaplacian spK2 spK2_isSymm 100 ω) x
+              > (1 + 1 / 2) * quadForm (laplacian spK2) x}
+      ≤ ENNReal.ofReal (1 / 2) := by
+  have hlog8 : Real.log (8 : ℝ) ≤ 300 / 32 := by
+    rw [Real.log_le_iff_le_exp (by norm_num)]
+    calc (8 : ℝ) = 224 / 32 + 1 := by norm_num
+      _ ≤ Real.exp (224 / 32) := Real.add_one_le_exp _
+      _ ≤ Real.exp (300 / 32) := Real.exp_le_exp.mpr (by norm_num)
+  have hbudget : (8 / 3) * Real.log (2 * ((Fintype.card (Fin 2) : ℝ)) / (1 / 2))
+        / (1 / 2) ^ 2 ≤ 100 := by
+    have hcard : ((Fintype.card (Fin 2) : ℝ)) = 2 := by simp
+    rw [hcard]
+    have h8 : (2 : ℝ) * 2 / (1 / 2) = 8 := by norm_num
+    rw [h8]
+    have hnorm : (8 / 3 : ℝ) * Real.log 8 / (1 / 2) ^ 2
+        = (32 / 3) * Real.log 8 := by
+      field_simp
+      ring
+    rw [hnorm]
+    linarith [hlog8]
+  exact sparsification_graph_budget spK2 spK2_isSymm spK2_nonneg
+    (1 / 2) (by norm_num) (by norm_num) (1 / 2) (by norm_num) 100
+    (by norm_num : (0 : ℝ) < 100) hbudget
+
+/-! ## The signed fixture and the fences -/
+
+open MeasureTheory ProbabilityTheory SpectralGraphTheory
+open scoped BigOperators Matrix Matrix.L2OpNorm
+
+/-- The signed fixture: `A₀₁ = A₁₂ = −2`, `A₀₂ = 1`, so
+`L = −(1,−2,1)(1,−2,1)ᵀ` — a signed Laplacian with a two-dimensional
+kernel (containing non-constant vectors) and eigenvalue `−6`. -/
+def sg : Matrix (Fin 3) (Fin 3) ℝ := !![0, -2, 1; -2, 0, -2; 1, -2, 0]
+
+theorem sg_isSymm : sg.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [sg]
+
+theorem sg_laplacian :
+    laplacian sg = -(rankOne ![1, -2, 1]) := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [laplacian, degreeMatrix, deg, sg, rankOne, Fin.sum_univ_three] <;>
+    norm_num
+
+theorem quadForm_neg {W : Type} [Fintype W] (M : Matrix W W ℝ) (x : W → ℝ) :
+    quadForm (-M) x = -quadForm M x := by
+  simp only [quadForm, Matrix.neg_mulVec, Matrix.dotProduct_neg]
+
+theorem sg_quadForm_nonpos (y : Fin 3 → ℝ) :
+    quadForm (laplacian sg) y ≤ 0 := by
+  rw [sg_laplacian, quadForm_neg, rankOne_quadForm]
+  have hs : 0 ≤ (y ⬝ᵥ (![1, -2, 1] : Fin 3 → ℝ)) ^ 2 := sq_nonneg _
+  nlinarith [hs]
+
+theorem sg_eigval_nonpos (k : Fin 3) :
+    eigvalOf (laplacian sg) (laplacian_symmetric sg sg_isSymm) k ≤ 0 := by
+  rw [← quadForm_eigvecOf_self (laplacian_symmetric sg sg_isSymm) k]
+  exact sg_quadForm_nonpos _
+
+/-- **The transport is junk-zero at the signed fixture** — every
+eigenvalue is nonpositive, so `√λ_k = 0` for every `k`. -/
+theorem sg_ssTransport_zero (x : Fin 3 → ℝ) :
+    ssTransport sg sg_isSymm x = 0 := by
+  funext k
+  simp only [ssTransport, Pi.zero_apply,
+    Real.sqrt_eq_zero_of_nonpos (sg_eigval_nonpos k), zero_mul]
+
+/-- **The isometry fence**: without nonnegativity the transport isometry
+fails — `xᵀLx = −36 < 0 = ‖c(x)‖²` at `x = (1,−2,1)`. -/
+theorem sg_iso_fence :
+    ¬ (quadForm (laplacian sg) ![1, -2, 1]
+        = ssTransport sg sg_isSymm ![1, -2, 1]
+          ⬝ᵥ ssTransport sg sg_isSymm ![1, -2, 1]) := by
+  rw [sg_ssTransport_zero, Matrix.dotProduct_zero]
+  have hq : quadForm (laplacian sg) ![1, -2, 1] = -36 := by
+    rw [sg_laplacian, quadForm_neg, rankOne_quadForm]
+    have hd : (![1, -2, 1] : Fin 3 → ℝ) ⬝ᵥ (![1, -2, 1] : Fin 3 → ℝ) = 6 := by
+      simp [Matrix.dotProduct, Fin.sum_univ_three]
+      norm_num
+    rw [hd]
+    norm_num
+  rw [hq]
+  norm_num
+
+/-- **The claim-A fence**: without nonnegativity the transport–edge-vector
+identity fails at the positive pair `(0, 2)` — the transport is junk-zero
+while `√(A₀₂/2)·(x₀ − x₂) = √(1/2) ≠ 0`. -/
+theorem sg_claimA_fence :
+    ¬ (ssTransport sg sg_isSymm (![1, 0, 0] : Fin 3 → ℝ)
+          ⬝ᵥ ssEdgeVec sg sg_isSymm 0 2
+        = Real.sqrt (sg 0 2 / 2)
+          * ((![1, 0, 0] : Fin 3 → ℝ) 0 - (![1, 0, 0] : Fin 3 → ℝ) 2)) := by
+  rw [sg_ssTransport_zero, Matrix.zero_dotProduct]
+  intro h
+  have hpos : (0 : ℝ) < sg 0 2 := by
+    simp [sg, Matrix.cons_val_zero, Matrix.head_cons]
+  have h2 : (0 : ℝ) < Real.sqrt (sg 0 2 / 2) :=
+    Real.sqrt_pos_of_pos (by positivity)
+  have hev : (![1, 0, 0] : Fin 3 → ℝ) 0 - (![1, 0, 0] : Fin 3 → ℝ) 2 = 1 := by
+    norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+  rw [hev, mul_one] at h
+  linarith
 
 end SparsificationTailQA

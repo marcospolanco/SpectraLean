@@ -22,8 +22,14 @@ follow-on delivery record below): the multiplicative `(1±ε)`
 refinement `sparsification_multiplicative_tail` and the
 `q ~ log n/ε²` budget corollary `sparsification_multiplicative_budget`
 — the field-standard sparsifier sentence on the delivered base, zero
-new axioms. This document authorizes no axiom admissions, commits, or
-external publication on its own.
+new axioms. **The final priced follow-on — the graph-vector form —
+DELIVERED 2026-08-28** (run `20260828T200603Z-run-1`, the second
+follow-on delivery record below): the sampled Laplacian's own
+`(1±ε)` tail `sparsification_graph_tail`/`sparsification_graph_budget`
+for every graph vector with no `im Π` restriction, through the
+transport and form-correspondence engine — zero new axioms. This
+document authorizes no axiom admissions, commits, or external
+publication on its own.
 
 ## The correction this proposal is built on
 
@@ -747,6 +753,103 @@ axioms` exactly as designed (above); **full `lake build` ✔
 findings allowlisted-confirmed), `check_citations`,
 `check_markdown_links` pass; scoreboard regenerated (**2808/10/0**).
 
-**Remaining priced follow-on (not started):** the *graph-vector*
-multiplicative form above (the sampled-Laplacian object and its
-form-level correspondence).
+**Remaining priced follow-on:** ~~the *graph-vector* multiplicative
+form above (the sampled-Laplacian object and its form-level
+correspondence).~~ **DELIVERED 2026-08-28** (the second follow-on
+delivery record below). No priced follow-ons remain open in this
+proposal.
+
+## Follow-on delivery record: the graph-vector form (2026-08-28, run `20260828T200603Z-run-1`)
+
+The proposal's last priced follow-on, **DELIVERED** as zero new axioms
+(count stays 10; `#print axioms` via `wip/ssgv_axcheck.lean` on all 28
+audited declarations: the 11 shelf declarations and all hard-crust QA
+exactly `propext, Classical.choice, Quot.sound`; the two Derived
+theorems and their two QA interface pins honestly carrying
+`matrix_bernstein` alone — the same conditional structure as the
+delivered tails). QA 2808 → 2830 (+22, the new graph-vector section of
+`SparsificationTail_QA.lean`).
+
+**(1) The engine layer** (`GraphTheory/Sparsification.lean`, new
+`Transport` section): the **transport** `ssTransport x : k ↦ √λ_k ·
+(x ⬝ᵥ q_k)` — on the `im Π` cone *by construction* (kernel coordinates
+killed by `√0`), `L`-isometric (`quadForm_laplacian_eq_ssTransport`:
+`xᵀLx = ‖c(x)‖²`, through the spectral resolution `quadForm_eigvalOf`),
+and paired with the edge vectors by **claim A**
+(`ssTransport_dot_ssEdgeVec`: `c ⬝ᵥ v_e = √(w_e/2)(x u − x v)` at
+positive pairs — kernel eigenvectors constant across the pair by
+`eq_of_laplacian_mulVec_eq_zero_of_pos_weight`, the load-bearing use of
+`hnn`). The **sampled Laplacian** `ssLaplacian q ω := ∑_e (g_e/2 · w_e)
+• rankOne (e_u − e_v)` with symmetry, PSD, and the **form-level
+correspondence** `quadForm_ssLaplacian_eq : xᵀL̃(ω)x = c(x)ᵀ S(ω) c(x)`
+for every vector and every outcome — per pair, claim A squared at
+positive weights (`w_eΔ² = 2(c ⬝ᵥ v_e)²` against the ordered-pair
+halving) and a junk-zero corner analysis at nonpositive weights (the
+edge vector vanishes through `√`, forcing the probability to `0` and
+the weight to `δ/0 = 0`, so both per-pair terms die).
+
+**(2) The Derived theorems** (`Derived/SparsificationTail.lean`):
+`sparsification_graph_tail` — the textbook sentence, `(1−ε)xᵀLx ≤
+xᵀL̃(ω)x ≤ (1+ε)xᵀLx` failing only on a set of the delivered exponential
+bound's measure, for **every graph vector with no `im Π` restriction**:
+the cone condition lives in the transport's construction, the isometry
+identifies `xᵀLx` with `‖c‖²`, the correspondence identifies `xᵀL̃x`
+with `cᵀSc`, and each failure disjunct is literally a failure of the
+delivered additive tail's event at `y := c(x)` — a `measure_mono` from
+that theorem. And `sparsification_graph_budget` — the same
+`q ≥ (8/3)·log(2d/δ)/ε²` budget sentence for the graph form, its
+numeric chain factored into a private `sparsification_budget_core`
+shared by nothing else yet (the delivered budget proof deliberately
+untouched).
+
+**(3) QA (+22):** the raw pins `xᵀLx = 4` (Dirichlet identity at the
+unit edge) and `xᵀL̃x = 8` (per-pair evaluation of the definition —
+weights `2` at the cross pairs, junk-zero loops); the transport
+isometry instance joined to the raw `4`; **the correspondence joined by
+two independent routes** — the raw `8` against the sampled operator's
+own evaluation through the claim-A dot values (`√(1/2)·2 = √2`
+arithmetic), so a wrong weight, edge difference, claim A, or
+correspondence breaks exactly one side; the **tight `ε = 1` instance**
+(`8 = (1+1)·4` attained with equality, a pure-data join); failure-event
+nonemptiness at `ε = 1/2` (`8 > 6`); both interface pins (the budget's
+`log 8 ≤ 300/32` discharge reused); and the **signed-fixture fences** —
+one fixture `A = !![0,−2,1; −2,0,−2; 1,−2, 0]` with `L =
+−rankOne ![1,−2,1]` (all eigenvalues nonpositive, kernel
+two-dimensional and non-constant), where the transport is *provably
+junk-zero* (`√λ_k = 0` for every `k`) while `xᵀLx = −36` and
+`√(A₀₂/2)·(x₀−x₂) = √(1/2) ≠ 0`: both the isometry and claim A are
+*refuted* in proved form when `hnn` is dropped — nonnegativity is
+load-bearing on both new engines, fenced exactly as the delivered
+family's signed fences fence theirs.
+
+**Technique findings (this pin's Mathlib):** `λ` is a reserved token —
+`hλ` does not parse (use another letter); `mul_sub`, not `sub_mul`, for
+`a * (b − c)`; `Real.sqrt` of a nonpositive is `Real.sqrt_eq_zero_of_
+nonpos` (no `sqrt_nonpos` here); `Real.sqrt_div` takes the numerator's
+nonnegativity and the denominator positionally
+(`Real.sqrt_div (show (0:ℝ) ≤ 1 by norm_num) 2`); a `calc` chain's
+terminal side must match the goal's *normalized* form — pre-running
+`pow_two` in a `simp only` can make the chain's `^ 2`-shaped endpoint
+unmatchable (drop it from the simp set and let the chain's own `ring`
+steps normalize); `Finset.sum_congr rfl (fun k _ => …)` inside `rw`
+needs parentheses around the lambda; rewriting a coefficient under a
+binder needs `simp only [hcoeff]` with a ∀-shaped equation, not a
+`Finset.sum_congr` rewrite (whose function-pattern will not match the
+coefficient's context); and the stale-olen trap recurred at the
+Derived-module import boundary (rebuild the changed shelf module
+first).
+
+**Verification:** spike first (`wip/ssgv_spike.lean`, every piece
+iterated to zero errors/warnings before any shelf edit — the module
+part, the Derived theorems, and the full QA section including the
+fences); `lake env lean` zero errors/zero warnings on all three touched
+modules; explicit `lake build` targets ✔ (Sparsification 2159/2159,
+SparsificationTail 2165/2165, the QA module 2166/2166); `#print axioms`
+exactly as designed (above); **full `lake build` ✔ (2405/2406,
+"Build completed successfully") immediately followed by
+`check_build_completeness.py` — 127/127 fresh, 0 stale, 0 missing, exit
+0**; `lint_axioms` (10, both findings allowlisted-confirmed),
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+idempotent (**2830/10/0**); map freshness after the stats-stamp sync
+(the delivery changes this proposal's status header — the check is
+mandatory).

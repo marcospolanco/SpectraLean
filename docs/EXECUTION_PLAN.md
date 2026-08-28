@@ -7,10 +7,103 @@ holds the append-only narrative.
 ## Active milestone
 
 None — see the delivered milestone below and the standing handoff. The
-sparsification `(1±ε)` multiplicative refinement + budget corollary
-(the standing handoff's top named fall-through candidate) were
-**delivered this run**; the Active table now holds only the gated
-empirical-stationary Step 2 row and Low human-decision items.
+graph-vector sparsification form (the standing handoff's named remaining
+priced follow-on) was **delivered this run**; the sparsification
+proposal now has no open follow-ons, and the Active table holds only the
+gated empirical-stationary Step 2 row and Low human-decision items.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The graph-vector multiplicative sparsification form — the SS program's
+textbook sentence and last priced follow-on —
+`proposals/spectral-sparsification-via-leverage-scores.md` (the
+proposal's own "Remaining priced follow-on", the standing handoff's
+named item — no High rows, no open Medium rows, the empirical-stationary
+Step 2 consumer-gated); run 1, 2026-08-28, run `20260828T200603Z-run-1`;
+DELIVERED — zero new axioms (count stays 10; `#print axioms` via
+`wip/ssgv_axcheck.lean` on all 28 audited declarations: the 11 shelf
+declarations and all hard-crust QA exactly `propext, Classical.choice,
+Quot.sound`; the two Derived theorems and their two QA interface pins
+honestly carrying `matrix_bernstein` alone — the same conditional
+structure as the delivered tails). QA 2808 → 2830 (+22,
+`SparsificationTail_QA.lean`'s new graph-vector section).**
+
+**Delivered** in three pieces: (1) **the engine layer** —
+`Sparsification.lean`'s new `Transport` section: the transport
+`ssTransport` (`c(x)_k = √λ_k (x ⬝ᵥ q_k)`, on the `im Π` cone *by
+construction* — the mechanism that removes the cone restriction from
+the statement, moving it into the definition), the isometry
+`quadForm_laplacian_eq_ssTransport` (`xᵀLx = ‖c(x)‖²` through the
+spectral resolution `quadForm_eigvalOf`), claim A
+`ssTransport_dot_ssEdgeVec` (`c ⬝ᵥ v_e = √(w_e/2)(x u − x v)` at
+positive pairs, the kernel-constancy
+`eq_of_laplacian_mulVec_eq_zero_of_pos_weight` load-bearing), the
+sampled Laplacian `ssLaplacian` (symmetric, PSD), and the form
+correspondence `quadForm_ssLaplacian_eq` (`xᵀL̃(ω)x = c(x)ᵀ S(ω) c(x)`
+for every vector and every outcome — claim A squared at positive pairs,
+junk-zero corners at nonpositive weights). (2) **The Derived
+theorems**: `sparsification_graph_tail` — `(1−ε)xᵀLx ≤ xᵀL̃(ω)x ≤
+(1+ε)xᵀLx` failing only on a set of the bound's measure, for *every*
+graph vector with **no `im Π` restriction** (a `measure_mono` from the
+delivered additive tail at `y := c(x)`) — and
+`sparsification_graph_budget` (the same `q ≥ (8/3)·log(2d/δ)/ε²`
+sentence, numeric chain factored as a private core; the delivered
+budget proof untouched). (3) **QA (+22)**: the raw pins `xᵀLx = 4` and
+`xᵀL̃x = 8` (per-pair evaluation), the isometry instance joined to the
+raw `4`, the correspondence joined by **two independent routes** (the
+raw `8` against the sampled operator's own evaluation through the
+claim-A dot values), the tight `ε = 1` instance (`8 = 2·4` attained),
+failure-event nonemptiness, both interface pins, and the
+**signed-fixture fences** — at `L = −rankOne ![1,−2,1]` (all
+eigenvalues nonpositive, kernel two-dimensional and non-constant) the
+transport is provably junk-zero while `xᵀLx = −36` and `√(A₀₂/2) ≠ 0`:
+the isometry and claim A both *refuted* in proved form without `hnn` —
+nonnegativity load-bearing on both new engines.
+
+**Verification:** spike first (`wip/ssgv_spike.lean`, all pieces
+iterated to zero errors/warnings before any shelf edit; technique
+findings recorded in the proposal's second follow-on delivery record —
+`λ` is a reserved token (`hλ` does not parse), `mul_sub` not `sub_mul`,
+`Real.sqrt_eq_zero_of_nonpos` (no `sqrt_nonpos` here), `Real.sqrt_div`'s
+positional signature, the calc-terminal-form trap with pre-normalized
+`pow_two`, parenthesized lambdas inside `rw`, ∀-equation `simp only`
+for under-binder coefficient rewrites, the stale-olen recurrence at the
+Derived import boundary); `lake env lean` zero errors/zero warnings on
+all three touched modules; explicit `lake build` targets ✔ (2159/2159,
+2165/2165, 2166/2166); `#print axioms` exactly as designed; **full
+`lake build` ✔ (2405/2406) immediately followed by
+`check_build_completeness.py` — 127/127 fresh, 0 stale, 0 missing, exit
+0**; `lint_axioms` (10, both findings allowlisted-confirmed),
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+idempotent (**2830/10/0**); **map freshness exit 0** after the
+stats-stamp sync (mandatory — this delivery changes a proposal's status
+header; stamps synced 2808 → 2830). Records updated: the proposal
+(status header + the second follow-on delivery record with technique
+findings + the residual struck through), `proposals/README.md` (the
+Delivered-table row completed — "program COMPLETE"; the superseded
+Phase-B row's pointer), README (2830; one module-table clause), the
+radar (QA axis synced, score held at 4.0 per protocol — the textbook
+statement shape of the already-counted sparsification family, not a new
+theorem family), the scoreboard (verification row + interpretation
+bullet), the backlog (item 7's follow-on clause), the index map (five
+new rows + the module blurb + two Derived rows), this plan, and the
+activity log. Nothing committed; the prior runs' deliveries are
+committed at `760526e` and preserved untouched.
+
+**Remaining risk:** none owed by the proposal — it now has no open
+priced follow-ons. The delivery's conditional structure is unchanged:
+the two graph-vector theorems are conditional on `matrix_bernstein` and
+must never be described as foundationally proved.
+
+**Next milestone (open):** the Active table's only actionable row is
+the empirical-stationary Step 2, still gated on a consumer pricing the
+bias-term shape; otherwise the priced follow-ons on record (a third
+concentration-axiom consumer — e.g. the uniform/existential-x
+quadratic-form packaging of the edge-perturbation tail, or the
+`t/δ`-sharpened drift interface), or the next load-bearing gap
+`docs/6_SGT_BACKLOG.md` names.
 
 ------
 

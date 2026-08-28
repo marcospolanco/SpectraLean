@@ -53,12 +53,22 @@ Design decisions (recorded in the proposal's Step-0 delivery):
   `1` (a pair sampled with probability one is not random), so the
   deviation identity `ssSampled ω − Π_{im L} = ∑_e X_e ω` holds for
   *every* outcome, not merely almost surely.
+- **The transport and the sampled Laplacian (the graph-vector
+  follow-on).** `ssTransport` scales eigen coordinates by `√λ_k`, is on
+  the `im Π` cone by construction and `L`-isometric (`xᵀLx = ‖c(x)‖²`);
+  `ssLaplacian` is the sampled Laplacian in graph coordinates, and
+  `quadForm_ssLaplacian_eq` is the form-level correspondence `xᵀL̃x =
+  cᵀS c` — together they convert the eigen-coordinate tail into the
+  graph-vector `(1±ε)` sparsifier statement with no cone restriction
+  (the transport *is* the cone condition).
 
 Everything here is proved; this module adds no axioms. The axiom-backed
 tail theorems consuming `matrix_bernstein` live in
 `Scaffold/Derived/SparsificationTail.lean`. QA:
 `Scaffold/QA/SpectralGraph/Sparsification_QA.lean` and
-`Scaffold/QA/Derived/SparsificationTail_QA.lean`.
+`Scaffold/QA/Derived/SparsificationTail_QA.lean` (whose graph-vector
+section also fences this module's transport lemmas on a signed
+fixture).
 -/
 
 open MeasureTheory ProbabilityTheory
@@ -1231,6 +1241,293 @@ theorem indepFun_ssSummand (q : ℝ) (hq : 0 ≤ q) {e e' : V × V} (hee : e ≠
     (ssSummandBool A hA q e) (ssSummandBool A hA q e') hee
 
 end Sampled
+
+section Transport
+
+variable (A : WAdj (V := V)) (hA : A.IsSymm)
+
+/-! ## The eigen-coordinate transport (the graph-vector form, follow-on)
+
+The transport that makes the graph-vector reading of the sparsifier
+sound for *every* graph vector: eigen coordinates scaled by `√λ`, on the
+`im Π` cone by construction. -/
+
+/-- **The eigen-coordinate transport** `c(x)_k = √λ_k · (x ⬝ᵥ q_k)`: the
+map that carries graph vectors to the eigen-coordinate space the sampled
+operator lives in, weighting each coordinate by `√λ_k`. It is the
+mechanism that removes the `im Π` cone restriction from the
+multiplicative sparsifier statement: the kernel coordinates are killed
+by `√0`, so `c(x)` is on the cone *by construction* for every graph
+vector `x`, and the transport is an `L`-isometry (below) — the
+graph-vector quadratic form `xᵀLx` is exactly `‖c(x)‖²`. At
+nonpositive eigenvalues `√` is junk-zero, which is why the isometry and
+the dot identity below carry the nonnegativity hypothesis (fenced in
+QA). -/
+noncomputable def ssTransport (x : V → ℝ) : V → ℝ :=
+  fun k => Real.sqrt (eigvalOf (laplacian A) (laplacian_symmetric A hA) k)
+    * (x ⬝ᵥ eigvecOf (laplacian A) (laplacian_symmetric A hA) k)
+
+/-- **The transport is `im Π`-coordinate by construction**: the image
+projector fixes `c(x)` at every graph vector — the zero-eigenvalue
+entries are killed by `√0` already in the definition, so no cone
+hypothesis ever appears in the graph-vector statements. -/
+theorem imageProjector_mulVec_ssTransport (x : V → ℝ) :
+    imageProjector A hA *ᵥ ssTransport A hA x = ssTransport A hA x := by
+  funext k
+  have hstep : (imageProjector A hA *ᵥ ssTransport A hA x) k
+      = (if eigvalOf (laplacian A) (laplacian_symmetric A hA) k = 0 then (0 : ℝ) else 1)
+        * ssTransport A hA x k := by
+    simp [imageProjector, Matrix.mulVec, Matrix.diagonal, Matrix.dotProduct,
+      Finset.sum_ite_eq]
+  rw [hstep]
+  by_cases h : eigvalOf (laplacian A) (laplacian_symmetric A hA) k = 0
+  · rw [if_pos h]
+    have hv : ssTransport A hA x k = 0 := by
+      simp only [ssTransport, h, Real.sqrt_zero, zero_mul]
+    rw [hv, mul_zero]
+  · rw [if_neg h, one_mul]
+
+/-- **The transport isometry**: `xᵀLx = ‖c(x)‖²` — the graph-vector
+Dirichlet energy is exactly the transport's squared Euclidean norm (the
+spectral resolution `quadForm_eigvalOf` per coordinate, `√λ² = λ` at
+nonnegative eigenvalues). This is one half of what converts the
+eigen-coordinate tail into a statement about the sampled Laplacian's
+quadratic form; the nonnegativity hypothesis is load-bearing (negative
+eigenvalues make `√λ` junk-zero while `xᵀLx` can be negative — fenced
+in QA). -/
+theorem quadForm_laplacian_eq_ssTransport (hnn : ∀ i j, 0 ≤ A i j) (x : V → ℝ) :
+    quadForm (laplacian A) x = ssTransport A hA x ⬝ᵥ ssTransport A hA x := by
+  have hL := laplacian_symmetric A hA
+  rw [quadForm_eigvalOf hL x, Matrix.dotProduct]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  have hev : 0 ≤ eigvalOf (laplacian A) hL k :=
+    eigvalOf_laplacian_nonneg A hA hnn k
+  have hR : ssTransport A hA x k * ssTransport A hA x k
+      = eigvalOf (laplacian A) hL k
+        * ((x ⬝ᵥ eigvecOf (laplacian A) hL k) ^ 2) := by
+    simp only [ssTransport]
+    calc (Real.sqrt (eigvalOf (laplacian A) hL k)
+          * (x ⬝ᵥ eigvecOf (laplacian A) hL k))
+        * (Real.sqrt (eigvalOf (laplacian A) hL k)
+          * (x ⬝ᵥ eigvecOf (laplacian A) hL k))
+        = (Real.sqrt (eigvalOf (laplacian A) hL k)
+            * Real.sqrt (eigvalOf (laplacian A) hL k))
+          * ((x ⬝ᵥ eigvecOf (laplacian A) hL k)
+            * (x ⬝ᵥ eigvecOf (laplacian A) hL k)) := by ring
+      _ = eigvalOf (laplacian A) hL k
+          * ((x ⬝ᵥ eigvecOf (laplacian A) hL k)
+            * (x ⬝ᵥ eigvecOf (laplacian A) hL k)) :=
+          by rw [Real.mul_self_sqrt hev]
+      _ = eigvalOf (laplacian A) hL k
+          * ((x ⬝ᵥ eigvecOf (laplacian A) hL k) ^ 2) := by ring
+  rw [Matrix.dotProduct_comm (eigvecOf (laplacian A) hL k) x, hR]
+
+/-! ## The transport–edge-vector dot identity (claim A) -/
+
+/-- **Claim A — the transport–edge-vector dot identity**: at a positive
+pair, `c(x) ⬝ᵥ v_e = √(w_e/2) · (x u − x v)` — the eigen-coordinate
+pairing of the transport with the Spielman–Srivastava edge vector is the
+plain voltage difference. The zero-eigenvalue coordinates drop out of
+both sides (the edge vector by its own definition, the transport by
+`√0`), and the kernel eigenvectors are constant across the pair by
+`eq_of_laplacian_mulVec_eq_zero_of_pos_weight` — the load-bearing use of
+nonnegativity (a signed graph's kernel need not be constant across a
+positive edge — fenced in QA). -/
+theorem ssTransport_dot_ssEdgeVec (hnn : ∀ i j, 0 ≤ A i j) {u v : V}
+    (hpos : 0 < A u v) (x : V → ℝ) :
+    ssTransport A hA x ⬝ᵥ ssEdgeVec A hA u v
+      = Real.sqrt (A u v / 2) * (x u - x v) := by
+  have hL := laplacian_symmetric A hA
+  have hker : ∀ k : V, eigvalOf (laplacian A) hL k = 0 →
+      eigvecOf (laplacian A) hL k u = eigvecOf (laplacian A) hL k v := by
+    intro k hk
+    have hev : (laplacian A) *ᵥ eigvecOf (laplacian A) hL k
+        = eigvalOf (laplacian A) hL k • eigvecOf (laplacian A) hL k :=
+      (isHermitian_of_isSymm hL).mulVec_eigenvectorBasis k
+    rw [hk, zero_smul] at hev
+    exact eq_of_laplacian_mulVec_eq_zero_of_pos_weight A hA hnn hev hpos
+  have hterm : ∀ k : V, ssTransport A hA x k * ssEdgeVec A hA u v k
+      = Real.sqrt (A u v / 2)
+        * ((x ⬝ᵥ eigvecOf (laplacian A) hL k)
+          * (eigvecOf (laplacian A) hL k u - eigvecOf (laplacian A) hL k v)) := by
+    intro k
+    by_cases hk : eigvalOf (laplacian A) hL k = 0
+    · have hv0 : ssEdgeVec A hA u v k = 0 := by simp [ssEdgeVec, hk]
+      rw [hv0, mul_zero]
+      have := hker k hk
+      rw [this, sub_self, mul_zero, mul_zero]
+    · have hevpos : 0 < eigvalOf (laplacian A) hL k := by
+        rcases eq_or_lt_of_le (eigvalOf_laplacian_nonneg A hA hnn k) with h | h
+        · exact absurd h.symm hk
+        · exact h
+      have hspos : 0 < Real.sqrt (eigvalOf (laplacian A) hL k) :=
+        Real.sqrt_pos_of_pos hevpos
+      have hne : Real.sqrt (eigvalOf (laplacian A) hL k) ≠ 0 := ne_of_gt hspos
+      simp only [ssTransport, ssEdgeVec, if_neg hk]
+      field_simp
+      ring
+  show ∑ k, ssTransport A hA x k * ssEdgeVec A hA u v k
+      = Real.sqrt (A u v / 2) * (x u - x v)
+  rw [Finset.sum_congr rfl (fun k _ => hterm k), ← Finset.mul_sum]
+  congr 1
+  have hexp := eigvecOf_expansion hL x
+  have hcomm : ∀ k : V, (eigvecOf (laplacian A) hL k ⬝ᵥ x)
+      = (x ⬝ᵥ eigvecOf (laplacian A) hL k) :=
+    fun k => Matrix.dotProduct_comm _ _
+  simp only [hcomm] at hexp
+  have hu : ∑ k, (x ⬝ᵥ eigvecOf (laplacian A) hL k)
+      * eigvecOf (laplacian A) hL k u = x u := by
+    have h1 := congrFun hexp u
+    simpa only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul] using h1
+  have hv : ∑ k, (x ⬝ᵥ eigvecOf (laplacian A) hL k)
+      * eigvecOf (laplacian A) hL k v = x v := by
+    have h1 := congrFun hexp v
+    simpa only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul] using h1
+  have hprod : ∀ k : V,
+      (x ⬝ᵥ eigvecOf (laplacian A) hL k)
+        * (eigvecOf (laplacian A) hL k u - eigvecOf (laplacian A) hL k v)
+      = (x ⬝ᵥ eigvecOf (laplacian A) hL k) * eigvecOf (laplacian A) hL k u
+        - (x ⬝ᵥ eigvecOf (laplacian A) hL k) * eigvecOf (laplacian A) hL k v :=
+    fun k => mul_sub _ _ _
+  rw [Finset.sum_congr rfl (fun k _ => hprod k),
+    Finset.sum_sub_distrib, hu, hv]
+
+/-! ## The sampled Laplacian and the form correspondence -/
+
+/-- The vertex-space edge-difference vector `e_u − e_v` at the ordered
+pair — the graph-side single-edge direction, against which the sampled
+Laplacian's rank-one summands are built. -/
+def ssEdgeDiff (u v : V) : V → ℝ :=
+  fun i => (if i = u then (1 : ℝ) else 0) - (if i = v then (1 : ℝ) else 0)
+
+/-- The pairing with an edge difference is the voltage difference:
+`x ⬝ᵥ (e_u − e_v) = x u − x v`. -/
+theorem dotProduct_ssEdgeDiff (x : V → ℝ) (u v : V) :
+    x ⬝ᵥ ssEdgeDiff u v = x u - x v := by
+  simp only [Matrix.dotProduct, ssEdgeDiff, mul_sub, mul_ite, mul_one, mul_zero,
+    Finset.sum_sub_distrib, Finset.sum_ite_eq', Finset.sum_ite_eq',
+    Finset.mem_univ, if_true]
+
+/-- **The sampled (sparsified) Laplacian** — the Spielman–Srivastava
+object in graph coordinates: each ordered pair contributes its single-edge
+Laplacian `w_e (e_u − e_v)(e_u − e_v)ᵀ`, halved for the ordered-pair
+double count, at the sampling weight `g_e(ω)` (`1` at saturated pairs,
+the inverse-probability reweighting `δ_e/p_e` otherwise). Its
+expectation is `laplacian A`; its form-level correspondence with the
+eigen-coordinate sampled operator is the theorem below — the identity
+that makes the graph-vector `(1±ε)` sparsifier statement a consequence
+of the eigen-coordinate tail. -/
+noncomputable def ssLaplacian (q : ℝ) (ω : (V × V) → Bool) : Matrix V V ℝ :=
+  ∑ e : V × V, (ssWeight A hA q e ω / 2 * A e.1 e.2)
+    • rankOne (ssEdgeDiff e.1 e.2)
+
+/-- The sampling weight is nonnegative: `1` at saturated pairs,
+`δ_e/p_e ≥ 0` otherwise (junk `δ/0 = 0` at zero-probability pairs,
+whose rank-one factor is the zero matrix anyway). -/
+theorem ssWeight_nonneg (hq : 0 ≤ q) (e : V × V) (ω : (V × V) → Bool) :
+    0 ≤ ssWeight A hA q e ω := by
+  unfold ssWeight
+  split_ifs
+  · norm_num
+  · by_cases hp : ssProb A hA q e = 0
+    · simp [hp]
+    · have hp0 : 0 < ssProb A hA q e := by
+        rcases le_or_lt 0 (ssProb A hA q e) with h | h
+        · exact lt_of_le_of_ne h (Ne.symm hp)
+        · linarith [ssProb_nonneg A hA q hq e]
+      unfold ssDelta
+      by_cases hω : ω e
+      · simp only [if_pos hω]
+        exact div_nonneg zero_le_one hp0.le
+      · simp only [if_neg hω, zero_div]
+        norm_num
+
+/-- The sampled Laplacian is symmetric — a sum of symmetric rank-one
+edge terms at real weights. -/
+theorem ssLaplacian_isSymm (q : ℝ) (ω : (V × V) → Bool) :
+    (ssLaplacian A hA q ω).IsSymm := by
+  refine isSymm_finset_sum _ fun e => ?_
+  exact Matrix.IsSymm.ext fun i j => by
+    simp [rankOne, mul_comm]
+
+/-- **The sampled Laplacian is positive semidefinite**: every pair's
+contribution is a nonnegative weight times a squared voltage
+difference (the `hnn`/`hq` hypotheses load-bearing exactly through the
+weight signs). -/
+theorem quadForm_ssLaplacian_nonneg (hnn : ∀ i j, 0 ≤ A i j) {q : ℝ} (hq : 0 ≤ q)
+    (ω : (V × V) → Bool) (x : V → ℝ) :
+    0 ≤ quadForm (ssLaplacian A hA q ω) x := by
+  rw [ssLaplacian, quadForm_finset_sum]
+  refine Finset.sum_nonneg fun e _ => ?_
+  rw [quadForm_smul, rankOne_quadForm, dotProduct_ssEdgeDiff]
+  refine mul_nonneg (mul_nonneg ?_ (hnn e.1 e.2)) (sq_nonneg _)
+  exact div_nonneg (ssWeight_nonneg A hA hq e ω) (by norm_num)
+
+/-- **The form-level correspondence** — the identity connecting the two
+representations of the sparsifier: `xᵀL̃(ω)x = c(x)ᵀ S(ω) c(x)` for
+every graph vector `x` and every outcome `ω`, with no null-event
+caveats. Per pair: at positive weights, claim A squared converts the
+voltage difference into the edge-vector pairing exactly
+(`w_e Δ² = 2(c ⬝ᵥ v_e)²`, the `1/2` against the ordered-pair halving);
+at nonpositive weights both sides' contributions vanish (the edge
+vector is junk-zero through `√`, forcing the probability to `0` and the
+weight to `δ/0 = 0`). This is the deterministic heart of the
+graph-vector tail theorem in `Derived/SparsificationTail.lean`. -/
+theorem quadForm_ssLaplacian_eq (hnn : ∀ i j, 0 ≤ A i j) (q : ℝ)
+    (ω : (V × V) → Bool) (x : V → ℝ) :
+    quadForm (ssLaplacian A hA q ω) x
+      = quadForm (ssSampled A hA q ω) (ssTransport A hA x) := by
+  have hL : quadForm (ssLaplacian A hA q ω) x
+      = ∑ e : V × V, (ssWeight A hA q e ω / 2 * A e.1 e.2)
+        * (x e.1 - x e.2) ^ 2 := by
+    rw [ssLaplacian, quadForm_finset_sum]
+    exact Finset.sum_congr rfl fun e _ => by
+      rw [quadForm_smul, rankOne_quadForm, dotProduct_ssEdgeDiff]
+  have hR : quadForm (ssSampled A hA q ω) (ssTransport A hA x)
+      = ∑ e : V × V, ssWeight A hA q e ω
+        * ((ssTransport A hA x) ⬝ᵥ ssEdgeVec A hA e.1 e.2) ^ 2 := by
+    rw [ssSampled, quadForm_finset_sum]
+    exact Finset.sum_congr rfl fun e _ => by
+      rw [quadForm_smul, rankOne_quadForm]
+  rw [hL, hR]
+  refine Finset.sum_congr rfl fun e _ => ?_
+  rcases lt_or_le 0 (A e.1 e.2) with hpos | hle
+  · have hclaim := ssTransport_dot_ssEdgeVec A hA hnn hpos x
+    have hsq : (Real.sqrt (A e.1 e.2 / 2) * (x e.1 - x e.2)) ^ 2
+        = (A e.1 e.2 / 2) * (x e.1 - x e.2) ^ 2 := by
+      calc (Real.sqrt (A e.1 e.2 / 2) * (x e.1 - x e.2)) ^ 2
+          = (Real.sqrt (A e.1 e.2 / 2) * Real.sqrt (A e.1 e.2 / 2))
+            * (x e.1 - x e.2) ^ 2 := by ring
+        _ = (A e.1 e.2 / 2) * (x e.1 - x e.2) ^ 2 := by
+            rw [Real.mul_self_sqrt (div_nonneg hpos.le (by norm_num))]
+    rw [hclaim, hsq]
+    ring
+  · -- `A e ≤ 0`: the edge vector is junk-zero (`√` of a nonpositive),
+    -- so the sampling weight is `0` (probability `min 1 0 = 0`, `δ/0 = 0`);
+    -- both per-pair terms vanish.
+    have hv : ssEdgeVec A hA e.1 e.2 = 0 := by
+      funext k
+      by_cases hk : eigvalOf (laplacian A) (laplacian_symmetric A hA) k = 0
+      · simp [ssEdgeVec, hk]
+      · simp only [ssEdgeVec, if_neg hk]
+        have hd : A e.1 e.2 / 2 ≤ 0 := by
+          rw [div_le_iff₀ (by norm_num : (0 : ℝ) < 2)]
+          linarith
+        rw [Real.sqrt_eq_zero_of_nonpos hd]
+        simp
+    have hdot : (ssTransport A hA x) ⬝ᵥ ssEdgeVec A hA e.1 e.2 = 0 := by
+      rw [hv, Matrix.dotProduct_zero]
+    have hp : ssProb A hA q e = 0 := by
+      unfold ssProb
+      rw [hv, Matrix.dotProduct_zero, mul_zero]
+      simp
+    have hW : ssWeight A hA q e ω = 0 := by
+      rw [ssWeight, if_neg (by rw [hp]; norm_num), hp, div_zero]
+    rw [hW, hdot]
+    simp
+
+
+end Transport
 
 end SpectralGraphTheory
 

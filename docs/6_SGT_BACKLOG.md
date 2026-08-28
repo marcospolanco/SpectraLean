@@ -856,8 +856,16 @@ the engine lemma `quadForm_imageProjector_eq_of_mulVec_eq` — and
 Tropp constant; zero new axioms, QA 2800 → 2808 with the cone fence
 proving the `im Π` restriction load-bearing — the un-guarded pointwise
 claim refuted at the all-false outcome; see the proposal's follow-on
-delivery record). The graph-vector Laplacian multiplicative form (the
-sampled-Laplacian object) remains the one priced follow-on.
+delivery record). **The graph-vector form was delivered 2026-08-28**
+(run `20260828T200603Z-run-1`): `sparsification_graph_tail` /
+`sparsification_graph_budget` — `(1±ε)xᵀLx ≤ xᵀL̃(ω)x ≤ (1+ε)xᵀLx`
+for every graph vector with *no* `im Π` restriction, through the
+transport (on-cone by construction, `L`-isometric), claim A, and the
+sampled-Laplacian form correspondence — the SS program's textbook
+sentence; zero new axioms, QA 2808 → 2830 with the raw `4`/`8` pins, a
+two-route correspondence join, and signed-fixture fences proving
+nonnegativity load-bearing on both new engines. The proposal now has
+no open follow-ons.
 The assembly (Finding B's `Fin n` transport, the quadratic-form
 transfer) and the proposal's three QA obligations remain Slice 3.
 

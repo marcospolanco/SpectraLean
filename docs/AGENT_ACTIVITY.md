@@ -5647,3 +5647,125 @@ concentration-axiom consumer — e.g. the uniform/existential-x
 quadratic-form packaging of the edge-perturbation tail, or the
 `t/δ`-sharpened drift interface), or the next load-bearing gap
 `docs/6_SGT_BACKLOG.md` names.
+
+## 2026-08-28T20:06:03Z — Graph-vector sparsification form in delivery: the sampled Laplacian's (1±ε) tail
+
+**Run:** `20260828T200603Z-run-1`  
+**Session:** `ses_fb6147a1effen0Rpy6ibuaLYsN`  
+**Status:** in-progress  
+**Milestone:** the sparsification proposal's last priced follow-on
+(`proposals/spectral-sparsification-via-leverage-scores.md`): the
+*graph-vector* multiplicative form — `xᵀL̃(ω)x` vs `xᵀLx` on the
+sampled Laplacian for every graph vector, no `im Π` cone restriction,
+at the same exponential tail plus the budget corollary. Selected per
+the standing handoff's fall-through: no High/open-Medium rows; the
+empirical-stationary Step 2 stays consumer-gated. Zero new axioms
+expected (conditional on `matrix_bernstein` alone via the delivered
+additive tail). Engine pieces: the transport `ssTransport` (eigen
+coordinates × `√λ`, automatically on-cone — the mechanism that removes
+the cone hypothesis), the isometry through `quadForm_eigvalOf`, claim A
+at positive pairs through `eq_of_laplacian_mulVec_eq_zero_of_pos_weight`,
+and the sampled-Laplacian object with its form-level correspondence.
+QA plan: K₂ raw pins + two-route correspondence join + tight `ε = 1`
+instance + the signed-fixture fences refuting both new engines'
+nonnegativity hypothesis (junk-zero transport vs `√(1/2) ≠ 0`; `−36 < 0`).
+
+## 2026-08-28T20:38:38Z — Graph-vector sparsification form delivered: the sampled Laplacian's (1±ε) tail, no cone restriction (terminal)
+
+**Run:** `20260828T200603Z-run-1`  
+**Session:** `ses_fb6147a1effen0Rpy6ibuaLYsN`  
+**Status:** completed  
+**Milestone (delivered):**
+`proposals/spectral-sparsification-via-leverage-scores.md` (the
+proposal's last priced follow-on, the standing handoff's named item —
+the Active table has no High rows and no open Medium rows) — **the
+graph-vector multiplicative form DELIVERED as zero new axioms (count
+stays 10; `#print axioms` via `wip/ssgv_axcheck.lean` on all 28 audited
+declarations: the 11 shelf declarations and all hard-crust QA exactly
+`propext, Classical.choice, Quot.sound`; the two Derived theorems and
+their two QA interface pins honestly carrying `matrix_bernstein`
+alone). QA 2808 → 2830 (+22).**
+
+**Changes:** (1) **The engine layer** — `GraphTheory/Sparsification.lean`'s
+new `Transport` section: the transport `ssTransport` (`c(x)_k = √λ_k
+(x ⬝ᵥ q_k)` — on the `im Π` cone *by construction*, which is exactly
+why the graph-vector statement needs no cone hypothesis: the
+restriction moved from the theorem's hypotheses into the definition),
+the isometry `quadForm_laplacian_eq_ssTransport` (`xᵀLx = ‖c(x)‖²`
+through `quadForm_eigvalOf`), claim A `ssTransport_dot_ssEdgeVec`
+(`c ⬝ᵥ v_e = √(w_e/2)(x u − x v)` at positive pairs, the kernel
+constancy `eq_of_laplacian_mulVec_eq_zero_of_pos_weight` load-bearing),
+the sampled Laplacian `ssLaplacian` (symmetric, PSD), and the
+form-level correspondence `quadForm_ssLaplacian_eq` (`xᵀL̃(ω)x =
+c(x)ᵀ S(ω) c(x)` for every vector and every outcome — claim A squared
+at positive pairs; at nonpositive weights a junk-zero corner analysis:
+the edge vector vanishes through `√`, forcing the probability to `0`
+and the weight to `δ/0 = 0`, so both per-pair terms die). (2) **The
+Derived theorems** — `Derived/SparsificationTail.lean`:
+`sparsification_graph_tail` — the textbook sentence `(1−ε)xᵀLx ≤
+xᵀL̃(ω)x ≤ (1+ε)xᵀLx` failing only on a set of the delivered
+exponential bound's measure, for *every* graph vector (a `measure_mono`
+from the delivered additive tail at `y := c(x)`: the isometry
+identifies the denominators, the correspondence the numerators) — and
+`sparsification_graph_budget` (the same `q ≥ (8/3)·log(2d/δ)/ε²`
+sentence, numeric chain factored as a private `sparsification_budget_core`;
+the delivered budget proof untouched). (3) **QA (+22)** — the raw pins
+`xᵀLx = 4` (Dirichlet identity) and `xᵀL̃x = 8` (per-pair evaluation of
+the definition), the isometry instance joined to the raw `4`, the
+correspondence joined by **two independent routes** (the raw `8`
+against the sampled operator's own evaluation through the claim-A dot
+values — a wrong weight, edge difference, claim A, or correspondence
+breaks exactly one side), the tight `ε = 1` instance (`8 = 2·4`
+attained, a pure-data join), failure-event nonemptiness, both interface
+pins, and the **signed-fixture fences**: at one fixture
+(`A = !![0,−2,1; −2,0,−2; 1,−2,0]`, `L = −rankOne ![1,−2,1]` — all
+eigenvalues nonpositive, kernel two-dimensional and non-constant) the
+transport is *provably junk-zero* (`√λ_k = 0` for every `k`) while
+`xᵀLx = −36` and `√(A₀₂/2)·(x₀−x₂) = √(1/2) ≠ 0`: the isometry and
+claim A both *refuted* in proved form without `hnn` — nonnegativity
+load-bearing on both new engines, fenced exactly as the delivered
+family's signed fences fence theirs. (4) **Records**: the proposal
+(status header + the second follow-on delivery record with technique
+findings — `λ` is a reserved token so `hλ` does not parse, `mul_sub`
+not `sub_mul`, `Real.sqrt_eq_zero_of_nonpos`'s name, `Real.sqrt_div`'s
+positional signature, the calc-terminal-form trap with pre-normalized
+`pow_two`, parenthesized lambdas inside `rw`, ∀-equation `simp only`
+for under-binder coefficient rewrites, the stale-olen recurrence at
+the Derived import boundary — and the residual struck through: the
+proposal now has no open follow-ons), `proposals/README.md` (the
+Delivered-table row completed — "program COMPLETE"; the superseded
+Phase-B row's pointer), README (2830; one module-table clause), the
+radar (QA axis synced, score held at 4.0 per protocol — the textbook
+statement shape of the already-counted sparsification family, not a
+new theorem family), the scoreboard (verification row + interpretation
+bullet), the backlog (item 7's follow-on clause), the index map (five
+engine rows + the two Derived rows + the module blurb), the map
+stamps, this plan, and this log.
+
+**Verification:** spike first (`wip/ssgv_spike.lean`, every piece
+iterated to zero errors/warnings before any shelf edit — the module
+part, the Derived theorems, and the full QA section including the
+fences); `lake env lean` zero errors/zero warnings on all three touched
+modules; explicit `lake build` targets ✔ (2159/2159, 2165/2165,
+2166/2166); `#print axioms` exactly as designed; **full `lake build` ✔
+(2405/2406, "Build completed successfully") immediately followed by
+`check_build_completeness.py` — 127/127 fresh, 0 stale, 0 missing,
+exit 0**; `lint_axioms` (10, both findings allowlisted-confirmed),
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+idempotent (**2830/10/0**); **map freshness exit 0** after the
+stats-stamp sync 2808 → 2830 (mandatory — this delivery changes the
+proposal's status header). Nothing committed; the prior runs'
+deliveries are committed at `760526e` and preserved untouched.
+
+**Remaining risk:** none owed by the proposal — it now has no open
+priced follow-ons. The two graph-vector theorems remain conditional on
+`matrix_bernstein` and must never be described as foundationally
+proved.
+
+**Next handoff:** the Active table's only actionable row is the
+empirical-stationary Step 2, still gated on a consumer pricing the
+bias-term shape; otherwise the priced follow-ons on record (a third
+concentration-axiom consumer — e.g. the uniform/existential-x
+quadratic-form packaging of the edge-perturbation tail, or the
+`t/δ`-sharpened drift interface), or the next load-bearing gap
+`docs/6_SGT_BACKLOG.md` names.

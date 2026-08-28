@@ -30,6 +30,17 @@ the `lake build` it cites (see `proposals/verify-build-completeness.md`
 for the incident that made this mandatory: a full build once printed
 "Build completed successfully" over a three-error QA file).
 
+Since 2026-08-28: **`README.md`'s "Recent highlights" list and "What's
+here" table entries stay to one line each — a module name and a single
+clause, no dates, step numbers, or proof-technique detail.** This
+journal is the place for the full delivery narrative; the proposal's own
+record is the place for technique findings. A "Records swept" list that
+updates README should add or tighten one line, not append a paragraph —
+the exhaustive per-delivery prose that used to accumulate directly in
+README (until a full rewrite on 2026-08-28, prompted by an operator
+readability complaint: individual lines had grown past 8,000 characters)
+belongs here and only here.
+
 ## 2026-08-28T04:24:18Z — Fiedler Davis–Kahan Step 2 delivered: the Fiedler-line rotation via the common-kernel identification, the proposal COMPLETE (terminal)
 
 **Run:** `20260828T034649Z-run-1`  

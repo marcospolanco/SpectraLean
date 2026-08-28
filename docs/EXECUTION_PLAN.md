@@ -7,15 +7,215 @@ holds the append-only narrative.
 ## Active milestone
 
 None — see the delivered milestone below and the standing handoff.
-The empirical-stationary-distribution row (the Active table's top
-Medium-High row; no High rows remain) had Steps 0+1 **delivered this
-run** and retired to the Delivered table with Step 2 priced-deferred;
-the next run falls through to the remaining Medium-High/Medium rows
-per priority item 0.
+The Fiedler Davis–Kahan row's Step 2 (the payoff slice) was **delivered
+this run**, completing the proposal's program; the next run falls
+through to the remaining Medium-High/Medium rows per priority item 0.
 
 ------
 
 ## Delivered milestones (most recent first)
+
+**Fiedler Davis–Kahan Step 2 — the Fiedler-line rotation, the proposal's
+payoff slice; `proposals/fiedler-subspace-stability-davis-kahan.md`
+(the delivered Medium-High row's priced-deferred next slice, "gated on
+nothing but its own budget"; selected per priority item 0 fall-through —
+no High rows, the empirical-stationary Step 2 gated on a consumer); run
+1, 2026-08-28, run `20260828T034649Z-run-1`; DELIVERED — pure hard
+crust, zero new axioms (count stays 10; `#print axioms` via
+`wip/fsd2_axcheck.lean` on all 24 audited declarations — 7 module + 17
+QA: exactly `propext, Classical.choice, Quot.sound`, every one; the
+statement consumes only *proved* theorems — Step 1's wrapper and the
+kernel-characterization ecosystem — so the whole chain is
+unconditional). QA 2714 → 2731 (+17, `Fiedler_QA.lean`'s new
+`FiedlerLineStability` section).**
+
+**Delivered** in three pieces: (1) `Spectral.lean`'s projector section
+— the self-adjoint coordinate form `dotProduct_mulVec_comm_of_isSymm`,
+the Step-0-priced **uniqueness lemma
+`eq_of_isSymm_idempotent_of_forall_mulVec_eq`** (symmetric idempotents
+determined by fixed space: `ker P = Fix(P)ᗮ` algebraically, the
+fixed-space hypothesis transferring kernels, `Q ∘ P = P` collapsing the
+action — nothing in the pin supplies it), the projector eigenbasis
+expansion **`spectralProjector_mulVec_eq_sum`**, and
+**`eigvecOf_expansion`** (every vector is its eigenbasis expansion);
+(2) `Spectral.lean` after `laplacian_evals_zero` — the
+**connectivity-free fixed-space iff
+`initialProjector_laplacian_zero_fix_iff`** (the index-0 projector's
+fixed space is exactly the kernel: filtered eigenvectors have
+eigenvalue exactly `0` by the two spectral pins; kernel coordinates
+vanish above the threshold where eigenvalues are positive) and the
+**common-kernel identification
+`initialProjector_laplacian_zero_eq_of_connected`** (any two connected
+Laplacians carry the *same* index-0 projector — the uniqueness lemma
+joined to `laplacian_mulVec_eq_zero_iff_exists_const` on both sides,
+making the kernel-characterization ecosystem load-bearing on a
+projector-equality statement for the first time); (3) `Fiedler.lean`'s
+headline **`fiedlerLine_stability`** — at Step 1's stack plus
+connectivity/nonnegativity of base and perturbed graph,
+`‖(P₁' − P₀') − (P₁ − P₀)‖ ≤ ‖laplacian E‖/δ`: the identification
+rewrites `P₀' = P₀`, the residual telescopes (`abel`) to the Step-1
+projector difference. QA per obligation 3: the P₃ → K₃ edge-addition
+instance (separation `δ = 2` discharged against the two pinned spectra
+— the load-bearing step; the single-edge perturbation's Laplacian
+identified as `rankOne ![1,0,-1]` with its norm pinned **exactly `2`
+from both sides**, the rank-one bound and the quadForm witness consumed
+cross-module from the Sparsification delivery — so the derived bound is
+exactly `≤ 1`, the perturbed side sitting on Davis–Kahan's own tie
+branch with zero slack), the identification instance at the genuine
+two-spectrum pair P₃/K₃ (`{0,1,3}` vs `{0,3,3}`), the fix-iff vector
+pins (`onesVec` fixed; `![1,2,3]` not fixed with the kernel computed
+by the diffusion form), and the **disconnected fence** (the empty
+graph's index-0 projector provably ≠ P₃'s, witnessed by `e₀` —
+connectivity load-bearing, both iff directions exercised). Obligation
+3's hand-computed angular movement honestly narrowed (entrywise
+projector values depend on `eigvecOf` choices; the falsification
+content lives in the separation discharge, the two-sided norm pin, the
+zero-slack tie instance, and the fence).
+
+**Verification:** spike first (`wip/fsd2_spike.lean` iterated to zero
+errors/warnings before any shelf Lean; technique findings recorded in
+the proposal's Step-2 delivery record — the EuclideanSpace/Pi
+elaboration seam at `sum_repr'` (restate the sum at the Pi type inside
+a `have` before `Finset.sum_apply`/`Pi.smul_apply` rewrites will
+match); the `Matrix.smul_dotProduct` parse direction (⬝ᵥ binds tighter
+than •, so `(λ • v) ⬝ᵥ f` needs the dotProduct-unfold + `Finset.mul_sum`
+route); the self-referential-rewrite trap on `Q *ᵥ (Q *ᵥ y)`
+(four `have`s joined by `.trans` instead of one `rw` chain);
+`sub_sub_sub_cancel_left`'s `c − a − (c − b)` shape in this pin
+(`abel` is the robust telescoping route); the `first | exact absurd rfl
+hij | (simp …; try norm_num)` idiom for entrywise matrix identities
+under `by_cases`; `laplacian_mulVec_apply` as the cheap route for
+concrete `L *ᵥ x`; the stale-olen recurrence twice at import
+boundaries); `lake env lean` — zero errors/zero warnings on Fiedler and
+its QA, Spectral at exactly its pre-existing 8-warning baseline;
+explicit `lake build` targets ✔ (Spectral, Fiedler 2205/2205, QA
+2224/2224); `#print axioms` — the standard three only, all 24; **full
+`lake build` ✔ (2402/2403, "Build completed successfully")
+immediately followed by `check_build_completeness.py` — 123/123 fresh,
+0 stale, 0 missing, exit 0** (after the documented mtime remediation
+for the one post-build docstring edit); `lint_axioms` (10, no issues),
+`check_citations`, `check_markdown_links` pass after the record sweep;
+scoreboard regenerated idempotent (**2731/10/0**). Records updated: the
+proposal (COMPLETE header + the Step-2 delivery record with technique
+findings + the honest narrowing note), `proposals/README.md` (the row
+retired to the Delivered table with the program-COMPLETE result),
+README (2731; the cuts-and-expansion module table's Step-2 clause), the
+radar (QA axis synced 2714 → 2731; axis 4's Step-2 clause with the
+score held at 5.0 per protocol — new identification-layer engine inside
+the already-counted projector/kernel families, load-bearing but not a
+new theorem family), the scoreboard (verification row + interpretation
+bullet + header date), the backlog (the program-closure clause), the
+index map (the `fiedlerLine_stability` row + the identification-layer
+note), the QA module docstring, this plan, and the activity log.
+Nothing committed; the prior runs' uncommitted deliveries preserved
+untouched.
+
+**Remaining risk:** none blocking — the proposal records COMPLETE.
+Natural priced follow-ons now that both ends exist: the concentration →
+subspace-stability pipeline (composing `fiedlerLine_stability` or the
+Step-1 wrapper with `sparsification_norm_tail`, the named companion
+consumer), and the sampled-Laplacian quadratic-form consumer for
+`matrix_hoeffding` (the remaining Medium row, whose Step-0 checks are
+half-answered by the delivered `abs_quadForm_le_of_l2OpNorm_le`).
+
+**Next milestone (open):** per priority item 0 — the remaining
+Medium-High/Medium rows (the sampled-Laplacian quadratic-form consumer
+for `matrix_hoeffding`; the sparsification follow-ons; the
+empirical-stationary Step 2 once a consumer prices the bias-term
+shape), or the concentration → stability pipeline above.
+
+------
+
+## Delivered milestones (most recent first)
+
+**Fiedler-subspace Davis–Kahan Step 0 verdict + Step 1 —
+`davis_kahan_sin_theta`'s first graph-theoretic consumer, the
+perturbation family's zero-Mathlib-consumer valley closed at the SGT
+center; `proposals/fiedler-subspace-stability-davis-kahan.md` (the
+Active table's top actionable Medium-High row; no High rows; the other
+Medium-High row's Step 2 gated on a consumer); run 1, 2026-08-28, run
+`20260828T013901Z-run-1`; DELIVERED — pure hard crust, zero new axioms
+(count stays 10; `#print axioms` via `wip/fsd_axcheck.lean` on all 22
+audited declarations — 5 module + 17 QA, the private helper and the
+`k3Adj` fixture covered transitively: exactly `propext,
+Classical.choice, Quot.sound`, every one; the wrapper consumes a
+*proved* theorem, so the whole chain is unconditional). QA 2695 → 2714
+(+19, `Fiedler_QA.lean`'s new `FiedlerSubspaceStability` section).**
+
+**Step 0 (the three verdicts, recorded in the proposal before any
+shelf Lean):** (1) the proposal's "zero consumers anywhere" premise
+corrected — `davisKahanTwoPoint` in `Derived/ProjectorDrift.lean`
+invokes the theorem in a proof term; the true gap was the
+zero-Mathlib-layer / graph-theoretic one (`measure_load_bearing`'s
+valley), which stood and is now closed; (2) the delivered Band
+Davis–Kahan family does NOT subsume Step 1 (two-sided windows with
+both-flank/pairwise separation vs the one-sided bottom-2 projector —
+the band route needs strictly more plumbing and would bypass the
+target theorem); (3) Step 2's residual-projector route priced: the
+subprojector law IS `spectralProjector_mul_spectralProjector`, the
+residual idempotence and telescoping are immediate algebra, and the
+genuinely priced piece is the common-kernel identification
+`initialProjector L 0 = initialProjector L' 0` (fixed-space
+uniqueness + eigenbasis expansion — nothing on file supplies either) —
+its own deferred slice.
+
+**Step 1 delivered** in three pieces: `Spectral.lean`'s four lemmas
+(`laplacian_zero`, **`laplacian_add`** — the perturbed-adjacency
+Laplacian identity, the statement-shape correction of the proposal's
+draft; **`evals_congr`** — the general-index proof-irrelevance
+transport, sibling of `secondEval_congr`; **`laplacian_evals_zero`** —
+the bottom-Laplacian-eigenvalue pin, no connectivity hypothesis, the
+reusable fixture starting point); `Fiedler.lean`'s headline
+**`fiedlerSubspace_stability`** (`‖initialProjector (laplacian (A+E))
+1 − initialProjector (laplacian A) 1‖ ≤ ‖laplacian E‖/δ` at
+`3 ≤ card V` and `δ ≤ λ₃(L(A+E)) − λ₂(L A)`, consuming
+`davis_kahan_sin_theta` verbatim at `k = 1`, no connectivity
+hypothesis); and the QA per obligations 1–2 (exact combinatorial P₃
+pins — λ₂ = 1 with the new `≥` side by the sum-of-squares identity
+`E(x) = ‖x‖² + 3(x₀+x₂)²` on the zero-sum constraint, λ₃ = 3 by trace;
+the two-route zero-perturbation cross-check with the separation
+discharge load-bearing against the pinned `{0,1,3}` spectrum; and the
+K₃ tie-witness — λ₂ = λ₃ = 3 both sides exact, the wrapper's
+hypothesis set provably EMPTY at the tie: tie-awareness inherited,
+vacuous not silently bounded).
+
+**Verification:** spike first (`wip/fsd_spike.lean` iterated to zero
+errors/warnings before any shelf Lean; technique findings recorded in
+the proposal's delivery record — the `Fin (card V)` numeral trap with
+the `⟨1, by omega⟩` spelling and the `show (1:ℕ)+1 < …; omega` side
+condition; the `evals`-typed sum vs `Fin.sum_univ_three` defeq-`have`
+idiom; `deg` at fixtures by `rw [deg, Fin.sum_univ_three] <;> norm_num
+[adjacency]` after classical-filter goals resisted `simp`+`decide`;
+the pinned Mathlib's `le_csInf (Nonempty) (∀∈)` vs `csInf_le
+(BddBelow) (∈)` signatures; the stale-olen recurrence at the import
+boundary); `lake env lean` zero errors/zero warnings on Fiedler and
+its QA, Spectral at exactly its pre-existing 8-warning baseline;
+explicit `lake build` targets ✔ (module, QA); **full `lake build` ✔
+(2402/2403, "Build completed successfully") immediately followed by
+`check_build_completeness.py` — 123/123 fresh, 0 stale, 0 missing,
+exit 0**; `lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass after the record sweep; scoreboard
+regenerated (**2714/10/0**). Records updated: the proposal (status
+header + the premise-correction note on the obligation section + the
+Step-0 verdict + the Step-1 delivery record with technique findings),
+`proposals/README.md` (the row marked delivered with Step 2 deferred +
+the Delivered-table row), README (2714; the cuts-and-expansion module
+table's Fiedler clause), the radar (QA axis synced 2695 → 2714 across
+64 modules; axis 4's evidence clause with the score held at 5.0 per
+protocol — a consumer instantiation of an already-counted perturbation
+theorem, load-bearing but not a new theorem family), the scoreboard
+(verification row + interpretation bullet), the backlog (the
+delivery clause), the index map (the Fiedler section's wrapper row +
+the engine-lemma note), this plan, and the activity log. Nothing
+committed; the prior runs' uncommitted deliveries preserved untouched.
+
+**Remaining risk:** none blocking. Step 2 (the Fiedler-*line*
+rotation: subtract the common kernel projector from both rank-2
+projectors — the proposal's actual payoff) is priced with its exact
+route and gated on nothing but its own budget; a companion consumer
+composing the wrapper with `sparsification_norm_tail` (the
+concentration → subspace-stability pipeline the proposal names) is
+natural now that both ends exist.
 
 **Empirical-stationary-distribution Steps 0+1 — the V-valued i.i.d.
 sampling space and `hoeffding_empirical`'s first theorem consumer;

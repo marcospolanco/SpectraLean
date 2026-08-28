@@ -1,5 +1,6 @@
 import Scaffold.Mathlib.GraphTheory.Spectral
 import Scaffold.Mathlib.GraphTheory.Cheeger
+import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan
 
 /-!
 # The Fiedler vector and its sign partition
@@ -77,7 +78,7 @@ against that pin, the attainment instantiation, the identified cut, and
 the regularity refutation (`d = 100`).
 -/
 
-open scoped Classical Matrix
+open scoped Classical Matrix Matrix.L2OpNorm
 
 namespace SpectralGraphTheory
 
@@ -511,5 +512,126 @@ theorem fiedler_sweep_cut (A : WAdj (V := V)) (hA : A.IsSymm)
   rw [show (2 * lambda2 A hA hcard / d)
     = 2 * (lambda2 A hA hcard / d) from by ring]
   exact hle
+
+/-!
+## Fiedler-subspace stability (the Davis–Kahan consumer)
+
+Step 1 of `proposals/fiedler-subspace-stability-davis-kahan.md`
+(delivered 2026-08-28): the first graph-theoretic consumer of the
+proved `davis_kahan_sin_theta` — before this, the theorem's exact
+hypothesis shape (the single-pair two-cluster separation, the `k = 1`
+index convention, tie-awareness) had never been exercised at a graph
+spectrum (`measure_load_bearing`'s zero-consumer valley for
+`DavisKahan.lean`; the derived layer's `davisKahanTwoPoint` consumes it
+only at abstract matrices).
+
+Step 2 (delivered the same day) isolates the Fiedler *line* — see
+`fiedlerLine_stability` below.
+-/
+
+/-- **Fiedler-subspace stability, the Davis–Kahan instantiation.** On a
+weighted graph `A` with at least three vertices, perturbed by a
+symmetric `E`, the bottom-2 invariant spectral subspace of the
+combinatorial Laplacian — on a *connected* base graph, the Fiedler
+cluster `span {onesVec, fiedlerVector A}`, since
+`laplacian_kernel_eq_span_onesVec` pins the index-0 mode to the
+constants — moves by at most the operator norm of the *Laplacian*
+perturbation `‖laplacian E‖`, inversely to the two-cluster separation
+`δ` between the perturbed graph's third eigenvalue and the base graph's
+Fiedler eigenvalue.
+
+The instantiation is mechanical — `laplacian_add` transports the
+perturbed Laplacian into the theorem's `A + E` shape, `evals_congr`
+carries the separation hypothesis across the two spellings of the
+perturbed operator — but it is the first load-bearing exercise of
+`davis_kahan_sin_theta`'s hypothesis shape at genuine graph spectra: a
+wrong index convention, a wrong operator in the separation, or a wrong
+Laplacian arithmetic breaks exactly this statement. No connectivity
+hypothesis: the bound holds on every symmetric base and perturbation;
+connectivity is what interprets the projector as the Fiedler cluster.
+The sharper Fiedler-*line* statement is `fiedlerLine_stability` below.
+
+QA: `Scaffold/QA/SpectralGraph/Fiedler_QA.lean`, section
+`FiedlerSubspaceStability` — the exact P₃ spectrum pins, the
+two-route zero-perturbation cross-check, and the K₃ tie-awareness
+witness. -/
+theorem fiedlerSubspace_stability (A E : WAdj (V := V)) (hA : A.IsSymm)
+    (hE : E.IsSymm) (hcard : 3 ≤ Fintype.card V) (δ : ℝ) (hδ : 0 < δ)
+    (hsep : δ ≤ evals (laplacian_symmetric (A + E) (hA.add hE)) ⟨2, by omega⟩
+        - evals (laplacian_symmetric A hA) ⟨1, by omega⟩) :
+    ‖initialProjector (laplacian (A + E))
+        (laplacian_symmetric (A + E) (hA.add hE)) ⟨1, by omega⟩
+      - initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨1, by omega⟩‖
+      ≤ ‖laplacian E‖ / δ := by
+  have hL : (laplacian A).IsSymm := laplacian_symmetric A hA
+  have hLE : (laplacian E).IsSymm := laplacian_symmetric E hE
+  have hsum : (laplacian A + laplacian E).IsSymm := hL.add hLE
+  have hsep' : δ ≤ evals hsum ⟨2, by omega⟩ - evals hL ⟨1, by omega⟩ := by
+    rw [evals_congr hsum (laplacian_symmetric (A + E) (hA.add hE))
+      (laplacian_add A E).symm ⟨2, by omega⟩]
+    exact hsep
+  have hdk := Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.davis_kahan_sin_theta
+    (laplacian A) (laplacian E) hL hsum
+    ⟨1, by omega⟩ (by show (1 : ℕ) + 1 < Fintype.card V; omega) δ hδ hsep'
+  rw [initialProjector_congr (laplacian_add A E)
+    (laplacian_symmetric (A + E) (hA.add hE)) hsum ⟨1, by omega⟩]
+  exact hdk
+
+/-- **Fiedler-line stability: the Fiedler vector's own rotation, not the
+rank-2 subspace containing it** (Step 2 of
+`proposals/fiedler-subspace-stability-davis-kahan.md`). Subtracting the
+index-0 projector from both bottom-2 projectors leaves exactly the
+Fiedler-mode projectors `P₁ − P₀`, and on *connected* graphs the kernel
+projector `P₀` is the same matrix on both sides —
+`initialProjector_laplacian_zero_eq_of_connected`, consuming
+`laplacian_mulVec_eq_zero_iff_exists_const` through the
+fixed-space-uniqueness layer — so the residual difference telescopes to
+the plain projector difference bounded in Step 1.
+
+This is the proposal's actual payoff: the rank-2 rotation bounded by
+`fiedlerSubspace_stability` is entirely attributable to the Fiedler
+component, because connected graphs never move their kernel direction —
+only the Laplacian null space, not the perturbation, decides it. The
+hypothesis stack is Step 1's plus the two connectivity and nonnegativity
+assumptions that make the kernel identification true; these are
+load-bearing (QA's disconnected fence refutes the identification on the
+empty graph), not decorative.
+
+QA: `Scaffold/QA/SpectralGraph/Fiedler_QA.lean`, section
+`FiedlerLineStability` — the P₃ → K₃ edge-addition instance (bound
+exactly `≤ 1`, with the perturbed side sitting on Davis–Kahan's own
+tie branch), the identification instance at the genuine two-spectrum
+pair, and the connectivity fence. -/
+theorem fiedlerLine_stability (A E : WAdj (V := V)) (hA : A.IsSymm)
+    (hE : E.IsSymm) (hnnA : ∀ i j, 0 ≤ A i j) (hnnAE : ∀ i j, 0 ≤ (A + E) i j)
+    (hconnA : (supportGraph A hA).Connected)
+    (hconnAE : (supportGraph (A + E) (hA.add hE)).Connected)
+    (hcard : 3 ≤ Fintype.card V) (δ : ℝ) (hδ : 0 < δ)
+    (hsep : δ ≤ evals (laplacian_symmetric (A + E) (hA.add hE)) ⟨2, by omega⟩
+        - evals (laplacian_symmetric A hA) ⟨1, by omega⟩) :
+    ‖(initialProjector (laplacian (A + E))
+          (laplacian_symmetric (A + E) (hA.add hE)) ⟨1, by omega⟩
+        - initialProjector (laplacian (A + E))
+          (laplacian_symmetric (A + E) (hA.add hE)) ⟨0, by omega⟩)
+      - (initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨1, by omega⟩
+        - initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨0, by omega⟩)‖
+      ≤ ‖laplacian E‖ / δ := by
+  have hcommon : initialProjector (laplacian (A + E))
+        (laplacian_symmetric (A + E) (hA.add hE)) ⟨0, by omega⟩
+      = initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨0, by omega⟩ :=
+    initialProjector_laplacian_zero_eq_of_connected (A + E) A (hA.add hE) hA
+      hnnAE hnnA hconnAE hconnA (by omega)
+  rw [hcommon]
+  have htele : (initialProjector (laplacian (A + E))
+          (laplacian_symmetric (A + E) (hA.add hE)) ⟨1, by omega⟩
+        - initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨0, by omega⟩)
+      - (initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨1, by omega⟩
+        - initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨0, by omega⟩)
+      = initialProjector (laplacian (A + E))
+          (laplacian_symmetric (A + E) (hA.add hE)) ⟨1, by omega⟩
+        - initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨1, by omega⟩ := by
+    abel
+  rw [htele]
+  exact fiedlerSubspace_stability A E hA hE hcard δ hδ hsep
 
 end SpectralGraphTheory

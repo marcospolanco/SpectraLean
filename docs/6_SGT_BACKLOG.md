@@ -456,7 +456,23 @@ the algebraic-connectivity certificate `lambda2_pos_of_connected`, and
 the sign partition `fiedlerPartition` proved nonempty and proper on
 connected graphs, all hard crust; QA computes the partition on the
 `P₄` barbell to be exactly the known good cut. See
-`proposals/fiedler-partitioning.md`); **Phase B delivered 2026-08-23**
+`proposals/fiedler-partitioning.md`); **Fiedler-subspace stability
+delivered 2026-08-28** (`proposals/fiedler-subspace-stability-davis-kahan.md`
+Step 0 verdict + Step 1: `fiedlerSubspace_stability` — the bottom-2
+invariant spectral subspace of the combinatorial Laplacian moves by at
+most `‖laplacian E‖/δ` under a symmetric perturbation at two-cluster
+separation `δ`, the proved `davis_kahan_sin_theta`'s first
+graph-theoretic consumer, closing that theorem's zero-Mathlib-consumer
+valley; with `laplacian_add`/`evals_congr`/`laplacian_evals_zero` as
+reusable spectrum pins — and **the Fiedler-*line* rotation delivered
+the same day** (the proposal's Step 2, its payoff slice:
+`fiedlerLine_stability` — the residual Fiedler-mode projector
+difference `‖(P₁' − P₀') − (P₁ − P₀)‖ ≤ ‖laplacian E‖/δ` on connected
+base and perturbed graphs — through the common-kernel identification
+`initialProjector_laplacian_zero_eq_of_connected` (every connected
+Laplacian carries the same index-0 projector; uniqueness-by-fixed-space
+plus the connectivity-free fixed-space iff), making the program
+complete); **Phase B delivered 2026-08-23**
 — `cheeger_cut_existence`, the classical Cheeger cut-existence
 certificate: on every connected `d`-regular graph a nonempty proper
 `S` exists with `conductance S ^ 2 ≤ 2 · lambda2 / d` (the recorded

@@ -127,8 +127,39 @@ theorem degreeMatrix_symmetric (A : WAdj (V := V)) :
 
 /-- The Laplacian of a symmetric weighted adjacency matrix is symmetric. -/
 theorem laplacian_symmetric (A : WAdj (V := V)) (hA : Matrix.IsSymm A) :
-    Matrix.IsSymm (laplacian A) :=
+    (laplacian A).IsSymm :=
   (degreeMatrix_symmetric A).sub hA
+
+/-- The Laplacian of the zero adjacency is the zero matrix (degrees are
+zero row sums). -/
+theorem laplacian_zero : laplacian (0 : WAdj (V := V)) = 0 := by
+  ext i j
+  simp [laplacian, degreeMatrix, deg]
+
+/-- **The Laplacian of a perturbed adjacency is the Laplacian of the
+base plus the Laplacian of the perturbation.** The degree functional is
+a row sum, so it is additive entrywise. This is the identity through
+which perturbation consumers transport a perturbed graph's Laplacian
+into the `A + E` shape of matrix perturbation theorems — first
+consumed by `Fiedler.fiedlerSubspace_stability` (the Davis–Kahan
+Fiedler-subspace wrapper). -/
+theorem laplacian_add (A E : WAdj (V := V)) :
+    laplacian (A + E) = laplacian A + laplacian E := by
+  ext i j
+  by_cases h : i = j
+  · subst h
+    have hdeg : deg (A + E) i = deg A i + deg E i := by
+      simp only [deg, Matrix.add_apply, Finset.sum_add_distrib]
+    show degreeMatrix (A + E) i i - (A + E) i i
+      = (degreeMatrix A i i - A i i) + (degreeMatrix E i i - E i i)
+    rw [degreeMatrix_diagonal, degreeMatrix_diagonal, degreeMatrix_diagonal,
+      Matrix.add_apply, hdeg]
+    ring
+  · show degreeMatrix (A + E) i j - (A + E) i j
+      = (degreeMatrix A i j - A i j) + (degreeMatrix E i j - E i j)
+    rw [degreeMatrix_off_diagonal (A + E) h, degreeMatrix_off_diagonal A h,
+      degreeMatrix_off_diagonal E h, Matrix.add_apply]
+    ring
 
 /-- The degree of `i` is the row sum, so every Laplacian row sums to zero;
 the all-ones vector is in the kernel of every Laplacian. No symmetry is
@@ -686,6 +717,137 @@ theorem initialProjector_idempotent (M : Matrix V V ℝ) (hM : M.IsSymm)
     initialProjector M hM k * initialProjector M hM k
       = initialProjector M hM k :=
   spectralProjector_idempotent M hM _
+
+/-!
+### Symmetric idempotents and fixed spaces
+
+The uniqueness layer behind the kernel-projector identification: a
+symmetric idempotent is the orthogonal projection onto its fixed space,
+so two of them with the same fixed space are equal. The proof is pure
+algebra — `ker P = Fix(P)ᗮ` by symmetry, so the fixed-space hypothesis
+transfers kernels, and `Q ∘ P = P` plus that transfer forces `Q = P` on
+every vector. First consumed by
+`initialProjector_laplacian_zero_eq_of_connected` (the Fiedler-line
+stability delivery).
+-/
+
+omit [DecidableEq V] in
+/-- A symmetric operator is self-adjoint in coordinates: the dot
+product against its image can be slid across. `Matrix.dotProduct_mulVec`
+plus symmetry; the coordinate form consumed by the projector uniqueness
+layer and by eigenvalue-coordinate arguments. -/
+theorem dotProduct_mulVec_comm_of_isSymm {M : Matrix V V ℝ} (hM : M.IsSymm)
+    (w f : V → ℝ) :
+    Matrix.dotProduct w (M *ᵥ f) = Matrix.dotProduct (M *ᵥ w) f := by
+  rw [Matrix.dotProduct_mulVec, ← Matrix.vecMul_transpose, hM.eq]
+
+/-- **Symmetric idempotents are determined by their fixed spaces**: if
+`P` and `Q` are symmetric idempotents and `P *ᵥ x = x ↔ Q *ᵥ x = x` for
+every `x`, then `P = Q`.
+
+The proof route: for a symmetric idempotent, `ker P = Fix(P)ᗮ`
+algebraically (a kernel vector is orthogonal to every image, and
+`‖P y‖² = ⟨y, P y⟩` forces the converse), so the shared fixed space
+transfers kernels; then `Q *ᵥ x = Q *ᵥ (P *ᵥ x) + Q *ᵥ (x − P *ᵥ x)`
+collapses to `P *ᵥ x` on both terms — the first by idempotence of `P`,
+the second by the kernel transfer. Acting identically on every vector,
+`P` and `Q` are the same matrix.
+
+This is the uniqueness half of the common-kernel projector
+identification (`initialProjector_laplacian_zero_eq_of_connected`);
+nothing in the pinned Mathlib supplies it. -/
+theorem eq_of_isSymm_idempotent_of_forall_mulVec_eq {P Q : Matrix V V ℝ}
+    (hPs : P.IsSymm) (hPi : P * P = P) (hQs : Q.IsSymm) (hQi : Q * Q = Q)
+    (h : ∀ x : V → ℝ, P *ᵥ x = x ↔ Q *ᵥ x = x) : P = Q := by
+  have hfix : ∀ (R : Matrix V V ℝ), R.IsSymm → R * R = R → ∀ y : V → ℝ,
+      R *ᵥ (R *ᵥ y) = R *ᵥ y := fun _ _ hRi y => by
+    rw [Matrix.mulVec_mulVec, hRi]
+  have hker : ∀ y : V → ℝ, P *ᵥ y = 0 → Q *ᵥ y = 0 := by
+    intro y hy
+    have hfixQ : Q *ᵥ (Q *ᵥ y) = Q *ᵥ y := hfix Q hQs hQi y
+    have hfixP : P *ᵥ (Q *ᵥ y) = Q *ᵥ y := (h (Q *ᵥ y)).2 hfixQ
+    have hA : Matrix.dotProduct y (Q *ᵥ y)
+        = Matrix.dotProduct y (P *ᵥ (Q *ᵥ y)) := by rw [hfixP]
+    have hB : Matrix.dotProduct y (P *ᵥ (Q *ᵥ y))
+        = Matrix.dotProduct (P *ᵥ y) (Q *ᵥ y) :=
+      dotProduct_mulVec_comm_of_isSymm hPs y (Q *ᵥ y)
+    have hC : Matrix.dotProduct (P *ᵥ y) (Q *ᵥ y) = 0 := by
+      rw [hy, Matrix.zero_dotProduct]
+    have hD : Matrix.dotProduct y (Q *ᵥ y)
+        = Matrix.dotProduct y (Q *ᵥ (Q *ᵥ y)) := by rw [hfixQ]
+    have hE : Matrix.dotProduct y (Q *ᵥ (Q *ᵥ y))
+        = Matrix.dotProduct (Q *ᵥ y) (Q *ᵥ y) :=
+      dotProduct_mulVec_comm_of_isSymm hQs y (Q *ᵥ y)
+    exact Matrix.dotProduct_self_eq_zero.1
+      ((hD.trans hE).symm.trans (hA.trans (hB.trans hC)))
+  have hact : ∀ x : V → ℝ, P *ᵥ x = Q *ᵥ x := by
+    intro x
+    have hfixP2 : P *ᵥ (P *ᵥ x) = P *ᵥ x := hfix P hPs hPi x
+    have hfixQ2 : Q *ᵥ (P *ᵥ x) = P *ᵥ x := (h (P *ᵥ x)).1 hfixP2
+    have hker2 : Q *ᵥ (x - P *ᵥ x) = 0 := by
+      refine hker _ ?_
+      rw [← Matrix.mulVecLin_apply, map_sub, Matrix.mulVecLin_apply,
+        Matrix.mulVecLin_apply, hfixP2, sub_self]
+    have hq : Q *ᵥ x = P *ᵥ x := by
+      calc Q *ᵥ x = Q *ᵥ (P *ᵥ x + (x - P *ᵥ x)) := by rw [add_sub_cancel]
+        _ = Q *ᵥ (P *ᵥ x) + Q *ᵥ (x - P *ᵥ x) := by
+              rw [← Matrix.mulVecLin_apply, map_add, Matrix.mulVecLin_apply,
+                Matrix.mulVecLin_apply]
+        _ = P *ᵥ x := by rw [hfixQ2, hker2, add_zero]
+    exact hq.symm
+  ext i j
+  have hvec := congrFun (hact (Pi.single j (1 : ℝ))) i
+  simpa using hvec
+
+/-- The action of a spectral projector expanded in its own eigenbasis:
+`P_c *ᵥ x` is the filtered combination `∑_{λᵢ ≤ c} (vᵢ ⬝ᵥ x) • vᵢ`. The
+interface consumed by the fixed-space characterization of the index-0
+Laplacian projector (`initialProjector_laplacian_zero_fix_iff`). -/
+theorem spectralProjector_mulVec_eq_sum {M : Matrix V V ℝ} (hM : M.IsSymm)
+    (c : ℝ) (x : V → ℝ) :
+    spectralProjector M hM c *ᵥ x
+      = ∑ i ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+          (eigvecOf M hM i ⬝ᵥ x) • eigvecOf M hM i := by
+  funext a
+  have hstep : ∀ b : V,
+      (∑ i ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+          eigvecOf M hM i a * eigvecOf M hM i b) * x b
+      = ∑ i ∈ Finset.univ.filter (fun i => eigvalOf M hM i ≤ c),
+          (eigvecOf M hM i a * eigvecOf M hM i b) * x b :=
+    fun b => Finset.sum_mul _ _ _
+  have hring : ∀ i b : V, (eigvecOf M hM i a * eigvecOf M hM i b) * x b
+      = eigvecOf M hM i a * (eigvecOf M hM i b * x b) := fun i b => by ring
+  simp only [Matrix.mulVec, Matrix.dotProduct, spectralProjector,
+    Matrix.of_apply, Finset.sum_apply, smul_eq_mul]
+  rw [Finset.sum_congr rfl (fun b _ => hstep b), Finset.sum_comm]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [Finset.sum_congr rfl (fun b _ => hring i b), ← Finset.mul_sum]
+  exact mul_comm _ _
+
+/-- Every vector is its eigenbasis expansion: `x = ∑ i, (vᵢ ⬝ᵥ x) • vᵢ`.
+The `OrthonormalBasis.sum_repr'` of the spectral theorem restated at the
+shelf's plain-function eigenvectors. The reconstruction half of the
+fixed-space characterization of the index-0 Laplacian projector. -/
+theorem eigvecOf_expansion {M : Matrix V V ℝ} (hM : M.IsSymm) (x : V → ℝ) :
+    ∑ i, (eigvecOf M hM i ⬝ᵥ x) • eigvecOf M hM i = x := by
+  have h := (isHermitian_of_isSymm hM).eigenvectorBasis.sum_repr'
+    (x : EuclideanSpace ℝ V)
+  have hcoeff : ∀ i : V,
+      ⟪(isHermitian_of_isSymm hM).eigenvectorBasis i, x⟫_ℝ
+        = eigvecOf M hM i ⬝ᵥ x := by
+    intro i
+    simp [RCLike.inner_apply, eigvecOf, Matrix.dotProduct]
+  funext a
+  have hb := congrFun h a
+  simp only [hcoeff] at hb
+  have hsum : ((∑ i : V, (eigvecOf M hM i ⬝ᵥ x) •
+      ((isHermitian_of_isSymm hM).eigenvectorBasis i : V → ℝ))) a
+      = ∑ i : V, (eigvecOf M hM i ⬝ᵥ x) * eigvecOf M hM i a := by
+    rw [Finset.sum_apply]
+    exact Finset.sum_congr rfl fun i _ => rfl
+  simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
+  rw [← hsum]
+  exact hb
 
 end Spectrum
 
@@ -2266,6 +2428,19 @@ theorem secondEval_congr {M₁ M₂ : Matrix V V ℝ} (hM₁ : M₁.IsSymm)
   subst h
   rfl
 
+/-- Proof-irrelevance transport for the sorted spectrum across equal
+operator spellings, at every index (the general-index sibling of
+`secondEval_congr` above): `evals` does not depend on which symmetry
+proof parameterizes it. The robust route around the
+motive-not-type-correct trap of rewriting matrix equalities under
+proof-carrying applications — first consumed by
+`Fiedler.fiedlerSubspace_stability`'s separation transport. -/
+theorem evals_congr {M₁ M₂ : Matrix V V ℝ} (hM₁ : M₁.IsSymm)
+    (hM₂ : M₂.IsSymm) (h : M₁ = M₂) (k : Fin (Fintype.card V)) :
+    evals hM₁ k = evals hM₂ k := by
+  subst h
+  rfl
+
 /-- **General-kernel Rayleigh domination** (the consumer form of the
 Courant–Fischer principle at an arbitrary kernel vector): every nonzero
 test vector orthogonal to a *nonzero kernel vector* `w` of a PSD
@@ -3287,6 +3462,161 @@ theorem exists_eigvalOf_eq_of_mulVec_eq_smul {M : Matrix V V ℝ} (hM : M.IsSymm
   exact hx (Matrix.dotProduct_self_eq_zero.1 hzero)
 
 end OrderStatistics
+
+/-- **The bottom eigenvalue of a Laplacian with symmetric nonnegative
+weights is exactly `0`** — no connectivity hypothesis. The all-ones
+vector is an eigenvector at `0` (`laplacian_ones_in_kernel`), so `0` is
+an eigenvalue and `evals_first_le_eigvalOf` puts the sorted minimum
+below it; PSD (`laplacian_psd`) rules out anything smaller. The
+*multiplicity* of `0` is what connectivity controls
+(`Fiedler.lambda2_pos_of_connected`); this lemma is the pin every exact
+Laplacian-spectrum fixture starts from. -/
+theorem laplacian_evals_zero (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hnonneg : ∀ i j, 0 ≤ A i j) (hcard : 0 < Fintype.card V) :
+    evals (laplacian_symmetric A hA) ⟨0, by omega⟩ = 0 := by
+  have hpsd := laplacian_psd A hA hnonneg
+  obtain ⟨v⟩ : Nonempty V := Fintype.card_pos_iff.1 hcard
+  have hvne : (onesVec : V → ℝ) ≠ 0 := by
+    intro h
+    have hv : (onesVec : V → ℝ) v = 0 := congrFun h v
+    simp [onesVec] at hv
+  obtain ⟨i, hi⟩ := exists_eigvalOf_eq_of_mulVec_eq_smul
+    (laplacian_symmetric A hA) hvne
+    (by rw [zero_smul]; exact laplacian_ones_in_kernel A)
+  obtain ⟨i', hi'⟩ := evals_mem_eigvalOf (laplacian_symmetric A hA)
+    ⟨0, by omega⟩
+  have hge : (0 : ℝ) ≤ eigvalOf (laplacian A) (laplacian_symmetric A hA) i' := by
+    have h := hpsd (eigvecOf (laplacian A) (laplacian_symmetric A hA) i')
+    rwa [quadForm_eigvecOf_self] at h
+  have hle : evals (laplacian_symmetric A hA) ⟨0, by omega⟩
+      ≤ eigvalOf (laplacian A) (laplacian_symmetric A hA) i :=
+    evals_first_le_eigvalOf _ (by omega) i
+  rw [← hi'] at hge
+  rw [hi] at hle
+  linarith
+
+/-!
+### The kernel projector is common to all connected Laplacians
+
+The index-0 invariant projector of a Laplacian is exactly the
+orthogonal projection onto the kernel — with **no** connectivity
+hypothesis (`initialProjector_laplacian_zero_fix_iff`), via the
+eigenbasis expansion and the bottom-eigenvalue pin. On connected graphs
+the kernel is the constant line
+(`laplacian_mulVec_eq_zero_iff_exists_const`), so *every* connected
+Laplacian carries the *same* index-0 projector
+(`initialProjector_laplacian_zero_eq_of_connected`): connected graphs
+never move their kernel direction, whatever the perturbation does to
+the rest of the spectrum. This is the identification the Fiedler-line
+stability statement (`Fiedler.fiedlerLine_stability`) subtracts off.
+-/
+
+/-- **The fixed space of the index-0 Laplacian projector is exactly the
+kernel** — no connectivity hypothesis. Forward: every eigenvector below
+the bottom sorted eigenvalue has eigenvalue exactly `0` (the pin
+`laplacian_evals_zero` from below, `evals_first_le_eigvalOf` from
+above), so the projector's range lies in the kernel. Backward: above
+the threshold the eigenvalues are strictly positive, so the eigenbasis
+coordinates of a kernel vector vanish there, and the eigenbasis
+expansion reconstructs it inside the projector's range. -/
+theorem initialProjector_laplacian_zero_fix_iff (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hcard : 0 < Fintype.card V)
+    (f : V → ℝ) :
+    initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨0, by omega⟩ *ᵥ f = f
+      ↔ (laplacian A).mulVec f = 0 := by
+  have hL : (laplacian A).IsSymm := laplacian_symmetric A hA
+  have hev : ∀ i : V, (laplacian A) *ᵥ eigvecOf (laplacian A) hL i
+      = eigvalOf (laplacian A) hL i • eigvecOf (laplacian A) hL i :=
+    fun i => (isHermitian_of_isSymm hL).mulVec_eigenvectorBasis i
+  have hzero : evals (laplacian_symmetric A hA) ⟨0, by omega⟩ = 0 :=
+    laplacian_evals_zero A hA hnn hcard
+  have hge : ∀ i : V, (0 : ℝ) ≤ eigvalOf (laplacian A) hL i := fun i => by
+    have hle := evals_first_le_eigvalOf hL (by omega) i
+    rwa [hzero] at hle
+  constructor
+  · intro hfix
+    have hexp : initialProjector (laplacian A) hL ⟨0, by omega⟩ *ᵥ f
+        = ∑ i ∈ Finset.univ.filter
+            (fun i => eigvalOf (laplacian A) hL i ≤ evals hL ⟨0, by omega⟩),
+            (eigvecOf (laplacian A) hL i ⬝ᵥ f) • eigvecOf (laplacian A) hL i :=
+      spectralProjector_mulVec_eq_sum hL (evals hL ⟨0, by omega⟩) f
+    have hmap : (laplacian A) *ᵥ (∑ i ∈ Finset.univ.filter
+          (fun i => eigvalOf (laplacian A) hL i ≤ evals hL ⟨0, by omega⟩),
+          (eigvecOf (laplacian A) hL i ⬝ᵥ f) • eigvecOf (laplacian A) hL i)
+      = ∑ i ∈ Finset.univ.filter
+          (fun i => eigvalOf (laplacian A) hL i ≤ evals hL ⟨0, by omega⟩),
+          (eigvecOf (laplacian A) hL i ⬝ᵥ f)
+            • ((laplacian A) *ᵥ eigvecOf (laplacian A) hL i) := by
+      rw [← Matrix.mulVecLin_apply, map_sum]
+      exact Finset.sum_congr rfl fun i _ => Matrix.mulVec_smul _ _ _
+    rw [← hfix, hexp, hmap]
+    refine Finset.sum_eq_zero fun i hi => ?_
+    have hmem := (Finset.mem_filter.1 hi).2
+    rw [hzero] at hmem
+    have hi0 : eigvalOf (laplacian A) hL i = 0 := le_antisymm hmem (hge i)
+    rw [hev i, hi0, zero_smul, smul_zero]
+  · intro hker0
+    have hvan : ∀ i ∉ Finset.univ.filter
+          (fun i => eigvalOf (laplacian A) hL i ≤ evals hL ⟨0, by omega⟩),
+        eigvecOf (laplacian A) hL i ⬝ᵥ f = 0 := by
+      intro i hi
+      have hnotle : ¬ (eigvalOf (laplacian A) hL i ≤ evals hL ⟨0, by omega⟩) :=
+        fun hc => hi (Finset.mem_filter.2 ⟨Finset.mem_univ _, hc⟩)
+      have hpos : (0 : ℝ) < eigvalOf (laplacian A) hL i := by
+        have hlt := lt_of_not_ge hnotle
+        rwa [hzero] at hlt
+      have hcoord : eigvalOf (laplacian A) hL i
+            * (eigvecOf (laplacian A) hL i ⬝ᵥ f)
+          = eigvecOf (laplacian A) hL i ⬝ᵥ ((laplacian A) *ᵥ f) := by
+        rw [dotProduct_mulVec_comm_of_isSymm hL, hev i]
+        simp only [Matrix.dotProduct, Pi.smul_apply, smul_eq_mul,
+          Finset.mul_sum]
+        exact Finset.sum_congr rfl fun j _ => by ring
+      rw [hker0, Matrix.dotProduct_zero] at hcoord
+      rcases mul_eq_zero.1 hcoord with h0 | h
+      · exact absurd h0 hpos.ne'
+      · exact h
+    have hsumF : ∑ i ∈ Finset.univ.filter
+          (fun i => eigvalOf (laplacian A) hL i ≤ evals hL ⟨0, by omega⟩),
+          (eigvecOf (laplacian A) hL i ⬝ᵥ f) • eigvecOf (laplacian A) hL i
+      = ∑ i, (eigvecOf (laplacian A) hL i ⬝ᵥ f) • eigvecOf (laplacian A) hL i :=
+      Finset.sum_subset (Finset.filter_subset _ _)
+        (fun i _ hi => by rw [hvan i hi, zero_smul])
+    exact (spectralProjector_mulVec_eq_sum hL (evals hL ⟨0, by omega⟩) f).trans
+      (hsumF.trans (eigvecOf_expansion hL f))
+
+/-- **Every connected Laplacian carries the same index-0 spectral
+projector.** Both projectors are symmetric idempotents
+(`initialProjector_symmetric`, `initialProjector_idempotent`); their
+fixed spaces are their kernels by the iff above; and on connected
+graphs the kernels are the constant line on both sides
+(`laplacian_mulVec_eq_zero_iff_exists_const`). So the uniqueness lemma
+applies — the projectors are *equal*, as matrices, for any two
+connected weighted graphs on the same vertex type.
+
+This is the load-bearing identification of the Fiedler-line stability
+delivery: it is what lets a perturbation statement subtract the kernel
+projector from both sides. It genuinely needs connectivity — on a
+disconnected graph the kernel is larger and the identification fails
+(QA: `Fiedler_QA`'s disconnected fence). -/
+theorem initialProjector_laplacian_zero_eq_of_connected (A A' : WAdj (V := V))
+    (hA : A.IsSymm) (hA' : A'.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hnn' : ∀ i j, 0 ≤ A' i j)
+    (hconn : (supportGraph A hA).Connected)
+    (hconn' : (supportGraph A' hA').Connected) (hcard : 0 < Fintype.card V) :
+    initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨0, by omega⟩
+      = initialProjector (laplacian A') (laplacian_symmetric A' hA') ⟨0, by omega⟩ := by
+  refine eq_of_isSymm_idempotent_of_forall_mulVec_eq
+    (initialProjector_symmetric (laplacian A) (laplacian_symmetric A hA) ⟨0, by omega⟩)
+    (initialProjector_idempotent (laplacian A) (laplacian_symmetric A hA) ⟨0, by omega⟩)
+    (initialProjector_symmetric (laplacian A') (laplacian_symmetric A' hA') ⟨0, by omega⟩)
+    (initialProjector_idempotent (laplacian A') (laplacian_symmetric A' hA') ⟨0, by omega⟩)
+    ?_
+  intro x
+  rw [initialProjector_laplacian_zero_fix_iff A hA hnn hcard,
+    initialProjector_laplacian_zero_fix_iff A' hA' hnn' hcard,
+    laplacian_mulVec_eq_zero_iff_exists_const A hA hnn hconn,
+    laplacian_mulVec_eq_zero_iff_exists_const A' hA' hnn' hconn']
 
 /-!
 ## 6. Event-driven adjacency updates

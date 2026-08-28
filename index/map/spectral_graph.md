@@ -531,6 +531,32 @@ importing `Cheeger`): the certified conductance cut, pure hard crust.
 | `fiedlerVector_rayleigh_regularNormalizedLaplacian` | **Phase B bridge:** `R_{L_sym}(f) = lambda2 / d` (unit norm × the quadratic-form transfer × the energy identity) |
 | `cheeger_cut_existence` | **Phase B, the certified conductance cut:** on every connected `d`-regular graph, `∃ S` nonempty proper with `conductance S ^ 2 ≤ 2 · lambda2 / d` — the classical Cheeger cut-existence corollary, composed from the proved sweep lemma at the Fiedler vector + `cheegerConstant_attained` (the sign cut itself is not certifiable from `lambda2` alone; the swept-level-set extraction is the named follow-on) |
 | `fiedler_sweep_cut` | **Phase C (2026-08-24, `proposals/sweep-cut-extraction.md`), the swept Fiedler cut:** on every connected `d`-regular graph, a *closed superlevel or sublevel set of the Fiedler vector* (the object the spectral-partitioning sweep returns, not the non-constructive minimizer) satisfies `conductance S ^ 2 ≤ 2 · lambda2 / d` — `cheeger_sweep_cut` at the Fiedler vector through the Phase B Rayleigh bridge; QA identifies the cut on `K₂` (singleton, conductance `1` = the pinned `cheegerConstant` — the sweep is exact there) and characterizes the swept family through the antisymmetry pins |
+| `fiedlerSubspace_stability` | **(2026-08-28, `proposals/fiedler-subspace-stability-davis-kahan.md` Step 1) the Fiedler-subspace Davis–Kahan wrapper:** on every symmetric base `A` and perturbation `E` with `3 ≤ card V` and separation `δ ≤ λ₃(L(A+E)) − λ₂(L A)`, `‖initialProjector (L(A+E)) 1 − initialProjector (L A) 1‖ ≤ ‖laplacian E‖/δ` — the bottom-2 invariant spectral subspace (on a connected base, the Fiedler cluster `span {onesVec, fiedlerVector}`) moves by at most the Laplacian perturbation's norm over the gap; the proved `davis_kahan_sin_theta`'s first graph-theoretic consumer, through the new `laplacian_add` transport (module: `Spectral`); no connectivity hypothesis, tie-awareness inherited (QA: at the K₃ `λ₂ = λ₃` tie the hypothesis set is provably empty) |
+
+The Step-2 headline — the proposal's payoff — sits in the same module:
+
+| Declaration | Statement |
+| --- | --- |
+| `fiedlerLine_stability` | **(2026-08-28, the same proposal's Step 2) the Fiedler-line rotation:** on connected base `A` and perturbed `A + E` (symmetric, nonnegative, `3 ≤ card V`) at Step 1's separation `δ ≤ λ₃(L(A+E)) − λ₂(L A)`, the residual Fiedler-mode projector difference `‖(initialProjector (L(A+E)) 1 − initialProjector (L(A+E)) 0) − (initialProjector (L A) 1 − initialProjector (L A) 0)‖ ≤ ‖laplacian E‖/δ` — the rank-2 rotation attributed to the Fiedler component itself, because connected graphs never move their kernel direction; the common-kernel identification telescopes the residual to the Step-1 projector difference (QA: the P₃ → K₃ edge-addition instance with the bound exactly `≤ 1` on Davis–Kahan's own tie branch, the perturbation norm pinned `= 2` both sides, and the disconnected fence proving connectivity load-bearing) |
+
+The identification layer behind it lives in `GraphTheory.Spectral`:
+`dotProduct_mulVec_comm_of_isSymm` (the self-adjoint coordinate form),
+`eq_of_isSymm_idempotent_of_forall_mulVec_eq` (symmetric idempotents
+determined by fixed space — `ker P = Fix(P)ᗮ` algebraically),
+`spectralProjector_mulVec_eq_sum` (the projector's action in its own
+eigenbasis), `eigvecOf_expansion` (every vector is its eigenbasis
+expansion), `initialProjector_laplacian_zero_fix_iff` (the index-0
+projector's fixed space is exactly the kernel, connectivity-free), and
+`initialProjector_laplacian_zero_eq_of_connected` (every connected
+Laplacian carries the same index-0 projector — the uniqueness lemma
+joined to `laplacian_mulVec_eq_zero_iff_exists_const`). The Step-1
+engine lemmas also live in `GraphTheory.Spectral`:
+`laplacian_zero` and `laplacian_add` (the perturbed-adjacency Laplacian
+identity), `evals_congr` (general-index proof-irrelevance for the
+sorted spectrum), and `laplacian_evals_zero` (the bottom Laplacian
+eigenvalue is exactly `0` on symmetric nonnegative weights, no
+connectivity hypothesis — the pin every exact Laplacian-spectrum
+fixture starts from).
 
 `GraphTheory.Cheeger` additionally carries Phase B's enabling lemma:
 `cheegerConstant_attained` (the conductance `sInf` realized as a

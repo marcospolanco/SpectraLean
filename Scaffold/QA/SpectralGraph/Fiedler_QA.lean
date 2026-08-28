@@ -48,6 +48,7 @@
 -/
 
 import Scaffold.Mathlib.GraphTheory.Fiedler
+import Scaffold.Mathlib.GraphTheory.Sparsification
 import Scaffold.QA.SpectralGraph.Variational_QA
 
 open scoped BigOperators Classical Matrix
@@ -1074,3 +1075,648 @@ theorem k2_sweep_optimal_QA :
   exact ⟨S, h1, by rw [h1, k2_cheegerConstant_eq_one_QA]⟩
 
 end FiedlerPhaseC
+
+/-!
+## Fiedler-subspace stability (`fiedlerSubspace_stability`)
+
+Step 1 QA of `proposals/fiedler-subspace-stability-davis-kahan.md`:
+the Davis–Kahan Fiedler-subspace wrapper, exercised at exact graph
+spectra.
+
+- **Obligation 1 (the cross-check):** the exact combinatorial P₃
+  spectrum pins `λ₂ = 1` (the `≥` side new, by the sum-of-squares
+  identity `E(x) = ‖x‖² + 3 (x₀ + x₂)²` on the zero-sum constraint)
+  and `λ₃ = 3` (by `laplacian_evals_zero` + the λ₂ pin + the trace
+  identity `0 + 1 + λ₃ = 4`), then the wrapper's zero-perturbation
+  instance at `δ = 2` cross-checked against the raw matrix identity
+  `P₃ + 0 = P₃` — two routes meeting at distance exactly `0`, with the
+  separation discharge as the load-bearing step (a wrong index or
+  wrong operator in `hsep` fails exactly there).
+- **Obligation 2 (the boundary witness):** the complete graph `K₃`,
+  where the Fiedler eigenvalue is not simple (`λ₂ = λ₃ = 3`, both sides
+  exact: the `≤` by the Rayleigh engine at `![1, -1, 0]`, the `≥` by
+  the identity `E(x) = 3‖x‖² − (x₀+x₁+x₂)²` on the constraint), pins
+  the wrapper's hypothesis set as *provably empty* for every positive
+  `δ` — the eigenvalue tie at the threshold makes the statement
+  vacuous rather than silently bounded: tie-awareness inherited from
+  Davis–Kahan's own case split.
+
+All proofs are real Lean proofs (no `sorry`/`admit`); everything here
+is unconditional (the wrapper and all engine lemmas it consumes are
+proved).
+
+Step 2 (`FiedlerLineStability`, 2026-08-28): the residual-projector
+statement on the same fixtures — the P₃ → K₃ edge-addition instance
+with the bound exactly `≤ 1` (the perturbed side sits on Davis–Kahan's
+own tie branch), the perturbation norm pinned exactly `2` from both
+sides, the common-kernel identification at the genuine two-spectrum
+pair P₃/K₃, the fix-iff pins at vectors, and the disconnected fence
+proving the identification's connectivity hypothesis load-bearing.
+All unconditional.
+
+Scoreboard: ../QA_SCOREBOARD.md
+-/
+
+section FiedlerSubspaceStability
+
+open scoped Matrix.L2OpNorm
+
+open Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation
+
+/-- Private helper: a nonzero real vector has strictly positive squared
+norm (as a dot product). -/
+private theorem dotProduct_self_pos {n : Type} [Fintype n]
+    (hn : 0 < Fintype.card n) {x : n → ℝ} (hx : x ≠ 0) :
+    0 < Matrix.dotProduct x x := by
+  obtain ⟨v⟩ : Nonempty n := Fintype.card_pos_iff.1 hn
+  have hle : (0 : ℝ) ≤ Matrix.dotProduct x x := by
+    simp only [Matrix.dotProduct]
+    exact Finset.sum_nonneg fun j _ => mul_self_nonneg _
+  rcases lt_or_eq_of_le hle with h | h
+  · exact h
+  · exfalso
+    apply hx
+    funext i
+    have hsum0 : ∑ k, x k * x k = 0 := by
+      rw [← show Matrix.dotProduct x x = ∑ k, x k * x k from rfl]
+      exact h.symm
+    have hmem : ∀ j : n, x j * x j = 0 := fun j =>
+      (Finset.sum_eq_zero_iff_of_nonneg
+        (fun k (_ : k ∈ Finset.univ) => mul_self_nonneg _)).1 hsum0 j
+        (Finset.mem_univ j)
+    exact mul_self_eq_zero.1 (hmem i)
+
+/-- The Dirichlet form of `P₃` at any vector: the two edge terms. -/
+theorem path3_quadForm (x : Fin 3 → ℝ) :
+    quadForm (laplacian path3Adj) x
+      = (x 0 - x 1) ^ 2 + (x 1 - x 2) ^ 2 := by
+  rw [laplacian_quadForm path3Adj path3Adj_symmetric x]
+  simp [path3Adj, Fin.sum_univ_three]
+  ring
+
+/-- **λ₂ of the combinatorial three-path is exactly `1` — the `≥`
+side**, by the sum-of-squares identity `E(x) = ‖x‖² + 3 (x₀ + x₂)²` on
+the zero-sum constraint (the constraint is what the variational engine
+supplies; the identity is pure algebra, `linear_combination` on
+`∑ x = 0`). Load-bearing: a wrong Dirichlet form or a wrong constraint
+direction breaks exactly this pin. -/
+theorem path3_lambda2_ge_one_QA :
+    1 ≤ lambda2 path3Adj path3Adj_symmetric (by norm_num) := by
+  rw [lambda2_variational path3Adj path3Adj_symmetric path3Adj_nonneg
+    (by norm_num)]
+  have hwne : (![1, 0, -1] : Fin 3 → ℝ) ≠ 0 := by
+    intro h
+    have h1 : (![1, 0, -1] : Fin 3 → ℝ) 0 = 0 := congrFun h 0
+    simp at h1
+  have hworth : Matrix.dotProduct (![1, 0, -1] : Fin 3 → ℝ) onesVec = 0 := by
+    simp [Matrix.dotProduct, onesVec, Fin.sum_univ_three]
+  have hqf : quadForm (laplacian path3Adj) (![1, 0, -1] : Fin 3 → ℝ) = 2 := by
+    rw [path3_quadForm]
+    norm_num [Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.cons_val_succ, Matrix.head_cons]
+  have hdot : Matrix.dotProduct (![1, 0, -1] : Fin 3 → ℝ)
+      (![1, 0, -1] : Fin 3 → ℝ) = 2 := by
+    norm_num [Matrix.dotProduct, Fin.sum_univ_three]
+  have hray : rayleigh (laplacian path3Adj) (![1, 0, -1] : Fin 3 → ℝ) = 1 := by
+    rw [rayleigh, if_neg hwne, hqf, hdot]
+    norm_num
+  refine le_csInf ⟨1, (![1, 0, -1] : Fin 3 → ℝ), hwne, hworth, hray⟩ ?_
+  rintro r ⟨y, hy0, horth, rfl⟩
+  have hsum3 : y 0 + y 1 + y 2 = 0 := by
+    simpa [Matrix.dotProduct, onesVec, Fin.sum_univ_three] using horth
+  have hident : (y 0 - y 1) ^ 2 + (y 1 - y 2) ^ 2
+      = (y 0) ^ 2 + (y 1) ^ 2 + (y 2) ^ 2 + 3 * (y 0 + y 2) ^ 2 := by
+    linear_combination hsum3 * (-3 * y 0 + y 1 - 3 * y 2)
+  have hnn : 0 < Matrix.dotProduct y y :=
+    dotProduct_self_pos (by norm_num) hy0
+  have hdd : Matrix.dotProduct y y
+      = (y 0) ^ 2 + (y 1) ^ 2 + (y 2) ^ 2 := by
+    rw [show Matrix.dotProduct y y = ∑ k, y k * y k from rfl,
+      Fin.sum_univ_three]
+    ring
+  rw [rayleigh, if_neg hy0, path3_quadForm, hident]
+  refine (one_le_div hnn).2 ?_
+  rw [hdd]
+  nlinarith [sq_nonneg (y 0 + y 2)]
+
+/-- λ₂ of the combinatorial three-path, exact: the two one-sided pins
+(the `≤` side is `Variational_QA.path3_lambda2_le_one_QA`). -/
+theorem path3_lambda2_eq_one_QA :
+    lambda2 path3Adj path3Adj_symmetric (by norm_num) = 1 :=
+  le_antisymm path3_lambda2_le_one_QA path3_lambda2_ge_one_QA
+
+theorem path3_evals_zero_QA :
+    evals (laplacian_symmetric path3Adj path3Adj_symmetric) ⟨0, by norm_num⟩
+      = 0 :=
+  laplacian_evals_zero path3Adj path3Adj_symmetric path3Adj_nonneg
+    (by norm_num)
+
+theorem path3_evals_one_eq_one_QA :
+    evals (laplacian_symmetric path3Adj path3Adj_symmetric) ⟨1, by norm_num⟩
+      = 1 :=
+  (lambda2_eq_secondEval path3Adj path3Adj_symmetric (by norm_num)).symm
+    |>.trans path3_lambda2_eq_one_QA
+
+/-- Trace of the three-path Laplacian: degrees `1 + 2 + 1`. -/
+theorem path3_trace : (laplacian path3Adj).trace = 4 := by
+  have hdeg : ∀ i : Fin 3,
+      deg path3Adj i = if (i : ℕ) = 1 then 2 else 1 := by
+    intro i
+    fin_cases i <;> rw [deg, Fin.sum_univ_three] <;> norm_num [path3Adj]
+  have hLdiag : ∀ i : Fin 3,
+      (laplacian path3Adj) i i = if (i : ℕ) = 1 then 2 else 1 := by
+    intro i
+    rw [laplacian, Matrix.sub_apply, degreeMatrix_diagonal,
+      show path3Adj i i = 0 from by
+        have : ∀ i : Fin 3, path3Adj i i = 0 := by
+          intro i
+          fin_cases i <;> simp [path3Adj]
+        exact this i, sub_zero]
+    exact hdeg i
+  rw [show (laplacian path3Adj).trace
+      = ∑ i : Fin 3, (laplacian path3Adj) i i from rfl,
+    Finset.sum_congr rfl fun i _ => hLdiag i]
+  simp only [Fin.sum_univ_three]
+  norm_num
+
+/-- **λ₃ of the three-path Laplacian is exactly `3`**, by the trace
+identity `0 + 1 + λ₃ = 4` at the two exact pins. The separation
+hypothesis of the Davis–Kahan wrapper consumes precisely this value. -/
+theorem path3_evals_two_eq_three_QA :
+    evals (laplacian_symmetric path3Adj path3Adj_symmetric) ⟨2, by norm_num⟩
+      = 3 := by
+  have hsum := evals_sum_eq_trace
+    (laplacian_symmetric path3Adj path3Adj_symmetric)
+  have h1 : ∑ i : Fin 3,
+      evals (laplacian_symmetric path3Adj path3Adj_symmetric) i = 4 := by
+    rw [show (laplacian path3Adj).trace = 4 from path3_trace] at hsum
+    exact hsum
+  have hsum3 : evals (laplacian_symmetric path3Adj path3Adj_symmetric)
+        ⟨0, by norm_num⟩
+      + evals (laplacian_symmetric path3Adj path3Adj_symmetric)
+        ⟨1, by norm_num⟩
+      + evals (laplacian_symmetric path3Adj path3Adj_symmetric)
+        ⟨2, by norm_num⟩ = 4 := by
+    simp only [Fin.sum_univ_three] at h1
+    exact h1
+  rw [path3_evals_zero_QA, path3_evals_one_eq_one_QA] at hsum3
+  linarith
+
+/-- **Obligation 1, route 2 (raw):** at `E = 0` the projector distance
+is exactly `0` by the matrix identity `P₃ + 0 = P₃` alone — no
+Davis–Kahan, no wrapper. -/
+theorem fiedlerSubspace_zero_raw_QA :
+    ‖initialProjector (laplacian (path3Adj + 0))
+        (laplacian_symmetric (path3Adj + 0)
+          (path3Adj_symmetric.add (by simp))) ⟨1, by norm_num⟩
+      - initialProjector (laplacian path3Adj)
+        (laplacian_symmetric path3Adj path3Adj_symmetric) ⟨1, by norm_num⟩‖
+      = 0 := by
+  have hident : initialProjector (laplacian (path3Adj + 0))
+      (laplacian_symmetric (path3Adj + 0)
+        (path3Adj_symmetric.add (by simp))) ⟨1, by norm_num⟩
+      = initialProjector (laplacian path3Adj)
+        (laplacian_symmetric path3Adj path3Adj_symmetric) ⟨1, by norm_num⟩ :=
+    initialProjector_congr (by rw [add_zero])
+      (laplacian_symmetric (path3Adj + 0)
+        (path3Adj_symmetric.add (by simp)))
+      (laplacian_symmetric path3Adj path3Adj_symmetric) ⟨1, by norm_num⟩
+  rw [hident, sub_self, norm_zero]
+
+/-- **Obligation 1, route 1 (the wrapper):** the instance itself, with
+the separation hypothesis discharged by the exact spectrum pins — the
+load-bearing step (a wrong index convention or wrong operator in the
+wrapper's `hsep` fails exactly here: the pins are `0, 1, 3`, and only
+`λ₃ − λ₂ = 3 − 1` admits `δ = 2`). -/
+theorem fiedlerSubspace_zero_bound_QA :
+    ‖initialProjector (laplacian (path3Adj + 0))
+        (laplacian_symmetric (path3Adj + 0)
+          (path3Adj_symmetric.add (by simp))) ⟨1, by norm_num⟩
+      - initialProjector (laplacian path3Adj)
+        (laplacian_symmetric path3Adj path3Adj_symmetric) ⟨1, by norm_num⟩‖
+      ≤ ‖laplacian (0 : WAdj (V := Fin 3))‖ / 2 := by
+  refine fiedlerSubspace_stability path3Adj 0 path3Adj_symmetric
+    (by simp) (by norm_num) 2 (by norm_num) ?_
+  rw [evals_congr (laplacian_symmetric (path3Adj + 0)
+      (path3Adj_symmetric.add (by simp)))
+    (laplacian_symmetric path3Adj path3Adj_symmetric)
+    (by rw [add_zero]) ⟨2, by norm_num⟩,
+    path3_evals_two_eq_three_QA, path3_evals_one_eq_one_QA]
+  norm_num
+
+/-- **The two routes meet:** the wrapper's bound `≤ 0` (route 1) and
+the raw identity `= 0` (route 2) sandwich the distance at exactly `0`. -/
+theorem fiedlerSubspace_zero_join_QA :
+    ‖initialProjector (laplacian (path3Adj + 0))
+        (laplacian_symmetric (path3Adj + 0)
+          (path3Adj_symmetric.add (by simp))) ⟨1, by norm_num⟩
+      - initialProjector (laplacian path3Adj)
+        (laplacian_symmetric path3Adj path3Adj_symmetric) ⟨1, by norm_num⟩‖
+      = 0 := by
+  refine le_antisymm ?_ (norm_nonneg _)
+  have h := fiedlerSubspace_zero_bound_QA
+  rwa [show laplacian (0 : WAdj (V := Fin 3)) = 0 from
+    laplacian_zero (V := Fin 3), norm_zero, zero_div] at h
+
+/-- Adjacency of the complete graph on three vertices. -/
+def k3Adj : Matrix (Fin 3) (Fin 3) ℝ :=
+  Matrix.of fun i j => if (i : ℕ) = (j : ℕ) then 0 else 1
+
+theorem k3Adj_symmetric : k3Adj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [k3Adj]
+
+theorem k3Adj_nonneg : ∀ i j, 0 ≤ k3Adj i j := by
+  intro i j
+  simp only [k3Adj, Matrix.of_apply]
+  split <;> norm_num
+
+theorem k3_quadForm (x : Fin 3 → ℝ) :
+    quadForm (laplacian k3Adj) x
+      = (x 0 - x 1) ^ 2 + (x 1 - x 2) ^ 2 + (x 0 - x 2) ^ 2 := by
+  rw [laplacian_quadForm k3Adj k3Adj_symmetric x]
+  simp [k3Adj, Fin.sum_univ_three]
+  ring
+
+/-- **λ₂ of `K₃` is exactly `3`** — the Fiedler eigenvalue is NOT
+simple: the bottom cluster is the whole nonzero spectrum, the substance
+of the vacuity witness below. The `≤` side is the Rayleigh engine at
+the explicit mode `![1, -1, 0]`; the `≥` side is the identity
+`E(x) = 3‖x‖² − (x₀+x₁+x₂)²` on the zero-sum constraint (equality
+throughout — the whole orthogonal complement of `onesVec` is an
+eigenspace). -/
+theorem k3_lambda2_eq_three_QA :
+    lambda2 k3Adj k3Adj_symmetric (by norm_num) = 3 := by
+  refine le_antisymm ?_ ?_
+  · rw [lambda2_variational k3Adj k3Adj_symmetric k3Adj_nonneg (by norm_num)]
+    have hvne : (![1, -1, 0] : Fin 3 → ℝ) ≠ 0 := by
+      intro h
+      have h1 : (![1, -1, 0] : Fin 3 → ℝ) 0 = 0 := congrFun h 0
+      simp at h1
+    have hworth : Matrix.dotProduct (![1, -1, 0] : Fin 3 → ℝ) onesVec = 0 := by
+      simp [Matrix.dotProduct, onesVec, Fin.sum_univ_three]
+    have hray : rayleigh (laplacian k3Adj) (![1, -1, 0] : Fin 3 → ℝ) = 3 := by
+      rw [rayleigh, if_neg hvne, k3_quadForm]
+      norm_num [Matrix.dotProduct, Fin.sum_univ_three]
+    exact csInf_le ⟨0, by
+      rintro r ⟨y, hy0, -, rfl⟩
+      rw [rayleigh, if_neg hy0]
+      exact div_nonneg (laplacian_psd k3Adj k3Adj_symmetric k3Adj_nonneg y)
+        (by
+          simp only [Matrix.dotProduct]
+          exact Finset.sum_nonneg fun j _ => mul_self_nonneg _)⟩
+      ⟨(![1, -1, 0] : Fin 3 → ℝ), hvne, hworth, hray⟩
+  · rw [lambda2_variational k3Adj k3Adj_symmetric k3Adj_nonneg (by norm_num)]
+    have hvne : (![1, -1, 0] : Fin 3 → ℝ) ≠ 0 := by
+      intro h
+      have h1 : (![1, -1, 0] : Fin 3 → ℝ) 0 = 0 := congrFun h 0
+      simp at h1
+    have hworth : Matrix.dotProduct (![1, -1, 0] : Fin 3 → ℝ) onesVec = 0 := by
+      simp [Matrix.dotProduct, onesVec, Fin.sum_univ_three]
+    have hray : rayleigh (laplacian k3Adj) (![1, -1, 0] : Fin 3 → ℝ) = 3 := by
+      rw [rayleigh, if_neg hvne, k3_quadForm]
+      norm_num [Matrix.dotProduct, Fin.sum_univ_three]
+    refine le_csInf ⟨3, (![1, -1, 0] : Fin 3 → ℝ), hvne, hworth, hray⟩ ?_
+    rintro r ⟨y, hy0, horth, rfl⟩
+    have hsum3 : y 0 + y 1 + y 2 = 0 := by
+      simpa [Matrix.dotProduct, onesVec, Fin.sum_univ_three] using horth
+    have hident : (y 0 - y 1) ^ 2 + (y 1 - y 2) ^ 2 + (y 0 - y 2) ^ 2
+        = 3 * ((y 0) ^ 2 + (y 1) ^ 2 + (y 2) ^ 2)
+          - (y 0 + y 1 + y 2) ^ 2 := by
+      ring
+    have hnn : 0 < Matrix.dotProduct y y :=
+      dotProduct_self_pos (by norm_num) hy0
+    have hdd : Matrix.dotProduct y y
+        = (y 0) ^ 2 + (y 1) ^ 2 + (y 2) ^ 2 := by
+      rw [show Matrix.dotProduct y y = ∑ k, y k * y k from rfl,
+        Fin.sum_univ_three]
+      ring
+    have hquad : quadForm (laplacian k3Adj) y
+        = 3 * Matrix.dotProduct y y := by
+      rw [k3_quadForm, hident, hsum3, hdd]
+      ring
+    rw [rayleigh, if_neg hy0, hquad]
+    exact (le_div_iff₀ hnn).2 (le_refl _)
+
+theorem k3_evals_zero_QA :
+    evals (laplacian_symmetric k3Adj k3Adj_symmetric) ⟨0, by norm_num⟩
+      = 0 :=
+  laplacian_evals_zero k3Adj k3Adj_symmetric k3Adj_nonneg (by norm_num)
+
+theorem k3_evals_one_eq_three_QA :
+    evals (laplacian_symmetric k3Adj k3Adj_symmetric) ⟨1, by norm_num⟩
+      = 3 :=
+  (lambda2_eq_secondEval k3Adj k3Adj_symmetric (by norm_num)).symm
+    |>.trans k3_lambda2_eq_three_QA
+
+theorem k3_trace : (laplacian k3Adj).trace = 6 := by
+  have hdeg : ∀ i : Fin 3, deg k3Adj i = 2 := by
+    intro i
+    fin_cases i <;> rw [deg, Fin.sum_univ_three] <;> norm_num [k3Adj]
+  have hLdiag : ∀ i : Fin 3, (laplacian k3Adj) i i = 2 := by
+    intro i
+    rw [laplacian, Matrix.sub_apply, degreeMatrix_diagonal,
+      show k3Adj i i = 0 from by
+        have : ∀ i : Fin 3, k3Adj i i = 0 := by
+          intro i
+          simp [k3Adj]
+        exact this i, sub_zero]
+    exact hdeg i
+  rw [show (laplacian k3Adj).trace
+      = ∑ i : Fin 3, (laplacian k3Adj) i i from rfl,
+    Finset.sum_congr rfl fun i _ => hLdiag i]
+  simp only [Fin.sum_univ_three]
+  norm_num
+
+/-- λ₃ of `K₃` equals λ₂: the trace identity `0 + 3 + λ₃ = 6` pins the
+eigenvalue tie at the exact threshold the wrapper's separation
+hypothesis lives on. -/
+theorem k3_evals_two_eq_three_QA :
+    evals (laplacian_symmetric k3Adj k3Adj_symmetric) ⟨2, by norm_num⟩
+      = 3 := by
+  have hsum := evals_sum_eq_trace
+    (laplacian_symmetric k3Adj k3Adj_symmetric)
+  have h1 : ∑ i : Fin 3,
+      evals (laplacian_symmetric k3Adj k3Adj_symmetric) i = 6 := by
+    rw [show (laplacian k3Adj).trace = 6 from k3_trace] at hsum
+    exact hsum
+  have hsum3 : evals (laplacian_symmetric k3Adj k3Adj_symmetric)
+        ⟨0, by norm_num⟩
+      + evals (laplacian_symmetric k3Adj k3Adj_symmetric)
+        ⟨1, by norm_num⟩
+      + evals (laplacian_symmetric k3Adj k3Adj_symmetric)
+        ⟨2, by norm_num⟩ = 6 := by
+    simp only [Fin.sum_univ_three] at h1
+    exact h1
+  rw [k3_evals_zero_QA, k3_evals_one_eq_three_QA] at hsum3
+  linarith
+
+/-- **Obligation 2, the boundary witness: at the eigenvalue tie the
+hypothesis set is provably empty.** At the complete graph `K₃` the
+Fiedler eigenvalue is not simple (`λ₂ = λ₃ = 3`), so for every positive
+`δ` the wrapper's separation hypothesis fails — the statement is
+vacuous at the tie (the honest boundary Davis–Kahan's own proof
+case-splits on), not silently useful. -/
+theorem fiedlerSubspace_tie_vacuous_QA (δ : ℝ) (hδ : 0 < δ) :
+    ¬ (δ ≤ evals (laplacian_symmetric (k3Adj + 0)
+          (k3Adj_symmetric.add (by simp))) ⟨2, by norm_num⟩
+        - evals (laplacian_symmetric k3Adj k3Adj_symmetric)
+          ⟨1, by norm_num⟩) := by
+  intro h
+  rw [evals_congr (laplacian_symmetric (k3Adj + 0)
+      (k3Adj_symmetric.add (by simp)))
+    (laplacian_symmetric k3Adj k3Adj_symmetric)
+    (by rw [add_zero]) ⟨2, by norm_num⟩,
+    k3_evals_two_eq_three_QA, k3_evals_one_eq_three_QA] at h
+  linarith
+
+end FiedlerSubspaceStability
+
+/-!
+### Step 2: the Fiedler line
+
+The residual-projector statement (`fiedlerLine_stability`) exercised on
+fixtures: the P₃ → K₃ edge addition (the perturbed side sits exactly on
+Davis–Kahan's tie branch, the derived bound exactly `≤ 1`), the
+common-kernel identification at a genuine two-spectrum pair, the fix-iff
+pins at concrete vectors, and the disconnected fence proving the
+identification's connectivity hypothesis load-bearing.
+-/
+
+section FiedlerLineStability
+
+open scoped Matrix.L2OpNorm
+
+/-- The single edge `(0,2)`: the perturbation turning `P₃` into `K₃`. -/
+def edge02 : Matrix (Fin 3) (Fin 3) ℝ :=
+  Matrix.of fun i j =>
+    if ((i : ℕ) = 0 ∧ (j : ℕ) = 2) ∨ ((i : ℕ) = 2 ∧ (j : ℕ) = 0) then 1 else 0
+
+theorem edge02_isSymm : edge02.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [edge02]
+
+theorem edge02_nonneg : ∀ i j, 0 ≤ edge02 i j := by
+  intro i j
+  simp only [edge02, Matrix.of_apply]
+  split <;> norm_num
+
+theorem edge02_deg (i : Fin 3) :
+    deg edge02 i = if (i : ℕ) = 1 then 0 else 1 := by
+  fin_cases i <;> rw [deg, Fin.sum_univ_three] <;> norm_num [edge02]
+
+theorem edge02_laplacian_eq_rankOne :
+    laplacian edge02 = rankOne (![1, 0, -1] : Fin 3 → ℝ) := by
+  ext i j
+  rw [laplacian, Matrix.sub_apply]
+  by_cases hij : i = j
+  · subst hij
+    rw [degreeMatrix_diagonal, edge02_deg i, rankOne_apply]
+    fin_cases i <;>
+      simp [edge02, Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.cons_val_succ, Matrix.head_cons]
+  · rw [degreeMatrix_off_diagonal edge02 hij, rankOne_apply]
+    fin_cases i <;> fin_cases j <;>
+      first
+      | exact absurd rfl hij
+      | (simp [edge02, Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
+          Matrix.cons_val_succ, Matrix.head_cons]; try norm_num)
+
+/-- **The perturbation norm is exactly `2`, pinned from both sides** —
+`≤ 2` by the rank-one bound (`l2OpNorm_rankOne_le`, the Sparsification
+delivery's algebra), `≥ 2` by the quadForm witness `![1, 0, -1]` through
+the norm→form transfer (`abs_quadForm_le_of_l2OpNorm_le`, `4 ≤ 2 · 2`).
+A wrong constant anywhere in that chain breaks exactly one side. -/
+theorem edge02_laplacian_norm : ‖laplacian edge02‖ = 2 := by
+  refine le_antisymm ?_ ?_
+  · rw [edge02_laplacian_eq_rankOne]
+    have hle := l2OpNorm_rankOne_le (![1, 0, -1] : Fin 3 → ℝ)
+    rw [show Matrix.dotProduct (![1, 0, -1] : Fin 3 → ℝ)
+        (![1, 0, -1] : Fin 3 → ℝ) = 2 from
+      by norm_num [Matrix.dotProduct, Fin.sum_univ_three]] at hle
+    exact hle
+  · have hq : quadForm (laplacian edge02) (![1, 0, -1] : Fin 3 → ℝ) = 4 := by
+      rw [edge02_laplacian_eq_rankOne, rankOne_quadForm]
+      norm_num [Matrix.dotProduct, Fin.sum_univ_three]
+    have hle := abs_quadForm_le_of_l2OpNorm_le
+      (t := ‖laplacian edge02‖) (le_refl _) (![1, 0, -1] : Fin 3 → ℝ)
+    rw [hq, abs_of_nonneg (by norm_num),
+      show Matrix.dotProduct (![1, 0, -1] : Fin 3 → ℝ)
+        (![1, 0, -1] : Fin 3 → ℝ) = 2 from
+        by norm_num [Matrix.dotProduct, Fin.sum_univ_three]] at hle
+    linarith
+
+theorem path3_deg_QA (i : Fin 3) :
+    deg path3Adj i = if (i : ℕ) = 1 then 2 else 1 := by
+  fin_cases i <;> rw [deg, Fin.sum_univ_three] <;> norm_num [path3Adj]
+
+theorem path3_add_edge02 : path3Adj + edge02 = k3Adj := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [path3Adj, edge02, k3Adj, Matrix.of_apply]
+
+theorem path3_supportGraph_connected :
+    (supportGraph path3Adj path3Adj_symmetric).Connected := by
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  refine ⟨1, ?_⟩
+  intro v
+  fin_cases v
+  · exact ⟨SimpleGraph.Walk.cons (u := 1) (v := 0) (w := 0)
+      ⟨by decide, by simp [path3Adj]⟩ SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 1) (v := 2) (w := 2)
+      ⟨by decide, by simp [path3Adj]⟩ SimpleGraph.Walk.nil⟩
+
+theorem k3_supportGraph_connected :
+    (supportGraph k3Adj k3Adj_symmetric).Connected := by
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  refine ⟨1, ?_⟩
+  intro v
+  fin_cases v
+  · exact ⟨SimpleGraph.Walk.cons (u := 1) (v := 0) (w := 0)
+      ⟨by decide, by simp [k3Adj]⟩ SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 1) (v := 2) (w := 2)
+      ⟨by decide, by simp [k3Adj]⟩ SimpleGraph.Walk.nil⟩
+
+theorem sum_nonneg : ∀ i j, 0 ≤ (path3Adj + edge02) i j := by
+  intro i j
+  simp only [Matrix.add_apply]
+  have h1 : 0 ≤ path3Adj i j := path3Adj_nonneg i j
+  have h2 : 0 ≤ edge02 i j := edge02_nonneg i j
+  linarith
+
+theorem sum_supportGraph_connected :
+    (supportGraph (path3Adj + edge02) (path3Adj_symmetric.add edge02_isSymm)).Connected := by
+  have heq : supportGraph (path3Adj + edge02) (path3Adj_symmetric.add edge02_isSymm)
+      = supportGraph k3Adj k3Adj_symmetric := by
+    ext i j
+    simp only [supportGraph_adj]
+    constructor <;> intro ⟨hij, hpos⟩
+    · exact ⟨hij, by rw [path3_add_edge02] at hpos; exact hpos⟩
+    · exact ⟨hij, by rw [path3_add_edge02]; exact hpos⟩
+  rw [heq]
+  exact k3_supportGraph_connected
+
+theorem line_sep_QA : (2 : ℝ) ≤ evals (laplacian_symmetric (path3Adj + edge02)
+      (path3Adj_symmetric.add edge02_isSymm)) ⟨2, by norm_num⟩
+    - evals (laplacian_symmetric path3Adj path3Adj_symmetric) ⟨1, by norm_num⟩ := by
+  rw [evals_congr (laplacian_symmetric (path3Adj + edge02)
+      (path3Adj_symmetric.add edge02_isSymm))
+    (laplacian_symmetric k3Adj k3Adj_symmetric)
+    (by rw [path3_add_edge02]) ⟨2, by norm_num⟩,
+    k3_evals_two_eq_three_QA, path3_evals_one_eq_one_QA]
+  norm_num
+
+/-- **The headline instance: the P₃ → K₃ edge addition.** The
+separation `δ = 2` is discharged against the two pinned spectra
+(`λ₃(L K₃) = 3`, `λ₂(L P₃) = 1`) — the load-bearing step, since only
+that difference admits `δ = 2` — and the bound evaluates to
+`‖laplacian edge02‖ / 2 = 2 / 2 = 1`. The perturbed side `K₃` sits
+exactly on Davis–Kahan's own tie branch (`λ₂ = λ₃ = 3`), the branch
+whose proof route yields `≤ 1 ≤ ‖E‖/δ` with **no slack here**: the
+derived bound is exactly `1`, not a vacuous margin. -/
+theorem fiedlerLine_K3_le_one_QA :
+    ‖(initialProjector (laplacian (path3Adj + edge02))
+          (laplacian_symmetric (path3Adj + edge02)
+            (path3Adj_symmetric.add edge02_isSymm)) ⟨1, by norm_num⟩
+        - initialProjector (laplacian (path3Adj + edge02))
+          (laplacian_symmetric (path3Adj + edge02)
+            (path3Adj_symmetric.add edge02_isSymm)) ⟨0, by norm_num⟩)
+      - (initialProjector (laplacian path3Adj)
+          (laplacian_symmetric path3Adj path3Adj_symmetric) ⟨1, by norm_num⟩
+        - initialProjector (laplacian path3Adj)
+          (laplacian_symmetric path3Adj path3Adj_symmetric) ⟨0, by norm_num⟩)‖
+      ≤ 1 := by
+  have h := fiedlerLine_stability path3Adj edge02 path3Adj_symmetric edge02_isSymm
+    path3Adj_nonneg sum_nonneg path3_supportGraph_connected
+    sum_supportGraph_connected (by norm_num : (3 : ℕ) ≤ Fintype.card (Fin 3))
+    2 (by norm_num) line_sep_QA
+  rwa [edge02_laplacian_norm, div_self two_ne_zero] at h
+
+/-- **The identification instance at a genuine two-spectrum pair:** `P₃`
+(spectrum `{0, 1, 3}`) and `K₃` (spectrum `{0, 3, 3}`) share the kernel
+line, so their index-0 projectors coincide — the equality the headline
+uses internally, exercised at operators that differ everywhere except
+on the constants. -/
+theorem initialProjector_zero_path3_eq_k3_QA :
+    initialProjector (laplacian path3Adj)
+        (laplacian_symmetric path3Adj path3Adj_symmetric) ⟨0, by norm_num⟩
+      = initialProjector (laplacian k3Adj)
+        (laplacian_symmetric k3Adj k3Adj_symmetric) ⟨0, by norm_num⟩ :=
+  initialProjector_laplacian_zero_eq_of_connected path3Adj k3Adj
+    path3Adj_symmetric k3Adj_symmetric path3Adj_nonneg k3Adj_nonneg
+    path3_supportGraph_connected k3_supportGraph_connected (by norm_num)
+
+/-- The fix-iff, positive side: the constant vector is fixed by the
+index-0 projector of `P₃` (kernel to fixed space). -/
+theorem initialProjector_zero_fix_ones_QA :
+    initialProjector (laplacian path3Adj)
+        (laplacian_symmetric path3Adj path3Adj_symmetric) ⟨0, by norm_num⟩ *ᵥ
+      (onesVec : Fin 3 → ℝ) = onesVec :=
+  (initialProjector_laplacian_zero_fix_iff path3Adj path3Adj_symmetric
+    path3Adj_nonneg (by norm_num) onesVec).2
+    (laplacian_ones_in_kernel path3Adj)
+
+/-- The fix-iff, negative side: `![1, 2, 3]` is not constant, is not in
+the kernel of `P₃`'s Laplacian (`L *ᵥ ![1, 2, 3] = ![-1, 0, 1] ≠ 0` by
+the diffusion form), and is therefore not fixed by the index-0
+projector. -/
+theorem initialProjector_zero_nofix_123_QA :
+    initialProjector (laplacian path3Adj)
+        (laplacian_symmetric path3Adj path3Adj_symmetric) ⟨0, by norm_num⟩ *ᵥ
+      (![1, 2, 3] : Fin 3 → ℝ) ≠ (![1, 2, 3] : Fin 3 → ℝ) := by
+  intro hfix
+  have hker := (initialProjector_laplacian_zero_fix_iff path3Adj path3Adj_symmetric
+    path3Adj_nonneg (by norm_num) _).1 hfix
+  have hL : (laplacian path3Adj) *ᵥ (![1, 2, 3] : Fin 3 → ℝ)
+      = ![(-1 : ℝ), 0, 1] := by
+    funext i
+    fin_cases i <;> rw [laplacian_mulVec_apply, Fin.sum_univ_three] <;>
+      norm_num [path3Adj, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.cons_val_succ, Matrix.head_cons]
+  rw [hL] at hker
+  have h0 := congrFun hker 0
+  have hne : (![(-1 : ℝ), 0, 1] : Fin 3 → ℝ) 0 ≠ (0 : Fin 3 → ℝ) 0 := by
+    norm_num
+  exact absurd h0 hne
+
+/-- **The disconnected fence: the identification fails without
+connectivity.** The empty graph's Laplacian is the zero matrix, so its
+index-0 projector fixes every kernel vector — including `e₀` (the
+kernel is everything); `P₃`'s projector does not fix `e₀` (it is not in
+the kernel: `L *ᵥ e₀ = ![1, -1, 0] ≠ 0`). Both directions of the
+fix-iff are exercised, and the identification's connectivity hypothesis
+is proved load-bearing rather than decorative. -/
+theorem initialProjector_zero_disconnected_fence_QA :
+    initialProjector (laplacian (0 : WAdj (V := Fin 3)))
+        (laplacian_symmetric 0 (by simp)) ⟨0, by norm_num⟩
+      ≠ initialProjector (laplacian path3Adj)
+        (laplacian_symmetric path3Adj path3Adj_symmetric) ⟨0, by norm_num⟩ := by
+  intro heq
+  have h1 : initialProjector (laplacian (0 : WAdj (V := Fin 3)))
+      (laplacian_symmetric 0 (by simp)) ⟨0, by norm_num⟩ *ᵥ
+      (![1, 0, 0] : Fin 3 → ℝ) = (![1, 0, 0] : Fin 3 → ℝ) := by
+    refine (initialProjector_laplacian_zero_fix_iff (0 : WAdj (V := Fin 3))
+      (by simp) (fun i j => by simp) (by norm_num) _).2 ?_
+    rw [laplacian_zero (V := Fin 3), Matrix.zero_mulVec]
+  have h2 : initialProjector (laplacian path3Adj)
+      (laplacian_symmetric path3Adj path3Adj_symmetric) ⟨0, by norm_num⟩ *ᵥ
+      (![1, 0, 0] : Fin 3 → ℝ) ≠ (![1, 0, 0] : Fin 3 → ℝ) := by
+    intro hfix
+    have hker := (initialProjector_laplacian_zero_fix_iff path3Adj
+      path3Adj_symmetric path3Adj_nonneg (by norm_num) _).1 hfix
+    have hL : (laplacian path3Adj) *ᵥ (![1, 0, 0] : Fin 3 → ℝ)
+        = ![1, -1, 0] := by
+      funext i
+      fin_cases i <;> rw [laplacian_mulVec_apply, Fin.sum_univ_three] <;>
+        norm_num [path3Adj, Matrix.cons_val_zero, Matrix.cons_val_one,
+          Matrix.cons_val_succ, Matrix.head_cons]
+    rw [hL] at hker
+    have h0 := congrFun hker 0
+    have hne : (![1, -1, 0] : Fin 3 → ℝ) 0 ≠ (0 : Fin 3 → ℝ) 0 := by
+      norm_num
+    exact absurd h0 hne
+  exact h2 (heq ▸ h1)
+
+end FiedlerLineStability

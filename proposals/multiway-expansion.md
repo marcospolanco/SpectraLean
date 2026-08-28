@@ -393,4 +393,8 @@ untouched.
 
 **Remaining priced follow-on (not started):** the multiway *hard*
 direction (λ_k from below, higher-order Cheeger from above) — genuinely
-multi-run, gated on a named consumer.
+multi-run, gated on a named consumer. **Tracked as its own proposal as
+of 2026-08-28: see `proposals/multiway-cheeger-hard-direction.md`**,
+opened after an external review independently flagged the same gap;
+gated on an operator adoption decision, mirroring
+`alon-boppana-bound.md`'s pre-adoption lifecycle.

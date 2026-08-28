@@ -25,7 +25,7 @@ This textbook is a primary source for modern concentration inequalities. Scaffol
 |---------|------|------------|---------|
 | Definition 2.5.1 / Prop. 2.5.2 (Subgaussian norm) | 27/29 | `subgaussianNorm` (real definition) | `Scalar/Subgaussian.lean` |
 | Proposition 2.5.2 (ii) (Tail bound) | 29 | `subgaussian_tail_bound` (**proved 2026-08-22**; repaired hypotheses — the moment stated integrably at `K`, conclusion unchanged; the former axiom shape was materially false, refuted in QA at `3 • δ₀`) | `Scalar/Subgaussian.lean` |
-| Lemma 2.6.2 (Hoeffding's lemma) | 32 | `hoeffding_lemma` (axiom) | `Scalar/Subgaussian.lean` |
+| Lemma 2.6.2 (Hoeffding's lemma) | 32 | `hoeffding_lemma` (axiom, **repaired 2026-08-28**: probability-measure guard + `√6·a` constant; the pre-repair `≤ a` shape was materially false, two refutations in QA) | `Scalar/Subgaussian.lean` |
 | Theorem 2.2.2 (Hoeffding's inequality) | 24 | `hoeffding_inequality` (axiom) | `Scalar/Hoeffding.lean` |
 | Corollary 2.2.3 (IID Hoeffding) | 25 | `hoeffding_iid` (proved from `hoeffding_inequality`) | `Scalar/Hoeffding.lean` |
 | Theorem 2.8.1 (Bernstein's inequality) | 43 | `bernstein_inequality` (axiom) | `Scalar/Bernstein.lean` |

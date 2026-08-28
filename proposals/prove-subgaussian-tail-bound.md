@@ -296,18 +296,20 @@ two docstrings (`subgaussianNorm`'s junk-behavior correction;
 `hoeffding_lemma_zero_QA` never existed), this proposal, and the
 execution plan / activity log.
 
-### Adjacent hazard recorded (not addressed — a named residual for the
-remaining concentration axioms' own Step 0s)
+### Adjacent hazard recorded (resolved 2026-08-28)
 
-**Followed up 2026-08-28:** see
-`proposals/audit-scalar-concentration-integrability-hazard.md`, which
-opens the Step 0 this note asked for on `hoeffding_inequality`,
-`bernstein_inequality`, `bernstein_bounded_variance`, and the same-file
-`hoeffding_lemma`. That proposal's structural read found three of the
-four already carry `[IsProbabilityMeasure μ]` plus bounded+measurable
-hypotheses that likely rule out both mechanisms below; `hoeffding_lemma`
-carries neither guard and is the priority spike. Not yet Lean-verified
-as of that proposal's own filing.
+**Resolved:** the Step 0 this note asked for was opened and closed the
+same day by `proposals/audit-scalar-concentration-integrability-hazard.md`.
+Verdicts: `hoeffding_inequality`, `bernstein_inequality`, and
+`bernstein_bounded_variance` are **safe** against the junk-integral
+hazard below — their `IsProbabilityMeasure` + bounded + measurable guard
+set discharges integrability, now proved on the shelf as
+`integrable_of_bounded_measurable` and `integrable_sq_sub_mean`.
+`hoeffding_lemma` was found **materially false in two further ways**
+(the constant `1` refuted at a probability-space Rademacher fixture;
+every constant `≤ 4` refuted at a mass-19/10 measure) and repaired in
+place (probability-measure guard + `√6·a`). The historical warning is
+preserved below for provenance.
 
 The junk-integral mechanism is not specific to this axiom.
 `hoeffding_inequality` and `bernstein_inequality` state their
@@ -315,14 +317,17 @@ centering/mean hypotheses as Bochner integrals over an *unconstrained*
 `μ`; on an infinite measure, a non-integrable `X i` satisfies
 `∫ X i ∂μ = 0` by the same `integral_undef` junk, making those
 hypotheses vacuous while the conclusion bounds a possibly-infinite
-measure's tail by `≤ 2`. Any future retirement attempt of either must
-run its own Step 0 against this hazard (the pairwise-independence
-mismatch already recorded in this proposal's assessment is a second,
-independent blocker there). The matrix trio
-(`matrix_hoeffding`/`matrix_bernstein`/`matrix_azuma_hoeffding`) states
-hypotheses through Scaffold's `MatrixMDS` structure (comap-past
-σ-algebras plus set-integral conditional means), whose integrals carry
-the same junk surface — same caveat.
+measure's tail by `≤ 2`. (The 2026-08-28 audit's per-file check found
+both axioms *do* carry `[IsProbabilityMeasure μ]` through their section
+variables — the guarded reading is the one on the shelf, and their audit
+closed safe.) Any future retirement attempt of either must still run
+its own Step 0 (the pairwise-independence mismatch already recorded in
+this proposal's assessment is a second, independent blocker there). The
+matrix trio (`matrix_hoeffding`/`matrix_bernstein`/
+`matrix_azuma_hoeffding`) states hypotheses through Scaffold's
+`MatrixMDS` structure (comap-past σ-algebras plus set-integral
+conditional means), whose integrals carry the same junk surface — same
+caveat, still open.
 
 ### Open next step
 

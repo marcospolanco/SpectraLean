@@ -56,11 +56,20 @@ Bochner integrals of the matrix squares. Centering is the hypothesis
 `∫ X i = 0`; boundedness is the uniform spectral-norm bound `‖X i ω‖ ≤ R`.
 Integrability of the squares follows from measurability plus this bound.
 
+Statement history: repaired in place 2026-08-28 (run
+`20260828T090419Z-run-1`, Step 0 of
+`proposals/matrix-hoeffding-spectral-gap-estimation.md`): the pre-repair
+statement had no nondegeneracy hypothesis and was materially false at the
+corner `Fintype.card V = 0`, `t = 0` — the tail event is all of `Ω`, so a
+probability measure gives `1` against the bound `2 · 0 · exp … = 0`;
+refuted in hypothesis form as `old_matrix_bernstein_refuted_fin0_QA` in
+`Scaffold/QA/Concentration/Matrix_QA.lean`. The `[Nonempty V]` guard makes
+explicit the `d ≥ 1` the cited Tropp theorem carries implicitly.
+
 QA: exercised by `matrix_bernstein_zero_QA` in
 `Scaffold/QA/Concentration/Matrix_QA.lean`, which instantiates the axiom at
-the zero sequence and checks the resulting empty-event bound.
--/
-axiom matrix_bernstein {n : ℕ} {X : Fin n → Ω → Matrix V V ℝ} {R : ℝ}
+the zero sequence and checks the resulting empty-event bound. -/
+axiom matrix_bernstein {n : ℕ} [Nonempty V] {X : Fin n → Ω → Matrix V V ℝ} {R : ℝ}
     (h_meas : ∀ i, StronglyMeasurable (X i))
     (h_indep : ∀ i j, i ≠ j → IndepFun (X i) (X j) μ)
     (h_herm : ∀ i ω, (X i ω).IsHermitian)

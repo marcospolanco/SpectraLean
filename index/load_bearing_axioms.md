@@ -14,17 +14,17 @@ A **load-bearing axiom** is an axiom that:
 
 ### Scalar Concentration
 
-#### `subgaussian_tail_bound`
-- **Source**: Vershynin, High-Dimensional Probability, Theorem 2.1.1
-- **Impact**: Foundation for all subgaussian concentration
-- **Dependencies**: Used by most scalar concentration inequalities
-- **Formalization priority**: HIGH
+#### `subgaussian_tail_bound` (proved 2026-08-22 — no longer an axiom)
+- **Source**: Vershynin, High-Dimensional Probability, Proposition 2.5.2 (ii)
+- **Impact**: Foundation for subgaussian concentration
+- **Dependencies**: None currently; the proof is Markov's inequality at the stated moment
+- **Formalization priority**: closed (retired from the axiom boundary)
 
 #### `hoeffding_lemma`
 - **Source**: Vershynin, High-Dimensional Probability, Lemma 2.6.2
-- **Impact**: Connects boundedness to subgaussian property
-- **Dependencies**: Used by Hoeffding and Bernstein inequalities
-- **Formalization priority**: HIGH
+- **Impact**: Connects boundedness to the subgaussian property (probability measure; conclusion `≤ √6·a` — repaired 2026-08-28, the pre-repair shape was materially false per `proposals/audit-scalar-concentration-integrability-hazard.md`)
+- **Dependencies**: No theorem consumers (QA-only contact: `subgaussian_norm_zero_QA`, `hoeffding_lemma_rademacher_QA`)
+- **Formalization priority**: HIGH (blocked on the pinned Mathlib lacking Hoeffding's λ-form lemma)
 
 #### `bernstein_inequality`
 - **Source**: Vershynin, High-Dimensional Probability, Theorem 2.8.1

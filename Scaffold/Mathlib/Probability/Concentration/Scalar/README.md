@@ -15,7 +15,10 @@ The subgaussian (ψ₂) norm and its admitted consequences.
 - `subgaussianNorm_nonneg` - proved nonnegativity
 
 **Axioms**:
-- `hoeffding_lemma` - bounded and centered ⇒ subgaussian
+- `hoeffding_lemma` - bounded and centered ⇒ ≤ √6·a-subgaussian on
+  probability measures (repaired 2026-08-28: the pre-repair
+  `≤ a` shape with no measure guard was materially false — two
+  refutation witnesses in `QA/Concentration/Scalar_QA.lean`)
 - `subgaussian_tail_bound` - P(|X| ≥ t) ≤ 2exp(-t²/(2K²))
 
 **Source**: Vershynin, High-Dimensional Probability, Chapter 2
@@ -28,6 +31,8 @@ The subgaussian (ψ₂) norm and its admitted consequences.
 
 **Proved** (not axioms):
 - `hoeffding_iid` - uniform-bound specialization of `hoeffding_inequality`
+- `integrable_of_bounded_measurable` - the audit's integrability safety
+  lemma (measurable + bounded + probability measure ⇒ `Integrable`)
 
 **Sources**: Vershynin Thm 2.2.2 / Cor 2.2.3; Boucheron–Lugosi–Massart Thm 2.8
 
@@ -38,6 +43,8 @@ The subgaussian (ψ₂) norm and its admitted consequences.
 - `bernstein_bounded_variance` - explicit variance budget form
 
 **Proved** (not axioms):
+- `integrable_sq_sub_mean` - the audit's centered-square integrability
+  safety lemma for both axioms' variance statistics
 - `bernstein_iid` - common-variance specialization of `bernstein_inequality`
 
 **Sources**: Vershynin Thm 2.8.1 / Cor 2.8.3; Wainwright Thm 2.15

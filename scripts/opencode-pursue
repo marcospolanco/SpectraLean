@@ -131,6 +131,7 @@ verify_for_commit() {
   python3 scripts/check_markdown_links.py
   lake build
   python3 scripts/check_build_completeness.py
+  python3 scripts/check_scaffold_map_freshness.py
   git diff --check
 }
 

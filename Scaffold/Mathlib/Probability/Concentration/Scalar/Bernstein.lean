@@ -34,6 +34,40 @@ namespace Scaffold.Mathlib.Probability.Concentration.Scalar
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
 
+/-- Integrability safety for the variance statistics in
+`bernstein_inequality` and `bernstein_bounded_variance`: on a
+probability measure, a measurable uniformly bounded variable has its
+centered square integrable, so the variance integrals appearing in both
+axioms' conclusions (and the `h_var` clause of the budget form) are
+honest — none of them can be the junk `0` of
+`MeasureTheory.integral_undef`.
+
+Recorded by the integrability audit of 2026-08-28
+(`proposals/audit-scalar-concentration-integrability-hazard.md`, Step
+0). QA: `integrable_sq_sub_mean_rademacher_QA` in
+`Scaffold/QA/Concentration/Scalar_QA.lean`.
+-/
+theorem integrable_sq_sub_mean {X : Ω → ℝ} {a : ℝ}
+    (h_meas : Measurable X) (h_bound : ∀ ω, |X ω| ≤ a) :
+    Integrable (fun ω => (X ω - ∫ ω', X ω' ∂μ) ^ 2) μ := by
+  set c : ℝ := ∫ ω', X ω' ∂μ with hc
+  have hbdd : ∀ ω, |X ω - c| ≤ |a| + |c| := by
+    intro ω
+    have hX : |X ω| ≤ |a| := (h_bound ω).trans (le_abs_self a)
+    calc |X ω - c| ≤ |X ω| + |c| := abs_sub _ _
+      _ ≤ |a| + |c| := add_le_add hX le_rfl
+  have hmsub : Measurable fun ω => X ω - c := h_meas.sub measurable_const
+  have hm : Measurable fun ω => (X ω - c) ^ 2 := by
+    have hmul : Measurable fun ω => (X ω - c) * (X ω - c) := hmsub.mul hmsub
+    have heq : (fun ω => (X ω - c) ^ 2) = fun ω => (X ω - c) * (X ω - c) := by
+      funext ω; rw [sq]
+    rw [heq]; exact hmul
+  refine Integrable.mono' (integrable_const ((|a| + |c|) ^ 2)) hm.aestronglyMeasurable ?_
+  refine ae_of_all μ fun ω => ?_
+  have h1 : |X ω - c| ^ 2 ≤ (|a| + |c|) ^ 2 :=
+    pow_le_pow_left₀ (abs_nonneg _) (hbdd ω) 2
+  simpa [Real.norm_eq_abs, sq_abs] using h1
+
 /-- Bernstein's inequality: a sum of independent variables with
 `|X i ω| ≤ a` satisfies the two-sided, variance-dependent tail bound
 `P {|∑ (X i - E (X i))| ≥ t} ≤ 2 exp (-t² / (2 V + 2 a t / 3))`,

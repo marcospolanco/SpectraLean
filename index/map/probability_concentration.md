@@ -12,7 +12,7 @@ This index maps Lean modules and axioms for concentration inequalities by topic 
 |-------------|------|-------------|--------|
 | `subgaussianNorm` | definition | Ψ₂ norm via the MGF characterization; junk behavior documented (empty set → 0 via `Real.sInf_empty`; non-integrable MGFs → junk-zero integrals make the set *full*, also 0) | Vershynin Def 2.5.1 / Prop 2.5.2 |
 | `subgaussianNorm_nonneg` | proved | `0 ≤ subgaussianNorm X μ` | — |
-| `hoeffding_lemma` | axiom | Bounded and centered ⇒ subgaussian | Vershynin Lem 2.6.2 |
+| `hoeffding_lemma` | axiom (**repaired 2026-08-28**; the pre-repair `subgaussianNorm ≤ a` shape with no measure constraint was materially false in two ways — the constant `1` refuted at the fair-coin Rademacher fixture, and *every* constant `≤ 4` refuted at the mass-19/10 rescaling, both with genuinely-satisfied hypotheses; see `proposals/audit-scalar-concentration-integrability-hazard.md`) | Bounded and centered on a **probability measure** ⇒ `subgaussianNorm ≤ √6·a` | Vershynin Lem 2.6.2 (λ-form; the `√6` derived via two-sided tail + layer-cake integration) |
 | `subgaussian_tail_bound` | **proved** (2026-08-22; retired from axiom with repaired hypotheses `0 < K`, MGF integrable, MGF integral ≤ 2 — the old `subgaussianNorm ≤ K` shape was materially false via `sInf ∅ = 0` and junk-zero integrals, refuted in QA at `3 • δ₀`) | μ{\|X\| ≥ t} ≤ 2exp(−t²/(2K²)) | Vershynin Prop 2.5.2 (ii) |
 
 Formerly admitted subgaussian statements without a current consumer
@@ -26,7 +26,8 @@ axiom boundary in the 2026-08-17 concentration repair.
 
 | Declaration | Kind | Description | Source |
 |-------------|------|-------------|--------|
-| `hoeffding_inequality` | axiom | Sums of bounded independent variables | Vershynin Thm 2.2.2 |
+| `hoeffding_inequality` | axiom (audited safe 2026-08-28: `IsProbabilityMeasure` + bounded + measurable rule out the junk-integral hazard) | Sums of bounded independent variables | Vershynin Thm 2.2.2 |
+| `integrable_of_bounded_measurable` | proved | The audit's safety lemma: measurable + `|X| ≤ a` + probability measure ⇒ `Integrable X` | — |
 | `hoeffding_iid` | proved | Uniform-bound specialization | Vershynin Cor 2.2.3 |
 | `hoeffding_empirical` | axiom | Empirical averages of [0,1] variables | Boucheron-Lugosi-Massart Thm 2.8 |
 
@@ -36,8 +37,9 @@ axiom boundary in the 2026-08-17 concentration repair.
 
 | Declaration | Kind | Description | Source |
 |-------------|------|-------------|--------|
-| `bernstein_inequality` | axiom | Tail bound with variance | Vershynin Thm 2.8.1 |
-| `bernstein_bounded_variance` | axiom | Bounded variance form | Wainwright Thm 2.15 |
+| `bernstein_inequality` | axiom (audited safe 2026-08-28: same guard set as `hoeffding_inequality`) | Tail bound with variance | Vershynin Thm 2.8.1 |
+| `bernstein_bounded_variance` | axiom (audited safe 2026-08-28) | Bounded variance form | Wainwright Thm 2.15 |
+| `integrable_sq_sub_mean` | proved | The audit's centered-square safety lemma: both Bernstein axioms' variance statistics are honest integrals | — |
 | `bernstein_iid` | proved | Common-variance specialization | Vershynin Cor 2.8.3 |
 
 ## Sampling Spaces
@@ -94,7 +96,7 @@ matrices defined in `Matrix/Basic.lean`.
 
 | Declaration | Kind | Description | Source |
 |-------------|------|-------------|--------|
-| `matrix_hoeffding` | axiom | Independent Hermitian, PSD-dominated squares | Tropp Thm 1.4 |
+| `matrix_hoeffding` | axiom | Independent Hermitian, PSD-dominated squares; `[Nonempty V]` guard (repaired 2026-08-28 — the guard-free shape was inconsistent at `card V = 0`, `t = 0`) | Tropp Thm 1.4 |
 
 ### Matrix Bernstein
 
@@ -102,7 +104,7 @@ matrices defined in `Matrix/Basic.lean`.
 
 | Declaration | Kind | Description | Source |
 |-------------|------|-------------|--------|
-| `matrix_bernstein` | axiom | Independent centered uniformly bounded | Tropp Thm 1.1 |
+| `matrix_bernstein` | axiom | Independent centered uniformly bounded; `[Nonempty V]` guard (repaired 2026-08-28 — same degenerate-dimension corner) | Tropp Thm 1.1 |
 
 ### Matrix Azuma–Hoeffding
 
@@ -112,9 +114,22 @@ matrices defined in `Matrix/Basic.lean`.
 |-------------|------|-------------|--------|
 | `mdsFiltration` | definition | Natural past σ-algebra of a matrix sequence | — |
 | `MatrixMDS` | definition | Martingale-difference structure with uniform bound | — |
-| `matrix_azuma_hoeffding` | axiom | Dependent-event tail bound `2d exp(-t²/(8mR²))` | Tropp Thm 7.1 |
+| `matrix_azuma_hoeffding` | axiom | Dependent-event tail bound `2d exp(-t²/(8mR²))`; `[Nonempty V]` guard (repaired 2026-08-28 — same corner) | Tropp Thm 7.1 |
 
 ### Derived consumers
+
+**Module**: `Scaffold.Derived.EdgePerturbationTail` (derived layer, not axioms — 2026-08-28)
+
+`matrix_hoeffding`'s first theorem consumer, on the centered Bernoulli
+edge-perturbation design of `GraphTheory.EdgePerturbation` (every axiom
+clause proved hard crust; the design is sign-free — no hypothesis on the
+weight matrix, the only load-bearing clause hypothesis `p ∈ [0, 1]`).
+
+| Declaration | Kind | Description | Consumes |
+|-------------|------|-------------|----------|
+| `matrix_hoeffding_quadForm` | theorem (axiom-conditional) | Fixed-nonzero-vector quadratic-form pullback of the axiom (`x ≠ 0` load-bearing: at `x = 0` the event is all of `Ω`) | `matrix_hoeffding` |
+| `edgePerturbation_norm_tail` | theorem (axiom-conditional) | `μ {‖∑_e (δ_e − p_e) • L_e‖ ≥ t} ≤ 2 d exp(−t²/(2 ‖∑_e L_e²‖))` | `matrix_hoeffding` |
+| `edgePerturbation_quadForm_tail` | theorem (axiom-conditional) | The same bound at `t (x ⬝ᵥ x) ≤ |xᵀ S(ω) x|` for a fixed nonzero `x` | `matrix_hoeffding` |
 
 **Module**: `Scaffold.Derived.EventStream` (derived layer, not axioms)
 
@@ -150,8 +165,8 @@ matrices defined in `Matrix/Basic.lean`.
 
 ### For Bounded Variables
 
-1. Use `hoeffding_lemma` to show subgaussian
-2. Apply `subgaussian_sum_bound` or `hoeffding_inequality`
+1. Use `hoeffding_lemma` (probability measure; conclusion `≤ √6·a`) to show subgaussian
+2. Apply `hoeffding_inequality` (integrability of the clause set certified by `integrable_of_bounded_measurable`)
 
 ### For Variance-Dependent Bounds
 

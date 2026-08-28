@@ -50,10 +50,12 @@ import Scaffold.Mathlib.Probability.Concentration.Matrix.Azuma
 import Scaffold.Mathlib.Probability.BernoulliProduct
 import Scaffold.Mathlib.Probability.IIDProduct
 import Scaffold.Mathlib.GraphTheory.Sparsification
+import Scaffold.Mathlib.GraphTheory.EdgePerturbation
 import Scaffold.Mathlib.InformationTheory.Entropy
 import Scaffold.Derived.EventStream
 import Scaffold.Derived.ProjectorDrift
 import Scaffold.Derived.SparsificationTail
+import Scaffold.Derived.EdgePerturbationTail
 import Scaffold.Derived.EmpiricalStationary
 
 /-!

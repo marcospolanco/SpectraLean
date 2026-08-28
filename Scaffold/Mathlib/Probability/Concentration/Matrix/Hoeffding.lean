@@ -60,11 +60,25 @@ introduces the factor `2`. The semidefinite order is Mathlib's
 `Matrix.L2OpNorm`. The source needs no centering hypothesis, and none is
 imposed.
 
+Statement history: repaired in place 2026-08-28 (run
+`20260828T090419Z-run-1`, Step 0 of
+`proposals/matrix-hoeffding-spectral-gap-estimation.md`): the pre-repair
+statement had no nondegeneracy hypothesis and was materially false at the
+corner `Fintype.card V = 0`, `t = 0` — the tail event `{ω | ‖∑ X i ω‖ ≥ 0}`
+is all of `Ω` (nonnegativity of the norm), so a probability measure gives
+`1`, while the dimension prefactor makes the bound `2 · 0 · exp … = 0`;
+the instantiated axiom reads `1 ≤ 0`, refuted in hypothesis form as
+`old_matrix_hoeffding_refuted_fin0_QA` in
+`Scaffold/QA/Concentration/Matrix_QA.lean`. The cited Tropp theorem is
+stated for dimension-`d` matrices, carrying the implicit `d ≥ 1` of
+nonempty matrix dimensions; the `[Nonempty V]` guard makes that
+assumption explicit. At `t = 0` the repaired statement is honest on
+nonempty `V`: `(1 : ℝ≥0∞) ≤ 2 d` (`two_card_bound_honest_QA`, same file).
+
 QA: exercised by `matrix_hoeffding_zero_QA` in
 `Scaffold/QA/Concentration/Matrix_QA.lean`, which instantiates the axiom at
-the zero sequence and checks the resulting empty-event bound.
--/
-axiom matrix_hoeffding {n : ℕ} {X : Fin n → Ω → Matrix V V ℝ}
+the zero sequence and checks the resulting empty-event bound. -/
+axiom matrix_hoeffding {n : ℕ} [Nonempty V] {X : Fin n → Ω → Matrix V V ℝ}
     {A : Fin n → Matrix V V ℝ}
     (h_meas : ∀ i, StronglyMeasurable (X i))
     (h_indep : ∀ i j, i ≠ j → IndepFun (X i) (X j) μ)

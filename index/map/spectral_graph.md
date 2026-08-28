@@ -1404,6 +1404,24 @@ sampled operator and its exact pointwise deviation identity.
 | `ssSummandBool` / `ssSummand_eq_ssSummandBool` / `ssSummand_fun_eq` | Sparsification Slice 3 | The Bool-valued summand shape (a finite-range function of one coordinate) |
 | `stronglyMeasurable_ssSummand` / `indepFun_ssSummand` | Sparsification Slice 3 | The `h_meas` and `h_indep` clauses of `matrix_bernstein` at this design, through the Slice-1 transfer layer |
 
+### `Scaffold.Mathlib.GraphTheory.EdgePerturbation` (the matrix-Hoeffding engine — 2026-08-28)
+
+The deterministic engine for `matrix_hoeffding`'s first theorem consumer:
+single-edge Laplacian algebra joined to the `rankOne` family, the
+`Matrix.PosSemidef` helpers the pin lacks, and the centered Bernoulli
+edge-perturbation design with every repaired-axiom clause proved
+(sign-free — no hypothesis on the weight matrix).
+
+| Declaration | Area | Description |
+| --- | --- | --- |
+| `edgeAdj` / `edgeAdj_isSymm` / `deg_edgeAdj` | Edge perturbation | The single-edge adjacency `w` on `{i, j}`, its symmetry and row sums |
+| `laplacian_edgeAdj` | Edge perturbation | `L(edge i j w) = w • (e_i − e_j)(e_i − e_j)ᵀ` — the join to the `rankOne` algebra, valid also at `i = j` |
+| `posSemidef_smul_nonneg` / `rankOne_posSemidef` | PSD helpers | Nonnegative scaling and rank-one matrices are PSD (pin gaps) |
+| `posSemidef_mul_self_of_isSymm` | PSD helpers | **Squares of symmetric matrices are PSD** — no PSD hypothesis on `M`; through `dotProduct_mulVec_comm_of_isSymm`, its first consumer outside the projector-uniqueness layer |
+| `perturbEdgeLap` / `perturbEdgeLap_posSemidef` / `laplacian_edgeAdj_eq_perturbEdgeLap` | Edge perturbation | The single-edge Laplacian block and its PSD at nonnegative weights |
+| `perturbSummand` / `perturbSummand_mul_self` / `perturbSummand_sq_le` | Edge perturbation | The centered Bernoulli summand `(δ_e − p_e) • L_e` and the **semidefinite bound `X_e² ⪯ L_e²`** — the axiom's `h_bound` clause, sign-free, load-bearing only on `p ∈ [0, 1]` |
+| `stronglyMeasurable_perturbSummand` / `indepFun_perturbSummand` | Edge perturbation | The `h_meas`/`h_indep` clauses through BernoulliProduct's matrix transfer layer |
+
 ### `Scaffold.Derived.SparsificationTail` (leverage-score sparsification, Slice 3 — the axiom-backed assembly)
 
 The program's payoff: `matrix_bernstein`'s first real theorem consumer

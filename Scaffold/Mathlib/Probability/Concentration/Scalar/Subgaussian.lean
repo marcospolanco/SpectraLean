@@ -75,29 +75,60 @@ theorem subgaussianNorm_nonneg (X : Ω → ℝ) (μ : Measure Ω) :
     0 ≤ subgaussianNorm X μ :=
   Real.sInf_nonneg fun K hK => le_of_lt hK.1
 
-/-- Hoeffding's lemma: a random variable bounded by `a` with mean zero is
-`a`-subgaussian.
+/-- Hoeffding's lemma: a random variable bounded by `a` with mean zero on
+a *probability* measure is `(√6 · a)`-subgaussian.
 
 Source:
 - Vershynin, High-Dimensional Probability, 2nd ed., Cambridge University
   Press, 2018, Lemma 2.6.2, Chapter 2, p. 32.
 
 Statement differences: the source states the MGF form
-`E exp(λX) ≤ exp(λ²a²/2)`; we state it through `subgaussianNorm`, whose MGF
-characterization is equivalent up to universal constants
-(Proposition 2.5.2), so the conclusion may lose an absolute constant
-relative to the source.
+`E exp(λX) ≤ exp(λ²a²/2)`; we state it through `subgaussianNorm`. The
+constant is ours, derived: the source's λ-form gives the two-sided tail
+`P {|X| ≥ x} ≤ 2 exp (-x² / (2a²))`, and layer-cake integration of
+`Y = exp (X²/K²)` at `K² = 6a²` yields `E Y ≤ 1 + 2/(K²/(2a²) − 1) = 2`
+exactly at `K = √6 · a`. (Vershynin's Proposition 2.5.2 records the
+equivalence of the two characterizations only up to unspecified
+constants.)
 
-QA: exercised, together with `subgaussianNorm_nonneg`, by
-`subgaussian_norm_zero_QA` in `Scaffold/QA/Concentration/Scalar_QA.lean`
-(it supplies the `≤ 0` half of `subgaussianNorm (fun _ => 0) μ = 0`; the
-`≥ 0` half is the proved `subgaussianNorm_nonneg`). Before the
-2026-08-22 retirement it also fed the old axiom-shaped
-`subgaussian_tail_bound`; the proved theorem no longer consumes it.
+Statement history: admitted through 2026-08-28 as
+`subgaussianNorm X μ ≤ a` with **no** measure constraint, this shape was
+**materially false in two independent ways**, both found by the
+integrability audit
+(`proposals/audit-scalar-concentration-integrability-hazard.md`,
+Step 0) and both refuted in QA
+(`Scaffold/QA/Concentration/Scalar_QA.lean`):
+
+1. **Wrong constant.** On the fair-coin probability measure, the
+   Rademacher variable `±1` with `a = 1` satisfies every hypothesis
+   genuinely (`∫ X = 0` for real), but the defining set only contains
+   `K` with `K² ≥ 1/log 2`, so the norm is `1/√(log 2) ≈ 1.20 > 1`
+   (`old_hoeffding_lemma_refuted_constant_QA`: the norm is at least
+   `6/5`). No junk values are involved — this refutes the constant `1`
+   on well-behaved probability spaces.
+2. **Missing mass guard.** On the mass-`19/10` rescaling of the same
+   measure (mean still genuinely `0`), the defining set's threshold
+   `1/√(log (2/M))` grows without bound as the mass `M` approaches `2`
+   from below — the norm is `> 4` there
+   (`old_hoeffding_lemma_refuted_guard_QA`), so **no** finite constant
+   rescues the statement without a probability-measure hypothesis.
+
+Junk safety of the repaired statement: the two junk mechanisms recorded
+at `subgaussianNorm` collapse the norm *downward* (empty defining set →
+`sInf = 0`; junk-zero MGF integrals → every `K` admissible → `sInf = 0`),
+and the conclusion is an upper bound, so non-integrable or
+non-measurable `X` cannot falsify it; on probability measures with
+a.e.-measurable `X` the classical derivation above applies.
+
+QA: exercised by `subgaussian_norm_zero_QA` (the `≤ √6 * 0 = 0` half of
+`subgaussianNorm (fun _ => 0) μ = 0`) and
+`hoeffding_lemma_rademacher_QA` (the repaired statement instantiated at
+the same Rademacher fixture that refutes the old constant) in
+`Scaffold/QA/Concentration/Scalar_QA.lean`.
 -/
-axiom hoeffding_lemma {X : Ω → ℝ} {a : ℝ} (ha : 0 ≤ a)
-    (h_bound : ∀ ω, |X ω| ≤ a) (h_mean : ∫ ω, X ω ∂μ = 0) :
-    subgaussianNorm X μ ≤ a
+axiom hoeffding_lemma {X : Ω → ℝ} {a : ℝ} [IsProbabilityMeasure μ]
+    (ha : 0 ≤ a) (h_bound : ∀ ω, |X ω| ≤ a) (h_mean : ∫ ω, X ω ∂μ = 0) :
+    subgaussianNorm X μ ≤ √6 * a
 
 /-- Tail bound for a random variable with a subgaussian moment bound: if
 `exp (X ω ^ 2 / K ^ 2)` is integrable with integral at most `2`, then the

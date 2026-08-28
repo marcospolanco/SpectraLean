@@ -239,7 +239,7 @@
   </div>
 
   <footer>
-    Source: <code>docs/scaffold_map.html</code> in the Scaffold repository. Rendered with inline SVG generated at load time from the embedded data table — no external libraries, no network calls. To update: edit <code>CORE</code>/<code>SPOKES</code> in the script below and redeploy.
+    Source: <code>docs/scaffold_map.html</code> in the Scaffold repository. Rendered with inline SVG generated at load time from the embedded data table — no external libraries, no network calls. To update: edit <code>CORE</code>/<code>SPOKES</code> in the script below and redeploy. Each station's <code>source</code> names the <code>proposals/*.md</code> file tracking it; <code>scripts/check_scaffold_map_freshness.py</code> reconciles this table against the SVG data, the QA scoreboard, and those proposals' own status lines.
   </footer>
 </div>
 
@@ -259,14 +259,14 @@
     id: "core",
     label: "SGT CORE",
     items: [
-      { name: "Courant–Fischer", status: "proved", note: "Rayleigh-quotient variational characterization of every eigenvalue." },
-      { name: "Cauchy Interlacing", status: "proved", note: "Principal-submatrix eigenvalues interlace the parent spectrum." },
-      { name: "Cheeger — easy direction", status: "proved", note: "φ ≤ √(2λ₂); retired from axiom 2026-08-18." },
-      { name: "Cheeger — hard direction", status: "proved", note: "φ²/2 ≤ λ₂; retired 2026-08-23, closing the perturbation-axiom discharge program." },
-      { name: "Weyl's Inequality", status: "proved", note: "Additive eigenvalue perturbation bound; retired 2026-08-20." },
-      { name: "Davis–Kahan sin Θ", status: "proved", note: "Invariant-subspace rotation bound; retired 2026-08-21." },
-      { name: "Thomson's Principle", status: "proved", note: "Variational characterization of effective resistance." },
-      { name: "Foster's Theorem", status: "proved", note: "∑ conductance·resistance = n − 1 over the spanning structure." }
+      { name: "Courant–Fischer", status: "proved", source: "prove-courant-fischer.md", note: "Rayleigh-quotient variational characterization of every eigenvalue." },
+      { name: "Cauchy Interlacing", status: "proved", source: null, note: "Principal-submatrix eigenvalues interlace the parent spectrum." },
+      { name: "Cheeger — easy direction", status: "proved", source: "prove-cheeger-easy-direction.md", note: "φ ≤ √(2λ₂); retired from axiom 2026-08-18." },
+      { name: "Cheeger — hard direction", status: "proved", source: "discharge-perturbation-axioms.md", note: "φ²/2 ≤ λ₂; retired 2026-08-23, closing the perturbation-axiom discharge program." },
+      { name: "Weyl's Inequality", status: "proved", source: "discharge-perturbation-axioms.md", note: "Additive eigenvalue perturbation bound; retired 2026-08-20." },
+      { name: "Davis–Kahan sin Θ", status: "proved", source: "discharge-perturbation-axioms.md", note: "Invariant-subspace rotation bound; retired 2026-08-21." },
+      { name: "Thomson's Principle", status: "proved", source: "electrical-flow-routing.md", note: "Variational characterization of effective resistance." },
+      { name: "Foster's Theorem", status: "proved", source: null, note: "∑ conductance·resistance = n − 1 over the spanning structure. Delivered by spectral-graph-sparsification.md Phase A; that file's mixed status line (Phase A delivered, Phase B blocked) has no single bucket, so it is deliberately unlinked here." }
     ]
   };
 
@@ -274,64 +274,64 @@
     {
       id: "north", label: "BERNOULLI HEIGHTS", sub: "Probability & High-Dim Stats",
       stations: [
-        { name: "Normalized Laplacians", status: "proved" },
-        { name: "Walk–Similarity Bridge", status: "proved" },
-        { name: "Spectral Gap Transfer", status: "proved" },
-        { name: "MCMC Mixing Time", status: "proved", note: "χ²(t,x) ≤ (λ*)^{2t}·((πx)⁻¹−1); program complete 2026-08-22." },
-        { name: "Subgaussian Tail Bound", status: "proved", note: "Hypotheses repaired, retired 2026-08-22." },
-        { name: "Finite Relative Entropy", status: "proved", note: "Gibbs' inequality both directions + entropy maximum." },
-        { name: "Matrix Concentration", status: "axiom", note: "Hoeffding / Bernstein / Azuma — admitted, cited, unretired." }
+        { name: "Normalized Laplacians", status: "proved", source: "mixing-time-bound.md" },
+        { name: "Walk–Similarity Bridge", status: "proved", source: "mixing-time-bound.md" },
+        { name: "Spectral Gap Transfer", status: "proved", source: "mixing-time-bound.md" },
+        { name: "MCMC Mixing Time", status: "proved", source: "mixing-time-bound.md", note: "χ²(t,x) ≤ (λ*)^{2t}·((πx)⁻¹−1); program complete 2026-08-22." },
+        { name: "Subgaussian Tail Bound", status: "proved", source: "prove-subgaussian-tail-bound.md", note: "Hypotheses repaired, retired 2026-08-22." },
+        { name: "Finite Relative Entropy", status: "proved", source: "finite-relative-entropy.md", note: "Gibbs' inequality both directions + entropy maximum." },
+        { name: "Matrix Concentration", status: "axiom", source: null, note: "Hoeffding / Bernstein / Azuma — admitted, cited, unretired." }
       ]
     },
     {
       id: "application", label: "APPLICATION RING", sub: "Consumers of the core",
       stations: [
-        { name: "Fiedler Partitioning", status: "proved", note: "Certified conductance cut — first consumer of the Cheeger hard-direction retirement, 2026-08-23." }
+        { name: "Fiedler Partitioning", status: "proved", source: "fiedler-partitioning.md", note: "Certified conductance cut — first consumer of the Cheeger hard-direction retirement, 2026-08-23." }
       ]
     },
     {
       id: "east", label: "KURAMOTO JUNCTION", sub: "Dynamical Systems & Network Control",
       stations: [
-        { name: "Perron–Frobenius", status: "axiom", note: "Irreducible nonnegative matrices; admitted 2026-08-22, no strict-dominance clause." },
-        { name: "Directed Operators", status: "proved", note: "directedNormalizedLaplacian; program complete 2026-08-22, zero new axioms." },
-        { name: "Heat Semigroup", status: "proved", note: "heatKernel; Phases A+B complete 2026-08-23 (identity, semigroup law, mass conservation, DC limit)." },
-        { name: "Heat — Phase C", status: "proved", note: "Derivative at t=0 + first-order remainder bound; delivered 2026-08-23, program complete." },
-        { name: "Discrete Affine Convergence", status: "proved", note: "Finite-vector geometric decay + affine-iteration convergence; delivered 2026-08-23 in one run, zero new axioms." },
-        { name: "Consensus & Sync.", status: "gated", note: "General graph semigroups remain gated pending a named consumer." }
+        { name: "Perron–Frobenius", status: "axiom", source: "admit-perron-frobenius.md", note: "Irreducible nonnegative matrices; admitted 2026-08-22, no strict-dominance clause." },
+        { name: "Directed Operators", status: "proved", source: "directed-graph-operators.md", note: "directedNormalizedLaplacian; program complete 2026-08-22, zero new axioms." },
+        { name: "Heat Semigroup", status: "proved", source: "reversibility-and-heat-semigroup.md", note: "heatKernel; Phases A+B complete 2026-08-23 (identity, semigroup law, mass conservation, DC limit)." },
+        { name: "Heat — Phase C", status: "proved", source: "reversibility-and-heat-semigroup.md", note: "Derivative at t=0 + first-order remainder bound; delivered 2026-08-23, program complete." },
+        { name: "Discrete Affine Convergence", status: "proved", source: "discrete-affine-convergence.md", note: "Finite-vector geometric decay + affine-iteration convergence; delivered 2026-08-23 in one run, zero new axioms." },
+        { name: "Consensus & Sync.", status: "gated", source: null, note: "General graph semigroups remain gated pending a named consumer." }
       ]
     },
     {
       id: "south", label: "KIRCHHOFF FLATS", sub: "Statistical Physics & Disordered Systems",
       stations: [
-        { name: "Electrical Flow", status: "proved" },
-        { name: "Effective Resistance", status: "proved" },
-        { name: "Dirichlet Energy", status: "proved" },
-        { name: "Weighted Matrix-Tree", status: "gated", note: "No named consumer yet — technical decision required." }
+        { name: "Electrical Flow", status: "proved", source: "electrical-flow-routing.md" },
+        { name: "Effective Resistance", status: "proved", source: "electrical-structure-crust.md" },
+        { name: "Dirichlet Energy", status: "proved", source: "electrical-structure-crust.md" },
+        { name: "Weighted Matrix-Tree", status: "gated", source: "weighted-matrix-tree-theorem.md", note: "No named consumer yet — technical decision required." }
       ]
     },
     {
       id: "frontier", label: "OPEN FRONTIER", sub: "Surveyed, not yet built",
       stations: [
-        { name: "Alon–Boppana Bound", status: "proved", note: "Adopted 2026-08-26, delivered COMPLETE 2026-08-27 (Nilli's variational/test-vector route, diameter-dependent form); first theorem consumer (Ramanujan Expansion Ceiling) delivered same day." },
-        { name: "Approx. Spectral Projection", status: "proved", note: "Lanczos/Kaniel–Paige route; Steps 0, 1a, 1b, 1c all delivered 2026-08-23/24, program complete." }
+        { name: "Alon–Boppana Bound", status: "proved", source: "alon-boppana-bound.md", note: "Adopted 2026-08-26, delivered COMPLETE 2026-08-27 (Nilli's variational/test-vector route, diameter-dependent form); first theorem consumer (Ramanujan Expansion Ceiling) delivered same day." },
+        { name: "Approx. Spectral Projection", status: "proved", source: "approximate-spectral-projection.md", note: "Lanczos/Kaniel–Paige route; Steps 0, 1a, 1b, 1c all delivered 2026-08-23/24, program complete." }
       ]
     },
     {
       id: "southwest", label: "NEURIPS BAY", sub: "Machine Learning & Graph Signal Processing",
       stations: [
-        { name: "Resolvent Calculus", status: "proved" },
-        { name: "Band Projectors", status: "proved" },
-        { name: "Tikhonov Filter", status: "proved" },
-        { name: "Tikhonov — Phase 2", status: "proved", note: "Recovered as a functional-calculus instance; delivered COMPLETE 2026-08-25 alongside the Heat instance." },
-        { name: "Decidable Certificates", status: "proved" }
+        { name: "Resolvent Calculus", status: "proved", source: "resolvent-calculus-psd.md" },
+        { name: "Band Projectors", status: "proved", source: "spectral-band-projectors.md" },
+        { name: "Tikhonov Filter", status: "proved", source: "tikhonov-shrinkage-filter.md" },
+        { name: "Tikhonov — Phase 2", status: "proved", source: "hermitian-calculus-consumer-tikhonov-heat.md", note: "Recovered as a functional-calculus instance; delivered COMPLETE 2026-08-25 alongside the Heat instance." },
+        { name: "Decidable Certificates", status: "proved", source: "decidable-spectral-certificates.md" }
       ]
     },
     {
       id: "northwest", label: "STOC CITY", sub: "Theoretical CS & Algorithms",
       stations: [
-        { name: "Leverage Scores", status: "proved", note: "Spectral sparsification via leverage-score sampling; Step 1 COMPLETE 2026-08-27 across three slices — matrix_bernstein's first real theorem consumer." },
-        { name: "Matrix Chernoff Bridge", status: "proved", note: "matrix_bernstein already existed, imported, and is now consumed (Derived/SparsificationTail.lean) — the old 'does not exist' finding was a stale path-literal check, corrected 2026-08-26." },
-        { name: "Spielman–Srivastava", status: "gated", note: "This document's own Phase B is superseded by the Leverage-Score proposal (delivered, see above) and is not being pursued under its original three-path framing." }
+        { name: "Leverage Scores", status: "proved", source: "spectral-sparsification-via-leverage-scores.md", note: "Spectral sparsification via leverage-score sampling; Step 1 COMPLETE 2026-08-27 across three slices — matrix_bernstein's first real theorem consumer." },
+        { name: "Matrix Chernoff Bridge", status: "proved", source: "spectral-sparsification-via-leverage-scores.md", note: "matrix_bernstein already existed, imported, and is now consumed (Derived/SparsificationTail.lean) — the old 'does not exist' finding was a stale path-literal check, corrected 2026-08-26." },
+        { name: "Spielman–Srivastava", status: "gated", source: "spectral-graph-sparsification.md", note: "This document's own Phase B is superseded by the Leverage-Score proposal (delivered, see above) and is not being pursued under its original three-path framing." }
       ]
     }
   ];
@@ -481,6 +481,6 @@
   addStat("in progress", counts.progress, "var(--st-progress)");
   addStat("gated on a decision", counts.gated, "var(--st-gated)");
   document.getElementById("repo-stamp").textContent =
-    "Repo-wide: 10 explicit axioms · 2731 QA declarations · 0 sorries";
+    "Repo-wide: 10 explicit axioms · 2765 QA declarations · 0 sorries";
 })();
 </script>

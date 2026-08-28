@@ -157,6 +157,10 @@ theorem eventStreamProjectorDrift {Ω : Type*} {mΩ : MeasurableSpace Ω}
       rw [div_lt_div_iff₀ hδpos hδpos]
       exact mul_lt_mul_of_pos_right hnorm hδpos
     exact absurd hω (by linarith)
+  -- `eventStreamTail` (post-2026-08-28 repair) carries the `[Nonempty V]`
+  -- guard the Azuma axiom now makes explicit; here it is derived from the
+  -- theorem's own spectral-index hypothesis `k : Fin (Fintype.card V)`.
+  haveI : Nonempty V := ⟨(Fintype.equivFin V).symm k⟩
   exact le_trans (measure_mono hincl)
     (eventStreamTail A R h_adapt h_cond h_bound m s hs.le)
 

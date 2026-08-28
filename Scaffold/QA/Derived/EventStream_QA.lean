@@ -81,7 +81,7 @@ theorem constantStream_adapt_QA (G : Matrix V V ℝ) (k : ℕ) :
 /-- The derived tail theorem instantiated at a constant stream with bound
 `R = 0`: all martingale hypotheses are discharged constructively and the
 conclusion is the degenerate Azuma bound. -/
-theorem eventStreamTail_constant_QA (G : Matrix V V ℝ) (m : ℕ) (t : ℝ) (ht : 0 < t) :
+theorem eventStreamTail_constant_QA [Nonempty V] (G : Matrix V V ℝ) (m : ℕ) (t : ℝ) (ht : 0 < t) :
     μ {ω | ‖laplacianSequence (constantStream G ω) m
         - laplacianSequence (constantStream G ω) 0‖ ≥ t} ≤
       ENNReal.ofReal (2 * (Fintype.card V : ℝ) *

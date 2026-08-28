@@ -30,6 +30,13 @@ the `lake build` it cites (see `proposals/verify-build-completeness.md`
 for the incident that made this mandatory: a full build once printed
 "Build completed successfully" over a three-error QA file).
 
+Since 2026-08-28, any entry reporting a delivery that changes a
+proposal's status header must also record
+`python3 scripts/check_scaffold_map_freshness.py` passing (see
+`proposals/verify-scaffold-map-freshness.md` for the stale-map incident
+that made this mandatory: the pre-commit hook re-rendered the map on
+every commit while its hand-maintained data tables drifted for days).
+
 Since 2026-08-28: **`README.md`'s "Recent highlights" list and "What's
 here" table entries stay to one line each — a module name and a single
 clause, no dates, step numbers, or proof-technique detail.** This
@@ -40,6 +47,230 @@ the exhaustive per-delivery prose that used to accumulate directly in
 README (until a full rewrite on 2026-08-28, prompted by an operator
 readability complaint: individual lines had grown past 8,000 characters)
 belongs here and only here.
+
+## 2026-08-28T12:18:48Z — Matrix-Hoeffding consumer delivered with the degenerate-dimension repair of all three matrix concentration axioms (terminal)
+
+**Run:** `20260828T090419Z-run-1`  
+**Session:** `ses_fb86ae73cffeN8L6vhbZxPoF60`  
+**Status:** completed  
+**Milestone (delivered):** `proposals/matrix-hoeffding-spectral-gap-estimation.md`
+(the Active table's remaining Medium row, the standing handoff's top
+named milestone) — **Steps 0+1 DELIVERED as zero new axioms (count stays
+10; `#print axioms` via `wip/mh_axcheck.lean`: engine + hard-crust QA
+exactly `propext, Classical.choice, Quot.sound`; the two Derived tails
+and the tail-instance QA pin honestly carrying `matrix_hoeffding`
+alone). QA 2749 → 2765 (+16).** The in-progress entry's finding was
+confirmed by the spike and drove the repair-first sequencing.
+
+**Changes:** (1) **The repair (Slice A)** — all three matrix
+concentration axioms (`matrix_hoeffding`, `matrix_bernstein`,
+`matrix_azuma_hoeffding`) were materially false at
+`Fintype.card V = 0`, `t = 0` (the tail event is all of `Ω`, so a
+probability measure gives `1` against the `2 · card V` prefactor's
+`0`; each instantiated axiom read `1 ≤ 0`, i.e. was inconsistent —
+every conditional theorem in the family was vacuous until this
+repair). Repaired in place with the `[Nonempty V]` guard the cited
+Tropp statements carry implicitly (statement-history docstrings);
+hypothesis-form refutation records + the `t = 0` honesty lemma added
+to `Matrix_QA.lean`; guard threaded through `eventStreamTail`, both
+`sparsification_*_tail` (binder) and `eventStreamProjectorDrift`
+(derived internally from its own `k : Fin (card V)`, no signature
+change). (2) **The consumer (Slice B)** — new
+`GraphTheory/EdgePerturbation.lean` (single-edge algebra joined to the
+`rankOne` family by `laplacian_edgeAdj`; `Matrix.PosSemidef` helpers
+the pin lacks, including squares-of-symmetric-PSD through
+`dotProduct_mulVec_comm_of_isSymm`; the centered Bernoulli edge design
+`(δ_e − p_e) • L_e` with every repaired-axiom clause proved —
+**sign-free: no hypothesis on the weight matrix at all**, the only
+load-bearing clause hypothesis being `p ∈ [0,1]`) and new
+`Derived/EdgePerturbationTail.lean` (`matrix_hoeffding_quadForm` at
+the load-bearing `x ≠ 0` guard — at `x = 0` the event is all of `Ω`
+and the statement false for large `t` — plus the assembled norm and
+quadratic-form tails, `Fin n` transport by `Fintype.equivFin` +
+`Equiv.sum_comp`); umbrella imports added. (3) **QA** (+16): the
+variance statistic pinned exactly (`∑_e L_e² = 4 • v vᵀ`,
+`‖∑_e L_e²‖ = 8`, the rank-one norm proved two-sided by the
+squared-action bound), the all-true outcome's sum exactly the unit
+edge Laplacian (quadratic form `1` at `e₀`), the closed-form tail
+instance `4 exp(−1/16)`, the degenerate zero-weight graph, the
+`p ≡ 2` interval fence (the semidefinite clause provably fails outside
+`[0,1]`), and the negative-weight sign-free witness. (4) **Records**:
+the proposal (COMPLETE header, Step-0 verdicts, the repair record,
+Step-1 delivery with technique findings — this pin's reversed
+`sub_smul`, the ℕ-vs-ℝ smul-literal trap on `Fin 2`, `IsSymm`-not-a-
+structure, `omit` before docstrings, PosSemidef's defeq-star clause,
+sum-bound `ring` failures), `proposals/README.md` (row retired to the
+Delivered table), README (2765; one module-table line), the radar (QA
+axis synced; axis 7's third-consumer clause with the score held at 4.5
+per protocol), the backlog, both index maps + the Tropp source row,
+`docs/2_ARCHITECTURE.md`'s debt note, the scoreboard (verification row
++ interpretation bullet), the map stats stamps, this plan, and this
+log.
+
+**Verification:** spike first (`wip/mh0_spike.lean` — probes for the
+refutation (elaborated live against the pre-repair axiom), the
+repair-side arithmetic, the edge algebra, the PSD helpers, the clause
+lemmas, and the generic corollary — all to zero errors/warnings before
+any shelf edit); `lake env lean` zero errors on every touched module
+with `Matrix_QA.lean` at its exact 16-warning and `EventStream_QA.lean`
+at its 3-warning baseline (verified against the stashed pre-change
+tree); explicit `lake build` targets ✔; **full `lake build` ✔
+(2404/2405) immediately followed by `check_build_completeness.py` —
+126/126 fresh, 0 stale, 0 missing, exit 0** (after the documented
+single-module remediation for the one QA module outside the umbrella's
+closure); `lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated idempotent
+(**2765/10/0**); **map freshness exit 0** (mandatory — the proposal's
+status header changed; the check caught the 2749 → 2765 stamp drift on
+first run, as designed). Nothing committed; the prior runs' uncommitted
+deliveries preserved untouched.
+
+**Remaining risk:** none blocking on the repaired trio — the corner is
+fenced by refutation records and the zero-QAs instantiate the repaired
+statements. Priced follow-ons recorded in the proposal: the
+sampled-graph packaging identity (needs `laplacian_smul`/`laplacian_sum`),
+the uniform (existential-x) quadratic-form packaging, and the
+matrix-martingale golden-factor question (source-level, not a repair).
+
+**Next handoff:** per priority item 0 — no High rows and no open Medium
+rows remain in the Active table (the sparsification and
+empirical-stationary follow-ons stay Medium-priced; Step 2 of the
+latter still gated on a consumer pricing the bias-term shape); the
+Fiedler program's named concentration → subspace-stability pipeline is
+now natural from both ends (`fiedlerLine_stability` ×
+`edgePerturbation_norm_tail` share the `[Nonempty V]`/probability-space
+interfaces).
+
+## 2026-08-28T07:53:36Z — Integrability audit delivered: `hoeffding_lemma` caught materially false in two new ways and repaired; the other three audited safe with proved safety lemmas (terminal)
+
+**Run:** `20260828T070330Z-run-1`  
+**Session:** `ses_fb8e05e3affewNe8eAGtMVuuex`  
+**Status:** completed  
+**Milestone (delivered):** the Active table's 2026-08-28 Medium audit row
+(`audit-scalar-concentration-integrability-hazard.md`), selected over the
+additive `matrix_hoeffding` consumer row per the priority order's
+trust-surface item — **Step 0 complete on all four zero-consumer scalar
+concentration axioms; DELIVERED as zero new axioms (count stays 10;
+`#print axioms` via `wip/asc_axcheck.lean` on all 21 audited
+declarations: the 17 refutation-family QA lemmas and both proved safety
+lemmas exactly `propext, Classical.choice, Quot.sound`; the two axiom
+consumers honestly carrying `hoeffding_lemma` alone). QA 2731 → 2749
+(+18).**
+
+**Changes:** (1) `hoeffding_lemma` **repaired in place** in
+`Subgaussian.lean`: `[IsProbabilityMeasure μ]` added, conclusion's
+constant corrected `a → √6·a` with the derivation in the docstring
+(cited λ-form → two-sided tail → layer-cake gives
+`E exp(X²/(6a²)) ≤ 2` exactly at `K² = 6a²`; junk-safe because both junk
+mechanisms collapse the norm downward and the conclusion is an upper
+bound). The pre-repair shape was **materially false in two Lean-verified
+ways beyond the two recorded junk mechanisms**, both found by pre-spike
+hand analysis and confirmed by the spike: the *constant defect*
+(`old_hoeffding_lemma_refuted_constant_QA` — at the fair-coin Rademacher
+probability fixture every old hypothesis holds genuinely, yet
+`subgaussianNorm ≥ 6/5 > 1 = a`; `Real.log_two_lt_d9` arithmetic, no
+junk anywhere) and the *guard defect*
+(`old_hoeffding_lemma_refuted_guard_QA` — at the mass-19/10 rescaling
+with the mean still genuinely zero, the norm is `≥ 21/5`, so no constant
+`≤ 4` repairs the old shape; rational arithmetic via
+`Real.log_le_sub_one_of_pos` + `Real.add_one_lt_exp`). (2) The three
+guarded axioms confirmed safe with the discharge *proved on the shelf*:
+`integrable_of_bounded_measurable` (`Hoeffding.lean`) and
+`integrable_sq_sub_mean` (`Bernstein.lean`) — `Integrable.mono'` at
+`integrable_const` from exactly each axiom's guard set. (3) QA +18 in
+`Scalar_QA.lean`: the two refutation witnesses, the norm lower bounds,
+the re-instantiation `hoeffding_lemma_rademacher_QA` (`≤ √6·1` at the
+fixture that kills the old constant), the safety-lemma instances (the
+fixture's mean routed through the first lemma — its first consumer), and
+the arithmetic cores. (4) Records: the proposal (verdicts + delivery
+record + technique findings), the retired subgaussian proposal's
+adjacent-hazard note resolved, `proposals/README.md` (row retired to
+Delivered), the three index files (including the corrected false
+dependency claim "used by Hoeffding and Bernstein inequalities" and the
+closed stale `subgaussian_tail_bound`-as-axiom entry), the Scalar
+README, README's status count, the radar QA axis, the map files' stats
+stamps, the scoreboard (verification row + interpretation bullet), the
+execution plan, and this log.
+
+**Decisive commands and outcomes:** spike first — `lake env lean
+wip/asc_spike.lean` iterated to **zero errors/zero warnings** before any
+shelf edit (catches recorded in the proposal: the pin's `Measurable.pow`
+is the exponent-*function* form — use `Measurable.mul` + `pow_two` for
+natural powers; `le_csInf` requires `Set.Nonempty` + the ∀∈ bound, each
+defining set needing an explicit member — `K = 2` at the probability
+fixture via `exp (1/4) ≤ 2`, `K = 100` at the scaled fixture via
+`exp (1/10000) < 10000/9999` from `add_one_lt_exp` at the negative point
+composed with `exp(x)·exp(−x) = 1`; the strictness discipline — `le_csInf`
+is non-strict, so the scaled refutation proves `≥ 21/5` and refutes
+`≤ 4`, never `≤ 21/5`; numeral-normalization bridges (`show
+(2:ℝ)^2 = 4 from by norm_num`) before matching decimal-statement lemmas
+at `K = 2`/`K = 100` instantiations; the stale-olen recurrence twice at
+the module/QA import boundaries). Then `lake env lean` — zero errors on
+all three changed modules at exactly the pre-existing warning baselines
+(1/2/2, line-shifted) and zero errors on the QA file, whose warning
+count *improved* 9 → 8 (the repair gives `subgaussian_norm_zero_QA` a
+use for its instance); explicit `lake build` targets ✔ (three modules
+1970/1970, QA module); `lake env lean wip/asc_axcheck.lean` — the trust
+boundary exactly as designed; **full `lake build` ✔ (2402/2403, "Build
+completed successfully") immediately followed by
+`python3 scripts/check_build_completeness.py` — after the documented
+mtime remediation (remove artifact + rebuild once) for the one post-build
+docstring rewrap, 123/123 fresh, 0 stale, 0 missing, exit 0**;
+`lint_axioms` (10, no issues), `check_citations` (pass, after one
+prose-line-wrap repair: the checker's `^axiom` pattern had matched the
+docstring phrase "axiom materially false" at a line start),
+`check_markdown_links` pass; scoreboard regenerated idempotent
+(**2749/10/0**); **`python3 scripts/check_scaffold_map_freshness.py`
+exit 0 — mandatory since this run changes a proposal's status header;
+the check caught the 2731 → 2749 stats-stamp drift on its first run, as
+designed, and passed after both map files were synced**.
+
+**Verification:** the two refutation witnesses are negative-witness QA
+in the strategy document's exact sense — fixtures built to knock the
+axiom over, with every hypothesis *genuinely* discharged (bounded
+variable, honest mean-zero integral of an integrable function), so the
+falsity is classical, not a junk-value artifact; the first is
+load-bearing on `subgaussianNorm`'s exact MGF-set definition (a wrong
+threshold constant anywhere breaks the `6/5` lower bound), the second
+proves the repaired axiom's probability-measure hypothesis load-bearing
+by refuting every constant alternative. The repaired statement's own
+interface is exercised at the same fixture (`≤ √6·1`, consistent with
+the proved `6/5 < √6`). QA does not and did not prove `hoeffding_lemma`;
+its two consumers report it honestly in `#print axioms`.
+
+**Remaining risk:** none blocking on the audited four. The recorded open
+residual is the matrix trio's own `MatrixMDS`-shaped junk surface
+(`matrix_hoeffding`/`matrix_bernstein`/`matrix_azuma_hoeffding`), per
+the proposal's Non-goals — `matrix_hoeffding`'s consumer proposal should
+run its Step 0 against it before building.
+
+**Next handoff:** per priority item 0 — the remaining Medium rows: the
+sampled-Laplacian quadratic-form consumer for `matrix_hoeffding` (its
+Step 0 now includes the `MatrixMDS` junk-surface check this audit
+surfaced), the sparsification follow-ons, and the empirical-stationary
+Step 2 once a consumer prices the bias-term shape.
+
+## 2026-08-28T07:03:30Z — Scalar-concentration junk-hazard audit in delivery: four zero-consumer axioms, two candidate defects found in `hoeffding_lemma`
+
+**Run:** `20260828T070330Z-run-1`  
+**Session:** (recorded at terminal entry)  
+**Status:** in-progress  
+**Milestone:** the Active table's 2026-08-28 Medium audit row
+(`audit-scalar-concentration-integrability-hazard.md`), selected over the
+additive `matrix_hoeffding` consumer row per the priority order's
+trust-surface item — the same file family produced one materially false
+axiom on 2026-08-22 and left an explicit warning on these siblings.
+Pre-spike hand analysis found two candidate defects in `hoeffding_lemma`
+beyond the two recorded junk mechanisms: a wrong-constant defect
+(Rademacher threshold `a/√(ln 2) ≈ 1.201a > a` at probability measures)
+and a missing-mass-guard defect (mass-just-under-2 measures make the
+threshold exceed any fixed constant). Plan: spike both refutations plus
+the three safe axioms' integrability discharges, then — if the
+refutations hold — repair `hoeffding_lemma` in place
+(`[IsProbabilityMeasure μ]` + `√6 * a`, derivation recorded), mirror the
+`old_subgaussian_tail_bound_refuted_QA` family, sweep the three index
+files and the retired proposal's adjacent-hazard note, and run the full
+ladder. Zero new axioms; count stays 10.
 
 ## 2026-08-28T04:24:18Z — Fiedler Davis–Kahan Step 2 delivered: the Fiedler-line rotation via the common-kernel identification, the proposal COMPLETE (terminal)
 
@@ -5041,3 +5272,35 @@ untouched; nothing committed.
 **Remaining risk:** none blocking. Priced follow-ons recorded in the proposal: the hypothesis-free general scaling lemma (eigenvalue-multiset machinery the pin lacks; no named consumer), a `k = 1`-hosting fixture (C₁₂) for instance-level two-`k` QA, and the asymptotic family corollary (a named d-regular family with `diam → ∞`).
 
 **Next handoff:** the Active table has no High rows — per priority item 0, fall through to the Medium-High/Medium rows: empirical-stationary-distribution Step 0 (its i.i.d.-sampling prerequisite is delivered), the sampled-Laplacian quadratic-form consumer, the Fiedler-subspace Davis–Kahan Step-0 check, or the sparsification follow-ons.
+
+## 2026-08-28T05:29:30Z — Transit-map freshness reconciliation in delivery: the High row
+
+**Run:** `20260828T052502Z-run-1`  
+**Session:** `ses_fb92bda48ffeA3QDR4b37n04l4`  
+**Status:** in-progress  
+**Milestone:** the Active priority table's only High row (`proposals/verify-scaffold-map-freshness.md`), selected per priority item 0 — the transit map (the operator-facing rendering of the SGT delivery record) drifted from ground truth for days while the pre-commit hook re-rendered it every commit; the fix pattern is the `verify-build-completeness.md` one, a mandatory reconciliation script rather than a process reminder. Deliverable: `scripts/check_scaffold_map_freshness.py` (Tier 1 scoreboard-number + station-parity checks, hard-fail; Tier 2 per-station `source` → proposal-status keyword buckets, fail-loud-not-auto-edit), the `source` schema in both map files, ladder wiring at the five `check_build_completeness.py` locations plus report-only in the hook, and the acceptance-bar fixtures. No Lean, no axioms.
+
+## 2026-08-28T05:46:29Z — Transit-map freshness reconciliation delivered: the check, the source schema, and the ladder wiring (terminal)
+
+**Run:** `20260828T052502Z-run-1`  
+**Session:** `ses_fb92bda48ffeA3QDR4b37n04l4`  
+**Status:** completed  
+**Milestone (delivered):** the Active priority table's only High row (`proposals/verify-scaffold-map-freshness.md`), selected per priority item 0 — **DELIVERED in full; no Lean, no axioms, no QA change (counts stay 2731/10/0, scoreboard regeneration idempotent).**
+
+**Changes:** (1) `scripts/check_scaffold_map_freshness.py` — Tier 1: the scoreboard's generated metrics table is parsed (never re-hardcoded) and every `Repo-wide: N explicit axioms · M QA declarations · K sorries` stamp in either map file must match it (a deleted stamp is its own finding); station parity between the SVG generator's data (parsed via `ast.literal_eval`) and the HTML's data tables (a string-literal-aware recursive brace scanner — a station note embeds `{2t}` inside a quoted string, which ate both a naive `[^0-9]*` regex — HTML entities carry digits — and a first-draft scanner that grabbed spoke objects instead of station objects), pairwise by name on status AND `source`, single-file presence a failure. Tier 2: each cited proposal's first `**Status:**` paragraph (both `**Status:** X` and `**Status: X**` marker spellings accepted — the corpus is not uniform, `alon-boppana-bound.md` uses the second) is keyword-bucketed with **gated-words precedence** (a partly-blocked proposal is not cleanly delivered — and this is exactly what keeps the mixed-phase `spectral-graph-sparsification.md` consistent for the gated Spielman–Srivastava station), then `COMPLETE`/`DELIVERED` → {proved, axiom} (axiom stations with delivered admission proposals are sound), then bare `Proposed` → {open, gated} (the proposal's own sanctioned narrowing: authorized-vs-gated lives in the priority table, not status prose); a station tier outside the bucket fails with the proposal's own status text quoted. (2) The `source` schema in both map files — 32 of 36 stations linked; the four unlinked (Cauchy Interlacing, Foster's Theorem — mixed-phase source; Matrix Concentration — admission predates delivery records; Consensus & Sync.) printed on every run as visible coverage gaps, reasons recorded in the data tables. (3) Ladder wiring at all five `check_build_completeness.py` locations (`scripts/opencode-pursue`'s `verify_for_commit`, `AGENTS.md` § Verification, `docs/2_ARCHITECTURE.md` §10, `scripts/README.md`, this file's format block) plus `.git/hooks/pre-commit` report-only — findings to stderr, never blocking. (4) The proposal's status header → COMPLETE + the delivery record (classifier decisions, the dissolved repair, residuals); `proposals/README.md`'s High row retired + the Delivered-table row (a mid-edit row-clobber of the Fiedler Delivered row was caught by count-check and fully restored — net diff verified as exactly one row modified, one added).
+
+**Decisive commands and outcomes:** `python3 scripts/check_scaffold_map_freshness.py` — **exit 0 on the post-fix tree** (36 stations checked; 32 with a source, 4 without, listed; scoreboard 10 axioms · 2731 QA · 0 sorries); the acceptance-bar fixtures, each a reconstructed pre-fix root in gitignored scratch (removed after): historical stats drift `9 explicit axioms · 1503 QA` in both stamps → **exit 1** with both findings naming the scoreboard's real numbers; a synthetic station in the SVG data only → **exit 1** parity failure; the Alon–Boppana regression (station flipped back to `gated` against its COMPLETE proposal) → **exit 1** with the finding quoting the proposal's own status line; the deleted HTML stamp → **exit 1**; `bash .git/hooks/pre-commit` end-to-end → **exit 0** (SVG regenerated byte-identical — the `source` fields do not render — nothing staged, findings channelled to stderr); `check_markdown_links` / `check_citations` / `lint_axioms` pass after the records sweep; `generate_qa_scoreboard` idempotent (no diff). No Lean source changed, so no `lake build` this run — the Lean tree's last verified state remains the prior run's full build + 123/123 `check_build_completeness`.
+
+**Verification:** the check is falsification-oriented by construction — every tier was demonstrated failing on a reconstructed instance of the exact historical incident it exists to catch, and the fixtures live in the delivery record. Tier 2's honest limits are recorded rather than hidden: it is a forcing function (keyword buckets with named precedence), never an auto-editor, and the note-text-contradiction case stays a documented manual example. One anticipated records repair dissolved under inspection: `decidable-spectral-certificates.md`'s header was read as stale "Proposed" from a truncated preview, but its status paragraph already records "The program is COMPLETE" a sentence later — the classifier reads it correctly, and the misread is recorded in the delivery record as the same preview-truncation error class the check itself guards against.
+
+**Remaining risk:** the stamps' hand-maintained commit-SHA/date text stays unchecked (reconciling it against git state is out of scope for a text ladder step); missing stations for recent deliveries (Ramanujan ceiling, Fiedler Davis–Kahan, empirical-stationary, Multiway, Signed graphs) remain a completeness gap for a human placement decision, per the proposal's Non-goals — flagged, not resolved.
+
+**Next handoff:** the Active table has no High rows — per priority item 0 fall through to the Medium-High/Medium rows (the sampled-Laplacian quadratic-form consumer for `matrix_hoeffding`; the sparsification follow-ons; the empirical-stationary Step 2 once a consumer prices the bias-term shape), or the concentration → subspace-stability pipeline named in the Fiedler program's handoff.
+
+## 2026-08-28T13:25:41Z — Concentration → subspace-stability pipeline in delivery: composing fiedlerLine_stability with edgePerturbation_norm_tail
+
+**Run:** `20260828T132541Z-run-1`  
+**Session:** `ses_fb778a266ffekfoYNH33LtGgB9`  
+**Status:** in-progress  
+**Milestone:** the standing handoff's named next candidate (priority item 0 fall-through — no High rows, only priced follow-ons open): **the concentration → subspace-stability pipeline**, the first join of the two most recent center deliveries. Deliverable: `Derived/EdgePerturbationDrift.lean` — `edgePerturbation_fiedlerSubspace_drift` and `edgePerturbation_fiedlerLine_drift` (high-probability Fiedler rotation under the centered Bernoulli edge design, the `eventStreamProjectorDrift` inclusion idiom at the new design, separation discharged from the base graph's spectral gap via the proved Weyl on the tail event's complement), plus the priced engine follow-on `laplacian_smul`/`laplacian_sum` (Spectral.lean) and the design layer `perturbWeight` with the packaging identity `laplacian (perturbWeight A p ω) = ∑ₑ perturbSummand A p e ω` (EdgePerturbation.lean — the sampled-graph packaging identity's named prerequisite), and the QA section (the identity pinned at the K₂ concrete outcome; the P₃ full-hypothesis line-drift instance with the closed-form bound). Conditional on `matrix_hoeffding` via the tail alone — zero new axioms; the stability side (Davis–Kahan, kernel identification) is proved. SGT leverage: the Fiedler program's payoff statement exercised under a *random* perturbation for the first time, making the kernel-characterization ecosystem load-bearing inside a probability bound.
+

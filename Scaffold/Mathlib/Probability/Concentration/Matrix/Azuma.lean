@@ -96,13 +96,24 @@ sum is over `Finset.range m`. The `m` factor is load-bearing: without it
 the specialization is false already for independent Rademacher sums with
 `m ≥ 2`, whose fluctuation is of order `√m R`.
 
+Statement history: repaired in place 2026-08-28 (run
+`20260828T090419Z-run-1`, Step 0 of
+`proposals/matrix-hoeffding-spectral-gap-estimation.md`): the pre-repair
+statement had no nondegeneracy hypothesis and was materially false at the
+corner `Fintype.card V = 0`, `t = 0` — the tail event is all of `Ω`, so a
+probability measure gives `1` against the bound `2 · 0 · exp … = 0`;
+refuted in hypothesis form as
+`old_matrix_azuma_refuted_fin0_QA` in
+`Scaffold/QA/Concentration/Matrix_QA.lean`. The `[Nonempty V]` guard makes
+explicit the `d ≥ 1` the cited Tropp theorem carries implicitly.
+
 QA: exercised by `matrix_azuma_zero_QA` in
 `Scaffold/QA/Concentration/Matrix_QA.lean`, which instantiates the axiom at
 the constant-zero difference sequence and checks the resulting empty-event
 bound.
 -/
 axiom matrix_azuma_hoeffding {μ : Measure Ω} [IsProbabilityMeasure μ]
-    (m : ℕ) (S : MatrixMDS (V := V) μ) (t : ℝ) (ht : 0 ≤ t) :
+    [Nonempty V] (m : ℕ) (S : MatrixMDS (V := V) μ) (t : ℝ) (ht : 0 ≤ t) :
     μ {ω | ‖∑ k in Finset.range m, S.X k ω‖ ≥ t} ≤
       ENNReal.ofReal (2 * (Fintype.card V : ℝ) *
         Real.exp (-t ^ 2 / (8 * (m : ℝ) * S.R ^ 2)))

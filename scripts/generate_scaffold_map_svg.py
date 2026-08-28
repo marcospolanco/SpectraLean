@@ -4,8 +4,15 @@
 This is a static, single-theme snapshot (no <script>, no CSS variables,
 no interactivity) so it renders directly in GitHub's Markdown viewer via
 a plain <img> tag. The clickable, hoverable version lives at
-docs/scaffold_map.html and carries the same data independently -- update
-both by hand when a proposal's status changes.
+docs/scaffold_map.html and carries the same data independently.
+
+Each station carries an optional `source` naming the proposals/*.md file
+whose status it tracks (None where no proposal exists -- classical core
+entries and not-yet-proposed stations). scripts/check_scaffold_map_freshness.py
+reconciles this table against docs/scaffold_map.html, the QA scoreboard's
+generated numbers, and each cited proposal's own **Status:** line -- so
+"update both by hand when a proposal's status changes" is now enforced
+mechanically rather than remembered.
 """
 import math
 
@@ -17,55 +24,71 @@ STATUS = {
     "gated":    {"label": "Gated on a decision",  "color": "#8A8378", "fill": False, "dash": "3,3"},
 }
 
+# Core landmarks are all "proved" by construction (the roster header says
+# so); the second tuple element is the optional proposals/*.md source that
+# tracks the landmark's delivery record, or None.
 CORE = [
-    "Courant–Fischer", "Cauchy Interlacing",
-    "Cheeger — easy direction", "Cheeger — hard direction",
-    "Weyl's Inequality", "Davis–Kahan sin Θ",
-    "Thomson's Principle", "Foster's Theorem",
+    ("Courant–Fischer", "prove-courant-fischer.md"),
+    ("Cauchy Interlacing", None),
+    ("Cheeger — easy direction", "prove-cheeger-easy-direction.md"),
+    ("Cheeger — hard direction", "discharge-perturbation-axioms.md"),
+    ("Weyl's Inequality", "discharge-perturbation-axioms.md"),
+    ("Davis–Kahan sin Θ", "discharge-perturbation-axioms.md"),
+    ("Thomson's Principle", "electrical-flow-routing.md"),
+    # Foster's Theorem has no clean single source: spectral-graph-sparsification.md
+    # mixes "Phase A DELIVERED" with "Phase B blocked" in one status line, which the
+    # freshness check would classify as gated. Deliberately unlinked, and visible
+    # in that check's no-source coverage list.
+    ("Foster's Theorem", None),
 ]
 
 SPOKES = [
     ("BERNOULLI HEIGHTS", "Probability & High-Dim Stats", [
-        ("Normalized Laplacians", "proved"),
-        ("Walk–Similarity Bridge", "proved"),
-        ("Spectral Gap Transfer", "proved"),
-        ("MCMC Mixing Time", "proved"),
-        ("Subgaussian Tail Bound", "proved"),
-        ("Finite Relative Entropy", "proved"),
-        ("Matrix Concentration", "axiom"),
+        ("Normalized Laplacians", "proved", "mixing-time-bound.md"),
+        ("Walk–Similarity Bridge", "proved", "mixing-time-bound.md"),
+        ("Spectral Gap Transfer", "proved", "mixing-time-bound.md"),
+        ("MCMC Mixing Time", "proved", "mixing-time-bound.md"),
+        ("Subgaussian Tail Bound", "proved", "prove-subgaussian-tail-bound.md"),
+        ("Finite Relative Entropy", "proved", "finite-relative-entropy.md"),
+        # Admitted-axiom station: the audit proposal tracking these axioms is
+        # still Proposed, so linking it would misclassify; the admission itself
+        # predates the proposal system's delivery records.
+        ("Matrix Concentration", "axiom", None),
     ]),
     ("APPLICATION RING", "Consumers of the core", [
-        ("Fiedler Partitioning", "proved"),
+        ("Fiedler Partitioning", "proved", "fiedler-partitioning.md"),
     ]),
     ("KURAMOTO JUNCTION", "Dynamical Systems & Control", [
-        ("Perron–Frobenius", "axiom"),
-        ("Directed Operators", "proved"),
-        ("Heat Semigroup", "proved"),
-        ("Heat — Phase C", "proved"),
-        ("Discrete Affine Convergence", "proved"),
-        ("Consensus & Sync.", "gated"),
+        ("Perron–Frobenius", "axiom", "admit-perron-frobenius.md"),
+        ("Directed Operators", "proved", "directed-graph-operators.md"),
+        ("Heat Semigroup", "proved", "reversibility-and-heat-semigroup.md"),
+        ("Heat — Phase C", "proved", "reversibility-and-heat-semigroup.md"),
+        ("Discrete Affine Convergence", "proved", "discrete-affine-convergence.md"),
+        ("Consensus & Sync.", "gated", None),
     ]),
     ("KIRCHHOFF FLATS", "Statistical Physics", [
-        ("Electrical Flow", "proved"),
-        ("Effective Resistance", "proved"),
-        ("Dirichlet Energy", "proved"),
-        ("Weighted Matrix-Tree", "gated"),
+        ("Electrical Flow", "proved", "electrical-flow-routing.md"),
+        ("Effective Resistance", "proved", "electrical-structure-crust.md"),
+        ("Dirichlet Energy", "proved", "electrical-structure-crust.md"),
+        ("Weighted Matrix-Tree", "gated", "weighted-matrix-tree-theorem.md"),
     ]),
     ("OPEN FRONTIER", "Surveyed, not yet built", [
-        ("Alon–Boppana Bound", "proved"),
-        ("Approx. Spectral Projection", "proved"),
+        ("Alon–Boppana Bound", "proved", "alon-boppana-bound.md"),
+        ("Approx. Spectral Projection", "proved", "approximate-spectral-projection.md"),
     ]),
     ("NEURIPS BAY", "ML & Graph Signal Processing", [
-        ("Resolvent Calculus", "proved"),
-        ("Band Projectors", "proved"),
-        ("Tikhonov Filter", "proved"),
-        ("Tikhonov — Phase 2", "proved"),
-        ("Decidable Certificates", "proved"),
+        ("Resolvent Calculus", "proved", "resolvent-calculus-psd.md"),
+        ("Band Projectors", "proved", "spectral-band-projectors.md"),
+        ("Tikhonov Filter", "proved", "tikhonov-shrinkage-filter.md"),
+        ("Tikhonov — Phase 2", "proved", "hermitian-calculus-consumer-tikhonov-heat.md"),
+        ("Decidable Certificates", "proved", "decidable-spectral-certificates.md"),
     ]),
     ("STOC CITY", "Theoretical CS & Algorithms", [
-        ("Leverage Scores", "proved"),
-        ("Matrix Chernoff Bridge", "proved"),
-        ("Spielman–Srivastava", "gated"),
+        ("Leverage Scores", "proved", "spectral-sparsification-via-leverage-scores.md"),
+        ("Matrix Chernoff Bridge", "proved", "spectral-sparsification-via-leverage-scores.md"),
+        # Phase B of this proposal is the SS sparsification the station tracks, and
+        # its status line's "blocked" language is exactly what keeps the station gated.
+        ("Spielman–Srivastava", "gated", "spectral-graph-sparsification.md"),
     ]),
 ]
 
@@ -121,7 +144,7 @@ parts.append(f'<text x="36" y="52" font-size="32" font-weight="700" fill="{INK}"
 parts.append(f'<text x="36" y="78" font-size="14" fill="{INK_SOFT}" '
              f'font-family="ui-monospace,Consolas,monospace">A hub-and-spoke reading of the SGT core and the seven axes it feeds, colored by proof status.</text>')
 parts.append(f'<text x="36" y="102" font-size="13" fill="{INK_FAINT}" '
-             f'font-family="ui-monospace,Consolas,monospace">Repo-wide: 10 explicit axioms &#183; 2731 QA declarations &#183; 0 sorries &#8212; as of commit 8c5c415, 2026-08-28</text>')
+             f'font-family="ui-monospace,Consolas,monospace">Repo-wide: 10 explicit axioms &#183; 2765 QA declarations &#183; 0 sorries &#8212; as of commit 8c5c415, 2026-08-28</text>')
 
 # ---- legend ----
 lx = 36
@@ -143,7 +166,7 @@ roster_x, roster_y = 36, 186
 parts.append(f'<text x="{roster_x}" y="{roster_y}" font-size="15" font-weight="700" fill="{INK}" '
              f'font-family="ui-sans-serif,Helvetica,Arial,sans-serif">SGT CORE — proved, hard crust</text>')
 col_w = 300
-for i, name in enumerate(CORE):
+for i, (name, _source) in enumerate(CORE):
     col, row = divmod(i, 4)
     x = roster_x + col * col_w
     y = roster_y + 30 + row * 24
@@ -187,7 +210,7 @@ for i, (axis_label, axis_sub, stations) in enumerate(SPOKES):
         f'x2="{CX+dx*last_r:.1f}" y2="{CY+dy*last_r:.1f}" stroke="{RULE}" stroke-width="3"/>'
     )
 
-    for j, (name, status) in enumerate(stations):
+    for j, (name, status, _source) in enumerate(stations):
         r = STATION_START + j * gap
         x, y = CX + dx * r, CY + dy * r
         dot(x, y, status)

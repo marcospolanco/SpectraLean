@@ -74,8 +74,8 @@ bounds for sums of random matrices", FoCM 12(4):389–434, 2012,
 Theorem 1.1): the hypothesis clauses are all proved here, but the tail
 inequality itself is axiom-backed. The statement needs no connectivity —
 centering is connectivity-free by the Slice-2 design. -/
-theorem sparsification_norm_tail (hnn : ∀ i j, 0 ≤ A i j) (q : ℝ) (hq : 0 < q)
-    (t : ℝ) (ht : 0 ≤ t) :
+theorem sparsification_norm_tail [Nonempty V] (hnn : ∀ i j, 0 ≤ A i j)
+    (q : ℝ) (hq : 0 < q) (t : ℝ) (ht : 0 ≤ t) :
     ssMeasure A hA q hq.le
         {ω | ‖ssSampled A hA q ω - imageProjector A hA‖ ≥ t}
       ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) *
@@ -191,8 +191,8 @@ measure the sampled operator's quadratic form uniformly approximates the
 image projector's in the additive form
 `|xᵀ S(ω) x − xᵀ Π x| ≤ t · (x ⬝ᵥ x)` for *every* vector. CONDITIONAL
 ON THE `matrix_bernstein` AXIOM (the norm tail above, transferred). -/
-theorem sparsification_quadForm_tail (hnn : ∀ i j, 0 ≤ A i j) (q : ℝ)
-    (hq : 0 < q) (t : ℝ) (ht : 0 ≤ t) :
+theorem sparsification_quadForm_tail [Nonempty V] (hnn : ∀ i j, 0 ≤ A i j)
+    (q : ℝ) (hq : 0 < q) (t : ℝ) (ht : 0 ≤ t) :
     ssMeasure A hA q hq.le
         {ω | ∃ x : V → ℝ, t * (x ⬝ᵥ x)
           < |quadForm (ssSampled A hA q ω) x

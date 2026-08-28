@@ -34,6 +34,26 @@ namespace Scaffold.Mathlib.Probability.Concentration.Scalar
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
 
+/-- Integrability safety for `hoeffding_inequality`'s hypothesis clauses:
+on a probability measure, a measurable uniformly bounded variable is
+integrable, so the axiom's `h_mean : ∫ X i ∂μ = 0` clause is an honest
+constraint — the mean integral cannot be the junk `0` that
+`MeasureTheory.integral_undef` assigns to non-integrable functions.
+
+Recorded by the integrability audit of 2026-08-28
+(`proposals/audit-scalar-concentration-integrability-hazard.md`, Step
+0): together with the probability-measure constraint, this rules out
+both junk mechanisms that made the sibling
+`subgaussian_tail_bound` axiom materially false. QA: `integrable_rademacher_QA` in
+`Scaffold/QA/Concentration/Scalar_QA.lean`.
+-/
+theorem integrable_of_bounded_measurable {X : Ω → ℝ} {a : ℝ}
+    (h_meas : Measurable X) (h_bound : ∀ ω, |X ω| ≤ a) : Integrable X μ :=
+  Integrable.mono' (integrable_const |a|) h_meas.aestronglyMeasurable
+    (ae_of_all μ fun ω => by
+      have hX : |X ω| ≤ |a| := (h_bound ω).trans (le_abs_self a)
+      simpa [Real.norm_eq_abs] using hX)
+
 /-- Hoeffding's inequality: a sum of independent, centered variables with
 `|X i ω| ≤ a i` satisfies the two-sided tail bound
 `P {|∑ X i| ≥ t} ≤ 2 exp (-t² / (2 ∑ a i²))`.

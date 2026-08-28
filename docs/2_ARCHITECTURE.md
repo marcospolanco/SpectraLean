@@ -146,6 +146,8 @@ The repository pins Lean and Mathlib in `lean-toolchain` and `lakefile.lean`. Th
 
 A full `lake build` exit status alone does not certify every on-disk source: the default target builds the umbrella's import closure, so a file merely present on disk (an interrupted run's fresh draft) is silently outside the checked set. `scripts/check_build_completeness.py` runs after every full build and fails nonzero when any `Scaffold/**/*.lean` source has a missing or mtime-stale `.olean` artifact; its docstring records the remediation calibrated against Lake's content-hash up-to-date semantics.
 
+Documentation freshness has the same shape: the transit map's two hand-maintained data tables (`scripts/generate_scaffold_map_svg.py` and `docs/scaffold_map.html`) once drifted from ground truth for days while the pre-commit hook re-rendered the SVG on every commit. `scripts/check_scaffold_map_freshness.py` reconciles both tables against each other, against the scoreboard's generated numbers, and against each station's cited proposal's own `**Status:**` line; the hook runs it report-only and the verification ladder is the blocking enforcement.
+
 The generated [QA scoreboard](5_QA_SCOREBOARD.md) is the authority for current counts and recorded check results.
 
 ## 11. Contribution workflow
@@ -178,7 +180,22 @@ Community process is defined by `governance/CONTRIBUTING.md`, `MAINTAINERS.md`, 
   and the theorem now states the moment integrably. A recorded residual:
   the same junk-integral surface touches the mean hypotheses of
   `hoeffding_inequality`/`bernstein_inequality` on infinite measures and
-  the `MatrixMDS` set-integrals — their own future Step 0s must check it.
+  the `MatrixMDS` set-integrals — their own future Step 0s must check it
+  (the scalar side was audited safe on 2026-08-28 with proved
+  integrability discharges; see
+  `proposals/audit-scalar-concentration-integrability-hazard.md`).
+  The matrix side's own Step 0 check (2026-08-28,
+  `proposals/matrix-hoeffding-spectral-gap-estimation.md`) found a
+  different, larger defect: **all three matrix concentration axioms
+  (`matrix_hoeffding`, `matrix_bernstein`, `matrix_azuma_hoeffding`) were
+  inconsistent at the degenerate dimension** — at `Fintype.card V = 0`,
+  `t = 0` each instantiates to the provable `1 ≤ 0` (the tail event is
+  all of `Ω`; the `2 · card V` prefactor collapses the bound to `0`).
+  All three were repaired in place with the `[Nonempty V]` guard the
+  cited Tropp statements carry implicitly, with hypothesis-form
+  refutation records in `Matrix_QA.lean`; `matrix_hoeffding` carries no
+  integral clauses at all, so the junk-integral surface does not reach
+  it — the defect there was purely the missing nondegeneracy guard.
 - Spectral-projector idempotence and eigenbasis orthonormality/completeness
   behind `spectralProjector` are proved locally
   (`eigvecOf_inner`, `eigvecOf_complete`, `spectralProjector_idempotent`,

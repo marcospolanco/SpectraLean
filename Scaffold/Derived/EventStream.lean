@@ -108,7 +108,8 @@ QA: exercised by `eventStreamTail_constant_QA` and
 `Scaffold/QA/Derived/EventStream_QA.lean`, which instantiate the theorem
 at a constant (zero-increment) stream.
 -/
-theorem eventStreamTail {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
+theorem eventStreamTail [Nonempty V] {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {μ : Measure Ω}
     [IsProbabilityMeasure μ] (A : Ω → TimeVaryingGraph V) (R : ℝ)
     (h_adapt : ∀ k, StronglyMeasurable[mdsFiltration (randomLaplacianIncrement A) (k + 1)]
       (randomLaplacianIncrement A k))

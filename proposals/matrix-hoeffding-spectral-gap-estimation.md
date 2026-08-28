@@ -1,8 +1,15 @@
 # Proposal: Concentration of a Sampled Laplacian's Quadratic Form — a Real Consumer for Matrix Hoeffding
 
-**Status:** Proposed; **priority:** Medium. This document authorizes no
-Lean changes, axiom admissions, commits, or external publication on its
-own — Step 0 (the survey below) must land before Step 1 begins.
+**Status:** COMPLETE 2026-08-28 (run `20260828T090419Z-run-1`): Steps 0
+and 1 both delivered, plus the **degenerate-dimension repair of all three
+matrix concentration axioms** that Step 0's defect check found mandatory
+first (each of `matrix_hoeffding`, `matrix_bernstein`,
+`matrix_azuma_hoeffding` was materially false — inconsistent — at
+`Fintype.card V = 0`, `t = 0`; repaired with the `[Nonempty V]` guard the
+cited Tropp statements carry implicitly). Zero new axioms (count stays
+10); `matrix_hoeffding` now has its first theorem consumer. This document
+authorizes no further Lean changes, admissions, commits, or external
+publication on its own.
 
 ## The obligation this discharges
 
@@ -97,3 +104,171 @@ form (a strictly stronger and harder statement, likely its own follow-on).
 [Spectral Sparsification via Leverage-Score Sampling](spectral-sparsification-via-leverage-scores.md)
 (the harder, Bernstein-based sibling consumer), `docs/6_SGT_BACKLOG.md`,
 `docs/7_SGT_RADAR.md` axis 7.
+
+## Delivery record (2026-08-28, run `20260828T090419Z-run-1`)
+
+### Step 0 — the verdicts, recorded before any shelf Lean (spiked first: `wip/mh0_spike.lean`, iterated to zero errors/warnings)
+
+1. **The junk/defect surface check (the charge the scalar audit's
+   2026-08-28 residual added to this Step 0) found a materially false
+   corner shared by all three matrix axioms.** `matrix_hoeffding` itself
+   carries no integral clauses at all (centering-free — the
+   `MatrixMDS`-shaped junk surface does not apply to it), but at
+   `Fintype.card V = 0`, `t = 0` it instantiates to the provable
+   `1 ≤ 0`: the tail event `{ω | ‖∑ X i ω‖ ≥ 0}` is all of `Ω`
+   (nonnegativity of the norm), so a probability measure gives `1`,
+   while the dimension prefactor makes the bound
+   `2 · 0 · exp … = 0`. The same corner falsifies `matrix_bernstein`
+   and `matrix_azuma_hoeffding` verbatim (identical prefactor and event,
+   denominators irrelevant at `t = 0`). This is the
+   pre-repair-`cheeger_lower_bound`/`hoeffding_lemma` failure class: an
+   axiom inconsistent at a degenerate corner makes every conditional
+   theorem vacuous, so the repair was mandatory *before* any consumer.
+   Spike evidence: the refutation was elaborated directly against the
+   then-current axiom (`hoeffding_refuted_fin0 : False`).
+2. **The Step-0 checks of the draft statement:** (1) the norm→form
+   transfer exists on the shelf — `abs_quadForm_le_of_l2OpNorm_le`
+   (Sparsification Slice 3), no new proof needed; (2) the
+   "event-stream frontier" pointer is `GraphTheory/Dynamics.lean` +
+   `Derived/EventStream.lean`, the *Azuma* (martingale-difference)
+   route — no Hoeffding consumer exists anywhere, so this proposal
+   composes rather than duplicates (the hypothesis sets are genuinely
+   disjoint: adapted sequences vs independent families); (3) a fixed
+   non-random test vector suffices, **but it must be nonzero** — at
+   `x = 0` the event is all of `Ω` and the quadratic-form corollary is
+   false for large `t` (found in the spike; the guard `x ≠ 0` is in the
+   delivered statements).
+3. **Premise corrections:** the draft's `|quadForm …| ≥ t * ‖x‖²`
+   uses the dot-product norm (delivered at `t * (x ⬝ᵥ x)`, matching the
+   transfer lemma); the named `VariationalTransfer` lemmas
+   (`normalizedLaplacian_psd`, `rayleigh_normalizedLaplacian_degreeSqrt`)
+   are no longer zero-consumer (the irregular-Cheeger program consumed
+   them in-file), so this delivery's fresh loading is
+   `BernoulliProduct`'s matrix transfer layer (second consumer family),
+   the `rankOne` algebra, `laplacian_add`-family engine, and
+   `dotProduct_mulVec_comm_of_isSymm` (first consumer outside the
+   projector-uniqueness layer).
+
+### The repair (Slice A, delivered first)
+
+- All three axioms repaired in place with the `[Nonempty V]` guard
+  (statement-history docstrings record the refuting corner and the
+  derivation that the cited Tropp theorems carry `d ≥ 1` implicitly).
+  At `t = 0` the repaired statements are honest on nonempty `V`:
+  `(1 : ℝ≥0∞) ≤ 2 d` (`two_card_bound_honest_QA`).
+- Refutation records in `Matrix_QA.lean`, in hypothesis form (the old
+  shape instantiated at the corner): `old_matrix_hoeffding_refuted_fin0_QA`,
+  `old_matrix_bernstein_refuted_fin0_QA`, `old_matrix_azuma_refuted_fin0_QA`
+  — each `False` from the instantiated old inequality, standard three
+  axioms only.
+- Consumer threading: `eventStreamTail` and the two
+  `sparsification_*_tail` theorems take the guard as a binder;
+  `eventStreamProjectorDrift` derives it internally from its own
+  `k : Fin (Fintype.card V)` (no signature change); the three zero-QAs
+  take it per-theorem. QA warning baselines unchanged (16/3, verified
+  against the stashed pre-change tree).
+
+### Step 1 — the consumer (Slice B)
+
+- New `Scaffold/Mathlib/GraphTheory/EdgePerturbation.lean` (umbrella
+  import added), three hard-crust layers: the single-edge algebra
+  (`edgeAdj`, `deg_edgeAdj`, and `laplacian_edgeAdj` — the identity
+  `L(edge i j w) = w • (e_i − e_j)(e_i − e_j)ᵀ` joining the design to
+  the `rankOne` algebra, valid also at `i = j` where both sides
+  vanish); the `Matrix.PosSemidef` helpers the pin lacks
+  (`posSemidef_smul_nonneg`, `rankOne_posSemidef`,
+  `posSemidef_mul_self_of_isSymm` — squares of symmetric matrices are
+  PSD, through the self-adjoint coordinate form); and the centered
+  Bernoulli edge-perturbation design (`perturbEdgeLap`,
+  `perturbSummand = (δ_e − p_e) • L_e`) with every repaired-axiom clause
+  *proved*: `stronglyMeasurable_perturbSummand`,
+  `indepFun_perturbSummand` (both through BernoulliProduct's matrix
+  transfer layer), `perturbSummand_isSymm`, and
+  `perturbSummand_sq_le` (`X_e² ⪯ L_e²`).
+- **Finding (statement-shape): the design is sign-free.** No hypothesis
+  on the weight matrix `A` at all — not nonnegativity, not symmetry —
+  because `L_e` is symmetric for every weight and squares of symmetric
+  matrices are PSD; the only load-bearing hypothesis of the clause set
+  is the sampling interval `p e ∈ [0, 1]` (through
+  `(δ_e − p_e)² ≤ 1`). Fenced in QA at `p ≡ 2` (the clause provably
+  fails); witnessed at a negative weight (`epNeg_clause_QA`).
+- New `Scaffold/Derived/EdgePerturbationTail.lean` (umbrella import
+  added): the generic **`matrix_hoeffding_quadForm`** (the fixed-nonzero-
+  vector quadratic-form pullback of the axiom, `x ≠ 0` load-bearing) and
+  the assembled **`edgePerturbation_norm_tail`** +
+  **`edgePerturbation_quadForm_tail`** at the design, with the `Fin n`
+  summand transport by `Fintype.equivFin` + `Equiv.sum_comp`
+  (Sparsification's Finding-B pattern, second consumer). Both tails are
+  conditional on `matrix_hoeffding` alone (`#print axioms` via
+  `wip/mh_axcheck.lean`).
+- QA `Scaffold/QA/Derived/EdgePerturbation_QA.lean` (+12; 2749 → 2765
+  repo-wide with the Matrix_QA repair records): the variance statistic
+  pinned **exactly** (`∑_e L_e² = 4 • v vᵀ`; `‖∑_e L_e²‖ = 8` — with the
+  rank-one norm pin `‖v vᵀ‖ = 2` proved *two-sided*, the lower side by
+  the squared-action bound); the design arithmetic at a concrete
+  outcome (all-true at `p ≡ ½` sums to exactly the unit edge Laplacian,
+  quadratic form `1` at `e₀`); the closed-form tail instance
+  `4 exp(−1/16)`; the degenerate zero-weight graph (event empty at
+  `t > 0`); the interval fence; and the sign-free witness.
+
+### Technique findings (for future runs)
+
+- This pin's `sub_smul` is `(r - s) • y = r • y - s • y` — to prove
+  `M - c • M = (1 - c) • M`, drive the rewrite from the *equation's
+  RHS* (`rw […, sub_smul, one_smul]` closes by rfl), not by seeking the
+  difference form on the left.
+- On `Fin 2`, the literal `2 • M` in a statement can elaborate as the
+  ℕ-tower `nsmul` (`(2 : ℕ) • M`) rather than ℝ-smul — ascribe every
+  scalar in such statements (`(2 : ℝ) • …`), or `rw`/`rfl` fail with a
+  confusing display.
+- `Matrix.IsSymm` is a def (`Aᵀ = A`), not a structure: anonymous
+  constructors fail; `show (M)ᵀ = M` then prove the equation (and
+  `Matrix.IsSymm.eq` for the converse direction).
+- The `omit … in` must precede the docstring, not sit between it and
+  the theorem.
+- PosSemidef's quadratic-form clause at ℝ is *defeq* (not syntactic)
+  `0 ≤ x ⬝ᵥ (M *ᵥ x)` with `star x ≡ x` — `show` transfers it, but
+  `rw` cannot; restate at the dot-product form before rewriting.
+- `ring` fails on `∑ x, -(f x ^ 2 * 12) = ∑ x, -12 * (f x * f x)`
+  (bound-variable atoms); `Finset.sum_congr rfl (fun x _ => ring_nf …)`
+  closes it.
+- `Fintype.sum_prod_type` + `Fin.sum_univ_two` produce pair-literals
+  that do not always syntactically match `(0, 0)`-spelled hypotheses —
+  prefer per-branch `fin_cases` computation over rewriting by
+  pair-facts when the fixture is small.
+
+### Verification
+
+Spike first (`wip/mh0_spike.lean`, all pieces to zero errors/warnings
+before any shelf edit, including the live refutation against the
+pre-repair axiom); `lake env lean` zero errors on every touched module
+(the three axiom files, `Matrix_QA.lean` at its exact 16-warning
+baseline, `EventStream_QA.lean` at 3, the new modules clean, the Derived
+consumers clean); explicit `lake build` targets ✔; `#print axioms` via
+`wip/mh_axcheck.lean` — engine and QA hard crust exactly
+`propext, Classical.choice, Quot.sound`, the two Derived tails and the
+two axiom-instantiating QA pins honestly carrying `matrix_hoeffding`
+alone, the bernstein/azuma zero-QAs honestly carrying theirs; **full
+`lake build` ✔ (2404/2405, "Build completed successfully") immediately
+followed by `check_build_completeness.py` — after the documented
+single-module remediation, 126/126 fresh, 0 stale, 0 missing, exit 0**;
+`lint_axioms` (10, no issues), `check_citations`, `check_markdown_links`
+pass; scoreboard regenerated idempotent (**2765/10/0**); **map freshness
+exit 0** after the stats-stamp sync (mandatory — this delivery changes
+the proposal's status header; the check caught the 2749 → 2765 drift on
+first run, as designed).
+
+### Residuals and priced follow-ons
+
+- The sampled-graph packaging (`∑_e (δ_e − p_e) • L_e` rewritten as
+  `laplacian (sampledAdj ω) − laplacian (expectedAdj)` through
+  `laplacian_smul`/`laplacian_sum` — the latter two engine lemmas are
+  not yet on the shelf) is the natural next slice; the theorem's meaning
+  currently rests on `laplacian_edgeAdj` identifying the blocks as
+  single-edge Laplacians.
+- The uniform (sup-over-x / existential-x) quadratic-form form —
+  `sparsification_quadForm_tail`'s event shape — is an alternative
+  packaging of the same bound.
+- The `2 d` dimension prefactor is not tightened to the matrix-martingale
+  golden factor anywhere in this family (a Tropp-source-level question,
+  not a repair).

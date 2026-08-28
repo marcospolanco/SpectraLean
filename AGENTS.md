@@ -90,6 +90,7 @@ python3 scripts/check_citations.py
 python3 scripts/check_markdown_links.py
 lake build
 python3 scripts/check_build_completeness.py
+python3 scripts/check_scaffold_map_freshness.py
 ```
 
 `check_build_completeness.py` runs after every full `lake build`: a
@@ -98,5 +99,13 @@ on-disk source (an interrupted run once left a broken QA file that the
 full build passed over silently). The script fails nonzero if any
 `Scaffold/**/*.lean` source has a missing or mtime-stale `.olean`
 artifact; its docstring records the calibrated remediation.
+
+`check_scaffold_map_freshness.py` reconciles the transit map's two
+hand-maintained data tables (the SVG generator's and the HTML's)
+against each other, against the scoreboard's generated numbers, and
+against each station's cited proposal's own status line — a delivery
+that changes a proposal's status header is not verified until it
+passes. The pre-commit hook runs it report-only; this ladder step is
+the blocking enforcement.
 
 For Lean changes, directly build or elaborate every changed module and its closest QA consumer; do not rely only on the umbrella target.

@@ -22,7 +22,7 @@ As of August 27, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 10 |
-| QA theorems/lemmas | 2731, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 2765, with no `sorry` or `admit` under `Scaffold/` |
 
 Recent highlights (full per-run history in
 [`docs/AGENT_ACTIVITY.md`](docs/AGENT_ACTIVITY.md); per-result detail in each
@@ -192,6 +192,7 @@ The near-term center is general SGT. Public modules currently cover:
 | Perturbation | `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan,BandDavisKahan,ProjectionGap,Duhamel}` — Weyl's inequality, Davis–Kahan sin Θ, and the band/cluster projector-stability family |
 | Concentration | `Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*` |
 | Spectral sparsification | `GraphTheory.Sparsification`, `Derived.SparsificationTail`, `Probability.BernoulliProduct` — leverage-score sampling; `matrix_bernstein`'s first real theorem consumer |
+| Edge-perturbation concentration | `GraphTheory.EdgePerturbation`, `Derived.EdgePerturbationTail` — centered Bernoulli edge-Laplacian perturbations; `matrix_hoeffding`'s first theorem consumer |
 | Empirical stationary distribution | `Probability.IIDProduct`, `Derived.EmpiricalStationary` — `hoeffding_empirical`'s first theorem consumer |
 | Finite-distribution entropy | `InformationTheory.Entropy` (relative entropy and Shannon entropy, Gibbs' inequality, the entropy maximum — all proved) |
 | Discrete-affine dynamics | `Dynamics.DiscreteAffine` (finite-vector geometric decay and affine-iteration convergence, all proved) |

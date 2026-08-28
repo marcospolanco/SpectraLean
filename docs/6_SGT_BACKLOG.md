@@ -771,6 +771,24 @@ transfer layer — the clause machinery the eventual `matrix_bernstein`
 consumer (the leverage-score sparsifier, Slices 2–3) and the
 empirical-stationary-distribution proposal both need.
 
+**Matrix-Hoeffding consumer delivered + all three matrix concentration
+axioms repaired (2026-08-28,
+`proposals/matrix-hoeffding-spectral-gap-estimation.md`; QA
+2749 → 2765, zero new axioms):** the delivery's Step-0 defect check
+found `matrix_hoeffding`, `matrix_bernstein`, and
+`matrix_azuma_hoeffding` all inconsistent at the degenerate dimension
+(`card V = 0`, `t = 0` gives the provable `1 ≤ 0`); all three repaired
+in place with the `[Nonempty V]` guard, refutation records in
+`Matrix_QA.lean`. `matrix_hoeffding` — the concentration family's last
+zero-consumer dimension-prefactored axiom — now has its first theorem
+consumer: `Derived.EdgePerturbationTail`'s
+`edgePerturbation_norm_tail`/`edgePerturbation_quadForm_tail` on the
+new sign-free centered Bernoulli edge-Laplacian design of
+`GraphTheory.EdgePerturbation` (single-edge algebra joined to the
+`rankOne` family, the PosSemidef helpers the pin lacks, every axiom
+clause proved), conditional on that axiom alone. The sampled-graph
+packaging identity is the priced follow-on.
+
 **Empirical-stationary-distribution Steps 0+1 delivered (2026-08-27,
 `proposals/empirical-stationary-distribution-concentration.md`; QA
 2666 → 2695, zero new axioms):** the V-valued i.i.d. product sampling

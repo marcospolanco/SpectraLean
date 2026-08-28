@@ -1,6 +1,7 @@
 # Proposal: Verify Transit-Map Freshness by Reconciliation, Not the Pre-Commit Hook Alone
 
-**Status:** Proposed 2026-08-28.
+**Status:** **COMPLETE — delivered 2026-08-28** (run `20260828T052502Z-run-1`);
+see the delivery record at the end of this document.
 
 ## The incident this responds to
 
@@ -171,3 +172,92 @@ visible rather than silently treated as "nothing to check").
   commits is a bigger decision than a documentation-freshness checker
   should make unilaterally; Step 1 should default to report-only in the
   hook and hard-fail only in the explicit ladder step.
+
+## Delivery record (2026-08-28, run `20260828T052502Z-run-1`)
+
+Delivered in full, no scope reductions beyond the two the Non-goals
+section pre-authorized (both recorded below). No Lean, no axioms, no QA
+declarations — the deliverable is the script, the `source`-field schema
+in both map files, and the documentation wiring.
+
+**The script: `scripts/check_scaffold_map_freshness.py`.** Tier 1
+parses the scoreboard's generated metrics table (never re-hardcoding
+the numbers), then checks every `Repo-wide: N explicit axioms · M QA
+declarations · K sorries` stamp in either map file against it — a
+deleted stamp is its own finding, "the stats line was deleted, not
+updated". Station parity compares the SVG generator's `CORE`/`SPOKES`
+(parsed via `ast.literal_eval`, so a syntax error in the data table is
+an operational error, not a silent skip) against the HTML's data tables
+(a string-literal-aware brace scanner — needed because a station note
+embeds `{2t}` inside a quoted string, which ate both a naive regex and
+a first-draft scanner), pairwise by name, on status AND on `source`;
+presence in one file only is a failure. Tier 2 reads each cited
+proposal's first `**Status:**` paragraph and keyword-buckets it.
+
+**Classifier decisions, recorded rather than hidden:**
+
+- *Gated-words precedence.* `gated`/`blocked`/decision-required
+  language wins over `COMPLETE`/`DELIVERED` in the same paragraph: a
+  proposal that is partly blocked is not cleanly delivered. This is
+  exactly what keeps the Spielman–Srivastava station (gated, sourced to
+  `spectral-graph-sparsification.md` whose Phase A is delivered but
+  whose Phase B is "not ready — blocked") consistent rather than a
+  false positive — and it is why Foster's Theorem, whose delivery lives
+  in the same mixed file, is deliberately unlinked and appears in the
+  explicit no-source coverage list instead.
+- *The proposed bucket accepts both `open` and `gated`* — the sanctioned
+  narrowing: the authorized-vs-gated distinction lives in
+  `proposals/README.md`'s priority table, not in a proposal's own status
+  prose (`weighted-matrix-tree-theorem.md` says only "Proposed." while
+  the README row says "Low — technical decision required"). The
+  material incident-catching distinction — delivered-vs-not — is kept
+  strict.
+- *Status-marker nonuniformity.* `**Status: COMPLETE …**` (no closing
+  colon inside the marker, `alon-boppana-bound.md`'s spelling) and
+  `**Status:** COMPLETE …` are both accepted; a station whose source
+  uses neither spelling is a finding, not a skip.
+
+**The `source` schema:** 32 of 36 stations are linked across both files
+(8 core, 28 spoke stations); the four unlinked are listed on every run
+as coverage gaps, not hidden: Cauchy Interlacing (no proposal exists —
+the proposal's own anticipated case), Foster's Theorem (mixed-phase
+source file, above), Matrix Concentration (admitted-axiom station whose
+admission predates the delivery-record convention; the audit proposal
+tracking these axioms is still Proposed and would misclassify), and
+Consensus & Sync. (gated on a named consumer that no document tracks).
+The historical note-contradiction case (Matrix Chernoff Bridge's old
+"does not exist" note) stays a documented manual example, as the
+acceptance bar permitted: no cheap general rule checks note *text*
+against evidence, and none was forced.
+
+**Acceptance bar, all reproduced against reconstructed pre-fix states**
+(gitignored fixture roots, since deleted): the historical stats drift
+(9 axioms/1503 QA against the current scoreboard) → nonzero with the
+finding naming both numbers; a synthetic station present in one file's
+data only → nonzero parity failure; the Tier-2 regression fixture
+(Alon–Boppana station flipped back to `gated` against its COMPLETE
+proposal) → nonzero with the finding quoting the proposal's own status
+line; the deleted HTML stamp → nonzero. The post-fix tree exits 0.
+
+**Wiring:** `scripts/opencode-pursue`'s `verify_for_commit` (immediately
+after `check_build_completeness.py`), `AGENTS.md` § Verification,
+`docs/2_ARCHITECTURE.md` §10, `scripts/README.md`,
+`docs/AGENT_ACTIVITY.md`'s format block (a delivery changing a
+proposal's status header now must record this check passing), and
+`.git/hooks/pre-commit` in report-only mode (findings to stderr, never
+blocking — blocking stays in the ladder step).
+
+**One anticipated repair dissolved.** The plan expected to repair
+`decidable-spectral-certificates.md`'s status header, read as "Proposed"
+in a truncated preview; the full paragraph already records "The program
+is COMPLETE" one sentence later, and the classifier reads it correctly.
+The stale-header premise was an artifact of previewing only the first
+line-and-a-half — worth recording, since it is the same reading error
+class this proposal exists to catch humans making.
+
+**Residual, known and accepted:** the stamps' "as of commit SHA, date"
+text remains hand-maintained and unchecked — reconciling it against git
+state is out of scope for a text-parsing ladder step. Missing stations
+for delivered results (Ramanujan ceiling, Fiedler Davis–Kahan, the
+empirical-stationary consumer, Multiway, Signed graphs) remain a
+completeness gap for a human placement decision, per Non-goals.

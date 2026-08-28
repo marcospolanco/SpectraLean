@@ -1,6 +1,17 @@
 # Proposal: Audit the Four Zero-Consumer Scalar Concentration Axioms for the Subgaussian Junk-Integral Hazard
 
-**Status:** Proposed 2026-08-28.
+**Status:** DELIVERED 2026-08-28 (run `20260828T070330Z-run-1`) — Step 0
+complete for all four axioms, with one materially false axiom found and
+repaired. Per-axiom verdicts: `hoeffding_lemma` **materially false in
+two ways beyond the two recorded junk mechanisms, repaired in place**
+(probability-measure guard + `√6·a` constant; two refutation witnesses
+proved in QA with genuinely-satisfied hypotheses);
+`hoeffding_inequality`, `bernstein_inequality`,
+`bernstein_bounded_variance` **audited and confirmed sound** against the
+junk-integral hazard — their guard set (`IsProbabilityMeasure` + bounded
++ measurable) discharges integrability through two new proved safety
+lemmas left on the shelf. Zero new axioms; the explicit axiom count
+stays 10. Delivery record below.
 
 Assessed from `Scaffold/Mathlib/Probability/Concentration/Scalar/Bernstein.lean`
 (`bernstein_inequality`, `bernstein_bounded_variance`),
@@ -193,3 +204,106 @@ not its answer.
   restatement without a demonstrated defect is exactly the kind of
   change this repository's Step 1 contract forbids
   (`discharge-perturbation-axioms.md`'s precedent).
+
+## Delivery record (2026-08-28, run `20260828T070330Z-run-1`)
+
+Step 0 ran as specified — one spike per axiom, in the prescribed order —
+and produced the highest-value outcome scope item 2 anticipated, though
+not through the mechanism the proposal predicted.
+
+**`hoeffding_lemma`: materially false — two defects, both Lean-verified.**
+The proposal's "honesty note" hand-trace (junk collapses the norm
+downward; the conclusion is an upper bound) turned out to be *correct
+for the junk mechanisms* — but it missed that the axiom is false for
+classical reasons on perfectly well-behaved spaces:
+
+1. **Constant defect** (`old_hoeffding_lemma_refuted_constant_QA`): at
+   the fair-coin Rademacher fixture `rademacherX` on `rademacherMeasure`
+   (`½·(δ_true + δ_false)`, a genuine probability measure), every
+   hypothesis of the old axiom holds genuinely — `|±1| ≤ 1`, and
+   `∫ X ∂μ = 0` as an *honest* integral of an integrable bounded
+   variable — yet the defining set only contains `K` with
+   `K² ≥ 1/log 2`, so `subgaussianNorm ≥ 6/5 > 1 = a`. The refutation
+   needs no junk values at all: `Real.log_two_lt_d9` gives
+   `log 2 < 0.6932 < 25/36 ≤ 1/K²` for `K ≤ 6/5`, hence
+   `exp (1/K²) > 2`, so `K` is excluded.
+2. **Guard defect** (`old_hoeffding_lemma_refuted_guard_QA`): at the
+   mass-`19/10` rescaling `scaledRademacherMeasure` (finite, *not*
+   probability; mean still genuinely zero by cancellation), the
+   threshold `1/√(log (2/M))` exceeds `4` — every `K ≤ 21/5` is
+   excluded via `log (20/19) ≤ 1/19 < 25/441 ≤ 1/K²` (rational
+   arithmetic plus `Real.log_le_sub_one_of_pos`, no decimal bounds
+   needed). Since the norm is `≥ 21/5` there, **no** constant `≤ 4`
+   repairs the old statement: the missing probability-measure guard is
+   load-bearing, not decorative.
+
+**The repair** (same name, per the subgaussian-retirement template;
+architecture §9 emergency-repair precedent): `hoeffding_lemma` now
+carries `[IsProbabilityMeasure μ]` and concludes
+`subgaussianNorm X μ ≤ √6 * a`. The `√6` is derived, not asserted from
+a source: the cited λ-form (Vershynin Lemma 2.6.2,
+`E exp(λX) ≤ exp(λ²a²/2)`) gives the two-sided tail
+`P {|X| ≥ x} ≤ 2 exp(−x²/(2a²))`, and layer-cake integration of
+`Y = exp(X²/K²)` yields `E Y ≤ 1 + 2/(K²/(2a²) − 1) = 2` exactly at
+`K² = 6a²`. Junk safety of the repaired statement: both junk
+mechanisms collapse the norm *downward* (empty set → `sInf = 0`; full
+set via junk-zero integrals → `sInf = 0`) and the conclusion is an
+upper bound, so non-integrable/non-measurable inputs cannot falsify it;
+the full derivation is in the axiom's docstring. The repaired statement
+is re-instantiated at the refuting fixture
+(`hoeffding_lemma_rademacher_QA`: `≤ √6·1`, consistent with the proved
+`6/5` lower bound since `6/5 < √6`), and the existing
+`subgaussian_norm_zero_QA` consumer carries over unchanged at `a = 0`
+(`√6·0 = 0`).
+
+**The three guarded axioms: confirmed sound, with the safety lemmas left
+on the shelf.** `integrable_of_bounded_measurable` (in `Hoeffding.lean`)
+proves `Integrable X μ` from exactly `h_meas` + `h_bound` +
+`IsProbabilityMeasure μ` — so `hoeffding_inequality`'s `h_mean` clause
+is an honest constraint, never a junk-integral vacuity.
+`integrable_sq_sub_mean` (in `Bernstein.lean`) proves the centered-square
+integrability behind both Bernstein axioms' variance statistics the same
+way (bound `(|a| + |∫X|)²`, `Integrable.mono'` at `integrable_const`,
+which the probability hypothesis makes available). Both lemmas are
+consumed by QA at the Rademacher fixture
+(`integrable_rademacher_QA`, `integrable_sq_sub_mean_rademacher_QA`),
+and `rademacherMeasure_mean_QA` itself routes integrability through the
+first lemma — the audit's finding made durable and reusable. Per the
+Non-goals, no retirement attempt was manufactured for these three.
+
+**Technique findings** (for future Step-0s on this shelf): the pin's
+`Measurable.pow` is the exponent-*function* version — for natural
+powers use `Measurable.mul` + `pow_two` or `measurable_pow.comp`;
+`le_csInf` in this pin requires `Set.Nonempty` *and* the ∀∈ bound (the
+documented Fiedler-run note holds; each defining set needed an explicit
+member — `K = 2` at the probability fixture via `exp (1/4) ≤ 2`, and
+`K = 100` at the scaled fixture via `exp (1/10000) < 10000/9999`, the
+latter from `add_one_lt_exp` at the negative point composed with
+`exp (x)·exp(−x) = 1`); strictness discipline — `le_csInf` yields a
+non-strict lower bound, so a refutation at threshold `c` must refute
+`≤ c'` for some `c' < c` (the scaled refutation proves `≥ 21/5` and
+refutes `≤ 4`, not `≤ 21/5`); the numeral-normalization trap — after
+instantiating at `K = 2`/`K = 100`, integrals display `1 / 2 ^ 2` and
+`1 / 100 ^ 2`, so numeric bridges (`show (2:ℝ)^2 = 4 from by norm_num`)
+are needed before matching decimal-statement lemmas; the stale-olen
+recurrence at the module/QA import boundary (rebuild module targets
+before elaborating the consumer), twice this run after the two
+stash-pop baseline comparisons.
+
+**Verification:** spike first (`wip/asc_spike.lean`, zero errors/warnings
+before any shelf edit); `lake env lean` zero errors on all three changed
+modules with warnings exactly at the pre-existing baselines (1/2/2,
+line-shifted) and zero errors on the QA file whose warning count
+*improved* 9 → 8 (the repair gives `subgaussian_norm_zero_QA` a use for
+the probability-measure instance); explicit `lake build` targets ✔ (the
+three modules 1970/1970, the QA file); `#print axioms` via
+`wip/asc_axcheck.lean` on all 21 audited declarations — the 17
+refutation-family and both safety lemmas exactly
+`propext, Classical.choice, Quot.sound`, the two axiom consumers
+(`subgaussian_norm_zero_QA`, `hoeffding_lemma_rademacher_QA`) carrying
+`hoeffding_lemma` and nothing else beyond the standard three — the
+delivery's entire trust boundary. Axiom count stays 10 (one repaired in
+place, none added or removed); `lint_axioms`, `check_citations`,
+`check_markdown_links`, scoreboard regeneration, map-freshness check,
+full `lake build` + `check_build_completeness` — see the terminal
+activity entry for the recorded outcomes.

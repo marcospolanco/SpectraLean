@@ -220,7 +220,7 @@
       <h1>Scaffold Transit Map</h1>
       <div class="sub">A hub-and-spoke reading of the spectral-graph-theory core and the five research axes it feeds — same metaphor as <code>wip/driving.md</code>, redrawn as data instead of an illustration so it can be redeployed as proofs land.</div>
     </div>
-    <div class="stamp">as of commit <b id="stamp-sha">73ccbff</b><br>2026-08-24</div>
+    <div class="stamp">as of commit <b id="stamp-sha">8c5c415</b><br>2026-08-28</div>
   </div>
 
   <div class="stats" id="stats"></div>
@@ -295,8 +295,8 @@
         { name: "Perron–Frobenius", status: "axiom", note: "Irreducible nonnegative matrices; admitted 2026-08-22, no strict-dominance clause." },
         { name: "Directed Operators", status: "proved", note: "directedNormalizedLaplacian; program complete 2026-08-22, zero new axioms." },
         { name: "Heat Semigroup", status: "proved", note: "heatKernel; Phases A+B complete 2026-08-23 (identity, semigroup law, mass conservation, DC limit)." },
-        { name: "Heat — Phase C", status: "open", note: "Derivative at t=0 + first-order remainder bound; opened for the spectral-proof rewrite." },
-        { name: "Discrete Affine Convergence", status: "open", note: "Finite-vector geometric decay + affine-iteration convergence; new proposal, not the iceboxed ODE gap." },
+        { name: "Heat — Phase C", status: "proved", note: "Derivative at t=0 + first-order remainder bound; delivered 2026-08-23, program complete." },
+        { name: "Discrete Affine Convergence", status: "proved", note: "Finite-vector geometric decay + affine-iteration convergence; delivered 2026-08-23 in one run, zero new axioms." },
         { name: "Consensus & Sync.", status: "gated", note: "General graph semigroups remain gated pending a named consumer." }
       ]
     },
@@ -312,8 +312,8 @@
     {
       id: "frontier", label: "OPEN FRONTIER", sub: "Surveyed, not yet built",
       stations: [
-        { name: "Alon–Boppana Bound", status: "gated", note: "Step-0 survey complete — variational/Nilli route recommended, awaiting an operator decision." },
-        { name: "Approx. Spectral Projection", status: "progress", note: "Lanczos/Kaniel–Paige route cleared; Step 1a (interface layer) is next." }
+        { name: "Alon–Boppana Bound", status: "proved", note: "Adopted 2026-08-26, delivered COMPLETE 2026-08-27 (Nilli's variational/test-vector route, diameter-dependent form); first theorem consumer (Ramanujan Expansion Ceiling) delivered same day." },
+        { name: "Approx. Spectral Projection", status: "proved", note: "Lanczos/Kaniel–Paige route; Steps 0, 1a, 1b, 1c all delivered 2026-08-23/24, program complete." }
       ]
     },
     {
@@ -322,16 +322,16 @@
         { name: "Resolvent Calculus", status: "proved" },
         { name: "Band Projectors", status: "proved" },
         { name: "Tikhonov Filter", status: "proved" },
-        { name: "Tikhonov — Phase 2", status: "open", note: "Hard-filter limit + finite tail-suppression corollary; opened for the spectral-proof rewrite." },
+        { name: "Tikhonov — Phase 2", status: "proved", note: "Recovered as a functional-calculus instance; delivered COMPLETE 2026-08-25 alongside the Heat instance." },
         { name: "Decidable Certificates", status: "proved" }
       ]
     },
     {
       id: "northwest", label: "STOC CITY", sub: "Theoretical CS & Algorithms",
       stations: [
-        { name: "Leverage Scores", status: "gated" },
-        { name: "Matrix Chernoff Bridge", status: "gated", note: "The cited theorem does not exist anywhere in the repository — not a citation fix." },
-        { name: "Spielman–Srivastava", status: "gated", note: "Sparsification Phase B blocked on the Chernoff gap above." }
+        { name: "Leverage Scores", status: "proved", note: "Spectral sparsification via leverage-score sampling; Step 1 COMPLETE 2026-08-27 across three slices — matrix_bernstein's first real theorem consumer." },
+        { name: "Matrix Chernoff Bridge", status: "proved", note: "matrix_bernstein already existed, imported, and is now consumed (Derived/SparsificationTail.lean) — the old 'does not exist' finding was a stale path-literal check, corrected 2026-08-26." },
+        { name: "Spielman–Srivastava", status: "gated", note: "This document's own Phase B is superseded by the Leverage-Score proposal (delivered, see above) and is not being pursued under its original three-path framing." }
       ]
     }
   ];
@@ -481,6 +481,6 @@
   addStat("in progress", counts.progress, "var(--st-progress)");
   addStat("gated on a decision", counts.gated, "var(--st-gated)");
   document.getElementById("repo-stamp").textContent =
-    "Repo-wide: 9 explicit axioms · 1503 QA declarations · 0 sorries";
+    "Repo-wide: 10 explicit axioms · 2731 QA declarations · 0 sorries";
 })();
 </script>

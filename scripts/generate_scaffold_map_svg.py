@@ -41,8 +41,8 @@ SPOKES = [
         ("Perron–Frobenius", "axiom"),
         ("Directed Operators", "proved"),
         ("Heat Semigroup", "proved"),
-        ("Heat — Phase C", "open"),
-        ("Discrete Affine Convergence", "open"),
+        ("Heat — Phase C", "proved"),
+        ("Discrete Affine Convergence", "proved"),
         ("Consensus & Sync.", "gated"),
     ]),
     ("KIRCHHOFF FLATS", "Statistical Physics", [
@@ -52,19 +52,19 @@ SPOKES = [
         ("Weighted Matrix-Tree", "gated"),
     ]),
     ("OPEN FRONTIER", "Surveyed, not yet built", [
-        ("Alon–Boppana Bound", "gated"),
-        ("Approx. Spectral Projection", "progress"),
+        ("Alon–Boppana Bound", "proved"),
+        ("Approx. Spectral Projection", "proved"),
     ]),
     ("NEURIPS BAY", "ML & Graph Signal Processing", [
         ("Resolvent Calculus", "proved"),
         ("Band Projectors", "proved"),
         ("Tikhonov Filter", "proved"),
-        ("Tikhonov — Phase 2", "open"),
+        ("Tikhonov — Phase 2", "proved"),
         ("Decidable Certificates", "proved"),
     ]),
     ("STOC CITY", "Theoretical CS & Algorithms", [
-        ("Leverage Scores", "gated"),
-        ("Matrix Chernoff Bridge", "gated"),
+        ("Leverage Scores", "proved"),
+        ("Matrix Chernoff Bridge", "proved"),
         ("Spielman–Srivastava", "gated"),
     ]),
 ]
@@ -121,7 +121,7 @@ parts.append(f'<text x="36" y="52" font-size="32" font-weight="700" fill="{INK}"
 parts.append(f'<text x="36" y="78" font-size="14" fill="{INK_SOFT}" '
              f'font-family="ui-monospace,Consolas,monospace">A hub-and-spoke reading of the SGT core and the seven axes it feeds, colored by proof status.</text>')
 parts.append(f'<text x="36" y="102" font-size="13" fill="{INK_FAINT}" '
-             f'font-family="ui-monospace,Consolas,monospace">Repo-wide: 9 explicit axioms &#183; 1503 QA declarations &#183; 0 sorries &#8212; as of commit 73ccbff, 2026-08-24</text>')
+             f'font-family="ui-monospace,Consolas,monospace">Repo-wide: 10 explicit axioms &#183; 2731 QA declarations &#183; 0 sorries &#8212; as of commit 8c5c415, 2026-08-28</text>')
 
 # ---- legend ----
 lx = 36

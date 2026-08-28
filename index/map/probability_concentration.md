@@ -66,6 +66,22 @@ empirical-stationary-distribution proposal names)
 | `integral_coord_smul` | proved | `∫ (δ_e) • M = p e • M` — the matrix centering building block |
 | `integral_coord_center_smul` | proved | `∫ ((δ_e / p e) − 1) • M = 0` at `p e ≠ 0` — the `h_mean` clause shape |
 
+### IID Product Space (V-valued)
+
+**Module**: `Scaffold.Mathlib.Probability.IIDProduct`
+
+| Declaration | Kind | Description |
+|-------------|------|-------------|
+| `iidMass` / `iidPMF` | definition | The i.i.d. product PMF on `ι → V` at a normalized factor `q : V → ℝ`; the mass hypotheses load-bearing (fenced in QA) |
+| `sum_mass_eq_one` / `sum_iidMass_eq_one` | proved | The factor and joint masses sum to one |
+| `sum_coord_mul` / `sum_coord2_mul` | proved | The one-/two-coordinate factorized marginals (independence's arithmetic core) |
+| `measurable_coord` | proved | Measurability of coordinate projections at the product σ-algebra |
+| `toMeasure_cyl` | proved | Coordinate-cylinder measures are factor masses |
+| `indepFun_coord` | proved | Pairwise `IndepFun` of the V-valued projections |
+| `measurable_indicator_coord` | proved | The `h_meas` clause shape of `hoeffding_empirical` at coordinate indicators |
+| `integral_indicator` | proved | `∫ 1_{ω e = i} ∂μ = q i` — the mean-clause constant the empirical form's centering collapses to |
+| `indepFun_indicator_coord` | proved | The `h_indep` clause shape of `hoeffding_empirical` at coordinate indicators |
+
 ## Matrix Concentration
 
 All statements are over the spectral norm (`Matrix.L2OpNorm`), the
@@ -122,6 +138,13 @@ matrices defined in `Matrix/Basic.lean`.
 |-------|-------------|--------|
 | `freedman_inequality` | Martingale with variance process | Freedman (1975) |
 | `gaussian_matrix_concentration` | Gaussian matrix spectral norm | Vershynin Thm 5.3.1 |
+
+**Module**: `Scaffold.Derived.EmpiricalStationary` (derived layer; the two theorems below are axiom-backed, honestly reported by `#print axioms`)
+
+| Declaration | Kind | Description | Consumes |
+|-------------|------|-------------|----------|
+| `hoeffding_empirical_iid` | axiom-backed derived | The empirical visit frequency of `i` in `n` i.i.d. `q`-samples concentrates around `q i` at `2 exp(−2nt²)`; `n ≠ 0` load-bearing at the centering collapse | `hoeffding_empirical` |
+| `empiricalWalkDistribution_tail` | axiom-backed derived | The graph instance at `q = walkDistribution A t₀ x`: `P{\|p̂_i(n) − ν_{t₀} i\| ≥ t} ≤ 2 exp(−2nt²)`; no symmetry/connectivity/mixing hypothesis | `hoeffding_empirical` |
 
 ## Usage Patterns
 

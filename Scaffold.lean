@@ -48,11 +48,13 @@ import Scaffold.Mathlib.Probability.Concentration.Matrix.Hoeffding
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Bernstein
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Azuma
 import Scaffold.Mathlib.Probability.BernoulliProduct
+import Scaffold.Mathlib.Probability.IIDProduct
 import Scaffold.Mathlib.GraphTheory.Sparsification
 import Scaffold.Mathlib.InformationTheory.Entropy
 import Scaffold.Derived.EventStream
 import Scaffold.Derived.ProjectorDrift
 import Scaffold.Derived.SparsificationTail
+import Scaffold.Derived.EmpiricalStationary
 
 /-!
 # Scaffold library root

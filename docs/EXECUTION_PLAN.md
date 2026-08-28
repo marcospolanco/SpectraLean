@@ -7,10 +7,102 @@ holds the append-only narrative.
 ## Active milestone
 
 None — see the delivered milestone below and the standing handoff.
-The Ramanujan Expansion Ceiling row (the Active table's only High)
-was **delivered this run** and retired to the Delivered table; with
-no High rows remaining, the next run falls through to the
-Medium-High/Medium rows per priority item 0.
+The empirical-stationary-distribution row (the Active table's top
+Medium-High row; no High rows remain) had Steps 0+1 **delivered this
+run** and retired to the Delivered table with Step 2 priced-deferred;
+the next run falls through to the remaining Medium-High/Medium rows
+per priority item 0.
+
+------
+
+## Delivered milestones (most recent first)
+
+**Empirical-stationary-distribution Steps 0+1 — the V-valued i.i.d.
+sampling space and `hoeffding_empirical`'s first theorem consumer;
+`proposals/empirical-stationary-distribution-concentration.md` (the
+Active table's top Medium-High row); run 1, 2026-08-27, run
+`20260827T234233Z-run-1`; selected per priority item 0 fall-through
+(no High rows): DELIVERED — zero new axioms (count stays 10;
+`#print axioms` via `wip/esd_axcheck.lean` + `wip/esd_qa_axcheck.lean`:
+the 14 sampling-module declarations and both Mixing lemmas exactly
+`propext, Classical.choice, Quot.sound`; the two Derived theorems and
+the three tail-instantiating QA pins honestly carry
+`hoeffding_empirical` — the delivery's trust boundary, nothing else).
+QA 2666 → 2695 (+29, the new `Scaffold/QA/Probability/IIDProduct_QA.lean`
+and `Scaffold/QA/Derived/EmpiricalStationary_QA.lean`).**
+
+**Step 0 (the survey verdict, recorded in the proposal before any
+shelf Lean):** no V-valued i.i.d. measure exists in the shelf (only
+`bernPMF` on `ι → Bool`); the minimal object is BernoulliProduct's
+construction at an arbitrary normalized `q : V → ℝ` — the arithmetic
+core generalizing verbatim, with the σ-algebra on `V` honestly
+carried as `[MeasurableSpace V] [MeasurableSingletonClass V]`
+instance hypotheses (automatic on `Fin n` fixtures). One graph-side
+gap found and filled: `walkDistribution_nonneg` (only
+`sum_walkDistribution` existed).
+
+**Step 1 delivered** in three pieces: `Scaffold/Mathlib/Probability/
+IIDProduct.lean` (the sampling space: `iidPMF`, the factorized
+marginals, cylinder measures, `indepFun_coord`, and the three
+`hoeffding_empirical` clause shapes at coordinate indicators —
+`measurable_indicator_coord`, `integral_indicator`,
+`indepFun_indicator_coord`; pure hard crust, consumer-neutral);
+`walkTransitionMatrix_nonneg` + `walkDistribution_nonneg` in
+`Mixing.lean`; and `Scaffold/Derived/EmpiricalStationary.lean` —
+**`hoeffding_empirical_iid`** (the generic composition at any
+normalized `q`; `n ≠ 0` load-bearing at the centering collapse) and
+**`empiricalWalkDistribution_tail`** (the graph instance at
+`q = walkDistribution A t₀ x`: `P{|p̂_i(n) − ν_{t₀} i| ≥ t} ≤
+2 exp(−2nt²)`, hypotheses just nonnegative weights and positive
+degrees — no symmetry, no connectivity, no mixing).
+
+**Verification:** spike first (`wip/esd0_spike.lean` iterated to
+zero errors/warnings before any shelf Lean; technique findings
+recorded in the proposal's delivery record — the function-space-∑
+binder-annotation elaboration trap, the semantic-vs-linter tension on
+`omit` of section variables pulled into `iidPMF`'s signature by
+`Finset.univ`, the `Fin 2`-value enumeration idiom via
+`(by omega) + Fin.ext` around the recorded `fin_cases`-wrapper quirk,
+`← add_assoc`'s left-associated 4-atom chain, the Nat-cast spelling
+in exponent rewrites, and `abs_of_nonpos` for negative deviations);
+`lake env lean` zero errors/zero warnings on all five touched/new
+files; explicit `lake build` targets ✔ (2006/2006, 2192/2192,
+2210/2210); **full `lake build` ✔ (2402/2403, "Build completed
+successfully") immediately followed by `check_build_completeness.py`
+— after the documented remediation for the one QA module outside the
+umbrella's closure, 123/123 fresh, 0 stale, 0 missing, exit 0**;
+`lint_axioms` (10, no issues), `check_citations`,
+`check_markdown_links` pass after the record sweep; scoreboard
+regenerated (**2695/10/0**). Records updated: the proposal (status
+header + Step-0 verdict + Step-1 delivery record with technique
+findings + Step-2 deferral), `proposals/README.md` (the row marked
+delivered with Step 2 deferred), README (2695; two new module-table
+rows; the coverage-snapshot axis 7 → 4.5 with the date), the radar
+(QA axis synced 2666 → 2695 across 64 modules; **axis 7 re-scored
+4.0 → 4.5** — the axis's own recorded raise trigger, "a real theorem
+consumer of an admitted concentration axiom," now met twice over, by
+`matrix_bernstein` at Slice 3 and `hoeffding_empirical` here, with
+the Slice-3 consumer credited on the axis as a records repair), the
+scoreboard (verification row + interpretation bullet), the backlog
+(the delivery clause), the index maps (`probability_concentration.md`
+— the IID Product Space section + the EmpiricalStationary derived
+consumer block; `spectral_graph.md` — the walk-law nonnegativity
+rows), this plan, and the activity log. Nothing committed; the prior
+runs' uncommitted deliveries preserved untouched.
+
+**Remaining risk:** none blocking. The stationarity-limit form
+(concentration around `stationaryVec` with the mixing decay folded
+in as a bias term) is the proposal's priced deferred Step 2, gated on
+a consumer naming the bias-term shape. The sampling space carries
+its σ-algebra as instance hypotheses — any consumer at an abstract
+vertex type must supply them (`Fin n` fixtures are automatic).
+
+**Next milestone (open):** per priority item 0 — the remaining
+Medium-High/Medium rows (the sampled-Laplacian quadratic-form
+consumer for `matrix_hoeffding`; the Fiedler-subspace Davis–Kahan
+Step-0 check against the delivered Band family; the sparsification
+follow-ons), or the deferred Step 2 above once a consumer prices the
+bias-term shape.
 
 ------
 

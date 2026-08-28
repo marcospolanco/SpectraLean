@@ -755,6 +755,21 @@ transfer layer — the clause machinery the eventual `matrix_bernstein`
 consumer (the leverage-score sparsifier, Slices 2–3) and the
 empirical-stationary-distribution proposal both need.
 
+**Empirical-stationary-distribution Steps 0+1 delivered (2026-08-27,
+`proposals/empirical-stationary-distribution-concentration.md`; QA
+2666 → 2695, zero new axioms):** the V-valued i.i.d. product sampling
+space `Probability.IIDProduct` (the BernoulliProduct construction at
+an arbitrary normalized factor), the walk-law nonnegativity layer
+(`walkTransitionMatrix_nonneg`/`walkDistribution_nonneg` in
+`Mixing.lean`), and `Derived.EmpiricalStationary` —
+**`hoeffding_empirical`'s first theorem consumer**: the fixed-time
+empirical visit-frequency concentration
+`P{|p̂_i(n) − ν_{t₀} i| ≥ t} ≤ 2 exp(−2nt²)`, conditional on that axiom
+alone with every hypothesis clause proved hard crust, no
+symmetry/connectivity/mixing hypothesis. The stationarity-limit form
+(folding the mixing decay in as a bias term) is the proposal's priced
+deferred Step 2.
+
 **Sparsification Step 1, Slice 2 delivered (2026-08-27, the same
 proposal; pure hard crust, zero new axioms, QA 2609 → 2632):**
 `GraphTheory/Sparsification.lean` — the deterministic SS algebra, every

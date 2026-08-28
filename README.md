@@ -22,7 +22,7 @@ As of August 27, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 10 |
-| QA theorems/lemmas | 2666, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 2695, with no `sorry` or `admit` under `Scaffold/` |
 
 The remaining trust surface is: **Perron–Frobenius for irreducible
 nonnegative matrices**
@@ -439,6 +439,8 @@ The near-term center is general SGT. Public modules currently cover:
 | Deterministic SS algebra + sampled operator (sparsification) | `GraphTheory.Sparsification` (delivered 2026-08-27, `proposals/spectral-sparsification-via-leverage-scores.md` Steps 1 Slices 2–3 — the deterministic core of leverage-score sparsification, every input the `matrix_bernstein` assembly consumes, plus since Slice 3 the sampled operator and transfer layer: the rank-one algebra with the norm bound `‖v vᵀ‖ ≤ v ⬝ᵥ v`, the polarized bilinear Dirichlet identity, the eigen-coordinate edge vectors `ssEdgeVec` (`√(w/2)·(v_k u − v_k v)/√λ_k` — the Foster spectral machinery's own representation, no pseudoinverse or matrix square root) with `‖v_e‖² = w_e R_eff/2` and the Foster budget corollary `∑ ‖v_e‖² = card V − 1`, the image projector with `∑_e v_e v_eᵀ = Π_{im L}` *exactly* (the ordered-pair `1/√2` halving — so the sampling space is the delivered `bernPMF` at `ι = V × V` verbatim), the Bernoulli second moment `E[(δ/p−1)²] = (1−p)/p`, and the Finding-A-guarded sampling family with the three clause lemmas at the classical constants *proved*: `∫ X_e = 0` with no connectivity hypothesis (zero-leverage pairs absorbed by the zero rank-one factor), the uniform pointwise `‖X_e ω‖ ≤ 1/q`, `∑_e ∫ X_e X_e = Σ`, and the headline `‖Σ‖ ≤ 1/q`; pure hard crust, zero new axioms; QA +23 — the two-route budget pin on K₂, the two-sided rank-one norm identity, the exact variance coefficient, and the Finding-A and `q = 0` fences; since Slice 3 also the sampled weight `ssWeight` (the deterministic saturation guard), `ssSampled` with the *exact pointwise* deviation identity `ssSampled ω − Π = ∑_e X_e ω`, the norm→form transfer `abs_quadForm_le_of_l2OpNorm_le` (`‖M‖ ≤ t → |xᵀMx| ≤ t (x⬝ᵥx)`, symmetry-free), and the Bool-valued summand shape closing `h_meas`/`h_indep` through the Slice-1 transfer layer) |
 | Sparsification tail bound (assembly) | `Derived.SparsificationTail` (delivered 2026-08-27, the proposal's Step 1 Slice 3 — `matrix_bernstein`'s first real theorem consumer, **conditional on that axiom**: `sparsification_norm_tail` — `μ {‖S(ω) − Π_{im L}‖ ≥ t} ≤ 2 d exp(−t²/(2/q + 2t/(3q)))` on the product-Bernoulli sampling space at the proved constants `R = 1/q`, `‖Σ‖ ≤ 1/q`, no connectivity hypothesis, Finding B's `Fin n` transport via `Fintype.equivFin` + `Equiv.sum_comp` — and `sparsification_quadForm_tail`, the additive eigen-coordinate pullback `|xᵀ S x − xᵀ Π x| ≤ t (x ⬝ᵥ x)` for every vector outside the bounded-measure set; all hypothesis clauses proved hard crust, the tail inequality axiom-backed and reported as such in `#print axioms`) |
 | Bernoulli product sampling space | `Probability.BernoulliProduct` (delivered 2026-08-27, `proposals/spectral-sparsification-via-leverage-scores.md` Step 1 Slice 1 — the shelf's first concrete probability space: the product-Bernoulli PMF `bernPMF` on `ι → Bool` with the one-/two-coordinate marginals, pairwise `IndepFun` of coordinates, the cylinder measures, `∫ δ_e ∂μ = p e`, and the matrix-codomain transfer layer (`StronglyMeasurable` at the spectral-norm topology, `Measurable` at the shelf's matrix σ-algebra, the `IndepFun.comp` transfer, `∫ ((δ_e/p_e) − 1) • M ∂μ = 0` at `p e ≠ 0`) — exactly the `h_meas`/`h_indep`/`h_mean` clause shapes `matrix_bernstein`'s hypothesis set demands, all proved, zero new axioms; the i.i.d.-sampling prerequisite the empirical-stationary-distribution proposal also names) |
+| V-valued i.i.d. product sampling space | `Probability.IIDProduct` (delivered 2026-08-27, `proposals/empirical-stationary-distribution-concentration.md` Step 0+1 — the shelf's first i.i.d. space over an *arbitrary* finite value type: the product PMF `iidPMF` on `ι → V` at any normalized `q : V → ℝ`, the BernoulliProduct construction generalized from the two-atom factor, with the one-/two-coordinate marginals, cylinder measures, pairwise `indepFun_coord` of the projections, and the `hoeffding_empirical` clause shapes at the coordinate indicators — `measurable_indicator_coord`, `integral_indicator` (`∫ 1_{ω e = i} ∂μ = q i`), `indepFun_indicator_coord`; the σ-algebra on `V` carried as `[MeasurableSpace V] [MeasurableSingletonClass V]` instance hypotheses (both automatic on `Fin n` fixtures); all proved, zero axioms) |
+| Empirical stationary distribution (fixed-time concentration) | `Derived.EmpiricalStationary` (delivered 2026-08-27, the same proposal's Step 1 — **`hoeffding_empirical`'s first theorem consumer**, conditional on that axiom alone: `hoeffding_empirical_iid` — the generic composition, the empirical visit frequency of `i` in `n` i.i.d. `q`-samples concentrates around `q i` at `2 exp(−2nt²)`, `n ≠ 0` load-bearing at the centering collapse — and `empiricalWalkDistribution_tail` — the graph instance `P{|p̂_i(n) − ν_{t₀} i| ≥ t} ≤ 2 exp(−2nt²)` at `q = walkDistribution A t₀ x` certified a probability vector by the new proved `walkDistribution_nonneg` + `sum_walkDistribution`; hypotheses just nonnegative weights and positive degrees, no symmetry/connectivity/mixing; `#print axioms` reports the axiom honestly, every clause proof hard crust) |
 | Finite-distribution entropy | `InformationTheory.Entropy` (relative entropy and Shannon entropy, Gibbs' inequality, the entropy maximum — all proved) |
 | Discrete-affine dynamics | `Dynamics.DiscreteAffine` (the finite-vector geometric-decay wrapper `r ^ n • x → 0` for `\|r\| < 1` and the affine-iteration convergence theorem `x_{n+1} = (1−α) • x_n + α • e → e` for `0 < α < 2`, with the closed form — all proved, stated at a general real normed space; the `sgt-gaps.md` item-2 consumer interface, opening backlog item 5's discrete-affine slice) |
 | Matrix updates | `Core.MatrixUpdates` (Woodbury, Sherman–Morrison) |
@@ -455,7 +457,7 @@ example, and the [SGT Radar](docs/7_SGT_RADAR.md) for coverage scores.
 
 ### SGT coverage snapshot
 
-Last assessed: August 26, 2026. Scores reflect usable, verified coverage on a
+Last assessed: August 27, 2026. Scores reflect usable, verified coverage on a
 0–5 scale; see the [full radar and evidence](docs/7_SGT_RADAR.md).
 
 | Area | Coverage |
@@ -466,7 +468,7 @@ Last assessed: August 26, 2026. Scores reflect usable, verified coverage on a
 | Cuts, expansion, and clustering | 5.0 / 5 |
 | Random walks and diffusion | 4.0 / 5 |
 | Combinatorial and electrical structure | 4.5 / 5 |
-| Perturbation, randomness, and algorithms | 4.0 / 5 |
+| Perturbation, randomness, and algorithms | 4.5 / 5 |
 | Adjacent systems interfaces | 1.0 / 5 |
 
 Assurance quality is assessed separately in the full radar; subject coverage

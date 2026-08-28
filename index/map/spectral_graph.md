@@ -645,6 +645,7 @@ Parseval-exact); the plain Euclidean distance is a corollary bridge.
 | `walkDistribution` | the walk law started at `x` after `t` steps: `(Pᵀ)ᵗ *ᵥ δₓ` (definition) |
 | `walkDistribution_zero` / `walkDistribution_succ` | `ν₀ = δₓ`; `ν_{t+1} = Pᵀ *ᵥ ν_t` (evolution equations) |
 | `sum_walkDistribution` | mass conservation: `∑ ν_t = 1` at every `t` (load-bearing on row-stochasticity) |
+| `walkTransitionMatrix_nonneg` / `walkDistribution_nonneg` | entrywise nonnegativity of the walk kernel and the walk law at every time — with `sum_walkDistribution`, what makes `ν_{t₀}` a legal factor distribution for `Probability.IIDProduct.iidPMF` (the empirical-concentration consumer `Derived.EmpiricalStationary`) |
 | `walkDensity` | the density `h_t = ν_t/π` (definition) — the coordinate the transferred eigenbasis diagonalizes |
 | `walkDensity_succ` | **the density evolution** `h_{t+1} = P *ᵥ h_t` — detailed balance in action (the Phase A interface's first consumer); the interface Step 3 consumes |
 | `chiSquareDistance` | the χ² mixing distance `∑ (ν_t − π)²/π` (definition; junk `0` at `π i = 0`) |

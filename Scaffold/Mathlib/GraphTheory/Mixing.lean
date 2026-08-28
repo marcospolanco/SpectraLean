@@ -207,6 +207,44 @@ theorem sum_walkDistribution (A : WAdj (V := V)) (hd : ∀ i, 0 < deg A i)
   | succ t ih => rw [walkDistribution_succ, hstep, ih]
 
 /-!
+## Nonnegativity of the walk law
+-/
+
+/-- Entrywise nonnegativity of the general walk transition matrix at
+nonnegative weights and positive degrees: `P i j = (deg A i)⁻¹ A i j
+≥ 0`. Support lemma for the walk law's nonnegativity, the hypothesis
+that makes `walkDistribution` a legal factor distribution for
+`Probability.IIDProduct.iidPMF`. -/
+theorem walkTransitionMatrix_nonneg (A : WAdj (V := V)) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) (i j : V) :
+    0 ≤ walkTransitionMatrix A i j := by
+  rw [walkTransitionMatrix_apply]
+  exact mul_nonneg (inv_nonneg.mpr (le_of_lt (hd i))) (hnn i j)
+
+/-- The walk law is entrywise nonnegative at every time: with
+nonnegative weights and positive degrees, `(Pᵀ)ᵗ *ᵥ δₓ` never goes
+negative — alongside `sum_walkDistribution`, this is what makes the
+fixed-time walk law a probability vector and the empirical
+concentration program's sampling factor
+(`Scaffold.Derived.EmpiricalStationary`). -/
+theorem walkDistribution_nonneg (A : WAdj (V := V)) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) (t : ℕ) (x i : V) :
+    0 ≤ walkDistribution A t x i := by
+  have hall : ∀ j, 0 ≤ walkDistribution A t x j := by
+    induction t with
+    | zero =>
+      intro j
+      rw [walkDistribution_zero]
+      by_cases h : j = x <;> simp [Pi.single_apply, h]
+    | succ t ih =>
+      intro j
+      rw [walkDistribution_succ]
+      simp only [Matrix.mulVec, Matrix.dotProduct, Matrix.transpose_apply]
+      exact Finset.sum_nonneg fun k _ =>
+        mul_nonneg (walkTransitionMatrix_nonneg A hnn hd k j) (ih k)
+  exact hall i
+
+/-!
 ## The density: the coordinate the eigenbasis diagonalizes
 -/
 

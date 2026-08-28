@@ -92,3 +92,19 @@ both are confirmed absent from Mathlib, not merely uncited.
 If the pinned Mathlib version advances, re-check the Golden–Thompson and
 Lieb searches above before relying on this finding — per the same
 discipline `docs/8_MATHLIB_COVERAGE_MAP.md` applies to its own rows.
+
+**Re-verified 2026-08-28** (pin unchanged, `v4.14.0`): both searches
+repeated verbatim against the current `.lake/packages/mathlib` — zero
+Golden–Thompson hits under any naming; the same single coincidental
+`Lieb` match in `Analysis/Calculus/VectorField.lean`, unrelated on
+inspection. Finding unchanged. Prompted by an external SGT-specialist
+review (no code access) independently naming matrix concentration's
+axiom-boundary as this repository's "largest trust-surface liability,"
+raised against `proposals/README.md`'s Active-table entries for
+`matrix_bernstein`'s and `matrix_hoeffding`'s consumer proposals. Path 1
+of the three below has since actually happened: `matrix_bernstein` got
+its first real theorem consumer (`Derived/SparsificationTail.lean`,
+delivered 2026-08-27) without needing Golden–Thompson or Lieb's
+concavity at all — direct evidence the ordering below is the right one,
+not just a plausible guess. Paths 2 and 3 remain open and un-costed;
+neither is rejected, both stay exactly as priced above.

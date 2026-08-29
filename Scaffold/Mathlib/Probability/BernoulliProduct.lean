@@ -367,6 +367,39 @@ theorem integral_delta (p : ι → ℝ) (hp0 : ∀ i, 0 ≤ p i) (hp1 : ∀ i, p
     rw [heval, ENNReal.toReal_ofReal (hp0 e)]
   · exact fun a _ => hfin a
 
+/-- The second-moment companion of `integral_delta`: the centered
+Bernoulli square integrates to the variance `∫ (δ_e − p e)² ∂μ =
+p e (1 − p e)` — the scalar core of the `bernstein_inequality` axiom's
+variance clause at any design built from centered Bernoulli factors.
+Through the pointwise expansion `(δ − p)² = δ • (1 − 2p) + p²` (δ² = δ),
+linearity, and `integral_delta` itself: a wrong Bernoulli mean or a
+wrong centering breaks exactly this. Added 2026-08-29 for the
+Bernstein-twin delivery
+(`proposals/hoeffding-inequality-degree-concentration.md`). -/
+theorem integral_sq_delta_sub (p : ι → ℝ) (hp0 : ∀ i, 0 ≤ p i) (hp1 : ∀ i, p i ≤ 1)
+    (e : ι) :
+    ∫ ω : ι → Bool, ((if ω e then (1 : ℝ) else 0) - p e) ^ 2
+        ∂(bernPMF p hp0 hp1).toMeasure = p e * (1 - p e) := by
+  haveI : IsProbabilityMeasure (bernPMF p hp0 hp1).toMeasure :=
+    PMF.toMeasure.isProbabilityMeasure _
+  have hexp : ∀ ω : ι → Bool,
+      ((if ω e then (1 : ℝ) else 0) - p e) ^ 2
+        = (if ω e then (1 : ℝ) else 0) • (1 - 2 * p e) + p e * p e := by
+    intro ω
+    cases h : ω e <;> simp [h] <;> ring
+  have heq : (fun ω : ι → Bool => ((if ω e then (1 : ℝ) else 0) - p e) ^ 2)
+      = fun ω : ι → Bool =>
+          (if ω e then (1 : ℝ) else 0) • (1 - 2 * p e) + p e * p e :=
+    funext hexp
+  rw [heq, integral_add
+    (f := fun ω : ι → Bool => (if ω e then (1 : ℝ) else 0) • (1 - 2 * p e))
+    (g := fun _ : ι → Bool => p e * p e) Integrable.of_finite (integrable_const _)]
+  rw [integral_smul_const, integral_delta p hp0 hp1 e]
+  have hc : ∫ (_ : ι → Bool), p e * p e ∂(bernPMF p hp0 hp1).toMeasure = p e * p e := by
+    rw [integral_const, measure_univ, ENNReal.one_toReal, one_smul]
+  rw [hc, smul_eq_mul]
+  ring
+
 end Independence
 
 section MatrixLayer

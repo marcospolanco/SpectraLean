@@ -167,6 +167,24 @@ theorem deg_smul (c : ℝ) (M : WAdj (V := V)) (i : V) :
     deg (c • M) i = c * deg M i := by
   simp only [deg, Matrix.smul_apply, smul_eq_mul, Finset.mul_sum]
 
+omit [DecidableEq V] in
+/-- The degree functional is additive: degrees are row sums. With
+`deg_sum` this completes the degree-level linearity package beside the
+Laplacian's (`laplacian_add`/`laplacian_smul`); first consumed by
+`EdgePerturbation.deg_resampled` (the degree-deviation identity of the
+centered-Bernoulli edge design, the engine of the degree tail). -/
+theorem deg_add (A B : WAdj (V := V)) (i : V) :
+    deg (A + B) i = deg A i + deg B i := by
+  simp only [deg, Matrix.add_apply, Finset.sum_add_distrib]
+
+omit [DecidableEq V] in
+/-- The degree of a summed adjacency family: the finite sum commutes
+with the row sum. -/
+theorem deg_sum (B : (V × V) → Matrix V V ℝ) (i : V) :
+    deg (∑ e, B e) i = ∑ e, deg (B e) i := by
+  simp only [deg, Matrix.sum_apply]
+  rw [Finset.sum_comm]
+
 /-- **The Laplacian of a scaled adjacency is the scaled Laplacian** —
 the second half of the Laplacian's linearity package (with
 `laplacian_add` above), through which summed sampling designs transport.
@@ -407,6 +425,7 @@ theorem evals_first_le_eigvalOf {M : Matrix V V ℝ} (hM : M.IsSymm)
     rw [hpe]
   · exact hsort.rel_get_of_lt (by simpa [hlen] using h0)
 
+
 /-- The orthogonal spectral projector onto the span of the eigenvectors
 whose eigenvalues are at most `c`:
 `P_c = ∑_{λᵢ ≤ c} vᵢ vᵢᵀ` over the orthonormal eigenbasis.
@@ -475,6 +494,37 @@ theorem eigvecOf_inner (M : Matrix V V ℝ) (hM : M.IsSymm) (i j : V) :
   have hij := h i j
   rw [PiLp.inner_apply] at hij
   simpa [RCLike.inner_apply] using hij
+
+/-- Every eigenbasis value of the identity matrix is `1`: each
+eigenbasis vector is an eigenvector of `1` at eigenvalue `1` (the
+eigenaction `1 *ᵥ v = v` against `eigvecOf_inner`'s unit norm). The
+engine behind the identity-spectrum pin `evals_one`. -/
+theorem eigvalOf_one (hOne : (1 : Matrix V V ℝ).IsSymm) (i : V) :
+    eigvalOf (1 : Matrix V V ℝ) hOne i = 1 := by
+  have hev : (1 : Matrix V V ℝ) *ᵥ eigvecOf (1 : Matrix V V ℝ) hOne i
+      = eigvalOf (1 : Matrix V V ℝ) hOne i • eigvecOf (1 : Matrix V V ℝ) hOne i :=
+    (isHermitian_of_isSymm hOne).mulVec_eigenvectorBasis i
+  rw [Matrix.one_mulVec] at hev
+  have hself : Matrix.dotProduct (eigvecOf (1 : Matrix V V ℝ) hOne i)
+      (eigvecOf (1 : Matrix V V ℝ) hOne i) = 1 := by
+    simpa [Matrix.dotProduct] using eigvecOf_inner (1 : Matrix V V ℝ) hOne i i
+  have h0 := congrArg (Matrix.dotProduct (eigvecOf (1 : Matrix V V ℝ) hOne i)) hev
+  rw [Matrix.dotProduct_smul, smul_eq_mul, hself] at h0
+  simpa using h0.symm
+
+/-- **The sorted spectrum of the identity matrix is `1` at every index**
+— every eigenbasis value is `1` (`eigvalOf_one`) and every sorted entry
+is one of them (`evals_mem_eigvalOf`). This is the *identity's* junk
+spectrum, the value the normalized Laplacian degenerates to at
+nonpositive-degree corners
+(`Normalized.normalizedLaplacian_eq_one_of_forall_deg_nonpos`): an easy
+thing to mispredict as the zero matrix's `0` when designing refutation
+fixtures against degenerate outcomes. -/
+theorem evals_one (hOne : (1 : Matrix V V ℝ).IsSymm)
+    (k : Fin (Fintype.card V)) :
+    evals hOne k = 1 := by
+  obtain ⟨i, hi⟩ := evals_mem_eigvalOf hOne k
+  rw [hi, eigvalOf_one hOne i]
 
 /-- Completeness of the eigenbasis: the synthesis
 `∑ i, v i a * v i b` recovers the identity matrix. Proved from

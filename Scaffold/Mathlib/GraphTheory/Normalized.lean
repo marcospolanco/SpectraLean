@@ -53,6 +53,19 @@ Delivered (all proved, no axioms):
   density dynamics, consumed by the mixing program's centered-evolution
   step).
 
+Delivered 2026-08-29 (the degenerate-degree corner audit,
+`proposals/matrix-hoeffding-spectral-gap-estimation.md`'s window-family
+honesty notes; all proved, no axioms):
+
+- `degreeInvSqrt_apply_eq_zero_iff` — the reciprocal degree factor
+  vanishes exactly at nonpositive degrees (both the zero corner and the
+  negative corner, the `p ≠ ½` outcomes route);
+- `normalizedLaplacian_eq_one_of_forall_deg_nonpos` — at all-nonpositive
+  degrees the normalized Laplacian degenerates to the *identity* `1`,
+  whose sorted spectrum is `1` (`Spectral.evals_one`), not the zero
+  matrix's `0` — the junk corner refutation-fixture design in this
+  family must predict correctly.
+
 Delivered 2026-08-22 (`proposals/mixing-time-bound.md` Step 1; all
 proved, no axioms) — the eigenpair transfer through the similarity:
 
@@ -250,6 +263,60 @@ theorem normalizedLaplacian_mulVec_degreeSqrt_onesVec (A : WAdj (V := V))
       laplacian_ones_in_kernel A, Matrix.mulVec_zero]
   rw [Matrix.mulVec_mulVec]
   exact h1
+
+/-!
+## Degenerate-degree corners
+
+The definition's honest junk behavior, pinned as theorems (the corner
+audit of `proposals/matrix-hoeffding-spectral-gap-estimation.md`'s
+window-family honesty notes, 2026-08-29). At a vertex of nonpositive
+degree, `Real.sqrt` of a nonpositive number is `0` and `0⁻¹ = 0`, so the
+reciprocal degree factor vanishes; if *every* degree is nonpositive the
+whole congruence collapses and `normalizedLaplacian` degenerates to the
+*identity* `1` — whose sorted spectrum is `1` at every index
+(`Spectral.evals_one`), **not** the zero matrix's `0`. Two corners land
+here: the zero-degree corner (the all-false outcomes of the
+edge-resampling designs at any `p`) and the negative-degree corner (the
+outcomes of designs at `p ≠ ½`, where resampled adjacencies can carry
+negative row sums). Predicting refutation fixtures against such
+outcomes means predicting the identity's junk spectrum; these lemmas
+make that a shelf fact rather than a spike finding.
+-/
+
+/-- The reciprocal degree factor vanishes exactly at nonpositive
+degrees — both the zero corner (`√0 = 0`, `0⁻¹ = 0`) and the negative
+corner (`Real.sqrt` of a negative number is `0`) — while a positive
+degree keeps it nonzero. -/
+theorem degreeInvSqrt_apply_eq_zero_iff (A : WAdj (V := V)) (i : V) :
+    degreeInvSqrt A i i = 0 ↔ deg A i ≤ 0 := by
+  rw [degreeInvSqrt, Matrix.diagonal_apply_eq]
+  constructor
+  · intro h
+    by_contra hpos
+    push_neg at hpos
+    exact (inv_ne_zero (Real.sqrt_ne_zero'.mpr hpos)) h
+  · intro h
+    rw [Real.sqrt_eq_zero_of_nonpos h, _root_.inv_zero]
+
+/-- **The identity degeneration**: at all-nonpositive degrees the
+normalized Laplacian is the identity matrix `1` (the reciprocal factor
+is the zero matrix, and `1 − 0 = 1`) — the degenerate corner whose junk
+spectrum is `1`, not the zero matrix's `0`. QA:
+`Scaffold.QA.Derived.EdgePerturbation`'s degenerate-degree corner audit
+(both corners witnessed, the spectral contrast pinned). -/
+theorem normalizedLaplacian_eq_one_of_forall_deg_nonpos (A : WAdj (V := V))
+    (hdeg : ∀ i, deg A i ≤ 0) :
+    normalizedLaplacian A = 1 := by
+  have hd0 : degreeInvSqrt A = 0 := by
+    ext i j
+    by_cases h : i = j
+    · subst h
+      rw [degreeInvSqrt, Matrix.diagonal_apply_eq, Matrix.zero_apply,
+        Real.sqrt_eq_zero_of_nonpos (hdeg i), _root_.inv_zero]
+    · rw [Matrix.zero_apply, degreeInvSqrt]
+      simp [Matrix.diagonal_apply, h]
+  rw [normalizedLaplacian, hd0]
+  simp
 
 /-- Agreement with the regular cone: on a `d`-regular graph with
 positive degree, the general normalized Laplacian *is*

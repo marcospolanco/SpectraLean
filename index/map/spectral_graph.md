@@ -52,7 +52,13 @@ with the `_self` / `_of_lt` specializations); spectrum pinning tools (2026-08-18
 matrix-facing λ₂ APIs), `evals_mem_eigvalOf` (sorted-spectrum ↔
 eigenbasis connection), `eigvalOf_sum_eq_trace` (trace from the unitary
 diagonalization), `eigvalOf_le_of_quadForm_nonpos` (one-sided Rayleigh
-eigenvalue bound — the refutation engine of `Cheeger_QA`); top-of-
+eigenvalue bound — the refutation engine of `Cheeger_QA`); the
+identity-spectrum pin (2026-08-29, the degenerate-degree corner audit):
+`eigvalOf_one` (every eigenbasis value of the identity matrix is `1`,
+from the eigenaction `1 *ᵥ v = v` against `eigvecOf_inner`'s unit
+norm) and `evals_one` (**the sorted spectrum of the identity is `1` at
+every index** — the junk value `normalizedLaplacian` degenerates to at
+nonpositive-degree corners, not the zero matrix's `0`); top-of-
 spectrum tools (2026-08-19, the decidable-certificates Step-2 slice):
 `eigvalOf_le_evals_last` (the sorted spectrum's last entry dominates
 every eigenbasis eigenvalue), `quadForm_le_evals_last` (**top
@@ -608,6 +614,8 @@ All statements proved (2026-08-17), no axioms:
 | `degreeSqrt_mul_normalizedLaplacian_mul_degreeSqrt` | congruence `√D L_sym √D = laplacian A` |
 | `normalizedLaplacian_mul_degreeSqrt` | the left-multiplied congruence `L_sym √D = (1/√D) L` (2026-08-25) |
 | `normalizedLaplacian_mulVec_degreeSqrt_onesVec` | **the kernel vector is `√D · onesVec`, not `onesVec`** (2026-08-25) — the structural fact separating the irregular variational picture; consumed by `cheeger_upper_bound_normalized` |
+| `degreeInvSqrt_apply_eq_zero_iff` | **the degenerate-degree corners pinned** (2026-08-29): the reciprocal factor vanishes exactly at nonpositive degrees — both the zero corner and the *negative* corner (`Real.sqrt` of a negative is `0`), the `p ≠ ½` outcomes route |
+| `normalizedLaplacian_eq_one_of_forall_deg_nonpos` | the identity degeneration: at all-nonpositive degrees `L_sym = 1`, whose sorted spectrum is `1` (`evals_one`) — the junk corner refutation-fixture design must predict |
 | `normalizedLaplacian_eq_regularNormalizedLaplacian` | agreement with the regular cone |
 | `walkTransitionMatrix`, `walkLaplacian` | definitions: general walk form `D⁻¹A`, `I − D⁻¹A` |
 | `walkTransitionMatrix_row_sum` | row-stochasticity on irregular graphs (positive degrees) |
@@ -1454,7 +1462,12 @@ edge-perturbation design with every repaired-axiom clause proved
 | `stronglyMeasurable_perturbSummand` / `indepFun_perturbSummand` | Edge perturbation | The `h_meas`/`h_indep` clauses through BernoulliProduct's matrix transfer layer |
 | `perturbAdj` / `perturbWeight` / `perturbWeight_isSymm` | Edge perturbation | **(2026-08-28, the pipeline delivery) the random weight-space perturbation** — the summed centered single-edge adjacencies, symmetric for every outcome |
 | `perturbWeight_apply_of_ne` / `perturbWeight_apply_diag` | Edge perturbation | The entry formulas: off the diagonal the two ordered pairs on `{i, j}` contribute; on the diagonal one (no double count) |
+| `perturbWeight_entry_nonneg` | Edge perturbation | **The nonnegativity design condition** (2026-08-29, the admissibility dissolution): at `p e + p (e.2, e.1) ≤ 1` every resampled entry is nonnegative at *every* outcome — off-diagonal `A i j · (1 + δ_{ij} + δ_{ji} − p_{ij} − p_{ji})`, diagonal `A i i · (1 + δ_{ii} − p_{ii})`; tight at the uniform `p ≡ ½` boundary, refuted-when-dropped at `p ≡ 9/10` (QA) |
 | `laplacian_perturbWeight` | Edge perturbation | **The packaging identity** `laplacian (perturbWeight A p ω) = ∑ₑ perturbSummand A p e ω` — the concentration → stability pipeline's deterministic hinge, through `laplacian_sum`/`laplacian_smul` (delivered the same day in `Spectral.lean`, retiring the sparsification program's recorded engine prerequisite) |
+| `degPerturbWeight` / `degPerturbSummand` / `deg_perturbAdj` / `deg_perturbWeight` | Edge perturbation | (2026-08-29, the degree-concentration delivery) the scalar-companion design: the ordered pair's weight in vertex `v`'s degree and its centered Bernoulli summand, with the row-sum transport |
+| `deg_resampled` | Edge perturbation | **The degree-deviation identity** `deg (A + perturbWeight A p ω) v = deg A v + ∑ₑ degPerturbSummand A p v e ω` — the deterministic hinge of the degree tail, through `deg_add`/`deg_sum` (the degree-linearity package delivered beside `deg_smul` in `Spectral.lean`) |
+| `measurable_degPerturbSummand` / `indepFun_degPerturbSummand` / `degPerturbSummand_abs_le` / `integral_degPerturbSummand_eq_zero` | Edge perturbation | The four `hoeffding_inequality` clauses at the design (2026-08-29): measurability and pairwise independence through BernoulliProduct's scalar layer, the bound `\|X_e\| ≤ \|w_v(e)\|` (sign-free), and the centering `∫ X_e = 0` through `integral_delta` + the audit's integrability safety — no `p ≠ 0` guard needed |
+| `integral_sq_degPerturbSummand` | Edge perturbation | The `bernstein_inequality` variance clause at the design (2026-08-29, the Bernstein twin): `∫ X_e² ∂μ = w_v(e)² p e (1 − p e)` through BernoulliProduct's second-moment companion `integral_sq_delta_sub` (`∫ (δ_e − p_e)² = p_e (1 − p_e)`, beside `integral_delta`) — identifies the axiom's variance statistic exactly, making the twin variance-adaptive |
 
 ### `Scaffold.Derived.EdgePerturbationDrift` (the concentration → subspace-stability pipeline — 2026-08-28)
 

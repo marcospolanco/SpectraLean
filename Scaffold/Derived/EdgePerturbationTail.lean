@@ -68,14 +68,79 @@
     ceiling the sweep extraction — the window family completed into an
     algorithmic output).
 
+  The degree tail (the scalar sibling, `hoeffding_inequality`'s first
+  theorem consumer — 2026-08-29,
+  `proposals/hoeffding-inequality-degree-concentration.md`):
+
+  - `edgePerturbation_degree_tail`: the per-vertex degree-deviation
+    tail `μ {|deg G_ω v − deg A v| ≥ t} ≤ 2 exp(−t²/(2 S_v))` at the
+    variance statistic `S_v = ∑ₑ w_v(e)²` — the complementary
+    concentration the window family's honesty notes name as missing
+    (the λ₂/norm tails carry zero degree information,
+    `L(E_ω)·1 = 0` identically).
+  - `edgePerturbation_degree_tail_all`: the all-vertices union bound,
+    stated at the exact per-vertex sum — the first step toward
+    *deriving* the admissibility window rather than hypothesizing it.
+
+  The Bernstein twin (the variance-adaptive degree tail, 2026-08-29,
+  the same proposal's priced follow-on — `bernstein_inequality`'s and
+  `bernstein_bounded_variance`'s first theorem consumers):
+
+  - `edgePerturbation_degree_tail_bernstein`: the per-vertex tail at
+    the *true* variance statistic `σ²_v = ∑ₑ w_v(e)² p e (1 − p e)` and
+    a magnitude budget `M ≥ |w_v(e)|`:
+    `μ {|dev| ≥ t} ≤ 2 exp(−t²/(2 σ²_v + 2Mt/3))` — strictly sharper
+    than the Hoeffding twin at interior sampling probabilities
+    (`σ²_v ≤ S_v/4`), pinned numerically in the QA.
+  - `edgePerturbation_degree_tail_bernstein_budget`: the budget form at
+    any supplied variance budget `σ²_v ≤ Vbud`.
+
+  The admissibility dissolution (2026-08-29, the degree-concentration
+  proposal's priced follow-on — the window family's first measured
+  event with *no* admissibility conjunct):
+
+  - `perturbAdmissible_of_degDev_lt`: the degree-window transfer — base
+    degrees in the shrunk window `[dmin + s, dmax − s]` plus
+    per-vertex deviations strictly below `s` put the outcome inside the
+    admissibility window (nonnegativity from the pair design condition
+    `p e + p eᵀ ≤ 1`, degrees from the shrunk window).
+  - `edgePerturbation_normalized_connectivity_bracket_unconditional`:
+    the union of the delivered bracket with the all-vertices degree
+    tail — leaving the two-sided normalized-connectivity window is
+    bounded by the window tail at `t` plus the degree tail at `s`,
+    with no conditioning event. Conditional on `matrix_hoeffding`
+    *and* `hoeffding_inequality` together — the family's only
+    two-axiom member.
+  - `edgePerturbation_normalized_cheeger_floor_unconditional` and
+    `edgePerturbation_fiedler_sweep_cut_tail_unconditional`: the
+    dissolution completed across the family (same day, the follow-on
+    the bracket's delivery priced) — the floor and the
+    algorithm-facing swept-cut capstone made unconditional at the same
+    decomposition, so every window-family measured event now reads
+    without a conditioning conjunct (each two-axiom:
+    `matrix_hoeffding` via the window theorem, `hoeffding_inequality`
+    via the degree tail).
+
   The tail theorems are **conditional on the `matrix_hoeffding`
   axiom** (Tropp 2012, Theorem 1.4, as repaired 2026-08-28 with the
   `[Nonempty V]` guard) and must never be described as foundationally
-  proved; `#print axioms` reports the dependency honestly. Every
-  hypothesis clause of the axiom is discharged by a proved lemma in the
-  engine module. The transfer side is *proved* hard crust: the Weyl
-  inequality (retired from axiom 2026-08-20), the packaging identity
-  `laplacian_perturbWeight`, `laplacian_add`, and `evals_congr`.
+  proved; the two Hoeffding degree tails are conditional on the *scalar*
+  `hoeffding_inequality` axiom (Vershynin 2018, Theorem 2.2.2, audited
+  safe 2026-08-28) exactly as its own delivery record states; the two
+  Bernstein twin tails are conditional on the `bernstein_inequality`
+  (Vershynin 2018, Theorem 2.8.1) and `bernstein_bounded_variance`
+  (Wainwright 2019, Theorem 2.15) axioms respectively — each tail on its
+  own axiom alone, `#print axioms` verifying zero cross-contact — and
+  the unconditional bracket (the dissolution) is conditional on
+  `matrix_hoeffding` and `hoeffding_inequality` *together*, the only
+  deliberate two-axiom member of the family, each via its own
+  sub-theorem.
+  Every hypothesis clause of all four axioms is discharged by a proved
+  lemma in the engine module. The transfer side is *proved* hard crust:
+  the Weyl inequality (retired from axiom 2026-08-20), the packaging
+  identity `laplacian_perturbWeight`, `laplacian_add`, `evals_congr`,
+  and the degree-linearity package `deg_add`/`deg_sum` behind
+  `deg_resampled`.
 
   QA: `Scaffold/QA/Derived/EdgePerturbation_QA.lean`.
 -/
@@ -84,12 +149,15 @@ import Scaffold.Mathlib.GraphTheory.EdgePerturbation
 import Scaffold.Mathlib.GraphTheory.Cheeger
 import Scaffold.Mathlib.GraphTheory.VariationalTransfer
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Hoeffding
+import Scaffold.Mathlib.Probability.Concentration.Scalar.Hoeffding
+import Scaffold.Mathlib.Probability.Concentration.Scalar.Bernstein
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl
 
 open MeasureTheory ProbabilityTheory
 open SpectralGraphTheory
 open Scaffold.Mathlib.Probability.BernoulliProduct
 open Scaffold.Mathlib.Probability.Concentration.Matrix
+open Scaffold.Mathlib.Probability.Concentration.Scalar
 open Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation
 open scoped BigOperators Matrix Matrix.L2OpNorm
 
@@ -513,7 +581,11 @@ graph are exactly the window conjuncts); no dropped-window refutation
 fixture exists at fixture scale — at the junk outcomes the normalized
 Laplacian degenerates to the identity, whose `λ₂ = 1` keeps the
 un-windowed floor condition false on `K₂`-shaped fixtures (recorded
-honestly in the QA section). -/
+honestly in the QA section, and — since the 2026-08-29 corner audit —
+*proved* there: `normalizedLaplacian_eq_one_of_forall_deg_nonpos` and
+`evals_one` pin the identity junk on the shelf, with both the
+zero-degree and the negative-degree corners witnessed in
+`EdgePerturbation_QA.lean`'s cornerAudit section). -/
 
 section NormalizedCheegerWindow
 
@@ -682,10 +754,18 @@ and sweep extraction are proved hard crust.
 
 The floor-positivity guard is proof-load-bearing, not decorative: at
 `t ≥ dmin·φ²/2` the window no longer forces `0 < λ₂`, and connectivity
-of the resampled graph — the sweep theorem's entry ticket — is lost
-(no cheap refutation fixture exists at fixture scale, since at 2–3
-vertices the tail bound exceeds `1`; recorded honestly in the QA
-section). -/
+of the resampled graph — the sweep theorem's entry ticket — is lost.
+The guard is also *fixture-refuted when dropped*
+(`epC4_sweepWindow_unguarded_refuted_QA` in
+`Scaffold/QA/Derived/EdgePerturbation_QA.lean`, 2026-08-29): on `C₄`
+at window `[1, 2]` the perfect-matching outcomes are
+admissible-but-disconnected — their bad-set membership via
+`¬connected` is `t`-invariant, so at large `t` the collapsed bound
+drops below their atom mass and the un-guarded statement is false in
+proved arithmetic. This corrects the original honesty note, whose
+"at 2–3 vertices the tail bound exceeds `1`" obstruction had anchored
+on the eigenvalue-floor membership route and on fixtures where no
+admissible-but-disconnected outcome exists at all. -/
 theorem edgePerturbation_fiedler_sweep_cut_tail (hA : A.IsSymm)
     (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
     (dmin dmax : ℝ) (hdmin : ∀ i, dmin ≤ deg A i) (hpos : 0 < dmin)
@@ -742,5 +822,843 @@ theorem edgePerturbation_fiedler_sweep_cut_tail (hA : A.IsSymm)
   exact le_trans hcond h2c
 
 end NormalizedCheegerWindow
+
+/-! ## The degree tail — `hoeffding_inequality`'s first theorem consumer
+
+The scalar sibling of the assemblies above, at the *same* centered
+Bernoulli edge-resampling design: the per-vertex degree-deviation tail.
+Where the λ₂/norm tails control the operator (and carry zero degree
+information — `L(E_ω)·1 = 0` identically), this controls the quantity the
+irregular window family's admissibility story is made of: the resampled
+degrees themselves, `μ {|deg G_ω v − deg A v| ≥ t} ≤ 2 exp(−t²/(2 S_v))`
+at the variance statistic `S_v = ∑ₑ w_v(e)²` (both incident ordered
+pairs counted — the double count is the design's honest price). No
+hypothesis on the weight matrix (the design is sign-free); no dimension
+prefactor (the scalar axiom's prefactor is the constant `2`, which
+unlike the matrix trio's `2 · card V` never collapses at a degenerate
+dimension — no `Nonempty` guard is needed here).
+-/
+
+section DegreeTail
+
+variable (A : WAdj (V := V)) (p : (V × V) → ℝ)
+
+/-- **The per-vertex degree-deviation tail** — `hoeffding_inequality`
+assembled at the degree design of `EdgePerturbation.lean`'s section 5:
+on the product-Bernoulli space at inclusion probabilities `p ∈ [0, 1]`,
+the deviation of any vertex's resampled degree from its base degree
+obeys the classical two-sided exponential tail against the deterministic
+variance statistic `∑ₑ w_v(e)²`. CONDITIONAL ON THE `hoeffding_inequality`
+AXIOM: all four hypothesis clauses are proved at the design
+(`measurable_degPerturbSummand`, `indepFun_degPerturbSummand`,
+`degPerturbSummand_abs_le`, `integral_degPerturbSummand_eq_zero`). -/
+theorem edgePerturbation_degree_tail (hp0 : ∀ e, 0 ≤ p e)
+    (hp1 : ∀ e, p e ≤ 1) (v : V) (t : ℝ) (ht : 0 ≤ t) :
+    (bernPMF p hp0 hp1).toMeasure
+        {ω : (V × V) → Bool |
+          t ≤ |deg (A + perturbWeight A p ω) v - deg A v|}
+      ≤ ENNReal.ofReal (2 * Real.exp (-(t ^ 2)
+          / (2 * ∑ e, (degPerturbWeight A v e) ^ 2))) := by
+  haveI hprob : IsProbabilityMeasure (bernPMF p hp0 hp1).toMeasure :=
+    PMF.toMeasure.isProbabilityMeasure _
+  have hmeas : ∀ i : Fin (Fintype.card (V × V)),
+      Measurable fun ω : (V × V) → Bool =>
+        degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω :=
+    fun i => measurable_degPerturbSummand A p v _
+  have hindep : ∀ i j : Fin (Fintype.card (V × V)), i ≠ j →
+      IndepFun (fun ω : (V × V) → Bool =>
+          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω)
+        (fun ω : (V × V) → Bool =>
+          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm j) ω)
+        (bernPMF p hp0 hp1).toMeasure :=
+    fun i j hij => indepFun_degPerturbSummand A p hp0 hp1 v
+      ((Fintype.equivFin (V × V)).symm.injective.ne hij)
+  have hbound : ∀ (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool),
+      |degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω|
+        ≤ |degPerturbWeight A v ((Fintype.equivFin (V × V)).symm i)| :=
+    fun i ω => degPerturbSummand_abs_le A p hp0 hp1 v _ ω
+  have hmean : ∀ i : Fin (Fintype.card (V × V)),
+      ∫ ω : (V × V) → Bool,
+          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω
+        ∂(bernPMF p hp0 hp1).toMeasure = 0 :=
+    fun i => integral_degPerturbSummand_eq_zero A p hp0 hp1 v _
+  have hmain := hoeffding_inequality
+    (μ := (bernPMF p hp0 hp1).toMeasure)
+    (X := fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>
+      degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω)
+    (a := fun i => |degPerturbWeight A v ((Fintype.equivFin (V × V)).symm i)|)
+    hmeas hindep hbound hmean t ht
+  have hsum : ∀ ω : (V × V) → Bool,
+      ∑ i : Fin (Fintype.card (V × V)),
+        (fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>
+          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω) i ω
+      = deg (A + perturbWeight A p ω) v - deg A v := fun ω => by
+    rw [deg_resampled]
+    rw [Equiv.sum_comp (Fintype.equivFin (V × V)).symm
+      (fun e : V × V => degPerturbSummand A p v e ω)]
+    ring
+  have hseteq : {ω : (V × V) → Bool |
+      t ≤ |∑ i : Fin (Fintype.card (V × V)),
+        (fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>
+          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω) i ω|}
+      = {ω : (V × V) → Bool |
+          t ≤ |deg (A + perturbWeight A p ω) v - deg A v|} := by
+    ext ω
+    simp only [Set.mem_setOf_eq]
+    exact Iff.of_eq (congrArg (fun S : ℝ => t ≤ |S|) (hsum ω))
+  rw [hseteq] at hmain
+  have hvar : ∑ i : Fin (Fintype.card (V × V)),
+      (fun i => |degPerturbWeight A v ((Fintype.equivFin (V × V)).symm i)|) i ^ 2
+      = ∑ e, (degPerturbWeight A v e) ^ 2 := by
+    rw [Equiv.sum_comp (Fintype.equivFin (V × V)).symm
+      (fun e : V × V => |degPerturbWeight A v e| ^ 2)]
+    exact Finset.sum_congr rfl fun e _ => sq_abs _
+  rw [hvar] at hmain
+  exact hmain
+
+/-- **The all-vertices degree-deviation tail** — the union bound over the
+vertex set, stated at the exact per-vertex sum (each vertex keeps its own
+variance statistic in the exponent). Collapsing to a uniform exponent
+`2 |V| exp(−t²/(2B))` needs a per-vertex `0 < S_v ≤ B` (a vertex with
+`S_v = 0` is pair-isolated — its deviation is identically zero, but
+division-monotonicity is junk there); the collapse is left to consumers
+whose graphs satisfy it, and demonstrated numerically in the QA at the
+`K₂` fixture where both statistics are equal. CONDITIONAL ON THE
+`hoeffding_inequality` AXIOM (the per-vertex tail above, union-bounded). -/
+theorem edgePerturbation_degree_tail_all (hp0 : ∀ e, 0 ≤ p e)
+    (hp1 : ∀ e, p e ≤ 1) (t : ℝ) (ht : 0 ≤ t) :
+    (bernPMF p hp0 hp1).toMeasure
+        {ω : (V × V) → Bool |
+          ∃ v, t ≤ |deg (A + perturbWeight A p ω) v - deg A v|}
+      ≤ ∑ v : V, ENNReal.ofReal (2 * Real.exp (-(t ^ 2)
+          / (2 * ∑ e, (degPerturbWeight A v e) ^ 2))) := by
+  have hcover : {ω : (V × V) → Bool |
+      ∃ v, t ≤ |deg (A + perturbWeight A p ω) v - deg A v|}
+      ⊆ ⋃ v : V, {ω : (V × V) → Bool |
+        t ≤ |deg (A + perturbWeight A p ω) v - deg A v|} := by
+    intro ω hω
+    obtain ⟨v, hv⟩ := hω
+    exact Set.mem_iUnion.2 ⟨v, hv⟩
+  calc (bernPMF p hp0 hp1).toMeasure
+        {ω : (V × V) → Bool |
+          ∃ v, t ≤ |deg (A + perturbWeight A p ω) v - deg A v|}
+      ≤ (bernPMF p hp0 hp1).toMeasure
+          (⋃ v : V, {ω : (V × V) → Bool |
+            t ≤ |deg (A + perturbWeight A p ω) v - deg A v|}) :=
+        measure_mono hcover
+    _ ≤ ∑ v : V, (bernPMF p hp0 hp1).toMeasure
+          {ω : (V × V) → Bool |
+            t ≤ |deg (A + perturbWeight A p ω) v - deg A v|} :=
+        measure_iUnion_fintype_le _ _
+    _ ≤ ∑ v : V, ENNReal.ofReal (2 * Real.exp (-(t ^ 2)
+          / (2 * ∑ e, (degPerturbWeight A v e) ^ 2))) :=
+        Finset.sum_le_sum
+          fun v _ => edgePerturbation_degree_tail A p hp0 hp1 v t ht
+
+end DegreeTail
+
+/-! ## The Bernstein twin — `bernstein_inequality`'s and
+`bernstein_bounded_variance`'s first theorem consumers
+
+The variance-adaptive siblings of the degree tails above, at the *same*
+centered Bernoulli edge-resampling design: where Hoeffding's denominator
+uses only the magnitude range `∑ₑ w_v(e)²`, Bernstein's uses the true
+variance `σ²_v = ∑ₑ w_v(e)² p e (1 − p e)` — the quantity the design's
+own second-moment engine (`integral_sq_degPerturbSummand`) computes
+exactly — plus a linear term `2Mt/3` at a magnitude budget
+`M ≥ |w_v(e)|` (the axiom's uniform-bound clause; at any fixture the
+budget is the largest incident weight). At interior sampling
+probabilities `σ²_v ≤ S_v/4` (each Bernoulli factor contributing
+`p (1 − p) ≤ 1/4`), so at moderate `t` the Bernstein bound is strictly
+sharper — pinned numerically in the QA (`epK2_bernstein_beats_hoeffding`).
+
+Degenerate-corner analysis (recorded at delivery, 2026-08-29): the
+scalar prefactor is again the constant `2`, never collapsing at a
+degenerate dimension — no `Nonempty` guard is needed; at `t = 0` the
+numerator `−t² = 0` makes the exponent `zero_div`-junk-free (`0/d = 0`,
+bound `2 ≥ 1 ≥ μ(·)`) exactly as in the Hoeffding twin; at empty `V`
+the theorems are vacuous in `v`; and the derived `0 ≤ M` is discharged
+from `hM` at the incident pair `(v, v)`, so no spurious hypothesis is
+carried.
+-/
+
+section BernsteinTwin
+
+variable (A : WAdj (V := V)) (p : (V × V) → ℝ)
+
+/-- **The variance-adaptive per-vertex degree-deviation tail** —
+`bernstein_inequality` assembled at the degree design of
+`EdgePerturbation.lean`'s section 5: on the product-Bernoulli space at
+inclusion probabilities `p ∈ [0, 1]`, the deviation of any vertex's
+resampled degree from its base degree obeys the classical
+variance-dependent tail against the *true* variance statistic
+`σ²_v = ∑ₑ w_v(e)² p e (1 − p e)` and the magnitude budget
+`M ≥ |w_v(e)|`. CONDITIONAL ON THE `bernstein_inequality` AXIOM: every
+hypothesis clause is proved at the design (`measurable_degPerturbSummand`,
+`indepFun_degPerturbSummand`, the bound through
+`degPerturbSummand_abs_le` composed with `hM`, the variance statistic
+through `integral_sq_degPerturbSummand` composed with the centering
+`integral_degPerturbSummand_eq_zero`). -/
+theorem edgePerturbation_degree_tail_bernstein (hp0 : ∀ e, 0 ≤ p e)
+    (hp1 : ∀ e, p e ≤ 1) (v : V) {M : ℝ}
+    (hM : ∀ e, |degPerturbWeight A v e| ≤ M) (t : ℝ) (ht : 0 ≤ t) :
+    (bernPMF p hp0 hp1).toMeasure
+        {ω : (V × V) → Bool |
+          t ≤ |deg (A + perturbWeight A p ω) v - deg A v|}
+      ≤ ENNReal.ofReal (2 * Real.exp (-(t ^ 2)
+          / (2 * ∑ e, (degPerturbWeight A v e) ^ 2 * p e * (1 - p e)
+            + (2 * M * t) / 3))) := by
+  haveI hprob : IsProbabilityMeasure (bernPMF p hp0 hp1).toMeasure :=
+    PMF.toMeasure.isProbabilityMeasure _
+  have hmeas : ∀ i : Fin (Fintype.card (V × V)),
+      Measurable fun ω : (V × V) → Bool =>
+        degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω :=
+    fun i => measurable_degPerturbSummand A p v _
+  have hindep : ∀ i j : Fin (Fintype.card (V × V)), i ≠ j →
+      IndepFun (fun ω : (V × V) → Bool =>
+          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω)
+        (fun ω : (V × V) → Bool =>
+          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm j) ω)
+        (bernPMF p hp0 hp1).toMeasure :=
+    fun i j hij => indepFun_degPerturbSummand A p hp0 hp1 v
+      ((Fintype.equivFin (V × V)).symm.injective.ne hij)
+  have hmean : ∀ i : Fin (Fintype.card (V × V)),
+      ∫ ω : (V × V) → Bool,
+          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω
+        ∂(bernPMF p hp0 hp1).toMeasure = 0 :=
+    fun i => integral_degPerturbSummand_eq_zero A p hp0 hp1 v _
+  have hM0 : 0 ≤ M := le_trans (abs_nonneg _) (hM (v, v))
+  have hbound : ∀ (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool),
+      |degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω| ≤ M :=
+    fun i ω =>
+      le_trans (degPerturbSummand_abs_le A p hp0 hp1 v _ ω)
+        (hM ((Fintype.equivFin (V × V)).symm i))
+  have hmain := bernstein_inequality
+    (μ := (bernPMF p hp0 hp1).toMeasure)
+    (X := fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>
+      degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω)
+    (a := M) hM0 hmeas hindep hbound t ht
+  -- the event: the centering drops through the proved zero means
+  have hcenter : ∀ ω : (V × V) → Bool,
+      ∑ i : Fin (Fintype.card (V × V)),
+        (degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω
+          - ∫ ω' : (V × V) → Bool,
+              degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω'
+            ∂(bernPMF p hp0 hp1).toMeasure)
+      = ∑ i : Fin (Fintype.card (V × V)),
+          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω := by
+    intro ω
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [hmean i, sub_zero]
+  have hsum : ∀ ω : (V × V) → Bool,
+      ∑ i : Fin (Fintype.card (V × V)),
+        (fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>
+          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω) i ω
+      = deg (A + perturbWeight A p ω) v - deg A v := fun ω => by
+    rw [deg_resampled]
+    rw [Equiv.sum_comp (Fintype.equivFin (V × V)).symm
+      (fun e : V × V => degPerturbSummand A p v e ω)]
+    ring
+  have hseteq : {ω : (V × V) → Bool |
+      t ≤ |∑ i : Fin (Fintype.card (V × V)),
+        (degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω
+          - ∫ ω' : (V × V) → Bool,
+              degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω'
+            ∂(bernPMF p hp0 hp1).toMeasure)|}
+      = {ω : (V × V) → Bool |
+          t ≤ |deg (A + perturbWeight A p ω) v - deg A v|} := by
+    ext ω
+    simp only [Set.mem_setOf_eq]
+    rw [hcenter ω]
+    exact Iff.of_eq (congrArg (fun S : ℝ => t ≤ |S|) (hsum ω))
+  rw [hseteq] at hmain
+  -- the variance sum: each centered second moment is w² p (1 − p)
+  have hvar : ∑ i : Fin (Fintype.card (V × V)),
+      ∫ ω : (V × V) → Bool,
+          (degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω
+            - ∫ ω' : (V × V) → Bool,
+                degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω'
+              ∂(bernPMF p hp0 hp1).toMeasure) ^ 2
+        ∂(bernPMF p hp0 hp1).toMeasure
+      = ∑ e, (degPerturbWeight A v e) ^ 2 * p e * (1 - p e) := by
+    have hterm : ∀ i : Fin (Fintype.card (V × V)),
+        ∫ ω : (V × V) → Bool,
+            (degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω
+              - ∫ ω' : (V × V) → Bool,
+                  degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω'
+                ∂(bernPMF p hp0 hp1).toMeasure) ^ 2
+          ∂(bernPMF p hp0 hp1).toMeasure
+        = (degPerturbWeight A v ((Fintype.equivFin (V × V)).symm i)) ^ 2
+          * p ((Fintype.equivFin (V × V)).symm i)
+          * (1 - p ((Fintype.equivFin (V × V)).symm i)) := by
+      intro i
+      have hfn : (fun ω : (V × V) → Bool =>
+          (degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω
+            - ∫ ω' : (V × V) → Bool,
+                degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω'
+              ∂(bernPMF p hp0 hp1).toMeasure) ^ 2)
+          = fun ω : (V × V) → Bool =>
+            (degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω) ^ 2 := by
+        funext ω
+        rw [hmean i, sub_zero]
+      rw [hfn]
+      exact integral_sq_degPerturbSummand A p hp0 hp1 v _
+    rw [Finset.sum_congr rfl (fun i _ => hterm i)]
+    exact Equiv.sum_comp (Fintype.equivFin (V × V)).symm
+      (fun e : V × V => (degPerturbWeight A v e) ^ 2 * p e * (1 - p e))
+  rw [hvar] at hmain
+  exact hmain
+
+/-- **The budget form of the variance-adaptive degree tail** —
+`bernstein_bounded_variance` assembled at the same design: any supplied
+variance budget `Vbud` dominating the true statistic `σ²_v` and the
+same magnitude budget `M` give the tail with `2 Vbud` in place of
+`2 σ²_v`. CONDITIONAL ON THE `bernstein_bounded_variance` AXIOM (on its
+clause set alone; the budget relaxation is honest by monotonicity of
+the exponent — pinned numerically in the QA). -/
+theorem edgePerturbation_degree_tail_bernstein_budget (hp0 : ∀ e, 0 ≤ p e)
+    (hp1 : ∀ e, p e ≤ 1) (v : V) {M Vbud : ℝ}
+    (hM : ∀ e, |degPerturbWeight A v e| ≤ M)
+    (hvar : ∑ e, (degPerturbWeight A v e) ^ 2 * p e * (1 - p e) ≤ Vbud)
+    (t : ℝ) (ht : 0 ≤ t) :
+    (bernPMF p hp0 hp1).toMeasure
+        {ω : (V × V) → Bool |
+          t ≤ |deg (A + perturbWeight A p ω) v - deg A v|}
+      ≤ ENNReal.ofReal (2 * Real.exp (-(t ^ 2) / (2 * Vbud + (2 * M * t) / 3))) := by
+  haveI hprob : IsProbabilityMeasure (bernPMF p hp0 hp1).toMeasure :=
+    PMF.toMeasure.isProbabilityMeasure _
+  have hmeas : ∀ i : Fin (Fintype.card (V × V)),
+      Measurable fun ω : (V × V) → Bool =>
+        degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω :=
+    fun i => measurable_degPerturbSummand A p v _
+  have hindep : ∀ i j : Fin (Fintype.card (V × V)), i ≠ j →
+      IndepFun (fun ω : (V × V) → Bool =>
+          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω)
+        (fun ω : (V × V) → Bool =>
+          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm j) ω)
+        (bernPMF p hp0 hp1).toMeasure :=
+    fun i j hij => indepFun_degPerturbSummand A p hp0 hp1 v
+      ((Fintype.equivFin (V × V)).symm.injective.ne hij)
+  have hmean : ∀ i : Fin (Fintype.card (V × V)),
+      ∫ ω : (V × V) → Bool,
+          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω
+        ∂(bernPMF p hp0 hp1).toMeasure = 0 :=
+    fun i => integral_degPerturbSummand_eq_zero A p hp0 hp1 v _
+  have hM0 : 0 ≤ M := le_trans (abs_nonneg _) (hM (v, v))
+  have hbound : ∀ (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool),
+      |degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω| ≤ M :=
+    fun i ω =>
+      le_trans (degPerturbSummand_abs_le A p hp0 hp1 v _ ω)
+        (hM ((Fintype.equivFin (V × V)).symm i))
+  have hv0 : 0 ≤ Vbud :=
+    le_trans (Finset.sum_nonneg fun e _ =>
+      mul_nonneg (mul_nonneg (sq_nonneg _) (hp0 e))
+        (by linarith [hp1 e])) hvar
+  have hvarax : ∑ i : Fin (Fintype.card (V × V)),
+      ∫ ω : (V × V) → Bool,
+          (degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω
+            - ∫ ω' : (V × V) → Bool,
+                degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω'
+              ∂(bernPMF p hp0 hp1).toMeasure) ^ 2
+        ∂(bernPMF p hp0 hp1).toMeasure
+      ≤ Vbud := by
+    have hterm : ∀ i : Fin (Fintype.card (V × V)),
+        ∫ ω : (V × V) → Bool,
+            (degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω
+              - ∫ ω' : (V × V) → Bool,
+                  degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω'
+                ∂(bernPMF p hp0 hp1).toMeasure) ^ 2
+          ∂(bernPMF p hp0 hp1).toMeasure
+        = (degPerturbWeight A v ((Fintype.equivFin (V × V)).symm i)) ^ 2
+          * p ((Fintype.equivFin (V × V)).symm i)
+          * (1 - p ((Fintype.equivFin (V × V)).symm i)) := by
+      intro i
+      have hfn : (fun ω : (V × V) → Bool =>
+          (degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω
+            - ∫ ω' : (V × V) → Bool,
+                degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω'
+              ∂(bernPMF p hp0 hp1).toMeasure) ^ 2)
+          = fun ω : (V × V) → Bool =>
+            (degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω) ^ 2 := by
+        funext ω
+        rw [hmean i, sub_zero]
+      rw [hfn]
+      exact integral_sq_degPerturbSummand A p hp0 hp1 v _
+    rw [Finset.sum_congr rfl (fun i _ => hterm i),
+      Equiv.sum_comp (Fintype.equivFin (V × V)).symm
+        (fun e : V × V => (degPerturbWeight A v e) ^ 2 * p e * (1 - p e))]
+    exact hvar
+  have hmain := bernstein_bounded_variance
+    (μ := (bernPMF p hp0 hp1).toMeasure)
+    (X := fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>
+      degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω)
+    (a := M) (v := Vbud) hM0 hv0 hmeas hindep hbound hvarax t ht
+  have hcenter : ∀ ω : (V × V) → Bool,
+      ∑ i : Fin (Fintype.card (V × V)),
+        (degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω
+          - ∫ ω' : (V × V) → Bool,
+              degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω'
+            ∂(bernPMF p hp0 hp1).toMeasure)
+      = ∑ i : Fin (Fintype.card (V × V)),
+          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω := by
+    intro ω
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [hmean i, sub_zero]
+  have hsum : ∀ ω : (V × V) → Bool,
+      ∑ i : Fin (Fintype.card (V × V)),
+        (fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>
+          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω) i ω
+      = deg (A + perturbWeight A p ω) v - deg A v := fun ω => by
+    rw [deg_resampled]
+    rw [Equiv.sum_comp (Fintype.equivFin (V × V)).symm
+      (fun e : V × V => degPerturbSummand A p v e ω)]
+    ring
+  have hseteq : {ω : (V × V) → Bool |
+      t ≤ |∑ i : Fin (Fintype.card (V × V)),
+        (degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω
+          - ∫ ω' : (V × V) → Bool,
+              degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω'
+            ∂(bernPMF p hp0 hp1).toMeasure)|}
+      = {ω : (V × V) → Bool |
+          t ≤ |deg (A + perturbWeight A p ω) v - deg A v|} := by
+    ext ω
+    simp only [Set.mem_setOf_eq]
+    rw [hcenter ω]
+    exact Iff.of_eq (congrArg (fun S : ℝ => t ≤ |S|) (hsum ω))
+  rw [hseteq] at hmain
+  exact hmain
+
+end BernsteinTwin
+
+/-! ## The admissibility dissolution — the unconditional window family
+
+The window family's recorded honesty note — "the admissibility window
+is proof-load-bearing, not fixture-refuted" — stood because every
+measured event *conditioned* on `perturbAdmissible`. This section
+dissolves that conjunct on both halves at once (the degree-concentration
+proposal's priced follow-on, 2026-08-29): the nonnegativity half is
+*derived* from the pair design condition `p e + p (e.2, e.1) ≤ 1`
+(satisfied with equality by the uniform design `p ≡ ½`) through the
+engine lemma `perturbWeight_entry_nonneg`, and the degree half from
+base degrees in a shrunk window `[dmin + s, dmax − s]` plus the
+delivered all-vertices degree tail: an outcome with every per-vertex
+deviation strictly below `s` keeps the resampled degrees in
+`[dmin, dmax]`. The result is the family's first measured event with no
+admissibility conjunct — the window statement a consumer can read
+unconditionally, at the price of one extra tail term.
+
+The same-day completion applies the identical decomposition to the
+family's other two members: the floor theorem and the swept-Fiedler-cut
+capstone now have their own unconditional forms, so the *whole*
+window family — floor, bracket, swept cut — is stated without a
+conditioning event. Each is a two-axiom member (`matrix_hoeffding`
+through the conditional window theorem, `hoeffding_inequality` through
+the degree tail), honestly so; the transfer, the engine lemma, and the
+union-bound arithmetic are proved hard crust. -/
+
+section AdmissibilityDissolution
+
+variable (A : WAdj (V := V)) (p : (V × V) → ℝ)
+
+/-- **The degree-window transfer**: base degrees in the shrunk window
+`[dmin + s, dmax − s]` plus per-vertex deviations strictly below `s` put
+the outcome inside the admissibility window `[dmin, dmax]` — the
+nonnegativity conjunct from the pair design condition, the degree
+conjuncts from the shrunk window and the strict deviation bound (the
+strictness carries `s`'s sign implicitly, so no separate `0 ≤ s`
+hypothesis). Load-bearing on the engine lemma `perturbWeight_entry_nonneg`
+and the entry formulas: a wrong off-diagonal entry shape breaks the
+nonnegativity half exactly. -/
+theorem perturbAdmissible_of_degDev_lt (A : WAdj (V := V)) (p : (V × V) → ℝ)
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hp1 : ∀ e, p e ≤ 1)
+    (hpd : ∀ e, p e + p (e.2, e.1) ≤ 1)
+    (dmin dmax s : ℝ)
+    (hdmin : ∀ i, dmin + s ≤ deg A i) (hdmax : ∀ i, deg A i ≤ dmax - s)
+    {ω : (V × V) → Bool}
+    (hdev : ∀ v, |deg (A + perturbWeight A p ω) v - deg A v| < s) :
+    perturbAdmissible A p dmin dmax ω := by
+  refine ⟨fun i j => perturbWeight_entry_nonneg A p hA hnn hp1 hpd ω i j,
+    ?_, ?_⟩
+  · intro v
+    have h := abs_lt.1 (hdev v)
+    have hdg : deg (A + perturbWeight A p ω) v
+        = deg A v + (deg (A + perturbWeight A p ω) v - deg A v) := by ring
+    rw [hdg]
+    linarith [hdmin v]
+  · intro v
+    have h := abs_lt.1 (hdev v)
+    have hdg : deg (A + perturbWeight A p ω) v
+        = deg A v + (deg (A + perturbWeight A p ω) v - deg A v) := by ring
+    rw [hdg]
+    linarith [hdmax v]
+
+/-- **The unconditional connectivity bracket — the admissibility
+dissolution**: the window family's first measured event with *no
+admissibility conjunct*. On a symmetric nonnegative base graph whose
+degrees sit in the shrunk window `[dmin + s, dmax − s]` (`0 < dmin`), at
+the pair design condition, leaving the two-sided
+normalized-connectivity window
+
+`[(dmin·φ(A)²/2 − t)/dmax, (2·dmax·φ(A) + t)/dmin]`
+
+has probability at most the window tail at `t` plus the all-vertices
+degree tail at `s`:
+
+`μ {λ₂(L_sym G_ω) below floor ∨ above ceiling} ≤ 2 d exp(−t²/(2‖∑ₑ L_e²‖))
+  + ∑_v 2 exp(−s²/(2 S_v))`.
+
+The decomposition: every outcome either has some vertex deviation `≥ s`
+(the degree tail's event) or has all deviations `< s`, in which case the
+transfer helper makes it admissible and the delivered bracket's event
+applies. Both tails are load-bearing — the window half through the
+sandwich and the irregular Cheeger pair, the degree half through the
+degree-design's clause lemmas. CONDITIONAL ON THE `matrix_hoeffding`
+AXIOM (via the bracket) AND THE `hoeffding_inequality` AXIOM (via the
+degree tail) — the family's only two-axiom member, honestly so: the
+dissolution consumes one tail of each kind; the transfer, the engine
+lemma, and the degree-window arithmetic are proved hard crust. The
+`s = 0` degeneration is harmless (the deviation event becomes all of
+`Ω`, the bound vacuous but true); `hcard : 2 ≤ card V` fences the empty
+index type. -/
+theorem edgePerturbation_normalized_connectivity_bracket_unconditional
+    (A : WAdj (V := V)) (p : (V × V) → ℝ) (hA : A.IsSymm)
+    (hnn : ∀ i j, 0 ≤ A i j)
+    (dmin dmax s t : ℝ) (hpos : 0 < dmin) (hs : 0 ≤ s)
+    (hdmin : ∀ i, dmin + s ≤ deg A i) (hdmax : ∀ i, deg A i ≤ dmax - s)
+    (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 1)
+    (hpd : ∀ e, p e + p (e.2, e.1) ≤ 1) [Nonempty V]
+    (hcard : 2 ≤ Fintype.card V) (ht : 0 ≤ t) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool |
+        (secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+            (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) hcard
+          ≤ (dmin * cheegerConstant A ^ 2 / 2 - t) / dmax
+        ∨ (2 * (dmax * cheegerConstant A) + t) / dmin
+          ≤ secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+              (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+                (hA.add (perturbWeight_isSymm A p ω))) hcard)}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(t ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖)))
+        + ∑ v : V, ENNReal.ofReal (2 * Real.exp (-(s ^ 2)
+          / (2 * ∑ e, (degPerturbWeight A v e) ^ 2))) := by
+  have hd : ∀ i, 0 < deg A i := fun i =>
+    lt_of_lt_of_le hpos (le_trans (by linarith) (hdmin i))
+  have hdmin' : ∀ i, dmin ≤ deg A i := fun i =>
+    le_trans (by linarith) (hdmin i)
+  have hdmax' : ∀ i, deg A i ≤ dmax := fun i =>
+    le_trans (hdmax i) (by linarith)
+  have hsplit : {ω : (V × V) → Bool |
+      (secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+            (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) hcard
+          ≤ (dmin * cheegerConstant A ^ 2 / 2 - t) / dmax
+        ∨ (2 * (dmax * cheegerConstant A) + t) / dmin
+          ≤ secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+              (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+                (hA.add (perturbWeight_isSymm A p ω))) hcard)}
+      ⊆ {ω : (V × V) → Bool |
+          perturbAdmissible A p dmin dmax ω ∧
+          (secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+            (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) hcard
+            ≤ (dmin * cheegerConstant A ^ 2 / 2 - t) / dmax
+          ∨ (2 * (dmax * cheegerConstant A) + t) / dmin
+            ≤ secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+                (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+                  (hA.add (perturbWeight_isSymm A p ω))) hcard)}
+        ∪ {ω : (V × V) → Bool |
+          ∃ v, s ≤ |deg (A + perturbWeight A p ω) v - deg A v|} := by
+    intro ω hω
+    by_cases hdev : ∃ v, s ≤ |deg (A + perturbWeight A p ω) v - deg A v|
+    · exact Or.inr hdev
+    · refine Or.inl ⟨?_, hω⟩
+      push_neg at hdev
+      exact perturbAdmissible_of_degDev_lt A p hA hnn hp1 hpd dmin dmax s
+        hdmin hdmax hdev
+  calc (bernPMF p hp0 hp1).toMeasure
+        {ω : (V × V) → Bool |
+          (secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+            (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) hcard
+            ≤ (dmin * cheegerConstant A ^ 2 / 2 - t) / dmax
+          ∨ (2 * (dmax * cheegerConstant A) + t) / dmin
+            ≤ secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+                (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+                  (hA.add (perturbWeight_isSymm A p ω))) hcard)}
+      ≤ (bernPMF p hp0 hp1).toMeasure
+          ({ω : (V × V) → Bool |
+              perturbAdmissible A p dmin dmax ω ∧
+              (secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+                (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+                  (hA.add (perturbWeight_isSymm A p ω))) hcard
+                ≤ (dmin * cheegerConstant A ^ 2 / 2 - t) / dmax
+              ∨ (2 * (dmax * cheegerConstant A) + t) / dmin
+                ≤ secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+                    (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+                      (hA.add (perturbWeight_isSymm A p ω))) hcard)}
+            ∪ {ω : (V × V) → Bool |
+              ∃ v, s ≤ |deg (A + perturbWeight A p ω) v - deg A v|}) :=
+        measure_mono hsplit
+    _ ≤ (bernPMF p hp0 hp1).toMeasure
+          {ω : (V × V) → Bool |
+            perturbAdmissible A p dmin dmax ω ∧
+            (secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+              (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+                (hA.add (perturbWeight_isSymm A p ω))) hcard
+              ≤ (dmin * cheegerConstant A ^ 2 / 2 - t) / dmax
+            ∨ (2 * (dmax * cheegerConstant A) + t) / dmin
+              ≤ secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+                  (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+                    (hA.add (perturbWeight_isSymm A p ω))) hcard)}
+        + (bernPMF p hp0 hp1).toMeasure
+          {ω : (V × V) → Bool |
+            ∃ v, s ≤ |deg (A + perturbWeight A p ω) v - deg A v|} :=
+        measure_union_le _ _
+    _ ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(t ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖)))
+        + ∑ v : V, ENNReal.ofReal (2 * Real.exp (-(s ^ 2)
+          / (2 * ∑ e, (degPerturbWeight A v e) ^ 2))) :=
+        add_le_add
+          (edgePerturbation_normalized_connectivity_bracket A p hA hnn hd
+            dmin dmax hdmin' hpos hdmax' hp0 hp1 hcard t ht)
+          (edgePerturbation_degree_tail_all A p hp0 hp1 s hs)
+
+/-- **The unconditional normalized Cheeger floor — the admissibility
+dissolution, floor member**: the decomposition's second application.
+On a symmetric nonnegative base graph whose degrees sit in the shrunk
+window `[dmin + s, dmax − s]` (`0 < dmin`), at the pair design
+condition, the *unconditioned* floor event —
+
+`μ {λ₂(L_sym G_ω) ≤ (dmin·φ(A)²/2 − t)/dmax} ≤ 2 d exp(−t²/(2‖∑ₑ L_e²‖))
+  + ∑_v 2 exp(−s²/(2 S_v))`.
+
+Every outcome either has some vertex deviation `≥ s` (the degree tail's
+event) or has all deviations `< s`, in which case the transfer helper
+makes it admissible and the delivered floor theorem's event applies.
+CONDITIONAL ON THE `matrix_hoeffding` AXIOM (via the floor) AND THE
+`hoeffding_inequality` AXIOM (via the degree tail); the decomposition
+is proved hard crust. `s = 0` harmless, `hcard` fences the empty index
+type, exactly as in the bracket member. -/
+theorem edgePerturbation_normalized_cheeger_floor_unconditional
+    (A : WAdj (V := V)) (p : (V × V) → ℝ) (hA : A.IsSymm)
+    (hnn : ∀ i j, 0 ≤ A i j)
+    (dmin dmax s t : ℝ) (hpos : 0 < dmin) (hs : 0 ≤ s)
+    (hdmin : ∀ i, dmin + s ≤ deg A i) (hdmax : ∀ i, deg A i ≤ dmax - s)
+    (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 1)
+    (hpd : ∀ e, p e + p (e.2, e.1) ≤ 1) [Nonempty V]
+    (hcard : 2 ≤ Fintype.card V) (ht : 0 ≤ t) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool |
+        secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+            (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) hcard
+          ≤ (dmin * cheegerConstant A ^ 2 / 2 - t) / dmax}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(t ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖)))
+        + ∑ v : V, ENNReal.ofReal (2 * Real.exp (-(s ^ 2)
+          / (2 * ∑ e, (degPerturbWeight A v e) ^ 2))) := by
+  have hd : ∀ i, 0 < deg A i := fun i =>
+    lt_of_lt_of_le hpos (le_trans (by linarith) (hdmin i))
+  have hdmin' : ∀ i, dmin ≤ deg A i := fun i =>
+    le_trans (by linarith) (hdmin i)
+  have hsplit : {ω : (V × V) → Bool |
+      secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+            (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) hcard
+          ≤ (dmin * cheegerConstant A ^ 2 / 2 - t) / dmax}
+      ⊆ {ω : (V × V) → Bool |
+          perturbAdmissible A p dmin dmax ω ∧
+          secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+              (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+                (hA.add (perturbWeight_isSymm A p ω))) hcard
+            ≤ (dmin * cheegerConstant A ^ 2 / 2 - t) / dmax}
+        ∪ {ω : (V × V) → Bool |
+          ∃ v, s ≤ |deg (A + perturbWeight A p ω) v - deg A v|} := by
+    intro ω hω
+    by_cases hdev : ∃ v, s ≤ |deg (A + perturbWeight A p ω) v - deg A v|
+    · exact Or.inr hdev
+    · refine Or.inl ⟨?_, hω⟩
+      push_neg at hdev
+      exact perturbAdmissible_of_degDev_lt A p hA hnn hp1 hpd dmin dmax s
+        hdmin hdmax hdev
+  calc (bernPMF p hp0 hp1).toMeasure
+        {ω : (V × V) → Bool |
+          secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+              (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+                (hA.add (perturbWeight_isSymm A p ω))) hcard
+            ≤ (dmin * cheegerConstant A ^ 2 / 2 - t) / dmax}
+      ≤ (bernPMF p hp0 hp1).toMeasure
+          ({ω : (V × V) → Bool |
+              perturbAdmissible A p dmin dmax ω ∧
+              secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+                  (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+                    (hA.add (perturbWeight_isSymm A p ω))) hcard
+                ≤ (dmin * cheegerConstant A ^ 2 / 2 - t) / dmax}
+            ∪ {ω : (V × V) → Bool |
+              ∃ v, s ≤ |deg (A + perturbWeight A p ω) v - deg A v|}) :=
+        measure_mono hsplit
+    _ ≤ (bernPMF p hp0 hp1).toMeasure
+          {ω : (V × V) → Bool |
+            perturbAdmissible A p dmin dmax ω ∧
+            secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+                (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+                  (hA.add (perturbWeight_isSymm A p ω))) hcard
+              ≤ (dmin * cheegerConstant A ^ 2 / 2 - t) / dmax}
+        + (bernPMF p hp0 hp1).toMeasure
+          {ω : (V × V) → Bool |
+            ∃ v, s ≤ |deg (A + perturbWeight A p ω) v - deg A v|} :=
+        measure_union_le _ _
+    _ ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(t ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖)))
+        + ∑ v : V, ENNReal.ofReal (2 * Real.exp (-(s ^ 2)
+          / (2 * ∑ e, (degPerturbWeight A v e) ^ 2))) :=
+        add_le_add
+          (edgePerturbation_normalized_cheeger_floor A p hA hnn hd
+            dmin dmax hdmin' hpos hp0 hp1 hcard t ht)
+          (edgePerturbation_degree_tail_all A p hp0 hp1 s hs)
+
+/-- **The unconditional swept-Fiedler-cut tail — the admissibility
+dissolution, capstone member**: the decomposition's third application,
+completing the window family. At the same shrunk-window/pair-condition
+stack plus the floor-positivity guard (`0 < dmin·φ²/2 − t`), the
+failure of the good outcome — the resampled graph disconnected, or
+connected with no swept level set of its own Fiedler sweep vector at
+
+`conductance G_ω S² ≤ 2 · (2·dmax·φ(A) + t)/dmin`
+
+— is bounded by the window tail at `t` plus the degree tail at `s`,
+with **no conditioning event**: an unconditioned high-probability
+algorithmic output under random edge resampling. CONDITIONAL ON THE
+`matrix_hoeffding` AXIOM (via the swept-cut tail) AND THE
+`hoeffding_inequality` AXIOM (via the degree tail); the decomposition
+is proved hard crust. The floor-positivity guard remains
+proof-load-bearing exactly as in the conditional capstone (its
+dropped-guard refutation fixture, `epC4_sweepWindow_unguarded_refuted_QA`,
+carries over verbatim: the guard is a hypothesis of both members). -/
+theorem edgePerturbation_fiedler_sweep_cut_tail_unconditional
+    (A : WAdj (V := V)) (p : (V × V) → ℝ) (hA : A.IsSymm)
+    (hnn : ∀ i j, 0 ≤ A i j)
+    (dmin dmax s t : ℝ) (hpos : 0 < dmin) (hs : 0 ≤ s)
+    (hdmin : ∀ i, dmin + s ≤ deg A i) (hdmax : ∀ i, deg A i ≤ dmax - s)
+    (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 1)
+    (hpd : ∀ e, p e + p (e.2, e.1) ≤ 1) [Nonempty V]
+    (hcard : 2 ≤ Fintype.card V) (ht : 0 ≤ t)
+    (hfloor : 0 < dmin * cheegerConstant A ^ 2 / 2 - t) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool |
+        ¬ ((supportGraph (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))).Connected ∧
+           ∃ S : Finset V, S.Nonempty ∧ Sᶜ.Nonempty ∧
+             ((∃ u : ℝ, ∀ i, i ∈ S ↔
+                 u ≤ fiedlerSweepVector (A + perturbWeight A p ω)
+                   (hA.add (perturbWeight_isSymm A p ω)) hcard i)
+               ∨ (∃ u : ℝ, ∀ i, i ∈ S ↔
+                 fiedlerSweepVector (A + perturbWeight A p ω)
+                   (hA.add (perturbWeight_isSymm A p ω)) hcard i ≤ u)) ∧
+             conductance (A + perturbWeight A p ω) S ^ 2
+               ≤ 2 * ((2 * (dmax * cheegerConstant A) + t) / dmin))}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(t ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖)))
+        + ∑ v : V, ENNReal.ofReal (2 * Real.exp (-(s ^ 2)
+          / (2 * ∑ e, (degPerturbWeight A v e) ^ 2))) := by
+  have hd : ∀ i, 0 < deg A i := fun i =>
+    lt_of_lt_of_le hpos (le_trans (by linarith) (hdmin i))
+  have hdmin' : ∀ i, dmin ≤ deg A i := fun i =>
+    le_trans (by linarith) (hdmin i)
+  have hdmax' : ∀ i, deg A i ≤ dmax := fun i =>
+    le_trans (hdmax i) (by linarith)
+  have hsplit : {ω : (V × V) → Bool |
+      ¬ ((supportGraph (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))).Connected ∧
+           ∃ S : Finset V, S.Nonempty ∧ Sᶜ.Nonempty ∧
+             ((∃ u : ℝ, ∀ i, i ∈ S ↔
+                 u ≤ fiedlerSweepVector (A + perturbWeight A p ω)
+                   (hA.add (perturbWeight_isSymm A p ω)) hcard i)
+               ∨ (∃ u : ℝ, ∀ i, i ∈ S ↔
+                 fiedlerSweepVector (A + perturbWeight A p ω)
+                   (hA.add (perturbWeight_isSymm A p ω)) hcard i ≤ u)) ∧
+             conductance (A + perturbWeight A p ω) S ^ 2
+               ≤ 2 * ((2 * (dmax * cheegerConstant A) + t) / dmin))}
+      ⊆ ({ω : (V × V) → Bool |
+            perturbAdmissible A p dmin dmax ω ∧
+            ¬ ((supportGraph (A + perturbWeight A p ω)
+                  (hA.add (perturbWeight_isSymm A p ω))).Connected ∧
+               ∃ S : Finset V, S.Nonempty ∧ Sᶜ.Nonempty ∧
+                 ((∃ u : ℝ, ∀ i, i ∈ S ↔
+                     u ≤ fiedlerSweepVector (A + perturbWeight A p ω)
+                       (hA.add (perturbWeight_isSymm A p ω)) hcard i)
+                   ∨ (∃ u : ℝ, ∀ i, i ∈ S ↔
+                     fiedlerSweepVector (A + perturbWeight A p ω)
+                       (hA.add (perturbWeight_isSymm A p ω)) hcard i ≤ u)) ∧
+                 conductance (A + perturbWeight A p ω) S ^ 2
+                   ≤ 2 * ((2 * (dmax * cheegerConstant A) + t) / dmin))}
+          ∪ {ω : (V × V) → Bool |
+            ∃ v, s ≤ |deg (A + perturbWeight A p ω) v - deg A v|}) := by
+    intro ω hω
+    by_cases hdev : ∃ v, s ≤ |deg (A + perturbWeight A p ω) v - deg A v|
+    · exact Or.inr hdev
+    · refine Or.inl ⟨?_, hω⟩
+      push_neg at hdev
+      exact perturbAdmissible_of_degDev_lt A p hA hnn hp1 hpd dmin dmax s
+        hdmin hdmax hdev
+  calc (bernPMF p hp0 hp1).toMeasure
+        {ω : (V × V) → Bool |
+          ¬ ((supportGraph (A + perturbWeight A p ω)
+                (hA.add (perturbWeight_isSymm A p ω))).Connected ∧
+             ∃ S : Finset V, S.Nonempty ∧ Sᶜ.Nonempty ∧
+               ((∃ u : ℝ, ∀ i, i ∈ S ↔
+                   u ≤ fiedlerSweepVector (A + perturbWeight A p ω)
+                     (hA.add (perturbWeight_isSymm A p ω)) hcard i)
+                 ∨ (∃ u : ℝ, ∀ i, i ∈ S ↔
+                   fiedlerSweepVector (A + perturbWeight A p ω)
+                     (hA.add (perturbWeight_isSymm A p ω)) hcard i ≤ u)) ∧
+               conductance (A + perturbWeight A p ω) S ^ 2
+                 ≤ 2 * ((2 * (dmax * cheegerConstant A) + t) / dmin))}
+      ≤ (bernPMF p hp0 hp1).toMeasure
+          ({ω : (V × V) → Bool |
+              perturbAdmissible A p dmin dmax ω ∧
+              ¬ ((supportGraph (A + perturbWeight A p ω)
+                    (hA.add (perturbWeight_isSymm A p ω))).Connected ∧
+                 ∃ S : Finset V, S.Nonempty ∧ Sᶜ.Nonempty ∧
+                   ((∃ u : ℝ, ∀ i, i ∈ S ↔
+                       u ≤ fiedlerSweepVector (A + perturbWeight A p ω)
+                         (hA.add (perturbWeight_isSymm A p ω)) hcard i)
+                     ∨ (∃ u : ℝ, ∀ i, i ∈ S ↔
+                       fiedlerSweepVector (A + perturbWeight A p ω)
+                         (hA.add (perturbWeight_isSymm A p ω)) hcard i ≤ u)) ∧
+                   conductance (A + perturbWeight A p ω) S ^ 2
+                     ≤ 2 * ((2 * (dmax * cheegerConstant A) + t) / dmin))}
+            ∪ {ω : (V × V) → Bool |
+              ∃ v, s ≤ |deg (A + perturbWeight A p ω) v - deg A v|}) :=
+        measure_mono hsplit
+    _ ≤ (bernPMF p hp0 hp1).toMeasure
+          {ω : (V × V) → Bool |
+            perturbAdmissible A p dmin dmax ω ∧
+            ¬ ((supportGraph (A + perturbWeight A p ω)
+                  (hA.add (perturbWeight_isSymm A p ω))).Connected ∧
+               ∃ S : Finset V, S.Nonempty ∧ Sᶜ.Nonempty ∧
+                 ((∃ u : ℝ, ∀ i, i ∈ S ↔
+                     u ≤ fiedlerSweepVector (A + perturbWeight A p ω)
+                       (hA.add (perturbWeight_isSymm A p ω)) hcard i)
+                   ∨ (∃ u : ℝ, ∀ i, i ∈ S ↔
+                     fiedlerSweepVector (A + perturbWeight A p ω)
+                       (hA.add (perturbWeight_isSymm A p ω)) hcard i ≤ u)) ∧
+                 conductance (A + perturbWeight A p ω) S ^ 2
+                   ≤ 2 * ((2 * (dmax * cheegerConstant A) + t) / dmin))}
+        + (bernPMF p hp0 hp1).toMeasure
+          {ω : (V × V) → Bool |
+            ∃ v, s ≤ |deg (A + perturbWeight A p ω) v - deg A v|} :=
+        measure_union_le _ _
+    _ ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(t ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖)))
+        + ∑ v : V, ENNReal.ofReal (2 * Real.exp (-(s ^ 2)
+          / (2 * ∑ e, (degPerturbWeight A v e) ^ 2))) :=
+        add_le_add
+          (edgePerturbation_fiedler_sweep_cut_tail A p hA hnn hd
+            dmin dmax hdmin' hpos hdmax' hp0 hp1 hcard t ht hfloor)
+          (edgePerturbation_degree_tail_all A p hp0 hp1 s hs)
+
+end AdmissibilityDissolution
 
 end Scaffold.Derived.EdgePerturbationTail

@@ -851,3 +851,187 @@ follow-on list remains empty. The composition the triangle unlocked is
 now on the shelf — the family's next natural frontier is a consumer
 that prices the swept cut's *quality* (e.g. a Cheeger-informed
 partition objective), none named yet.**
+
+### Follow-on delivery: the C₄ dropped-guard refutation of the sweep-cut tail's floor-positivity guard (2026-08-29)
+
+**Run `20260829T073300Z-run-1` — DELIVERED.** The falsification
+discipline applied to this delivery's own honesty note: the recorded
+claim "no dropped-guard refutation fixture exists at fixture scale — at
+2–3 vertices the tail bound exceeds `1`, the window family's
+junk-measure obstruction" was **over-narrow and is corrected on the
+record**. The obstruction analysis had anchored on the
+*eigenvalue-floor* membership route (λ₂ ≤ floor, which shrinks with
+`t`) and on K₂/P₃-scale fixtures, where no admissible-but-disconnected
+outcome exists at all. The *disconnectedness* route is different:
+bad-set membership via `¬connected` is `t`-invariant, so the bound
+`2 d exp(−t²/(2‖Σ‖))` — which collapses as `t → ∞` — eventually drops
+below the atom mass of any single admissible-disconnected outcome,
+falsifying the un-guarded statement in proved arithmetic.
+
+- **The fixture** (`EdgePerturbation_QA.lean`'s new guard-fence
+  section): `epC4`, the 4-cycle at unit weights (symmetric, nonnegative,
+  degrees all `2`), at the *hypothesis-loosened* window `[dmin, dmax] =
+  [1, 2]` (every hypothesis of the theorem except `hfloor` genuinely
+  holds — the window need only contain the base degrees), `p ≡ ½`, and
+  `t = 9000` (where `hfloor` is exactly what fails:
+  `0 < 1·φ²/2 − 9000` is false).
+- **The matching outcome** `epC4ω`: exactly the two edges `{0,1}`,
+  `{2,3}` kept. Its resampled adjacency `epC4 + perturbWeight` is the
+  two weight-`2` edges (`epC4_perturbed_eq`, entrywise through the
+  design's off-diagonal formula); it is **admissible** (nonnegative,
+  degrees all `2` — one kept edge of weight `2` per vertex) and
+  **disconnected** (the component indicator `![1,1,0,0]` is a
+  non-constant Laplacian-kernel vector — `epC4M_lap_mulVec` raw, then
+  the contrapositive of
+  `exists_const_of_laplacian_mulVec_eq_zero`: connectivity would force
+  the kernel constant).
+- **The measure side**: the singleton's atom mass is exactly
+  `(1/2)^16 = 1/65536` (`epC4ω_mass` — sixteen fairly-flipped ordered
+  pairs; `PMF.toMeasure_apply` at the measurable singleton), and
+  `{epC4ω} ⊆` the measured event, so the event's measure ≥ `1/65536`.
+- **The bound side**: `‖∑ₑ L_e²‖ ≤ 64` (`epC4_varNorm_le`: triangle +
+  submultiplicativity + `l2OpNorm_rankOne_le`, every entry weight ≤ 1,
+  every single-edge squared norm ≤ 2) and `> 0` (`epC4_varNorm_pos`:
+  the `(0,0)` entry pinned `= 8` by the sixteen-way literal
+  enumeration — the honest content that the refutation's exponent
+  divides by a genuine positive, not a junk `0`). Hence
+  `8·exp(−9000²/(2‖Σ‖)) ≤ 8/(1 + 9000²/128) < 1/65536` — the last
+  step `field_simp`/`norm_num` on `524288 < 632813.5`.
+- **The headline** `epC4_sweepWindow_unguarded_refuted_QA`: the
+  negation of the un-guarded conclusion at the fixture —
+  `measure_mono` (outer-measure monotonicity; the pin's `measure_mono`
+  needs no measurability) joins the atom-mass lower bound to the
+  ENNReal-ofReal comparison, contradicted by the ℝ-side strict bound.
+  `#print axioms`: exactly `propext, Classical.choice, Quot.sound` on
+  all eight audited declarations — a refutation cannot consume the
+  axiom-conditional theorem.
+
+**Honesty notes.** (1) The window `[1, 2]` is a *loose* instantiation
+of a hypothesis (the theorem's own `hdmin/hdmax` only demand it contain
+the base degrees) — this is exactly what makes the matching outcome
+admissible; at the tight window `[2, 2]` every admissible C₄ outcome
+keeps the full cycle and the fixture disappears. The refutation
+therefore also exhibits the *admissibility window* doing real work
+beside the floor guard. (2) The technique lesson for future
+dropped-guard hunts in this family: enumerate the *t-invariant*
+membership routes (structural properties of `G_ω` like
+connectedness), not only the eigenvalue-window routes (which are
+t-monotone and evasive); and check the bound against *atom masses*,
+not against `1`.
+
+**Verification:** spike first (`wip/c4fence_spike.lean`, every piece
+iterated to zero errors/warnings before any shelf edit, with the
+spike's own `#print axioms` confirming the unconditional structure
+pre-shelf); `lake env lean` zero errors/zero warnings on the QA module
+(its lone `Try this: ring_nf` note verified pre-existing on the
+stashed unmodified tree); explicit `lake build` targets ✔ on
+`EdgePerturbation_QA` (2238/2238) and, after the docstring correction,
+`EdgePerturbationTail` (2227/2227); full ladder below in the activity
+log.
+
+### Follow-on delivery: the degenerate-degree corner audit — the parked junk-spectrum finding settled in proved form (2026-08-29)
+
+**Run `20260829T092750Z-run-1` — DELIVERED.** The falsification
+frontier's residue, priced and discharged. Two things happened before
+the audit was selected, both worth recording because they are the
+*falsification discipline applied and surviving*:
+
+**Adversarial analysis 1 — the sharpened drift's `s = γ` corner,
+attacked and standing.** The sharpened-interface honesty note claims
+the `s < γ` guard "admits no cheap refutation fixture … on every
+available fixture the bound exceeds `1`". This run attacked that claim
+two ways and the note **survived, now with structural reasons**:
+(a) *the `p`-scaling route fails* — the bound's variance statistic is
+the *deterministic* `‖∑ₑ L_e²‖` (the `h_bound` clause's matrix, not
+the design's actual variance `∑ p(1−p) L_e²`), so shrinking `p`
+does not shrink the bound: at `s = γ` the event is all of `Ω`
+(threshold `γ/0 = 0`) but the bound is `p`-independent;
+(b) *the weight-scaling route fails* — the exponent
+`γ²/(2‖Σ₀‖)` is invariant under uniform weight scaling (both `γ` and
+`√‖Σ₀‖` scale linearly), and mixed weights only lower it (a heavy
+edge inflates `Σ₀ = 2∑wₑ²·rankOne` quadratically while the gap grows
+linearly; on the 2-edge path the exponent is provably capped at
+`2/3 < ln 6`). The note's claim is correct at fixture scale and the
+`s = γ` corner stays proof-load-bearing — no correction owed.
+
+**Adversarial analysis 2 — the window family's dropped admissibility
+conjunct, attacked and standing.** The `p ≠ ½` outcome route (negative
+off-diagonal entries at legal design points — e.g. at `p ≡ 1` the K₂
+all-false outcome's resampled adjacency is the *negative* edge, its
+degrees `-1 < 0`) was examined for a floor-event refutation and
+fails on an **inertia obstruction**: `L_sym G_ω = 1 −
+D^{-1/2}ÃD^{-1/2}` with the congruence preserving `Ã`'s inertia, and
+every resampled adjacency of the form "complete-minus-edges" (or any
+sum of edge blocks with at most one positive eigendirection — all
+outcomes on the small fixtures) has at most one positive eigenvalue,
+so `μ₂(M) ≤ 0` and `λ₂(L_sym G_ω) = 1 − μ₂ ≥ 1 > floor` at every
+legal `t`. The floor event stays empty at those outcomes — exactly the
+identity-junk mechanism the honesty note recorded, now with its
+spectral reason. (This analysis consumed the junk-prediction fact
+three times over, which is what priced the audit below.)
+
+**The delivery.** The parked spike-level finding — "the normalized
+Laplacian's junk value at zero-degree corners is the *identity's*
+spectrum (`λ₂ = 1`), not the zero matrix's" — is now shelf fact, plus
+the hitherto-unrecorded **negative-degree corner**:
+
+- **`Normalized.lean`** (public, proved): `degreeInvSqrt_apply_eq_zero_iff`
+  (the reciprocal factor vanishes exactly at `deg ≤ 0` — `√0 = 0`
+  with `0⁻¹ = 0` on the zero side, `Real.sqrt` of a negative on the
+  other) and `normalizedLaplacian_eq_one_of_forall_deg_nonpos` (the
+  identity degeneration `L_sym = 1`).
+- **`Spectral.lean`** (public, proved): `eigvalOf_one` (every
+  eigenbasis value of the identity is `1`, by the eigenaction
+  `1 *ᵥ v = v` against `eigvecOf_inner`'s unit norm) and `evals_one`
+  (the sorted spectrum of the identity is `1` at every index, through
+  `evals_mem_eigvalOf`).
+- **QA (+12, 2951 → 2963**, `EdgePerturbation_QA.lean`'s cornerAudit
+  section): the all-false `p ≡ ½` outcome's degrees pinned `0`, its
+  normalized Laplacian pinned `1`, **the parked finding pinned**
+  (`λ₂(L_sym) = 1` through `secondEval_congr` + `evals_one`), the
+  easy misprediction refuted (`λ₂ ≠ 0`), the **spectral contrast in
+  one proved statement** (`λ₂(L) = 0 ∧ λ₂(L_sym) = 1` at the same
+  outcome — the two junk spectra side by side), **the honesty note's
+  floor-condition mechanism proved** (the un-windowed floor condition
+  false at the fixture: `1 ≤ 1/2` fails), the negative corner
+  (`p ≡ 1`: resampled adjacency `= (-1) • K₂`, degrees `-1`,
+  the same identity junk, `λ₂ = 1`), and the vanishing iff exercised
+  on both sides at one fixture pair.
+
+`#print axioms` via `wip/degcorner_axcheck.lean` on all 15 audited
+declarations: exactly `propext, Classical.choice, Quot.sound`. The
+Derived bracket's docstring honesty note updated in place to point at
+the proved lemmas (docstring-only, rebuilt clean).
+
+**Technique findings (small):** `inv_zero` is ambiguous under
+`open Matrix` (`_root_.inv_zero` the fix); `Matrix.diagonal_apply_eq`
+spells the on-diagonal entry where `Matrix.diagonal_apply` leaves an
+`if` that `rw`'s auto-`rfl` then half-closes (the robust entry-level
+route); `one_mul`/`mul_one` mix-ups remain the spike's most common
+arithmetic slip; and the recorded rw-auto-rfl fragility — a trailing
+`norm_num` after `rw` can be silently unreachable, worth checking in
+the spike phase rather than after shelving.
+
+**Verification:** spike first (`wip/degcorner_spike.lean`, every piece
+to zero errors/warnings before any shelf edit, the spike's own
+`#print axioms` at the standard three on all 16 declarations pre-shelf);
+`lake env lean` zero errors on all three touched modules
+(`Spectral.lean` and `Normalized.lean` at warning sets verified
+identical to the stashed unmodified tree — only line shifts; the QA
+module at its recorded pre-existing `Try this: ring_nf` baseline);
+explicit `lake build` targets ✔ on `Spectral`, `Normalized`,
+`EdgePerturbationTail`, and `EdgePerturbation_QA`; `#print axioms` via
+`wip/degcorner_axcheck.lean` exactly as designed (15 declarations);
+**full `lake build` ✔ (2405/2406) immediately followed by
+`check_build_completeness.py` — 128 source files, 128 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` (10, both
+findings allowlisted-confirmed), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**2963/10/0**);
+**map freshness exit 0** after the stats-stamp sync (2951 → 2963 in
+both map files, SVG regenerated; no proposal status header changed).
+
+**Status: the parked corner audit delivered; the proposal's open
+residues are unchanged (the bracket's un-windowed statement genuinely
+shrinks with `t` and stays unfalsified; the empirical-stationary Step
+2 stays consumer-gated). The honesty-note claims this run attacked
+stand, now with their structural reasons recorded above.**

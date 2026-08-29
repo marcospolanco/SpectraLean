@@ -2,7 +2,7 @@
 <rect x="0" y="0" width="2000" height="2020" fill="#F3F4EE" stroke="#9AA39A" stroke-width="2"/>
 <text x="36" y="52" font-size="32" font-weight="700" fill="#22282B" font-family="ui-sans-serif,Helvetica,Arial,sans-serif">SCAFFOLD TRANSIT MAP</text>
 <text x="36" y="78" font-size="14" fill="#4B5359" font-family="ui-monospace,Consolas,monospace">A hub-and-spoke reading of the SGT core and the seven axes it feeds, colored by proof status.</text>
-<text x="36" y="102" font-size="13" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">Repo-wide: 10 explicit axioms &#183; 2922 QA declarations &#183; 0 sorries &#8212; as of working tree, 2026-08-29</text>
+<text x="36" y="102" font-size="13" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">Repo-wide: 10 explicit axioms &#183; 3008 QA declarations &#183; 0 sorries &#8212; as of working tree, 2026-08-29</text>
 <circle cx="42" cy="132" r="6" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
 <text x="54" y="136" font-size="13" fill="#4B5359" font-family="ui-monospace,Consolas,monospace">Proved (hard crust)</text>
 <circle cx="247.79999999999998" cy="132" r="6" fill="#8A5A12" stroke="#8A5A12" stroke-width="2"/>

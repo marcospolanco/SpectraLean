@@ -7,15 +7,664 @@ holds the append-only narrative.
 ## Active milestone
 
 None — see the delivered milestone below and the standing handoff. The
-swept-Fiedler-cut consumer of the normalized connectivity window (the
-standing handoff's named composition, the window family's
-algorithm-facing capstone) was **delivered this run**; the Active
-table still holds only the gated empirical-stationary Step 2 row and
-Low human-decision items.
+dissolution-completion milestone (the floor and swept-cut members made
+unconditional, finishing the window family) was **delivered this run**;
+the degree-concentration proposal's follow-on list is empty (its
+completion record prices nothing new), and the Active table still
+holds only the gated empirical-stationary Step 2 row and Low
+human-decision items.
 
 ------
 
 ## Delivered milestones (most recent first)
+
+**The dissolution completion — the floor and swept-cut members made
+unconditional, the window family finished (floor, bracket, swept cut
+all reading without a conditioning conjunct), the previous delivery's
+own priced follow-on —
+`proposals/hoeffding-inequality-degree-concentration.md` (the
+completion delivery record with the strict-containment witness and the
+carried-over floor-guard note); run 1, 2026-08-29, run
+`20260829T155521Z-run-1`; DELIVERED — zero new axioms (count stays 10;
+`#print axioms` via `wip/dissolve2_axcheck.lean` on all 7 audited
+declarations: the three hard-crust QA witnesses exactly `propext,
+Classical.choice, Quot.sound`; the two Derived theorems and their two
+closed-form QA instances honestly carrying `matrix_hoeffding` AND
+`hoeffding_inequality` together, each via its own sub-theorem — the
+family's two-axiom shape, now three members). QA 3003 → 3008 (+5,
+`EdgePerturbation_QA.lean`'s AdmissibilityDissolution completion
+subsection).**
+
+**Delivered** as two theorems plus QA. *(Selection context: no High
+rows; the one Medium-High row consumer-gated; the standing handoff's
+top named priced follow-on — the dissolution's own honesty note named
+the floor and sweep-cut conjuncts exactly.)* (1) **The theorems**
+(`EdgePerturbationTail.lean`'s AdmissibilityDissolution section, the
+delivered `hsplit`/`measure_union_le`/`add_le_add` skeleton applied
+verbatim):
+`edgePerturbation_normalized_cheeger_floor_unconditional` —
+`μ {λ₂(L_sym G_ω) ≤ (dmin·φ²/2 − t)/dmax} ≤ window tail at t + degree
+tail at s` — and `edgePerturbation_fiedler_sweep_cut_tail_unconditional`
+— the algorithm-facing capstone made unconditional: the failure of
+"connected with a swept level set of the resampled graph's own Fiedler
+sweep vector at `conductance² ≤ 2·(2·dmax·φ + t)/dmin`" bounded the
+same way, at the same stack plus the floor-positivity guard. The entire
+new content is the set-comprehension shapes; the decomposition itself
+was already load-borne by the bracket. (2) **QA (+5)**: the all-false
+disconnectedness witness (the kernel-constancy contrapositive
+`exists_const_of_laplacian_mulVec_eq_zero` at the zero adjacency, the
+`![1, 0]` component indicator non-constant); the **strict-containment
+witness** (the all-false outcome provably *in* the unconditional sweep
+bad event while provably *not* admissible, joining the previous
+delivery's `epK2_half_allFalse_not_admissible` — the dissolution
+genuinely enlarged the measured event, the degree-tail term its honest
+price, and a "dissolution" that quietly shrank the event would break
+this witness; hard crust); the good-outcome conjunction at the
+dissolution's window (the all-true resampled graph connected with a
+swept cut at `conductance² ≤ 4` inside the ceiling `81/4` — the bad
+event not all of `Ω`); and the two closed-form instances (`4
+exp(−1/4096) + 4 exp(−1/16)` each on `K₂` at `p ≡ 1/10`, window
+`[1/2, 5/2]`, `s = 1/2`, `t = 1/16`, the sweep one's floor hypothesis
+genuinely holding at `3/16 > 0`).
+
+**Verification:** spike first (`wip/dissolve2_spike.lean`, every piece
+— both theorems, the full QA section, the axiom audit — iterated to
+zero errors/warnings before any shelf edit, one elaboration slip
+caught: an anonymous-constructor `?_` placeholder under `exact` fails
+to leave its goal, `refine` the fix); `lake env lean` zero errors on
+both touched modules (the Derived module zero output; the QA module at
+its recorded three-note `Try this: ring_nf` baseline — this delivery
+adds none); explicit `lake build` targets ✔ on
+`Scaffold.Derived.EdgePerturbationTail` and
+`Scaffold.QA.Derived.EdgePerturbation_QA`; `#print axioms` via
+`wip/dissolve2_axcheck.lean` exactly as designed (7 declarations);
+**full `lake build` ✔ (2405/2406) immediately followed by
+`check_build_completeness.py` — 128 source files, 128 fresh artifacts,
+0 stale, 0 missing, exit 0**; `lint_axioms` (10, both findings
+allowlisted-confirmed), `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated (**3008/10/0**, generator idempotent);
+**map freshness exit 0** after the stats-stamp sync (3003 → 3008 in
+both map files, SVG regenerated; no proposal status header changed —
+the governing proposal's COMPLETE verdict unchanged, its status line
+extended with the completion run). Records updated: the proposal (the
+completion delivery record with the degenerate-corner analysis, the
+strict-containment witness's falsifiability reading, and the empty
+follow-on list), `proposals/README.md` (the Delivered row's completion
+clause), README (3008; the highlights clause; the edge-perturbation
+module-table clause), the radar (QA axis synced to 3008/66 modules,
+score held at 4.0 per protocol — the completion of the already-counted
+dissolution within the already-counted window family), the scoreboard
+(verification row + interpretation bullet + the three script rows),
+the probability-concentration index map (the two Derived rows), the map
+stamps + regenerated SVG, this plan, and the activity log. Nothing
+committed; the prior runs' deliveries preserved untouched.
+
+**Remaining risk:** none owed by the delivery — the decomposition and
+witnesses are unconditional hard crust. The two new Derived theorems
+are conditional on `matrix_hoeffding` and `hoeffding_inequality`
+together and must never be described as foundationally proved. The
+sweep member's floor-positivity guard remains proof-load-bearing
+exactly as in the conditional capstone (it feeds the connectivity
+transfer, not the admissibility window; the C₄ dropped-guard refutation
+fixture `epC4_sweepWindow_unguarded_refuted_QA` carries over verbatim —
+the guard is a hypothesis of both members). The pair condition and the
+shrunk-window hypotheses remain genuine design/regularity prices, as
+recorded in the dissolution record.
+
+**Next milestone (open):** the Active table's only actionable row
+remains the empirical-stationary Step 2, still gated on a consumer
+pricing the bias-term shape; otherwise the next load-bearing gap
+`docs/6_SGT_BACKLOG.md` names (all remaining items consumer-gated) or
+a consumer of the now-complete unconditional window family (none named
+yet — the family's natural next frontier).
+
+------
+
+## Delivered milestones (most recent first)
+
+**The admissibility dissolution — the window family's first
+unconditional measured event, the degree-concentration proposal's sole
+priced follow-on, unblocked by the two prior runs' degree tails —
+`proposals/hoeffding-inequality-degree-concentration.md` (the
+dissolution follow-on delivery record with the two-axiom honesty note);
+run 1, 2026-08-29, run `20260829T142812Z-run-1`; DELIVERED — zero new
+axioms (count stays 10; `#print axioms` via `wip/dissolve_axcheck.lean`
+on all 17 audited declarations: the engine lemma
+`perturbWeight_entry_nonneg`, the transfer helper
+`perturbAdmissible_of_degDev_lt`, and fourteen hard-crust QA lemmas
+exactly `propext, Classical.choice, Quot.sound`; the unconditional
+bracket and its closed-form QA instance honestly carrying
+`matrix_hoeffding` AND `hoeffding_inequality` together — the family's
+first deliberate two-axiom member, each via its own sub-theorem). QA
+2987 → 3003 (+16, `EdgePerturbation_QA.lean`'s AdmissibilityDissolution
+section).**
+
+**Delivered** in three pieces. *(Selection context: no High rows; the
+one Medium-High row consumer-gated; the standing handoff's top priced
+follow-on, explicitly unblocked "with both tails available as the
+degree half's engine".)* (1) **The engine** (`EdgePerturbation.lean`'s
+WeightSpace section, public hard crust):
+`perturbWeight_entry_nonneg` — at the pair design condition
+`p e + p (e.2, e.1) ≤ 1` every resampled entry is nonnegative at every
+outcome (off-diagonal `A i j · (1 + δ_{ij} + δ_{ji} − p_{ij} − p_{ji})`
+by symmetry; diagonal `A i i · (1 + δ_{ii} − p_{ii})`; no `hp0` clause
+needed). (2) **The transfer and the theorem**
+(`EdgePerturbationTail.lean`'s new AdmissibilityDissolution section):
+`perturbAdmissible_of_degDev_lt` — base degrees in the shrunk window
+`[dmin + s, dmax − s]` plus per-vertex deviations `< s` put the outcome
+inside `[dmin, dmax]` (no `0 ≤ s` hypothesis: `abs_lt` carries the
+sign) — and `edgePerturbation_normalized_connectivity_bracket_unconditional`:
+at the bracket's stack with the shrunk base window plus the pair
+condition, leaving the two-sided normalized-connectivity window — an
+**unconditioned event, no admissibility conjunct** — is bounded by the
+window tail at `t` plus the degree tail at `s` (the decomposition
+"some deviation ≥ s, or all < s and then admissible": `measure_mono`
+into a union, `measure_union_le`, `add_le_add` of the delivered bracket
+and degree tail). (3) **QA (+16)**: the pair condition at both uniform
+designs (`½ + ½ = 1` the boundary, `1/10` with slack); the boundary
+entry pin (the `p ≡ ½` all-false off-diagonal entry exactly `0` — the
+engine's inequality *tight* at the boundary); the
+**dropped-pair-condition fence** (`p ≡ 9/10`: the entry exactly `−4/5`
+at a design legal in every other respect — the design condition
+load-bearing); the transfer's positive witness (`p ≡ 1/10`: deviations
+`|−1/5| < 1/2`, derived degree `4/5` by `deg_resampled`); the
+strictness-boundary coherence (the `p ≡ ½` all-false outcome in the
+degree event and provably not admissible — the helper's strict `< s`
+honest); the ∀-vertex statistic; and the closed-form instance
+`4 exp(−1/4096) + 4 exp(−1/16)` on `K₂` at window `[1/2, 5/2]`,
+`s = 1/2`, `t = 1/16`.
+
+**Verification:** spike first (`wip/dissolve_spike.lean`, every piece —
+engine, transfer, theorem, the full QA section, and the axiom audit —
+iterated to zero errors/warnings before any shelf edit, three genuine
+elaboration slips caught and recorded in the proposal);
+`lake env lean` zero errors on all three touched modules
+(`EdgePerturbation.lean` zero warnings; the QA module at its recorded
+three-note `Try this: ring_nf` baseline, verified unchanged against the
+stashed pre-delivery tree — the pre-degree-tail HEAD baseline is one
+note, the post-Bernstein three, this delivery adds none); explicit
+`lake build` targets ✔ on `EdgePerturbation`, `EdgePerturbationTail`,
+and `EdgePerturbation_QA`; `#print axioms` via
+`wip/dissolve_axcheck.lean` exactly as designed (17 declarations);
+**full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — after the documented mtime remediation
+(the baseline stash-cycle touched five source mtimes; remove artifact +
+rebuild once), 128 source files, 128 fresh artifacts, 0 stale, 0
+missing, exit 0**; `lint_axioms` (10, both findings
+allowlisted-confirmed), `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated (**3003/10/0**, generator idempotent);
+**map freshness exit 0** after the stats-stamp sync (2987 → 3003 in
+both map files, SVG regenerated; no proposal status header changed —
+the governing proposal's COMPLETE verdict unchanged). Records updated:
+the proposal (the dissolution delivery record with the degenerate-corner
+analysis, four technique findings, and the residual honesty note — the
+floor and sweep-cut theorems still carry their own admissibility
+conjuncts, dissolvable by the same decomposition, priced not owed),
+`proposals/README.md` (the Delivered row's dissolution clause), README
+(3003; the highlights clause; the edge-perturbation module-table
+clause), the radar (QA axis synced to 3003/66 modules, score held at
+4.0 per protocol — the first composition of the already-counted
+degree-tail and window families), the scoreboard (verification row +
+interpretation bullet), both index maps (the engine row in
+`spectral_graph.md`; the transfer + theorem rows in
+`probability_concentration.md`), this plan, and the activity log.
+Nothing committed; the prior runs' deliveries preserved untouched.
+
+**Remaining risk:** none owed by the delivery — the engine and transfer
+are unconditional hard crust. The new Derived theorem is conditional on
+`matrix_hoeffding` and `hoeffding_inequality` together and must never
+be described as foundationally proved. The pair condition
+`p e + p eᵀ ≤ 1` is a genuine design restriction (uniform designs mean
+`p ≤ ½`; the `p ≡ 9/10` fence shows what breaks without it); no
+theorem-level dropped-pair refutation is claimed at fixture scale (the
+shrunk-window hypotheses cannot hold on the `K₂`-class fixtures without
+window slack — the standing junk-window obstruction), the piece-level
+fence carries the falsification content.
+
+**Next milestone (open):** the Active table's only actionable row
+remains the empirical-stationary Step 2, still gated on a consumer
+pricing the bias-term shape; otherwise the same decomposition applied
+to the floor and sweep-cut theorems' own admissibility conjuncts
+(priced, not owed), or the next load-bearing gap `docs/6_SGT_BACKLOG.md`
+names (all remaining items consumer-gated).
+
+------
+
+## Delivered milestones (most recent first)
+
+**The Bernstein twin — `bernstein_inequality`'s and
+`bernstein_bounded_variance`'s first theorem consumers: the
+variance-adaptive per-vertex degree tails at the delivered centered
+Bernoulli edge-resampling design, closing the zero-consumer gap for two
+of the three remaining axioms in one slice —
+`proposals/hoeffding-inequality-degree-concentration.md` (the priced
+Bernstein-twin follow-on, delivered the same day by the next run; no
+High rows, the one Medium-High row consumer-gated); run 1, 2026-08-29,
+run `20260829T125827Z-run-1`; DELIVERED — zero new axioms (count stays
+10; `#print axioms` via `wip/berntwin_axcheck.lean` on all 14 audited
+declarations: the two engine lemmas (`integral_sq_delta_sub`,
+`integral_sq_degPerturbSummand`) and eight hard-crust QA lemmas exactly
+`propext, Classical.choice, Quot.sound`; the two Derived tails and
+their two QA pins honestly carrying their own axiom alone —
+`bernstein_inequality` and `bernstein_bounded_variance` respectively,
+zero cross-contact). QA 2977 → 2987 (+10, `EdgePerturbation_QA.lean`'s
+bernsteinTwin section).**
+
+**Delivered** in four pieces. *(Selection context: no High rows; the
+one Medium-High row consumer-gated; the standing handoff's top priced
+follow-on, unblocked by the previous run's clause machinery — of the
+ten admitted axioms, three remained zero-consumer after that delivery:
+`bernstein_inequality`, `bernstein_bounded_variance`, `hoeffding_lemma`
+— this closes two of the three.)* (1) **The engine**:
+`BernoulliProduct.lean`'s second-moment companion of `integral_delta`
+— `integral_sq_delta_sub` (`∫ (δ_e − p e)² ∂μ = p e (1 − p e)`, through
+the pointwise expansion `(δ − p)² = δ • (1 − 2p) + p²` and the `f • c`
+spelling of `integral_smul_const`) — plus `EdgePerturbation.lean`'s
+design instantiation `integral_sq_degPerturbSummand` (`∫ X_e² ∂μ =
+w_v(e)² p e (1 − p e)`). (2) **The tails**
+(`Derived/EdgePerturbationTail.lean`'s bernsteinTwin section):
+`edgePerturbation_degree_tail_bernstein` — `μ {|deg dev| ≥ t} ≤
+2 exp(−t²/(2 σ²_v + 2Mt/3))` at the *true* variance statistic
+`σ²_v = ∑ₑ w_v(e)² p e (1 − p e)` and magnitude budget `M ≥ |w_v(e)|`
+(`0 ≤ M` derived at the incident pair, no spurious hypothesis; two
+assembly differences from the Hoeffding twin forced by the axioms'
+shapes: the centering sits inside the event and the variance
+statistic, so both rewrites run through per-summand congruence) — and
+`edgePerturbation_degree_tail_bernstein_budget` at any supplied
+`σ²_v ≤ Vbud` (on `bernstein_bounded_variance`'s clause set alone).
+(3) **The degenerate-corner analysis** (recorded pre-statement):
+prefactor constant `2` (no dimension collapse — no `Nonempty` guard);
+`t = 0` safe through `zero_div`; empty `V` vacuous in `v`; the
+nonnegativity clauses derived, not hypothesized. (4) **QA (+10)**: the
+true statistic pinned exactly (`σ²₀ = ½` on `K₂` at the fair coin)
+with the **Poisson-trial degeneration (`∑ w² p = 1`) refuted** — a
+future edit dropping the `(1 − p)` factor breaks exactly this; the
+fourfold variance reduction as an **equation** (`σ²₀ = S₀/4`, sharp at
+the fair coin, joined to the delivered Hoeffding statistic); the
+engine integral at an incident pair (`¼`); `M = 1` at the fixture; the
+**strict variance-adaptivity improvement proved** (`2 exp(−3/5) <
+2 exp(−1/4)` by strict exp monotonicity — the cross-axiom coherence
+check showing the Bernstein tail genuinely stronger than the delivered
+Hoeffding tail at the same fixture and threshold, hard crust); the
+budget relaxation pinned honest; and the two closed-form conditional
+instances (`2 exp(−3/5)`, `2 exp(−3/8)`).
+
+**Verification:** spike first (`wip/berntwin_spike.lean`, every piece —
+both engine lemmas, both tails, the full QA section, and the axiom
+audit — iterated to zero errors/warnings before any shelf edit);
+`lake env lean` zero errors on all four touched modules (the QA module
+at its recorded three-note `Try this: ring_nf` baseline — this
+delivery's `norm_num` calls add **none**, verified by elaborating the
+stashed pre-delivery tree); explicit `lake build` targets ✔ on
+`BernoulliProduct`, `EdgePerturbation`, `EdgePerturbationTail`, and
+`EdgePerturbation_QA`; `#print axioms` via `wip/berntwin_axcheck.lean`
+exactly as designed (14 declarations); **full `lake build` ✔ (2403/2406)
+immediately followed by `check_build_completeness.py` — after the
+documented mtime remediation (a stash-cycle for the baseline comparison
+touched five source mtimes; remove artifact + rebuild once) — 128
+source files, 128 fresh artifacts, 0 stale, 0 missing, exit 0**;
+`lint_axioms` (10, both findings allowlisted-confirmed, exit 0),
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+(**2987/10/0**, generator idempotent across the hand-maintained rows);
+**map freshness exit 0** after the stats-stamp sync (2977 → 2987 in
+both map files, SVG regenerated; no proposal status header changed).
+Records updated: the proposal (the Bernstein-twin follow-on delivery
+record with technique findings — the pin's `integral_smul_const` is the
+`f • c` shape with the constant on the right, `integral_const_smul`
+being the different leading-constant lemma; `Integrable.of_finite` as
+the BernoulliProduct idiom; the per-summand `Finset.sum_congr` route
+around whole-function `rw` under sum binders), `proposals/README.md`
+(the Delivered row's follow-on clause), README (2987; the highlights
+bullet; the edge-perturbation module-table clause), the radar (QA axis
+synced to 2987/66 modules, score held at 4.0 per protocol — axiom-
+consumer instantiations within the already-counted concentration
+category), the scoreboard (verification rows + interpretation bullet),
+both index maps (the two Derived rows in `probability_concentration.md`;
+the variance-clause engine row in `spectral_graph.md`), this plan, and
+the activity log. Nothing committed; the prior runs' deliveries
+preserved untouched.
+
+**Remaining risk:** none owed by the delivery — the engine and QA are
+unconditional hard crust. The two new Derived tails are conditional on
+their own axiom alone and must never be described as foundationally
+proved. Only `hoeffding_lemma` remains zero-consumer — its natural
+consumer is `bernstein_inequality`'s own proof (upstream work, not a
+graph-theoretic consumer). The sole priced follow-on (not owed): the
+admissibility dissolution (union with the window bracket + the
+`p e + p eᵀ ≤ 1` nonnegativity design condition), now with both degree
+tails available as the degree half's engine — the Bernstein one
+strictly sharper at interior `p`.
+
+**Next milestone (open):** the Active table's only actionable row
+remains the empirical-stationary Step 2, still gated on a consumer
+pricing the bias-term shape; otherwise the admissibility dissolution
+(the sole priced follow-on, now unblocked with both tails), or the next
+load-bearing gap `docs/6_SGT_BACKLOG.md` names (all remaining items
+consumer-gated).
+
+------
+
+## Delivered milestones (most recent first)
+
+**`hoeffding_inequality`'s first theorem consumer — vertex-degree
+concentration under the centered Bernoulli edge-resampling design, with
+the all-vertices union bound — the zero-consumer gap class's next
+member, serving the window family's recorded admissibility gap —
+`proposals/hoeffding-inequality-degree-concentration.md` (created and
+delivered this run per the same-run pattern); run 1, 2026-08-29, run
+`20260829T110514Z-run-1`; DELIVERED — zero new axioms (count stays 10;
+`#print axioms` via `wip/degconc_axcheck.lean` on all 23 audited
+declarations: the seven engine lemmas and twelve hard-crust QA lemmas
+exactly `propext, Classical.choice, Quot.sound`; the two Derived tails
+and two axiom-instantiating QA pins honestly carrying
+`hoeffding_inequality` alone). QA 2963 → 2977 (+14,
+`EdgePerturbation_QA.lean`'s degreeTail section).**
+
+**Delivered** in four pieces. *(Selection context: no High rows; the
+one Medium-High row consumer-gated; the previous run recorded the
+fixture-scale falsification frontier as exhausted; a consumer audit
+found four of the ten admitted axioms with zero theorem consumers
+outside their own files — `hoeffding_inequality`,
+`bernstein_inequality`, `bernstein_bounded_variance`, `hoeffding_lemma`
+— audited safe 2026-08-28 but never load-bearing.)* (1) **The engine**:
+`Spectral.lean`'s degree-linearity package (`deg_add`/`deg_sum` beside
+`deg_smul`) plus `EdgePerturbation.lean`'s section 5 — the design
+(`degPerturbWeight`: the ordered pair's weight in `v`'s degree;
+`degPerturbSummand`: its centered Bernoulli summand), the identity
+`deg_resampled` (`deg (A + perturbWeight A p ω) v = deg A v + ∑ₑ
+degPerturbSummand A p v e ω`, through `deg_edgeAdj` row sums), and all
+four `hoeffding_inequality` clauses proved at the design
+(measurability and pairwise independence through BernoulliProduct's
+scalar layer — `measurable_coord`/`indepFun_coord`, their first scalar
+consumers; the bound `|X_e| ≤ |w_v(e)|` from `|δ − p| ≤ 1`, sign-free,
+no hypothesis on `A`; the centering `∫ X_e = 0` through
+`integral_delta` + the audit's `integrable_of_bounded_measurable`, no
+`p ≠ 0` guard needed). (2) **The tails** (`Derived/
+EdgePerturbationTail.lean`'s degreeTail section):
+`edgePerturbation_degree_tail` — `μ {|deg G_ω v − deg A v| ≥ t} ≤
+2 exp(−t²/(2 S_v))` at `S_v = ∑ₑ w_v(e)²` (both incident ordered pairs
+counted), `Fin n` transport by the established pattern — and
+`edgePerturbation_degree_tail_all`, the union bound over vertices at
+the exact per-vertex sum (the collapse to a uniform exponent needs
+per-vertex positivity — a pair-isolated vertex has `S_v = 0`, junk
+under division-monotonicity — so the collapse is left to consumers and
+demonstrated numerically in QA). (3) **The degenerate-corner analysis**
+(recorded pre-statement): the scalar prefactor is the constant `2`,
+never collapsing at a degenerate dimension — no `Nonempty` guard
+needed, the 2026-08-28 hazard analysis transferring clean to the scalar
+side. (4) **QA (+14)**: the variance statistic pinned exactly
+(`S₀ = 2` on `K₂`) with the single-counted `1` refuted (the ordered-pair
+double count load-bearing in the exponent); the deviation identity at
+the all-true outcome by **two independent routes** (raw weight-space —
+the resampled graph is `2 • K₂`, degree `2` — vs the design's identity
+`1 + ½ + ½`, a wrong entry formula breaking exactly route B) and at
+the all-false outcome joined to the corner audit's existing raw pin;
+the closed-form instances (`2 exp(−1/4)` per-vertex, `4 exp(−1/4)`
+union with the collapse demonstrated); and the **exact event measure
+`1/2`** — the deviation event at `t = 1` is the agreement event of the
+two incident coordinates, computed through the design's own
+independence machinery (`indepFun_coord` + `toMeasure_cyl`),
+independently of the tail theorem, putting the bound's fixture-scale
+slack on the record (the window family's recorded junk-measure
+obstruction: no wrong-constant refutation exists at fixture scale; the
+exactness pins carry the falsification content).
+
+**Verification:** spike first (`wip/degconc_spike.lean`, every piece —
+design, clause set, both tails, and the full QA section — iterated to
+zero errors before any shelf edit); `lake env lean` zero errors on all
+four touched modules (`Spectral.lean` at its pre-existing warning
+baseline; `EdgePerturbation.lean`, `EdgePerturbationTail.lean` at zero
+warnings; the QA module at three `Try this: ring_nf` notes — one
+pre-existing baseline plus two added by this delivery's
+`simp`/`norm_num` calls, cosmetic, recorded in the proposal); explicit
+`lake build` targets ✔ on `Spectral`, `EdgePerturbation`,
+`EdgePerturbationTail`, and `EdgePerturbation_QA`; `#print axioms` via
+`wip/degconc_axcheck.lean` exactly as designed (23 declarations);
+**full `lake build` ✔ (2405/2406) immediately followed by
+`check_build_completeness.py` — after the documented single-module
+mtime remediation (remove + rebuild once) for the Derived module,
+whose header docstring was edited after the full build — 128 source
+files, 128 fresh artifacts, 0 stale, 0 missing, exit 0, re-confirmed
+at the final tree**; `lint_axioms` (10, both findings
+allowlisted-confirmed), `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated (**2977/10/0**); **map freshness exit 0** after
+the stats-stamp sync (2963 → 2977 in both map files, SVG regenerated;
+no proposal status header changed — the new proposal is COMPLETE from
+birth, no station data changed). Records updated: the new proposal
+(COMPLETE header + delivery record with technique findings — `rw`
+cannot rewrite a ∀-hypothesis under the union bound's `∑ v` binder,
+`simp only` can; `integral_sub` needs explicit `(f := …) (g := …)`
+names for the higher-order split; the pin has no real
+`integral_mul_const`, the `smul`-spelling + `integral_smul_const` the
+route; the `((0, 1) : Fin 2 × Fin 2)` parenthesization trap; the QA
+module's ring_nf-note baseline move), `proposals/README.md` (the
+Delivered row), README (2977; the highlights bullet; the
+edge-perturbation module-table clause), the radar (QA axis synced to
+2977/66 modules, score held at 4.0 per protocol — an axiom-consumer
+instantiation within the already-counted concentration category), the
+scoreboard (verification row + interpretation bullet + the lint row),
+both index maps (the design rows in `spectral_graph.md`; the two
+Derived rows in `probability_concentration.md`), the Derived module's
+header (the degree-tail bullets and the honest dual-axiom conditional
+note), this plan, and the activity log. Nothing committed; the prior
+runs' deliveries preserved untouched.
+
+**Remaining risk:** none owed by the delivery. The two new Derived
+tails are conditional on `hoeffding_inequality` and must never be
+described as foundationally proved. The priced follow-ons (not owed):
+the admissibility dissolution (union with the window bracket + the
+`p e + p eᵀ ≤ 1` nonnegativity design condition, dissolving the
+window family's degree-half honesty note) and the Bernstein twin (the
+variance-adaptive degree tail — `bernstein_inequality`'s would-be
+first consumer).
+
+**Next milestone (open):** the Active table's only actionable row
+remains the empirical-stationary Step 2, still gated on a consumer
+pricing the bias-term shape; otherwise the admissibility dissolution or
+the Bernstein twin (both priced above, both now unblocked by this
+delivery's clause machinery), or the next load-bearing gap
+`docs/6_SGT_BACKLOG.md` names (all remaining items consumer-gated).
+
+------
+
+## Delivered milestones (most recent first)
+
+**The normalized-Laplacian degenerate-degree corner audit — the parked
+spike-level junk-spectrum finding settled in proved form, plus the
+negative-degree corner (hitherto unrecorded) and the two adversarial
+analyses that priced it —
+`proposals/matrix-hoeffding-spectral-gap-estimation.md` (the corner-audit
+follow-on delivery record with the two survived honesty-note attacks);
+run 1, 2026-08-29, run `20260829T092750Z-run-1`; DELIVERED — zero new
+axioms (count stays 10; `#print axioms` via `wip/degcorner_axcheck.lean`
+on all 15 audited declarations: exactly `propext, Classical.choice,
+Quot.sound`). QA 2951 → 2963 (+12, `EdgePerturbation_QA.lean`'s new
+cornerAudit section).**
+
+**Delivered** as two shelf lemma pairs plus the audit instances.
+*(Selection context: no High rows; the one Medium-High row is
+consumer-gated; the run first attacked the two dropped-guard targets
+the shelf's honesty notes name — the sharpened drift's `s = γ` corner
+and the window family's admissibility conjunct — and both notes
+survived for structural reasons recorded in the proposal: the drift
+bound's variance proxy is the deterministic `‖∑ L_e²‖`, p-independent,
+and its exponent weight-scale-invariant (capped ≈ 2/3 on hand fixtures
+against the needed `ln(2d)`); the window's excluded outcomes force
+`λ₂(L_sym) ≥ 1 > floor` by congruence inertia. Those analyses consumed
+the parked junk-spectrum finding three times over — exactly the pricing
+its "if one is ever priced" gate asked for.)* **The shelf lemmas**:
+`Normalized.lean`'s new degenerate-degree-corners section —
+`degreeInvSqrt_apply_eq_zero_iff` (the reciprocal factor vanishes
+exactly at `deg ≤ 0`: `√0 = 0` with `0⁻¹ = 0` on the zero side,
+`Real.sqrt` of a negative on the other) and
+`normalizedLaplacian_eq_one_of_forall_deg_nonpos` (the identity
+degeneration `L_sym = 1`) — plus `Spectral.lean`'s `eigvalOf_one`
+(the eigenaction `1 *ᵥ v = v` against `eigvecOf_inner`'s unit norm) and
+`evals_one` (**the sorted spectrum of the identity is `1` at every
+index**, through `evals_mem_eigvalOf`). **The QA audit (+12)**: the
+all-false `p ≡ ½` outcome's degrees pinned `0` and its normalized
+Laplacian `1`; **the parked finding pinned** — `λ₂(L_sym) = 1`, the
+identity's spectrum; the easy misprediction refuted (`λ₂ ≠ 0`); the
+**spectral contrast in one proved statement** (`λ₂(L) = 0 ∧
+λ₂(L_sym) = 1` at the same outcome — the two junk spectra side by
+side, so a future refutation-fixture design cannot conflate them); the
+**honesty note's floor-condition mechanism proved** (the un-windowed
+floor condition false at the fixture: `1 ≤ 1/2` fails); the
+**negative-degree corner** — the audit's own addition to the record:
+at `p ≡ 1` the K₂ all-false outcome's resampled adjacency is the
+negative edge (`= (-1) • K₂`, degrees `-1 < 0`), landing on the same
+identity junk (`λ₂ = 1`) — the `p ≠ ½` outcomes route, previously
+unrecorded; and the vanishing iff exercised on both sides at one
+fixture pair.
+
+**Verification:** spike first (`wip/degcorner_spike.lean`, every piece
+iterated to zero errors/warnings before any shelf edit, the spike's own
+`#print axioms` at the standard three on all 16 declarations pre-shelf);
+`lake env lean` zero errors on all three touched modules
+(`Spectral.lean`/`Normalized.lean` at warning sets verified *identical*
+to the stashed unmodified tree — only line shifts; the QA module at its
+recorded pre-existing `Try this: ring_nf` baseline; the Derived Tail
+module re-elaborated after its docstring-only edit, exit 0); explicit
+`lake build` targets ✔ on `Spectral`, `Normalized`,
+`EdgePerturbationTail`, and `EdgePerturbation_QA`; `#print axioms` via
+`wip/degcorner_axcheck.lean` exactly as designed (15 declarations);
+**full `lake build` ✔ (2405/2406) immediately followed by
+`check_build_completeness.py` — after the documented single-module
+mtime remediation (remove + rebuild once) for the Derived module,
+whose header docstring was edited after the full build — 128 source
+files, 128 fresh artifacts, 0 stale, 0 missing, exit 0, re-confirmed
+at the final tree**; `lint_axioms` (10, both findings
+allowlisted-confirmed), `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated (**2963/10/0**); **map freshness exit 0** after
+the stats-stamp sync (2951 → 2963 in both map files, SVG regenerated;
+no proposal status header changed). Records updated: the proposal (the
+corner-audit delivery record with the two adversarial analyses and
+technique findings), the Derived bracket's docstring honesty note
+(pointer to the proved lemmas), README (2963; the variational-spectra
+module-table clause), the radar (QA axis synced to 2963/66 modules,
+score held at 4.0 per protocol — a corner audit on already-counted
+definitions, not a new theorem family), the scoreboard (verification
+row + interpretation bullet + the three script rows), the spectral-graph
+index map (the `evals_one` pair in the Spectral section, the corner
+pair in the Normalized table), this plan, and the activity log.
+Nothing committed; the prior runs' deliveries preserved untouched.
+
+**Remaining risk:** none owed by the delivery — the audit is
+unconditional hard crust. The honesty notes it settles stand as
+recorded; the proposal's open residues are unchanged (the bracket's
+un-windowed statement genuinely shrinks with `t` and stays
+unfalsified at fixture scale; the conditional theorems remain
+conditional on `matrix_hoeffding` and must never be described as
+foundationally proved).
+
+**Next milestone (open):** the Active table's only actionable row
+remains the empirical-stationary Step 2, still gated on a consumer
+pricing the bias-term shape; otherwise the next load-bearing gap
+`docs/6_SGT_BACKLOG.md` names (all its remaining items are
+consumer-gated), a consumer that prices the swept cut's *quality*
+(none named), or a genuinely new falsification target — the named
+fixture-scale targets have now all been attacked, with their
+structural survival reasons on record (the audit pattern's natural
+exhaustion point).
+
+------
+
+## Delivered milestones (most recent first)
+
+**The C₄ dropped-guard refutation of the swept-Fiedler-cut tail's
+floor-positivity guard — the falsification-discipline milestone named
+by the previous run's own honesty note (its "no dropped-guard
+refutation fixture exists at fixture scale" claim and its parked
+"next corner audit" finding), correcting that note on the record:
+`epC4_sweepWindow_unguarded_refuted_QA` in
+`Scaffold/QA/Derived/EdgePerturbation_QA.lean`'s new guard-fence
+section — `proposals/matrix-hoeffding-spectral-gap-estimation.md` (the
+C₄ guard-fence follow-on delivery record; no High rows, no open Medium
+rows, the empirical-stationary Step 2 consumer-gated); run 1,
+2026-08-29, run `20260829T073300Z-run-1`; DELIVERED — zero new axioms
+(count stays 10; `#print axioms` in the spike on all eight audited new
+declarations: exactly `propext, Classical.choice, Quot.sound` — a
+refutation proves a negation and cannot consume the axiom-conditional
+theorem). QA 2922 → 2951 (+29).**
+
+**Delivered** as one refutation plus its support stack. **The
+mechanism**: the recorded obstruction ("at 2–3 vertices the tail bound
+exceeds `1`") had anchored on the *eigenvalue-floor* membership route —
+t-monotone, evasive — and on fixtures where no
+admissible-but-disconnected outcome exists at all. The *disconnectedness*
+route is `t`-invariant: on C₄ at the hypothesis-loosened window
+`[dmin, dmax] = [1, 2]` (every hypothesis of
+`edgePerturbation_fiedler_sweep_cut_tail` except `hfloor` genuinely
+holds — the window need only contain the base degrees, which are all
+`2`), the perfect-matching outcome (exactly the edges `{0,1}`, `{2,3}`
+kept) is **admissible** (`epC4ω_admissible`: nonnegative resampled
+adjacency, degrees all `2` — one kept weight-`2` edge per vertex) and
+**disconnected** (`epC4ω_supportGraph_not_connected`: the component
+indicator `![1,1,0,0]` is a non-constant Laplacian-kernel vector —
+raw `epC4M_lap_mulVec` — so the contrapositive of
+`exists_const_of_laplacian_mulVec_eq_zero` kills connectivity), hence
+in the measured event at *every* `t`. **The arithmetic**: the atom
+mass is exactly `(1/2)^16 = 1/65536` (`epC4ω_mass`, sixteen fairly
+flipped ordered pairs), the variance statistic is bounded `‖∑ L_e²‖ ≤
+64` (`epC4_varNorm_le`: `norm_sum_le` + submultiplicativity +
+`l2OpNorm_rankOne_le`, every entry weight `≤ 1`) and genuinely
+positive (`epC4_varNorm_pos`: the `(0,0)` entry `= 8` by sixteen-way
+literal enumeration — the honest content that the exponent divides by
+a real positive, not a junk `0`), so at `t = 9000` the bound
+`8·exp(−9000²/(2‖Σ‖)) ≤ 8/(1 + 9000²/128) < 1/65536` and the
+un-guarded statement is **false in proved arithmetic**.
+
+**Verification:** spike first (`wip/c4fence_spike.lean`, every piece
+iterated to zero errors/warnings before any shelf edit, the spike's own
+`#print axioms` confirming the unconditional structure pre-shelf);
+`lake env lean` zero errors/zero warnings on the QA module (its lone
+`Try this: ring_nf` note verified pre-existing on the stashed
+unmodified tree); explicit `lake build` targets ✔ on
+`EdgePerturbation_QA` (2238/2238) and — after the in-place docstring
+correction of the Derived theorem's honesty note —
+`EdgePerturbationTail` (2227/2227); **full `lake build` ✔ immediately
+followed by `check_build_completeness.py` — after the documented
+single-module mtime remediation (remove + rebuild once) for the stale
+QA olean, 128 source files, 128 fresh artifacts, 0 stale, 0 missing,
+exit 0**; `lint_axioms` (10, both findings allowlisted-confirmed),
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+(**2951/10/0**); **map freshness exit 0** after the stats-stamp sync
+(2922 → 2951 in both map files, SVG regenerated; this delivery does not
+change any proposal's status header). Records updated: the
+matrix-Hoeffding proposal (the C₄ guard-fence follow-on record with the
+honesty-note correction and the two technique lessons — enumerate
+t-invariant *structural* membership routes rather than t-monotone
+eigenvalue ones, and compare bounds against *atom masses* rather than
+`1`; the loose window `[1,2]` is a legal hypothesis instantiation and
+it is what makes the matching outcome admissible, so the fixture also
+exhibits the admissibility window doing real exclusion work beside the
+guard), the Derived theorem's docstring (the corrected honesty note),
+README (2951; one module-table clause), the radar (QA axis synced to
+2951/66 modules, score held at 4.0 per protocol — a negative-witness
+fence on the already-counted window family), the scoreboard
+(verification row + interpretation bullet + the three script rows),
+this plan, and the activity log. Nothing committed; the prior runs'
+deliveries preserved untouched.
+
+**Remaining risk:** none owed by the delivery — the fence is
+unconditional hard crust. The window family's *conditional* theorems
+remain conditional on `matrix_hoeffding` and must never be described as
+foundationally proved. The corrected honesty note's residue: the
+*bracket's* un-windowed statement remains unfalsified at fixture scale
+(its event genuinely shrinks with `t` — the analysis is in the
+proposal's record), and the parked spike-level finding about the
+normalized Laplacian's zero-degree junk spectrum (the identity's, not
+the zero matrix's) remains recorded for a future corner audit if one is
+ever priced.
+
+**Next milestone (open):** the Active table's only actionable row
+remains the empirical-stationary Step 2, still gated on a consumer
+pricing the bias-term shape; otherwise the next load-bearing gap
+`docs/6_SGT_BACKLOG.md` names (all its remaining items are
+consumer-gated), a consumer that prices the swept cut's *quality*
+(none named), or the next falsification target the shelf's honesty
+notes name (the audit pattern this run executed once).
+
 
 **The swept-Fiedler-cut consumer of the normalized connectivity window
 — the standing handoff's named composition ("the volume-weighted

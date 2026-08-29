@@ -70,6 +70,31 @@
     guard is proof-load-bearing, not fixture-refutable — the same
     junk-measure obstruction as the window family (at 2–3 vertices the
     tail bound exceeds `1`, so no un-guarded instance can be refuted).
+  - the degenerate-degree corner audit (the cornerAudit section): the
+    parked spike-level finding of the window family's honesty notes
+    settled in proved form — at the all-false `K₂` outcome (zero
+    degrees) the normalized Laplacian is the identity and its `λ₂` is
+    exactly `1` (`evals_one`), *not* the zero matrix's `0` that the
+    combinatorial Laplacian's `λ₂ = 0` beside it might suggest — the
+    two junk spectra exhibited as one proved contrast; the negative-
+    degree corner (the `p ≡ 1` all-false outcome's resampled adjacency
+    is the negative edge, degrees `-1 < 0`) lands on the same identity
+    junk; the honesty note's floor-condition mechanism ("keeps the
+    un-windowed floor condition false") pinned as a proved instance; and
+    the `degreeInvSqrt` vanishing iff exercised on both sides at one
+    fixture pair. All hard crust, standard three axioms only.
+  - the Bernstein twin (the bernsteinTwin section): the
+    variance-adaptive degree tails' QA — the true variance statistic
+    pinned exactly (`σ²₀ = ½` on `K₂` at the fair coin) with the
+    Poisson-trial shape (`∑ w² p = 1`) refuted and the fourfold
+    variance reduction pinned as an equation (`σ²₀ = S₀/4`); the
+    strict variance-adaptivity improvement *proved*
+    (`2 exp(−3/5) < 2 exp(−1/4)`: the Bernstein bound beats the
+    delivered Hoeffding bound at the same fixture and threshold); the
+    budget relaxation pinned honest (`≤`); and the two closed-form
+    conditional tail instances. The hard-crust lemmas are standard
+    three axioms only; the two instances honestly carry their
+    respective axioms.
 -/
 
 import Scaffold.Derived.EdgePerturbationTail
@@ -1875,5 +1900,1587 @@ theorem epP3_sweepWindow_tail_QA :
     ring
   rw [hRHS] at htail
   exact htail
+
+
+/-! ### The C₄ dropped-guard refutation of the floor-positivity guard
+
+The honesty note above ("no dropped-guard refutation fixture exists at
+fixture scale: at 2–3 vertices the tail bound exceeds `1`") was
+over-narrow, and this section corrects it on the record: the obstruction
+analysis was anchored on the *eigenvalue-floor* membership route at
+2–3-vertex fixtures, where no admissible-but-disconnected outcome
+exists at all. The disconnectedness route is different: bad-set
+membership via `¬connected` is `t`-invariant, so at a four-vertex
+fixture with a one-degree-loosened window the atom mass of a single
+admissible-disconnected outcome lower-bounds the measured event at
+every `t`, while the bound `2 d exp(−t²/(2‖Σ‖))` collapses as
+`t → ∞`. The guard is thereby *fixture-refuted when dropped*, upgrading
+it from "proof-load-bearing, unfalsified" — the
+`old_cheeger_lower_bound_refuted_QA` failure class. Everything here is
+pure hard crust: a refutation proves a negation and cannot consume the
+axiom-conditional theorem (`#print axioms` on the headline: exactly the
+standard three). -/
+
+theorem rankOne_mul_rankOne_apply (u v : Fin 4 → ℝ) (i j : Fin 4) :
+    (rankOne u * rankOne v) i j = (u ⬝ᵥ v) * u i * v j := by
+  simp only [Matrix.mul_apply, rankOne_apply, Matrix.dotProduct]
+  calc ∑ x : Fin 4, u i * u x * (v x * v j)
+      = ∑ x : Fin 4, (u i * v j) * (u x * v x) :=
+        Finset.sum_congr rfl fun k _ => by ring
+    _ = (u i * v j) * ∑ x : Fin 4, u x * v x := by rw [Finset.mul_sum]
+    _ = (∑ x : Fin 4, u x * v x) * u i * v j := by ring
+
+theorem dot_single_left (i : Fin 4) (w : Fin 4 → ℝ) :
+    (Pi.single i (1 : ℝ)) ⬝ᵥ w = w i := by
+  classical
+  simp only [Matrix.dotProduct, Pi.single_apply, mul_ite, mul_one, mul_zero]
+  simp
+
+theorem dot_single_sub_single (i j : Fin 4) (hij : i ≠ j) :
+    (Pi.single i (1 : ℝ) - Pi.single j (1 : ℝ)) ⬝ᵥ
+      (Pi.single i (1 : ℝ) - Pi.single j (1 : ℝ)) = (2 : ℝ) := by
+  simp [Pi.single_apply, hij]
+  ring
+
+/-! ### The C₄ fixture -/
+
+noncomputable def epHalf4 : (Fin 4 × Fin 4) → ℝ := fun _ => 1 / 2
+
+theorem epHalf4_nonneg : ∀ e, 0 ≤ epHalf4 e := fun e => by norm_num [epHalf4]
+
+theorem epHalf4_le_one : ∀ e, epHalf4 e ≤ 1 := fun e => by norm_num [epHalf4]
+
+/-- The 4-cycle adjacency on `Fin 4` (cycle `0 - 1 - 2 - 3 - 0`): the
+odd val-sum pairs are exactly the cycle's ordered edge pairs. -/
+def epC4 : Matrix (Fin 4) (Fin 4) ℝ :=
+  Matrix.of fun i j =>
+    if i.val + j.val = 1 ∨ i.val + j.val = 3 ∨ i.val + j.val = 5 then 1 else 0
+
+theorem epC4_apply (i j : Fin 4) :
+    epC4 i j =
+      if i.val + j.val = 1 ∨ i.val + j.val = 3 ∨ i.val + j.val = 5 then 1 else 0 :=
+  rfl
+
+theorem epC4_mem (i j : Fin 4) : epC4 i j = 0 ∨ epC4 i j = 1 := by
+  by_cases h : i.val + j.val = 1 ∨ i.val + j.val = 3 ∨ i.val + j.val = 5
+  · exact Or.inr (by simp [epC4_apply, h])
+  · exact Or.inl (by simp [epC4_apply, h])
+
+theorem epC4_symmetric : epC4.IsSymm := by
+  apply Matrix.IsSymm.ext
+  intro i j
+  by_cases h : i.val + j.val = 1 ∨ i.val + j.val = 3 ∨ i.val + j.val = 5
+  · have h' : j.val + i.val = 1 ∨ j.val + i.val = 3 ∨ j.val + i.val = 5 := by omega
+    simp [epC4_apply, h, h']
+  · have h' : ¬(j.val + i.val = 1 ∨ j.val + i.val = 3 ∨ j.val + i.val = 5) := by omega
+    simp [epC4_apply, h, h']
+
+theorem epC4_nonneg (i j : Fin 4) : 0 ≤ epC4 i j := by
+  rcases epC4_mem i j with h | h; all_goals rw [h]; all_goals norm_num
+
+theorem epC4_deg (i : Fin 4) : deg epC4 i = 2 := by
+  fin_cases i <;>
+    simp only [deg, epC4_apply, Fin.sum_univ_four,
+      show ((3 : Fin 4)).val = 3 from rfl] <;> norm_num
+
+theorem epC4_pos_deg (i : Fin 4) : 0 < deg epC4 i := by
+  rw [epC4_deg i]; norm_num
+
+/-- The matching outcome: exactly the two edges `{0, 1}` and `{2, 3}`
+are kept (both orientations), all other pairs dropped. -/
+def epC4ω : (Fin 4 × Fin 4) → Bool :=
+  fun e => decide (e.1.val + e.2.val = 1 ∨ e.1.val + e.2.val = 5)
+
+theorem epC4ω_apply (e : Fin 4 × Fin 4) :
+    epC4ω e = decide (e.1.val + e.2.val = 1 ∨ e.1.val + e.2.val = 5) := rfl
+
+/-- The resampled adjacency at the matching outcome: the two kept edges
+at weight `2` (base weight `1` plus the centered increment `1`), all
+other entries `0`. -/
+def epC4M : Matrix (Fin 4) (Fin 4) ℝ :=
+  Matrix.of fun i j =>
+    if i.val + j.val = 1 ∨ i.val + j.val = 5 then 2 else 0
+
+theorem epC4M_apply (i j : Fin 4) :
+    epC4M i j = if i.val + j.val = 1 ∨ i.val + j.val = 5 then 2 else 0 := rfl
+
+theorem epC4_perturbed_eq :
+    epC4 + perturbWeight epC4 epHalf4 epC4ω = epC4M := by
+  ext i j
+  by_cases hij : i = j
+  · subst hij
+    rw [Matrix.add_apply, perturbWeight_apply_diag]
+    have hw : epC4 i i = 0 := by
+      simp only [epC4_apply]
+      rw [if_neg (by omega)]
+    have hM : epC4M i i = 0 := by
+      simp only [epC4M_apply]
+      rw [if_neg (by omega)]
+    rw [hw, hM]
+    norm_num [epC4ω_apply, epHalf4]
+  · rw [Matrix.add_apply, perturbWeight_apply_of_ne _ _ _ hij]
+    have hcomm : j.val + i.val = i.val + j.val := Nat.add_comm j.val i.val
+    have hsymω : epC4ω (j, i) = epC4ω (i, j) := by
+      simp only [epC4ω_apply, hcomm]
+    have hsymA : epC4 j i = epC4 i j := by
+      simp only [epC4_apply, hcomm]
+    rw [hsymω, hsymA]
+    by_cases h : i.val + j.val = 1 ∨ i.val + j.val = 5
+    · have hw : epC4 i j = 1 := by
+        simp only [epC4_apply]
+        rw [if_pos (by omega :
+          i.val + j.val = 1 ∨ i.val + j.val = 3 ∨ i.val + j.val = 5)]
+      have hω : epC4ω (i, j) = true := by
+        simp only [epC4ω_apply]
+        exact decide_eq_true h
+      have hM : epC4M i j = 2 := by
+        simp only [epC4M_apply]
+        rw [if_pos h]
+      rw [hw, hω, hM]
+      norm_num [epHalf4]
+    · have hωf : epC4ω (i, j) = false := by
+        simp only [epC4ω_apply]
+        exact decide_eq_false h
+      rw [hωf]
+      by_cases h3 : i.val + j.val = 3
+      · have hw : epC4 i j = 1 := by
+          simp only [epC4_apply]
+          rw [if_pos (by omega :
+            i.val + j.val = 1 ∨ i.val + j.val = 3 ∨ i.val + j.val = 5)]
+        have hM : epC4M i j = 0 := by
+          simp only [epC4M_apply]
+          rw [if_neg (by omega)]
+        rw [hw, hM]
+        norm_num [epHalf4]
+      · have hw : epC4 i j = 0 := by
+          simp only [epC4_apply]
+          rw [if_neg (by omega)]
+        have hM : epC4M i j = 0 := by
+          simp only [epC4M_apply]
+          rw [if_neg (by omega)]
+        rw [hw, hM]
+        norm_num [epHalf4]
+
+theorem epC4M_symmetric : epC4M.IsSymm := by
+  apply Matrix.IsSymm.ext
+  intro i j
+  by_cases h : i.val + j.val = 1 ∨ i.val + j.val = 5
+  · have h' : j.val + i.val = 1 ∨ j.val + i.val = 5 := by omega
+    simp [epC4M_apply, h, h']
+  · have h' : ¬(j.val + i.val = 1 ∨ j.val + i.val = 5) := by omega
+    simp [epC4M_apply, h, h']
+
+theorem epC4M_nonneg (i j : Fin 4) : 0 ≤ epC4M i j := by
+  simp only [epC4M_apply]
+  split_ifs <;> norm_num
+
+theorem epC4M_deg (i : Fin 4) : deg epC4M i = 2 := by
+  fin_cases i <;> simp only [deg, epC4M_apply, Fin.sum_univ_four,
+    show ((3 : Fin 4)).val = 3 from rfl] <;> norm_num
+
+/-! ### The matching outcome: admissible and disconnected -/
+
+/-- The matching outcome is admissible at the window `[1, 2]`: the
+resampled adjacency is nonnegative and every degree is `2`. -/
+theorem epC4ω_admissible : perturbAdmissible epC4 epHalf4 1 2 epC4ω := by
+  refine ⟨fun i j => ?_, fun i => ?_, fun i => ?_⟩
+  · rw [epC4_perturbed_eq]
+    exact epC4M_nonneg i j
+  · rw [epC4_perturbed_eq, epC4M_deg i]
+    norm_num
+  · rw [epC4_perturbed_eq, epC4M_deg i]
+
+/-- The Laplacian of the resampled adjacency kills the component
+indicator `![1, 1, 0, 0]` — the raw kernel computation behind the
+disconnectedness witness. -/
+theorem epC4M_lap_mulVec :
+    (laplacian epC4M).mulVec ![1, 1, 0, 0] = 0 := by
+  have hfin4 : ∀ k : Fin 4, k = 0 ∨ k = 1 ∨ k = 2 ∨ k = 3 := by
+    intro k
+    fin_cases k <;> simp
+  funext i
+  rw [Matrix.mulVec, Matrix.dotProduct]
+  rcases hfin4 i with rfl | rfl | rfl | rfl <;>
+    simp only [laplacian, Matrix.sub_apply, degreeMatrix, deg, epC4M_apply,
+      epC4M_deg, Fin.sum_univ_four,
+      show ((3 : Fin 4)).val = 3 from rfl] <;> norm_num <;> simp
+
+/-- The matching outcome's resampled support graph is exactly the
+support graph of the explicit rescaled matrix. -/
+theorem epC4ω_supportGraph_eq :
+    supportGraph (epC4 + perturbWeight epC4 epHalf4 epC4ω)
+        (epC4_symmetric.add (perturbWeight_isSymm epC4 epHalf4 epC4ω))
+      = supportGraph epC4M epC4M_symmetric := by
+  ext i j
+  rw [supportGraph_adj, supportGraph_adj, epC4_perturbed_eq]
+
+/-- The matching outcome's resampled graph is **disconnected**: the two
+weight-`2` edges are separate components. Route: the component indicator
+is a non-constant Laplacian-kernel vector, contradicting
+connectivity ⇒ kernel-is-constants. -/
+theorem epC4ω_supportGraph_not_connected :
+    ¬ (supportGraph (epC4 + perturbWeight epC4 epHalf4 epC4ω)
+        (epC4_symmetric.add (perturbWeight_isSymm epC4 epHalf4 epC4ω))).Connected := by
+  intro hconn
+  rw [epC4ω_supportGraph_eq] at hconn
+  obtain ⟨c, hc⟩ := exists_const_of_laplacian_mulVec_eq_zero epC4M
+    epC4M_symmetric epC4M_nonneg hconn epC4M_lap_mulVec
+  have h0 : (1 : ℝ) = c := by
+    have h : (![1, 1, 0, 0] : Fin 4 → ℝ) 0 = c := by rw [hc]
+    simpa using h
+  have h2 : (0 : ℝ) = c := by
+    have h : (![1, 1, 0, 0] : Fin 4 → ℝ) 2 = c := by rw [hc]
+    simpa using h
+  linarith
+
+
+/-! ### The variance statistic: an explicit upper bound and positivity -/
+
+/-- Every single-edge vector of the design has squared norm at most
+`2` (exactly `2` off the diagonal, `0` on it). -/
+theorem single_sub_single_dot_le_two (i j : Fin 4) :
+    (Pi.single i (1 : ℝ) - Pi.single j (1 : ℝ)) ⬝ᵥ
+      (Pi.single i (1 : ℝ) - Pi.single j (1 : ℝ)) ≤ (2 : ℝ) := by
+  rcases eq_or_ne i j with rfl | hij
+  · simp
+  · rw [dot_single_sub_single i j hij]
+
+/-- The design's variance statistic is bounded: `‖∑ L_e²‖ ≤ 64`, by the
+triangle inequality, submultiplicativity, and the rank-one norm bound
+`l2OpNorm_rankOne_le`, with every entry weight bounded by `1`. -/
+theorem epC4_varNorm_le :
+    ‖∑ e : Fin 4 × Fin 4, perturbEdgeLap epC4 e * perturbEdgeLap epC4 e‖ ≤ 64 := by
+  have hpair : ∀ e : Fin 4 × Fin 4,
+      ‖perturbEdgeLap epC4 e‖ ≤ (2 : ℝ) := by
+    intro e
+    have hle : ‖rankOne (Pi.single e.1 (1 : ℝ) - Pi.single e.2 (1 : ℝ))‖
+        ≤ (Pi.single e.1 (1 : ℝ) - Pi.single e.2 (1 : ℝ)) ⬝ᵥ
+          (Pi.single e.1 (1 : ℝ) - Pi.single e.2 (1 : ℝ)) :=
+      l2OpNorm_rankOne_le _
+    have hd : (Pi.single e.1 (1 : ℝ) - Pi.single e.2 (1 : ℝ)) ⬝ᵥ
+        (Pi.single e.1 (1 : ℝ) - Pi.single e.2 (1 : ℝ)) ≤ (2 : ℝ) :=
+      single_sub_single_dot_le_two e.1 e.2
+    have hkey : |epC4 e.1 e.2| * ((Pi.single e.1 (1 : ℝ) - Pi.single e.2 (1 : ℝ)) ⬝ᵥ
+        (Pi.single e.1 (1 : ℝ) - Pi.single e.2 (1 : ℝ))) ≤ (2 : ℝ) := by
+      rcases epC4_mem e.1 e.2 with h | h
+      · rw [h]
+        simp
+      · rw [h]
+        simp only [abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 1), one_mul]
+        exact hd
+    rw [perturbEdgeLap, norm_smul, Real.norm_eq_abs]
+    refine le_trans (mul_le_mul_of_nonneg_left hle (abs_nonneg _)) ?_
+    nlinarith [hkey]
+  have hsq : ∀ e : Fin 4 × Fin 4,
+      ‖perturbEdgeLap epC4 e * perturbEdgeLap epC4 e‖ ≤ (4 : ℝ) := by
+    intro e
+    have := hpair e
+    calc ‖perturbEdgeLap epC4 e * perturbEdgeLap epC4 e‖
+        ≤ ‖perturbEdgeLap epC4 e‖ * ‖perturbEdgeLap epC4 e‖ := norm_mul_le _ _
+      _ ≤ (4 : ℝ) := by nlinarith [norm_nonneg (perturbEdgeLap epC4 e)]
+  calc ‖∑ e : Fin 4 × Fin 4, perturbEdgeLap epC4 e * perturbEdgeLap epC4 e‖
+      ≤ ∑ e : Fin 4 × Fin 4, ‖perturbEdgeLap epC4 e * perturbEdgeLap epC4 e‖ :=
+        norm_sum_le Finset.univ _
+    _ ≤ ∑ _e : Fin 4 × Fin 4, (4 : ℝ) := Finset.sum_le_sum fun e _ => hsq e
+    _ = 64 := by
+        rw [Finset.sum_const, Finset.card_univ, Fintype.card_prod, Fintype.card_fin]
+        norm_num
+
+
+/-! ### The variance statistic is genuinely nonzero -/
+
+theorem dot_single_sub_single' (i j : Fin 4) :
+    (Pi.single i (1 : ℝ) - Pi.single j (1 : ℝ)) ⬝ᵥ
+      (Pi.single i (1 : ℝ) - Pi.single j (1 : ℝ))
+      = if i = j then (0 : ℝ) else (2 : ℝ) := by
+  rcases eq_or_ne i j with rfl | hij
+  · simp
+  · rw [dot_single_sub_single i j hij]
+    simp [hij]
+
+/-- The single-edge vector of the design at the pair `e`. -/
+def epVec4 (e : Fin 4 × Fin 4) : Fin 4 → ℝ :=
+  Pi.single e.1 (1 : ℝ) - Pi.single e.2 (1 : ℝ)
+
+/-- The `(0, 0)` entry of every summand, spelled for literal
+enumeration: `w² · (v ⬝ᵥ v) · v 0²`. -/
+theorem epC4_summand_entry (e : Fin 4 × Fin 4) :
+    (perturbEdgeLap epC4 e * perturbEdgeLap epC4 e) 0 0
+      = epC4 e.1 e.2 * epC4 e.1 e.2
+        * (if e.1 = e.2 then (0 : ℝ) else (2 : ℝ))
+        * (epVec4 e 0) * (epVec4 e 0) := by
+  rw [perturbEdgeLap, Matrix.smul_mul, Matrix.mul_smul, smul_smul,
+    Matrix.smul_apply, smul_eq_mul, rankOne_mul_rankOne_apply,
+    epVec4, dot_single_sub_single' e.1 e.2]
+  ring
+
+/-- The `(0, 0)` entry of the variance statistic is `8`: the four
+ordered pairs on the edges at vertex `0` each contribute
+`1 · 2 · 1 = 2`. -/
+theorem epC4_varEntry :
+    (∑ e : Fin 4 × Fin 4, perturbEdgeLap epC4 e * perturbEdgeLap epC4 e) 0 0 = 8 := by
+  rw [Matrix.sum_apply, Fintype.sum_prod_type]
+  simp only [Fin.sum_univ_four]
+  rw [epC4_summand_entry (0, 0), epC4_summand_entry (0, 1),
+    epC4_summand_entry (0, 2), epC4_summand_entry (0, 3),
+    epC4_summand_entry (1, 0), epC4_summand_entry (1, 1),
+    epC4_summand_entry (1, 2), epC4_summand_entry (1, 3),
+    epC4_summand_entry (2, 0), epC4_summand_entry (2, 1),
+    epC4_summand_entry (2, 2), epC4_summand_entry (2, 3),
+    epC4_summand_entry (3, 0), epC4_summand_entry (3, 1),
+    epC4_summand_entry (3, 2), epC4_summand_entry (3, 3)]
+  simp only [epC4_apply, epVec4, Pi.single_apply, Pi.sub_apply, Matrix.of_apply,
+    show ((3 : Fin 4)).val = 3 from rfl]
+  norm_num
+  simp
+  norm_num
+
+/-- The variance statistic is genuinely nonzero: its `(0, 0)` entry is
+`8`, so the norm is positive — the refutation's exponent divides by a
+genuinely positive quantity, not a junk `0`. -/
+theorem epC4_varNorm_pos :
+    0 < ‖∑ e : Fin 4 × Fin 4, perturbEdgeLap epC4 e * perturbEdgeLap epC4 e‖ := by
+  have hne : (∑ e : Fin 4 × Fin 4, perturbEdgeLap epC4 e * perturbEdgeLap epC4 e) ≠ 0 := by
+    intro h
+    have hE := epC4_varEntry
+    rw [h] at hE
+    simp at hE
+  exact norm_pos_iff.mpr hne
+
+
+/-! ### The atom mass -/
+
+/-- The single matching outcome carries mass `(1/2)^16 = 1/65536`
+under the product-Bernoulli design at `p ≡ ½`: all sixteen ordered-pair
+coordinates flip fairly. -/
+theorem epC4ω_mass :
+    (bernPMF epHalf4 epHalf4_nonneg epHalf4_le_one).toMeasure {epC4ω}
+      = ENNReal.ofReal ((1 : ℝ) / 65536) := by
+  have hmeas : MeasurableSet ({epC4ω} : Set ((Fin 4 × Fin 4) → Bool)) :=
+    measurableSet_singleton _
+  rw [PMF.toMeasure_apply _ _ hmeas, tsum_fintype]
+  simp only [Set.indicator_apply]
+  rw [Finset.sum_eq_single epC4ω
+    (fun ω _ hne => if_neg (by simp [hne]))
+    (fun hmem => absurd (Finset.mem_univ _) hmem)]
+  rw [if_pos (Set.mem_singleton epC4ω), bernPMF_apply, jointMass]
+  have hfac : ∀ e : Fin 4 × Fin 4,
+      bern epHalf4 e (epC4ω e) = ENNReal.ofReal ((1 : ℝ) / 2) := by
+    intro e
+    cases epC4ω e with
+    | false =>
+        show ENNReal.ofReal (1 - epHalf4 e) = ENNReal.ofReal ((1 : ℝ) / 2)
+        rw [epHalf4]
+        norm_num
+    | true =>
+        show ENNReal.ofReal (epHalf4 e) = ENNReal.ofReal ((1 : ℝ) / 2)
+        rw [epHalf4]
+  rw [Finset.prod_congr rfl (fun e _ => hfac e), Finset.prod_const,
+    Finset.card_univ, Fintype.card_prod, Fintype.card_fin, ← ENNReal.ofReal_pow]
+  norm_num
+  norm_num
+
+
+/-! ### The headline refutation -/
+
+/-- **The dropped-guard refutation of the swept-Fiedler-cut tail's
+floor-positivity hypothesis.** With every other hypothesis of
+`edgePerturbation_fiedler_sweep_cut_tail` genuinely satisfied at the C₄
+fixture (symmetric nonnegative weights, positive degrees, window
+`[1, 2]` containing them, `p ≡ ½`), but with the guard
+`0 < dmin·φ²/2 − t` *dropped* (at `t = 9000` it is exactly what fails),
+the would-be conclusion is **false in proved arithmetic**: the measured
+event contains the matching outcome — admissible (degrees all `2`) and
+disconnected, hence failing the connected-conjunct at *every* `t` — so
+its measure is at least the atom mass `1/65536`, while the bound
+`8 · exp(−9000²/(2‖Σ‖)) ≤ 8/(1 + 9000²/128) < 1/65536` collapses at
+large `t`. The membership route is `t`-invariant disconnectedness, not
+the eigenvalue floor — which is why the K₂/P₃-scale obstruction
+recorded in the honesty note ("at 2–3 vertices the tail bound exceeds
+`1`") does not persist at the four-vertex fixture: the guard is
+fixture-refuted when dropped, not merely proof-load-bearing. Pure hard
+crust: a refutation cannot consume the axiom-conditional theorem. -/
+theorem epC4_sweepWindow_unguarded_refuted_QA :
+    ¬ ((bernPMF epHalf4 epHalf4_nonneg epHalf4_le_one).toMeasure
+        {ω : (Fin 4 × Fin 4) → Bool |
+          perturbAdmissible epC4 epHalf4 1 2 ω ∧
+          ¬ ((supportGraph (epC4 + perturbWeight epC4 epHalf4 ω)
+                (epC4_symmetric.add (perturbWeight_isSymm epC4 epHalf4 ω))).Connected ∧
+              ∃ S : Finset (Fin 4), S.Nonempty ∧ Sᶜ.Nonempty ∧
+                ((∃ u : ℝ, ∀ i, i ∈ S ↔
+                    u ≤ fiedlerSweepVector (epC4 + perturbWeight epC4 epHalf4 ω)
+                      (epC4_symmetric.add (perturbWeight_isSymm epC4 epHalf4 ω))
+                      (by norm_num) i)
+                  ∨ (∃ u : ℝ, ∀ i, i ∈ S ↔
+                    fiedlerSweepVector (epC4 + perturbWeight epC4 epHalf4 ω)
+                      (epC4_symmetric.add (perturbWeight_isSymm epC4 epHalf4 ω))
+                      (by norm_num) i ≤ u)) ∧
+                conductance (epC4 + perturbWeight epC4 epHalf4 ω) S ^ 2
+                  ≤ 2 * ((2 * ((2 : ℝ) * cheegerConstant epC4) + 9000) / 1))}
+      ≤ ENNReal.ofReal (2 * (4 : ℝ)
+          * Real.exp (-((9000 : ℝ) ^ 2)
+            / (2 * ‖∑ e : Fin 4 × Fin 4,
+                perturbEdgeLap epC4 e * perturbEdgeLap epC4 e‖)))) := by
+  intro hle
+  have hsub : ({epC4ω} : Set ((Fin 4 × Fin 4) → Bool))
+      ⊆ {ω : (Fin 4 × Fin 4) → Bool |
+          perturbAdmissible epC4 epHalf4 1 2 ω ∧
+          ¬ ((supportGraph (epC4 + perturbWeight epC4 epHalf4 ω)
+                (epC4_symmetric.add (perturbWeight_isSymm epC4 epHalf4 ω))).Connected ∧
+              ∃ S : Finset (Fin 4), S.Nonempty ∧ Sᶜ.Nonempty ∧
+                ((∃ u : ℝ, ∀ i, i ∈ S ↔
+                    u ≤ fiedlerSweepVector (epC4 + perturbWeight epC4 epHalf4 ω)
+                      (epC4_symmetric.add (perturbWeight_isSymm epC4 epHalf4 ω))
+                      (by norm_num) i)
+                  ∨ (∃ u : ℝ, ∀ i, i ∈ S ↔
+                    fiedlerSweepVector (epC4 + perturbWeight epC4 epHalf4 ω)
+                      (epC4_symmetric.add (perturbWeight_isSymm epC4 epHalf4 ω))
+                      (by norm_num) i ≤ u)) ∧
+                conductance (epC4 + perturbWeight epC4 epHalf4 ω) S ^ 2
+                  ≤ 2 * ((2 * ((2 : ℝ) * cheegerConstant epC4) + 9000) / 1))} := by
+    intro ω hω
+    simp only [Set.mem_singleton_iff] at hω
+    subst hω
+    exact ⟨epC4ω_admissible,
+      fun hgood => epC4ω_supportGraph_not_connected hgood.1⟩
+  have hmono : (bernPMF epHalf4 epHalf4_nonneg epHalf4_le_one).toMeasure {epC4ω}
+      ≤ (bernPMF epHalf4 epHalf4_nonneg epHalf4_le_one).toMeasure
+          {ω : (Fin 4 × Fin 4) → Bool |
+            perturbAdmissible epC4 epHalf4 1 2 ω ∧
+            ¬ ((supportGraph (epC4 + perturbWeight epC4 epHalf4 ω)
+                  (epC4_symmetric.add (perturbWeight_isSymm epC4 epHalf4 ω))).Connected ∧
+                ∃ S : Finset (Fin 4), S.Nonempty ∧ Sᶜ.Nonempty ∧
+                  ((∃ u : ℝ, ∀ i, i ∈ S ↔
+                      u ≤ fiedlerSweepVector (epC4 + perturbWeight epC4 epHalf4 ω)
+                        (epC4_symmetric.add (perturbWeight_isSymm epC4 epHalf4 ω))
+                        (by norm_num) i)
+                    ∨ (∃ u : ℝ, ∀ i, i ∈ S ↔
+                      fiedlerSweepVector (epC4 + perturbWeight epC4 epHalf4 ω)
+                        (epC4_symmetric.add (perturbWeight_isSymm epC4 epHalf4 ω))
+                        (by norm_num) i ≤ u)) ∧
+                  conductance (epC4 + perturbWeight epC4 epHalf4 ω) S ^ 2
+                    ≤ 2 * ((2 * ((2 : ℝ) * cheegerConstant epC4) + 9000) / 1))} :=
+    measure_mono hsub
+  rw [epC4ω_mass] at hmono
+  have hcomb : ENNReal.ofReal ((1 : ℝ) / 65536)
+      ≤ ENNReal.ofReal (2 * (4 : ℝ)
+          * Real.exp (-((9000 : ℝ) ^ 2)
+            / (2 * ‖∑ e : Fin 4 × Fin 4,
+                perturbEdgeLap epC4 e * perturbEdgeLap epC4 e‖))) :=
+    hmono.trans hle
+  rw [ENNReal.ofReal_le_ofReal_iff (by positivity)] at hcomb
+  refine absurd hcomb (not_le.mpr ?_)
+  have hvar_le : ‖∑ e : Fin 4 × Fin 4,
+      perturbEdgeLap epC4 e * perturbEdgeLap epC4 e‖ ≤ 64 := epC4_varNorm_le
+  have hvar_pos : (0 : ℝ) < ‖∑ e : Fin 4 × Fin 4,
+      perturbEdgeLap epC4 e * perturbEdgeLap epC4 e‖ := epC4_varNorm_pos
+  have hmono2 : Real.exp (-((9000 : ℝ) ^ 2)
+      / (2 * ‖∑ e : Fin 4 × Fin 4,
+          perturbEdgeLap epC4 e * perturbEdgeLap epC4 e‖))
+      ≤ Real.exp (-((9000 : ℝ) ^ 2) / 128) := by
+    refine Real.exp_le_exp.2 ?_
+    have hquot : ((9000 : ℝ) ^ 2 / 128
+        ≤ (9000 : ℝ) ^ 2 / (2 * ‖∑ e : Fin 4 × Fin 4,
+            perturbEdgeLap epC4 e * perturbEdgeLap epC4 e‖)) := by
+      rw [div_le_div_iff₀ (by norm_num : (0 : ℝ) < 128) (by positivity)]
+      have h2 : (2 : ℝ) * ‖∑ e : Fin 4 × Fin 4,
+          perturbEdgeLap epC4 e * perturbEdgeLap epC4 e‖ ≤ 128 := by linarith
+      exact mul_le_mul_of_nonneg_left h2 (sq_nonneg (9000 : ℝ))
+    rw [neg_div, neg_div]
+    linarith
+  have hinv : Real.exp (-((9000 : ℝ) ^ 2) / 128)
+      ≤ 1 / (1 + (9000 : ℝ) ^ 2 / 128) := by
+    have hexp : (1 : ℝ) + (9000 : ℝ) ^ 2 / 128 ≤ Real.exp ((9000 : ℝ) ^ 2 / 128) := by
+      rw [add_comm]
+      exact Real.add_one_le_exp _
+    have h1 : Real.exp (-((9000 : ℝ) ^ 2) / 128) * Real.exp ((9000 : ℝ) ^ 2 / 128) = 1 := by
+      rw [← Real.exp_add, neg_div, neg_add_cancel, Real.exp_zero]
+    rw [le_div_iff₀ (by norm_num : (0 : ℝ) < 1 + (9000 : ℝ) ^ 2 / 128)]
+    calc Real.exp (-((9000 : ℝ) ^ 2) / 128) * (1 + (9000 : ℝ) ^ 2 / 128)
+        ≤ Real.exp (-((9000 : ℝ) ^ 2) / 128) * Real.exp ((9000 : ℝ) ^ 2 / 128) :=
+          mul_le_mul_of_nonneg_left hexp (Real.exp_nonneg _)
+      _ = 1 := by rw [h1]
+  have hlt : (2 : ℝ) * 4 * (1 / (1 + (9000 : ℝ) ^ 2 / 128)) < 1 / 65536 := by
+    field_simp
+    norm_num
+  calc (2 : ℝ) * 4 * Real.exp (-((9000 : ℝ) ^ 2)
+          / (2 * ‖∑ e : Fin 4 × Fin 4,
+              perturbEdgeLap epC4 e * perturbEdgeLap epC4 e‖))
+      ≤ (2 : ℝ) * 4 * Real.exp (-((9000 : ℝ) ^ 2) / 128) :=
+        by exact mul_le_mul_of_nonneg_left hmono2 (by norm_num)
+    _ ≤ (2 : ℝ) * 4 * (1 / (1 + (9000 : ℝ) ^ 2 / 128)) :=
+        by exact mul_le_mul_of_nonneg_left hinv (by norm_num)
+    _ < 1 / 65536 := hlt
+
+/-! ## The degenerate-degree corner audit
+
+The parked finding of the window family's honesty notes ("the
+normalized Laplacian's junk value at zero-degree corners is the
+*identity's* spectrum (`λ₂ = 1`), not the zero matrix's — an easy
+mistake to make when predicting refutation fixtures in this family"),
+recorded there as a spike-level fact on 2026-08-29's window delivery and
+settled here as shelf lemmas (`Normalized.degreeInvSqrt_apply_eq_zero_iff`,
+`Normalized.normalizedLaplacian_eq_one_of_forall_deg_nonpos`,
+`Spectral.evals_one`) plus the audit instances below.
+
+The negative-degree corner is this audit's own addition to the record:
+the honesty note had anchored on zero-degree corners, but the
+edge-resampling designs at `p ≠ ½` also produce outcomes with
+*negative* degrees (negative off-diagonal entries with negative row
+sums) — and `Real.sqrt` of a negative number is `0`, so those outcomes
+land on the same identity junk. Both corners are witnessed at one
+fixture pair. -/
+
+/-- deg at the all-false `p ≡ ½` outcome is `0` — the zero-degree
+corner. -/
+theorem epK2_perturbed_allFalse_deg (i : Fin 2) :
+    deg (epK2 + perturbWeight epK2 epHalf (fun _ => false)) i = 0 := by
+  rw [epK2_perturbed_allFalse_eq]
+  simp [deg]
+
+/-- The identity degeneration at the fixture: the all-false outcome's
+normalized Laplacian is `1`. -/
+theorem epK2_allFalse_normLap_eq_one :
+    normalizedLaplacian (epK2 + perturbWeight epK2 epHalf (fun _ => false)) = 1 :=
+  normalizedLaplacian_eq_one_of_forall_deg_nonpos _
+    (fun i => by simp [epK2_perturbed_allFalse_deg i])
+
+/-- **The parked finding, pinned**: `λ₂` of the normalized Laplacian at
+the all-false outcome is exactly `1` — the identity's spectrum
+(`evals_one` through the proof-irrelevance bridge `secondEval_congr`). -/
+theorem epK2_allFalse_normLap_secondEval_eq_one :
+    secondEval (normalizedLaplacian (epK2 + perturbWeight epK2 epHalf (fun _ => false)))
+      (normalizedLaplacian_symmetric _
+        (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => false))))
+      (by norm_num) = 1 := by
+  rw [secondEval_congr _
+    (show (1 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm from Matrix.transpose_one)
+    epK2_allFalse_normLap_eq_one (by norm_num)]
+  exact evals_one _ _
+
+/-- The easy misprediction — the zero matrix's `0` — refuted in proved
+form at the same outcome. -/
+theorem epK2_allFalse_normLap_secondEval_ne_zero :
+    secondEval (normalizedLaplacian (epK2 + perturbWeight epK2 epHalf (fun _ => false)))
+      (normalizedLaplacian_symmetric _
+        (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => false))))
+      (by norm_num) ≠ 0 := by
+  rw [epK2_allFalse_normLap_secondEval_eq_one]
+  norm_num
+
+/-- **The spectral contrast in one proved statement**: at the same
+all-false outcome, the combinatorial Laplacian's junk spectrum is the
+zero matrix's (`λ₂ = 0`, the existing kernel-plus-trace pin) while the
+normalized Laplacian's is the identity's (`λ₂ = 1`) — the two corners
+the window family's honesty note distinguishes, exhibited side by side
+so a future refutation-fixture design cannot conflate them. -/
+theorem epK2_allFalse_spectral_contrast_QA :
+    lambda2 (epK2 + perturbWeight epK2 epHalf (fun _ => false))
+      (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => false)))
+      (by norm_num) = 0
+      ∧ secondEval (normalizedLaplacian (epK2 + perturbWeight epK2 epHalf (fun _ => false)))
+        (normalizedLaplacian_symmetric _
+          (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => false))))
+        (by norm_num) = 1 :=
+  ⟨epK2_perturbed_allFalse_lambda2_eq_zero, epK2_allFalse_normLap_secondEval_eq_one⟩
+
+/-- **The honesty note's floor-condition mechanism, proved**: at the
+all-false outcome the un-windowed floor condition — the conclusion-side
+membership of `edgePerturbation_normalized_cheeger_floor` with the
+admissibility conjunct dropped, at `dmin = dmax = 1`, `φ(K₂) = 1`,
+`t = 0` — is false: `1 ≤ 1/2` fails. This is the proved form of "the
+identity's `λ₂ = 1` keeps the un-windowed floor condition false on
+`K₂`-shaped fixtures". -/
+theorem epK2_allFalse_floor_condition_false_QA :
+    ¬ (secondEval (normalizedLaplacian (epK2 + perturbWeight epK2 epHalf (fun _ => false)))
+        (normalizedLaplacian_symmetric _
+          (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => false))))
+        (by norm_num)
+      ≤ (1 : ℝ) * (cheegerConstant epK2) ^ 2 / 2 - 0) := by
+  rw [epK2_allFalse_normLap_secondEval_eq_one, epK2_cheegerConstant]
+  norm_num
+
+/-- The uniform-one inclusion probabilities — the negative-corner
+design point (legal: `0 ≤ 1 ≤ 1`). -/
+noncomputable def epOne : (Fin 2 × Fin 2) → ℝ := fun _ => 1
+
+theorem epOne_mem (e) : 0 ≤ epOne e ∧ epOne e ≤ 1 := by
+  constructor <;> norm_num [epOne]
+
+/-- The negative-degree corner's fixture: at `p ≡ 1` the all-false
+outcome's resampled adjacency is the *negative* edge (entrywise through
+the design's entry formulas). -/
+theorem epK2_perturbed_allFalse_epOne_eq :
+    epK2 + perturbWeight epK2 epOne (fun _ => false) = (-1 : ℝ) • epK2 := by
+  ext i j
+  by_cases hij : i = j
+  · subst hij
+    rw [Matrix.add_apply, Matrix.smul_apply, smul_eq_mul, perturbWeight_apply_diag,
+      epK2_diag i]
+    simp [epOne]
+  · rw [Matrix.add_apply, Matrix.smul_apply, smul_eq_mul,
+      perturbWeight_apply_of_ne _ _ _ hij]
+    fin_cases i <;> fin_cases j <;> simp [epK2, epOne]
+
+/-- The negative corner's degree profile: `-1 < 0` on every vertex. -/
+theorem epK2_perturbed_allFalse_epOne_neg_deg (i : Fin 2) :
+    deg (epK2 + perturbWeight epK2 epOne (fun _ => false)) i = -1 := by
+  rw [epK2_perturbed_allFalse_epOne_eq, deg_smul, epK2_regular i]
+  norm_num
+
+/-- The identity degeneration holds at the negative corner too. -/
+theorem epK2_allFalse_epOne_normLap_eq_one :
+    normalizedLaplacian (epK2 + perturbWeight epK2 epOne (fun _ => false)) = 1 :=
+  normalizedLaplacian_eq_one_of_forall_deg_nonpos _
+    (fun i => by simp [epK2_perturbed_allFalse_epOne_neg_deg i])
+
+/-- The negative-degree corner's junk spectrum is the identity's too —
+`λ₂ = 1` at a resampled adjacency with strictly negative degrees. -/
+theorem epK2_allFalse_epOne_normLap_secondEval_eq_one :
+    secondEval (normalizedLaplacian (epK2 + perturbWeight epK2 epOne (fun _ => false)))
+      (normalizedLaplacian_symmetric _
+        (epK2_symmetric.add (perturbWeight_isSymm epK2 epOne (fun _ => false))))
+      (by norm_num) = 1 := by
+  rw [secondEval_congr _
+    (show (1 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm from Matrix.transpose_one)
+    epK2_allFalse_epOne_normLap_eq_one (by norm_num)]
+  exact evals_one _ _
+
+/-- The vanishing iff exercised on both sides at one fixture pair: the
+positive-degree base graph keeps a nonzero reciprocal factor, the
+all-false outcome's zero-degree adjacency kills it. -/
+theorem epK2_degreeInvSqrt_iff_QA (i : Fin 2) :
+    degreeInvSqrt epK2 i i ≠ 0
+      ∧ degreeInvSqrt (epK2 + perturbWeight epK2 epHalf (fun _ => false)) i i = 0 :=
+  ⟨(degreeInvSqrt_apply_eq_zero_iff epK2 i).not.mpr (by
+      simp [epK2_regular i]),
+    (degreeInvSqrt_apply_eq_zero_iff _ i).mpr
+      (by simp [epK2_perturbed_allFalse_deg i])⟩
+
+/-! ## The degree tail (the degreeTail section)
+
+QA for `hoeffding_inequality`'s first theorem consumer
+(`Derived/EdgePerturbationTail.lean`'s degreeTail section, the scalar
+sibling of the matrix assemblies above). The tail theorems are
+conditional on the `hoeffding_inequality` axiom; these lemmas do not
+prove that axiom. What they pin, on the `K₂` fixture:
+
+- the variance statistic exactly: `S₀ = 2`, both incident ordered pairs
+  counted (a single-counted statistic `1` is refuted — the double count
+  is load-bearing in the exponent);
+- the degree-deviation identity at the all-true outcome by two
+  independent routes (raw weight-space arithmetic — the resampled graph
+  is `2 • K₂`, degree `2` — vs the design's own identity, base degree
+  plus summed centered summands `1 + ½ + ½`), and at the all-false
+  outcome (degree `0`, joined to the corner-audit's existing pin);
+- the closed-form tail instance `μ {|dev| ≥ 1} ≤ 2 exp(−1/4)`;
+- the *exact* event measure `1/2` — the agreement event of the two
+  incident coordinates, computed through the design's own independence
+  machinery (`indepFun_coord` + `toMeasure_cyl`), independently of the
+  tail theorem — so the bound's slack at fixture scale is on the record
+  (`1/2 ≤ 2 exp(−1/4)`), the same junk-measure obstruction the window
+  family records honestly;
+- the union-bound instance, with the collapse to `4 exp(−1/4)`
+  demonstrated numerically (both vertices' statistics equal on `K₂`) and
+  the union event's measure pinned `1/2` (both deviations are the same
+  function of the coordinates on `K₂` — the union bound double-counts
+  there, honestly).
+-/
+
+/-- The four ordered-pair weights of vertex `0` on `K₂`: only the two
+off-diagonal pairs are incident with nonzero weight. -/
+theorem epK2_degWeight_facts :
+    degPerturbWeight epK2 0 (0, 0) = 0
+      ∧ degPerturbWeight epK2 0 (0, 1) = 1
+      ∧ degPerturbWeight epK2 0 (1, 0) = 1
+      ∧ degPerturbWeight epK2 0 (1, 1) = 0 := by
+  refine ⟨?_, ?_, ?_, ?_⟩ <;> simp [degPerturbWeight, epK2]
+
+/-- The base degree of `K₂` at `0`. -/
+theorem epK2_deg_base : deg epK2 0 = 1 := by
+  simp [deg, epK2, Fin.sum_univ_two]
+
+/-- **The degree variance statistic on `K₂`, exactly**: both ordered
+pairs incident to vertex `0` carry weight `1`, so the sum of squared
+weights is `2`. -/
+theorem epK2_degree_variance :
+    ∑ e : Fin 2 × Fin 2, (degPerturbWeight epK2 0 e) ^ 2 = 2 := by
+  obtain ⟨h00, h01, h10, h11⟩ := epK2_degWeight_facts
+  rw [Fintype.sum_prod_type]
+  simp only [Fin.sum_univ_two]
+  rw [h00, h01, h10, h11]
+  ring_nf
+
+/-- The single-counted statistic is refuted: summing the squared weights
+over one orientation per edge would give `1`, but the design's statistic
+counts both incident ordered pairs and is `2` — the double count is
+load-bearing in the tail's exponent. -/
+theorem epK2_degree_variance_ne_one :
+    ¬ (∑ e : Fin 2 × Fin 2, (degPerturbWeight epK2 0 e) ^ 2 = 1) := by
+  rw [epK2_degree_variance]
+  norm_num
+
+/-- **Route A (raw weight-space)**: at the all-true outcome the resampled
+adjacency is `2 • K₂` (the perturbation is `K₂` itself), whose degree
+at `0` is `2`. -/
+theorem epK2_degDev_allTrue_raw :
+    deg (epK2 + perturbWeight epK2 epHalf (fun _ => true)) 0 = 2 := by
+  have hpw : perturbWeight epK2 epHalf (fun _ => true) = epK2 :=
+    epK2_perturbWeight_allTrue
+  rw [hpw]
+  have h2 : (epK2 + epK2 : Matrix (Fin 2) (Fin 2) ℝ) = (2 : ℝ) • epK2 := by
+    ext i j
+    simp only [Matrix.add_apply, epK2, Matrix.of_apply, Matrix.smul_apply,
+      smul_eq_mul]
+    split_ifs <;> ring_nf
+  rw [h2, deg_smul, epK2_deg_base]
+  ring_nf
+
+/-- The summed centered degree summands at the all-true outcome:
+`½ + ½` from the two incident ordered pairs. -/
+theorem epK2_degSum_allTrue :
+    ∑ e : Fin 2 × Fin 2,
+        degPerturbSummand epK2 epHalf 0 e (fun _ => true) = 1 := by
+  rw [Fintype.sum_prod_type]
+  simp only [Fin.sum_univ_two, degPerturbSummand]
+  rw [epK2_degWeight_facts.1, epK2_degWeight_facts.2.1,
+    epK2_degWeight_facts.2.2.1, epK2_degWeight_facts.2.2.2]
+  simp [epHalf]
+  norm_num
+
+/-- **Route B (the design's identity)**: the resampled degree through
+`deg_resampled` — base degree plus summed centered summands, `1 + 1` —
+a wrong deviation identity breaks exactly this route while route A
+survives. -/
+theorem epK2_degDev_allTrue_identity :
+    deg (epK2 + perturbWeight epK2 epHalf (fun _ => true)) 0 = 2 := by
+  rw [deg_resampled, epK2_deg_base, epK2_degSum_allTrue]
+  norm_num
+
+/-- **Route B at the all-false outcome**: the resampled degree is
+`1 − ½ − ½ = 0` through the identity, joined to the corner-audit's
+existing raw pin (`epK2_perturbed_allFalse_deg`) — the identity holds
+at the other extreme of the design's outcome space. -/
+theorem epK2_degDev_allFalse_identity :
+    deg (epK2 + perturbWeight epK2 epHalf (fun _ => false)) 0 = 0 := by
+  rw [deg_resampled, epK2_deg_base]
+  have hsum : ∑ e : Fin 2 × Fin 2,
+      degPerturbSummand epK2 epHalf 0 e (fun _ => false) = -1 := by
+    rw [Fintype.sum_prod_type]
+    simp only [Fin.sum_univ_two, degPerturbSummand]
+    rw [epK2_degWeight_facts.1, epK2_degWeight_facts.2.1,
+      epK2_degWeight_facts.2.2.1, epK2_degWeight_facts.2.2.2]
+    simp [epHalf]
+    norm_num
+  rw [hsum]
+  ring
+
+/-- The resampled degree of `K₂` at `0` under the uniform-half design is
+exactly the sum of the two incident coordinate indicators — the
+deviation is `δ₀₁ + δ₁₀ − 1`, taking the values `−1, 0, 1`. -/
+theorem epK2_degResampled_eq (ω : (Fin 2 × Fin 2) → Bool) :
+    deg (epK2 + perturbWeight epK2 epHalf ω) 0
+      = (if ω (0, 1) then (1 : ℝ) else 0)
+        + (if ω (1, 0) then (1 : ℝ) else 0) := by
+  have h := deg_resampled epK2 epHalf ω 0
+  have hsum : ∑ e : Fin 2 × Fin 2, degPerturbSummand epK2 epHalf 0 e ω
+      = ((if ω (0, 1) then (1 : ℝ) else 0) - epHalf (0, 1))
+        + ((if ω (1, 0) then (1 : ℝ) else 0) - epHalf (1, 0)) := by
+    rw [Fintype.sum_prod_type]
+    simp only [Fin.sum_univ_two, degPerturbSummand]
+    rw [epK2_degWeight_facts.1, epK2_degWeight_facts.2.1,
+      epK2_degWeight_facts.2.2.1, epK2_degWeight_facts.2.2.2]
+    simp [epHalf]
+  rw [h, hsum, epK2_deg_base]
+  simp [epHalf]
+  ring
+
+/-- **The closed-form degree tail instance on `K₂`** at `t = 1`:
+`μ {|deg G_ω 0 − deg K₂ 0| ≥ 1} ≤ 2 exp(−1/4)` — the scalar axiom's
+prefactor `2` (no dimension factor) and the variance statistic `2` in
+the denominator `2 · 2`. CONDITIONAL ON THE `hoeffding_inequality` AXIOM
+(instantiated, not re-proved). -/
+theorem epK2_degree_tail_QA :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+        {ω : (Fin 2 × Fin 2) → Bool |
+          (1 : ℝ) ≤ |deg (epK2 + perturbWeight epK2 epHalf ω) 0 - deg epK2 0|}
+      ≤ ENNReal.ofReal (2 * Real.exp (-((1 : ℝ) ^ 2) / 4)) := by
+  have htail := edgePerturbation_degree_tail epK2 epHalf epHalf_nonneg
+    epHalf_le_one 0 1 zero_le_one
+  rw [epK2_degree_variance] at htail
+  have hRHS : (2 : ℝ) * Real.exp (-((1 : ℝ) ^ 2) / (2 * 2))
+      = 2 * Real.exp (-((1 : ℝ) ^ 2) / 4) := by
+    ring
+  rw [show 2 * Real.exp (-((1 : ℝ) ^ 2) / 4)
+      = 2 * Real.exp (-((1 : ℝ) ^ 2) / (2 * 2)) from hRHS.symm]
+  exact htail
+
+/-- The single-coordinate cylinder masses at the fair coin: each incident
+coordinate carries mass `½`. -/
+theorem epK2_cyl_mass (e : Fin 2 × Fin 2) (b : Bool) :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+        ((fun ω : (Fin 2 × Fin 2) → Bool => ω e) ⁻¹' {b})
+      = ENNReal.ofReal ((1 : ℝ) / 2) := by
+  rw [toMeasure_cyl epHalf epHalf_nonneg epHalf_le_one e {b}]
+  cases b with
+  | true => simp [bern, epHalf]
+  | false => simp [bern, epHalf]; ring_nf
+
+/-- **The exact event measure**: the degree-deviation event at `t = 1` on
+`K₂` is exactly the agreement event of the two incident coordinates, of
+measure `¼ + ¼ = ½` — computed through the design's own independence
+machinery (`indepFun_coord` + `toMeasure_cyl`), independently of the tail
+theorem. With the closed-form bound above this pins the honest slack
+`1/2 ≤ 2 exp(−1/4)` (the same junk-measure obstruction the window family
+records: at fixture scale the exponential never drops below the atom
+masses, so no wrong-constant refutation exists here — the exactness pins
+above carry the falsification content). -/
+theorem epK2_degree_event_measure :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+        {ω : (Fin 2 × Fin 2) → Bool |
+          (1 : ℝ) ≤ |deg (epK2 + perturbWeight epK2 epHalf ω) 0 - deg epK2 0|}
+      = ENNReal.ofReal ((1 : ℝ) / 2) := by
+  have hE : {ω : (Fin 2 × Fin 2) → Bool |
+      (1 : ℝ) ≤ |deg (epK2 + perturbWeight epK2 epHalf ω) 0 - deg epK2 0|}
+      = ((fun ω : (Fin 2 × Fin 2) → Bool => ω (0, 1)) ⁻¹' {true}
+            ∩ (fun ω : (Fin 2 × Fin 2) → Bool => ω (1, 0)) ⁻¹' {true})
+        ∪ ((fun ω : (Fin 2 × Fin 2) → Bool => ω (0, 1)) ⁻¹' {false}
+            ∩ (fun ω : (Fin 2 × Fin 2) → Bool => ω (1, 0)) ⁻¹' {false}) := by
+    ext ω
+    simp only [Set.mem_setOf_eq, Set.mem_union, Set.mem_inter_iff,
+      Set.mem_preimage, Set.mem_singleton_iff]
+    rw [epK2_degResampled_eq ω, epK2_deg_base]
+    cases h1 : ω (0, 1) <;> cases h2 : ω (1, 0) <;> simp [h1, h2]
+  have hdisj : Disjoint
+      ((fun ω : (Fin 2 × Fin 2) → Bool => ω (0, 1)) ⁻¹' {true}
+        ∩ (fun ω : (Fin 2 × Fin 2) → Bool => ω (1, 0)) ⁻¹' {true})
+      ((fun ω : (Fin 2 × Fin 2) → Bool => ω (0, 1)) ⁻¹' {false}
+        ∩ (fun ω : (Fin 2 × Fin 2) → Bool => ω (1, 0)) ⁻¹' {false}) := by
+    rw [Set.disjoint_iff_inter_eq_empty]
+    ext ω
+    simp only [Set.mem_inter_iff, Set.mem_preimage, Set.mem_singleton_iff,
+      Set.mem_empty_iff_false]
+    cases ω (0, 1) <;> simp
+  have hm2 : MeasurableSet
+      ((fun ω : (Fin 2 × Fin 2) → Bool => ω (0, 1)) ⁻¹' {false}
+        ∩ (fun ω : (Fin 2 × Fin 2) → Bool => ω (1, 0)) ⁻¹' {false}) :=
+    ((measurable_coord (0, 1)) (Set.toFinite ({false} : Set Bool)).measurableSet).inter
+      ((measurable_coord (1, 0)) (Set.toFinite ({false} : Set Bool)).measurableSet)
+  have hnee : ((0, 1) : Fin 2 × Fin 2) ≠ (1, 0) := by
+    decide
+  have hindep := indepFun_coord epHalf epHalf_nonneg epHalf_le_one hnee
+  rw [indepFun_iff_measure_inter_preimage_eq_mul] at hindep
+  have hTT := hindep {true} {true}
+    ((Set.toFinite ({true} : Set Bool)).measurableSet)
+    ((Set.toFinite ({true} : Set Bool)).measurableSet)
+  have hFF := hindep {false} {false}
+    ((Set.toFinite ({false} : Set Bool)).measurableSet)
+    ((Set.toFinite ({false} : Set Bool)).measurableSet)
+  rw [hE, measure_union hdisj hm2, hTT, hFF,
+    epK2_cyl_mass (0, 1) true, epK2_cyl_mass (1, 0) true,
+    epK2_cyl_mass (0, 1) false, epK2_cyl_mass (1, 0) false]
+  rw [← ENNReal.ofReal_mul (by norm_num),
+    ← ENNReal.ofReal_add (by norm_num) (by norm_num)]
+  ring_nf
+
+/-- **The union-bound instance on `K₂`**: the all-vertices tail at
+`t = 1` against the summed bound, collapsed numerically to
+`4 exp(−1/4)` (both vertices' variance statistics are `2` — the collapse
+that needs per-vertex positivity in general is exact here). CONDITIONAL
+ON THE `hoeffding_inequality` AXIOM via the union theorem. -/
+theorem epK2_degree_tail_all_QA :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+        {ω : (Fin 2 × Fin 2) → Bool |
+          ∃ v, (1 : ℝ) ≤ |deg (epK2 + perturbWeight epK2 epHalf ω) v
+            - deg epK2 v|}
+      ≤ ∑ _v : Fin 2, ENNReal.ofReal (2 * Real.exp (-((1 : ℝ) ^ 2) / 4)) := by
+  have htail := edgePerturbation_degree_tail_all epK2 epHalf epHalf_nonneg
+    epHalf_le_one 1 zero_le_one
+  have hvar : ∀ v : Fin 2, ∑ e : Fin 2 × Fin 2, (degPerturbWeight epK2 v e) ^ 2
+      = 2 := by
+    intro v
+    have hc : ∀ w : Fin 2, w = 0 ∨ w = 1 := by
+      intro w
+      fin_cases w <;> simp
+    rcases hc v with rfl | rfl
+    · exact epK2_degree_variance
+    · rw [Fintype.sum_prod_type]
+      simp only [Fin.sum_univ_two, degPerturbWeight, epK2]
+      norm_num
+  simp only [hvar] at htail
+  have hRHS : (2 : ℝ) * Real.exp (-((1 : ℝ) ^ 2) / (2 * 2))
+      = 2 * Real.exp (-((1 : ℝ) ^ 2) / 4) := by
+    ring
+  have hsum : ∑ v : Fin 2,
+      ENNReal.ofReal (2 * Real.exp (-((1 : ℝ) ^ 2) / (2 * 2)))
+      = ∑ v : Fin 2, ENNReal.ofReal (2 * Real.exp (-((1 : ℝ) ^ 2) / 4)) :=
+    Finset.sum_congr rfl fun _ _ => by rw [hRHS]
+  rw [hsum] at htail
+  exact htail
+
+/-- The union event's measure is also exactly `1/2` — on `K₂` both
+vertices' deviations are the same function of the coordinates, so the
+existential adds nothing and the union bound double-counts: the honest
+slack of the union form is on the record beside the per-vertex one. -/
+theorem epK2_degree_event_all_measure :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+        {ω : (Fin 2 × Fin 2) → Bool |
+          ∃ v, (1 : ℝ) ≤ |deg (epK2 + perturbWeight epK2 epHalf ω) v
+            - deg epK2 v|}
+      = ENNReal.ofReal ((1 : ℝ) / 2) := by
+  have hEq : {ω : (Fin 2 × Fin 2) → Bool |
+      ∃ v, (1 : ℝ) ≤ |deg (epK2 + perturbWeight epK2 epHalf ω) v
+        - deg epK2 v|}
+      = {ω : (Fin 2 × Fin 2) → Bool |
+          (1 : ℝ) ≤ |deg (epK2 + perturbWeight epK2 epHalf ω) 0
+            - deg epK2 0|} := by
+    ext ω
+    simp only [Set.mem_setOf_eq]
+    constructor
+    · rintro ⟨v, hv⟩
+      have hc : ∀ w : Fin 2, w = 0 ∨ w = 1 := by
+        intro w
+        fin_cases w <;> simp
+      rcases hc v with rfl | rfl
+      · exact hv
+      · have h1 : deg epK2 1 = 1 := by simp [deg, epK2, Fin.sum_univ_two]
+        have h2 : deg (epK2 + perturbWeight epK2 epHalf ω) 1
+            = (if ω (0, 1) then (1 : ℝ) else 0)
+              + (if ω (1, 0) then (1 : ℝ) else 0) := by
+          have h := deg_resampled epK2 epHalf ω 1
+          have hsum : ∑ e : Fin 2 × Fin 2, degPerturbSummand epK2 epHalf 1 e ω
+              = ((if ω (0, 1) then (1 : ℝ) else 0) - epHalf (0, 1))
+                + ((if ω (1, 0) then (1 : ℝ) else 0) - epHalf (1, 0)) := by
+            rw [Fintype.sum_prod_type]
+            simp only [Fin.sum_univ_two, degPerturbSummand, degPerturbWeight]
+            cases ω (0, 1) <;> cases ω (1, 0) <;>
+              simp [epK2, epHalf]
+          rw [h, hsum, h1]
+          simp [epHalf]
+          ring
+        rw [epK2_degResampled_eq ω, epK2_deg_base]
+        rw [h2, h1] at hv
+        exact hv
+    · intro hv
+      exact ⟨0, hv⟩
+  rw [hEq, epK2_degree_event_measure]
+
+/-! ## The Bernstein twin (the bernsteinTwin section)
+
+QA for `bernstein_inequality`'s and `bernstein_bounded_variance`'s first
+theorem consumers (`Derived/EdgePerturbationTail.lean`'s bernsteinTwin
+section, the variance-adaptive siblings of the degreeTail section
+above). The tail theorems are conditional on their respective axioms;
+these lemmas do not prove those axioms. What they pin, on the `K₂`
+fixture at the fair coin:
+
+- the *true* variance statistic exactly: `σ²₀ = ∑ₑ w² p (1 − p) = ½`,
+  with the Poisson-trial shape `∑ₑ w² p = 1` (the dropped-`(1 − p)`
+  degeneration) refuted — the centered-vs-uncentered distinction is
+  load-bearing in the Bernstein denominator;
+- the fourfold variance reduction as an equation: `σ²₀ = S₀/4` where
+  `S₀ = ∑ₑ w² = 2` is the Hoeffding twin's range statistic —
+  `p (1 − p) = ¼` is sharp at the fair coin, so `σ²_v ≤ S_v/4` holds
+  with equality at this fixture;
+- the engine's variance integral at an incident pair: `∫ X_e² = ¼`;
+- the **strict variance-adaptivity improvement, proved**:
+  `2 exp(−3/5) < 2 exp(−1/4)` — the Bernstein bound at the exact
+  statistic strictly beats the delivered Hoeffding bound at the same
+  fixture and threshold (`t = 1`, `M = 1`), by strict monotonicity of
+  `exp` at `1/4 < 3/5`. This is the cross-axiom coherence check:
+  variance adaptivity is a real strengthening at moderate `t`, not a
+  reparametrization;
+- the budget relaxation pinned honest: the budget bound dominates the
+  exact-statistic bound;
+- the two closed-form conditional tail instances (`2 exp(−3/5)` exact,
+  `2 exp(−3/8)` at the budget `Vbud = 1`).
+-/
+
+section BernsteinTwin
+
+open Scaffold.Derived.EdgePerturbationTail
+
+/-- **The Bernstein variance statistic on K₂, exactly**: both incident
+ordered pairs carry weight `1` at the fair coin `p ≡ ½`, so
+`σ² = 2 · ½ · ½ = ½`. -/
+theorem epK2_degree_bernstein_variance :
+    ∑ e : Fin 2 × Fin 2,
+        (degPerturbWeight epK2 0 e) ^ 2 * epHalf e * (1 - epHalf e) = 1 / 2 := by
+  obtain ⟨h00, h01, h10, h11⟩ := epK2_degWeight_facts
+  rw [Fintype.sum_prod_type]
+  simp only [Fin.sum_univ_two]
+  rw [h00, h01, h10, h11]
+  simp [epHalf]
+  norm_num
+
+/-- The Poisson-trial shape is refuted: dropping the `(1 − p)` factor
+would give `∑ w² p = 1` at this fixture, but the true variance statistic
+is `½` — the centered-vs-uncentered distinction is load-bearing in the
+Bernstein denominator. -/
+theorem epK2_degree_bernstein_variance_ne_one :
+    ¬ (∑ e : Fin 2 × Fin 2,
+        (degPerturbWeight epK2 0 e) ^ 2 * epHalf e * (1 - epHalf e) = 1) := by
+  rw [epK2_degree_bernstein_variance]
+  norm_num
+
+/-- **The fourfold variance reduction, pinned as an equation**: at the
+fair coin the Bernstein statistic is exactly the Hoeffding range
+statistic over four (`½ = 2/4`) — `p (1 − p) = ¼` is sharp there, so the
+general bound `σ²_v ≤ S_v/4` holds with equality at this fixture. -/
+theorem epK2_bernstein_variance_quarter :
+    ∑ e : Fin 2 × Fin 2,
+        (degPerturbWeight epK2 0 e) ^ 2 * epHalf e * (1 - epHalf e)
+      = (∑ e : Fin 2 × Fin 2, (degPerturbWeight epK2 0 e) ^ 2) / 4 := by
+  rw [epK2_degree_bernstein_variance, epK2_degree_variance]
+  norm_num
+
+/-- The engine's variance integral pinned at the incident pair:
+`∫ X_{(0,1)}² = 1² · ½ · ½ = ¼`. -/
+theorem epK2_engine_variance :
+    ∫ ω : (Fin 2 × Fin 2) → Bool,
+        (degPerturbSummand epK2 epHalf 0 (0, 1) ω) ^ 2
+      ∂(bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure = 1 / 4 := by
+  rw [integral_sq_degPerturbSummand epK2 epHalf epHalf_nonneg epHalf_le_one 0 (0, 1)]
+  rw [epK2_degWeight_facts.2.1]
+  simp only [epHalf]
+  norm_num
+
+/-- The magnitude bound `M = 1` holds at the fixture: every incident
+weight is `0` or `1`. -/
+theorem epK2_degree_bernstein_M :
+    ∀ e : Fin 2 × Fin 2, |degPerturbWeight epK2 0 e| ≤ 1 := by
+  intro e
+  unfold degPerturbWeight epK2
+  simp only [Matrix.of_apply]
+  by_cases h2 : e.1 = e.2 <;> by_cases h1 : (0 : Fin 2) = e.1 ∨ (0 : Fin 2) = e.2 <;>
+    simp [h1, h2]
+
+/-- The budget-form variance hypothesis at `Vbud = 1`. -/
+theorem epK2_bernstein_budget_var :
+    ∑ e : Fin 2 × Fin 2,
+        (degPerturbWeight epK2 0 e) ^ 2 * epHalf e * (1 - epHalf e) ≤ 1 := by
+  rw [epK2_degree_bernstein_variance]
+  norm_num
+
+/-- **The closed-form Bernstein degree tail instance on `K₂`** at `t = 1`,
+`M = 1`: `μ {|dev| ≥ 1} ≤ 2 exp(−3/5)` — the denominator
+`2 σ² + 2Mt/3 = 1 + 2/3 = 5/3`. CONDITIONAL ON THE
+`bernstein_inequality` AXIOM (instantiated, not re-proved). -/
+theorem epK2_degree_tail_bernstein_QA :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+        {ω : (Fin 2 × Fin 2) → Bool |
+          (1 : ℝ) ≤ |deg (epK2 + perturbWeight epK2 epHalf ω) 0 - deg epK2 0|}
+      ≤ ENNReal.ofReal (2 * Real.exp (-(3 / 5 : ℝ))) := by
+  have htail := edgePerturbation_degree_tail_bernstein epK2 epHalf epHalf_nonneg
+    epHalf_le_one 0 epK2_degree_bernstein_M 1 zero_le_one
+  rw [epK2_degree_bernstein_variance] at htail
+  have hRHS : (2 : ℝ) * Real.exp (-((1 : ℝ) ^ 2) / (2 * (1 / 2) + (2 * 1 * 1) / 3))
+      = 2 * Real.exp (-(3 / 5 : ℝ)) := by
+    rw [one_pow]
+    norm_num
+  rw [hRHS] at htail
+  exact htail
+
+/-- **The budget instance** at `Vbud = 1`: the coarser denominator
+`2 · 1 + 2/3 = 8/3` gives `2 exp(−3/8)`. CONDITIONAL ON THE
+`bernstein_bounded_variance` AXIOM (instantiated, not re-proved). -/
+theorem epK2_degree_tail_bernstein_budget_QA :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+        {ω : (Fin 2 × Fin 2) → Bool |
+          (1 : ℝ) ≤ |deg (epK2 + perturbWeight epK2 epHalf ω) 0 - deg epK2 0|}
+      ≤ ENNReal.ofReal (2 * Real.exp (-(3 / 8 : ℝ))) := by
+  have htail := edgePerturbation_degree_tail_bernstein_budget epK2 epHalf
+    epHalf_nonneg epHalf_le_one 0 epK2_degree_bernstein_M (Vbud := 1)
+    epK2_bernstein_budget_var 1 zero_le_one
+  have hRHS : (2 : ℝ) * Real.exp (-((1 : ℝ) ^ 2) / (2 * 1 + (2 * 1 * 1) / 3))
+      = 2 * Real.exp (-(3 / 8 : ℝ)) := by
+    rw [one_pow]
+    norm_num
+  rw [hRHS] at htail
+  exact htail
+
+/-- **The strict variance-adaptivity improvement, proved**: the Bernstein
+bound at the exact statistic strictly beats the Hoeffding bound at the
+same fixture and threshold — `2 exp(−3/5) < 2 exp(−1/4)` because
+`1/4 < 3/5` and `exp` is strictly monotone. This is the cross-axiom
+coherence check: variance adaptivity is a real strengthening at
+moderate `t`, not a reparametrization. Hard crust, standard three
+axioms only. -/
+theorem epK2_bernstein_beats_hoeffding :
+    (2 : ℝ) * Real.exp (-(3 / 5 : ℝ)) < 2 * Real.exp (-((1 : ℝ) / 4)) := by
+  have h : (-(3 / 5 : ℝ)) < -((1 : ℝ) / 4) := by norm_num
+  have he := Real.exp_lt_exp.mpr h
+  exact mul_lt_mul_of_pos_left he zero_lt_two
+
+/-- The budget relaxation is honest (weaker, never stronger): the
+budget bound dominates the exact-statistic bound — `3/8 ≤ 3/5` in the
+exponent. Hard crust, standard three axioms only. -/
+theorem epK2_bernstein_exact_le_budget :
+    (2 : ℝ) * Real.exp (-(3 / 5 : ℝ)) ≤ 2 * Real.exp (-(3 / 8 : ℝ)) := by
+  have h : (-(3 / 5 : ℝ)) ≤ -(3 / 8 : ℝ) := by norm_num
+  exact mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr h) zero_le_two
+
+end BernsteinTwin
+
+/-! ## The admissibility dissolution (the AdmissibilityDissolution
+section)
+
+QA for the window family's first unconditional measured event
+(`Derived/EdgePerturbationTail.lean`'s dissolution section, the
+degree-concentration proposal's priced follow-on). The unconditional
+bracket is conditional on the `matrix_hoeffding` and
+`hoeffding_inequality` axioms together; these lemmas do not prove either
+axiom. What they pin, on the `K₂` fixture:
+
+- the pair design condition at the uniform designs: `p ≡ ½` satisfies
+  it with *equality* (the boundary), `p ≡ 1/10` with slack;
+- the boundary entry pin: at `p ≡ ½` the all-false outcome's
+  off-diagonal entry is exactly `0` — nonnegative *at* the boundary,
+  not strictly inside it (the engine's inequality is tight there);
+- the dropped-pair-condition fence: at `p ≡ 9/10` (inside `[0, 1]`,
+  violating only the pair condition) the same entry is exactly `−4/5` —
+  nonnegativity genuinely fails, the design condition is load-bearing;
+- the transfer's positive witness: at `p ≡ 1/10` the all-false
+  outcome's deviation is exactly `|−1/5| < 1/2` at both vertices, so
+  with base degrees `1` in the shrunk window `[1, 2]` the outcome lands
+  inside the admissibility window `[1/2, 5/2]`, the derived degree
+  `4/5` pinned by the design's own identity;
+- the strictness boundary, coherent: at `p ≡ ½` the all-false outcome's
+  deviation is `1 ≥ s = 1/2` — in the degree tail's event, exactly
+  where the transfer does not apply — and indeed not admissible;
+- the closed-form instance: the *unconditioned* window-exit event
+  bounded by `4 exp(−1/4096) + 4 exp(−1/16)` on `K₂` at the
+  `p ≡ 1/10` design, window `[1/2, 5/2]`, `s = 1/2`, `t = 1/16`.
+
+The same-day completion (the floor and swept-cut members below) adds:
+the all-false disconnectedness witness (the empty resampled graph,
+by the kernel-constancy contrapositive); the **strict-containment
+witness** — the all-false outcome sits in the unconditional sweep bad
+event while provably not admissible, so the dissolution genuinely
+enlarges the measured event and the degree-tail term is its honest
+price; the good-outcome conjunction at the dissolution's window (the
+unconditional bad event is not all of `Ω`); and the two closed-form
+instances (`4 exp(−1/4096) + 4 exp(−1/16)` each). -/
+
+section AdmissibilityDissolution
+
+/-- The one-tenth design. -/
+noncomputable def epTenth : (Fin 2 × Fin 2) → ℝ := fun _ => 1 / 10
+
+theorem epTenth_nonneg : ∀ e, 0 ≤ epTenth e := by
+  intro e; unfold epTenth; norm_num
+
+theorem epTenth_le_one : ∀ e, epTenth e ≤ 1 := by
+  intro e; unfold epTenth; norm_num
+
+/-- **The pair design condition at the uniform designs**: `p ≡ ½`
+satisfies it with equality (the boundary of the hypothesis), `p ≡ 1/10`
+with slack. -/
+theorem epHalf_pair : ∀ e : Fin 2 × Fin 2,
+    epHalf e + epHalf (e.2, e.1) ≤ 1 := by
+  intro e; unfold epHalf; norm_num
+
+theorem epTenth_pair : ∀ e : Fin 2 × Fin 2,
+    epTenth e + epTenth (e.2, e.1) ≤ 1 := by
+  intro e; unfold epTenth; norm_num
+
+/-- **The boundary entry pin**: at the uniform design `p ≡ ½` the pair
+condition is tight, and the all-false outcome's off-diagonal entry is
+exactly `0` — nonnegative at the boundary, not strictly inside it
+(joined to the corner audit's whole-matrix pin
+`epK2_perturbed_allFalse_eq`). -/
+theorem epK2_dissolve_entry_allFalse_eq_zero :
+    (epK2 + perturbWeight epK2 epHalf (fun _ => false)) 0 1 = 0 := by
+  rw [Matrix.add_apply, perturbWeight_apply_of_ne epK2 epHalf
+    (fun _ => false) (by norm_num)]
+  simp only [epK2, Matrix.of_apply, epHalf]
+  norm_num
+
+/-- The engine lemma instantiated at the boundary outcome (hard crust;
+the pin above shows its inequality is exactly tight here). -/
+theorem epK2_dissolve_engine_allFalse_nonneg :
+    0 ≤ (epK2 + perturbWeight epK2 epHalf (fun _ => false)) 0 1 :=
+  perturbWeight_entry_nonneg epK2 epHalf epK2_symmetric
+    (fun i j => epK2_nonneg i j) epHalf_le_one epHalf_pair
+    (fun _ => false) 0 1
+
+/-- **The dropped-pair-condition fence**: at `p ≡ 9/10` (inside
+`[0, 1]`, violating only the pair condition `p e + p eᵀ ≤ 1`) the
+all-false outcome's off-diagonal entry is exactly `−4/5` —
+nonnegativity genuinely fails. The design condition is load-bearing for
+the dissolution's nonnegativity half; every *other* hypothesis of the
+engine lemma holds at this design point. -/
+theorem epK2_dissolve_entry_nineTenth_eq :
+    (epK2 + perturbWeight epK2 (fun _ => (9 / 10 : ℝ)) (fun _ => false))
+      0 1 = -(4 / 5) := by
+  rw [Matrix.add_apply, perturbWeight_apply_of_ne epK2
+    (fun _ => (9 / 10 : ℝ)) (fun _ => false) (by norm_num)]
+  simp only [epK2, Matrix.of_apply]
+  norm_num
+
+theorem epK2_dissolve_pairCond_refuted :
+    ¬ 0 ≤ (epK2 + perturbWeight epK2 (fun _ => (9 / 10 : ℝ))
+        (fun _ => false)) 0 1 := by
+  rw [epK2_dissolve_entry_nineTenth_eq]
+  norm_num
+
+/-- The summed centered degree summands at `p ≡ 1/10`, all-false:
+`−1/10 − 1/10 = −1/5` at each vertex (both vertices endpoints of both
+off-diagonal ordered pairs; the diagonal pairs carry weight `0`). -/
+theorem epK2_tenth_degSum_allFalse (v : Fin 2) :
+    ∑ e : Fin 2 × Fin 2,
+        degPerturbSummand epK2 epTenth v e (fun _ => false) = -(1 / 5) := by
+  rw [Fintype.sum_prod_type]
+  simp only [Fin.sum_univ_two, degPerturbSummand, degPerturbWeight, epTenth]
+  fin_cases v <;> simp [epK2] <;> norm_num
+
+/-- **The transfer's positive witness**: at `p ≡ 1/10` the all-false
+outcome's degree deviation is exactly `|−1/5| < 1/2` at both vertices —
+the strict bound the transfer helper needs, at genuine slack. -/
+theorem epK2_tenth_degDev_allFalse_lt :
+    ∀ v, |deg (epK2 + perturbWeight epK2 epTenth (fun _ => false)) v
+      - deg epK2 v| < 1 / 2 := by
+  intro v
+  rw [deg_resampled, epK2_regular v, epK2_tenth_degSum_allFalse v]
+  simp [abs_lt]
+  norm_num
+
+/-- **The derived admissibility**, through the transfer helper: base
+degrees `1` in the shrunk window `[1, 2]` (`dmin = 1/2`, `dmax = 5/2`,
+`s = 1/2`), deviations `1/5 < 1/2` — the outcome lands inside
+`[1/2, 5/2]`. -/
+theorem epK2_tenth_allFalse_admissible :
+    perturbAdmissible epK2 epTenth (1 / 2) (5 / 2) (fun _ => false) := by
+  refine perturbAdmissible_of_degDev_lt epK2 epTenth epK2_symmetric
+    (fun i j => epK2_nonneg i j) epTenth_le_one epTenth_pair
+    (1 / 2) (5 / 2) (1 / 2) ?_ ?_
+    epK2_tenth_degDev_allFalse_lt
+  · intro i
+    rw [epK2_regular i]; norm_num
+  · intro i
+    rw [epK2_regular i]; norm_num
+
+/-- The derived degree at the witness outcome, by the design's own
+identity: base `1` plus deviation `−1/5` gives `4/5`, inside
+`[1/2, 5/2]` — a wrong deviation identity breaks exactly this. -/
+theorem epK2_tenth_allFalse_deg :
+    deg (epK2 + perturbWeight epK2 epTenth (fun _ => false)) 0 = 4 / 5 := by
+  rw [deg_resampled, epK2_deg_base, epK2_tenth_degSum_allFalse 0]
+  norm_num
+
+/-- **The strictness boundary, coherent**: at `p ≡ ½` the all-false
+outcome's deviation is `|−1| = 1 ≥ s = 1/2` — it sits in the degree
+tail's event, exactly where the transfer helper does not apply — and
+indeed it is *not* admissible (degree `0` below the floor `1/2`). The
+helper's strict `< s` is honest, not an artifact. -/
+theorem epK2_half_allFalse_inDevEvent :
+    ∃ v : Fin 2, 1 / 2
+      ≤ |deg (epK2 + perturbWeight epK2 epHalf (fun _ => false)) v
+        - deg epK2 v| := by
+  refine ⟨0, ?_⟩
+  rw [deg_resampled, epK2_deg_base]
+  have hsum : ∑ e : Fin 2 × Fin 2,
+      degPerturbSummand epK2 epHalf 0 e (fun _ => false) = -1 := by
+    rw [Fintype.sum_prod_type]
+    simp only [Fin.sum_univ_two, degPerturbSummand, degPerturbWeight, epHalf]
+    simp [epK2]
+    norm_num
+  rw [hsum]
+  simp [abs_lt]
+  norm_num
+
+theorem epK2_half_allFalse_not_admissible :
+    ¬ perturbAdmissible epK2 epHalf (1 / 2) (5 / 2) (fun _ => false) := by
+  rintro ⟨-, hdmin', -⟩
+  have hdeg : deg (epK2 + perturbWeight epK2 epHalf (fun _ => false))
+      (0 : Fin 2) = 0 := epK2_perturbed_allFalse_deg 0
+  have h0 := hdmin' 0
+  rw [hdeg] at h0
+  norm_num at h0
+
+/-- The degree variance statistic at both vertices (the delivered
+tail's per-vertex statistic `S_v = 2` on `K₂`, all four ordered pairs
+enumerated — the ∀-vertex form the closed-form instance's `∑ v`
+consumes). -/
+theorem epK2_degree_variance' (v : Fin 2) :
+    ∑ e : Fin 2 × Fin 2, (degPerturbWeight epK2 v e) ^ 2 = 2 := by
+  rw [Fintype.sum_prod_type]
+  simp only [Fin.sum_univ_two, degPerturbWeight]
+  fin_cases v <;> simp [epK2] <;> norm_num
+
+/-- **The unconditional bracket in closed form** on `K₂` at the
+`p ≡ 1/10` design, window `[1/2, 5/2]`, deviation budget `s = 1/2`,
+tail level `t = 1/16`: the *unconditioned* window-exit event is bounded
+by `4 exp(−1/4096) + 4 exp(−1/16)` — the window tail (dimension factor
+`2 · 2`, variance norm `8`) plus the degree tail (both vertices'
+statistic `2`). CONDITIONAL ON THE `matrix_hoeffding` AND
+`hoeffding_inequality` AXIOMS (instantiated via the unconditional
+bracket, not re-proved) — the family's only two-axiom member. -/
+theorem epK2_bracket_unconditional_closedForm_QA :
+    (bernPMF epTenth epTenth_nonneg epTenth_le_one).toMeasure
+      {ω : Fin 2 × Fin 2 → Bool |
+        (secondEval (normalizedLaplacian (epK2 + perturbWeight epK2 epTenth ω))
+            (normalizedLaplacian_symmetric (epK2 + perturbWeight epK2 epTenth ω)
+              (epK2_symmetric.add (perturbWeight_isSymm epK2 epTenth ω)))
+            (by norm_num)
+          ≤ (1 / 2 * cheegerConstant epK2 ^ 2 / 2 - 1 / 16) / (5 / 2)
+        ∨ (2 * ((5 / 2) * cheegerConstant epK2) + 1 / 16) / (1 / 2)
+          ≤ secondEval (normalizedLaplacian (epK2 + perturbWeight epK2 epTenth ω))
+              (normalizedLaplacian_symmetric (epK2 + perturbWeight epK2 epTenth ω)
+                (epK2_symmetric.add (perturbWeight_isSymm epK2 epTenth ω)))
+              (by norm_num))}
+      ≤ ENNReal.ofReal (4 * Real.exp (-(1 / 4096 : ℝ)))
+        + ENNReal.ofReal (4 * Real.exp (-(1 / 16 : ℝ))) := by
+  have h := edgePerturbation_normalized_connectivity_bracket_unconditional
+    epK2 epTenth epK2_symmetric (fun i j => epK2_nonneg i j)
+    (1 / 2) (5 / 2) (1 / 2) (1 / 16) (by norm_num) (by norm_num)
+    (fun i => by rw [epK2_regular i]; norm_num)
+    (fun i => by rw [epK2_regular i]; norm_num)
+    epTenth_nonneg epTenth_le_one epTenth_pair (by norm_num)
+    (by norm_num)
+  have hcard : (Fintype.card (Fin 2) : ℝ) = 2 := by norm_num
+  have hvar : ‖∑ e : Fin 2 × Fin 2,
+      perturbEdgeLap epK2 e * perturbEdgeLap epK2 e‖ = 8 :=
+    epK2_variance_norm
+  rw [hcard, hvar] at h
+  have hargd : (-((1 / 2 : ℝ) ^ 2) / (2 * 2)) = -(1 / 16 : ℝ) := by norm_num
+  have hdegsum : ∑ v : Fin 2, ENNReal.ofReal (2 * Real.exp
+      (-((1 / 2 : ℝ) ^ 2) / (2 * ∑ e : Fin 2 × Fin 2,
+        (degPerturbWeight epK2 v e) ^ 2)))
+      = ENNReal.ofReal (4 * Real.exp (-(1 / 16 : ℝ))) := by
+    have h0 : ∑ e : Fin 2 × Fin 2,
+        (degPerturbWeight epK2 (0 : Fin 2) e) ^ 2 = 2 :=
+      epK2_degree_variance' 0
+    have h1 : ∑ e : Fin 2 × Fin 2,
+        (degPerturbWeight epK2 (1 : Fin 2) e) ^ 2 = 2 :=
+      epK2_degree_variance' 1
+    rw [Fin.sum_univ_two, h0, h1, hargd]
+    have hA : (0 : ℝ) ≤ 2 * Real.exp (-(1 / 16 : ℝ)) := by positivity
+    exact Eq.trans (ENNReal.ofReal_add hA hA).symm
+      (congrArg ENNReal.ofReal (by ring))
+  rw [hdegsum] at h
+  have hargw : (-((1 / 16 : ℝ) ^ 2) / (2 * 8)) = -(1 / 4096 : ℝ) := by
+    norm_num
+  have hwin : (2 : ℝ) * 2 * Real.exp (-((1 / 16 : ℝ) ^ 2) / (2 * 8))
+      = 4 * Real.exp (-(1 / 4096 : ℝ)) := by rw [hargw]; ring
+  rw [hwin] at h
+  exact h
+
+/-! ### The dissolution completion (floor and swept cut)
+
+The same decomposition applied to the window family's other two
+members (`edgePerturbation_normalized_cheeger_floor_unconditional`,
+`edgePerturbation_fiedler_sweep_cut_tail_unconditional`) — the family
+completed to unconditional statements throughout. -/
+
+/-- The support graph of the all-false perturbed `K₂` (the empty graph)
+is **disconnected** — the kernel-constancy contrapositive at the zero
+adjacency: every vector lies in the zero Laplacian's kernel, and the
+component indicator `![1, 0]` is not constant. -/
+theorem epK2_allFalse_supportGraph_not_connected :
+    ¬ (supportGraph (epK2 + perturbWeight epK2 epHalf (fun _ => false))
+      (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+        (fun _ => false)))).Connected := by
+  intro hconn
+  have hf : (laplacian (epK2 + perturbWeight epK2 epHalf (fun _ => false))).mulVec
+      (fun i => if (i : Fin 2) = 0 then (1 : ℝ) else 0) = 0 := by
+    rw [epK2_perturbed_allFalse_eq]
+    have hd0 : degreeMatrix (0 : Matrix (Fin 2) (Fin 2) ℝ) = 0 := by
+      ext a b
+      simp [degreeMatrix, deg]
+    rw [laplacian, sub_zero, hd0, Matrix.zero_mulVec]
+  obtain ⟨c, hc⟩ := exists_const_of_laplacian_mulVec_eq_zero
+    (epK2 + perturbWeight epK2 epHalf (fun _ => false))
+    (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => false)))
+    epK2_perturbed_allFalse_nonneg hconn hf
+  have e0 := congrFun hc (0 : Fin 2)
+  have e1 := congrFun hc (1 : Fin 2)
+  simp only [] at e0 e1
+  norm_num at e0 e1
+  linarith
+
+/-- **The strict-containment witness**: the all-false outcome at the
+`p ≡ ½` design sits in the *unconditional* sweep bad event (its resampled
+graph is disconnected) while being provably *not* admissible — so the
+dissolution's measured event genuinely contains outcomes the conditional
+theorem's event excludes. The degree-tail term is the honest price of
+those outcomes. Hard crust: a negation and a non-membership, no axiom
+contact. -/
+theorem epK2_sweepUnconditional_strictly_larger_witness_QA :
+    (¬ ((supportGraph (epK2 + perturbWeight epK2 epHalf (fun _ => false))
+             (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+               (fun _ => false)))).Connected ∧
+        ∃ S : Finset (Fin 2), S.Nonempty ∧ Sᶜ.Nonempty ∧
+          ((∃ u : ℝ, ∀ i, i ∈ S ↔
+              u ≤ fiedlerSweepVector (epK2 + perturbWeight epK2 epHalf
+                  (fun _ => false))
+                (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+                  (fun _ => false))) (by norm_num) i)
+            ∨ (∃ u : ℝ, ∀ i, i ∈ S ↔
+              fiedlerSweepVector (epK2 + perturbWeight epK2 epHalf
+                  (fun _ => false))
+                (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+                  (fun _ => false))) (by norm_num) i ≤ u)) ∧
+          conductance (epK2 + perturbWeight epK2 epHalf (fun _ => false)) S ^ 2
+            ≤ 2 * ((2 * ((5 / 2 : ℝ) * cheegerConstant epK2) + 1 / 16)
+                / (1 / 2))))
+    ∧ ¬ perturbAdmissible epK2 epHalf (1 / 2) (5 / 2) (fun _ => false) := by
+  refine ⟨fun hgood => epK2_allFalse_supportGraph_not_connected hgood.1,
+    epK2_half_allFalse_not_admissible⟩
+
+/-- **The good-outcome conjunction at the dissolution's window**: the
+all-true outcome's resampled graph (the weight-`2` edge) is connected
+and carries a swept Fiedler cut at `conductance² ≤ 2·λ₂ = 4`, well
+inside the window bound `2·((2·(5/2·φ) + 1/16)/(1/2)) = 81/4` — so the
+*unconditional* bad event omits this outcome: it is not all of `Ω`. -/
+theorem epK2_sweepUnconditional_allTrue_good_QA :
+    (supportGraph (epK2 + perturbWeight epK2 epHalf (fun _ => true))
+      (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+        (fun _ => true)))).Connected ∧
+    ∃ S : Finset (Fin 2), S.Nonempty ∧ Sᶜ.Nonempty ∧
+      ((∃ u : ℝ, ∀ i, i ∈ S ↔
+          u ≤ fiedlerSweepVector (epK2 + perturbWeight epK2 epHalf
+              (fun _ => true))
+            (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+              (fun _ => true))) (by norm_num) i)
+        ∨ (∃ u : ℝ, ∀ i, i ∈ S ↔
+          fiedlerSweepVector (epK2 + perturbWeight epK2 epHalf
+              (fun _ => true))
+            (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+              (fun _ => true))) (by norm_num) i ≤ u)) ∧
+      conductance (epK2 + perturbWeight epK2 epHalf (fun _ => true)) S ^ 2
+        ≤ 2 * ((2 * ((5 / 2 : ℝ) * cheegerConstant epK2) + 1 / 16)
+            / (1 / 2)) := by
+  have hd' : ∀ i, 0 < deg (epK2 + perturbWeight epK2 epHalf
+      (fun _ => true)) i := by
+    intro i
+    rw [epK2_allTrue_deg i]
+    norm_num
+  obtain ⟨S, hSne, hScne, hlev, hcond⟩ :=
+    fiedler_sweep_cut_normalized (epK2 + perturbWeight epK2 epHalf
+        (fun _ => true))
+      (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => true)))
+      epK2_perturbed_allTrue_nonneg hd' (by norm_num)
+      epK2_allTrue_supportGraph_connected
+  rw [epK2_normLap_secondEval_allTrue] at hcond
+  refine ⟨epK2_allTrue_supportGraph_connected, S, hSne, hScne, hlev, ?_⟩
+  rw [epK2_cheegerConstant]
+  linarith
+
+/-- **The unconditional floor in closed form** on `K₂` at the `p ≡ 1/10`
+design, window `[1/2, 5/2]`, deviation budget `s = 1/2`, tail level
+`t = 1/16`: the *unconditioned* floor event is bounded by
+`4 exp(−1/4096) + 4 exp(−1/16)`. CONDITIONAL ON THE `matrix_hoeffding`
+AND `hoeffding_inequality` AXIOMS (instantiated via the unconditional
+floor, not re-proved). -/
+theorem epK2_floor_unconditional_closedForm_QA :
+    (bernPMF epTenth epTenth_nonneg epTenth_le_one).toMeasure
+      {ω : Fin 2 × Fin 2 → Bool |
+        secondEval (normalizedLaplacian (epK2 + perturbWeight epK2 epTenth ω))
+            (normalizedLaplacian_symmetric (epK2 + perturbWeight epK2 epTenth ω)
+              (epK2_symmetric.add (perturbWeight_isSymm epK2 epTenth ω)))
+            (by norm_num)
+          ≤ (1 / 2 * cheegerConstant epK2 ^ 2 / 2 - 1 / 16) / (5 / 2)}
+      ≤ ENNReal.ofReal (4 * Real.exp (-(1 / 4096 : ℝ)))
+        + ENNReal.ofReal (4 * Real.exp (-(1 / 16 : ℝ))) := by
+  have h := edgePerturbation_normalized_cheeger_floor_unconditional
+    epK2 epTenth epK2_symmetric (fun i j => epK2_nonneg i j)
+    (1 / 2) (5 / 2) (1 / 2) (1 / 16) (by norm_num) (by norm_num)
+    (fun i => by rw [epK2_regular i]; norm_num)
+    (fun i => by rw [epK2_regular i]; norm_num)
+    epTenth_nonneg epTenth_le_one epTenth_pair (by norm_num)
+    (by norm_num)
+  have hcard : (Fintype.card (Fin 2) : ℝ) = 2 := by norm_num
+  have hvar : ‖∑ e : Fin 2 × Fin 2,
+      perturbEdgeLap epK2 e * perturbEdgeLap epK2 e‖ = 8 :=
+    epK2_variance_norm
+  rw [hcard, hvar] at h
+  have hargd : (-((1 / 2 : ℝ) ^ 2) / (2 * 2)) = -(1 / 16 : ℝ) := by norm_num
+  have hdegsum : ∑ v : Fin 2, ENNReal.ofReal (2 * Real.exp
+      (-((1 / 2 : ℝ) ^ 2) / (2 * ∑ e : Fin 2 × Fin 2,
+        (degPerturbWeight epK2 v e) ^ 2)))
+      = ENNReal.ofReal (4 * Real.exp (-(1 / 16 : ℝ))) := by
+    have h0 : ∑ e : Fin 2 × Fin 2,
+        (degPerturbWeight epK2 (0 : Fin 2) e) ^ 2 = 2 :=
+      epK2_degree_variance' 0
+    have h1 : ∑ e : Fin 2 × Fin 2,
+        (degPerturbWeight epK2 (1 : Fin 2) e) ^ 2 = 2 :=
+      epK2_degree_variance' 1
+    rw [Fin.sum_univ_two, h0, h1, hargd]
+    have hA : (0 : ℝ) ≤ 2 * Real.exp (-(1 / 16 : ℝ)) := by positivity
+    exact Eq.trans (ENNReal.ofReal_add hA hA).symm
+      (congrArg ENNReal.ofReal (by ring))
+  rw [hdegsum] at h
+  have hargw : (-((1 / 16 : ℝ) ^ 2) / (2 * 8)) = -(1 / 4096 : ℝ) := by
+    norm_num
+  have hwin : (2 : ℝ) * 2 * Real.exp (-((1 / 16 : ℝ) ^ 2) / (2 * 8))
+      = 4 * Real.exp (-(1 / 4096 : ℝ)) := by rw [hargw]; ring
+  rw [hwin] at h
+  exact h
+
+/-- **The unconditional swept-cut tail in closed form** on `K₂` at the
+`p ≡ 1/10` design, window `[1/2, 5/2]`, `s = 1/2`, `t = 1/16`: the
+failure-of-good-outcome event (with no conditioning conjunct) is bounded
+by `4 exp(−1/4096) + 4 exp(−1/16)`, the floor hypothesis genuinely
+holding (`0 < 1/2·φ²/2 − 1/16 = 3/16`). CONDITIONAL ON THE
+`matrix_hoeffding` AND `hoeffding_inequality` AXIOMS. -/
+theorem epK2_sweepUnconditional_closedForm_QA :
+    (bernPMF epTenth epTenth_nonneg epTenth_le_one).toMeasure
+      {ω : Fin 2 × Fin 2 → Bool |
+        ¬ ((supportGraph (epK2 + perturbWeight epK2 epTenth ω)
+              (epK2_symmetric.add (perturbWeight_isSymm epK2 epTenth ω))).Connected ∧
+           ∃ S : Finset (Fin 2), S.Nonempty ∧ Sᶜ.Nonempty ∧
+             ((∃ u : ℝ, ∀ i, i ∈ S ↔
+                 u ≤ fiedlerSweepVector (epK2 + perturbWeight epK2 epTenth ω)
+                   (epK2_symmetric.add (perturbWeight_isSymm epK2 epTenth ω))
+                   (by norm_num) i)
+               ∨ (∃ u : ℝ, ∀ i, i ∈ S ↔
+                 fiedlerSweepVector (epK2 + perturbWeight epK2 epTenth ω)
+                   (epK2_symmetric.add (perturbWeight_isSymm epK2 epTenth ω))
+                   (by norm_num) i ≤ u)) ∧
+             conductance (epK2 + perturbWeight epK2 epTenth ω) S ^ 2
+               ≤ 2 * ((2 * ((5 / 2 : ℝ) * cheegerConstant epK2) + 1 / 16)
+                   / (1 / 2)))}
+      ≤ ENNReal.ofReal (4 * Real.exp (-(1 / 4096 : ℝ)))
+        + ENNReal.ofReal (4 * Real.exp (-(1 / 16 : ℝ))) := by
+  have hfloor : (0 : ℝ) < 1 / 2 * (cheegerConstant epK2) ^ 2 / 2 - 1 / 16 := by
+    rw [epK2_cheegerConstant]
+    norm_num
+  have h := edgePerturbation_fiedler_sweep_cut_tail_unconditional
+    epK2 epTenth epK2_symmetric (fun i j => epK2_nonneg i j)
+    (1 / 2) (5 / 2) (1 / 2) (1 / 16) (by norm_num) (by norm_num)
+    (fun i => by rw [epK2_regular i]; norm_num)
+    (fun i => by rw [epK2_regular i]; norm_num)
+    epTenth_nonneg epTenth_le_one epTenth_pair (by norm_num)
+    (by norm_num) hfloor
+  have hcard : (Fintype.card (Fin 2) : ℝ) = 2 := by norm_num
+  have hvar : ‖∑ e : Fin 2 × Fin 2,
+      perturbEdgeLap epK2 e * perturbEdgeLap epK2 e‖ = 8 :=
+    epK2_variance_norm
+  rw [hcard, hvar] at h
+  have hargd : (-((1 / 2 : ℝ) ^ 2) / (2 * 2)) = -(1 / 16 : ℝ) := by norm_num
+  have hdegsum : ∑ v : Fin 2, ENNReal.ofReal (2 * Real.exp
+      (-((1 / 2 : ℝ) ^ 2) / (2 * ∑ e : Fin 2 × Fin 2,
+        (degPerturbWeight epK2 v e) ^ 2)))
+      = ENNReal.ofReal (4 * Real.exp (-(1 / 16 : ℝ))) := by
+    have h0 : ∑ e : Fin 2 × Fin 2,
+        (degPerturbWeight epK2 (0 : Fin 2) e) ^ 2 = 2 :=
+      epK2_degree_variance' 0
+    have h1 : ∑ e : Fin 2 × Fin 2,
+        (degPerturbWeight epK2 (1 : Fin 2) e) ^ 2 = 2 :=
+      epK2_degree_variance' 1
+    rw [Fin.sum_univ_two, h0, h1, hargd]
+    have hA : (0 : ℝ) ≤ 2 * Real.exp (-(1 / 16 : ℝ)) := by positivity
+    exact Eq.trans (ENNReal.ofReal_add hA hA).symm
+      (congrArg ENNReal.ofReal (by ring))
+  rw [hdegsum] at h
+  have hargw : (-((1 / 16 : ℝ) ^ 2) / (2 * 8)) = -(1 / 4096 : ℝ) := by
+    norm_num
+  have hwin : (2 : ℝ) * 2 * Real.exp (-((1 / 16 : ℝ) ^ 2) / (2 * 8))
+      = 4 * Real.exp (-(1 / 4096 : ℝ)) := by rw [hargw]; ring
+  rw [hwin] at h
+  exact h
+
+end AdmissibilityDissolution
 
 end Scaffold.QA.Derived.EdgePerturbation

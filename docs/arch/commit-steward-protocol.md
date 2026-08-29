@@ -86,8 +86,15 @@ same function as a steward that reads no records at all.
 ### Step 0 — Liveness check
 
 ```sh
-ps aux | grep -i opencode | grep -v grep
+scripts/isrunning
 ```
+
+Prefer this over a raw `ps aux | grep -i opencode` — it also reports,
+when idle, the launchd schedule's next expected fire time (from the
+plist's `StartInterval` and the most recent run log) and whether the
+Z.ai quota threshold has been reached, both of which a bare process
+grep can't answer. Fall back to `ps aux | grep -i opencode | grep -v
+grep` only if the script itself is unavailable.
 
 If a run is active, **stop here.** Do not verify or commit against a
 tree a live process may still be writing to. Re-check on the next
@@ -232,7 +239,7 @@ regardless of what else passed.
 git status --short --porcelain > /tmp/pre_commit_status.txt
 sleep 1
 diff <(cat /tmp/pre_commit_status.txt) <(git status --short --porcelain) && echo STABLE
-ps aux | grep -i opencode | grep -v grep
+scripts/isrunning
 ```
 
 A verification ladder takes real wall-clock time (a full `lake build`

@@ -130,6 +130,12 @@ weight matrix, the only load-bearing clause hypothesis `p ∈ [0, 1]`).
 | `matrix_hoeffding_quadForm` | theorem (axiom-conditional) | Fixed-nonzero-vector quadratic-form pullback of the axiom (`x ≠ 0` load-bearing: at `x = 0` the event is all of `Ω`) | `matrix_hoeffding` |
 | `edgePerturbation_norm_tail` | theorem (axiom-conditional) | `μ {‖∑_e (δ_e − p_e) • L_e‖ ≥ t} ≤ 2 d exp(−t²/(2 ‖∑_e L_e²‖))` | `matrix_hoeffding` |
 | `edgePerturbation_quadForm_tail` | theorem (axiom-conditional) | The same bound at `t (x ⬝ᵥ x) ≤ |xᵀ S(ω) x|` for a fixed nonzero `x` | `matrix_hoeffding` |
+| `edgePerturbation_eval_tail` | theorem (axiom-conditional) | The eigenvalue-level packaging (2026-08-28, the follow-on delivery): `μ {t ≤ |λᵢ(L(A+E_ω)) − λᵢ(L A)|} ≤ 2 d exp(−t²/(2 ‖∑_e L_e²‖))` at every sorted index — the norm tail joined to the *proved* Weyl inequality | `matrix_hoeffding` |
+| `edgePerturbation_eval_lower_tail` | theorem (axiom-conditional) | The one-sided gap-survival form `μ {λᵢ(L(A+E_ω)) ≤ λᵢ(L A) − t} ≤ …` | `matrix_hoeffding` |
+| `edgePerturbation_lambda2_lower_tail` | theorem (axiom-conditional) | The λ₂ spelling at the `lambda2` interface (`2 ≤ card V`) — the Fiedler-facing robustness statement | `matrix_hoeffding` |
+| `edgePerturbation_quadForm_uniform_tail` | theorem (axiom-conditional) | The uniform/existential-x packaging: outside the bound's failure set, `|xᵀ L(E_ω) x| < t (x ⬝ᵥ x)` for *every* nonzero `x` simultaneously (`x ≠ 0` guard load-bearing — the un-guarded event is all of `Ω`) | `matrix_hoeffding` |
+| `edgePerturbation_lambda2_cheeger_floor` | theorem (axiom-conditional) | The Cheeger-driven connectivity floor (2026-08-28, the Cheeger-window follow-on): `μ {λ₂(L(A+E_ω)) ≤ d·φ(A)²/2 − t} ≤ 2 d exp(−t²/(2 ‖∑_e L_e²‖))` on `d`-regular input — the proved `cheeger_lower_bound_laplacian` composed with the λ₂ lower tail by `measure_mono` | `matrix_hoeffding` |
+| `edgePerturbation_connectivity_bracket` | theorem (axiom-conditional) | The two-sided window (2026-08-28): `μ {λ₂(L(A+E_ω)) ≤ d·φ²/2 − t ∨ 2dφ + t ≤ λ₂(L(A+E_ω))} ≤ 2 d exp(…)` at the same constant as the one-sided tail — both Cheeger directions (the engine pair) load-bearing on the inclusion into the two-sided eigenvalue tail | `matrix_hoeffding` |
 
 **Module**: `Scaffold.Derived.EventStream` (derived layer, not axioms)
 

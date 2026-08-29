@@ -21,23 +21,61 @@
   - `edgePerturbation_quadForm_tail`: the same bound for the failure of
     the additive quadratic-form approximation at a fixed nonzero vector.
 
-  The two tail theorems are **conditional on the `matrix_hoeffding`
+  The eigenvalue-level packaging (the proposal's namesake application):
+  the tail transferred to the sorted spectrum through the *proved* Weyl
+  inequality.
+
+  - `edgePerturbation_eval_tail`: every Laplacian eigenvalue of the
+    resampled graph concentrates around the base graph's —
+    `μ {|λᵢ(L(A+E_ω)) − λᵢ(L A)| ≥ t} ≤ 2 d exp(−t²/(2‖∑_e L_e²‖))`
+    at every sorted index.
+  - `edgePerturbation_eval_lower_tail`: the one-sided gap-survival form
+    `μ {λᵢ(L(A+E_ω)) ≤ λᵢ(L A) − t} ≤ …` — the "random resampling does
+    not destroy the spectral gap" statement.
+  - `edgePerturbation_lambda2_lower_tail`: the λ₂-spelled corollary at
+    the `lambda2` interface, for Fiedler/Cheeger-facing consumers.
+  - `edgePerturbation_quadForm_uniform_tail`: the uniform
+    (existential-x) quadratic-form packaging — outside a set of the
+    bound's measure, `|xᵀ L(E_ω) x| < t (x ⬝ᵥ x)` for *every* nonzero
+    vector simultaneously (the proposal's priced sup-over-x residual;
+    the `x ≠ 0` guard is load-bearing — at `x = 0` the un-guarded event
+    is all of `Ω`).
+
+  The Cheeger-window packaging (2026-08-28, the standing handoff's named
+  conductance/Cheeger-level consumer of the λ₂ tail): the first join of
+  the edge-perturbation concentration family to the Cheeger center.
+
+  - `edgePerturbation_lambda2_cheeger_floor`: the resampled graph's
+    algebraic connectivity stays above the Cheeger-driven floor
+    `d · φ(G)² / 2 − t` outside the λ₂ tail's bound.
+  - `edgePerturbation_connectivity_bracket`: the two-sided window —
+    both Cheeger directions (through the engine pair
+    `cheeger_lower_bound_laplacian`/`cheeger_upper_bound_laplacian`)
+    load-bearing on one statement: leaving the window
+    `[d·φ²/2 − t, 2dφ + t]` implies leaving the eigenvalue tail event.
+
+  The tail theorems are **conditional on the `matrix_hoeffding`
   axiom** (Tropp 2012, Theorem 1.4, as repaired 2026-08-28 with the
   `[Nonempty V]` guard) and must never be described as foundationally
   proved; `#print axioms` reports the dependency honestly. Every
   hypothesis clause of the axiom is discharged by a proved lemma in the
-  engine module.
+  engine module. The transfer side is *proved* hard crust: the Weyl
+  inequality (retired from axiom 2026-08-20), the packaging identity
+  `laplacian_perturbWeight`, `laplacian_add`, and `evals_congr`.
 
   QA: `Scaffold/QA/Derived/EdgePerturbation_QA.lean`.
 -/
 
 import Scaffold.Mathlib.GraphTheory.EdgePerturbation
+import Scaffold.Mathlib.GraphTheory.Cheeger
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Hoeffding
+import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl
 
 open MeasureTheory ProbabilityTheory
 open SpectralGraphTheory
 open Scaffold.Mathlib.Probability.BernoulliProduct
 open Scaffold.Mathlib.Probability.Concentration.Matrix
+open Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation
 open scoped BigOperators Matrix Matrix.L2OpNorm
 
 namespace Scaffold.Derived.EdgePerturbationTail
@@ -196,5 +234,233 @@ theorem edgePerturbation_quadForm_tail [Nonempty V]
   linarith
 
 end Assembly
+
+/-! ## The eigenvalue-level packaging -/
+
+section Eigenvalue
+
+variable (A : WAdj (V := V)) (p : (V × V) → ℝ)
+
+/-- **The eigenvalue-level edge-perturbation tail** — the norm tail
+transferred to the sorted spectrum through the *proved* Weyl inequality:
+at every sorted index `i`, the resampled graph's Laplacian eigenvalue
+concentrates around the base graph's,
+`μ {t ≤ |λᵢ(L(A+E_ω)) − λᵢ(L A)|} ≤ 2 d exp(−t²/(2‖∑_e L_e²‖))`.
+
+The transfer: on the complement of the tail event the packaging identity
+`laplacian_perturbWeight` reads the norm bound as `‖L(E_ω)‖`, Weyl (a
+theorem here since 2026-08-20, not an axiom) bounds the eigenvalue
+displacement by that norm, and `laplacian_add`/`evals_congr` join the
+two Laplacian spellings. CONDITIONAL ON THE `matrix_hoeffding` AXIOM via
+the norm tail alone; the Weyl side is proved. -/
+theorem edgePerturbation_eval_tail (hA : A.IsSymm)
+    (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 1) [Nonempty V]
+    (i : Fin (Fintype.card V)) (t : ℝ) (ht : 0 ≤ t) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool |
+        t ≤ |evals (laplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) i
+          - evals (laplacian_symmetric A hA) i|}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(t ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖))) := by
+  refine le_trans (measure_mono ?_)
+    (edgePerturbation_norm_tail A p hp0 hp1 t ht)
+  intro ω hω
+  simp only [Set.mem_setOf_eq] at hω ⊢
+  by_contra hlt
+  have hE := perturbWeight_isSymm A p ω
+  have hL := laplacian_symmetric A hA
+  have hLE := laplacian_symmetric (perturbWeight A p ω) hE
+  have hwy := weyl_inequality (laplacian A) (laplacian (perturbWeight A p ω))
+    hL hLE i
+  rw [show ‖laplacian (perturbWeight A p ω)‖
+      = ‖∑ e : V × V, perturbSummand A p e ω‖ from by
+        rw [laplacian_perturbWeight]] at hwy
+  rw [evals_congr (laplacian_symmetric (A + perturbWeight A p ω)
+      (hA.add hE)) (hL.add hLE) (laplacian_add A (perturbWeight A p ω)) i]
+    at hω
+  have hnorm : ‖∑ e : V × V, perturbSummand A p e ω‖ < t := lt_of_not_ge hlt
+  linarith
+
+/-- **The one-sided gap-survival tail** — the same exponential bound for
+the event that resampling *depresses* the `i`-th Laplacian eigenvalue by
+more than `t`: `μ {λᵢ(L(A+E_ω)) ≤ λᵢ(L A) − t} ≤ 2 d exp(…)`. The
+complement reading is the field-standard robustness statement: with
+probability at least `1 − 2 d exp(−t²/(2‖∑_e L_e²‖))`, every eigenvalue
+(in particular λ₂ — the algebraic-connectivity certificate) stays within
+`t` of its base value from below. Derived from `edgePerturbation_eval_tail`
+by event inclusion (`λ' ≤ λ − t` implies `t ≤ |λ' − λ|`).
+CONDITIONAL ON THE `matrix_hoeffding` AXIOM via the two-sided tail. -/
+theorem edgePerturbation_eval_lower_tail (hA : A.IsSymm)
+    (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 1) [Nonempty V]
+    (i : Fin (Fintype.card V)) (t : ℝ) (ht : 0 ≤ t) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool |
+        evals (laplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) i
+          ≤ evals (laplacian_symmetric A hA) i - t}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(t ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖))) := by
+  refine le_trans (measure_mono ?_)
+    (edgePerturbation_eval_tail A p hA hp0 hp1 i t ht)
+  intro ω hω
+  simp only [Set.mem_setOf_eq] at hω ⊢
+  rw [abs_of_nonpos (by linarith)]
+  linarith
+
+/-- **The λ₂ gap-survival corollary** — the one-sided tail at the
+`lambda2` interface (the Fiedler-facing spelling, `2 ≤ card V`): under
+random edge resampling, the algebraic connectivity of the resampled
+graph stays above `lambda2 A − t` outside a set of measure at most
+`2 d exp(−t²/(2‖∑_e L_e²‖))`. Join with `lambda2_pos_of_connected` for
+the connectivity-robustness reading. CONDITIONAL ON THE
+`matrix_hoeffding` AXIOM via the one-sided tail. -/
+theorem edgePerturbation_lambda2_lower_tail (hA : A.IsSymm)
+    (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 1) [Nonempty V]
+    (hcard : 2 ≤ Fintype.card V) (t : ℝ) (ht : 0 ≤ t) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool |
+        lambda2 (A + perturbWeight A p ω) (hA.add (perturbWeight_isSymm A p ω))
+          hcard ≤ lambda2 A hA hcard - t}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(t ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖))) := by
+  have h := edgePerturbation_eval_lower_tail A p hA hp0 hp1 ⟨1, by omega⟩ t ht
+  simpa [lambda2] using h
+
+/-- **The uniform quadratic-form tail** — the existential-vector
+packaging (complement reading: outside a set of the bound's measure,
+`|xᵀ L(E_ω) x| < t (x ⬝ᵥ x)` for *every* nonzero vector `x`
+simultaneously). The event inclusion is the norm→form domination
+contraposed: a witnessing `x ≠ 0` forces `‖L(E_ω)‖ ≥ t` through
+`abs_quadForm_le_of_l2OpNorm_le` and the packaging identity
+`laplacian_perturbWeight`.
+
+The `x ≠ 0` guard is load-bearing, not decorative: at `x = 0` the
+membership condition is `t · 0 ≤ |0|` — always true — so the un-guarded
+existential event is all of `Ω` and no exponential bound can hold (the
+QA fence `epK2_uniform_guard_fence_QA` refutes the un-guarded form in
+proved arithmetic). CONDITIONAL ON THE `matrix_hoeffding` AXIOM via the
+norm tail alone. -/
+theorem edgePerturbation_quadForm_uniform_tail
+    (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 1) [Nonempty V]
+    (t : ℝ) (ht : 0 ≤ t) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool | ∃ x : V → ℝ, x ≠ 0 ∧
+        t * (x ⬝ᵥ x) ≤ |quadForm (laplacian (perturbWeight A p ω)) x|}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(t ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖))) := by
+  refine le_trans (measure_mono ?_)
+    (edgePerturbation_norm_tail A p hp0 hp1 t ht)
+  intro ω hω
+  simp only [Set.mem_setOf_eq] at hω ⊢
+  by_contra hlt
+  obtain ⟨x, hx0, hx⟩ := hω
+  have hnorm : ‖∑ e : V × V, perturbSummand A p e ω‖ < t := lt_of_not_ge hlt
+  rw [show laplacian (perturbWeight A p ω)
+      = ∑ e : V × V, perturbSummand A p e ω from laplacian_perturbWeight A p ω]
+    at hx
+  have hle : |quadForm (∑ e : V × V, perturbSummand A p e ω) x|
+      ≤ ‖∑ e : V × V, perturbSummand A p e ω‖ * (x ⬝ᵥ x) :=
+    abs_quadForm_le_of_l2OpNorm_le (le_refl _) x
+  have hCx : 0 < x ⬝ᵥ x := dotProduct_self_pos_of_ne_zero hx0
+  have hprod : 0 < (t - ‖∑ e : V × V, perturbSummand A p e ω‖) * (x ⬝ᵥ x) :=
+    mul_pos (by linarith) hCx
+  have hexp : (t - ‖∑ e : V × V, perturbSummand A p e ω‖) * (x ⬝ᵥ x)
+      = t * (x ⬝ᵥ x) - ‖∑ e : V × V, perturbSummand A p e ω‖ * (x ⬝ᵥ x) := by
+    ring
+  linarith
+
+end Eigenvalue
+
+/-! ## The Cheeger window -/
+
+section CheegerWindow
+
+variable (A : WAdj (V := V)) (p : (V × V) → ℝ)
+
+/-- **The Cheeger-driven connectivity floor under random edge
+resampling** — on a `d`-regular connected-enough base graph, the
+resampled graph's algebraic connectivity stays above the Cheeger floor
+`d · φ(G)² / 2 − t` outside a set of the λ₂ tail's measure:
+`μ {λ₂(L(A+E_ω)) ≤ d·φ(A)²/2 − t} ≤ 2 d exp(−t²/(2‖∑_e L_e²‖))`.
+
+The composition: the proved `cheeger_lower_bound_laplacian` puts the
+base `λ₂` above the floor, so the floor-crossing event is inside the
+delivered λ₂ lower-tail event (`edgePerturbation_lambda2_lower_tail`) —
+a pure `measure_mono`. This is the conductance/Cheeger-level consumer
+the eigenvalue tail's delivery record priced: the expansion certificate
+of the base graph survives random resampling at the concentration
+bridge's own confidence. CONDITIONAL ON THE `matrix_hoeffding` AXIOM via
+the lower tail alone; the Cheeger side is proved hard crust. -/
+theorem edgePerturbation_lambda2_cheeger_floor (hA : A.IsSymm)
+    (hnonneg : ∀ i j, 0 ≤ A i j) (d : ℝ) (hd : ∀ i, deg A i = d) (hdpos : 0 < d)
+    (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 1) [Nonempty V]
+    (hcard : 2 ≤ Fintype.card V) (t : ℝ) (ht : 0 ≤ t) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool |
+        lambda2 (A + perturbWeight A p ω) (hA.add (perturbWeight_isSymm A p ω)) hcard
+          ≤ d * (cheegerConstant A) ^ 2 / 2 - t}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(t ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖))) := by
+  refine le_trans (measure_mono ?_)
+    (edgePerturbation_lambda2_lower_tail A p hA hp0 hp1 hcard t ht)
+  intro ω hω
+  simp only [Set.mem_setOf_eq] at hω ⊢
+  have hfloor := cheeger_lower_bound_laplacian A hA hnonneg d hd hdpos hcard
+  linarith
+
+/-- **The connectivity bracket** — the two-sided Cheeger window under
+random edge resampling: leaving `[d·φ²/2 − t, 2 d φ + t]` implies leaving
+the two-sided eigenvalue tail event, so
+`μ {λ₂(L(A+E_ω)) ≤ d·φ²/2 − t ∨ 2dφ + t ≤ λ₂(L(A+E_ω))}
+≤ 2 d exp(−t²/(2‖∑_e L_e²‖))` — the same constant as the one-sided tail,
+because the window *contains* the eigenvalue ball `[λ₂ − t, λ₂ + t]`.
+
+Both Cheeger directions are load-bearing on the inclusion: the floor
+side consumes `cheeger_lower_bound_laplacian` (`d·φ²/2 ≤ λ₂`), the
+ceiling side `cheeger_upper_bound_laplacian` (`λ₂ ≤ 2dφ`) — a wrong
+constant on either side breaks the corresponding half of the
+`measure_mono`. The transfer to the spectrum is the proved-Weyl
+`edgePerturbation_eval_tail` at index 1. CONDITIONAL ON THE
+`matrix_hoeffding` AXIOM via the two-sided tail; both Cheeger sides
+proved. -/
+theorem edgePerturbation_connectivity_bracket (hA : A.IsSymm)
+    (hnonneg : ∀ i j, 0 ≤ A i j) (d : ℝ) (hd : ∀ i, deg A i = d) (hdpos : 0 < d)
+    (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 1) [Nonempty V]
+    (hcard : 2 ≤ Fintype.card V) (t : ℝ) (ht : 0 ≤ t) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool |
+        lambda2 (A + perturbWeight A p ω) (hA.add (perturbWeight_isSymm A p ω)) hcard
+          ≤ d * (cheegerConstant A) ^ 2 / 2 - t
+        ∨ 2 * (d * cheegerConstant A) + t
+          ≤ lambda2 (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω)) hcard}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(t ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖))) := by
+  have hfloor := cheeger_lower_bound_laplacian A hA hnonneg d hd hdpos hcard
+  have hceil := cheeger_upper_bound_laplacian A hA hnonneg d hd hdpos hcard
+  refine le_trans (measure_mono ?_)
+    (edgePerturbation_eval_tail A p hA hp0 hp1 ⟨1, by omega⟩ t ht)
+  intro ω hω
+  simp only [Set.mem_setOf_eq] at hω ⊢
+  rcases hω with hlow | hhigh
+  · have h1 : lambda2 (A + perturbWeight A p ω)
+          (hA.add (perturbWeight_isSymm A p ω)) hcard
+        ≤ lambda2 A hA hcard - t := by linarith
+    show t ≤ |(lambda2 (A + perturbWeight A p ω)
+          (hA.add (perturbWeight_isSymm A p ω)) hcard : ℝ)
+        - lambda2 A hA hcard|
+    rw [abs_of_nonpos (by linarith)]
+    linarith
+  · have h1 : lambda2 A hA hcard + t
+        ≤ lambda2 (A + perturbWeight A p ω)
+            (hA.add (perturbWeight_isSymm A p ω)) hcard := by linarith
+    show t ≤ |(lambda2 (A + perturbWeight A p ω)
+          (hA.add (perturbWeight_isSymm A p ω)) hcard : ℝ)
+        - lambda2 A hA hcard|
+    rw [abs_of_nonneg (by linarith)]
+    linarith
+
+end CheegerWindow
 
 end Scaffold.Derived.EdgePerturbationTail

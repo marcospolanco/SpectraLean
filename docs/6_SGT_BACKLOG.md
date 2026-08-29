@@ -799,8 +799,29 @@ consumer: `Derived.EdgePerturbationTail`'s
 new sign-free centered Bernoulli edge-Laplacian design of
 `GraphTheory.EdgePerturbation` (single-edge algebra joined to the
 `rankOne` family, the PosSemidef helpers the pin lacks, every axiom
-clause proved), conditional on that axiom alone. The sampled-graph
-packaging identity is the priced follow-on.
+clause proved), conditional on that axiom alone. ~~The sampled-graph
+packaging identity is the priced follow-on.~~ Delivered 2026-08-28 by
+the pipeline run (see the Fiedler item above), and joined the same day
+by **the eigenvalue-level packaging** (run `20260828T214358Z-run-1`;
+QA 2830 → 2843, zero new axioms): `edgePerturbation_eval_tail` —
+`μ{|λᵢ(L(A+E_ω)) − λᵢ(L A)| ≥ t} ≤ 2 d exp(−t²/(2‖∑ₑ L_e²‖))` at
+every sorted index, the norm tail transferred to the sorted spectrum
+through the *proved* Weyl inequality (the proposal's filename
+namesake), with the one-sided gap-survival, the λ₂-spelled corollary,
+and the uniform/existential-x quadratic-form packaging whose `x ≠ 0`
+guard the QA fence proves load-bearing — the Weyl transfer pinned
+*tight* at a genuine design outcome (`|4 − 2| = ‖L(E_ω)‖ = 2` on K₂,
+independent routes). The proposal's priced residual list is now empty.
+**The Cheeger-window consumer followed the same day** (run
+`20260828T230752Z-run-1`; QA 2843 → 2855, zero new axioms): the proved
+Cheeger pair transported to the combinatorial `lambda2` spelling as
+public API (`cheeger_lower_bound_laplacian`/`cheeger_upper_bound_laplacian`
+via `L = d • L_sym` and `secondEval_smul_of_pos`), then composed with
+the λ₂ tail into the high-probability connectivity window —
+`μ{λ₂(G_ω) ≤ d·φ²/2 − t} ≤ 2 d exp(…)` and the two-sided bracket at the
+same constant, both Cheeger directions load-bearing on the inclusion
+(the window contains the eigenvalue ball `[λ₂ − t, λ₂ + t]`); see the
+proposal's Cheeger-window follow-on delivery record.
 
 **Empirical-stationary-distribution Steps 0+1 delivered (2026-08-27,
 `proposals/empirical-stationary-distribution-concentration.md`; QA

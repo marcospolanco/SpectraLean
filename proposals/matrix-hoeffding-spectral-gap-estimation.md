@@ -267,9 +267,13 @@ first run, as designed).
   currently rests on `laplacian_edgeAdj` identifying the blocks as
   single-edge Laplacians.~~ **DELIVERED 2026-08-28** (run
   `20260828T132541Z-run-1`) — the follow-on delivery record below.
-- The uniform (sup-over-x / existential-x) quadratic-form form —
+- ~~The uniform (sup-over-x / existential-x) quadratic-form form —
   `sparsification_quadForm_tail`'s event shape — is an alternative
-  packaging of the same bound.
+  packaging of the same bound.~~ **DELIVERED 2026-08-28** (run
+  `20260828T214358Z-run-1`) — the eigenvalue-level follow-on delivery
+  record below, whose
+  `edgePerturbation_quadForm_uniform_tail` is exactly this packaging
+  (with the `x ≠ 0` guard the refutation fence proves load-bearing).
 - The `2 d` dimension prefactor is not tightened to the matrix-martingale
   golden factor anywhere in this family (a Tropp-source-level question,
   not a repair).
@@ -359,3 +363,178 @@ for the top-index conversion in `l2OpNorm_eq_max_abs_evals`; and the
 stale-olen recurrence at every import boundary.
 
 **Status: the follow-on delivered; this proposal remains COMPLETE.**
+
+### Follow-on delivery record: the eigenvalue-level tail — spectral-gap concentration (2026-08-28, run `20260828T214358Z-run-1`)
+
+The standing handoff's named "third concentration-axiom consumer"
+candidate class, delivered in its SGT-native member — the join of the
+delivered norm tail with the *proved* `weyl_inequality`, which is this
+proposal's own filename namesake ("spectral-gap estimation") and the
+sup-over-x form its Step-0 note 3 deferred. Four theorems in
+`Derived/EdgePerturbationTail.lean`'s new eigenvalue section, all
+**conditional on `matrix_hoeffding` via the norm tail alone** with the
+transfer side pure hard crust (Weyl — proved since 2026-08-20 — plus
+the packaging identity `laplacian_perturbWeight`, `laplacian_add`,
+`evals_congr`, the `separation_of_norm_lt` idiom of the drift module):
+
+- `edgePerturbation_eval_tail` — `μ{t ≤ |λᵢ(L(A+E_ω)) − λᵢ(L A)|} ≤
+  2 d exp(−t²/(2‖∑ₑ L_e²‖))` at *every* sorted index: the resampled
+  graph's whole Laplacian spectrum concentrates around the base's. This
+  is the packaging the Cheeger/Fiedler/mixing interfaces read directly —
+  the norm tail lands in operator language, the center's currency is
+  `evals`.
+- `edgePerturbation_eval_lower_tail` — the one-sided gap-survival form
+  `μ{λᵢ(L̃_ω) ≤ λᵢ(L) − t} ≤ …` (event inclusion from the two-sided
+  form: `λ' ≤ λ − t` forces `t ≤ |λ' − λ|`).
+- `edgePerturbation_lambda2_lower_tail` — the λ₂-spelled corollary at
+  the `lambda2` interface (`2 ≤ card V`), the Fiedler-facing robustness
+  statement.
+- `edgePerturbation_quadForm_uniform_tail` — the priced residual below,
+  struck through on delivery: the existential-vector packaging whose
+  complement reads `|xᵀ L(E_ω) x| < t (x ⬝ᵥ x)` for every nonzero
+  vector simultaneously.
+
+**QA +13 (2830 → 2843, `EdgePerturbation_QA.lean`'s spectral-gap
+section):** the base and perturbed `K₂` spectra pinned exactly by the
+kernel-plus-trace route (`λ₂ = 2`; `λ₂ = 4` at the all-true outcome
+where the resampled graph is the weight-`2` edge —
+`epK2_perturbed_allTrue_eq` joining the raw weight-space route to the
+existing `perturbWeight` pin), **the Weyl transfer tight at a genuine
+design outcome** (`epK2_weylTight_allTrue_QA`: `|4 − 2| =
+‖L(E_ω)‖ = 2`, the two sides by independent routes — kernel-plus-trace
+spectra vs the packaging pin joined to the two-sided rank-one norm; a
+constant mistake anywhere on the transfer path breaks the equality),
+the closed-form instances on `K₂` (`4 exp(−1/16)` eigenvalue and
+uniform-form, `4 exp(−4/16)` λ₂) and the three-path (`6 exp(−1/24)` at
+index 2), and the **`x = 0` guard fence**
+(`epK2_uniform_guard_fence_QA`): the un-guarded existential event is
+provably all of `Ω` (`x = 0` always witnesses `t · 0 ≤ |0|`) with
+measure exactly `1`, while at `t = 7` the would-be bound
+`4 exp(−49/16) < 1` (from `4 < 1 + 49/16 ≤ exp(49/16)` via
+`Real.add_one_le_exp`) — the un-guarded statement *refuted* in proved
+arithmetic, the guard load-bearing rather than decorative.
+
+**Verification:** spike first (`wip/ept_spike.lean`, every piece to
+zero errors/warnings before any shelf edit); `lake env lean` zero
+errors/zero warnings on both touched modules (the Derived module after
+its explicit olen rebuild — the stale-olen recurrence again — and the
+QA file); `#print axioms` via `wip/ept_axcheck.lean` on all 17 audited
+declarations: the 9 hard-crust QA lemmas (including the tightness pin
+and the guard fence) exactly `propext, Classical.choice, Quot.sound`;
+the four Derived theorems and the four closed-form QA instances
+honestly carrying `matrix_hoeffding` alone; **full `lake build` ✔
+(2405/2406) immediately followed by `check_build_completeness.py` —
+127/127 fresh, 0 stale, 0 missing, exit 0**; `lint_axioms` (10, both
+findings allowlisted-confirmed), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**2843/10/0**);
+map freshness exit 0 after the stats-stamp sync.
+
+**Technique findings** (this delivery's catch record, on top of the
+recorded ones): the auto-bound-identifier trap — an unresolved fixture
+name in a QA statement silently becomes an *auto-bound implicit
+variable*, so the theorem typechecks while every later `rw` with the
+concrete fixture's pin fails with a confusing pattern mismatch (the
+fix is opening the fixture's namespace; the symptom is the pin's
+constant displaying with a namespace prefix inside the rewrite
+pattern); the `⟨0, by omega⟩ : Fin (Fintype.card V)` vs `(0 : Fin n)`
+spelling split inside `linarith` — two defeq-but-syntactically-distinct
+eigenvalue terms do not cancel, and the robust route is restating each
+pinned value at the `Fin n` spelling through a type-ascribed `have`
+(the `∑ i : Fin n, … := hsum` transport idiom) before any arithmetic;
+`Matrix.trace` is `∑ i, M i i` by `rfl` but only after the matrix's
+spelling is fully concrete — a `Finset.sum_congr` at an abstract
+spelling leaves `2 * 2 = 4`-shaped numeral goals that `norm_num`
+closes and `simp` alone displays unresolved; and the positional-binder
+order trap between a `variable (A) (p)` section and a theorem's own
+`(hA)` binder — the section variables prepend, so a spike proof
+transplanted with its original argument order fails with "application
+type mismatch" naming the second argument.
+
+**Status: both follow-ons now delivered; the proposal's priced
+residual list is empty. The matrix-martingale golden-factor question
+(a Tropp-source-level question, not a repair) remains the only
+unpriced observation on record.**
+
+------
+
+### Follow-on delivery record (2026-08-28, run `20260828T230752Z-run-1`): the Cheeger-window consumer of the λ₂ tail
+
+The standing handoff's named "conductance/Cheeger-level consumer of the
+new λ₂ tail" (priced, not owed, in the eigenvalue delivery's next-handoff
+note) — **delivered as zero new axioms (count stays 10; `#print axioms`
+via `wip/cheegerfloor_axcheck.lean` on all 16 audited declarations: the
+two engine lemmas and ten hard-crust QA lemmas exactly `propext,
+Classical.choice, Quot.sound`; the two Derived theorems and the two
+closed-form QA instances honestly carrying `matrix_hoeffding` alone).
+QA 2843 → 2855 (+12, `EdgePerturbation_QA.lean`'s Cheeger-window
+section).**
+
+Three pieces:
+
+1. **The engine pair** (`GraphTheory/Cheeger.lean`, public API): the
+   combinatorial-Laplacian spelling of both Cheeger bounds on
+   `d`-regular graphs — `cheeger_lower_bound_laplacian`
+   (`d · φ²/2 ≤ lambda2`) and `cheeger_upper_bound_laplacian`
+   (`lambda2 ≤ 2 d φ`) — pure composition of the proved pair with the
+   regularity bridge `smul_regularNormalizedLaplacian` (`L = d • L_sym`)
+   and the positive-scaling lemma `secondEval_smul_of_pos` at
+   `lambda2_eq_secondEval`. This closes the regular-Cheeger ↔ `lambda2`
+   interface gap for every future consumer (the Fiedler, Alon–Boppana,
+   and edge-perturbation families all read the combinatorial spelling).
+2. **The Derived theorems** (`Derived/EdgePerturbationTail.lean`'s
+   CheegerWindow section): `edgePerturbation_lambda2_cheeger_floor` —
+   `μ {λ₂(L(A+E_ω)) ≤ d·φ(A)²/2 − t} ≤ 2 d exp(−t²/(2‖∑ₑ L_e²‖))` (a
+   pure `measure_mono`: the floor-crossing event sits inside the
+   delivered λ₂ lower-tail event because the base `λ₂` is above the
+   floor) — and `edgePerturbation_connectivity_bracket`, the two-sided
+   window: leaving `[d·φ²/2 − t, 2dφ + t]` implies leaving the
+   two-sided eigenvalue tail event, at the *same* constant (no union
+   bound needed — the window contains the eigenvalue ball
+   `[λ₂ − t, λ₂ + t]`), with **both Cheeger directions load-bearing on
+   the inclusion** (a wrong constant on either engine side breaks the
+   corresponding half of the `measure_mono`).
+3. **QA (+12)**: the φ(K₂) = 1 and 1-regularity pins transferred at
+   definitional equality from `Cheeger_QA`'s fixture (the join point to
+   the Cheeger QA stack), the base λ₂ = 2 at the `lambda2` interface,
+   the engine window instantiated with the **ceiling attained at
+   equality** (`λ₂ = 2 = 2·(1·φ)` — the third conjunct), the closed-form
+   floor and bracket tail instances at `t = 1/2`
+   (`4 exp(−1/64)`), the all-false outcome stack (perturbed adjacency
+   = 0 entrywise; λ₂ = 0 by kernel-plus-trace), **non-vacuity witnesses
+   for both window sides** (the all-false outcome below the floor with
+   `λ₂ = 0` attained at equality; the all-true outcome above the
+   ceiling at `λ₂ = 4 ≥ 5/2`).
+
+**Verification:** spike first (`wip/cheegerfloor_spike.lean`, every
+piece to zero errors/warnings before any shelf edit); direct `lake
+build` targets ✔ on all three touched modules; `#print axioms` exactly
+as designed (16 declarations); **full `lake build` ✔ (2405/2406)
+immediately followed by `check_build_completeness.py` — 127/127 fresh,
+0 stale, 0 missing, exit 0**; `lint_axioms` (10, both findings
+allowlisted-confirmed), `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated (**2855/10/0**); map freshness exit 0 after the
+stats-stamp sync (2843 → 2855 in both map files).
+
+**Technique findings** (small, this slice): the direct
+`have h0 := laplacian_evals_zero …` keeps the lemma's `⟨0, by omega⟩`
+spelling and thereby re-trips the recorded `Fin`-spelling linarith trap
+— the type-ascribed `have h0 : … (0 : Fin 2) = 0 := …` restatement is
+the fix, exactly as the previous delivery recorded; `(degreeMatrix 0
+- 0).trace` needs the unfold order `rw [laplacian, sub_zero, hd0,
+Matrix.trace_zero]` with an explicit `degreeMatrix 0 = 0` `have` (`simp
+[degreeMatrix, deg]` alone does not unfold the `dite` under
+`Matrix.trace`).
+
+**Honesty note on fences:** the engine pair's guards (`hnonneg`,
+`0 < d`) are inherited from the proved Cheeger pair and the scaling
+lemma, and are *proof*-load-bearing there; at the two-vertex signed
+1-regular fixture (`d = −1`) the un-guarded floor statement still holds
+(`−1/2 ≤ 0` — both sides collapse), so no K₂-shaped refutation fixture
+exists for the dropped-guard statement; the QA obligation is met by the
+instances above (both theorem instances exercised, one bound attained
+with equality) rather than by a fence.
+
+**Status: the Cheeger-window consumer delivered; the proposal's priced
+residual list remains empty (the matrix-martingale golden-factor
+question, a Tropp-source-level observation, remains the only unpriced
+item on record).**

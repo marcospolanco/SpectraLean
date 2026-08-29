@@ -1558,6 +1558,90 @@ theorem cheeger_lower_bound (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
 end Step1c
 
 /-!
+### The combinatorial-Laplacian spelling of the Cheeger pair (proved)
+
+The two bounds above are stated at the normalized operator
+`secondEval (regularNormalizedLaplacian A d)`; these corollaries transport
+them to the combinatorial spelling `lambda2 A hA hcard` that the Fiedler,
+Alon–Boppana, and edge-perturbation consumers use. On a `d`-regular graph
+`L = d • L_sym` (`smul_regularNormalizedLaplacian`), so the transport is
+the positive-scaling lemma `secondEval_smul_of_pos` — the same bridge the
+Ramanujan expansion ceiling uses in the other direction.
+-/
+
+/-- **The Cheeger lower bound at the combinatorial Laplacian** — on a
+`d`-regular graph, `d · φ(G)² / 2 ≤ λ₂(L)`: the hard direction's constant
+scaled to the unnormalized spectrum. Pure composition of the proved
+`cheeger_lower_bound` with the regularity bridge
+`smul_regularNormalizedLaplacian` (`L = d • L_sym`) and the
+positive-scaling lemma `secondEval_smul_of_pos` at
+`lambda2_eq_secondEval`. The `hnonneg` and `0 < d` guards are the same
+load-bearing hypotheses the proved pair carries (the scaling lemma needs
+`0 < d`; the Cheeger input needs nonnegative weights).
+
+First consumer: `Derived.EdgePerturbationTail
+.edgePerturbation_lambda2_cheeger_floor` (the high-probability
+connectivity floor under random edge resampling, 2026-08-28).
+
+QA: `Scaffold.QA.Derived.EdgePerturbation.epK2_cheeger_window_QA`
+(instantiated on `K₂` at `φ = 1`, `λ₂ = 2`). -/
+theorem cheeger_lower_bound_laplacian (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnonneg : ∀ i j, 0 ≤ A i j) (d : ℝ) (hd : ∀ i, deg A i = d)
+    (hdpos : 0 < d) (hcard : 2 ≤ Fintype.card V) :
+    d * (cheegerConstant A) ^ 2 / 2 ≤ lambda2 A hA hcard := by
+  have hLsym := regularNormalizedLaplacian_symmetric A hA d
+  have hscale : secondEval (d • regularNormalizedLaplacian A d)
+      (smul_isSymm hLsym d) hcard
+      = d * secondEval (regularNormalizedLaplacian A d) hLsym hcard :=
+    secondEval_smul_of_pos hLsym
+      (regularNormalizedLaplacian_psd A hA hnonneg d hd hdpos)
+      (regularNormalizedLaplacian_mulVec_onesVec A d hd hdpos.ne') hcard hdpos
+  have hid : secondEval (d • regularNormalizedLaplacian A d)
+      (smul_isSymm hLsym d) hcard
+      = secondEval (laplacian A) (laplacian_symmetric A hA) hcard :=
+    secondEval_congr _ _ (smul_regularNormalizedLaplacian A d hd hdpos.ne') hcard
+  rw [lambda2_eq_secondEval A hA hcard, ← hid, hscale]
+  calc d * (cheegerConstant A) ^ 2 / 2
+      = d * ((cheegerConstant A) ^ 2 / 2) := by ring
+    _ ≤ d * secondEval (regularNormalizedLaplacian A d) hLsym hcard :=
+        mul_le_mul_of_nonneg_left
+          (cheeger_lower_bound A hA hnonneg d hd hdpos hcard) hdpos.le
+
+/-- **The Cheeger upper bound at the combinatorial Laplacian** — on a
+`d`-regular graph, `λ₂(L) ≤ 2 d φ(G)`: the easy direction's ceiling scaled
+to the unnormalized spectrum, by the same
+bridge-and-scaling route as `cheeger_lower_bound_laplacian`.
+
+First consumer: `Derived.EdgePerturbationTail
+.edgePerturbation_connectivity_bracket` (the two-sided
+high-probability connectivity window under random edge resampling — both
+Cheeger directions load-bearing on one statement, 2026-08-28).
+
+QA: `Scaffold.QA.Derived.EdgePerturbation.epK2_cheeger_window_QA`
+(attained with equality on `K₂`: `λ₂ = 2 = 2 · (1 · φ)`). -/
+theorem cheeger_upper_bound_laplacian (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnonneg : ∀ i j, 0 ≤ A i j) (d : ℝ) (hd : ∀ i, deg A i = d)
+    (hdpos : 0 < d) (hcard : 2 ≤ Fintype.card V) :
+    lambda2 A hA hcard ≤ 2 * (d * cheegerConstant A) := by
+  have hLsym := regularNormalizedLaplacian_symmetric A hA d
+  have hscale : secondEval (d • regularNormalizedLaplacian A d)
+      (smul_isSymm hLsym d) hcard
+      = d * secondEval (regularNormalizedLaplacian A d) hLsym hcard :=
+    secondEval_smul_of_pos hLsym
+      (regularNormalizedLaplacian_psd A hA hnonneg d hd hdpos)
+      (regularNormalizedLaplacian_mulVec_onesVec A d hd hdpos.ne') hcard hdpos
+  have hid : secondEval (d • regularNormalizedLaplacian A d)
+      (smul_isSymm hLsym d) hcard
+      = secondEval (laplacian A) (laplacian_symmetric A hA) hcard :=
+    secondEval_congr _ _ (smul_regularNormalizedLaplacian A d hd hdpos.ne') hcard
+  rw [lambda2_eq_secondEval A hA hcard, ← hid, hscale]
+  calc d * secondEval (regularNormalizedLaplacian A d) hLsym hcard
+      ≤ d * (2 * cheegerConstant A) :=
+        mul_le_mul_of_nonneg_left
+          (cheeger_upper_bound A hA hnonneg d hd hdpos hcard) hdpos.le
+    _ = 2 * (d * cheegerConstant A) := by ring
+
+/-!
 ### The volume-weighted (irregular) hard direction machinery (proved)
 
 The machinery of the irregular Cheeger *hard* direction

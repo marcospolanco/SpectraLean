@@ -35,11 +35,23 @@
     `μ {‖rotation‖ ≥ 1} ≤ 6 exp(−1/24)`. The drift instance is
     conditional on the `matrix_hoeffding` axiom via the drift theorem,
     not a proof of it.
+  - the eigenvalue-level tail's QA (the spectral-gap section): the base
+    and perturbed `K₂` spectra pinned exactly (`λ₂ = 2`; `λ₂ = 4` at the
+    all-true outcome, where the resampled graph is the weight-`2` edge),
+    the Weyl transfer *tight* at that genuine design outcome
+    (`|4 − 2| = ‖L(E_ω)‖ = 2`, both sides by independent routes), the
+    closed-form eigenvalue/λ₂/uniform-form instances on `K₂` and the
+    three-path (`4 exp(−1/16)`, `6 exp(−1/24)`), and the `x = 0` guard
+    fence — the un-guarded uniform event is all of `Ω`, refuting the
+    un-guarded bound in proved arithmetic at `t = 7`. The tail instances
+    are conditional on the `matrix_hoeffding` axiom via the new theorems,
+    not proofs of it.
 -/
 
 import Scaffold.Derived.EdgePerturbationTail
 import Scaffold.Derived.EdgePerturbationDrift
 import Scaffold.QA.SpectralGraph.Fiedler_QA
+import Scaffold.QA.SpectralGraph.Cheeger_QA
 
 open MeasureTheory ProbabilityTheory SpectralGraphTheory
 open SpectralGraphTheory.QA
@@ -624,5 +636,481 @@ theorem epP3_fiedlerLine_drift_QA :
     ring
   rw [hRHS] at h
   simpa using h
+
+/-! ## The eigenvalue-level tail -/
+
+/-! ### The `K₂` eigenvalue stack -/
+
+theorem epK2_symmetric : epK2.IsSymm := by
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [epK2]
+
+theorem epK2_nonneg (i j : Fin 2) : 0 ≤ epK2 i j := by
+  fin_cases i <;> fin_cases j <;> simp [epK2]
+
+theorem epK2_diag (i : Fin 2) : epK2 i i = 0 := by
+  fin_cases i <;> simp [epK2]
+
+/-- The base λ₂ on `K₂` is exactly `2`: the kernel eigenvalue is `0`
+(proved zero-eigenvalue pin at the nonnegative weights) and the trace is
+`2` (both degrees `1`), so the sorted second entry is forced. -/
+theorem epK2_evals_one_eq_two_QA :
+    evals (laplacian_symmetric epK2 epK2_symmetric) ⟨1, by norm_num⟩ = 2 := by
+  have h0 : evals (laplacian_symmetric epK2 epK2_symmetric) (0 : Fin 2) = 0 :=
+    laplacian_evals_zero epK2 epK2_symmetric epK2_nonneg (by norm_num)
+  have hsum := evals_sum_eq_trace (laplacian_symmetric epK2 epK2_symmetric)
+  have htrace : (laplacian epK2).trace = 2 := by
+    have hdiag : ∀ i : Fin 2, (laplacian epK2) i i = 1 := by
+      intro i
+      have hdeg : deg epK2 i = 1 := by
+        fin_cases i <;> simp [deg, epK2, Fin.sum_univ_two]
+      rw [laplacian, Matrix.sub_apply, degreeMatrix_diagonal,
+        hdeg, epK2_diag i, sub_zero]
+    rw [show (laplacian epK2).trace = ∑ i, (laplacian epK2) i i from rfl,
+      Finset.sum_congr rfl fun i _ => hdiag i]
+    simp [Fin.sum_univ_two]
+  rw [htrace] at hsum
+  have h2 : ∑ i : Fin 2,
+      evals (laplacian_symmetric epK2 epK2_symmetric) i = 2 := hsum
+  simp only [Fin.sum_univ_two] at h2
+  have h1' : evals (laplacian_symmetric epK2 epK2_symmetric) (1 : Fin 2) = 2 := by
+    linarith
+  exact h1'
+
+/-- The perturbed graph at the all-true outcome is the weight-`2` edge:
+`A + E_ω = 2 • A` entrywise (the raw weight-space route joined to the
+existing `perturbWeight` pin). -/
+theorem epK2_perturbed_allTrue_eq :
+    epK2 + perturbWeight epK2 epHalf (fun _ => true)
+      = (2 : ℝ) • epK2 := by
+  ext i j
+  rw [Matrix.add_apply, Matrix.smul_apply, smul_eq_mul,
+    show perturbWeight epK2 epHalf (fun _ => true) i j = epK2 i j from by
+      rw [epK2_perturbWeight_allTrue]]
+  ring
+
+theorem epK2_perturbed_allTrue_nonneg (i j : Fin 2) :
+    0 ≤ (epK2 + perturbWeight epK2 epHalf (fun _ => true)) i j := by
+  rw [epK2_perturbed_allTrue_eq]
+  simp only [Matrix.smul_apply, smul_eq_mul]
+  fin_cases i <;> fin_cases j <;> simp [epK2]
+
+/-- The perturbed λ₂ at the all-true outcome is exactly `4` — the same
+kernel-plus-trace route at the doubled degree. -/
+theorem epK2_perturbed_evals_one_eq_four_QA :
+    evals (laplacian_symmetric (epK2 + perturbWeight epK2 epHalf (fun _ => true))
+      (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => true))))
+      ⟨1, by norm_num⟩ = 4 := by
+  have h0 := laplacian_evals_zero
+    (epK2 + perturbWeight epK2 epHalf (fun _ => true))
+    (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => true)))
+    epK2_perturbed_allTrue_nonneg (by norm_num)
+  have h0' : evals (laplacian_symmetric
+      (epK2 + perturbWeight epK2 epHalf (fun _ => true))
+      (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => true))))
+      (0 : Fin 2) = 0 := h0
+  have hsum := evals_sum_eq_trace
+    (laplacian_symmetric (epK2 + perturbWeight epK2 epHalf (fun _ => true))
+      (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => true))))
+  have htrace :
+      (laplacian (epK2 + perturbWeight epK2 epHalf (fun _ => true))).trace
+      = 4 := by
+    have hdiag : ∀ i : Fin 2, (laplacian epK2) i i = 1 := by
+      intro i
+      have hdeg : deg epK2 i = 1 := by
+        fin_cases i <;> simp [deg, epK2, Fin.sum_univ_two]
+      rw [laplacian, Matrix.sub_apply, degreeMatrix_diagonal,
+        hdeg, epK2_diag i, sub_zero]
+    have hdiag2 : ∀ i : Fin 2,
+        (laplacian (epK2 + perturbWeight epK2 epHalf (fun _ => true))) i i
+        = 2 := by
+      intro i
+      rw [epK2_perturbed_allTrue_eq, laplacian_smul,
+        Matrix.smul_apply, smul_eq_mul, hdiag i]
+      ring
+    rw [show (laplacian (epK2 + perturbWeight epK2 epHalf (fun _ => true))).trace
+        = ∑ i, (laplacian (epK2
+            + perturbWeight epK2 epHalf (fun _ => true))) i i from rfl,
+      Finset.sum_congr rfl fun i _ => hdiag2 i]
+    simp [Fin.sum_univ_two]
+    norm_num
+  rw [htrace] at hsum
+  have h2 : ∑ i : Fin 2,
+      evals (laplacian_symmetric (epK2
+        + perturbWeight epK2 epHalf (fun _ => true))
+        (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+          (fun _ => true)))) i = 4 := hsum
+  simp only [Fin.sum_univ_two] at h2
+  have h1' : evals (laplacian_symmetric (epK2
+      + perturbWeight epK2 epHalf (fun _ => true))
+      (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+        (fun _ => true)))) (1 : Fin 2) = 4 := by
+    linarith
+  exact h1'
+
+/-- **The Weyl transfer is tight at a genuine design outcome**: at the
+all-true outcome the eigenvalue displacement `|4 − 2|` equals the
+perturbation norm `‖L(E_ω)‖ = ‖rankOne epVec‖ = 2` — the two sides
+pinned by independent routes (kernel-plus-trace spectra vs the
+weight-space packaging pin joined to the two-sided rank-one norm). A
+constant mistake anywhere on the transfer path breaks this equality. -/
+theorem epK2_weylTight_allTrue_QA :
+    |evals (laplacian_symmetric (epK2 + perturbWeight epK2 epHalf (fun _ => true))
+        (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => true))))
+        ⟨1, by norm_num⟩
+      - evals (laplacian_symmetric epK2 epK2_symmetric) ⟨1, by norm_num⟩|
+      = ‖laplacian (perturbWeight epK2 epHalf (fun _ => true))‖ := by
+  rw [epK2_perturbed_evals_one_eq_four_QA, epK2_evals_one_eq_two_QA,
+    epK2_packaging_twoRoute_QA, epK2_rankOne_norm]
+  norm_num
+
+/-! ### The closed-form instances -/
+
+/-- **The eigenvalue tail on `K₂` at `p ≡ ½`, `t = 1`, index 1, in closed
+form**: `μ {|λ₂(L̃_ω) − 2| ≥ 1} ≤ 4 exp(−1/16)` — the dimension factor
+`2 · 2`, the variance norm `8` in the exponent's denominator `2 · 8`.
+CONDITIONAL ON THE `matrix_hoeffding` AXIOM (instantiated, not
+re-proved). -/
+theorem epK2_eval_tail_QA :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+      {ω : (Fin 2 × Fin 2) → Bool |
+        (1 : ℝ) ≤ |evals (laplacian_symmetric (epK2 + perturbWeight epK2 epHalf ω)
+              (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf ω)))
+            ⟨1, by norm_num⟩
+          - evals (laplacian_symmetric epK2 epK2_symmetric) ⟨1, by norm_num⟩|}
+      ≤ ENNReal.ofReal (4 * Real.exp (-((1 : ℝ)) / 16)) := by
+  have htail := edgePerturbation_eval_tail epK2 epHalf epK2_symmetric
+    epHalf_nonneg epHalf_le_one ⟨1, by norm_num⟩ 1 zero_le_one
+  rw [epK2_variance_norm] at htail
+  have hcard : (Fintype.card (Fin 2) : ℝ) = 2 := by norm_num
+  rw [hcard] at htail
+  have hRHS : (2 : ℝ) * 2 * Real.exp (-((1 : ℝ) ^ 2) / (2 * 8))
+      = 4 * Real.exp (-((1 : ℝ)) / 16) := by
+    have h1 : -((1 : ℝ) ^ 2) / (2 * 8) = -((1 : ℝ)) / 16 := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at htail
+  simpa using htail
+
+/-- **The λ₂ gap-survival instance on `K₂` at `p ≡ ½`, `t = 2`, in closed
+form**: `μ {λ₂(L̃_ω) ≤ 0} ≤ 4 exp(−4/16)` — and the event is provably
+nonempty (the all-false outcome kills the edge, where `λ₂ = 0`), so the
+bound has genuine content rather than certifying an empty event.
+CONDITIONAL ON THE `matrix_hoeffding` AXIOM. -/
+theorem epK2_lambda2_lower_tail_QA :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+      {ω : (Fin 2 × Fin 2) → Bool |
+        lambda2 (epK2 + perturbWeight epK2 epHalf ω)
+          (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf ω))
+          (by norm_num) ≤ lambda2 epK2 epK2_symmetric (by norm_num) - 2}
+      ≤ ENNReal.ofReal (4 * Real.exp (-((2 : ℝ)) / 8)) := by
+  have htail := edgePerturbation_lambda2_lower_tail epK2 epHalf epK2_symmetric
+    epHalf_nonneg epHalf_le_one (by norm_num) 2 (by norm_num)
+  rw [epK2_variance_norm] at htail
+  have hcard : (Fintype.card (Fin 2) : ℝ) = 2 := by norm_num
+  rw [hcard] at htail
+  have hRHS : (2 : ℝ) * 2 * Real.exp (-((2 : ℝ) ^ 2) / (2 * 8))
+      = 4 * Real.exp (-((2 : ℝ)) / 8) := by
+    have h1 : -((2 : ℝ) ^ 2) / (2 * 8) = -((2 : ℝ)) / 8 := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at htail
+  simpa [lambda2] using htail
+
+/-- **The uniform quadratic-form tail on `K₂` at `p ≡ ½`, `t = 1`, in
+closed form**: the existential-vector event obeys the same
+`4 exp(−1/16)`. CONDITIONAL ON THE `matrix_hoeffding` AXIOM. -/
+theorem epK2_uniform_tail_QA :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+      {ω : (Fin 2 × Fin 2) → Bool | ∃ x : Fin 2 → ℝ, x ≠ 0 ∧
+        (1 : ℝ) * (x ⬝ᵥ x)
+          ≤ |quadForm (laplacian (perturbWeight epK2 epHalf ω)) x|}
+      ≤ ENNReal.ofReal (4 * Real.exp (-((1 : ℝ)) / 16)) := by
+  have htail := edgePerturbation_quadForm_uniform_tail epK2 epHalf
+    epHalf_nonneg epHalf_le_one 1 zero_le_one
+  rw [epK2_variance_norm] at htail
+  have hcard : (Fintype.card (Fin 2) : ℝ) = 2 := by norm_num
+  rw [hcard] at htail
+  have hRHS : (2 : ℝ) * 2 * Real.exp (-((1 : ℝ) ^ 2) / (2 * 8))
+      = 4 * Real.exp (-((1 : ℝ)) / 16) := by
+    have h1 : -((1 : ℝ) ^ 2) / (2 * 8) = -((1 : ℝ)) / 16 := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at htail
+  simpa using htail
+
+/-- **The `x = 0` guard fence**: without the `x ≠ 0` guard the
+existential event is all of `Ω` (`x = 0` always witnesses
+`t · 0 ≤ |0|`), so its measure is exactly `1` — while at `t = 7` the
+would-be bound `4 exp(−49/16) < 1` (from `4 < 1 + 49/16 ≤ exp(49/16)`).
+The un-guarded statement is thereby *refuted* in proved arithmetic: the
+guard is load-bearing, not decorative. -/
+theorem epK2_uniform_guard_fence_QA :
+    ¬ ((bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+        {ω : (Fin 2 × Fin 2) → Bool | ∃ x : Fin 2 → ℝ,
+          (7 : ℝ) * (x ⬝ᵥ x)
+            ≤ |quadForm (laplacian (perturbWeight epK2 epHalf ω)) x|}
+        ≤ ENNReal.ofReal (4 * Real.exp (-((49 : ℝ) / 16)))) := by
+  have huniv : {ω : (Fin 2 × Fin 2) → Bool | ∃ x : Fin 2 → ℝ,
+      (7 : ℝ) * (x ⬝ᵥ x)
+        ≤ |quadForm (laplacian (perturbWeight epK2 epHalf ω)) x|}
+      = Set.univ := by
+    ext ω
+    simp only [Set.mem_setOf_eq, Set.mem_univ, iff_true]
+    exact ⟨0, by simp [quadForm]⟩
+  have h1 : (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+      {ω : (Fin 2 × Fin 2) → Bool | ∃ x : Fin 2 → ℝ,
+        (7 : ℝ) * (x ⬝ᵥ x)
+          ≤ |quadForm (laplacian (perturbWeight epK2 epHalf ω)) x|} = 1 := by
+    rw [huniv]
+    exact measure_univ
+  intro hle
+  rw [h1] at hle
+  have hbound : (4 : ℝ) * Real.exp (-((49 : ℝ) / 16)) < 1 := by
+    have hexp : (4 : ℝ) < Real.exp ((49 : ℝ) / 16) :=
+      lt_of_lt_of_le (by norm_num) (Real.add_one_le_exp ((49 : ℝ) / 16))
+    have hdiv : (4 : ℝ) / Real.exp ((49 : ℝ) / 16) < 1 :=
+      (div_lt_one (Real.exp_pos ((49 : ℝ) / 16))).2 hexp
+    have hkey : (4 : ℝ) * Real.exp (-((49 : ℝ) / 16))
+        = (4 : ℝ) / Real.exp ((49 : ℝ) / 16) := by
+      rw [Real.exp_neg, mul_comm, inv_mul_eq_div]
+    rw [hkey]
+    exact hdiv
+  have hlt : ENNReal.ofReal (4 * Real.exp (-((49 : ℝ) / 16)))
+      < ENNReal.ofReal 1 :=
+    (ENNReal.ofReal_lt_ofReal_iff (by norm_num)).2 hbound
+  rw [ENNReal.ofReal_one] at hlt
+  exact absurd hle (not_le.2 hlt)
+
+/-! ### The three-path instance -/
+
+/-- **The eigenvalue tail on the three-path at `p ≡ ¼`, `t = 1`, index 2,
+in closed form**: `μ {|λ₃(L̃_ω) − 3| ≥ 1} ≤ 6 exp(−1/24)` — the
+dimension factor `2 · 3`, the variance norm `12` in the exponent's
+denominator `2 · 12`, both pinned in the drift section. CONDITIONAL ON
+THE `matrix_hoeffding` AXIOM. -/
+theorem epP3_eval_tail_QA :
+    (bernPMF epQuarter epQuarter_nonneg epQuarter_le_one).toMeasure
+      {ω : (Fin 3 × Fin 3) → Bool |
+        (1 : ℝ) ≤ |evals (laplacian_symmetric (path3Adj
+              + perturbWeight path3Adj epQuarter ω)
+              (path3Adj_symmetric.add (perturbWeight_isSymm path3Adj epQuarter ω)))
+            ⟨2, by norm_num⟩
+          - evals (laplacian_symmetric path3Adj path3Adj_symmetric)
+            ⟨2, by norm_num⟩|}
+      ≤ ENNReal.ofReal (6 * Real.exp (-((1 : ℝ)) / 24)) := by
+  have htail := edgePerturbation_eval_tail path3Adj epQuarter
+    path3Adj_symmetric epQuarter_nonneg epQuarter_le_one ⟨2, by norm_num⟩
+    1 zero_le_one
+  rw [epP3_variance_norm] at htail
+  have hcard : (Fintype.card (Fin 3) : ℝ) = 3 := by norm_num
+  rw [hcard] at htail
+  have hRHS : (2 : ℝ) * 3 * Real.exp (-((1 : ℝ) ^ 2) / (2 * 12))
+      = 6 * Real.exp (-((1 : ℝ)) / 24) := by
+    have h1 : -((1 : ℝ) ^ 2) / (2 * 12) = -((1 : ℝ)) / 24 := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at htail
+  simpa using htail
+
+/-! ## The Cheeger window (K₂) -/
+
+/-! ### The base-graph pins -/
+
+/-- The φ(K₂) = 1 pin, transferred at definitional equality from
+`Cheeger_QA`'s independently proved value at its own (identical) edge
+fixture — the join point of this section to the Cheeger QA stack. -/
+theorem epK2_cheegerConstant : cheegerConstant epK2 = 1 := by
+  have h : epK2 = SpectralGraphTheory.QA.edgeAdj := rfl
+  rw [h]
+  exact SpectralGraphTheory.QA.edge_cheegerConstant
+
+/-- `K₂` is `1`-regular, transferred the same way. -/
+theorem epK2_regular : ∀ i, deg epK2 i = 1 := by
+  have h : epK2 = SpectralGraphTheory.QA.edgeAdj := rfl
+  rw [h]
+  exact SpectralGraphTheory.QA.edgeAdj_regular
+
+/-- The base λ₂ on `K₂` at the `lambda2` interface is `2` (the
+kernel-plus-trace pin `epK2_evals_one_eq_two_QA` transported). -/
+theorem epK2_lambda2_eq_two :
+    lambda2 epK2 epK2_symmetric (by norm_num) = 2 := by
+  simpa [lambda2] using epK2_evals_one_eq_two_QA
+
+/-- **The engine pair instantiated on `K₂`**: floor
+`1·φ²/2 = 1/2 ≤ λ₂ = 2` and ceiling `λ₂ = 2 = 2·(1·φ)` — the ceiling
+attained with *equality* (third conjunct), so a wrong constant on either
+engine side of `cheeger_{lower,upper}_bound_laplacian` breaks this QA at
+the third conjunct, and the two `≤` conjuncts exercise both theorem
+instances. -/
+theorem epK2_cheeger_window_QA :
+    (1 : ℝ) * (cheegerConstant epK2) ^ 2 / 2
+      ≤ lambda2 epK2 epK2_symmetric (by norm_num)
+      ∧ lambda2 epK2 epK2_symmetric (by norm_num)
+        ≤ 2 * ((1 : ℝ) * cheegerConstant epK2)
+      ∧ lambda2 epK2 epK2_symmetric (by norm_num)
+        = 2 * ((1 : ℝ) * cheegerConstant epK2) := by
+  refine ⟨cheeger_lower_bound_laplacian epK2 epK2_symmetric epK2_nonneg 1
+      epK2_regular (by norm_num) (by norm_num),
+    cheeger_upper_bound_laplacian epK2 epK2_symmetric epK2_nonneg 1
+      epK2_regular (by norm_num) (by norm_num), ?_⟩
+  rw [epK2_lambda2_eq_two, epK2_cheegerConstant]
+  norm_num
+
+/-! ### The all-false outcome stack -/
+
+/-- The all-false outcome kills the edge: the perturbed adjacency is the
+zero matrix, entrywise through the design's entry formulas
+(`perturbWeight_apply_of_ne`/`perturbWeight_apply_diag` at
+`p ≡ ½`). -/
+theorem epK2_perturbed_allFalse_eq :
+    epK2 + perturbWeight epK2 epHalf (fun _ => false) = 0 := by
+  ext i j
+  by_cases hij : i = j
+  · subst hij
+    rw [Matrix.add_apply, Matrix.zero_apply, perturbWeight_apply_diag,
+      epK2_diag i]
+    simp [epHalf]
+  · rw [Matrix.add_apply, Matrix.zero_apply, perturbWeight_apply_of_ne _ _ _ hij]
+    fin_cases i <;> fin_cases j <;> simp [epK2, epHalf] <;> norm_num
+
+theorem epK2_perturbed_allFalse_nonneg (i j : Fin 2) :
+    0 ≤ (epK2 + perturbWeight epK2 epHalf (fun _ => false)) i j := by
+  rw [epK2_perturbed_allFalse_eq]
+  norm_num
+
+/-- λ₂ at the all-false outcome is exactly `0` — the kernel-plus-trace
+route at the zero adjacency (kernel eigenvalue `0`, trace `0`). -/
+theorem epK2_perturbed_allFalse_lambda2_eq_zero :
+    lambda2 (epK2 + perturbWeight epK2 epHalf (fun _ => false))
+      (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => false)))
+      (by norm_num) = 0 := by
+  have h0 : evals (laplacian_symmetric
+      (epK2 + perturbWeight epK2 epHalf (fun _ => false))
+      (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => false))))
+      (0 : Fin 2) = 0 :=
+    laplacian_evals_zero
+    (epK2 + perturbWeight epK2 epHalf (fun _ => false))
+    (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => false)))
+    epK2_perturbed_allFalse_nonneg (by norm_num)
+  have hsum := evals_sum_eq_trace
+    (laplacian_symmetric (epK2 + perturbWeight epK2 epHalf (fun _ => false))
+      (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => false))))
+  have htrace :
+      (laplacian (epK2 + perturbWeight epK2 epHalf (fun _ => false))).trace
+        = 0 := by
+    rw [epK2_perturbed_allFalse_eq]
+    have hd0 : degreeMatrix (0 : Matrix (Fin 2) (Fin 2) ℝ) = 0 := by
+      ext a b
+      simp [degreeMatrix, deg]
+    rw [laplacian, sub_zero, hd0, Matrix.trace_zero]
+  rw [htrace] at hsum
+  have h2 : ∑ i : Fin 2,
+      evals (laplacian_symmetric
+          (epK2 + perturbWeight epK2 epHalf (fun _ => false))
+          (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => false))))
+        i = 0 := hsum
+  simp only [Fin.sum_univ_two] at h2
+  have h1' : evals (laplacian_symmetric
+      (epK2 + perturbWeight epK2 epHalf (fun _ => false))
+      (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => false))))
+      (1 : Fin 2) = 0 := by
+    linarith
+  simpa [lambda2] using h1'
+
+/-! ### The closed-form Cheeger-window instances -/
+
+/-- **The Cheeger floor tail on `K₂` at `p ≡ ½`, `t = ½`, in closed
+form**: `μ {λ₂(L̃_ω) ≤ 1·φ²/2 − ½ = 0} ≤ 4 exp(−1/64)` — the dimension
+factor `2 · 2`, the variance norm `8` in the exponent's denominator
+`2 · 8`. CONDITIONAL ON THE `matrix_hoeffding` AXIOM (instantiated, not
+re-proved). -/
+theorem epK2_cheeger_floor_tail_QA :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+      {ω : (Fin 2 × Fin 2) → Bool |
+        lambda2 (epK2 + perturbWeight epK2 epHalf ω)
+          (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf ω))
+          (by norm_num) ≤ (1 : ℝ) * (cheegerConstant epK2) ^ 2 / 2 - 1 / 2}
+      ≤ ENNReal.ofReal (4 * Real.exp (-((1 : ℝ)) / 64)) := by
+  have htail := edgePerturbation_lambda2_cheeger_floor epK2 epHalf
+    epK2_symmetric epK2_nonneg 1 epK2_regular (by norm_num)
+    epHalf_nonneg epHalf_le_one (by norm_num) (1 / 2) (by norm_num)
+  rw [epK2_variance_norm] at htail
+  have hcard : (Fintype.card (Fin 2) : ℝ) = 2 := by norm_num
+  rw [hcard] at htail
+  have hRHS : (2 : ℝ) * 2 * Real.exp (-((1 / 2 : ℝ) ^ 2) / (2 * 8))
+      = 4 * Real.exp (-((1 : ℝ)) / 64) := by
+    have h1 : -((1 / 2 : ℝ) ^ 2) / (2 * 8) = -((1 : ℝ)) / 64 := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at htail
+  exact htail
+
+/-- **Non-vacuity of the floor tail**: the all-false outcome belongs to
+the floor event with `λ₂ = 0 = 1·φ²/2 − ½` attained at equality — the
+bound has genuine content rather than certifying an empty event (random
+resampling really can destroy the connectivity certificate; the tail
+prices exactly that risk). -/
+theorem epK2_cheeger_floor_nonvacuous_QA :
+    (fun _ => false) ∈ {ω : (Fin 2 × Fin 2) → Bool |
+        lambda2 (epK2 + perturbWeight epK2 epHalf ω)
+          (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf ω))
+          (by norm_num) ≤ (1 : ℝ) * (cheegerConstant epK2) ^ 2 / 2 - 1 / 2} := by
+  simp only [Set.mem_setOf_eq]
+  rw [epK2_perturbed_allFalse_lambda2_eq_zero, epK2_cheegerConstant]
+  norm_num
+
+/-- **The connectivity bracket on `K₂` at `p ≡ ½`, `t = ½`, in closed
+form**: `μ {λ₂(L̃_ω) ∉ [1·φ²/2 − ½, 2·(1·φ) + ½] = [0, 5/2]}
+≤ 4 exp(−1/64)` — the same constant as the one-sided tail (the window
+contains the eigenvalue ball). CONDITIONAL ON THE `matrix_hoeffding`
+AXIOM. -/
+theorem epK2_connectivity_bracket_QA :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+      {ω : (Fin 2 × Fin 2) → Bool |
+        lambda2 (epK2 + perturbWeight epK2 epHalf ω)
+          (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf ω))
+          (by norm_num) ≤ (1 : ℝ) * (cheegerConstant epK2) ^ 2 / 2 - 1 / 2
+        ∨ 2 * ((1 : ℝ) * cheegerConstant epK2) + 1 / 2
+          ≤ lambda2 (epK2 + perturbWeight epK2 epHalf ω)
+            (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf ω))
+            (by norm_num)}
+      ≤ ENNReal.ofReal (4 * Real.exp (-((1 : ℝ)) / 64)) := by
+  have htail := edgePerturbation_connectivity_bracket epK2 epHalf
+    epK2_symmetric epK2_nonneg 1 epK2_regular (by norm_num)
+    epHalf_nonneg epHalf_le_one (by norm_num) (1 / 2) (by norm_num)
+  rw [epK2_variance_norm] at htail
+  have hcard : (Fintype.card (Fin 2) : ℝ) = 2 := by norm_num
+  rw [hcard] at htail
+  have hRHS : (2 : ℝ) * 2 * Real.exp (-((1 / 2 : ℝ) ^ 2) / (2 * 8))
+      = 4 * Real.exp (-((1 : ℝ)) / 64) := by
+    have h1 : -((1 / 2 : ℝ) ^ 2) / (2 * 8) = -((1 : ℝ)) / 64 := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at htail
+  exact htail
+
+/-- λ₂ at the all-true outcome is `4` (the weight-`2` edge) — the
+existing pinned spectrum at the `lambda2` interface. -/
+theorem epK2_perturbed_allTrue_lambda2_eq_four :
+    lambda2 (epK2 + perturbWeight epK2 epHalf (fun _ => true))
+      (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => true)))
+      (by norm_num) = 4 := by
+  simpa [lambda2] using epK2_perturbed_evals_one_eq_four_QA
+
+/-- **The upper window side fires too**: the all-true outcome sits above
+the bracket's ceiling (`λ₂ = 4 ≥ 2·(1·φ) + ½ = 5/2`) — both sides of the
+window are witnessed at concrete outcomes of the design (the all-false
+outcome below, this one above), so neither disjunct of the bracket event
+is vacuous. -/
+theorem epK2_bracket_upper_fires_QA :
+    (fun _ => true) ∈ {ω : (Fin 2 × Fin 2) → Bool |
+        2 * ((1 : ℝ) * cheegerConstant epK2) + 1 / 2
+          ≤ lambda2 (epK2 + perturbWeight epK2 epHalf ω)
+            (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf ω))
+            (by norm_num)} := by
+  simp only [Set.mem_setOf_eq]
+  rw [epK2_perturbed_allTrue_lambda2_eq_four, epK2_cheegerConstant]
+  norm_num
 
 end Scaffold.QA.Derived.EdgePerturbation

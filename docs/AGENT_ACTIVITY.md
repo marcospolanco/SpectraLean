@@ -56,6 +56,208 @@ README (until a full rewrite on 2026-08-28, prompted by an operator
 readability complaint: individual lines had grown past 8,000 characters)
 belongs here and only here.
 
+## 2026-08-28T23:23:58Z — Cheeger-window consumer of the λ₂ tail delivered: the high-probability connectivity window under random edge resampling (terminal)
+
+**Run:** `20260828T230752Z-run-1`  
+**Session:** `ses_fb564f6d3ffe0r0ERiz5rQ57Ht`  
+**Status:** completed  
+**Milestone (delivered):** the standing handoff's named
+"conductance/Cheeger-level consumer of the new λ₂ tail" (priced, not
+owed) — the first join of the edge-perturbation concentration family to
+the Cheeger center — **DELIVERED as zero new axioms (count stays 10;
+`#print axioms` via `wip/cheegerfloor_axcheck.lean` on all 16 audited
+declarations: the two engine lemmas and ten hard-crust QA lemmas
+exactly `propext, Classical.choice, Quot.sound`; the two Derived
+theorems and the two closed-form QA instances honestly carrying
+`matrix_hoeffding` alone). QA 2843 → 2855 (+12,
+`EdgePerturbation_QA.lean`'s Cheeger-window section).**
+
+**Changes:** (1) `GraphTheory/Cheeger.lean`'s public-API engine pair —
+the combinatorial-Laplacian spelling of both Cheeger bounds on
+d-regular graphs: `cheeger_lower_bound_laplacian` (`d·φ²/2 ≤ lambda2`)
+and `cheeger_upper_bound_laplacian` (`lambda2 ≤ 2 d φ`), pure
+composition of the proved pair with `smul_regularNormalizedLaplacian`
+(`L = d • L_sym`) and `secondEval_smul_of_pos` — closing the
+regular-Cheeger ↔ `lambda2` interface gap. (2)
+`Derived/EdgePerturbationTail.lean`'s CheegerWindow section —
+`edgePerturbation_lambda2_cheeger_floor` (`μ{λ₂(G_ω) ≤ d·φ²/2 − t} ≤
+2 d exp(−t²/(2‖∑ₑ L_e²‖))` by `measure_mono` into the delivered λ₂
+lower tail) and `edgePerturbation_connectivity_bracket` (leaving
+`[d·φ²/2 − t, 2dφ + t]` implies leaving the two-sided eigenvalue tail
+at the *same* constant — the window contains the eigenvalue ball; both
+Cheeger directions load-bearing on the inclusion). (3) QA +12: the
+φ(K₂) = 1 and 1-regularity pins transferred at definitional equality
+from `Cheeger_QA`'s fixture, the base λ₂ = 2 at the `lambda2`
+interface, the engine window with the **ceiling attained at equality**
+(`λ₂ = 2 = 2·(1·φ)`), the closed-form floor/bracket instances at
+`t = 1/2` (`4 exp(−1/64)`), and **non-vacuity witnesses for both
+window sides** (all-false below the floor with `λ₂ = 0` attained at
+equality; all-true above the ceiling at `λ₂ = 4 ≥ 5/2`).
+
+**Verification:** spike first (`wip/cheegerfloor_spike.lean`, zero
+errors/warnings before any shelf edit); direct `lake build` targets ✔
+on all three touched modules; `#print axioms` exactly as designed;
+**full `lake build` ✔ (2405/2406) immediately followed by
+`check_build_completeness.py` — 127/127 fresh, 0 stale, 0 missing, exit
+0**; `lint_axioms` (10, both findings allowlisted-confirmed),
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+idempotent (**2855/10/0**); **map freshness exit 0** after the
+stats-stamp sync (2843 → 2855). Records updated: the proposal (the
+Cheeger-window follow-on delivery record with technique findings — the
+direct `have h0 := laplacian_evals_zero …` re-tripping the recorded
+`Fin`-spelling linarith trap, the `degreeMatrix 0` unfold order — and
+the honesty note on the absence of a K₂-shaped dropped-guard refutation
+fixture), `proposals/README.md`, README (2855 + one module-table
+clause), the radar (QA axis synced, held at 4.0 per protocol), the
+scoreboard, the backlog (item 7), both index maps, the execution plan,
+and this log. Nothing committed; prior runs' deliveries committed at
+`c9a6044` and preserved untouched.
+
+**Remaining risk:** none owed. The delivery's conditional structure is
+unchanged: the two Derived theorems are conditional on
+`matrix_hoeffding` and must never be described as foundationally
+proved.
+
+**Next handoff:** the Active table's only actionable row remains the
+empirical-stationary Step 2 (gated on a consumer pricing the bias-term
+shape); otherwise the priced follow-ons on record — the `t/δ`-sharpened
+drift interface (an `s/(γ−s)`-shaped statement mirroring
+`eventStreamProjectorDrift`), the irregular/volume-weighted analogue of
+the new window (needs the degree bridge to `normalizedLaplacian`) — or
+the next load-bearing gap `docs/6_SGT_BACKLOG.md` names.
+
+## 2026-08-28T23:07:52Z — Cheeger-window consumer of the λ₂ tail: high-probability expansion window under random edge resampling (terminal; closed by operator verification)
+
+**Run:** `20260828T230752Z-run-1`  
+**Session:** `ses_fb564f6d3ffe0r0ERiz5rQ57Ht`  
+**Status:** completed  
+
+**Closing note (operator, 2026-08-28):** the run exited after writing the
+plan below and the actual Lean work, but before its own terminal entry —
+the records-gap pattern seen earlier this session. Verified independently
+before closing: the planned `Cheeger.lean` pair
+(`cheeger_lower_bound_laplacian`, `cheeger_upper_bound_laplacian`) and the
+planned `Derived/EdgePerturbationTail.lean` consumers
+(`edgePerturbation_lambda2_cheeger_floor`,
+`edgePerturbation_connectivity_bracket`) are all present and match this
+plan; full `lake build` (2406 targets, "Build completed successfully");
+`check_build_completeness.py` (127/127 fresh, 0 stale, 0 missing);
+`lint_axioms` (10, both prior findings still allowlisted-confirmed);
+`check_scaffold_map_freshness.py` exit 0; `check_citations`,
+`check_markdown_links` pass; QA 2843 → 2855 (+12,
+`EdgePerturbation_QA.lean`'s Cheeger-window section). `#print axioms`
+independently re-run: the two `Cheeger.lean` corollaries are unconditional
+hard crust (`propext, Classical.choice, Quot.sound` only); the two Derived
+consumers carry exactly `matrix_hoeffding` and nothing else, matching the
+plan's own claim. No `sorry`/`admit` found in any touched file.
+**Milestone:** the standing handoff's named "conductance/Cheeger-level
+consumer of the new λ₂ tail" (priced, not owed) — the first join of the
+edge-perturbation concentration family to the Cheeger center: the
+resampled graph's algebraic connectivity stays inside the Cheeger-driven
+window `[d·φ²/2 − t, 2dφ + t]` outside a set of the eigenvalue tail's
+measure, with both Cheeger directions load-bearing on the inclusion.
+Zero new axioms planned (conditional on `matrix_hoeffding` via the
+delivered tail alone).
+
+**Changes (planned):** (1) `Cheeger.lean` public-API engine pair — the
+combinatorial-Laplacian spelling of both Cheeger bounds on d-regular
+graphs (`d·φ²/2 ≤ lambda2` / `lambda2 ≤ 2dφ`), a pure composition of
+`smul_regularNormalizedLaplacian`, `secondEval_smul_of_pos`, and the
+proved pair; (2) `Derived/EdgePerturbationTail.lean`'s Cheeger-window
+section — the floor tail `μ{λ₂(G_ω) ≤ d·φ²/2 − t} ≤ 2 d exp(…)` and the
+two-sided bracket (both directions consumed); (3) K₂ QA: the φ(K₂) = 1
+join to Cheeger_QA's pinned value, the tight ceiling equality
+`λ₂ = 2dφ` attained, closed-form tail instances at t = 1/2, and the
+all-false/all-true non-vacuity witnesses (both window sides provably
+fire at concrete outcomes).
+
+**Next handoff (interim):** spike in `wip/cheegerfloor_spike.lean` to
+zero errors/warnings before any shelf edit.
+
+## 2026-08-28T22:00:09Z — Eigenvalue-level edge-perturbation tail delivered: spectral-gap concentration via proved Weyl ∘ matrix-Hoeffding tail (terminal)
+
+**Run:** `20260828T214358Z-run-1`  
+**Session:** `ses_fb5af754effe6Y0M4rrPcZCfGU`  
+**Status:** completed  
+**Milestone (delivered):** the standing handoff's named "third
+concentration-axiom consumer" candidate in its SGT-native member —
+`proposals/matrix-hoeffling-spectral-gap-estimation.md`'s follow-on
+delivery record (its filename namesake application and its priced
+uniform-form residual) — **DELIVERED as zero new axioms (count stays
+10; `#print axioms` via `wip/ept_axcheck.lean` on all 17 audited
+declarations: the 9 hard-crust QA lemmas exactly `propext,
+Classical.choice, Quot.sound`; the four Derived theorems and the four
+closed-form QA instances honestly carrying `matrix_hoeffding` alone).
+QA 2830 → 2843 (+13, `EdgePerturbation_QA.lean`'s spectral-gap
+section).**
+
+**Changes:** (1) `Derived/EdgePerturbationTail.lean`'s new eigenvalue
+section — `edgePerturbation_eval_tail`
+(`μ{t ≤ |λᵢ(L(A+E_ω)) − λᵢ(L A)|} ≤ 2 d exp(−t²/(2‖∑ₑ L_e²‖))` at
+every sorted index, the norm tail transferred to the sorted spectrum
+through the *proved* `weyl_inequality` — the Weyl side has been hard
+crust since its 2026-08-20 retirement — via the packaging identity,
+`laplacian_add`, `evals_congr`), the one-sided gap-survival form, the
+λ₂-spelled corollary at the `lambda2` interface, and the priced
+uniform/existential-x quadratic-form packaging (its `x ≠ 0` guard
+proved load-bearing by the fence below). (2) QA +13: the base and
+perturbed K₂ spectra by the kernel-plus-trace route (`λ₂ = 2`; `λ₂ = 4`
+at the all-true outcome where the resampled graph is the weight-2
+edge), **the Weyl transfer pinned tight at a genuine design outcome**
+(`|4 − 2| = ‖L(E_ω)‖ = 2`, both sides by independent routes — a
+constant mistake anywhere on the transfer path breaks the proved
+equality), the closed-form instances on K₂ and the three-path, and the
+`x = 0` guard fence refuting the un-guarded uniform statement in
+proved arithmetic (the un-guarded event is all of `Ω`, measure `1`,
+against `4 exp(−49/16) < 1` from `Real.add_one_le_exp`). (3) Records:
+the proposal (residual struck through + the follow-on delivery record
+with technique findings — the auto-bound-identifier trap, the
+`Fin (Fintype.card V)` vs `Fin n` spelling split inside `linarith`,
+the section-variable argument-order trap), `proposals/README.md`,
+README (2843 + the module-table clause), the radar QA axis (held at
+4.0 per protocol), the scoreboard, the backlog, the index map (four
+Derived-consumer rows), both map stamps, the execution plan, and this
+log.
+
+**Verification:** spike first (`wip/ept_spike.lean`, zero
+errors/warnings before any shelf edit); `lake env lean` zero
+errors/zero warnings on both touched modules (the Derived module after
+its explicit olen rebuild — the stale-olen recurrence); explicit
+`lake build` targets ✔; `#print axioms` exactly as designed; **full
+`lake build` ✔ (2405/2406) immediately followed by
+`check_build_completeness.py` — 127/127 fresh, 0 stale, 0 missing,
+exit 0**; `lint_axioms` (10, both findings allowlisted-confirmed),
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+idempotent (**2843/10/0**); **map freshness exit 0** after the
+stats-stamp sync (mandatory — this delivery changes a proposal's
+status header). Nothing committed; the prior runs' committed
+deliveries preserved untouched.
+
+**Remaining risk:** none owed — the proposal's priced residual list is
+now empty. The four new theorems are conditional on `matrix_hoeffding`
+and must never be described as foundationally proved.
+
+**Next handoff:** the Active table's only actionable row remains the
+empirical-stationary Step 2 (gated on a consumer pricing the bias-term
+shape); otherwise the `t/δ`-sharpened drift interface, a
+conductance/Cheeger-level consumer of the new λ₂ tail (priced, not
+owed), or the next load-bearing gap `docs/6_SGT_BACKLOG.md` names.
+
+## 2026-08-28T21:43:58Z — Eigenvalue-level edge-perturbation tail in delivery: spectral-gap concentration via Weyl ∘ tail
+
+**Run:** `20260828T214358Z-run-1`  
+**Session:** `ses_fb5af754effe6Y0M4rrPcZCfGU`  
+**Status:** in-progress  
+**Milestone:** the standing handoff's named "third concentration-axiom
+consumer" candidate in its SGT-native member — the eigenvalue-level
+packaging of `edgePerturbation_norm_tail`: `μ{|λᵢ(L(A+E_ω)) − λᵢ(L A)|
+≥ t} ≤ 2 d exp(−t²/(2‖∑ₑ L_e²‖))` at every sorted index (the parent
+proposal's filename namesake), plus the priced uniform/existential-x
+quadratic-form residual and the one-sided gap-survival form. Zero new
+axioms; conditional on `matrix_hoeffding` via the tail alone, with the
+Weyl side proved. Spiking first in `wip/ept_spike.lean` before any
+shelf edit.
+
 ## 2026-08-28T12:18:48Z — Matrix-Hoeffding consumer delivered with the degenerate-dimension repair of all three matrix concentration axioms (terminal)
 
 **Run:** `20260828T090419Z-run-1`  

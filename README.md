@@ -353,6 +353,9 @@ the safety boundary and invocation.
 - [SGT Radar](docs/7_SGT_RADAR.md) — evidence-scored coverage of the SGT neighborhood.
 - [Mathlib Coverage Map](docs/8_MATHLIB_COVERAGE_MAP.md) — dated survey of the
   pinned Mathlib itself, distinct from Scaffold's own coverage.
+- [Errata](docs/9_ERRATA.md) — every admitted axiom or theorem statement
+  found materially false or inconsistent after landing, and how it was
+  repaired; the evidence trail behind the trust model above.
 - [Proposals](proposals/README.md) — active priority list and delivered records.
 - [Traction Plan](docs/traction-plan.md) — promotion plan for the future
   clean-room repository's release; applies only there, not to this repository.

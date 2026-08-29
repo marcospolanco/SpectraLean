@@ -145,7 +145,7 @@ When Mathlib or another accepted dependency provides a proved replacement:
 5. Retain compatibility for the documented deprecation window unless the declaration is unsound or unsafe.
 6. Remove the axiom and update citation/topic indices in the next permitted release.
 
-An emergency removal is appropriate for a materially false statement, an inconsistent assumption set, or a declaration that creates unacceptable trust exposure. Release notes must identify the impact.
+An emergency removal is appropriate for a materially false statement, an inconsistent assumption set, or a declaration that creates unacceptable trust exposure. Release notes must identify the impact. Every instance of this — every axiom or theorem statement actually found false or inconsistent, not merely unproved — is recorded in [Errata](9_ERRATA.md); an emergency removal that never gets an entry there defeats the purpose of keeping the list.
 
 ## 10. Toolchain and verification
 

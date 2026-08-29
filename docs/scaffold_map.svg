@@ -83,13 +83,13 @@
 <text x="1408.6" y="909.5" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Weighted Matrix-Tree</text>
 <text x="1450.3" y="830.9" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">KIRCHHOFF FLATS</text>
 <text x="1450.3" y="810.9" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">Statistical Physics</text>
-<line x1="1124.8" y1="1248.5" x2="1379.1" y2="1306.5" stroke="#9AA39A" stroke-width="3"/>
-<circle cx="1253.5" cy="1277.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
-<text x="1266.5" y="1282.9" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Alon–Boppana Bound</text>
-<circle cx="1349.9" cy="1299.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
-<text x="1362.9" y="1304.9" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Approx. Spectral Projection</text>
-<text x="1418.1" y="1345.4" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">OPEN FRONTIER</text>
-<text x="1418.1" y="1365.4" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">Surveyed, not yet built</text>
+<line x1="899.9" y1="1140.2" x2="709.2" y2="988.1" stroke="#9AA39A" stroke-width="3"/>
+<circle cx="796.7" cy="1057.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="783.7" y="1062.9" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Alon–Boppana Bound</text>
+<circle cx="732.6" cy="1006.8" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="719.6" y="1011.8" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Approx. Spectral Projection</text>
+<text x="677.9" y="933.1" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">OPEN FRONTIER</text>
+<text x="677.9" y="913.1" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">Surveyed, not yet built</text>
 <line x1="1055.5" y1="1335.3" x2="1268.1" y2="1776.8" stroke="#9AA39A" stroke-width="3"/>
 <circle cx="1112.8" cy="1454.3" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
 <text x="1125.8" y="1459.3" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Resolvent Calculus</text>
@@ -103,13 +103,11 @@
 <text x="1268.1" y="1754.8" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Decidable Certificates</text>
 <text x="1285.5" y="1842.8" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">NEURIPS BAY</text>
 <text x="1285.5" y="1862.8" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">ML &amp; Graph Signal Processing</text>
-<line x1="899.9" y1="1140.2" x2="645.0" y2="936.9" stroke="#9AA39A" stroke-width="3"/>
-<circle cx="796.7" cy="1057.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
-<text x="783.7" y="1062.9" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Leverage Scores</text>
-<circle cx="732.6" cy="1006.8" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
-<text x="719.6" y="1011.8" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Matrix Chernoff Bridge</text>
-<circle cx="668.5" cy="955.6" r="7" fill="#F3F4EE" stroke="#8A8378" stroke-width="2" stroke-dasharray="3,3"/>
-<text x="655.5" y="960.6" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Spielman–Srivastava</text>
-<text x="613.8" y="882.0" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">STOC CITY</text>
-<text x="613.8" y="862.0" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">Theoretical CS &amp; Algorithms</text>
+<line x1="1124.8" y1="1248.5" x2="1379.1" y2="1306.5" stroke="#9AA39A" stroke-width="3"/>
+<circle cx="1253.5" cy="1277.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="1266.5" y="1282.9" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Leverage Scores</text>
+<circle cx="1349.9" cy="1299.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="1362.9" y="1304.9" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Matrix Chernoff Bridge</text>
+<text x="1418.1" y="1345.4" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">STOC CITY</text>
+<text x="1418.1" y="1365.4" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">Theoretical CS &amp; Algorithms</text>
 </svg>

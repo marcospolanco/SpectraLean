@@ -86,9 +86,6 @@ SPOKES = [
     ("STOC CITY", "Theoretical CS & Algorithms", [
         ("Leverage Scores", "proved", "spectral-sparsification-via-leverage-scores.md"),
         ("Matrix Chernoff Bridge", "proved", "spectral-sparsification-via-leverage-scores.md"),
-        # Phase B of this proposal is the SS sparsification the station tracks, and
-        # its status line's "blocked" language is exactly what keeps the station gated.
-        ("Spielman–Srivastava", "gated", "spectral-graph-sparsification.md"),
     ]),
 ]
 

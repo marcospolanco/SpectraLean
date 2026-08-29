@@ -88,7 +88,7 @@ theorem hoeffding_empirical_iid {V : Type*} [Fintype V] [DecidableEq V]
   rw [hset]
   exact Scaffold.Mathlib.Probability.Concentration.Scalar.hoeffding_empirical
     (fun k => measurable_indicator_coord k i)
-    (fun k k' hkk' => indepFun_indicator_coord q hq0 hq1 hkk' i i)
+    (iIndepFun_indicator_coord (V := V) q hq0 hq1 i)
     (fun k ω => by split_ifs <;> simp) t ht
 
 /-- The graph instance: for `n` i.i.d. samples of the fixed-time

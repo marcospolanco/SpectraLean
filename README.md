@@ -22,7 +22,7 @@ As of August 29, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 10 |
-| QA theorems/lemmas | 3008, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 3099, with no `sorry` or `admit` under `Scaffold/` |
 
 Recent highlights (full per-run history in
 [`docs/AGENT_ACTIVITY.md`](docs/AGENT_ACTIVITY.md); per-result detail in each

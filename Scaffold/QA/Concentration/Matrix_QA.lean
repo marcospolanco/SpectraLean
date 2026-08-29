@@ -44,6 +44,42 @@ theorem indepFun_const_matrix_QA (A : Matrix V V ℝ) (Y : Ω → Matrix V V ℝ
   rw [IndepFun_iff_Indep, MeasurableSpace.comap_const]
   exact indep_bot_left _
 
+/-- A constant matrix family is mutually independent under any
+probability measure — the repaired `h_indep` clause shape at the
+zero-family instantiations below. -/
+theorem iIndepFun_const_matrix_QA {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)
+    [IsProbabilityMeasure μ] {n : ℕ} (M : Matrix V V ℝ) :
+    iIndepFun (fun _ : Fin n =>
+      (inferInstance : MeasurableSpace (Matrix V V ℝ)))
+      (fun (_ : Fin n) (_ : Ω) => M) μ := by
+  rw [iIndepFun_iff_measure_inter_preimage_eq_mul]
+  intro T sets hsets
+  by_cases hall : ∀ i ∈ T, M ∈ sets i
+  · have hpre : ∀ i ∈ T, (fun _ : Ω => M) ⁻¹' sets i = Set.univ := by
+      intro i hi
+      ext ω
+      simp only [Set.mem_preimage, Set.mem_univ, iff_true]
+      exact hall i hi
+    have huniv : (⋂ i ∈ T, (fun _ : Ω => M) ⁻¹' sets i) = Set.univ := by
+      ext ω
+      simp only [Set.mem_iInter, Set.mem_univ, Set.mem_preimage]
+      exact ⟨fun _ => trivial, fun h => fun i hi => hall i hi⟩
+    rw [huniv, measure_univ]
+    rw [Finset.prod_eq_one fun i hi => by rw [hpre i hi, measure_univ]]
+  · push_neg at hall
+    obtain ⟨i₀, hi₀, hi₀A⟩ := hall
+    have hempty : (⋂ i ∈ T, (fun _ : Ω => M) ⁻¹' sets i) = ∅ := by
+      ext ω
+      simp only [Set.mem_iInter, Set.mem_preimage, Set.mem_empty_iff_false]
+      exact ⟨fun h => hi₀A (h i₀ hi₀), fun h => h.elim⟩
+    have hzero : μ ((fun _ : Ω => M) ⁻¹' sets i₀) = 0 := by
+      have hpre : (fun _ : Ω => M) ⁻¹' sets i₀ = ∅ := by
+        ext ω
+        simp only [Set.mem_preimage, Set.mem_empty_iff_false]
+        exact ⟨hi₀A, fun h => h.elim⟩
+      rw [hpre, measure_empty]
+    rw [hempty, measure_empty, Finset.prod_eq_zero hi₀ hzero]
+
 /-!
 ## Matrix Hoeffding interface
 -/
@@ -57,7 +93,7 @@ theorem matrix_hoeffding_zero_QA [Nonempty V] {n : ℕ} (t : ℝ) (ht : 0 < t) :
       ENNReal.ofReal (2 * (Fintype.card V : ℝ) *
         Real.exp (-(t ^ 2) / (2 * ‖∑ i : Fin n, (0 : Matrix V V ℝ) * 0‖))) := by
   exact matrix_hoeffding (X := fun _ _ => 0) (A := fun _ => 0)
-    (fun i => stronglyMeasurable_const) (fun i j _ => indepFun_const_matrix_QA 0 _)
+    (fun i => stronglyMeasurable_const) (iIndepFun_const_matrix_QA (Ω := Ω) (μ := μ) 0)
     (fun i ω => Matrix.isHermitian_zero) (fun i ω => by simpa using Matrix.PosSemidef.zero)
     t ht.le
 
@@ -83,7 +119,7 @@ theorem matrix_bernstein_zero_QA [Nonempty V] {n : ℕ} (t : ℝ) (ht : 0 < t) :
         Real.exp (-(t ^ 2) / (2 * ‖∑ i : Fin n, ∫ ω : Ω,
           (0 : Matrix V V ℝ) * 0 ∂μ‖ + (2 * 0 * t) / 3))) :=
   matrix_bernstein (X := fun _ _ => 0) (R := 0)
-    (fun i => stronglyMeasurable_const) (fun i j _ => indepFun_const_matrix_QA 0 _)
+    (fun i => stronglyMeasurable_const) (iIndepFun_const_matrix_QA (Ω := Ω) (μ := μ) 0)
     (fun i ω => Matrix.isHermitian_zero) (fun i => by simp)
     (fun i ω => by simp) t ht.le
 

@@ -222,21 +222,33 @@ break it, not evidence none exists — see §6.
   concentration and edge-perturbation work of 2026-08-28/29), that
   deferred Step 0 was finally run, confirming the concern was real for
   all six axioms sharing the pattern.
-- **Repair:** **in progress as of this writing** — the six axiom
-  signatures have been tightened from pairwise `IndepFun` to
-  `iIndepFun`, and a mutual-independence engine
-  (`iIndepFun_coord`/`iIndepFun_coord_matrix`) added to
-  `BernoulliProduct.lean`, but consumer threading is incomplete:
-  `Derived/SparsificationTail.lean` and `Derived/EmpiricalStationary.lean`
-  still call the axioms at the old pairwise-only signature and
-  currently fail to typecheck. Nothing has been committed. See
-  `docs/AGENT_ACTIVITY.md`'s 2026-08-29T17:33:40Z entry for the live
-  working notes and remaining-work list.
-- **Source:** `docs/AGENT_ACTIVITY.md`, 2026-08-29T17:33:40Z entry.
-- **Status:** **open — repair in progress.** This entry will be updated
-  with a commit reference once the repair lands and the full
-  verification ladder passes; per this document's own discipline (§6),
-  it is recorded now, while open, rather than only after the fact.
+- **Repair:** complete, 2026-08-29 (runs `20260829T173340Z-run-1`,
+  `20260829T195611Z-run-1`, and `20260829T222414Z-run-1`). All six axiom
+  signatures tightened from pairwise `IndepFun` to `iIndepFun` (mutual
+  independence — the hypothesis shape the cited Hoeffding/Bernstein/
+  matrix-Chernoff sources actually carry); mutual-independence engines
+  added to `BernoulliProduct.lean` (`toMeasure_cyl_inter`,
+  `iIndepFun_coord`, `iIndepFun_of_injective`, `iIndepFun_coord_apply`,
+  `iIndepFun_coord_matrix`) and `IIDProduct.lean` (the `iidPMF` analogue
+  plus `iIndepFun_indicator_coord`); every consumer clause site threaded
+  (`EdgePerturbation`, `Sparsification`, `EmpiricalStationary`, and the
+  three Derived tail modules — public statements unchanged, `#print
+  axioms` verifying each Derived tail conditional on its own axiom
+  alone); the Walsh refutation family recorded in QA
+  (`Scaffold/QA/Concentration/PairwiseIndependence_QA.lean`, six
+  hypothesis-form refutations at exactly the standard three axioms — a
+  refutation cannot carry the axiom it refutes); the pre-existing
+  pairwise lemmas retained on the shelf as the refutation records'
+  interface. The full verification ladder passed on the repaired tree
+  (129/129 build completeness, axiom lint, citations, links, scoreboard
+  3099, map freshness). Not yet committed at this entry's update —
+  autonomous runs do not commit; the commit reference lands with the
+  operator's commit per `docs/arch/commit-steward-protocol.md`.
+- **Source:** `proposals/pairwise-independence-concentration-repair.md`
+  (the delivery record with the full witness mechanics and consumer
+  threading inventory); `docs/AGENT_ACTIVITY.md`'s 2026-08-29 entries
+  (17:33:40Z, 19:56:11Z, 22:24:14Z).
+- **Status:** resolved.
 
 ## Related: process and tooling self-corrections
 

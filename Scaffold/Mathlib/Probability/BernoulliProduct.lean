@@ -402,6 +402,144 @@ theorem integral_sq_delta_sub (p : ι → ℝ) (hp0 : ∀ i, 0 ≤ p i) (hp1 : �
 
 end Independence
 
+section IIndep
+
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
+
+open scoped Classical in
+/-- The mass of a finite coordinate-cylinder intersection — the
+finite-family generalization of `toMeasure_cyl` (its `|T| = 1` case)
+and the engine for the coordinates' mutual independence below. -/
+theorem toMeasure_cyl_inter (p : ι → ℝ) (hp0 : ∀ i, 0 ≤ p i) (hp1 : ∀ i, p i ≤ 1)
+    (T : Finset ι) (A : ι → Set Bool) :
+    (bernPMF p hp0 hp1).toMeasure (⋂ i ∈ T, (fun ω : ι → Bool => ω i) ⁻¹' A i)
+      = ∏ i ∈ T, ∑ b, (if b ∈ A i then (1 : ℝ≥0∞) else 0) * bern p i b := by
+  have hmeas : MeasurableSet (⋂ i ∈ T, (fun ω : ι → Bool => ω i) ⁻¹' A i) :=
+    Set.Finite.measurableSet (Set.toFinite _)
+  rw [PMF.toMeasure_apply (bernPMF p hp0 hp1) _ hmeas, tsum_fintype]
+  simp only [Set.indicator_apply, Set.mem_iInter, Set.mem_preimage]
+  have hpt : ∀ ω : ι → Bool,
+      (if ∀ i ∈ T, ω i ∈ A i then bernPMF p hp0 hp1 ω else 0)
+        = ∏ i, ((if i ∈ T then (if ω i ∈ A i then (1 : ℝ≥0∞) else 0) else 1)
+            * bern p i (ω i)) := by
+    intro ω
+    by_cases hall : ∀ i ∈ T, ω i ∈ A i
+    · rw [if_pos hall, bernPMF_apply,
+        show jointMass p ω = ∏ i, bern p i (ω i) from rfl, Finset.prod_mul_distrib]
+      have hone : (∏ i : ι, if i ∈ T then (if ω i ∈ A i then (1 : ℝ≥0∞) else 0) else 1) = 1 :=
+        Finset.prod_eq_one fun i _ => by
+          by_cases hi : i ∈ T
+          · rw [if_pos hi, if_pos (hall i hi)]
+          · rw [if_neg hi]
+      rw [hone, one_mul]
+    · push_neg at hall
+      obtain ⟨i₀, hi₀T, hi₀A⟩ := hall
+      have hzero : ∏ i, ((if i ∈ T then (if ω i ∈ A i then (1 : ℝ≥0∞) else 0) else 1)
+          * bern p i (ω i)) = 0 := by
+        refine Finset.prod_eq_zero (Finset.mem_univ i₀) ?_
+        rw [if_pos hi₀T, if_neg hi₀A, zero_mul]
+      rw [if_neg (fun h => hi₀A (h i₀ hi₀T)), hzero]
+  rw [Finset.sum_congr rfl (fun ω _ => hpt ω),
+    show (Finset.univ : Finset (ι → Bool)) = Fintype.piFinset fun _ => Finset.univ from by
+      ext ω; simp [Fintype.mem_piFinset],
+    Finset.sum_prod_piFinset (Finset.univ : Finset Bool)
+      (fun i b => (if i ∈ T then (if b ∈ A i then (1 : ℝ≥0∞) else 0) else 1) * bern p i b)]
+  have houter : ∏ i : ι, ∑ b : Bool,
+      ((if i ∈ T then (if b ∈ A i then (1 : ℝ≥0∞) else 0) else 1) * bern p i b)
+      = ∏ i ∈ T, ∑ b : Bool,
+      ((if i ∈ T then (if b ∈ A i then (1 : ℝ≥0∞) else 0) else 1) * bern p i b) := by
+    refine (Finset.prod_subset (Finset.subset_univ T) fun i _ hi => ?_).symm
+    simp only [if_neg hi, one_mul]
+    exact sum_bern_eq_one p hp0 hp1 i
+  rw [houter]
+  exact Finset.prod_congr rfl fun i hi => by
+    refine Finset.sum_congr rfl fun b _ => ?_
+    rw [if_pos hi]
+
+/-- Mutual independence of the coordinate projections — the repaired
+`h_indep` clause shape of the concentration axioms at the
+BernoulliProduct design (the pairwise `indepFun_coord` above is its
+two-point consequence, kept for the refutation records). -/
+theorem iIndepFun_coord (p : ι → ℝ) (hp0 : ∀ i, 0 ≤ p i) (hp1 : ∀ i, p i ≤ 1) :
+    iIndepFun (fun _ : ι => (inferInstance : MeasurableSpace Bool))
+      (fun (i : ι) (ω : ι → Bool) => ω i) (bernPMF p hp0 hp1).toMeasure := by
+  rw [iIndepFun_iff_measure_inter_preimage_eq_mul]
+  intro T sets hsets
+  rw [toMeasure_cyl_inter p hp0 hp1 T sets]
+  exact Finset.prod_congr rfl fun i _ => (toMeasure_cyl p hp0 hp1 i (sets i)).symm
+
+/-- Mutual independence is inherited by injectively reindexed
+families (uniform codomain — the shape every design consumer needs). -/
+theorem iIndepFun_of_injective {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
+    {ι ι' γ : Type*} {mγ : MeasurableSpace γ}
+    {f : ι → Ω → γ} (hf : iIndepFun (fun _ : ι => mγ) f μ) (e : ι' → ι)
+    (he : Function.Injective e) :
+    iIndepFun (fun _ : ι' => mγ) (fun x : ι' => f (e x)) μ := by
+  classical
+  rw [iIndepFun_iff_measure_inter_preimage_eq_mul] at hf ⊢
+  intro T' sets' hsets'
+  set A : ι → Set γ := fun j =>
+    if h : ∃ k, e k = j ∧ k ∈ T' then sets' h.choose else Set.univ with hA
+  have hAeq : ∀ (k : ι') (hk : k ∈ T'), A (e k) = sets' k := by
+    intro k hk
+    have hex : ∃ k', e k' = e k ∧ k' ∈ T' := ⟨k, rfl, hk⟩
+    show (if h : ∃ k', e k' = e k ∧ k' ∈ T' then sets' h.choose else Set.univ) = sets' k
+    rw [dif_pos hex]
+    have hke : hex.choose = k := he hex.choose_spec.1
+    rw [hke]
+  have hAmeas : ∀ j ∈ T'.image e, MeasurableSet (A j) := by
+    intro j hj
+    show MeasurableSet (if h : ∃ k, e k = j ∧ k ∈ T' then sets' h.choose else Set.univ)
+    by_cases hex : ∃ k, e k = j ∧ k ∈ T'
+    · rw [dif_pos hex]; exact hsets' _ hex.choose_spec.2
+    · rw [dif_neg hex]; exact MeasurableSet.univ
+  have himage : (⋂ k ∈ T', (f (e k)) ⁻¹' sets' k)
+      = ⋂ j ∈ T'.image e, (f j) ⁻¹' A j := by
+    ext ω
+    simp only [Set.mem_iInter, Set.mem_preimage]
+    constructor
+    · intro h j hj
+      obtain ⟨k, hk, rfl⟩ := Finset.mem_image.mp hj
+      have h1 : A (e k) = sets' k := hAeq k hk
+      rw [h1]
+      exact h k hk
+    · intro h k hk
+      have h1 : A (e k) = sets' k := hAeq k hk
+      have h2 : f (e k) ω ∈ A (e k) := h (e k) (Finset.mem_image_of_mem (f := e) hk)
+      rw [h1] at h2
+      exact h2
+  have hmass := hf (T'.image e) (sets := A) hAmeas
+  rw [himage, hmass, Finset.prod_image (fun a _ b _ hab => he hab)]
+  exact Finset.prod_congr rfl fun k hk => by rw [hAeq k hk]
+
+
+/-- Mutual independence at an arbitrary measurable codomain with all
+single-coordinate factors measurable, for summand families factoring
+through injectively-distinct single coordinates — the repaired
+`h_indep` clause shape at the scalar layer (the degree-tail design). -/
+theorem iIndepFun_coord_apply (p : ι → ℝ) (hp0 : ∀ i, 0 ≤ p i) (hp1 : ∀ i, p i ≤ 1)
+    {γ : Type*} {mγ : MeasurableSpace γ}
+    {ι' : Type*} [Fintype ι'] (e : ι' → ι) (he : Function.Injective e)
+    (F : ι' → Bool → γ) (hF : ∀ k, Measurable (F k)) :
+    iIndepFun (fun _ : ι' => mγ)
+      (fun (k : ι') (ω : ι → Bool) => F k (ω (e k))) (bernPMF p hp0 hp1).toMeasure :=
+  (iIndepFun_of_injective (iIndepFun_coord p hp0 hp1) e he).comp F hF
+
+/-- Mutual independence at the matrix codomain, for summand families
+factoring through injectively-distinct single coordinates — the
+repaired `h_indep` clause shape at the matrix layer (the sparsification
+and edge-perturbation designs). -/
+theorem iIndepFun_coord_matrix (p : ι → ℝ) (hp0 : ∀ i, 0 ≤ p i) (hp1 : ∀ i, p i ≤ 1)
+    {ι' : Type*} [Fintype ι'] (e : ι' → ι) (he : Function.Injective e)
+    (F : ι' → Bool → Matrix V V ℝ) :
+    iIndepFun (fun _ : ι' => (inferInstance : MeasurableSpace (Matrix V V ℝ)))
+      (fun (k : ι') (ω : ι → Bool) => F k (ω (e k))) (bernPMF p hp0 hp1).toMeasure :=
+  (iIndepFun_of_injective (iIndepFun_coord p hp0 hp1) e he).comp F
+    (fun k => measurable_of_finite (F k))
+
+end IIndep
+
+
 section MatrixLayer
 
 variable {ι : Type*} [Fintype ι] [DecidableEq ι]

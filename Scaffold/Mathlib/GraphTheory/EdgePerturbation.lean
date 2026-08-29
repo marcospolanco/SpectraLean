@@ -292,6 +292,22 @@ theorem indepFun_perturbSummand (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 1
     (F := fun b => ((if b then (1 : ℝ) else 0) - p e) • perturbEdgeLap A e)
     (G := fun b => ((if b then (1 : ℝ) else 0) - p e') • perturbEdgeLap A e') hee
 
+/-- The repaired `h_indep` clause of `matrix_hoeffding` at the design,
+transported to the axiom's `Fin n` index: the whole summand family is
+mutually independent under the product-Bernoulli measure (the pairwise
+lemma above is its two-point consequence, kept for the refutation
+records). -/
+theorem iIndepFun_perturbSummand (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 1) :
+    iIndepFun (fun _ : Fin (Fintype.card (V × V)) =>
+        (inferInstance : MeasurableSpace (Matrix V V ℝ)))
+      (fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>
+        perturbSummand A p ((Fintype.equivFin (V × V)).symm i) ω)
+      (bernPMF p hp0 hp1).toMeasure :=
+  iIndepFun_coord_matrix p hp0 hp1 (Fintype.equivFin (V × V)).symm
+    ((Fintype.equivFin (V × V)).symm.injective)
+    (fun k b => ((if b then (1 : ℝ) else 0) - p ((Fintype.equivFin (V × V)).symm k)) •
+      perturbEdgeLap A ((Fintype.equivFin (V × V)).symm k))
+
 end Design
 
 /-! ## 4. The weight-space perturbation and the packaging identity -/
@@ -560,6 +576,22 @@ theorem indepFun_degPerturbSummand (A : WAdj (V := V)) (p : (V × V) → ℝ)
     (measurable_of_finite
       (fun b : Bool => ((if b then (1 : ℝ) else 0) - p e')
         * degPerturbWeight A v e'))
+
+/-- The repaired `h_indep` clause of `hoeffding_inequality` at the
+degree-tail design, transported to the axiom's `Fin n` index: the whole
+centered-summand family is mutually independent. -/
+theorem iIndepFun_degPerturbSummand (A : WAdj (V := V)) (p : (V × V) → ℝ)
+    (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 1) (v : V) :
+    iIndepFun (fun _ : Fin (Fintype.card (V × V)) =>
+        (inferInstance : MeasurableSpace ℝ))
+      (fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>
+        degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω)
+      (bernPMF p hp0 hp1).toMeasure :=
+  iIndepFun_coord_apply p hp0 hp1 (Fintype.equivFin (V × V)).symm
+    ((Fintype.equivFin (V × V)).symm.injective)
+    (fun k b => ((if b then (1 : ℝ) else 0) - p ((Fintype.equivFin (V × V)).symm k)) *
+      degPerturbWeight A v ((Fintype.equivFin (V × V)).symm k))
+    (fun _ => measurable_of_finite _)
 
 omit [Fintype V] in
 /-- The `h_bound` clause of `hoeffding_inequality` at the design:

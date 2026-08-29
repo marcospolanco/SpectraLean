@@ -74,7 +74,7 @@ the zero sequence and checks the resulting empty-event bound.
 -/
 axiom hoeffding_inequality {n : ℕ} {X : Fin n → Ω → ℝ} {a : Fin n → ℝ}
     (h_meas : ∀ i, Measurable (X i))
-    (h_indep : ∀ i j, i ≠ j → IndepFun (X i) (X j) μ)
+    (h_indep : iIndepFun (fun _ : Fin n => (inferInstance : MeasurableSpace ℝ)) X μ)
     (h_bound : ∀ i ω, |X i ω| ≤ a i)
     (h_mean : ∀ i, ∫ ω, X i ω ∂μ = 0)
     (t : ℝ) (ht : 0 ≤ t) :
@@ -92,7 +92,7 @@ Source:
 -/
 theorem hoeffding_iid {n : ℕ} {X : Fin n → Ω → ℝ} {a : ℝ} (ha : 0 ≤ a)
     (h_meas : ∀ i, Measurable (X i))
-    (h_indep : ∀ i j, i ≠ j → IndepFun (X i) (X j) μ)
+    (h_indep : iIndepFun (fun _ : Fin n => (inferInstance : MeasurableSpace ℝ)) X μ)
     (h_bound : ∀ i ω, |X i ω| ≤ a)
     (h_mean : ∀ i, ∫ ω, X i ω ∂μ = 0)
     (t : ℝ) (ht : 0 ≤ t) :
@@ -120,7 +120,7 @@ centering structure, whose degenerate case reduces to that pattern.
 -/
 axiom hoeffding_empirical {n : ℕ} {X : Fin n → Ω → ℝ}
     (h_meas : ∀ i, Measurable (X i))
-    (h_indep : ∀ i j, i ≠ j → IndepFun (X i) (X j) μ)
+    (h_indep : iIndepFun (fun _ : Fin n => (inferInstance : MeasurableSpace ℝ)) X μ)
     (h_bound : ∀ i ω, 0 ≤ X i ω ∧ X i ω ≤ 1)
     (t : ℝ) (ht : 0 ≤ t) :
     μ {ω | |(1 / (n : ℝ)) * ∑ i, X i ω

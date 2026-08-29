@@ -7006,3 +7006,108 @@ remaining items consumer-gated).
 **Remaining risk:** none owed — engine and QA are unconditional hard crust; the two Derived tails are conditional on their own axiom and must never be described as foundationally proved. Only `hoeffding_lemma` remains zero-consumer (its natural consumer is `bernstein_inequality`'s own proof — upstream work). The sole priced follow-on: the admissibility dissolution, now with both degree tails as candidate engines (the Bernstein one strictly sharper at interior `p`).
 
 **Next handoff:** the Active table's only actionable row remains the empirical-stationary Step 2, gated on a consumer pricing the bias-term shape; otherwise the admissibility dissolution (priced, unblocked), or the next load-bearing gap `docs/6_SGT_BACKLOG.md` names (all remaining items consumer-gated).
+
+## 2026-08-29T17:33:40Z — The pairwise-independence audit: six concentration axioms carry a false hypothesis shape
+
+**Run:** `20260829T173340Z-run-1`  
+**Session:** `ses_fb17db359ffe9YX8gfLEglYVtE`  
+**Status:** in-progress  
+**Milestone:** priority item 4 (reduce the explicit trust surface), selected
+per priority item 0 (no High rows; the Medium-High empirical-stationary
+Step 2 row consumer-gated; all Low rows human-decision-gated): a Step-0
+audit found that all six independence-carrying concentration axioms
+(`hoeffding_inequality`, `hoeffding_empirical`, `bernstein_inequality`,
+`bernstein_bounded_variance`, `matrix_hoeffding`, `matrix_bernstein`;
+Azuma's `MatrixMDS` is a genuine martingale shape, unaffected)
+hypothesize only pairwise `IndepFun` — and pairwise independence does
+not suffice for Hoeffding/Chernoff: the 15 Walsh characters of the fair
+BernoulliProduct on `Fin 4 → Bool` are pairwise independent with sum 15
+on the all-false atom (mass 1/16) and −1 elsewhere, refuting each
+axiom's tail bound at `t = 15` by a factor ≫ 1 with numerics needing
+only `e ≥ 2`. Deliverable: the refutation fixtures in QA, the in-place
+repair (pairwise clause → `iIndepFun`), the `iIndepFun_coord` /
+`iIndepFun_coord_matrix` engine in BernoullilliProduct (cylinder-mass
+generalization of the delivered `sum_coord2_mul` route), full consumer
+threading (designs are genuinely mutually independent — public Derived
+statements unchanged), and records. Zero new axioms (count stays 10;
+six repaired in place).
+
+**Changes (planned):** `Scaffold/Mathlib/Probability/BernoulliProduct.lean`
+(iIndep machinery), `IIDProduct.lean`, the four Scalar + two Matrix
+concentration axiom files, `EdgePerturbation.lean`,
+`EdgePerturbationTail.lean`, `SparsificationTail.lean`,
+QA files (`Scalar_QA.lean` refutation family + re-instantiations,
+`Matrix_QA.lean`, `EmpiricalStationary_QA.lean`,
+`SparsificationTail_QA.lean`, `EdgePerturbation_QA.lean` pins), a new
+proposal, and the status records.
+
+**Verification (planned):** spike to zero errors before any shelf edit;
+`lake env lean` on all touched modules; explicit `lake build` targets;
+`#print axioms` on the repaired axioms' consumers; full `lake build` +
+`check_build_completeness.py`; `lint_axioms` (allowlist decisions for
+any new axiom signature shapes — repairs keep existing guards),
+`check_citations`, `check_markdown_links`; scoreboard regeneration;
+map-freshness sync if any proposal status header changes.
+
+## 2026-08-29T19:56:11Z — Continuing the pairwise-independence repair: threading the remaining consumers and building the refutation fixtures
+
+**Run:** `20260829T195611Z-run-1`  
+**Session:** `ses_fb0f2f880ffe4AHeHedI2WzxDA`  
+**Status:** in-progress  
+**Milestone:** continuation of the active pairwise-independence audit
+and repair (run `20260829T173340Z-run-1` repaired the six axiom
+signatures in place and threaded the BernoulliProduct and
+EdgePerturbation chains; the tree does not build as it stands). This
+run: (1) restore build reachability — IIDProduct's `iIndepFun`
+coordinate machinery (the `iidPMF` analogue of the delivered
+BernoulliProduct engine), EmpiricalStationary + Sparsification
+consumer threading, and the zero-family QA re-instantiations
+(Scalar_QA, Matrix_QA, EmpiricalStationary_QA) that still pass the
+dead pairwise clause; (2) the Walsh-family refutation fixtures in QA
+(the falsification content justifying the repair): the 15 nontrivial
+characters of the fair BernoulliProduct on `Fin 4 → Bool`, their
+pairwise independence and zero means (flip-involution), the sum value
+15/−1, and the six hypothesis-form refutations of the pre-repair
+shapes; (3) the proposal and status records. Zero new axioms (count
+stays 10; six repaired in place, consumers' public statements
+unchanged).
+
+**Changes (planned):** `Scaffold/Mathlib/Probability/IIDProduct.lean`
+(iIndep engine), `Scaffold/Derived/EmpiricalStationary.lean`,
+`Scaffold/Mathlib/GraphTheory/Sparsification.lean`
+(`iIndepFun_ssSummand`), `Scaffold/Derived/SparsificationTail.lean`,
+QA re-instantiations, a new
+`Scaffold/QA/Concentration/PairwiseIndependence_QA.lean`, a new
+proposal, and the status records.
+
+**Verification (planned):** spike to zero errors before shelf edits;
+`lake env lean` on touched modules; explicit `lake build` targets;
+`#print axioms` on the repaired axioms' consumers; full `lake build` +
+`check_build_completeness.py`; `lint_axioms`, `check_citations`,
+`check_markdown_links`; scoreboard regeneration; map-freshness sync.
+
+## 2026-08-29T22:24:14Z — Completing the pairwise-independence repair: verification restored, records closed
+
+**Run:** `20260829T222414Z-run-1`  
+**Session:** `ses_fb06adbf6ffeS2fmzA1T2Vw5Iu`  
+**Status:** in-progress  
+**Milestone:** completion of the active pairwise-independence repair (runs `20260829T173340Z-run-1`, `20260829T195611Z-run-1`): the interrupted prior run left the tree mid-threading with the records claiming more than the tree delivered. This run: (1) re-verify every claim independently — the six repaired axioms, the BernoulliProduct/IIDProduct `iIndepFun` engines, all consumer threadings, and the Walsh refutation family; (2) finish what the interruption left open — the new QA file carried linter warnings/deprecation notes (cleaned to zero output), the map stats stamps were still 3008 (synced to 3099, SVG regenerated), Errata §6 still recorded the repair as open/in-progress; (3) close every record: Errata §6, the `proposals/README.md` Delivered row, README/radar counts, the execution plan, and the terminal activity entry.
+
+**Changes (planned):** `Scaffold/QA/Concentration/PairwiseIndependence_QA.lean` (warning cleanup only — six linter notes, one deprecation pair, one positionless `Try this: ring_nf` traced by bisection to a `ring` call and replaced by `ring_nf`), `docs/9_ERRATA.md` (§6 closed), `proposals/README.md` (Delivered row), `README.md`, `docs/7_SGT_RADAR.md` (count syncs), `scripts/generate_scaffold_map_svg.py` + `docs/scaffold_map.html` (stats stamps), `docs/EXECUTION_PLAN.md`, this file.
+
+**Verification (planned):** full `lake build` + `check_build_completeness.py` (129/129); `#print axioms` on the six refutations, the nine engines, and the eight Derived consumers (each on its own axiom alone); `lint_axioms`, `check_citations`, `check_markdown_links`; scoreboard idempotence; map freshness exit 0.
+
+## 2026-08-29T22:27:50Z — Pairwise-independence repair completed and verified
+
+**Run:** `20260829T222414Z-run-1`  
+**Session:** `ses_fb06adbf6ffeS2fmzA1T2Vw5Iu`  
+**Status:** completed  
+**Milestone:** the active pairwise-independence repair (runs `20260829T173340Z-run-1`, `20260829T195611Z-run-1`) — six of the ten admitted concentration axioms had pairwise-only `IndepFun` hypothesis clauses, materially false per the Walsh-character counterexample (Errata §6) — brought to a fully verified, fully recorded close.
+
+**Changes:** `Scaffold/QA/Concentration/PairwiseIndependence_QA.lean` (linter cleanup only: six unused-binder notes, two deprecated `div_lt_iff`/`lt_div_iff` → `…₀`, one unnecessary-seq-focus pair, one positionless `Try this: ring_nf` located by bisection — a `ring` call in `ofReal_le_refl` — and replaced by `ring_nf`; the file now elaborates with zero output); `wip/pairwise3_axcheck.lean` (the consumer/engine axiom audit, extending the interrupted run's refutation audit); records — `docs/9_ERRATA.md` §6 resolved, `proposals/README.md`'s Delivered row, the proposal's status header (third-run clause), `README.md` (3099), `docs/7_SGT_RADAR.md` (QA axis 3099/67 modules; axis 7's second axiom-consistency-repair clause), `docs/5_QA_SCOREBOARD.md` (verification row), `index/map/probability_concentration.md` (repair annotations on all six axiom rows + the new `iIndepFun` engine rows), `scripts/generate_scaffold_map_svg.py` + `docs/scaffold_map.html` (stats stamps 3008 → 3099, SVG regenerated), `docs/EXECUTION_PLAN.md` (queue emptied, delivered record).
+
+**Verification:** every interrupted-run claim re-checked independently before any record edit: explicit `lake build` targets ✔ on all touched modules; `#print axioms` via `wip/pairwise2_axcheck.lean` (six refutations: exactly `propext, Classical.choice, Quot.sound`) and `wip/pairwise3_axcheck.lean` (nine engines hard-crust; the eight Derived consumers each conditional on its own axiom alone — `matrix_hoeffding` ×2, `hoeffding_inequality`, `bernstein_inequality`, `matrix_bernstein` ×2, `hoeffding_empirical` ×2); **full `lake build` ✔ immediately followed by `check_build_completeness.py` — first pass flagged the QA file's own stale artifact after the linter cleanup (my edit), remediated by the documented remove-and-rebuild, final 129 source files, 129 fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` (10, both findings allowlisted-confirmed), `check_citations`, `check_markdown_links` pass; scoreboard regenerated (**3099/10/0**, idempotent across two runs, hand verification row preserved); **map freshness exit 0** (45 stations, no proposal status header changed).
+
+**Remaining risk:** the six axioms remain admitted — the repair fixes the hypothesis *shape*; truth stays with the cited literature, and the Derived tails remain conditional on their own axioms. The whole delivery (this milestone's three runs) sits uncommitted in the worktree; the Errata §6 commit reference lands with the operator's commit per `docs/arch/commit-steward-protocol.md`.
+
+**Next handoff:** the queue is empty — check `proposals/README.md`'s Active table first (no High rows; the Medium-High empirical-stationary Step 2 is consumer-gated on the bias-term shape); otherwise the center-out policy. `hoeffding_lemma` remains the one zero-consumer axiom (its natural consumer is `bernstein_inequality`'s own proof — upstream work).

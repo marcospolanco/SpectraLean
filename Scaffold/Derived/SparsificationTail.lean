@@ -101,14 +101,12 @@ theorem sparsification_norm_tail [Nonempty V] (hnn : ∀ i j, 0 ≤ A i j)
       StronglyMeasurable fun ω : (V × V) → Bool =>
         ssSummand A hA q ((Fintype.equivFin (V × V)).symm i) ω :=
     fun i => stronglyMeasurable_ssSummand A hA q _
-  have hindep : ∀ i j : Fin (Fintype.card (V × V)), i ≠ j →
-      IndepFun (fun ω : (V × V) → Bool =>
-          ssSummand A hA q ((Fintype.equivFin (V × V)).symm i) ω)
-        (fun ω : (V × V) → Bool =>
-          ssSummand A hA q ((Fintype.equivFin (V × V)).symm j) ω)
-        (ssMeasure A hA q hq.le) :=
-    fun i j hij => indepFun_ssSummand A hA q hq.le
-      ((Fintype.equivFin (V × V)).symm.injective.ne hij)
+  have hindep : iIndepFun (fun _ : Fin (Fintype.card (V × V)) =>
+      (inferInstance : MeasurableSpace (Matrix V V ℝ)))
+      (fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>
+        ssSummand A hA q ((Fintype.equivFin (V × V)).symm i) ω)
+      (ssMeasure A hA q hq.le) :=
+    iIndepFun_ssSummand A hA q hq.le
   have hherm : ∀ (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool),
       (ssSummand A hA q ((Fintype.equivFin (V × V)).symm i) ω).IsHermitian :=
     fun i ω => isHermitian_of_isSymm (ssSummand_isSymm A hA q _ ω)

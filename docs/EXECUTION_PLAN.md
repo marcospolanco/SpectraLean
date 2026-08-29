@@ -6,17 +6,95 @@ holds the append-only narrative.
 
 ## Active milestone
 
-None — see the delivered milestone below and the standing handoff. The
-dissolution-completion milestone (the floor and swept-cut members made
-unconditional, finishing the window family) was **delivered this run**;
-the degree-concentration proposal's follow-on list is empty (its
-completion record prices nothing new), and the Active table still
-holds only the gated empirical-stationary Step 2 row and Low
-human-decision items.
+None — the queue is empty as of 2026-08-29T22:24:14Z. The next run
+checks `proposals/README.md`'s Active priority table first (priority
+item 0; no High rows stand, the one Medium-High row is consumer-gated
+on the empirical-stationary Step-2 bias-term shape), then falls
+through to the center-out SGT policy. Natural candidates on record:
+the empirical-stationary Step 2 (gated), any named load-bearing gap
+`docs/6_SGT_BACKLOG.md` carries (all remaining items consumer-gated),
+or the next axiom-trust audit the Errata pattern suggests.
 
 ------
 
 ## Delivered milestones (most recent first)
+
+**The pairwise-independence repair of the six concentration axioms —
+Errata §6 closed, the largest single trust-surface repair in the
+project's history (six of the ten admitted axioms materially false in
+hypothesis shape, all repaired in place at unchanged public consumer
+statements) — `proposals/pairwise-independence-concentration-repair.md`;
+delivered 2026-08-29 across runs `20260829T173340Z-run-1` (the Step-0
+audit, the six axiom signatures, the BernoulliProduct engine, the
+EdgePerturbation chains), `20260829T195611Z-run-1` (the IIDProduct
+engine, the EmpiricalStationary/Sparsification threading, the QA
+re-instantiations, the Walsh refutation family, the scoreboard), and
+`20260829T222414Z-run-1` (independent re-verification of every claim,
+the QA file's linter cleanup to zero output, the map-stats sync, and
+the records closure). DELIVERED — zero new axioms (count stays 10;
+`#print axioms` via `wip/pairwise2_axcheck.lean`/`wip/pairwise3_axcheck.lean`
+on all 23 audited declarations: the six hypothesis-form refutations at
+exactly the standard three — a refutation cannot carry the axiom it
+refutes — the nine `iIndepFun` engines hard-crust, and each of the
+eight Derived consumers conditional on its own axiom alone). QA
+3008 → 3099 (+91: the new `PairwiseIndependence_QA.lean` at 89
+declarations plus the two `iIndepFun_const_*_QA` re-instantiation
+lemmas).**
+
+The finding: all six independence-carrying concentration axioms
+hypothesized only pairwise `IndepFun` — insufficient for
+Hoeffding/Chernoff. The falsification content: the fifteen nontrivial
+Walsh characters of the fair `BernoulliProduct` on `Fin 4 → Bool` are
+pairwise independent (xor-translation group action forcing all four
+joint sign cells to mass `1/4`), centered (flip-involution), bounded
+by `1`, with sum `15` on the all-false atom (mass `1/16`) — six
+hypothesis-form refutations, one per pre-repair axiom, every other
+hypothesis clause *proved* at the fixture (the scalar pair directly;
+the matrix pair through the rank-one idempotent lift `‖E‖ = 1`; the
+`[0,1]`-valued affine images for `hoeffding_empirical`), the tail
+bounds proved `< 1/16` from `e^{1/2} ≥ 3/2` and `e ≥ 9/4` alone. The
+repair: the pairwise clause became `iIndepFun` (mutual independence —
+the cited sources' actual hypothesis shape); the engines live on both
+sampling spaces (`BernoulliProduct`'s `toMeasure_cyl_inter` /
+`iIndepFun_coord` / `iIndepFun_of_injective` / `iIndepFun_coord_apply`
+/ `iIndepFun_coord_matrix`; `IIDProduct`'s `iidPMF` analogue plus
+`iIndepFun_indicator_coord`) with the design-level clauses
+(`iIndepFun_perturbSummand`, `iIndepFun_degPerturbSummand`,
+`iIndepFun_ssSummand`) and the three Derived tail modules threaded;
+the pre-existing pairwise lemmas remain on the shelf as the refutation
+records' interface.
+
+**Verification** (all re-run independently by the completing run):
+`lake env lean` zero errors on every touched module and zero
+warnings on the new QA file; explicit `lake build` targets ✔ on every
+changed module; **full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 129 source files, 129 fresh artifacts,
+0 stale, 0 missing, exit 0** (the completeness pass caught the new
+file's stale artifact after the linter cleanup — removed and rebuilt
+once, the documented remediation); `lint_axioms` (10, both findings
+allowlisted-confirmed; the repair adds no guard surface — the clause
+got strictly stronger, the 2026-08-28 guards untouched),
+`check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**3099/10/0**, idempotent) with the verification row
+added; **map freshness exit 0** after the stats-stamp sync
+(3008 → 3099 in both map files, SVG regenerated; no station's
+proposal status changed — the delivery has no station). Records
+closed: Errata §6 (resolved, with the not-yet-committed note),
+`proposals/README.md` (the Delivered row), README (3099), the radar
+(QA axis + axis 7's second axiom-consistency-repair clause), the
+probability-concentration index map (repair annotations + engine
+rows), the proposal's status header, this plan.
+
+**Remaining risk:** the six axioms remain admitted (the repair fixes
+the hypothesis shape, not the truth — that stays with the cited
+literature); every conditional Derived tail must continue to be
+reported as conditional on its own axiom. The work is uncommitted at
+this entry (autonomous runs do not commit); the commit reference
+lands with the operator's commit. **Next handoff:** the queue is
+empty — check the Active table first; the empirical-stationary Step 2
+remains consumer-gated, and `hoeffding_lemma` remains the one
+zero-consumer axiom (its natural consumer is `bernstein_inequality`'s
+own proof, upstream work).
 
 **The dissolution completion — the floor and swept-cut members made
 unconditional, the window family finished (floor, bracket, swept cut

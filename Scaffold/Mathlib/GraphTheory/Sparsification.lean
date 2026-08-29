@@ -1240,6 +1240,22 @@ theorem indepFun_ssSummand (q : ℝ) (hq : 0 ≤ q) {e e' : V × V} (hee : e ≠
     (fun e => ssProb_nonneg A hA q hq e) (fun e => ssProb_le_one A hA q e)
     (ssSummandBool A hA q e) (ssSummandBool A hA q e') hee
 
+/-- The repaired `h_indep` clause of `matrix_bernstein` at the design,
+transported to the axiom's `Fin n` index: the whole summand family is
+mutually independent under the design measure (the pairwise lemma
+above is its two-point consequence, kept for the refutation
+records). -/
+theorem iIndepFun_ssSummand (q : ℝ) (hq : 0 ≤ q) :
+    iIndepFun (fun _ : Fin (Fintype.card (V × V)) =>
+        (inferInstance : MeasurableSpace (Matrix V V ℝ)))
+      (fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>
+        ssSummand A hA q ((Fintype.equivFin (V × V)).symm i) ω)
+      (ssMeasure A hA q hq) :=
+  iIndepFun_coord_matrix (fun e => ssProb A hA q e)
+    (fun e => ssProb_nonneg A hA q hq e) (fun e => ssProb_le_one A hA q e)
+    (Fintype.equivFin (V × V)).symm ((Fintype.equivFin (V × V)).symm.injective)
+    (fun k => ssSummandBool A hA q ((Fintype.equivFin (V × V)).symm k))
+
 end Sampled
 
 section Transport

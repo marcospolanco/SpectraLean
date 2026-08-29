@@ -182,7 +182,8 @@ all of `Ω` and the statement is false for large `t`. -/
 theorem matrix_hoeffding_quadForm {n : ℕ} [Nonempty V]
     {X : Fin n → Ω → Matrix V V ℝ} {A : Fin n → Matrix V V ℝ}
     (h_meas : ∀ i, StronglyMeasurable (X i))
-    (h_indep : ∀ i j, i ≠ j → IndepFun (X i) (X j) μ)
+    (h_indep : iIndepFun (fun _ : Fin n =>
+      (inferInstance : MeasurableSpace (Matrix V V ℝ))) X μ)
     (h_herm : ∀ i ω, (X i ω).IsHermitian)
     (h_bound : ∀ i ω, Matrix.PosSemidef (A i * A i - X i ω * X i ω))
     (t : ℝ) (ht : 0 ≤ t) (x : V → ℝ) (hx : x ≠ 0) :
@@ -235,14 +236,12 @@ theorem edgePerturbation_norm_tail [Nonempty V]
       StronglyMeasurable fun ω : (V × V) → Bool =>
         perturbSummand A p ((Fintype.equivFin (V × V)).symm i) ω :=
     fun i => stronglyMeasurable_perturbSummand A p _
-  have hindep : ∀ i j : Fin (Fintype.card (V × V)), i ≠ j →
-      IndepFun (fun ω : (V × V) → Bool =>
-          perturbSummand A p ((Fintype.equivFin (V × V)).symm i) ω)
-        (fun ω : (V × V) → Bool =>
-          perturbSummand A p ((Fintype.equivFin (V × V)).symm j) ω)
-        (bernPMF p hp0 hp1).toMeasure :=
-    fun i j hij => indepFun_perturbSummand A p hp0 hp1 _ _
-      ((Fintype.equivFin (V × V)).symm.injective.ne hij)
+  have hindep : iIndepFun (fun _ : Fin (Fintype.card (V × V)) =>
+      (inferInstance : MeasurableSpace (Matrix V V ℝ)))
+      (fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>
+        perturbSummand A p ((Fintype.equivFin (V × V)).symm i) ω)
+      (bernPMF p hp0 hp1).toMeasure :=
+    iIndepFun_perturbSummand A p hp0 hp1
   have hherm : ∀ (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool),
       (perturbSummand A p ((Fintype.equivFin (V × V)).symm i) ω).IsHermitian :=
     fun i ω => isHermitian_of_isSymm (perturbSummand_isSymm A p _ ω)
@@ -865,14 +864,12 @@ theorem edgePerturbation_degree_tail (hp0 : ∀ e, 0 ≤ p e)
       Measurable fun ω : (V × V) → Bool =>
         degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω :=
     fun i => measurable_degPerturbSummand A p v _
-  have hindep : ∀ i j : Fin (Fintype.card (V × V)), i ≠ j →
-      IndepFun (fun ω : (V × V) → Bool =>
-          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω)
-        (fun ω : (V × V) → Bool =>
-          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm j) ω)
-        (bernPMF p hp0 hp1).toMeasure :=
-    fun i j hij => indepFun_degPerturbSummand A p hp0 hp1 v
-      ((Fintype.equivFin (V × V)).symm.injective.ne hij)
+  have hindep : iIndepFun (fun _ : Fin (Fintype.card (V × V)) =>
+      (inferInstance : MeasurableSpace ℝ))
+      (fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>
+        degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω)
+      (bernPMF p hp0 hp1).toMeasure :=
+    iIndepFun_degPerturbSummand A p hp0 hp1 v
   have hbound : ∀ (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool),
       |degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω|
         ≤ |degPerturbWeight A v ((Fintype.equivFin (V × V)).symm i)| :=
@@ -1014,14 +1011,12 @@ theorem edgePerturbation_degree_tail_bernstein (hp0 : ∀ e, 0 ≤ p e)
       Measurable fun ω : (V × V) → Bool =>
         degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω :=
     fun i => measurable_degPerturbSummand A p v _
-  have hindep : ∀ i j : Fin (Fintype.card (V × V)), i ≠ j →
-      IndepFun (fun ω : (V × V) → Bool =>
-          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω)
-        (fun ω : (V × V) → Bool =>
-          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm j) ω)
-        (bernPMF p hp0 hp1).toMeasure :=
-    fun i j hij => indepFun_degPerturbSummand A p hp0 hp1 v
-      ((Fintype.equivFin (V × V)).symm.injective.ne hij)
+  have hindep : iIndepFun (fun _ : Fin (Fintype.card (V × V)) =>
+      (inferInstance : MeasurableSpace ℝ))
+      (fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>
+        degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω)
+      (bernPMF p hp0 hp1).toMeasure :=
+    iIndepFun_degPerturbSummand A p hp0 hp1 v
   have hmean : ∀ i : Fin (Fintype.card (V × V)),
       ∫ ω : (V × V) → Bool,
           degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω
@@ -1131,14 +1126,12 @@ theorem edgePerturbation_degree_tail_bernstein_budget (hp0 : ∀ e, 0 ≤ p e)
       Measurable fun ω : (V × V) → Bool =>
         degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω :=
     fun i => measurable_degPerturbSummand A p v _
-  have hindep : ∀ i j : Fin (Fintype.card (V × V)), i ≠ j →
-      IndepFun (fun ω : (V × V) → Bool =>
-          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω)
-        (fun ω : (V × V) → Bool =>
-          degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm j) ω)
-        (bernPMF p hp0 hp1).toMeasure :=
-    fun i j hij => indepFun_degPerturbSummand A p hp0 hp1 v
-      ((Fintype.equivFin (V × V)).symm.injective.ne hij)
+  have hindep : iIndepFun (fun _ : Fin (Fintype.card (V × V)) =>
+      (inferInstance : MeasurableSpace ℝ))
+      (fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>
+        degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω)
+      (bernPMF p hp0 hp1).toMeasure :=
+    iIndepFun_degPerturbSummand A p hp0 hp1 v
   have hmean : ∀ i : Fin (Fintype.card (V × V)),
       ∫ ω : (V × V) → Bool,
           degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω

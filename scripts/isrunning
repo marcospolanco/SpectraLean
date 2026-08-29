@@ -1,0 +1,191 @@
+#!/usr/bin/env python3
+"""Check whether `scripts/opencode-pursue` is running or when it will run next."""
+
+import os
+import plistlib
+import re
+import subprocess
+import sys
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+
+def get_project_root() -> Path:
+    return Path(__file__).resolve().parent.parent
+
+
+def find_running_pursue():
+    """Find running opencode-pursue process(es) and return list of (pid, lstart, command)."""
+    try:
+        out = subprocess.check_output(
+            ["ps", "-ax", "-o", "pid,lstart,command"], stderr=subprocess.DEVNULL
+        ).decode("utf-8")
+    except Exception:
+        return []
+
+    my_pid = os.getpid()
+    running = []
+    for line in out.splitlines():
+        line_strip = line.strip()
+        if not line_strip:
+            continue
+        parts = line_strip.split(None, 6)
+        # ps format: PID STARTED (5 tokens: Day Mon DD HH:MM:SS YYYY) COMMAND
+        if len(parts) >= 7:
+            try:
+                pid = int(parts[0])
+            except ValueError:
+                continue
+            if pid == my_pid:
+                continue
+            lstart_str = " ".join(parts[1:6])
+            command = parts[6]
+            if "opencode-pursue" in command and "isrunning" not in command:
+                running.append((pid, lstart_str, command))
+    return running
+
+
+def get_launchd_info(label: str = "io.github.marcospolanco.scaffold-pursue"):
+    """Check launchctl print for the launchd agent."""
+    uid = os.getuid()
+    target = f"gui/{uid}/{label}"
+    try:
+        out = subprocess.check_output(
+            ["launchctl", "print", target], stderr=subprocess.DEVNULL
+        ).decode("utf-8")
+        return out
+    except subprocess.CalledProcessError:
+        return None
+
+
+def get_plist_interval(project_root: Path, label: str = "io.github.marcospolanco.scaffold-pursue"):
+    """Find configured StartInterval from user LaunchAgent or repo template."""
+    user_plist = Path.home() / "Library" / "LaunchAgents" / f"{label}.plist"
+    repo_plist = project_root / "scripts" / f"{label}.plist"
+
+    for plist_path in [user_plist, repo_plist]:
+        if plist_path.is_file():
+            try:
+                with open(plist_path, "rb") as f:
+                    data = plistlib.load(f)
+                    if "StartInterval" in data:
+                        return int(data["StartInterval"]), plist_path
+            except Exception:
+                pass
+    return 3600, None
+
+
+def get_last_run_timestamp(project_root: Path):
+    """Estimate the most recent run start / finish timestamp from logs or activity."""
+    candidates = []
+
+    # Check launchd log mtime
+    launchd_log = project_root / ".opencode" / "scaffold-pursue.launchd.log"
+    if launchd_log.exists():
+        candidates.append(launchd_log.stat().st_mtime)
+
+    # Check run logs in .opencode/runs/
+    runs_dir = project_root / ".opencode" / "runs"
+    if runs_dir.is_dir():
+        for log_file in runs_dir.glob("*.log"):
+            # Try to parse timestamp from filename: YYYYMMDDTHHMMSSZ-run-N.log
+            m = re.match(r"^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z-run-", log_file.name)
+            if m:
+                dt = datetime(
+                    int(m.group(1)),
+                    int(m.group(2)),
+                    int(m.group(3)),
+                    int(m.group(4)),
+                    int(m.group(5)),
+                    int(m.group(6)),
+                    tzinfo=timezone.utc,
+                )
+                candidates.append(dt.timestamp())
+            candidates.append(log_file.stat().st_mtime)
+
+    return max(candidates) if candidates else None
+
+
+def get_zquota_next_reset(project_root: Path):
+    """Query scripts/zquota --json to check if blocked and get quota reset time."""
+    zquota_script = project_root / "scripts" / "zquota"
+    if not zquota_script.exists():
+        return None
+    try:
+        out = subprocess.check_output(
+            [str(zquota_script), "--json"], stderr=subprocess.DEVNULL
+        ).decode("utf-8")
+        import json
+        data = json.loads(out)
+        if not data.get("ready") and data.get("nextResetAt"):
+            return data.get("nextResetAt")
+    except Exception:
+        pass
+    return None
+
+
+def format_dt(dt: datetime) -> str:
+    # Format with local timezone
+    return dt.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
+
+
+def main():
+    project_root = get_project_root()
+    running_procs = find_running_pursue()
+
+    if running_procs:
+        print("Status: RUNNING")
+        for pid, lstart, cmd in running_procs:
+            try:
+                # lstart format: "Sat Aug 29 15:12:47 2026"
+                dt = datetime.strptime(lstart, "%a %b %d %H:%M:%S %Y")
+                local_dt = dt.astimezone()
+                print(f"PID: {pid}")
+                print(f"Started: {format_dt(local_dt)} ({lstart})")
+            except Exception:
+                print(f"PID: {pid}")
+                print(f"Started: {lstart}")
+            print(f"Command: {cmd}")
+        return 0
+
+    print("Status: NOT RUNNING")
+    
+    # Check if launchd service is loaded
+    label = "io.github.marcospolanco.scaffold-pursue"
+    launchd_info = get_launchd_info(label)
+    interval, plist_path = get_plist_interval(project_root, label)
+
+    # Check quota status
+    quota_reset = get_zquota_next_reset(project_root)
+
+    if launchd_info is not None:
+        last_mtime = get_last_run_timestamp(project_root)
+        now = time.time()
+
+        if last_mtime:
+            next_run_ts = last_mtime + interval
+            # If past the interval, launchd will trigger promptly on schedule
+            if next_run_ts < now:
+                next_run_str = "imminently / on next scheduled launchd cycle"
+            else:
+                next_dt = datetime.fromtimestamp(next_run_ts).astimezone()
+                next_run_str = f"at approx. {format_dt(next_dt)} (every {interval}s / {interval // 60}m)"
+        else:
+            next_run_str = f"scheduled via launchd (every {interval}s / {interval // 60}m)"
+
+        print(f"Schedule: launchd service '{label}' is ACTIVE")
+        print(f"Next expected run: {next_run_str}")
+        if quota_reset:
+            print(f"Note: Z.ai quota threshold reached. Quota resets at {quota_reset} (next run before reset will exit 75).")
+    else:
+        print(f"Schedule: launchd service '{label}' is NOT loaded.")
+        print(f"Next expected run: Manual invocation needed (e.g. `scripts/opencode-pursue --runs 1`)")
+        if plist_path:
+            print(f"To enable automated hourly runs: launchctl bootstrap gui/$(id -u) {plist_path}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -88,7 +88,7 @@ the zero sequence and checks the resulting empty-event bound.
 -/
 axiom bernstein_inequality {n : ℕ} {X : Fin n → Ω → ℝ} {a : ℝ} (ha : 0 ≤ a)
     (h_meas : ∀ i, Measurable (X i))
-    (h_indep : ∀ i j, i ≠ j → IndepFun (X i) (X j) μ)
+    (h_indep : iIndepFun (fun _ : Fin n => (inferInstance : MeasurableSpace ℝ)) X μ)
     (h_bound : ∀ i ω, |X i ω| ≤ a)
     (t : ℝ) (ht : 0 ≤ t) :
     μ {ω | |∑ i, (X i ω - ∫ ω', X i ω' ∂μ)| ≥ t} ≤
@@ -111,7 +111,7 @@ pattern certified for `bernstein_inequality`.
 axiom bernstein_bounded_variance {n : ℕ} {X : Fin n → Ω → ℝ} {a v : ℝ}
     (ha : 0 ≤ a) (hv : 0 ≤ v)
     (h_meas : ∀ i, Measurable (X i))
-    (h_indep : ∀ i j, i ≠ j → IndepFun (X i) (X j) μ)
+    (h_indep : iIndepFun (fun _ : Fin n => (inferInstance : MeasurableSpace ℝ)) X μ)
     (h_bound : ∀ i ω, |X i ω| ≤ a)
     (h_var : ∑ i, ∫ ω, (X i ω - ∫ ω', X i ω' ∂μ) ^ 2 ∂μ ≤ v)
     (t : ℝ) (ht : 0 ≤ t) :
@@ -133,7 +133,7 @@ form rescales the numerator to `n t²`.
 theorem bernstein_iid {n : ℕ} {X : Fin n → Ω → ℝ} {a σ_sq : ℝ} (ha : 0 ≤ a)
     (hσ : 0 ≤ σ_sq)
     (h_meas : ∀ i, Measurable (X i))
-    (h_indep : ∀ i j, i ≠ j → IndepFun (X i) (X j) μ)
+    (h_indep : iIndepFun (fun _ : Fin n => (inferInstance : MeasurableSpace ℝ)) X μ)
     (h_bound : ∀ i ω, |X i ω| ≤ a)
     (h_var : ∀ i, ∫ ω, (X i ω - ∫ ω', X i ω' ∂μ) ^ 2 ∂μ = σ_sq)
     (t : ℝ) (ht : 0 ≤ t) :

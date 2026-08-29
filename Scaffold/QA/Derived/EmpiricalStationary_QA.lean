@@ -122,7 +122,7 @@ theorem junk_n_zero_QA :
       ≤ ENNReal.ofReal (2 * Real.exp (-2 * ((0 : ℕ) : ℝ) * 0 ^ 2)) := by
   refine Scaffold.Mathlib.Probability.Concentration.Scalar.hoeffding_empirical
     (fun k => measurable_indicator_coord (V := Fin 2) k 0)
-    (fun k k' hkk' => indepFun_indicator_coord (V := Fin 2) q23 q23_nonneg q23_sum hkk' 0 0)
+    (iIndepFun_indicator_coord (V := Fin 2) q23 q23_nonneg q23_sum 0)
     (fun _k ω => by split_ifs <;> simp) 0 le_rfl
 
 /-- The `n = 0` event is everything (identified, not opaque). -/

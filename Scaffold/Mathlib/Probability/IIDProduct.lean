@@ -17,6 +17,7 @@ import Mathlib.Probability.ProbabilityMassFunction.Integrals
 import Mathlib.Probability.ProbabilityMassFunction.Constructions
 import Mathlib.Probability.Independence.Basic
 import Mathlib.MeasureTheory.Integral.SetIntegral
+import Scaffold.Mathlib.Probability.BernoulliProduct
 
 /-!
 # The i.i.d. product sampling space at a finite distribution
@@ -379,5 +380,97 @@ theorem indepFun_indicator_coord (q : V → ℝ) (hq0 : ∀ v, 0 ≤ q v) (hq1 :
     (measurable_of_finite (fun v : V => if v = j then (1 : ℝ) else 0))
 
 end Independence
+
+section IIndep
+
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
+variable {V : Type*} [Fintype V] [DecidableEq V] [MeasurableSpace V] [MeasurableSingletonClass V]
+
+open scoped Classical in
+/-- The mass of a finite coordinate-cylinder intersection at the i.i.d.
+product — the finite-family generalization of `toMeasure_cyl` (its
+`|T| = 1` case). -/
+theorem toMeasure_cyl_inter (q : V → ℝ) (hq0 : ∀ v, 0 ≤ q v) (hq1 : ∑ v, q v = 1)
+    (T : Finset ι) (A : ι → Set V) :
+    (iidPMF q hq0 hq1).toMeasure (⋂ i ∈ T, (fun ω : ι → V => ω i) ⁻¹' A i)
+      = ∏ i ∈ T, ∑ v, (if v ∈ A i then (1 : ℝ≥0∞) else 0) * ENNReal.ofReal (q v) := by
+  have hmeas : MeasurableSet (⋂ i ∈ T, (fun ω : ι → V => ω i) ⁻¹' A i) :=
+    Set.Finite.measurableSet (Set.toFinite _)
+  rw [PMF.toMeasure_apply (iidPMF q hq0 hq1) _ hmeas, tsum_fintype]
+  simp only [Set.indicator_apply, Set.mem_iInter, Set.mem_preimage]
+  have hpt : ∀ ω : ι → V,
+      (if ∀ i ∈ T, ω i ∈ A i then iidPMF q hq0 hq1 ω else 0)
+        = ∏ i, ((if i ∈ T then (if ω i ∈ A i then (1 : ℝ≥0∞) else 0) else 1)
+            * ENNReal.ofReal (q (ω i))) := by
+    intro ω
+    by_cases hall : ∀ i ∈ T, ω i ∈ A i
+    · rw [if_pos hall, iidPMF_apply,
+        show iidMass q ω = ∏ i, ENNReal.ofReal (q (ω i)) from rfl, Finset.prod_mul_distrib]
+      have hone : (∏ i : ι, if i ∈ T then (if ω i ∈ A i then (1 : ℝ≥0∞) else 0) else 1) = 1 :=
+        Finset.prod_eq_one fun i _ => by
+          by_cases hi : i ∈ T
+          · rw [if_pos hi, if_pos (hall i hi)]
+          · rw [if_neg hi]
+      rw [hone, one_mul]
+    · push_neg at hall
+      obtain ⟨i₀, hi₀T, hi₀A⟩ := hall
+      have hzero : ∏ i, ((if i ∈ T then (if ω i ∈ A i then (1 : ℝ≥0∞) else 0) else 1)
+          * ENNReal.ofReal (q (ω i))) = 0 := by
+        refine Finset.prod_eq_zero (Finset.mem_univ i₀) ?_
+        rw [if_pos hi₀T, if_neg hi₀A, zero_mul]
+      rw [if_neg (fun h => hi₀A (h i₀ hi₀T)), hzero]
+  rw [Finset.sum_congr rfl (fun ω _ => hpt ω),
+    show (Finset.univ : Finset (ι → V)) = Fintype.piFinset fun _ => Finset.univ from by
+      ext ω; simp [Fintype.mem_piFinset],
+    Finset.sum_prod_piFinset (Finset.univ : Finset V)
+      (fun i v => (if i ∈ T then (if v ∈ A i then (1 : ℝ≥0∞) else 0) else 1)
+        * ENNReal.ofReal (q v))]
+  have houter : ∏ i : ι, ∑ v : V,
+      ((if i ∈ T then (if v ∈ A i then (1 : ℝ≥0∞) else 0) else 1) * ENNReal.ofReal (q v))
+      = ∏ i ∈ T, ∑ v : V,
+      ((if i ∈ T then (if v ∈ A i then (1 : ℝ≥0∞) else 0) else 1) * ENNReal.ofReal (q v)) := by
+    refine (Finset.prod_subset (Finset.subset_univ T) fun i _ hi => ?_).symm
+    simp only [if_neg hi, one_mul]
+    exact sum_mass_eq_one hq0 hq1
+  rw [houter]
+  exact Finset.prod_congr rfl fun i hi => by
+    refine Finset.sum_congr rfl fun v _ => ?_
+    rw [if_pos hi]
+
+/-- Mutual independence of the coordinate projections at the i.i.d.
+product. -/
+theorem iIndepFun_coord (q : V → ℝ) (hq0 : ∀ v, 0 ≤ q v) (hq1 : ∑ v, q v = 1) :
+    iIndepFun (fun _ : ι => (inferInstance : MeasurableSpace V))
+      (fun (i : ι) (ω : ι → V) => ω i) (iidPMF q hq0 hq1).toMeasure := by
+  rw [iIndepFun_iff_measure_inter_preimage_eq_mul]
+  intro T sets hsets
+  rw [toMeasure_cyl_inter q hq0 hq1 T sets]
+  exact Finset.prod_congr rfl fun i _ => (toMeasure_cyl q hq0 hq1 i (sets i)).symm
+
+/-- Mutual independence at an arbitrary measurable codomain, for
+families factoring through injectively-distinct single coordinates. -/
+theorem iIndepFun_coord_apply (q : V → ℝ) (hq0 : ∀ v, 0 ≤ q v) (hq1 : ∑ v, q v = 1)
+    {γ : Type*} {mγ : MeasurableSpace γ}
+    {ι' : Type*} [Fintype ι'] (e : ι' → ι) (he : Function.Injective e)
+    (F : ι' → V → γ) (hF : ∀ k, Measurable (F k)) :
+    iIndepFun (fun _ : ι' => mγ)
+      (fun (k : ι') (ω : ι → V) => F k (ω (e k))) (iidPMF q hq0 hq1).toMeasure :=
+  (Scaffold.Mathlib.Probability.BernoulliProduct.iIndepFun_of_injective
+    (iIndepFun_coord q hq0 hq1) e he).comp F hF
+
+/-- Mutual independence of the coordinate indicators — the repaired
+`h_indep` clause shape of `hoeffding_empirical` at this sampling space
+(the pairwise `indepFun_indicator_coord` above is its two-point
+consequence, kept for the refutation records). -/
+theorem iIndepFun_indicator_coord (q : V → ℝ) (hq0 : ∀ v, 0 ≤ q v) (hq1 : ∑ v, q v = 1)
+    {n : ℕ} (i : V) :
+    iIndepFun (fun _ : Fin n => (inferInstance : MeasurableSpace ℝ))
+      (fun (k : Fin n) (ω : Fin n → V) => (if ω k = i then (1 : ℝ) else 0))
+      (iidPMF q hq0 hq1).toMeasure :=
+  iIndepFun_coord_apply q hq0 hq1 id Function.injective_id
+    (fun _ v => if v = i then (1 : ℝ) else 0) (fun _ => measurable_of_finite _)
+
+
+end IIndep
 
 end Scaffold.Mathlib.Probability.IIDProduct

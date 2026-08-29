@@ -71,7 +71,8 @@ QA: exercised by `matrix_bernstein_zero_QA` in
 the zero sequence and checks the resulting empty-event bound. -/
 axiom matrix_bernstein {n : ℕ} [Nonempty V] {X : Fin n → Ω → Matrix V V ℝ} {R : ℝ}
     (h_meas : ∀ i, StronglyMeasurable (X i))
-    (h_indep : ∀ i j, i ≠ j → IndepFun (X i) (X j) μ)
+    (h_indep : iIndepFun (fun _ : Fin n =>
+      (inferInstance : MeasurableSpace (Matrix V V ℝ))) X μ)
     (h_herm : ∀ i ω, (X i ω).IsHermitian)
     (h_mean : ∀ i, ∫ ω, X i ω ∂μ = 0)
     (h_bound : ∀ i ω, ‖X i ω‖ ≤ R)

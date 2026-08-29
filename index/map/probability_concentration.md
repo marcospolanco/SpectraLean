@@ -26,10 +26,10 @@ axiom boundary in the 2026-08-17 concentration repair.
 
 | Declaration | Kind | Description | Source |
 |-------------|------|-------------|--------|
-| `hoeffding_inequality` | axiom (audited safe 2026-08-28: `IsProbabilityMeasure` + bounded + measurable rule out the junk-integral hazard) | Sums of bounded independent variables | Vershynin Thm 2.2.2 |
+| `hoeffding_inequality` | axiom (audited safe 2026-08-28: `IsProbabilityMeasure` + bounded + measurable rule out the junk-integral hazard; **repaired 2026-08-29**: the independence clause, pairwise `IndepFun` in the pre-repair shape, is `iIndepFun` — mutual independence — matching the cited source; the old shape refuted by the Walsh-character fixture, Errata §6) | Sums of bounded independent variables | Vershynin Thm 2.2.2 |
 | `integrable_of_bounded_measurable` | proved | The audit's safety lemma: measurable + `|X| ≤ a` + probability measure ⇒ `Integrable X` | — |
 | `hoeffding_iid` | proved | Uniform-bound specialization | Vershynin Cor 2.2.3 |
-| `hoeffding_empirical` | axiom | Empirical averages of [0,1] variables | Boucheron-Lugosi-Massart Thm 2.8 |
+| `hoeffding_empirical` | axiom (**repaired 2026-08-29**: pairwise → `iIndepFun`, Errata §6) | Empirical averages of [0,1] variables | Boucheron-Lugosi-Massart Thm 2.8 |
 
 ### Bernstein's Inequality
 
@@ -37,8 +37,8 @@ axiom boundary in the 2026-08-17 concentration repair.
 
 | Declaration | Kind | Description | Source |
 |-------------|------|-------------|--------|
-| `bernstein_inequality` | axiom (audited safe 2026-08-28: same guard set as `hoeffding_inequality`) | Tail bound with variance | Vershynin Thm 2.8.1 |
-| `bernstein_bounded_variance` | axiom (audited safe 2026-08-28) | Bounded variance form | Wainwright Thm 2.15 |
+| `bernstein_inequality` | axiom (audited safe 2026-08-28: same guard set as `hoeffding_inequality`; **repaired 2026-08-29**: pairwise → `iIndepFun`, Errata §6) | Tail bound with variance | Vershynin Thm 2.8.1 |
+| `bernstein_bounded_variance` | axiom (audited safe 2026-08-28; **repaired 2026-08-29**: pairwise → `iIndepFun`, Errata §6) | Bounded variance form | Wainwright Thm 2.15 |
 | `integrable_sq_sub_mean` | proved | The audit's centered-square safety lemma: both Bernstein axioms' variance statistics are honest integrals | — |
 | `bernstein_iid` | proved | Common-variance specialization | Vershynin Cor 2.8.3 |
 
@@ -59,7 +59,12 @@ empirical-stationary-distribution proposal names)
 | `bernPMF` | definition | The product-Bernoulli PMF on `ι → Bool`; `[0,1]` hypotheses load-bearing (fenced in QA) |
 | `sum_coord_mul` | proved | The one-coordinate marginal (the product structure's arithmetic core) |
 | `sum_coord2_mul` | proved | The two-coordinate marginal (independence's arithmetic core) |
-| `indepFun_coord` | proved | Pairwise `IndepFun` of coordinate projections — the `h_indep` clause shape |
+| `indepFun_coord` | proved | Pairwise `IndepFun` of coordinate projections — the two-point consequence of the mutual engine (kept as the refutation records' interface) |
+| `toMeasure_cyl_inter` | proved | Finite coordinate-cylinder intersections (2026-08-29) — the engine for mutual independence |
+| `iIndepFun_coord` | proved | **Mutual independence of the coordinate projections** (2026-08-29) — the repaired `h_indep` clause shape |
+| `iIndepFun_of_injective` | proved | Mutual independence inherited by injective reindexing (2026-08-29, generic) |
+| `iIndepFun_coord_apply` | proved | The mutual clause at an arbitrary measurable codomain, single-coordinate factors (2026-08-29) — the scalar designs' `h_indep` |
+| `iIndepFun_coord_matrix` | proved | The mutual clause at the matrix codomain (2026-08-29) — the sparsification and edge-perturbation designs' `h_indep` |
 | `toMeasure_cyl` | proved | Coordinate-cylinder measures are Bernoulli masses |
 | `integral_delta` | proved | `∫ δ_e ∂μ = p e` — the scalar `h_mean` core |
 | `stronglyMeasurable_coord_matrix` | proved | The `h_meas` clause at the L2OpNorm topology (topology-only route) |
@@ -79,10 +84,11 @@ empirical-stationary-distribution proposal names)
 | `sum_coord_mul` / `sum_coord2_mul` | proved | The one-/two-coordinate factorized marginals (independence's arithmetic core) |
 | `measurable_coord` | proved | Measurability of coordinate projections at the product σ-algebra |
 | `toMeasure_cyl` | proved | Coordinate-cylinder measures are factor masses |
-| `indepFun_coord` | proved | Pairwise `IndepFun` of the V-valued projections |
+| `indepFun_coord` | proved | Pairwise `IndepFun` of the V-valued projections (the two-point consequence of the mutual engine) |
 | `measurable_indicator_coord` | proved | The `h_meas` clause shape of `hoeffding_empirical` at coordinate indicators |
 | `integral_indicator` | proved | `∫ 1_{ω e = i} ∂μ = q i` — the mean-clause constant the empirical form's centering collapses to |
-| `indepFun_indicator_coord` | proved | The `h_indep` clause shape of `hoeffding_empirical` at coordinate indicators |
+| `indepFun_indicator_coord` | proved | The pairwise clause at coordinate indicators (the two-point consequence; refutation records' interface) |
+| `iIndepFun_coord` / `iIndepFun_coord_apply` / `iIndepFun_indicator_coord` | proved | The `iidPMF` mutual-independence engine (2026-08-29) — `iIndepFun_indicator_coord` is the repaired `h_indep` clause shape of `hoeffding_empirical` at this sampling space |
 
 ## Matrix Concentration
 
@@ -96,7 +102,7 @@ matrices defined in `Matrix/Basic.lean`.
 
 | Declaration | Kind | Description | Source |
 |-------------|------|-------------|--------|
-| `matrix_hoeffding` | axiom | Independent Hermitian, PSD-dominated squares; `[Nonempty V]` guard (repaired 2026-08-28 — the guard-free shape was inconsistent at `card V = 0`, `t = 0`) | Tropp Thm 1.4 |
+| `matrix_hoeffding` | axiom | Mutually independent Hermitian, PSD-dominated squares; `[Nonempty V]` guard (repaired 2026-08-28 — the guard-free shape was inconsistent at `card V = 0`, `t = 0`; **repaired 2026-08-29**: pairwise → `iIndepFun`, Errata §6) | Tropp Thm 1.4 |
 
 ### Matrix Bernstein
 
@@ -104,7 +110,7 @@ matrices defined in `Matrix/Basic.lean`.
 
 | Declaration | Kind | Description | Source |
 |-------------|------|-------------|--------|
-| `matrix_bernstein` | axiom | Independent centered uniformly bounded; `[Nonempty V]` guard (repaired 2026-08-28 — same degenerate-dimension corner) | Tropp Thm 1.1 |
+| `matrix_bernstein` | axiom | Mutually independent centered uniformly bounded; `[Nonempty V]` guard (repaired 2026-08-28 — same degenerate-dimension corner; **repaired 2026-08-29**: pairwise → `iIndepFun`, Errata §6) | Tropp Thm 1.1 |
 
 ### Matrix Azuma–Hoeffding
 

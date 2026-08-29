@@ -457,6 +457,43 @@ theorem hoeffding_lemma_rademacher_QA :
   hoeffding_lemma (by norm_num : (0 : ℝ) ≤ 1) (fun b => by rw [rademacherX_abs_QA b])
     rademacherMeasure_mean_QA
 
+/-- A constant real family is mutually independent under any
+probability measure — the repaired `h_indep` clause shape at the
+zero-family instantiations below (a constant family generates the
+trivial σ-algebra at every finite index intersection; the pre-repair
+pairwise clause is its two-point consequence). -/
+theorem iIndepFun_const_real_QA {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)
+    [IsProbabilityMeasure μ] {n : ℕ} (c : ℝ) :
+    iIndepFun (fun _ : Fin n => (inferInstance : MeasurableSpace ℝ))
+      (fun (_ : Fin n) (_ : Ω) => c) μ := by
+  rw [iIndepFun_iff_measure_inter_preimage_eq_mul]
+  intro T sets hsets
+  by_cases hall : ∀ i ∈ T, c ∈ sets i
+  · have hpre : ∀ i ∈ T, (fun _ : Ω => c) ⁻¹' sets i = Set.univ := by
+      intro i hi
+      ext ω
+      simp only [Set.mem_preimage, Set.mem_univ, iff_true]
+      exact hall i hi
+    have huniv : (⋂ i ∈ T, (fun _ : Ω => c) ⁻¹' sets i) = Set.univ := by
+      ext ω
+      simp only [Set.mem_iInter, Set.mem_univ, Set.mem_preimage]
+      exact ⟨fun _ => trivial, fun h => fun i hi => hall i hi⟩
+    rw [huniv, measure_univ]
+    rw [Finset.prod_eq_one fun i hi => by rw [hpre i hi, measure_univ]]
+  · push_neg at hall
+    obtain ⟨i₀, hi₀, hi₀A⟩ := hall
+    have hempty : (⋂ i ∈ T, (fun _ : Ω => c) ⁻¹' sets i) = ∅ := by
+      ext ω
+      simp only [Set.mem_iInter, Set.mem_preimage, Set.mem_empty_iff_false]
+      exact ⟨fun h => hi₀A (h i₀ hi₀), fun h => h.elim⟩
+    have hzero : μ ((fun _ : Ω => c) ⁻¹' sets i₀) = 0 := by
+      have hpre : (fun _ : Ω => c) ⁻¹' sets i₀ = ∅ := by
+        ext ω
+        simp only [Set.mem_preimage, Set.mem_empty_iff_false]
+        exact ⟨hi₀A, fun h => h.elim⟩
+      rw [hpre, measure_empty]
+    rw [hempty, measure_empty, Finset.prod_eq_zero hi₀ hzero]
+
 /-!
 ## Hoeffding interface
 -/
@@ -469,7 +506,7 @@ theorem hoeffding_inequality_zero_QA {n : ℕ} (t : ℝ) (ht : 0 < t) :
       ENNReal.ofReal (2 * Real.exp (-(t ^ 2) / (2 * (n : ℝ)))) := by
   have hax := hoeffding_inequality (n := n) (X := fun _ _ => (0 : ℝ)) (a := fun _ => 1)
     (fun i => measurable_const)
-    (fun i j _ => indepFun_const_left_QA (Ω := Ω) (μ := μ) 0 (fun _ => (0 : ℝ)))
+    (iIndepFun_const_real_QA (Ω := Ω) (μ := μ) 0)
     (fun i ω => by simp) (fun i => by simp) t ht.le
   rwa [show ∑ i : Fin n, (1 : ℝ) ^ 2 = (n : ℝ) by simp] at hax
 
@@ -494,7 +531,7 @@ theorem bernstein_inequality_zero_QA {n : ℕ} (t : ℝ) (ht : 0 < t) :
       ENNReal.ofReal (2 * Real.exp (-(t ^ 2) / ((2 * 1 * t) / 3))) := by
   have hax := bernstein_inequality (n := n) (X := fun _ _ => (0 : ℝ)) (a := 1) (by norm_num)
     (fun i => measurable_const)
-    (fun i j _ => indepFun_const_left_QA (Ω := Ω) (μ := μ) 0 (fun _ => (0 : ℝ)))
+    (iIndepFun_const_real_QA (Ω := Ω) (μ := μ) 0)
     (fun i ω => by simp) t ht.le
   have hsum : ∑ i : Fin n, ∫ ω : Ω,
       ((0 : ℝ) - ∫ ω' : Ω, (0 : ℝ) ∂μ) ^ 2 ∂μ = 0 := by

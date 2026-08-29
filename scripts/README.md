@@ -12,6 +12,7 @@ These scripts maintain documentation and policy metadata; they do not replace Le
 | `check_scaffold_map_freshness.py` | Fail if the transit map's two data tables (`scripts/generate_scaffold_map_svg.py` and `docs/scaffold_map.html`) disagree with each other, with the QA scoreboard's generated numbers, or with a cited proposal's own `**Status:**` line — a delivery that changes a proposal's status header is not verified until this passes (the pre-commit hook runs it report-only). |
 | `zquota` | Query Z.ai quota and provide an automation-safe start gate. |
 | `opencode-pursue` | Run or resume bounded non-interactive pursuit sessions with GLM-5.3 at high reasoning effort. |
+| `isrunning` | Check whether `opencode-pursue` is running (with start time) or determine when it will run next. |
 | `io.github.marcospolanco.scaffold-pursue.plist` | Per-user macOS LaunchAgent template for hourly quota-aware pursuit. |
 
 ## Autonomous OpenCode run

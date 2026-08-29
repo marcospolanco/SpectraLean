@@ -241,9 +241,12 @@ break it, not evidence none exists — see §6.
   pairwise lemmas retained on the shelf as the refutation records'
   interface. The full verification ladder passed on the repaired tree
   (129/129 build completeness, axiom lint, citations, links, scoreboard
-  3099, map freshness). Not yet committed at this entry's update —
-  autonomous runs do not commit; the commit reference lands with the
-  operator's commit per `docs/arch/commit-steward-protocol.md`.
+  3099, map freshness), independently re-verified by the operator
+  before committing — including a from-scratch `#print axioms`
+  re-derivation on all six refutation theorems, not just trusting the
+  delivery record.
+- **Commit:** `3980397` — `fix(sgt): repair pairwise-vs-mutual
+  independence defect across six concentration axioms`.
 - **Source:** `proposals/pairwise-independence-concentration-repair.md`
   (the delivery record with the full witness mechanics and consumer
   threading inventory); `docs/AGENT_ACTIVITY.md`'s 2026-08-29 entries

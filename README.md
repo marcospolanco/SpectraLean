@@ -356,6 +356,9 @@ the safety boundary and invocation.
 - [Proposals](proposals/README.md) — active priority list and delivered records.
 - [Traction Plan](docs/traction-plan.md) — promotion plan for the future
   clean-room repository's release; applies only there, not to this repository.
+- [Commit Steward Protocol](docs/arch/commit-steward-protocol.md) — the
+  verify-and-commit procedure that sits between the autonomous agent
+  (which has no git authority) and `main`.
 - [Contributing](governance/CONTRIBUTING.md) — contribution and review workflow.
 
 ## License

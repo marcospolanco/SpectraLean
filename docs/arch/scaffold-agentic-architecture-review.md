@@ -60,6 +60,8 @@ Scaffold solves this fundamental dilemma through two architectural breakthroughs
 1. **The Kernel as the Definitive Adversary:** The agent operates against an unforgiving, deterministic truth oracle—the **Lean 4 typechecker**. A proposed theorem step either typechecks against its exact mathematical type or it does not. The evaluation is absolute and mathematically bounded.
 2. **Absolute Separation of Generation and Authority:** The autonomous agent possesses zero authority to execute git commits, push code, or declare axioms valid on its own self-report. The control plane relies exclusively on synchronous deterministic linters and an isolated, read-only commit steward.
 
+The commit steward's own procedure — what it actually checks, in what order, and where it escalates to a human rather than deciding alone — is formalized in [`commit-steward-protocol.md`](commit-steward-protocol.md), written after the role had run manually across several sessions and stabilized in practice.
+
 ---
 
 ## 2. Station-by-Station Audit: The 9-Station Agentic Design Palace

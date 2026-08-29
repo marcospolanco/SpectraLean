@@ -46,12 +46,37 @@
     un-guarded bound in proved arithmetic at `t = 7`. The tail instances
     are conditional on the `matrix_hoeffding` axiom via the new theorems,
     not proofs of it.
+  - the sharpened (matched-threshold) drift interface's QA: the envelope
+    arithmetic of the `s/(γ−s)` parametrization pinned in general
+    (domination `t ≤ γt/(t+δ)`; same-threshold identity
+    `(γt/(t+δ))/(γ−γt/(t+δ)) = t/δ`) and at the concrete naive instance
+    `(1, ½)` of `γ = 2`, the closed-form three-path instances at the
+    join point (`6 exp(−1/24)`, subspace and line variants) and at the
+    non-trivial threshold `2` (`6 exp(−2/27)`), the naive
+    delivered-theorem instance at threshold `2` (`6 exp(−1/24)`), and
+    the strict-improvement pin `6 exp(−2/27) < 6 exp(−1/24)`. The
+    sharpened instances are conditional on the `matrix_hoeffding` axiom
+    via the sharpened theorems, not proofs of it.
+  - the swept-Fiedler-cut consumer's QA (the sweepWindow section): the
+    all-true `K₂` outcome provably *not* in the measured event (its
+    resampled graph connected by a raw walk witness, and carrying a
+    swept Fiedler cut at `conductance² ≤ 2·λ₂ = 4` — the deterministic
+    sweep theorem at the pinned spectrum, well inside the window bound),
+    and the closed-form tail instances on `K₂` (`4 exp(−1/4096)`) and
+    the three-path (`6 exp(−1/6144)`) at `t = 1/16`, where the floor
+    hypothesis `0 < 1/2·φ²/2 − 1/16 = 1/16` genuinely holds. The tail
+    instances are conditional on the `matrix_hoeffding` axiom via the
+    new theorem, not proofs of it. Honesty note: the floor-positivity
+    guard is proof-load-bearing, not fixture-refutable — the same
+    junk-measure obstruction as the window family (at 2–3 vertices the
+    tail bound exceeds `1`, so no un-guarded instance can be refuted).
 -/
 
 import Scaffold.Derived.EdgePerturbationTail
 import Scaffold.Derived.EdgePerturbationDrift
 import Scaffold.QA.SpectralGraph.Fiedler_QA
 import Scaffold.QA.SpectralGraph.Cheeger_QA
+import Scaffold.QA.SpectralGraph.IrregularCheeger_QA
 
 open MeasureTheory ProbabilityTheory SpectralGraphTheory
 open SpectralGraphTheory.QA
@@ -1112,5 +1137,743 @@ theorem epK2_bracket_upper_fires_QA :
   simp only [Set.mem_setOf_eq]
   rw [epK2_perturbed_allTrue_lambda2_eq_four, epK2_cheegerConstant]
   norm_num
+
+/-! ## The sharpened (matched-threshold) drift interface
+
+The QA for `edgePerturbation_fiedlerSubspace_drift'` /
+`edgePerturbation_fiedlerLine_drift'`: the envelope arithmetic pinned
+in general and at concrete numerics, the closed-form three-path
+instances, and the strict-improvement pin. -/
+
+/-- **Envelope domination**: every valid `(t, δ)` instance of the
+delivered `t/δ`-shaped drift family is dominated by the sharpened
+parametrization at the same threshold — the exponent `t²` never exceeds
+`s²` at `s := γt/(t+δ)`, the sharpened statement's level (the `s/(γ−s)`
+threshold of that level is exactly `t/δ`; the companion lemma below).
+This is the arithmetic content of "the sharpened form is the envelope
+of the delivered family". -/
+theorem ep_envelope_domination_QA {γ t δ : ℝ} (ht : 0 ≤ t)
+    (hδ : 0 < δ) (hle : t + δ ≤ γ) :
+    t ≤ γ * t / (t + δ) := by
+  rcases eq_or_lt_of_le ht with rfl | htpos
+  · norm_num
+  · have hsumpos : (0:ℝ) < t + δ := by linarith
+    rw [le_div_iff₀ hsumpos]
+    have h := mul_le_mul_of_nonneg_right hle (le_of_lt htpos)
+    nlinarith [h]
+
+/-- **Envelope same-threshold identity**: the sharpened level
+`s := γt/(t+δ)` sits at exactly the delivered instance's threshold —
+`s/(γ−s) = t/δ` — so the domination above is a comparison at one and
+the same threshold: together the two lemmas say the sharpened family is
+*the* envelope of the `t/δ` family, not merely a subfamily of it. -/
+theorem ep_envelope_threshold_QA {γ t δ : ℝ} (hγ : 0 < γ) (ht : 0 ≤ t)
+    (hδ : 0 < δ) :
+    (γ * t / (t + δ)) / (γ - γ * t / (t + δ)) = t / δ := by
+  have hsumpos : (0:ℝ) < t + δ := by linarith
+  have hden : γ - γ * t / (t + δ) = γ * δ / (t + δ) := by
+    field_simp
+    ring
+  rw [hden]
+  field_simp
+  ring
+
+/-- The concrete envelope join: at the naive valid instance
+`(t, δ) = (1, ½)` of `γ = 2`, the dominated sharpened level is
+`2·1/(1 + ½) = 4/3 ≥ 1` — the general domination lemma at hand values
+(a wrong envelope constant breaks exactly this numeric pin). -/
+theorem ep_naive_domination_instance_QA :
+    (1:ℝ) ≤ 2 * 1 / (1 + 1 / 2) :=
+  ep_envelope_domination_QA (γ := 2) (t := 1) (δ := 1 / 2)
+    (by norm_num) (by norm_num) (by norm_num)
+
+/-- The concrete same-threshold join: the envelope point `4/3` of the
+naive `(1, ½)` instance sits at exactly its threshold
+`(4/3)/(2 − 4/3) = 1/(½) = 2`. -/
+theorem ep_naive_threshold_instance_QA :
+    ((2:ℝ) * 1 / (1 + 1 / 2)) / (2 - 2 * 1 / (1 + 1 / 2)) = 1 / (1 / 2) :=
+  ep_envelope_threshold_QA (γ := 2) (t := 1) (δ := 1 / 2)
+    (by norm_num) (by norm_num) (by norm_num)
+
+/-- The base three-path gap bound in the sharpened interface's shape:
+`γ = 2 ≤ λ₃ − λ₂ = 3 − 1` (the two exact spectrum pins). -/
+theorem epP3_hgap_two :
+    (2:ℝ) ≤ evals (laplacian_symmetric path3Adj path3Adj_symmetric)
+        ⟨2, by norm_num⟩
+      - evals (laplacian_symmetric path3Adj path3Adj_symmetric)
+        ⟨1, by norm_num⟩ := by
+  rw [path3_evals_two_eq_three_QA, path3_evals_one_eq_one_QA]
+  norm_num
+
+/-- **The sharpened subspace-drift instance on the path, in closed
+form**: at `γ = 2` (the whole base gap) and `s = 1`, the bottom-2
+subspace rotation under random edge resampling exceeds
+`1/(2−1) = 1` with probability at most `6 exp(−1/24)` — the join
+point: the delivered `t/δ` instance's numbers (t = δ = 1) recovered
+with the gap consumed inline, and the envelope-optimal split for
+threshold `1` at `γ = 2` is exactly `s = 2·1/(1+1) = 1`. CONDITIONAL
+ON THE `matrix_hoeffding` AXIOM (instantiated via the sharpened
+theorem, not re-proved). -/
+theorem epP3_fiedlerSubspace_drift'_QA :
+    (bernPMF epQuarter epQuarter_nonneg epQuarter_le_one).toMeasure
+      {ω : (Fin 3 × Fin 3) → Bool |
+        ‖initialProjector (laplacian (path3Adj
+              + perturbWeight path3Adj epQuarter ω))
+            (laplacian_symmetric (path3Adj
+              + perturbWeight path3Adj epQuarter ω)
+              (path3Adj_symmetric.add
+                (perturbWeight_isSymm path3Adj epQuarter ω)))
+              ⟨1, by norm_num⟩
+          - initialProjector (laplacian path3Adj)
+            (laplacian_symmetric path3Adj path3Adj_symmetric)
+            ⟨1, by norm_num⟩‖ ≥ (1:ℝ) / (2 - 1)}
+      ≤ ENNReal.ofReal (6 * Real.exp (-((1:ℝ)) / 24)) := by
+  have h := edgePerturbation_fiedlerSubspace_drift' path3Adj
+    path3Adj_symmetric epQuarter epQuarter_nonneg epQuarter_le_one
+    (by simp) 2 epP3_hgap_two 1 one_pos (by norm_num)
+  rw [epP3_variance_norm] at h
+  have hcard : (Fintype.card (Fin 3) : ℝ) = 3 := by norm_num
+  rw [hcard] at h
+  have hRHS : (2:ℝ) * 3 * Real.exp (-((1:ℝ) ^ 2) / (2 * 12))
+      = 6 * Real.exp (-((1:ℝ)) / 24) := by
+    have h1 : -((1:ℝ) ^ 2) / (2 * 12) = -((1:ℝ)) / 24 := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at h
+  exact h
+
+/-- **The sharpened Fiedler-line drift instance on the path, in closed
+form** (the join point, line variant): at `γ = 2`, `s = 1`, the
+Fiedler-line rotation exceeds `1/(2−1) = 1` with probability at most
+`6 exp(−1/24)` — the same closed form as the delivered `t/δ`
+instance, now with the gap consumed inline. CONDITIONAL ON THE
+`matrix_hoeffding` AXIOM (instantiated via the sharpened theorem, not
+re-proved). -/
+theorem epP3_fiedlerLine_drift'_QA :
+    (bernPMF epQuarter epQuarter_nonneg epQuarter_le_one).toMeasure
+      {ω : (Fin 3 × Fin 3) → Bool |
+        ‖(initialProjector (laplacian (path3Adj
+              + perturbWeight path3Adj epQuarter ω))
+            (laplacian_symmetric (path3Adj
+              + perturbWeight path3Adj epQuarter ω)
+              (path3Adj_symmetric.add
+                (perturbWeight_isSymm path3Adj epQuarter ω)))
+              ⟨1, by norm_num⟩
+          - initialProjector (laplacian (path3Adj
+              + perturbWeight path3Adj epQuarter ω))
+            (laplacian_symmetric (path3Adj
+              + perturbWeight path3Adj epQuarter ω)
+              (path3Adj_symmetric.add
+                (perturbWeight_isSymm path3Adj epQuarter ω)))
+              ⟨0, by norm_num⟩)
+        - (initialProjector (laplacian path3Adj)
+            (laplacian_symmetric path3Adj path3Adj_symmetric)
+            ⟨1, by norm_num⟩
+          - initialProjector (laplacian path3Adj)
+            (laplacian_symmetric path3Adj path3Adj_symmetric)
+            ⟨0, by norm_num⟩)‖ ≥ (1:ℝ) / (2 - 1)}
+      ≤ ENNReal.ofReal (6 * Real.exp (-((1:ℝ)) / 24)) := by
+  have h := edgePerturbation_fiedlerLine_drift' path3Adj path3Adj_symmetric
+    epQuarter epQuarter_nonneg epQuarter_le_one path3Adj_nonneg
+    epP3_perturbed_nonneg path3_supportGraph_connected
+    (fun ω => by rw [epP3_supportGraph ω]; exact path3_supportGraph_connected)
+    (by simp) 2 epP3_hgap_two 1 one_pos (by norm_num)
+  rw [epP3_variance_norm] at h
+  have hcard : (Fintype.card (Fin 3) : ℝ) = 3 := by norm_num
+  rw [hcard] at h
+  have hRHS : (2:ℝ) * 3 * Real.exp (-((1:ℝ) ^ 2) / (2 * 12))
+      = 6 * Real.exp (-((1:ℝ)) / 24) := by
+    have h1 : -((1:ℝ) ^ 2) / (2 * 12) = -((1:ℝ)) / 24 := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at h
+  exact h
+
+/-- **The sharpened Fiedler-line drift instance at the non-trivial
+threshold `2`**: at `γ = 2`, `s = 4/3` (the envelope point for
+threshold `u = 2`: `s = γu/(1+u) = 4/3`, `s/(γ−s) = 2`), the rotation
+exceeds `2` with probability at most `6 exp(−2/27)` (the exponent
+`(4/3)²/(2·12) = 2/27`). A wrong constant anywhere on the sharpened
+statement's parametrization — the threshold `s/(γ−s)`, the tail level
+`s`, or the gap consumption `γ` — breaks exactly this closed form.
+CONDITIONAL ON THE `matrix_hoeffding` AXIOM (instantiated via the
+sharpened theorem, not re-proved). -/
+theorem epP3_fiedlerLine_drift'_threshold_two_QA :
+    (bernPMF epQuarter epQuarter_nonneg epQuarter_le_one).toMeasure
+      {ω : (Fin 3 × Fin 3) → Bool |
+        ‖(initialProjector (laplacian (path3Adj
+              + perturbWeight path3Adj epQuarter ω))
+            (laplacian_symmetric (path3Adj
+              + perturbWeight path3Adj epQuarter ω)
+              (path3Adj_symmetric.add
+                (perturbWeight_isSymm path3Adj epQuarter ω)))
+              ⟨1, by norm_num⟩
+          - initialProjector (laplacian (path3Adj
+              + perturbWeight path3Adj epQuarter ω))
+            (laplacian_symmetric (path3Adj
+              + perturbWeight path3Adj epQuarter ω)
+              (path3Adj_symmetric.add
+                (perturbWeight_isSymm path3Adj epQuarter ω)))
+              ⟨0, by norm_num⟩)
+        - (initialProjector (laplacian path3Adj)
+            (laplacian_symmetric path3Adj path3Adj_symmetric)
+            ⟨1, by norm_num⟩
+          - initialProjector (laplacian path3Adj)
+            (laplacian_symmetric path3Adj path3Adj_symmetric)
+            ⟨0, by norm_num⟩)‖ ≥ (4 / 3 : ℝ) / (2 - 4 / 3)}
+      ≤ ENNReal.ofReal (6 * Real.exp (-((2 / 27 : ℝ)))) := by
+  have h := edgePerturbation_fiedlerLine_drift' path3Adj path3Adj_symmetric
+    epQuarter epQuarter_nonneg epQuarter_le_one path3Adj_nonneg
+    epP3_perturbed_nonneg path3_supportGraph_connected
+    (fun ω => by rw [epP3_supportGraph ω]; exact path3_supportGraph_connected)
+    (by simp) 2 epP3_hgap_two (4 / 3) (by norm_num)
+    (by norm_num)
+  rw [epP3_variance_norm] at h
+  have hcard : (Fintype.card (Fin 3) : ℝ) = 3 := by norm_num
+  rw [hcard] at h
+  have hRHS : (2:ℝ) * 3 * Real.exp (-((4 / 3 : ℝ) ^ 2) / (2 * 12))
+      = 6 * Real.exp (-((2 / 27 : ℝ))) := by
+    have h1 : -((4 / 3 : ℝ) ^ 2) / (2 * 12) = -((2 / 27 : ℝ)) := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at h
+  exact h
+
+/-- **The naive non-envelope instance at the same threshold `2`**: the
+*delivered* `t/δ` theorem at the valid but non-envelope split
+`(t, δ) = (1, ½)` (constraint `1 + ½ ≤ 2` holds; threshold
+`1/(½) = 2`) yields only `6 exp(−1/24)` — the comparison partner for
+the strict-improvement pin below. CONDITIONAL ON THE
+`matrix_hoeffding` AXIOM. -/
+theorem epP3_fiedlerLine_drift_naive_QA :
+    (bernPMF epQuarter epQuarter_nonneg epQuarter_le_one).toMeasure
+      {ω : (Fin 3 × Fin 3) → Bool |
+        ‖(initialProjector (laplacian (path3Adj
+              + perturbWeight path3Adj epQuarter ω))
+            (laplacian_symmetric (path3Adj
+              + perturbWeight path3Adj epQuarter ω)
+              (path3Adj_symmetric.add
+                (perturbWeight_isSymm path3Adj epQuarter ω)))
+              ⟨1, by norm_num⟩
+          - initialProjector (laplacian (path3Adj
+              + perturbWeight path3Adj epQuarter ω))
+            (laplacian_symmetric (path3Adj
+              + perturbWeight path3Adj epQuarter ω)
+              (path3Adj_symmetric.add
+                (perturbWeight_isSymm path3Adj epQuarter ω)))
+              ⟨0, by norm_num⟩)
+        - (initialProjector (laplacian path3Adj)
+            (laplacian_symmetric path3Adj path3Adj_symmetric)
+            ⟨1, by norm_num⟩
+          - initialProjector (laplacian path3Adj)
+            (laplacian_symmetric path3Adj path3Adj_symmetric)
+            ⟨0, by norm_num⟩)‖ ≥ (1:ℝ) / (1 / 2)}
+      ≤ ENNReal.ofReal (6 * Real.exp (-((1:ℝ)) / 24)) := by
+  have hgap : (1:ℝ) + 1 / 2
+      ≤ evals (laplacian_symmetric path3Adj path3Adj_symmetric)
+          ⟨2, by norm_num⟩
+        - evals (laplacian_symmetric path3Adj path3Adj_symmetric)
+          ⟨1, by norm_num⟩ := by
+    rw [path3_evals_two_eq_three_QA, path3_evals_one_eq_one_QA]
+    norm_num
+  have h := edgePerturbation_fiedlerLine_drift path3Adj path3Adj_symmetric
+    epQuarter epQuarter_nonneg epQuarter_le_one path3Adj_nonneg
+    epP3_perturbed_nonneg path3_supportGraph_connected
+    (fun ω => by rw [epP3_supportGraph ω]; exact path3_supportGraph_connected)
+    (by simp) (1 / 2) (by norm_num) 1 zero_le_one hgap
+  rw [epP3_variance_norm] at h
+  have hcard : (Fintype.card (Fin 3) : ℝ) = 3 := by norm_num
+  rw [hcard] at h
+  have hRHS : (2:ℝ) * 3 * Real.exp (-((1:ℝ) ^ 2) / (2 * 12))
+      = 6 * Real.exp (-((1:ℝ)) / 24) := by
+    have h1 : -((1:ℝ) ^ 2) / (2 * 12) = -((1:ℝ)) / 24 := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at h
+  exact h
+
+/-- **The sharpened interface strictly improves a valid non-envelope
+instance at the same threshold**: at threshold `2` on the path, the
+sharpened bound `6 exp(−2/27)` is strictly smaller than the naive
+`(1, ½)` instance's `6 exp(−1/24)` (proved by strict exp monotonicity
+at `1/24 < 2/27`) — the envelope point's exponent `(4/3)²` strictly
+dominates the naive `1²`, so matching threshold to tail is a real
+strengthening, not a reparametrization. -/
+theorem epP3_sharp_improves_QA :
+    6 * Real.exp (-((2 / 27 : ℝ))) < 6 * Real.exp (-((1:ℝ)) / 24) := by
+  have h : (1:ℝ) / 24 < 2 / 27 := by norm_num
+  have hexp : Real.exp (-((2 / 27 : ℝ))) < Real.exp (-((1:ℝ)) / 24) :=
+    Real.exp_lt_exp.mpr (by linarith)
+  exact mul_lt_mul_of_pos_left hexp (by norm_num)
+
+/-! ## The normalized (irregular) Cheeger window
+
+The irregular window family
+(`edgePerturbation_normalized_cheeger_floor`,
+`edgePerturbation_normalized_connectivity_bracket`) and the new
+window-Cheeger engine pair. The tail instances are CONDITIONAL ON THE
+`matrix_hoeffding` AXIOM (instantiated, not re-proved); the engine
+instances and the admissibility witnesses are hard crust.
+
+Honesty note on the admissibility window: it is *proof-load-bearing*
+(the sandwich's `hnn`/`hd` clauses on the perturbed graph are exactly
+the window conjuncts, and the assembly's `measure_mono` has no route
+without them), but no dropped-window refutation fixture exists at
+fixture scale: at the outcomes the window excludes, the degrees hit
+`0` and `normalizedLaplacian` degenerates to the identity
+(`degreeInvSqrt = 0⁻¹ = 0`), whose `λ₂ = 1` keeps the un-windowed floor
+condition false on `K₂`-shaped fixtures (the floor never exceeds
+`dmin·φ²/2 / dmax ≤ 1/4` there). The witnesses below therefore pin
+that the window genuinely restricts the outcome space (admissible and
+inadmissible outcomes both exist), not that the un-windowed statement
+fails. -/
+
+/-- The P₃ degree profile: `1, 2, 1`. -/
+theorem epP3_deg (i : Fin 3) :
+    deg path3Adj i = if (i : ℕ) = 1 then 2 else 1 := by
+  fin_cases i <;> rw [deg, Fin.sum_univ_three] <;> norm_num [path3Adj]
+
+theorem epP3_pos_deg (i : Fin 3) : 0 < deg path3Adj i := by
+  rw [epP3_deg i]
+  fin_cases i <;> norm_num
+
+theorem epK2_pos_deg (i : Fin 2) : 0 < deg epK2 i := by
+  rw [epK2_regular i]
+  norm_num
+
+/-- The φ(P₃) = 1 pin, transferred entrywise from the irregular-Cheeger
+QA's own path fixture. -/
+theorem epP3_cheegerConstant : cheegerConstant path3Adj = 1 := by
+  have h : path3Adj = SpectralGraphTheory.QA.icPathAdj := by
+    ext i j
+    fin_cases i <;> fin_cases j
+    <;> simp [path3Adj, SpectralGraphTheory.QA.icPathAdj]
+  rw [h]
+  exact SpectralGraphTheory.QA.icPathAdj_cheegerConstant
+
+/-- **The window engine pair on `K₂`** (degree window `[1, 1]`): floor
+`1·φ²/2 = 1/2 ≤ λ₂ = 2`; ceiling `λ₂ = 2 = 2·(1·φ)` attained with
+equality — a wrong constant on either engine side breaks the third
+conjunct. -/
+theorem epK2_normWindow_engine_QA :
+    (1 : ℝ) * (cheegerConstant epK2) ^ 2 / 2
+      ≤ lambda2 epK2 epK2_symmetric (by norm_num)
+      ∧ lambda2 epK2 epK2_symmetric (by norm_num)
+        ≤ 2 * ((1 : ℝ) * cheegerConstant epK2)
+      ∧ lambda2 epK2 epK2_symmetric (by norm_num)
+        = 2 * ((1 : ℝ) * cheegerConstant epK2) := by
+  refine ⟨cheeger_lower_bound_laplacian_of_degree_window epK2
+      epK2_symmetric epK2_nonneg epK2_pos_deg 1
+      (fun i => by rw [epK2_regular i]) one_pos (by norm_num),
+    cheeger_upper_bound_laplacian_of_degree_window epK2
+      epK2_symmetric epK2_nonneg epK2_pos_deg 1
+      (fun i => by rw [epK2_regular i]) (by norm_num), ?_⟩
+  rw [epK2_lambda2_eq_two, epK2_cheegerConstant]
+  norm_num
+
+/-- **The window engine pair on the genuinely irregular `P₃`** (degrees
+`1, 2, 1`, window `[1, 2]`): floor `1·1²/2 = 1/2 ≤ λ₂(L P₃) = 1` (the
+honest slack of the bracket); ceiling `λ₂ = 1 ≤ 2·(2·1) = 4`. -/
+theorem epP3_normWindow_engine_QA :
+    (1 : ℝ) * (cheegerConstant path3Adj) ^ 2 / 2
+      ≤ lambda2 path3Adj path3Adj_symmetric (by norm_num)
+      ∧ lambda2 path3Adj path3Adj_symmetric (by norm_num)
+        ≤ 2 * ((2 : ℝ) * cheegerConstant path3Adj) := by
+  refine ⟨cheeger_lower_bound_laplacian_of_degree_window path3Adj
+      path3Adj_symmetric path3Adj_nonneg epP3_pos_deg 1
+      (fun i => by rw [epP3_deg i]; fin_cases i <;> norm_num) one_pos
+      (by norm_num),
+    cheeger_upper_bound_laplacian_of_degree_window path3Adj
+      path3Adj_symmetric path3Adj_nonneg epP3_pos_deg 2
+      (fun i => by rw [epP3_deg i]; fin_cases i <;> norm_num)
+      (by norm_num)⟩
+
+/-- Entry form of the normalized Laplacian on `2×2` matrices (any
+adjacency). -/
+theorem epK2_normLap_entry (M : Matrix (Fin 2) (Fin 2) ℝ) (i j : Fin 2) :
+    normalizedLaplacian M i j
+      = (if i = j then (1 : ℝ) else 0)
+        - (Real.sqrt (deg M i))⁻¹ * M i j * (Real.sqrt (deg M j))⁻¹ := by
+  simp only [normalizedLaplacian, Matrix.sub_apply, Matrix.one_apply,
+    Matrix.diagonal_mul, Matrix.mul_diagonal, degreeInvSqrt,
+    Matrix.diagonal_apply]
+
+/-- The perturbed degree at the all-true outcome is `2` on every vertex. -/
+theorem epK2_allTrue_deg (i : Fin 2) :
+    deg (epK2 + perturbWeight epK2 epHalf (fun _ => true)) i = 2 := by
+  rw [epK2_perturbed_allTrue_eq, deg_smul, epK2_regular i]
+  norm_num
+
+/-- **Scale invariance by raw computation**: the normalized Laplacian of
+the weight-`2` edge equals that of the unit edge, entrywise (the
+normalized Laplacian of a `c`-scaled regular graph is scale-invariant,
+pinned here at the concrete `c = 2`). -/
+theorem epK2_normLap_allTrue_eq :
+    normalizedLaplacian (epK2 + perturbWeight epK2 epHalf (fun _ => true))
+      = normalizedLaplacian epK2 := by
+  ext i j
+  rw [epK2_normLap_entry, epK2_normLap_entry, epK2_allTrue_deg i,
+    epK2_allTrue_deg j, epK2_regular i, epK2_regular j]
+  have hent : (epK2 + perturbWeight epK2 epHalf (fun _ => true)) i j
+      = 2 * epK2 i j := by
+    rw [epK2_perturbed_allTrue_eq, Matrix.smul_apply, smul_eq_mul]
+  have hss : Real.sqrt (2 : ℝ) * Real.sqrt 2 = 2 := by
+    rw [← sq]
+    exact Real.sq_sqrt (by norm_num)
+  have hpair : (Real.sqrt (2 : ℝ))⁻¹ * (Real.sqrt 2)⁻¹ = 1 / 2 := by
+    rw [← mul_inv, hss]
+    norm_num
+  have hinv : (Real.sqrt 2)⁻¹ * (2 * epK2 i j) * (Real.sqrt 2)⁻¹
+      = epK2 i j := by
+    have hre : (Real.sqrt 2)⁻¹ * (2 * epK2 i j) * (Real.sqrt 2)⁻¹
+        = ((Real.sqrt 2)⁻¹ * (Real.sqrt 2)⁻¹) * (2 * epK2 i j) := by ring
+    rw [hre, hpair]
+    ring
+  rw [hent, hinv, Real.sqrt_one, inv_one, one_mul, mul_one]
+
+/-- λ₂(L_sym) at the all-true outcome is exactly `2` — the
+scale-invariance equality joined to the irregular-Cheeger QA's own
+`K₂` pin. -/
+theorem epK2_normLap_secondEval_allTrue :
+    secondEval (normalizedLaplacian (epK2 + perturbWeight epK2 epHalf
+        (fun _ => true)))
+      (normalizedLaplacian_symmetric _
+        (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+          (fun _ => true))))
+      (by norm_num) = 2 := by
+  rw [secondEval_congr
+    (normalizedLaplacian_symmetric _
+      (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+        (fun _ => true))))
+    (normalizedLaplacian_symmetric epK2 epK2_symmetric)
+    epK2_normLap_allTrue_eq (by norm_num)]
+  exact SpectralGraphTheory.QA.icEdge_normLap_secondEval
+
+/-- **The admissible-event non-vacuity witness**: the all-true outcome
+stays in the window `[1/2, 2]` (entries `2 ≥ 0`, degrees `2`) — the
+admissibility conjunct is satisfiable at a real outcome, so the window
+family's events are not structurally empty. -/
+theorem epK2_normWindow_allTrue_admissible_QA :
+    perturbAdmissible epK2 epHalf (1 / 2) 2 (fun _ => true) := by
+  refine ⟨fun i j => epK2_perturbed_allTrue_nonneg i j, fun i => ?_,
+    fun i => ?_⟩
+  · rw [epK2_allTrue_deg i]
+    norm_num
+  · rw [epK2_allTrue_deg i]
+
+/-- **The complement witness**: the admissible all-true outcome's
+normalized connectivity sits strictly inside the window at `t = 1/2` —
+neither disjunct of the bracket event fires at a real admissible
+outcome (`λ₂(L_sym) = 2` against floor `-1/8` and ceiling `9`); the
+theorem's promise holds non-vacuously at a point. -/
+theorem epK2_normWindow_inwindow_QA :
+    ¬ (secondEval (normalizedLaplacian (epK2 + perturbWeight epK2 epHalf
+            (fun _ => true)))
+          (normalizedLaplacian_symmetric _
+            (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+              (fun _ => true))))
+          (by norm_num)
+        ≤ ((1 / 2 : ℝ) * (cheegerConstant epK2) ^ 2 / 2 - 1 / 2) / 2)
+      ∧ ¬ (2 * ((2 : ℝ) * cheegerConstant epK2) + 1 / 2) / (1 / 2)
+        ≤ secondEval (normalizedLaplacian (epK2 + perturbWeight epK2 epHalf
+            (fun _ => true)))
+          (normalizedLaplacian_symmetric _
+            (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+              (fun _ => true))))
+          (by norm_num) := by
+  constructor
+  · intro hle
+    rw [epK2_cheegerConstant] at hle
+    have hval := epK2_normLap_secondEval_allTrue
+    linarith
+  · intro hle
+    rw [epK2_cheegerConstant] at hle
+    have hval := epK2_normLap_secondEval_allTrue
+    linarith
+
+/-- **The window genuinely restricts the outcome space**: the all-false
+outcome (degree `0`) is inadmissible at the same window — the degree
+floor excludes it. -/
+theorem epK2_normWindow_allFalse_inadmissible_QA :
+    ¬ perturbAdmissible epK2 epHalf (1 / 2) 2 (fun _ => false) := by
+  rintro ⟨hnn', hdmin', hdmax'⟩
+  have hdeg : deg (epK2 + perturbWeight epK2 epHalf (fun _ => false))
+      (0 : Fin 2) = 0 := by
+    rw [epK2_perturbed_allFalse_eq]
+    simp [deg]
+  have h0 := hdmin' 0
+  rw [hdeg] at h0
+  norm_num at h0
+
+/-- **The degree ceiling excludes too**: on `P₃` at `p ≡ 1/4`, the
+all-true outcome has nonnegative entries (every outcome does, by
+`epP3_perturbed_nonneg`) but middle degree `5 > 3` — the ceiling
+conjunct is the one that fails. -/
+theorem epP3_normWindow_allTrue_degCeiling_QA :
+    ¬ perturbAdmissible path3Adj epQuarter (1 / 2) 3 (fun _ => true) := by
+  rintro ⟨hnn', hdmin', hdmax'⟩
+  have hentry : ∀ j : Fin 3,
+      (path3Adj + perturbWeight path3Adj epQuarter (fun _ => true)) 1 j
+        = path3Adj 1 j * (5 / 2 : ℝ) := by
+    intro j
+    rw [epP3_perturbed_apply]
+    congr 1
+    norm_num
+  have hdeg : deg (path3Adj + perturbWeight path3Adj epQuarter
+      (fun _ => true)) 1 = 5 := by
+    show ∑ j : Fin 3,
+        (path3Adj + perturbWeight path3Adj epQuarter (fun _ => true)) 1 j = 5
+    simp only [hentry]
+    rw [Fin.sum_univ_three]
+    norm_num [path3Adj]
+  have h1 := hdmax' 1
+  rw [hdeg] at h1
+  norm_num at h1
+
+/-- **The normalized Cheeger floor tail on `K₂` at `p ≡ ½`, window
+`[1/2, 2]`, `t = ½`, in closed form**: `μ {ω admissible ∧
+λ₂(L_sym G_ω) ≤ (1/2·φ²/2 − 1/2)/2 = −1/8} ≤ 4 exp(−1/64)` — the
+dimension factor `2 · 2`, the variance norm `8` in the exponent's
+denominator. CONDITIONAL ON THE `matrix_hoeffding` AXIOM (instantiated,
+not re-proved). -/
+theorem epK2_normWindow_floor_tail_QA :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+      {ω : (Fin 2 × Fin 2) → Bool |
+        perturbAdmissible epK2 epHalf (1 / 2) 2 ω ∧
+        secondEval (normalizedLaplacian (epK2 + perturbWeight epK2 epHalf ω))
+            (normalizedLaplacian_symmetric _
+              (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf ω)))
+            (by norm_num)
+          ≤ ((1 / 2 : ℝ) * (cheegerConstant epK2) ^ 2 / 2 - 1 / 2) / 2}
+      ≤ ENNReal.ofReal (4 * Real.exp (-((1 : ℝ)) / 64)) := by
+  have htail := edgePerturbation_normalized_cheeger_floor epK2 epHalf
+    epK2_symmetric epK2_nonneg epK2_pos_deg (1 / 2) 2
+    (fun i => by rw [epK2_regular i]; norm_num) (by norm_num)
+    epHalf_nonneg epHalf_le_one (by norm_num) (1 / 2) (by norm_num)
+  rw [epK2_variance_norm] at htail
+  have hcard : (Fintype.card (Fin 2) : ℝ) = 2 := by norm_num
+  rw [hcard] at htail
+  have hRHS : (2 : ℝ) * 2 * Real.exp (-((1 / 2 : ℝ) ^ 2) / (2 * 8))
+      = 4 * Real.exp (-((1 : ℝ)) / 64) := by
+    have h1 : -((1 / 2 : ℝ) ^ 2) / (2 * 8) = -((1 : ℝ)) / 64 := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at htail
+  exact htail
+
+/-- **The normalized connectivity bracket on `K₂` at `p ≡ ½`, window
+`[1/2, 2]`, `t = ½`, in closed form** — the same constant as the
+one-sided tail (the window contains the sandwich-scaled eigenvalue
+ball). CONDITIONAL ON THE `matrix_hoeffding` AXIOM. -/
+theorem epK2_normWindow_bracket_QA :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+      {ω : (Fin 2 × Fin 2) → Bool |
+        perturbAdmissible epK2 epHalf (1 / 2) 2 ω ∧
+        (secondEval (normalizedLaplacian (epK2 + perturbWeight epK2 epHalf ω))
+            (normalizedLaplacian_symmetric _
+              (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf ω)))
+            (by norm_num)
+          ≤ ((1 / 2 : ℝ) * (cheegerConstant epK2) ^ 2 / 2 - 1 / 2) / 2
+        ∨ (2 * ((2 : ℝ) * cheegerConstant epK2) + 1 / 2) / (1 / 2)
+          ≤ secondEval (normalizedLaplacian (epK2 + perturbWeight epK2 epHalf ω))
+              (normalizedLaplacian_symmetric _
+                (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf ω)))
+              (by norm_num))}
+      ≤ ENNReal.ofReal (4 * Real.exp (-((1 : ℝ)) / 64)) := by
+  have htail := edgePerturbation_normalized_connectivity_bracket epK2
+    epHalf epK2_symmetric epK2_nonneg epK2_pos_deg (1 / 2) 2
+    (fun i => by rw [epK2_regular i]; norm_num) (by norm_num)
+    (fun i => by rw [epK2_regular i]; norm_num)
+    epHalf_nonneg epHalf_le_one (by norm_num) (1 / 2) (by norm_num)
+  rw [epK2_variance_norm] at htail
+  have hcard : (Fintype.card (Fin 2) : ℝ) = 2 := by norm_num
+  rw [hcard] at htail
+  have hRHS : (2 : ℝ) * 2 * Real.exp (-((1 / 2 : ℝ) ^ 2) / (2 * 8))
+      = 4 * Real.exp (-((1 : ℝ)) / 64) := by
+    have h1 : -((1 / 2 : ℝ) ^ 2) / (2 * 8) = -((1 : ℝ)) / 64 := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at htail
+  exact htail
+
+/-! ## The swept-Fiedler-cut consumer of the normalized window
+
+The algorithm-facing capstone of the window family
+(`edgePerturbation_fiedler_sweep_cut_tail`): the volume-weighted sweep
+extraction joined to the normalized connectivity window — the chain
+concentration → eigenvalue window → connectivity → *the cut the
+spectral-partitioning sweep returns*, on the resampled graph, with high
+probability. The tail instances are CONDITIONAL ON THE
+`matrix_hoeffding` AXIOM (instantiated, not re-proved); the
+good-outcome witness and connectivity pin are hard crust.
+
+Honesty note on the floor-positivity guard
+(`0 < dmin·φ²/2 − t`): it is *proof-load-bearing* — it is exactly what
+the connectivity transfer consumes (`0 < λ₂(L_sym G_ω) ↔ connected`,
+and a non-positive floor no longer forces `λ₂ > 0`) — but no
+dropped-guard refutation fixture exists at fixture scale: at 2–3
+vertices the tail bound exceeds `1`, so the un-guarded measure
+statement cannot be refuted by a lower-bound-only argument (the same
+junk-measure obstruction the window family recorded). -/
+
+/-- The support graph of the all-true perturbed `K₂` (the weight-`2`
+edge) is connected — by a raw two-vertex walk witness, no spectral
+route. -/
+theorem epK2_allTrue_supportGraph_connected :
+    (supportGraph (epK2 + perturbWeight epK2 epHalf (fun _ => true))
+      (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+        (fun _ => true)))).Connected := by
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  have hadj : (supportGraph (epK2 + perturbWeight epK2 epHalf (fun _ => true))
+      (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+        (fun _ => true)))).Adj (0 : Fin 2) 1 := by
+    rw [supportGraph_adj]
+    refine ⟨by decide, ?_⟩
+    rw [epK2_perturbed_allTrue_eq, Matrix.smul_apply, smul_eq_mul]
+    have h01 : epK2 (0 : Fin 2) 1 = 1 := by simp [epK2]
+    rw [h01]
+    norm_num
+  refine ⟨0, fun v => ?_⟩
+  fin_cases v
+  · exact ⟨SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons hadj SimpleGraph.Walk.nil⟩
+
+/-- **The good-outcome witness**: the admissible all-true outcome is
+provably *not* in the measured event — its resampled graph is connected
+and carries a swept Fiedler cut at `conductance² ≤ 2·λ₂ = 4` (the
+deterministic sweep theorem at the pinned spectrum), well inside the
+window bound `2·((2·(2·φ) + 1/16)/(1/2)) = 16.25`. The theorem's promise
+holds non-vacuously at a real admissible outcome; a wrong constant on
+the window ceiling or the sweep constant breaks the numeric join. -/
+theorem epK2_sweepWindow_allTrue_not_measured_QA :
+    ¬ (perturbAdmissible epK2 epHalf (1 / 2) 2 (fun _ => true) ∧
+      ¬ ((supportGraph (epK2 + perturbWeight epK2 epHalf (fun _ => true))
+            (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+              (fun _ => true)))).Connected ∧
+        ∃ S : Finset (Fin 2), S.Nonempty ∧ Sᶜ.Nonempty ∧
+          ((∃ u : ℝ, ∀ i, i ∈ S ↔
+              u ≤ fiedlerSweepVector (epK2 + perturbWeight epK2 epHalf
+                (fun _ => true))
+                (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+                  (fun _ => true))) (by norm_num) i)
+            ∨ (∃ u : ℝ, ∀ i, i ∈ S ↔
+              fiedlerSweepVector (epK2 + perturbWeight epK2 epHalf
+                (fun _ => true))
+                (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf
+                  (fun _ => true))) (by norm_num) i ≤ u)) ∧
+          conductance (epK2 + perturbWeight epK2 epHalf (fun _ => true)) S ^ 2
+            ≤ 2 * ((2 * ((2 : ℝ) * cheegerConstant epK2) + 1 / 16)
+                / (1 / 2)))) := by
+  rintro ⟨hadm, hbad⟩
+  have hd' : ∀ i, 0 < deg (epK2 + perturbWeight epK2 epHalf
+      (fun _ => true)) i := by
+    intro i
+    rw [epK2_allTrue_deg i]
+    norm_num
+  obtain ⟨S, hSne, hScne, hlev, hcond⟩ :=
+    fiedler_sweep_cut_normalized (epK2 + perturbWeight epK2 epHalf
+        (fun _ => true))
+      (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf (fun _ => true)))
+      epK2_perturbed_allTrue_nonneg hd' (by norm_num)
+      epK2_allTrue_supportGraph_connected
+  rw [epK2_normLap_secondEval_allTrue] at hcond
+  refine hbad ⟨epK2_allTrue_supportGraph_connected, S, hSne, hScne, hlev, ?_⟩
+  rw [epK2_cheegerConstant]
+  linarith
+
+/-- **The swept-Fiedler-cut tail on `K₂` at `p ≡ ½`, window `[1/2, 2]`,
+`t = 1/16`, in closed form**: the failure-of-good-outcome event obeys
+`4 exp(−1/4096)` — the dimension factor `2·2`, the variance norm `8`,
+and the floor hypothesis genuinely holding
+(`0 < 1/2·φ²/2 − 1/16 = 1/16`). CONDITIONAL ON THE `matrix_hoeffding`
+AXIOM (instantiated, not re-proved). -/
+theorem epK2_sweepWindow_tail_QA :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+      {ω : (Fin 2 × Fin 2) → Bool |
+        perturbAdmissible epK2 epHalf (1 / 2) 2 ω ∧
+        ¬ ((supportGraph (epK2 + perturbWeight epK2 epHalf ω)
+              (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf ω))).Connected ∧
+          ∃ S : Finset (Fin 2), S.Nonempty ∧ Sᶜ.Nonempty ∧
+            ((∃ u : ℝ, ∀ i, i ∈ S ↔
+                u ≤ fiedlerSweepVector (epK2 + perturbWeight epK2 epHalf ω)
+                  (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf ω))
+                  (by norm_num) i)
+              ∨ (∃ u : ℝ, ∀ i, i ∈ S ↔
+                fiedlerSweepVector (epK2 + perturbWeight epK2 epHalf ω)
+                  (epK2_symmetric.add (perturbWeight_isSymm epK2 epHalf ω))
+                  (by norm_num) i ≤ u)) ∧
+            conductance (epK2 + perturbWeight epK2 epHalf ω) S ^ 2
+              ≤ 2 * ((2 * ((2 : ℝ) * cheegerConstant epK2) + 1 / 16)
+                  / (1 / 2)))}
+      ≤ ENNReal.ofReal (4 * Real.exp (-((1 : ℝ)) / 4096)) := by
+  have hfloor : (0 : ℝ) < 1 / 2 * (cheegerConstant epK2) ^ 2 / 2 - 1 / 16 := by
+    rw [epK2_cheegerConstant]
+    norm_num
+  have htail := edgePerturbation_fiedler_sweep_cut_tail epK2
+    epHalf epK2_symmetric epK2_nonneg epK2_pos_deg (1 / 2) 2
+    (fun i => by rw [epK2_regular i]; norm_num) (by norm_num)
+    (fun i => by rw [epK2_regular i]; norm_num)
+    epHalf_nonneg epHalf_le_one (hcard := by norm_num) (t := 1 / 16)
+    (ht := by norm_num) (hfloor := hfloor)
+  rw [epK2_variance_norm] at htail
+  have hcard : (Fintype.card (Fin 2) : ℝ) = 2 := by norm_num
+  rw [hcard] at htail
+  have hRHS : (2 : ℝ) * 2 * Real.exp (-((1 / 16 : ℝ) ^ 2) / (2 * 8))
+      = 4 * Real.exp (-((1 : ℝ)) / 4096) := by
+    have h1 : -((1 / 16 : ℝ) ^ 2) / (2 * 8) = -((1 : ℝ)) / 4096 := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at htail
+  exact htail
+
+/-- **The swept-Fiedler-cut tail on the three-path at `p ≡ ¼`, window
+`[1/2, 3]`, `t = 1/16`, in closed form**: `6 exp(−1/6144)` — the
+dimension factor `2·3`, the variance norm `12`, the floor hypothesis
+`0 < 1/2·φ(P₃)²/2 − 1/16 = 1/16` (φ(P₃) = 1 pinned in the normWindow
+section). CONDITIONAL ON THE `matrix_hoeffding` AXIOM. -/
+theorem epP3_sweepWindow_tail_QA :
+    (bernPMF epQuarter epQuarter_nonneg epQuarter_le_one).toMeasure
+      {ω : (Fin 3 × Fin 3) → Bool |
+        perturbAdmissible path3Adj epQuarter (1 / 2) 3 ω ∧
+        ¬ ((supportGraph (path3Adj + perturbWeight path3Adj epQuarter ω)
+              (path3Adj_symmetric.add
+                (perturbWeight_isSymm path3Adj epQuarter ω))).Connected ∧
+          ∃ S : Finset (Fin 3), S.Nonempty ∧ Sᶜ.Nonempty ∧
+            ((∃ u : ℝ, ∀ i, i ∈ S ↔
+                u ≤ fiedlerSweepVector (path3Adj
+                  + perturbWeight path3Adj epQuarter ω)
+                  (path3Adj_symmetric.add
+                    (perturbWeight_isSymm path3Adj epQuarter ω))
+                  (by norm_num) i)
+              ∨ (∃ u : ℝ, ∀ i, i ∈ S ↔
+                fiedlerSweepVector (path3Adj
+                  + perturbWeight path3Adj epQuarter ω)
+                  (path3Adj_symmetric.add
+                    (perturbWeight_isSymm path3Adj epQuarter ω))
+                  (by norm_num) i ≤ u)) ∧
+            conductance (path3Adj + perturbWeight path3Adj epQuarter ω) S ^ 2
+              ≤ 2 * ((2 * ((3 : ℝ) * cheegerConstant path3Adj) + 1 / 16)
+                  / (1 / 2)))}
+      ≤ ENNReal.ofReal (6 * Real.exp (-((1 : ℝ)) / 6144)) := by
+  have hfloor : (0 : ℝ) < 1 / 2 * (cheegerConstant path3Adj) ^ 2 / 2
+      - 1 / 16 := by
+    rw [epP3_cheegerConstant]
+    norm_num
+  have htail := edgePerturbation_fiedler_sweep_cut_tail path3Adj
+    epQuarter path3Adj_symmetric path3Adj_nonneg epP3_pos_deg (1 / 2) 3
+    (fun i => by rw [epP3_deg i]; fin_cases i <;> norm_num) (by norm_num)
+    (fun i => by rw [epP3_deg i]; fin_cases i <;> norm_num)
+    epQuarter_nonneg epQuarter_le_one (hcard := by norm_num) (t := 1 / 16)
+    (ht := by norm_num) (hfloor := hfloor)
+  rw [epP3_variance_norm] at htail
+  have hcard : (Fintype.card (Fin 3) : ℝ) = 3 := by norm_num
+  rw [hcard] at htail
+  have hRHS : (2 : ℝ) * 3 * Real.exp (-((1 / 16 : ℝ) ^ 2) / (2 * 12))
+      = 6 * Real.exp (-((1 : ℝ)) / 6144) := by
+    have h1 : -((1 / 16 : ℝ) ^ 2) / (2 * 12) = -((1 : ℝ)) / 6144 := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at htail
+  exact htail
 
 end Scaffold.QA.Derived.EdgePerturbation

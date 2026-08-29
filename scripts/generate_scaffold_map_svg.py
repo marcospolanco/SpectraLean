@@ -144,7 +144,7 @@ parts.append(f'<text x="36" y="52" font-size="32" font-weight="700" fill="{INK}"
 parts.append(f'<text x="36" y="78" font-size="14" fill="{INK_SOFT}" '
              f'font-family="ui-monospace,Consolas,monospace">A hub-and-spoke reading of the SGT core and the seven axes it feeds, colored by proof status.</text>')
 parts.append(f'<text x="36" y="102" font-size="13" fill="{INK_FAINT}" '
-             f'font-family="ui-monospace,Consolas,monospace">Repo-wide: 10 explicit axioms &#183; 2855 QA declarations &#183; 0 sorries &#8212; as of commit 8c5c415, 2026-08-28</text>')
+             f'font-family="ui-monospace,Consolas,monospace">Repo-wide: 10 explicit axioms &#183; 2922 QA declarations &#183; 0 sorries &#8212; as of working tree, 2026-08-29</text>')
 
 # ---- legend ----
 lx = 36

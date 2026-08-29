@@ -54,6 +54,20 @@
     load-bearing on one statement: leaving the window
     `[d·φ²/2 − t, 2dφ + t]` implies leaving the eigenvalue tail event.
 
+  The normalized (irregular) window packaging (2026-08-29, the degree
+  sandwich's named consumer) and its algorithm-facing capstone:
+
+  - `edgePerturbation_normalized_cheeger_floor` and
+    `edgePerturbation_normalized_connectivity_bracket`: the irregular
+    siblings at `λ₂(L_sym G_ω)`, assembled through the degree sandwich.
+  - `edgePerturbation_fiedler_sweep_cut_tail`: the swept-Fiedler-cut
+    consumer — outside the bracket's tail set, every admissible outcome
+    is *connected* and carries an explicit swept level set of its own
+    Fiedler sweep vector at `conductance² ≤ 2 · (2·dmax·φ + t)/dmin`
+    (the floor's positivity feeding the connectivity transfer, the
+    ceiling the sweep extraction — the window family completed into an
+    algorithmic output).
+
   The tail theorems are **conditional on the `matrix_hoeffding`
   axiom** (Tropp 2012, Theorem 1.4, as repaired 2026-08-28 with the
   `[Nonempty V]` guard) and must never be described as foundationally
@@ -68,6 +82,7 @@
 
 import Scaffold.Mathlib.GraphTheory.EdgePerturbation
 import Scaffold.Mathlib.GraphTheory.Cheeger
+import Scaffold.Mathlib.GraphTheory.VariationalTransfer
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Hoeffding
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Weyl
 
@@ -462,5 +477,270 @@ theorem edgePerturbation_connectivity_bracket (hA : A.IsSymm)
     linarith
 
 end CheegerWindow
+
+/-! ## The normalized (irregular) Cheeger window
+
+The irregular sibling of the Cheeger window above, assembled from the
+same λ₂ tail through the degree eigenvalue sandwich
+(`GraphTheory.VariationalTransfer`, 2026-08-29) and the irregular
+Cheeger pair: a high-probability window on the *normalized* algebraic
+connectivity `λ₂(L_sym G_ω)` of the resampled graph under random edge
+resampling, on arbitrary symmetric nonnegative positive-degree base
+graphs — no regularity.
+
+The resampling design's degrees are random, and the centered design
+(`perturbSummand`) makes them genuinely so: no design restriction
+preserves the tail (it consumes the centered design), and the norm tail
+carries zero degree information (`L(E_ω) · 1 = 0` identically — the
+Laplacian of any symmetric matrix kills the constants). The window
+therefore carries its admissibility **event-internally**: the measured
+set intersects with the outcomes whose resampled graph stays a
+nonnegative weighted graph with degrees in the base graph's window
+`[dmin, dmax]` (`perturbAdmissible`). The complement reading: outside a
+set of the bound's measure, every admissible outcome keeps
+`λ₂(L_sym G_ω)` inside `((dmin·φ²/2 − t)/dmax, (2·dmax·φ + t)/dmin)`.
+
+Sandwich-side consumption (the assembly's Step-0 design verdict): the
+floor side runs the sandwich's *lower* side at the perturbed degree
+*ceiling* — a depressed normalized eigenvalue with degrees bounded
+above forces a depressed combinatorial eigenvalue, into the delivered
+λ₂ lower tail — and the ceiling side the *upper* side at the degree
+*floor*. The floor theorem's window constant divides by `dmax`; the
+bracket's ceiling by `dmin`. Both Cheeger directions are load-bearing
+on the bracket's inclusion, and the admissibility window is
+proof-load-bearing (the sandwich's `hnn`/`hd` clauses on the perturbed
+graph are exactly the window conjuncts); no dropped-window refutation
+fixture exists at fixture scale — at the junk outcomes the normalized
+Laplacian degenerates to the identity, whose `λ₂ = 1` keeps the
+un-windowed floor condition false on `K₂`-shaped fixtures (recorded
+honestly in the QA section). -/
+
+section NormalizedCheegerWindow
+
+variable (A : WAdj (V := V)) (p : (V × V) → ℝ)
+
+/-- The admissibility window of the irregular Cheeger window: the
+outcomes whose resampled graph stays a nonnegative weighted graph with
+degrees in the base graph's window `[dmin, dmax]`. Nonnegativity and
+the degree floor are the exact hypothesis clauses the irregular Cheeger
+pair and the degree sandwich need on the perturbed graph; the degree
+ceiling is the sandwich's lower-side constant. -/
+def perturbAdmissible (A : WAdj (V := V)) (p : (V × V) → ℝ)
+    (dmin dmax : ℝ) (ω : (V × V) → Bool) : Prop :=
+  (∀ i j, 0 ≤ (A + perturbWeight A p ω) i j) ∧
+    (∀ i, dmin ≤ deg (A + perturbWeight A p ω) i) ∧
+      ∀ i, deg (A + perturbWeight A p ω) i ≤ dmax
+
+/-- **The normalized Cheeger floor under random edge resampling** — on
+a symmetric nonnegative positive-degree base graph with degrees in
+`[dmin, dmax]` (`0 < dmin`), the resampled graph's *normalized* algebraic
+connectivity stays above `(dmin · φ(A)²/2 − t) / dmax` outside a set of
+the λ₂ tail's measure, on the outcomes whose resampled degrees stay in
+the same window:
+`μ {ω admissible ∧ λ₂(L_sym G_ω) ≤ (dmin·φ²/2 − t)/dmax}
+≤ 2 d exp(−t²/(2‖∑ₑ L_e²‖))`.
+
+The composition: on the admissible outcomes the sandwich's lower side
+(`div_le_secondEval_normalizedLaplacian`) turns a depressed normalized
+eigenvalue into a depressed combinatorial one, and the new engine
+`cheeger_lower_bound_laplacian_of_degree_window` puts the base `λ₂`
+above the same floor — a pure `measure_mono` into the delivered λ₂
+lower tail. CONDITIONAL ON THE `matrix_hoeffding` AXIOM via the lower
+tail alone; the Cheeger and sandwich sides are proved hard crust. -/
+theorem edgePerturbation_normalized_cheeger_floor (hA : A.IsSymm)
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (dmin dmax : ℝ) (hdmin : ∀ i, dmin ≤ deg A i) (hpos : 0 < dmin)
+    (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 1) [Nonempty V]
+    (hcard : 2 ≤ Fintype.card V) (t : ℝ) (ht : 0 ≤ t) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool |
+        perturbAdmissible A p dmin dmax ω ∧
+        secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+            (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) hcard
+          ≤ (dmin * cheegerConstant A ^ 2 / 2 - t) / dmax}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(t ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖))) := by
+  refine le_trans (measure_mono ?_)
+    (edgePerturbation_lambda2_lower_tail A p hA hp0 hp1 hcard t ht)
+  rintro ω ⟨⟨hnn', hdmin', hdmax'⟩, hlow⟩
+  simp only [Set.mem_setOf_eq]
+  have hd' : ∀ i, 0 < deg (A + perturbWeight A p ω) i :=
+    fun i => lt_of_lt_of_le hpos (hdmin' i)
+  obtain ⟨i₀⟩ := ‹Nonempty V›
+  have hdmaxpos : 0 < dmax := lt_of_lt_of_le (hd' i₀) (hdmax' i₀)
+  have hsand := div_le_secondEval_normalizedLaplacian
+    (A + perturbWeight A p ω) (hA.add (perturbWeight_isSymm A p ω))
+    hnn' hd' dmax hdmax' hcard
+  have h2 := hsand.trans hlow
+  rw [div_le_div_iff₀ hdmaxpos hdmaxpos] at h2
+  have h3 := le_of_mul_le_mul_right h2 hdmaxpos
+  have h4 := cheeger_lower_bound_laplacian_of_degree_window A hA hnn hd
+    dmin hdmin hpos hcard
+  linarith
+
+/-- **The normalized connectivity bracket** — the two-sided irregular
+Cheeger window under random edge resampling: leaving
+`[(dmin·φ(A)²/2 − t)/dmax, (2·dmax·φ(A) + t)/dmin]` implies leaving the
+two-sided eigenvalue tail at the *same* constant (the window contains
+the sandwich-scaled eigenvalue ball), on the admissible outcomes:
+`μ {ω admissible ∧ (λ₂(L_sym G_ω) ≤ floor ∨ ceiling ≤ λ₂(L_sym G_ω))}
+≤ 2 d exp(−t²/(2‖∑ₑ L_e²‖))`.
+
+Both sides are load-bearing on the inclusion — the floor through the
+sandwich's lower side at `dmax` plus the new window-Cheeger floor
+engine, the ceiling through the sandwich's upper side at `dmin` plus
+the window-Cheeger ceiling engine — and a wrong `dmin`/`dmax` pairing
+breaks the corresponding half. CONDITIONAL ON THE `matrix_hoeffding`
+AXIOM via the two-sided tail; Cheeger and sandwich sides proved. -/
+theorem edgePerturbation_normalized_connectivity_bracket (hA : A.IsSymm)
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (dmin dmax : ℝ) (hdmin : ∀ i, dmin ≤ deg A i) (hpos : 0 < dmin)
+    (hdmax : ∀ i, deg A i ≤ dmax)
+    (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 1) [Nonempty V]
+    (hcard : 2 ≤ Fintype.card V) (t : ℝ) (ht : 0 ≤ t) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool |
+        perturbAdmissible A p dmin dmax ω ∧
+        (secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+            (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) hcard
+          ≤ (dmin * cheegerConstant A ^ 2 / 2 - t) / dmax
+        ∨ (2 * (dmax * cheegerConstant A) + t) / dmin
+          ≤ secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+              (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+                (hA.add (perturbWeight_isSymm A p ω))) hcard)}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(t ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖))) := by
+  have hfloor := cheeger_lower_bound_laplacian_of_degree_window A hA hnn hd
+    dmin hdmin hpos hcard
+  have hceil := cheeger_upper_bound_laplacian_of_degree_window A hA hnn hd
+    dmax hdmax hcard
+  refine le_trans (measure_mono ?_)
+    (edgePerturbation_eval_tail A p hA hp0 hp1 ⟨1, by omega⟩ t ht)
+  rintro ω ⟨⟨hnn', hdmin', hdmax'⟩, hlow | hhigh⟩
+  · simp only [Set.mem_setOf_eq]
+    have hd' : ∀ i, 0 < deg (A + perturbWeight A p ω) i :=
+      fun i => lt_of_lt_of_le hpos (hdmin' i)
+    obtain ⟨i₀⟩ := ‹Nonempty V›
+    have hdmaxpos : 0 < dmax := lt_of_lt_of_le (hd' i₀) (hdmax' i₀)
+    have hsand := div_le_secondEval_normalizedLaplacian
+      (A + perturbWeight A p ω) (hA.add (perturbWeight_isSymm A p ω))
+      hnn' hd' dmax hdmax' hcard
+    have h2 := hsand.trans hlow
+    rw [div_le_div_iff₀ hdmaxpos hdmaxpos] at h2
+    have h3 := le_of_mul_le_mul_right h2 hdmaxpos
+    have h1 : lambda2 (A + perturbWeight A p ω)
+        (hA.add (perturbWeight_isSymm A p ω)) hcard
+        ≤ lambda2 A hA hcard - t := by linarith
+    show t ≤ |(lambda2 (A + perturbWeight A p ω)
+          (hA.add (perturbWeight_isSymm A p ω)) hcard : ℝ)
+        - lambda2 A hA hcard|
+    rw [abs_of_nonpos (by linarith)]
+    linarith
+  · simp only [Set.mem_setOf_eq]
+    have hd' : ∀ i, 0 < deg (A + perturbWeight A p ω) i :=
+      fun i => lt_of_lt_of_le hpos (hdmin' i)
+    have hsand := secondEval_normalizedLaplacian_le_div
+      (A + perturbWeight A p ω) (hA.add (perturbWeight_isSymm A p ω))
+      hnn' hd' dmin hdmin' hpos hcard
+    have h2 := le_trans hhigh hsand
+    rw [div_le_div_iff₀ hpos hpos] at h2
+    have h3 := le_of_mul_le_mul_right h2 hpos
+    have h1 : lambda2 A hA hcard + t
+        ≤ lambda2 (A + perturbWeight A p ω)
+            (hA.add (perturbWeight_isSymm A p ω)) hcard := by linarith
+    show t ≤ |(lambda2 (A + perturbWeight A p ω)
+          (hA.add (perturbWeight_isSymm A p ω)) hcard : ℝ)
+        - lambda2 A hA hcard|
+    rw [abs_of_nonneg (by linarith)]
+    linarith
+
+/-- **The swept-Fiedler-cut consumer of the normalized window** — the
+window family's algorithm-facing capstone: under random edge
+resampling, outside the bracket's tail set every admissible outcome's
+resampled graph is **connected** and carries an explicit swept level
+set of *its own* Fiedler sweep vector at
+
+`conductance G_ω S ^ 2 ≤ 2 · (2·dmax·φ(A) + t)/dmin`,
+
+whenever the window's floor numerator is positive (`t < dmin·φ²/2`):
+
+`μ {ω admissible ∧ ¬(connected G_ω ∧ ∃ swept S, conductance² ≤
+2·ceiling)} ≤ 2 d exp(−t²/(2‖∑ₑ L_e²‖))`.
+
+The composition — each delivered family load-bearing on one link: the
+window *floor's positivity* (the new hypothesis `hfloor`) feeds the
+connectivity transfer (`secondEval_normalizedLaplacian_pos_iff_connected`
+— a depressed-to-zero eigenvalue would disconnect the resampled graph
+and kill the sweep theorem's input), and the window *ceiling* caps the
+sweep extraction (`fiedler_sweep_cut_normalized` on the resampled
+graph, whose `conductance² ≤ 2 λ₂` is then bounded by `2·ceiling`). A
+pure `measure_mono` into the delivered bracket. CONDITIONAL ON THE
+`matrix_hoeffding` AXIOM via the bracket; the connectivity transfer
+and sweep extraction are proved hard crust.
+
+The floor-positivity guard is proof-load-bearing, not decorative: at
+`t ≥ dmin·φ²/2` the window no longer forces `0 < λ₂`, and connectivity
+of the resampled graph — the sweep theorem's entry ticket — is lost
+(no cheap refutation fixture exists at fixture scale, since at 2–3
+vertices the tail bound exceeds `1`; recorded honestly in the QA
+section). -/
+theorem edgePerturbation_fiedler_sweep_cut_tail (hA : A.IsSymm)
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (dmin dmax : ℝ) (hdmin : ∀ i, dmin ≤ deg A i) (hpos : 0 < dmin)
+    (hdmax : ∀ i, deg A i ≤ dmax)
+    (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 1) [Nonempty V]
+    (hcard : 2 ≤ Fintype.card V) (t : ℝ) (ht : 0 ≤ t)
+    (hfloor : 0 < dmin * cheegerConstant A ^ 2 / 2 - t) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool |
+        perturbAdmissible A p dmin dmax ω ∧
+        ¬ ((supportGraph (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))).Connected ∧
+           ∃ S : Finset V, S.Nonempty ∧ Sᶜ.Nonempty ∧
+             ((∃ u : ℝ, ∀ i, i ∈ S ↔
+                 u ≤ fiedlerSweepVector (A + perturbWeight A p ω)
+                   (hA.add (perturbWeight_isSymm A p ω)) hcard i)
+               ∨ (∃ u : ℝ, ∀ i, i ∈ S ↔
+                 fiedlerSweepVector (A + perturbWeight A p ω)
+                   (hA.add (perturbWeight_isSymm A p ω)) hcard i ≤ u)) ∧
+             conductance (A + perturbWeight A p ω) S ^ 2
+               ≤ 2 * ((2 * (dmax * cheegerConstant A) + t) / dmin))}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(t ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖))) := by
+  refine le_trans (measure_mono ?_)
+    (edgePerturbation_normalized_connectivity_bracket A p hA hnn hd dmin dmax
+      hdmin hpos hdmax hp0 hp1 hcard t ht)
+  rintro ω ⟨hadm, hbad⟩
+  refine ⟨hadm, ?_⟩
+  by_contra hdisj
+  push_neg at hdisj
+  obtain ⟨i₀⟩ := ‹Nonempty V›
+  have hd' : ∀ i, 0 < deg (A + perturbWeight A p ω) i :=
+    fun i => lt_of_lt_of_le hpos (hadm.2.1 i)
+  have hdmaxpos : 0 < dmax := lt_of_lt_of_le (hd' i₀) (hadm.2.2 i₀)
+  have hfloorpos : 0 < (dmin * cheegerConstant A ^ 2 / 2 - t) / dmax :=
+    div_pos hfloor hdmaxpos
+  have hpos₂ : 0 < secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+      (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+        (hA.add (perturbWeight_isSymm A p ω))) hcard :=
+    lt_trans hfloorpos hdisj.1
+  have hconn : (supportGraph (A + perturbWeight A p ω)
+      (hA.add (perturbWeight_isSymm A p ω))).Connected :=
+    (secondEval_normalizedLaplacian_pos_iff_connected
+      (A + perturbWeight A p ω)
+      (hA.add (perturbWeight_isSymm A p ω)) hadm.1 hd' hcard).1 hpos₂
+  obtain ⟨S, hSne, hScne, hlev, hcond⟩ :=
+    fiedler_sweep_cut_normalized (A + perturbWeight A p ω)
+      (hA.add (perturbWeight_isSymm A p ω)) hadm.1 hd' hcard hconn
+  refine hbad ⟨hconn, S, hSne, hScne, hlev, ?_⟩
+  have h2c : (2 : ℝ) * secondEval (normalizedLaplacian (A + perturbWeight A p ω))
+      (normalizedLaplacian_symmetric (A + perturbWeight A p ω)
+        (hA.add (perturbWeight_isSymm A p ω))) hcard
+      ≤ 2 * ((2 * (dmax * cheegerConstant A) + t) / dmin) := by linarith
+  exact le_trans hcond h2c
+
+end NormalizedCheegerWindow
 
 end Scaffold.Derived.EdgePerturbationTail

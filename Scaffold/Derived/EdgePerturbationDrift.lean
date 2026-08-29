@@ -19,6 +19,16 @@
     graphs on the connectivity stack, so the residual rotation is the
     Fiedler mode's own), under the additional per-outcome nonnegativity
     and connectivity design constraints the kernel identification needs.
+  - `edgePerturbation_fiedlerSubspace_drift'` and
+    `edgePerturbation_fiedlerLine_drift'`: the sharpened,
+    matched-threshold pair — the `s/(γ−s)`-shaped statements mirroring
+    `eventStreamProjectorDrift` exactly, at `0 < s < γ ≤ λ₃ − λ₂`: the
+    gap parameter is consumed inline (no separate `t + δ` split) and
+    the threshold is matched to the tail level. At a fixed threshold
+    `u` this is the envelope-optimal instance of the `t/δ` family: the
+    constraint `t + δ ≤ γ` at `t/δ = u` maximizes the exponent `t²` at
+    `t = γu/(1+u)`, which is exactly the `s` of the sharpened
+    statement (`s/(γ−s) = u`).
 
   Both are CONDITIONAL ON THE `matrix_hoeffding` AXIOM via the tail
   alone (`edgePerturbation_norm_tail`, Tropp 2012, Theorem 1.4, as
@@ -37,7 +47,8 @@
 
   QA: `Scaffold/QA/Derived/EdgePerturbation_QA.lean`, the drift section —
   the closed-form Fiedler-line instance on the three-path
-  (`6 exp(−1/24)`).
+  (`6 exp(−1/24)`), and the sharpened-interface section (the envelope
+  arithmetic and the matched-threshold instances).
 -/
 
 import Scaffold.Derived.EdgePerturbationTail
@@ -201,5 +212,95 @@ theorem edgePerturbation_fiedlerLine_drift (A : WAdj (V := V))
       rw [div_lt_div_iff₀ hδ hδ]
       exact mul_lt_mul_of_pos_right hnorm hδ)
   exact absurd hω (not_le_of_lt hkey)
+
+/-!
+## The sharpened (matched-threshold) drift interface
+
+The two theorems above bound `μ{‖rotation‖ ≥ t/δ}` by a tail sitting at
+level `t`: at a fixed threshold `u = t/δ` the exponent `t²` is *not*
+envelope-optimal — the constraint `t + δ ≤ γ` (where `γ` is any lower
+bound on the base gap) maximizes `t` at `t = γu/(1+u)`. The statements
+below consume the gap parameter inline and sit exactly at that envelope
+point: with `s := γu/(1+u)` one has `s/(γ−s) = u`, so the threshold and
+the tail level are matched, mirroring `eventStreamProjectorDrift`'s
+statement shape exactly. Both are the delivered pair instantiated at
+`t := s`, `δ := γ − s` (`0 < γ` is derivable from `0 < s < γ`, so no
+explicit positivity hypothesis on `γ` is carried).
+-/
+
+/-- **Fiedler-subspace drift, sharpened (matched-threshold) form** — the
+`s/(γ−s)`-shaped statement mirroring `eventStreamProjectorDrift`
+exactly: at any `0 < s < γ ≤ λ₃(L A) − λ₂(L A)`, the probability that
+the bottom-2 Laplacian subspace rotates by more than `s/(γ−s)` is at
+most `2 d exp(−s²/(2‖∑ₑ L_e²‖))` — the gap consumed inline, threshold
+matched to tail, and the pointwise-strongest instance of the
+`t/δ`-family at every threshold (at threshold `u = s/(γ−s)` the
+exponent `s² = (γu/(1+u))²` is the maximum of `t²` over all valid
+`(t, δ)` splits of the delivered statement).
+
+CONDITIONAL ON THE `matrix_hoeffding` AXIOM via the delivered
+`t/δ`-form alone; that theorem's deterministic side (Davis–Kahan, Weyl
+separation discharge) is proved. -/
+theorem edgePerturbation_fiedlerSubspace_drift' (A : WAdj (V := V))
+    (hA : A.IsSymm) (p : (V × V) → ℝ) (hp0 : ∀ e, 0 ≤ p e)
+    (hp1 : ∀ e, p e ≤ 1) (hcard : 3 ≤ Fintype.card V)
+    (γ : ℝ)
+    (hgap : γ ≤ evals (laplacian_symmetric A hA) ⟨2, by omega⟩
+      - evals (laplacian_symmetric A hA) ⟨1, by omega⟩)
+    (s : ℝ) (hs : 0 < s) (hsg : s < γ) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool |
+        ‖initialProjector (laplacian (A + perturbWeight A p ω))
+            (laplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) ⟨1, by omega⟩
+          - initialProjector (laplacian A) (laplacian_symmetric A hA)
+            ⟨1, by omega⟩‖ ≥ s / (γ - s)}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(s ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖))) :=
+  edgePerturbation_fiedlerSubspace_drift A hA p hp0 hp1 hcard (γ - s)
+    (sub_pos.mpr hsg) s hs.le (by linarith)
+
+/-- **Fiedler-line drift, sharpened (matched-threshold) form** — the
+payoff statement of the pipeline in the `s/(γ−s)` shape of
+`eventStreamProjectorDrift`: at any `0 < s < γ ≤ λ₃(L A) − λ₂(L A)`,
+the probability that the Fiedler *line* itself rotates by more than
+`s/(γ−s)` is at most `2 d exp(−s²/(2‖∑ₑ L_e²‖))` — the gap consumed
+inline and the threshold matched to the tail (the envelope-optimal
+instance of the delivered `t/δ` form at every threshold). Hypotheses
+are the sharpened subspace variant's plus the per-outcome design
+constraints the common-kernel identification needs.
+
+CONDITIONAL ON THE `matrix_hoeffding` AXIOM via the delivered
+`t/δ`-form alone; the Davis–Kahan side, the kernel identification, and
+the packaging identity are proved. -/
+theorem edgePerturbation_fiedlerLine_drift' (A : WAdj (V := V))
+    (hA : A.IsSymm) (p : (V × V) → ℝ) (hp0 : ∀ e, 0 ≤ p e)
+    (hp1 : ∀ e, p e ≤ 1)
+    (hnnA : ∀ i j, 0 ≤ A i j)
+    (hnnAE : ∀ ω i j, 0 ≤ (A + perturbWeight A p ω) i j)
+    (hconnA : (supportGraph A hA).Connected)
+    (hconnAE : ∀ ω, (supportGraph (A + perturbWeight A p ω)
+      (hA.add (perturbWeight_isSymm A p ω))).Connected)
+    (hcard : 3 ≤ Fintype.card V)
+    (γ : ℝ)
+    (hgap : γ ≤ evals (laplacian_symmetric A hA) ⟨2, by omega⟩
+      - evals (laplacian_symmetric A hA) ⟨1, by omega⟩)
+    (s : ℝ) (hs : 0 < s) (hsg : s < γ) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool |
+        ‖(initialProjector (laplacian (A + perturbWeight A p ω))
+            (laplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) ⟨1, by omega⟩
+          - initialProjector (laplacian (A + perturbWeight A p ω))
+            (laplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) ⟨0, by omega⟩)
+        - (initialProjector (laplacian A) (laplacian_symmetric A hA)
+            ⟨1, by omega⟩
+          - initialProjector (laplacian A) (laplacian_symmetric A hA)
+            ⟨0, by omega⟩)‖ ≥ s / (γ - s)}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(s ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖))) :=
+  edgePerturbation_fiedlerLine_drift A hA p hp0 hp1 hnnA hnnAE hconnA
+    hconnAE hcard (γ - s) (sub_pos.mpr hsg) s hs.le (by linarith)
 
 end Scaffold.Derived.EdgePerturbationDrift

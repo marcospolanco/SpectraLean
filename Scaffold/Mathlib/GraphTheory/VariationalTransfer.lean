@@ -1584,4 +1584,429 @@ theorem fiedler_sweep_cut_normalized (A : WAdj (V := V))
     fiedlerVectorNormalized_rayleigh A hA hcard] at hcond
   exact hcond
 
+/-!
+## The degree eigenvalue sandwich (2026-08-29)
+
+The eigenvalue-level bridge between the combinatorial and normalized
+worlds — the engine the irregular analogue of the Cheeger window needs
+(the delivered window family composes the combinatorial-λ₂ tail with
+the regular Cheeger pair; the irregular Cheeger pair lives at
+`secondEval (normalizedLaplacian A)` and, before this section, had no
+eigenvalue-level connection to `lambda2` at all — only the quadratic-
+form and Rayleigh-quotient transfers above).
+
+The statement is the classical two-sided degree comparison: with every
+degree in `[dmin, dmax]` and `0 < dmin`, at *every* sorted index `k`,
+
+  `λₖ(L) / dmax ≤ λₖ(L_sym) ≤ λₖ(L) / dmin`.
+
+No pointwise test-vector route exists — the two natural variational
+problems constrain `x ⊥ 1` (combinatorial) and `x ⊥ √D · onesVec`
+(normalized), and the degree substitution `x ↦ √D x` maps one
+constraint set to a *degree-weighted* orthogonality, not the other — so
+the proof rides the subspace min–max (`evals_min_max` with both
+Courant–Fischer witness forms) with the witness subspaces transported
+through the degree stretch (a linear equivalence at positive degrees):
+the upper side dominates `λₖ(L_sym)`'s sInf by the image of the
+combinatorial existence-form subspace, the lower side runs the
+competitor form on the un-stretched preimage. The pointwise input is
+the Rayleigh-quotient bracket `R_{L_sym}(√D x) ∈ [R_L(x)/dmax,
+R_L(x)/dmin]` (the congruence engine plus `laplacian_psd`), which is
+where an error in the congruence, the PSD hypothesis, or the degree
+guards would break the whole sandwich.
+-/
+
+/-- The degree stretch as a linear equivalence: `x ↦ √D x` is bijective
+exactly when every degree is positive (the inverse is the `1/√D`
+stretch). The subspace transport of the sandwich runs through this. -/
+noncomputable def degreeSqrtEquiv (A : WAdj (V := V)) (hd : ∀ i, 0 < deg A i) :
+    (V → ℝ) ≃ₗ[ℝ] (V → ℝ) :=
+  LinearEquiv.ofBijective (Matrix.mulVecLin (degreeSqrt A))
+    ⟨fun x y h => by
+      by_contra hxy
+      have h1 : Matrix.mulVecLin (degreeSqrt A) (x - y) = 0 := by
+        rw [map_sub, h, sub_self]
+      have hz : degreeSqrt A *ᵥ (x - y) = 0 := h1
+      exact absurd hz (degreeSqrt_mulVec_ne_zero A hd (sub_ne_zero.2 hxy)),
+      fun y => ⟨degreeInvSqrt A *ᵥ y, by
+        rw [Matrix.mulVecLin_apply, Matrix.mulVec_mulVec,
+          degreeSqrt_mul_degreeInvSqrt A hd, Matrix.one_mulVec]⟩⟩
+
+omit [DecidableEq V] in
+/-- The degree-weighted denominator, lower bound: with `dmin` below
+every degree, the degree-weighted squared norm is at least `dmin`
+times the plain squared norm. -/
+theorem sum_deg_mul_sq_ge (A : WAdj (V := V)) (dmin : ℝ)
+    (hdmin : ∀ i, dmin ≤ deg A i) (x : V → ℝ) :
+    dmin * Matrix.dotProduct x x ≤ ∑ i, deg A i * x i * x i := by
+  have h1 : dmin * ∑ i, x i * x i ≤ ∑ i, deg A i * x i * x i := by
+    rw [Finset.mul_sum]
+    exact Finset.sum_le_sum fun i _ =>
+      by nlinarith [hdmin i, sq_nonneg (x i)]
+  rw [← Matrix.dotProduct]
+  exact h1
+
+omit [DecidableEq V] in
+/-- The degree-weighted denominator, upper bound: with every degree at
+most `dmax`, the degree-weighted squared norm is at most `dmax` times
+the plain squared norm. -/
+theorem sum_deg_mul_sq_le (A : WAdj (V := V)) (dmax : ℝ)
+    (hdmax : ∀ i, deg A i ≤ dmax) (x : V → ℝ) :
+    ∑ i, deg A i * x i * x i ≤ dmax * Matrix.dotProduct x x := by
+  have h1 : ∑ i, deg A i * x i * x i ≤ dmax * ∑ i, x i * x i := by
+    rw [Finset.mul_sum]
+    exact Finset.sum_le_sum fun i _ =>
+      by nlinarith [hdmax i, sq_nonneg (x i)]
+  rw [← Matrix.dotProduct]
+  exact h1
+
+/-- The quotient bracket, upper side: `R_{L_sym}(√D x) ≤ R_L(x)/dmin`
+for nonzero `x` — the PSD numerator over a denominator at least `dmin`
+times the plain norm. The pointwise engine of the sandwich's `dmin`
+half; nonnegativity of the weights is load-bearing through
+`laplacian_psd` (on signed input the combinatorial form is not PSD and
+the division flips). -/
+theorem rayleigh_normalizedLaplacian_le_div (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (dmin : ℝ) (hdmin : ∀ i, dmin ≤ deg A i) (hpos : 0 < dmin)
+    {x : V → ℝ} (hx0 : x ≠ 0) :
+    rayleigh (normalizedLaplacian A) (degreeSqrt A *ᵥ x)
+      ≤ rayleigh (laplacian A) x / dmin := by
+  have hpsd := laplacian_psd A hA hnn
+  have hs : 0 < Matrix.dotProduct x x := dotProduct_self_pos hx0
+  have hbr := sum_deg_mul_sq_ge A dmin hdmin x
+  have hWpos : 0 < ∑ i, deg A i * x i * x i :=
+    lt_of_lt_of_le (mul_pos hpos hs) hbr
+  rw [rayleigh_normalizedLaplacian_degreeSqrt A hd hx0, rayleigh,
+    if_neg hx0, div_div]
+  rw [div_le_div_iff₀ hWpos (mul_pos hs hpos)]
+  have hq := hpsd x
+  nlinarith [hbr, hq]
+
+/-- The quotient bracket, lower side: `R_L(x) ≤ dmax · R_{L_sym}(√D x)`
+for nonzero `x` — the PSD numerator over a denominator at most `dmax`
+times the plain norm. The pointwise engine of the sandwich's `dmax`
+half. -/
+theorem rayleigh_le_mul_rayleigh_normalizedLaplacian (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (dmax : ℝ) (hdmax : ∀ i, deg A i ≤ dmax)
+    {x : V → ℝ} (hx0 : x ≠ 0) :
+    rayleigh (laplacian A) x
+      ≤ dmax * rayleigh (normalizedLaplacian A) (degreeSqrt A *ᵥ x) := by
+  have hpsd := laplacian_psd A hA hnn
+  have hs : 0 < Matrix.dotProduct x x := dotProduct_self_pos hx0
+  have hbr := sum_deg_mul_sq_le A dmax hdmax x
+  have hWpos : 0 < ∑ i, deg A i * x i * x i := by
+    obtain ⟨i, hi⟩ : ∃ i, x i ≠ 0 := by
+      by_contra hcon
+      push_neg at hcon
+      exact hx0 (funext hcon)
+    exact Finset.sum_pos' (fun j _ => by
+      calc deg A j * x j * x j = deg A j * (x j * x j) := by ring
+        _ ≥ 0 := mul_nonneg (hd j).le (mul_self_nonneg _))
+      ⟨i, Finset.mem_univ _, by
+        calc deg A i * x i * x i = deg A i * (x i * x i) := by ring
+          _ > 0 := mul_pos (hd i) (mul_self_pos.2 hi)⟩
+  rw [rayleigh_normalizedLaplacian_degreeSqrt A hd hx0, rayleigh,
+    if_neg hx0, ← mul_div_assoc]
+  rw [div_le_div_iff₀ hs hWpos]
+  have hq := hpsd x
+  nlinarith [hbr, hq]
+
+/-- **The bottom eigenvalue of the normalized Laplacian is exactly
+`0`** on positive-degree graphs — no connectivity, the normalized
+counterpart of `laplacian_evals_zero`. The stretched constants are an
+eigenvector at `0`, and PSD of `L_sym` rules out anything smaller. The
+pin every exact normalized-spectrum fixture starts from. -/
+theorem normalizedLaplacian_evals_zero (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (hcard : 0 < Fintype.card V) :
+    evals (normalizedLaplacian_symmetric A hA) ⟨0, by omega⟩ = 0 := by
+  have hpsd := normalizedLaplacian_psd A hA hnn hd
+  obtain ⟨v⟩ := Fintype.card_pos_iff.1 hcard
+  have hvne : (onesVec : V → ℝ) ≠ 0 := by
+    intro h
+    have hv : (onesVec : V → ℝ) v = 0 := congrFun h v
+    simp [onesVec] at hv
+  have hwne : degreeSqrt A *ᵥ (onesVec : V → ℝ) ≠ 0 :=
+    degreeSqrt_mulVec_ne_zero A hd hvne
+  obtain ⟨i, hi⟩ := exists_eigvalOf_eq_of_mulVec_eq_smul
+    (normalizedLaplacian_symmetric A hA) hwne
+    (by rw [zero_smul]; exact normalizedLaplacian_mulVec_degreeSqrt_onesVec A hd)
+  obtain ⟨i', hi'⟩ := evals_mem_eigvalOf (normalizedLaplacian_symmetric A hA)
+    ⟨0, by omega⟩
+  have hge : (0 : ℝ)
+      ≤ eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i' := by
+    have h := hpsd (eigvecOf (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) i')
+    rw [quadForm_eigvecOf_self] at h
+    exact h
+  have hle : evals (normalizedLaplacian_symmetric A hA) ⟨0, by omega⟩
+      ≤ eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i :=
+    evals_first_le_eigvalOf _ (by omega) i
+  rw [← hi'] at hge
+  rw [hi] at hle
+  linarith
+
+/-- **The degree eigenvalue sandwich, upper side (engine).** On any
+symmetric nonnegative positive-degree graph, at every sorted index `k`,
+the normalized-Laplacian eigenvalue is at most the combinatorial one
+divided by the degree floor:
+
+  `λₖ(L_sym) ≤ λₖ(L) / dmin`  whenever  `dmin ≤ deg A i` (all `i`),
+  `0 < dmin`.
+
+Source (classical background; this is a proof, not an admission):
+- Horn, R. & Johnson, C., "Matrix Analysis", 2nd ed., Cambridge
+  University Press, 2013, Section 4.2 (Courant–Fischer), whose
+  subspace min–max applied to the degree-weighted Rayleigh quotient
+  gives this comparison; the statement is the standard
+  normalized/unnormalized eigenvalue sandwich of spectral graph theory.
+
+Route: the combinatorial existence form exhibits a `(k+1)`-dimensional
+subspace `W₁` whose Rayleigh quotients all sit below `λₖ(L)`; its
+image under the degree stretch is again `(k+1)`-dimensional
+(`finrank_map_eq_of_injective` through `degreeSqrtEquiv`), and the
+quotient bracket bounds every image Rayleigh quotient by
+`R_L(x)/dmin ≤ λₖ(L)/dmin` — so `λₖ(L)/dmin` is a dominating value of
+`L_sym`'s min–max set, and `csInf_le` closes. The competitor direction
+supplies the set's boundedness.
+
+QA: `Scaffold/QA/SpectralGraph/DegreeSandwich_QA.lean` — the P₃
+instance with the upper side *attained at equality*
+(`dsP3_upper_tight_QA`: `λ₂(L_sym) = 1 = λ₂(L)/dmin`), the wrong-
+constant pairing fence (`dsP3_wrongConstant_refuted_QA`), the K₂
+regular squeeze (`dsK2_squeeze_*_QA`), the non-second index instance
+(`dsP3_engine_k2_QA`), and the `dmin = 0` isolated-vertex junk fence
+(`dsIso_upper_dmin_zero_refuted_QA`) showing the `0 < dmin` guard
+load-bearing. -/
+theorem evals_normalizedLaplacian_le_div (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (dmin : ℝ) (hdmin : ∀ i, dmin ≤ deg A i) (hpos : 0 < dmin)
+    (k : Fin (Fintype.card V)) :
+    evals (normalizedLaplacian_symmetric A hA) k
+      ≤ evals (laplacian_symmetric A hA) k / dmin := by
+  classical
+  have hLsym := normalizedLaplacian_symmetric A hA
+  have hL := laplacian_symmetric A hA
+  obtain ⟨W₁, hW₁r, hW₁b⟩ := exists_submodule_forall_rayleigh_le hL k
+  set f : (V → ℝ) →ₗ[ℝ] (V → ℝ) := Matrix.mulVecLin (degreeSqrt A) with hf
+  have hinj : Function.Injective f := (degreeSqrtEquiv A hd).injective
+  set S : Set ℝ := {r : ℝ | ∃ W : Submodule ℝ (V → ℝ),
+      Module.finrank ℝ W = (k : ℕ) + 1 ∧
+      ∀ x ∈ W, x ≠ 0 → rayleigh (normalizedLaplacian A) x ≤ r} with hSdef
+  have hdom : ∀ r ∈ S, evals hLsym k ≤ r := by
+    rintro r ⟨W, hWr, hWb⟩
+    obtain ⟨x, hxW, hx0, hge⟩ :=
+      exists_ne_mem_rayleigh_ge_of_finrank_eq hLsym k W hWr
+    exact hge.trans (hWb x hxW hx0)
+  have hbdd : BddBelow S := ⟨evals hLsym k, fun r hr => hdom r hr⟩
+  have hfin : Module.finrank ℝ (Submodule.map f W₁) = (k : ℕ) + 1 := by
+    rw [finrank_map_eq_of_injective f hinj W₁]
+    exact hW₁r
+  have hmem : (evals hL k / dmin) ∈ S := by
+    refine ⟨Submodule.map f W₁, hfin, ?_⟩
+    rintro y ⟨x, hxW, hxy⟩ hy0
+    have hx0 : x ≠ 0 := by
+      intro h
+      rw [h, map_zero] at hxy
+      exact hy0 hxy.symm
+    have hray :=
+      rayleigh_normalizedLaplacian_le_div A hA hnn hd dmin hdmin hpos hx0
+    have hxy' : degreeSqrt A *ᵥ x = y := hxy
+    calc rayleigh (normalizedLaplacian A) y
+        = rayleigh (normalizedLaplacian A) (degreeSqrt A *ᵥ x) := by rw [hxy']
+      _ ≤ rayleigh (laplacian A) x / dmin := hray
+      _ ≤ evals hL k / dmin :=
+          div_le_div_of_nonneg_right (hW₁b x hxW hx0) (le_of_lt hpos)
+  rw [evals_min_max hLsym k]
+  exact csInf_le hbdd hmem
+
+/-- **The degree eigenvalue sandwich, lower side (engine).** On any
+symmetric nonnegative positive-degree graph, at every sorted index `k`,
+
+  `λₖ(L) / dmax ≤ λₖ(L_sym)`  whenever  `deg A i ≤ dmax` (all `i`).
+
+Same source and same machinery, run in the other direction: every
+dominating value `r` of the normalized min–max set (on some
+`(k+1)`-dimensional `W`) yields, on the un-stretched preimage subspace,
+a competitor vector `x` with `λₖ(L) ≤ R_L(x) ≤ dmax · R_{L_sym}(√D x)`
+(the quotient bracket's lower side at `√D x ∈ W`, where the dominating
+hypothesis bounds `R_{L_sym} ≤ r`), forcing `λₖ(L)/dmax ≤ r`; `le_csInf`
+closes. The positivity `0 < dmax` is derived, not assumed (`2 ≤ card`
+free: any vertex's degree is positive and bounded).
+
+QA: as above — the P₃ lower instance (`dsP3_lower_QA`), the K₂ squeeze,
+and the `k = 2` engine instance. -/
+theorem div_le_evals_normalizedLaplacian (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (dmax : ℝ) (hdmax : ∀ i, deg A i ≤ dmax)
+    (k : Fin (Fintype.card V)) :
+    evals (laplacian_symmetric A hA) k / dmax
+      ≤ evals (normalizedLaplacian_symmetric A hA) k := by
+  classical
+  have hLsym := normalizedLaplacian_symmetric A hA
+  have hL := laplacian_symmetric A hA
+  have hne : Nonempty V := Fintype.card_pos_iff.1 (by
+    have := k.isLt
+    omega)
+  have hpos : 0 < dmax := by
+    obtain ⟨i⟩ := hne
+    exact lt_of_lt_of_le (hd i) (hdmax i)
+  set g : (V → ℝ) →ₗ[ℝ] (V → ℝ) :=
+    ((degreeSqrtEquiv A hd).symm.toLinearMap) with hg
+  have hinjg : Function.Injective g := (degreeSqrtEquiv A hd).symm.injective
+  set S : Set ℝ := {r : ℝ | ∃ W : Submodule ℝ (V → ℝ),
+      Module.finrank ℝ W = (k : ℕ) + 1 ∧
+      ∀ x ∈ W, x ≠ 0 → rayleigh (normalizedLaplacian A) x ≤ r} with hSdef2
+  have hne' : S.Nonempty := by
+    obtain ⟨W₁, hW₁r, hW₁b⟩ := exists_submodule_forall_rayleigh_le hLsym k
+    exact ⟨evals hLsym k, ⟨W₁, hW₁r, hW₁b⟩⟩
+  have hmem' : ∀ r ∈ S, evals hL k / dmax ≤ r := by
+    rintro r ⟨W, hWr, hWb⟩
+    have hgr : Module.finrank ℝ (Submodule.map g W) = (k : ℕ) + 1 := by
+      rw [finrank_map_eq_of_injective g hinjg W, hWr]
+    obtain ⟨x, hxW', hx0, hge⟩ :=
+      exists_ne_mem_rayleigh_ge_of_finrank_eq hL k (Submodule.map g W) hgr
+    obtain ⟨y, hyW, hxy⟩ := Submodule.mem_map.1 hxW'
+    have hstretch : degreeSqrt A *ᵥ x = y := by
+      have h1 : (degreeSqrtEquiv A hd) x = y := by
+        have h2 := congrArg (degreeSqrtEquiv A hd) hxy
+        rw [show (degreeSqrtEquiv A hd) (g y) = y from
+          LinearEquiv.apply_symm_apply (degreeSqrtEquiv A hd) y] at h2
+        exact h2.symm
+      exact h1
+    have hy0 : y ≠ 0 := by
+      intro h
+      have hzero : degreeSqrt A *ᵥ x = 0 := hstretch.trans h
+      exact hx0 (by
+        by_contra hxne
+        exact absurd (degreeSqrt_mulVec_ne_zero A hd hxne)
+          (by rw [hzero]; simp))
+    have hbr :=
+      rayleigh_le_mul_rayleigh_normalizedLaplacian A hA hnn hd dmax hdmax hx0
+    have hyr := hWb y hyW hy0
+    rw [div_le_iff₀ hpos]
+    calc evals hL k ≤ rayleigh (laplacian A) x := hge
+      _ ≤ dmax * rayleigh (normalizedLaplacian A) (degreeSqrt A *ᵥ x) := hbr
+      _ = dmax * rayleigh (normalizedLaplacian A) y := by rw [hstretch]
+      _ ≤ dmax * r := mul_le_mul_of_nonneg_left hyr (le_of_lt hpos)
+      _ = r * dmax := by ring
+  rw [evals_min_max hLsym k]
+  exact le_csInf hne' hmem'
+
+/-- Interface corollary at `secondEval`/`lambda2`, upper side:
+`λ₂(L_sym) ≤ lambda2 A / dmin` — the shape the irregular Cheeger-window
+consumer composes with the delivered λ₂ tails. -/
+theorem secondEval_normalizedLaplacian_le_div (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (dmin : ℝ) (hdmin : ∀ i, dmin ≤ deg A i) (hpos : 0 < dmin)
+    (hcard : 2 ≤ Fintype.card V) :
+    secondEval (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) hcard
+      ≤ lambda2 A hA hcard / dmin :=
+  evals_normalizedLaplacian_le_div A hA hnn hd dmin hdmin hpos ⟨1, by omega⟩
+
+/-- Interface corollary at `secondEval`/`lambda2`, lower side:
+`lambda2 A / dmax ≤ λ₂(L_sym)`. -/
+theorem div_le_secondEval_normalizedLaplacian (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (dmax : ℝ) (hdmax : ∀ i, deg A i ≤ dmax)
+    (hcard : 2 ≤ Fintype.card V) :
+    lambda2 A hA hcard / dmax
+      ≤ secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard :=
+  div_le_evals_normalizedLaplacian A hA hnn hd dmax hdmax ⟨1, by omega⟩
+
+/-- Division-free mul form, lower side: `dmin · λ₂(L_sym) ≤ lambda2`. -/
+theorem mul_degMin_le_lambda2 (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (dmin : ℝ) (hdmin : ∀ i, dmin ≤ deg A i) (hpos : 0 < dmin)
+    (hcard : 2 ≤ Fintype.card V) :
+    dmin * secondEval (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) hcard
+      ≤ lambda2 A hA hcard := by
+  have h := secondEval_normalizedLaplacian_le_div A hA hnn hd dmin hdmin hpos hcard
+  calc dmin * secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard
+      ≤ dmin * (lambda2 A hA hcard / dmin) :=
+        mul_le_mul_of_nonneg_left h hpos.le
+    _ = lambda2 A hA hcard := by field_simp
+
+/-- Division-free mul form, upper side: `lambda2 ≤ dmax · λ₂(L_sym)`. -/
+theorem lambda2_le_mul_degMax (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (dmax : ℝ) (hdmax : ∀ i, deg A i ≤ dmax)
+    (hcard : 2 ≤ Fintype.card V) :
+    lambda2 A hA hcard
+      ≤ dmax * secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard := by
+  have h := div_le_secondEval_normalizedLaplacian A hA hnn hd dmax hdmax hcard
+  have hpos : 0 < dmax := by
+    obtain ⟨i⟩ : Nonempty V := Fintype.card_pos_iff.1 (by omega)
+    exact lt_of_lt_of_le (hd i) (hdmax i)
+  calc lambda2 A hA hcard
+      = dmax * (lambda2 A hA hcard / dmax) := by field_simp
+    _ ≤ dmax * secondEval (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) hcard :=
+        mul_le_mul_of_nonneg_left h hpos.le
+
+/-- **The Cheeger floor at the combinatorial Laplacian, degree-window
+form** — on any symmetric nonnegative positive-degree graph with degrees
+in `[dmin, dmax]` (`0 < dmin`), `dmin · φ(G)² / 2 ≤ λ₂(L)`: the
+irregular hard direction scaled through the sandwich's upper side
+(`mul_degMin_le_lambda2`). On a `d`-regular graph (`dmin = d`) this is
+`cheeger_lower_bound_laplacian`'s `d · φ²/2 ≤ λ₂` exactly; no
+regularity hypothesis is needed.
+
+First consumer: `Derived.EdgePerturbationTail
+.edgePerturbation_normalized_cheeger_floor` (the irregular Cheeger
+window under random edge resampling, 2026-08-29).
+
+QA: `Scaffold.QA.Derived.EdgePerturbation.epK2_normWindow_engine_QA`
+(K₂: `1/2 ≤ 2`, slack) and `.epP3_normWindow_engine_QA` (the genuinely
+irregular P₃: `1/2 ≤ 1`, the bracket's honest slack). -/
+theorem cheeger_lower_bound_laplacian_of_degree_window (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (dmin : ℝ) (hdmin : ∀ i, dmin ≤ deg A i) (hpos : 0 < dmin)
+    (hcard : 2 ≤ Fintype.card V) :
+    dmin * cheegerConstant A ^ 2 / 2 ≤ lambda2 A hA hcard := by
+  calc dmin * cheegerConstant A ^ 2 / 2
+      = dmin * (cheegerConstant A ^ 2 / 2) := by ring
+    _ ≤ dmin * secondEval (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) hcard :=
+          mul_le_mul_of_nonneg_left
+            (cheeger_lower_bound_normalized A hA hnn hd hcard) hpos.le
+    _ ≤ lambda2 A hA hcard :=
+        mul_degMin_le_lambda2 A hA hnn hd dmin hdmin hpos hcard
+
+/-- **The Cheeger ceiling at the combinatorial Laplacian, degree-window
+form** — `λ₂(L) ≤ 2 · dmax · φ(G)`: the irregular easy direction scaled
+through the sandwich's lower side (`lambda2_le_mul_degMax`), the
+sibling of `cheeger_upper_bound_laplacian` at `dmax = d` on regular
+input. Both window-Cheeger constants are load-bearing on the window
+family's bracket: a wrong pairing of `dmin`/`dmax` breaks the
+corresponding half of the assembly's `measure_mono`.
+
+QA: the third conjunct of
+`Scaffold.QA.Derived.EdgePerturbation.epK2_normWindow_engine_QA`
+(K₂: `λ₂ = 2 = 2 · (1 · φ)`, attained with equality). -/
+theorem cheeger_upper_bound_laplacian_of_degree_window (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (dmax : ℝ) (hdmax : ∀ i, deg A i ≤ dmax)
+    (hcard : 2 ≤ Fintype.card V) :
+    lambda2 A hA hcard ≤ 2 * (dmax * cheegerConstant A) := by
+  have hdmaxpos : 0 < dmax := by
+    obtain ⟨i⟩ : Nonempty V := Fintype.card_pos_iff.1 (by omega)
+    exact lt_of_lt_of_le (hd i) (hdmax i)
+  calc lambda2 A hA hcard
+      ≤ dmax * secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard :=
+          lambda2_le_mul_degMax A hA hnn hd dmax hdmax hcard
+    _ ≤ dmax * (2 * cheegerConstant A) :=
+        mul_le_mul_of_nonneg_left
+          (cheeger_upper_bound_normalized A hA hnn hd hcard) hdmaxpos.le
+    _ = 2 * (dmax * cheegerConstant A) := by ring
+
 end SpectralGraphTheory

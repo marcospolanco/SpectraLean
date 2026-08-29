@@ -56,6 +56,218 @@ README (until a full rewrite on 2026-08-28, prompted by an operator
 readability complaint: individual lines had grown past 8,000 characters)
 belongs here and only here.
 
+## 2026-08-29T03:29:49Z — Degree eigenvalue sandwich delivered: the `dmin/dmax` spectrum bridge to `normalizedLaplacian`, the irregular-window engine (terminal)
+
+**Run:** `20260829T025710Z-run-1`  
+**Session:** `ses_fb49d4316ffei9OpmdCbq7BaSn`  
+**Status:** completed  
+**Milestone (delivered):** the standing handoff's top named follow-on
+prerequisite — the irregular/volume-weighted Cheeger window's own
+named missing piece, "the degree bridge to `normalizedLaplacian`" —
+**DELIVERED as zero new axioms (count stays 10; `#print axioms` on the
+audited engine, interface, and headline QA declarations: exactly
+`propext, Classical.choice, Quot.sound` — pure hard crust). QA
+2865 → 2902 (+37, the new `DegreeSandwich_QA.lean`).**
+
+**Changes:** (1) **The engine** — `GraphTheory/VariationalTransfer.lean`'s
+new sandwich section: `evals_normalizedLaplacian_le_div` and
+`div_le_evals_normalizedLaplacian` —
+`λₖ(laplacian A)/dmax ≤ evals (normalizedLaplacian A) k ≤
+λₖ(laplacian A)/dmin` at **every** sorted index, on arbitrary symmetric
+nonnegative positive-degree graphs (no connectivity — the irregular
+Cheeger pair's own hypothesis shape) — plus the degree stretch as a
+linear equivalence (`degreeSqrtEquiv`), the two degree-weighted
+denominator bounds, the two pointwise Rayleigh-quotient bracket
+lemmas, the supporting `normalizedLaplacian_evals_zero` pin (the
+normalized counterpart of `laplacian_evals_zero`), the
+`lambda2`/`secondEval` interface pair, and division-free mul forms.
+Pre-delivery analysis established **no pointwise test-vector route
+exists** (the `x ⊥ 1` vs `x ⊥ √D·1` constraint sets mismatch under the
+degree substitution), so the proof rides the shelf's subspace
+Courant–Fischer machinery (`evals_min_max` with both witness forms,
+witness subspaces transported through the stretch) — load-bearing on
+the congruence, `laplacian_psd`, and the CF engine. (2) **QA (+37)** —
+the new `DegreeSandwich_QA.lean`: the P₃ exact pin `λ₂(L_sym) = 1` by
+two independent raw computations (eigenpair-witness `≤` side;
+constraint-algebra `≥` side), the upper side of the sandwich
+**attained at equality** (`1 = λ₂/dmin`), the wrong-constant pairing
+fence (`1 ≤ 1/2` refuted), the lower-side instance with the bracket's
+honest slack, the engine at a non-second index through trace-route
+pins (`3/2 ≤ 2`), the K₂ regular squeeze tight on both ends
+(`2 ≤ 2 ≤ 2`), and the **`dmin = 0` isolated-vertex fence** — on
+`K₂ ⊕` an isolated vertex the degree-floor hypothesis still holds at
+`dmin = 0` while the un-guarded upper side reads `1 ≤ lambda2/0 = 0`:
+refuted, the junk-instantiation failure mode the positivity guard
+fences. (3) **Records**: the new proposal
+`proposals/degree-eigenvalue-sandwich.md` (COMPLETE + delivery record
+with the no-pointwise-route analysis finding, one caught proof-design
+slip — the lower side's competitor form must run on the *normalized*
+dominating set — and the technique findings: the `Fin (Fintype.card
+(Fin 3))` binder-spelling sum trap with the recorded type-ascription
+fix, `set`-naming to resolve `csInf_le`'s TC metavariable, the 3×3
+`!![…]`-literal entry stall with the `Matrix.of`-if + decide-simp
+idiom, `mul_le_mul_of_nonneg_left`'s side-sensitivity,
+`Real.inv_mul_cancel` absent for `inv_mul_cancel₀`),
+`proposals/README.md` (the Delivered-table row), README (2902; date;
+one module-table clause), the radar (QA axis synced to 2902/66
+modules, held at 4.0 per protocol), the scoreboard (verification row +
+interpretation bullet), the backlog (item 3's update clause), the
+index map (the sandwich section's rows), the map stamps + regenerated
+SVG, this plan, and this log.
+
+**Verification:** spike first (`wip/ds_spike.lean`, `wip/ds_qa_spike.lean`
+— every piece to zero errors/warnings before any shelf edit); explicit
+`lake build` targets ✔ (`Scaffold.Mathlib.GraphTheory.VariationalTransfer`
+2190/2190, `Scaffold.QA.SpectralGraph.DegreeSandwich_QA` 2230/2230);
+`#print axioms` exactly as designed; **full `lake build` ✔ (2405/2406)
+immediately followed by `check_build_completeness.py` — 128 source
+files, 128 fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms`
+exit 0 (10 axioms, both findings allowlisted-confirmed),
+`check_citations` and `check_markdown_links` pass; scoreboard
+regenerated idempotent (**2902/10/0**); **map freshness exit 0** after
+the stats-stamp sync (2865 → 2902 in both map files). Nothing
+committed; the prior run's uncommitted sharpened-drift delivery and
+`b9717df` below it preserved untouched.
+
+**Remaining risk:** none owed — the sandwich is unconditional hard
+crust. The open priced follow-on is the irregular Cheeger window
+assembly (now unblocked), whose Step-0 design questions are recorded
+in the proposal: the keep-or-drop resampling design can isolate
+vertices (making `L_sym(G_ω)` junk at those outcomes), and which side
+of the sandwich each inclusion consumes must be settled against the
+delivered λ₂ tails' shapes.
+
+**Next handoff:** the Active table's only actionable row remains the
+empirical-stationary Step 2 (still gated on a consumer pricing the
+bias-term shape); otherwise the irregular Cheeger window assembly
+(priced, not owed; its engine now delivered), or the next load-bearing
+gap `docs/6_SGT_BACKLOG.md` names.
+
+## 2026-08-29T02:57:10Z — Degree eigenvalue sandwich in delivery: the `dmin/dmax` spectrum bridge to `normalizedLaplacian`
+
+**Run:** `20260829T025710Z-run-1`  
+**Session:** `ses_fb49d4316ffei9OpmdCbq7BaSn`  
+**Status:** in-progress  
+**Milestone:** the standing handoff's top named follow-on prerequisite —
+the irregular/volume-weighted Cheeger window's own named missing piece,
+"the degree bridge to `normalizedLaplacian`". Deliver the classical
+two-sided eigenvalue sandwich `λₖ(laplacian A)/dmax ≤
+evals (normalizedLaplacian A) k ≤ λₖ(laplacian A)/dmin` at every sorted
+index (engine), plus the `secondEval`/`lambda2` interface pair the
+window consumes. Analysis on the current tree established that no
+pointwise test-vector route exists (the `x ⊥ 1` vs `x ⊥ √d` constraint
+sets mismatch under the degree substitution), so the proof must ride the
+shelf's subspace min–max (`evals_min_max`, both Courant–Fischer witness
+forms, `finrank_map_eq_of_injective`) composed with the proved
+congruence and `laplacian_psd` — load-bearing on all of them. Zero new
+axioms expected. QA plan: the P₃ instance with the upper side attained
+at equality (`λ₂(L_sym) = 1 = λ₂(L)/dmin`), the wrong-constant pairing
+fence (`¬(1 ≤ 1/2)`), the K₂ regular squeeze (both sides `2 ≤ 2 ≤ 2`),
+a non-second index instance at `k = 2` (trace route), and the `dmin = 0`
+isolated-vertex junk fence (`λ₂(L_sym) = 1` against `λ₂/0 = 0`).
+
+## 2026-08-29T01:38:22Z — Sharpened drift interface delivered: the matched-threshold `s/(γ−s)` pair, the envelope arithmetic proved (terminal)
+
+**Run:** `20260829T012051Z-run-1`  
+**Session:** `ses_fb4e9d34cffevjpNTzrZmfXFxU`  
+**Status:** completed  
+**Milestone (delivered):** the standing handoff's top named priced
+follow-on — the `t/δ`-sharpened drift interface — **DELIVERED as zero
+new axioms (count stays 10; `#print axioms` via
+`wip/sharpdrift_axcheck.lean` on all 12 audited declarations: the five
+envelope-arithmetic/gap QA lemmas and the strict-improvement pin
+exactly `propext, Classical.choice, Quot.sound`; the two sharpened
+Derived theorems and the four theorem-instantiating QA pins honestly
+carrying `matrix_hoeffding` alone — the same conditional structure as
+the delivered pair). QA 2855 → 2865 (+10,
+`EdgePerturbation_QA.lean`'s sharpened-interface section).**
+
+**Changes:** (1) **The sharpened pair** —
+`Derived/EdgePerturbationDrift.lean`'s new sharpened section:
+`edgePerturbation_fiedlerSubspace_drift'` and
+`edgePerturbation_fiedlerLine_drift'` — at `0 < s < γ ≤ λ₃(L A) −
+λ₂(L A)`, `μ{‖rotation‖ ≥ s/(γ−s)} ≤ 2 d exp(−s²/(2‖∑ₑ L_e²‖))` — the
+delivered `t/δ` pair instantiated at `t := s`, `δ := γ − s`: the gap
+consumed inline, the threshold matched to the tail, the exact
+statement shape of `eventStreamProjectorDrift`; the envelope-optimal
+instance of the `t/δ` family at every threshold (at threshold
+`u = s/(γ−s)` the exponent is maximized at `s = γu/(1+u)`). (2) **QA
+(+10)** — the envelope arithmetic *proved*: domination (`t ≤ γt/(t+δ)`
+at every valid instance) and the same-threshold identity
+(`(γt/(t+δ))/(γ−γt/(t+δ)) = t/δ` — together: the sharpened family *is*
+the envelope of the delivered family), both joined to concrete
+numerics at the naive `(1, ½)` instance of `γ = 2` (envelope point
+`4/3`); the closed-form three-path instances at the join point
+(`6 exp(−1/24)`, both variants) and at the non-trivial threshold `2`
+(`s = 4/3`, `6 exp(−2/27)`); the naive delivered-theorem instance at
+threshold `2`; and the strict-improvement pin `6 exp(−2/27) <
+6 exp(−1/24)` — matching threshold to tail is a real strengthening,
+not a reparametrization. (3) **Records**: the matrix-Hoeffding
+proposal (the sharpened-interface follow-on delivery record with
+technique findings — the goal-side numeral-type ascription trap
+(`(2:ℝ)` needed where the corresponding `have` infers ℝ), the
+stale-olen recurrence at exactly the recorded boundary (QA elaboration
+reports the new Derived theorems as unknown identifiers until the
+artifact refresh) — and the honesty note that the `s < γ` guard admits
+no cheap refutation fixture: at `s = γ` the junk threshold makes the
+event all of `Ω` but `2 d exp(−γ²/(2‖∑ L_e²‖)) > 1` on every available
+fixture, so the guard is *proof*-load-bearing, not fixture-refutable),
+`proposals/README.md` (the Delivered-table row's follow-on clause),
+README (2865; one module-table clause), the radar (QA axis synced,
+held at 4.0 per protocol), the scoreboard (verification row +
+interpretation bullet + reviewed date), the backlog (item 4's pipeline
+clause), the index map (the module blurb + the two sharpened rows),
+the map stamps + regenerated SVG, this plan, and this log.
+
+**Verification:** spike first (`wip/sharpdrift_spike.lean`, every
+piece to zero errors/warnings before any shelf edit); `lake env lean`
+zero errors on both touched modules with output exactly at the
+pre-existing baseline (the QA module's lone pre-existing
+`Try this: ring_nf` note verified present on the unmodified tree by
+stash); explicit `lake build` targets ✔ (2236/2236); `#print axioms`
+exactly as designed (12 declarations); **full `lake build` ✔
+(2405/2406) immediately followed by `check_build_completeness.py` —
+after the documented single-module mtime remediation, 127/127 fresh,
+0 stale, 0 missing, exit 0**; `lint_axioms` (10, both findings
+allowlisted-confirmed), `check_citations`, `check_markdown_links` pass;
+scoreboard regenerated idempotent (**2865/10/0**); **map freshness
+exit 0** after the stats-stamp sync (2855 → 2865 in both map files;
+no proposal status header changed). Nothing committed; the prior
+runs' deliveries are committed at `b9717df` and preserved untouched.
+
+**Remaining risk:** none owed — the pipeline family's priced
+follow-on list is empty. The two sharpened theorems remain conditional
+on `matrix_hoeffding` and must never be described as foundationally
+proved.
+
+**Next handoff:** the Active table's only actionable row remains the
+empirical-stationary Step 2 (gated on a consumer pricing the
+bias-term shape); otherwise the irregular/volume-weighted analogue of
+the Cheeger window (needs the degree bridge to
+`normalizedLaplacian`) — or the next load-bearing gap
+`docs/6_SGT_BACKLOG.md` names.
+
+## 2026-08-29T01:20:51Z — Sharpened drift interface in delivery: the matched-threshold `s/(γ−s)` pair for the edge-resampling design
+
+**Run:** `20260829T012051Z-run-1`  
+**Session:** `ses_fb4e9d34cffevjpNTzrZmfXFxU`  
+**Status:** in-progress  
+**Milestone:** the standing handoff's top priced follow-on — the
+`t/δ`-sharpened drift interface. The delivered
+`edgePerturbation_fiedlerSubspace_drift`/`edgePerturbation_fiedlerLine_drift`
+bound `μ{‖rotation‖ ≥ t/δ} ≤ 2 d exp(−t²/(2‖∑ₑ L_e²‖))` under
+`t + δ ≤ λ₃ − λ₂`; deliver the `s/(γ−s)`-shaped pair mirroring
+`eventStreamProjectorDrift` exactly (at `0 < s < γ ≤ gap`:
+`μ{‖rotation‖ ≥ s/(γ−s)} ≤ 2 d exp(−s²/(2σ²))`), the delivered pair at
+`t := s`, `δ := γ − s` — the gap consumed inline, threshold matched to
+tail, envelope-optimal at every threshold. Zero new axioms expected
+(conditional on `matrix_hoeffding` via the delivered pair alone). QA
+plan: the envelope arithmetic pinned (domination `t ≤ γt/(t+δ)` +
+same-threshold identity, general and at the concrete `(1, ½)` instance),
+the closed-form three-path instances (`6 exp(−1/24)` at γ = 2, s = 1;
+`6 exp(−2/27)` at threshold 2), and the strict-improvement pin over a
+valid non-envelope instance at the same threshold.
+
 ## 2026-08-28T23:23:58Z — Cheeger-window consumer of the λ₂ tail delivered: the high-probability connectivity window under random edge resampling (terminal)
 
 **Run:** `20260828T230752Z-run-1`  
@@ -5971,3 +6183,199 @@ concentration-axiom consumer — e.g. the uniform/existential-x
 quadratic-form packaging of the edge-perturbation tail, or the
 `t/δ`-sharpened drift interface), or the next load-bearing gap
 `docs/6_SGT_BACKLOG.md` names.
+
+## 2026-08-29T04:37:41Z — Irregular Cheeger window assembly (in-progress)
+
+**Run:** `20260829T043741Z-run-1`  
+**Session:** `ses_fb43760f1ffeHJ6dyaqJCwOvH5`  
+**Status:** in-progress  
+**Milestone:** the degree sandwich's own named consumer — the irregular
+(normalized) Cheeger window under random edge resampling, composing the
+delivered λ₂ tail, the 2026-08-29 degree sandwich, and the irregular
+Cheeger pair; the first three-way composition across those three
+families. Step-0 design verdicts settled: admissibility window
+event-internal (no design restriction preserves the centered design, and
+the norm tail carries zero degree information since `L(E_ω)·1 = 0`
+identically); floor consumes the sandwich lower side at the perturbed
+degree ceiling, ceiling the upper side at the degree floor; new engine
+pair `dmin·φ²/2 ≤ λ₂(L A) ≤ 2·dmax·φ(A)`. Spiking in `wip/` before any
+shelf edit.
+
+## 2026-08-29T05:02:14Z — Irregular (normalized) Cheeger window delivered: the degree sandwich's consumer, the λ₂ tail × sandwich × irregular-Cheeger three-way composition (terminal)
+
+**Run:** `20260829T043741Z-run-1`  
+**Session:** `ses_fb43760f1ffeHJ6dyaqJCwOvH5`  
+**Status:** completed  
+**Milestone (delivered):** the degree sandwich's own named priced
+follow-on (and the execution plan's top open candidate) — the
+high-probability **normalized**-connectivity window under random edge
+resampling, on arbitrary symmetric nonnegative positive-degree base
+graphs with no regularity — **DELIVERED as zero new axioms (count
+stays 10; `#print axioms` via `wip/irrwin_axcheck.lean` on all 14
+audited declarations: the engine pair and ten hard-crust QA lemmas
+exactly `propext, Classical.choice, Quot.sound`; the two Derived
+window theorems and the two closed-form QA instances honestly carrying
+`matrix_hoeffding` alone). QA 2902 → 2918 (+16,
+`EdgePerturbation_QA.lean`'s normWindow section).**
+
+**Changes:** (1) **The engine pair** —
+`GraphTheory/VariationalTransfer.lean` beside the sandwich's
+interfaces: `cheeger_lower_bound_laplacian_of_degree_window`
+(`dmin·φ²/2 ≤ λ₂(L)`, the irregular hard direction ×
+`mul_degMin_le_lambda2`) and
+`cheeger_upper_bound_laplacian_of_degree_window` (`λ₂(L) ≤ 2·dmax·φ`,
+via `lambda2_le_mul_degMax`) — the degree-window generalizations of
+the regular pair, reducing to it at `dmin = dmax = d`. (2) **The
+window** — `Derived/EdgePerturbationTail.lean`'s NormalizedCheegerWindow
+section: `perturbAdmissible` (the event-internal admissibility window),
+`edgePerturbation_normalized_cheeger_floor`, and
+`edgePerturbation_normalized_connectivity_bracket`. Both Step-0 design
+verdicts settled as the sandwich proposal predicted: the per-outcome
+degree bound is event-internal (no design restriction preserves the
+centered tail; the norm tail carries zero degree information since
+`L(E_ω)·1 = 0` identically), and the floor consumes the sandwich's
+lower side at the perturbed degree *ceiling* while the ceiling consumes
+the upper side at the degree *floor*. (3) **QA (+16)** — the engine
+ceiling attained with equality on `K₂`, the genuinely irregular `P₃`
+instances (φ(P₃) = 1 transferred entrywise), the scale-invariance raw
+computation with `λ₂(L_sym) = 2` at the all-true outcome, the
+admissibility witnesses on **both** window sides (all-false excluded by
+the degree floor; `P₃` all-true by the degree ceiling `5 > 3` with
+nonnegative entries), the complement witness (`2` strictly inside the
+window at `t = 1/2`), and the two closed-form instances
+(`4 exp(−1/64)`). (4) **Records** — the matrix-Hoeffding proposal (the
+follow-on delivery record with the Step-0 verdicts, the honesty note,
+and technique findings), the sandwich proposal (status header + the
+residual struck through), `proposals/README.md` (both Delivered rows),
+README (2918; one module-table clause), the radar (QA axis synced,
+score held at 4.0 per protocol), the scoreboard (verification row +
+interpretation bullet), the backlog (the follow-on clause closed), both
+index maps, the map stamps + regenerated SVG, the execution plan, and
+this log.
+
+**Verification:** spike first (`wip/irrwin_spike.lean`, every piece to
+zero errors/warnings before any shelf edit; one statement-direction
+slip caught by elaboration and recorded in the proposal);
+`lake env lean` zero errors/zero warnings on all three touched modules
+(the QA module at its pre-existing `Try this: ring_nf` baseline,
+verified present on the HEAD version of the file); explicit `lake
+build` targets ✔ (`VariationalTransfer`, `EdgePerturbationTail`,
+`EdgePerturbation_QA` — each "Build completed successfully");
+`#print axioms` exactly as designed (14 declarations); **full `lake
+build` ✔ (2405/2406) immediately followed by
+`check_build_completeness.py` — 128 source files, 128 fresh artifacts,
+0 stale, 0 missing, exit 0**; `lint_axioms` (10, both findings
+allowlisted-confirmed), `check_citations`, `check_markdown_links`
+pass; scoreboard regenerated idempotent (**2918/10/0**); **map
+freshness exit 0** after the stats-stamp sync (mandatory — this
+delivery changes the sandwich proposal's status header).
+
+**Remaining risk:** none owed — the window family's priced follow-on
+list is empty on both spelling sides. The two new Derived theorems are
+conditional on `matrix_hoeffding` and must never be described as
+foundationally proved. The honesty note stands: the admissibility
+window is proof-load-bearing with no dropped-window refutation fixture
+at fixture scale — the normalized Laplacian's junk value at
+zero-degree corners is the *identity's* spectrum (`λ₂ = 1`), not the
+zero matrix's (a spike-level finding recorded for the next corner
+audit).
+
+**Next handoff:** the Active table's only actionable row remains the
+empirical-stationary Step 2, still gated on a consumer pricing the
+bias-term shape; otherwise the next load-bearing gap
+`docs/6_SGT_BACKLOG.md` names, or a new composition the now-complete
+window/sandwich/tail triangle unlocks (e.g. the volume-weighted sweep
+extraction joined to the normalized window's floor — priced, not
+owed).
+
+## 2026-08-29T06:06:01Z — Sweep-cut consumer of the normalized window (in-progress)
+
+**Run:** `20260829T060601Z-run-1`  
+**Session:** `ses_fb3e2e4d4ffeAL7MrTS8ProaBm`  
+**Status:** in-progress  
+**Milestone:** the standing handoff's named composition — the
+volume-weighted sweep extraction joined to the normalized connectivity
+window: `edgePerturbation_fiedler_sweep_cut_tail`, a high-probability
+*certified swept Fiedler cut of the resampled graph* (connected ∧ an
+explicit swept level set at `conductance² ≤ 2·(2·dmax·φ + t)/dmin`)
+under random edge resampling, on the admissible outcomes, at the new
+floor-positivity hypothesis `0 < dmin·φ²/2 − t` (the floor's positivity
+is what the connectivity transfer consumes: `λ₂ > 0 ↔ connected`). A
+pure `measure_mono` into the delivered bracket, load-bearing on three
+delivered families (bracket, connectivity transfer,
+`fiedler_sweep_cut_normalized`). QA: closed-form K₂/P₃ tail instances
+plus the good-outcome witness at the all-true outcome. Spiking in
+`wip/sweepwin_spike.lean` before any shelf edit.
+
+## 2026-08-29T06:17:46Z — Swept-Fiedler-cut consumer of the normalized window delivered: the window family's algorithm-facing capstone (terminal)
+
+**Run:** `20260829T060601Z-run-1`  
+**Session:** `ses_fb3e2e4d4ffeAL7MrTS8ProaBm`  
+**Status:** completed  
+**Milestone (delivered):** the standing handoff's named composition —
+the volume-weighted sweep extraction joined to the normalized
+connectivity window — **DELIVERED as zero new axioms (count stays 10;
+`#print axioms` via `wip/sweepwin_axcheck.lean` on all five audited
+declarations: the connectivity pin and the good-outcome witness exactly
+`propext, Classical.choice, Quot.sound`; the Derived theorem and the
+two closed-form QA instances honestly carrying `matrix_hoeffding`
+alone). QA 2918 → 2922 (+4, `EdgePerturbation_QA.lean`'s sweepWindow
+section).**
+
+**Changes:** (1) **The theorem**
+(`Derived/EdgePerturbationTail.lean`'s NormalizedCheegerWindow
+section): `edgePerturbation_fiedler_sweep_cut_tail` — at the bracket's
+hypothesis stack plus the new floor-positivity guard
+`0 < dmin·φ²/2 − t`, `μ {ω admissible ∧ ¬(connected G_ω ∧ ∃ swept S,
+conductance² ≤ 2·(2·dmax·φ + t)/dmin)} ≤ 2 d exp(−t²/(2‖∑ₑ L_e²‖))`,
+the swept existential exactly `fiedler_sweep_cut_normalized`'s return
+shape on the resampled graph — the chain concentration → eigenvalue
+window → connectivity → the spectral-partitioning sweep's cut, closed
+under one statement, with three delivered families load-bearing (the
+floor's positivity is the connectivity transfer's exact input, the
+ceiling caps the sweep extraction, the bracket is the measure bound).
+(2) **QA (+4)**: the raw-walk connectivity pin at the all-true `K₂`
+outcome, the good-outcome witness (that outcome provably *not* in the
+measured event — its swept cut from the deterministic theorem at the
+pinned `λ₂(L_sym) = 2`, `conductance² ≤ 4` inside the window bound
+`16.25`), and the closed-form K₂/P₃ tail instances at `t = 1/16`
+(`4 exp(−1/4096)`, `6 exp(−1/6144)`). (3) **Records** — the
+matrix-Hoeffding proposal (the sweep-cut follow-on delivery record with
+the guard's design verdict and technique findings: the
+positional-application trap with a trailing `Prop` argument after
+postponed `(by norm_num)` slots — the named-argument form the fix —
+and the stale-olen recurrence), `proposals/README.md` (the Delivered
+row's sweep-cut clause), README (2922; one module-table clause), the
+radar (QA axis synced, score held at 4.0 per protocol), the scoreboard
+(verification row + interpretation bullet), the backlog (item 3's
+capstone clause), the probability-concentration index map (the
+theorem's row), the map stamps + regenerated SVG, the execution plan,
+and this log.
+
+**Verification:** spike first (`wip/sweepwin_spike.lean`, every piece
+to zero errors/warnings before any shelf edit, the spike's own
+`#print axioms` confirming the conditional structure pre-shelf);
+`lake env lean` zero errors/zero warnings on both touched modules (the
+QA module at its recorded pre-existing `Try this: ring_nf` baseline);
+explicit `lake build` targets ✔ on `EdgePerturbationTail` (2227/2227)
+and `EdgePerturbation_QA`; `#print axioms` exactly as designed (5
+declarations); **full `lake build` ✔ (2405/2406) immediately followed
+by `check_build_completeness.py` — 128 source files, 128 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` (10, both
+findings allowlisted-confirmed), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated idempotent
+(**2922/10/0**); **map freshness exit 0** after the stats-stamp sync
+(2918 → 2922 in both map files; no proposal status header changed).
+
+**Remaining risk:** none owed — the theorem is conditional on
+`matrix_hoeffding` and must never be described as foundationally
+proved. The guard's honesty note stands: the floor-positivity
+hypothesis is proof-load-bearing (the connectivity transfer's input)
+with no dropped-guard refutation fixture possible at fixture scale —
+the recorded junk-measure obstruction, not an unexamined corner.
+
+**Next handoff:** the Active table's only actionable row remains the
+empirical-stationary Step 2, still gated on a consumer pricing the
+bias-term shape; otherwise the next load-bearing gap
+`docs/6_SGT_BACKLOG.md` names (all remaining items consumer-gated), or
+a consumer that prices the swept cut's quality (none named yet).

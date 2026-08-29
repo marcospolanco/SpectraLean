@@ -456,6 +456,8 @@ Real definitions: `regularNormalizedLaplacian`, `cutTestVector`.
 | `cheeger_upper_bound` | **theorem (proved 2026-08-18; axiom before, retired)** | `λ₂(L_sym) ≤ 2 φ(G)` for `d`-regular graphs — proved from `secondEval_variational` at the volume-centered cut indicator | [Chung](../sources/chung_spectral_graph.md) |
 | `cheeger_lower_bound_laplacian` | theorem (2026-08-28, combinatorial spelling) | `d · φ(G)²/2 ≤ λ₂(L)` on `d`-regular graphs — the hard direction transported to the combinatorial Laplacian (`L = d • L_sym` by `smul_regularNormalizedLaplacian`, scaled by `secondEval_smul_of_pos`); first consumer the connectivity floor `edgePerturbation_lambda2_cheeger_floor` | [Chung](../sources/chung_spectral_graph.md) |
 | `cheeger_upper_bound_laplacian` | theorem (2026-08-28, combinatorial spelling) | `λ₂(L) ≤ 2 d φ(G)` on `d`-regular graphs — the easy-direction ceiling by the same bridge-and-scaling route; attained with equality on `K₂` (`λ₂ = 2 = 2·(1·φ)`); first consumer the connectivity bracket `edgePerturbation_connectivity_bracket` | [Chung](../sources/chung_spectral_graph.md) |
+| `cheeger_lower_bound_laplacian_of_degree_window` | theorem (2026-08-29, degree-window spelling) | `dmin · φ(G)²/2 ≤ λ₂(L)` on any symmetric nonnegative positive-degree graph with degrees in `[dmin, dmax]` (`0 < dmin`) — the irregular hard direction scaled through the degree sandwich's `mul_degMin_le_lambda2`; reduces to `cheeger_lower_bound_laplacian` at `dmin = d`; first consumer `edgePerturbation_normalized_cheeger_floor` | [Chung](../sources/chung_spectral_graph.md) |
+| `cheeger_upper_bound_laplacian_of_degree_window` | theorem (2026-08-29, degree-window spelling) | `λ₂(L) ≤ 2 · dmax · φ(G)` — the irregular easy direction scaled through `lambda2_le_mul_degMax`; attained with equality on `K₂` (`λ₂ = 2 = 2·(1·φ)`); first consumer `edgePerturbation_normalized_connectivity_bracket` | [Chung](../sources/chung_spectral_graph.md) |
 | `core_sum_abs_sq_sub_sq` | theorem (2026-08-23, hard-direction Step 1a) | **Component A**, the Cauchy–Schwarz core: `(∑ i j, A i j \|f i² − f j²\|)² ≤ E'(f) · 4 ∑ i deg A i f i²` (no sign hypothesis on `f`; `IsSymm` load-bearing on the degree collapse — refuted in QA on asymmetric nonnegative input) | [Chung](../sources/chung_spectral_graph.md) |
 | `sq_posPart_sub_add_sq_negPart_sub_le`, `sum_edgeWeight_sq_posPart_add_sq_negPart_le` | theorem (2026-08-23, hard-direction Step 1a) | the *fused* median-part contraction: `(max (a−m) 0 − max (b−m) 0)² + (max (m−a) 0 − max (m−b) 0)² ≤ (a−b)²` pointwise (translation invariance absorbed into the RHS), summed to `E'((x−m)⁺) + E'((x−m)⁻) ≤ E'(x)` under nonneg weights only — the tight form whose cross-edge slack pays for carrying both parts | [Chung](../sources/chung_spectral_graph.md) |
 | `sum_deg_mul_eq_of_regular` | theorem (2026-08-23, hard-direction Step 1a) | regularity bridge `∑ i, deg A i · f i² = d · ∑ i, f i²` | [Chung](../sources/chung_spectral_graph.md) |
@@ -610,6 +612,25 @@ All statements proved (2026-08-17), no axioms:
 | `walkTransitionMatrix`, `walkLaplacian` | definitions: general walk form `D⁻¹A`, `I − D⁻¹A` |
 | `walkTransitionMatrix_row_sum` | row-stochasticity on irregular graphs (positive degrees) |
 | `degreeSqrt_mul_walkLaplacian_mul_degreeInvSqrt` | similarity `√D · L_walk · (1/√D) = L_sym` |
+
+The degree eigenvalue sandwich (2026-08-29,
+`proposals/degree-eigenvalue-sandwich.md`, delivered in
+`VariationalTransfer.lean`; all proved, no axioms) — the
+eigenvalue-level bridge between the combinatorial and normalized
+worlds, at the irregular family's own hypothesis shape (symmetric
+nonnegative positive degrees, no connectivity):
+
+| Declaration | Content |
+|-------------|---------|
+| `degreeSqrtEquiv` | the degree stretch `x ↦ √D x` as a linear equivalence (inverse `1/√D`; positive degrees) |
+| `sum_deg_mul_sq_ge`, `sum_deg_mul_sq_le` | the degree-weighted squared norm bracketed by `dmin·‖x‖²` and `dmax·‖x‖²` |
+| `rayleigh_normalizedLaplacian_le_div` | pointwise bracket upper side: `R_{L_sym}(√D x) ≤ R_L(x)/dmin` (PSD load-bearing) |
+| `rayleigh_le_mul_rayleigh_normalizedLaplacian` | pointwise bracket lower side: `R_L(x) ≤ dmax · R_{L_sym}(√D x)` |
+| `normalizedLaplacian_evals_zero` | the bottom eigenvalue of `L_sym` is exactly `0` (no connectivity) — the normalized counterpart of `laplacian_evals_zero` |
+| `evals_normalizedLaplacian_le_div` | **sandwich upper side**: `evals (L_sym) k ≤ evals (laplacian) k / dmin` at every sorted index, via the subspace min–max with the existence-form witness subspace stretched by `√D` |
+| `div_le_evals_normalizedLaplacian` | **sandwich lower side**: `evals (laplacian) k / dmax ≤ evals (L_sym) k`, via the competitor form on the un-stretched preimage |
+| `secondEval_normalizedLaplacian_le_div`, `div_le_secondEval_normalizedLaplacian` | the interface pair at `lambda2`/`secondEval` (the shape the irregular Cheeger-window consumer composes) |
+| `mul_degMin_le_lambda2`, `lambda2_le_mul_degMax` | division-free mul forms of both sides |
 
 Eigenpair transfer through the similarity (2026-08-22, proposal
 `mixing-time-bound.md` Step 1, no axioms; the section closing this
@@ -1439,17 +1460,25 @@ edge-perturbation design with every repaired-axiom clause proved
 
 The first join of the two most recent center deliveries:
 high-probability Fiedler rotation under the centered Bernoulli edge
-design, in the `eventStreamProjectorDrift` inclusion idiom. Both
+design, in the `eventStreamProjectorDrift` inclusion idiom. All four
 declarations are **conditional on the `matrix_hoeffding` axiom via the
 tail alone**; the Davis–Kahan side, the kernel identification, the
 packaging identity, and the Weyl separation discharge are proved. The
 separation is stated against the *base* graph's deterministic gap —
-no per-outcome spectral hypothesis.
+no per-outcome spectral hypothesis. The primed pair (2026-08-29) is
+the sharpened, matched-threshold interface: the `s/(γ−s)` shape of
+`eventStreamProjectorDrift` with the gap consumed inline and the
+threshold matched to the tail — the envelope-optimal instance of the
+`t/δ` family at every threshold (at threshold `u` the exponent is
+maximized at `s = γu/(1+u)`; QA proves the domination and
+same-threshold identities).
 
 | Declaration | Area | Description |
 | --- | --- | --- |
 | `edgePerturbation_fiedlerSubspace_drift` | Fiedler stability | At `t + δ ≤ λ₃(A) − λ₂(A)`: `μ{‖P(A+E_ω) − P(A)‖ ≥ t/δ} ≤ 2 d exp(−t²/(2‖∑ₑ L_e²‖))` — the bottom-2 subspace (the Fiedler cluster on a connected base) under random edge resampling |
 | `edgePerturbation_fiedlerLine_drift` | Fiedler stability | The payoff: the same tail for the Fiedler *line* itself, under the per-outcome nonnegativity/connectivity design constraints the kernel identification needs (both hold universally at `p_{ij} + p_{ji} ≤ 1` on positive-weight pairs); QA pins the closed-form instance `6 exp(−1/24)` on the three-path at `p ≡ ¼` |
+| `edgePerturbation_fiedlerSubspace_drift'` | Fiedler stability | The sharpened (matched-threshold) form mirroring `eventStreamProjectorDrift` exactly: at `0 < s < γ ≤ λ₃(A) − λ₂(A)`, `μ{‖P(A+E_ω) − P(A)‖ ≥ s/(γ−s)} ≤ 2 d exp(−s²/(2‖∑ₑ L_e²‖))` — the gap consumed inline, and the envelope-optimal instance of the `t/δ` family at every threshold (QA proves the envelope arithmetic) |
+| `edgePerturbation_fiedlerLine_drift'` | Fiedler stability | The sharpened payoff: the same `s/(γ−s)` statement for the Fiedler *line* itself, at the same design constraints; QA pins the closed-form instances `6 exp(−1/24)` (join point, γ = 2, s = 1) and `6 exp(−2/27)` (threshold 2, s = 4/3) plus the strict improvement over a valid non-envelope instance at the same threshold |
 
 ### `Scaffold.Derived.SparsificationTail` (leverage-score sparsification, Slice 3 — the axiom-backed assembly)
 

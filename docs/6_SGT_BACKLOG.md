@@ -295,6 +295,57 @@ pseudo-edge `hedge`, the half-weight edge `h01`, the one-vertex loop
 edges through `ballE_disjoint_of_lt_distEdge` and
 `radialVec_rayleigh_ge`, concluding via `secondEval_variational`).
 
+*Update (2026-08-29, follow-on):* **the degree eigenvalue sandwich
+delivered** (`proposals/degree-eigenvalue-sandwich.md`, zero new
+axioms) — the eigenvalue-level bridge the irregular family lacked:
+`λₖ(laplacian A)/dmax ≤ evals (normalizedLaplacian A) k ≤
+λₖ(laplacian A)/dmin` at every sorted index on arbitrary symmetric
+nonnegative positive-degree graphs (`evals_normalizedLaplacian_le_div`
+/ `div_le_evals_normalizedLaplacian` in `VariationalTransfer.lean`,
+plus the `lambda2`/`secondEval` interface pair and mul forms, and the
+supporting `normalizedLaplacian_evals_zero` pin). Pre-delivery
+analysis established that no pointwise test-vector route exists (the
+`x ⊥ 1` vs `x ⊥ √D·1` constraint sets mismatch under the degree
+substitution), so the proof rides the subspace Courant–Fischer
+machinery (`evals_min_max` with both witness forms, the degree stretch
+as a linear equivalence transporting witness subspaces) — load-bearing
+on the congruence, `laplacian_psd`, and the CF engine. QA +37 (the new
+`DegreeSandwich_QA.lean`: the P₃ exact pin by two independent routes,
+the upper side attained at equality, the wrong-constant pairing fence,
+the K₂ regular squeeze tight both ends, the `k = 2` engine instance,
+and the `dmin = 0` isolated-vertex junk fence). The named consumer —
+the irregular analogue of the Cheeger window (composing the λ₂ tails
+with this bridge and the irregular pair) — **was delivered the same
+day** (run `20260829T043741Z-run-1`, record in
+`proposals/matrix-hoeffding-spectral-gap-estimation.md`'s follow-on
+section): the window-Cheeger engine pair
+`dmin·φ²/2 ≤ λ₂(L) ≤ 2·dmax·φ`
+(`cheeger_{lower,upper}_bound_laplacian_of_degree_window`) plus
+`edgePerturbation_normalized_cheeger_floor` and
+`edgePerturbation_normalized_connectivity_bracket` at
+`Derived/EdgePerturbationTail.lean`, with the admissibility window
+event-internal (`perturbAdmissible` — the Step-0 verdict: no design
+restriction preserves the centered tail and the norm tail carries zero
+degree information since `L(E_ω)·1 = 0` identically) and the floor
+consuming the sandwich's lower side at the perturbed degree ceiling,
+the ceiling the upper side at the degree floor. Zero new axioms;
+QA +16 (2902 → 2918). **The window family's algorithm-facing capstone
+followed the same day** (run `20260829T060601Z-run-1`, the standing
+handoff's named "volume-weighted sweep extraction joined to the
+normalized window's floor" composition, record in the matrix-Hoeffding
+proposal's sweep-cut follow-on section):
+`edgePerturbation_fiedler_sweep_cut_tail` — outside the bracket's tail
+set, every admissible outcome's resampled graph is *connected* (the
+floor-positivity guard `0 < dmin·φ²/2 − t` feeding the connectivity
+transfer `secondEval_normalizedLaplacian_pos_iff_connected`) and
+carries an explicit swept level set of its own Fiedler sweep vector at
+`conductance² ≤ 2·(2·dmax·φ + t)/dmin` (`fiedler_sweep_cut_normalized`
+on the resampled graph, the ceiling capping its `2λ₂` bound) — the
+chain concentration → eigenvalue window → connectivity → the
+spectral-partitioning sweep's cut, closed under one statement;
+conditional on `matrix_hoeffding` alone. Zero new axioms;
+QA +4 (2918 → 2922).
+
 *Update (2026-08-25/26):* **the irregular (volume-weighted) Cheeger *upper*
 bound delivered** (`proposals/irregular-cheeger-variational-transfer.md`
 Steps 0+1, found committed-but-unindexed and pursued per priority item
@@ -484,7 +535,16 @@ perturbSummand` and the new Laplacian linearity package
 `laplacian_smul`/`laplacian_sum`, with the separation discharged from
 the base graph's deterministic gap by the proved Weyl on the tail
 event's complement — conditional on `matrix_hoeffding` via the tail
-alone; see the matrix-Hoeffding proposal's follow-on delivery record));
+alone; see the matrix-Hoeffding proposal's follow-on delivery record).
+The pipeline's priced `t/δ`-sharpened interface **delivered
+2026-08-29** (run `20260829T012051Z-run-1`, the same proposal's
+sharpened-interface record): the matched-threshold `s/(γ−s)` pair
+`edgePerturbation_fiedlerSubspace_drift'`/`edgePerturbation_fiedlerLine_drift'`
+— `eventStreamProjectorDrift`'s exact statement shape with the gap
+consumed inline, the envelope-optimal instance of the `t/δ` family at
+every threshold (QA proves the envelope arithmetic and the strict
+improvement over a valid non-envelope instance at the same threshold);
+zero new axioms, QA +10 (2855 → 2865);
 **Phase B delivered 2026-08-23**
 — `cheeger_cut_existence`, the classical Cheeger cut-existence
 certificate: on every connected `d`-regular graph a nonempty proper

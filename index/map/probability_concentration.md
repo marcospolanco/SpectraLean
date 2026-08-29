@@ -118,7 +118,7 @@ matrices defined in `Matrix/Basic.lean`.
 
 ### Derived consumers
 
-**Module**: `Scaffold.Derived.EdgePerturbationTail` (derived layer, not axioms — 2026-08-28)
+**Module**: `Scaffold.Derived.EdgePerturbationTail` (derived layer, not axioms — 2026-08-28; the irregular normalized window added 2026-08-29)
 
 `matrix_hoeffding`'s first theorem consumer, on the centered Bernoulli
 edge-perturbation design of `GraphTheory.EdgePerturbation` (every axiom
@@ -136,6 +136,10 @@ weight matrix, the only load-bearing clause hypothesis `p ∈ [0, 1]`).
 | `edgePerturbation_quadForm_uniform_tail` | theorem (axiom-conditional) | The uniform/existential-x packaging: outside the bound's failure set, `|xᵀ L(E_ω) x| < t (x ⬝ᵥ x)` for *every* nonzero `x` simultaneously (`x ≠ 0` guard load-bearing — the un-guarded event is all of `Ω`) | `matrix_hoeffding` |
 | `edgePerturbation_lambda2_cheeger_floor` | theorem (axiom-conditional) | The Cheeger-driven connectivity floor (2026-08-28, the Cheeger-window follow-on): `μ {λ₂(L(A+E_ω)) ≤ d·φ(A)²/2 − t} ≤ 2 d exp(−t²/(2 ‖∑_e L_e²‖))` on `d`-regular input — the proved `cheeger_lower_bound_laplacian` composed with the λ₂ lower tail by `measure_mono` | `matrix_hoeffding` |
 | `edgePerturbation_connectivity_bracket` | theorem (axiom-conditional) | The two-sided window (2026-08-28): `μ {λ₂(L(A+E_ω)) ≤ d·φ²/2 − t ∨ 2dφ + t ≤ λ₂(L(A+E_ω))} ≤ 2 d exp(…)` at the same constant as the one-sided tail — both Cheeger directions (the engine pair) load-bearing on the inclusion into the two-sided eigenvalue tail | `matrix_hoeffding` |
+| `perturbAdmissible` | definition | The admissibility window of the irregular design (2026-08-29): outcomes whose resampled graph stays nonnegative with degrees in the base window `[dmin, dmax]` — event-internal because the centered design's degrees are random and the norm tail carries zero degree information (`L(E_ω)·1 = 0` identically) | — |
+| `edgePerturbation_normalized_cheeger_floor` | theorem (axiom-conditional) | The *normalized* Cheeger floor (2026-08-29, the irregular window): `μ {ω admissible ∧ λ₂(L_sym G_ω) ≤ (dmin·φ(A)²/2 − t)/dmax} ≤ 2 d exp(−t²/(2 ‖∑_e L_e²‖))` on arbitrary symmetric nonnegative positive-degree base graphs — the sandwich's lower side on the perturbed graph plus the window-Cheeger floor engine, a `measure_mono` into the λ₂ lower tail | `matrix_hoeffding` |
+| `edgePerturbation_normalized_connectivity_bracket` | theorem (axiom-conditional) | The two-sided *normalized* window (2026-08-29, the irregular window): leaving `[(dminφ²/2 − t)/dmax, (2·dmax·φ + t)/dmin]` implies leaving the two-sided eigenvalue tail at the same constant — the floor consumes the sandwich's lower side at the perturbed degree ceiling, the ceiling the upper side at the degree floor; both engine constants load-bearing | `matrix_hoeffding` |
+| `edgePerturbation_fiedler_sweep_cut_tail` | theorem (axiom-conditional) | The swept-Fiedler-cut consumer of the normalized window (2026-08-29, the family's algorithm-facing capstone): at the floor-positivity guard `0 < dmin·φ²/2 − t`, `μ {ω admissible ∧ ¬(connected G_ω ∧ ∃ swept S, conductance G_ω S² ≤ 2·(2·dmax·φ + t)/dmin)} ≤ 2 d exp(−t²/(2 ‖∑_e L_e²‖))` — the floor's positivity feeding the connectivity transfer (`0 < λ₂(L_sym) ↔ connected`), the ceiling capping `fiedler_sweep_cut_normalized` on the resampled graph; three delivered families load-bearing on one statement | `matrix_hoeffding` |
 
 **Module**: `Scaffold.Derived.EventStream` (derived layer, not axioms)
 

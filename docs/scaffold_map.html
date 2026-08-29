@@ -286,7 +286,11 @@
     {
       id: "application", label: "APPLICATION RING", sub: "Consumers of the core",
       stations: [
-        { name: "Fiedler Partitioning", status: "proved", source: "fiedler-partitioning.md", note: "Certified conductance cut — first consumer of the Cheeger hard-direction retirement, 2026-08-23." }
+        { name: "Fiedler Partitioning", status: "proved", source: "fiedler-partitioning.md", note: "Certified conductance cut — first consumer of the Cheeger hard-direction retirement, 2026-08-23." },
+        { name: "Fiedler-Subspace Stability", status: "proved", source: "fiedler-subspace-stability-davis-kahan.md", note: "davis_kahan_sin_theta's first graph-theoretic consumer; both the subspace and the Fiedler-line rotation delivered COMPLETE 2026-08-28." },
+        { name: "Empirical Stationary Distribution", status: "proved", source: "empirical-stationary-distribution-concentration.md", note: "hoeffding_empirical's first theorem consumer — fixed-time concentration of the empirical walk distribution, delivered 2026-08-27." },
+        { name: "Vertex-Degree Concentration", status: "proved", source: "hoeffding-inequality-degree-concentration.md", note: "hoeffding_inequality's and both Bernstein axioms' first theorem consumers — per-vertex degree deviation under edge resampling, with a proved variance-adaptivity improvement; delivered 2026-08-29." },
+        { name: "Ramanujan Expansion Ceiling", status: "proved", source: "ramanujan-expansion-ceiling.md", note: "Alon–Boppana's first theorem consumer — composed with the Cheeger lower bound into the textbook ceiling on expansion quality, delivered 2026-08-27." }
       ]
     },
     {
@@ -310,10 +314,13 @@
       ]
     },
     {
-      id: "frontier", label: "OPEN FRONTIER", sub: "Surveyed, not yet built",
+      id: "frontier", label: "OPEN FRONTIER", sub: "Landmark theorems",
       stations: [
         { name: "Alon–Boppana Bound", status: "proved", source: "alon-boppana-bound.md", note: "Adopted 2026-08-26, delivered COMPLETE 2026-08-27 (Nilli's variational/test-vector route, diameter-dependent form); first theorem consumer (Ramanujan Expansion Ceiling) delivered same day." },
-        { name: "Approx. Spectral Projection", status: "proved", source: "approximate-spectral-projection.md", note: "Lanczos/Kaniel–Paige route; Steps 0, 1a, 1b, 1c all delivered 2026-08-23/24, program complete." }
+        { name: "Approx. Spectral Projection", status: "proved", source: "approximate-spectral-projection.md", note: "Lanczos/Kaniel–Paige route; Steps 0, 1a, 1b, 1c all delivered 2026-08-23/24, program complete." },
+        { name: "Higher-Order Cheeger — easy direction", status: "proved", source: "multiway-expansion.md", note: "The every-family multiway Cheeger bound plus its ρ_k partition-minimum packaging; delivered COMPLETE 2026-08-26." },
+        { name: "Higher-Order Cheeger — hard direction", status: "gated", source: "multiway-cheeger-hard-direction.md", note: "Lee–Gharan–Trevisan's lower bound. No internal consumer; needs continuous geometric probability not confirmed present in the pin. Gated on an operator adoption decision before even the Step 0 survey." },
+        { name: "Degree Eigenvalue Sandwich", status: "proved", source: "degree-eigenvalue-sandwich.md", note: "The dmin/dmax spectral bridge between the combinatorial and normalized Laplacian at every sorted index, on arbitrary irregular graphs; delivered COMPLETE 2026-08-29." }
       ]
     },
     {
@@ -330,7 +337,10 @@
       id: "northwest", label: "STOC CITY", sub: "Theoretical CS & Algorithms",
       stations: [
         { name: "Leverage Scores", status: "proved", source: "spectral-sparsification-via-leverage-scores.md", note: "Spectral sparsification via leverage-score sampling, complete — matrix_bernstein's first real theorem consumer, including the (1±ε) sparsifier guarantee and its graph-vector form with no cone restriction." },
-        { name: "Matrix Chernoff Bridge", status: "proved", source: "spectral-sparsification-via-leverage-scores.md", note: "matrix_bernstein already existed, imported, and is now consumed (Derived/SparsificationTail.lean) — the old 'does not exist' finding was a stale path-literal check, corrected 2026-08-26." }
+        { name: "Matrix Chernoff Bridge", status: "proved", source: "spectral-sparsification-via-leverage-scores.md", note: "matrix_bernstein already existed, imported, and is now consumed (Derived/SparsificationTail.lean) — the old 'does not exist' finding was a stale path-literal check, corrected 2026-08-26." },
+        { name: "Edge-Perturbation Concentration", status: "proved", source: "matrix-hoeffding-spectral-gap-estimation.md", note: "matrix_hoeffding's first real theorem consumer — norm and quadratic-form tails on a centered Bernoulli edge-Laplacian design, plus the eigenvalue-level tail via proved Weyl; delivered 2026-08-28." },
+        { name: "Swept-Fiedler-Cut Capstone", status: "proved", source: "matrix-hoeffding-spectral-gap-estimation.md", note: "The algorithm-facing chain: concentration → eigenvalue window → connectivity → an explicit swept Fiedler cut, closed under one statement; delivered 2026-08-29, made unconditional by the admissibility dissolution the same day." },
+        { name: "Subspace-Stability Pipeline", status: "proved", source: "matrix-hoeffding-spectral-gap-estimation.md", note: "Composes Fiedler-line stability with the edge-perturbation tail into a high-probability Fiedler-rotation bound under random edge resampling; delivered 2026-08-28." }
       ]
     }
   ];

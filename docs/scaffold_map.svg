@@ -52,11 +52,19 @@
 <text x="1013.0" y="473.0" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Matrix Concentration</text>
 <text x="1000.0" y="368.0" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">BERNOULLI HEIGHTS</text>
 <text x="1000.0" y="348.0" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">Probability &amp; High-Dim Stats</text>
-<line x1="875.2" y1="1248.5" x2="717.3" y2="1284.5" stroke="#9AA39A" stroke-width="3"/>
-<circle cx="746.5" cy="1277.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
-<text x="733.5" y="1282.9" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Fiedler Partitioning</text>
-<text x="678.3" y="1323.4" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">APPLICATION RING</text>
-<text x="678.3" y="1343.4" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">Consumers of the core</text>
+<line x1="1055.5" y1="1335.3" x2="1268.1" y2="1776.8" stroke="#9AA39A" stroke-width="3"/>
+<circle cx="1112.8" cy="1454.3" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="1125.8" y="1459.3" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Fiedler Partitioning</text>
+<circle cx="1148.4" cy="1528.1" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="1161.4" y="1533.1" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Fiedler-Subspace Stability</text>
+<circle cx="1184.0" cy="1602.0" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="1197.0" y="1607.0" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Empirical Stationary Distribution</text>
+<circle cx="1219.5" cy="1675.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="1232.5" y="1680.9" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Vertex-Degree Concentration</text>
+<circle cx="1255.1" cy="1749.8" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="1268.1" y="1754.8" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Ramanujan Expansion Ceiling</text>
+<text x="1285.5" y="1842.8" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">APPLICATION RING</text>
+<text x="1285.5" y="1862.8" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">Consumers of the core</text>
 <line x1="944.5" y1="1335.3" x2="696.3" y2="1850.7" stroke="#9AA39A" stroke-width="3"/>
 <circle cx="887.2" cy="1454.3" r="7" fill="#8A5A12" stroke="#8A5A12" stroke-width="2"/>
 <text x="874.2" y="1459.3" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Perron–Frobenius</text>
@@ -72,42 +80,54 @@
 <text x="696.3" y="1828.6" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Consensus &amp; Sync.</text>
 <text x="678.9" y="1916.7" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">KURAMOTO JUNCTION</text>
 <text x="678.9" y="1936.7" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">Dynamical Systems &amp; Control</text>
-<line x1="1100.1" y1="1140.2" x2="1419.1" y2="885.8" stroke="#9AA39A" stroke-width="3"/>
+<line x1="875.2" y1="1248.5" x2="428.1" y2="1350.5" stroke="#9AA39A" stroke-width="3"/>
+<circle cx="746.5" cy="1277.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="733.5" y="1282.9" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Electrical Flow</text>
+<circle cx="650.1" cy="1299.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="637.1" y="1304.9" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Effective Resistance</text>
+<circle cx="553.7" cy="1321.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="540.7" y="1326.9" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Dirichlet Energy</text>
+<circle cx="457.4" cy="1343.9" r="7" fill="#F3F4EE" stroke="#8A8378" stroke-width="2" stroke-dasharray="3,3"/>
+<text x="444.4" y="1348.9" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Weighted Matrix-Tree</text>
+<text x="389.1" y="1389.4" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">KIRCHHOFF FLATS</text>
+<text x="389.1" y="1409.4" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">Statistical Physics</text>
+<line x1="1100.1" y1="1140.2" x2="1483.2" y2="834.7" stroke="#9AA39A" stroke-width="3"/>
 <circle cx="1203.3" cy="1057.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
-<text x="1216.3" y="1062.9" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Electrical Flow</text>
+<text x="1216.3" y="1062.9" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Alon–Boppana Bound</text>
 <circle cx="1267.4" cy="1006.8" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
-<text x="1280.4" y="1011.8" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Effective Resistance</text>
+<text x="1280.4" y="1011.8" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Approx. Spectral Projection</text>
 <circle cx="1331.5" cy="955.6" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
-<text x="1344.5" y="960.6" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Dirichlet Energy</text>
+<text x="1344.5" y="960.6" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Higher-Order Cheeger — easy direction</text>
 <circle cx="1395.6" cy="904.5" r="7" fill="#F3F4EE" stroke="#8A8378" stroke-width="2" stroke-dasharray="3,3"/>
-<text x="1408.6" y="909.5" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Weighted Matrix-Tree</text>
-<text x="1450.3" y="830.9" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">KIRCHHOFF FLATS</text>
-<text x="1450.3" y="810.9" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">Statistical Physics</text>
-<line x1="899.9" y1="1140.2" x2="709.2" y2="988.1" stroke="#9AA39A" stroke-width="3"/>
+<text x="1408.6" y="909.5" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Higher-Order Cheeger — hard direction</text>
+<circle cx="1459.7" cy="853.4" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="1472.7" y="858.4" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Degree Eigenvalue Sandwich</text>
+<text x="1514.4" y="779.7" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">OPEN FRONTIER</text>
+<text x="1514.4" y="759.7" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">Landmark theorems</text>
+<line x1="899.9" y1="1140.2" x2="516.8" y2="834.7" stroke="#9AA39A" stroke-width="3"/>
 <circle cx="796.7" cy="1057.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
-<text x="783.7" y="1062.9" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Alon–Boppana Bound</text>
+<text x="783.7" y="1062.9" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Resolvent Calculus</text>
 <circle cx="732.6" cy="1006.8" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
-<text x="719.6" y="1011.8" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Approx. Spectral Projection</text>
-<text x="677.9" y="933.1" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">OPEN FRONTIER</text>
-<text x="677.9" y="913.1" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">Surveyed, not yet built</text>
-<line x1="1055.5" y1="1335.3" x2="1268.1" y2="1776.8" stroke="#9AA39A" stroke-width="3"/>
-<circle cx="1112.8" cy="1454.3" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
-<text x="1125.8" y="1459.3" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Resolvent Calculus</text>
-<circle cx="1148.4" cy="1528.1" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
-<text x="1161.4" y="1533.1" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Band Projectors</text>
-<circle cx="1184.0" cy="1602.0" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
-<text x="1197.0" y="1607.0" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Tikhonov Filter</text>
-<circle cx="1219.5" cy="1675.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
-<text x="1232.5" y="1680.9" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Tikhonov — Phase 2</text>
-<circle cx="1255.1" cy="1749.8" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
-<text x="1268.1" y="1754.8" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Decidable Certificates</text>
-<text x="1285.5" y="1842.8" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">NEURIPS BAY</text>
-<text x="1285.5" y="1862.8" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">ML &amp; Graph Signal Processing</text>
-<line x1="1124.8" y1="1248.5" x2="1379.1" y2="1306.5" stroke="#9AA39A" stroke-width="3"/>
+<text x="719.6" y="1011.8" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Band Projectors</text>
+<circle cx="668.5" cy="955.6" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="655.5" y="960.6" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Tikhonov Filter</text>
+<circle cx="604.4" cy="904.5" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="591.4" y="909.5" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Tikhonov — Phase 2</text>
+<circle cx="540.3" cy="853.4" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="527.3" y="858.4" text-anchor="end" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Decidable Certificates</text>
+<text x="485.6" y="779.7" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">NEURIPS BAY</text>
+<text x="485.6" y="759.7" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">ML &amp; Graph Signal Processing</text>
+<line x1="1124.8" y1="1248.5" x2="1668.3" y2="1372.5" stroke="#9AA39A" stroke-width="3"/>
 <circle cx="1253.5" cy="1277.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
 <text x="1266.5" y="1282.9" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Leverage Scores</text>
 <circle cx="1349.9" cy="1299.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
 <text x="1362.9" y="1304.9" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Matrix Chernoff Bridge</text>
-<text x="1418.1" y="1345.4" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">STOC CITY</text>
-<text x="1418.1" y="1365.4" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">Theoretical CS &amp; Algorithms</text>
+<circle cx="1446.3" cy="1321.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="1459.3" y="1326.9" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Edge-Perturbation Concentration</text>
+<circle cx="1542.6" cy="1343.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="1555.6" y="1348.9" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Swept-Fiedler-Cut Capstone</text>
+<circle cx="1639.0" cy="1365.9" r="7" fill="#1D6B4A" stroke="#1D6B4A" stroke-width="2"/>
+<text x="1652.0" y="1370.9" text-anchor="start" font-size="14" fill="#22282B" font-family="ui-monospace,Consolas,monospace">Subspace-Stability Pipeline</text>
+<text x="1707.3" y="1411.4" text-anchor="middle" font-size="17" fill="#22282B" font-weight="700" font-family="ui-monospace,Consolas,monospace">STOC CITY</text>
+<text x="1707.3" y="1431.4" text-anchor="middle" font-size="11" fill="#7A817F" font-family="ui-monospace,Consolas,monospace">Theoretical CS &amp; Algorithms</text>
 </svg>

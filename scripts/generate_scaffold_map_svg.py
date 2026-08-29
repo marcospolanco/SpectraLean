@@ -57,6 +57,10 @@ SPOKES = [
     ]),
     ("APPLICATION RING", "Consumers of the core", [
         ("Fiedler Partitioning", "proved", "fiedler-partitioning.md"),
+        ("Fiedler-Subspace Stability", "proved", "fiedler-subspace-stability-davis-kahan.md"),
+        ("Empirical Stationary Distribution", "proved", "empirical-stationary-distribution-concentration.md"),
+        ("Vertex-Degree Concentration", "proved", "hoeffding-inequality-degree-concentration.md"),
+        ("Ramanujan Expansion Ceiling", "proved", "ramanujan-expansion-ceiling.md"),
     ]),
     ("KURAMOTO JUNCTION", "Dynamical Systems & Control", [
         ("Perron–Frobenius", "axiom", "admit-perron-frobenius.md"),
@@ -72,9 +76,12 @@ SPOKES = [
         ("Dirichlet Energy", "proved", "electrical-structure-crust.md"),
         ("Weighted Matrix-Tree", "gated", "weighted-matrix-tree-theorem.md"),
     ]),
-    ("OPEN FRONTIER", "Surveyed, not yet built", [
+    ("OPEN FRONTIER", "Landmark theorems", [
         ("Alon–Boppana Bound", "proved", "alon-boppana-bound.md"),
         ("Approx. Spectral Projection", "proved", "approximate-spectral-projection.md"),
+        ("Higher-Order Cheeger — easy direction", "proved", "multiway-expansion.md"),
+        ("Higher-Order Cheeger — hard direction", "gated", "multiway-cheeger-hard-direction.md"),
+        ("Degree Eigenvalue Sandwich", "proved", "degree-eigenvalue-sandwich.md"),
     ]),
     ("NEURIPS BAY", "ML & Graph Signal Processing", [
         ("Resolvent Calculus", "proved", "resolvent-calculus-psd.md"),
@@ -86,6 +93,9 @@ SPOKES = [
     ("STOC CITY", "Theoretical CS & Algorithms", [
         ("Leverage Scores", "proved", "spectral-sparsification-via-leverage-scores.md"),
         ("Matrix Chernoff Bridge", "proved", "spectral-sparsification-via-leverage-scores.md"),
+        ("Edge-Perturbation Concentration", "proved", "matrix-hoeffding-spectral-gap-estimation.md"),
+        ("Swept-Fiedler-Cut Capstone", "proved", "matrix-hoeffding-spectral-gap-estimation.md"),
+        ("Subspace-Stability Pipeline", "proved", "matrix-hoeffding-spectral-gap-estimation.md"),
     ]),
 ]
 

@@ -15,9 +15,11 @@ irregular family's last priced follow-on, priced there as "a multi-run
 program; a dedicated run should start with that Step-0, not with
 definitions"; the Step-0 verdict below dissolved both priced
 obstructions, collapsing the program to one delivery. Zero axioms
-admitted, nothing committed, nothing published. The remaining priced
-follow-on is the multiway *hard* direction only (multi-run, gated on a
-named consumer).
+admitted, nothing committed, nothing published.
+
+The remaining priced follow-on is the multiway *hard* direction only
+(multi-run, gated on a named consumer) — this proposal's own scope
+(the easy direction) is fully delivered regardless.
 
 ## The obligation this discharges
 

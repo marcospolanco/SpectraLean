@@ -370,9 +370,8 @@ break it, not evidence none exists — see §6.
   `propext, Classical.choice, Quot.sound`). The repaired statements'
   first genuinely random closed-form instances landed in QA (the fair
   coin, bound `2 exp(−3/8) > 1`). Full verification ladder passed.
-- **Commit:** pending (this delivery sits uncommitted in the worktree;
-  autonomous runs do not commit — the reference lands with the
-  operator's commit, per the commit-steward protocol).
+- **Commit:** `3669fbb` — `fix(sgt): repair-and-retire the Bernstein
+  pair (Errata #8); retire hoeffding_lemma (axioms 8 -> 5)`.
 - **Source:** `proposals/repair-and-retire-bernstein-pair.md` (the
   route, the degenerate-corner analysis, the numerical LD record, the
   delivery record for both runs); `docs/AGENT_ACTIVITY.md`'s 2026-08-30

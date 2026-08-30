@@ -305,9 +305,9 @@ break it, not evidence none exists — see §6.
   `matrix_azuma_hoeffding` alone (via
   `wip/azumajunk_axcheck.lean`/`wip/azumajunk_axcheck2.lean`). The
   full verification ladder passed on the repaired tree.
-- **Commit:** pending (autonomous runs do not commit; the reference
-  lands with the operator's commit, per
-  `docs/arch/commit-steward-protocol.md`).
+- **Commit:** `e77df27` — `fix(sgt): repair MatrixMDS ambient-
+  measurability defect; retire hoeffding_inequality and
+  hoeffding_empirical (10 -> 8 axioms)`.
 - **Source:** `proposals/audit-matrix-azuma-mds-measurability-hazard.md`
   (the delivery record with the fixture mechanics and technique
   findings); `docs/AGENT_ACTIVITY.md`'s 2026-08-29 entries (23:52:39Z

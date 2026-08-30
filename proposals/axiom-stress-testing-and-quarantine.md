@@ -371,26 +371,26 @@ the result is a better-tested conditional interface. When it breaks, the
 failure is a useful formalization result and the declaration is quarantined
 or repaired in place (§2) until resolved.
 
-## Decision needed
+## Decision needed — resolved in part, 2026-08-30
 
-This proposal does not decide whether Scaffold should adopt its full
-vocabulary and 6-stage lifecycle as standing policy, or continue with the
-lighter combination already in place — `docs/9_ERRATA.md` for the repair
-case and `docs/arch/commit-steward-protocol.md` for the verification-gate
-case, both of which cover a meaningful fraction of what this document asks
-for without new terminology or tooling.
+The operator was offered three options: adopt the full vocabulary and
+6-stage lifecycle as standing policy; keep only the lighter combination
+already in place (`docs/9_ERRATA.md` for the repair case,
+`docs/arch/commit-steward-protocol.md` for the verification-gate case); or
+adopt just §7's concrete tooling items without the vocabulary.
 
-The genuinely new, concrete value this document adds beyond what already
-exists is §7 items 3–5: an axiom linter extension requiring
-status/source/replacement metadata, an axiom-audit command checking
-negative-witness independence, and a public-umbrella reachability check
-against quarantined modules. Those are buildable independently of adopting
-the full lifecycle vocabulary, and could become their own proposals if an
-operator decides they are worth the tooling investment.
+**The operator chose the third option.** §7 items 3–5 — the axiom linter
+extension, the negative-witness independence checker, and the
+public-umbrella reachability check — are split into their own proposal,
+[`axiom-audit-tooling.md`](axiom-audit-tooling.md), indexed **High** in
+`proposals/README.md`. That proposal is self-contained and does not require
+adopting this document's vocabulary or lifecycle to execute.
 
-Whether to adopt the heavier apparatus wholesale, adopt only §7's concrete
-tooling items, or leave things as they are is an operator call — the same
-posture as the adjacent
+**What remains genuinely undecided:** whether to additionally adopt the
+`candidate`/`admitted`/`quarantined`/`proved`/`retired` disposition
+vocabulary and the 6-stage lifecycle (§§2–6) as standing policy governing
+future axiom admissions, on top of the tooling above. That question is not
+queued for any run and stays a Low/human-decision-required item — the same
+posture the adjacent
 [Retire the Mushy Center Systematically](retire-the-mushy-center.md)
-proposal takes toward its own heavier apparatus. An autonomous run should not
-stand up any part of this unprompted.
+proposal takes toward its own heavier apparatus.

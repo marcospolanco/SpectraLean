@@ -44,11 +44,25 @@ the correction here so it doesn't live only inside one proposal.
 ## The pattern
 
 Scaffold's axiom boundary is not an arbitrary trust decision — it is close
-to a direct trace of this map. Weyl, Davis–Kahan, and the Cheeger hard
-direction are admitted because nothing upstream exists to build them
-from. Hoeffding/Bernstein got proved, not admitted, because Mathlib
-supplies the raw probability machinery even though it lacks the named
-theorems. Where Mathlib has a partial tendril — the extreme-eigenvalue
+to a direct trace of this map. Weyl, Davis–Kahan, the Cheeger hard
+direction, and now the entire scalar concentration stack (Hoeffding,
+Bernstein, and the ψ₂-form Hoeffding lemma) were all admitted once and
+then proved locally as the right engine became available; the currently
+admitted set (5, 2026-08-30) is exactly the list this map explains —
+the Perron–Frobenius pair (nothing upstream) and the matrix
+concentration trio — with the scalar tail stack retired across
+2026-08-30: the Hoeffding tail half
+(`hoeffding_inequality`/`hoeffding_empirical`) by proving Hoeffding's
+lemma locally (`proposals/prove-hoeffding-inequality-mgf.md`, axioms
+10 → 8), the Bernstein pair (`bernstein_inequality`/`bernstein_bounded_variance`)
+repaired and retired by the local Bennett MGF engine
+(Errata §8, `proposals/repair-and-retire-bernstein-pair.md`, axioms
+8 → 6), and the ψ₂-form `hoeffding_lemma` retired by the
+pointwise-collapse route (`proposals/retire-hoeffding-lemma-pointwise-collapse.md`,
+axioms 6 → 5 — at the `√6` constant the defining set sees only the
+bound and the mass, so boundedness alone proves the statement), because
+Mathlib supplies the raw probability machinery even
+though it lacks the named theorems. Where Mathlib has a partial tendril — the extreme-eigenvalue
 Rayleigh principle plus invariant-subspace restriction — Scaffold built
 the full Courant–Fischer min–max engine locally and then proved both the
 λ₂ instance (2026-08-18, `lambda2_variational`) and interlacing

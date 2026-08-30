@@ -187,12 +187,23 @@ Community process is defined by `governance/CONTRIBUTING.md`, `MAINTAINERS.md`, 
   junk mechanisms (`Real.sInf_empty` vacuity; `integral_undef` making the
   MGF integral junk-zero, hence the defining set full, for heavy tails),
   and the theorem now states the moment integrably. A recorded residual:
-  the same junk-integral surface touches the mean hypotheses of
-  `hoeffding_inequality`/`bernstein_inequality` on infinite measures and
-  the `MatrixMDS` set-integrals — their own future Step 0s must check it
-  (the scalar side was audited safe on 2026-08-28 with proved
-  integrability discharges; see
-  `proposals/audit-scalar-concentration-integrability-hazard.md`).
+  the same junk-integral surface touches the `MatrixMDS` set-integrals —
+  their own future Step 0 must check it (the scalar side was audited
+  safe on 2026-08-28 with proved integrability discharges; see
+  `proposals/audit-scalar-concentration-integrability-hazard.md`; the
+  `hoeffding_inequality`/`hoeffding_empirical` half of the scalar
+  residual was fully discharged by the 2026-08-30 retirement — both are
+  now proved theorems whose engine routes every mean hypothesis through
+  `integrable_of_bounded_measurable` before integrating,
+  `proposals/prove-hoeffding-inequality-mgf.md` — and the
+  `bernstein_inequality`/`bernstein_bounded_variance` half was
+  discharged by the 2026-08-30 repair-and-retirement (Errata §8,
+  `proposals/repair-and-retire-bernstein-pair.md`): the admitted forms'
+  *uncentered* bound hypothesis materially understated the Bennett
+  price, both were repaired to the source-faithful centered bound and
+  proved by the local Bennett MGF engine with every hypothesis-side
+  integral discharged honestly — the scalar junk-integral residual is
+  now fully worked).
   The matrix side's own Step 0 check (2026-08-28,
   `proposals/matrix-hoeffding-spectral-gap-estimation.md`) found a
   different, larger defect: **all three matrix concentration axioms

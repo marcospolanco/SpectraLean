@@ -2964,8 +2964,9 @@ theorem epK2_bernstein_budget_var :
 
 /-- **The closed-form Bernstein degree tail instance on `K₂`** at `t = 1`,
 `M = 1`: `μ {|dev| ≥ 1} ≤ 2 exp(−3/5)` — the denominator
-`2 σ² + 2Mt/3 = 1 + 2/3 = 5/3`. CONDITIONAL ON THE
-`bernstein_inequality` AXIOM (instantiated, not re-proved). -/
+`2 σ² + 2Mt/3 = 1 + 2/3 = 5/3`. Instantiates the (locally proved,
+2026-08-30 retired) `bernstein_inequality` theorem through its Derived
+consumer. -/
 theorem epK2_degree_tail_bernstein_QA :
     (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
         {ω : (Fin 2 × Fin 2) → Bool |
@@ -2982,8 +2983,9 @@ theorem epK2_degree_tail_bernstein_QA :
   exact htail
 
 /-- **The budget instance** at `Vbud = 1`: the coarser denominator
-`2 · 1 + 2/3 = 8/3` gives `2 exp(−3/8)`. CONDITIONAL ON THE
-`bernstein_bounded_variance` AXIOM (instantiated, not re-proved). -/
+`2 · 1 + 2/3 = 8/3` gives `2 exp(−3/8)`. Instantiates the (locally
+proved, 2026-08-30 retired) `bernstein_bounded_variance` theorem
+through its Derived consumer. -/
 theorem epK2_degree_tail_bernstein_budget_QA :
     (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
         {ω : (Fin 2 × Fin 2) → Bool |

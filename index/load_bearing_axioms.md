@@ -23,14 +23,14 @@ A **load-bearing axiom** is an axiom that:
 #### `hoeffding_lemma`
 - **Source**: Vershynin, High-Dimensional Probability, Lemma 2.6.2
 - **Impact**: Connects boundedness to the subgaussian property (probability measure; conclusion `≤ √6·a` — repaired 2026-08-28, the pre-repair shape was materially false per `proposals/audit-scalar-concentration-integrability-hazard.md`)
-- **Dependencies**: No theorem consumers (QA-only contact: `subgaussian_norm_zero_QA`, `hoeffding_lemma_rademacher_QA`)
-- **Formalization priority**: HIGH (blocked on the pinned Mathlib lacking Hoeffding's λ-form lemma)
+- **Dependencies**: Retired to a proved theorem 2026-08-30 (`proposals/retire-hoeffding-lemma-pointwise-collapse.md`) — the pointwise-collapse route through the sharper companion `subgaussianNorm_le_of_bounded` (`≤ a/√(log 2)`, no centering); former QA contact (`subgaussian_norm_zero_QA`, `hoeffding_lemma_rademacher_QA`) now hard crust
+- **Formalization priority**: closed (retired from the axiom boundary)
 
 #### `bernstein_inequality`
 - **Source**: Vershynin, High-Dimensional Probability, Theorem 2.8.1
 - **Impact**: Provides variance-dependent bounds (tighter than Hoeffding)
-- **Dependencies**: Used throughout ML theory and statistics
-- **Formalization priority**: HIGH
+- **Dependencies**: Retired to a proved theorem 2026-08-30 (Errata §8, `proposals/repair-and-retire-bernstein-pair.md`) — repaired to the source-faithful centered bound and proved by the local Bennett MGF engine
+- **Formalization priority**: closed (retired from the axiom boundary)
 
 ### Matrix Concentration
 
@@ -64,8 +64,7 @@ A **load-bearing axiom** is an axiom that:
 
 ### Formalization Priority Ranking
 
-1. **HIGH**: subgaussian_tail_bound, hoeffding_lemma, bernstein_inequality, matrix_bernstein
-2. **MEDIUM**: davis_kahan_sin_theta, matrix_hoeffding
+1. **HIGH**: matrix_bernstein, matrix_hoeffding, matrix_azuma_hoeffding, perron_frobenius, primitive_power_tendsto (the five remaining admitted axioms — every one has theorem consumers; the scalar family is fully proved: `subgaussian_tail_bound` retired 2026-08-22, `hoeffding_inequality`/`hoeffding_empirical` and `bernstein_inequality`/`bernstein_bounded_variance` and `hoeffding_lemma` retired 2026-08-30)
 3. **LOW**: Specialized corollaries and variants
 
 ## Tracking

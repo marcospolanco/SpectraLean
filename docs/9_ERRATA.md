@@ -34,7 +34,7 @@ transit-map staleness incident in
 corrected there is about a status label, not a mathematical
 statement).
 
-**How to read the count.** Six entries below is not a small number,
+**How to read the count.** Eight entries below is not a small number,
 and it should not be read as one. It is also not evidence the project
 is unusually error-prone — every entry was found by the project's own
 deliberate practice of building adversarial fixtures against its own
@@ -313,6 +313,72 @@ break it, not evidence none exists — see §6.
   findings); `docs/AGENT_ACTIVITY.md`'s 2026-08-29 entries (23:52:39Z
   and the completing run).
 - **Status:** resolved.
+
+## 8. The uncentered-bound hypothesis of the scalar Bernstein pair
+
+- **Found:** 2026-08-30 (run `20260830T124650Z-run-1`, the Step-0
+  adversarial check of the planned retirement; delivered by run
+  `20260830T150349Z-run-1`).
+- **What was wrong:** `bernstein_inequality` and
+  `bernstein_bounded_variance` hypothesized the **uncentered** bound
+  `|X i ω| ≤ a` while centering internally in the conclusion, but the
+  cited sources (Vershynin 2.8.1, Wainwright 2.15) hypothesize
+  *mean-zero* variables with the bound on the **centered** ones. The
+  centered variable satisfies only `|X − E X| ≤ 2a`, so the `2at/3`
+  linear term underpriced the Bennett bound by up to a factor 2 —
+  a hypothesis-translation the statement-difference notes glossed over.
+  Evidence the claim is materially false, not merely under-justified:
+  at the biased ±1 coin (`q = 1/10`, `a = 1`, true variance
+  `V = 9/25`), the true large-deviation rate at per-variable deviation
+  `y = 1/2` is `I(1/2) = 0.2269…` (binomial rate `D(0.35‖0.1)`) while
+  the claimed exponent rate is `y²/(2V + 2ay/3) = 0.2373…` — the claim
+  exceeds the truth by ~1% per variable, so the tail bound is violated
+  for `n ≳ 500–1000` (beyond exact Lean witness scale; recorded here as
+  numerical LD evidence, honestly not a Lean refutation). The MGF
+  *mechanism* is Lean-proved at fixture scale: at `λ = 5/9` the claimed
+  per-variable exponent `λ²V/(2(1 − λa/3))` is exactly `3/44`, and the
+  true MGF is `E e^{λY} = (9/10)e^{−1/9} + (1/10)e > 44/41 > e^{3/44}`
+  (`bernstein_mgf_separation_QA`,
+  `old_bernstein_mgf_uncentered_refuted_QA` in
+  `Scaffold/QA/Concentration/Scalar_QA.lean`) — every bound from
+  `Real.add_one_lt_exp`, `Real.one_sub_le_exp_neg`, and the pinned
+  `e > 2.7182818283` alone.
+- **How it was found:** the standing handoff after the 2026-08-30
+  Hoeffding retirement named the Bernstein pair's own retirement route
+  as the natural frontier; the mandatory pre-admission-edit Step 0
+  compared the axioms' exact hypothesis set against the cited sources
+  clause by clause, and the centering mismatch surfaced immediately.
+  This is the §5 hazard-adjacent class (a hypothesis the source carries
+  being read in a weaker form), the mirror of §6's
+  independence-strength repair and §7's dropped-measurability repair.
+- **Repair:** complete, 2026-08-30 — a repair-plus-retirement. Both
+  statements repaired in place to the source-faithful centered
+  hypothesis `|X i ω − ∫ ω', X i ω' ∂μ| ≤ a` and **proved** by a local
+  Bennett engine (`Bernstein.lean`: Bennett's ratio with its integral
+  representation and whole-line monotonicity, the series bound
+  `q(v) ≤ 1/(2(1 − v/3))` on `(0, 3)`, the per-variable MGF bound, and
+  the Chernoff assembly at `λ = t/(V + at/3)` reusing the Hoeffding
+  retirement's proved machinery) — axioms 8 → 6, zero new axioms. The
+  dead `0 ≤ v` clause of the budget form dropped (implied by `h_var`,
+  unused; the repaired statement strictly stronger). Consumers
+  re-threaded: `bernstein_iid` re-derived at the centered shape; the
+  two Derived Bernstein-twin tails re-proved at the same public
+  statements through the designs' proved zero means (their `h_bound`
+  clauses now honest centered bounds) — both now **hard crust**
+  (`#print axioms` via `wip/bernretire_axcheck.lean`: 33 audited
+  declarations, the retired names and the twin tails each exactly
+  `propext, Classical.choice, Quot.sound`). The repaired statements'
+  first genuinely random closed-form instances landed in QA (the fair
+  coin, bound `2 exp(−3/8) > 1`). Full verification ladder passed.
+- **Commit:** pending (this delivery sits uncommitted in the worktree;
+  autonomous runs do not commit — the reference lands with the
+  operator's commit, per the commit-steward protocol).
+- **Source:** `proposals/repair-and-retire-bernstein-pair.md` (the
+  route, the degenerate-corner analysis, the numerical LD record, the
+  delivery record for both runs); `docs/AGENT_ACTIVITY.md`'s 2026-08-30
+  entries (12:48:05Z and this run).
+- **Status:** resolved.
+
 
 ## Related: process and tooling self-corrections
 

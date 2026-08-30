@@ -6,29 +6,316 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**Retiring `hoeffding_inequality` and `hoeffding_empirical` from axioms
-to theorems — proving Hoeffding's lemma locally in MGF interval form
-(`E exp(λX) ≤ exp(λ²(b−a)²/8)` for mean-zero `X ∈ [a,b]` on a
-probability measure) and deriving both tail axioms from it by the
-classical Chernoff route, dropping the admitted-axiom count 10 → 8.**
-Run `20260830T030715Z-run-1`; selected per priority item 0 (no High
+**None open.** The queue is empty — check `proposals/README.md`'s Active
+table first (no High rows; the one Medium-High row — the
+empirical-stationary Step 2 — consumer-gated on the bias-term shape);
+otherwise the center-out policy. Natural named frontiers: the matrix
+trio's own retirement route (the matrix MGF machinery — Lieb-class,
+multi-run — the scalar pattern now proved three times over), a consumer
+of the unconditional window family, or the next load-bearing gap
+`docs/6_SGT_BACKLOG.md` names.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The `hoeffding_lemma` pointwise-collapse retirement — the last scalar
+concentration axiom and the last zero-consumer axiom eliminated in one
+slice, axioms 6 → 5, after which every remaining admitted axiom (the
+PF pair, the matrix trio) has a theorem consumer and the scalar
+concentration subtree is axiom-free end to end —
+`proposals/retire-hoeffding-lemma-pointwise-collapse.md`; run
+`20260830T165957Z-run-1`; DELIVERED — zero new axioms (`#print axioms`
+via `wip/hlretire_axcheck.lean` on 11 audited declarations: the retired
+name at its unchanged public shape, the two new companions, the three
+new QA declarations, and the four pre-existing consumers each exactly
+`propext, Classical.choice, Quot.sound` — hard crust, blast radius
+zero: the axiom had no consumers, and every former QA instantiation is
+now strictly lighter). QA 3160 → 3163 (+3, `Scalar_QA.lean`'s
+retirement section).**
+
+The delivery's content: (1) **The Step-0 finding** —
+`subgaussianNorm`'s defining set `{K | 0 < K ∧ ∫ exp (X²/K²) ∂μ ≤ 2}`
+cannot see the mean, only the bound and the mass, so the pointwise
+collapse `exp (X ω²·log 2/a²) ≤ exp (log 2) = 2` proves the sharper
+companion **`subgaussianNorm_le_of_bounded`** (`≤ a/√(log 2)` with no
+mean-zero, no measurability, and no numeric pins — `1/√(log 2) ≤ √6`
+from `Real.one_sub_inv_le_log_of_pos` at `x = 2`), which implies the
+admitted statement at its unchanged shape. The honest finding recorded:
+at the `√6` constant the admitted statement never carried the source's
+λ-form content (that content is the separately proved
+`hoeffding_lemma_mgf`); the mean-zero hypothesis is retained for
+statement stability and documented as unused (deliberate
+`set_option linter.unusedVariables false in`). (2) **The corner** —
+`subgaussianNorm_eq_zero_of_forall_eq_zero` (the `a = 0` squeeze via
+`Real.sInf_le_iff` at `ε/2`, no junk division touched). (3) **The
+falsification content** (QA +3): the **exact two-sided pin**
+`rademacher_norm_eq_QA` (`norm = 1/√(log 2)` — the companion's
+constant *attained*: membership at equality `exp (log 2) = 2`, the
+member lower bound `1/K² ≤ log 2`; the 2026-08-28 refutation's
+lower-bound class re-derived two-sided), the **uncentered witness**
+(`X ≡ 1`, mean `1 ≠ 0`), and the **companion's own mass-guard fence**
+(at the mass-19/10 fixture the norm is exactly `1/√(log (20/19))`,
+attained, exceeding `1/√(log 2)` since `20/19 < 2` — the probability
+instance load-bearing for the new theorem, the refuted target strictly
+sharper than the axiom's `√6`).
+
+**Verification:** spike first (`wip/hlretire_spike.lean`, zero errors
+before any shelf edit); `lake env lean` zero errors on both touched
+modules with warning baselines verified against the working-tree
+baseline by file-pair elaboration (`Subgaussian.lean` at its one
+pre-existing HEAD note only; `Scalar_QA.lean` warning multiset
+identical — the +2 vs git-HEAD are the Bernstein run's recorded pair);
+explicit `lake build` targets ✔ on both modules; `#print axioms` via
+`wip/hlretire_axcheck.lean` (11 declarations) as above; **full
+`lake build` ✔ immediately followed by `check_build_completeness.py` —
+129 source files, 129 fresh artifacts, 0 stale, 0 missing, exit 0**;
+`lint_axioms` (5 — direct grep confirms exactly the PF pair + matrix
+trio), `check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**3163/5/0**); **map freshness exit 0** after the stats
+sync (3160 → 3163 QA and 6 → 5 axioms in both map files, SVG
+regenerated; no proposal status header changed — the new proposal has
+no station). Records updated: the proposal (COMPLETE from birth, with
+the degenerate-corner analysis and six technique findings — the
+`set_option ... in` docstring-placement lesson confirming the MatrixMDS
+`omit` precedent, the bare-numeral `rw` pollution trap, `Real.exp_log`'s
+argument-instantiation trap, `sq_lt_sq'`'s real first hypothesis, the
+nlinarith product-atom limit, the `Real.sInf_le_iff` squeeze idiom),
+`proposals/README.md` (Delivered row, the misplaced table separator
+from the previous delivery repaired), README (5 axioms / 3163 QA / the
+scalar-stack-axiom-free clause), the radar (QA + axiom-minimization rows
+synced, scores held at 4.0/4.5 per protocol, net trend extended
+`→ 8 → 6 → 5`), the coverage map (the admitted-set paragraph), both
+index maps + the load-bearing-axioms file (the `hoeffding_lemma` and
+stale `bernstein_inequality` entries closed, the priority line repaired
+to the five remaining axioms), `Scalar/README.md` (fully de-staled to
+the proved state), the scoreboard verification row, the map stamps +
+regenerated SVG, this plan, and the activity log. Nothing committed;
+the prior runs' deliveries preserved untouched.
+
+**Remaining risk:** none owed by the delivery — the retired statement
+is genuinely proved (no residual axiom contact), and the pin/witness/
+fence are unconditional hard crust. The remaining admitted surface: the
+PF pair and the matrix trio, every one consumer-covered; the window
+family remains conditional on `matrix_hoeffding`, the sparsification
+family on `matrix_bernstein`, and the persistence pair on
+`matrix_azuma_hoeffding`, all to be reported as such.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The Bernstein repair-and-retirement — Errata §8: both scalar
+Bernstein axioms materially false in hypothesis shape (the *uncentered*
+bound `|X i ω| ≤ a` where the cited sources bound the *centered*
+variables), repaired in place to the source-faithful centered bound and
+*proved* by a local Bennett MGF engine, axioms 8 → 6 —
+`proposals/repair-and-retire-bernstein-pair.md`; opened by run
+`20260830T124650Z-run-1` (the Step-0 finding, the plan, the spiked
+engine — both repaired statements already elaborating in
+`wip/bernspike.lean` — when it exited before its terminal entry),
+delivered by run `20260830T150349Z-run-1`. DELIVERED — zero new axioms
+(`#print axioms` via `wip/bernretire_axcheck.lean` on 33 audited
+declarations: the retired names, the eight Bennett-engine lemmas, the
+7 new retirement-QA declarations, and the two Derived Bernstein-twin
+tails plus their two QA pins each exactly `propext, Classical.choice,
+Quot.sound` — **the twins and pins hard crust**; the window family on
+`matrix_hoeffding` alone, the sparsification family on
+`matrix_bernstein` alone, both unchanged; `hoeffding_empirical_iid`/
+`empiricalWalkDistribution_tail` hard crust). QA 3145 → 3160 (+15,
+`Scalar_QA.lean`'s Bernstein retirement section).**
+
+The delivery's content: (1) **The engine** (`Bernstein.lean`, hard
+crust): Bennett's ratio `bennettQ` with the integral representation
+`q(u) = ∫₀¹(1−s)e^{us}ds` (antiderivative route), whole-line
+monotonicity (no sign case split), the series bound
+`q(v) ≤ 1/(2(1−v/3))` on `(0,3)` (termwise `(j+2)! ≥ 2·3ʲ`), the
+pointwise bound `exp_le_add_sq_mul`, the per-variable MGF bound
+`bennett_mgf`, the sum bound through the Hoeffding retirement's proved
+`integral_prod_exp_of_iIndepFun`, and the Chernoff assembly at
+`λ = t/(V + at/3)` closing at exactly `−t²/(2V + 2at/3)` via the
+retirement's `markov_tail_of_mgf` — honest integrability throughout
+(every hypothesis-side integral discharged through
+`integrable_of_bounded_measurable`/`integrable_sq_sub_mean`, never a
+junk zero; the V = 0 corner a dedicated null-event case; the dead
+`0 ≤ v` budget clause dropped, the repaired statement strictly
+stronger). (2) **The falsification content** (QA +15): the biased-coin
+fixture (`q = 1/10`) with the *true* variance pinned `9/25`; the
+**MGF-separation witness** — every pre-repair hypothesis genuinely
+held at `a = 1`, yet at `λ = 5/9` the claimed per-variable exponent is
+exactly `3/44` and `E e^{λY} ≥ (9/10)(17/18)² + e/10 > 44/41 >
+e^{3/44}` (bounds from `add_one_lt_exp`/`one_sub_le_exp_neg`/the
+pinned `e` alone; the opening run's draft constant `(18/25)(e−2)` was
+an arithmetic slip, corrected — `(9/25)(e−2)` is the true Bennett
+exponent, which the true MGF does *not* exceed); the **refutation
+fence** `old_bernstein_mgf_uncentered_refuted_QA`; the numerical LD
+record (rate `0.2269` vs claimed `0.2373`, violated for
+`n ≳ 500–1000`, honestly recorded as numerical evidence); the repaired
+statements' first genuinely random closed-form instances (fair coin,
+`2 exp(−3/8) > 1`, `iIndepFun.of_subsingleton` supplying singleton
+independence). (3) **Consumer threading**: `bernstein_iid` re-derived
+at the centered shape; the two Derived twin tails re-proved at
+unchanged public statements through the designs' proved zero means;
+the two EdgePerturbation QA pins now hard crust; the stale
+"CONDITIONAL ON THE AXIOM" docstrings corrected everywhere.
+
+**Verification:** spike iterated to zero errors/zero warnings before
+any shelf edit; `lake env lean` zero errors on every touched module
+with warning baselines compared against HEAD by file-pair elaboration
+(`Bernstein.lean` strictly fewer warnings than HEAD — the
+`bernstein_iid` section-variable note gone with the theorem route;
+`Scalar_QA.lean` +2 statement-binder warnings of the recorded
+zero-family class — the `∑ i : Fin 1` binders, recorded not appeased);
+explicit `lake build` targets ✔ on all four touched modules;
+`#print axioms` via `wip/bernretire_axcheck.lean` (33 declarations) as
+above; **full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 129 source files, 129 fresh artifacts,
+0 stale, 0 missing, exit 0** (re-run after the post-build docstring
+edits with those two modules rebuilt); `lint_axioms` (6, both PF
+findings allowlisted-confirmed), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**3160/6/0**);
+**map freshness exit 0** after the stats-stamp sync (3145 → 3160,
+8 → 6 in both map files, SVG regenerated; no proposal status header
+changed — the new proposal has no station). Records updated: Errata §8
+(the intro count corrected Six → Eight alongside), the proposal
+(COMPLETE from birth, with the corrected witness constants and the
+technique findings — `Real.add_one_lt_exp`'s hypothesis-shape trap,
+`Integrable.smul_measure`'s `c ≠ ∞` via `div_lt_top.ne`,
+ENNReal-tenths arithmetic, higher-order `rw` needing the function
+explicit, `cases b`'s false-first bullet order),
+`proposals/README.md` (Delivered row), README (6 axioms / 3160 QA /
+the scalar-tail-stack-proved highlights clause), the radar (QA axis
+synced; the axiom-minimization row-head count repaired 10 → 6 with
+both retirement notes and the net trend extended `→ 8 → 6`; score held
+at 4.5 and 4.0 per protocol), both source maps (the stale `(axiom)`
+markers for all three retired names corrected), the
+probability-concentration topic map (the two retired rows, the six new
+engine rows, the two twin rows now hard crust), architecture §12 (the
+scalar junk-integral residual now fully worked), the coverage map (the
+admitted set named correctly), the scoreboard verification row, the
+map stamps + regenerated SVG, this plan, and the activity log.
+Nothing committed; the prior runs' deliveries preserved untouched.
+
+**Remaining risk:** none owed by the delivery — the retired statements
+are genuinely proved (no residual axiom contact), and the fences are
+unconditional hard crust. The remaining admitted surface: the PF pair,
+the matrix trio, and `hoeffding_lemma` (still the one zero-consumer
+axiom; its natural consumer was this proof's engine, which used
+`bennett_mgf` instead). The window family remains conditional on
+`matrix_hoeffding` and the sparsification family on `matrix_bernstein`,
+and must continue to be reported as such.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The Hoeffding retirement's QA-and-records closure — the two artifacts
+the delivering run left unlanded when it exited before its terminal
+entry (the operator's closing note named both as real follow-up work):
+the adversarial QA the retirement planned (fences and closed-form
+instances, +27 declarations) and the proposal record
+`proposals/prove-hoeffding-inequality-mgf.md` — plus the consumer
+axiom-load audit the retirement only claimed: four Derived theorems
+verified hard crust, six verified strictly lighter.**
+Run `20260830T053158Z-run-1`; selected per priority item 0 (no High
 rows; the one Medium-High row consumer-gated; all Low rows
-human-decision-gated) and priority item 4 (reduce the explicit trust
-surface) over new breadth: `hoeffding_inequality` and
-`hoeffding_empirical` are two of the ten admitted axioms whose entire
-mathematical content follows from the two-standard-step
-secant/Chernoff argument, every needed pin lemma exists
-(`convexOn_exp`, `IndepFun.integral_mul_of_nonneg`,
-`iIndepFun.indepFun_finset_prod_of_not_mem`,
-`antitone_of_deriv_nonpos`, `Real.exp_sum`, `HasDerivAt.log`), and the
-retirement makes every Derived consumer strictly lighter
-(`edgePerturbation_degree_tail*` shed `hoeffding_inequality`, leaving
-`matrix_hoeffding` alone; the empirical-stationary tails
-`hoeffding_empirical_iid`/`empiricalWalkDistribution_tail` become hard
-crust). Next action: spike the analytic core (the
-`φ(u) = (1−p)e^{−pu} + pe^{(1−p)u} ≤ e^{u²/8}` inequality by the
-perfect-square second-derivative route) plus the assembly in
-`wip/hoeffding_mgf_spike.lean` to zero errors before any shelf edit.
+human-decision-gated) and the standing handoff's own named follow-up.
+The Lean retirement itself (runs `20260830T030715Z-run-1` → commit
+e77df27: `hoeffding_lemma_mgf` + both retired statements proved, axioms
+10 → 8) was already at HEAD; this run added the falsification content a
+proved theorem without an engineered witness lacks — the exact
+"compiles beside the substrate" failure mode `docs/1_STRATEGY.md` names,
+and the class the `√6·a` repair of the admitted `hoeffding_lemma`
+proved matters for this lemma family. DELIVERED — zero new axioms (count
+stays 8; `#print axioms` via `wip/hoeffding_qa_axcheck.lean` on all 37
+audited declarations: the 24 new QA declarations — fences and instances
+— each exactly `propext, Classical.choice, Quot.sound`, the fences with
+zero axiom contact as refutations must be; the retired names
+standard-three; `edgePerturbation_degree_tail`, `degree_tail_all`,
+`hoeffding_empirical_iid`, and `empiricalWalkDistribution_tail` **hard
+crust**; the six window-family members conditional on
+`matrix_hoeffding` alone). QA 3118 → 3145 (+27, `Scalar_QA.lean`'s
+retirement section).**
+
+The delivered content: (1) **The wrong-constant fence at the MGF
+level** — the fair-coin Rademacher fixture's exact MGF `(e + e⁻¹)/2`
+(closed form through the two Dirac atoms; ≥ `3/2` from the pinned
+`exp_one_gt_d9`/`exp_one_lt_d9`) against the `K = 12` sharpening of
+`hoeffding_lemma_mgf`'s conclusion (`exp (1/3) < 3/2` by cubing against
+the same pins): a proof regression weakening the proved constant `8`
+past `12` breaks the fence (fixture-sharpness threshold `K ≈ 9.22`
+recorded honestly). (2) **The mass-guard fence** — at the mass-`19/10`
+measure every *other* hypothesis holds genuinely (measurability,
+pointwise bound, the mean already proved on the shelf since the
+2026-08-28 audit) and the conclusion fails (MGF scales with the mass to
+`≥ 57/20` vs `exp (1/2) < 5/3`): `[IsProbabilityMeasure]` load-bearing.
+(3) **The tail-level denominator fence** — the fair two-coin
+BernoulliProduct space, the Rademacher lift's tail event at `t = 2` the
+agreement event of *exactly* `1/2` (computed through the design's own
+independence machinery, independently of the tail theorem), refuting
+the factor-`2`-less exponent denominator (`2 exp (−2) < 1/2`). (4)
+**Closed-form instances** — the MGF lemma at the fair coin with the
+provable window `3/2 ≤ (e+e⁻¹)/2 ≤ exp (1/2) < 5/3`; `hoeffding_inequality`
+at its first genuinely random family (the `iIndepFun_coord` ±1 lift —
+the zero-family instances cannot exercise the independence clause),
+bound `2 exp (−1)` with the slack pin `1/2 < 2 exp (−1)`;
+`hoeffding_empirical` at the `[0,1]` coordinate indicators with the
+exact deviation-event measure `1/2`. (5) **The proposal** — the route
+narrative (secant → two-point sharp bound by the perfect-square
+identity → Chernoff assembly), the Step-0 degenerate-corner analysis
+(mass guard, junk integrals, the `n = 0` corner, the constants), the
+delivery record for both runs, and the technique findings.
+
+**Verification:** spike first (`wip/hoeffding_qa_spike.lean`, every
+piece iterated to zero errors/zero warnings before shelf insertion —
+one positionless `Try this: ring_nf` bisected to a `ring` call and
+replaced, the same lesson the pairwise repair recorded); `lake env
+lean` on the shelf QA module with the warning multiset verified
+**byte-identical** against the HEAD baseline by file-pair elaboration
+(`git show HEAD:… > wip/scalar_qa_base.lean`; the 7 zero-family binder
+warnings arrived with the retirement commit, not this delivery —
+recorded, not appeased, per the MatrixMDS precedent); explicit `lake
+build` target ✔ on `Scaffold.QA.Concentration.Scalar_QA`; `#print
+axioms` via `wip/hoeffding_qa_axcheck.lean` exactly as designed (37
+declarations); **full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 129 source files, 129 fresh artifacts,
+0 stale, 0 missing, exit 0**; `lint_axioms` (8), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**3145/8/0**, the
+hand verification row preserved across regeneration); **map freshness
+exit 0** after the 3118 → 3145 stats-stamp sync in both map files (SVG
+regenerated; no proposal status header changed — the new proposal has
+no station). Records updated: the proposal (COMPLETE from birth), the
+`proposals/README.md` Delivered row, README (**8** axioms — the row the
+retirement run left at 10 — and 3145 QA), the radar (QA axis synced,
+score held at 4.0 per protocol), both index-map updates
+(`probability_concentration.md`: the two retired rows' axiom → proved
+with the QA clauses, the proved-core rows, the four now-hard-crust
+consumer rows, the six window rows' single-axiom column; the §12
+residual sentence in `docs/2_ARCHITECTURE.md` — the scalar half of the
+junk-integral residual discharged by the retirement; the coverage map's
+pattern paragraph — the admitted set named correctly), the scoreboard
+verification row, the map stamps + regenerated SVG, this plan, and the
+activity log. Nothing committed; the prior runs' deliveries preserved
+untouched.
+
+**Remaining risk:** none owed by the delivery — the fences and
+instances are unconditional hard crust, and the retired statements are
+genuinely proved (no residual axiom contact). The remaining admitted
+surface: the PF pair, the matrix trio, the Bernstein pair, and
+`hoeffding_lemma` (still the one zero-consumer axiom; its natural
+consumer is `bernstein_inequality`'s own proof — upstream work). The
+window family remains conditional on `matrix_hoeffding` and must
+continue to be reported as such.
+
+**Next handoff:** the queue is empty — check `proposals/README.md`'s
+Active table first (no High rows; the Medium-High
+empirical-stationary Step 2 consumer-gated on the bias-term shape — now
+cheaper than ever since its tails are hard crust); otherwise the
+center-out policy. Natural named frontiers: a consumer of the
+unconditional window family, the `bernstein_inequality` family's own
+retirement route (the last scalar tail axioms — Bennett/Bernstein MGF
+machinery would be the analogy of this delivery), or the next
+load-bearing gap `docs/6_SGT_BACKLOG.md` names.
 
 ------
 

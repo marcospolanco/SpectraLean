@@ -125,16 +125,18 @@
   axiom** (Tropp 2012, Theorem 1.4, as repaired 2026-08-28 with the
   `[Nonempty V]` guard) and must never be described as foundationally
   proved; the two Hoeffding degree tails are conditional on the *scalar*
-  `hoeffding_inequality` axiom (Vershynin 2018, Theorem 2.2.2, audited
-  safe 2026-08-28) exactly as its own delivery record states; the two
-  Bernstein twin tails are conditional on the `bernstein_inequality`
-  (Vershynin 2018, Theorem 2.8.1) and `bernstein_bounded_variance`
-  (Wainwright 2019, Theorem 2.15) axioms respectively — each tail on its
-  own axiom alone, `#print axioms` verifying zero cross-contact — and
-  the unconditional bracket (the dissolution) is conditional on
-  `matrix_hoeffding` and `hoeffding_inequality` *together*, the only
-  deliberate two-axiom member of the family, each via its own
-  sub-theorem.
+  `hoeffding_inequality` theorem (Vershynin 2018, Theorem 2.2.2 — proved
+  locally since the 2026-08-30 Hoeffding retirement) exactly as its own
+  delivery record states; the two Bernstein twin tails ride the
+  `bernstein_inequality` (Vershynin 2018, Theorem 2.8.1) and
+  `bernstein_bounded_variance` (Wainwright 2019, Theorem 2.15)
+  **theorems, themselves proved locally since the 2026-08-30
+  repair-and-retirement (Errata §8) — the twin tails are hard crust,
+  with no axiom contact (`#print axioms` verified)**; and the
+  unconditional bracket members (the dissolution family) are conditional
+  on `matrix_hoeffding` alone — their other engine,
+  `hoeffding_inequality`, having been proved in the same
+  retirement — each via its own sub-theorem.
   Every hypothesis clause of all four axioms is discharged by a proved
   lemma in the engine module. The transfer side is *proved* hard crust:
   the Weyl inequality (retired from axiom 2026-08-20), the packaging
@@ -990,10 +992,12 @@ inclusion probabilities `p ∈ [0, 1]`, the deviation of any vertex's
 resampled degree from its base degree obeys the classical
 variance-dependent tail against the *true* variance statistic
 `σ²_v = ∑ₑ w_v(e)² p e (1 − p e)` and the magnitude budget
-`M ≥ |w_v(e)|`. CONDITIONAL ON THE `bernstein_inequality` AXIOM: every
-hypothesis clause is proved at the design (`measurable_degPerturbSummand`,
-`indepFun_degPerturbSummand`, the bound through
-`degPerturbSummand_abs_le` composed with `hM`, the variance statistic
+`M ≥ |w_v(e)|`. HARD CRUST since the 2026-08-30 Bernstein
+repair-and-retirement (Errata §8): every hypothesis clause is proved at
+the design (`measurable_degPerturbSummand`,
+`indepFun_degPerturbSummand`, the centered bound through
+`degPerturbSummand_abs_le` composed with `hM` and the proved zero means,
+the variance statistic
 through `integral_sq_degPerturbSummand` composed with the centering
 `integral_degPerturbSummand_eq_zero`). -/
 theorem edgePerturbation_degree_tail_bernstein (hp0 : ∀ e, 0 ≤ p e)
@@ -1024,9 +1028,13 @@ theorem edgePerturbation_degree_tail_bernstein (hp0 : ∀ e, 0 ≤ p e)
     fun i => integral_degPerturbSummand_eq_zero A p hp0 hp1 v _
   have hM0 : 0 ≤ M := le_trans (abs_nonneg _) (hM (v, v))
   have hbound : ∀ (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool),
-      |degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω| ≤ M :=
-    fun i ω =>
-      le_trans (degPerturbSummand_abs_le A p hp0 hp1 v _ ω)
+      |degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω
+        - ∫ ω' : (V × V) → Bool,
+            degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω'
+          ∂(bernPMF p hp0 hp1).toMeasure| ≤ M :=
+    fun i ω => by
+      rw [hmean i, sub_zero]
+      exact le_trans (degPerturbSummand_abs_le A p hp0 hp1 v _ ω)
         (hM ((Fintype.equivFin (V × V)).symm i))
   have hmain := bernstein_inequality
     (μ := (bernPMF p hp0 hp1).toMeasure)
@@ -1108,9 +1116,9 @@ theorem edgePerturbation_degree_tail_bernstein (hp0 : ∀ e, 0 ≤ p e)
 `bernstein_bounded_variance` assembled at the same design: any supplied
 variance budget `Vbud` dominating the true statistic `σ²_v` and the
 same magnitude budget `M` give the tail with `2 Vbud` in place of
-`2 σ²_v`. CONDITIONAL ON THE `bernstein_bounded_variance` AXIOM (on its
-clause set alone; the budget relaxation is honest by monotonicity of
-the exponent — pinned numerically in the QA). -/
+`2 σ²_v`. HARD CRUST since the 2026-08-30 Bernstein
+repair-and-retirement (Errata §8; the budget relaxation is honest by
+monotonicity of the exponent — pinned numerically in the QA). -/
 theorem edgePerturbation_degree_tail_bernstein_budget (hp0 : ∀ e, 0 ≤ p e)
     (hp1 : ∀ e, p e ≤ 1) (v : V) {M Vbud : ℝ}
     (hM : ∀ e, |degPerturbWeight A v e| ≤ M)
@@ -1139,14 +1147,14 @@ theorem edgePerturbation_degree_tail_bernstein_budget (hp0 : ∀ e, 0 ≤ p e)
     fun i => integral_degPerturbSummand_eq_zero A p hp0 hp1 v _
   have hM0 : 0 ≤ M := le_trans (abs_nonneg _) (hM (v, v))
   have hbound : ∀ (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool),
-      |degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω| ≤ M :=
-    fun i ω =>
-      le_trans (degPerturbSummand_abs_le A p hp0 hp1 v _ ω)
+      |degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω
+        - ∫ ω' : (V × V) → Bool,
+            degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω'
+          ∂(bernPMF p hp0 hp1).toMeasure| ≤ M :=
+    fun i ω => by
+      rw [hmean i, sub_zero]
+      exact le_trans (degPerturbSummand_abs_le A p hp0 hp1 v _ ω)
         (hM ((Fintype.equivFin (V × V)).symm i))
-  have hv0 : 0 ≤ Vbud :=
-    le_trans (Finset.sum_nonneg fun e _ =>
-      mul_nonneg (mul_nonneg (sq_nonneg _) (hp0 e))
-        (by linarith [hp1 e])) hvar
   have hvarax : ∑ i : Fin (Fintype.card (V × V)),
       ∫ ω : (V × V) → Bool,
           (degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω
@@ -1185,7 +1193,7 @@ theorem edgePerturbation_degree_tail_bernstein_budget (hp0 : ∀ e, 0 ≤ p e)
     (μ := (bernPMF p hp0 hp1).toMeasure)
     (X := fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>
       degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω)
-    (a := M) (v := Vbud) hM0 hv0 hmeas hindep hbound hvarax t ht
+    (a := M) (v := Vbud) hM0 hmeas hindep hbound hvarax t ht
   have hcenter : ∀ ω : (V × V) → Bool,
       ∑ i : Fin (Fintype.card (V × V)),
         (degPerturbSummand A p v ((Fintype.equivFin (V × V)).symm i) ω

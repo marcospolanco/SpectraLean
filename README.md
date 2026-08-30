@@ -16,13 +16,13 @@ revision](docs/5_QA_SCOREBOARD.md) rather than tracking `main`.
 
 ## Status
 
-As of August 29, 2026:
+As of August 30, 2026:
 
 | Check | Result |
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
-| Explicit cited axioms | 10 |
-| QA theorems/lemmas | 3118, with no `sorry` or `admit` under `Scaffold/` |
+| Explicit cited axioms | 5 |
+| QA theorems/lemmas | 3163, with no `sorry` or `admit` under `Scaffold/` |
 
 Recent highlights (full per-run history in
 [`docs/AGENT_ACTIVITY.md`](docs/AGENT_ACTIVITY.md); per-result detail in each
@@ -53,12 +53,20 @@ linked proposal):
   variance-adaptive degree tails — `bernstein_inequality`'s and
   `bernstein_bounded_variance`'s first consumers, strictly sharper at
   interior sampling probabilities: `2 exp(−3/5) < 2 exp(−1/4)` proved on
-   the fixture) and the **admissibility dissolution** (the window
-   family's first unconditional measured event — the admissibility
-   conjunct derived from the pair design condition plus the degree
-   tails — completed across the family: the floor and swept-cut
-   capstone unconditional too)
-   ([proposal](proposals/hoeffding-inequality-degree-concentration.md)).
+    the fixture) and the **admissibility dissolution** (the window
+    family's first unconditional measured event — the admissibility
+    conjunct derived from the pair design condition plus the degree
+    tails — completed across the family: the floor and swept-cut
+    capstone unconditional too). **The scalar concentration stack is now
+    axiom-free end to end** — the tail theorems (Hoeffding
+    2026-08-30, `hoeffding_lemma_mgf` + the Chernoff assembly; Bernstein
+    2026-08-30, the Bennett MGF engine, Errata §8) and the ψ₂-form
+    `hoeffding_lemma` itself (2026-08-30, the pointwise-collapse route:
+    the defining set sees only the bound and the mass, the sharp
+    bound `a/√(log 2)` attained) — every remaining admitted axiom now
+    has a theorem consumer.
+    ([proposal](proposals/hoeffding-inequality-degree-concentration.md),
+    [retirement](proposals/retire-hoeffding-lemma-pointwise-collapse.md)).
 
 The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for
 current counts, verification commands, and limitations.

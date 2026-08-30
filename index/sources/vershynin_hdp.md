@@ -25,10 +25,10 @@ This textbook is a primary source for modern concentration inequalities. Scaffol
 |---------|------|------------|---------|
 | Definition 2.5.1 / Prop. 2.5.2 (Subgaussian norm) | 27/29 | `subgaussianNorm` (real definition) | `Scalar/Subgaussian.lean` |
 | Proposition 2.5.2 (ii) (Tail bound) | 29 | `subgaussian_tail_bound` (**proved 2026-08-22**; repaired hypotheses — the moment stated integrably at `K`, conclusion unchanged; the former axiom shape was materially false, refuted in QA at `3 • δ₀`) | `Scalar/Subgaussian.lean` |
-| Lemma 2.6.2 (Hoeffding's lemma) | 32 | `hoeffding_lemma` (axiom, **repaired 2026-08-28**: probability-measure guard + `√6·a` constant; the pre-repair `≤ a` shape was materially false, two refutations in QA) | `Scalar/Subgaussian.lean` |
-| Theorem 2.2.2 (Hoeffding's inequality) | 24 | `hoeffding_inequality` (axiom) | `Scalar/Hoeffding.lean` |
+| Lemma 2.6.2 (Hoeffding's lemma) | 32 | `hoeffding_lemma` (**proved theorem since 2026-08-30** — the pointwise-collapse retirement, `proposals/retire-hoeffding-lemma-pointwise-collapse.md`: at the `√6·a` constant the defining set sees only the bound and the mass, so the sharper companion `subgaussianNorm_le_of_bounded` (`≤ a/√(log 2)`, no centering) implies the admitted shape at the statement unchanged; repaired 2026-08-28 when the pre-repair `≤ a` shape was found materially false, two refutations in QA) | `Scalar/Subgaussian.lean` |
+| Theorem 2.2.2 (Hoeffding's inequality) | 24 | `hoeffding_inequality` (**proved theorem since 2026-08-30** — the Hoeffding retirement, `proposals/prove-hoeffding-inequality-mgf.md`) | `Scalar/Hoeffding.lean` |
 | Corollary 2.2.3 (IID Hoeffding) | 25 | `hoeffding_iid` (proved from `hoeffding_inequality`) | `Scalar/Hoeffding.lean` |
-| Theorem 2.8.1 (Bernstein's inequality) | 43 | `bernstein_inequality` (axiom) | `Scalar/Bernstein.lean` |
+| Theorem 2.8.1 (Bernstein's inequality) | 43 | `bernstein_inequality` (**proved theorem since 2026-08-30** — the repair-and-retirement, Errata §8: the admitted form's *uncentered* bound hypothesis materially understated the Bennett price; repaired to the source's centered bound and proved by the local Bennett MGF engine) | `Scalar/Bernstein.lean` |
 | Corollary 2.8.3 (IID Bernstein) | 45 | `bernstein_iid` (proved from `bernstein_inequality`) | `Scalar/Bernstein.lean` |
 
 Statements from Chapter 2 that were previously admitted but have no named

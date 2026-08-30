@@ -21,13 +21,19 @@ import Mathlib.MeasureTheory.Integral.Bochner
 
 The ψ₂ (subgaussian) size of a real random variable, defined for the
 Bochner integral on an arbitrary measure, together with the proved tail
-bound for that definition and the admitted (cited) Hoeffding lemma that
-Scaffold currently consumes.
+bound for that definition and Hoeffding's lemma bounding that size for
+bounded variables.
 
 `subgaussianNorm` is a real definition, not an axiom: it is the infimum of
 the admissible MGF bounds. The tail bound about it is a proved theorem;
-Hoeffding's lemma (bounded zero-mean variables have small ψ₂ size)
-remains an explicit axiom with a citation.
+Hoeffding's lemma in this ψ₂ form was admitted as a cited axiom through
+2026-08-29 and was **retired to a proved theorem on 2026-08-30** by the
+pointwise-collapse route (see the lemma's docstring): on a probability
+measure, boundedness alone puts `a / √(log 2)` in the defining set. The
+source's λ-form content — the mean-zero MGF bound that actually carries
+Vershynin Lemma 2.6.2 — is proved independently as
+`hoeffding_lemma_mgf` in `Hoeffding.lean` (retired from axiom
+2026-08-30).
 
 Only the statements with a named downstream consumer are stated;
 Vershynin's moment-growth and centering estimates are left out of the
@@ -75,6 +81,95 @@ theorem subgaussianNorm_nonneg (X : Ω → ℝ) (μ : Measure Ω) :
     0 ≤ subgaussianNorm X μ :=
   Real.sInf_nonneg fun K hK => le_of_lt hK.1
 
+/-- A variable that is pointwise zero has subgaussian norm exactly `0` on
+a probability measure: every `K > 0` is admissible (`∫ 1 = 1 ≤ 2`), so
+the defining set is all of `Set.Ioi 0` and its infimum is `0`. This is
+the `a = 0` corner of the bounded-variable bound below. -/
+theorem subgaussianNorm_eq_zero_of_forall_eq_zero [IsProbabilityMeasure μ]
+    {X : Ω → ℝ} (hX : ∀ ω, X ω = 0) :
+    subgaussianNorm X μ = 0 := by
+  have hint : ∀ K : ℝ, 0 < K → ∫ ω, Real.exp (X ω ^ 2 / K ^ 2) ∂μ = 1 := by
+    intro K _
+    have h1 : (fun ω => Real.exp (X ω ^ 2 / K ^ 2)) = fun _ : Ω => (1 : ℝ) :=
+      funext fun ω => by simp [hX ω]
+    rw [h1, integral_const, measure_univ]
+    simp
+  have hmem : ∀ r : ℝ, 0 < r → r ∈ {K : ℝ | 0 < K
+      ∧ ∫ ω, Real.exp (X ω ^ 2 / K ^ 2) ∂μ ≤ 2} := by
+    intro r hr
+    exact ⟨hr, by rw [hint r hr]; norm_num⟩
+  have hbb : BddBelow {K : ℝ | 0 < K ∧ ∫ ω, Real.exp (X ω ^ 2 / K ^ 2) ∂μ ≤ 2} :=
+    ⟨0, fun k hk => le_of_lt hk.1⟩
+  have hne : {K : ℝ | 0 < K ∧ ∫ ω, Real.exp (X ω ^ 2 / K ^ 2) ∂μ ≤ 2}.Nonempty :=
+    ⟨1, hmem 1 one_pos⟩
+  simp only [subgaussianNorm]
+  refine le_antisymm ?_ (Real.sInf_nonneg fun K hK => le_of_lt hK.1)
+  exact (Real.sInf_le_iff hbb hne).2
+    (fun ε hε => ⟨ε / 2, hmem _ (by positivity), by linarith⟩)
+
+/-- The sharp boundedness-only collapse of the subgaussian norm: on a
+probability measure, any `X` with `|X ω| ≤ a` — no centering, no
+measurability hypothesis — satisfies `subgaussianNorm X μ ≤ a / √(log 2)`.
+
+The defining set `{K | 0 < K ∧ ∫ exp (X²/K²) ∂μ ≤ 2}` cannot see the
+mean of `X`, only its bound: pointwise
+`exp (X ω² / K²) ≤ exp (log 2) = 2` at `K = a / √(log 2)`, so the moment
+condition holds with equality at the supremum. The constant is the exact
+uniform one over all bounded variables — attained by every `X` with
+`|X| ≡ a` (at the Rademacher fixture the norm is *exactly*
+`1/√(log 2)`, QA `rademacher_norm_eq_QA`), and it strictly improves the
+`√6 · a` of `hoeffding_lemma` (since `log 2 ≥ 1/2`, by
+`Real.one_sub_inv_le_log_of_pos`). No numeric pins are used anywhere.
+
+The probability-measure instance is load-bearing, exactly as it was for
+the admitted statement it retires: at a measure of mass above `1` the
+conclusion fails (QA `subgaussianNorm_le_of_bounded_guard_refuted_QA`
+refutes it at the mass-`19/10` fixture). Junk-behavior: the proof's
+integral step (`integral_mono_of_nonneg`) needs no measurability of `X`;
+when the integrand is not ae-strongly-measurable the Bochner integral is
+the junk `0` and the conclusion holds a fortiori.
+
+QA: exercised by `subgaussianNorm_le_of_bounded_uncentered_QA` (the
+companion at an uncentered variable) and
+`subgaussianNorm_le_of_bounded_guard_refuted_QA` (the mass-guard fence)
+in `Scaffold/QA/Concentration/Scalar_QA.lean`; its sharpness is pinned by
+`rademacher_norm_eq_QA` in the same file. -/
+theorem subgaussianNorm_le_of_bounded [IsProbabilityMeasure μ] {X : Ω → ℝ} {a : ℝ}
+    (ha : 0 ≤ a) (h_bound : ∀ ω, |X ω| ≤ a) :
+    subgaussianNorm X μ ≤ a / Real.sqrt (Real.log 2) := by
+  rcases eq_or_lt_of_le ha with rfl | ha0
+  · have hX : ∀ ω, X ω = 0 := fun ω =>
+      le_antisymm (abs_le.mp (h_bound ω)).2 (by simpa using (abs_le.mp (h_bound ω)).1)
+    rw [subgaussianNorm_eq_zero_of_forall_eq_zero hX]
+    simp
+  · have hL : (0 : ℝ) < Real.log 2 := Real.log_pos one_lt_two
+    have hK : (0 : ℝ) < a / Real.sqrt (Real.log 2) := div_pos ha0 (Real.sqrt_pos.2 hL)
+    have hKeq : Real.log 2 * (a / Real.sqrt (Real.log 2)) ^ 2 = a ^ 2 := by
+      rw [div_pow, Real.sq_sqrt (le_of_lt hL)]
+      field_simp
+    have hmem : a / Real.sqrt (Real.log 2) ∈ {K : ℝ | 0 < K
+        ∧ ∫ ω, Real.exp (X ω ^ 2 / K ^ 2) ∂μ ≤ 2} := by
+      refine ⟨hK, ?_⟩
+      have hptw : ∀ ω,
+          Real.exp (X ω ^ 2 / (a / Real.sqrt (Real.log 2)) ^ 2) ≤ (2 : ℝ) := by
+        intro ω
+        obtain ⟨hl, hr⟩ := abs_le.mp (h_bound ω)
+        have hX2 : X ω ^ 2 ≤ a ^ 2 := by nlinarith [hl, hr, sq_nonneg (X ω), sq_nonneg a]
+        have hle : X ω ^ 2 / (a / Real.sqrt (Real.log 2)) ^ 2 ≤ Real.log 2 := by
+          rw [div_le_iff₀ (by positivity : (0 : ℝ) < (a / Real.sqrt (Real.log 2)) ^ 2), hKeq]
+          exact hX2
+        calc Real.exp (X ω ^ 2 / (a / Real.sqrt (Real.log 2)) ^ 2)
+            ≤ Real.exp (Real.log 2) := Real.exp_le_exp.2 hle
+          _ = 2 := Real.exp_log (by norm_num : (0 : ℝ) < 2)
+      calc ∫ ω, Real.exp (X ω ^ 2 / (a / Real.sqrt (Real.log 2)) ^ 2) ∂μ
+          ≤ ∫ _ : Ω, (2 : ℝ) ∂μ :=
+            integral_mono_of_nonneg (ae_of_all μ fun _ => (Real.exp_pos _).le)
+              (integrable_const _) (ae_of_all μ hptw)
+        _ = 2 := by rw [integral_const, measure_univ]; simp
+    simp only [subgaussianNorm]
+    exact csInf_le ⟨0, fun k hk => le_of_lt hk.1⟩ hmem
+
+set_option linter.unusedVariables false in
 /-- Hoeffding's lemma: a random variable bounded by `a` with mean zero on
 a *probability* measure is `(√6 · a)`-subgaussian.
 
@@ -113,22 +208,53 @@ Step 0) and both refuted in QA
    (`old_hoeffding_lemma_refuted_guard_QA`), so **no** finite constant
    rescues the statement without a probability-measure hypothesis.
 
-Junk safety of the repaired statement: the two junk mechanisms recorded
-at `subgaussianNorm` collapse the norm *downward* (empty defining set →
-`sInf = 0`; junk-zero MGF integrals → every `K` admissible → `sInf = 0`),
-and the conclusion is an upper bound, so non-integrable or
-non-measurable `X` cannot falsify it; on probability measures with
-a.e.-measurable `X` the classical derivation above applies.
+**Retirement (2026-08-30):** proved locally by the pointwise-collapse
+route (`proposals/retire-hoeffding-lemma-pointwise-collapse.md`), at the
+unchanged public statement. The proof routes through the sharper
+companion `subgaussianNorm_le_of_bounded` (`≤ a / √(log 2)`, no
+centering) plus `1/√(log 2) ≤ √6` (from `log 2 ≥ 1/2`). The finding the
+retirement records: at the `√6 · a` constant this statement never
+carried the source's λ-form content — the defining set sees only the
+bound `|X ω| ≤ a` and the mass, so boundedness alone proves it. The
+mean-zero hypothesis is retained purely for statement stability of the
+retired shape; the source's actual mean-zero λ-form content is proved
+independently as `hoeffding_lemma_mgf` in `Hoeffding.lean`.
+
+Junk safety: the proof needs no measurability of `X` (the integral step
+is `integral_mono_of_nonneg`, valid for any `X`; junk-zero integrals
+only shrink the left side), and both recorded junk mechanisms collapse
+the norm *downward* while the conclusion is an upper bound.
 
 QA: exercised by `subgaussian_norm_zero_QA` (the `≤ √6 * 0 = 0` half of
-`subgaussianNorm (fun _ => 0) μ = 0`) and
-`hoeffding_lemma_rademacher_QA` (the repaired statement instantiated at
-the same Rademacher fixture that refutes the old constant) in
-`Scaffold/QA/Concentration/Scalar_QA.lean`.
--/
-axiom hoeffding_lemma {X : Ω → ℝ} {a : ℝ} [IsProbabilityMeasure μ]
+`subgaussianNorm (fun _ => 0) μ = 0`),
+`hoeffding_lemma_rademacher_QA` (the retired statement instantiated at
+the same Rademacher fixture that refutes the old constant — hard crust
+since this retirement), and the retirement section's
+`rademacher_norm_eq_QA` /
+`subgaussianNorm_le_of_bounded_guard_refuted_QA` in
+`Scaffold/QA/Concentration/Scalar_QA.lean`. -/
+theorem hoeffding_lemma {X : Ω → ℝ} {a : ℝ} [IsProbabilityMeasure μ]
     (ha : 0 ≤ a) (h_bound : ∀ ω, |X ω| ≤ a) (h_mean : ∫ ω, X ω ∂μ = 0) :
-    subgaussianNorm X μ ≤ √6 * a
+    subgaussianNorm X μ ≤ √6 * a := by
+  have hL : (0 : ℝ) < Real.log 2 := Real.log_pos one_lt_two
+  have hlog : (1 : ℝ) / 2 ≤ Real.log 2 := by
+    have h := Real.one_sub_inv_le_log_of_pos (by norm_num : (0 : ℝ) < 2)
+    norm_num at h
+    exact h
+  refine le_trans (subgaussianNorm_le_of_bounded ha h_bound) ?_
+  rcases eq_or_lt_of_le ha with rfl | ha0
+  · simp
+  · have h6L : (1 : ℝ) ≤ 6 * Real.log 2 := by linarith
+    have hkey : (1 : ℝ) / Real.sqrt (Real.log 2) ≤ Real.sqrt 6 := by
+      rw [div_le_iff₀ (Real.sqrt_pos.2 hL)]
+      calc (1 : ℝ) = Real.sqrt 1 := Real.sqrt_one.symm
+        _ ≤ Real.sqrt (6 * Real.log 2) := Real.sqrt_le_sqrt h6L
+        _ = Real.sqrt 6 * Real.sqrt (Real.log 2) :=
+            Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 6) (Real.log 2)
+    calc a / Real.sqrt (Real.log 2)
+        = a * ((1 : ℝ) / Real.sqrt (Real.log 2)) := div_eq_mul_one_div _ _
+      _ ≤ a * Real.sqrt 6 := mul_le_mul_of_nonneg_left hkey (le_of_lt ha0)
+      _ = Real.sqrt 6 * a := mul_comm _ _
 
 /-- Tail bound for a random variable with a subgaussian moment bound: if
 `exp (X ω ^ 2 / K ^ 2)` is integrable with integral at most `2`, then the

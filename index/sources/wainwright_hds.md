@@ -22,7 +22,7 @@ This textbook provides alternative formulations and proofs of concentration ineq
 
 | Theorem | Page | Lean Axiom | Module |
 |---------|------|------------|---------|
-| Theorem 2.15 (Bernstein's inequality) | 52 | `bernstein_bounded_variance` | `Scalar/Bernstein.lean` |
+| Theorem 2.15 (Bernstein's inequality) | 52 | `bernstein_bounded_variance` (**proved theorem since 2026-08-30** — the repair-and-retirement, Errata §8, centered bound + the local Bennett engine) | `Scalar/Bernstein.lean` |
 | Proposition 2.2 (Chernoff bound) | 35 | `chernoff_bound_generic` | TODO |
 
 ### Chapter 6: Subgaussian and Subexponential
@@ -30,7 +30,7 @@ This textbook provides alternative formulations and proofs of concentration ineq
 | Theorem | Page | Lean Axiom | Module |
 |---------|------|------------|--------|
 | Definition 6.1 (Subgaussian) | 180 | `subgaussian_norm_alt` | TODO |
-| Example 6.3 (Bounded variables) | 183 | Reference to `hoeffding_lemma` | `Subgaussian.lean` |
+| Example 6.3 (Bounded variables) | 183 | Reference to `hoeffding_lemma` (proved theorem since 2026-08-30) | `Subgaussian.lean` |
 
 ## Notes
 

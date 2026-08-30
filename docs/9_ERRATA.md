@@ -34,7 +34,7 @@ transit-map staleness incident in
 corrected there is about a status label, not a mathematical
 statement).
 
-**How to read the count.** Eight entries below is not a small number,
+**How to read the count.** Nine entries below is not a small number,
 and it should not be read as one. It is also not evidence the project
 is unusually error-prone — every entry was found by the project's own
 deliberate practice of building adversarial fixtures against its own
@@ -378,6 +378,85 @@ break it, not evidence none exists — see §6.
   entries (12:48:05Z and this run).
 - **Status:** resolved.
 
+## 9. The missing centering hypothesis of `matrix_hoeffding`
+
+- **Found:** 2026-08-30 (run `20260830T183850Z-run-1`, the Step-0
+  adversarial check at the head of the matrix trio's retirement-route
+  frontier, before any engine work).
+- **What was wrong:** `matrix_hoeffding` hypothesized measurability,
+  mutual independence, Hermitianity, and semidefinite domination
+  `X i ω² ⪯ A i ²` — and **no centering** — while its sibling
+  `matrix_bernstein` has carried `h_mean : ∀ i, ∫ ω, X i ω ∂μ = 0` all
+  along. The axiom's own statement-difference note asserted "the source
+  needs no centering hypothesis, and none is imposed." That claim is
+  wrong as an encoding: the deterministic uncentered family
+  `X i ≡ 1` (with `A i ≡ 1`) satisfies the semidefinite domination at
+  equality (`1² − 1² = 0 ⪰ 0`) and every other hypothesis, yet the sum
+  drifts to norm `n` while the variance statistic stays `‖n·1‖` —
+  refuting the tail in one line. Lean evidence, all in
+  `Scaffold/QA/Concentration/Matrix_QA.lean`:
+  `ones_family_old_clauses_QA` proves every pre-repair hypothesis at
+  the family (measurability of constants, `iIndepFun_const_matrix_QA`
+  mutual independence, Hermitianity, `PosSemidef.zero` at equality);
+  `norm_one_add_one_fin1_QA` pins the fixture's norm two-sided exactly
+  (`‖1 + 1‖ = 2` on `Fin 1`, through the eigenvalue sandwich
+  `evals_first_le_eigvalOf`/`eigvalOf_le_evals_last` and both
+  operator-norm bridges — an independent computation joining
+  `l2OpNorm_one_fin1_QA`);
+  `old_matrix_hoeffding_refuted_uncentered_QA` derives `False` from the
+  pre-repair conclusion at `V = Fin 1`, `n = 2`, `t = 2`: the event is
+  all of `Ω` (probability `1`) against the bound
+  `2 · 1 · exp(−1) < 1` (from the pinned `2 < exp 1`); and
+  `ones_mean_ne_zero_QA` is the exclusion fence — the repaired clause
+  rejects exactly the refuting family, whose integral is `1 ≠ 0`.
+- **How it was found:** the Errata §8 audit of the scalar Bernstein
+  pair explicitly checked the matrix sibling `matrix_bernstein` safe on
+  the centering axis ("centered `h_mean` + bound on the same variables,
+  Tropp's shape") but never ran the same axis on `matrix_hoeffding`,
+  whose docstring actively claimed the clause was unnecessary. Running
+  the §5 adversarial Step 0 on the remaining admitted surface (the
+  standing handoff's named frontier being the matrix trio's retirement
+  route) surfaced it immediately: the deterministic constant family is
+  the first fixture any uncentered-hypothesis audit tries. This is the
+  same hazard class as §8 (an encoding that drops or weakens a
+  hypothesis the source's own proof machinery — here the symmetrization
+  step — requires), found because the check was actually run, not
+  because the shape looked wrong.
+- **Repair:** complete, 2026-08-30 — repaired in place with
+  `h_mean : ∀ i, ∫ ω, X i ω ∂μ = 0` inserted between `h_herm` and
+  `h_bound` (the sibling's exact clause idiom); axiom count stays 5.
+  The window family's engine gained
+  `integral_perturbSummand_eq_zero` (`EdgePerturbation.lean`: the
+  matrix-codomain clone of the deg-design's centering through
+  `integral_delta` + `integrable_of_bounded_measurable`, honest
+  integrability, no junk zeros); `edgePerturbation_norm_tail` and every
+  downstream member (the eval tail, both Cheeger windows, the
+  unconditional dissolution trio, both Fiedler-drift theorems)
+  re-proved at **unchanged public statements**; only the generic
+  passthrough `matrix_hoeffding_quadForm` gains the matching hypothesis
+  (threaded unchanged from the axiom); `matrix_hoeffding_zero_QA`
+  re-instantiated at the repaired clause set. `#print axioms` via
+  `wip/mhrepair_axcheck.lean` (19 declarations): the four new QA
+  declarations and the engine lemma exactly the standard three; every
+  audited consumer conditional on `matrix_hoeffding` alone — the same
+  single-axiom load as before the repair. Full verification ladder
+  passed (build completeness 129/129 fresh).
+- **Citation note:** the statement-difference note's claim that the
+  source needs no centering is corrected honestly: whatever hypothesis
+  set Tropp's Theorem 1.4 carries (a centering clause, or a
+  distributional-symmetry condition implying it), it must exclude the
+  deterministic uncentered family above — the source framework's
+  symmetrization step requires centered summands. The Lean-side repair
+  adopts the centering clause (the sibling's idiom); the locator-level
+  check against a physical copy of the source stays an open item per
+  the standing locator rule (page numbers are confirmed, not invented).
+- **Commit:** pending (autonomous runs do not commit; the reference
+  lands with the operator's commit, per the commit-steward protocol).
+- **Source:** `proposals/repair-matrix-hoeffding-centering.md` (the
+  finding, the repair record, the degenerate-corner analysis of the
+  repaired clause set, the technique findings);
+  `docs/AGENT_ACTIVITY.md`'s 2026-08-30 entries.
+- **Status:** resolved.
 
 ## Related: process and tooling self-corrections
 

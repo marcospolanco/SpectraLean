@@ -308,6 +308,45 @@ theorem iIndepFun_perturbSummand (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 
     (fun k b => ((if b then (1 : ℝ) else 0) - p ((Fintype.equivFin (V × V)).symm k)) •
       perturbEdgeLap A ((Fintype.equivFin (V × V)).symm k))
 
+/-- The repaired `h_mean` clause of `matrix_hoeffding` at the design (the
+2026-08-30 centering repair, Errata §9): every Laplacian-side summand
+integrates to zero, through the Bernoulli mean (`integral_delta`) and the
+audit's integrability safety (`integrable_of_bounded_measurable`) — the
+matrix-codomain clone of `integral_degPerturbSummand_eq_zero` below. The
+centering is what the semidefinite domination clause cannot see: the
+refuting family of the pre-repair axiom is a *constant* multiple of the
+design's edge block (mean `≠ 0`), so this clause is the repair's
+load-bearing content at the consumer. -/
+theorem integral_perturbSummand_eq_zero (hp0 : ∀ e, 0 ≤ p e)
+    (hp1 : ∀ e, p e ≤ 1) (e : V × V) :
+    ∫ ω : (V × V) → Bool, perturbSummand A p e ω
+      ∂(bernPMF p hp0 hp1).toMeasure = 0 := by
+  have hδmeas : Measurable
+      fun ω : (V × V) → Bool => (if ω e then (1 : ℝ) else 0) :=
+    (measurable_of_finite
+      (fun b : Bool => if b then (1 : ℝ) else 0)).comp (measurable_coord e)
+  have hintf : Integrable
+      (fun ω : (V × V) → Bool => (if ω e then (1 : ℝ) else 0))
+      (bernPMF p hp0 hp1).toMeasure := by
+    refine integrable_of_bounded_measurable hδmeas (a := (1 : ℝ)) ?_
+    intro ω
+    cases h : ω e <;> simp [h]
+  have hfun : (fun ω : (V × V) → Bool => perturbSummand A p e ω)
+      = fun ω : (V × V) → Bool =>
+        ((if ω e then (1 : ℝ) else 0) - p e) • perturbEdgeLap A e := by
+    funext ω
+    rfl
+  rw [hfun, integral_smul_const]
+  have hdecomp := integral_sub
+    (f := fun ω : (V × V) → Bool => (if ω e then (1 : ℝ) else 0))
+    (g := fun _ : (V × V) → Bool => p e) hintf (integrable_const _)
+  rw [hdecomp, integral_delta]
+  have hconst : ∫ (_ : (V × V) → Bool), p e ∂(bernPMF p hp0 hp1).toMeasure
+      = p e := by
+    rw [integral_const]
+    simp
+  rw [hconst, sub_self, zero_smul]
+
 end Design
 
 /-! ## 4. The weight-space perturbation and the packaging identity -/

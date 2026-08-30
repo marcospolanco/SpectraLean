@@ -216,6 +216,24 @@ Community process is defined by `governance/CONTRIBUTING.md`, `MAINTAINERS.md`, 
   refutation records in `Matrix_QA.lean`; `matrix_hoeffding` carries no
   integral clauses at all, so the junk-integral surface does not reach
   it — the defect there was purely the missing nondegeneracy guard.
+  A third defect in `matrix_hoeffding` alone was found and repaired
+  2026-08-30 (Errata §9, `proposals/repair-matrix-hoeffding-centering.md`):
+  the statement carried **no centering clause** (its docstring even claimed
+  the source needs none), while the sibling `matrix_bernstein` has carried
+  `h_mean` since admission — the deterministic constant-ones family
+  satisfies every other hypothesis genuinely (self-domination at
+  equality) and refutes the tail at `V = Fin 1`, `n = 2`, `t = 2`
+  (`1 ≤ 2·exp(−1) < 1`), refuted in hypothesis form with an exclusion
+  fence in `Matrix_QA.lean`. Repaired in place with
+  `h_mean : ∀ i, ∫ ω, X i ω ∂μ = 0`; the window family's design
+  discharges it through the proved
+  `integral_perturbSummand_eq_zero`, and every conditional consumer's
+  public statement is unchanged (only the generic passthrough
+  `matrix_hoeffding_quadForm` gains the matching hypothesis). The
+  2026-08-30 scalar Bernstein audit had checked `matrix_bernstein` safe
+  on exactly this axis and never run it on the sibling — the §5
+  hazard-class list is a floor, and each audit must cover every axiom
+  its class touches.
   The `MatrixMDS` half of the residual was then run as its own Step 0
   on 2026-08-29 (`proposals/audit-matrix-azuma-mds-measurability-hazard.md`,
   Errata §7) and found real: the structure's `adapted` field was

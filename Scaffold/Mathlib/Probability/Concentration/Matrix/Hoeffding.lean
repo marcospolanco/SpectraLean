@@ -22,13 +22,17 @@ import Scaffold.Mathlib.Probability.Concentration.Matrix.Basic
 /-!
 # Matrix Hoeffding inequality
 
-Tail bound for sums of independent, Hermitian random matrices whose squares
-are dominated in the semidefinite order, in the spectral norm
-(`Matrix.L2OpNorm`).
+Tail bound for sums of independent, centered, Hermitian random matrices
+whose squares are dominated in the semidefinite order, in the spectral
+norm (`Matrix.L2OpNorm`).
 
 This is the matrix concentration statement consumed by Scaffold's
 event-stream frontier: bounded per-event Laplacian perturbations with
-independent events.
+independent events. Repaired 2026-08-30 with the centering clause
+`h_mean` (Errata §9): without it the statement is refuted by the
+deterministic uncentered family — see the axiom's statement-history note
+and `old_matrix_hoeffding_refuted_uncentered_QA` in
+`Scaffold/QA/Concentration/Matrix_QA.lean`.
 -/
 
 open MeasureTheory ProbabilityTheory Real
@@ -39,9 +43,9 @@ namespace Scaffold.Mathlib.Probability.Concentration.Matrix
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
 variable {V : Type*} [Fintype V] [DecidableEq V]
 
-/-- Matrix Hoeffding inequality: for independent Hermitian matrix-valued
-variables `X i` with `X i ω ^ 2 ⪯ A i ^ 2` in the semidefinite order
-(written `Matrix.PosSemidef (A i * A i - X i ω * X i ω)`), the spectral
+/-- Matrix Hoeffding inequality: for independent, centered, Hermitian
+matrix-valued variables `X i` with `X i ω ^ 2 ⪯ A i ^ 2` in the semidefinite
+order (written `Matrix.PosSemidef (A i * A i - X i ω * X i ω)`), the spectral
 norm of the sum obeys
 `P {‖∑ X i‖ ≥ t} ≤ 2 d exp (-t² / (2 ‖∑ A i²‖))`, where
 `d = card V`.
@@ -57,8 +61,10 @@ tail `P {λ_max (∑ X i) ≥ t} ≤ d exp (-σ² ...)` with the variance statis
 source bound to `∑ X i` and `∑ -X i` and using the union bound, which
 introduces the factor `2`. The semidefinite order is Mathlib's
 `Matrix.PosSemidef` and the norm is the operator ℓ² ("spectral") norm
-`Matrix.L2OpNorm`. The source needs no centering hypothesis, and none is
-imposed.
+`Matrix.L2OpNorm`. Centering is the hypothesis
+`h_mean : ∀ i, ∫ ω, X i ω ∂μ = 0`, the same clause idiom as the sibling
+`matrix_bernstein`; the semidefinite domination `X i ω² ⪯ A i ²` alone
+carries no information about the mean.
 
 Statement history: repaired in place 2026-08-28 (run
 `20260828T090419Z-run-1`, Step 0 of
@@ -75,6 +81,27 @@ nonempty matrix dimensions; the `[Nonempty V]` guard makes that
 assumption explicit. At `t = 0` the repaired statement is honest on
 nonempty `V`: `(1 : ℝ≥0∞) ≤ 2 d` (`two_card_bound_honest_QA`, same file).
 
+Repaired in place again 2026-08-30 (run `20260830T183850Z-run-1`,
+Errata §9, `proposals/repair-matrix-hoeffding-centering.md`): the
+statement had no centering clause — an earlier note here even claimed
+"the source needs no centering hypothesis" — and was materially false in
+hypothesis shape: the deterministic uncentered family `X i ≡ 1` (with
+`A i ≡ 1`) satisfies the semidefinite domination at equality and every
+other hypothesis, yet at `V = Fin 1`, `n = 2`, `t = 2` the tail event is
+all of `Ω` against the bound `2 · exp (−1) < 1`; refuted in hypothesis
+form as `old_matrix_hoeffding_refuted_uncentered_QA` (same QA file),
+with every old hypothesis clause separately proved at the fixture
+(`ones_family_old_clauses_QA`) and the repaired clause's exclusion
+proved (`ones_mean_ne_zero_QA`: the refuting family integrates to
+`1 ≠ 0`). Whatever hypothesis set the cited source carries (centering,
+or a distributional-symmetry condition implying it), it must exclude
+exactly this uncentered deterministic family — the symmetrization step
+in the source's own framework requires centered summands — so the
+centering clause is the encoding that keeps the deterministic centered
+designs (the edge-perturbation window family) instantiable; the
+locator-level check against a physical copy of the source remains an
+open item per the standing locator rule.
+
 QA: exercised by `matrix_hoeffding_zero_QA` in
 `Scaffold/QA/Concentration/Matrix_QA.lean`, which instantiates the axiom at
 the zero sequence and checks the resulting empty-event bound. -/
@@ -84,6 +111,7 @@ axiom matrix_hoeffding {n : ℕ} [Nonempty V] {X : Fin n → Ω → Matrix V V �
     (h_indep : iIndepFun (fun _ : Fin n =>
       (inferInstance : MeasurableSpace (Matrix V V ℝ))) X μ)
     (h_herm : ∀ i ω, (X i ω).IsHermitian)
+    (h_mean : ∀ i, ∫ ω, X i ω ∂μ = 0)
     (h_bound : ∀ i ω, Matrix.PosSemidef (A i * A i - X i ω * X i ω))
     (t : ℝ) (ht : 0 ≤ t) :
     μ {ω | ‖∑ i, X i ω‖ ≥ t} ≤

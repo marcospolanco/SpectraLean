@@ -11,9 +11,105 @@ table first (no High rows; the one Medium-High row — the
 empirical-stationary Step 2 — consumer-gated on the bias-term shape);
 otherwise the center-out policy. Natural named frontiers: the matrix
 trio's own retirement route (the matrix MGF machinery — Lieb-class,
-multi-run — the scalar pattern now proved three times over), a consumer
+multi-run — the scalar pattern now proved three times over, **now with
+a correctly-shaped target statement after the §9 repair**), a consumer
 of the unconditional window family, or the next load-bearing gap
 `docs/6_SGT_BACKLOG.md` names.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The `matrix_hoeffding` missing-centering repair — Errata §9, the
+largest-consumer admitted axiom materially false in hypothesis shape,
+repaired in place with the sibling's centering clause, axiom count stays
+5 — `proposals/repair-matrix-hoeffding-centering.md`; run
+`20260830T183850Z-run-1`; DELIVERED — zero new axioms (`#print axioms`
+via `wip/mhrepair_axcheck.lean` on 19 audited declarations: the four new
+QA declarations and the engine lemma `integral_perturbSummand_eq_zero`
+each exactly `propext, Classical.choice, Quot.sound` — the refutation
+and exclusion fence with zero axiom contact, as refutations must have;
+every audited consumer — `matrix_hoeffding_quadForm`, the
+norm/quadForm/eval/λ₂ tails, both Cheeger windows, the unconditional
+dissolution trio, both Fiedler-drift theorems — conditional on
+`matrix_hoeffding` alone, the same single-axiom load as before the
+repair). QA 3163 → 3167 (+4, `Matrix_QA.lean`'s centering-repair
+section).**
+
+The delivery's content: (1) **The Step-0 finding** — the admitted axiom
+carried no centering clause (its own docstring asserting "the source
+needs no centering hypothesis, and none is imposed") while the sibling
+`matrix_bernstein` has carried `h_mean` since admission; the
+deterministic constant-ones family `X i ≡ 1` (with `A i ≡ 1`) satisfies
+every other hypothesis genuinely — self-domination at equality — and
+refutes the tail at `V = Fin 1`, `n = 2`, `t = 2`: the event is all of
+`Ω` (norm exactly `2`) against `2 · 1 · exp (−1) < 1` from the pinned
+`2 < exp 1`. The 2026-08-30 Bernstein §8 audit had checked the sibling
+safe on exactly this axis and never run it on this file — each audit
+must cover every axiom its hazard class touches. (2) **The repair** —
+`h_mean : ∀ i, ∫ ω, X i ω ∂μ = 0` inserted between `h_herm` and
+`h_bound` (the sibling's exact idiom), with the docstring's
+source-fidelity claim corrected honestly (whatever hypothesis set the
+cited source carries, it must exclude the deterministic uncentered
+family — the source framework's own symmetrization step requires
+centered summands; the locator-level check stays open per the standing
+locator rule). (3) **The falsification content** (QA +4): the exact
+two-sided `Fin 1` norm pin `norm_one_add_one_fin1_QA` (through the
+eigenvalue sandwich `evals_first_le_eigvalOf`/`eigvalOf_le_evals_last`
+collapsed by the unique index, and both operator-norm bridges), the
+clauses-hold record `ones_family_old_clauses_QA` (every pre-repair
+hypothesis *proved* at the refuting family), the hypothesis-form
+refutation `old_matrix_hoeffding_refuted_uncentered_QA`, and the
+exclusion fence `ones_mean_ne_zero_QA` (the repaired clause rejects
+exactly the refuting family — its integral is `1 ≠ 0`). (4) **Consumer
+threading**: the engine `integral_perturbSummand_eq_zero` (the
+matrix-codomain clone of the deg-design's `integral_delta` centering,
+honest integrability, no junk zeros) added to
+`EdgePerturbation.lean`'s design section; `edgePerturbation_norm_tail`
+and every downstream member re-proved at unchanged public statements —
+only the generic passthrough `matrix_hoeffding_quadForm` gains the
+matching hypothesis; `matrix_hoeffding_zero_QA` re-instantiated.
+
+**Verification:** spike first (`wip/mhrepair_spike.lean` — the
+refutation, the fence, the engine, and the norm pin iterated to zero
+errors before any shelf edit, six elaboration slips caught and recorded
+as technique findings); `lake env lean` zero errors on all five touched
+modules with the `Matrix_QA.lean` warning multiset compared against the
+HEAD baseline by file-pair elaboration (`wip/mhqa_base.lean`) —
+identical except **one** new statement-binder warning of the recorded
+zero-family class (the signature change shifts info-tree attribution so
+the byte-identical `matrix_hoeffding_zero_QA` statement's
+variance-statistic binder newly warns; the documented MatrixMDS
+precedent, recorded not appeased); explicit `lake build` targets ✔ on
+every changed module; **full `lake build` ✔ (2407 targets) immediately
+followed by `check_build_completeness.py` — 129 source files, 129 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` (5, both PF
+findings allowlisted-confirmed; no guard-surface change — the added
+clause only strengthens the hypothesis set), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**3167/5/0**);
+**map freshness exit 0** after the 3163 → 3167 stats sync in both map
+files, SVG regenerated (no proposal status header changed — the new
+proposal has no station). Records updated: Errata §9 (intro count Eight
+→ Nine), the proposal (COMPLETE from birth, with the degenerate-corner
+analysis of the repaired clause set — the junk-integral hazard guarded
+by `h_meas`+the equation itself, unlike the §7 case — and five
+technique findings), `proposals/README.md` (Delivered row), README
+(3167), the radar (axis 7's fourth axiom-consistency-repair clause and
+the QA axis synced, scores held at 4.5/4.0 per protocol), the
+probability-concentration index map and the Tropp source index (the
+repair annotations), architecture §12 (the third-defect note and the
+audit-coverage lesson), the scoreboard verification row, the map stamps
++ regenerated SVG, this plan, and the activity log. Nothing committed;
+the prior runs' deliveries preserved untouched.
+
+**Remaining risk:** the axiom remains admitted — the repair fixes the
+hypothesis *shape*; truth stays with the cited Tropp source, and every
+conditional Derived tail (the window family, the eval tail, the
+unconditional trio, the drift pair, the persistence pair on
+`matrix_azuma_hoeffding`, the sparsification family on
+`matrix_bernstein`) remains conditional on its own axiom and must never
+be described as foundationally proved. The Errata §9 commit reference
+lands with the operator's commit.
 
 ------
 

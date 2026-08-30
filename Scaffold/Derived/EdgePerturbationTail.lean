@@ -179,7 +179,9 @@ fixed nonzero test vector, `t (x ⬝ᵥ x) ≤ |xᵀ (∑ X i ω) x|` can only h
 where `t ≤ ‖∑ X i ω‖` (the norm→form domination
 `abs_quadForm_le_of_l2OpNorm_le`, contraposed through measure
 monotonicity). CONDITIONAL ON THE `matrix_hoeffding` AXIOM at exactly its
-clause set. The nonzero guard is load-bearing: at `x = 0` the event is
+clause set (the 2026-08-30 repaired set, including the centering clause
+`h_mean` — Errata §9; the hypothesis is threaded through unchanged from
+the axiom). The nonzero guard is load-bearing: at `x = 0` the event is
 all of `Ω` and the statement is false for large `t`. -/
 theorem matrix_hoeffding_quadForm {n : ℕ} [Nonempty V]
     {X : Fin n → Ω → Matrix V V ℝ} {A : Fin n → Matrix V V ℝ}
@@ -187,13 +189,14 @@ theorem matrix_hoeffding_quadForm {n : ℕ} [Nonempty V]
     (h_indep : iIndepFun (fun _ : Fin n =>
       (inferInstance : MeasurableSpace (Matrix V V ℝ))) X μ)
     (h_herm : ∀ i ω, (X i ω).IsHermitian)
+    (h_mean : ∀ i, ∫ ω, X i ω ∂μ = 0)
     (h_bound : ∀ i ω, Matrix.PosSemidef (A i * A i - X i ω * X i ω))
     (t : ℝ) (ht : 0 ≤ t) (x : V → ℝ) (hx : x ≠ 0) :
     μ {ω | t * (x ⬝ᵥ x) ≤ |quadForm (∑ i, X i ω) x|}
       ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) *
         Real.exp (-(t ^ 2) / (2 * ‖∑ i, A i * A i‖))) := by
   refine le_trans (measure_mono ?_)
-    (matrix_hoeffding h_meas h_indep h_herm h_bound t ht)
+    (matrix_hoeffding h_meas h_indep h_herm h_mean h_bound t ht)
   intro ω hω
   by_contra hcon
   simp only [Set.mem_setOf_eq, not_le] at hcon
@@ -221,9 +224,11 @@ inclusion probabilities `p ∈ [0, 1]`, the spectral norm of the summed
 centered edge-Laplacian perturbation obeys the classical exponential tail
 against the deterministic variance statistic `‖∑_e L_e²‖`. No hypothesis
 on the weight matrix `A` (the design is sign-free). CONDITIONAL ON THE
-`matrix_hoeffding` AXIOM: all four hypothesis clauses are proved
-(`stronglyMeasurable_perturbSummand`, `indepFun_perturbSummand`,
-`perturbSummand_isSymm`, `perturbSummand_sq_le`). -/
+`matrix_hoeffding` AXIOM: all five hypothesis clauses are proved
+(`stronglyMeasurable_perturbSummand`, `iIndepFun_perturbSummand`,
+`perturbSummand_isSymm`, `integral_perturbSummand_eq_zero` — the
+centering, added by the 2026-08-30 Errata §9 repair — and
+`perturbSummand_sq_le`). -/
 theorem edgePerturbation_norm_tail [Nonempty V]
     (hp0 : ∀ e, 0 ≤ p e) (hp1 : ∀ e, p e ≤ 1)
     (t : ℝ) (ht : 0 ≤ t) :
@@ -247,6 +252,11 @@ theorem edgePerturbation_norm_tail [Nonempty V]
   have hherm : ∀ (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool),
       (perturbSummand A p ((Fintype.equivFin (V × V)).symm i) ω).IsHermitian :=
     fun i ω => isHermitian_of_isSymm (perturbSummand_isSymm A p _ ω)
+  have hmean : ∀ (i : Fin (Fintype.card (V × V))),
+      ∫ ω : (V × V) → Bool,
+        perturbSummand A p ((Fintype.equivFin (V × V)).symm i) ω
+        ∂(bernPMF p hp0 hp1).toMeasure = 0 :=
+    fun i => integral_perturbSummand_eq_zero A p hp0 hp1 _
   have hbound : ∀ (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool),
       Matrix.PosSemidef
         (perturbEdgeLap A ((Fintype.equivFin (V × V)).symm i)
@@ -259,7 +269,7 @@ theorem edgePerturbation_norm_tail [Nonempty V]
     (X := fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>
       perturbSummand A p ((Fintype.equivFin (V × V)).symm i) ω)
     (A := fun i => perturbEdgeLap A ((Fintype.equivFin (V × V)).symm i))
-    hmeas hindep hherm hbound t ht
+    hmeas hindep hherm hmean hbound t ht
   have hsum : ∀ ω : (V × V) → Bool,
       ∑ i : Fin (Fintype.card (V × V)),
         (fun (i : Fin (Fintype.card (V × V))) (ω : (V × V) → Bool) =>

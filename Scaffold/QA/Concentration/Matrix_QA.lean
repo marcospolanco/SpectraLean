@@ -24,6 +24,7 @@ import Scaffold.Mathlib.Probability.Concentration.Matrix.Bernstein
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Azuma
 import Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent
 import Scaffold.Mathlib.GraphTheory.Spectral
+import Mathlib.Data.Complex.ExponentialBounds
 
 open MeasureTheory ProbabilityTheory Classical
 open Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent SpectralGraphTheory
@@ -90,14 +91,17 @@ theorem iIndepFun_const_matrix_QA {Ω : Type*} [MeasurableSpace Ω] (μ : Measur
 /-- Matrix Hoeffding instantiated at the constant-zero family with zero
 dominators `A i = 0`: all hypotheses are discharged constructively
 (`PosSemidef.zero` for the semidefinite order, `isHermitian_zero`,
-`stronglyMeasurable_const`, constant independence). -/
+`stronglyMeasurable_const`, constant independence, and the repaired
+centering clause — the integral of the constant-zero family vanishes).
+Re-threaded at the 2026-08-30 centering repair (Errata §9). -/
 theorem matrix_hoeffding_zero_QA [Nonempty V] {n : ℕ} (t : ℝ) (ht : 0 < t) :
     μ {ω : Ω | ‖∑ i : Fin n, (0 : Matrix V V ℝ)‖ ≥ t} ≤
       ENNReal.ofReal (2 * (Fintype.card V : ℝ) *
         Real.exp (-(t ^ 2) / (2 * ‖∑ i : Fin n, (0 : Matrix V V ℝ) * 0‖))) := by
   exact matrix_hoeffding (X := fun _ _ => 0) (A := fun _ => 0)
     (fun i => stronglyMeasurable_const) (iIndepFun_const_matrix_QA (Ω := Ω) (μ := μ) 0)
-    (fun i ω => Matrix.isHermitian_zero) (fun i ω => by simpa using Matrix.PosSemidef.zero)
+    (fun i ω => Matrix.isHermitian_zero) (fun _i => by simp)
+    (fun i ω => by simpa using Matrix.PosSemidef.zero)
     t ht.le
 
 /-- The matrix-Hoeffding zero-family event is empty, so its measure is
@@ -261,6 +265,161 @@ theorem two_card_bound_honest_QA {W : Type*} [Fintype W] [Nonempty W] :
     linarith
   rw [← ENNReal.ofReal_one]
   exact ENNReal.ofReal_le_ofReal h1
+
+
+/-!
+## The centering repair record (2026-08-30, Errata §9)
+
+`matrix_hoeffding` was repaired on 2026-08-30 (run
+`20260830T183850Z-run-1`, Step 0 of
+`proposals/repair-matrix-hoeffding-centering.md`) by adding the centering
+clause `h_mean : ∀ i, ∫ ω, X i ω ∂μ = 0` — the same clause idiom its
+sibling `matrix_bernstein` has carried all along. The pre-repair
+statement was materially false in hypothesis shape: the deterministic
+constant-ones family below satisfies every pre-repair hypothesis
+genuinely — self-domination at equality, measurability, mutual
+independence of constants, Hermitianity — yet its tail event is all of
+`Ω` against a bound strictly below `1`. This is the same hazard class as
+the scalar Bernstein pair (Errata §8: an uncentered hypothesis set where
+the source bounds centered variables), found here by running the §5
+adversarial Step-0 that the Bernstein audit never extended to this file.
+The lemmas below record the exact `Fin 1` norm pin the fixture rides on,
+the proved pre-repair hypothesis set at the family, the hypothesis-form
+refutation, and the exclusion fence (the repaired clause rejects exactly
+the refuting family).
+-/
+
+/-- The exact `Fin 1` norm pin: `‖(1 : Matrix (Fin 1) (Fin 1) ℝ) + 1‖ = 2`.
+Every vector is an eigenvector at `2` (`(1 + 1) *ᵥ x = 2 • x`), so the
+`evals_first_le_eigvalOf`/`eigvalOf_le_evals_last` sandwich pins the
+unique sorted eigenvalue at `2`, and both operator-norm bridges
+(`l2OpNorm_le_of_abs_evals_le`, `abs_evals_le_l2OpNorm`) close at
+equality — an independent two-sided computation of the fixture's
+variance statistic, joining `l2OpNorm_one_fin1_QA` above. -/
+theorem norm_one_add_one_fin1_QA :
+    ‖((1 : Matrix (Fin 1) (Fin 1) ℝ) + 1)‖ = 2 := by
+  have hisymm : ((1 : Matrix (Fin 1) (Fin 1) ℝ) + 1).IsSymm := by
+    simp [Matrix.IsSymm]
+  have hxne : (onesVec : Fin 1 → ℝ) ≠ 0 := by
+    intro h
+    have hv : (onesVec : Fin 1 → ℝ) ⟨0, by norm_num⟩ = 0 := congrFun h _
+    simp [onesVec] at hv
+  have hxμ : ((1 : Matrix (Fin 1) (Fin 1) ℝ) + 1) *ᵥ (onesVec : Fin 1 → ℝ)
+      = (2 : ℝ) • (onesVec : Fin 1 → ℝ) := by
+    rw [Matrix.add_mulVec, Matrix.one_mulVec]
+    exact (two_smul ℝ _).symm
+  obtain ⟨i, hi⟩ := exists_eigvalOf_eq_of_mulVec_eq_smul hisymm hxne hxμ
+  have hcard : (1 : ℕ) ≤ Fintype.card (Fin 1) := by norm_num
+  have hlast : (Fin.mk (Fintype.card (Fin 1) - 1) (by norm_num))
+      = (Fin.mk 0 (by norm_num) : Fin (Fintype.card (Fin 1))) := by
+    ext
+    norm_num
+  have hpin : evals hisymm (Fin.mk 0 (by norm_num) : Fin (Fintype.card (Fin 1)))
+      = 2 := by
+    have hle := evals_first_le_eigvalOf hisymm hcard i
+    have hge := eigvalOf_le_evals_last hisymm hcard i
+    rw [hlast] at hge
+    rw [hi] at hle hge
+    exact le_antisymm hle hge
+  refine le_antisymm ?_ ?_
+  · refine l2OpNorm_le_of_abs_evals_le hisymm (by norm_num) ?_
+    intro k
+    have hk : k.val = 0 := by
+      have hlt := k.isLt
+      simp only [Fintype.card_fin] at hlt
+      omega
+    rw [show k = (Fin.mk 0 (by norm_num) : Fin (Fintype.card (Fin 1)))
+        from Fin.ext hk, hpin]
+    norm_num
+  · have h := abs_evals_le_l2OpNorm hisymm
+      (Fin.mk 0 (by norm_num) : Fin (Fintype.card (Fin 1)))
+    rw [hpin] at h
+    simpa using h
+
+/-- Every pre-repair hypothesis clause of `matrix_hoeffding` is *proved*
+at the refuting family (the constant-ones matrices on `V = Fin 1`,
+`n = 2`): measurability of constants, mutual independence of constants
+at the matrix codomain, Hermitianity of the identity, and semidefinite
+self-domination at equality (`1² − 1² = 0 ⪰ 0`). No centering clause
+existed to fail — that absence is the defect. -/
+theorem ones_family_old_clauses_QA {Ω : Type*} [MeasurableSpace Ω]
+    (μ : Measure Ω) [IsProbabilityMeasure μ] :
+    (∀ _i : Fin 2, StronglyMeasurable
+        (fun (_ω : Ω) => (1 : Matrix (Fin 1) (Fin 1) ℝ)))
+      ∧ iIndepFun (fun _ : Fin 2 =>
+          (inferInstance : MeasurableSpace (Matrix (Fin 1) (Fin 1) ℝ)))
+          (fun (_ : Fin 2) (_ : Ω) => (1 : Matrix (Fin 1) (Fin 1) ℝ)) μ
+      ∧ (∀ (_i : Fin 2) (_ω : Ω),
+          ((1 : Matrix (Fin 1) (Fin 1) ℝ)).IsHermitian)
+      ∧ (∀ (_i : Fin 2) (_ω : Ω),
+          Matrix.PosSemidef ((1 : Matrix (Fin 1) (Fin 1) ℝ) * 1
+            - (1 : Matrix (Fin 1) (Fin 1) ℝ) * 1)) := by
+  refine ⟨fun _i => stronglyMeasurable_const,
+    iIndepFun_const_matrix_QA (Ω := Ω) (μ := μ) 1, fun _i _ω => ?_,
+    fun _i _ω => ?_⟩
+  · exact isHermitian_of_isSymm (by simp [Matrix.IsSymm])
+  · simpa using Matrix.PosSemidef.zero
+
+/-- **The pre-repair `matrix_hoeffding` shape is refuted by an uncentered
+deterministic family**: at `V = Fin 1`, `n = 2`, `X i = A i = 1` (every
+pre-repair hypothesis genuinely holds — `ones_family_old_clauses_QA`),
+`t = 2`, the tail event is all of `Ω` (the norm is exactly `2` by
+`norm_one_add_one_fin1_QA`), so a probability measure gives `1`, while
+the bound is `2 · 1 · exp (−1) < 1` (from the pinned `2 < exp 1`). The
+family's mean is `1 ≠ 0`: the missing centering hypothesis is the
+defect. -/
+theorem old_matrix_hoeffding_refuted_uncentered_QA {Ω : Type*}
+    [MeasurableSpace Ω] (μ : Measure Ω) [IsProbabilityMeasure μ]
+    (h : μ {_ω : Ω | ‖∑ _i : Fin 2, (1 : Matrix (Fin 1) (Fin 1) ℝ)‖ ≥ (2 : ℝ)}
+      ≤ ENNReal.ofReal (2 * (Fintype.card (Fin 1) : ℝ) *
+        Real.exp (-((2 : ℝ) ^ 2) / (2 * ‖∑ _i : Fin 2,
+          ((1 : Matrix (Fin 1) (Fin 1) ℝ) * 1)‖)))) :
+    False := by
+  have hsumA : ∑ i : Fin 2, ((1 : Matrix (Fin 1) (Fin 1) ℝ) * 1)
+      = (1 : Matrix (Fin 1) (Fin 1) ℝ) + 1 := by
+    rw [Finset.sum_congr rfl fun _i (_ : _i ∈ Finset.univ) => Matrix.one_mul 1,
+      Fin.sum_univ_two fun _ => 1]
+  have hev : {_ω : Ω | ‖∑ _i : Fin 2, (1 : Matrix (Fin 1) (Fin 1) ℝ)‖ ≥ (2 : ℝ)}
+      = Set.univ := by
+    ext _ω
+    simp only [Set.mem_setOf_eq, Set.mem_univ, ge_iff_le]
+    rw [Fin.sum_univ_two fun _ => (1 : Matrix (Fin 1) (Fin 1) ℝ),
+      norm_one_add_one_fin1_QA]
+    exact iff_of_true (le_refl _) trivial
+  rw [hev, measure_univ] at h
+  rw [hsumA, norm_one_add_one_fin1_QA] at h
+  have hcard : (Fintype.card (Fin 1) : ℝ) = 1 := by norm_num
+  rw [hcard, mul_one] at h
+  have hex : (-((2 : ℝ) ^ 2)) / (2 * 2) = -(1 : ℝ) := by norm_num
+  rw [hex] at h
+  rw [ENNReal.one_le_ofReal] at h
+  have hexp : (2 : ℝ) < Real.exp 1 :=
+    lt_of_lt_of_le (by norm_num : (2 : ℝ) < 2.7182818283)
+      (le_of_lt Real.exp_one_gt_d9)
+  have hlt : (2 : ℝ) * Real.exp (-(1 : ℝ)) < 1 := by
+    have hpos : (0 : ℝ) < Real.exp 1 := Real.exp_pos 1
+    have hinvt : (2 : ℝ) * (Real.exp 1) ⁻¹ * Real.exp 1 = 2 := by
+      rw [mul_assoc, inv_mul_cancel₀ (ne_of_gt hpos), mul_one]
+    rw [Real.exp_neg]
+    rcases lt_or_ge ((2 : ℝ) * (Real.exp 1) ⁻¹) 1 with hlt | hge
+    · exact hlt
+    · have hmul := mul_le_mul_of_nonneg_right hge hpos.le
+      rw [hinvt, one_mul] at hmul
+      exact absurd hmul (not_le.mpr hexp)
+  linarith
+
+/-- **The exclusion fence**: the repaired `h_mean` clause genuinely
+rejects the refuting family — the constant-ones summand integrates to
+`1 ≠ 0` on every probability space, so the repaired axiom's hypothesis
+set is not satisfiable by the counterexample that refuted the old shape
+(the repair does real exclusion work, the `azDrift_not_stronglyMeasurable_QA`
+pattern). -/
+theorem ones_mean_ne_zero_QA {Ω : Type*} [MeasurableSpace Ω]
+    (μ : Measure Ω) [IsProbabilityMeasure μ] :
+    ∫ (_ω : Ω), (1 : Matrix (Fin 1) (Fin 1) ℝ) ∂μ
+      ≠ (0 : Matrix (Fin 1) (Fin 1) ℝ) := by
+  rw [integral_const]
+  simp [one_ne_zero]
 
 
 /-!

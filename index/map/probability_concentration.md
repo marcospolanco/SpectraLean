@@ -107,7 +107,7 @@ matrices defined in `Matrix/Basic.lean`.
 
 | Declaration | Kind | Description | Source |
 |-------------|------|-------------|--------|
-| `matrix_hoeffding` | axiom | Mutually independent Hermitian, PSD-dominated squares; `[Nonempty V]` guard (repaired 2026-08-28 — the guard-free shape was inconsistent at `card V = 0`, `t = 0`; **repaired 2026-08-29**: pairwise → `iIndepFun`, Errata §6) | Tropp Thm 1.4 |
+| `matrix_hoeffding` | axiom | Mutually independent, **centered** (`h_mean : ∀ i, ∫ X i ∂μ = 0`, added by the 2026-08-30 Errata §9 repair — the uncentered pre-repair shape was refuted by the deterministic constant-ones family, `old_matrix_hoeffding_refuted_uncentered_QA`) Hermitian, PSD-dominated squares; `[Nonempty V]` guard (repaired 2026-08-28 — the guard-free shape was inconsistent at `card V = 0`, `t = 0`; **repaired 2026-08-29**: pairwise → `iIndepFun`, Errata §6) | Tropp Thm 1.4 |
 
 ### Matrix Bernstein
 
@@ -138,7 +138,7 @@ weight matrix, the only load-bearing clause hypothesis `p ∈ [0, 1]`).
 
 | Declaration | Kind | Description | Consumes |
 |-------------|------|-------------|----------|
-| `matrix_hoeffding_quadForm` | theorem (axiom-conditional) | Fixed-nonzero-vector quadratic-form pullback of the axiom (`x ≠ 0` load-bearing: at `x = 0` the event is all of `Ω`) | `matrix_hoeffding` |
+| `matrix_hoeffding_quadForm` | theorem (axiom-conditional) | Fixed-nonzero-vector quadratic-form pullback of the axiom (`x ≠ 0` load-bearing: at `x = 0` the event is all of `Ω`; statement gains the axiom's `h_mean` centering hypothesis at the 2026-08-30 Errata §9 repair) | `matrix_hoeffding` |
 | `edgePerturbation_norm_tail` | theorem (axiom-conditional) | `μ {‖∑_e (δ_e − p_e) • L_e‖ ≥ t} ≤ 2 d exp(−t²/(2 ‖∑_e L_e²‖))` | `matrix_hoeffding` |
 | `edgePerturbation_quadForm_tail` | theorem (axiom-conditional) | The same bound at `t (x ⬝ᵥ x) ≤ |xᵀ S(ω) x|` for a fixed nonzero `x` | `matrix_hoeffding` |
 | `edgePerturbation_eval_tail` | theorem (axiom-conditional) | The eigenvalue-level packaging (2026-08-28, the follow-on delivery): `μ {t ≤ |λᵢ(L(A+E_ω)) − λᵢ(L A)|} ≤ 2 d exp(−t²/(2 ‖∑_e L_e²‖))` at every sorted index — the norm tail joined to the *proved* Weyl inequality | `matrix_hoeffding` |

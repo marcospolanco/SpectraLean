@@ -22,7 +22,7 @@ As of August 30, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 5 |
-| QA theorems/lemmas | 3167, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 3172, with no `sorry` or `admit` under `Scaffold/` |
 
 Recent highlights (full per-run history in
 [`docs/AGENT_ACTIVITY.md`](docs/AGENT_ACTIVITY.md); per-result detail in each
@@ -67,6 +67,14 @@ linked proposal):
     has a theorem consumer.
     ([proposal](proposals/hoeffding-inequality-degree-concentration.md),
     [retirement](proposals/retire-hoeffding-lemma-pointwise-collapse.md)).
+- **The matrix master bound** — the first proved slice of the matrix
+  concentration retirement route: Tropp's Proposition 3.1 (the
+  Laplace-transform step every matrix concentration proof consumes) in
+  its two-sided spectral-norm form, with its deterministic engine the
+  trace-exponential spectral identity `tr (exp (θ•M)) =
+  ∑ exp (θ·λᵢ(M))` (the identity the pinned Mathlib lists as an open
+  TODO), the degenerate `V = ∅` corner guarded at birth and fenced in
+  QA ([proposal](proposals/matrix-master-bound-first-slice.md)).
 
 The generated [QA Scoreboard](docs/5_QA_SCOREBOARD.md) is the authority for
 current counts, verification commands, and limitations.

@@ -6,52 +6,64 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**The matrix retirement route, Step 1 — the master bound.** Selected
-per priority item 0 (no High rows; the one Medium-High row
-consumer-gated; all Low rows human-decision-gated) and the standing
-handoff's first-named frontier (the matrix trio's own retirement
-route). Leverage: the retirement of `matrix_hoeffding` /
-`matrix_bernstein` / `matrix_azuma_hoeffding` (axioms 5 → 2 if it
-completes) needs two engines — the *master bound* (Tropp's Proposition
-3.1: `P{λmax ≥ t} ≤ inf_θ e^{−θt} E tr e^{θY}`, the Laplace-transform
-step every matrix concentration proof consumes) and the *sum-MGF step*
-(Lieb-class: `E tr e^{H+X} ≤ tr e^{H + log E e^X}` — genuinely deep,
-future multi-run, gated on an operator decision about admitting the
-analytic core vs proving it). This run delivers the **first engine as
-pure hard crust, zero new axioms**: the deterministic
-trace-exponential spectral identity
-`tr (exp (θ•M)) = ∑ i, exp (θ·λᵢ(M))` for real-symmetric `M` (the
-pin's own `MatrixExponential.lean` lists the det/trace-exp spectral
-identity as an open TODO — verified absent), the eigenvalue↔trace
-bridge, and the two-sided spectral-norm master bound in the axioms'
-`ℝ≥0∞` idiom (measurability through `StronglyMeasurable Y` +
-continuity of the trace-exponential; Markov on the lintegral — no
-integrability hypothesis, honest for unbounded summands). The scalar
-retirement pattern (engine before statement: `hoeffding_lemma_mgf` →
-the tail statements) applied to the matrix side. Step-0 degenerate
-corner **checked before stating**: the two-sided master bound is false
-at `V = ∅`, `t = 0` (event = all of `Ω`, bound `= 0`) — the same
-corner class the axioms carry `[Nonempty V]` for; the guard is added
-at birth and fenced in QA (the `Fin 0` refutation, closed through
-`l2OpNorm_le_of_abs_eigvalOf_le`'s vacuous instantiation).
-
-**Status (commit steward, 2026-08-30):** the shelf module has landed —
-`Scaffold/Mathlib/Probability/Concentration/Matrix/MasterBound.lean`
-and its QA section in `Matrix_QA.lean` are in the tree, and both were
-independently re-verified (`lake build` clean, `#print axioms` on all
-13 new declarations exactly `propext, Classical.choice, Quot.sound`,
-`lint_axioms`/`check_citations`/`check_markdown_links` all pass, no
-`sorry`/`admit`). What remains is exactly the records ladder that was
-never written: `proposals/matrix-master-bound-first-slice.md`, its
-`proposals/README.md` row, `README.md`/`docs/7_SGT_RADAR.md`/index-map
-updates, the map stat stamps + SVG regeneration, and a
-`docs/5_QA_SCOREBOARD.md` row. Next action for a future run: write
-that records ladder for the already-landed module — no further Lean
-work needed for Step 1.
+**None queued — the next run selects per priority item 0.** The Active
+table has no High rows; the Medium-High row (empirical-stationary Step
+2) is consumer-gated; all Low rows are human-decision-gated. The matrix
+retirement route's Step 2 (the Lieb-class sum-MGF step, Tropp Thm 6.1)
+is **gated on an operator decision** between admitting the analytic
+core and proving it — recorded as the route's standing gate in
+`proposals/matrix-master-bound-first-slice.md`, not an autonomous
+default. Natural named frontiers otherwise: a consumer of the
+unconditional window family, or the next load-bearing gap
+`docs/6_SGT_BACKLOG.md` names (all remaining items consumer-gated).
 
 ------
 
 ## Delivered milestones (most recent first)
+
+**The matrix master bound — retirement route Step 1's records closure
+— Tropp's Proposition 3.1 (the Laplace-transform step every matrix
+concentration proof consumes) in its two-sided spectral-norm form, plus
+its deterministic engine the trace-exponential spectral identity
+`tr (exp (θ•M)) = ∑ exp (θ·λᵢ(M))` (the identity the pinned Mathlib's
+own `MatrixExponential.lean` lists as an open TODO), pure hard crust,
+zero new axioms — `proposals/matrix-master-bound-first-slice.md`.** The
+Lean (`Matrix/MasterBound.lean`, 8 proved declarations; `Matrix_QA.lean`
+'s MasterBoundQA section, +5) was delivered by run
+`20260830T202747Z-run-1` and independently re-verified by the operator
+at commit `0a1cb8c` (clean build, `#print axioms` on all 13 new
+declarations exactly the standard three, `Fin 0` corner guarded at
+birth and fenced); **this run (`20260830T221307Z-run-1`, records-only)
+wrote the ladder the delivering run owed** — the proposal (COMPLETE
+from birth, with the Step-0 corner analysis and the priced Step-2
+gate), the `proposals/README.md` Delivered row, README (3172 + the
+highlights bullet), the radar QA axis (3167 → 3172, score held at 4.0
+per protocol — the retirement route's engine slice with its
+falsification fence, within the already-counted concentration
+category), the probability-concentration index map's master-bound
+section (6 rows), the Tropp source index's Proposition 3.1 row, both
+map stat stamps + the regenerated SVG, the scoreboard verification
+row, this plan, and the activity log.
+
+**Verification (this run, on the unchanged tree — no `Scaffold/**`
+edits):** scoreboard regeneration **3172/5/0**; `lint_axioms` (5, both
+PF findings allowlisted-confirmed — no axiom surface touched);
+`check_citations` ("All axioms have proper citations!"); `check_markdown_links`
+clean; **`check_scaffold_map_freshness` exit 0** (45 stations, both
+tables reconciled at 3172) after the stamp sync and SVG regeneration;
+**`check_build_completeness.py` — 130 source files, 130 fresh
+artifacts, 0 stale, 0 missing, exit 0.** The Lean-side claims on
+record are the operator's `0a1cb8c` verification (cited as such in the
+proposal and scoreboard row), not re-derived here.
+
+**Remaining risk:** none owed by the records — the module is pure hard
+crust and the records now match the tree. The route's honest residue:
+Step 2 (the sum-MGF step) is gated on an operator decision, and until
+it lands the three matrix axioms stay admitted — every conditional
+Derived tail on them remains conditional and must never be described
+as foundationally proved.
+
+------
 
 **The `matrix_hoeffding` missing-centering repair — Errata §9, the
 largest-consumer admitted axiom materially false in hypothesis shape,

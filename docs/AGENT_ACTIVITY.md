@@ -7296,3 +7296,92 @@ proposal, and the status records.
 **Verification (planned):** spike to zero errors/zero warnings in `wip/mgb_spike.lean` before any shelf edit; `lake env lean` on both touched modules with warning-baseline comparison; explicit `lake build` targets; `#print axioms` via a `wip/mgb_axcheck.lean` (every new declaration expected exactly `propext, Classical.choice, Quot.sound`); full `lake build` + `check_build_completeness.py`; `lint_axioms` (5 — no axiom surface changes), `check_citations`, `check_markdown_links`; scoreboard regeneration; map-freshness stats sync (QA count up; axioms stay 5).
 
 **Operator closing note (commit steward, 2026-08-30):** the run stopped after landing the shelf module and its QA but before writing any of the records listed above as "planned" — no `proposals/matrix-master-bound-first-slice.md`, no `proposals/README.md` row, no `README.md`/`docs/7_SGT_RADAR.md`/index/map updates, no SVG regeneration, no `docs/5_QA_SCOREBOARD.md` row. Independently re-verified rather than trusting the plan: `lake build` clean (2407/2407); `check_build_completeness.py` — 130 source files, 130 fresh artifacts, 0 stale, 0 missing; `#print axioms` via a fresh `wip/verify_masterbound.lean` on all 13 new declarations (`trace_exp_smul_eq_sum_exp_eigvalOf`, `trace_exp_nonneg`, `exp_smul_eigvalOf_le_trace_exp`, `continuous_trace_exp`, `stronglyMeasurable_trace_exp`, `measure_mul_le_lintegral`, `exists_abs_eigvalOf_ge`, `matrix_master_bound`, and the five QA declarations) — every one exactly `propext, Classical.choice, Quot.sound`, confirming pure hard crust as claimed, zero new axiom contact; `lint_axioms` unchanged at 5 (both findings the pre-existing allowlisted PF pair, no new axiom surface); `check_citations` and `check_markdown_links` pass; `sorry`/`admit` sweep on both touched files clean (only the prose word "admitted" in doc comments). Not done here: the proposal narrative and index/README/radar/scoreboard/SVG updates were left unwritten rather than fabricated by the operator — this is real, verified, but under-documented work, and the next run (or this operator, on request) still owes the records ladder before the map/scoreboard can be called in sync with this module's existence.
+
+## 2026-08-30T22:13:07Z — Writing the master bound's records ladder (retirement route Step 1 closure)
+
+**Run:** `20260830T221307Z-run-1`  
+**Session:** `unavailable` (to be confirmed before the terminal entry)  
+**Status:** in-progress  
+**Milestone:** the delivering run's owed records ladder for the already-landed
+matrix master bound (commit `0a1cb8c`, independently re-verified by the
+operator: `lake build` clean, `#print axioms` on all 13 new declarations
+exactly the standard three, no `sorry`/`admit`) — selected per priority
+item 0 (no High rows; the Medium-High row consumer-gated; Low rows
+human-decision-gated) and the standing handoff's own next action. No
+Lean work: write `proposals/matrix-master-bound-first-slice.md`
+(COMPLETE from birth), the `proposals/README.md` Delivered row, the
+`README.md`/`docs/7_SGT_RADAR.md` QA syncs (3167 → 3172), the
+`index/map/probability_concentration.md` master-bound section, the
+`index/sources/tropp_tail_bounds.md` Proposition 3.1 row, the map stat
+stamps in both map files + SVG regeneration, and the
+`docs/5_QA_SCOREBOARD.md` verification row. Leverage: the module is the
+first proved slice of the matrix trio's retirement route — until these
+records exist, the transit map, scoreboard, and indices are out of sync
+with the tree (the exact drift class `check_scaffold_map_freshness.py`
+was built to catch), and the module's docstring cites a proposal file
+that does not exist.
+
+**Changes (planned):** the eight records above; no `Scaffold/**` edits.
+
+**Verification (planned):** records-only — re-run
+`generate_qa_scoreboard.py` (3172/5/0), `lint_axioms`, `check_citations`,
+`check_markdown_links`, `check_scaffold_map_freshness` (after the stamp
+sync), and `check_build_completeness.py` on the unchanged tree; the Lean
+claims recorded are the operator's `0a1cb8c` verification, cited as
+such, not re-derived.
+
+## 2026-08-30T22:17:57Z — Master bound records ladder delivered: the map, scoreboard, and indices back in sync with the tree (terminal)
+
+**Run:** `20260830T221307Z-run-1`  
+**Session:** `ses_fab45aaf0ffeA3tq2Sm9eoy4ZK` (the in-progress entry's
+`unavailable` was this session before it registered; confirmed via
+`opencode session list --max-count 1 --format json` before this
+terminal entry)  
+**Status:** completed  
+**Milestone:** the matrix retirement route Step 1's records closure —
+the eight-record ladder the delivering run (`20260830T202747Z-run-1`,
+operator-verified at commit `0a1cb8c`) owed, written by this run with
+**zero `Scaffold/**` edits**: `proposals/matrix-master-bound-first-slice.md`
+(COMPLETE from birth — the summary, the load-bearing analysis, the
+Step-0 degenerate-corner record, the two-run delivery/verification
+history, the priced Step-2 gate), the `proposals/README.md` Delivered
+row, `README.md` (3172 + the master-bound highlights bullet),
+`docs/7_SGT_RADAR.md` (QA axis synced 3167 → 3172, score held at 4.0
+per protocol), `index/map/probability_concentration.md` (the new
+Master Bound engine section, 6 rows), `index/sources/tropp_tail_bounds.md`
+(Proposition 3.1 as a *proved* result + the scope list), both map stat
+stamps + the regenerated SVG, the `docs/5_QA_SCOREBOARD.md`
+verification row, the execution plan, and this log. Until this run the
+module's own docstring cited a proposal that did not exist and the
+map/scoreboard were two QA counts behind the tree — the exact drift
+class the freshness reconciliation was built to catch.
+
+**Verification (records-only, on the unchanged tree):** scoreboard
+regeneration **3172/5/0** (idempotent, the hand verification row
+preserved); `lint_axioms` (5, both PF findings allowlisted-confirmed —
+no axiom surface touched); `check_citations` — "All axioms have proper
+citations!"; `check_markdown_links` clean; **`check_scaffold_map_freshness`
+exit 0** (45 stations, both hand-maintained tables reconciled at 3172
+with the scoreboard) after the stamp sync and SVG regeneration —
+mandatory before claiming this closure, since the run's whole subject
+is map/scoreboard sync; **`check_build_completeness.py` — 130 source
+files, 130 fresh artifacts, 0 stale, 0 missing, exit 0** on the
+untouched Lean. The Lean-side claims on record (the 13-declaration
+`#print axioms` audit, the clean 2407/2407 build) are the operator's
+`0a1cb8c` verification, cited as such in the proposal and the
+scoreboard row — not re-derived by this run.
+
+**Remaining risk:** none owed by the delivery. The route's honest
+residue, now recorded in the proposal: Step 2 (the Lieb-class sum-MGF
+step, Tropp Thm 6.1) is gated on an operator decision between
+admitting the analytic core and proving it; until it lands the three
+matrix axioms stay admitted and every conditional Derived tail on them
+remains conditional, never foundationally proved.
+
+**Next handoff:** the queue is empty — check `proposals/README.md`'s
+Active table first (no High rows; the Medium-High
+empirical-stationary Step 2 consumer-gated on the bias-term shape; Low
+rows human-decision-gated). The matrix retirement route's next slice
+is itself an operator decision (the Step-2 gate); otherwise the
+center-out policy — a consumer of the unconditional window family, or
+the next load-bearing gap `docs/6_SGT_BACKLOG.md` names.

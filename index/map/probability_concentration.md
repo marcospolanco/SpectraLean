@@ -101,6 +101,23 @@ All statements are over the spectral norm (`Matrix.L2OpNorm`), the
 semidefinite order (`Matrix.PosSemidef`), and the product σ-algebra on
 matrices defined in `Matrix/Basic.lean`.
 
+### Master Bound (retirement-route engine)
+
+**Module**: `Scaffold.Mathlib.Probability.Concentration.Matrix.MasterBound`
+(delivered 2026-08-30, `proposals/matrix-master-bound-first-slice.md` —
+all proved, zero axioms: the first slice of the admitted matrix trio's
+retirement route, the Laplace-transform engine every matrix
+concentration proof consumes)
+
+| Declaration | Kind | Description | Source |
+|-------------|------|-------------|--------|
+| `trace_exp_smul_eq_sum_exp_eigvalOf` | proved (2026-08-30) | The trace-exponential spectral identity `tr (exp (θ•M)) = ∑ i, exp (θ·λᵢ(M))` for real-symmetric `M`, any scale `θ` — the identity the pinned Mathlib's `MatrixExponential.lean` lists as an open TODO; conjugation through the spectral theorem's unitary diagonalization (`exp_conj` + `exp_diagonal`), the exp-carrying extension of `eigvalOf_sum_eq_trace`'s route | — |
+| `trace_exp_nonneg` / `exp_smul_eigvalOf_le_trace_exp` | proved (2026-08-30) | The trace-exponential is a sum of exponentials (nonnegative), and every eigenvalue's exponential is a single summand of it — the deterministic half of the master bound's inclusion step | — |
+| `continuous_trace_exp` / `stronglyMeasurable_trace_exp` | proved (2026-08-30) | The trace-exponential is continuous in the matrix argument (at the `l∞`-instance topology, the canonical product topology) and hence strongly measurable after any strongly measurable matrix-valued function — the hypothesis under which the Markov step applies | — |
+| `measure_mul_le_lintegral` | proved (2026-08-30) | Markov's inequality on the lower integral (`c · μ {c ≤ f} ≤ ∫⁻ f`), no integrability hypothesis, `c = 0` allowed — honest for unbounded summands | — |
+| `exists_abs_eigvalOf_ge` | proved (2026-08-30) | The norm–eigenvalue attainment bridge: on a nonempty index type every threshold below the operator norm is attained by some eigenvalue in absolute value (`[Nonempty V]` load-bearing — fails at `V = ∅`, `t = 0`, fenced by `master_bound_fin0_unguarded_refuted_QA`) | — |
+| `matrix_master_bound` | **proved** (2026-08-30) | Tropp's Proposition 3.1, the two-sided spectral-norm form: `μ {t ≤ ‖Y‖} ≤ e^{−θt} (E tr e^{θY} + E tr e^{−θY})` for strongly measurable symmetric-matrix-valued `Y`, `θ ≥ 0` — the expectations as `ℝ≥0∞` lower integrals (no integrability hypothesis); `[Nonempty V]` guard at birth; the `inf_θ` left to the consumer; the still-admitted trio rides it together with the (future, gated) sum-MGF step | Tropp Prop 3.1 |
+
 ### Matrix Hoeffding
 
 **Module**: `Scaffold.Mathlib.Probability.Concentration.Matrix.Hoeffding`

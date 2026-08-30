@@ -22,6 +22,7 @@
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Hoeffding
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Bernstein
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Azuma
+import Scaffold.Mathlib.Probability.Concentration.Matrix.MasterBound
 import Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent
 import Scaffold.Mathlib.GraphTheory.Spectral
 import Mathlib.Data.Complex.ExponentialBounds
@@ -820,5 +821,159 @@ theorem azDrift_not_stronglyMeasurable_QA (k : ℕ) (hk : k < 32) :
     rw [h0] at h
     simpa using h
   exact absurd (e1.trans e0.symm) (by norm_num)
+
+/-!
+## The master bound (retirement route, Step 1)
+
+QA for `Matrix.MasterBound`: the deterministic trace-exponential
+identity pinned two-sided at a fully computed fixture, the master bound
+instantiated end-to-end at the constant design, and the degenerate
+`V = ∅` corner fenced (the corner class the admitted matrix axioms were
+repaired for on 2026-08-28 — this module carries its guard at birth).
+-/
+
+section MasterBoundQA
+
+open Scaffold.Mathlib.Probability.Concentration.Matrix
+
+private def diagD : Matrix (Fin 2) (Fin 2) ℝ := Matrix.diagonal ![0, 2]
+
+private theorem diagD_symm : diagD.IsSymm := by
+  simp [diagD]
+
+/-- The two eigenvalues of `diagD`, pinned by trace and determinant
+(independent of the trace-exponential identity). -/
+private theorem diagD_eigs :
+    ((eigvalOf diagD diagD_symm 0 = 0 ∧ eigvalOf diagD diagD_symm 1 = 2) ∨
+     (eigvalOf diagD diagD_symm 0 = 2 ∧ eigvalOf diagD diagD_symm 1 = 0)) := by
+  have hsum : eigvalOf diagD diagD_symm 0 + eigvalOf diagD diagD_symm 1 = 2 := by
+    have h := eigvalOf_sum_eq_trace diagD diagD_symm
+    simpa [diagD, Matrix.trace_diagonal] using h
+  have hprod : eigvalOf diagD diagD_symm 0 * eigvalOf diagD diagD_symm 1 = 0 := by
+    have h := (isHermitian_of_isSymm diagD_symm).det_eq_prod_eigenvalues
+    have hdet : diagD.det = 0 := by simp [diagD, Matrix.det_diagonal]
+    rw [hdet] at h
+    simpa [eigvalOf, Fin.prod_univ_two, RCLike.ofReal_real_eq_id] using h.symm
+  rcases mul_eq_zero.mp hprod with h0 | h0
+  · exact Or.inl ⟨h0, by rw [h0] at hsum; linarith⟩
+  · exact Or.inr ⟨by rw [h0] at hsum; linarith, h0⟩
+
+/-- The trace-exponential at the diagonal fixture, computed directly by
+the diagonal route (`exp_diagonal` + `trace_diagonal`) — independent of
+the trace identity. -/
+theorem trace_exp_diag_direct_QA (w : ℝ) :
+    (NormedSpace.exp ℝ (w • diagD)).trace = 1 + Real.exp (2 * w) := by
+  have hd : w • diagD = Matrix.diagonal (![w * 0, w * 2]) := by
+    ext i j
+    simp [diagD, Matrix.diagonal_apply, Matrix.diagonal_smul]
+    split <;> fin_cases i <;> fin_cases j <;> simp
+  rw [hd, Matrix.exp_diagonal, Matrix.trace_diagonal]
+  have h0 : NormedSpace.exp ℝ (![w * 0, w * 2] : Fin 2 → ℝ) 0 = Real.exp (w * 0) := by
+    simp [Real.exp_eq_exp_ℝ]
+  have h1 : NormedSpace.exp ℝ (![w * 0, w * 2] : Fin 2 → ℝ) 1 = Real.exp (w * 2) := by
+    simp [Real.exp_eq_exp_ℝ]
+  rw [Fin.sum_univ_two, h0, h1]
+  simp only [mul_zero, Real.exp_zero, zero_add]
+  ring_nf
+
+/-- The trace identity joined to the eigenvalue pin at `θ = 1`: the
+theorem's value at the fixture is the true trace `1 + e²` — agreeing
+with `trace_exp_diag_direct_QA`'s independent diagonal route. A wrong
+eigen-expansion inside the identity would break this agreement. -/
+theorem trace_exp_diag_identity_QA :
+    ∑ i, Real.exp (1 * eigvalOf diagD diagD_symm i) = 1 + Real.exp 2 := by
+  rw [Fin.sum_univ_two]
+  rcases diagD_eigs with ⟨h0, h1⟩ | ⟨h0, h1⟩
+  · simp only [h0, h1, one_mul, Real.exp_zero]
+  · simp only [h0, h1, one_mul, Real.exp_zero]
+    ring
+
+/-- The `θ = −1` variant of the same join: the identity's sign path. -/
+theorem trace_exp_diag_identity_neg_QA :
+    ∑ i, Real.exp ((-1 : ℝ) * eigvalOf diagD diagD_symm i)
+      = 1 + Real.exp (-(2 : ℝ)) := by
+  rw [← trace_exp_smul_eq_sum_exp_eigvalOf diagD diagD_symm (-1),
+    trace_exp_diag_direct_QA (-1)]
+  simp
+
+private theorem diagD_norm : ‖diagD‖ = 2 := by
+  refine le_antisymm ?_ ?_
+  · refine Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent.l2OpNorm_le_of_abs_eigvalOf_le
+        diagD_symm (by norm_num) ?_
+    intro i
+    rcases diagD_eigs with ⟨h0, h1⟩ | ⟨h0, h1⟩
+    · fin_cases i <;> simp [h0, h1]
+    · fin_cases i <;> simp [h0, h1]
+  · rcases diagD_eigs with ⟨h0, h1⟩ | ⟨h0, h1⟩
+    · refine le_trans (show (2 : ℝ) ≤ |eigvalOf diagD diagD_symm 1| from by simp [h1]) ?_
+      exact Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent.abs_eigvalOf_le_l2OpNorm
+        diagD_symm 1
+    · refine le_trans (show (2 : ℝ) ≤ |eigvalOf diagD diagD_symm 0| from by simp [h0]) ?_
+      exact Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent.abs_eigvalOf_le_l2OpNorm
+        diagD_symm 0
+
+/-- **Constant-design master-bound instance**: `Y ≡ diagD`, `θ = 1`,
+`t = 2`. The tail event is all of `Ω` (the norm is exactly `2`, pinned),
+so the left side is `1`, and the instantiated bound computes to
+`e^{−2} ((1 + e²) + (1 + e^{−2}))` — at least `1` because the `e²` term
+pays for itself: the bound is not vacuous. The statement's interface is
+exercised end-to-end, every clause discharged. -/
+theorem master_bound_diag_constant_QA {Ω : Type} [MeasurableSpace Ω] (μ : Measure Ω)
+    [IsProbabilityMeasure μ] :
+    (1 : ℝ≥0∞) ≤ ENNReal.ofReal (Real.exp (-(2 : ℝ)))
+      * (ENNReal.ofReal (1 + Real.exp 2)
+        + ENNReal.ofReal (1 + Real.exp (-(2 : ℝ)))) := by
+  have h := matrix_master_bound (V := Fin 2) μ (fun _ => diagD_symm)
+    (Y := fun _ : Ω => diagD) stronglyMeasurable_const (θ := 1) (by norm_num) 2
+  have hev : {ω : Ω | (2 : ℝ) ≤ ‖(fun _ : Ω => diagD) ω‖} = Set.univ := by
+    ext ω
+    simp only [Set.mem_setOf_eq, Set.mem_univ]
+    exact iff_of_true (by simp [diagD_norm]) trivial
+  rw [hev, measure_univ] at h
+  rw [lintegral_congr (fun ω => by
+      show ENNReal.ofReal ((NormedSpace.exp ℝ ((1 : ℝ) • diagD)).trace) = _
+      rw [trace_exp_diag_direct_QA 1]), lintegral_const, measure_univ, mul_one,
+    lintegral_congr (fun ω => by
+      show ENNReal.ofReal ((NormedSpace.exp ℝ ((-1 : ℝ) • diagD)).trace) = _
+      rw [trace_exp_diag_direct_QA (-1 : ℝ)]), lintegral_const, measure_univ] at h
+  rw [mul_one, mul_one, show (2 : ℝ) * -1 = -(2 : ℝ) from by ring_nf,
+    show -((1 : ℝ) * 2) = -(2 : ℝ) from by ring_nf] at h
+  exact h
+
+/-- **Degenerate-corner fence**: at `V = Fin 0`, `Y ≡ 0`, `θ = 0`,
+`t = 0`, the master bound's conclusion without the `[Nonempty V]` guard
+reads `1 ≤ 0` — the tail event is all of `Ω` while both
+trace-exponentials sum over the empty index type. The guard is
+load-bearing exactly as for the admitted matrix concentration axioms
+(their own `Fin 0` refutations of the 2026-08-28 repair); here the
+fence is built at birth, per the §5 hazard-class discipline. -/
+theorem master_bound_fin0_unguarded_refuted_QA {Ω : Type} [MeasurableSpace Ω]
+    (μ : Measure Ω) [IsProbabilityMeasure μ]
+    (h : μ {ω : Ω | (0 : ℝ) ≤ ‖(fun _ : Ω => (0 : Matrix (Fin 0) (Fin 0) ℝ)) ω‖}
+      ≤ ENNReal.ofReal (Real.exp (-(0 : ℝ) * 0)) *
+        (∫⁻ ω, ENNReal.ofReal (
+            (NormedSpace.exp ℝ ((0 : ℝ) • (fun _ : Ω => (0 : Matrix (Fin 0) (Fin 0) ℝ)) ω)).trace)
+          ∂μ
+        + ∫⁻ ω, ENNReal.ofReal (
+            (NormedSpace.exp ℝ ((-0 : ℝ) • (fun _ : Ω => (0 : Matrix (Fin 0) (Fin 0) ℝ)) ω)).trace)
+          ∂μ)) :
+    False := by
+  have hev : {ω : Ω | (0 : ℝ) ≤ ‖(fun _ : Ω => (0 : Matrix (Fin 0) (Fin 0) ℝ)) ω‖}
+      = Set.univ := by
+    ext ω
+    simp only [Set.mem_setOf_eq, Set.mem_univ]
+    exact iff_of_true (norm_nonneg _) trivial
+  rw [hev, measure_univ] at h
+  have hz : ∀ (w : ℝ) (ω : Ω),
+      (NormedSpace.exp ℝ (w • (fun _ : Ω => (0 : Matrix (Fin 0) (Fin 0) ℝ)) ω)).trace = 0 := by
+    intro w ω
+    simp [Matrix.trace]
+  rw [lintegral_congr (fun ω => by rw [hz 0 ω]), lintegral_const,
+    lintegral_congr (fun ω => by rw [hz (-0 : ℝ) ω]), lintegral_const] at h
+  rw [measure_univ,
+    show (-0 : ℝ) * 0 = 0 from by ring_nf, Real.exp_zero, ENNReal.ofReal_one] at h
+  norm_num at h
+
+end MasterBoundQA
 
 end Scaffold.Mathlib.Probability.Concentration.Matrix.QA

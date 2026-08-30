@@ -6,15 +6,48 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**None open.** The queue is empty — check `proposals/README.md`'s Active
-table first (no High rows; the one Medium-High row — the
-empirical-stationary Step 2 — consumer-gated on the bias-term shape);
-otherwise the center-out policy. Natural named frontiers: the matrix
-trio's own retirement route (the matrix MGF machinery — Lieb-class,
-multi-run — the scalar pattern now proved three times over, **now with
-a correctly-shaped target statement after the §9 repair**), a consumer
-of the unconditional window family, or the next load-bearing gap
-`docs/6_SGT_BACKLOG.md` names.
+**The matrix retirement route, Step 1 — the master bound.** Selected
+per priority item 0 (no High rows; the one Medium-High row
+consumer-gated; all Low rows human-decision-gated) and the standing
+handoff's first-named frontier (the matrix trio's own retirement
+route). Leverage: the retirement of `matrix_hoeffding` /
+`matrix_bernstein` / `matrix_azuma_hoeffding` (axioms 5 → 2 if it
+completes) needs two engines — the *master bound* (Tropp's Proposition
+3.1: `P{λmax ≥ t} ≤ inf_θ e^{−θt} E tr e^{θY}`, the Laplace-transform
+step every matrix concentration proof consumes) and the *sum-MGF step*
+(Lieb-class: `E tr e^{H+X} ≤ tr e^{H + log E e^X}` — genuinely deep,
+future multi-run, gated on an operator decision about admitting the
+analytic core vs proving it). This run delivers the **first engine as
+pure hard crust, zero new axioms**: the deterministic
+trace-exponential spectral identity
+`tr (exp (θ•M)) = ∑ i, exp (θ·λᵢ(M))` for real-symmetric `M` (the
+pin's own `MatrixExponential.lean` lists the det/trace-exp spectral
+identity as an open TODO — verified absent), the eigenvalue↔trace
+bridge, and the two-sided spectral-norm master bound in the axioms'
+`ℝ≥0∞` idiom (measurability through `StronglyMeasurable Y` +
+continuity of the trace-exponential; Markov on the lintegral — no
+integrability hypothesis, honest for unbounded summands). The scalar
+retirement pattern (engine before statement: `hoeffding_lemma_mgf` →
+the tail statements) applied to the matrix side. Step-0 degenerate
+corner **checked before stating**: the two-sided master bound is false
+at `V = ∅`, `t = 0` (event = all of `Ω`, bound `= 0`) — the same
+corner class the axioms carry `[Nonempty V]` for; the guard is added
+at birth and fenced in QA (the `Fin 0` refutation, closed through
+`l2OpNorm_le_of_abs_eigvalOf_le`'s vacuous instantiation).
+
+**Status (commit steward, 2026-08-30):** the shelf module has landed —
+`Scaffold/Mathlib/Probability/Concentration/Matrix/MasterBound.lean`
+and its QA section in `Matrix_QA.lean` are in the tree, and both were
+independently re-verified (`lake build` clean, `#print axioms` on all
+13 new declarations exactly `propext, Classical.choice, Quot.sound`,
+`lint_axioms`/`check_citations`/`check_markdown_links` all pass, no
+`sorry`/`admit`). What remains is exactly the records ladder that was
+never written: `proposals/matrix-master-bound-first-slice.md`, its
+`proposals/README.md` row, `README.md`/`docs/7_SGT_RADAR.md`/index-map
+updates, the map stat stamps + SVG regeneration, and a
+`docs/5_QA_SCOREBOARD.md` row. Next action for a future run: write
+that records ladder for the already-landed module — no further Lean
+work needed for Step 1.
 
 ------
 

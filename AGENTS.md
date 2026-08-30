@@ -86,6 +86,8 @@ distinguish a regression from excluded or uncertified modules.
 ```sh
 python3 scripts/generate_qa_scoreboard.py
 python3 scripts/lint_axioms.py
+python3 scripts/check_refutation_independence.py
+python3 scripts/check_public_reachability.py
 python3 scripts/check_citations.py
 python3 scripts/check_markdown_links.py
 lake build
@@ -100,6 +102,23 @@ full build passed over silently). The script fails nonzero if any
 `Scaffold/**/*.lean` source has a missing or mtime-stale `.olean`
 artifact; its docstring records the calibrated remediation.
 
+`check_refutation_independence.py` (2026-08-30,
+`proposals/axiom-audit-tooling.md`) verifies mechanically that every
+QA declaration tagged `-- @refutes: <axiom>` does not, in its proof
+term, depend on the axiom it refutes — the "a refutation cannot
+consume what it refutes" discipline previously checked by hand in
+every repair record. It runs `#print axioms` through a generated
+`lake env lean` file, so it requires the built oleans (run it after
+`lake build`, or accept the elaboration cost of loading imports). A
+tag naming anything but a currently admitted axiom fails, so tags are
+removed with their axiom's retirement.
+
+`check_public_reachability.py` (2026-08-30, same proposal) walks the
+import graph from the public umbrella `Scaffold.lean` and fails if any
+module under `wip/` (the only non-public Lean directory, per its
+Step-0 survey) is reachable, directly or transitively, or if any
+`wip.*` import appears in a public module at all.
+
 `check_scaffold_map_freshness.py` reconciles the transit map's two
 hand-maintained data tables (the SVG generator's and the HTML's)
 against each other, against the scoreboard's generated numbers, and
@@ -109,7 +128,12 @@ passes. The pre-commit hook runs it report-only; this ladder step is
 the blocking enforcement.
 
 `lint_axioms.py` includes the degenerate-corner guard check
-(`proposals/lint-axiom-degenerate-corner-guards.md`): every
+(`proposals/lint-axiom-degenerate-corner-guards.md`) and the
+replacement-path documentation check (`proposals/axiom-audit-tooling.md`,
+2026-08-30: every `Scaffold/Mathlib` axiom's docstring must carry a
+labeled `Replacement path:` note — the theorem, engine, or Mathlib gap
+that would retire it, or an explicit no-known-route statement).
+The degenerate-corner guard: every
 `Scaffold/Mathlib` axiom whose signature carries a `Fintype`-carried
 matrix/vector index type with no visible `Nonempty` guard, or a
 `Measure` argument with no visible probability/finite-measure/total-

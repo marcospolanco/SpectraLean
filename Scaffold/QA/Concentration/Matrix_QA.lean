@@ -189,6 +189,7 @@ a degenerate corner makes every conditional theorem vacuous.
 
 /-- The pre-repair `matrix_hoeffding` shape is refuted at
 `V = Fin 0`, `t = 0`, the zero family: `1 ≤ 0`. -/
+-- @refutes: matrix_hoeffding
 theorem old_matrix_hoeffding_refuted_fin0_QA {Ω : Type*} [MeasurableSpace Ω]
     (μ : Measure Ω) [IsProbabilityMeasure μ]
     (h : μ {_ω : Ω | ‖∑ _i : Fin 1, (0 : Matrix (Fin 0) (Fin 0) ℝ)‖ ≥ (0 : ℝ)}
@@ -210,6 +211,7 @@ theorem old_matrix_hoeffding_refuted_fin0_QA {Ω : Type*} [MeasurableSpace Ω]
 
 /-- The pre-repair `matrix_bernstein` shape is refuted at the same corner
 (zero family, `R = 0`, `t = 0`): `1 ≤ 0`. -/
+-- @refutes: matrix_bernstein
 theorem old_matrix_bernstein_refuted_fin0_QA {Ω : Type*} [MeasurableSpace Ω]
     (μ : Measure Ω) [IsProbabilityMeasure μ]
     (h : μ {_ω : Ω | ‖∑ _i : Fin 1, (0 : Matrix (Fin 0) (Fin 0) ℝ)‖ ≥ (0 : ℝ)}
@@ -233,6 +235,7 @@ theorem old_matrix_bernstein_refuted_fin0_QA {Ω : Type*} [MeasurableSpace Ω]
 
 /-- The pre-repair `matrix_azuma_hoeffding` shape is refuted at the same
 corner (zero difference sequence, `m = 1`, `t = 0`): `1 ≤ 0`. -/
+-- @refutes: matrix_azuma_hoeffding
 theorem old_matrix_azuma_refuted_fin0_QA {Ω : Type*} [MeasurableSpace Ω]
     (μ : Measure Ω) [IsProbabilityMeasure μ]
     (h : μ {_ω : Ω | ‖∑ _k in Finset.range 1, (0 : Matrix (Fin 0) (Fin 0) ℝ)‖
@@ -369,6 +372,7 @@ pre-repair hypothesis genuinely holds — `ones_family_old_clauses_QA`),
 the bound is `2 · 1 · exp (−1) < 1` (from the pinned `2 < exp 1`). The
 family's mean is `1 ≠ 0`: the missing centering hypothesis is the
 defect. -/
+-- @refutes: matrix_hoeffding
 theorem old_matrix_hoeffding_refuted_uncentered_QA {Ω : Type*}
     [MeasurableSpace Ω] (μ : Measure Ω) [IsProbabilityMeasure μ]
     (h : μ {_ω : Ω | ‖∑ _i : Fin 2, (1 : Matrix (Fin 1) (Fin 1) ℝ)‖ ≥ (2 : ℝ)}
@@ -787,6 +791,7 @@ field is proved at the fixture (`azDrift_adapted_QA`,
 fails — the tail event carries mass `> 1/2` against the bound `≤ 1/2`.
 A refutation cannot consume the axiom it refutes; `#print axioms` reads
 exactly the standard three. -/
+-- @refutes: matrix_azuma_hoeffding
 theorem old_matrix_azuma_refuted_nonmeasurable_QA
     (h : azDriftMeasure {i : Fin 33 | ‖∑ k in Finset.range 32, azDriftSeq k i‖ ≥ 31}
       ≤ ENNReal.ofReal (2 * (Fintype.card (Fin 1) : ℝ) *

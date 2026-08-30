@@ -1092,6 +1092,7 @@ theorem wXvar : ∑ i : Fin 15, ∫ ω : Fin 4 → Bool, wXFam i ω * wXFam i ω
     Finset.sum_smul]
   simp
 
+-- @refutes: matrix_hoeffding
 theorem old_matrix_hoeffding_pairwise_refuted_QA
     (h : wμ {ω : Fin 4 → Bool | ‖∑ i : Fin 15, wXFam i ω‖ ≥ 15}
       ≤ ENNReal.ofReal (2 * (Fintype.card (Fin 2) : ℝ) *
@@ -1115,6 +1116,7 @@ theorem old_matrix_hoeffding_pairwise_refuted_QA
   rw [hexp, hcard] at hreal
   linarith
 
+-- @refutes: matrix_bernstein
 theorem old_matrix_bernstein_pairwise_refuted_QA
     (h : wμ {ω : Fin 4 → Bool | ‖∑ i : Fin 15, wXFam i ω‖ ≥ 15}
       ≤ ENNReal.ofReal (2 * (Fintype.card (Fin 2) : ℝ) *

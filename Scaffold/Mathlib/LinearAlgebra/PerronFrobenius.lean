@@ -158,6 +158,15 @@ arbitrary `Fintype V`; combinatorial irreducibility; the spectral radius
 encoded through complex charpoly roots since the pinned Mathlib has no
 matrix spectral radius).
 
+Replacement path: no local proof route is currently priced; retirement
+would come either from upstream replacement when Mathlib gains
+Perron–Frobenius for finite nonnegative irreducible matrices at this
+statement shape (comparison and adapter per `docs/2_ARCHITECTURE.md`
+§9) or from a local proof through the Frobenius normal form /
+spectral-radius machinery the pinned Mathlib does not yet expose for
+matrices (the complex charpoly encoding exists precisely because the
+pin has no matrix spectral radius).
+
 QA: exercised by
 `Scaffold.LinearAlgebra.QA.perron_frobenius_P_QA`,
 `Scaffold.LinearAlgebra.QA.perron_frobenius_D_QA`,

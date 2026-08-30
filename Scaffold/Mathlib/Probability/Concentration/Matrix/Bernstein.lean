@@ -66,6 +66,16 @@ refuted in hypothesis form as `old_matrix_bernstein_refuted_fin0_QA` in
 `Scaffold/QA/Concentration/Matrix_QA.lean`. The `[Nonempty V]` guard makes
 explicit the `d ≥ 1` the cited Tropp theorem carries implicitly.
 
+Replacement path: proved locally by completing the matrix master-bound
+retirement route (`proposals/matrix-master-bound-first-slice.md`): the
+delivered `matrix_master_bound` (Tropp Proposition 3.1, proved,
+`Matrix/MasterBound.lean`) already supplies the Laplace-transform step
+every matrix concentration proof consumes; the remaining step is the
+Lieb-class sum-MGF bound (Tropp Theorem 6.1 via Lieb's concavity
+theorem), the route's gated Step 2. Alternatively, upstream replacement
+when Mathlib gains an equivalent matrix Bernstein (adapter per
+`docs/2_ARCHITECTURE.md` §9).
+
 QA: exercised by `matrix_bernstein_zero_QA` in
 `Scaffold/QA/Concentration/Matrix_QA.lean`, which instantiates the axiom at
 the zero sequence and checks the resulting empty-event bound. -/

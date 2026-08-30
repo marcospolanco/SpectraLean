@@ -7385,3 +7385,104 @@ rows human-decision-gated). The matrix retirement route's next slice
 is itself an operator decision (the Step-2 gate); otherwise the
 center-out policy — a consumer of the unconditional window family, or
 the next load-bearing gap `docs/6_SGT_BACKLOG.md` names.
+
+## 2026-08-30T23:23:14Z — Axiom audit tooling: the three checks (High row)
+
+**Run:** `20260830T232314Z-run-1`  
+**Session:** `ses_fab0895aaffeNQerELrjBPiwHE`  
+**Status:** in-progress  
+**Milestone:** the Active table's one High row
+(`proposals/axiom-audit-tooling.md`), pursued per priority item 0:
+deliver all three mechanizable audit checks — negative-witness
+independence (`#print axioms`-verified per tagged declaration),
+replacement-path docstring lint (extend `lint_axioms.py`), and
+public-umbrella reachability against `wip/` — each wired at the five
+ladder locations with a broken fixture confirmed to fail then
+reverted. Leverage: every repair record so far checked
+"a refutation cannot consume what it refutes" by hand; this makes it
+mechanical. No axiom disposition changes, no Lean proof work.
+
+**Changes (planned):** two new `scripts/` checks + the
+`lint_axioms.py` extension; `-- @refutes:` tags on ten existing QA
+declarations; `Replacement path:` paragraphs in the five axiom
+docstrings; §5/§10 cross-references in `docs/2_ARCHITECTURE.md`; the
+five ladder wirings; the proposal's delivery record; README/radar/
+scoreboard stamps only if counts change (they should not — comment-only
+QA edits).
+
+**Verification (planned):** per-check fixtures (a tag on an
+axiom-consuming declaration; a `wip.` import in the umbrella;
+synthetic docstrings for the lint) confirmed to fail then reverted;
+then `lake build` + `check_build_completeness.py`, `lint_axioms.py`,
+`check_citations.py`, `check_markdown_links.py`, scoreboard
+regeneration, map freshness, and the two new scripts against the final
+tree.
+
+## 2026-08-30T23:38:22Z — Axiom audit tooling delivered: all three checks (terminal)
+
+**Run:** `20260830T232314Z-run-1`  
+**Session:** `ses_fab0895aaffeNQerELrjBPiwHE`  
+**Status:** completed  
+**Milestone:** the Active table's one High row
+(`proposals/axiom-audit-tooling.md`) delivered in full — the three
+mechanizable audit checks that turn hand-verified repair-record
+disciplines into ladder steps. Zero new axioms (count stays 5); QA
+counts unchanged (3172; comment-only QA edits).
+
+**Changes:** two new scripts —
+`scripts/check_refutation_independence.py` (the `-- @refutes: <axiom>`
+tag; namespace-tracked full-name binding; dependency extraction by a
+generated `lake env lean` file running `#print axioms`; ten existing
+declarations tagged: the five matrix-axiom pre-repair refutations, the
+pairwise pair, the PF `hex`/strict-dominance and `hπsum` corner audits
+the lint allowlist itself cites; tags naming retired names, binding
+`private` declarations, or vanishing all fail) and
+`scripts/check_public_reachability.py` (static import-closure walk
+from `Scaffold.lean`, 61 repo modules, `wip/` the only non-public Lean
+directory). `scripts/lint_axioms.py` gained the replacement-path
+documentation check (label family; all five axioms gained a labeled
+`Replacement path:` paragraph — matrix trio pointing at the delivered
+master-bound retirement route's gated Step 2, PF pair recording the
+honest no-priced-local-route answer; empty per-axiom allowlist
+mirroring the degenerate-corner pattern), and axiom extraction became
+block-comment-aware — the new check caught a phantom `axiom was` the
+raw regex had been producing from Azuma docstring prose. Ladder wiring
+at all five locations (AGENTS.md, architecture §5 cross-reference +
+§10, commit-steward-protocol Step 3 + pass-bar table, scripts/README,
+scoreboard verification rows) plus `governance/CONTRIBUTING.md`'s
+admission checklist. Records: the proposal (COMPLETE + delivery
+record), `proposals/README.md` (High row retired to Delivered), the
+execution plan, this entry.
+
+**Verification:** broken fixtures each confirmed to fail then reverted
+— a tag on the axiom-consuming `matrix_hoeffding_zero_QA` (exit 1,
+mechanism named); a tag naming retired `hoeffding_lemma` (exit 1,
+anti-rot); `import wip.reachability_fixture` in the umbrella (exit 1);
+the `Replacement path:` paragraph removed from `matrix_hoeffding`
+(lint exit 1). Final tree: all nine touched Lean modules elaborate
+directly with zero errors; full `lake build` clean; **`lake build`
+immediately followed by `check_build_completeness.py` — 130 source
+files, 130 fresh artifacts, 0 stale, 0 missing, exit 0** (after the
+documented explicit-target rebuild of the four out-of-closure QA
+modules); `lint_axioms.py` exit 0 (both PF allowlist notes intact);
+`check_refutation_independence.py` — `OK: 10 tagged … none consumes
+the axiom it refutes (5 current axioms)`; `check_public_reachability`
+clean; `check_citations`, `check_markdown_links` pass; scoreboard
+regeneration idempotent at 3172/5/0; `check_scaffold_map_freshness.py`
+exit 0 (45 stations; no proposal status header this delivery changed
+required it, but the full delivery-record sweep is map-checked anyway).
+
+**Remaining risk:** none owed — tooling plus comment-only Lean edits;
+the five axioms remain admitted and every conditional consumer keeps
+its conditional status. The independence check presumes built oleans
+(it elaborates a generated file importing QA modules), so run it after
+`lake build`; the elaboration cost is roughly a minute at the current
+tree.
+
+**Next handoff:** the queue is empty — check `proposals/README.md`'s
+Active table first (no High rows; the Medium-High
+empirical-stationary Step 2 consumer-gated; all Low rows
+human-decision-gated); then the center-out policy. Natural named
+frontiers: a consumer of the unconditional window family, the matrix
+retirement route's operator-gated Step 2, or the next load-bearing gap
+`docs/6_SGT_BACKLOG.md` names.

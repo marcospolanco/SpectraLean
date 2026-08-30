@@ -1,9 +1,10 @@
 # Proposal: Axiom Audit Tooling
 
-**Status:** Proposed. Authorizes new Python scripts and ladder wiring only;
-authorizes no axiom disposition changes, no adoption of quarantine
-vocabulary, and no Lean proof work beyond what a survey needs to design the
-checks.
+**Status:** COMPLETE — all three deliverables landed 2026-08-30 by run
+`20260830T232314Z-run-1` (see the delivery record at the bottom).
+Authorized new Python scripts and ladder wiring only; no axiom
+disposition changes, no quarantine vocabulary adopted, no Lean proof
+work beyond tags and docstring notes.
 
 **Provenance:** Split out of
 [`axiom-stress-testing-and-quarantine.md`](axiom-stress-testing-and-quarantine.md)'s
@@ -148,3 +149,89 @@ Each deliverable above is independently shippable; they do not need to land
 in the same run or the same order. A single run may complete all three if
 scope permits, or split them across runs, tracking partial progress in this
 proposal's own status line rather than in a separate document.
+
+## Delivery record (2026-08-30, run `20260830T232314Z-run-1`)
+
+All three deliverables landed in one run. Step-0 survey verdicts first,
+as each deliverable required:
+
+**Deliverable 1 — `scripts/check_refutation_independence.py`.** The
+naming survey settled option (b) decisively: the QA tree carries 60+
+`_refuted`/`_fence` declarations and naming alone cannot distinguish
+axiom-target refutations from the (majority) hypothesis-dropped-shape
+refutations of *proved theorems* — a naming parser would need a large,
+rotting exception list. The delivered mechanism: an explicit
+`-- @refutes: <axiom>` line tag (placed above the declaration), a
+namespace-tracking parser that binds tags to full declaration names,
+and real dependency extraction — one generated `lake env lean` file
+importing the tagged modules and issuing `#print axioms` on each full
+name, parsed for the dependency sets. Ten existing declarations carry
+tags: the five matrix-axiom pre-repair refutations
+(`old_matrix_{hoeffding,bernstein,azuma}_refuted_fin0_QA`,
+`old_matrix_hoeffding_refuted_uncentered_QA`,
+`old_matrix_azuma_refuted_nonmeasurable_QA`), the pairwise pair
+(`old_matrix_{hoeffding,bernstein}_pairwise_refuted_QA`), the PF
+`hex` unsat corner audit + `strict_dominance_refuted_QA`, and the
+`hπsum` unsat corner audit (`mass_one_unsat_card_zero_QA` — the two
+audits the lint allowlist cites as Lean-confirmed, so their own
+independence is now enforced). Scope decisions enforced by the script:
+tags naming anything but a *currently admitted* axiom fail (retired
+names take no tag — depending on a proved theorem is legitimate);
+zero tags fail (the false-silence failure mode); tags on `private`
+declarations fail (invisible to importing modules). Broken fixture
+(a tag on `matrix_hoeffding_zero_QA`, which consumes the axiom):
+confirmed failing with the exact mechanism named, then reverted.
+Anti-rot probe (a tag naming retired `hoeffding_lemma`): confirmed
+failing, then reverted. Final run: `OK: 10 tagged … none consumes the
+axiom it refutes (5 current axioms: …)`.
+
+**Deliverable 2 — the replacement-path lint in
+`scripts/lint_axioms.py`.** Survey verdict: *none* of the five current
+axioms carried a replacement-path note in prose — so the check
+recognizes a label family (`Replacement path:`, `Replacement route:`,
+`Retirement path:`, `Upstream replacement:`) and every axiom gained a
+labeled paragraph (no existing phrasing needed rewriting, the
+proposal's constraint, trivially — there was none to preserve): the
+matrix trio point at the delivered master-bound retirement route
+(`matrix_master_bound` proved + the gated Lieb-class sum-MGF Step 2 of
+`proposals/matrix-master-bound-first-slice.md`), the PF pair record
+the honest no-priced-local-route answer with the upstream replacement
+path. A per-axiom `REPLACEMENT_ALLOWLIST` (empty at delivery) mirrors
+the degenerate-corner pattern. Two incidental parser fixes the check
+surfaced: axiom extraction is now block-comment-aware (a prose
+docstring line reading "axiom was materially false" previously
+produced a phantom `axiom was` declaration — caught when the new check
+flagged it as having no docstring), and docstring recovery handles the
+`/-- … -/`-above-`axiom` shape. Broken fixture (the paragraph removed
+from `matrix_hoeffding`'s docstring): confirmed failing, then restored.
+
+**Deliverable 3 — `scripts/check_public_reachability.py`.** Step-0
+survey: `wip/` is the only non-public Lean directory (`Scaffold/
+Internal/` and `Scaffold/Trusted/` hold READMEs only; `research/` has
+no `.lean`); nothing under `Scaffold/` imports `wip.*` today. The
+check parses every repo `.lean` file's imports, walks the closure from
+the umbrella module `Scaffold` (61 repo modules), and fails on both a
+`wip/`-resident module in the closure and a `wip.`-prefixed import
+edge even when it resolves to no file. Broken fixture
+(`import wip.reachability_fixture` added to `Scaffold.lean` — the
+module doesn't exist): confirmed failing, then reverted.
+
+**Acceptance criteria:** no new axiom, `sorry`, or `admit` (QA count
+and axiom count unchanged — 3172/5/0, comment-only QA edits); both
+scripts standalone under `scripts/` wired at the five ladder locations
+(`AGENTS.md`, `docs/2_ARCHITECTURE.md` §5 cross-reference + §10,
+`docs/arch/commit-steward-protocol.md` Step 3 + pass-bar table,
+`scripts/README.md`, and the scoreboard verification row);
+`governance/CONTRIBUTING.md`'s axiom-addition checklist names the
+replacement-path and independence requirements at admission time. Full
+ladder on the final tree: `lake build` clean (2406/2407 targets,
+"Build completed successfully") with all nine touched Lean modules
+elaborating directly with zero errors; `check_build_completeness.py`
+130/130 fresh after the documented explicit-target rebuild of the four
+out-of-closure QA modules; `lint_axioms.py` exit 0 (both PF
+degenerate-corner allowlist notes intact); `check_citations.py` /
+`check_markdown_links.py` pass; `check_refutation_independence.py`
+and `check_public_reachability.py` pass as above;
+`check_scaffold_map_freshness.py` exit 0 (45 stations, no status
+headers changed by this delivery). Deferred items remain deferred as
+written.

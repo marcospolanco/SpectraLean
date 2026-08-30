@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Lint axiom declarations for consistency.
 
-Three checks:
+Four checks:
 
 1. No `axiom` declarations under `Scaffold/Trusted` (the public axiom
    location is `Scaffold/Mathlib`; Trusted is explanatory material).
@@ -41,6 +41,18 @@ Three checks:
    with the `Fin n` shape and its guard set (`0 < n`, `NeZero n`,
    `Nonempty (Fin n)`) — this note is the record of that decision, so
    the omission is deliberate rather than silent.
+4. Replacement-path documentation check
+   (`proposals/axiom-audit-tooling.md` Deliverable 2, 2026-08-30):
+   every `Scaffold/Mathlib` axiom's docstring must state what would
+   need to exist for the axiom to become a proved theorem — a named
+   theorem or engine to formalize, a named Mathlib gap, or an explicit
+   "no known route" statement. Several axioms already carried this in
+   prose; since the 2026-08-30 delivery every axiom carries a labeled
+   `Replacement path:` paragraph, and the check recognizes the label
+   family below so a rewrite is never forced. A per-axiom allowlist
+   (REPLACEMENT_ALLOWLIST, matching the degenerate-corner pattern)
+   records any axiom whose honest answer is recorded only here rather
+   than in its docstring.
 
 Signature-modeling notes (the parser approximates Lean's elaborator):
 - `variable`/`variables` binders are tracked with namespace/section
@@ -54,6 +66,9 @@ Signature-modeling notes (the parser approximates Lean's elaborator):
 - Binders are parsed by bracket matching (not regex splitting), so
   multi-name groups (`{a v : ℝ}`) and anonymous instance groups
   (`[Nonempty V]`) are handled.
+- Axiom docstrings are recovered as the nearest `/--` block above the
+  `axiom` line that closes (`-/`) before it; `/-!` module docs and
+  plain `/-` comments do not count.
 """
 
 import re
@@ -187,15 +202,47 @@ _CMD_RE = re.compile(
     r'section\b|variable\b|variables\b|open\b|import\b|export\b|#)')
 
 
+def _strip_block_comments(lines):
+    """Return lines with block-comment interiors (`/- ... -/`, including
+    `/--` docstrings and `/-!` module docs; these nest in Lean) blanked,
+    so prose like a docstring line reading 'axiom was materially false'
+    can never match a declaration regex. Line comments (`--`) are left;
+    they cannot begin a declaration either way."""
+    out = []
+    depth = 0
+    for line in lines:
+        kept = []
+        i = 0
+        code_visible = depth == 0
+        while i < len(line):
+            if line.startswith('/-', i):
+                if depth == 0:
+                    code_visible = True   # opener sits in visible code
+                depth += 1
+                i += 2
+            elif line.startswith('-/', i) and depth > 0:
+                depth -= 1
+                i += 2
+            else:
+                if depth == 0:
+                    kept.append(line[i])
+                i += 1
+        out.append(line if code_visible and ''.join(kept) == line else
+                   (''.join(kept) if code_visible else ''))
+    return out
+
+
 def _extract_axioms(lines):
     """Yield (line_index, name, declaration_text) for every `axiom`
     declaration, where declaration_text spans to the first blank line or
-    next top-level command."""
+    next top-level command. Docstring/comment interiors are masked
+    first, so prose starting with the word 'axiom' never matches."""
+    masked = _strip_block_comments(lines)
     results = []
     i = 0
     n = len(lines)
     while i < n:
-        m = re.match(r'^axiom\s+(\w+)', lines[i])
+        m = re.match(r'^axiom\s+(\w+)', masked[i])
         if m:
             decl = [lines[i]]
             j = i + 1
@@ -383,6 +430,85 @@ def _record(issues, notes, lean_file, idx, name, kind, description):
             f'in scripts/lint_axioms.py, kind `{kind}`)')
 
 
+# ---------------------------------------------------------------------------
+# Allowlist for the replacement-path documentation check (check 4):
+# axiom name -> recorded reason the axiom's docstring carries no labeled
+# replacement-path note. Entries here are the "no known route, and the
+# docstring says other things" escape hatch — the preferred state is the
+# labeled note in the docstring itself, so an entry should exist only
+# while that is being arranged, with the reason recorded.
+# Empty as of the 2026-08-30 delivery: all five current axioms carry a
+# `Replacement path:` paragraph.
+# ---------------------------------------------------------------------------
+
+REPLACEMENT_ALLOWLIST = {}
+
+# Label family the check recognizes at the start of a docstring line.
+# A delivery is never forced to rewrite prose that already uses one of
+# these labels; new labels can be added deliberately.
+REPLACEMENT_LABEL_RE = re.compile(
+    r'^\s*(Replacement path|Replacement route|Retirement path|'
+    r'Upstream replacement)\s*:', re.MULTILINE)
+
+
+def _docstring_above(lines, idx):
+    """Return the docstring text immediately above lines[idx] (an
+    `axiom` declaration), or None. The nearest `/--` opener above the
+    declaration whose `-/` closer sits below the opener; `/-!` module
+    docs and plain `/-` block comments do not count. Blank lines,
+    line comments, and annotations between closer and declaration are
+    tolerated."""
+    j = idx - 1
+    while j >= 0:
+        stripped = lines[j].lstrip()
+        if stripped.startswith('/--'):
+            break
+        if stripped.startswith('/-'):
+            return None   # module/plain block comment, not a docstring
+        j -= 1
+    if j < 0:
+        return None
+    block = []
+    k = j
+    while k < idx:
+        block.append(lines[k])
+        if '/-!' not in lines[k] and lines[k].rstrip().endswith('-/'):
+            return '\n'.join(block)
+        k += 1
+    return None   # unterminated (should not happen in valid Lean)
+
+
+def check_replacement_path_notes():
+    """Every Scaffold/Mathlib axiom's docstring must state its
+    replacement path (what would need to exist for it to become a
+    proved theorem). Returns issue strings."""
+    issues = []
+    base = Path('Scaffold/Mathlib')
+    if not base.exists():
+        return issues
+    for lean_file in sorted(base.rglob('*.lean')):
+        lines = lean_file.read_text().splitlines()
+        for idx, name, _ in _extract_axioms(lines):
+            if name in REPLACEMENT_ALLOWLIST:
+                continue
+            doc = _docstring_above(lines, idx)
+            if doc is None:
+                issues.append(
+                    f'{lean_file}:{idx + 1}: axiom {name} has no '
+                    f'docstring above the declaration — the replacement-'
+                    f'path note (and the citation) cannot be checked')
+            elif not REPLACEMENT_LABEL_RE.search(doc):
+                issues.append(
+                    f'{lean_file}:{idx + 1}: axiom {name} — docstring '
+                    f'has no replacement-path note (a labeled '
+                    f'`Replacement path:` paragraph stating what would '
+                    f'retire it: a named theorem/engine, a Mathlib gap, '
+                    f'or an explicit no-known-route statement; allowlist '
+                    f'entry in scripts/lint_axioms.py if recorded here '
+                    f'instead)')
+    return issues
+
+
 def check_axiom_in_public_api():
     """Check that no axioms are in the wrong location."""
     issues = []
@@ -437,6 +563,9 @@ def main():
     # unallowlisted findings fail the lint)
     guard_issues, guard_notes = check_degenerate_corner_guards()
     issues.extend(guard_issues)
+
+    # Replacement-path documentation check (check 4)
+    issues.extend(check_replacement_path_notes())
 
     if issues or guard_notes:
         for note in guard_notes:

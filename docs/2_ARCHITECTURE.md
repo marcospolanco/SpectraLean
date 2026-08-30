@@ -92,6 +92,19 @@ An axiom is admissible only when all of the following hold:
    - **Strictness mismatches** (`≤` vs `<`, a boundary value like `t = 0` or `K = 0` treated as excluded when the source allows it or vice versa).
 
    This list grows as new hazard classes are found; treat it as a floor, not a ceiling, and update it when a future audit or repair discovers a mechanism not already named here. The signature-visible half of the first two classes is checked mechanically: `scripts/lint_axioms.py`'s degenerate-corner guard check (added 2026-08-28, `proposals/lint-axiom-degenerate-corner-guards.md`) flags every axiom with a `Fintype`-carried index type or a `Measure` argument lacking a visible guard, with an allowlist that records why each flagged axiom is accepted — run it before an axiom lands and make the allowlist decision once, deliberately, at admission time. The check is a prompt to look, not a claim the axiom is wrong; it does not replace the adversarial-fixture Step 0.
+
+   Two further audit checks (both 2026-08-30,
+   `proposals/axiom-audit-tooling.md`) flank an admitted axiom's whole
+   lifecycle. `scripts/check_refutation_independence.py` verifies that
+   every QA declaration tagged `-- @refutes: <axiom>` does not, in its
+   proof term, depend on that axiom — a refutation cannot consume what
+   it refutes — so the adversarial fixtures this policy demands stay
+   honest evidence; tags name only currently admitted axioms and come
+   off with retirement. `scripts/lint_axioms.py`'s replacement-path
+   documentation check requires every axiom's docstring to carry a
+   labeled `Replacement path:` note — the theorem, engine, or Mathlib
+   gap that would retire it, or an explicit no-known-route statement —
+   so the retirement plan §9 assumes is recorded on the axiom itself.
 4. Its documentation cites an authoritative source precisely enough to locate the result.
 5. The documentation explains any difference between the source statement and the Lean statement.
 6. The axiom has a small blast radius and does not bundle unrelated facts.
@@ -156,6 +169,8 @@ A full `lake build` exit status alone does not certify every on-disk source: the
 Documentation freshness has the same shape: the transit map's two hand-maintained data tables (`scripts/generate_scaffold_map_svg.py` and `docs/scaffold_map.html`) once drifted from ground truth for days while the pre-commit hook re-rendered the SVG on every commit. `scripts/check_scaffold_map_freshness.py` reconciles both tables against each other, against the scoreboard's generated numbers, and against each station's cited proposal's own `**Status:**` line; the hook runs it report-only and the verification ladder is the blocking enforcement.
 
 Axiom signatures get the same structural treatment: `scripts/lint_axioms.py`'s degenerate-corner guard check (2026-08-28, `proposals/lint-axiom-degenerate-corner-guards.md`) flags every `Scaffold/Mathlib` axiom whose effective signature carries a `Fintype`-carried index type or a `Measure` argument with no visible guard, unless a per-axiom allowlist entry in the script records why the corner is accepted. Both 2026-08-28 axiom defects had exactly this gap visible in the signature alone; the check runs on every `lint_axioms.py` invocation in the ladder, and new admissions settle their allowlist entry when they land.
+
+Axiom evidence and public boundaries get structural treatment too (both 2026-08-30, `proposals/axiom-audit-tooling.md`): `scripts/check_refutation_independence.py` checks that every QA declaration tagged `-- @refutes: <axiom>` has a proof term free of that axiom — the refutation-independence discipline every repair record had verified by hand — and `scripts/check_public_reachability.py` walks the import graph from the umbrella `Scaffold.lean` and fails if any module under `wip/` (the only non-public Lean directory, confirmed by that proposal's Step-0 survey) is reachable from the public API. The independence check runs `#print axioms` through a generated `lake env lean` file, so it presumes built oleans; the reachability check is purely static.
 
 The generated [QA scoreboard](5_QA_SCOREBOARD.md) is the authority for current counts and recorded check results.
 

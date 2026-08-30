@@ -156,6 +156,8 @@ Record the actual output, not a paraphrase.
 lake build
 python3 scripts/check_build_completeness.py
 python3 scripts/lint_axioms.py
+python3 scripts/check_refutation_independence.py
+python3 scripts/check_public_reachability.py
 python3 scripts/check_scaffold_map_freshness.py   # only strictly required
                                                     # when a proposal's
                                                     # status header changed,
@@ -172,6 +174,8 @@ Pass bar, exactly:
 | `lake build` | "Build completed successfully"; new warnings, if any, match ones the record's own `Verification` section names as pre-existing — confirm by eye, don't assume |
 | `check_build_completeness.py` | `N source files, N fresh artifacts, 0 stale, 0 missing` |
 | `lint_axioms.py` | exit 0; any `Allowlisted:` lines are pre-existing entries, not new unexplained ones |
+| `check_refutation_independence.py` | `OK: N tagged refutation/fence declarations checked; none consumes the axiom it refutes` |
+| `check_public_reachability.py` | `OK: public umbrella import closure is N repo modules; no non-public (wip.*) module reachable` |
 | `check_scaffold_map_freshness.py` | exit 0 |
 | `check_citations.py` | "All axioms have proper citations!" |
 | `check_markdown_links.py` | "No broken local Markdown links" |

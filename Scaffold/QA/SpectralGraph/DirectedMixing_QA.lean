@@ -309,6 +309,7 @@ safe by unsatisfiability, not by a `Nonempty V` guard. This theorem is
 the Lean-confirmed verdict behind `scripts/lint_axioms.py`'s allowlist
 entry for `primitive_power_tendsto` (provisional until this audit
 landed). -/
+-- @refutes: primitive_power_tendsto
 theorem mass_one_unsat_card_zero_QA {V : Type} [Fintype V]
     (hV : Fintype.card V = 0) (π : V → ℝ) (hπsum : ∑ i, π i = 1) : False := by
   rw [Fintype.card_eq_zero_iff] at hV

@@ -138,6 +138,18 @@ hypothesis holds, the tail event carries mass `> 1/2` against the bound
 `≤ 1/2`). The repair lives in the `MatrixMDS.measurable` field; see
 `docs/9_ERRATA.md` §7.
 
+Replacement path: proved locally by completing the matrix master-bound
+retirement route (`proposals/matrix-master-bound-first-slice.md`): the
+delivered `matrix_master_bound` (Tropp Proposition 3.1, proved,
+`Matrix/MasterBound.lean`) already supplies the Laplace-transform step
+every matrix concentration proof consumes; the remaining steps are the
+Lieb-class sum-MGF bound (Tropp Theorem 6.1 via Lieb's concavity
+theorem) and its martingale-difference extension (Tropp's §7 route
+through the randomized blocking/sequential total expectation), the
+route's gated Step 2. Alternatively, upstream replacement when Mathlib
+gains an equivalent matrix Azuma (adapter per `docs/2_ARCHITECTURE.md`
+§9).
+
 QA: exercised by `matrix_azuma_zero_QA` in
 `Scaffold/QA/Concentration/Matrix_QA.lean`, which instantiates the axiom at
 the constant-zero difference sequence and checks the resulting empty-event

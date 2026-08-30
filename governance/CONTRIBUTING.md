@@ -91,7 +91,8 @@ Replacing an axiom with a mathlib re-export.
 - [ ] `index/map/<area>.md` updated
 - [ ] Changed modules compile directly; `lake build` alone may not reach every module
 - [ ] No `sorry` in `Scaffold/Mathlib/**`
-- [ ] `python3 scripts/lint_axioms.py` passes, including the degenerate-corner guard check — a flagged new axiom gets its allowlist entry (recording why the corner is accepted) at admission time
+- [ ] `python3 scripts/lint_axioms.py` passes, including the degenerate-corner guard check — a flagged new axiom gets its allowlist entry (recording why the corner is accepted) at admission time — and the replacement-path check (the axiom's docstring carries a labeled `Replacement path:` note)
+- [ ] `python3 scripts/check_refutation_independence.py` passes — any QA refutation/fence of the new axiom carries an `-- @refutes: <axiom>` tag and stays axiom-independent
 - [ ] Names follow mathlib conventions
 - [ ] QA coverage or a documented not-applicable rationale
 - [ ] QA lemma compiles and uses the new axiom

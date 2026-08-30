@@ -169,6 +169,14 @@ Statement differences and honest scope (no rate, Π topology,
 locators, page-level pending physical-copy review per repository
 policy.
 
+Replacement path: no dedicated local proof route is currently priced;
+retirement would come either from upstream replacement when Mathlib
+gains the Perron–Frobenius limit for primitive stochastic matrices
+(Horn–Johnson §8.5 / Levin–Peres–Wilmer Theorem 4.9 shape; comparison
+and adapter per `docs/2_ARCHITECTURE.md` §9) or from a local proof
+built on a stronger Perron–Frobenius suite (spectral projectors of the
+primitive case and the periodicity decomposition), itself unpriced.
+
 QA: exercised by
 `Scaffold.QA.SpectralGraph.DirectedMixing_QA.*`. -/
 axiom primitive_power_tendsto (P : Matrix V V ℝ)

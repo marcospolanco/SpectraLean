@@ -285,6 +285,7 @@ Perron root, of any eigenvector, has strictly smaller modulus — is
 hypotheses, the eigenpair `(−2, (−2,1))` satisfies the eigen-equation,
 and `|−2| = 2 = r`. Strict dominance requires primitivity; this is the
 proposal's Calibration boundary in proved form. -/
+-- @refutes: perron_frobenius
 theorem strict_dominance_refuted_QA :
     ¬ (∀ r : ℝ, ∀ x : Fin 2 → ℝ, (∀ i, 0 < x i) → D *ᵥ x = r • x →
         ∀ μ : ℝ, ∀ y : Fin 2 → ℝ, y ≠ 0 → D *ᵥ y = μ • y → μ ≠ r → |μ| < r) := by
@@ -609,6 +610,7 @@ dimension**: the corner is safe by unsatisfiability, not by a
 `Nonempty V` guard. This theorem is the Lean-confirmed verdict behind
 `scripts/lint_axioms.py`'s allowlist entry for `perron_frobenius`
 (the entry was provisional until this audit landed). -/
+-- @refutes: perron_frobenius
 theorem perron_frobenius_hex_unsat_card_zero_QA {V : Type} [Fintype V]
     (hV : Fintype.card V = 0) (A : Matrix V V ℝ)
     (hex : ∃ i j, 0 < A i j) : False := by

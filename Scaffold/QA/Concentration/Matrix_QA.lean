@@ -22,9 +22,12 @@
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Hoeffding
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Bernstein
 import Scaffold.Mathlib.Probability.Concentration.Matrix.Azuma
+import Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent
+import Scaffold.Mathlib.GraphTheory.Spectral
 
-open MeasureTheory ProbabilityTheory
-open scoped Matrix Matrix.L2OpNorm
+open MeasureTheory ProbabilityTheory Classical
+open Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent SpectralGraphTheory
+open scoped ENNReal Matrix Matrix.L2OpNorm
 
 namespace Scaffold.Mathlib.Probability.Concentration.Matrix.QA
 
@@ -128,14 +131,14 @@ theorem matrix_bernstein_zero_QA [Nonempty V] {n : ℕ} (t : ℝ) (ht : 0 < t) :
 -/
 
 /-- The constant-zero difference sequence is a `MatrixMDS` with bound
-`R = 0`: adaptedness holds because every σ-algebra dominates the trivial
-one, the conditional means vanish on every past event, and the norm bound
-is `‖0‖ ≤ 0`. -/
+`R = 0`: ambient strong measurability holds for constants, the
+conditional means vanish on every past event (genuinely — the integrals
+of the constant-zero function are real zeros), and the norm bound is
+`‖0‖ ≤ 0`. -/
 def zeroMatrixMDS : MatrixMDS (V := V) μ where
   R := 0
   X := fun _ _ => 0
-  adapted := fun k =>
-    (stronglyMeasurable_bot_iff (f := fun _ => (0 : Matrix V V ℝ))).2 ⟨0, rfl⟩ |>.mono bot_le
+  measurable := fun k => stronglyMeasurable_const
   cond_mean_zero := fun k S _ => by simp
   norm_bound := fun k ω => by simp
 
@@ -258,5 +261,405 @@ theorem two_card_bound_honest_QA {W : Type*} [Fintype W] [Nonempty W] :
     linarith
   rw [← ENNReal.ofReal_one]
   exact ENNReal.ofReal_le_ofReal h1
+
+
+/-!
+## The ambient-measurability repair record (2026-08-29)
+
+`MatrixMDS` was repaired on 2026-08-29 (run `20260829T235239Z-run-1`,
+Step 0 of `proposals/audit-matrix-azuma-mds-measurability-hazard.md`,
+Errata §7): the pre-repair structure's `adapted` field was content-free
+(`mdsFiltration` is the comap σ-algebra the `X j` generate themselves),
+nothing forced ambient strong measurability, and the `cond_mean_zero`
+set-integrals are the `integral_non_aestronglyMeasurable` junk zeros for
+non-ambiently-measurable bounded `X k` — so the martingale hypothesis was
+satisfiable by a bounded non-measurable drift. The lemmas below record
+the vacuity (set level), the junk engine, the refutation fixture with
+every old field proved, and the hypothesis-form refutation of the
+pre-repair axiom shape. The pre-repair `adapted` field at the fixture is
+proved as `azDrift_adapted`; the vacuity lemma is stated in the
+measurable-set sense (the SM form at the shelf's hand-rolled matrix
+σ-algebra has no registered Borel bridge, but the comap structure makes
+the set-level statement the mathematical content).
+-/
+
+omit [Fintype V] [DecidableEq V] in
+/-- The set-level vacuity record: every `X k` is measurable against the
+σ-algebra `mdsFiltration X (k+1)` that `X 0, …, X k` themselves generate
+(the comap σ-algebra is built from their preimages). This is why the
+pre-repair `adapted` field constrained nothing. -/
+theorem measurable_mdsFiltration_QA (X : ℕ → Ω → Matrix V V ℝ) (k : ℕ) :
+    Measurable[mdsFiltration X (k + 1)] (X k) := by
+  intro B hB
+  have hcyl : MeasurableSet[MeasurableSpace.pi]
+      {t : Fin (k + 1) → Matrix V V ℝ | t (k : Fin (k + 1)) ∈ B} :=
+    (measurable_pi_apply (k : Fin (k + 1))) hB
+  refine ⟨_, hcyl, ?_⟩
+  ext ω
+  simp
+
+/-- The junk-integral engine: a function that is not almost-everywhere
+strongly measurable w.r.t. the restricted measure has every set-integral
+equal to the definitional junk zero. -/
+theorem setIntegral_eq_zero_of_not_aeStronglyMeasurable_QA {W : Type*} [NormedAddCommGroup W]
+    [NormedSpace ℝ W] (f : Ω → W) (μ : Measure Ω)
+    (S : Set Ω) (hf : ¬ AEStronglyMeasurable f (μ.restrict S)) :
+    ∫ ω in S, f ω ∂μ = 0 :=
+  integral_non_aestronglyMeasurable hf
+
+/-! ### The caterpillar fixture
+
+`Ω = Fin 33` with the TRIVIAL σ-algebra: the measure puts mass `1/2` at
+the top point `32` and spreads `1/2` uniformly. Step `k` of the drift
+sequence is the identity matrix on the strict tail `{i | k < i}`, zero
+elsewhere: each step is bounded by `1`, its past σ-algebra cannot see
+the fresh tail variation, and the 32-step sum is `32 • 1` at the top
+point. Every pre-repair `MatrixMDS` field holds — the conditional means
+vanish through the junk mechanism — while the tail event carries mass
+`> 1/2` against the axiom bound `≤ 1/2`. -/
+
+noncomputable def azUniform :
+    @MeasureTheory.Measure (Fin 33) (⊥ : MeasurableSpace (Fin 33)) :=
+  ∑ i : Fin 33, (1 / 33 : ℝ≥0∞) •
+    @MeasureTheory.Measure.dirac (Fin 33) (⊥ : MeasurableSpace (Fin 33)) i
+
+theorem azUniform_univ_QA : azUniform Set.univ = 1 := by
+  rw [azUniform, Measure.finset_sum_apply]
+  have hmem : ∀ i : Fin 33, ((1 / 33 : ℝ≥0∞) •
+      @MeasureTheory.Measure.dirac (Fin 33) (⊥ : MeasurableSpace (Fin 33)) i) Set.univ
+      = 1 / 33 := by
+    intro i
+    rw [Measure.smul_apply,
+      @Measure.dirac_apply_of_mem (Fin 33) (⊥ : MeasurableSpace (Fin 33)) (s := Set.univ)
+        (a := i) (Set.mem_univ i)]
+    simp
+  rw [Finset.sum_congr rfl (fun i _ => hmem i), Finset.sum_const,
+    Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+  rw [one_div]
+  exact ENNReal.mul_inv_cancel (by exact_mod_cast (two_ne_zero : (2 : ℕ) ≠ 0)) (by simp)
+
+theorem azUniform_apply_QA (T : Set (Fin 33)) (j : Fin 33) (hj : j ∈ T) :
+    1 / 33 ≤ azUniform T := by
+  rw [azUniform, Measure.finset_sum_apply]
+  calc (1 / 33 : ℝ≥0∞)
+      = ((1 / 33 : ℝ≥0∞) •
+          @MeasureTheory.Measure.dirac (Fin 33) (⊥ : MeasurableSpace (Fin 33)) j) T := by
+          rw [Measure.smul_apply,
+            @Measure.dirac_apply_of_mem (Fin 33) (⊥ : MeasurableSpace (Fin 33)) (s := T)
+              (a := j) hj]
+          simp
+    _ ≤ ∑ i : Fin 33, ((1 / 33 : ℝ≥0∞) •
+          @MeasureTheory.Measure.dirac (Fin 33) (⊥ : MeasurableSpace (Fin 33)) i) T := by
+          refine Finset.single_le_sum (f := fun i => ((1 / 33 : ℝ≥0∞) •
+            @MeasureTheory.Measure.dirac (Fin 33) (⊥ : MeasurableSpace (Fin 33)) i) T)
+            (fun i _ => zero_le _) (Finset.mem_univ j)
+
+noncomputable def azDriftMeasure :
+    @MeasureTheory.Measure (Fin 33) (⊥ : MeasurableSpace (Fin 33)) :=
+  (1 / 2 : ℝ≥0∞) • @MeasureTheory.Measure.dirac (Fin 33) (⊥ : MeasurableSpace (Fin 33)) 32
+    + (1 / 2 : ℝ≥0∞) • azUniform
+
+instance : @IsProbabilityMeasure (Fin 33) (⊥ : MeasurableSpace (Fin 33)) azDriftMeasure := by
+  constructor
+  have h1 : ((1 / 2 : ℝ≥0∞) •
+      @MeasureTheory.Measure.dirac (Fin 33) (⊥ : MeasurableSpace (Fin 33)) 32) Set.univ
+      = 1 / 2 := by
+    rw [Measure.smul_apply,
+      @Measure.dirac_apply_of_mem (Fin 33) (⊥ : MeasurableSpace (Fin 33)) (s := Set.univ)
+        (a := 32) (Set.mem_univ 32)]
+    simp
+  have h2 : ((1 / 2 : ℝ≥0∞) • azUniform) Set.univ = 1 / 2 := by
+    rw [Measure.smul_apply, azUniform_univ_QA]
+    simp
+  show azDriftMeasure Set.univ = 1
+  rw [azDriftMeasure, Measure.add_apply, h1, h2, ← two_mul ((1 / 2 : ℝ≥0∞)),
+    one_div,
+    ENNReal.mul_inv_cancel (by exact_mod_cast (two_ne_zero : (2 : ℕ) ≠ 0)) (by simp)]
+
+theorem azDriftMeasure_ge_QA {T : Set (Fin 33)} (j : Fin 33) (hj : j ∈ T) :
+    (1 / 2 : ℝ≥0∞) * (1 / 33 : ℝ≥0∞) ≤ azDriftMeasure T := by
+  rw [azDriftMeasure, Measure.add_apply]
+  calc (1 / 2 : ℝ≥0∞) * (1 / 33 : ℝ≥0∞)
+      ≤ (1 / 2 : ℝ≥0∞) * azUniform T := mul_le_mul_left' (azUniform_apply_QA T j hj) _
+    _ = ((1 / 2 : ℝ≥0∞) • azUniform) T := by
+          rw [show ((1 / 2 : ℝ≥0∞) • azUniform) T = (1 / 2 : ℝ≥0∞) * azUniform T
+            from Measure.smul_apply _ _ _]
+    _ ≤ ((1 / 2 : ℝ≥0∞) •
+          @MeasureTheory.Measure.dirac (Fin 33) (⊥ : MeasurableSpace (Fin 33)) 32) T
+          + ((1 / 2 : ℝ≥0∞) • azUniform) T := le_add_of_nonneg_left (zero_le _)
+
+theorem azDriftMeasure_ge_top_QA {T : Set (Fin 33)} (h : (32 : Fin 33) ∈ T) :
+    1 / 2 + (1 / 2 : ℝ≥0∞) * (1 / 33 : ℝ≥0∞) ≤ azDriftMeasure T := by
+  have hd : (1 / 2 : ℝ≥0∞)
+      = ((1 / 2 : ℝ≥0∞) •
+          @MeasureTheory.Measure.dirac (Fin 33) (⊥ : MeasurableSpace (Fin 33)) 32) T := by
+    rw [Measure.smul_apply,
+      @Measure.dirac_apply_of_mem (Fin 33) (⊥ : MeasurableSpace (Fin 33)) (s := T)
+        (a := 32) h]
+    simp
+  have hu : (1 / 2 : ℝ≥0∞) * (1 / 33 : ℝ≥0∞)
+      ≤ ((1 / 2 : ℝ≥0∞) • azUniform) T := by
+    calc (1 / 2 : ℝ≥0∞) * (1 / 33 : ℝ≥0∞)
+        ≤ (1 / 2 : ℝ≥0∞) * azUniform T :=
+          mul_le_mul_left' (azUniform_apply_QA T 32 h) _
+      _ = ((1 / 2 : ℝ≥0∞) • azUniform) T := by
+            rw [show ((1 / 2 : ℝ≥0∞) • azUniform) T = (1 / 2 : ℝ≥0∞) * azUniform T
+              from Measure.smul_apply _ _ _]
+  rw [azDriftMeasure, Measure.add_apply]
+  exact add_le_add hd.le hu
+
+theorem azDriftMeasure_pos_QA {T : Set (Fin 33)} (j : Fin 33) (hj : j ∈ T) :
+    0 < azDriftMeasure T :=
+  lt_of_lt_of_le (by norm_num : (0 : ℝ≥0∞) < (1 / 2 : ℝ≥0∞) * (1 / 33 : ℝ≥0∞))
+    (azDriftMeasure_ge_QA j hj)
+
+/-- The drift sequence: step `k` is the identity on the strict tail
+`{i | k < i}`, zero elsewhere. -/
+def azDriftSeq (k : ℕ) : Fin 33 → Matrix (Fin 1) (Fin 1) ℝ :=
+  fun i => if k < (i : ℕ) then 1 else 0
+
+theorem azDriftSeq_eq_zero_of_le_QA (k : ℕ) (i : Fin 33) (h : (i : ℕ) ≤ k) :
+    azDriftSeq k i = 0 := by
+  rw [azDriftSeq]
+  have hnk : ¬ k < (i : ℕ) := by omega
+  simp [hnk]
+
+theorem azDriftSeq_eq_one_of_lt_QA (k : ℕ) (i : Fin 33) (h : k < (i : ℕ)) :
+    azDriftSeq k i = 1 := by
+  rw [azDriftSeq, if_pos h]
+
+theorem azDrift_fiber_eq_QA (k : ℕ) {i i' : Fin 33} (hi : (k : ℕ) ≤ (i : ℕ))
+    (hi' : (k : ℕ) ≤ (i' : ℕ)) :
+    (fun j : Fin k => azDriftSeq j i) = (fun j : Fin k => azDriftSeq j i') := by
+  funext j
+  rw [azDriftSeq_eq_one_of_lt_QA _ _ (by omega), azDriftSeq_eq_one_of_lt_QA _ _ (by omega)]
+
+theorem azDrift_tail_iff_QA (k : ℕ) {S : Set (Fin 33)}
+    (hS : MeasurableSet[mdsFiltration azDriftSeq k] S) {i i' : Fin 33}
+    (hi : (k : ℕ) ≤ (i : ℕ)) (hi' : (k : ℕ) ≤ (i' : ℕ)) :
+    i ∈ S ↔ i' ∈ S := by
+  unfold mdsFiltration at hS
+  obtain ⟨T, _, hTpre⟩ := MeasurableSpace.measurableSet_comap.1 hS
+  rw [← hTpre]
+  simp only [Set.mem_preimage]
+  rw [azDrift_fiber_eq_QA k hi hi']
+
+theorem l2OpNorm_one_fin1_QA : ‖(1 : Matrix (Fin 1) (Fin 1) ℝ)‖ = 1 := by
+  have hisymm : (1 : Matrix (Fin 1) (Fin 1) ℝ).IsSymm := by
+    simp [Matrix.IsSymm]
+  refine le_antisymm (l2OpNorm_le_of_abs_evals_le hisymm (by norm_num) ?_) ?_
+  · intro k
+    rw [evals_one hisymm]
+    simp
+  · have h := abs_evals_le_l2OpNorm hisymm (⟨0, by norm_num⟩ :
+      Fin (Fintype.card (Fin 1)))
+    rw [evals_one hisymm, abs_one] at h
+    exact h
+
+/-- The pre-repair `adapted` field holds at the fixture: the two-valued
+step function is `mdsFiltration`-strongly-measurable by the ite
+constructor at the (comap-measurable) level set. -/
+theorem azDrift_adapted_QA (k : ℕ) :
+    StronglyMeasurable[mdsFiltration azDriftSeq (k + 1)] (azDriftSeq k) := by
+  have hlev : MeasurableSet[mdsFiltration azDriftSeq (k + 1)] {i : Fin 33 | k < (i : ℕ)} := by
+    have hentry : Measurable fun m : Matrix (Fin 1) (Fin 1) ℝ => m 0 0 :=
+      (measurable_pi_apply (0 : Fin 1)).comp (measurable_pi_apply (0 : Fin 1))
+    have hIoi : @MeasurableSet ℝ _ (Set.Ioi (1 / 2 : ℝ)) := measurableSet_Ioi
+    have hB : MeasurableSet ((fun m : Matrix (Fin 1) (Fin 1) ℝ => m 0 0) ⁻¹'
+        (Set.Ioi (1 / 2 : ℝ))) := hentry hIoi
+    have hpre := (measurable_mdsFiltration_QA azDriftSeq k) hB
+    have hset : (azDriftSeq k) ⁻¹' ((fun m : Matrix (Fin 1) (Fin 1) ℝ => m 0 0) ⁻¹'
+        (Set.Ioi (1 / 2 : ℝ))) = {i : Fin 33 | k < (i : ℕ)} := by
+      ext i
+      simp only [Set.mem_preimage, Set.mem_Ioi, Set.mem_setOf_eq]
+      by_cases h : k < (i : ℕ)
+      · rw [azDriftSeq_eq_one_of_lt_QA k i h]
+        simp
+        exact iff_of_true (by norm_num) h
+      · rw [azDriftSeq_eq_zero_of_le_QA k i (by omega)]
+        simp
+        exact iff_of_false (by norm_num) h
+    rw [← hset]
+    exact hpre
+  unfold azDriftSeq
+  exact StronglyMeasurable.ite hlev stronglyMeasurable_const stronglyMeasurable_const
+
+/-- The old `norm_bound` field holds at the fixture with `R = 1`. -/
+theorem azDriftSeq_norm_bound_QA (k : ℕ) (i : Fin 33) :
+    ‖azDriftSeq k i‖ ≤ 1 := by
+  rcases Nat.lt_or_ge k (i : ℕ) with h | h
+  · rw [azDriftSeq_eq_one_of_lt_QA k i h, l2OpNorm_one_fin1_QA]
+  · rw [azDriftSeq_eq_zero_of_le_QA k i h]
+    simp
+
+/-- The old `cond_mean_zero` field holds at the fixture. On past sets
+avoiding the tail it holds genuinely (the integrand vanishes pointwise
+there); on past sets containing the tail it holds through the junk
+zero: the integrand is not almost-everywhere strongly measurable w.r.t.
+the restriction, because its two values both carry positive mass. -/
+theorem azDrift_cond_mean_zero_QA (k : ℕ) (S : Set (Fin 33))
+    (hS : MeasurableSet[mdsFiltration azDriftSeq k] S) :
+    ∫ i in S, azDriftSeq k i ∂azDriftMeasure = 0 := by
+  rcases Nat.lt_or_ge k 32 with hk | hk
+  · by_cases h32 : (32 : Fin 33) ∈ S
+    · rw [setIntegral_eq_zero_of_not_aeStronglyMeasurable_QA _ _ _]
+      intro haes
+      obtain ⟨c, hc⟩ :=
+        stronglyMeasurable_bot_iff.1 (AEStronglyMeasurable.stronglyMeasurable_mk haes)
+      have heq : azDriftSeq k =ᵐ[azDriftMeasure.restrict S] (fun _ => c) :=
+        (haes.ae_eq_mk).trans (by rw [hc])
+      have himp := ae_imp_of_ae_restrict heq
+      rw [ae_iff] at himp
+      have h32val : ((32 : Fin 33) : ℕ) = 32 := by decide
+      have h32le : (k : ℕ) ≤ ((32 : Fin 33) : ℕ) := by simp only [h32val]; omega
+      by_cases hc0 : c = 0
+      · have hjmem : (⟨k + 1, by omega⟩ : Fin 33) ∈ S :=
+          (azDrift_tail_iff_QA k hS (i := ⟨k + 1, by omega⟩) (i' := 32) (Nat.le_succ k)
+            h32le).2 h32
+        have hjval : azDriftSeq k (⟨k + 1, by omega⟩ : Fin 33) = 1 :=
+          azDriftSeq_eq_one_of_lt_QA _ _ (Nat.lt_succ_self k)
+        have hsub : ({(⟨k + 1, by omega⟩ : Fin 33)} : Set (Fin 33))
+            ⊆ {i | ¬ (i ∈ S → azDriftSeq k i = c)} := by
+          intro i hi
+          simp only [Set.mem_singleton_iff] at hi
+          subst i
+          simp only [Set.mem_setOf_eq, _root_.not_imp]
+          exact ⟨hjmem, by rw [hjval, hc0]; norm_num⟩
+        exact (azDriftMeasure_pos_QA _ (Set.mem_singleton _)).ne'
+          (measure_mono_null hsub himp)
+      · have hjmem : (⟨k, by omega⟩ : Fin 33) ∈ S :=
+          (azDrift_tail_iff_QA k hS (i := ⟨k, by omega⟩) (i' := 32) (Nat.le_refl k)
+            h32le).2 h32
+        have hjval : azDriftSeq k (⟨k, by omega⟩ : Fin 33) = 0 :=
+          azDriftSeq_eq_zero_of_le_QA _ _ (Nat.le_refl k)
+        have hsub : ({(⟨k, by omega⟩ : Fin 33)} : Set (Fin 33))
+            ⊆ {i | ¬ (i ∈ S → azDriftSeq k i = c)} := by
+          intro i hi
+          simp only [Set.mem_singleton_iff] at hi
+          subst i
+          simp only [Set.mem_setOf_eq, _root_.not_imp]
+          exact ⟨hjmem, by rw [hjval]; exact fun h => hc0 h.symm⟩
+        exact (azDriftMeasure_pos_QA _ (Set.mem_singleton _)).ne'
+          (measure_mono_null hsub himp)
+    · have hzero : ∀ i ∈ S, azDriftSeq k i = 0 := by
+        intro i hi
+        have h32val : ((32 : Fin 33) : ℕ) = 32 := by decide
+        have h32le : (k : ℕ) ≤ ((32 : Fin 33) : ℕ) := by simp only [h32val]; omega
+        have : ¬ (k : ℕ) ≤ (i : ℕ) := fun hle =>
+          h32 ((azDrift_tail_iff_QA k hS (i := i) (i' := 32) hle h32le).1 hi)
+        exact azDriftSeq_eq_zero_of_le_QA k i (by omega)
+      exact @setIntegral_eq_zero_of_forall_eq_zero (Fin 33) (Matrix (Fin 1) (Fin 1) ℝ)
+        (⊥ : MeasurableSpace (Fin 33)) _ _ (azDriftSeq k) S azDriftMeasure hzero
+  · have hzero : ∀ i : Fin 33, azDriftSeq k i = 0 :=
+      fun i => azDriftSeq_eq_zero_of_le_QA k i (by omega)
+    exact @setIntegral_eq_zero_of_forall_eq_zero (Fin 33) (Matrix (Fin 1) (Fin 1) ℝ)
+      (⊥ : MeasurableSpace (Fin 33)) _ _ (azDriftSeq k) S azDriftMeasure
+      (fun i _ => hzero i)
+
+/-- The fixture's tail event at `t = 31`: the sum of the first 32
+drift steps is `32 • 1` at the top point, so the event contains `{32}`
+and carries mass strictly above `1/2`. -/
+theorem azDrift_event_ge_QA :
+    (1 / 2 : ℝ≥0∞) < azDriftMeasure
+      {i : Fin 33 | ‖∑ k in Finset.range 32, azDriftSeq k i‖ ≥ 31} := by
+  have hsum : ∑ k in Finset.range 32, azDriftSeq k (32 : Fin 33)
+      = ((Finset.range 32).card : ℕ) • (1 : Matrix (Fin 1) (Fin 1) ℝ) := by
+    rw [Finset.sum_congr rfl (fun k hk => azDriftSeq_eq_one_of_lt_QA _ _
+      (by simpa using Finset.mem_range.1 hk)), Finset.sum_const]
+  have hval : ‖∑ k in Finset.range 32, azDriftSeq k (32 : Fin 33)‖ = 32 := by
+    rw [hsum, Finset.card_range, ← Nat.cast_smul_eq_nsmul (R := ℝ), norm_smul,
+      l2OpNorm_one_fin1_QA]
+    simp
+  have h32mem : (32 : Fin 33) ∈ {i : Fin 33 | ‖∑ k in Finset.range 32, azDriftSeq k i‖ ≥ 31} := by
+    simp only [Set.mem_setOf_eq, ge_iff_le]
+    rw [hval]
+    norm_num
+  refine lt_of_lt_of_le ?_ (azDriftMeasure_ge_top_QA h32mem)
+  have hpos : (0 : ℝ≥0∞) < (1 / 2 : ℝ≥0∞) * (1 / 33 : ℝ≥0∞) := by norm_num
+  calc (1 / 2 : ℝ≥0∞) = 1 / 2 + 0 := by ring
+    _ < 1 / 2 + (1 / 2 : ℝ≥0∞) * (1 / 33 : ℝ≥0∞) := by
+        exact ENNReal.add_lt_add_left (by norm_num : (1 / 2 : ℝ≥0∞) ≠ ⊤) hpos
+
+/-- The bound side at the fixture: `2 · 1 · exp (−31² / (8 · 32 · 1²))
+= 2 · exp (−961/256) ≤ 2 · exp (−3) ≤ 1/2`, since `exp 3 ≥ 1 + 3 = 4`. -/
+theorem azDrift_bound_le_half_QA :
+    ENNReal.ofReal (2 * (Fintype.card (Fin 1) : ℝ) *
+        Real.exp (-((31 : ℝ) ^ 2) / (8 * (32 : ℝ) * (1 : ℝ) ^ 2))) ≤ 1 / 2 := by
+  rw [show Real.exp (-((31 : ℝ) ^ 2) / (8 * (32 : ℝ) * (1 : ℝ) ^ 2))
+      = Real.exp (-((31 : ℝ) ^ 2 / (8 * (32 : ℝ) * (1 : ℝ) ^ 2))) from by
+    rw [neg_div]]
+  have hcard : (Fintype.card (Fin 1) : ℝ) = 1 := by norm_num
+  have hexp3 : (4 : ℝ) ≤ Real.exp 3 := by
+    have := Real.add_one_le_exp 3
+    linarith
+  have hmono : Real.exp (-((31 : ℝ) ^ 2 / (8 * (32 : ℝ) * (1 : ℝ) ^ 2)))
+      ≤ Real.exp (-(3 : ℝ)) := by
+    refine Real.exp_le_exp.2 ?_
+    have hfrac : ((31 : ℝ) ^ 2 / (8 * (32 : ℝ) * (1 : ℝ) ^ 2)) = 961 / 256 := by norm_num
+    rw [hfrac]
+    norm_num
+  have hneg : Real.exp (-(3 : ℝ)) = (Real.exp 3)⁻¹ := by
+    rw [Real.exp_neg]
+  have hA : Real.exp (-((31 : ℝ) ^ 2 / (8 * (32 : ℝ) * (1 : ℝ) ^ 2))) ≤ 1 / 4 := by
+    refine le_trans hmono ?_
+    rw [hneg]
+    have h4 : (Real.exp 3)⁻¹ ≤ (4 : ℝ)⁻¹ := inv_anti₀ (by positivity) hexp3
+    have h44 : ((4 : ℝ)⁻¹) = 1 / 4 := by norm_num
+    rwa [h44] at h4
+  have hA0 : (0 : ℝ) ≤ Real.exp (-((31 : ℝ) ^ 2 / (8 * (32 : ℝ) * (1 : ℝ) ^ 2))) :=
+    Real.exp_nonneg _
+  have h2 : ENNReal.ofReal (2 : ℝ) = (2 : ℝ≥0∞) := ENNReal.ofReal_ofNat 2
+  have hinv : ENNReal.ofReal ((2 : ℝ)⁻¹) = (2 : ℝ≥0∞)⁻¹ := by
+    rw [ENNReal.ofReal_inv_of_pos (by norm_num : (0 : ℝ) < 2), h2]
+  have hhalfℝ : (1 / 2 : ℝ) = (2 : ℝ)⁻¹ := by field_simp
+  have hbound : 2 * (Fintype.card (Fin 1) : ℝ) *
+      Real.exp (-((31 : ℝ) ^ 2 / (8 * (32 : ℝ) * (1 : ℝ) ^ 2))) ≤ (2 : ℝ)⁻¹ := by
+    rw [hcard, ← hhalfℝ]
+    nlinarith
+  rw [one_div (2 : ℝ≥0∞), ← hinv]
+  exact ENNReal.ofReal_le_ofReal hbound
+
+/-- The pre-repair `matrix_azuma_hoeffding` shape is refuted at the
+caterpillar fixture (hypothesis form): every pre-repair `MatrixMDS`
+field is proved at the fixture (`azDrift_adapted_QA`,
+`azDrift_cond_mean_zero_QA`, `azDriftSeq_norm_bound_QA` at `R = 1`, and
+`IsProbabilityMeasure azDriftMeasure`), yet the specialized conclusion
+fails — the tail event carries mass `> 1/2` against the bound `≤ 1/2`.
+A refutation cannot consume the axiom it refutes; `#print axioms` reads
+exactly the standard three. -/
+theorem old_matrix_azuma_refuted_nonmeasurable_QA
+    (h : azDriftMeasure {i : Fin 33 | ‖∑ k in Finset.range 32, azDriftSeq k i‖ ≥ 31}
+      ≤ ENNReal.ofReal (2 * (Fintype.card (Fin 1) : ℝ) *
+        Real.exp (-((31 : ℝ) ^ 2) / (8 * (32 : ℝ) * (1 : ℝ) ^ 2)))) :
+    False := by
+  refine absurd h (not_le.mpr ?_)
+  exact lt_of_le_of_lt azDrift_bound_le_half_QA azDrift_event_ge_QA
+
+/-- The repair is load-bearing: the drift fixture that satisfies every
+pre-repair `MatrixMDS` field (per the refutation above) FAILS the
+repaired `measurable` field — on the fixture's trivial ambient
+σ-algebra, strongly measurable functions are exactly the constants
+(`stronglyMeasurable_bot_iff`), and the drift takes the values `0` (at
+`⟨k⟩`) and `1` (at `⟨k + 1⟩`) whenever both points exist. The new
+field excludes exactly the counterexample family that refuted the old
+shape, so the repair does real exclusion work rather than adding a
+vacuous clause. -/
+theorem azDrift_not_stronglyMeasurable_QA (k : ℕ) (hk : k < 32) :
+    ¬ StronglyMeasurable[(⊥ : MeasurableSpace (Fin 33))] (azDriftSeq k) := by
+  rw [stronglyMeasurable_bot_iff]
+  rintro ⟨c, hc⟩
+  have h1 : azDriftSeq k (⟨k + 1, by omega⟩ : Fin 33) = 1 :=
+    azDriftSeq_eq_one_of_lt_QA k _ (Nat.lt_succ_self k)
+  have h0 : azDriftSeq k (⟨k, by omega⟩ : Fin 33) = 0 :=
+    azDriftSeq_eq_zero_of_le_QA k _ (Nat.le_refl k)
+  have e1 : (1 : Matrix (Fin 1) (Fin 1) ℝ) = c := by
+    have h := congrFun hc (⟨k + 1, by omega⟩ : Fin 33)
+    rw [h1] at h
+    simpa using h
+  have e0 : (0 : Matrix (Fin 1) (Fin 1) ℝ) = c := by
+    have h := congrFun hc (⟨k, by omega⟩ : Fin 33)
+    rw [h0] at h
+    simpa using h
+  exact absurd (e1.trans e0.symm) (by norm_num)
 
 end Scaffold.Mathlib.Probability.Concentration.Matrix.QA

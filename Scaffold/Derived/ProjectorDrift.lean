@@ -117,8 +117,7 @@ positive-gap hypothesis; the drift event is empty).
 theorem eventStreamProjectorDrift {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {μ : Measure Ω} [IsProbabilityMeasure μ] (A : Ω → TimeVaryingGraph V)
     (R : ℝ)
-    (h_adapt : ∀ k, StronglyMeasurable[mdsFiltration (randomLaplacianIncrement A) (k + 1)]
-      (randomLaplacianIncrement A k))
+    (h_meas : ∀ k, StronglyMeasurable[mΩ] (randomLaplacianIncrement A k))
     (h_cond : ∀ k S, MeasurableSet[mdsFiltration (randomLaplacianIncrement A) k] S →
       ∫ ω in S, randomLaplacianIncrement A k ω ∂μ = 0)
     (h_bound : ∀ k ω, ‖randomLaplacianIncrement A k ω‖ ≤ R)
@@ -162,6 +161,6 @@ theorem eventStreamProjectorDrift {Ω : Type*} {mΩ : MeasurableSpace Ω}
   -- theorem's own spectral-index hypothesis `k : Fin (Fintype.card V)`.
   haveI : Nonempty V := ⟨(Fintype.equivFin V).symm k⟩
   exact le_trans (measure_mono hincl)
-    (eventStreamTail A R h_adapt h_cond h_bound m s hs.le)
+    (eventStreamTail A R h_meas h_cond h_bound m s hs.le)
 
 end SpectralGraphTheory.Derived

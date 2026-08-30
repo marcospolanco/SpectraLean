@@ -68,15 +68,14 @@ theorem constantStream_isEventDriven_zero_QA (G : Matrix V V ℝ) (ω : Ω) :
 ## Derived tail bound
 -/
 
-/-- Adaptedness of the constant stream: every increment is the constant
-`0`, measurable even for the trivial σ-algebra. -/
-theorem constantStream_adapt_QA (G : Matrix V V ℝ) (k : ℕ) :
-    StronglyMeasurable[(mdsFiltration (randomLaplacianIncrement (constantStream (Ω := Ω) G)) (k + 1) : MeasurableSpace Ω)] (randomLaplacianIncrement (constantStream (Ω := Ω) G) k) := by
+/-- Ambient strong measurability of the constant stream (the repaired
+`h_meas` clause shape): every increment is the constant `0`. -/
+theorem constantStream_meas_QA (G : Matrix V V ℝ) (k : ℕ) :
+    StronglyMeasurable[mΩ] (randomLaplacianIncrement (constantStream (Ω := Ω) G) k) := by
   have h0 : randomLaplacianIncrement (constantStream (Ω := Ω) G) k = fun _ => 0 :=
     funext (constantStream_increment_zero_QA G k)
   rw [h0]
-  exact (stronglyMeasurable_bot_iff (f := fun _ => (0 : Matrix V V ℝ))).2 ⟨0, rfl⟩ |>.mono
-    bot_le
+  exact stronglyMeasurable_const
 
 /-- The derived tail theorem instantiated at a constant stream with bound
 `R = 0`: all martingale hypotheses are discharged constructively and the
@@ -87,7 +86,7 @@ theorem eventStreamTail_constant_QA [Nonempty V] (G : Matrix V V ℝ) (m : ℕ) 
       ENNReal.ofReal (2 * (Fintype.card V : ℝ) *
         Real.exp (-(t ^ 2) / (8 * (m : ℝ) * (0 : ℝ) ^ 2))) :=
   eventStreamTail (constantStream G) 0
-    (fun k => constantStream_adapt_QA G k)
+    (fun k => constantStream_meas_QA G k)
     (fun k S _ => by
       have h0 : randomLaplacianIncrement (constantStream (Ω := Ω) G) k = fun _ => 0 :=
         funext (constantStream_increment_zero_QA G k)

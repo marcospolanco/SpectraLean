@@ -6,14 +6,129 @@ holds the append-only narrative.
 
 ## Active milestone
 
-None — the queue is empty as of 2026-08-29T22:24:14Z. The next run
-checks `proposals/README.md`'s Active priority table first (priority
-item 0; no High rows stand, the one Medium-High row is consumer-gated
-on the empirical-stationary Step-2 bias-term shape), then falls
-through to the center-out SGT policy. Natural candidates on record:
-the empirical-stationary Step 2 (gated), any named load-bearing gap
-`docs/6_SGT_BACKLOG.md` carries (all remaining items consumer-gated),
-or the next axiom-trust audit the Errata pattern suggests.
+**Retiring `hoeffding_inequality` and `hoeffding_empirical` from axioms
+to theorems — proving Hoeffding's lemma locally in MGF interval form
+(`E exp(λX) ≤ exp(λ²(b−a)²/8)` for mean-zero `X ∈ [a,b]` on a
+probability measure) and deriving both tail axioms from it by the
+classical Chernoff route, dropping the admitted-axiom count 10 → 8.**
+Run `20260830T030715Z-run-1`; selected per priority item 0 (no High
+rows; the one Medium-High row consumer-gated; all Low rows
+human-decision-gated) and priority item 4 (reduce the explicit trust
+surface) over new breadth: `hoeffding_inequality` and
+`hoeffding_empirical` are two of the ten admitted axioms whose entire
+mathematical content follows from the two-standard-step
+secant/Chernoff argument, every needed pin lemma exists
+(`convexOn_exp`, `IndepFun.integral_mul_of_nonneg`,
+`iIndepFun.indepFun_finset_prod_of_not_mem`,
+`antitone_of_deriv_nonpos`, `Real.exp_sum`, `HasDerivAt.log`), and the
+retirement makes every Derived consumer strictly lighter
+(`edgePerturbation_degree_tail*` shed `hoeffding_inequality`, leaving
+`matrix_hoeffding` alone; the empirical-stationary tails
+`hoeffding_empirical_iid`/`empiricalWalkDistribution_tail` become hard
+crust). Next action: spike the analytic core (the
+`φ(u) = (1−p)e^{−pu} + pe^{(1−p)u} ≤ e^{u²/8}` inequality by the
+perfect-square second-derivative route) plus the assembly in
+`wip/hoeffding_mgf_spike.lean` to zero errors before any shelf edit.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The `MatrixMDS` ambient-measurability repair — the standing §12
+junk-integral residual's own deferred Step 0, found real, Errata §7 —
+`proposals/audit-matrix-azuma-mds-measurability-hazard.md`; opened by
+run `20260829T235239Z-run-1` (the spike-verified finding, the in-place
+repair, the consumer threading, the refutation family), completed by
+the next run (the two shelf/spike divergence fixes, the exclusion
+fence, Errata §7, the proposal, the full ladder, and the records
+closure — the recurring interrupted-run pattern, handled per the
+pairwise repair's completion precedent); DELIVERED — zero new axioms
+(count stays 10; `#print axioms` via `wip/azumajunk_axcheck.lean`/
+`wip/azumajunk_axcheck2.lean` on 18 audited declarations: the
+refutation `old_matrix_azuma_refuted_nonmeasurable_QA`, the exclusion
+fence `azDrift_not_stronglyMeasurable_QA`, the vacuity record
+`measurable_mdsFiltration_QA`, the junk-integral engine, and seven
+fixture lemmas each at exactly `propext, Classical.choice, Quot.sound`;
+`matrix_azuma_zero_QA`, `eventStreamTail_constant_QA`,
+`eventStreamProjectorDrift_constant_QA`, `eventStreamTail`, and
+`eventStreamProjectorDrift` each conditional on `matrix_azuma_hoeffding`
+alone; the three event-empty lemmas standard-three). QA 3099 → 3118
+(+19, `Matrix_QA.lean`'s repair-record section).**
+
+The finding: `MatrixMDS.adapted` was content-free (`mdsFiltration` is
+the comap σ-algebra the `X j` generate themselves — the field proved
+for every `X`), nothing forced ambient strong measurability, and the
+`cond_mean_zero` set-integrals are junk zeros for non-measurable
+bounded drifts — so `matrix_azuma_hoeffding` and both Derived consumers
+(whose `h_cond` clauses inherit the hole) were materially false in
+hypothesis form, exactly the Errata encoding class (a hypothesis the
+cited Tropp source carries implicitly, dropped). The falsification
+content: the 33-point caterpillar fixture (trivial σ-algebra, mass
+`1/2` at the top point plus `1/2` uniform so every nonempty set has
+positive mass; 32-step drift `X k = 1` on `{i | k < i}`) with every old
+field *proved* — including `azDrift_cond_mean_zero_QA`, the substantive
+lemma exhibiting the junk mechanism explicitly (both function values
+carry positive mass, so no ae-strong-measurability w.r.t. the
+restriction) — while the tail event carries mass `> 1/2` against the
+bound `≤ 1/2` (from `exp 3 ≥ 4`). The repair: the vacuous field
+replaced by `measurable : ∀ k, StronglyMeasurable (X k)` (the vacuity
+itself proved and recorded — junk content swapped for load-bearing
+content), both Derived consumers threaded to ambient `h_meas` (public
+statements otherwise unchanged), and the **exclusion fence**
+`azDrift_not_stronglyMeasurable_QA` proving the repaired field rejects
+exactly the refuting drift (trivial-σ-algebra SM = constants; the drift
+takes both values `0` and `1`) — the repair does real exclusion work,
+load-bearing in the falsifiability sense.
+
+**Verification:** the completing run first re-established build
+reachability (the interrupted tree had two shelf/spike divergences: a
+docstring preceding `omit … in` fails to parse — the docstring goes
+between the `omit` line and the theorem; and the spike's `simpa using h`
+out-clevered by `simp` on `Fin 1`, replaced by the honest eigenvalue
+route `rw [evals_one, abs_one] at h; exact h` keeping
+`l2OpNorm_le_of_abs_evals_le`/`abs_evals_le_l2OpNorm` load-bearing);
+`lake env lean` zero errors on all six touched modules with warning
+sets compared against the HEAD baseline by file-pair elaboration
+(identical multisets except one documented cosmetic pair: the repair
+changes info-tree attribution so the byte-identical
+`matrix_azuma_zero_QA` statement's set-builder binders newly warn —
+isolated decisively to the one-line `zeroMatrixMDS` field change,
+recorded in the proposal); explicit `lake build` targets ✔ on every
+changed module; the stale docstring reference
+`measurable_mdsFiltration` → `measurable_mdsFiltration_QA` in
+`Azuma.lean` fixed; the fence spiked to zero errors
+(`wip/azjunk_fence_spike.lean`) before shelf insertion; **full
+`lake build` ✔ (2405/2406) immediately followed by
+`check_build_completeness.py` — 129 source files, 129 fresh artifacts,
+0 stale, 0 missing, exit 0**; `lint_axioms` (10, both findings
+allowlisted-confirmed — no guard-surface change), `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**3118/10/0**);
+**map freshness exit 0** after the 3099 → 3118 stats-stamp sync in both
+map files (SVG regenerated; no proposal status header changed — the new
+proposal has no station). Records closed: Errata §7 (resolved,
+commit-reference pending per the commit-steward protocol), the proposal
+(status header + delivery record), `proposals/README.md` (Delivered
+row), README (3118), the radar (QA axis synced to 3118/67 modules;
+axis 7's third axiom-consistency-repair clause — score held at 4.5 per
+protocol), `docs/2_ARCHITECTURE.md` §12 (the residual resolved with the
+repair recorded), the probability-concentration index map (the
+`MatrixMDS`/`matrix_azuma_hoeffding` repair annotations), the
+scoreboard verification row, this plan, and the activity log.
+
+**Remaining risk:** the axiom remains admitted — the repair fixes the
+hypothesis *shape*; truth stays with the cited Tropp source, and both
+Derived theorems remain conditional on `matrix_azuma_hoeffding` and
+must never be described as foundationally proved. The adjacent recorded
+residual (scalar mean hypotheses on infinite measures) was already
+audited safe 2026-08-28; the §12 junk-integral residual list is now
+fully worked. The whole delivery sits uncommitted in the worktree
+(autonomous runs do not commit); the Errata §7 commit reference lands
+with the operator's commit.
+
+**Next handoff:** the queue is empty — check the Active table first;
+the empirical-stationary Step 2 remains consumer-gated, `hoeffding_lemma`
+remains the one zero-consumer axiom, and the natural named frontier is
+a consumer of the unconditional window family.
 
 ------
 

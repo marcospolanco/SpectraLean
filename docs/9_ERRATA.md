@@ -253,6 +253,67 @@ break it, not evidence none exists — see §6.
   (17:33:40Z, 19:56:11Z, 22:24:14Z).
 - **Status:** resolved.
 
+## 7. The `MatrixMDS` ambient-measurability defect (`matrix_azuma_hoeffding`)
+
+- **Found:** 2026-08-29 (run `20260829T235239Z-run-1`; completed by the
+  next run).
+- **What was wrong:** the `MatrixMDS` structure encoding Tropp's
+  matrix-martingale hypothesis carried no ambient strong-measurability
+  clause, and its `adapted` field was **content-free**:
+  `StronglyMeasurable[mdsFiltration X (k+1)] (X k)` holds for *every*
+  `X`, because `mdsFiltration` is the comap σ-algebra that `X 0, …, X k`
+  themselves generate (proved as `measurable_mdsFiltration_QA`). With
+  nothing forcing ambient measurability, the `cond_mean_zero`
+  set-integrals are `integral_non_aestronglyMeasurable` **junk zeros**
+  for any non-ambiently-measurable `X k` — so the martingale hypothesis
+  was satisfiable by a bounded non-measurable drift, making
+  `matrix_azuma_hoeffding` and both Derived consumers
+  (`eventStreamTail`, `eventStreamProjectorDrift` — their `h_cond`
+  clauses inherit the hole) materially false in hypothesis form.
+  Refuted concretely: on `Ω = Fin 33` with the trivial σ-algebra and a
+  probability measure putting mass `1/2` at the top point and `1/2`
+  uniformly, the 32-step drift sequence `X k = 1` on the strict tail
+  `{i | k < i}`, `0` elsewhere, satisfies every pre-repair field
+  (`azDrift_adapted_QA`, `azDrift_cond_mean_zero_QA` through the junk
+  mechanism, `azDriftSeq_norm_bound_QA` at `R = 1`) while the tail
+  event `{‖∑_{k<32} X k‖ ≥ 31}` carries mass `> 1/2` against the
+  axiom's bound `2 · 1 · exp(−961/256) ≤ 1/2`
+  (`old_matrix_azuma_refuted_nonmeasurable_QA`).
+- **How it was found:** the standing residual in
+  `docs/2_ARCHITECTURE.md` §12 recorded on 2026-08-22 that "the same
+  junk-integral surface touches … the `MatrixMDS` set-integrals — their
+  own future Step 0s must check it"; the Errata-pattern audit of
+  2026-08-29 ran that deferred Step 0, spike-first, and found the
+  encoding had dropped a hypothesis the cited Tropp source carries
+  implicitly (adapted processes live measurably on the filtered space).
+  This is the same hazard class as §4 (junk-valued integrals making a
+  hypothesis vacuous), on the matrix side.
+- **Repair:** complete, 2026-08-29. The vacuous `adapted` field was
+  replaced in place by `measurable : ∀ k, StronglyMeasurable (X k)`
+  (ambient strong measurability — nothing lost, junk content swapped
+  for load-bearing content: the vacuity is itself proved and recorded
+  as `measurable_mdsFiltration_QA`); `eventStreamTail`'s and
+  `eventStreamProjectorDrift`'s content-free `h_adapt` clauses were
+  threaded to the honest ambient `h_meas` shape (public statements
+  otherwise unchanged); the QA consumers re-instantiated; the fence
+  `azDrift_not_stronglyMeasurable_QA` proves the repaired field
+  *excludes* exactly the drift that refuted the old shape (on the
+  fixture's trivial σ-algebra, strongly measurable = constant, and the
+  drift takes both values `0` and `1`), so the repair does real
+  exclusion work. `#print axioms` verifies the refutation family at
+  exactly the standard three and each Derived consumer conditional on
+  `matrix_azuma_hoeffding` alone (via
+  `wip/azumajunk_axcheck.lean`/`wip/azumajunk_axcheck2.lean`). The
+  full verification ladder passed on the repaired tree.
+- **Commit:** pending (autonomous runs do not commit; the reference
+  lands with the operator's commit, per
+  `docs/arch/commit-steward-protocol.md`).
+- **Source:** `proposals/audit-matrix-azuma-mds-measurability-hazard.md`
+  (the delivery record with the fixture mechanics and technique
+  findings); `docs/AGENT_ACTIVITY.md`'s 2026-08-29 entries (23:52:39Z
+  and the completing run).
+- **Status:** resolved.
+
 ## Related: process and tooling self-corrections
 
 A narrower category — not an axiom or theorem found false, but a

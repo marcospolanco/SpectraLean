@@ -205,6 +205,20 @@ Community process is defined by `governance/CONTRIBUTING.md`, `MAINTAINERS.md`, 
   refutation records in `Matrix_QA.lean`; `matrix_hoeffding` carries no
   integral clauses at all, so the junk-integral surface does not reach
   it — the defect there was purely the missing nondegeneracy guard.
+  The `MatrixMDS` half of the residual was then run as its own Step 0
+  on 2026-08-29 (`proposals/audit-matrix-azuma-mds-measurability-hazard.md`,
+  Errata §7) and found real: the structure's `adapted` field was
+  content-free (`mdsFiltration` is the comap σ-algebra the `X j`
+  generate themselves) and nothing forced ambient strong measurability,
+  so the `cond_mean_zero` set-integrals were junk zeros and
+  `matrix_azuma_hoeffding` was satisfiable by a bounded non-measurable
+  drift (refuted in hypothesis form at a 33-point caterpillar fixture).
+  Repaired in place — `adapted` replaced by the honest
+  `measurable : ∀ k, StronglyMeasurable (X k)` field, both Derived
+  consumers threaded to ambient `h_meas`, with the exclusion fence
+  proving the repaired field rejects the refuting fixture — leaving
+  the scalar-side residual sentence above as the only remaining open
+  half, already audited safe.
 - Spectral-projector idempotence and eigenbasis orthonormality/completeness
   behind `spectralProjector` are proved locally
   (`eigvecOf_inner`, `eigvecOf_complete`, `spectralProjector_idempotent`,

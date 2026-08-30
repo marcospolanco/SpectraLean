@@ -76,8 +76,7 @@ theorem eventStreamProjectorDrift_constant_QA (G : Matrix V V ℝ) (hG : G.IsSym
           = fun _ => 0 :=
         funext (constantStream_increment_zero_QA G k')
       rw [h0]
-      exact (stronglyMeasurable_bot_iff (f := fun _ => (0 : Matrix V V ℝ))).2 ⟨0, rfl⟩ |>.mono
-        bot_le)
+      exact stronglyMeasurable_const)
     (fun k' S _ => by
       have h0 : randomLaplacianIncrement (constantStream (Ω := Ω) G) k'
           = fun _ => 0 :=

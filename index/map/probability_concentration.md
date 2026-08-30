@@ -119,8 +119,8 @@ matrices defined in `Matrix/Basic.lean`.
 | Declaration | Kind | Description | Source |
 |-------------|------|-------------|--------|
 | `mdsFiltration` | definition | Natural past σ-algebra of a matrix sequence | — |
-| `MatrixMDS` | definition | Martingale-difference structure with uniform bound | — |
-| `matrix_azuma_hoeffding` | axiom | Dependent-event tail bound `2d exp(-t²/(8mR²))`; `[Nonempty V]` guard (repaired 2026-08-28 — same corner) | Tropp Thm 7.1 |
+| `MatrixMDS` | definition | Martingale-difference structure with uniform bound (**repaired 2026-08-29** — the `adapted` field was content-free and nothing forced ambient strong measurability, making the `cond_mean_zero` integrals junk zeros; replaced by `measurable : ∀ k, StronglyMeasurable (X k)`, Errata §7) | — |
+| `matrix_azuma_hoeffding` | axiom | Dependent-event tail bound `2d exp(-t²/(8mR²))`; `[Nonempty V]` guard (repaired 2026-08-28 — same corner; **hypothesis repair 2026-08-29** via the `MatrixMDS` field, Errata §7) | Tropp Thm 7.1 |
 
 ### Derived consumers
 

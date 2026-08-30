@@ -450,8 +450,8 @@ break it, not evidence none exists — see §6.
   adopts the centering clause (the sibling's idiom); the locator-level
   check against a physical copy of the source stays an open item per
   the standing locator rule (page numbers are confirmed, not invented).
-- **Commit:** pending (autonomous runs do not commit; the reference
-  lands with the operator's commit, per the commit-steward protocol).
+- **Commit:** `179e598` — `fix(sgt): repair matrix_hoeffding's missing
+  centering hypothesis (Errata #9)`.
 - **Source:** `proposals/repair-matrix-hoeffding-centering.md` (the
   finding, the repair record, the degenerate-corner analysis of the
   repaired clause set, the technique findings);

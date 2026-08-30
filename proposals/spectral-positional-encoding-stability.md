@@ -10,24 +10,42 @@ as "closest to a demo you could show someone this week" because almost all
 of the required mathematics is already proved in this repository under a
 different name.
 
-## The capability
+## The capability, and an honest correction about its novelty
 
 Graph transformers that use Laplacian eigenvectors as positional encodings
 — Dwivedi & Bresson's LapPE, Kreuzer et al.'s Spectral Attention Networks
 (SAN) — have a known, mostly empirical robustness problem: the bottom-`k`
 Laplacian eigenvectors used as node coordinates can rotate arbitrarily
-within a near-degenerate eigenspace, and nobody ships a *proved* bound for
-how much a small graph edit can move that encoding. Papers handle this with
-sign-flip data augmentation and empirical robustness testing, not a closed-
-form guarantee.
+within a near-degenerate eigenspace. Those two papers themselves handle it
+with sign-flip data augmentation and empirical robustness testing, not a
+closed-form guarantee.
 
-This proposal produces that guarantee: given a base graph, a bounded edge
-perturbation, and a verified eigenvalue-gap separation at the encoding's
-cutoff rank, output a certified upper bound on how far the resulting
-`k`-dimensional positional-encoding subspace can move. It would be, as far
-as a source-index search of this repository and the cited ML literature
-shows, the first Lean-checked closed-form stability certificate for a
-graph-transformer positional encoding.
+**This is not new mathematics, and an earlier draft of this proposal
+overclaimed on that point.** Davis-Kahan sin-θ is 1970s perturbation
+theory; applying it to graph Laplacians for stability is well established
+— von Luxburg's spectral clustering tutorial (2007) uses the same style of
+argument for clustering stability, and a real line of GNN-theory work
+(Gama & Ribeiro; Levie et al. on the stability/transferability of spectral
+graph filters) derives closed-form stability bounds for graph filters and
+GNN outputs under graph perturbation using essentially this spectral-
+perturbation machinery, on paper, already. The specific move used here —
+subtracting the shared kernel projector on connected graphs to isolate just
+the informative `k`-dimensional component before applying Davis-Kahan — is
+a clean trick but is closer to folklore than a citable novel result; no
+claim of first-ever proof is being made for it.
+
+What this proposal actually contributes is narrower and still worth
+having: **a machine-checked instance of a known class of result**, not a
+new theorem. Nobody, as far as a search of this repository and the cited
+literature shows, has formalized this specific bound in a proof
+assistant — the contribution is verification and a closed-form artifact a
+practitioner can cite and check, not mathematical discovery. Given a base
+graph, a bounded edge perturbation, and a verified eigenvalue-gap
+separation at the encoding's cutoff rank, this produces a certified upper
+bound on how far the resulting `k`-dimensional positional-encoding
+subspace can move — the same content the Gama/Levie-style literature
+already argues informally, now Lean-checked and specialized to the LapPE
+kernel-isolation case.
 
 ## Why this is nearly free: the hard math is already done
 
@@ -132,10 +150,14 @@ before trusting a positional encoding near a small eigenvalue gap.
   `δ`. This proposal does not include a method for computing or certifying
   `δ` itself beyond what `evals` already gives; that remains the caller's
   obligation, exactly as it already is for `fiedlerSubspace_stability`.
-- This is a Scaffold-original corollary, not a restatement of a theorem
-  from the cited ML papers — Dwivedi & Bresson and Kreuzer et al. motivate
-  *why* this bound is useful; they do not state or prove it. Cite them as
-  motivation, not as the source of the theorem.
+- Not a restatement of a theorem from the cited ML papers — Dwivedi &
+  Bresson and Kreuzer et al. motivate *why* this bound is useful; they do
+  not state or prove it. But it is also not new mathematics: it is a
+  machine-checked instance of the Davis-Kahan-based graph-perturbation
+  stability arguments already published informally (von Luxburg 2007;
+  Gama & Ribeiro; Levie et al.). Cite the LapPE/SAN papers as motivation
+  for *why this matters*, and the stability-theory line as the actual
+  mathematical precedent — not as an unclaimed first proof.
 
 ## QA
 

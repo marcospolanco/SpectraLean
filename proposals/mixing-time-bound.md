@@ -115,6 +115,14 @@ specifically rather than ℓ². Requires a probability-measure wrapper
 Scaffold has never used before — treat as its own proposal-scale decision,
 not a default continuation of this one.
 
+**Delivered 2026-08-31 as its own proposal**
+([`total-variation-mixing-conversion.md`](total-variation-mixing-conversion.md)):
+both gates discharged there — the consumer named (the field-standard
+`t_mix(ε)` statement, instantiated as the TV twin of the oversmoothing
+ceiling), and the measure-wrapper cost estimate dissolved by scoping
+(vector TV on the vertex type, no `MeasureTheory`). Zero new axioms;
+the conversion constant attained exactly on `K₂`.
+
 ## Deferred and removed
 
 - **General (non-diagonally-similar) walk mixing** — out of scope. This

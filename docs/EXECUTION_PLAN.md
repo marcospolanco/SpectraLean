@@ -7,16 +7,105 @@ holds the append-only narrative.
 ## Active milestone
 
 **None queued — the next run selects per priority item 0.** This run
-delivered the empirical-stationary proposal's Step 2 — the Active
-table's own Medium-High row — retiring it to the Delivered table
-below; the Active table now holds no rows above the human-decision
-gates (all remaining rows are Low/decision-gated). The matrix
-retirement route's Step 2 stays gated on the recorded operator
-decision. A next run without direction falls through to the center-out
-SGT policy (`docs/6_SGT_BACKLOG.md`) or the priced deferred follow-ons
-the recent proposals record (the oversmoothing proposal's remaining
-items: the genuine over-squashing floor, consumer-gated, and the
-Python certificate bridge, operator-gated).
+delivered the ℓ² → total-variation mixing conversion — the mixing
+program's deferred optional Step 4, as its own same-run proposal —
+closing the random-walk radar axis's single named remaining absent
+category; the Active table still holds no rows above the
+human-decision gates (all Low/decision-gated). A next run without
+direction falls through to the center-out SGT policy
+(`docs/6_SGT_BACKLOG.md`) or the priced deferred follow-ons the recent
+proposals record (the oversmoothing proposal's remaining items: the
+genuine over-squashing floor, consumer-gated, and the Python
+certificate bridge, operator-gated; the matrix retirement route's
+Step 2 stays gated on the recorded operator decision).
+
+------
+
+## Delivered milestones (most recent first)
+
+**The ℓ² → total-variation mixing conversion — the mixing program's
+deferred optional Step 4 delivered as its own same-run proposal
+(`proposals/total-variation-mixing-conversion.md`; run
+`20260831T141839Z-run-1`). DELIVERED — zero new axioms (count stays
+5; `#print axioms` via `wip/tv_axcheck.lean` on all 35 audited
+declarations — 10 shelf + 25 QA — every one exactly `propext,
+Classical.choice, Quot.sound`, pure hard crust). QA 3313 → 3338
+(+25, `Mixing_QA.lean`'s total-variation section). Radar axis 5
+re-scored 4.0 → 4.5: the axis's named absent category is closed.**
+
+The delivery's content: (1) **Both of Step 4's recorded gates
+discharged on the record** — the consumer gate by naming the
+field-standard mixing statement itself (every textbook mixing bound,
+`t_mix(ε)` included, is TV-based) instantiated as **the TV twin of
+the delivered oversmoothing ceiling** (the repo's most recent family);
+the cost gate (the 2026-08-22 "probability-measure wrapper Scaffold
+has never used" estimate) dissolved by scoping — vector TV
+`(1/2) ∑ |ν − π|` on the vertex type, no `MeasureTheory` anywhere
+(the mixing program's own Step-2 idiom). (2) **The shelf** —
+`Mixing.lean`'s `TotalVariation` section: `tvDistance` (vector form,
+noncomputable), nonneg/symmetry/triangle, the generic Cauchy–Schwarz
+conversion `tvDistance_le_half_sqrt` (`TV ≤ (1/2)·√χ²` at the sharp
+classical constant; sign-free on `ν`, hence strictly stronger than
+the textbook probability-vector form), the unconditional walk-level
+shadow, and the rate form at exactly `chiSquareDistance_le_of_connected`'s
+hypothesis set; `Oversmoothing.lean`'s TV-twin section: the
+split-constant rate form, **the depth-form TV ceiling** (the
+entrywise ceiling's own threshold at `2ε`), and the two-start `2ε`
+twin. (3) **The QA** — the exact-attainment pin `k2_conversion_attained_QA`
+(`K₂` at `t = 1`: `TV = (1/2)·√χ² = 1/2`, both sides independently
+pinned — the constant sharp, Cauchy–Schwarz equality witnessed), the
+triangle's exact TV values `1/3, 1/6, 1/12` against both rate-form
+instances with the domination proved (honest C–S slack), the depth-2
+certificate at `ε = 1/4` with **depth 1 proved to fail the threshold**
+(`2 < 2√2`), the two-start instance at depth 3 with raw value `1/8`,
+and the **mass-one fence** (at the mass-2 weight `(1,1)` — positive,
+the only other conversion hypothesis, proved genuine at the fixture —
+the un-guarded conversion reads `1/2 ≤ (1/2)·√(1/2)`, refuted).
+
+**Verification:** spike first (`wip/tv_spike.lean` — the shelf
+declarations, the full QA section, and the axiom audit iterated to
+zero errors/zero warnings before any shelf edit, six technique
+findings recorded in the proposal: the pin's mixed sqrt-lemma
+conventions — `Real.sqrt_le_sqrt` an implication while
+`Real.sqrt_lt_sqrt` takes two explicit arguments and `_iff` is the
+iff —, `Real.sqrt_mul`'s proof-then-value argument order,
+`pow_mul_le_of_log_threshold`'s `log (C/ε)` parsing needing an
+in-proof `ring` conversion from the `√C/(2ε)` display, `norm_num`'s
+abs-of-numeral evaluation only with `neg_sub`/`abs_of_neg`/
+`abs_of_nonneg` supplied, the stale-olen Mixing→Oversmoothing import
+boundary recurrence, and the delete-don't-retain rule for hypotheses
+the proof turns out not to need); `lake env lean` zero errors/zero
+warnings on all three touched modules; explicit `lake build` targets
+✔ on all three; **full `lake build` ✔ (2407/2408) immediately
+followed by `check_build_completeness.py` — 131 source files, 131
+fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` (5, both
+PF findings allowlisted-confirmed); `check_refutation_independence`
+(10-tag clean — no tags added, nothing here touches an axiom);
+`check_public_reachability` clean (62 modules); `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**3338/5/0**,
+idempotent with the hand verification row); **map-freshness exit 0**
+after the 3313 → 3338 stats sync in both map files and SVG
+regeneration (the new proposal has no station). Records updated: the
+proposal (COMPLETE from birth, with the gate-discharge record, the
+degenerate-corner analysis, and the technique findings),
+`proposals/README.md` (Delivered row), `mixing-time-bound.md` (a
+delivered-pointer note on its Step-4 section — status header
+untouched), README (3338, the walks-and-mixing row extension, a
+highlights bullet, the coverage-snapshot sync to axis 5 at 4.5), the
+radar (axis 5 re-scored 4.0 → 4.5 with the delivery recorded; QA axis
+synced at 4.0 per protocol), `index/map/spectral_graph.md` (nine new
+rows), the scoreboard verification row, the QA module's purpose
+header, both map data tables + regenerated SVG, this plan, and the
+activity log. Nothing committed; the previous runs' uncommitted
+deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed. The
+TV family's rates are caller-certified exactly like the χ² family's
+own `r` certificates; bipartite graphs remain honestly outside every
+`r < 1` certificate's reach. The deferred items stand as recorded (a
+defined `t_mix` object, consumer-gated; the reverse TV → χ² calculus,
+no consumer named).
 
 ------
 

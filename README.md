@@ -22,7 +22,7 @@ As of August 31, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 5 |
-| QA theorems/lemmas | 3313, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 3338, with no `sorry` or `admit` under `Scaffold/` |
 
 Recent highlights (full per-run history in
 [`docs/AGENT_ACTIVITY.md`](docs/AGENT_ACTIVITY.md); per-result detail in each
@@ -235,7 +235,7 @@ The near-term center is general SGT. Public modules currently cover:
 | Decidable spectral certificates | `GraphTheory.SpectralCertificates` (ℚ and kernel-verifiable ℤ specification checkers, both soundness-proved) |
 | Electrical structure | `GraphTheory.Electrical`, `GraphTheory.ElectricalFlow`, `GraphTheory.Foster` — effective resistance as a genuine metric, Foster's theorem, leverage scores |
 | Heat semigroup | `GraphTheory.Heat` — the diffusion operator `e^{-tL}`: semigroup law, mass conservation, eigenmode decay, the connected-graph DC limit, and the derivative/remainder bounds at `t = 0`; program complete |
-| Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized`, `GraphTheory.Stationary`, `GraphTheory.Mixing` — the ℓ²-mixing proxy and the geometric-decay mixing bound — plus `GraphTheory.Oversmoothing`, the certified depth past which propagated views are provably ε-close to stationarity, and the per-pair resistance contrast bound (the walk law's four-point contrast against `√R·√R` of the two pairs) |
+| Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized`, `GraphTheory.Stationary`, `GraphTheory.Mixing` — the ℓ²-mixing proxy and the geometric-decay mixing bound — plus `GraphTheory.Oversmoothing`, the certified depth past which propagated views are provably ε-close to stationarity, the per-pair resistance contrast bound (the walk law's four-point contrast against `√R·√R` of the two pairs), and the **total-variation mixing conversion** (`tvDistance` with `TV ≤ (1/2)·√χ²` at the sharp classical constant, and the depth-form TV ceiling — the field-standard `t_mix(ε)` statement form, with its two-start `2ε` twin) |
 | Directed operators | `GraphTheory.Directed` — out/in-degree, directed handshaking, the directed normalized Laplacian |
 | Krylov methods and Chebyshev polynomials | `GraphTheory.Krylov` — the Lanczos/Kaniel–Paige program, complete end-to-end |
 | Polynomial filters and band projection | `GraphTheory.PolyFilter` — filter-agnostic band-projector approximation, with power-method and Chebyshev instantiations |
@@ -270,7 +270,7 @@ example, and the [SGT Radar](docs/7_SGT_RADAR.md) for coverage scores.
 
 ### SGT coverage snapshot
 
-Last assessed: August 27, 2026. Scores reflect usable, verified coverage on a
+Last assessed: August 31, 2026. Scores reflect usable, verified coverage on a
 0–5 scale; see the [full radar and evidence](docs/7_SGT_RADAR.md).
 
 | Area | Coverage |
@@ -279,7 +279,7 @@ Last assessed: August 27, 2026. Scores reflect usable, verified coverage on a
 | Spectral linear algebra | 4.5 / 5 |
 | Variational and functional methods | 4.0 / 5 |
 | Cuts, expansion, and clustering | 5.0 / 5 |
-| Random walks and diffusion | 4.0 / 5 |
+| Random walks and diffusion | 4.5 / 5 |
 | Combinatorial and electrical structure | 4.5 / 5 |
 | Perturbation, randomness, and algorithms | 4.5 / 5 |
 | Adjacent systems interfaces | 1.0 / 5 |

@@ -27,8 +27,10 @@ center.
 
 **Scoping record (the proposal's decide-and-record gate, made before
 any statement):** the ℓ² statement alone satisfies this proposal's
-goal; the ℓ² → TV conversion stays a separate further step (the
-proposal's own Step 4 framing). Within ℓ², the *weighted* form is
+goal; the ℓ² → TV conversion was a separate further step (the
+proposal's own Step 4 framing) — delivered 2026-08-31 as its own
+proposal, in the module's `TotalVariation` section below. Within ℓ²,
+the *weighted* form is
 primary: the proxy is the χ² distance
 `χ²(t, x) = ∑ i, (ν_t i − π i)² / π i` with `π = deg/vol`, because the
 decay bound of Step 3 is Parseval-exact in the π-weighted inner
@@ -79,6 +81,22 @@ The declarations:
   composed with mass conservation), and the headline mixing bound
   `chiSquareDistance_le_of_connected`:
   `χ²(t, x) ≤ r ^ (2t) · ((π x)⁻¹ − 1)` under the rate hypothesis.
+- the **total-variation distance and the ℓ² conversion** (the mixing
+  program's deferred Step 4, delivered 2026-08-31 as its own proposal
+  `proposals/total-variation-mixing-conversion.md`): `tvDistance` in
+  its finite-state vector form `(1/2) ∑ i, |μ i − ν i|` — the scoping
+  decision recorded in that proposal dissolves the original Step-4
+  cost estimate (no `MeasureTheory` wrapper: the module is already
+  vector-valued, and for probability vectors this `L¹` form *is* the
+  classical finite-state TV) — with symmetry, the triangle
+  inequality, the generic Cauchy–Schwarz conversion
+  `tvDistance_le_half_sqrt` (`TV ≤ (1/2)·√χ²` at the sharp classical
+  constant, attained exactly on `K₂`), the unconditional walk-level
+  shadow `walkDistribution_tvDistance_le`, and the rate form
+  `walkDistribution_tvDistance_le_of_connected` — the closing χ² bound
+  restated in the field-standard mixing distance. (The depth-form TV
+  ceiling and its two-start twin live in `Oversmoothing.lean`, beside
+  the entrywise family they twin.)
 
 Everything here is proved; no axiom is admitted. The pinned Mathlib
 has no chi-square, total-variation, or mixing-time objects (surveyed
@@ -903,5 +921,158 @@ theorem chiSquareDistance_le_of_connected (A : WAdj (V := V))
     _ = r ^ (2 * t) * chiSquareDistance A 0 x := by rw [h0]
     _ = r ^ (2 * t) * ((stationaryVec A x)⁻¹ - 1) := by
           rw [chiSquareDistance_zero A hd x]
+
+/-! ### The total-variation distance and the ℓ² conversion
+
+The mixing program's deferred Step 4
+(`proposals/total-variation-mixing-conversion.md`, delivered
+2026-08-31): the field-standard mixing distance, obtained from the χ²
+distance by the classical Cauchy–Schwarz step at its sharp constant
+`TV ≤ (1/2)·√χ²` — no `MeasureTheory` anywhere (the scoping decision
+that dissolved the original Step-4 cost estimate). -/
+
+/-- The total-variation distance between two vectors on the finite
+vertex type, in its finite-state vector form
+`tvDistance μ ν = (1/2) ∑ i, |μ i − ν i|`. Scoping record (the mixing
+program's own Step-4 idiom): no `MeasureTheory` anywhere — this
+module is vector-valued, and for probability vectors this `L¹` form
+*is* the classical finite-state total variation (equal to the
+max-over-events discrepancy `sup_A |μ A − ν A|`, a fact we do not
+need and do not restate). Real arithmetic throughout —
+`noncomputable` like the module's other distances. -/
+noncomputable def tvDistance (μ ν : V → ℝ) : ℝ :=
+  (1/2) * ∑ i, |μ i - ν i|
+
+omit [DecidableEq V] in
+theorem tvDistance_nonneg (μ ν : V → ℝ) : 0 ≤ tvDistance μ ν := by
+  rw [tvDistance]
+  positivity
+
+omit [DecidableEq V] in
+theorem tvDistance_symm (μ ν : V → ℝ) :
+    tvDistance μ ν = tvDistance ν μ := by
+  simp only [tvDistance, abs_sub_comm]
+
+omit [DecidableEq V] in
+/-- The triangle inequality — the only structural fact the two-start
+corollary needs. -/
+theorem tvDistance_triangle (μ ν ρ : V → ℝ) :
+    tvDistance μ ρ ≤ tvDistance μ ν + tvDistance ν ρ := by
+  have hpt : ∀ i : V, |μ i - ρ i| ≤ |μ i - ν i| + |ν i - ρ i| := by
+    intro i
+    rw [← sub_add_sub_cancel]
+    exact abs_add _ _
+  have hsum : ∑ i, |μ i - ρ i|
+      ≤ ∑ i, (|μ i - ν i| + |ν i - ρ i|) :=
+    Finset.sum_le_sum fun i _ => hpt i
+  rw [Finset.sum_add_distrib] at hsum
+  simp only [tvDistance]
+  linarith
+
+omit [DecidableEq V] in
+/-- **The ℓ² → total-variation conversion** — the classical
+Cauchy–Schwarz step, at its sharp constant: for a positive weight `w`
+of total mass one and any vector `ν`, the total-variation distance
+from `ν` to `w` is at most half the square root of the χ² distance
+`∑ i, (ν i − w i)² / w i`. Both remaining hypotheses are load-bearing:
+a mass-`2` weight refutes the un-guarded form
+(`tv_conversion_mass_guard_refuted_QA`), while the `|ν i − w i| =
+w i · |ν i / w i − 1|` identity is sign-free — no sign or mass
+hypothesis on `ν` is needed, the bound holding for arbitrary signed
+vectors, not just probability vectors. -/
+theorem tvDistance_le_half_sqrt {w ν : V → ℝ} (hw : ∀ i, 0 < w i)
+    (hw1 : ∑ i, w i = 1) :
+    tvDistance ν w
+      ≤ (1/2) * Real.sqrt (∑ i, (ν i - w i)^2 / w i) := by
+  have hpt : ∀ i : V, |ν i - w i| = w i * |ν i / w i - 1| := by
+    intro i
+    have hwi : w i ≠ 0 := ne_of_gt (hw i)
+    have hkey : ν i - w i = w i * (ν i / w i - 1) := by
+      field_simp
+    rw [hkey, abs_mul, abs_of_pos (hw i)]
+  have hTV : 2 * tvDistance ν w
+      = ∑ i, w i * |ν i / w i - 1| := by
+    have h2 : (2 : ℝ) * tvDistance ν w = ∑ i, |ν i - w i| := by
+      rw [tvDistance, ← mul_assoc,
+        show (2 : ℝ) * (1/2) = 1 from by norm_num, one_mul]
+    rw [h2]
+    exact Finset.sum_congr rfl fun i _ => hpt i
+  have hcs : (∑ i, w i * |ν i / w i - 1|)^2
+      ≤ (∑ i, w i) * ∑ i, w i * (ν i / w i - 1)^2 := by
+    have hgen := Finset.sum_mul_sq_le_sq_mul_sq (Finset.univ : Finset V)
+      (fun i => Real.sqrt (w i))
+      (fun i => Real.sqrt (w i) * |ν i / w i - 1|)
+    have hfg : ∀ i : V, (Real.sqrt (w i))
+        * (Real.sqrt (w i) * |ν i / w i - 1|)
+        = w i * |ν i / w i - 1| := by
+      intro i
+      rw [← mul_assoc, Real.mul_self_sqrt (le_of_lt (hw i))]
+    have hfsq : ∀ i : V, (Real.sqrt (w i))^2 = w i :=
+      fun i => Real.sq_sqrt (le_of_lt (hw i))
+    have hgsq : ∀ i : V, (Real.sqrt (w i) * |ν i / w i - 1|)^2
+        = w i * (ν i / w i - 1)^2 := by
+      intro i
+      rw [mul_pow, hfsq i, sq_abs]
+    rw [Finset.sum_congr rfl fun i _ => hfg i,
+      Finset.sum_congr rfl fun i _ => hfsq i,
+      Finset.sum_congr rfl fun i _ => hgsq i] at hgen
+    exact hgen
+  have hsum2 : ∑ i, w i * (ν i / w i - 1)^2
+      = ∑ i, (ν i - w i)^2 / w i :=
+    Finset.sum_congr rfl fun i _ => by
+      have hwi : w i ≠ 0 := ne_of_gt (hw i)
+      field_simp
+      ring
+  rw [hw1, one_mul, hsum2] at hcs
+  have key : (2 * tvDistance ν w)^2
+      ≤ ∑ i, (ν i - w i)^2 / w i := by
+    rw [hTV]
+    exact hcs
+  have htvnn : 0 ≤ 2 * tvDistance ν w := by
+    rw [tvDistance]
+    positivity
+  have hkey2 : Real.sqrt ((2 * tvDistance ν w)^2)
+      ≤ Real.sqrt (∑ i, (ν i - w i)^2 / w i) :=
+    Real.sqrt_le_sqrt key
+  rw [Real.sqrt_sq htvnn] at hkey2
+  linarith
+
+/-- **The walk-level conversion**: the χ² mixing bound's TV shadow —
+the walk law's total-variation distance to stationarity is at most
+half the square root of the χ² distance, unconditionally (no
+connectivity, no rate: every hypothesis here is one this module
+already proves for every walk). -/
+theorem walkDistribution_tvDistance_le (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (t : ℕ) (x : V) :
+    tvDistance (walkDistribution A t x) (stationaryVec A)
+      ≤ (1/2) * Real.sqrt (chiSquareDistance A t x) :=
+  tvDistance_le_half_sqrt (stationaryVec_pos A hd)
+    (sum_stationaryVec A hd)
+
+/-- **The rate form** — the mixing program's closing bound restated in
+total variation: under exactly `chiSquareDistance_le_of_connected`'s
+hypothesis set, `TV(ν_t x, π) ≤ (1/2) · √(r^{2t} · ((π x)⁻¹ − 1))`.
+Pure hard crust: one Cauchy–Schwarz step composed with the proved χ²
+bound. QA: the exact-attainment pin `k2_conversion_attained_QA` (on
+`K₂` at `t = 1`, `TV = (1/2)·√χ²` with both sides `1/2` — the
+constant sharp) and the triangle instances at `t = 1, 2, 3`
+(`tri_tv_*_eq_QA`), with the depth-form consumers' QA in
+`Mixing_QA.lean`'s TV section. -/
+theorem walkDistribution_tvDistance_le_of_connected (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (hconn : (supportGraph A hA).Connected) (r : ℝ)
+    (t : ℕ) (x : V)
+    (hrate : ∀ i : V, eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i ≠ 0 →
+      |1 - eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i| ≤ r) :
+    tvDistance (walkDistribution A t x) (stationaryVec A)
+      ≤ (1/2) * Real.sqrt
+          (r ^ (2 * t) * ((stationaryVec A x)⁻¹ - 1)) := by
+  refine (walkDistribution_tvDistance_le A hd t x).trans ?_
+  exact mul_le_mul_of_nonneg_left
+    (Real.sqrt_le_sqrt
+      (chiSquareDistance_le_of_connected A hA hnn hd hconn r t x hrate))
+    (by norm_num)
 
 end SpectralGraphTheory

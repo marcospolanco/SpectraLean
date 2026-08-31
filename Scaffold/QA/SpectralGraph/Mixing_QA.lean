@@ -39,6 +39,19 @@
   theorems, not axioms; QA checks the interfaces where the arithmetic
   is evaluated.
 
+  The total-variation section (2026-08-31,
+  `proposals/total-variation-mixing-conversion.md`) exercises the ℓ² →
+  TV conversion and its depth-form consumers: the **exact-attainment
+  pin** `k2_conversion_attained_QA` (on `K₂` at `t = 1`,
+  `TV = (1/2)·√χ² = 1/2` with both sides independently pinned — the
+  conversion's constant sharp, no smaller constant possible), the
+  triangle's exact TV values at `t = 1, 2, 3` against the rate and
+  split-rate theorem instances, the depth-2 certificate at `ε = 1/4`
+  with depth 1 *proved* to fail the threshold, the two-start instance
+  at depth 3 with its raw value `1/8`, and the mass-one fence
+  (`tv_conversion_mass_guard_refuted_QA`: at a mass-2 weight the
+  un-guarded conversion reads `1/2 ≤ (1/2)·√(1/2)`, refuted).
+
   Scoreboard: ../QA_SCOREBOARD.md
 -/
 
@@ -2481,5 +2494,319 @@ theorem c4_contrast_dropped_hyp_refuted_QA :
 
 
 end C4Fence
+
+/-! ### The ℓ² → TV conversion QA (2026-08-31)
+
+`proposals/total-variation-mixing-conversion.md`: the conversion
+`tvDistance_le_half_sqrt` and its walk-level/depth-form consumers,
+exercised at the counted triangle fixture plus a new `K₂` edge
+fixture — the conversion's constant is *attained exactly* on `K₂`
+(the strongest QA shape a bound theorem can have), and the generic
+conversion's mass-one hypothesis is fenced. -/
+
+/-- Adjacency of the unit edge `K₂` on `Fin 2`. -/
+def k2Adj : Matrix (Fin 2) (Fin 2) ℝ :=
+  Matrix.of !![0, 1; 1, 0]
+
+theorem k2Adj_apply (i j : Fin 2) : k2Adj i j = if i = j then 0 else 1 := by
+  fin_cases i <;> fin_cases j <;> rfl
+
+theorem k2Adj_isSymm : k2Adj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  rw [k2Adj_apply, k2Adj_apply]
+  by_cases h : i = j
+  · simp [h]
+  · simp [h, Ne.symm h]
+
+theorem k2Adj_nonneg (i j : Fin 2) : 0 ≤ k2Adj i j := by
+  rw [k2Adj_apply]
+  by_cases h : i = j <;> simp [h]
+
+theorem k2Adj_deg_eq (i : Fin 2) : deg k2Adj i = 1 := by
+  rw [deg]
+  fin_cases i <;> simp [k2Adj_apply, Fin.sum_univ_two]
+
+theorem k2Adj_deg_pos (i : Fin 2) : 0 < deg k2Adj i := by
+  simp [k2Adj_deg_eq]
+
+/-- The edge's support graph is connected. -/
+theorem k2_connected : (supportGraph k2Adj k2Adj_isSymm).Connected := by
+  have hfrom0 : ∀ v : Fin 2,
+      (supportGraph k2Adj k2Adj_isSymm).Reachable 0 v := by
+    intro v
+    fin_cases v
+    · exact ⟨SimpleGraph.Walk.nil⟩
+    · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 1)
+        ⟨by decide, by norm_num [k2Adj]⟩ SimpleGraph.Walk.nil⟩
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  exact ⟨0, hfrom0⟩
+
+/-- `π = (1/2, 1/2)` on the edge. -/
+theorem k2_pi_QA (i : Fin 2) : stationaryVec k2Adj i = 1/2 := by
+  have hv : vol k2Adj (Finset.univ : Finset (Fin 2)) = 2 := by
+    simp only [vol, k2Adj_deg_eq, Finset.sum_const, Finset.card_univ,
+      Fintype.card_fin]
+    norm_num
+  rw [stationaryVec, k2Adj_deg_eq, hv]
+
+/-- The one-step law from vertex `0` on the edge: `(0, 1)`. -/
+theorem k2_dist_one_QA :
+    walkDistribution k2Adj 1 0 = ![0, 1] := by
+  rw [walkDistribution_succ, walkDistribution_zero]
+  funext i
+  fin_cases i
+  all_goals simp [walkTransitionMatrix, deg, k2Adj, Matrix.mulVec,
+    Matrix.dotProduct, Fin.sum_univ_two, Pi.single_apply]
+
+/-- **The exact TV value on the edge at `t = 1`**: the walk law has
+moved the whole mass across the edge, so the distance to the uniform
+stationary vector is maximal, `1/2`. -/
+theorem k2_tv_one_QA :
+    tvDistance (walkDistribution k2Adj 1 0) (stationaryVec k2Adj) = 1/2 := by
+  rw [tvDistance]
+  norm_num [k2_dist_one_QA, k2_pi_QA, Fin.sum_univ_two,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+    neg_sub, abs_of_neg, abs_of_nonneg]
+
+/-- **The exact χ² value on the edge at `t = 1`**: `1`. -/
+theorem k2_chi2_one_QA :
+    chiSquareDistance k2Adj 1 0 = 1 := by
+  simp only [chiSquareDistance, k2_dist_one_QA, k2_pi_QA,
+    Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons]
+  norm_num
+
+/-- **The conversion constant attained exactly**: on `K₂` at `t = 1`,
+`TV = 1/2 = (1/2) · √χ² = (1/2) · √1` — no sharper constant in front
+of the square root can hold, the strongest QA shape a bound theorem
+can have. (Cauchy–Schwarz attains equality here: the centered density
+`h₁ = (0, 2)` has `|h − 1|` constant on the two vertices.) -/
+theorem k2_conversion_attained_QA :
+    tvDistance (walkDistribution k2Adj 1 0) (stationaryVec k2Adj)
+      = (1/2) * Real.sqrt (chiSquareDistance k2Adj 1 0) := by
+  rw [k2_tv_one_QA, k2_chi2_one_QA, Real.sqrt_one]
+  norm_num
+
+/-- **The conversion instance on the edge** (the unconditional
+walk-level form; the bipartite edge admits no `r < 1` rate, so the
+rate form is honestly vacuous here — the conversion itself is not). -/
+theorem k2_conversion_le_QA :
+    tvDistance (walkDistribution k2Adj 1 0) (stationaryVec k2Adj)
+      ≤ (1/2) * Real.sqrt (chiSquareDistance k2Adj 1 0) :=
+  walkDistribution_tvDistance_le k2Adj k2Adj_deg_pos 1 0
+
+/-- The conversion's one remaining hypothesis holds genuinely at the
+mass-refutation fixture below (positive weight) — the refutation
+isolates exactly the mass clause. -/
+theorem tv_conversion_fixture_clauses_QA :
+    ∀ i : Fin 2, 0 < (![1, 1] : Fin 2 → ℝ) i := by
+  intro i
+  fin_cases i <;> norm_num
+
+/-- **The mass-one hypothesis is load-bearing**: at the mass-`2`
+weight `w = (1, 1)` (positive, as the conversion's only other
+hypothesis demands — see `tv_conversion_fixture_clauses_QA`) and the
+genuine probability vector `ν = (1/2, 1/2)`, the un-guarded
+conclusion reads `1/2 ≤ (1/2)·√(1/2)`, which is false — total mass
+`∑ w = 1` cannot be dropped from the generic conversion. -/
+theorem tv_conversion_mass_guard_refuted_QA :
+    ¬ (tvDistance (![(1/2 : ℝ), 1/2] : Fin 2 → ℝ) (![1, 1] : Fin 2 → ℝ)
+      ≤ (1/2) * Real.sqrt (∑ i : Fin 2,
+          ((![(1/2 : ℝ), 1/2] : Fin 2 → ℝ) i
+            - (![1, 1] : Fin 2 → ℝ) i)^2
+          / (![1, 1] : Fin 2 → ℝ) i)) := by
+  intro h
+  have hsum : ∑ i : Fin 2,
+      ((![(1/2 : ℝ), 1/2] : Fin 2 → ℝ) i
+        - (![1, 1] : Fin 2 → ℝ) i)^2
+      / (![1, 1] : Fin 2 → ℝ) i = 1/2 := by
+    simp only [Fin.sum_univ_two, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.head_cons]
+    norm_num
+  have hL : tvDistance (![(1/2 : ℝ), 1/2] : Fin 2 → ℝ)
+      (![1, 1] : Fin 2 → ℝ) = 1/2 := by
+    rw [tvDistance]
+    norm_num [Fin.sum_univ_two, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.head_cons, neg_sub, abs_of_neg,
+      abs_of_nonneg]
+  rw [hL, hsum] at h
+  have hs : Real.sqrt (1/2) < 1 := by
+    have hlt := (Real.sqrt_lt_sqrt_iff
+      (by norm_num : (0 : ℝ) ≤ 1/2)).mpr (by norm_num : (1/2 : ℝ) < 1)
+    rwa [Real.sqrt_one] at hlt
+  have hlt : (1/2 : ℝ) * Real.sqrt (1/2) < (1/2) * 1 :=
+    mul_lt_mul_of_pos_left hs (by norm_num)
+  rw [mul_one] at hlt
+  linarith
+
+/-- **The exact TV value on the triangle at `t = 1`**: `1/3`. -/
+theorem tri_tv_one_eq_QA :
+    tvDistance (walkDistribution triAdj 1 0) (stationaryVec triAdj)
+      = 1/3 := by
+  rw [tvDistance]
+  norm_num [tri_dist_one_QA, tri_pi_QA, Fin.sum_univ_three,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+    Matrix.head_cons, neg_sub, abs_of_neg, abs_of_nonneg]
+
+/-- **The exact TV value on the triangle at `t = 2`**: `1/6`. -/
+theorem tri_tv_two_eq_QA :
+    tvDistance (walkDistribution triAdj 2 0) (stationaryVec triAdj)
+      = 1/6 := by
+  rw [tvDistance]
+  norm_num [tri_dist_two_QA, tri_pi_QA, Fin.sum_univ_three,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+    Matrix.head_cons, neg_sub, abs_of_neg, abs_of_nonneg]
+
+/-- **The exact TV value on the triangle at `t = 3`**: `1/12` (the raw
+`ν₃` pinned beside it by `tri_dist_three_zero_QA`). -/
+theorem tri_tv_three_eq_QA :
+    tvDistance (walkDistribution triAdj 3 0) (stationaryVec triAdj)
+      = 1/12 := by
+  rw [tvDistance]
+  norm_num [tri_dist_three_zero_QA, tri_pi_QA, Fin.sum_univ_three,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+    Matrix.head_cons, neg_sub, abs_of_neg, abs_of_nonneg]
+
+/-- **The rate form instantiated** — the un-split TV bound on the
+triangle at rate `1/2`, `t = 1`. -/
+theorem tri_tv_rate_one_QA :
+    tvDistance (walkDistribution triAdj 1 0) (stationaryVec triAdj)
+      ≤ (1/2) * Real.sqrt
+          ((1/2)^(2 * 1) * ((stationaryVec triAdj 0)⁻¹ - 1)) :=
+  walkDistribution_tvDistance_le_of_connected triAdj triAdj_isSymm
+    triAdj_nonneg triAdj_deg_pos tri_connected (1/2) 1 0 tri_rate_QA
+
+/-- The numerics behind the instance: the bound's right side is
+`(1/2)·√(1/2)` while the pinned true value is `1/3` — honest Cauchy–
+Schwarz slack (equality in the conversion needs `|h − 1|` constant,
+which fails on the triangle). -/
+theorem tri_tv_rate_one_holds_QA :
+    (1/3 : ℝ) ≤ (1/2) * Real.sqrt (1/2) := by
+  have hsq : ((2/3 : ℝ))^2 ≤ 1/2 := by norm_num
+  have h23 : (2/3 : ℝ) ≤ Real.sqrt (1/2) :=
+    Real.le_sqrt_of_sq_le hsq
+  linarith
+
+/-- **The split rate form instantiated** — `TV ≤ (1/2)·(1/2)·√2` at
+`t = 1` on the triangle. -/
+theorem tri_tv_rate_split_one_QA :
+    tvDistance (walkDistribution triAdj 1 0) (stationaryVec triAdj)
+      ≤ (1/2) * (1/2)^1 * Real.sqrt 2 := by
+  have hpi : (stationaryVec triAdj 0)⁻¹ - 1 = 2 := by
+    rw [tri_pi_QA 0]
+    norm_num
+  have h := walkDistribution_tvDistance_le_of_rate triAdj triAdj_isSymm
+    triAdj_nonneg triAdj_deg_pos tri_connected (1/2) (by norm_num)
+    tri_rate_QA 1 0
+  rw [hpi] at h
+  exact h
+
+theorem sqrt_two_le_two_QA : Real.sqrt 2 ≤ 2 := by
+  have h4 : Real.sqrt ((4 : ℝ)) = 2 := by
+    rw [show (4 : ℝ) = (2 : ℝ)^2 from by norm_num,
+      Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 2)]
+  exact (Real.sqrt_le_sqrt (by norm_num : (2 : ℝ) ≤ 4)).trans (le_of_eq h4)
+
+/-- **The TV-depth certificate on the triangle**: at rate `1/2` and
+`ε = 1/4`, depth `2` already brings the walk law within `1/4` of
+stationarity in total variation (threshold: `log (2√2)/log 2 = 3/2
+≤ 2`; the true value `TV(2) = 1/6` sits inside). -/
+theorem tri_tv_depth_two_QA :
+    tvDistance (walkDistribution triAdj 2 0) (stationaryVec triAdj)
+      ≤ 1/4 := by
+  have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have hpos : 0 < Real.sqrt 2 / (2 * (1/4 : ℝ)) := by positivity
+  have h4 : (2 : ℝ) ^ (2 : ℕ) = 4 := by norm_num
+  have hle : Real.sqrt 2 / (2 * (1/4 : ℝ)) ≤ (2 : ℝ) ^ (2 : ℕ) := by
+    rw [div_le_iff₀ (by norm_num : (0 : ℝ) < 2 * (1/4)), h4,
+      show (4 : ℝ) * (2 * (1/4 : ℝ)) = 2 from by norm_num]
+    exact sqrt_two_le_two_QA
+  have hlog := (Real.log_le_log_iff hpos
+    (by rw [h4]; norm_num)).mpr hle
+  rw [Real.log_pow] at hlog
+  refine walkDistribution_tvDistance_le_of_depth triAdj triAdj_isSymm
+    triAdj_nonneg triAdj_deg_pos tri_connected (1/2) (1/4) (by norm_num)
+    (by norm_num) (by norm_num) tri_rate_QA 2 0 ?_
+  have hpi : (stationaryVec triAdj 0)⁻¹ - 1 = 2 := by
+    rw [tri_pi_QA 0]
+    norm_num
+  rw [hpi, show Real.log (1 / (1/2 : ℝ)) = Real.log 2 from by
+      rw [show (1 : ℝ) / (1/2) = 2 from by norm_num],
+    div_le_iff₀ hlog2]
+  push_cast at hlog ⊢
+  linarith
+
+/-- **Depth `1` does not meet the same threshold**: `2 < 2√2`, so the
+depth-2 certificate is the sharp one — the threshold hypothesis
+genuinely does the work (the true value `TV(1) = 1/3 > 1/4` confirms
+no depth-1 TV statement was available on this fixture). -/
+theorem tri_tv_depth_one_fails_QA :
+    ¬ (Real.log (Real.sqrt 2 / (2 * (1/4 : ℝ)))
+      / Real.log 2 ≤ (1 : ℝ)) := by
+  intro h
+  have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have h2 : Real.log (Real.sqrt 2 / (2 * (1/4 : ℝ)))
+      ≤ (1 : ℝ) * Real.log 2 :=
+    (div_le_iff₀ hlog2).mp h
+  rw [one_mul] at h2
+  have hlt : (2 : ℝ) < Real.sqrt 2 / (2 * (1/4 : ℝ)) := by
+    rw [lt_div_iff₀ (by norm_num : (0 : ℝ) < 2 * (1/4)),
+      show (2 : ℝ) * (2 * (1/4 : ℝ)) = 1 from by norm_num]
+    have h1 : (1 : ℝ) < Real.sqrt 2 := by
+      have hlt2 := Real.sqrt_lt_sqrt (by norm_num : (0 : ℝ) ≤ 1)
+        (by norm_num : (1 : ℝ) < 2)
+      rwa [Real.sqrt_one] at hlt2
+    linarith
+  have hmono := (Real.log_lt_log_iff (by norm_num : (0 : ℝ) < 2)
+    (by positivity : 0 < Real.sqrt 2 / (2 * (1/4 : ℝ)))).mpr hlt
+  linarith
+
+/-- **The two-start TV twin instantiated**: at depth `3` both starts'
+thresholds hold (`log (2√2)/log 2 = 3/2 ≤ 3`), so the two `3`-step
+laws are within `2·(1/4) = 1/2` of each other in total variation. -/
+theorem tri_tv_two_start_three_QA :
+    tvDistance (walkDistribution triAdj 3 0) (walkDistribution triAdj 3 1)
+      ≤ 2 * (1/4) := by
+  have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have hpos : 0 < Real.sqrt 2 / (2 * (1/4 : ℝ)) := by positivity
+  have h8 : (2 : ℝ) ^ (3 : ℕ) = 8 := by norm_num
+  have hle : Real.sqrt 2 / (2 * (1/4 : ℝ)) ≤ (2 : ℝ) ^ (3 : ℕ) := by
+    rw [div_le_iff₀ (by norm_num : (0 : ℝ) < 2 * (1/4)), h8,
+      show (8 : ℝ) * (2 * (1/4 : ℝ)) = 4 from by norm_num]
+    linarith [sqrt_two_le_two_QA]
+  have hlog := (Real.log_le_log_iff hpos (by rw [h8]; norm_num)).mpr hle
+  rw [Real.log_pow] at hlog
+  have hthr0 : Real.log (Real.sqrt 2 / (2 * (1/4 : ℝ)))
+      / Real.log 2 ≤ (3 : ℝ) := by
+    rw [div_le_iff₀ hlog2]
+    push_cast at hlog ⊢
+    linarith
+  have e0 : (stationaryVec triAdj 0)⁻¹ - 1 = 2 := by
+    rw [tri_pi_QA 0]
+    norm_num
+  have e1 : (stationaryVec triAdj 1)⁻¹ - 1 = 2 := by
+    rw [tri_pi_QA 1]
+    norm_num
+  refine walkDistribution_tvDistance_sub_le_of_depth triAdj triAdj_isSymm
+    triAdj_nonneg triAdj_deg_pos tri_connected (1/2) (1/4) (by norm_num)
+    (by norm_num) (by norm_num) tri_rate_QA 3 0 1 ?_ ?_
+  · rw [e0, show Real.log (1 / (1/2 : ℝ)) = Real.log 2 from by
+      rw [show (1 : ℝ) / (1/2) = 2 from by norm_num]]
+    exact hthr0
+  · rw [e1, show Real.log (1 / (1/2 : ℝ)) = Real.log 2 from by
+      rw [show (1 : ℝ) / (1/2) = 2 from by norm_num]]
+    exact hthr0
+
+/-- **The two-start raw value**: `TV(ν₃ 0, ν₃ 1) = 1/8` — the true
+distance at a quarter of the `2ε = 1/2` bound, honest slack beside
+the certified statement. -/
+theorem tri_tv_two_start_value_QA :
+    tvDistance (walkDistribution triAdj 3 0) (walkDistribution triAdj 3 1)
+      = 1/8 := by
+  rw [tvDistance]
+  norm_num [tri_dist_three_zero_QA, tri_dist_three_one_QA,
+    Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.cons_val_two, Matrix.head_cons, neg_sub, abs_of_neg,
+    abs_of_nonneg]
 
 end SpectralGraphTheory.QA

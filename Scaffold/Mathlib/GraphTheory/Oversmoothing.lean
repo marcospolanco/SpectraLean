@@ -58,6 +58,17 @@ The declarations:
   **monotone in the rate** — a looser rate certificate provably buys a
   provably larger threshold (the engine behind the QA sanity contrast;
   the ceiling tracks the certified spectral gap, not a constant).
+- the **TV twin** (delivered 2026-08-31,
+  `proposals/total-variation-mixing-conversion.md`):
+  `walkDistribution_tvDistance_le_of_rate` (the split-constant rate
+  form `TV ≤ (1/2)·r^t·√C`), `walkDistribution_tvDistance_le_of_depth`
+  (past the threshold — the entrywise ceiling's own with `ε` at `2ε` —
+  the walk law is within `ε` of stationarity *in total variation*,
+  the field-standard `t_mix(ε)` statement), and
+  `walkDistribution_tvDistance_sub_le_of_depth` (the two-start `2ε`
+  twin through `tvDistance_triangle`), all consuming
+  `Mixing.lean`'s conversion `TV ≤ (1/2)·√χ²` composed with the proved
+  χ² mixing bound.
 
 ## The per-pair resistance refinement (delivered 2026-08-31)
 
@@ -845,5 +856,113 @@ theorem walkDistribution_pair_contrast_abs_le' {A : WAdj (V := V)} {d : ℝ}
       (pow_nonneg hr t)) t x₁ x₂ y y' hlam
 
 end PairResistance
+
+/-! ### The TV twin of the oversmoothing ceiling
+
+The depth-form consumers of the total-variation mixing bound
+(`proposals/total-variation-mixing-conversion.md`, delivered
+2026-08-31): the field-standard statement of the oversmoothing
+ceiling — past a computable depth, the propagated *distribution* is
+within `ε` of stationarity in total variation (`t_mix(ε)`'s own
+statement form), with the two-start `2ε` twin mirroring the entrywise
+family's corollary. -/
+
+/-- **The split-constant rate form** — `TV ≤ (1/2) · r ^ t · √C` with
+`C = (π x)⁻¹ − 1 ≥ 0` (`stationaryVec_le_one`), the shape the
+depth-form threshold consumes. -/
+theorem walkDistribution_tvDistance_le_of_rate (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (hconn : (supportGraph A hA).Connected) (r : ℝ)
+    (hr : 0 ≤ r)
+    (hrate : ∀ i : V, eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i ≠ 0 →
+      |1 - eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i| ≤ r)
+    (t : ℕ) (x : V) :
+    tvDistance (walkDistribution A t x) (stationaryVec A)
+      ≤ (1/2) * r ^ t * Real.sqrt ((stationaryVec A x)⁻¹ - 1) := by
+  have hC : 0 ≤ (stationaryVec A x)⁻¹ - 1 := by
+    have h1 := stationaryVec_le_one A hd x
+    have hpos := stationaryVec_pos A hd x
+    have hinv := (one_le_inv₀ hpos).mpr h1
+    linarith
+  refine (walkDistribution_tvDistance_le_of_connected A hA hnn hd hconn r
+    t x hrate).trans ?_
+  rw [show r ^ (2 * t) = (r ^ t)^2 by rw [← pow_mul]; congr 1; ring,
+    Real.sqrt_mul (sq_nonneg (r ^ t)) ((stationaryVec A x)⁻¹ - 1),
+    Real.sqrt_sq (pow_nonneg hr t)]
+  exact le_of_eq (by ring)
+
+/-- **The TV twin of the oversmoothing ceiling**: past the TV
+threshold depth `log (√C / (2ε)) / log (1/r)` (with
+`C = (π x)⁻¹ − 1`), the walk law from `x` is within `ε` of the
+stationary distribution *in total variation* — the field-standard
+mixing statement (`t_mix(ε)` is TV-based), now expressible on this
+shelf. The threshold is the entrywise ceiling's own with `ε` replaced
+by `2ε`, exactly the factor the Cauchy–Schwarz conversion and the
+`L¹` sum pay. -/
+theorem walkDistribution_tvDistance_le_of_depth (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (hconn : (supportGraph A hA).Connected) (r ε : ℝ)
+    (hr : 0 < r) (hr1 : r < 1) (hε : 0 < ε)
+    (hrate : ∀ i : V, eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i ≠ 0 →
+      |1 - eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i| ≤ r)
+    (t : ℕ) (x : V)
+    (hthr : Real.log (Real.sqrt ((stationaryVec A x)⁻¹ - 1) / (2 * ε))
+      / Real.log (1 / r) ≤ (t : ℝ)) :
+    tvDistance (walkDistribution A t x) (stationaryVec A) ≤ ε := by
+  refine (walkDistribution_tvDistance_le_of_rate A hA hnn hd hconn r
+    (le_of_lt hr) hrate t x).trans ?_
+  have hthr' : Real.log (Real.sqrt ((stationaryVec A x)⁻¹ - 1) / 2 / ε)
+      / Real.log (1 / r) ≤ (t : ℝ) := by
+    rw [show Real.sqrt ((stationaryVec A x)⁻¹ - 1) / 2 / ε
+        = Real.sqrt ((stationaryVec A x)⁻¹ - 1) / (2 * ε) from by ring]
+    exact hthr
+  have hkey : r ^ t
+      * (Real.sqrt ((stationaryVec A x)⁻¹ - 1) / 2) ≤ ε :=
+    pow_mul_le_of_log_threshold hr hr1
+      (div_nonneg (Real.sqrt_nonneg _) (by norm_num : (0 : ℝ) ≤ 2)) hε t
+      hthr'
+  have hring : (1/2) * r ^ t * Real.sqrt ((stationaryVec A x)⁻¹ - 1)
+      = r ^ t * (Real.sqrt ((stationaryVec A x)⁻¹ - 1) / 2) := by ring
+  rw [hring]
+  exact hkey
+
+/-- **Two-start indistinguishability in total variation** — the TV
+twin of the entrywise two-start corollary: past both starts' own TV
+thresholds, the two `t`-step laws are within `2ε` of each other in
+total variation. -/
+theorem walkDistribution_tvDistance_sub_le_of_depth
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V]
+    (hconn : (supportGraph A hA).Connected) (r ε : ℝ)
+    (hr : 0 < r) (hr1 : r < 1) (hε : 0 < ε)
+    (hrate : ∀ i : V, eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i ≠ 0 →
+      |1 - eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i| ≤ r)
+    (t : ℕ) (x x' : V)
+    (hthr : Real.log (Real.sqrt ((stationaryVec A x)⁻¹ - 1) / (2 * ε))
+      / Real.log (1 / r) ≤ (t : ℝ))
+    (hthr' : Real.log (Real.sqrt ((stationaryVec A x')⁻¹ - 1) / (2 * ε))
+      / Real.log (1 / r) ≤ (t : ℝ)) :
+    tvDistance (walkDistribution A t x) (walkDistribution A t x')
+      ≤ 2 * ε := by
+  have h1 : tvDistance (walkDistribution A t x) (stationaryVec A)
+      ≤ ε := walkDistribution_tvDistance_le_of_depth A hA hnn hd hconn r ε
+    hr hr1 hε hrate t x hthr
+  have h2 : tvDistance (stationaryVec A) (walkDistribution A t x')
+      ≤ ε := by
+    rw [tvDistance_symm]
+    exact walkDistribution_tvDistance_le_of_depth A hA hnn hd hconn r ε
+      hr hr1 hε hrate t x' hthr'
+  calc tvDistance (walkDistribution A t x) (walkDistribution A t x')
+      ≤ tvDistance (walkDistribution A t x) (stationaryVec A)
+          + tvDistance (stationaryVec A) (walkDistribution A t x') :=
+        tvDistance_triangle _ _ _
+    _ ≤ ε + ε := add_le_add h1 h2
+    _ = 2 * ε := by ring
 
 end SpectralGraphTheory

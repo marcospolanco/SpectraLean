@@ -732,6 +732,11 @@ Parseval-exact); the plain Euclidean distance is a corollary bridge.
 | `sum_deg_mul_walkDensity_sub_one_eq_zero` | **mass conservation in the conjugated pairing:** `∑ deg (h₀ − 1) = 0` (termwise `deg · h₀ = vol · ν₀`, both sums `vol`) |
 | `eigvecOf_dotProduct_degreeSqrt_walkDensity_sub_one_of_eigvalOf_eq_zero` | **the connectivity mode derivation:** on a connected graph every `μ = 0` eigenvector of `L_sym` is orthogonal to `√D *ᵥ (h₀ − 1)` — the kernel transferred through the congruence `√D L_sym √D = L`, pinned constant by the shelf's kernel theorem, collapsed by mass conservation |
 | `chiSquareDistance_le_of_connected` | **the closing mixing bound:** `χ²(t, x) ≤ r ^ (2t) · ((π x)⁻¹ − 1)` on connected symmetric-nonnegative positive-degree networks under the rate hypothesis — the mixing-time program's target statement, mode hypothesis *derived* from connectivity rather than assumed |
+| `tvDistance` | **the total-variation distance** in its finite-state vector form `(1/2) ∑ i, \|μ i − ν i\|` — the mixing program's deferred Step 4 (2026-08-31, `proposals/total-variation-mixing-conversion.md`), scoped vector-valued: no `MeasureTheory` anywhere, and for probability vectors this `L¹` form *is* the classical finite-state TV |
+| `tvDistance_triangle` | the triangle inequality — the only structural fact the two-start TV twin needs |
+| `tvDistance_le_half_sqrt` | **the ℓ² → TV conversion:** for a positive weight `w` of total mass one and *any* vector `ν` (sign-free), `TV ≤ (1/2)·√(∑ (ν − w)²/w)` — the classical Cauchy–Schwarz step at its sharp constant (attained exactly on `K₂`), mass-one hypothesis load-bearing (fenced in QA) |
+| `walkDistribution_tvDistance_le` | the unconditional walk-level shadow: `TV(ν_t x, π) ≤ (1/2)·√χ²(t, x)` for every walk — no connectivity, no rate |
+| `walkDistribution_tvDistance_le_of_connected` | **the rate form:** `TV(ν_t x, π) ≤ (1/2)·√(r^{2t} · ((π x)⁻¹ − 1))` at exactly the χ² theorem's hypothesis set — the closing mixing bound restated in the field-standard distance |
 
 ### `Scaffold.Mathlib.GraphTheory.Oversmoothing` (the certified oversmoothing ceiling)
 
@@ -758,6 +763,9 @@ single global rate, and no reach at all on graphs admitting no
 | `walkDistribution_pair_contrast_abs_le` | **the per-pair resistance contrast bound:** on a connected `d`-regular graph, the four-point contrast of the walk law is bounded by the certified mode-rate `ρ` times `√R(x₁,x₂)·√R(y,y')` — Foster's spectral resistance formula joined through Cauchy–Schwarz; the first bridge between the electrical and mixing axes |
 | `walkDistribution_pair_contrast_abs_le'` | the packaged corollary at the walk family's `\|1 − λ_k/d\| ≤ r` certificate shape — the explicit mode-rate `2 d r^t` (via the `λ ≤ 2d` engine `laplacian_quadForm_le_two_mul`/`eigvalOf_laplacian_le_two_mul`) |
 | `oversmoothing_log_threshold_mono` | **rate monotonicity:** a looser certified rate buys a provably larger threshold — the ceiling tracks the certified spectral gap (the QA sanity-contrast engine) |
+| `walkDistribution_tvDistance_le_of_rate` | **the TV twin, split-constant rate form:** `TV(ν_t x, π) ≤ (1/2)·r^t·√C` with `C = (π x)⁻¹ − 1 ≥ 0` (`stationaryVec_le_one` supplying the nonnegativity) — the shape the depth threshold consumes |
+| `walkDistribution_tvDistance_le_of_depth` | **the TV ceiling:** past the threshold `log (√C/(2ε))/log (1/r)` (the entrywise ceiling's own at `2ε`), the walk law is within `ε` of stationarity *in total variation* — the field-standard `t_mix(ε)` statement form, now expressible on the shelf |
+| `walkDistribution_tvDistance_sub_le_of_depth` | **two-start indistinguishability in TV:** past both starts' thresholds, the two `t`-step laws are within `2ε` of each other in total variation (triangle + symmetry) |
 
 Supporting additions elsewhere: `Spectral.eigvecOf_dotProduct_one_sub_mulVec`
 (the generic eigenaction at `1 − M`, composed from

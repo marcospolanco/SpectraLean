@@ -8079,3 +8079,110 @@ run falls through to the center-out policy or the priced deferred
 follow-ons (the oversmoothing proposal's over-squashing floor,
 consumer-gated, and the Python certificate bridge, operator-gated).
 The operator-gated matrix master-bound Step 2 is unchanged.
+
+## 2026-08-31T14:22:00Z — The ℓ²→TV mixing conversion: intent recorded
+
+**Run:** `20260831T141839Z-run-1`  
+**Session:** `ses_fa7db904affet1ylWBOu9m3kw0`  
+**Status:** in-progress  
+**Milestone:** the mixing program's optional Step 4 — the ℓ² →
+total-variation conversion — delivered as its own same-run proposal
+(`proposals/total-variation-mixing-conversion.md`), closing the
+random-walk radar axis's single remaining absent category.
+
+**Changes (intent):** selection per priority item 0 — the Active table
+holds no rows above the human-decision gates, so the run falls through
+to the center-out policy; the radar's axis-5 line names the TV
+conversion as the axis's only remaining absent category, gated by the
+mixing proposal's own Step 4 as "its own proposal-scale decision" with
+two conditions this run discharges on the record: the named consumer
+(the field-standard mixing statement, instantiated as the TV twin of
+the delivered oversmoothing ceiling and its two-start corollary) and
+the cost blocker's dissolution (vector TV on the vertex type — no
+`MeasureTheory`, the module's own Step-2 idiom). Plan: `tvDistance`
+(nonneg/symmetry/triangle) + the generic Cauchy–Schwarz conversion
+`TV ≤ (1/2)·√χ²` + the walk-level rate mirror in `Mixing.lean`; the
+split-constant, depth-form ceiling, and two-start `2ε` twin in
+`Oversmoothing.lean`; QA on the counted triangle fixture plus a `K₂`
+exact-attainment pin and a mass-one fence. Zero new axioms.
+
+**Verification:** planned — spike to zero errors first, `lake env
+lean` on both touched modules, explicit build targets, `#print
+axioms` audit, full `lake build` + completeness, the script ladder,
+scoreboard and map sync.
+
+**Next handoff:** deliver or record the precise obstruction.
+
+## 2026-08-31T15:04:00Z — The ℓ²→TV mixing conversion delivered: the field-standard mixing statement on the shelf (terminal)
+
+**Run:** `20260831T141839Z-run-1`  
+**Session:** `ses_fa7db904affet1ylWBOu9m3kw0`  
+**Status:** completed  
+**Milestone:** the mixing program's deferred optional Step 4 — the ℓ²
+→ total-variation conversion — proposed and delivered in one run as
+its own proposal (`proposals/total-variation-mixing-conversion.md`),
+closing the random-walk radar axis's single named remaining absent
+category (axis 5 re-scored 4.0 → 4.5).
+
+**Changes:** selection per priority item 0 — no rows above the
+human-decision gates, so the run fell through to the center-out
+policy and took the radar's own named gap. Step 4's two recorded
+gates discharged on the record: the consumer named (the field-standard
+`t_mix(ε)` statement, instantiated as the TV twin of the delivered
+oversmoothing ceiling and its two-start corollary) and the 2026-08-22
+"probability-measure wrapper" cost estimate dissolved by scoping
+(vector TV on the vertex type, no `MeasureTheory` — the mixing
+program's own Step-2 idiom). Shelf: `Mixing.lean`'s `TotalVariation`
+section (`tvDistance`, nonneg/symmetry/triangle, the generic
+Cauchy–Schwarz conversion `tvDistance_le_half_sqrt` at the sharp
+classical constant `TV ≤ (1/2)·√χ²` — sign-free on `ν`, strictly
+stronger than the textbook probability-vector form — plus the
+unconditional walk-level shadow and the rate form at exactly the χ²
+theorem's hypothesis set) and `Oversmoothing.lean`'s TV-twin section
+(split-constant rate form, the depth-form TV ceiling — the entrywise
+ceiling's own threshold at `2ε` — and the two-start `2ε` twin). QA
++25 (3313 → 3338): the exact-attainment pin on `K₂` (`TV = (1/2)·√χ²
+= 1/2`, both sides independently pinned — the constant sharp), the
+triangle's exact TV values `1/3, 1/6, 1/12` with the domination
+proved, the depth-2 certificate at `ε = 1/4` with depth 1 proved to
+fail the threshold, the two-start instance with raw value `1/8`, and
+the mass-one fence (mass-2 weight refutes the un-guarded conversion,
+the surviving hypothesis proved genuine at the fixture). Records: the
+proposal, `proposals/README.md`, `mixing-time-bound.md`'s Step-4
+delivered pointer, README (3338, module row, highlight, snapshot
+sync), the radar (axis 5 → 4.5; QA axis synced at 4.0 per protocol),
+`index/map/spectral_graph.md`, the scoreboard verification row, both
+map data tables + regenerated SVG, the QA module's purpose header,
+the execution plan, this log. Nothing committed; previous runs'
+uncommitted deliveries preserved.
+
+**Verification:** spike `wip/tv_spike.lean` iterated to zero
+errors/zero warnings before any shelf edit (six technique findings
+recorded in the proposal — notably the pin's mixed sqrt-lemma
+conventions and `norm_num`'s abs-of-numeral evaluation recipe);
+`lake env lean` zero errors/zero warnings on all three touched
+modules; explicit `lake build` targets ✔; `#print axioms` via
+`wip/tv_axcheck.lean` (35 audited: 10 shelf + 25 QA) — every one
+exactly `propext, Classical.choice, Quot.sound`; **full `lake build`
+✔ (2407/2408) immediately followed by `check_build_completeness.py`
+— 131 source files, 131 fresh artifacts, 0 stale, 0 missing, exit
+0**; `lint_axioms` (5); `check_refutation_independence` (10-tag
+clean); `check_public_reachability` (62 modules); `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated at **3338/5/0**
+(idempotent with the hand verification row);
+`check_scaffold_map_freshness` exit 0 after the 3313 → 3338 stats
+sync in both map files + SVG regeneration (the new proposal has no
+station).
+
+**Remaining risk:** none owed — pure hard crust, no axiom disposition
+changed, no existing public statement changed. Rates remain
+caller-certified exactly like the χ² family's `r` certificates;
+bipartite graphs stay honestly outside every `r < 1` certificate's
+reach. Deferred: a defined `t_mix` object (consumer-gated), the
+reverse TV → χ² calculus (no consumer named).
+
+**Next handoff:** the Active table still holds no rows above the
+human-decision gates; a next run falls through to the center-out
+policy or the recorded priced deferred follow-ons (the over-squashing
+floor, consumer-gated; the Python certificate bridge, operator-gated;
+matrix master-bound Step 2, operator-gated).

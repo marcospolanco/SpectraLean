@@ -25,7 +25,7 @@ As of August 31, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 5 |
-| QA theorems/lemmas | 3338, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 3401, with no `sorry` or `admit` under `Scaffold/` |
 
 Recent highlights (full per-run history in
 [`docs/AGENT_ACTIVITY.md`](docs/AGENT_ACTIVITY.md); per-result detail in each
@@ -247,11 +247,11 @@ The near-term center is general SGT. Public modules currently cover:
 | Area | Modules |
 | --- | --- |
 | Graphs and Laplacians | `GraphTheory.Spectral`, `GraphTheory.SimpleGraphAdapter` |
-| Variational spectra | Courant–Fischer, Rayleigh, Cauchy interlacing, the identity-spectrum pin `evals_one` (in `Spectral`) |
+| Variational spectra | Courant–Fischer, Rayleigh, Cauchy interlacing, the identity-spectrum pin `evals_one` (in `Spectral`), and the **Poincaré inequality family** (`GraphTheory.Poincare`: variance ≤ energy/gap in both the combinatorial and degree-weighted π forms, plus the linear-in-gap edge-expansion bound `λ₂·\|S\|·(\|V\|−\|S\|)/\|V\| ≤ boundary`) |
 | Cuts and expansion | `GraphTheory.Cheeger`, `GraphTheory.Fiedler`, `GraphTheory.Expander`, `GraphTheory.Multiway`, `GraphTheory.VariationalTransfer` — both Cheeger directions (regular and volume-weighted), the Expander Mixing Lemma and Hoffman bound, certified-conductance and swept-cut extraction, the higher-order (multiway) easy direction, and the degree eigenvalue sandwich `λₖ(L)/dmax ≤ λₖ(L_sym) ≤ λₖ(L)/dmin` |
 | Decidable spectral certificates | `GraphTheory.SpectralCertificates` (ℚ and kernel-verifiable ℤ specification checkers, both soundness-proved) |
 | Electrical structure | `GraphTheory.Electrical`, `GraphTheory.ElectricalFlow`, `GraphTheory.Foster` — effective resistance as a genuine metric, Foster's theorem, leverage scores |
-| Heat semigroup | `GraphTheory.Heat` — the diffusion operator `e^{-tL}`: semigroup law, mass conservation, eigenmode decay, the connected-graph DC limit, and the derivative/remainder bounds at `t = 0`; program complete |
+| Heat semigroup | `GraphTheory.Heat` — the diffusion operator `e^{-tL}`: semigroup law, mass conservation, eigenmode decay, the connected-graph DC limit, the derivative/remainder bounds at `t = 0`, and heat-variance decay (`Var(e^{-tL}f) ≤ e^{−2tλ₂}Var(f)`, the Poincaré family's consumer, hypothesis-minimal — exact at `λ₂ = 0`); program complete |
 | Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized`, `GraphTheory.Stationary`, `GraphTheory.Mixing` — the ℓ²-mixing proxy and the geometric-decay mixing bound — plus `GraphTheory.Oversmoothing`, the certified depth past which propagated views are provably ε-close to stationarity, the per-pair resistance contrast bound (the walk law's four-point contrast against `√R·√R` of the two pairs), and the **total-variation mixing conversion** (`tvDistance` with `TV ≤ (1/2)·√χ²` at the sharp classical constant, and the depth-form TV ceiling — the field-standard `t_mix(ε)` statement form, with its two-start `2ε` twin) |
 | Directed operators | `GraphTheory.Directed` — out/in-degree, directed handshaking, the directed normalized Laplacian |
 | Krylov methods and Chebyshev polynomials | `GraphTheory.Krylov` — the Lanczos/Kaniel–Paige program, complete end-to-end |

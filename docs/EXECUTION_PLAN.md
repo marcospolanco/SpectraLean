@@ -7,17 +7,193 @@ holds the append-only narrative.
 ## Active milestone
 
 **None queued — the next run selects per priority item 0.** This run
-delivered the ℓ² → total-variation mixing conversion — the mixing
-program's deferred optional Step 4, as its own same-run proposal —
-closing the random-walk radar axis's single named remaining absent
-category; the Active table still holds no rows above the
-human-decision gates (all Low/decision-gated). A next run without
-direction falls through to the center-out SGT policy
-(`docs/6_SGT_BACKLOG.md`) or the priced deferred follow-ons the recent
-proposals record (the oversmoothing proposal's remaining items: the
-genuine over-squashing floor, consumer-gated, and the Python
-certificate bridge, operator-gated; the matrix retirement route's
-Step 2 stays gated on the recorded operator decision).
+delivered heat-variance decay (record below), the Poincaré proposal's
+own named deferred follow-on and the heat family's λ₂-consumer. The
+Active table still holds no rows above the human-decision gates (all
+Low/decision-gated). A next run without direction falls through to the
+center-out SGT policy (`docs/6_SGT_BACKLOG.md`) or the priced deferred
+follow-ons the recent proposals record: axis 3's own remaining named
+gap log-Sobolev (needs a named consumer per its re-score-trigger note —
+the natural composition point is `InformationTheory.Entropy`'s Gibbs
+bound), the new heat-variance proposal's π-weighted `L_sym` twin
+(consumer-gated on a named walk/heat statement needing it), the
+oversmoothing proposal's remaining items (the over-squashing floor,
+consumer-gated; the Python certificate bridge, operator-gated), and the
+matrix retirement route's Step 2 (operator-gated).
+
+------
+
+## Delivered milestones (most recent first)
+
+**Heat-variance decay — the Poincaré delivery's named deferred
+follow-on, the heat family's consumer of λ₂
+(`proposals/heat-variance-decay.md`, same-run proposal pattern; run
+`20260831T175959Z-run-1`). DELIVERED — zero new axioms (count stays 5;
+`#print axioms` via `wip/heatvar_axcheck.lean` on all 26 audited
+declarations — 7 shelf + 19 QA — every one exactly `propext,
+Classical.choice, Quot.sound`, pure hard crust). QA 3382 → 3401 (+19,
+`Heat_QA.lean`'s variance-decay section). Radar axis 3 held at 4.5 and
+the QA axis at 4.0 per protocol (a consumer composition of the
+already-counted Poincaré and heat families plus new negative-witness
+fences).**
+
+The delivery's content: (1) **The recorded cost gate dissolved by
+route** — the Poincaré proposal's Deferred section priced this item as
+"needs derivative machinery not priced here" on the
+semigroup-plus-Poincaré differential route; delivered instead by the
+**eigenbasis contraction** (the mixing program's proved ℓ²(π)
+technique transferred from `P^t` to `e^{-tL}` through the shelf's
+`heatKernel_mulVec_eigvecOf` and `dotProduct_eigvecOf` — no derivatives
+anywhere). (2) **The shelf** — `Heat.lean`'s variance-decay section:
+the eigenvalue plumbing `eigvalOf_mem_evals` +
+`secondEval_le_eigvalOf_of_ne_zero` (below-gap eigenvalues *are*
+kernel eigenvalues), the positive-gap kernel lemma
+`eigvecOf_ker_eq_smul_onesVec_of_secondEval_pos` (a centered kernel
+residual would force `λ₂ ≤ 0` through `secondEval_le_rayleigh`), mean
+preservation `sum_heatKernel_mulVec`, the coordinate-damping
+`eigvecOf_dotProduct_heatKernel_mulVec` and Parseval-exact
+`dotProduct_self_heatKernel_mulVec`, and **`heatKernel_variance_decay`**
+— `∑((e^{-tL}f) i − mean f)² ≤ e^{−2tλ₂}·∑(f i − mean f)²`
+*hypothesis-minimal* (no connectivity, no gap positivity: at `λ₂ = 0`
+the true rate-1 statement), two branches over one Parseval identity
+(positive gap: zero modes carry no coordinate + the eigenvalue
+comparison; nonpositive gap: every factor `≤ 1 ≤ e^{−2tλ₂}`, no mode
+hypothesis at all). (3) **The QA** — exact attainment at Fiedler
+vectors at *every* time (K₂ `2e^{-4t}`, P₃ `2e^{-2t}` — the same shape
+at the other gap value on an irregular graph, both instances closing
+at equality with gaps read from independently pinned spectra), the
+wrong-constant refutation (gap `3` reads `2e^{-4} ≤ 2e^{-6}`, refuted
+via `e^{-6} < e^{-4}`), the **λ₂ = 0 disconnected branch pinned exact**
+(both sides exactly `2/3` at the `Fin 3` component indicator — a kernel
+vector fixed by the no-leakage engine — with the fixture's gap proved
+*exactly zero*: ≤ 0 by the Rayleigh bound at the centered kernel vector
+`![1,1,−2]`, ≥ 0 by `evals_sorted` + `laplacian_evals_zero`), mean
+preservation by two independent routes (the symmetry-transfer lemma vs
+the closed form + hand arithmetic), and the `t = 0` corner.
+
+**Verification:** spike first (`wip/heatvar_spike.lean` — both layers
+and the full axiom audit iterated to zero errors/zero warnings before
+any shelf edit, six technique findings recorded in the proposal: the
+first-argument dotProduct lemma names (`sub_dotProduct`/
+`smul_dotProduct`) and the vector-difference `mulVec_sub` vs the
+matrix-difference `sub_mulVec`, `Monotone`'s strict-implicit
+application with `Fin.le_def`, `List.mem_iff_get`'s two-component
+destructuring, the `WithLp`-coercion exact-not-rw rule for
+`mulVec_eigenvectorBasis`, the `Real.exp_lt_exp` iff shape, and the
+stale-olen import-boundary recurrence); `lake env lean` zero
+errors/zero warnings on both touched modules; explicit `lake build`
+targets ✔ on both; **full `lake build` ✔ (2408/2409) immediately
+followed by `check_build_completeness.py` — 133 source files, 133
+fresh artifacts, 0 stale, 0 missing, exit 0** (after the documented
+single-module mtime remediation); `lint_axioms` exit 0 (5, both PF
+findings allowlisted-confirmed); `check_refutation_independence`
+(10-tag clean — no tags added, nothing here touches an axiom);
+`check_public_reachability` clean (63 modules); `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**3401/5/0**) with
+the verification row added; **map-freshness exit 0** after the
+3382 → 3401 stats sync in both map files and SVG regeneration (the new
+proposal has no station). Records updated: the proposal (COMPLETE from
+birth, with the route-decision record, degenerate-corner analysis, and
+technique findings), `poincare-inequality.md` (delivered-pointer note
+on its Deferred item — status header untouched), `proposals/README.md`
+(Delivered row), README (3401 + the heat-semigroup module-table row
+extension), the radar QA axis (synced, 4.0 held per protocol),
+`index/map/spectral_graph.md` (eight new rows + the section paragraph),
+the scoreboard verification row, both map data tables + regenerated
+SVG, this plan, and the activity log. Nothing committed; the previous
+runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed. The
+named follow-ons stand as recorded: the π-weighted `L_sym` twin
+(consumer-gated), log-Sobolev (axis 3's remaining named gap,
+consumer-gated on an entropy inequality composing
+`InformationTheory.Entropy`'s Gibbs bound), and the heat-kernel form
+of the `t_mix` depth packaging (consumer-gated on the TV proposal's
+deferred `t_mix` object).
+
+------
+
+## Delivered milestones (most recent first)
+
+**The Poincaré inequality family — radar axis 3's named absent category
+closed (`proposals/poincare-inequality.md`; run
+`20260831T161132Z-run-1`). DELIVERED — zero new axioms (count stays 5;
+`#print axioms` via `wip/poincare_axcheck.lean` on all 55 audited
+declarations — 7 shelf + 48 fixture-pin/QA — every one exactly
+`propext, Classical.choice, Quot.sound`, pure hard crust). QA
+3338 → 3382 (+44, the new `Scaffold/QA/SpectralGraph/Poincare_QA.lean`).
+Radar axis 3 re-scored 4.0 → 4.5 (log-Sobolev the remaining named
+gap); QA axis held at 4.0 per protocol.**
+
+The delivery's content: (1) **The shelf** — the new
+`Scaffold/Mathlib/GraphTheory/Poincare.lean` (umbrella-imported;
+`check_public_reachability` now counts 63 modules):
+`quadForm_laplacian_sub_const` (centering invariance of the energy
+through the ones kernel), the division-free engine
+`poincare_variance_mul_le` (`λ₂(L)·∑(f i − mean f)² ≤ fᵀLf` — *no*
+λ₂-positivity hypothesis, vacuous at `λ₂ = 0`), `poincare_inequality`
+(`∑(f i − mean f)² ≤ fᵀLf/λ₂(L)`) with the connected twin (gap from
+`lambda2_pos_of_connected`), `poincare_inequality_normalized` — the
+degree-weighted π form `∑ deg·(f − E_π f)² ≤ fᵀLf/λ₂(L_sym)` through
+`secondEval_le_rayleigh_of_ker` at `√D(f − E_π f·1)` (orthogonal to
+`√D·1` by mass conservation) with the energy transported through the
+congruence `√D L_sym √D = L`, plus its connected twin — and
+`spectral_gap_edge_expansion` (`λ₂·|S|·(|V|−|S|)/|V| ≤ boundary A S`
+for every vertex set; linear in the gap, set-by-set, consuming
+Multiway's indicator energy identity — its first consumer outside its
+own module). (2) **The QA** — exact attainment at Fiedler vectors on
+K₂ (`2 = 4/2`), P₃ (`2 = 2/1`), and K₃ for the normalized form
+(`4 = 6/(3/2)`, the L_sym gap pinned through the entrywise
+`L_sym(K₃) = (1/2)•L(K₃)` and `secondEval_smul_of_pos`); the
+wrong-constant refutation (the K₂ shape at gap `3` reads `2 ≤ 4/3` at
+the very fixture that attains the true constant); the **no-constant
+connectivity fence** (the disconnected two-edge fixture: component
+indicator variance `1`, energy `0`, so no finite `c` makes any
+Poincaré-shaped inequality true — `0 < λ₂` exactly the boundary of the
+true region; the fixture's gap also proved nonpositive); both
+**edge-expansion instances attained with equality** (`1 = 1` on K₂,
+`2 = 2` on K₃ singleton cuts).
+
+**Verification:** spike first (`wip/poincare_spike.lean` — the shelf
+declarations and the full QA section iterated to zero errors/zero
+warnings before any shelf edit, with six technique findings recorded in
+the proposal: the `Finset.sum_congr`-as-rw metavariable trap, the
+`le_div_iff₀` direction/order discipline, the pinned Mathlib's
+`sqrt_mul_self`/`mul_self_sqrt` shape split, `neg_sub`'s usable
+direction, the anonymous-constructor-with-by-blocks statement
+elaboration failure and its named-lemma resolution, and literal-Fin
+`ite` reduction under simp vs norm_num); `lake env lean` zero
+errors/zero warnings on both new modules; explicit `lake build`
+targets ✔ on both; **full `lake build` ✔ (2408/2409) immediately
+followed by `check_build_completeness.py` — 133 source files, 133
+fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0
+(5, both PF findings allowlisted-confirmed); `check_refutation_independence`
+(10-tag clean — no tags added, nothing here touches an axiom);
+`check_public_reachability` clean (63 modules); `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**3382/5/0**,
+idempotent with the hand verification row); **map-freshness exit 0**
+after the 3338 → 3382 stats sync in both map files and SVG
+regeneration (the new proposal has no station). Records updated: the
+proposal (COMPLETE from birth, with the delivery record and technique
+findings), `proposals/README.md` (Delivered row), README (3382 + the
+variational-spectra module-table row), the radar (axis 3 re-scored
+4.0 → 4.5 with the delivery recorded and the absent list reduced to
+log-Sobolev; the QA axis synced at 4.0 per protocol; the stale
+"weakest axes" summary paragraph repaired to match the verified
+table), `index/map/spectral_graph.md` (the new module section and
+status-list update), the scoreboard verification row, both map data
+tables + regenerated SVG, this plan, and the activity log. Nothing
+committed; the previous runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed. The
+named follow-ons stand as recorded: heat-variance decay
+(`Var(e^{-tL}f) ≤ e^{−2tλ₂}Var(f)`, the heat family's consumer),
+log-Sobolev (axis 3's remaining named gap, consumer-gated on an
+entropy inequality composing `InformationTheory.Entropy`'s Gibbs
+bound), and a `t_mix`-style packaged depth from the normalized form
+(consumer-gated on the TV proposal's own deferred `t_mix` object).
 
 ------
 

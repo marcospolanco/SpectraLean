@@ -6,7 +6,7 @@ conductance, Cheeger theory, interlacing, and event-driven dynamics.
 ## Status
 
 **Implemented and build-certified** (see the QA scoreboard):
-`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,SpectralCertificates,Tikhonov,Band,ClusterProjector,Cheeger,Mixing,Oversmoothing,Dynamics,Krylov,PolyFilter,Multiway}`.
+`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,SpectralCertificates,Tikhonov,Band,ClusterProjector,Cheeger,Mixing,Oversmoothing,Poincare,Dynamics,Krylov,PolyFilter,Multiway}`.
 
 ## Modules and Declarations
 
@@ -777,6 +777,34 @@ transfer — `√D *ᵥ (Pᵗ *ᵥ g) = (1 − L_sym)ᵗ *ᵥ (√D *ᵥ g)`), p
 (the constant fix `P *ᵥ 1 = 1`), `degreeSqrt_mulVec_apply`, and
 `degreeInvSqrt_mulVec_apply` (the conjugating actions' entry forms).
 
+### `Scaffold.Mathlib.GraphTheory.Poincare` (the Poincaré inequality family)
+
+All statements proved (2026-08-31,
+`proposals/poincare-inequality.md`), no axioms — the functional
+inequality the variational axis's charter names beside Courant–Fischer:
+variance controlled by Dirichlet energy at the spectral gap, in both
+the combinatorial and the degree-weighted (π-measure) forms, plus the
+cut-level consumer. Consumers: the mixing program's ℓ²(π) contraction
+(Poincaré in walk form), the heat family's priced variance-decay
+follow-on, and `Multiway.lean`'s indicator energy identity (its first
+consumer outside its own module).
+
+| Declaration | Content |
+|-------------|---------|
+| `quadForm_laplacian_sub_const` | centering invariance of the energy: `quadForm L (f − c • 1) = quadForm L f` (the ones kernel) |
+| `poincare_variance_mul_le` | **the division-free engine form:** `λ₂(L) · ∑ (f i − mean f)² ≤ fᵀLf` with *no* λ₂ positivity hypothesis (vacuous at `λ₂ = 0`; the QA no-constant fence proves the division form's guard is exactly the true region's boundary) |
+| `poincare_inequality` | **the combinatorial Poincaré inequality** `∑ (f i − mean f)² ≤ fᵀLf / λ₂(L)` at `0 < λ₂`, from `secondEval_le_rayleigh` at the centered vector |
+| `poincare_inequality_of_connected` | the connected twin (gap from `lambda2_pos_of_connected`) |
+| `poincare_inequality_normalized` | **the π-form:** `∑ deg i · (f i − E_π f)² ≤ fᵀLf / λ₂(L_sym)` — from `secondEval_le_rayleigh_of_ker` at `√D (f − E_π f · 1)` (orthogonal to `√D · 1` by mass conservation), energy through the congruence `√D L_sym √D = L`; the denominator is `L_sym`'s own eigenvalue (not scalar-related to the combinatorial one on irregular graphs) |
+| `poincare_inequality_normalized_of_connected` | the connected twin (gap from the delivered connectivity transfer) |
+| `spectral_gap_edge_expansion` | **spectral edge expansion:** `λ₂(L) · \|S\| · (\|V\| − \|S\|)/\|V\| ≤ boundary A S` for every vertex set — linear in the gap, set-by-set, no sweep/median/regularity; the indicator's variance collapse joined to `quadForm_laplacian_partIndicator` |
+
+Supporting QA: `Scaffold/QA/SpectralGraph/Poincare_QA.lean` (the
+exact-attainment pins on K₂/P₃/K₃ Fiedler vectors, the wrong-constant
+refutation, the no-constant connectivity fence on the disconnected
+two-edge fixture, and both edge-expansion instances attained with
+equality).
+
 ### `Scaffold.Mathlib.GraphTheory.Directed` (the directed degree layer and the directed normalized Laplacian)
 
 All statements proved (2026-08-22, `proposals/directed-graph-operators.md`
@@ -1228,7 +1256,15 @@ vector form), Step 2 the first-order remainder bound
 `|(e^{-tL} x) a − x a + t (L x) a| ≤ t² · ∑ᵢ λᵢ² |vᵢ ⬝ᵥ x| |vᵢ a|` on
 the window `|t · λᵢ| ≤ 1`, termwise through the pin's
 `Real.abs_exp_sub_one_sub_id_le`) plus its `[0, T]` interval packaging
-`heatKernel_firstOrder_remainder_interval`. Pure hard crust, zero
+`heatKernel_firstOrder_remainder_interval`. **The variance-decay
+section added 2026-08-31** (`proposals/heat-variance-decay.md`, the
+Poincaré delivery's named deferred follow-on): eigenvalue plumbing
+(`eigvalOf_mem_evals`, `secondEval_le_eigvalOf_of_ne_zero`), the
+positive-gap kernel lemma, mean preservation, the coordinate-damping
+and Parseval-exact heat identities, and **`heatKernel_variance_decay`**
+(`Var(e^{-tL}f) ≤ e^{−2tλ₂}Var(f)`, hypothesis-minimal — no
+connectivity, no gap positivity — by the eigenbasis contraction, no
+derivative machinery). Pure hard crust, zero
 axioms; QA at `Scaffold/QA/SpectralGraph/Heat_QA.lean`.
 
 | Declaration | Content |
@@ -1258,6 +1294,13 @@ axioms; QA at `Scaffold/QA/SpectralGraph/Heat_QA.lean`.
 | `heatKernel_mulVec_hasDerivAt_zero` | **the heat-flow derivative at zero, vector form** (Phase C Step 1): `HasDerivAt (fun t => heatKernel A t *ᵥ x) (-(laplacian A *ᵥ x)) 0` — the infinitesimal generator `d/dt e^{-tL} x\|₀ = -L x`, assembled from the entrywise engine by the pin's `hasDerivAt_pi` (the direct vector-form proof times out at `whnf` on a variable vertex type; recorded trap) |
 | `heatKernel_firstOrder_remainder_apply_le` | **the first-order remainder bound, entrywise form** (Phase C Step 2): on the window `\|t · λᵢ\| ≤ 1`, `\|(e^{-tL} x) a − x a + t (L x) a\| ≤ t² · ∑ᵢ λᵢ² \|vᵢ ⬝ᵥ x\| \|vᵢ a\|` at every coordinate `a` — the boundary-observable Taylor bound the dissolution theorem consumes; coordinate + generator coordinate expanded over the proved eigenbasis, the three sums combined termwise, each mode's scalar remainder by the pin's `Real.abs_exp_sub_one_sub_id_le`; no nonnegativity hypothesis |
 | `heatKernel_firstOrder_remainder_interval` | **the `[0, T]` interval packaging** (Phase C Step 2): the same bound uniformly on `[0, T]` whenever `T` meets the window (`\|T · λᵢ\| ≤ 1`), the hypothesis transfer `\|t · λ\| = t\|λ\| ≤ T\|λ\| = \|T · λ\| ≤ 1` by monotonicity |
+| `eigvalOf_mem_evals` | **eigenvalue plumbing, converse half** (2026-08-31, the variance-decay section, `proposals/heat-variance-decay.md`): every eigenbasis eigenvalue appears in the sorted spectrum (`∃ k, evals hM k = eigvalOf M hM i`) — the converse of `evals_mem_eigvalOf`, by `List.mem_iff_get` at the sorted list |
+| `secondEval_le_eigvalOf_of_ne_zero` | **every nonzero Laplacian eigenvalue dominates the gap**: an eigenvalue below `evals ⟨1⟩` sits at sorted index `0` (sortedness), which is exactly `0` (`laplacian_evals_zero`) — below-gap eigenvalues *are* kernel eigenvalues; the rate comparison the heat variance decay consumes |
+| `eigvecOf_ker_eq_smul_onesVec_of_secondEval_pos` | **kernel modes at a positive gap are constant**: a nonzero centered kernel residual would have Rayleigh quotient `0`, forcing `λ₂ ≤ 0` through `secondEval_le_rayleigh`; stated at `0 < λ₂` (the exact boundary), not connectivity |
+| `sum_heatKernel_mulVec` | **mean preservation**: `∑ (e^{-tL} f) = ∑ f` at every time on symmetric input — the sum is the `onesVec` pairing moved across by kernel symmetry (`heatKernel_isSymm` + `heatKernel_mulVec_onesVec`); what makes both variances in the headline decay center at the same mean |
+| `eigvecOf_dotProduct_heatKernel_mulVec` | **coordinate damping**: `vᵢ ⬝ᵥ (e^{-tL} *ᵥ x) = e^{−tλᵢ} (vᵢ ⬝ᵥ x)` — the heat analogue of the mixing program's walk-factor identity, through self-adjointness of the (symmetric) kernel plus `heatKernel_mulVec_eigvecOf` |
+| `dotProduct_self_heatKernel_mulVec` | **Parseval-exact heat identity**: `‖e^{-tL}x‖² = ∑ᵢ (e^{−tλᵢ} (vᵢ ⬝ᵥ x))²` — no inequality lost; the exact quantity the variance becomes in eigenbasis coordinates |
+| `heatKernel_variance_decay` | **heat-variance decay — the Poincaré delivery's named deferred follow-on, the heat family's consumer of λ₂**: `∑ ((e^{-tL}f) i − mean f)² ≤ e^{−2tλ₂} · ∑ (f i − mean f)²` for every `f` on every symmetric nonnegative network at every `t ≥ 0`, hypothesis-minimal (no connectivity, no gap positivity — at `λ₂ = 0` the true rate-1 statement, QA-pinned *exact* there); proved by the eigenbasis contraction (the mixing program's proved ℓ²(π) technique transferred from `P^t` to `e^{-tL}`, no derivative machinery), the two branches sharing one Parseval identity: at `0 < λ₂` zero modes carry no coordinate + the eigenvalue comparison; at `λ₂ ≤ 0` every factor `≤ 1 ≤ e^{−2tλ₂}` |
 
 ### `Scaffold.Mathlib.Dynamics.DiscreteAffine` (discrete-affine dynamics)
 

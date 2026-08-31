@@ -29,6 +29,7 @@ import Scaffold.Mathlib.GraphTheory.ClusterProjector
 import Scaffold.Mathlib.GraphTheory.FunctionalCalculus
 import Scaffold.Mathlib.GraphTheory.VariationalTransfer
 import Scaffold.Mathlib.GraphTheory.Multiway
+import Scaffold.Mathlib.GraphTheory.Poincare
 import Scaffold.Mathlib.GraphTheory.Signed
 import Scaffold.Mathlib.GraphTheory.AlonBoppana
 import Scaffold.Mathlib.GraphTheory.Dynamics

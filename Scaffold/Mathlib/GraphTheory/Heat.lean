@@ -142,6 +142,32 @@ input) delivers the first-order remainder bound:
 - `heatKernel_firstOrder_remainder_interval`: the uniform form on
   `[0, T]` whenever `T` itself meets the window.
 
+Variance decay (2026-08-31, `proposals/heat-variance-decay.md` — the
+Poincaré delivery's named deferred follow-on, the heat family's
+consumer of `λ₂`) delivers the exponential variance contraction by the
+*eigenbasis route* — the mixing program's proved ℓ²(π) contraction
+technique transferred from `P^t` to `e^{-tL}`, no derivative machinery:
+
+- the eigenvalue plumbing `eigvalOf_mem_evals` (every eigenbasis
+  eigenvalue appears in the sorted spectrum) and
+  `secondEval_le_eigvalOf_of_ne_zero` (every *nonzero* Laplacian
+  eigenvalue dominates the spectral gap — below-gap eigenvalues are
+  exactly the kernel eigenvalues);
+- `eigvecOf_ker_eq_smul_onesVec_of_secondEval_pos`: at a positive gap
+  every kernel eigenbasis vector is constant (a nonzero centered kernel
+  residual would force `λ₂ ≤ 0` through the Rayleigh bound);
+- `sum_heatKernel_mulVec`: mean preservation at every time (the sum is
+  the `onesVec` pairing, moved across by symmetry — what makes both
+  variances in the headline statement center at the *same* mean);
+- `eigvecOf_dotProduct_heatKernel_mulVec` and the Parseval-exact
+  `dotProduct_self_heatKernel_mulVec`: the heat analogue of the walk
+  program's coordinate-damping and decay identities;
+- **`heatKernel_variance_decay`**: `∑ i, ((e^{-tL} f) i − mean f)² ≤
+  e^{−2tλ₂} · ∑ i, (f i − mean f)²` for every function on every
+  symmetric nonnegative network at every `t ≥ 0` — hypothesis-minimal
+  (no connectivity, no gap positivity: at `λ₂ = 0` the bound is the
+  true rate-1 statement, and QA pins it *exact* there).
+
 ## Scope notes (recorded before stating, 2026-08-23)
 
 - `t` ranges over all of ℝ by construction. For negative `t` this is
@@ -1105,5 +1131,323 @@ theorem heatKernel_firstOrder_remainder_interval (A : WAdj (V := V))
     _ = |T * eigvalOf (laplacian A) (laplacian_symmetric A hA) i| := by
         rw [abs_mul, abs_of_nonneg hT0]
     _ ≤ 1 := hT i
+
+
+/-!
+## Variance decay (the Poincaré follow-on)
+
+The Poincaré delivery's named deferred follow-on
+(`proposals/heat-variance-decay.md`, 2026-08-31): the heat family's
+consumer of `λ₂`. The route is the eigenbasis contraction — the mixing
+program's proved ℓ²(π) technique transferred from `P^t` to `e^{-tL}`
+through `heatKernel_mulVec_eigvecOf` and `dotProduct_eigvecOf` — with no
+derivative machinery (the semigroup-plus-Poincaré differential route was
+priced out in the Poincaré proposal's Deferred section; this route
+dissolves that cost).
+-/
+
+/-! ## Variance decay (shelf layer) -/
+
+/-- **Eigenvalue plumbing, converse half**: every eigenvalue of the
+eigenbasis listing appears in the sorted spectrum (the converse of
+`evals_mem_eigvalOf`; together they say sorting permutes the listing).
+Consumed by the nonzero-eigenvalue lower bound below. -/
+theorem eigvalOf_mem_evals {M : Matrix V V ℝ} (hM : M.IsSymm) (i : V) :
+    ∃ k : Fin (Fintype.card V), evals hM k = eigvalOf M hM i := by
+  have hlen : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset V).val.map
+        ((isHermitian_of_isSymm hM).eigenvalues))).length =
+      Fintype.card V := by
+    rw [Multiset.length_sort, Multiset.card_map]; simp
+  have hmem : eigvalOf M hM i ∈ Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset V).val.map
+        ((isHermitian_of_isSymm hM).eigenvalues)) := by
+    rw [Multiset.mem_sort]
+    exact Multiset.mem_map.2 ⟨i, Finset.mem_univ _, rfl⟩
+  obtain ⟨p, hp⟩ := List.mem_iff_get.1 hmem
+  have hlen' : (p : ℕ) < Fintype.card V := by simpa [hlen] using p.isLt
+  exact ⟨⟨(p : ℕ), hlen'⟩, hp⟩
+
+/-- **Every nonzero Laplacian eigenvalue dominates the spectral gap.**
+On a symmetric nonnegative network, `λ₂ (laplacian A) ≤ μᵢ` for every
+eigenbasis mode with `μᵢ ≠ 0`. The heat variance-decay rate comparison
+consumes this. Route: an eigenvalue below `evals ⟨1⟩` must sit at sorted
+index `0` (sortedness), which is exactly `0` (`laplacian_evals_zero`) —
+so below-gap eigenvalues are exactly the kernel eigenvalues. -/
+theorem secondEval_le_eigvalOf_of_ne_zero (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (hnn : ∀ i j, 0 ≤ A i j)
+    (hcard : 2 ≤ Fintype.card V) {i : V}
+    (hne : eigvalOf (laplacian A) (laplacian_symmetric A hA) i ≠ 0) :
+    secondEval (laplacian A) (laplacian_symmetric A hA) hcard
+      ≤ eigvalOf (laplacian A) (laplacian_symmetric A hA) i := by
+  have hL := laplacian_symmetric A hA
+  by_contra hcon
+  push_neg at hcon
+  obtain ⟨k, hk⟩ := eigvalOf_mem_evals hL i
+  rcases Nat.lt_or_ge (k : ℕ) 1 with hk0 | hk1
+  · have hkz : (k : ℕ) = 0 := by omega
+    have hzero : eigvalOf (laplacian A) hL i = 0 := by
+      rw [← hk, show k = ⟨(0 : ℕ), by omega⟩ from Fin.ext hkz]
+      exact laplacian_evals_zero A hA hnn (by omega)
+    exact hne hzero
+  · have hmono : evals hL ⟨(1 : ℕ), by omega⟩ ≤ evals hL k :=
+      evals_sorted hL (Fin.le_def.2 hk1)
+    have hSE : evals hL ⟨(1 : ℕ), by omega⟩
+        = secondEval (laplacian A) hL hcard := rfl
+    rw [hSE, hk] at hmono
+    exact absurd hmono (not_le.2 hcon)
+
+/-- **Kernel modes at a positive gap are constant**: if the spectral gap
+is positive, every zero-eigenvalue eigenbasis vector is a multiple of
+`onesVec`. Route: subtract the mean (the residual is orthogonal to
+`onesVec`, still in the kernel); a nonzero kernel residual orthogonal to
+`onesVec` would have Rayleigh quotient `0`, bounding `λ₂ ≤ 0` through
+`secondEval_le_rayleigh` — contradiction. -/
+theorem eigvecOf_ker_eq_smul_onesVec_of_secondEval_pos
+    (A : WAdj (V := V)) (hA : Matrix.IsSymm A) (hnn : ∀ i j, 0 ≤ A i j)
+    (hcard : 2 ≤ Fintype.card V)
+    (hpos : 0 < secondEval (laplacian A) (laplacian_symmetric A hA) hcard)
+    {i : V} (hμ : eigvalOf (laplacian A) (laplacian_symmetric A hA) i = 0) :
+    ∃ c : ℝ, eigvecOf (laplacian A) (laplacian_symmetric A hA) i = c • onesVec := by
+  have hL := laplacian_symmetric A hA
+  have hn0 : (0 : ℝ) < (Fintype.card V : ℝ) := Nat.cast_pos.2 (by omega)
+  have hker : laplacian A *ᵥ (eigvecOf (laplacian A) hL i) = 0 := by
+    have h := (isHermitian_of_isSymm hL).mulVec_eigenvectorBasis i
+    have hμ' : (isHermitian_of_isSymm hL).eigenvalues i = 0 := hμ
+    rw [hμ', zero_smul] at h
+    exact h
+  refine ⟨Matrix.dotProduct (eigvecOf (laplacian A) hL i) onesVec
+      / (Fintype.card V : ℝ), ?_⟩
+  by_cases hu : eigvecOf (laplacian A) hL i
+      - (Matrix.dotProduct (eigvecOf (laplacian A) hL i) onesVec
+          / (Fintype.card V : ℝ)) • onesVec = 0
+  · exact sub_eq_zero.1 hu
+  · exfalso
+    have hone : Matrix.dotProduct (onesVec : V → ℝ) onesVec
+        = (Fintype.card V : ℝ) := by
+      simp [Matrix.dotProduct, onesVec, Finset.card_univ]
+    have huorth : Matrix.dotProduct
+        (eigvecOf (laplacian A) hL i
+          - (Matrix.dotProduct (eigvecOf (laplacian A) hL i) onesVec
+              / (Fintype.card V : ℝ)) • onesVec) onesVec = 0 := by
+      rw [Matrix.sub_dotProduct, Matrix.smul_dotProduct, hone, smul_eq_mul,
+        div_mul_cancel₀ _ (ne_of_gt hn0), sub_self]
+    have huker : laplacian A *ᵥ (eigvecOf (laplacian A) hL i
+        - (Matrix.dotProduct (eigvecOf (laplacian A) hL i) onesVec
+            / (Fintype.card V : ℝ)) • onesVec) = 0 := by
+      rw [Matrix.mulVec_sub, hker, Matrix.mulVec_smul,
+        laplacian_ones_in_kernel, smul_zero, sub_zero]
+    have hR := secondEval_le_rayleigh hL (laplacian_psd A hA hnn)
+      (laplacian_ones_in_kernel A) hcard hu huorth
+    rw [rayleigh, if_neg hu] at hR
+    have hq : quadForm (laplacian A) (eigvecOf (laplacian A) hL i
+        - (Matrix.dotProduct (eigvecOf (laplacian A) hL i) onesVec
+            / (Fintype.card V : ℝ)) • onesVec) = 0 := by
+      rw [quadForm, huker, Matrix.dotProduct_zero]
+    rw [hq, zero_div] at hR
+    exact absurd hR (not_le.2 hpos)
+
+/-- **Mean preservation**: the heat semigroup preserves total mass at
+every time on a symmetric network — `∑ (e^{-tL} f) = ∑ f`. Route: the
+sum is the `onesVec` pairing, moved to the far side of the pairing by
+symmetry, where `heatKernel_mulVec_onesVec` fixes it. This is what makes
+both variances in `heatKernel_variance_decay` center at the *same* mean.
+-/
+theorem sum_heatKernel_mulVec (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (t : ℝ) (f : V → ℝ) :
+    ∑ i, (heatKernel A t *ᵥ f) i = ∑ j, f j := by
+  have h : Matrix.dotProduct (onesVec : V → ℝ) (heatKernel A t *ᵥ f)
+      = Matrix.dotProduct (onesVec : V → ℝ) f := by
+    rw [Matrix.dotProduct_mulVec, ← Matrix.mulVec_transpose,
+      (heatKernel_isSymm A hA t).eq, heatKernel_mulVec_onesVec A t]
+  simpa [Matrix.dotProduct, onesVec] using h
+
+/-- **Coordinate damping**: reading a component of the heat action in the
+Laplacian eigenbasis multiplies the component of the input by the mode's
+decay factor — `vᵢ ⬝ᵥ (e^{-tL} *ᵥ x) = e^{-tλᵢ} (vᵢ ⬝ᵥ x)`. The heat
+analogue of the mixing program's walk-factor identity, through
+self-adjointness of the (symmetric) kernel plus
+`heatKernel_mulVec_eigvecOf`. -/
+theorem eigvecOf_dotProduct_heatKernel_mulVec (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (t : ℝ) (x : V → ℝ) (i : V) :
+    Matrix.dotProduct (eigvecOf (laplacian A) (laplacian_symmetric A hA) i)
+        (heatKernel A t *ᵥ x)
+      = Real.exp (-(t * eigvalOf (laplacian A) (laplacian_symmetric A hA) i))
+        * Matrix.dotProduct (eigvecOf (laplacian A) (laplacian_symmetric A hA) i) x := by
+  rw [Matrix.dotProduct_mulVec, ← Matrix.mulVec_transpose,
+    (heatKernel_isSymm A hA t).eq, heatKernel_mulVec_eigvecOf A hA t i,
+    Matrix.smul_dotProduct, smul_eq_mul]
+
+/-- **Parseval-exact heat identity**: the squared Euclidean norm of the
+heat action is the eigenvalue-weighted sum of squared eigencoordinates,
+each weight `e^{-2tλᵢ}` — no inequality lost. The exact quantity the
+variance becomes in eigenbasis coordinates. -/
+theorem dotProduct_self_heatKernel_mulVec (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (t : ℝ) (x : V → ℝ) :
+    Matrix.dotProduct (heatKernel A t *ᵥ x) (heatKernel A t *ᵥ x)
+      = ∑ i, (Real.exp (-(t * eigvalOf (laplacian A)
+              (laplacian_symmetric A hA) i))
+          * Matrix.dotProduct (eigvecOf (laplacian A)
+              (laplacian_symmetric A hA) i) x) ^ 2 := by
+  rw [dotProduct_eigvecOf (laplacian_symmetric A hA) _ _]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [eigvecOf_dotProduct_heatKernel_mulVec A hA t x i, pow_two]
+
+/-- **Heat-variance decay** — the Poincaré delivery's named deferred
+follow-on, the heat family's consumer:
+
+`∑ i, ((e^{-tL} f) i − mean f)² ≤ e^{−2tλ₂} · ∑ i, (f i − mean f)²`
+
+for every function on every symmetric nonnegative network at every
+`t ≥ 0`. Hypothesis-minimal: no connectivity, no gap positivity — at
+`λ₂ = 0` (disconnected input) the statement is the true rate-1 decay
+bound, and the QA pins it *exact* there. The mean on both sides is
+`f`'s own mean (`sum_heatKernel_mulVec` preserves it). Route: the
+eigenbasis contraction — Parseval resolves both norms over the proved
+orthonormal eigenbasis, each mode's weight `e^{-2tλᵢ}` dominated by
+`e^{-2tλ₂}` — at a positive gap through `secondEval_le_eigvalOf_of_ne_zero`
+(zero modes carry no coordinate of a centered input, by
+`eigvecOf_ker_eq_smul_onesVec_of_secondEval_pos`), at a nonpositive gap
+because every factor is at most `1` (PSD) while `e^{-2tλ₂} ≥ 1`. -/
+theorem heatKernel_variance_decay (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
+    (hnn : ∀ i j, 0 ≤ A i j) (hcard : 2 ≤ Fintype.card V)
+    {t : ℝ} (ht : 0 ≤ t) (f : V → ℝ) :
+    ∑ i, ((heatKernel A t *ᵥ f) i
+        - (∑ j, f j) / (Fintype.card V : ℝ)) ^ 2
+      ≤ Real.exp (-(2 * t
+          * secondEval (laplacian A) (laplacian_symmetric A hA) hcard))
+        * ∑ i, (f i - (∑ j, f j) / (Fintype.card V : ℝ)) ^ 2 := by
+  have hL := laplacian_symmetric A hA
+  have hn0 : (0 : ℝ) < (Fintype.card V : ℝ) := Nat.cast_pos.2 (by omega)
+  obtain ⟨x, hxdef⟩ : ∃ x : V → ℝ,
+      ∀ i, x i = f i - (∑ j, f j) / (Fintype.card V : ℝ) :=
+    ⟨_, fun _ => rfl⟩
+  have hcenter : x = f - ((∑ j, f j) / (Fintype.card V : ℝ)) • onesVec := by
+    funext i
+    rw [hxdef i]
+    simp [onesVec]
+  have hsumx : ∑ i, x i = 0 := by
+    simp only [hxdef, Finset.sum_sub_distrib, Finset.sum_const,
+      nsmul_eq_mul, Finset.card_univ, mul_div_assoc,
+      mul_div_cancel₀ _ (ne_of_gt hn0)]
+    ring
+  have horth : Matrix.dotProduct x onesVec = 0 := by
+    simp only [Matrix.dotProduct, onesVec, mul_one]
+    exact hsumx
+  have hvar : ∑ i, (f i - (∑ j, f j) / (Fintype.card V : ℝ)) ^ 2
+      = Matrix.dotProduct x x := by
+    simp only [Matrix.dotProduct, ← hxdef, pow_two]
+  have hshift : heatKernel A t *ᵥ x
+      = (heatKernel A t *ᵥ f)
+        - ((∑ j, f j) / (Fintype.card V : ℝ)) • onesVec := by
+    rw [hcenter, Matrix.mulVec_sub, Matrix.mulVec_smul,
+      heatKernel_mulVec_onesVec]
+  have hentry : ∀ i, (heatKernel A t *ᵥ x) i
+      = (heatKernel A t *ᵥ f) i - (∑ j, f j) / (Fintype.card V : ℝ) := by
+    intro i
+    have h := congrFun hshift i
+    simpa [Pi.sub_apply, Pi.smul_apply, onesVec, smul_eq_mul] using h
+  have hLHS : ∑ i, ((heatKernel A t *ᵥ f) i
+        - (∑ j, f j) / (Fintype.card V : ℝ)) ^ 2
+      = Matrix.dotProduct (heatKernel A t *ᵥ x) (heatKernel A t *ᵥ x) := by
+    simp only [Matrix.dotProduct, ← hentry, pow_two]
+  rw [hLHS, hvar, dotProduct_self_heatKernel_mulVec A hA t x]
+  have hparse : ∑ i, (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2
+      = Matrix.dotProduct x x := by
+    rw [dotProduct_eigvecOf hL x x]
+    exact Finset.sum_congr rfl fun i _ => (pow_two _)
+  have hone : Matrix.dotProduct (onesVec : V → ℝ) x = 0 := by
+    rw [Matrix.dotProduct_comm]
+    exact horth
+  by_cases hpos : 0 < secondEval (laplacian A) hL hcard
+  · have hzero : ∀ i : V, eigvalOf (laplacian A) hL i = 0 →
+        Matrix.dotProduct (eigvecOf (laplacian A) hL i) x = 0 := by
+      intro i hμ
+      obtain ⟨c, hc⟩ := eigvecOf_ker_eq_smul_onesVec_of_secondEval_pos
+        A hA hnn hcard hpos hμ
+      rw [hc, Matrix.smul_dotProduct, smul_eq_mul, hone, mul_zero]
+    have hterm : ∀ i : V,
+        (Real.exp (-(t * eigvalOf (laplacian A) hL i))
+          * Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2
+        ≤ Real.exp (-(2 * t * secondEval (laplacian A) hL hcard))
+          * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2 := by
+      intro i
+      by_cases hμ : eigvalOf (laplacian A) hL i = 0
+      · rw [hzero i hμ]; simp
+      · have hle : secondEval (laplacian A) hL hcard
+            ≤ eigvalOf (laplacian A) hL i :=
+          secondEval_le_eigvalOf_of_ne_zero A hA hnn hcard hμ
+        have hf : (Real.exp (-(t * eigvalOf (laplacian A) hL i))) ^ 2
+            = Real.exp (-(2 * t * eigvalOf (laplacian A) hL i)) := by
+          rw [pow_two, ← Real.exp_add]
+          congr 1
+          ring
+        rw [mul_pow, hf]
+        have hmono : Real.exp (-(2 * t * eigvalOf (laplacian A) hL i))
+            ≤ Real.exp (-(2 * t * secondEval (laplacian A) hL hcard)) :=
+          Real.exp_le_exp.2 (neg_le_neg
+            (mul_le_mul_of_nonneg_left hle (mul_nonneg zero_le_two ht)))
+        exact mul_le_mul_of_nonneg_right hmono (sq_nonneg _)
+    calc ∑ i, (Real.exp (-(t * eigvalOf (laplacian A) hL i))
+          * Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2
+        ≤ ∑ i, Real.exp (-(2 * t * secondEval (laplacian A) hL hcard))
+            * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2 :=
+          Finset.sum_le_sum fun i _ => hterm i
+      _ = Real.exp (-(2 * t * secondEval (laplacian A) hL hcard))
+          * ∑ i, (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2 :=
+            (Finset.mul_sum _ _ _).symm
+      _ = Real.exp (-(2 * t * secondEval (laplacian A) hL hcard))
+          * Matrix.dotProduct x x := by rw [hparse]
+  · push_neg at hpos
+    have hr1 : (1 : ℝ)
+        ≤ Real.exp (-(2 * t * secondEval (laplacian A) hL hcard)) := by
+      have h0 : (1 : ℝ) = Real.exp 0 := Real.exp_zero.symm
+      rw [h0]
+      refine Real.exp_le_exp.2 ?_
+      rw [neg_nonneg]
+      exact mul_nonpos_of_nonneg_of_nonpos
+        (mul_nonneg zero_le_two ht) hpos
+    have hμnn : ∀ i : V, 0 ≤ eigvalOf (laplacian A) hL i := by
+      intro i
+      rw [← quadForm_eigvecOf_self hL i]
+      exact laplacian_psd A hA hnn _
+    have hterm : ∀ i : V,
+        (Real.exp (-(t * eigvalOf (laplacian A) hL i))
+          * Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2
+        ≤ Real.exp (-(2 * t * secondEval (laplacian A) hL hcard))
+          * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2 := by
+      intro i
+      have h1 : Real.exp (-(t * eigvalOf (laplacian A) hL i)) ≤ 1 :=
+        le_trans (Real.exp_le_exp.2
+          (by rw [neg_nonpos]; exact mul_nonneg ht (hμnn i)))
+          (le_of_eq Real.exp_zero)
+      have hfac : (Real.exp (-(t * eigvalOf (laplacian A) hL i))) ^ 2 ≤ 1 :=
+        pow_le_one₀ (Real.exp_nonneg _) h1
+      rw [mul_pow]
+      calc (Real.exp (-(t * eigvalOf (laplacian A) hL i))) ^ 2
+            * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2
+          ≤ 1 * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2 :=
+            mul_le_mul_of_nonneg_right hfac (sq_nonneg _)
+        _ = (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2 :=
+            one_mul _
+        _ ≤ Real.exp (-(2 * t * secondEval (laplacian A) hL hcard))
+            * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2 := by
+          have hkey : (1 : ℝ)
+              * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2
+              ≤ Real.exp (-(2 * t * secondEval (laplacian A) hL hcard))
+              * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2 :=
+            mul_le_mul_of_nonneg_right hr1 (sq_nonneg _)
+          rw [one_mul] at hkey
+          exact hkey
+    calc ∑ i, (Real.exp (-(t * eigvalOf (laplacian A) hL i))
+          * Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2
+        ≤ ∑ i, Real.exp (-(2 * t * secondEval (laplacian A) hL hcard))
+            * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2 :=
+          Finset.sum_le_sum fun i _ => hterm i
+      _ = Real.exp (-(2 * t * secondEval (laplacian A) hL hcard))
+          * ∑ i, (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2 :=
+            (Finset.mul_sum _ _ _).symm
+      _ = Real.exp (-(2 * t * secondEval (laplacian A) hL hcard))
+          * Matrix.dotProduct x x := by rw [hparse]
 
 end SpectralGraphTheory

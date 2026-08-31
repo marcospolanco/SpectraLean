@@ -18,7 +18,13 @@
   remainder bound: the K₂ eigenvalue inventory, the eigen-sum constant
   `4`, the concrete-bound witness cross-checked against the closed-form
   exponential value at two times, and the boundary-degradation witness
-  pinning the `t²` scaling and the `t = 1/2` window fence).
+  pinning the `t²` scaling and the `t = 1/2` window fence); and the
+  variance-decay section (2026-08-31,
+  `proposals/heat-variance-decay.md`): exact attainment at Fiedler
+  vectors on K₂ (`2 e^{-4t}`) and P₃ (`2 e^{-2t}`) at *every* time, the
+  wrong-constant refutation, the λ₂ = 0 disconnected branch pinned exact
+  (both sides `2/3`, the fixture's gap proved exactly zero), mean
+  preservation by two independent routes, and the `t = 0` corner.
 
   All proofs are real Lean proofs (no `sorry`/`admit`). These are
   theorems, not axioms; QA checks the interfaces where the arithmetic
@@ -28,6 +34,7 @@
 -/
 
 import Scaffold.Mathlib.GraphTheory.Heat
+import Scaffold.QA.SpectralGraph.Poincare_QA
 import Mathlib.Data.Matrix.Notation
 
 open scoped BigOperators Matrix
@@ -1040,5 +1047,339 @@ theorem heatKernel_edge_remainder_window_fenced_QA :
   have h1 := h i
   rw [hi, one_mul] at h1
   norm_num at h1
+
+
+/-! ## Variance decay (QA layer) -/
+
+theorem edgeAdj_card : 2 ≤ Fintype.card (Fin 2) := le_refl 2
+
+/-- **The K₂ exact-attainment pin**: at the Fiedler vector `![1, -1]`
+the decayed variance is exactly `e^{-4t} · 2` at *every* `t ≥ 0` —
+both sides of the theorem compute to the same closed form (the QA
+shape a bound theorem can have at an eigenvector input). -/
+theorem heat_variance_edge_attained_QA (t : ℝ) :
+    (∑ i : Fin 2, ((heatKernel edgeAdj t *ᵥ (![1, -1] : Fin 2 → ℝ)) i
+        - (∑ j, (![1, -1] : Fin 2 → ℝ) j)
+          / (Fintype.card (Fin 2) : ℝ)) ^ 2)
+      = Real.exp (-(4 * t)) * 2 := by
+  have hmean : (∑ j : Fin 2, (![1, -1] : Fin 2 → ℝ) j)
+      / (Fintype.card (Fin 2) : ℝ) = 0 := by
+    norm_num [Fin.sum_univ_two, Fintype.card_fin, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.head_cons]
+  rw [heatKernel_edge_mode_engine_QA t, hmean]
+  have hf : (Real.exp (-(2 * t))) ^ 2 = Real.exp (-(4 * t)) := by
+    rw [pow_two, ← Real.exp_add]
+    congr 1
+    ring
+  have h0 : ((Real.exp (-(2 * t)) • (![1, -1] : Fin 2 → ℝ)) 0 - 0) ^ 2
+      = (Real.exp (-(2 * t))) ^ 2 := by
+    simp [Matrix.cons_val_zero]
+  have h1 : ((Real.exp (-(2 * t)) • (![1, -1] : Fin 2 → ℝ)) 1 - 0) ^ 2
+      = (Real.exp (-(2 * t))) ^ 2 := by
+    simp [Matrix.cons_val_one, Matrix.head_cons]
+  rw [Fin.sum_univ_two, h0, h1, hf]
+  ring
+
+/-- **The K₂ theorem instance**: the variance-decay theorem on the edge,
+with the gap read from the independently pinned K₂ spectrum
+(`edgeLaplacian_evals_QA`) — closing at `le_refl`, i.e. exact
+attainment: no smaller constant than `e^{-2tλ₂}` works at the Fiedler
+vector. -/
+theorem heat_variance_edge_instance_QA (t : ℝ) (ht : 0 ≤ t) :
+    (∑ i : Fin 2, ((heatKernel edgeAdj t *ᵥ (![1, -1] : Fin 2 → ℝ)) i
+        - (∑ j, (![1, -1] : Fin 2 → ℝ) j)
+          / (Fintype.card (Fin 2) : ℝ)) ^ 2)
+      ≤ Real.exp (-(2 * t * secondEval (laplacian edgeAdj)
+          (laplacian_symmetric edgeAdj edgeAdj_isSymm) edgeAdj_card))
+        * ∑ i : Fin 2, ((![1, -1] : Fin 2 → ℝ) i
+          - (∑ j, (![1, -1] : Fin 2 → ℝ) j)
+            / (Fintype.card (Fin 2) : ℝ)) ^ 2 :=
+  heatKernel_variance_decay edgeAdj edgeAdj_isSymm edgeAdj_nonneg
+    edgeAdj_card ht ![1, -1]
+
+/-- The K₂ instance's RHS reads `e^{-4t} · 2` too: with the gap pinned
+`2` and the Fiedler variance pinned `2`, the bound is *attained*, not
+merely met. -/
+theorem heat_variance_edge_bound_value_QA (t : ℝ) :
+    Real.exp (-(2 * t * secondEval (laplacian edgeAdj)
+        (laplacian_symmetric edgeAdj edgeAdj_isSymm) edgeAdj_card))
+      * ∑ i : Fin 2, ((![1, -1] : Fin 2 → ℝ) i
+        - (∑ j, (![1, -1] : Fin 2 → ℝ) j)
+          / (Fintype.card (Fin 2) : ℝ)) ^ 2
+      = Real.exp (-(4 * t)) * 2 := by
+  have h2 : secondEval (laplacian edgeAdj)
+      (laplacian_symmetric edgeAdj edgeAdj_isSymm) edgeAdj_card = 2 :=
+    (edgeLaplacian_evals_QA).2
+  have hvar : ∑ i : Fin 2, ((![1, -1] : Fin 2 → ℝ) i
+        - (∑ j, (![1, -1] : Fin 2 → ℝ) j)
+          / (Fintype.card (Fin 2) : ℝ)) ^ 2 = 2 := by
+    simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, Matrix.tail_cons, Matrix.vecTail, Matrix.vecHead,
+      Fintype.card_fin]
+    norm_num
+  rw [h2, hvar]
+  congr 1
+  ring
+
+/-- The P₃ Fiedler eigen-equation, raw entrywise: `L *ᵥ ![1, 0, -1] =
+1 • ![1, 0, -1]` — the input the exponential eigenmode engine consumes
+on the path fixture (independent of every theorem here). -/
+theorem pcP3_laplacian_mulVec_fiedler :
+    laplacian pcP3 *ᵥ (![1, 0, -1] : Fin 3 → ℝ)
+      = (1 : ℝ) • (![1, 0, -1] : Fin 3 → ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Pi.zero_apply,
+      Fin.sum_univ_three, laplacian, degreeMatrix, deg, pcP3]
+
+/-- **The P₃ exact-attainment pin**: at the path's Fiedler vector the
+decayed variance is exactly `e^{-2t} · 2` at every `t ≥ 0` — the same
+attainment shape as K₂ at the *other* gap value (`1`, not `2`), on an
+irregular-degree graph. -/
+theorem heat_variance_p3_attained_QA (t : ℝ) :
+    (∑ i : Fin 3, ((heatKernel pcP3 t *ᵥ (![1, 0, -1] : Fin 3 → ℝ)) i
+        - (∑ j, (![1, 0, -1] : Fin 3 → ℝ) j)
+          / (Fintype.card (Fin 3) : ℝ)) ^ 2)
+      = Real.exp (-(2 * t)) * 2 := by
+  have hmode : heatKernel pcP3 t *ᵥ (![1, 0, -1] : Fin 3 → ℝ)
+      = Real.exp (-(t * 1)) • (![1, 0, -1] : Fin 3 → ℝ) := by
+    rw [heatKernel]
+    refine exp_mulVec_eq_smul_of_mulVec_eq_smul _ _ _ ?_
+    rw [Matrix.neg_mulVec, Matrix.smul_mulVec_assoc,
+      pcP3_laplacian_mulVec_fiedler, smul_smul, neg_smul]
+  rw [hmode]
+  have hmean : (∑ j : Fin 3, (![1, 0, -1] : Fin 3 → ℝ) j)
+      / (Fintype.card (Fin 3) : ℝ) = 0 := by
+    norm_num [Fin.sum_univ_three, Fintype.card_fin, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.cons_val_two, Matrix.head_cons]
+  rw [hmean]
+  have hf : (Real.exp (-(t * 1))) ^ 2 = Real.exp (-(2 * t)) := by
+    rw [pow_two, ← Real.exp_add]
+    congr 1
+    ring
+  have h0 : ((Real.exp (-(t * 1)) • (![1, 0, -1] : Fin 3 → ℝ)) 0 - 0) ^ 2
+      = (Real.exp (-(t * 1))) ^ 2 := by
+    simp [Matrix.cons_val_zero]
+  have h1 : ((Real.exp (-(t * 1)) • (![1, 0, -1] : Fin 3 → ℝ)) 1 - 0) ^ 2
+      = 0 := by
+    simp [Matrix.cons_val_one, Matrix.head_cons]
+  have h2 : ((Real.exp (-(t * 1)) • (![1, 0, -1] : Fin 3 → ℝ)) 2 - 0) ^ 2
+      = (Real.exp (-(t * 1))) ^ 2 := by
+    simp [Matrix.cons_val_two, Matrix.head_cons]
+  rw [Fin.sum_univ_three, h0, h1, h2, hf]
+  ring
+
+/-- **The P₃ theorem instance**: the variance-decay theorem on the path,
+gap read from the pinned P₃ spectrum — again closing at an exact
+attainment (`2 e^{-2t} = 2 e^{-2t}`). -/
+theorem heat_variance_p3_instance_QA (t : ℝ) :
+    (∑ i : Fin 3, ((heatKernel pcP3 t *ᵥ (![1, 0, -1] : Fin 3 → ℝ)) i
+        - (∑ j, (![1, 0, -1] : Fin 3 → ℝ) j)
+          / (Fintype.card (Fin 3) : ℝ)) ^ 2)
+      = Real.exp (-(2 * t * secondEval (laplacian pcP3)
+          (laplacian_symmetric pcP3 pcP3_isSymm) pcP3_card))
+        * ∑ i : Fin 3, ((![1, 0, -1] : Fin 3 → ℝ) i
+          - (∑ j, (![1, 0, -1] : Fin 3 → ℝ) j)
+            / (Fintype.card (Fin 3) : ℝ)) ^ 2 := by
+  have hvar : ∑ i : Fin 3, ((![1, 0, -1] : Fin 3 → ℝ) i
+        - (∑ j, (![1, 0, -1] : Fin 3 → ℝ) j)
+          / (Fintype.card (Fin 3) : ℝ)) ^ 2 = 2 := by
+    simp only [Fin.sum_univ_three, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.cons_val_two, Matrix.head_cons,
+      Matrix.tail_cons, Fintype.card_fin]
+    norm_num
+  rw [heat_variance_p3_attained_QA t, pcP3_secondEval_eq_one_QA, hvar]
+  congr 1
+  ring
+
+/-- **The wrong-constant refutation**: replacing the gap `2` by `3` in
+the K₂ instance makes the conclusion false at `t = 1` — the decayed
+variance `2 e^{-4}` is *not* at most `2 e^{-6}` (since `e^{-6} <
+e^{-4}`). The attained rate is load-bearing, not slack. -/
+theorem heat_variance_edge_wrong_constant_refuted_QA :
+    ¬ ((∑ i : Fin 2, ((heatKernel edgeAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ)) i
+        - (∑ j, (![1, -1] : Fin 2 → ℝ) j)
+          / (Fintype.card (Fin 2) : ℝ)) ^ 2)
+        ≤ Real.exp (-(2 * (1 : ℝ) * 3))
+          * ∑ i : Fin 2, ((![1, -1] : Fin 2 → ℝ) i
+            - (∑ j, (![1, -1] : Fin 2 → ℝ) j)
+              / (Fintype.card (Fin 2) : ℝ)) ^ 2) := by
+  intro hcon
+  have hval := heat_variance_edge_attained_QA 1
+  have hvar : ∑ i : Fin 2, ((![1, -1] : Fin 2 → ℝ) i
+        - (∑ j, (![1, -1] : Fin 2 → ℝ) j)
+          / (Fintype.card (Fin 2) : ℝ)) ^ 2 = 2 := by
+    simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, Matrix.tail_cons, Matrix.vecTail, Matrix.vecHead,
+      Fintype.card_fin]
+    norm_num
+  rw [hval, hvar, show -(4 * (1 : ℝ)) = -(4 : ℝ) by norm_num,
+    show -(2 * (1 : ℝ) * 3) = -(6 : ℝ) by norm_num] at hcon
+  have hlt : Real.exp (-(6 : ℝ)) < Real.exp (-(4 : ℝ)) :=
+    Real.exp_lt_exp.mpr (by norm_num)
+  linarith
+
+/-- The disconnected `Fin 3` fixture is symmetric, nonnegative, and
+card-eligible — the hypothesis set of the variance-decay theorem on
+degenerate (zero-gap) input. -/
+theorem disAdj_isSymm : disAdj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [disAdj]
+
+theorem disAdj_nonneg : ∀ i j, 0 ≤ disAdj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [disAdj]
+
+theorem disAdj_card : 2 ≤ Fintype.card (Fin 3) := by decide
+
+/-- The component-signed vector `![1, 1, -2]` is `L`-harmonic on the
+disconnected fixture, raw entrywise. -/
+theorem disAdj_laplacian_mulVec_ker_QA :
+    laplacian disAdj *ᵥ (![1, 1, -2] : Fin 3 → ℝ) = 0 := by
+  funext i
+  fin_cases i <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Pi.zero_apply,
+      Fin.sum_univ_three, laplacian, degreeMatrix, deg, disAdj]
+
+/-- It is orthogonal to `onesVec` — so it is a *centered* kernel vector,
+the witness that pins the fixture's gap to exactly zero. -/
+theorem disAdj_ker_orth_QA :
+    Matrix.dotProduct (![1, 1, -2] : Fin 3 → ℝ) onesVec = 0 := by
+  simp only [Matrix.dotProduct, onesVec, mul_one, Fin.sum_univ_three]
+  norm_num
+
+/-- **The disconnected fixture's gap is exactly `0`**: at most `0` by the
+Rayleigh bound at the centered kernel vector above, at least `0` by
+sortedness (`evals ⟨0⟩ ≤ evals ⟨1⟩`) plus `laplacian_evals_zero`. This is
+the λ₂ = 0 branch's fixture constant, pinned by hand. -/
+theorem disAdj_secondEval_eq_zero_QA :
+    secondEval (laplacian disAdj) (laplacian_symmetric disAdj disAdj_isSymm)
+      disAdj_card = 0 := by
+  have hx0 : (![1, 1, -2] : Fin 3 → ℝ) ≠ 0 := by
+    intro h
+    have h2 : (![1, 1, -2] : Fin 3 → ℝ) 2 = 0 := congrFun h 2
+    norm_num [Matrix.cons_val_two, Matrix.head_cons] at h2
+  have hxorth := disAdj_ker_orth_QA
+  have hR := secondEval_le_rayleigh (laplacian_symmetric disAdj disAdj_isSymm)
+    (laplacian_psd disAdj disAdj_isSymm disAdj_nonneg)
+    (laplacian_ones_in_kernel disAdj) disAdj_card hx0 hxorth
+  rw [rayleigh, if_neg hx0, quadForm, disAdj_laplacian_mulVec_ker_QA,
+    Matrix.dotProduct_zero, zero_div] at hR
+  have hge : (0 : ℝ) ≤ secondEval (laplacian disAdj)
+      (laplacian_symmetric disAdj disAdj_isSymm) disAdj_card := by
+    have h0 : evals (laplacian_symmetric disAdj disAdj_isSymm)
+        ⟨0, by simp⟩ = 0 :=
+      laplacian_evals_zero disAdj disAdj_isSymm disAdj_nonneg (by simp)
+    have hmono : evals (laplacian_symmetric disAdj disAdj_isSymm)
+        ⟨0, by simp⟩
+        ≤ evals (laplacian_symmetric disAdj disAdj_isSymm) ⟨1, by simp⟩ :=
+      evals_sorted _ (Fin.le_def.2 zero_le_one)
+    rw [show secondEval (laplacian disAdj)
+          (laplacian_symmetric disAdj disAdj_isSymm) disAdj_card
+        = evals (laplacian_symmetric disAdj disAdj_isSymm) ⟨1, by simp⟩ from rfl]
+    exact h0 ▸ hmono
+  linarith
+
+/-- **The λ₂ = 0 branch is exact**: on the disconnected fixture, at the
+component indicator (a kernel vector — heat fixes it by
+`heatKernel_noLeakage_component_QA`), both sides of the variance decay
+compute to exactly `2/3` at every time: the rate-`e^{0} = 1` bound is
+*attained*, so the theorem's zero-gap branch is tight exactly where it
+says nothing decays. -/
+theorem heat_variance_disconn_attained_QA (t : ℝ) :
+    (∑ i : Fin 3, ((heatKernel disAdj t *ᵥ
+          (fun j => if j = 2 then (0 : ℝ) else 1)) i
+        - (∑ j : Fin 3, (if j = 2 then (0 : ℝ) else 1))
+          / (Fintype.card (Fin 3) : ℝ)) ^ 2)
+      = 2 / 3
+      ∧ Real.exp (-(2 * t * secondEval (laplacian disAdj)
+          (laplacian_symmetric disAdj disAdj_isSymm) disAdj_card))
+          * ∑ i : Fin 3, ((if (i : Fin 3) = 2 then (0 : ℝ) else 1)
+            - (∑ j : Fin 3, (if j = 2 then (0 : ℝ) else 1))
+              / (Fintype.card (Fin 3) : ℝ)) ^ 2
+        = 2 / 3 := by
+  have hfix := heatKernel_noLeakage_component_QA t
+  have hsum : (∑ j : Fin 3, (if j = 2 then (0 : ℝ) else 1)) = 2 := by
+    have e0 : (if (0 : Fin 3) = 2 then (0 : ℝ) else 1) = 1 :=
+      if_neg (by decide)
+    have e1 : (if (1 : Fin 3) = 2 then (0 : ℝ) else 1) = 1 :=
+      if_neg (by decide)
+    have e2 : (if (2 : Fin 3) = 2 then (0 : ℝ) else 1) = 0 :=
+      if_pos rfl
+    rw [Fin.sum_univ_three, e0, e1, e2]
+    norm_num
+  have hmean : (∑ j : Fin 3, (if j = 2 then (0 : ℝ) else 1))
+      / (Fintype.card (Fin 3) : ℝ) = 2 / 3 := by
+    rw [hsum, Fintype.card_fin]
+    norm_num
+  have hvar : ∑ i : Fin 3, ((if (i : Fin 3) = 2 then (0 : ℝ) else 1)
+      - 2 / 3) ^ 2 = 2 / 3 := by
+    have e0 : ((if (0 : Fin 3) = 2 then (0 : ℝ) else 1) - 2 / 3) ^ 2
+        = 1 / 9 := by
+      rw [if_neg (by decide)]
+      norm_num
+    have e1 : ((if (1 : Fin 3) = 2 then (0 : ℝ) else 1) - 2 / 3) ^ 2
+        = 1 / 9 := by
+      rw [if_neg (by decide)]
+      norm_num
+    have e2 : ((if (2 : Fin 3) = 2 then (0 : ℝ) else 1) - 2 / 3) ^ 2
+        = 4 / 9 := by
+      rw [if_pos rfl]
+      norm_num
+    rw [Fin.sum_univ_three, e0, e1, e2]
+    norm_num
+  constructor
+  · rw [hfix, hmean]
+    exact hvar
+  · rw [hmean, hvar, disAdj_secondEval_eq_zero_QA, mul_zero, neg_zero,
+      Real.exp_zero, one_mul]
+
+/-- The theorem instance on the disconnected fixture — the λ₂ = 0 branch
+exercised end to end, closing at equality by the pin above. -/
+theorem heat_variance_disconn_instance_QA (t : ℝ) (ht : 0 ≤ t) :
+    (∑ i : Fin 3, ((heatKernel disAdj t *ᵥ
+          (fun j => if j = 2 then (0 : ℝ) else 1)) i
+        - (∑ j : Fin 3, (if j = 2 then (0 : ℝ) else 1))
+          / (Fintype.card (Fin 3) : ℝ)) ^ 2)
+      ≤ Real.exp (-(2 * t * secondEval (laplacian disAdj)
+          (laplacian_symmetric disAdj disAdj_isSymm) disAdj_card))
+        * ∑ i : Fin 3, ((if (i : Fin 3) = 2 then (0 : ℝ) else 1)
+          - (∑ j : Fin 3, (if j = 2 then (0 : ℝ) else 1))
+            / (Fintype.card (Fin 3) : ℝ)) ^ 2 :=
+  heatKernel_variance_decay disAdj disAdj_isSymm disAdj_nonneg
+    disAdj_card ht _
+
+/-- **Mean preservation, theorem route**: the total mass of the heat flow
+of `![1, 3]` on `K₂` at `t = 1` is exactly the input mass `4` —
+`sum_heatKernel_mulVec` instantiated on the fixture (a transpose slip in
+the lemma's symmetry transfer would move this number). -/
+theorem heat_variance_mean_preserved_theorem_QA :
+    ∑ i : Fin 2, (heatKernel edgeAdj 1 *ᵥ (![1, 3] : Fin 2 → ℝ)) i = 4 := by
+  rw [sum_heatKernel_mulVec edgeAdj edgeAdj_isSymm 1 (![1, 3] : Fin 2 → ℝ)]
+  norm_num [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons]
+
+set_option linter.unnecessarySeqFocus false in
+/-- **Mean preservation, raw route**: the same mass `4` from the closed
+form `heatKernel edgeAdj 1 = 1 + ((e^{-2} - 1)/2) • L` and hand
+arithmetic (`![1,3] + c • ![-2, 2]` sums to `4 + c · 0`) — independent
+of the symmetry-transfer lemma. Two routes to one mass. -/
+theorem heat_variance_mean_preserved_raw_QA :
+    ∑ i : Fin 2, (heatKernel edgeAdj 1 *ᵥ (![1, 3] : Fin 2 → ℝ)) i = 4 := by
+  rw [heatKernel_edge_closed_QA 1 (by norm_num), Matrix.add_mulVec,
+    Matrix.one_mulVec, Matrix.smul_mulVec_assoc, edgeLaplacian_mulVec_dc]
+  simp only [Fin.sum_univ_two, Pi.add_apply, Pi.smul_apply, smul_eq_mul,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+  ring
+
+/-- **The `t = 0` corner**: at time zero the statement is the identity
+`Var(f) ≤ 1 · Var(f)` — instantiated at every input on the fixture, with
+the rate factor computing to `exp 0 = 1` by hand. -/
+theorem heat_variance_zero_time_QA (f : Fin 2 → ℝ) :
+    (∑ i : Fin 2, ((heatKernel edgeAdj 0 *ᵥ f) i
+        - (∑ j, f j) / (Fintype.card (Fin 2) : ℝ)) ^ 2)
+      = ∑ i : Fin 2, (f i
+          - (∑ j, f j) / (Fintype.card (Fin 2) : ℝ)) ^ 2 := by
+  rw [heatKernel_zero, Matrix.one_mulVec]
 
 end SpectralGraphTheory.QA

@@ -1,9 +1,12 @@
 # Scaffold
 
-Scaffold lets researchers formalize new applied mathematics today by treating
-selected published results as explicit, cited assumptions. Lean checks every
-downstream deduction, while those assumptions remain visible, reviewable, and
-replaceable as formal proofs become available.
+Scaffold is a growing, machine-checked formalization of spectral graph theory
+in Lean 4. Every claim is exactly what it says: a proved theorem is proved by
+the kernel, and every remaining assumption is a small, explicit, cited
+placeholder for one specific unproven research result, never hidden behind
+`sorry`. The library's job is to keep proving those placeholders away: the
+explicit axiom count has already fallen from 10 to 5 as the hard crust has
+grown, and the trend is toward zero, not toward accumulation.
 
 The project’s center is **spectral graph theory (SGT)**. Its goal is a broad,
 reusable formal neighborhood around SGT: graph and Laplacian theory,
@@ -124,18 +127,32 @@ plain self-contained HTML/JS, no build step).
 
 ## Why Scaffold exists
 
-Modern applied work often depends on results that Mathlib does not yet expose
-in a directly usable form. Waiting for every prerequisite to be formalized can
-block experimentation at the frontier. Hiding those gaps behind `sorry`, on the
-other hand, obscures what has actually been established.
+Most of what makes spectral graph theory useful, both Cheeger directions, the
+Alon-Boppana bound, the Krylov/Kaniel-Paige program, the heat semigroup, the
+full scalar concentration stack, and the Hermitian functional-calculus bridge
+among them, is already proved end to end in Lean, with zero admitted axioms.
+That is the actual asset: a comprehensive, kernel-checked spectral graph
+theory library where you can trust every claim by construction, not by
+reputation.
 
-Scaffold makes the tradeoff explicit:
+A handful of research-frontier results (5 today, down from 10) are not yet
+proved anywhere in Lean, and Mathlib does not expose them either. Rather than
+block on every prerequisite or hide the gap behind `sorry`, Scaffold makes
+the boundary explicit and disciplined:
 
-- published background results may enter through a narrow, cited axiom boundary;
-- real definitions and stable APIs make those results composable in Lean;
+- a not-yet-proved published result may enter through a narrow, cited axiom,
+  never silently, always named and sourced;
+- real definitions and stable APIs make it composable in Lean immediately;
 - small QA proofs test the interfaces and selected consequences;
-- novel results remain conditional on their axioms until those axioms are
-  proved or replaced upstream.
+- anything downstream stays honestly conditional on that axiom until it is
+  proved locally or replaced upstream, with every retirement recorded in
+  [`docs/AGENT_ACTIVITY.md`](docs/AGENT_ACTIVITY.md) and every defect a stress
+  test ever found in an admitted axiom logged in
+  [`docs/9_ERRATA.md`](docs/9_ERRATA.md), not quietly dropped.
+
+The axiom boundary is the mechanism, not the pitch. The pitch is what it
+protects: you always know exactly which claims are proved and which are
+assumptions, and the assumption count only ever moves toward zero.
 
 This is stronger than informal derivation because Lean checks the downstream
 reasoning. It is weaker than foundational formalization because the admitted

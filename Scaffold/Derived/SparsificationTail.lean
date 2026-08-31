@@ -56,6 +56,19 @@ axioms` reports the dependency honestly.
   every graph vector with **no `im Π` restriction** (the transport is on
   the cone by construction), same tail and same budget through the
   shelf's form correspondence `quadForm_ssLaplacian_eq`.
+- `sparsificationBudget` (+ `_pos`, `_le`, `_min`): the **closed-form
+  sampling budget** (Track A of
+  `proposals/spectral-graph-sparsification-gnn-training.md`) — the
+  minimal natural `q` certified for both clauses of the budget
+  hypothesis, as pure arithmetic: zero axioms, `#print axioms` at the
+  standard three, so a caller supplies only `(n, ε, δ)`.
+- `sparsification_graph_budget_closedForm`: the plug-in form — the
+  graph-vector guarantee at the computed budget, the budget hypothesis
+  discharged by `sparsificationBudget_le` (CONDITIONAL ON THE
+  `matrix_bernstein` AXIOM exactly like the budget corollary it
+  applies; the *budget arithmetic* is axiom-free). The
+  practitioner-facing statement, trust caveat first, is
+  `docs/gnn-sparsification-budget.md`.
 
 The `Fin n` summand transport (the Step-0 Finding B) is
 `Fintype.equivFin` + `Equiv.sum_comp`; the sum, event, and variance
@@ -478,5 +491,75 @@ theorem sparsification_graph_budget [Nonempty V] (hnn : ∀ i j, 0 ≤ A i j)
   have hdpos : (0 : ℝ) < (Fintype.card V : ℝ) := by
     exact_mod_cast Fintype.card_pos
   exact sparsification_budget_core hdpos hε hε1 hδ hq hqbudget
+
+/-! ### The closed-form sampling budget (Track A)
+
+The budget corollaries above take `q` as a hypothesis the caller must
+discharge by hand. These declarations instead *output* the budget:
+`sparsificationBudget n ε δ` is the minimal natural `q` satisfying both
+clauses (`0 < q` and the inequality), the three certification lemmas
+prove exactly that, and `sparsification_graph_budget_closedForm` is the
+one-hypothesis-per-side plug-in form of the graph-vector guarantee.
+Everything in this section except the plug-in form is pure real
+arithmetic — no graph, no measure, no axiom. -/
+
+/-- **The closed-form per-edge sampling budget** — the minimal natural
+`q` satisfying both `0 < q` and the certified budget inequality
+`(8/3)·log(2n/δ)/ε² ≤ q`, at graph order `n` (instantiate at
+`Fintype.card V`), target relative accuracy `ε` (read at `0 < ε ≤ 1`),
+and failure probability `δ` (read at `0 < δ`). Pure arithmetic: no
+graph, no measure, no axiom. The `max 1` floor is what makes positivity
+unconditional — at `2n/δ ≤ 1` the log is nonpositive and the ceiling
+alone could be `0`, killing the `0 < q` clause of every budget theorem
+(fenced at `n = 1`, `δ = 10` in QA). -/
+noncomputable def sparsificationBudget (n : ℕ) (ε δ : ℝ) : ℕ :=
+  max 1 (Nat.ceil ((8 / 3) * Real.log (2 * (n : ℝ) / δ) / ε ^ 2))
+
+/-- The budget is positive — the `max 1` floor, unconditionally. -/
+theorem sparsificationBudget_pos (n : ℕ) (ε δ : ℝ) :
+    0 < sparsificationBudget n ε δ :=
+  lt_of_lt_of_le (zero_lt_one) (le_max_left _ _)
+
+/-- The budget meets the certified budget inequality of both budget
+corollaries (`sparsification_multiplicative_budget`,
+`sparsification_graph_budget`), unconditionally. -/
+theorem sparsificationBudget_le (n : ℕ) (ε δ : ℝ) :
+    (8 / 3) * Real.log (2 * (n : ℝ) / δ) / ε ^ 2
+      ≤ (sparsificationBudget n ε δ : ℝ) :=
+  (Nat.le_ceil _).trans (Nat.cast_le.2 (le_max_right _ _))
+
+/-- The budget is *minimal* among naturals: any positive natural `q`
+meeting the budget inequality dominates `sparsificationBudget n ε δ`.
+Together with `_pos` and `_le` this certifies the closed form as
+exactly the minimal certified budget, not merely one valid choice. -/
+theorem sparsificationBudget_min (n : ℕ) (ε δ : ℝ) {q : ℕ} (hq : 0 < q)
+    (hqbudget : (8 / 3) * Real.log (2 * (n : ℝ) / δ) / ε ^ 2 ≤ (q : ℝ)) :
+    sparsificationBudget n ε δ ≤ q :=
+  max_le hq (Nat.ceil_le.2 hqbudget)
+
+/-- **The plug-in budget guarantee** — `sparsification_graph_budget`
+at `q := ↑(sparsificationBudget (card V) ε δ)`: pass only the graph
+hypotheses and `(ε, δ)`; the sampling count comes out of the certified
+formula (positivity and budget inequality discharged by
+`sparsificationBudget_pos`/`_le`). CONDITIONAL ON THE
+`matrix_bernstein` AXIOM — it applies `sparsification_graph_budget`;
+the budget *arithmetic* (`sparsificationBudget` and its three lemmas)
+is axiom-free, but the guarantee obtained here is exactly as trusted as
+that axiom. See `docs/gnn-sparsification-budget.md`. -/
+theorem sparsification_graph_budget_closedForm [Nonempty V]
+    (hnn : ∀ i j, 0 ≤ A i j) (ε : ℝ) (hε : 0 < ε) (hε1 : ε ≤ 1)
+    (δ : ℝ) (hδ : 0 < δ) :
+    ssMeasure A hA ((sparsificationBudget (Fintype.card V) ε δ : ℝ))
+        (Nat.cast_pos.2 (sparsificationBudget_pos (Fintype.card V) ε δ)).le
+        {ω | ∃ x : V → ℝ, (1 - ε) * quadForm (laplacian A) x
+            > quadForm (ssLaplacian A hA
+                ((sparsificationBudget (Fintype.card V) ε δ : ℝ)) ω) x ∨
+          quadForm (ssLaplacian A hA
+                ((sparsificationBudget (Fintype.card V) ε δ : ℝ)) ω) x
+            > (1 + ε) * quadForm (laplacian A) x}
+      ≤ ENNReal.ofReal δ :=
+  sparsification_graph_budget A hA hnn ε hε hε1 δ hδ _
+    (Nat.cast_pos.2 (sparsificationBudget_pos (Fintype.card V) ε δ))
+    (sparsificationBudget_le (Fintype.card V) ε δ)
 
 end Scaffold.Derived.SparsificationTail

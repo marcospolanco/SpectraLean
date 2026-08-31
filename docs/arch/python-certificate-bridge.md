@@ -183,7 +183,16 @@ to wave at.
   only one that exists today; a real Step 0 would need to inventory
   which other Scaffold theorems (Cheeger, expander mixing, the
   degree-eigenvalue sandwich) admit the same decidable-certificate
-  treatment before promising broader coverage.
+  treatment before promising broader coverage. One second candidate is
+  already on the list (2026-08-31,
+  `proposals/spectral-graph-sparsification-gnn-training.md`): the
+  closed-form edge-sampling budget `sparsificationBudget n ε δ`
+  (`Scaffold/Derived/SparsificationTail.lean`) — a caller-side
+  certificate "my `q` suffices for my `(n, ε, δ)`" whose check is pure
+  ordered-real arithmetic (axiom-free, kernel-checkable without
+  floating-point modeling), feeding the `matrix_bernstein`-conditional
+  sparsifier guarantee; see the practitioner-facing note
+  [`docs/gnn-sparsification-budget.md`](../gnn-sparsification-budget.md).
 
 ## Gate
 

@@ -529,6 +529,161 @@ Step 2 (delivered the same day) isolates the Fiedler *line* — see
 `fiedlerLine_stability` below.
 -/
 
+/-!
+## Spectral-encoding stability: the general-rank Davis–Kahan family
+
+`proposals/spectral-positional-encoding-stability.md` (delivered
+2026-08-31): the rank-`k` generalizations of the two stability theorems
+below. The engines were never rank-2-limited — `davis_kahan_sin_theta`
+is stated for every index `k`, and the kernel identification
+`initialProjector_laplacian_zero_eq_of_connected` is rank-independent —
+so both general theorems are re-parameterizations of the delivered
+proofs, and the two `k = 1` theorems below are now one-line corollaries,
+re-proved in place at unchanged public statements.
+
+What this buys, stated for the ML audience: graph transformers that use
+the bottom-`k` Laplacian eigenvectors as positional encodings (LapPE:
+Dwivedi & Bresson, "A generalization of transformer networks to graph
+data", AAAI 2021; SAN: Kreuzer, Beaini, Hamilton, Létourneau & Tossou,
+"Rethinking graph transformers with spectral attention", NeurIPS 2021)
+face a known, mostly empirical robustness problem — eigenvector
+rotation within near-degenerate eigenspaces, handled in those papers by
+sign-flip augmentation and empirical testing. Given a base graph, a
+bounded edit summarized by `‖laplacian E‖`, and a verified eigenvalue
+gap `δ` at the encoding's cutoff rank, these theorems certify an upper
+bound `‖laplacian E‖ / δ` on how far the `k`-dimensional encoding
+subspace can move. This is a machine-checked instance of a *known*
+class of result — Davis–Kahan-based graph-perturbation stability
+argued informally by von Luxburg ("A tutorial on spectral clustering",
+Statistics and Computing 17(4), 2007) and, for spectral graph
+filters/GNNs, by Gama & Ribeiro and Levie et al. — not new mathematics
+and not a theorem from the ML papers, which motivate the bound without
+stating it.
+
+**Honest scope limits** (from the proposal, recorded here per its
+acceptance criteria):
+
+- the bound controls **subspace** (projector) distance in operator
+  norm, *not* a sign-resolved, entrywise distance between the
+  `k`-column encoding matrix a transformer consumes — subspace
+  distance is the well-posed invariant precisely because individual
+  eigenvectors have a sign/rotation ambiguity within tied or near-tied
+  eigenvalues, so this is not a weaker substitute for an entrywise
+  bound but the right question;
+- the kernel-isolated form requires **connectivity of both** graphs;
+- the caller supplies (or separately verifies) the gap `δ` — no method
+  for computing or certifying `δ` is included here;
+- neither theorem is a restatement of any result in the cited ML
+  papers.
+
+QA: `Scaffold/QA/SpectralGraph/Fiedler_QA.lean`, section
+`SpectralEncodingStability` — the star `K₁,₃ → K₄` instance at
+`k = ⟨2⟩` (a rank-3 base projector witnessed through the no-tie rank
+pin at the strict gap `1 < 4`), with the separation `4 − 1 = 3` pinned
+independently at that rank, the perturbation norm `‖L(triangle)‖ = 3`
+pinned two-sided, the full star spectrum `{0, 1, 1, 4}` pinned, and
+the **bound exactly attained**: the projector distance is `= 1`, not
+merely `≤ 1`.
+-/
+
+/-- **Spectral-encoding subspace stability, general rank.** On a
+weighted graph `A` with an index-`k` cutoff (`k + 1 < card V` keeps the
+upper cluster nonempty), perturbed by a symmetric `E`, the bottom-`k+1`
+invariant spectral subspace of the combinatorial Laplacian moves by at
+most the operator norm of the Laplacian perturbation, inversely to the
+separation `δ` between the perturbed graph's `k+2`-nd eigenvalue and
+the base graph's `k+1`-st.
+
+The general-rank form of `fiedlerSubspace_stability` (its `k = 1`
+instance); the proof is the same mechanical instantiation —
+`laplacian_add` transports the perturbed Laplacian into the theorem's
+`A + E` shape, `evals_congr` carries the separation hypothesis across
+the two spellings — with the index now the parameter. No connectivity
+hypothesis: the bound holds on every symmetric base and perturbation;
+connectivity is what interprets the projector as an encoding subspace.
+The kernel-isolated, ML-facing form is `spectralEncoding_stability`
+below. See the section docstring above for the honest scope limits.
+
+QA: `Scaffold/QA/SpectralGraph/Fiedler_QA.lean`, section
+`SpectralEncodingStability` — `seSubspace_star4_K4_QA` at `k = ⟨2⟩`
+with the exact-attainment pin
+`seSubspace_star4_K4_distance_eq_one_QA`. -/
+theorem spectralEncodingSubspace_stability {V : Type} [Fintype V]
+    [DecidableEq V] (A E : WAdj (V := V)) (hA : A.IsSymm) (hE : E.IsSymm)
+    (k : Fin (Fintype.card V)) (hk : (k : ℕ) + 1 < Fintype.card V)
+    (δ : ℝ) (hδ : 0 < δ)
+    (hsep : δ ≤ evals (laplacian_symmetric (A + E) (hA.add hE)) ⟨(k : ℕ) + 1, hk⟩
+        - evals (laplacian_symmetric A hA) k) :
+    ‖initialProjector (laplacian (A + E)) (laplacian_symmetric (A + E) (hA.add hE)) k
+      - initialProjector (laplacian A) (laplacian_symmetric A hA) k‖
+      ≤ ‖laplacian E‖ / δ := by
+  have hL : (laplacian A).IsSymm := laplacian_symmetric A hA
+  have hLE : (laplacian E).IsSymm := laplacian_symmetric E hE
+  have hsum : (laplacian A + laplacian E).IsSymm := hL.add hLE
+  have hsep' : δ ≤ evals hsum ⟨(k : ℕ) + 1, hk⟩ - evals hL k := by
+    rw [evals_congr hsum (laplacian_symmetric (A + E) (hA.add hE))
+      (laplacian_add A E).symm ⟨(k : ℕ) + 1, hk⟩]
+    exact hsep
+  have hdk := Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.davis_kahan_sin_theta
+    (laplacian A) (laplacian E) hL hsum k hk δ hδ hsep'
+  rw [initialProjector_congr (laplacian_add A E)
+    (laplacian_symmetric (A + E) (hA.add hE)) hsum k]
+  exact hdk
+
+/-- **Spectral-encoding stability, general rank, kernel-isolated.** On
+two *connected* graphs, subtracting the index-0 projector from both
+bottom-`k+1` projectors isolates the informative (non-constant)
+`k`-dimensional component of a Laplacian positional encoding, and its
+rotation is bounded by `‖laplacian E‖ / δ` exactly as in the subspace
+form — because connected graphs never move their kernel direction
+(`initialProjector_laplacian_zero_eq_of_connected`), the rank-`k`
+content of the bound is entirely attributable to the informative
+component.
+
+The general-rank form of `fiedlerLine_stability` (its `k = 1`
+instance); the hypothesis stack adds exactly the connectivity and
+nonnegativity assumptions that make the kernel identification true, and
+these are load-bearing (the `k = 1` QA's disconnected fence refutes the
+identification). See the section docstring above for the honest scope
+limits.
+
+QA: `Scaffold/QA/SpectralGraph/Fiedler_QA.lean`, section
+`SpectralEncodingStability` — `se_star4_K4_QA` at `k = ⟨2⟩` on the
+connected star `K₁,₃ → K₄` pair, with the common-kernel identification
+instantiated at the fixture (`initialProjector_zero_star4_eq_k4_QA`). -/
+theorem spectralEncoding_stability {V : Type} [Fintype V]
+    [DecidableEq V] (A E : WAdj (V := V)) (hA : A.IsSymm) (hE : E.IsSymm)
+    (hnnA : ∀ i j, 0 ≤ A i j) (hnnAE : ∀ i j, 0 ≤ (A + E) i j)
+    (hconnA : (supportGraph A hA).Connected)
+    (hconnAE : (supportGraph (A + E) (hA.add hE)).Connected)
+    (k : Fin (Fintype.card V)) (hk : (k : ℕ) + 1 < Fintype.card V)
+    (δ : ℝ) (hδ : 0 < δ)
+    (hsep : δ ≤ evals (laplacian_symmetric (A + E) (hA.add hE)) ⟨(k : ℕ) + 1, hk⟩
+        - evals (laplacian_symmetric A hA) k) :
+    ‖(initialProjector (laplacian (A + E)) (laplacian_symmetric (A + E) (hA.add hE)) k
+        - initialProjector (laplacian (A + E))
+          (laplacian_symmetric (A + E) (hA.add hE)) ⟨0, by omega⟩)
+      - (initialProjector (laplacian A) (laplacian_symmetric A hA) k
+        - initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨0, by omega⟩)‖
+      ≤ ‖laplacian E‖ / δ := by
+  have hcommon : initialProjector (laplacian (A + E))
+        (laplacian_symmetric (A + E) (hA.add hE)) ⟨0, by omega⟩
+      = initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨0, by omega⟩ :=
+    initialProjector_laplacian_zero_eq_of_connected (A + E) A (hA.add hE) hA
+      hnnAE hnnA hconnAE hconnA (by omega)
+  rw [hcommon]
+  have htele : (initialProjector (laplacian (A + E))
+          (laplacian_symmetric (A + E) (hA.add hE)) k
+        - initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨0, by omega⟩)
+      - (initialProjector (laplacian A) (laplacian_symmetric A hA) k
+        - initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨0, by omega⟩)
+      = initialProjector (laplacian (A + E))
+          (laplacian_symmetric (A + E) (hA.add hE)) k
+        - initialProjector (laplacian A) (laplacian_symmetric A hA) k := by
+    abel
+  rw [htele]
+  exact spectralEncodingSubspace_stability A E hA hE k hk δ hδ hsep
+
 /-- **Fiedler-subspace stability, the Davis–Kahan instantiation.** On a
 weighted graph `A` with at least three vertices, perturbed by a
 symmetric `E`, the bottom-2 invariant spectral subspace of the
@@ -563,19 +718,9 @@ theorem fiedlerSubspace_stability (A E : WAdj (V := V)) (hA : A.IsSymm)
         (laplacian_symmetric (A + E) (hA.add hE)) ⟨1, by omega⟩
       - initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨1, by omega⟩‖
       ≤ ‖laplacian E‖ / δ := by
-  have hL : (laplacian A).IsSymm := laplacian_symmetric A hA
-  have hLE : (laplacian E).IsSymm := laplacian_symmetric E hE
-  have hsum : (laplacian A + laplacian E).IsSymm := hL.add hLE
-  have hsep' : δ ≤ evals hsum ⟨2, by omega⟩ - evals hL ⟨1, by omega⟩ := by
-    rw [evals_congr hsum (laplacian_symmetric (A + E) (hA.add hE))
-      (laplacian_add A E).symm ⟨2, by omega⟩]
-    exact hsep
-  have hdk := Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.davis_kahan_sin_theta
-    (laplacian A) (laplacian E) hL hsum
-    ⟨1, by omega⟩ (by show (1 : ℕ) + 1 < Fintype.card V; omega) δ hδ hsep'
-  rw [initialProjector_congr (laplacian_add A E)
-    (laplacian_symmetric (A + E) (hA.add hE)) hsum ⟨1, by omega⟩]
-  exact hdk
+  refine spectralEncodingSubspace_stability A E hA hE ⟨1, by omega⟩ ?_ δ hδ hsep
+  show (1 : ℕ) + 1 < Fintype.card V
+  omega
 
 /-- **Fiedler-line stability: the Fiedler vector's own rotation, not the
 rank-2 subspace containing it** (Step 2 of
@@ -597,6 +742,11 @@ assumptions that make the kernel identification true; these are
 load-bearing (QA's disconnected fence refutes the identification on the
 empty graph), not decorative.
 
+Since 2026-08-31 this is the `k = 1` corollary of
+`spectralEncoding_stability` below (re-proved in place at the unchanged
+public statement; the generalization delivered
+`proposals/spectral-positional-encoding-stability.md`).
+
 QA: `Scaffold/QA/SpectralGraph/Fiedler_QA.lean`, section
 `FiedlerLineStability` — the P₃ → K₃ edge-addition instance (bound
 exactly `≤ 1`, with the perturbed side sitting on Davis–Kahan's own
@@ -616,22 +766,10 @@ theorem fiedlerLine_stability (A E : WAdj (V := V)) (hA : A.IsSymm)
       - (initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨1, by omega⟩
         - initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨0, by omega⟩)‖
       ≤ ‖laplacian E‖ / δ := by
-  have hcommon : initialProjector (laplacian (A + E))
-        (laplacian_symmetric (A + E) (hA.add hE)) ⟨0, by omega⟩
-      = initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨0, by omega⟩ :=
-    initialProjector_laplacian_zero_eq_of_connected (A + E) A (hA.add hE) hA
-      hnnAE hnnA hconnAE hconnA (by omega)
-  rw [hcommon]
-  have htele : (initialProjector (laplacian (A + E))
-          (laplacian_symmetric (A + E) (hA.add hE)) ⟨1, by omega⟩
-        - initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨0, by omega⟩)
-      - (initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨1, by omega⟩
-        - initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨0, by omega⟩)
-      = initialProjector (laplacian (A + E))
-          (laplacian_symmetric (A + E) (hA.add hE)) ⟨1, by omega⟩
-        - initialProjector (laplacian A) (laplacian_symmetric A hA) ⟨1, by omega⟩ := by
-    abel
-  rw [htele]
-  exact fiedlerSubspace_stability A E hA hE hcard δ hδ hsep
+  refine spectralEncoding_stability A E hA hE hnnA hnnAE hconnA hconnAE
+    ⟨1, by omega⟩ ?_ δ hδ hsep
+  show (1 : ℕ) + 1 < Fintype.card V
+  omega
+
 
 end SpectralGraphTheory

@@ -1720,3 +1720,861 @@ theorem initialProjector_zero_disconnected_fence_QA :
   exact h2 (heq ▸ h1)
 
 end FiedlerLineStability
+
+/-!
+## Spectral-encoding stability at general rank
+
+The QA of `proposals/spectral-positional-encoding-stability.md`
+(delivered 2026-08-31): the general-rank Davis–Kahan pair
+(`spectralEncodingSubspace_stability`/`spectralEncoding_stability` in
+`Scaffold.Mathlib.GraphTheory.Fiedler`) exercised at `k = ⟨2⟩` on the
+`Fin 4` fixture **star `K₁,₃` + leaf triangle = `K₄`** — a rank the
+existing `k = 1` theorems cannot reach (their index type is fixed at
+`⟨1⟩`; every declaration below bounds or pins the `⟨2⟩`-indexed
+projector or spectrum).
+
+- **The separation, computed independently at that rank**:
+  `λ₄(L K₄) − λ₃(L star) = 4 − 1 = 3`, both sides pinned from
+  independent machinery — the `K₄` top through the eigenvector-witness
+  bridge at `![3, -1, -1, -1]` plus the Rayleigh–Ritz engine at the full
+  standard basis, the star's third eigenvalue through the
+  Rayleigh–Ritz engine at the test family `{ones, v₁, v₂}` (kernel +
+  two leaf-difference modes) plus the variational lower side on the
+  zero-sum constraint. The full star spectrum `{0, 1, 1, 4}` is pinned.
+- **The perturbation norm `‶L(triangle)‶ = 3`** two-sided: `≤ 3`
+  through the bracketed triangle spectrum `{0, 0, 3, 3}` and
+  `l2OpNorm_le_of_abs_evals_le`; `≥ 3` by the quadForm witness at the
+  top eigenvector `![0, 1, -1, 0]` (`6 ≤ 2 · 3`).
+- **The rank witness**: the base projector `P_star⟨2⟩` is genuinely
+  rank 3, through the no-tie rank pin at the strict gap `1 < 4`.
+- **The instances**: both theorems' bounds evaluate to exactly
+  `‶L(triangle)‶ / 3 = 1`, and the kernel-isolated instance threads
+  both connectivity hypotheses (with the common-kernel identification
+  instantiated at the fixture).
+- **The exact-attainment pin**: the projector distance
+  `‶P_{K₄}⟨2⟩ − P_star⟨2⟩‶` is `= 1`, not merely `≤ 1` — the
+  `K₄` projector at its threshold `4` is the identity
+  (`spectralProjector_eq_one`), the star projector kills the top unit
+  eigenvector (its eigenvalue `4` exceeds the threshold `1`; every
+  filtered eigenbasis coordinate vanishes by orthonormality), and the
+  norm→form transfer bounds the norm below by the unit-vector
+  quadratic form `1`. The general-rank bound is tight at this fixture.
+
+All unconditional hard crust (no axiom contact).
+
+Scoreboard: ../QA_SCOREBOARD.md
+-/
+
+section SpectralEncodingStability
+
+open scoped Matrix.L2OpNorm
+
+open Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation
+/-! ### The Fin 4 fixture -/
+
+/-- Adjacency of the star `K₁,₃` (center `0`, leaves `1, 2, 3`). -/
+def star4Adj : Matrix (Fin 4) (Fin 4) ℝ :=
+  !![0, 1, 1, 1;
+     1, 0, 0, 0;
+     1, 0, 0, 0;
+     1, 0, 0, 0]
+
+/-- Adjacency of the triangle on the leaves `{1, 2, 3}` (zero row/column at `0`). -/
+def tri3Adj : Matrix (Fin 4) (Fin 4) ℝ :=
+  !![0, 0, 0, 0;
+     0, 0, 1, 1;
+     0, 1, 0, 1;
+     0, 1, 1, 0]
+
+/-- Adjacency of the complete graph `K₄`. -/
+def k4Adj : Matrix (Fin 4) (Fin 4) ℝ :=
+  !![0, 1, 1, 1;
+     1, 0, 1, 1;
+     1, 1, 0, 1;
+     1, 1, 1, 0]
+
+theorem star4_symmetric : star4Adj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [star4Adj, Matrix.vecHead, Matrix.vecTail]
+
+theorem star4_nonneg : ∀ i j, 0 ≤ star4Adj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [star4Adj, Matrix.vecHead, Matrix.vecTail]
+
+theorem tri3_symmetric : tri3Adj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [tri3Adj, Matrix.vecHead, Matrix.vecTail]
+
+theorem tri3_nonneg : ∀ i j, 0 ≤ tri3Adj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [tri3Adj, Matrix.vecHead, Matrix.vecTail]
+
+theorem k4_symmetric : k4Adj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [k4Adj, Matrix.vecHead, Matrix.vecTail]
+
+theorem k4_nonneg : ∀ i j, 0 ≤ k4Adj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [k4Adj, Matrix.vecHead, Matrix.vecTail]
+
+theorem star4_add_tri3 : star4Adj + tri3Adj = k4Adj := by
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [star4Adj, tri3Adj, k4Adj, Matrix.vecHead, Matrix.vecTail]
+
+theorem star4_deg_eq : deg star4Adj = ![3, 1, 1, 1] := by
+  funext i
+  fin_cases i <;> rw [deg, Fin.sum_univ_four] <;>
+    simp [star4Adj, Matrix.vecHead, Matrix.vecTail]
+  all_goals norm_num
+
+theorem tri3_deg_eq : deg tri3Adj = ![0, 2, 2, 2] := by
+  funext i
+  fin_cases i <;> rw [deg, Fin.sum_univ_four] <;>
+    simp [tri3Adj, Matrix.vecHead, Matrix.vecTail]
+  all_goals norm_num
+
+theorem k4_deg_eq : deg k4Adj = fun _ => 3 := by
+  funext i
+  fin_cases i <;> rw [deg, Fin.sum_univ_four] <;>
+    simp [k4Adj, Matrix.vecHead, Matrix.vecTail]
+  all_goals norm_num
+
+theorem star4_trace : (laplacian star4Adj).trace = 6 := by
+  have hdiag : ∀ i : Fin 4, (laplacian star4Adj) i i = deg star4Adj i := by
+    intro i
+    rw [laplacian, Matrix.sub_apply, degreeMatrix_diagonal]
+    have h0 : star4Adj i i = 0 := by fin_cases i <;> simp [star4Adj, Matrix.vecHead, Matrix.vecTail]
+    rw [h0, sub_zero]
+  rw [show (laplacian star4Adj).trace = ∑ i : Fin 4, (laplacian star4Adj) i i from rfl,
+    Finset.sum_congr rfl fun i _ => hdiag i, star4_deg_eq]
+  simp [Fin.sum_univ_four]
+  norm_num
+
+theorem tri3_trace : (laplacian tri3Adj).trace = 6 := by
+  have hdiag : ∀ i : Fin 4, (laplacian tri3Adj) i i = deg tri3Adj i := by
+    intro i
+    rw [laplacian, Matrix.sub_apply, degreeMatrix_diagonal]
+    have h0 : tri3Adj i i = 0 := by fin_cases i <;> simp [tri3Adj, Matrix.vecHead, Matrix.vecTail]
+    rw [h0, sub_zero]
+  rw [show (laplacian tri3Adj).trace = ∑ i : Fin 4, (laplacian tri3Adj) i i from rfl,
+    Finset.sum_congr rfl fun i _ => hdiag i, tri3_deg_eq]
+  simp [Fin.sum_univ_four]
+  norm_num
+
+theorem k4_trace : (laplacian k4Adj).trace = 12 := by
+  have hdiag : ∀ i : Fin 4, (laplacian k4Adj) i i = deg k4Adj i := by
+    intro i
+    rw [laplacian, Matrix.sub_apply, degreeMatrix_diagonal]
+    have h0 : k4Adj i i = 0 := by fin_cases i <;> simp [k4Adj, Matrix.vecHead, Matrix.vecTail]
+    rw [h0, sub_zero]
+  rw [show (laplacian k4Adj).trace = ∑ i : Fin 4, (laplacian k4Adj) i i from rfl,
+    Finset.sum_congr rfl fun i _ => hdiag i, k4_deg_eq]
+  simp [Fin.sum_univ_four]
+  norm_num
+
+/-- The Dirichlet form of the star: the three spoke terms. -/
+theorem star4_quadForm (x : Fin 4 → ℝ) :
+    quadForm (laplacian star4Adj) x
+      = (x 0 - x 1) ^ 2 + (x 0 - x 2) ^ 2 + (x 0 - x 3) ^ 2 := by
+  rw [laplacian_quadForm star4Adj star4_symmetric x]
+  simp [star4Adj, Matrix.vecHead, Matrix.vecTail, Fin.sum_univ_four]
+  ring
+
+/-- The Dirichlet form of the leaf triangle. -/
+theorem tri3_quadForm (x : Fin 4 → ℝ) :
+    quadForm (laplacian tri3Adj) x
+      = (x 1 - x 2) ^ 2 + (x 1 - x 3) ^ 2 + (x 2 - x 3) ^ 2 := by
+  rw [laplacian_quadForm tri3Adj tri3_symmetric x]
+  simp [tri3Adj, Matrix.vecHead, Matrix.vecTail, Fin.sum_univ_four]
+  ring
+
+/-- The Dirichlet form of `K₄` in sum form. -/
+theorem k4_quadForm (x : Fin 4 → ℝ) :
+    quadForm (laplacian k4Adj) x
+      = 4 * Matrix.dotProduct x x - (x 0 + x 1 + x 2 + x 3) ^ 2 := by
+  rw [laplacian_quadForm k4Adj k4_symmetric x]
+  have hdot : Matrix.dotProduct x x = ∑ i : Fin 4, x i * x i := rfl
+  rw [hdot]
+  simp [k4Adj, Matrix.vecHead, Matrix.vecTail, Fin.sum_univ_four]
+  ring
+
+/-! ### The star spectrum `{0, 1, 1, 4}` -/
+
+theorem star4_evals_zero_QA :
+    evals (laplacian_symmetric star4Adj star4_symmetric) ⟨0, by norm_num⟩ = 0 :=
+  laplacian_evals_zero star4Adj star4_symmetric star4_nonneg (by norm_num)
+
+/-- The universal upper bound `E ≤ 4 ‖x‖²` for the star. -/
+theorem star4_quadForm_le_four (x : Fin 4 → ℝ) :
+    quadForm (laplacian star4Adj) x ≤ 4 * Matrix.dotProduct x x := by
+  have hcs : (x 1 + x 2 + x 3) ^ 2 ≤ 3 * (x 1 ^ 2 + x 2 ^ 2 + x 3 ^ 2) := by
+    nlinarith [sq_nonneg (x 1 - x 2), sq_nonneg (x 1 - x 3),
+      sq_nonneg (x 2 - x 3)]
+  rw [star4_quadForm]
+  have hdot : Matrix.dotProduct x x
+      = x 0 ^ 2 + x 1 ^ 2 + x 2 ^ 2 + x 3 ^ 2 := by
+    rw [show Matrix.dotProduct x x = ∑ i : Fin 4, x i * x i from rfl,
+      Fin.sum_univ_four]
+    ring
+  rw [hdot]
+  nlinarith [hcs, sq_nonneg (x 0 + x 1 + x 2 + x 3)]
+
+/-- The eigenvalue-witness bridge composed with last-entry domination,
+local copy of the MultiwayCheeger private helper. -/
+private theorem evals_last_ge_of_mulVec_eq_smul' {V : Type} [Fintype V]
+    [DecidableEq V] {M : Matrix V V ℝ} (hM : M.IsSymm) (hcard : 1 ≤ Fintype.card V)
+    {x : V → ℝ} {μ : ℝ} (hx : x ≠ 0) (hxμ : M *ᵥ x = μ • x) :
+    μ ≤ evals hM ⟨Fintype.card V - 1, by omega⟩ := by
+  obtain ⟨i, hi⟩ := exists_eigvalOf_eq_of_mulVec_eq_smul hM hx hxμ
+  exact hi ▸ eigvalOf_le_evals_last hM hcard i
+
+theorem star4_w_ne : (![3, -1, -1, -1] : Fin 4 → ℝ) ≠ 0 := by
+  intro h
+  have h0 := congrFun h 0
+  simp at h0
+
+/-- The top star eigenvector `![3, -1, -1, -1]` at eigenvalue `4`. -/
+theorem star4_top_eigvec :
+    laplacian star4Adj *ᵥ (![3, -1, -1, -1] : Fin 4 → ℝ)
+      = (4 : ℝ) • ![3, -1, -1, -1] := by
+  funext i
+  fin_cases i <;>
+    simp [laplacian, Matrix.sub_apply, Matrix.mulVec, Matrix.dotProduct,
+      Fin.sum_univ_four, star4Adj, deg, degreeMatrix, Matrix.vecHead, Matrix.vecTail,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_succ,
+      Matrix.head_cons, Pi.smul_apply, smul_eq_mul] <;>
+    norm_num
+
+theorem star4_evals_three_ge_four_QA :
+    (4 : ℝ) ≤ evals (laplacian_symmetric star4Adj star4_symmetric)
+        ⟨3, by norm_num⟩ := by
+  have h := evals_last_ge_of_mulVec_eq_smul'
+    (laplacian_symmetric star4Adj star4_symmetric)
+    (by norm_num) star4_w_ne star4_top_eigvec
+  have hfin : (⟨Fintype.card (Fin 4) - 1, by norm_num⟩ :
+      Fin (Fintype.card (Fin 4))) = ⟨3, by norm_num⟩ := by
+    refine Fin.ext ?_
+    simp
+  rw [hfin] at h
+  exact h
+
+/-- The full standard basis is linearly independent. -/
+private theorem linearIndependent_single_fin4 :
+    LinearIndependent ℝ (fun i : Fin 4 => Pi.single i (1 : ℝ)) := by
+  rw [Fintype.linearIndependent_iff]
+  intro c hc i
+  have h0 := congrFun hc i
+  simp only [Finset.sum_apply, Pi.smul_apply, Pi.single_apply, smul_eq_mul,
+    mul_ite, mul_one, mul_zero] at h0
+  simpa using h0
+
+/-- The top star eigenvalue `4`, upper side: the Rayleigh–Ritz engine at
+the full standard basis with the universal bound `E ≤ 4 ‖x‖²`. -/
+theorem star4_evals_three_le_four_QA :
+    evals (laplacian_symmetric star4Adj star4_symmetric) ⟨3, by norm_num⟩ ≤ 4 := by
+  refine evals_le_of_linearIndependent (laplacian_symmetric star4Adj star4_symmetric)
+    (k := 4) (by norm_num) (by norm_num) linearIndependent_single_fin4 ?_
+  intro c
+  exact star4_quadForm_le_four _
+
+theorem star4_evals_three_eq_four_QA :
+    evals (laplacian_symmetric star4Adj star4_symmetric) ⟨3, by norm_num⟩ = 4 :=
+  le_antisymm star4_evals_three_le_four_QA star4_evals_three_ge_four_QA
+
+/-- `evals⟨2⟩ ≤ 1` by the general-`k` Rayleigh–Ritz engine at the
+three-dimensional test family `{ones, v₁, v₂}` (kernel plus the two
+leaf-difference modes): on its span `E ≤ ‖x‖²`. -/
+theorem star4_evals_two_le_one_QA :
+    evals (laplacian_symmetric star4Adj star4_symmetric) ⟨2, by norm_num⟩ ≤ 1 := by
+  have hcomp : ∀ (c : Fin 3 → ℝ),
+      ((∑ l : Fin 3, c l •
+          (![onesVec, ![0, 1, -1, 0], ![0, 1, 0, -1]] : Fin 3 → (Fin 4 → ℝ)) l) 0
+        = c 0)
+      ∧ ((∑ l : Fin 3, c l •
+          (![onesVec, ![0, 1, -1, 0], ![0, 1, 0, -1]] : Fin 3 → (Fin 4 → ℝ)) l) 1
+        = c 0 + c 1 + c 2)
+      ∧ ((∑ l : Fin 3, c l •
+          (![onesVec, ![0, 1, -1, 0], ![0, 1, 0, -1]] : Fin 3 → (Fin 4 → ℝ)) l) 2
+        = c 0 - c 1)
+      ∧ ((∑ l : Fin 3, c l •
+          (![onesVec, ![0, 1, -1, 0], ![0, 1, 0, -1]] : Fin 3 → (Fin 4 → ℝ)) l) 3
+        = c 0 - c 2) := by
+    intro c
+    refine ⟨?_, ?_, ?_, ?_⟩ <;>
+      simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul,
+        Fin.sum_univ_three, onesVec] <;>
+      norm_num [onesVec, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.cons_val_succ, Matrix.head_cons, Matrix.vecHead, Matrix.vecTail] <;>
+      try linarith
+  have hgi : LinearIndependent ℝ
+      (![onesVec, ![0, 1, -1, 0], ![0, 1, 0, -1]] : Fin 3 → (Fin 4 → ℝ)) := by
+    rw [Fintype.linearIndependent_iff]
+    intro c hc i
+    obtain ⟨e0, e1, e2, e3⟩ := hcomp c
+    have h0 := congrFun hc 0
+    have h2 := congrFun hc 2
+    have h3 := congrFun hc 3
+    simp only [Pi.zero_apply] at h0 h2 h3
+    rw [e0] at h0
+    rw [e2] at h2
+    rw [e3] at h3
+    have hc1 : c 1 = 0 := by linarith
+    have hc2 : c 2 = 0 := by linarith
+    fin_cases i
+    · exact h0
+    · exact hc1
+    · exact hc2
+  refine evals_le_of_linearIndependent (laplacian_symmetric star4Adj star4_symmetric)
+    (k := 3) (by norm_num) (by norm_num) hgi ?_
+  intro c
+  obtain ⟨e0, e1, e2, e3⟩ := hcomp c
+  have hdot : Matrix.dotProduct (∑ l : Fin 3, c l •
+      (![onesVec, ![0, 1, -1, 0], ![0, 1, 0, -1]] : Fin 3 → (Fin 4 → ℝ)) l)
+      (∑ l : Fin 3, c l •
+      (![onesVec, ![0, 1, -1, 0], ![0, 1, 0, -1]] : Fin 3 → (Fin 4 → ℝ)) l)
+      = (c 0) ^ 2 + (c 0 + c 1 + c 2) ^ 2 + (c 0 - c 1) ^ 2 + (c 0 - c 2) ^ 2 := by
+    rw [show Matrix.dotProduct _ _ = ∑ j : Fin 4, _ * _ from rfl, Fin.sum_univ_four,
+      e0, e1, e2, e3]
+    ring
+  rw [star4_quadForm, e0, e1, e2, e3, hdot]
+  nlinarith [sq_nonneg (c 0)]
+
+/-- `λ₂ ≥ 1`, the variational lower side: on the zero-sum constraint
+`E = ‖x‖² + 4 x₀²`. -/
+theorem star4_lambda2_ge_one_QA :
+    (1 : ℝ) ≤ lambda2 star4Adj star4_symmetric (by norm_num) := by
+  rw [lambda2_variational star4Adj star4_symmetric star4_nonneg (by norm_num)]
+  have hv1 : (![0, 1, -1, 0] : Fin 4 → ℝ) ≠ 0 := by
+    intro h
+    have h1 := congrFun h 1
+    simp at h1
+  have horth : Matrix.dotProduct (![0, 1, -1, 0] : Fin 4 → ℝ) onesVec = 0 := by
+    simp [Matrix.dotProduct, onesVec, Fin.sum_univ_four]
+  have hqf : quadForm (laplacian star4Adj) (![0, 1, -1, 0] : Fin 4 → ℝ) = 2 := by
+    rw [star4_quadForm]
+    norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_succ,
+      Matrix.head_cons]
+  have hdot : Matrix.dotProduct (![0, 1, -1, 0] : Fin 4 → ℝ)
+      (![0, 1, -1, 0] : Fin 4 → ℝ) = 2 := by
+    rw [show Matrix.dotProduct _ _ = ∑ i : Fin 4, _ * _ from rfl, Fin.sum_univ_four]
+    norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_succ,
+      Matrix.head_cons]
+  have hray : rayleigh (laplacian star4Adj) (![0, 1, -1, 0] : Fin 4 → ℝ) = 1 := by
+    rw [rayleigh, if_neg hv1, hqf, hdot]
+    norm_num
+  refine le_csInf ⟨1, (![0, 1, -1, 0] : Fin 4 → ℝ), hv1, horth, hray⟩ ?_
+  rintro r ⟨y, hy0, horth, rfl⟩
+  have hsum4 : y 0 + y 1 + y 2 + y 3 = 0 := by
+    simpa [Matrix.dotProduct, onesVec, Fin.sum_univ_four] using horth
+  have hnn : 0 < Matrix.dotProduct y y := by
+    have hle : (0 : ℝ) ≤ Matrix.dotProduct y y := by
+      simp only [Matrix.dotProduct]
+      exact Finset.sum_nonneg fun j _ => mul_self_nonneg _
+    rcases lt_or_eq_of_le hle with h | h
+    · exact h
+    · exfalso
+      apply hy0
+      funext i
+      have hsum0 : ∑ k, y k * y k = 0 := by
+        rw [← show Matrix.dotProduct y y = ∑ k, y k * y k from rfl]
+        exact h.symm
+      have hmem : ∀ j : Fin 4, y j * y j = 0 := fun j =>
+        (Finset.sum_eq_zero_iff_of_nonneg
+          (fun k (_ : k ∈ Finset.univ) => mul_self_nonneg _)).1 hsum0 j
+          (Finset.mem_univ j)
+      exact mul_self_eq_zero.1 (hmem i)
+  have hE : quadForm (laplacian star4Adj) y
+      = Matrix.dotProduct y y + 4 * (y 0) ^ 2 := by
+    rw [star4_quadForm]
+    have hdy : Matrix.dotProduct y y
+        = (y 0) ^ 2 + (y 1) ^ 2 + (y 2) ^ 2 + (y 3) ^ 2 := by
+      rw [show Matrix.dotProduct y y = ∑ i : Fin 4, y i * y i from rfl,
+        Fin.sum_univ_four]
+      ring
+    rw [hdy]
+    linear_combination hsum4 * (-2 * y 0)
+  rw [rayleigh, if_neg hy0, hE]
+  exact (one_le_div hnn).2 (by nlinarith [sq_nonneg (y 0)])
+
+theorem star4_evals_two_eq_one_QA :
+    evals (laplacian_symmetric star4Adj star4_symmetric) ⟨2, by norm_num⟩ = 1 := by
+  refine le_antisymm star4_evals_two_le_one_QA ?_
+  have hmono : evals (laplacian_symmetric star4Adj star4_symmetric) ⟨1, by norm_num⟩
+      ≤ evals (laplacian_symmetric star4Adj star4_symmetric) ⟨2, by norm_num⟩ :=
+    evals_sorted _ (Fin.mk_le_mk.2 (by norm_num))
+  have hlam : lambda2 star4Adj star4_symmetric (by norm_num)
+      = evals (laplacian_symmetric star4Adj star4_symmetric) ⟨1, by norm_num⟩ := rfl
+  rw [← hlam] at hmono
+  exact star4_lambda2_ge_one_QA.trans hmono
+
+/-! ### The triangle-perturbation norm `‖L(triangle)‖ = 3` -/
+
+theorem tri3_evals_zero_QA :
+    evals (laplacian_symmetric tri3Adj tri3_symmetric) ⟨0, by norm_num⟩ = 0 :=
+  laplacian_evals_zero tri3Adj tri3_symmetric tri3_nonneg (by norm_num)
+
+/-- `evals⟨1⟩ ≤ 0` by the Rayleigh–Ritz engine at the two-dimensional
+test family `{ones, e₀}` — both kernel vectors of the triangle. -/
+theorem tri3_evals_one_le_zero_QA :
+    evals (laplacian_symmetric tri3Adj tri3_symmetric) ⟨1, by norm_num⟩ ≤ 0 := by
+  have hcomp : ∀ (c : Fin 2 → ℝ),
+      ((∑ l : Fin 2, c l •
+          (![onesVec, ![1, 0, 0, 0]] : Fin 2 → (Fin 4 → ℝ)) l) 0 = c 0 + c 1)
+      ∧ ((∑ l : Fin 2, c l •
+          (![onesVec, ![1, 0, 0, 0]] : Fin 2 → (Fin 4 → ℝ)) l) 1 = c 0)
+      ∧ ((∑ l : Fin 2, c l •
+          (![onesVec, ![1, 0, 0, 0]] : Fin 2 → (Fin 4 → ℝ)) l) 2 = c 0)
+      ∧ ((∑ l : Fin 2, c l •
+          (![onesVec, ![1, 0, 0, 0]] : Fin 2 → (Fin 4 → ℝ)) l) 3 = c 0) := by
+    intro c
+    refine ⟨?_, ?_, ?_, ?_⟩ <;>
+      simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul,
+        Fin.sum_univ_two, onesVec] <;>
+      norm_num [onesVec, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.cons_val_succ, Matrix.head_cons, Matrix.vecHead, Matrix.vecTail]
+  have hgi : LinearIndependent ℝ
+      (![onesVec, ![1, 0, 0, 0]] : Fin 2 → (Fin 4 → ℝ)) := by
+    rw [Fintype.linearIndependent_iff]
+    intro c hc i
+    obtain ⟨e0, e1, e2, e3⟩ := hcomp c
+    have h0 := congrFun hc 0
+    have h1 := congrFun hc 1
+    simp only [Pi.zero_apply] at h0 h1
+    rw [e0] at h0
+    rw [e1] at h1
+    have hc1 : c 1 = 0 := by linarith
+    fin_cases i
+    · exact h1
+    · exact hc1
+  refine evals_le_of_linearIndependent (laplacian_symmetric tri3Adj tri3_symmetric)
+    (k := 2) (by norm_num) (by norm_num) hgi ?_
+  intro c
+  obtain ⟨e0, e1, e2, e3⟩ := hcomp c
+  rw [tri3_quadForm, e1, e2, e3]
+  simp
+
+theorem tri3_evals_one_eq_zero_QA :
+    evals (laplacian_symmetric tri3Adj tri3_symmetric) ⟨1, by norm_num⟩ = 0 := by
+  refine le_antisymm tri3_evals_one_le_zero_QA ?_
+  have hmono : evals (laplacian_symmetric tri3Adj tri3_symmetric) ⟨0, by norm_num⟩
+      ≤ evals (laplacian_symmetric tri3Adj tri3_symmetric) ⟨1, by norm_num⟩ :=
+    evals_sorted _ (Fin.mk_le_mk.2 (by norm_num))
+  rw [tri3_evals_zero_QA] at hmono
+  exact hmono
+
+theorem tri3_w_ne : (![0, 1, -1, 0] : Fin 4 → ℝ) ≠ 0 := by
+  intro h
+  have h1 := congrFun h 1
+  simp at h1
+
+/-- The triangle's top eigenvector `![0, 1, -1, 0]` at eigenvalue `3`. -/
+theorem tri3_top_eigvec :
+    laplacian tri3Adj *ᵥ (![0, 1, -1, 0] : Fin 4 → ℝ)
+      = (3 : ℝ) • ![0, 1, -1, 0] := by
+  funext i
+  fin_cases i <;>
+    simp [laplacian, Matrix.sub_apply, Matrix.mulVec, Matrix.dotProduct,
+      Fin.sum_univ_four, tri3Adj, deg, degreeMatrix, Matrix.vecHead,
+      Matrix.vecTail, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.cons_val_succ, Matrix.head_cons, Pi.smul_apply, smul_eq_mul] <;>
+    norm_num
+
+theorem tri3_evals_three_ge_three_QA :
+    (3 : ℝ) ≤ evals (laplacian_symmetric tri3Adj tri3_symmetric)
+        ⟨3, by norm_num⟩ := by
+  have h := evals_last_ge_of_mulVec_eq_smul'
+    (laplacian_symmetric tri3Adj tri3_symmetric)
+    (by norm_num) tri3_w_ne tri3_top_eigvec
+  have hfin : (⟨Fintype.card (Fin 4) - 1, by norm_num⟩ :
+      Fin (Fintype.card (Fin 4))) = ⟨3, by norm_num⟩ := by
+    refine Fin.ext ?_
+    simp
+  rw [hfin] at h
+  exact h
+
+/-- The universal upper bound `E ≤ 3 ‖x‖²` for the triangle: the
+identity `E = 3q − s²` on the leaf coordinates. -/
+theorem tri3_quadForm_le_three (x : Fin 4 → ℝ) :
+    quadForm (laplacian tri3Adj) x ≤ 3 * Matrix.dotProduct x x := by
+  rw [tri3_quadForm]
+  have hdot : Matrix.dotProduct x x
+      = x 0 ^ 2 + x 1 ^ 2 + x 2 ^ 2 + x 3 ^ 2 := by
+    rw [show Matrix.dotProduct x x = ∑ i : Fin 4, x i * x i from rfl,
+      Fin.sum_univ_four]
+    ring
+  rw [hdot]
+  have hE : (x 1 - x 2) ^ 2 + (x 1 - x 3) ^ 2 + (x 2 - x 3) ^ 2
+      = 3 * (x 1 ^ 2 + x 2 ^ 2 + x 3 ^ 2) - (x 1 + x 2 + x 3) ^ 2 := by
+    ring
+  rw [hE]
+  nlinarith [sq_nonneg (x 0), sq_nonneg (x 1 + x 2 + x 3)]
+
+theorem tri3_evals_three_le_three_QA :
+    evals (laplacian_symmetric tri3Adj tri3_symmetric) ⟨3, by norm_num⟩ ≤ 3 := by
+  refine evals_le_of_linearIndependent (laplacian_symmetric tri3Adj tri3_symmetric)
+    (k := 4) (by norm_num) (by norm_num) linearIndependent_single_fin4 ?_
+  intro c
+  exact tri3_quadForm_le_three _
+
+theorem tri3_evals_three_eq_three_QA :
+    evals (laplacian_symmetric tri3Adj tri3_symmetric) ⟨3, by norm_num⟩ = 3 :=
+  le_antisymm tri3_evals_three_le_three_QA tri3_evals_three_ge_three_QA
+
+/-- **The perturbation norm is exactly `3`, pinned from both sides**: `≤`
+through the bracketed spectrum (`⟨0⟩ = ⟨1⟩ = 0`, `⟨2⟩ ∈ [0, 3]`,
+`⟨3⟩ = 3`, all by `l2OpNorm_le_of_abs_evals_le`), `≥` by the quadForm
+witness at the top eigenvector (`6 ≤ 2 · 3`). -/
+theorem tri3_laplacian_norm : ‖laplacian tri3Adj‖ = 3 := by
+  refine le_antisymm ?_ ?_
+  · refine Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent.l2OpNorm_le_of_abs_evals_le
+      (laplacian_symmetric tri3Adj tri3_symmetric) (by norm_num) ?_
+    have m02 : evals (laplacian_symmetric tri3Adj tri3_symmetric) ⟨0, by norm_num⟩
+        ≤ evals (laplacian_symmetric tri3Adj tri3_symmetric) ⟨2, by norm_num⟩ :=
+      evals_sorted _ (Fin.mk_le_mk.2 (by norm_num))
+    have m23 : evals (laplacian_symmetric tri3Adj tri3_symmetric) ⟨2, by norm_num⟩
+        ≤ evals (laplacian_symmetric tri3Adj tri3_symmetric) ⟨3, by norm_num⟩ :=
+      evals_sorted _ (Fin.mk_le_mk.2 (by norm_num))
+    rw [tri3_evals_zero_QA] at m02
+    rw [tri3_evals_three_eq_three_QA] at m23
+    intro i
+    fin_cases i
+    · show |evals (laplacian_symmetric tri3Adj tri3_symmetric) ⟨0, by norm_num⟩| ≤ 3
+      rw [tri3_evals_zero_QA]
+      norm_num
+    · show |evals (laplacian_symmetric tri3Adj tri3_symmetric) ⟨1, by norm_num⟩| ≤ 3
+      rw [tri3_evals_one_eq_zero_QA]
+      norm_num
+    · show |evals (laplacian_symmetric tri3Adj tri3_symmetric) ⟨2, by norm_num⟩| ≤ 3
+      exact abs_le.2 ⟨by linarith, by linarith⟩
+    · show |evals (laplacian_symmetric tri3Adj tri3_symmetric) ⟨3, by norm_num⟩| ≤ 3
+      rw [tri3_evals_three_eq_three_QA]
+      norm_num
+  · have hq : quadForm (laplacian tri3Adj) (![0, 1, -1, 0] : Fin 4 → ℝ) = 6 := by
+      rw [tri3_quadForm]
+      norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_succ,
+        Matrix.head_cons, Matrix.vecHead, Matrix.vecTail]
+    have hdot : Matrix.dotProduct (![0, 1, -1, 0] : Fin 4 → ℝ)
+        (![0, 1, -1, 0] : Fin 4 → ℝ) = 2 := by
+      rw [show Matrix.dotProduct _ _ = ∑ i : Fin 4, _ * _ from rfl, Fin.sum_univ_four]
+      norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_succ,
+        Matrix.head_cons, Matrix.vecHead, Matrix.vecTail]
+    have hle := abs_quadForm_le_of_l2OpNorm_le
+      (t := ‖laplacian tri3Adj‖) (le_refl _) (![0, 1, -1, 0] : Fin 4 → ℝ)
+    rw [hq, abs_of_nonneg (by norm_num), hdot] at hle
+    linarith
+
+/-! ### The `K₄` top pins -/
+
+theorem k4_w_ne : (![3, -1, -1, -1] : Fin 4 → ℝ) ≠ 0 := by
+  intro h
+  have h0 := congrFun h 0
+  simp at h0
+
+/-- The top `K₄` eigenvector `![3, -1, -1, -1]` at eigenvalue `4`. -/
+theorem k4_top_eigvec :
+    laplacian k4Adj *ᵥ (![3, -1, -1, -1] : Fin 4 → ℝ)
+      = (4 : ℝ) • ![3, -1, -1, -1] := by
+  funext i
+  fin_cases i <;>
+    simp [laplacian, Matrix.sub_apply, Matrix.mulVec, Matrix.dotProduct,
+      Fin.sum_univ_four, k4Adj, deg, degreeMatrix, Matrix.vecHead,
+      Matrix.vecTail, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.cons_val_succ, Matrix.head_cons, Pi.smul_apply, smul_eq_mul] <;>
+    norm_num
+
+theorem k4_evals_three_ge_four_QA :
+    (4 : ℝ) ≤ evals (laplacian_symmetric k4Adj k4_symmetric)
+        ⟨3, by norm_num⟩ := by
+  have h := evals_last_ge_of_mulVec_eq_smul'
+    (laplacian_symmetric k4Adj k4_symmetric)
+    (by norm_num) k4_w_ne k4_top_eigvec
+  have hfin : (⟨Fintype.card (Fin 4) - 1, by norm_num⟩ :
+      Fin (Fintype.card (Fin 4))) = ⟨3, by norm_num⟩ := by
+    refine Fin.ext ?_
+    simp
+  rw [hfin] at h
+  exact h
+
+theorem k4_quadForm_le_four (x : Fin 4 → ℝ) :
+    quadForm (laplacian k4Adj) x ≤ 4 * Matrix.dotProduct x x := by
+  rw [k4_quadForm]
+  nlinarith [sq_nonneg (x 0 + x 1 + x 2 + x 3)]
+
+theorem k4_evals_three_le_four_QA :
+    evals (laplacian_symmetric k4Adj k4_symmetric) ⟨3, by norm_num⟩ ≤ 4 := by
+  refine evals_le_of_linearIndependent (laplacian_symmetric k4Adj k4_symmetric)
+    (k := 4) (by norm_num) (by norm_num) linearIndependent_single_fin4 ?_
+  intro c
+  exact k4_quadForm_le_four _
+
+theorem k4_evals_three_eq_four_QA :
+    evals (laplacian_symmetric k4Adj k4_symmetric) ⟨3, by norm_num⟩ = 4 :=
+  le_antisymm k4_evals_three_le_four_QA k4_evals_three_ge_four_QA
+
+/-- `evals⟨2⟩ = 4` by trace arithmetic: `⟨1⟩ + ⟨2⟩ = 8` with
+`⟨1⟩ ≤ ⟨2⟩ ≤ ⟨3⟩ = 4` forces both to be `4`. -/
+theorem k4_evals_two_eq_four_QA :
+    evals (laplacian_symmetric k4Adj k4_symmetric) ⟨2, by norm_num⟩ = 4 := by
+  have hsum : evals (laplacian_symmetric k4Adj k4_symmetric) ⟨0, by norm_num⟩
+      + evals (laplacian_symmetric k4Adj k4_symmetric) ⟨1, by norm_num⟩
+      + evals (laplacian_symmetric k4Adj k4_symmetric) ⟨2, by norm_num⟩
+      + evals (laplacian_symmetric k4Adj k4_symmetric) ⟨3, by norm_num⟩ = 12 := by
+    have htrace : ∑ i : Fin 4,
+        evals (laplacian_symmetric k4Adj k4_symmetric) i = 12 := by
+      rw [← k4_trace]
+      exact evals_sum_eq_trace (laplacian_symmetric k4Adj k4_symmetric)
+    rw [Fin.sum_univ_four] at htrace
+    have heq0 : evals (laplacian_symmetric k4Adj k4_symmetric) (0 : Fin 4)
+        = evals (laplacian_symmetric k4Adj k4_symmetric) ⟨0, by norm_num⟩ := rfl
+    have heq1 : evals (laplacian_symmetric k4Adj k4_symmetric) (1 : Fin 4)
+        = evals (laplacian_symmetric k4Adj k4_symmetric) ⟨1, by norm_num⟩ := rfl
+    have heq2 : evals (laplacian_symmetric k4Adj k4_symmetric) (2 : Fin 4)
+        = evals (laplacian_symmetric k4Adj k4_symmetric) ⟨2, by norm_num⟩ := rfl
+    have heq3 : evals (laplacian_symmetric k4Adj k4_symmetric) (3 : Fin 4)
+        = evals (laplacian_symmetric k4Adj k4_symmetric) ⟨3, by norm_num⟩ := rfl
+    rw [heq0, heq1, heq2, heq3] at htrace
+    exact htrace
+  rw [laplacian_evals_zero k4Adj k4_symmetric k4_nonneg (by norm_num),
+    k4_evals_three_eq_four_QA] at hsum
+  have h12 : evals (laplacian_symmetric k4Adj k4_symmetric) ⟨1, by norm_num⟩
+      ≤ evals (laplacian_symmetric k4Adj k4_symmetric) ⟨2, by norm_num⟩ :=
+    evals_sorted _ (Fin.mk_le_mk.2 (by norm_num))
+  have h23 : evals (laplacian_symmetric k4Adj k4_symmetric) ⟨2, by norm_num⟩
+      ≤ evals (laplacian_symmetric k4Adj k4_symmetric) ⟨3, by norm_num⟩ :=
+    evals_sorted _ (Fin.mk_le_mk.2 (by norm_num))
+  rw [k4_evals_three_eq_four_QA] at h23
+  linarith
+
+/-! ### Connectivity of the fixture -/
+
+theorem star4_supportGraph_connected :
+    (supportGraph star4Adj star4_symmetric).Connected := by
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  refine ⟨0, ?_⟩
+  intro v
+  fin_cases v
+  · exact ⟨SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 1)
+      ⟨by decide, by simp [star4Adj, Matrix.vecHead, Matrix.vecTail]⟩
+      SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 2) (w := 2)
+      ⟨by decide, by simp [star4Adj, Matrix.vecHead, Matrix.vecTail]⟩
+      SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 3) (w := 3)
+      ⟨by decide, by simp [star4Adj, Matrix.vecHead, Matrix.vecTail]⟩
+      SimpleGraph.Walk.nil⟩
+
+theorem k4_supportGraph_connected :
+    (supportGraph k4Adj k4_symmetric).Connected := by
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  refine ⟨0, ?_⟩
+  intro v
+  fin_cases v
+  · exact ⟨SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 1)
+      ⟨by decide, by simp [k4Adj, Matrix.vecHead, Matrix.vecTail]⟩
+      SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 2) (w := 2)
+      ⟨by decide, by simp [k4Adj, Matrix.vecHead, Matrix.vecTail]⟩
+      SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 3) (w := 3)
+      ⟨by decide, by simp [k4Adj, Matrix.vecHead, Matrix.vecTail]⟩
+      SimpleGraph.Walk.nil⟩
+
+theorem star_plus_tri3_supportGraph_connected :
+    (supportGraph (star4Adj + tri3Adj)
+      (star4_symmetric.add tri3_symmetric)).Connected := by
+  have heq : supportGraph (star4Adj + tri3Adj) (star4_symmetric.add tri3_symmetric)
+      = supportGraph k4Adj k4_symmetric := by
+    ext i j
+    simp only [supportGraph_adj]
+    constructor <;> intro ⟨hij, hpos⟩
+    · exact ⟨hij, by rw [star4_add_tri3] at hpos; exact hpos⟩
+    · exact ⟨hij, by rw [star4_add_tri3]; exact hpos⟩
+  rw [heq]
+  exact k4_supportGraph_connected
+
+theorem star_plus_tri3_nonneg : ∀ i j, 0 ≤ (star4Adj + tri3Adj) i j := by
+  intro i j
+  simp only [Matrix.add_apply]
+  have h1 : 0 ≤ star4Adj i j := star4_nonneg i j
+  have h2 : 0 ≤ tri3Adj i j := tri3_nonneg i j
+  linarith
+
+/-! ### The separation and the two theorem instances -/
+
+/-- **The separation at rank `k = ⟨2⟩`, computed independently**:
+`3 ≤ λ₄(L K₄) − λ₃(L star) = 4 − 1` from the two pinned spectra. -/
+theorem sep4_QA : (3 : ℝ) ≤ evals (laplacian_symmetric (star4Adj + tri3Adj)
+      (star4_symmetric.add tri3_symmetric)) ⟨3, by norm_num⟩
+    - evals (laplacian_symmetric star4Adj star4_symmetric) ⟨2, by norm_num⟩ := by
+  rw [evals_congr (laplacian_symmetric (star4Adj + tri3Adj)
+      (star4_symmetric.add tri3_symmetric))
+    (laplacian_symmetric k4Adj k4_symmetric)
+    (by rw [star4_add_tri3]) ⟨3, by norm_num⟩,
+    k4_evals_three_eq_four_QA, star4_evals_two_eq_one_QA]
+  norm_num
+
+/-- **The general-rank subspace instance at `k = ⟨2⟩`**: the bound
+evaluates to `‖L(triangle)‖ / 3 = 3 / 3 = 1`. -/
+theorem seSubspace_star4_K4_QA :
+    ‖initialProjector (laplacian (star4Adj + tri3Adj))
+        (laplacian_symmetric (star4Adj + tri3Adj) (star4_symmetric.add tri3_symmetric))
+        ⟨2, by norm_num⟩
+      - initialProjector (laplacian star4Adj) (laplacian_symmetric star4Adj star4_symmetric)
+        ⟨2, by norm_num⟩‖ ≤ 1 := by
+  have h := spectralEncodingSubspace_stability star4Adj tri3Adj star4_symmetric
+    tri3_symmetric ⟨2, by norm_num⟩ (by norm_num) 3 (by norm_num) sep4_QA
+  rw [tri3_laplacian_norm] at h
+  norm_num at h
+  exact h
+
+/-- **The kernel-isolated instance at `k = ⟨2⟩`**: the informative rank-3
+component of the encoding subspace, both graphs connected. -/
+theorem se_star4_K4_QA :
+    ‖(initialProjector (laplacian (star4Adj + tri3Adj))
+          (laplacian_symmetric (star4Adj + tri3Adj) (star4_symmetric.add tri3_symmetric))
+          ⟨2, by norm_num⟩
+        - initialProjector (laplacian (star4Adj + tri3Adj))
+          (laplacian_symmetric (star4Adj + tri3Adj) (star4_symmetric.add tri3_symmetric))
+          ⟨0, by norm_num⟩)
+      - (initialProjector (laplacian star4Adj) (laplacian_symmetric star4Adj star4_symmetric)
+          ⟨2, by norm_num⟩
+        - initialProjector (laplacian star4Adj) (laplacian_symmetric star4Adj star4_symmetric)
+          ⟨0, by norm_num⟩)‖ ≤ 1 := by
+  have h := spectralEncoding_stability star4Adj tri3Adj star4_symmetric tri3_symmetric
+    star4_nonneg star_plus_tri3_nonneg star4_supportGraph_connected
+    star_plus_tri3_supportGraph_connected ⟨2, by norm_num⟩ (by norm_num) 3 (by norm_num) sep4_QA
+  rw [tri3_laplacian_norm] at h
+  norm_num at h
+  exact h
+
+/-- The common-kernel identification instantiated at the fixture: both
+graphs connected, so the index-0 projectors agree. -/
+theorem initialProjector_zero_star4_eq_k4_QA :
+    initialProjector (laplacian star4Adj) (laplacian_symmetric star4Adj star4_symmetric)
+        ⟨0, by norm_num⟩
+      = initialProjector (laplacian k4Adj) (laplacian_symmetric k4Adj k4_symmetric)
+        ⟨0, by norm_num⟩ :=
+  initialProjector_laplacian_zero_eq_of_connected star4Adj k4Adj star4_symmetric
+    k4_symmetric star4_nonneg k4_nonneg star4_supportGraph_connected
+    k4_supportGraph_connected (by norm_num)
+
+/-- **The rank witness: the base projector is genuinely rank 3**, through
+the no-tie rank pin at the strict gap `λ₃ = 1 < 4 = λ₄`. -/
+theorem star4_initialProjector_rank_QA :
+    (initialProjector (laplacian star4Adj)
+        (laplacian_symmetric star4Adj star4_symmetric) ⟨2, by norm_num⟩).rank = 3 := by
+  rw [show initialProjector (laplacian star4Adj)
+        (laplacian_symmetric star4Adj star4_symmetric) ⟨2, by norm_num⟩
+      = spectralProjector (laplacian star4Adj)
+        (laplacian_symmetric star4Adj star4_symmetric)
+        (evals (laplacian_symmetric star4Adj star4_symmetric) ⟨2, by norm_num⟩) from rfl]
+  rw [rank_spectralProjector_evals_of_lt
+    (laplacian_symmetric star4Adj star4_symmetric) ⟨2, by norm_num⟩ (by norm_num) ?_]
+  norm_num
+  rw [star4_evals_two_eq_one_QA, star4_evals_three_eq_four_QA]
+  norm_num
+
+/-! ### The exact-attainment pin -/
+
+/-- **The general-rank bound is exactly attained at the fixture**: the
+projector distance is exactly `1`, not merely `≤ 1`. The `≥` side is the
+eigenbasis action argument: at the star's top unit eigenvector `u`
+(eigenvalue `4`, located by the witness bridge), the base projector kills
+`u` (its eigenvalue `4` exceeds the threshold `λ₃ = 1`, so every filtered
+eigenbasis coordinate vanishes by orthonormality) while the `K₄`
+projector at the threshold `4` is the identity; the difference acts as
+the identity on `u`, so its quadratic form is `u ⬝ᵥ u = 1`, and the
+norm-to-form transfer bounds the norm below by `1`. -/
+theorem seSubspace_star4_K4_distance_eq_one_QA :
+    ‖initialProjector (laplacian k4Adj) (laplacian_symmetric k4Adj k4_symmetric)
+        ⟨2, by norm_num⟩
+      - initialProjector (laplacian star4Adj) (laplacian_symmetric star4Adj star4_symmetric)
+        ⟨2, by norm_num⟩‖ = 1 := by
+  refine le_antisymm ?_ ?_
+  · rw [initialProjector_congr
+      (M := laplacian k4Adj) (N := laplacian (star4Adj + tri3Adj))
+      (by rw [star4_add_tri3]) (laplacian_symmetric k4Adj k4_symmetric)
+      (laplacian_symmetric (star4Adj + tri3Adj) (star4_symmetric.add tri3_symmetric))
+      ⟨2, by norm_num⟩]
+    exact seSubspace_star4_K4_QA
+  · obtain ⟨j₀, hj₀⟩ := exists_eigvalOf_eq_of_mulVec_eq_smul
+      (laplacian_symmetric star4Adj star4_symmetric) star4_w_ne star4_top_eigvec
+    have hstar : initialProjector (laplacian star4Adj)
+        (laplacian_symmetric star4Adj star4_symmetric) ⟨2, by norm_num⟩ *ᵥ
+        (eigvecOf (laplacian star4Adj) (laplacian_symmetric star4Adj star4_symmetric) j₀)
+        = 0 := by
+      rw [show initialProjector (laplacian star4Adj)
+            (laplacian_symmetric star4Adj star4_symmetric) ⟨2, by norm_num⟩
+          = spectralProjector (laplacian star4Adj)
+            (laplacian_symmetric star4Adj star4_symmetric)
+            (evals (laplacian_symmetric star4Adj star4_symmetric) ⟨2, by norm_num⟩)
+            from rfl,
+        spectralProjector_mulVec_eq_sum]
+      rw [star4_evals_two_eq_one_QA]
+      apply Finset.sum_eq_zero
+      intro i hi
+      rw [Finset.mem_filter] at hi
+      obtain ⟨_, hile⟩ := hi
+      have hne : i ≠ j₀ := by
+        intro he
+        rw [he, hj₀] at hile
+        norm_num at hile
+      have hd : Matrix.dotProduct
+          (eigvecOf (laplacian star4Adj) (laplacian_symmetric star4Adj star4_symmetric) i)
+          (eigvecOf (laplacian star4Adj) (laplacian_symmetric star4Adj star4_symmetric) j₀)
+          = 0 := by
+        rw [show Matrix.dotProduct _ _ = ∑ k, _ * _ from rfl, eigvecOf_inner]
+        simp [hne]
+      rw [hd, zero_smul]
+    have hk4 : initialProjector (laplacian k4Adj) (laplacian_symmetric k4Adj k4_symmetric)
+        ⟨2, by norm_num⟩ *ᵥ
+        (eigvecOf (laplacian star4Adj) (laplacian_symmetric star4Adj star4_symmetric) j₀)
+        = eigvecOf (laplacian star4Adj) (laplacian_symmetric star4Adj star4_symmetric) j₀ := by
+      rw [show initialProjector (laplacian k4Adj)
+            (laplacian_symmetric k4Adj k4_symmetric) ⟨2, by norm_num⟩
+          = spectralProjector (laplacian k4Adj) (laplacian_symmetric k4Adj k4_symmetric)
+            (evals (laplacian_symmetric k4Adj k4_symmetric) ⟨2, by norm_num⟩) from rfl]
+      have hone : spectralProjector (laplacian k4Adj) (laplacian_symmetric k4Adj k4_symmetric)
+          (evals (laplacian_symmetric k4Adj k4_symmetric) ⟨2, by norm_num⟩) = 1 := by
+        refine spectralProjector_eq_one (laplacian k4Adj)
+          (laplacian_symmetric k4Adj k4_symmetric)
+          (evals (laplacian_symmetric k4Adj k4_symmetric) ⟨2, by norm_num⟩) ?_
+        intro i
+        rw [k4_evals_two_eq_four_QA]
+        have hlast := eigvalOf_le_evals_last
+          (laplacian_symmetric k4Adj k4_symmetric) (by norm_num) i
+        have hfin : (⟨Fintype.card (Fin 4) - 1, by norm_num⟩ :
+            Fin (Fintype.card (Fin 4))) = ⟨3, by norm_num⟩ := by
+          refine Fin.ext ?_
+          simp
+        rw [hfin, k4_evals_three_eq_four_QA] at hlast
+        exact hlast
+      rw [hone, Matrix.one_mulVec]
+    have hact : (initialProjector (laplacian k4Adj)
+          (laplacian_symmetric k4Adj k4_symmetric) ⟨2, by norm_num⟩
+        - initialProjector (laplacian star4Adj)
+          (laplacian_symmetric star4Adj star4_symmetric) ⟨2, by norm_num⟩) *ᵥ
+        (eigvecOf (laplacian star4Adj) (laplacian_symmetric star4Adj star4_symmetric) j₀)
+        = eigvecOf (laplacian star4Adj) (laplacian_symmetric star4Adj star4_symmetric) j₀ := by
+      rw [Matrix.sub_mulVec, hk4, hstar, sub_zero]
+    have hu1 : Matrix.dotProduct
+        (eigvecOf (laplacian star4Adj) (laplacian_symmetric star4Adj star4_symmetric) j₀)
+        (eigvecOf (laplacian star4Adj) (laplacian_symmetric star4Adj star4_symmetric) j₀)
+        = 1 := by
+      rw [show Matrix.dotProduct _ _ = ∑ k, _ * _ from rfl, eigvecOf_inner]
+      simp
+    have hle := abs_quadForm_le_of_l2OpNorm_le
+      (t := ‖initialProjector (laplacian k4Adj) (laplacian_symmetric k4Adj k4_symmetric)
+          ⟨2, by norm_num⟩
+        - initialProjector (laplacian star4Adj)
+          (laplacian_symmetric star4Adj star4_symmetric) ⟨2, by norm_num⟩‖)
+      (le_refl _)
+      (eigvecOf (laplacian star4Adj) (laplacian_symmetric star4Adj star4_symmetric) j₀)
+    rw [show quadForm _ _ = Matrix.dotProduct _ (_ *ᵥ _) from rfl, hact, hu1,
+      abs_of_nonneg (by norm_num)] at hle
+    rw [mul_one] at hle
+    exact hle
+
+end SpectralEncodingStability

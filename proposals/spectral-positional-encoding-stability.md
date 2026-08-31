@@ -1,8 +1,10 @@
 # Proposal: Certified Stability for Laplacian Positional Encodings
 
-**Status:** Proposed. Authorizes Lean proof work generalizing an
-already-delivered theorem family from a fixed rank to an arbitrary rank;
-no new axioms, no changes to public statements that already exist.
+**Status:** COMPLETE (delivered 2026-08-31, run
+`20260831T011543Z-run-1` — see the delivery record at the end). The
+general-rank pair is on the shelf with the `k = 1` pair re-proved as
+corollaries; the `k ≥ 2` QA exceeds the acceptance criteria (the bound
+is exactly attained at the fixture). Zero new axioms.
 
 **Provenance:** New-capability direction chosen by the operator (2026-08-30)
 from a menu of AI/network-science intersection ideas — this was ranked #1
@@ -201,3 +203,106 @@ perturbation norm where the fixture allows it.
 - Extending the bound to individual eigenvector coordinates rather than
   the subspace — flagged above as the wrong question, not a deferred
   version of the right one.
+
+## Delivery record (2026-08-31, run `20260831T011543Z-run-1`)
+
+Delivered in one run, spike-first (`wip/lappe_spike.lean` iterated to
+zero errors before any shelf edit).
+
+**The theorems** (`Scaffold/Mathlib/GraphTheory/Fiedler.lean`, the new
+"Spectral-encoding stability: the general-rank Davis–Kahan family"
+section):
+
+- `spectralEncodingSubspace_stability` — the general-`k` form, at the
+  proposal's sketch shape modulo the mechanical index bookkeeping (the
+  separation's upper index `⟨(k : ℕ) + 1, hk⟩` replacing the literal
+  `⟨2⟩`; the `3 ≤ card` hypothesis subsumed by `hk`).
+- `spectralEncoding_stability` — the kernel-isolated general-`k` form,
+  hypothesis stack exactly as sketched.
+- `fiedlerSubspace_stability` and `fiedlerLine_stability` **re-proved as
+  one-line corollaries at unchanged public statements** — the option the
+  proposal left open, chosen deliberately: it machine-checks the claim
+  that nothing in either proof used `k = 1` specifically. Technique
+  note (recorded for future re-parameterizations): the corollary
+  instantiation needs `show (1 : ℕ) + 1 < Fintype.card V; omega` for the
+  `hk` argument — a bare `by omega` there sees the goal through the
+  opaque double coercion `↑↑⟨1, ⋯⟩` of the not-yet-elaborated `k`
+  binder and fails.
+- The section docstring carries the full honest-scope-limits block
+  (subspace-not-entrywise; both graphs connected for the isolated form;
+  `δ` the caller's obligation; not a restatement of the ML papers) plus
+  the citations the proposal's scope-limits section required: LapPE
+  (Dwivedi & Bresson, AAAI 2021) and SAN (Kreuzer et al., NeurIPS 2021)
+  as motivation; von Luxburg 2007 and the Gama & Ribeiro / Levie et al.
+  line as the informal mathematical precedent.
+
+**The QA** (`Fiedler_QA.lean`, the new SpectralEncodingStability
+section, +53 counted declarations) — the star `K₁,₃ → K₄` fixture on
+`Fin 4` at `k = ⟨2⟩`, a rank the existing `k = 1` theorems cannot
+express:
+
+- The full star spectrum `{0, 1, 1, 4}` pinned: `⟨0⟩ = 0`
+  (`laplacian_evals_zero`), `λ₂ = 1` (variational `≥` on the zero-sum
+  constraint `E = ‖x‖² + 4x₀²`; `≤` inherited from the `⟨2⟩ ≤ 1` bound
+  by sortedness), `⟨2⟩ = 1` (Rayleigh–Ritz engine
+  `evals_le_of_linearIndependent` at the test family
+  `{ones, v₁, v₂}` — on its span `E = ‖x‖² − 4·(kernel coefficient)²`,
+  the RR bound tight off the kernel), `⟨3⟩ = 4` (eigenvector witness
+  `![3, −1, −1, −1]` through `exists_eigvalOf_eq_of_mulVec_eq_smul` +
+  `eigvalOf_le_evals_last`; `≤` side by the RR engine at the full
+  standard basis with the universal `E ≤ 4‖x‖²` via Cauchy–Schwarz).
+- The separation `3 ≤ λ₄(L K₄) − λ₃(L star)` pinned independently at
+  that rank: the `K₄` top `4` by the same two-sided machinery (its
+  `⟨2⟩ = 4` additionally by trace arithmetic — `⟨1⟩ + ⟨2⟩ = 8` with
+  `⟨1⟩ ≤ ⟨2⟩ ≤ 4` forces both to `4`).
+- The perturbation norm `‖L(triangle)‖ = 3` two-sided: `≤ 3` through
+  the bracketed triangle spectrum `{0, 0, 3, 3}` (its `⟨1⟩ = 0` by the
+  RR engine at the kernel family `{ones, e₀}`) and
+  `l2OpNorm_le_of_abs_evals_le`; `≥ 3` by the quadForm witness at the
+  top eigenvector `![0, 1, −1, 0]` (`6 ≤ 2 · 3`).
+- The rank-3 witness: `rank P_star⟨2⟩ = 3` through
+  `rank_spectralProjector_evals_of_lt` at the strict gap `1 < 4` — the
+  bounded subspace is genuinely rank 3.
+- Both theorem instances, bounds evaluating to `‖L(triangle)‖ / 3 = 1`;
+  the kernel-isolated instance threads both connectivity hypotheses,
+  with the common-kernel identification instantiated at the fixture.
+- **The exact-attainment pin**
+  `seSubspace_star4_K4_distance_eq_one_QA`:
+  `‖P_{K₄}⟨2⟩ − P_star⟨2⟩‖ = 1`, not merely `≤ 1`. The `K₄` projector
+  at its threshold `4` is the identity (`spectralProjector_eq_one`,
+  `evals⟨2⟩(K₄) = 4` from the trace route); the star projector kills
+  the top unit eigenvector `u` (the eigenvalue `4` exceeds the
+  threshold `1`, so every filtered eigenbasis coordinate vanishes by
+  `eigvecOf_inner`); the difference acts as the identity on `u`, so
+  `quadForm D u = u ⬝ᵥ u = 1`, and the norm→form transfer
+  (`abs_quadForm_le_of_l2OpNorm_le`) closes the lower side. The
+  general-rank bound is tight at this fixture — the strongest QA shape
+  a bound theorem can have.
+
+**Acceptance criteria check:** no new axiom/`sorry`/`admit` ✓;
+`#print axioms` on all 18 audited declarations (both new theorems, both
+re-proved corollaries, the load-bearing QA members) exactly
+`propext, Classical.choice, Quot.sound` via `wip/lappe_axcheck.lean` ✓;
+the two existing public statements unchanged (re-proved, not removed) ✓;
+QA at `k ≥ 2` not producible by the `k = 1` theorems (every declaration
+bounds or pins a `⟨2⟩`-indexed object) ✓; honest scope limits stated in
+the module itself ✓; full ladder in the scoreboard verification row
+(direct elaboration of both modules with zero warnings — the QA warning
+baseline compared zero-against-zero with the HEAD file by pair
+elaboration — explicit build targets, full build + completeness
+130/130/0/0, `lint_axioms` 5, refutation-independence 10-tag clean with
+no tags added since nothing touches an axiom, citations, links,
+scoreboard 3172 → 3225/5/0, map-freshness exit 0 after the stamp sync)
+✓.
+
+**Records closed:** this proposal, `proposals/README.md` (the Medium-High
+row retired to the Delivered table), README (3225 + the highlights
+bullet), the radar QA axis (3172 → 3225, score held at 4.0 per
+protocol — a new-rank instantiation of the already-counted Davis–Kahan
+consumer family), `index/map/spectral_graph.md` (the general-rank
+section's two rows), the scoreboard verification row, both map stamps +
+the regenerated SVG, the execution plan, and the activity log.
+
+**Deferred as proposed:** the Python certificate bridge, automatic `δ`
+certification, and any entrywise extension — all recorded in the
+proposal's own Deferred section, none started.

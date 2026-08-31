@@ -16,13 +16,13 @@ revision](docs/5_QA_SCOREBOARD.md) rather than tracking `main`.
 
 ## Status
 
-As of August 30, 2026:
+As of August 31, 2026:
 
 | Check | Result |
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 5 |
-| QA theorems/lemmas | 3172, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 3252, with no `sorry` or `admit` under `Scaffold/` |
 
 Recent highlights (full per-run history in
 [`docs/AGENT_ACTIVITY.md`](docs/AGENT_ACTIVITY.md); per-result detail in each
@@ -31,9 +31,25 @@ linked proposal):
 - **Alon–Boppana bound** delivered complete end-to-end (Nilli's variational
   route), with the **Ramanujan Expansion Ceiling** as its first theorem
   consumer ([proposal](proposals/alon-boppana-bound.md)).
+- **Certified stability for Laplacian positional encodings**: the
+  general-rank Davis–Kahan pair (`spectralEncodingSubspace_stability`/
+  `spectralEncoding_stability`) — the first machine-checked instance of the
+  LapPE/SAN subspace-stability class, with the `k = 1` Fiedler pair as
+  corollaries and a `k = 2` QA where the bound is exactly attained
+  ([proposal](proposals/spectral-positional-encoding-stability.md)).
+- **Certified oversmoothing ceiling from mixing**: depth-form consumers of
+  the χ² mixing bound — past a computable depth, every node's propagated
+  view is provably within `ε` of stationarity, and any two starts'
+  views within `2ε`; QA pins the same graph at two rate certificates
+  (depth 3 vs 9 at the same `ε`)
+  ([proposal](proposals/message-passing-depth-mixing-bound.md)).
 - **Spectral sparsification via leverage-score sampling**, complete —
-  `matrix_bernstein`'s first real theorem consumer
-  ([proposal](proposals/spectral-sparsification-via-leverage-scores.md)).
+  `matrix_bernstein`'s first real theorem consumer — with the
+  **closed-form GNN sampling budget** (`sparsificationBudget`: the
+  minimal certified `q` from `(n, ε, δ)`, axiom-free) as its
+  practitioner-facing packaging
+  ([proposal](proposals/spectral-sparsification-via-leverage-scores.md),
+  [usage note](docs/gnn-sparsification-budget.md)).
 - **Both Cheeger inequalities** on arbitrary weighted graphs, including the
   volume-weighted (irregular) pair and the higher-order (multiway) easy
   direction (`GraphTheory.Cheeger`, `GraphTheory.Multiway`).
@@ -204,7 +220,7 @@ The near-term center is general SGT. Public modules currently cover:
 | Decidable spectral certificates | `GraphTheory.SpectralCertificates` (ℚ and kernel-verifiable ℤ specification checkers, both soundness-proved) |
 | Electrical structure | `GraphTheory.Electrical`, `GraphTheory.ElectricalFlow`, `GraphTheory.Foster` — effective resistance as a genuine metric, Foster's theorem, leverage scores |
 | Heat semigroup | `GraphTheory.Heat` — the diffusion operator `e^{-tL}`: semigroup law, mass conservation, eigenmode decay, the connected-graph DC limit, and the derivative/remainder bounds at `t = 0`; program complete |
-| Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized`, `GraphTheory.Stationary`, `GraphTheory.Mixing` — the ℓ²-mixing proxy and the geometric-decay mixing bound |
+| Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized`, `GraphTheory.Stationary`, `GraphTheory.Mixing` — the ℓ²-mixing proxy and the geometric-decay mixing bound — plus `GraphTheory.Oversmoothing`, the certified depth past which propagated views are provably ε-close to stationarity |
 | Directed operators | `GraphTheory.Directed` — out/in-degree, directed handshaking, the directed normalized Laplacian |
 | Krylov methods and Chebyshev polynomials | `GraphTheory.Krylov` — the Lanczos/Kaniel–Paige program, complete end-to-end |
 | Polynomial filters and band projection | `GraphTheory.PolyFilter` — filter-agnostic band-projector approximation, with power-method and Chebyshev instantiations |
@@ -375,9 +391,14 @@ the safety boundary and invocation.
 - [Proposals](proposals/README.md) — active priority list and delivered records.
 - [Traction Plan](docs/traction-plan.md) — promotion plan for the future
   clean-room repository's release; applies only there, not to this repository.
+- [GNN Sparsification Budget](docs/gnn-sparsification-budget.md) —
+  practitioner-facing usage note for the certified edge-sampling budget,
+  with the `matrix_bernstein` trust caveat stated first.
+- [Agentic Architecture Review](docs/arch/scaffold-agentic-architecture-review.md) — control-plane audit; live unattended `--commit` is B because Sequence 0 is unimplemented (verify/commit mismatch, mutable verifier, incomplete ladder, no host time budget). Planning contract A−; A+ not earned.
 - [Commit Steward Protocol](docs/arch/commit-steward-protocol.md) — the
   verify-and-commit procedure that sits between the autonomous agent
-  (which has no git authority) and `main`.
+  (which has no git authority) and `main`. The steward may veto; git
+  stays in the host and is never authorized by a model verdict.
 - [Contributing](governance/CONTRIBUTING.md) — contribution and review workflow.
 
 ## License

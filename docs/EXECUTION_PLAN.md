@@ -7,21 +7,238 @@ holds the append-only narrative.
 ## Active milestone
 
 **None queued — the next run selects per priority item 0.** The Active
-table has no High rows (the axiom-audit-tooling High row was delivered
-2026-08-30 and retired to the Delivered table below); the Medium-High
-row (empirical-stationary Step 2) is consumer-gated; all Low rows are
-human-decision-gated. The matrix retirement route's Step 2 (the
-Lieb-class sum-MGF step, Tropp Thm 6.1) is **gated on an operator
-decision** between admitting the analytic core and proving it —
-recorded as the route's standing gate in
-`proposals/matrix-master-bound-first-slice.md`, not an autonomous
-default. Natural named frontiers otherwise: a consumer of the
-unconditional window family, or the next load-bearing gap
-`docs/6_SGT_BACKLOG.md` names (all remaining items consumer-gated).
+table's Medium GNN-sparsification Track A row was delivered 2026-08-31
+(retired to the Delivered table below); with it, the Active table holds
+no actionable rows above the human-decision gates: the Medium-High
+empirical-stationary Step 2 row is consumer-gated, and all Low rows are
+decision-gated. The matrix retirement route's Step 2 (the Lieb-class
+sum-MGF step, Tropp Thm 6.1) is **gated on an operator decision**
+between admitting the analytic core and proving it — recorded as the
+route's standing gate in `proposals/matrix-master-bound-first-slice.md`,
+not an autonomous default. A next run without direction falls through
+to the center-out SGT policy (`docs/6_SGT_BACKLOG.md`) or to the
+sparsification proposal's priced deferred follow-ons.
 
 ------
 
 ## Delivered milestones (most recent first)
+
+**GNN-Sparsification Track A — packaging the certified sampling budget
+(`proposals/spectral-graph-sparsification-gnn-training.md`, the Active
+table's only actionable row; delivered by run `20260831T042937Z-run-1`).
+DELIVERED — zero new axioms (count stays 5; `#print axioms` via
+`wip/gnnbudget_axcheck.lean` on all 11 new declarations: the four pure
+shelf members and five arithmetic QA pins at exactly
+`propext, Classical.choice, Quot.sound`, the plug-in theorem and its QA
+interface pin honestly carrying `matrix_bernstein`). QA 3246 → 3252
+(+6, `SparsificationTail_QA.lean`'s closed-form budget section).**
+
+The delivery's content — all three Track A items: (1) **The closed-form
+corollary** in `SparsificationTail.lean`'s Track A section:
+`sparsificationBudget n ε δ := max 1 ⌈(8/3)·log(2n/δ)/ε²⌉` (the minimal
+natural `q` certified for *both* budget-hypothesis clauses — the `max 1`
+floor makes positivity unconditional; fenced at `n = 1`, `δ = 10` where
+the ceiling alone would be `0`), `sparsificationBudget_pos`/`_le`/
+`_min` (the last the **minimality among naturals** — the closed form is
+the exact minimum, not merely valid), all pure arithmetic at the
+standard three exactly as the acceptance criterion demands, and
+`sparsification_graph_budget_closedForm` (the plug-in guarantee: graph
+hypotheses plus `(ε, δ)` only; honestly conditional on
+`matrix_bernstein` like the corollary it applies). (2) **The ML-facing
+usage note** `docs/gnn-sparsification-budget.md` — budget formula in
+plain terms, worked `n = 10⁶` interpretation, certificate-vs-
+recommendation distinction, `matrix_bernstein` trust caveat as the first
+section; linked from the module docstring, README docs list, and the
+sparsification highlight. (3) **The python-bridge cross-reference** in
+`docs/arch/python-certificate-bridge.md` (the budget check named as the
+second candidate certified quantity). QA: two exact-`e` design pins
+(8 and 24 exactly — the formula tracks the log argument), the
+load-bearing floor pin, minimality pinned through `_min` itself (fails
+at 7), the join to the QA file's own hand budget (`≤ 100`, the same
+`log 8 ≤ 300/32` route), and the `K₂` interface pin.
+
+**Verification:** spike first (`wip/gnnbudget_spike.lean` iterated to
+zero errors before any shelf edit); `lake env lean` zero errors on both
+touched modules; explicit `lake build` targets ✔ on both; **full
+`lake build` ✔ (2407/2408) immediately followed by
+`check_build_completeness.py` — 131 source files, 131 fresh artifacts,
+0 stale, 0 missing, exit 0**; `lint_axioms` (5, both PF findings
+allowlisted-confirmed); `check_refutation_independence` (10-tag clean);
+`check_public_reachability` clean (62 modules); `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**3252/5/0**) with
+the verification row added; **map-freshness exit 0** after the
+3246 → 3252 stats sync in both map files and SVG regeneration (no
+proposal status header any station cites was changed). Records updated:
+the proposal (Track A DELIVERED + delivery record), `proposals/README.md`
+(row retired + Delivered row), README (3252 + docs bullet + highlight
+extension), the radar QA axis (synced, 4.0 held per protocol — packaging
+plus pins for the already-counted sparsification family),
+`index/map/spectral_graph.md` (Track A paragraph + two rows), the
+scoreboard, the QA module's purpose header, the map stamps + regenerated
+SVG, this plan, and the activity log. Nothing committed; the previous
+runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — no axiom disposition
+changed, no existing public statement changed. Track B (retiring
+`matrix_bernstein`) stays gated on the operator decision recorded in
+`matrix-master-bound-first-slice.md`; when it lands,
+`sparsification_graph_budget` and `_closedForm` become unconditionally
+proved with no statement change. The Python bridge itself stays gated
+on its own operator decision.
+
+**Certified Oversmoothing Ceiling from Mixing — the depth-form
+consumers of the mixing program's closing bound
+(`proposals/message-passing-depth-mixing-bound.md`, the Active table's
+top actionable Medium row; delivered by run `20260831T025541Z-run-1`).
+DELIVERED — zero new axioms (count stays 5; `#print axioms` via
+`wip/oversmoothing_axcheck.lean` on all 27 new declarations — 6 shelf +
+21 QA — each exactly `propext, Classical.choice, Quot.sound`). QA
+3225 → 3246 (+21, `Mixing_QA.lean`'s oversmoothing section).**
+
+The delivery's content: (1) **The new module**
+`Scaffold/Mathlib/GraphTheory/Oversmoothing.lean` (umbrella-imported;
+`check_public_reachability` now counts 62 modules): `stationaryVec_le_one`
+(the engine making the ceiling constant real), the Step-1 **entrywise
+extraction** `walkDistribution_sub_stationaryVec_abs_le`
+(`|ν_t x y − π y| ≤ r^t · √(π y · ((π x)⁻¹ − 1))` — one nonnegative χ²
+summand against the whole sum, the mixing bound's normalization
+entering the constant unchanged, load-bearing on its exact shape), the
+Step-2 **log-threshold calculus bridge** `pow_mul_le_of_log_threshold`
+(the corrected sign-of-`log` step the proposal's own correction record
+identifies; `C = 0` handled trivially), the **ceiling**
+`walkDistribution_sub_stationaryVec_le_of_depth`, the **two-start
+indistinguishability corollary**
+`walkDistribution_sub_walkDistribution_le_of_depth`, and the **rate
+monotonicity** `oversmoothing_log_threshold_mono`. (2) **The QA** on
+the triangle at two rate certificates — the proposal's sanity contrast
+delivered as *the same graph, two certificates*, isolating the
+mechanism: the honest `r = 1/2` certifies `ε = 1/8` at **exactly**
+depth 3 (`tri_ceiling_threshold_three_sharp_QA` proves depth 2 fails
+the threshold — the hypothesis load-bearing), the loose `r = 4/5`
+provably needs 9 (`tri_ceiling_loose_sharp_QA` excludes 8); true
+values beside every conclusion (deviations `1/6`, `1/12`, `1/768`; the
+two-start value `1/8` at exactly half its `2ε` bound); the `t = 0`
+corner soundness instance; the monotonicity pinned at the fixture;
+walk laws by raw literal iteration (`tri_dist_nine_zero_QA` =
+`(85/256, 171/512, 171/512)`). The honest-scope section (linearized
+mean-aggregation operator, global rate, bipartite graphs outside the
+ceiling's reach) lives in the module docstring per the acceptance
+criteria.
+
+**Verification:** spike first (`wip/oversmoothing_spike.lean` — the
+shelf layer and QA section iterated to zero errors/zero warnings
+before any shelf edit, with technique findings recorded: explicit-f
+`Finset.single_le_sum` under metavariables, `abs_le_of_sq_le_sq`
+vs `'`, `Real.log_le_log`'s first-argument positivity, `norm_num`
+`have`s before `linarith` for distinct rational atoms, `push_cast`
+bridging for natural-cast numerals); `lake env lean` zero errors and
+zero warnings on both touched modules; explicit `lake build` targets ✔
+on both; **full `lake build` ✔ (2407/2408) immediately followed by
+`check_build_completeness.py` — 131 source files, 131 fresh artifacts,
+0 stale, 0 missing, exit 0** (re-run after the final docstring edit
+with the QA module rebuilt); `lint_axioms` (5, both PF findings
+allowlisted-confirmed); `check_refutation_independence` (10-tag clean
+— no tags added, nothing here touches an axiom);
+`check_public_reachability` clean (62 modules);
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+(**3246/5/0**) with the verification row added; **map-freshness exit 0**
+after the 3225 → 3246 stats sync in both map files and SVG
+regeneration (no proposal status header this delivery changed required
+it beyond the stats — the proposal has no station). Records updated:
+the proposal (COMPLETE + delivery record), `proposals/README.md` (the
+Medium row retired, the Delivered row added), README (3246 + the
+highlights bullet + the walks-and-mixing row), the radar QA axis
+(synced, score held at 4.0 per protocol — the first depth-form
+consumers of the already-counted mixing program, reusing the counted
+triangle fixture family), `index/map/spectral_graph.md` (the new
+module's section and list entry), the scoreboard verification row, the
+QA module's purpose header, the map stamps + regenerated SVG, this
+plan, and the activity log. Nothing committed; prior deliveries
+preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed. The
+proposal's priced follow-ons stay as its Deferred section records
+them: the per-pair `effectiveResistance` refinement, the genuine
+over-squashing floor via the exact eigen-component equality (consumer-
+gated), and the Python certificate bridge. The bipartite exclusion is
+honest scope, not debt: no `r < 1` certificate exists there, exactly as
+the path fixture's pinned no-decay records.
+
+------
+
+## Delivered milestones (most recent first)
+
+**Certified Stability for Laplacian Positional Encodings — the
+general-rank Davis–Kahan family
+(`proposals/spectral-positional-encoding-stability.md`, the Active
+table's Medium-High row, operator-added 2026-08-30; delivered by run
+`20260831T011543Z-run-1`). DELIVERED — zero new axioms (count stays 5;
+`#print axioms` via `wip/lappe_axcheck.lean` on 18 audited declarations
+— both new theorems, both re-proved corollaries, the load-bearing QA
+members — each exactly `propext, Classical.choice, Quot.sound`). QA
+3172 → 3225 (+53, `Fiedler_QA.lean`'s SpectralEncodingStability
+section).**
+
+The delivery's content: (1) **The theorems**
+(`spectralEncodingSubspace_stability`/`spectralEncoding_stability` in
+`Fiedler.lean`) — the rank-`k` re-parameterizations of the delivered
+Fiedler-stability pair; the honest-novelty framing recorded in the
+module docstring with its scope limits (subspace not entrywise; both
+graphs connected for the isolated form; `δ` the caller's obligation;
+not a restatement of the ML papers — LapPE/SAN cited as motivation,
+von Luxburg / Gama–Ribeiro / Levie et al. as the informal precedent).
+(2) **The machine-checked subsumption** — `fiedlerSubspace_stability`
+and `fiedlerLine_stability` re-proved as one-line corollaries at
+unchanged public statements (technique finding recorded: the `hk`
+argument needs `show (1 : ℕ) + 1 < card V; omega` — a bare `by omega`
+sees the goal through the opaque `↑↑⟨1, ⋯⟩` coercion and fails).
+(3) **The `k = ⟨2⟩` QA** on the star `K₁,₃ → K₄` fixture — a rank the
+`k = 1` theorems cannot express: the separation `4 − 1 = 3` pinned
+independently at that rank (eigenvector-witness bridge + the
+general-`k` Rayleigh–Ritz engine `evals_le_of_linearIndependent`, both
+sides), the full star spectrum `{0, 1, 1, 4}` pinned, the perturbation
+norm `‖L(triangle)‖ = 3` pinned two-sided, the rank-3 projector
+witness at the strict gap `1 < 4`, both theorem instances with the
+bound exactly `1`, the common-kernel identification at the fixture,
+and the **exact-attainment pin** `‖P_{K₄}⟨2⟩ − P_star⟨2⟩‖ = 1` — the
+bound tight at the fixture, the strongest QA shape a bound theorem can
+have.
+
+**Verification:** spike first (`wip/lappe_spike.lean`, iterated to
+zero errors before any shelf edit — the Fin 4 entrywise work needed
+`!!`-literal matrices with `Matrix.vecHead/vecTail` unfolding, recorded
+as the working technique); `lake env lean` on both touched modules with
+zero errors and zero warnings (the QA warning baseline verified
+zero-against-zero with the HEAD file by pair elaboration,
+`wip/fiedlerqa_base.lean`); explicit `lake build` targets ✔ on both
+modules; **full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 130 source files, 130 fresh artifacts,
+0 stale, 0 missing, exit 0**; `lint_axioms` (5, both PF findings
+allowlisted-confirmed); `check_refutation_independence` (10-tag clean —
+no tags added, nothing here touches an axiom);
+`check_public_reachability` clean; `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**3225/5/0**);
+**map-freshness exit 0** after the 3172 → 3225 stats sync in both map
+files and SVG regeneration (no proposal status header this delivery
+changed required it beyond the stats — the proposal has no station).
+Records updated: the proposal (COMPLETE + delivery record),
+`proposals/README.md` (the Medium-High row retired, the Delivered row
+added), README (3225 + the highlights bullet), the radar QA axis
+(synced, score held at 4.0 per protocol — a new-rank instantiation of
+the already-counted Davis–Kahan consumer family),
+`index/map/spectral_graph.md` (the general-rank section's rows), the
+scoreboard verification row, the map stamps + regenerated SVG, this
+plan, and the activity log. Nothing committed; prior deliveries
+preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed (only
+proof bodies, to corollary form). The deferred follow-ons stay as the
+proposal's own Deferred section records them: the Python certificate
+bridge, automatic `δ` certification, and entrywise extensions (the last
+flagged there as the wrong question, not a deferred right one).
+
 
 **Axiom audit tooling — the Active table's one High row, all three
 checks delivered in one run: the negative-witness independence checker

@@ -6,7 +6,7 @@ conductance, Cheeger theory, interlacing, and event-driven dynamics.
 ## Status
 
 **Implemented and build-certified** (see the QA scoreboard):
-`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,SpectralCertificates,Tikhonov,Band,ClusterProjector,Cheeger,Mixing,Dynamics,Krylov,PolyFilter,Multiway}`.
+`Scaffold.Mathlib.GraphTheory.{Spectral,SimpleGraphAdapter,Electrical,ElectricalFlow,Foster,Expander,SpectralCertificates,Tikhonov,Band,ClusterProjector,Cheeger,Mixing,Oversmoothing,Dynamics,Krylov,PolyFilter,Multiway}`.
 
 ## Modules and Declarations
 
@@ -549,6 +549,18 @@ The Step-2 headline — the proposal's payoff — sits in the same module:
 | --- | --- |
 | `fiedlerLine_stability` | **(2026-08-28, the same proposal's Step 2) the Fiedler-line rotation:** on connected base `A` and perturbed `A + E` (symmetric, nonnegative, `3 ≤ card V`) at Step 1's separation `δ ≤ λ₃(L(A+E)) − λ₂(L A)`, the residual Fiedler-mode projector difference `‖(initialProjector (L(A+E)) 1 − initialProjector (L(A+E)) 0) − (initialProjector (L A) 1 − initialProjector (L A) 0)‖ ≤ ‖laplacian E‖/δ` — the rank-2 rotation attributed to the Fiedler component itself, because connected graphs never move their kernel direction; the common-kernel identification telescopes the residual to the Step-1 projector difference (QA: the P₃ → K₃ edge-addition instance with the bound exactly `≤ 1` on Davis–Kahan's own tie branch, the perturbation norm pinned `= 2` both sides, and the disconnected fence proving connectivity load-bearing) |
 
+
+The general-rank family (2026-08-31, proved, zero axioms — the operator-chosen
+new-capability direction `proposals/spectral-positional-encoding-stability.md`;
+both `k = 1` theorems above re-proved as one-line corollaries at unchanged
+public statements, machine-checking that nothing in their proofs used `k = 1`
+specifically):
+
+| Declaration | Statement |
+| --- | --- |
+| `spectralEncodingSubspace_stability` | **(2026-08-31) general-rank Davis–Kahan subspace bound:** on every symmetric base `A` and perturbation `E` with cutoff index `k` (`k + 1 < card V`) and separation `δ ≤ λ_{k+2}(L(A+E)) − λ_{k+1}(L A)`, `‖initialProjector (L(A+E)) k − initialProjector (L A) k‖ ≤ ‖laplacian E‖/δ` — the bottom-`k+1` invariant subspace (the object a Laplacian positional encoding spans) moves by at most the Laplacian perturbation's norm over the gap; the proved `davis_kahan_sin_theta` is rank-general, so this is the re-parameterization of the `k = 1` wrapper (QA: the star `K₁,₃` → `K₄` instance at `k = ⟨2⟩` with the separation pinned independently and **the bound exactly attained**) |
+| `spectralEncoding_stability` | **(2026-08-31) the kernel-isolated general-rank form:** on two *connected* graphs at the same separation, the residual `‖(P'_{k} − P'_{0}) − (P_{k} − P_{0})‖ ≤ ‖laplacian E‖/δ` — the informative (non-constant) `k`-dimensional component of the encoding, the common kernel projector cancelling exactly as at `k = 1`; the first machine-checked instance of the LapPE/SAN subspace-stability class (Dwivedi & Bresson; Kreuzer et al. as motivation; von Luxburg / Gama–Ribeiro / Levie et al. as the informal precedent), with the honest scope limits — subspace distance, not entrywise; both graphs connected; `δ` the caller's obligation — stated in the module docstring itself |
+
 The identification layer behind it lives in `GraphTheory.Spectral`:
 `dotProduct_mulVec_comm_of_isSymm` (the self-adjoint coordinate form),
 `eq_of_isSymm_idempotent_of_forall_mulVec_eq` (symmetric idempotents
@@ -720,6 +732,29 @@ Parseval-exact); the plain Euclidean distance is a corollary bridge.
 | `sum_deg_mul_walkDensity_sub_one_eq_zero` | **mass conservation in the conjugated pairing:** `∑ deg (h₀ − 1) = 0` (termwise `deg · h₀ = vol · ν₀`, both sums `vol`) |
 | `eigvecOf_dotProduct_degreeSqrt_walkDensity_sub_one_of_eigvalOf_eq_zero` | **the connectivity mode derivation:** on a connected graph every `μ = 0` eigenvector of `L_sym` is orthogonal to `√D *ᵥ (h₀ − 1)` — the kernel transferred through the congruence `√D L_sym √D = L`, pinned constant by the shelf's kernel theorem, collapsed by mass conservation |
 | `chiSquareDistance_le_of_connected` | **the closing mixing bound:** `χ²(t, x) ≤ r ^ (2t) · ((π x)⁻¹ − 1)` on connected symmetric-nonnegative positive-degree networks under the rate hypothesis — the mixing-time program's target statement, mode hypothesis *derived* from connectivity rather than assumed |
+
+### `Scaffold.Mathlib.GraphTheory.Oversmoothing` (the certified oversmoothing ceiling)
+
+All statements proved (2026-08-31,
+`proposals/message-passing-depth-mixing-bound.md`), no axioms — the
+depth-form consumers of `chiSquareDistance_le_of_connected`: the bound
+decreases in `t`, so it certifies convergence, and the depth statement
+it supports is an **oversmoothing ceiling** (guaranteed representation
+collapse past a computable depth), the corrected direction of the
+proposal's original (retracted) over-squashing floor. Honest scope in
+the module docstring: the linearized mean-aggregation propagation
+operator (a linear GCN-style layer up to weights/nonlinearity), a
+single global rate, and no reach at all on graphs admitting no
+`r < 1` certificate (bipartite graphs).
+
+| Declaration | Content |
+|-------------|---------|
+| `stationaryVec_le_one` | `π x ≤ 1` entrywise (positive masses summing to one) — what makes the ceiling constant real |
+| `walkDistribution_sub_stationaryVec_abs_le` | **the entrywise extraction:** `|ν_t x y − π y| ≤ r^t · √(π y · ((π x)⁻¹ − 1))` — one χ² summand bounded by the whole sum (`Finset.single_le_sum`), root-flipped; the mixing bound's normalization enters the constant unchanged |
+| `pow_mul_le_of_log_threshold` | **the log-threshold calculus bridge:** `log (C/ε)/log (1/r) ≤ t` with `0 < r < 1` ⟹ `r^t · C ≤ ε` (the sign of `log` is the proposal's corrected step; `C = 0` trivial) |
+| `walkDistribution_sub_stationaryVec_le_of_depth` | **the oversmoothing ceiling:** past the computed depth, the `t`-step walk law from any start is within `ε` of stationarity at every target vertex — the architecture-design ceiling |
+| `walkDistribution_sub_walkDistribution_le_of_depth` | **two-start indistinguishability:** past the depth, any two starts' `t`-step views are within `2ε` at every vertex — the informal oversmoothing statement made formal |
+| `oversmoothing_log_threshold_mono` | **rate monotonicity:** a looser certified rate buys a provably larger threshold — the ceiling tracks the certified spectral gap (the QA sanity-contrast engine) |
 
 Supporting additions elsewhere: `Spectral.eigvecOf_dotProduct_one_sub_mulVec`
 (the generic eigenaction at `1 − M`, composed from
@@ -1502,7 +1537,11 @@ hypothesis clause is proved hard crust, the tail inequality itself is
 axiom-backed, and `#print axioms` reports the dependency. The
 2026-08-28 follow-ons add the multiplicative `(1±ε)` sparsifier shape
 and its `q ~ log n/ε²` budget corollary on the same conditional
-structure.
+structure. The 2026-08-31 Track A additions (`sparsificationBudget`
+and the plug-in form,
+`proposals/spectral-graph-sparsification-gnn-training.md`) are the
+GNN-facing packaging: the closed-form minimal budget is **proved hard
+crust** — only the plug-in guarantee inherits the axiom.
 
 | Declaration | Area | Description |
 | --- | --- | --- |
@@ -1512,6 +1551,8 @@ structure.
 | `sparsification_multiplicative_budget` | Sparsification follow-on (axiom-conditional, 2026-08-28) | **The sample-complexity corollary**: at `0 < ε ≤ 1`, `0 < δ`, budget `q ≥ (8/3)·log(2 card V/δ)/ε²` drives the multiplicative failure measure below `δ` — the classical `q ~ log n/ε²` sentence at the exact Tropp exponent constant |
 | `sparsification_graph_tail` | Sparsification follow-on (axiom-conditional, 2026-08-28) | **The graph-vector `(1±ε)` tail** — the textbook sentence: `(1−ε)xᵀLx ≤ xᵀL̃(ω)x ≤ (1+ε)xᵀLx` failing only on a set of the bound's measure, for *every* graph vector with no `im Π` restriction (the transport is on-cone by construction; the isometry and form correspondence transfer the delivered additive tail verbatim) |
 | `sparsification_graph_budget` | Sparsification follow-on (axiom-conditional, 2026-08-28) | **The graph-vector budget corollary**: the same `q ≥ (8/3)·log(2d/δ)/ε²` sentence driving the graph-form failure measure below `δ` (numeric core factored as `sparsification_budget_core`) |
+| `sparsificationBudget` / `_pos` / `_le` / `_min` | GNN packaging Track A (proved, 2026-08-31) | **The closed-form sampling budget** — `max 1 ⌈(8/3)·log(2n/δ)/ε²⌉` as pure arithmetic (zero axioms): positive, meeting the budget inequality, and *minimal* among naturals, so a caller supplies only `(n, ε, δ)`; the GNN-facing statement with the trust caveat first is `docs/gnn-sparsification-budget.md` |
+| `sparsification_graph_budget_closedForm` | GNN packaging Track A (axiom-conditional, 2026-08-31) | **The plug-in budget guarantee**: `sparsification_graph_budget` at the computed budget — pass only the graph hypotheses and `(ε, δ)`; conditional on `matrix_bernstein` exactly like the corollary it applies, while the budget arithmetic itself is axiom-free |
 
 ## Applications
 

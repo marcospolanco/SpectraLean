@@ -37,6 +37,119 @@ proposal's status header must also record
 that made this mandatory: the pre-commit hook re-rendered the map on
 every commit while its hand-maintained data tables drifted for days).
 
+## 2026-08-31T03:24:11Z — The oversmoothing ceiling delivered: the mixing bound's depth-form consumers (terminal)
+
+**Run:** `20260831T025541Z-run-1`  
+**Session:** `ses_faa482327ffeQJrwYxRwuGC2L0`  
+**Status:** completed  
+**Milestone:** the corrected oversmoothing ceiling
+(`proposals/message-passing-depth-mixing-bound.md`, the Active table's
+top actionable Medium row, no High rows and the Medium-High row
+consumer-gated) — **delivered**: the new module
+`Scaffold/Mathlib.GraphTheory.Oversmoothing.lean` plus the QA section
+of `Mixing_QA.lean`, pure hard crust, zero new axioms (count stays 5),
+QA 3225 → 3246.
+
+**Changes:** the shelf (6 proved declarations): `stationaryVec_le_one`;
+the Step-1 entrywise extraction `walkDistribution_sub_stationaryVec_abs_le`
+(`|ν_t x y − π y| ≤ r^t · √(π y · ((π x)⁻¹ − 1))` — one χ² summand
+against the whole sum, the mixing bound's normalization entering the
+constant unchanged); the Step-2 log-threshold calculus bridge
+`pow_mul_le_of_log_threshold` (the corrected sign-of-`log` step);
+the ceiling `walkDistribution_sub_stationaryVec_le_of_depth`; the
+two-start indistinguishability corollary
+`walkDistribution_sub_walkDistribution_le_of_depth` (within `2ε` past
+the depth); the rate monotonicity `oversmoothing_log_threshold_mono`.
+Umbrella import added. QA +21 on the triangle at two rate certificates
+(the sanity contrast as the same graph, two certificates): the honest
+`r = 1/2` certifying `ε = 1/8` at **exactly** depth 3
+(`tri_ceiling_threshold_three_sharp_QA` proves depth 2 fails the
+threshold — the hypothesis load-bearing), the loose `r = 4/5` provably
+needing 9 (`tri_ceiling_loose_sharp_QA` excludes 8), true values
+beside every conclusion (deviations `1/6`, `1/12`, `1/768`; the
+two-start value `1/8` at exactly half its `2ε` bound), the `t = 0`
+corner soundness instance, the monotonicity pinned at the fixture, and
+the walk laws by raw literal iteration (`tri_dist_nine_zero_QA` =
+`(85/256, 171/512, 171/512)`). Records: the proposal (COMPLETE +
+delivery record with technique findings), `proposals/README.md` (Medium
+row retired, Delivered row added), README (3246 + highlights bullet +
+the walks-and-mixing row), the radar QA axis (synced, score held at
+4.0 per protocol), `index/map/spectral_graph.md` (the new module
+section + list entry), the scoreboard verification row, the QA module's
+purpose header, the map stamps (3225 → 3246 in both map files) +
+regenerated SVG, the execution plan, this log. The LapPE delivery's
+uncommitted work preserved untouched; nothing committed.
+
+**Verification:** spike first (`wip/oversmoothing_spike.lean`, zero
+errors/zero warnings before any shelf edit); `lake env lean` zero
+errors and zero warnings on both touched modules; explicit `lake
+build` targets ✔ on both; `#print axioms` via
+`wip/oversmoothing_axcheck.lean` — all 27 new declarations (6 shelf +
+21 QA) exactly `propext, Classical.choice, Quot.sound`; **full `lake
+build` ✔ (2407/2408) immediately followed by
+`check_build_completeness.py` — 131 source files, 131 fresh artifacts,
+0 stale, 0 missing, exit 0** (re-run clean after the final docstring
+edit with the QA module rebuilt); `lint_axioms` (5, both PF findings
+allowlisted-confirmed); `check_refutation_independence` (10-tag clean);
+`check_public_reachability` (62 modules, the new module in the
+closure); `check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; scoreboard regenerated (**3246/5/0**);
+map freshness exit 0 after the stats sync (no station's proposal
+status header changed — the proposal has no station).
+
+**Remaining risk:** none owed — pure hard crust, no axiom disposition
+changed, no existing public statement changed. The proposal's priced
+follow-ons stay deferred as recorded: the per-pair
+`effectiveResistance` refinement, the genuine over-squashing floor via
+the exact eigen-component equality (consumer-gated), the Python
+certificate bridge. Bipartite graphs are honestly outside the ceiling's
+reach (no `r < 1` certificate exists; the path fixture's pinned
+no-decay already records it).
+
+**Next handoff:** the queue is empty — check `proposals/README.md`'s
+Active table first (no High rows; the GNN-sparsification Track A
+Medium row — packaging the existing conditional
+`sparsification_graph_budget` with the `matrix_bernstein` caveat up
+front — is the natural next-run candidate; the empirical-stationary
+Step 2 Medium-High row stays consumer-gated); otherwise the
+center-out policy.
+
+## 2026-08-31T02:55:41Z — The oversmoothing ceiling: opening the corrected mixing-depth proposal
+
+**Run:** `20260831T025541Z-run-1`  
+**Session:** `ses_faa482327ffeQJrwYxRwuGC2L0`  
+**Status:** superseded by the completed entry above (this was the
+in-progress record; the milestone was delivered the same run)  
+**Milestone:** the Active table's top actionable Medium row — the
+corrected oversmoothing ceiling
+(`proposals/message-passing-depth-mixing-bound.md`): depth-form
+consumers of the delivered `chiSquareDistance_le_of_connected` (the
+entrywise extraction `|ν_t x y − π y| ≤ r^t · C` at the constant
+`C = sqrt(π y · ((π x)⁻¹ − 1))`, the log-threshold calculus bridge,
+the ceiling and two-start indistinguishability theorems, rate
+monotonicity), QA on the triangle fixture with the two-certificate
+contrast (rate 1/2 certifies depth 3 at `ε = 1/8`; rate 4/5 provably
+needs 9). Pure hard crust, zero new axioms.
+
+**Changes (planned):** new
+`Scaffold/Mathlib/GraphTheory/Oversmoothing.lean` (umbrella import),
+a new section of `Scaffold/QA/SpectralGraph/Mixing_QA.lean` reusing
+the triangle fixture (`tri_pi_QA`, `tri_rate_QA`,
+`tri_dist_*_QA`). Records to follow: the proposal (COMPLETE +
+delivery record), `proposals/README.md` (Medium row retired),
+README, radar, scoreboard, `index/map/spectral_graph.md`, map stamps
++ SVG, the execution plan, this log.
+
+**Verification (planned):** spike to zero errors/warnings before any
+shelf edit; `lake env lean` on both touched modules with warning
+baselines; explicit `lake build` targets; `#print axioms` on every
+new declaration (expect exactly `propext, Classical.choice,
+Quot.sound`); full `lake build` + `check_build_completeness.py`;
+`lint_axioms`, `check_refutation_independence`,
+`check_public_reachability`, `check_citations`,
+`check_markdown_links`; scoreboard regeneration and map-freshness
+sync.
+
 ## 2026-08-29T15:58:56Z — The floor and sweep-cut admissibility dissolution: completing the window family
 
 **Run:** `20260829T155521Z-run-1`  
@@ -7486,3 +7599,192 @@ human-decision-gated); then the center-out policy. Natural named
 frontiers: a consumer of the unconditional window family, the matrix
 retirement route's operator-gated Step 2, or the next load-bearing gap
 `docs/6_SGT_BACKLOG.md` names.
+
+## 2026-08-31T01:16:00Z — General-rank spectral-encoding stability: the LapPE Medium-High row
+
+**Run:** `20260831T011543Z-run-1`  
+**Session:** `ses_faaa476a2fferJOTLaZi3KXirf`  
+**Status:** in-progress  
+**Milestone:** the Active table's top actionable row
+(`proposals/spectral-positional-encoding-stability.md`, Medium-High,
+operator-added 2026-08-30; no High rows remain), pursued per priority
+item 0: generalize the Fiedler-stability pair to arbitrary rank `k`
+(`spectralEncodingSubspace_stability`/`spectralEncoding_stability`,
+mechanical re-parameterizations of proofs whose engines are already
+rank-general) plus a `k = ⟨2⟩` QA on the `Fin 4` star→K₄ fixture with
+independently pinned separation, perturbation norm, full star spectrum,
+rank-3 witness, and exact bound attainment. Zero new axioms; the k = 1
+public statements unchanged (re-proved as corollaries).
+
+**Changes (planned):** `Scaffold/Mathlib/GraphTheory/Fiedler.lean` (the
+general-rank section; the two existing theorems re-derived at unchanged
+statements), `Scaffold/QA/SpectralGraph/Fiedler_QA.lean` (the
+`SpectralEncodingStability` section), then the records ladder (proposal
+status + delivery record, `proposals/README.md` row retirement, README,
+radar QA axis, index maps, scoreboard, map stamps + SVG, this plan,
+this log).
+
+**Verification (planned):** spike to zero errors before shelf edits;
+`lake env lean` on both touched modules; explicit `lake build` targets;
+`#print axioms` on the new declarations (expected exactly the standard
+three); full `lake build` + `check_build_completeness.py`;
+`lint_axioms`, `check_refutation_independence`, `check_citations`,
+`check_markdown_links`; scoreboard regeneration; map-freshness sync
+after the QA-count stamp.
+
+## 2026-08-31T01:47:30Z — General-rank spectral-encoding stability delivered: the LapPE Medium-High row complete (terminal)
+
+**Run:** `20260831T011543Z-run-1`  
+**Session:** `ses_faaa476a2fferJOTLaZi3KXirf`  
+**Status:** completed  
+**Milestone:** the Active table's Medium-High row
+(`proposals/spectral-positional-encoding-stability.md`), **delivered**
+— the general-rank Davis–Kahan pair
+(`spectralEncodingSubspace_stability`/`spectralEncoding_stability`),
+the two `k = 1` Fiedler-stability theorems re-proved as one-line
+corollaries at unchanged public statements, and the `k = ⟨2⟩` QA on the
+star `K₁,₃ → K₄` fixture with the bound exactly attained. Zero new
+axioms; pure hard crust.
+
+**Changes:** `Scaffold/Mathlib/GraphTheory/Fiedler.lean` (the
+general-rank section — theorems, the ML-facing docstring with the
+proposal's honest scope limits and citations, and the two corollary
+re-proofs); `Scaffold/QA/SpectralGraph/Fiedler_QA.lean` (the
+SpectralEncodingStability section, +53 counted declarations: the
+fixture `star4Adj`/`tri3Adj`/`k4Adj`, the full star spectrum
+`{0, 1, 1, 4}` pinned, the two-sided perturbation norm `= 3`, the
+independently pinned separation `4 − 1 = 3` at rank `⟨2⟩`, the rank-3
+projector witness, both theorem instances with bound `1`, the
+common-kernel identification instance, and the exact-attainment pin
+`‖P_{K₄}⟨2⟩ − P_star⟨2⟩‖ = 1`). Records: the proposal (COMPLETE +
+delivery record with the acceptance-criteria check and two technique
+findings — the `↑↑⟨k⟩` omega opacity in corollary instantiations, the
+`!!`-matrix + `vecHead/vecTail` entrywise pattern),
+`proposals/README.md` (row retired + Delivered row), README (3225 +
+highlights bullet), the radar QA axis (3172 → 3225, score held at 4.0
+per protocol), `index/map/spectral_graph.md` (the general-rank rows),
+the scoreboard verification row, both map stamps + the regenerated
+SVG, the execution plan, this log.
+
+**Verification:** spike first (`wip/lappe_spike.lean`, iterated to
+zero errors before any shelf edit); `lake env lean` on both touched
+modules with zero errors and zero warnings (the QA warning baseline
+verified zero-against-zero with the HEAD file by pair elaboration);
+explicit `lake build` targets ✔ on both modules; `#print axioms` via
+`wip/lappe_axcheck.lean` (18 declarations: both new theorems, both
+corollaries, the load-bearing QA) each exactly
+`propext, Classical.choice, Quot.sound`; **full `lake build` ✔
+immediately followed by `check_build_completeness.py` — 130 source
+files, 130 fresh artifacts, 0 stale, 0 missing, exit 0**;
+`lint_axioms` (5), `check_refutation_independence` (10-tag clean; no
+tags added — nothing here touches an axiom), `check_public_reachability`
+clean, `check_citations`, `check_markdown_links` pass; scoreboard
+regenerated at **3225/5/0** (3172 → 3225); map-freshness exit 0 after
+the stamp sync (45 stations; the delivery has no station, so no
+proposal status header changed).
+
+**Remaining risk:** none owed — the delivery is conditional on nothing;
+no axiom disposition and no existing public statement changed (proof
+bodies only, to corollary form). The deferred follow-ons stay recorded
+in the proposal's own Deferred section (the Python certificate bridge,
+automatic `δ` certification, entrywise extensions — the last flagged as
+the wrong question).
+
+**Next handoff:** check `proposals/README.md`'s Active table first —
+no High rows; the Medium-High empirical-stationary Step 2 row remains
+consumer-gated; the two operator-added Medium rows (the over-smoothing
+ceiling from mixing, GNN-sparsification Track A packaging) are the
+natural next candidates; the matrix retirement route's Step 2 remains
+operator-gated.
+
+## 2026-08-31T04:29:56Z — GNN-sparsification Track A: packaging the certified budget (in progress)
+
+**Run:** `20260831T042937Z-run-1`  
+**Session:** `ses_fa9efa5eefferYAdWvJvlj5b1Y`  
+**Status:** in-progress  
+**Milestone:** the Active priority table's only actionable row —
+`proposals/spectral-graph-sparsification-gnn-training.md` Track A
+(Medium; Track B gated elsewhere): package the already-delivered
+certified sparsification guarantee
+(`sparsification_graph_budget`, conditional on `matrix_bernstein`) for
+the GNN audience it was motivated for — the closed-form minimal budget
+`sparsificationBudget n ε δ` (pure arithmetic, zero axioms), the
+plug-in guarantee form, an ML-facing usage note with the trust caveat
+first, and the python-bridge cross-reference. SGT leverage: makes an
+existing axiom-conditional SGT certificate directly consumable without
+hand-solving the budget inequality, while keeping its conditional
+status impossible to misread.
+
+**Changes:** none yet — recording intent before edits per protocol.
+**Next handoff:** Lean section in `SparsificationTail.lean` + QA pins
+in `SparsificationTail_QA.lean`, then docs, then the full ladder.
+
+## 2026-08-31T04:42:06Z — GNN-sparsification Track A delivered: the closed-form certified budget (terminal)
+
+**Run:** `20260831T042937Z-run-1`  
+**Session:** `ses_fa9efa5eefferYAdWvJvlj5b1Y`  
+**Status:** completed  
+**Milestone:** `proposals/spectral-graph-sparsification-gnn-training.md`
+Track A (the Active table's only actionable row, per priority item 0) —
+**delivered**: the closed-form sampling budget and plug-in guarantee in
+`Scaffold/Derived/SparsificationTail.lean`, the ML-facing usage note,
+and the python-bridge cross-reference. Pure packaging over the
+delivered 2026-08-28 guarantee; zero new axioms (count stays 5), QA
+3246 → 3252.
+
+**Changes:** the shelf Track A section — `sparsificationBudget n ε δ :=
+max 1 ⌈(8/3)·log(2n/δ)/ε²⌉` with `_pos`/`_le`/`_min` (positivity, the
+budget inequality, and **minimality among naturals** — the exact
+minimum, not merely a valid choice; all pure arithmetic, `#print
+axioms` exactly `propext, Classical.choice, Quot.sound` per the
+acceptance criterion) plus the plug-in
+`sparsification_graph_budget_closedForm` (pass only the graph and
+`(ε, δ)`; honestly conditional on `matrix_bernstein` — standard three
++ that axiom, never framed otherwise). QA +6 in
+`SparsificationTail_QA.lean`: two exact-`e` design pins (8 and 24
+exactly), the `max 1` floor proved load-bearing at `n = 1`, `δ = 10`,
+minimality pinned through `_min` itself (fails at 7), the closed form
+joined to the file's own hand budget (`≤ 100`, the same
+`log 8 ≤ 300/32` route), and the `K₂` interface pin. Docs: the new
+`docs/gnn-sparsification-budget.md` (trust caveat first), the
+python-bridge cross-reference, README (3252 + docs bullet + highlight
+extension), radar QA axis (4.0 held per protocol), index map (Track A
+paragraph + two rows), scoreboard verification row, both map data
+tables + regenerated SVG, the proposal (Track A DELIVERED + delivery
+record), `proposals/README.md` (row retired + Delivered row), the
+execution plan, this log. The previous runs' uncommitted deliveries
+(oversmoothing, LapPE) preserved untouched.
+
+**Verification:** spike `wip/gnnbudget_spike.lean` iterated to zero
+errors before any shelf edit (technique notes: `Nat.cast_pos` bridging
+the `ℕ`/`ℝ` positivity clause into `ssMeasure`; `Nat.ceil_ofNat` +
+`norm_num` for the ceiling of a numeric literal; `div_le_iff₀` in
+`rw` orientation for the nonpositive-budget floor step);
+`lake env lean` zero errors on both touched modules; explicit `lake
+build` targets ✔ on both; `#print axioms` via `wip/gnnbudget_axcheck.lean`
+on all 11 new declarations (four pure shelf + five arithmetic QA at the
+standard three; the plug-in theorem and its interface pin honestly
+carrying `matrix_bernstein`); **full `lake build` ✔ (2407/2408)
+immediately followed by `check_build_completeness.py` — 131 source
+files, 131 fresh artifacts, 0 stale, 0 missing, exit 0**;
+`lint_axioms` (5, both PF findings allowlisted-confirmed);
+`check_refutation_independence` (10 tagged, clean);
+`check_public_reachability` (62 repo modules); `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated at **3252/5/0**;
+**`check_scaffold_map_freshness` exit 0** after the 3246 → 3252 stats
+sync in both map files + SVG regeneration (no cited proposal status
+header changed beyond the station-less gnn-training proposal).
+
+**Remaining risk:** none owed — no axiom disposition changed, no
+existing public statement changed. Track B (retiring
+`matrix_bernstein` via the Lieb-concavity step) stays gated on the
+operator decision in `proposals/matrix-master-bound-first-slice.md`;
+the Python certificate bridge stays gated on its own operator decision.
+
+**Next handoff:** the Active priority table now has no actionable rows
+above the human-decision gates; a directed run falls through to the
+center-out SGT policy (`docs/6_SGT_BACKLOG.md`), the sparsification
+proposal's priced deferred follow-ons, or the empirical-stationary
+Step 2 bias-term consumer gate. Nothing committed; the worktree holds
+this delivery plus the two prior uncommitted ones for the commit
+steward.

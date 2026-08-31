@@ -18,7 +18,11 @@
   refuted while the rate hypothesis genuinely holds — with every
   headline quantity pinned by raw literal arithmetic independent of
   the theorem under test, and negative witnesses tying the
-  load-bearing hypotheses to refuted hypothesis-free forms.
+  load-bearing hypotheses to refuted hypothesis-free forms — plus the
+  oversmoothing-ceiling section (`Oversmoothing.lean`'s depth-form
+  consumers instantiated at two rate certificates: the honest `1/2`
+  certifying depth exactly 3, the loose `4/5` provably needing 9, at
+  the same `ε = 1/8`).
 
   The triangle's eigen-facts (`tri_eigvalOf_cases`, `tri_kernel_const`,
   `tri_exists_kernel_index`) and the disconnected fixture's spectrum
@@ -35,6 +39,7 @@
 -/
 
 import Scaffold.Mathlib.GraphTheory.Mixing
+import Scaffold.Mathlib.GraphTheory.Oversmoothing
 import Mathlib.Data.Matrix.Notation
 
 open scoped BigOperators Matrix
@@ -1652,6 +1657,354 @@ theorem disc_connected_guard_QA :
         ≤ (1/2)^(2 * 3) * ((stationaryVec discAdj 0)⁻¹ - 1)) := by
   rw [disc_chi2_three_QA, disc_bound_raw_QA]
   norm_num
+
+/-!
+### The oversmoothing ceiling (`Oversmoothing.lean`)
+
+The depth-form consumers of this module's closing bound, instantiated
+on the triangle at two different rate certificates — the QA program of
+`proposals/message-passing-depth-mixing-bound.md`. The same graph
+(`π = (1/3, 1/3, 1/3)`, so the entrywise constant is
+`√(2/3)` at every start/target pair) is certified at the honest rate
+`r = 1/2` (the exact spectrum `{0, 3/2, 3/2}`) and at the
+deliberately loose rate `r = 4/5` (a valid but weaker certificate the
+triangle also satisfies): at `ε = 1/8` the honest certificate
+provably reaches depth `3` (and not `2` — the threshold mechanism is
+load-bearing), while the loose one provably needs `9` (and does not
+reach `8`). The ceiling tracks the *certified* spectral gap, exactly
+the monotonicity the shelf's `oversmoothing_log_threshold_mono`
+states in general and `tri_threshold_mono_QA` pins at the fixture.
+Every conclusion is checked against the walk law computed by raw
+literal arithmetic (`tri_ceiling_*_value_QA`), independent of the
+theorem under test.
+-/
+
+/-- The entrywise constant at the triangle: `π ≡ 1/3` makes
+`√(π y · ((π x)⁻¹ − 1)) = √(2/3)` at every start/target pair. -/
+theorem tri_oversmoothingConstant_eq_QA (x y : Fin 3) :
+    Real.sqrt (stationaryVec triAdj y * ((stationaryVec triAdj x)⁻¹ - 1))
+      = Real.sqrt (2/3) := by
+  rw [tri_pi_QA y, tri_pi_QA x]
+  congr 1
+  norm_num
+
+/-- The square-root bound used by every threshold pin below. -/
+theorem tri_sqrt_le_one_QA : Real.sqrt (2/3) ≤ 1 :=
+  (Real.sqrt_le_sqrt (by norm_num : (2/3 : ℝ) ≤ 1)).trans_eq Real.sqrt_one
+
+/-- **The honest certificate's threshold at `ε = 1/2` is at most
+depth `1`** — one layer already certifies halved deviation on the
+triangle. -/
+theorem tri_ceiling_threshold_one_QA :
+    Real.log (Real.sqrt (2/3) / (1/2)) / Real.log 2 ≤ (1 : ℝ) := by
+  have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have hCpos : 0 < Real.sqrt (2/3) / (1/2) := by positivity
+  have hle : Real.sqrt (2/3) / (1/2) ≤ (2 : ℝ) := by
+    rw [div_le_iff₀ (by norm_num : (0:ℝ) < (1/2)),
+      show (2:ℝ) * (1/2) = 1 from by norm_num]
+    exact tri_sqrt_le_one_QA
+  have hlog := (Real.log_le_log_iff hCpos (by norm_num : (0:ℝ) < 2)).mpr hle
+  rw [div_le_iff₀ hlog2, one_mul]
+  exact hlog
+
+/-- **The honest certificate's threshold at `ε = 1/8` is at most
+depth `3`** (`8·√(2/3) ≤ 8` since `√(2/3) ≤ 1`); paired with
+`tri_ceiling_threshold_three_sharp_QA` below, `3` is exactly the
+minimal certified depth — the threshold inequality is load-bearing,
+not vacuous. -/
+theorem tri_ceiling_threshold_three_QA :
+    Real.log (Real.sqrt (2/3) / (1/8)) / Real.log 2 ≤ (3 : ℝ) := by
+  have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have h8 : (2:ℝ) ^ (3 : ℕ) = 8 := by norm_num
+  have hCpos : 0 < Real.sqrt (2/3) / (1/8) := by positivity
+  have hle : Real.sqrt (2/3) / (1/8) ≤ (2 : ℝ) ^ (3 : ℕ) := by
+    rw [h8, div_le_iff₀ (by norm_num : (0:ℝ) < (1/8)),
+      show (8:ℝ) * (1/8) = 1 from by norm_num]
+    exact tri_sqrt_le_one_QA
+  have hlog := (Real.log_le_log_iff hCpos
+    (by rw [h8]; norm_num)).mpr hle
+  rw [Real.log_pow] at hlog
+  rw [div_le_iff₀ hlog2]
+  push_cast at hlog ⊢
+  exact hlog
+
+/-- **The honest certificate's threshold at `ε = 1/8` is NOT at most
+depth `2`**: `2² = 4 < 8·√(2/3)`, so the depth-3 certificate of
+`tri_ceiling_threshold_three_QA` is the sharp one — the theorem's
+hypothesis genuinely does the work. -/
+theorem tri_ceiling_threshold_three_sharp_QA :
+    ¬ (Real.log (Real.sqrt (2/3) / (1/8)) / Real.log 2 ≤ (2 : ℝ)) := by
+  intro h
+  have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have h2 : Real.log (Real.sqrt (2/3) / (1/8)) ≤ (2 : ℝ) * Real.log 2 :=
+    (div_le_iff₀ hlog2).mp h
+  have h4 : (2:ℝ) ^ (2 : ℕ) < Real.sqrt (2/3) / (1/8) := by
+    rw [show (2:ℝ) ^ (2 : ℕ) = 4 from by norm_num,
+      lt_div_iff₀ (by norm_num : (0:ℝ) < (1/8)),
+      show (4:ℝ) * (1/8) = 1/2 from by norm_num]
+    have hsqrt : (1/2 : ℝ) < Real.sqrt (2/3) := by
+      have h := Real.sqrt_lt_sqrt (by norm_num : (0:ℝ) ≤ (1/2)^2)
+        (by norm_num : ((1/2 : ℝ)^2) < 2/3)
+      rwa [Real.sqrt_sq (by norm_num : (0:ℝ) ≤ 1/2)] at h
+    exact hsqrt
+  have hlt : Real.log ((2:ℝ) ^ (2 : ℕ))
+      < Real.log (Real.sqrt (2/3) / (1/8)) :=
+    Real.log_lt_log (by norm_num) h4
+  rw [Real.log_pow] at hlt
+  push_cast at hlt h2
+  linarith
+
+/-- **The ceiling at depth `1`, `ε = 1/2`**, from the honest
+certificate — the first layer already certifies the deviation bound. -/
+theorem tri_ceiling_one_QA :
+    |walkDistribution triAdj 1 0 1 - stationaryVec triAdj 1| ≤ 1/2 := by
+  refine walkDistribution_sub_stationaryVec_le_of_depth triAdj
+    triAdj_isSymm triAdj_nonneg triAdj_deg_pos tri_connected (1/2) (1/2)
+    (by norm_num) (by norm_num) (by norm_num) tri_rate_QA 1 0 1 ?_
+  rw [tri_oversmoothingConstant_eq_QA 0 1,
+    show (1:ℝ) / (1/2) = 2 from by norm_num]
+  simpa using tri_ceiling_threshold_one_QA
+
+/-- The true value at the depth-1 instance: deviation exactly `1/6`,
+well inside the certified `1/2` — the bound's slack is honest. -/
+theorem tri_ceiling_one_value_QA :
+    |walkDistribution triAdj 1 0 1 - stationaryVec triAdj 1| = 1/6 := by
+  simp only [tri_dist_one_QA, tri_pi_QA]
+  norm_num [Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons]
+
+/-- The three-step law from vertex `0`, by raw iteration of the
+evolution equation: `(1/4, 3/8, 3/8)`. -/
+theorem tri_dist_three_zero_QA :
+    walkDistribution triAdj 3 0 = ![1/4, 3/8, 3/8] := by
+  rw [walkDistribution_succ, tri_dist_two_QA]
+  funext i
+  fin_cases i
+  all_goals simp [walkTransitionMatrix_apply, triAdj_deg_eq, triAdj_apply,
+    Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three]
+  all_goals norm_num
+
+/-- The three-step law from vertex `1`: `(3/8, 1/4, 3/8)`. -/
+theorem tri_dist_three_one_QA :
+    walkDistribution triAdj 3 1 = ![3/8, 1/4, 3/8] := by
+  have h1 : walkDistribution triAdj 1 1 = ![1/2, 0, 1/2] := by
+    rw [walkDistribution_succ, walkDistribution_zero]
+    funext i
+    fin_cases i
+    all_goals simp [walkTransitionMatrix_apply, triAdj_deg_eq, triAdj_apply,
+      Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three, Pi.single_apply]
+  have h2 : walkDistribution triAdj 2 1 = ![1/4, 1/2, 1/4] := by
+    rw [walkDistribution_succ, h1]
+    funext i
+    fin_cases i
+    all_goals simp [walkTransitionMatrix_apply, triAdj_deg_eq, triAdj_apply,
+      Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three]
+    all_goals norm_num
+  rw [walkDistribution_succ, h2]
+  funext i
+  fin_cases i
+  all_goals simp [walkTransitionMatrix_apply, triAdj_deg_eq, triAdj_apply,
+    Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three]
+  all_goals norm_num
+
+/-- **The ceiling at depth `3`, `ε = 1/8`**, from the honest
+certificate — the depth the sharpness pin above identifies as the
+minimal certified one. -/
+theorem tri_ceiling_three_QA :
+    |walkDistribution triAdj 3 0 0 - stationaryVec triAdj 0| ≤ 1/8 := by
+  refine walkDistribution_sub_stationaryVec_le_of_depth triAdj
+    triAdj_isSymm triAdj_nonneg triAdj_deg_pos tri_connected (1/2) (1/8)
+    (by norm_num) (by norm_num) (by norm_num) tri_rate_QA 3 0 0 ?_
+  rw [tri_oversmoothingConstant_eq_QA 0 0,
+    show (1:ℝ) / (1/2) = 2 from by norm_num]
+  simpa using tri_ceiling_threshold_three_QA
+
+/-- The true value at the depth-3 instance: deviation exactly
+`1/12 ≤ 1/8` — the certified bound holds with genuine margin. -/
+theorem tri_ceiling_three_value_QA :
+    |walkDistribution triAdj 3 0 0 - stationaryVec triAdj 0| = 1/12 := by
+  simp only [tri_dist_three_zero_QA, tri_pi_QA]
+  norm_num [Matrix.cons_val_zero, Matrix.head_cons]
+
+/-- **The two-start indistinguishability corollary at depth `3`**:
+the `3`-step views from vertices `0` and `1` are within `2ε = 1/4` at
+every target — the starting-position information is provably gone
+past this depth. -/
+theorem tri_ceiling_two_start_QA :
+    |walkDistribution triAdj 3 0 0 - walkDistribution triAdj 3 1 0|
+      ≤ 2 * (1/8) := by
+  refine walkDistribution_sub_walkDistribution_le_of_depth triAdj
+    triAdj_isSymm triAdj_nonneg triAdj_deg_pos tri_connected (1/2) (1/8)
+    (by norm_num) (by norm_num) (by norm_num) tri_rate_QA 3 0 1 0 ?_ ?_
+  · rw [tri_oversmoothingConstant_eq_QA 0 0,
+      show (1:ℝ) / (1/2) = 2 from by norm_num]
+    simpa using tri_ceiling_threshold_three_QA
+  · rw [tri_oversmoothingConstant_eq_QA 1 0,
+      show (1:ℝ) / (1/2) = 2 from by norm_num]
+    simpa using tri_ceiling_threshold_three_QA
+
+/-- The true value at the two-start instance: exactly `1/8`, half the
+corollary's `2ε = 1/4` — both single-start bounds are attained with
+room, and the triangle-inequality assembly is honest. -/
+theorem tri_ceiling_two_start_value_QA :
+    |walkDistribution triAdj 3 0 0 - walkDistribution triAdj 3 1 0|
+      = 1/8 := by
+  simp only [tri_dist_three_zero_QA, tri_dist_three_one_QA]
+  norm_num [Matrix.cons_val_zero, Matrix.head_cons]
+
+/-- **The deliberately loose rate certificate**: the triangle's rate
+hypothesis also holds at `4/5` — a valid but weaker statement of the
+same spectral fact (`1/2 ≤ 4/5`). -/
+theorem tri_rate_four_fifths_QA (i : Fin 3)
+    (h : eigvalOf triL triH i ≠ 0) :
+    |1 - eigvalOf triL triH i| ≤ 4/5 :=
+  le_trans (tri_rate_QA i h) (by norm_num)
+
+/-- **The loose certificate's threshold at `ε = 1/8` is at most depth
+`9`**: `8·√(2/3) ≤ 8·(41/50) = 164/25 ≤ (5/4)⁹`. Same graph, same
+tolerance — three times the depth of the honest certificate. -/
+theorem tri_ceiling_loose_threshold_QA :
+    Real.log (Real.sqrt (2/3) / (1/8)) / Real.log (5/4) ≤ (9 : ℝ) := by
+  have hlogpos : 0 < Real.log (5/4) := Real.log_pos (by norm_num)
+  have h54 : (5/4 : ℝ) ^ (9 : ℕ) = 1953125 / 262144 := by norm_num
+  have hCpos : 0 < Real.sqrt (2/3) / (1/8) := by positivity
+  have hsqrt : Real.sqrt (2/3) ≤ 41/50 := by
+    have h := Real.sqrt_le_sqrt (by norm_num : (2/3 : ℝ) ≤ (41/50)^2)
+    rwa [Real.sqrt_sq (by norm_num : (0:ℝ) ≤ 41/50)] at h
+  have hnum : (41/50 : ℝ) ≤ 1953125/2097152 := by norm_num
+  have hle : Real.sqrt (2/3) / (1/8) ≤ (5/4 : ℝ) ^ (9 : ℕ) := by
+    rw [h54, div_le_iff₀ (by norm_num : (0:ℝ) < (1/8)),
+      show (1953125/262144 : ℝ) * (1/8) = 1953125/2097152 from by norm_num]
+    linarith
+  have hlog := (Real.log_le_log_iff hCpos
+    (by rw [h54]; norm_num)).mpr hle
+  rw [Real.log_pow] at hlog
+  rw [div_le_iff₀ hlogpos]
+  push_cast at hlog ⊢
+  exact hlog
+
+/-- **The loose certificate does NOT reach depth `8`**:
+`(5/4)⁸ ≤ 390625/65536 < 32/5 ≤ 8·√(2/3)`. The `3 → 9` jump is
+entirely the certificate's, not slack in the threshold mechanism. -/
+theorem tri_ceiling_loose_sharp_QA :
+    ¬ (Real.log (Real.sqrt (2/3) / (1/8)) / Real.log (5/4) ≤ (8 : ℝ)) := by
+  intro h
+  have hlogpos : 0 < Real.log (5/4) := Real.log_pos (by norm_num)
+  have h58 : (5/4 : ℝ) ^ (8 : ℕ) = 390625 / 65536 := by norm_num
+  have h8 : Real.log (Real.sqrt (2/3) / (1/8)) ≤ (8 : ℝ) * Real.log (5/4) :=
+    (div_le_iff₀ hlogpos).mp h
+  have hsqrt : (4/5 : ℝ) ≤ Real.sqrt (2/3) := by
+    have h := Real.sqrt_le_sqrt (by norm_num : ((4/5 : ℝ)^2) ≤ 2/3)
+    rwa [Real.sqrt_sq (by norm_num : (0:ℝ) ≤ 4/5)] at h
+  have hnum2 : (390625/65536 : ℝ) * (1/8) = 390625/524288 := by norm_num
+  have hnum3 : (390625/524288 : ℝ) < (4/5) := by norm_num
+  have hpowl : (5/4 : ℝ) ^ (8 : ℕ) < Real.sqrt (2/3) / (1/8) := by
+    rw [h58, lt_div_iff₀ (by norm_num : (0:ℝ) < (1/8)), hnum2]
+    linarith
+  have hlt : Real.log ((5/4 : ℝ) ^ (8 : ℕ))
+      < Real.log (Real.sqrt (2/3) / (1/8)) :=
+    Real.log_lt_log (by rw [h58]; norm_num) hpowl
+  rw [Real.log_pow] at hlt
+  linarith
+
+/-- **The ceiling at depth `9` from the loose certificate alone**:
+`r = 4/5` certifies `ε = 1/8` at depth `9` — the depth the honest
+certificate reached at `3`. -/
+theorem tri_ceiling_loose_QA :
+    |walkDistribution triAdj 9 0 0 - stationaryVec triAdj 0| ≤ 1/8 := by
+  refine walkDistribution_sub_stationaryVec_le_of_depth triAdj
+    triAdj_isSymm triAdj_nonneg triAdj_deg_pos tri_connected (4/5) (1/8)
+    (by norm_num) (by norm_num) (by norm_num) tri_rate_four_fifths_QA 9 0 0
+    ?_
+  rw [tri_oversmoothingConstant_eq_QA 0 0,
+    show (1:ℝ) / (4/5) = 5/4 from by norm_num]
+  simpa using tri_ceiling_loose_threshold_QA
+
+/-- The nine-step law from vertex `0`, by raw iteration:
+`(85/256, 171/512, 171/512)` — the alternating contraction around
+`1/3` visible in the numerators. -/
+theorem tri_dist_nine_zero_QA :
+    walkDistribution triAdj 9 0 = ![85/256, 171/512, 171/512] := by
+  have h4 : walkDistribution triAdj 4 0 = ![3/8, 5/16, 5/16] := by
+    rw [walkDistribution_succ, tri_dist_three_zero_QA]
+    funext i
+    fin_cases i
+    all_goals simp [walkTransitionMatrix_apply, triAdj_deg_eq, triAdj_apply,
+      Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three]
+    all_goals norm_num
+  have h5 : walkDistribution triAdj 5 0 = ![5/16, 11/32, 11/32] := by
+    rw [walkDistribution_succ, h4]
+    funext i
+    fin_cases i
+    all_goals simp [walkTransitionMatrix_apply, triAdj_deg_eq, triAdj_apply,
+      Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three]
+    all_goals norm_num
+  have h6 : walkDistribution triAdj 6 0 = ![11/32, 21/64, 21/64] := by
+    rw [walkDistribution_succ, h5]
+    funext i
+    fin_cases i
+    all_goals simp [walkTransitionMatrix_apply, triAdj_deg_eq, triAdj_apply,
+      Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three]
+    all_goals norm_num
+  have h7 : walkDistribution triAdj 7 0 = ![21/64, 43/128, 43/128] := by
+    rw [walkDistribution_succ, h6]
+    funext i
+    fin_cases i
+    all_goals simp [walkTransitionMatrix_apply, triAdj_deg_eq, triAdj_apply,
+      Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three]
+    all_goals norm_num
+  have h8 : walkDistribution triAdj 8 0 = ![43/128, 85/256, 85/256] := by
+    rw [walkDistribution_succ, h7]
+    funext i
+    fin_cases i
+    all_goals simp [walkTransitionMatrix_apply, triAdj_deg_eq, triAdj_apply,
+      Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three]
+    all_goals norm_num
+  rw [walkDistribution_succ, h8]
+  funext i
+  fin_cases i
+  all_goals simp [walkTransitionMatrix_apply, triAdj_deg_eq, triAdj_apply,
+    Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three]
+  all_goals norm_num
+
+/-- The true value at the depth-9 instance: deviation exactly
+`1/768` — deep inside the certified `1/8`, the loose certificate's
+price being depth, not correctness. -/
+theorem tri_ceiling_loose_value_QA :
+    |walkDistribution triAdj 9 0 0 - stationaryVec triAdj 0| = 1/768 := by
+  simp only [tri_dist_nine_zero_QA, tri_pi_QA]
+  norm_num [Matrix.cons_val_zero, Matrix.head_cons]
+
+/-- **The `t = 0` corner is sound**: with `ε` exactly the entrywise
+constant, the threshold is `log 1 / log (1/r) = 0 ≤ 0`, and the
+conclusion at depth zero — `|δ_x y − π y| ≤ √(π y · ((π x)⁻¹ − 1))` —
+is the entrywise extraction's own `t = 0` instance, true by the χ²
+normalization (`1/3 ≤ √(2/3)` at the fixture). -/
+theorem tri_ceiling_zero_QA :
+    |walkDistribution triAdj 0 0 1 - stationaryVec triAdj 1|
+      ≤ Real.sqrt (2/3) := by
+  refine walkDistribution_sub_stationaryVec_le_of_depth triAdj
+    triAdj_isSymm triAdj_nonneg triAdj_deg_pos tri_connected (1/2)
+    (Real.sqrt (2/3)) (by norm_num) (by norm_num)
+    (by positivity) tri_rate_QA 0 0 1 ?_
+  rw [tri_oversmoothingConstant_eq_QA 0 1,
+    show (1:ℝ) / (1/2) = 2 from by norm_num,
+    div_self (ne_of_gt (Real.sqrt_pos.mpr (by norm_num))),
+    Real.log_one, zero_div]
+  simp
+
+/-- **The sanity contrast's engine, pinned at the fixture**: the
+general monotonicity `oversmoothing_log_threshold_mono` at
+`r₁ = 1/2 ≤ r₂ = 4/5`, `C = √(2/3)`, `ε = 1/8` — the honest
+certificate's threshold is provably below the loose one's, as the
+numeric pins above witness concretely. -/
+theorem tri_threshold_mono_QA :
+    Real.log (Real.sqrt (2/3) / (1/8)) / Real.log (1 / (1/2))
+      ≤ Real.log (Real.sqrt (2/3) / (1/8)) / Real.log (1 / (4/5)) := by
+  refine oversmoothing_log_threshold_mono (r₁ := 1/2) (r₂ := 4/5)
+    (C := Real.sqrt (2/3)) (ε := 1/8) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) ?_
+  have h := Real.sqrt_le_sqrt (by norm_num : (1/8 : ℝ)^2 ≤ 2/3)
+  rwa [Real.sqrt_sq (by norm_num : (0:ℝ) ≤ 1/8)] at h
 
 end Triangle
 

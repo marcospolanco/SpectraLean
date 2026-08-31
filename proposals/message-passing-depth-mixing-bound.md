@@ -1,7 +1,8 @@
 # Proposal: Certified Oversmoothing Ceiling from Mixing
 
-**Status:** Proposed. New Lean derivation from already-proved primitives;
-no new axioms.
+**Status:** **COMPLETE** — delivered 2026-08-31 by run
+`20260831T025541Z-run-1` (see "Delivery record" below). New Lean
+derivation from already-proved primitives; no new axioms.
 
 **Correction (2026-08-30, same day as the original draft):** this document
 originally proposed an "over-squashing floor" — a certified *lower* bound
@@ -171,3 +172,74 @@ attempted here.
 - Exposure via the Python certificate bridge
   (`docs/arch/python-certificate-bridge.md`) — a natural follow-on, not
   part of this proposal.
+
+## Delivery record (2026-08-31, run `20260831T025541Z-run-1`)
+
+Delivered as specified, zero new axioms, QA 3225 → 3246 (+21):
+
+- **The shelf** — a new module, `Scaffold/Mathlib/GraphTheory.Oversmoothing.lean`
+  (umbrella-imported, 6 proved declarations):
+  `stationaryVec_le_one` (the engine making the ceiling constant real),
+  the Step-1 **entrywise extraction**
+  `walkDistribution_sub_stationaryVec_abs_le`
+  (`|ν_t x y − π y| ≤ r^t · √(π y · ((π x)⁻¹ − 1))`, one nonnegative
+  χ² summand against the whole sum via `Finset.single_le_sum`, the
+  square root closed through `abs_le_of_sq_le_sq`), the Step-2
+  **calculus bridge** `pow_mul_le_of_log_threshold` (the corrected
+  sign-of-`log` step; `C = 0` — the single-vertex degenerate constant —
+  handled trivially), the **ceiling**
+  `walkDistribution_sub_stationaryVec_le_of_depth`, the
+  **two-start indistinguishability corollary**
+  `walkDistribution_sub_walkDistribution_le_of_depth` (within `2ε`
+  past the depth), and the **rate monotonicity**
+  `oversmoothing_log_threshold_mono`.
+- **The QA** (`Mixing_QA.lean`'s oversmoothing section, +21), on the
+  triangle at two rate certificates — the proposal's sanity contrast
+  delivered as *the same graph, two certificates*, which isolates the
+  mechanism (the ceiling depends on the certified rate, not on the
+  fixture): the honest `r = 1/2` certifies `ε = 1/8` at **exactly**
+  depth 3 — `tri_ceiling_threshold_three_sharp_QA` proves depth 2 does
+  *not* satisfy the threshold (`4 < 8·√(2/3)`), so the hypothesis is
+  load-bearing — while the deliberately loose `r = 4/5` provably needs
+  depth 9 (`tri_ceiling_loose_sharp_QA` excludes 8 via
+  `(5/4)⁸ < 32/5 ≤ 8·√(2/3)`); the general monotonicity pinned at the
+  fixture; both ceiling instances and the two-start instance with true
+  values beside them (`1/12 ≤ 1/8`; `1/8` at exactly half the `2ε`
+  bound); the `t = 0` corner soundness instance (threshold `log 1 = 0`
+  at `ε` exactly the constant, conclusion the entrywise bound's own
+  `t = 0` case); the depth-1 instance at `ε = 1/2`; and every walk law
+  by raw literal iteration (`tri_dist_three_zero_QA`,
+  `tri_dist_three_one_QA`, `tri_dist_nine_zero_QA` =
+  `(85/256, 171/512, 171/512)`), deviations `1/6`, `1/12`, `1/768`.
+- **Verification:** spike first (`wip/oversmoothing_spike.lean`, the
+  shelf layer and QA section iterated to zero errors/zero warnings
+  before any shelf edit — technique findings: `Finset.single_le_sum`
+  needs the summand function given explicitly or the `chiSquareDistance`
+  defeq check fails under metavariables; `abs_le_of_sq_le_sq'` is the
+  `∧`-form in the pinned Mathlib, the plain name gives `|a| ≤ b`;
+  `Real.log_le_log` takes positivity of the *first* argument in this
+  pin; linarith cannot compare distinct rational atoms, so every
+  numeric bridge is discharged by `norm_num` `have`s before `linarith`;
+  `rw` at a natural-cast numeral needs `push_cast`/`simpa` bridging);
+  `lake env lean` zero errors/zero warnings on both touched modules;
+  explicit `lake build` targets ✔; **`#print axioms` via
+  `wip/oversmoothing_axcheck.lean` (27 declarations: 6 shelf + 21 QA)
+  each exactly `propext, Classical.choice, Quot.sound`**; full
+  `lake build` ✔ (2407/2408) + `check_build_completeness.py` — 131
+  source files, 131 fresh artifacts, 0 stale, 0 missing; `lint_axioms`
+  (5), `check_refutation_independence` (10 tagged, clean),
+  `check_public_reachability` (62 modules), `check_citations`,
+  `check_markdown_links` pass; scoreboard **3246/5/0**; map freshness
+  exit 0 after the stats sync (3225 → 3246 in both map files, SVG
+  regenerated; no station's proposal status changed — this proposal has
+  no station).
+
+The honest-scope section above appears in the delivered module's
+docstring (acceptance criterion), including the bipartite note: graphs
+admitting no `r < 1` certificate are outside the ceiling's reach
+entirely, as the path fixture's pinned `λ* = 1` no-decay already
+records. A priced follow-on from the correction section, **not**
+delivered: the genuine over-squashing floor via
+`eigvecOf_dotProduct_degreeSqrt_mulVec_pow_walkTransitionMatrix` (the
+exact eigen-component equality) — a different derivation with a
+different hypothesis structure, still awaiting a consumer.

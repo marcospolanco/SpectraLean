@@ -18,7 +18,10 @@
   graph-vector section pins the textbook form on the sampled Laplacian
   (raw pins, a two-route correspondence join, the tight `ε = 1`
   instance) and fences the transport engines' nonnegativity hypothesis
-  on a signed fixture with a nonpositive spectrum.
+  on a signed fixture with a nonpositive spectrum. The closed-form
+  budget section (2026-08-31) pins the GNN-facing `sparsificationBudget`
+  at exact-`e` designs, proves the `max 1` floor load-bearing, pins
+  minimality, and joins the closed form to the hand-chosen `q = 100`.
 
   Falsification content, per the load-bearing-growth policy:
 
@@ -861,5 +864,130 @@ theorem sg_claimA_fence :
     norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
   rw [hev, mul_one] at h
   linarith
+
+/-! ## The closed-form sampling budget (Track A, 2026-08-31)
+
+`proposals/spectral-graph-sparsification-gnn-training.md`: the budget
+corollaries take `q` as a hypothesis; `sparsificationBudget` *outputs*
+the minimal natural `q`. The pins below fix the formula's value at
+exact-`e` designs (where `log` collapses through `Real.log_exp`), prove
+the `max 1` floor load-bearing at a sub-unit `2n/δ` (the ceiling alone
+would be `0`, killing the `0 < q` clause), pin minimality at the same
+design through `sparsificationBudget_min` itself, and join the closed
+form to this file's own hand-chosen `q = 100` — plus the interface
+instance of the plug-in theorem at `K₂`. All of the pins are
+axiom-free (standard three); the interface instance honestly carries
+`matrix_bernstein` with the theorem it applies. -/
+
+/-- The exact-`e` design: at `n = 3`, `δ = 6/e`, `ε = 1/√3` the budget
+formula evaluates to exactly `8` (`2n/δ = e` so `log = 1`, `ε² = 1/3`)
+— a wrong `8/3`, a wrong `2n` factor, or a wrong ceiling breaks the
+value. -/
+theorem budget_e_design_QA :
+    sparsificationBudget 3 (1 / Real.sqrt 3) (6 / Real.exp 1) = 8 := by
+  have hε2 : (1 / Real.sqrt 3) ^ 2 = 1 / 3 := by
+    rw [div_pow, one_pow, Real.sq_sqrt (by norm_num)]
+  have hr : (2 : ℝ) * ((3 : ℕ) : ℝ) / (6 / Real.exp 1) = Real.exp 1 := by
+    field_simp
+    ring
+  unfold sparsificationBudget
+  rw [hr, Real.log_exp, hε2]
+  have hval : (8 / 3 : ℝ) * 1 / (1 / 3) = 8 := by norm_num
+  rw [hval, Nat.ceil_ofNat]
+  norm_num
+
+/-- A second exact-`e` design, scaling check: at `n = 1`, `δ = 2/e³`,
+`ε = 1/√3` the budget is exactly `24` (`2n/δ = e³` so `log = 3`) — the
+formula tracks the log argument, not a constant. -/
+theorem budget_exp3_design_QA :
+    sparsificationBudget 1 (1 / Real.sqrt 3) (2 / Real.exp 3) = 24 := by
+  have hε2 : (1 / Real.sqrt 3) ^ 2 = 1 / 3 := by
+    rw [div_pow, one_pow, Real.sq_sqrt (by norm_num)]
+  have hr : (2 : ℝ) * ((1 : ℕ) : ℝ) / (2 / Real.exp 3) = Real.exp 3 := by
+    field_simp
+  unfold sparsificationBudget
+  rw [hr, Real.log_exp, hε2]
+  have hval : (8 / 3 : ℝ) * 3 / (1 / 3) = 24 := by norm_num
+  rw [hval, Nat.ceil_ofNat]
+  norm_num
+
+/-- The `max 1` floor is load-bearing: at `n = 1`, `ε = 1/2`, `δ = 10`
+the ratio `2n/δ = 1/5 ≤ 1` has nonpositive log, so the ceiling alone is
+`0` and only the floor keeps the `0 < q` clause every budget theorem
+needs. -/
+theorem budget_floor_QA : sparsificationBudget 1 (1 / 2) 10 = 1 := by
+  have hlog : Real.log ((2 : ℝ) * ((1 : ℕ) : ℝ) / 10) ≤ 0 :=
+    Real.log_nonpos (by norm_num) (by norm_num)
+  have hq2 : (0 : ℝ) < (1 / 2) ^ 2 := by norm_num
+  have hB : (8 / 3 : ℝ) * Real.log ((2 : ℝ) * ((1 : ℕ) : ℝ) / 10)
+      / (1 / 2) ^ 2 ≤ 0 := by
+    rw [div_le_iff₀ hq2, zero_mul]
+    exact mul_nonpos_of_nonneg_of_nonpos (by norm_num) hlog
+  unfold sparsificationBudget
+  rw [Nat.ceil_eq_zero.2 hB]
+  norm_num
+
+/-- Minimality pinned at the exact-`e` design: the budget inequality
+fails at `q = 7`, so — through `sparsificationBudget_min` — the closed
+form's output `8` is the true minimum among naturals, not merely a
+valid choice. -/
+theorem budget_minimal_e_design_QA :
+    ¬ ((8 / 3 : ℝ) * Real.log (2 * ((3 : ℕ) : ℝ) / (6 / Real.exp 1))
+        / (1 / Real.sqrt 3) ^ 2 ≤ 7) := by
+  intro h
+  have h8 := sparsificationBudget_min (n := 3) (1 / Real.sqrt 3)
+    (6 / Real.exp 1) (by norm_num : (0 : ℕ) < 7) h
+  rw [budget_e_design_QA] at h8
+  omega
+
+/-- The closed form joined to this file's own hand budget: for the
+`K₂` parameters (`n = 2`, `ε = δ = 1/2`) the certified minimal budget
+is at most the `q = 100` the `budget_tail_K2` pin hand-discharged above
+(same `log 8 ≤ 300/32` route) — the closed form certifies the hand
+choice after the fact. -/
+theorem budget_closedForm_le_hand_QA :
+    sparsificationBudget 2 (1 / 2) (1 / 2) ≤ 100 := by
+  have hlog8 : Real.log (8 : ℝ) ≤ 300 / 32 := by
+    rw [Real.log_le_iff_le_exp (by norm_num)]
+    calc (8 : ℝ) = 224 / 32 + 1 := by norm_num
+      _ ≤ Real.exp (224 / 32) := Real.add_one_le_exp _
+      _ ≤ Real.exp (300 / 32) := Real.exp_le_exp.mpr (by norm_num)
+  refine max_le (by omega) (Nat.ceil_le.2 ?_)
+  have hcard : (2 : ℝ) * ((2 : ℕ) : ℝ) = 4 := by norm_num
+  rw [hcard]
+  have hr : (4 : ℝ) / (1 / 2) = 8 := by norm_num
+  rw [hr]
+  have hnorm : (8 / 3 : ℝ) * Real.log 8 / (1 / 2) ^ 2
+      = (32 / 3) * Real.log 8 := by
+    field_simp
+    ring
+  rw [hnorm]
+  have htop : (32 / 3 : ℝ) * (300 / 32) = 100 := by norm_num
+  calc (32 / 3 : ℝ) * Real.log 8
+      ≤ (32 / 3) * (300 / 32) :=
+        mul_le_mul_of_nonneg_left hlog8 (by norm_num)
+    _ = 100 := htop
+
+/-- Interface pin: the plug-in theorem applies at the `K₂` fixture with
+only `(ε, δ)` supplied — the budget hypothesis is discharged by the
+closed form itself. CONDITIONAL ON `matrix_bernstein` (via
+`sparsification_graph_budget`), reported honestly by
+`#print axioms`. -/
+theorem budget_closedForm_K2 :
+    ssMeasure spK2 spK2_isSymm
+        ((sparsificationBudget (Fintype.card (Fin 2)) (1 / 2) (1 / 2) : ℝ))
+        (Nat.cast_pos.2
+          (sparsificationBudget_pos (Fintype.card (Fin 2)) (1 / 2) (1 / 2))).le
+        {ω | ∃ x : Fin 2 → ℝ, (1 - 1 / 2) * quadForm (laplacian spK2) x
+            > quadForm (ssLaplacian spK2 spK2_isSymm
+                ((sparsificationBudget (Fintype.card (Fin 2))
+                  (1 / 2) (1 / 2) : ℝ)) ω) x ∨
+          quadForm (ssLaplacian spK2 spK2_isSymm
+                ((sparsificationBudget (Fintype.card (Fin 2))
+                  (1 / 2) (1 / 2) : ℝ)) ω) x
+            > (1 + 1 / 2) * quadForm (laplacian spK2) x}
+      ≤ ENNReal.ofReal (1 / 2) :=
+  sparsification_graph_budget_closedForm spK2 spK2_isSymm spK2_nonneg
+    (1 / 2) (by norm_num) (by norm_num) (1 / 2) (by norm_num)
 
 end SparsificationTailQA

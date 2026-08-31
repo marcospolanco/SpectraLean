@@ -19,6 +19,7 @@ import Scaffold.Mathlib.GraphTheory.PageRank
 import Scaffold.Mathlib.GraphTheory.DirectedMixing
 import Scaffold.Mathlib.GraphTheory.Stationary
 import Scaffold.Mathlib.GraphTheory.Mixing
+import Scaffold.Mathlib.GraphTheory.Oversmoothing
 import Scaffold.Mathlib.GraphTheory.Heat
 import Scaffold.Mathlib.GraphTheory.Directed
 import Scaffold.Mathlib.GraphTheory.Magnetic

@@ -29,6 +29,14 @@
     constraint `t + δ ≤ γ` at `t/δ = u` maximizes the exponent `t²` at
     `t = γu/(1+u)`, which is exactly the `s` of the sharpened
     statement (`s/(γ−s) = u`).
+  - The rank-`k` spectral-encoding drift pipeline (2026-08-31,
+    `proposals/spectral-encoding-drift-pipeline.md`):
+    `edgePerturbation_spectralEncodingSubspace_drift{'}` and
+    `edgePerturbation_spectralEncoding_drift{'}` — the same pipeline at
+    arbitrary encoding rank, consuming the general-rank stability pair
+    and discharging the separation inline from the base graph's
+    rank-`k` gap by Weyl at index `k + 1` (the LapPE delivery's priced
+    automatic-`δ` follow-on).
 
   Both are CONDITIONAL ON THE `matrix_hoeffding` AXIOM via the tail
   alone (`edgePerturbation_norm_tail`, Tropp 2012, Theorem 1.4, as
@@ -302,5 +310,239 @@ theorem edgePerturbation_fiedlerLine_drift' (A : WAdj (V := V))
           (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖))) :=
   edgePerturbation_fiedlerLine_drift A hA p hp0 hp1 hnnA hnnAE hconnA
     hconnAE hcard (γ - s) (sub_pos.mpr hsg) s hs.le (by linarith)
+
+/-!
+## The rank-`k` spectral-encoding drift pipeline (general rank)
+
+`proposals/spectral-encoding-drift-pipeline.md` (delivered 2026-08-31):
+the same pipeline at *arbitrary encoding rank* `k`, consuming the
+general-rank stability pair of
+`proposals/spectral-positional-encoding-stability.md`
+(`spectralEncodingSubspace_stability`/`spectralEncoding_stability`,
+which made the `k = 1` theorems above corollaries). This is that
+delivery's priced deferred follow-on — automatic `δ` certification: the
+separation hypothesis no longer appears as a caller obligation; it is
+discharged inline from the base graph's deterministic rank-`k` gap by
+the proved `weyl_inequality` at index `k + 1` on the tail event's
+complement. The caller supplies only the base gap — never a
+perturbed-spectrum `δ`.
+-/
+
+/-- Private helper, general rank: on the complement of the tail event,
+the base graph's rank-`k` spectral gap discharges the Davis–Kahan
+separation via Weyl at index `k + 1` — the random perturbation can only
+depress the `k + 2`-nd eigenvalue by its norm, which is below `t`
+there. -/
+private theorem separation_of_norm_lt' (A : WAdj (V := V)) (hA : A.IsSymm)
+    (p : (V × V) → ℝ) (ω : (V × V) → Bool)
+    (k : Fin (Fintype.card V)) (hk : (k : ℕ) + 1 < Fintype.card V)
+    {δ t : ℝ} (hgap : t + δ ≤ evals (laplacian_symmetric A hA) ⟨(k : ℕ) + 1, hk⟩
+      - evals (laplacian_symmetric A hA) k)
+    (hlt : ‖∑ e : V × V, perturbSummand A p e ω‖ < t) :
+    δ ≤ evals (laplacian_symmetric (A + perturbWeight A p ω)
+        (hA.add (perturbWeight_isSymm A p ω))) ⟨(k : ℕ) + 1, hk⟩
+      - evals (laplacian_symmetric A hA) k := by
+  have hE : (perturbWeight A p ω).IsSymm := perturbWeight_isSymm A p ω
+  have hL : (laplacian A).IsSymm := laplacian_symmetric A hA
+  have hLE : (laplacian (perturbWeight A p ω)).IsSymm := laplacian_symmetric _ hE
+  have hsum : (laplacian A + laplacian (perturbWeight A p ω)).IsSymm := hL.add hLE
+  have hwy := abs_le.mp (weyl_inequality (laplacian A)
+    (laplacian (perturbWeight A p ω)) hL hLE ⟨(k : ℕ) + 1, hk⟩)
+  rw [show ‖laplacian (perturbWeight A p ω)‖
+      = ‖∑ e : V × V, perturbSummand A p e ω‖ from by
+        rw [laplacian_perturbWeight]] at hwy
+  rw [evals_congr (laplacian_symmetric (A + perturbWeight A p ω)
+    (hA.add hE)) hsum (laplacian_add A (perturbWeight A p ω)) ⟨(k : ℕ) + 1, hk⟩]
+  linarith
+
+/-- **Spectral-encoding subspace drift, general rank** — the
+concentration → subspace-stability pipeline at arbitrary encoding rank:
+on the product-Bernoulli space at inclusion probabilities `p ∈ [0, 1]`,
+if the base graph's rank-`k` gap `evals ⟨k+1⟩ − evals k` exceeds
+`t + δ`, then the probability that the bottom-`k+1` Laplacian subspace
+(the `k`-dimensional positional-encoding subspace of the LapPE
+program) rotates by more than `t/δ` is at most
+`2 d exp(−t²/(2‖∑ₑ L_e²‖))`. The `k = 1` instance of this shape is
+`edgePerturbation_fiedlerSubspace_drift` above; the rank parameter is
+the ML-facing content (practical encodings use `k ≫ 1`).
+
+CONDITIONAL ON THE `matrix_hoeffding` AXIOM via the tail alone; the
+Davis–Kahan side and the Weyl separation discharge are proved. -/
+theorem edgePerturbation_spectralEncodingSubspace_drift (A : WAdj (V := V))
+    (hA : A.IsSymm) (p : (V × V) → ℝ) (hp0 : ∀ e, 0 ≤ p e)
+    (hp1 : ∀ e, p e ≤ 1)
+    (k : Fin (Fintype.card V)) (hk : (k : ℕ) + 1 < Fintype.card V)
+    (δ : ℝ) (hδ : 0 < δ) (t : ℝ) (ht : 0 ≤ t)
+    (hgap : t + δ ≤ evals (laplacian_symmetric A hA) ⟨(k : ℕ) + 1, hk⟩
+      - evals (laplacian_symmetric A hA) k) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool |
+        ‖initialProjector (laplacian (A + perturbWeight A p ω))
+            (laplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) k
+          - initialProjector (laplacian A) (laplacian_symmetric A hA) k‖ ≥ t / δ}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(t ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖))) := by
+  haveI : Nonempty V := ⟨(Fintype.equivFin V).symm ⟨1, by omega⟩⟩
+  refine le_trans (measure_mono ?_)
+    (edgePerturbation_norm_tail A p hp0 hp1 t ht)
+  intro ω hω
+  simp only [Set.mem_setOf_eq] at hω ⊢
+  by_contra hlt
+  have hnorm : ‖∑ e : V × V, perturbSummand A p e ω‖ < t := lt_of_not_ge hlt
+  have hsep := separation_of_norm_lt' A hA p ω k hk hgap hnorm
+  have hdk := spectralEncodingSubspace_stability A (perturbWeight A p ω) hA
+    (perturbWeight_isSymm A p ω) k hk δ hδ hsep
+  rw [show ‖laplacian (perturbWeight A p ω)‖
+      = ‖∑ e : V × V, perturbSummand A p e ω‖ from by
+        rw [laplacian_perturbWeight]] at hdk
+  have hkey : ‖initialProjector (laplacian (A + perturbWeight A p ω))
+      (laplacian_symmetric (A + perturbWeight A p ω)
+        (hA.add (perturbWeight_isSymm A p ω))) k
+    - initialProjector (laplacian A) (laplacian_symmetric A hA) k‖
+      < t / δ := by
+    exact lt_of_le_of_lt hdk (by
+      rw [div_lt_div_iff₀ hδ hδ]
+      exact mul_lt_mul_of_pos_right hnorm hδ)
+  exact absurd hω (not_le_of_lt hkey)
+
+/-- **Spectral-encoding drift, general rank, kernel-isolated** — the
+pipeline's ML-facing payoff: the same tail controls the rotation of the
+*informative* rank-`k` component `P_k − P₀` of the positional encoding
+itself (the constants subtracted off; on the connectivity stack the
+kernel projector is the same matrix on both graphs, so the rotation is
+entirely the encoding's own). Hypotheses are the subspace variant's
+plus the per-outcome design constraints (`hnnAE`, `hconnAE`) that make
+the common-kernel identification true — e.g. both hold when
+`p_{ij} + p_{ji} ≤ 1` on every positive-weight pair. The `k = 1`
+instance is `edgePerturbation_fiedlerLine_drift` above.
+
+CONDITIONAL ON THE `matrix_hoeffding` AXIOM via the tail alone; the
+Davis–Kahan side, the kernel identification, and the Weyl discharge
+are proved. -/
+theorem edgePerturbation_spectralEncoding_drift (A : WAdj (V := V))
+    (hA : A.IsSymm) (p : (V × V) → ℝ) (hp0 : ∀ e, 0 ≤ p e)
+    (hp1 : ∀ e, p e ≤ 1)
+    (hnnA : ∀ i j, 0 ≤ A i j)
+    (hnnAE : ∀ ω i j, 0 ≤ (A + perturbWeight A p ω) i j)
+    (hconnA : (supportGraph A hA).Connected)
+    (hconnAE : ∀ ω, (supportGraph (A + perturbWeight A p ω)
+      (hA.add (perturbWeight_isSymm A p ω))).Connected)
+    (k : Fin (Fintype.card V)) (hk : (k : ℕ) + 1 < Fintype.card V)
+    (δ : ℝ) (hδ : 0 < δ) (t : ℝ) (ht : 0 ≤ t)
+    (hgap : t + δ ≤ evals (laplacian_symmetric A hA) ⟨(k : ℕ) + 1, hk⟩
+      - evals (laplacian_symmetric A hA) k) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool |
+        ‖(initialProjector (laplacian (A + perturbWeight A p ω))
+            (laplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) k
+          - initialProjector (laplacian (A + perturbWeight A p ω))
+            (laplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) ⟨0, by omega⟩)
+        - (initialProjector (laplacian A) (laplacian_symmetric A hA) k
+          - initialProjector (laplacian A) (laplacian_symmetric A hA)
+            ⟨0, by omega⟩)‖ ≥ t / δ}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(t ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖))) := by
+  haveI : Nonempty V := ⟨(Fintype.equivFin V).symm ⟨1, by omega⟩⟩
+  refine le_trans (measure_mono ?_)
+    (edgePerturbation_norm_tail A p hp0 hp1 t ht)
+  intro ω hω
+  simp only [Set.mem_setOf_eq] at hω ⊢
+  by_contra hlt
+  have hnorm : ‖∑ e : V × V, perturbSummand A p e ω‖ < t := lt_of_not_ge hlt
+  have hsep := separation_of_norm_lt' A hA p ω k hk hgap hnorm
+  have hdk := spectralEncoding_stability A (perturbWeight A p ω) hA
+    (perturbWeight_isSymm A p ω) hnnA (hnnAE ω) hconnA (hconnAE ω) k hk δ hδ hsep
+  rw [show ‖laplacian (perturbWeight A p ω)‖
+      = ‖∑ e : V × V, perturbSummand A p e ω‖ from by
+        rw [laplacian_perturbWeight]] at hdk
+  have hkey : ‖(initialProjector (laplacian (A + perturbWeight A p ω))
+      (laplacian_symmetric (A + perturbWeight A p ω)
+        (hA.add (perturbWeight_isSymm A p ω))) k
+    - initialProjector (laplacian (A + perturbWeight A p ω))
+      (laplacian_symmetric (A + perturbWeight A p ω)
+        (hA.add (perturbWeight_isSymm A p ω))) ⟨0, by omega⟩)
+    - (initialProjector (laplacian A) (laplacian_symmetric A hA) k
+      - initialProjector (laplacian A) (laplacian_symmetric A hA)
+        ⟨0, by omega⟩)‖
+      < t / δ := by
+    exact lt_of_le_of_lt hdk (by
+      rw [div_lt_div_iff₀ hδ hδ]
+      exact mul_lt_mul_of_pos_right hnorm hδ)
+  exact absurd hω (not_le_of_lt hkey)
+
+/-- **Spectral-encoding subspace drift, sharpened (matched-threshold)
+form, general rank** — the `s/(γ−s)` shape at any encoding rank: at any
+`0 < s < γ ≤ evals ⟨k+1⟩ (L A) − evals k (L A)`, the probability that
+the bottom-`k+1` encoding subspace rotates by more than `s/(γ−s)` is at
+most `2 d exp(−s²/(2‖∑ₑ L_e²‖))` — the gap consumed inline, threshold
+matched to tail, the envelope-optimal instance of the `t/δ` family at
+every threshold (the `k = 1` instance is
+`edgePerturbation_fiedlerSubspace_drift'` above).
+
+CONDITIONAL ON THE `matrix_hoeffding` AXIOM via the delivered `t/δ`
+form alone. -/
+theorem edgePerturbation_spectralEncodingSubspace_drift' (A : WAdj (V := V))
+    (hA : A.IsSymm) (p : (V × V) → ℝ) (hp0 : ∀ e, 0 ≤ p e)
+    (hp1 : ∀ e, p e ≤ 1)
+    (k : Fin (Fintype.card V)) (hk : (k : ℕ) + 1 < Fintype.card V)
+    (γ : ℝ)
+    (hgap : γ ≤ evals (laplacian_symmetric A hA) ⟨(k : ℕ) + 1, hk⟩
+      - evals (laplacian_symmetric A hA) k)
+    (s : ℝ) (hs : 0 < s) (hsg : s < γ) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool |
+        ‖initialProjector (laplacian (A + perturbWeight A p ω))
+            (laplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) k
+          - initialProjector (laplacian A) (laplacian_symmetric A hA) k‖
+            ≥ s / (γ - s)}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(s ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖))) :=
+  edgePerturbation_spectralEncodingSubspace_drift A hA p hp0 hp1 k hk
+    (γ - s) (sub_pos.mpr hsg) s hs.le (by linarith)
+
+/-- **Spectral-encoding drift, kernel-isolated, sharpened
+(matched-threshold) form, general rank** — the ML-facing payoff
+statement at any encoding rank: at any `0 < s < γ ≤` the base graph's
+rank-`k` gap, the informative encoding component `P_k − P₀` rotates by
+more than `s/(γ−s)` with probability at most
+`2 d exp(−s²/(2‖∑ₑ L_e²‖))`. Hypotheses are the sharpened subspace
+variant's plus the per-outcome design constraints the kernel
+identification needs (the `k = 1` instance is
+`edgePerturbation_fiedlerLine_drift'` above).
+
+CONDITIONAL ON THE `matrix_hoeffding` AXIOM via the delivered `t/δ`
+form alone. -/
+theorem edgePerturbation_spectralEncoding_drift' (A : WAdj (V := V))
+    (hA : A.IsSymm) (p : (V × V) → ℝ) (hp0 : ∀ e, 0 ≤ p e)
+    (hp1 : ∀ e, p e ≤ 1)
+    (hnnA : ∀ i j, 0 ≤ A i j)
+    (hnnAE : ∀ ω i j, 0 ≤ (A + perturbWeight A p ω) i j)
+    (hconnA : (supportGraph A hA).Connected)
+    (hconnAE : ∀ ω, (supportGraph (A + perturbWeight A p ω)
+      (hA.add (perturbWeight_isSymm A p ω))).Connected)
+    (k : Fin (Fintype.card V)) (hk : (k : ℕ) + 1 < Fintype.card V)
+    (γ : ℝ)
+    (hgap : γ ≤ evals (laplacian_symmetric A hA) ⟨(k : ℕ) + 1, hk⟩
+      - evals (laplacian_symmetric A hA) k)
+    (s : ℝ) (hs : 0 < s) (hsg : s < γ) :
+    (bernPMF p hp0 hp1).toMeasure
+      {ω : (V × V) → Bool |
+        ‖(initialProjector (laplacian (A + perturbWeight A p ω))
+            (laplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) k
+          - initialProjector (laplacian (A + perturbWeight A p ω))
+            (laplacian_symmetric (A + perturbWeight A p ω)
+              (hA.add (perturbWeight_isSymm A p ω))) ⟨0, by omega⟩)
+        - (initialProjector (laplacian A) (laplacian_symmetric A hA) k
+          - initialProjector (laplacian A) (laplacian_symmetric A hA)
+            ⟨0, by omega⟩)‖ ≥ s / (γ - s)}
+      ≤ ENNReal.ofReal (2 * (Fintype.card V : ℝ) * Real.exp (-(s ^ 2) /
+          (2 * ‖∑ e : V × V, perturbEdgeLap A e * perturbEdgeLap A e‖))) :=
+  edgePerturbation_spectralEncoding_drift A hA p hp0 hp1 hnnA hnnAE hconnA
+    hconnAE k hk (γ - s) (sub_pos.mpr hsg) s hs.le (by linarith)
 
 end Scaffold.Derived.EdgePerturbationDrift

@@ -1,11 +1,13 @@
 # Proposal: Concentration of the Empirical Stationary Distribution — a Real Consumer for Scalar Hoeffding
 
-**Status:** Steps 0+1 COMPLETE (delivered 2026-08-27, run
-`20260827T234233Z-run-1` — the Step-0 survey verdict and the Step-1
-fixed-time delivery below); the stationarity-limit form is the priced
-deferred Step 2. This document authorizes no Lean changes, axiom
-admissions, commits, or external publication on its own beyond what
-its delivery record states.
+**Status:** COMPLETE — Steps 0+1 delivered 2026-08-27 (run
+`20260827T234233Z-run-1`, the Step-0 survey verdict and the Step-1
+fixed-time delivery below); Step 2 (the stationarity-limit form)
+delivered 2026-08-31 (run `20260831T103057Z-run-1`, the follow-on
+delivery record below, the consumer gate discharged by naming the
+oversmoothing ceiling's empirical counterpart). This document
+authorizes no Lean changes, axiom admissions, commits, or external
+publication on its own beyond what its delivery record states.
 
 ## Step 0 verdict (2026-08-27, recorded before any shelf Lean)
 
@@ -225,3 +227,155 @@ which is mechanical once the measure space exists.
 
 [A Spectral Mixing-Time Bound (delivered)](mixing-time-bound.md),
 `docs/6_SGT_BACKLOG.md`, `docs/7_SGT_RADAR.md` axis 7.
+
+
+## Step 2 delivery record (2026-08-31, run `20260831T103057Z-run-1`)
+
+Delivered per the Deferred section's own pricing gate — "a named
+consumer for the bias-term shape should price it first" — with the
+consumer named: **the oversmoothing ceiling's empirical counterpart**
+(`proposals/message-passing-depth-mixing-bound.md`, delivered
+2026-08-31 hours earlier). That ceiling bounds the *true* walk law's
+entrywise distance to stationarity past a computable depth; Step 2 is
+the statement an agent that can only *sample* the walk needs — past
+the same depth certificate, `n` i.i.d. simulated trajectories estimate
+the stationary value to `ε` with failure probability `2 exp (−n ε²/2)`.
+The depth certificate of the mixing axis thereby becomes a sampling
+guarantee, and the two most recent mixing-axis deliveries compose.
+Zero new axioms (count stays 5); every declaration is pure hard crust
+(`hoeffding_empirical` was retired 2026-08-30, so the whole chain —
+sampler, tail engine, entrywise extraction, bias fold — is
+axiom-free).
+
+### The Lean
+
+`Scaffold/Derived/EmpiricalStationary.lean`'s new `StationaryLimit`
+section, two theorems:
+
+- `empiricalWalkDistribution_stationary_tail` — the bias-term form:
+  on a connected graph with a certified mixing rate `r` (exactly the
+  oversmoothing ceiling's own hypothesis set), at any threshold
+  strictly above the entrywise bias
+  `r ^ t₀ √(π i ((π x)⁻¹ − 1))`,
+  `P{|p̂_i(n) − π i| ≥ t} ≤ 2 exp(−2 n (t − bias)²)`. The one-line
+  mathematical content is the triangle-route event inclusion
+  `{|p̂ − π| ≥ t} ⊆ {|p̂ − ν_{t₀}| ≥ t − bias}` (with
+  `|ν_{t₀} − π| ≤ bias` the proved
+  `walkDistribution_sub_stationaryVec_abs_le`), closed by measure
+  monotonicity into the delivered fixed-time tail — the proposal's
+  own sketched "triangle inequality with the decay folded in as a
+  bias term", stated at the direct-subset form rather than the
+  two-event union split (strictly cleaner: one application, no union
+  bound, the exponent paying only for the residual).
+- `empiricalWalkDistribution_stationary_tail_of_depth` — the capstone:
+  past the ceiling's own threshold computed at `ε / 2`, the bias is at
+  most `ε / 2` (by the shelf's `pow_mul_le_of_log_threshold`), and the
+  exponent arithmetic collapses `-2 n (ε − ε/2)²` to `-n ε² / 2`.
+
+An honesty repair rode along: the module docstring and both Step-1
+theorem docstrings still described the pair as **conditional on the
+admitted axiom `hoeffding_empirical`** — stale since the 2026-08-30
+retirement (the retirement's records already verified
+`empiricalWalkDistribution_tail` hard crust; the index map already
+said so) — now corrected, with the fact re-verified rather than
+assumed (`#print axioms` in `wip/empstat2_axcheck.lean`).
+
+### The QA (`EmpiricalStationary_QA.lean`'s Step-2 section, +7, 3306 → 3313)
+
+On the triangle at the honest certificate `r = 1/2`, reusing the
+oversmoothing QA's own pins:
+
+1. the raw deviation `|ν₂ 0 0 − π 0| = 1/6` (walk law + stationary
+   value, both raw) beside the bias `(1/2)² · √(2/3)` with the
+   domination `1/6 ≤ (1/4)√(2/3)` *proved* — the fold-in is honest
+   slack, witnessed, not asserted;
+2. the bias-form interface instance at `t₀ = 2`, `n = 2`,
+   `t = 1/2` (the exponent left closed-form in the bias);
+3. the depth-form capstone instance at `ε = 1/4` (so the threshold
+   hypothesis is *exactly* the delivered `tri_ceiling_threshold_three_QA`
+   at `ε/2 = 1/8`), closing at the clean `2 exp(−1/16)`;
+4. non-vacuity: the both-samples-at-`0` cylinder (mass
+   `(ν₃ 0 0)² = 1/16` through `toMeasure_cyl_inter`) sits inside the
+   measured event — the capstone bounds a real event;
+5. the **fence**: the bias-free naive form — concluding around `π` at
+   the empirical exponent with no bias term, i.e. treating the `t₀`-step
+   law as already stationary — is *refuted* at `t₀ = 0`: the sampler
+   law is `δ₀`, every outcome gives `p̂ = 1` and deviation `2/3`, so
+   `{|p̂ − 1/3| ≥ 2/3}` is the whole space at measure `1`, against
+   `2 exp(−16/9) < 1` (from `Real.add_one_le_exp (16/9)`, monotone
+   inversion). The bias term — equivalently, the depth — is
+   load-bearing;
+6. the `t₀ = 0` corner of the delivered form itself: admitted with the
+   honest large bias `√(2/3)` (not excluded by the strict guard), the
+   event genuinely empty at `t = 1` — the form degrades gracefully as
+   the bias grows, exactly the behavior the fence demands.
+
+### Degenerate-corner analysis (the standing Step-0 discipline)
+
+- `n = 0` is excluded by `hn` exactly as in Step 1 (its boundary
+  behavior is fenced in the Step-1 QA; the strict guard is the same
+  clause).
+- `t₀ = 0`: analyzed and *pinned* rather than excluded — the form
+  holds with the honest `O(1)` bias (QA item 6), and the naive
+  no-bias reading is refuted (QA item 5). No hypothesis of the
+  statement is satisfiable-vacuous here: connectivity and the rate
+  certificate are the ceiling's own, unchanged.
+- `t ≤ bias`: the strict guard `hbias` keeps the exponent meaningful;
+  at `t ≤ bias` the bound statement is still true (the exponent is
+  then nonpositive and `2 exp(·) ≥ 2 > 1 ≥` any PMF-derived measure)
+  but shape-degenerate — the guard is for statement honesty, not
+  truth, and the QA's fence pins why the guarded quantity is the
+  meaningful one.
+
+### Technique findings
+
+1. `Real.add_one_le_exp` in the pinned Mathlib takes the *value*
+   explicitly and carries no hypothesis
+   (`Real.add_one_le_exp (x : ℝ) : x + 1 ≤ exp x`), while
+   `Real.add_one_lt_exp (hx : x ≠ 0) : x + 1 < exp x` — a `by
+   norm_num` passed where the value is expected leaves a `⊢ ℝ` goal,
+   the bare-numeral elaboration trap in its most confusing costume.
+2. `inv_le_inv_of_le` is deprecated to `inv_anti₀` in this pin.
+3. `Real.sqrt_lt_sqrt (hx : 0 ≤ x) (h : x < y)` takes *both*
+   hypotheses; the single-argument application misfires into a
+   metavariable type error.
+4. The stale-olen import-boundary recurrence bit once more at the
+   Derived→QA boundary (rebuild the shelf target before elaborating
+   the QA file) — consistent with the drift-pipeline run's finding.
+5. `toMeasure_cyl_inter`'s rewritten goal keeps the cylinder family
+   `A i` un-beta-reduced: a downstream `rw` against a beta-spelled
+   pattern fails while `Finset.prod_const` (which abstracts under the
+   binder) fires first; the robust order is prod-const → card →
+   `Finset.sum_eq_single` applied *to the goal's own sum* (instance-
+   preserving — a standalone `have` of the factor equation elaborates
+   a different `Decidable` instance and will not rewrite).
+6. `push_cast at h` (not `norm_num at h`) is the cast-normalizer
+   that leaves measures and sets untouched — `norm_num` unfolds the
+   measure into indicator sums and mangles `√(2/3)` into `√2/√3`.
+
+### Verification
+
+`lake env lean` zero errors/zero warnings on both touched modules;
+explicit `lake build` targets ✔ on
+`Scaffold.Derived.EmpiricalStationary` and
+`Scaffold.QA.Derived.EmpiricalStationary_QA`; `#print axioms` via
+`wip/empstat2_axcheck.lean` (11 audited: both new theorems, all seven
+QA declarations, both de-staled Step-1 theorems) — every one exactly
+`propext, Classical.choice, Quot.sound`; full `lake build` ✔
+(2407/2408) immediately followed by `check_build_completeness.py` —
+131 source files, 131 fresh artifacts, 0 stale, 0 missing, exit 0
+(after the documented artifact-removal mtime remediation);
+`lint_axioms` (5, both PF findings allowlisted-confirmed);
+`check_refutation_independence` (10 tagged, clean);
+`check_public_reachability` (62 modules); `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated at **3313/5/0**;
+`check_scaffold_map_freshness` exit 0 after the 3306 → 3313 stats
+sync in both map files and SVG regeneration. Records updated: this
+document, `proposals/README.md` (the Medium-High row retired to the
+Delivered table), README (3313), the radar QA axis (synced, 4.0 held
+per protocol), `index/map/probability_concentration.md` (the two new
+rows and the stale axiom-backed lead repaired), the scoreboard
+verification row, both map data tables + regenerated SVG, the QA
+module's purpose header, the execution plan, and the activity log.
+Nothing committed; the previous runs' uncommitted deliveries
+preserved.

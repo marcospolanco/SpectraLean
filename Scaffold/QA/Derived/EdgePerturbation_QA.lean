@@ -35,6 +35,21 @@
     `μ {‖rotation‖ ≥ 1} ≤ 6 exp(−1/24)`. The drift instance is
     conditional on the `matrix_hoeffding` axiom via the drift theorem,
     not a proof of it.
+  - the rank-`k` spectral-encoding drift pipeline's QA (2026-08-31, the
+    RankKDrift section): on the star `K₁,₃` at `k = ⟨2⟩` — a rank the
+    `k = 1` drift family cannot express — the variance proxy pinned
+    (`∑ₑ L_e² = 4 • L(K₁,₃)`, `‖·‖ = 16` through the pinned top
+    eigenvalue `4`), the per-outcome stack at `p ≡ ¼` (same connected
+    support graph in every outcome), the base gap pinned at the rank
+    (`evals ⟨3⟩ − evals ⟨2⟩ = 4 − 1 = 3`), the **rank-load-bearing
+    vacuity pin** (`evals ⟨2⟩ − evals ⟨1⟩ = 0` by the trace route: the
+    λ₂ = λ₃ tie makes the `k = ⟨1⟩` family vacuous on this fixture, so
+    the `k = ⟨2⟩` cutoff is exactly what the tie structure demands),
+    and the closed-form instances — subspace `t/δ` at `t = 1`,
+    `δ = 2`, sharpened at `γ = 3`, `s = 1`, and the kernel-isolated
+    encoding form, all `μ {‖rotation‖ ≥ 1/2} ≤ 8 exp(−1/32)`. The
+    instances are conditional on the `matrix_hoeffding` axiom via the
+    drift theorems, not proofs of it.
   - the eigenvalue-level tail's QA (the spectral-gap section): the base
     and perturbed `K₂` spectra pinned exactly (`λ₂ = 2`; `λ₂ = 4` at the
     all-true outcome, where the resampled graph is the weight-`2` edge),
@@ -3484,5 +3499,437 @@ theorem epK2_sweepUnconditional_closedForm_QA :
   exact h
 
 end AdmissibilityDissolution
+
+
+/-! ## The rank-`k` spectral-encoding drift QA (star `K₁,₃` at `k = ⟨2⟩`) -/
+
+noncomputable def epStarQ : (Fin 4 × Fin 4) → ℝ := fun _ => 1 / 4
+
+theorem epStarQ_nonneg : ∀ e, 0 ≤ epStarQ e := fun e => by norm_num [epStarQ]
+
+theorem epStarQ_le_one : ∀ e, epStarQ e ≤ 1 := fun e => by norm_num [epStarQ]
+
+/-- The three spoke vectors of the star, in `Pi.single` spelling. -/
+def epS1 : Fin 4 → ℝ := Pi.single 0 1 - Pi.single 1 1
+def epS2 : Fin 4 → ℝ := Pi.single 0 1 - Pi.single 2 1
+def epS3 : Fin 4 → ℝ := Pi.single 0 1 - Pi.single 3 1
+
+theorem epS1_dot : epS1 ⬝ᵥ epS1 = 2 := by
+  simp [Matrix.dotProduct, epS1, Fin.sum_univ_four]; norm_num
+
+theorem epS2_dot : epS2 ⬝ᵥ epS2 = 2 := by
+  simp [Matrix.dotProduct, epS2, Fin.sum_univ_four]; norm_num
+
+theorem epS3_dot : epS3 ⬝ᵥ epS3 = 2 := by
+  simp [Matrix.dotProduct, epS3, Fin.sum_univ_four]; norm_num
+
+theorem star4Adj_eq_edges :
+    star4Adj = edgeAdj 0 1 1 + edgeAdj 0 2 1 + edgeAdj 0 3 1 := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [star4Adj, edgeAdj_apply, Matrix.add_apply, Matrix.of_apply,
+      Matrix.vecHead, Matrix.vecTail]
+
+theorem lap_star4_eq_rankOne_sum :
+    laplacian star4Adj = rankOne epS1 + rankOne epS2 + rankOne epS3 := by
+  rw [star4Adj_eq_edges, laplacian_add, laplacian_add, laplacian_edgeAdj,
+    laplacian_edgeAdj, laplacian_edgeAdj, one_smul, one_smul, one_smul]
+  simp only [epS1, epS2, epS3]
+
+theorem epStar4_edgeLap_facts :
+    perturbEdgeLap star4Adj (0, 1) = rankOne epS1
+      ∧ perturbEdgeLap star4Adj (1, 0) = rankOne epS1
+      ∧ perturbEdgeLap star4Adj (0, 2) = rankOne epS2
+      ∧ perturbEdgeLap star4Adj (2, 0) = rankOne epS2
+      ∧ perturbEdgeLap star4Adj (0, 3) = rankOne epS3
+      ∧ perturbEdgeLap star4Adj (3, 0) = rankOne epS3 := by
+  have hw : star4Adj 0 1 = 1 ∧ star4Adj 1 0 = 1 ∧ star4Adj 0 2 = 1
+      ∧ star4Adj 2 0 = 1 ∧ star4Adj 0 3 = 1 ∧ star4Adj 3 0 = 1 := by
+    refine ⟨by simp [star4Adj], by simp [star4Adj], by simp [star4Adj],
+      ?_, ?_, ?_⟩ <;>
+      simp [star4Adj, Matrix.vecHead, Matrix.vecTail]
+  obtain ⟨w01, w10, w02, w20, w03, w30⟩ := hw
+  have hv10 : (Pi.single 1 1 - Pi.single 0 1 : Fin 4 → ℝ) = -epS1 := by
+    funext x; fin_cases x <;> simp [epS1, Pi.single_apply]
+  have hv20 : (Pi.single 2 1 - Pi.single 0 1 : Fin 4 → ℝ) = -epS2 := by
+    funext x; fin_cases x <;> simp [epS2, Pi.single_apply]
+  have hv30 : (Pi.single 3 1 - Pi.single 0 1 : Fin 4 → ℝ) = -epS3 := by
+    funext x; fin_cases x <;> simp [epS3, Pi.single_apply]
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+  · rw [perturbEdgeLap, w01, one_smul]; simp only [epS1]
+  · rw [perturbEdgeLap, w10, one_smul, hv10, rankOne_neg]
+  · rw [perturbEdgeLap, w02, one_smul]; simp only [epS2]
+  · rw [perturbEdgeLap, w20, one_smul, hv20, rankOne_neg]
+  · rw [perturbEdgeLap, w03, one_smul]; simp only [epS3]
+  · rw [perturbEdgeLap, w30, one_smul, hv30, rankOne_neg]
+
+/-- The variance statistic on the star: the six ordered spoke pairs each
+square to `2 • vvᵀ`, collecting to `4 • L(K₁,₃)`. -/
+theorem epStar4_variance_sum :
+    ∑ e : Fin 4 × Fin 4, perturbEdgeLap star4Adj e * perturbEdgeLap star4Adj e
+      = (4 : ℝ) • laplacian star4Adj := by
+  obtain ⟨h01, h10, h02, h20, h03, h30⟩ := epStar4_edgeLap_facts
+  have hp4 : ∀ e : Fin 4 × Fin 4,
+      e = (0, 0) ∨ e = (0, 1) ∨ e = (0, 2) ∨ e = (0, 3) ∨ e = (1, 0)
+        ∨ e = (1, 1) ∨ e = (1, 2) ∨ e = (1, 3) ∨ e = (2, 0) ∨ e = (2, 1)
+        ∨ e = (2, 2) ∨ e = (2, 3) ∨ e = (3, 0) ∨ e = (3, 1) ∨ e = (3, 2)
+        ∨ e = (3, 3) := by
+    intro e
+    rcases e with ⟨a, b⟩
+    fin_cases a <;> fin_cases b <;> simp
+  have hsq : ∀ e : Fin 4 × Fin 4,
+      perturbEdgeLap star4Adj e * perturbEdgeLap star4Adj e
+        = if e = (0, 1) ∨ e = (1, 0) then (2 : ℝ) • rankOne epS1
+          else if e = (0, 2) ∨ e = (2, 0) then (2 : ℝ) • rankOne epS2
+          else if e = (0, 3) ∨ e = (3, 0) then (2 : ℝ) • rankOne epS3
+          else 0 := by
+    intro e
+    rcases hp4 e with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+      | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+    · rw [if_neg (by decide : ¬(((0, 0) : Fin 4 × Fin 4) = (0, 1)
+            ∨ ((0, 0) : Fin 4 × Fin 4) = (1, 0))),
+        if_neg (by decide : ¬(((0, 0) : Fin 4 × Fin 4) = (0, 2)
+            ∨ ((0, 0) : Fin 4 × Fin 4) = (2, 0))),
+        if_neg (by decide : ¬(((0, 0) : Fin 4 × Fin 4) = (0, 3)
+            ∨ ((0, 0) : Fin 4 × Fin 4) = (3, 0)))]
+      simp [perturbEdgeLap, star4Adj, Matrix.vecHead, Matrix.vecTail]
+    · rw [if_pos (Or.inl rfl), h01, rankOne_mul_self, epS1_dot]
+    · rw [if_neg (by decide : ¬(((0, 2) : Fin 4 × Fin 4) = (0, 1)
+            ∨ ((0, 2) : Fin 4 × Fin 4) = (1, 0))),
+        if_pos (Or.inl rfl), h02, rankOne_mul_self, epS2_dot]
+    · rw [if_neg (by decide : ¬(((0, 3) : Fin 4 × Fin 4) = (0, 1)
+            ∨ ((0, 3) : Fin 4 × Fin 4) = (1, 0))),
+        if_neg (by decide : ¬(((0, 3) : Fin 4 × Fin 4) = (0, 2)
+            ∨ ((0, 3) : Fin 4 × Fin 4) = (2, 0))),
+        if_pos (Or.inl rfl), h03, rankOne_mul_self, epS3_dot]
+    · rw [if_pos (Or.inr rfl), h10, rankOne_mul_self, epS1_dot]
+    · rw [if_neg (by decide : ¬(((1, 1) : Fin 4 × Fin 4) = (0, 1)
+            ∨ ((1, 1) : Fin 4 × Fin 4) = (1, 0))),
+        if_neg (by decide : ¬(((1, 1) : Fin 4 × Fin 4) = (0, 2)
+            ∨ ((1, 1) : Fin 4 × Fin 4) = (2, 0))),
+        if_neg (by decide : ¬(((1, 1) : Fin 4 × Fin 4) = (0, 3)
+            ∨ ((1, 1) : Fin 4 × Fin 4) = (3, 0)))]
+      simp [perturbEdgeLap, star4Adj, Matrix.vecHead, Matrix.vecTail]
+    · rw [if_neg (by decide : ¬(((1, 2) : Fin 4 × Fin 4) = (0, 1)
+            ∨ ((1, 2) : Fin 4 × Fin 4) = (1, 0))),
+        if_neg (by decide : ¬(((1, 2) : Fin 4 × Fin 4) = (0, 2)
+            ∨ ((1, 2) : Fin 4 × Fin 4) = (2, 0))),
+        if_neg (by decide : ¬(((1, 2) : Fin 4 × Fin 4) = (0, 3)
+            ∨ ((1, 2) : Fin 4 × Fin 4) = (3, 0)))]
+      simp [perturbEdgeLap, star4Adj, Matrix.vecHead, Matrix.vecTail]
+    · rw [if_neg (by decide : ¬(((1, 3) : Fin 4 × Fin 4) = (0, 1)
+            ∨ ((1, 3) : Fin 4 × Fin 4) = (1, 0))),
+        if_neg (by decide : ¬(((1, 3) : Fin 4 × Fin 4) = (0, 2)
+            ∨ ((1, 3) : Fin 4 × Fin 4) = (2, 0))),
+        if_neg (by decide : ¬(((1, 3) : Fin 4 × Fin 4) = (0, 3)
+            ∨ ((1, 3) : Fin 4 × Fin 4) = (3, 0)))]
+      simp [perturbEdgeLap, star4Adj, Matrix.vecHead, Matrix.vecTail]
+    · rw [if_neg (by decide : ¬(((2, 0) : Fin 4 × Fin 4) = (0, 1)
+            ∨ ((2, 0) : Fin 4 × Fin 4) = (1, 0))),
+        if_pos (Or.inr rfl), h20, rankOne_mul_self, epS2_dot]
+    · rw [if_neg (by decide : ¬(((2, 1) : Fin 4 × Fin 4) = (0, 1)
+            ∨ ((2, 1) : Fin 4 × Fin 4) = (1, 0))),
+        if_neg (by decide : ¬(((2, 1) : Fin 4 × Fin 4) = (0, 2)
+            ∨ ((2, 1) : Fin 4 × Fin 4) = (2, 0))),
+        if_neg (by decide : ¬(((2, 1) : Fin 4 × Fin 4) = (0, 3)
+            ∨ ((2, 1) : Fin 4 × Fin 4) = (3, 0)))]
+      simp [perturbEdgeLap, star4Adj, Matrix.vecHead, Matrix.vecTail]
+    · rw [if_neg (by decide : ¬(((2, 2) : Fin 4 × Fin 4) = (0, 1)
+            ∨ ((2, 2) : Fin 4 × Fin 4) = (1, 0))),
+        if_neg (by decide : ¬(((2, 2) : Fin 4 × Fin 4) = (0, 2)
+            ∨ ((2, 2) : Fin 4 × Fin 4) = (2, 0))),
+        if_neg (by decide : ¬(((2, 2) : Fin 4 × Fin 4) = (0, 3)
+            ∨ ((2, 2) : Fin 4 × Fin 4) = (3, 0)))]
+      simp [perturbEdgeLap, star4Adj, Matrix.vecHead, Matrix.vecTail]
+    · rw [if_neg (by decide : ¬(((2, 3) : Fin 4 × Fin 4) = (0, 1)
+            ∨ ((2, 3) : Fin 4 × Fin 4) = (1, 0))),
+        if_neg (by decide : ¬(((2, 3) : Fin 4 × Fin 4) = (0, 2)
+            ∨ ((2, 3) : Fin 4 × Fin 4) = (2, 0))),
+        if_neg (by decide : ¬(((2, 3) : Fin 4 × Fin 4) = (0, 3)
+            ∨ ((2, 3) : Fin 4 × Fin 4) = (3, 0)))]
+      simp [perturbEdgeLap, star4Adj, Matrix.vecHead, Matrix.vecTail]
+    · rw [if_neg (by decide : ¬(((3, 0) : Fin 4 × Fin 4) = (0, 1)
+            ∨ ((3, 0) : Fin 4 × Fin 4) = (1, 0))),
+        if_neg (by decide : ¬(((3, 0) : Fin 4 × Fin 4) = (0, 2)
+            ∨ ((3, 0) : Fin 4 × Fin 4) = (2, 0))),
+        if_pos (Or.inr rfl), h30, rankOne_mul_self, epS3_dot]
+    · rw [if_neg (by decide : ¬(((3, 1) : Fin 4 × Fin 4) = (0, 1)
+            ∨ ((3, 1) : Fin 4 × Fin 4) = (1, 0))),
+        if_neg (by decide : ¬(((3, 1) : Fin 4 × Fin 4) = (0, 2)
+            ∨ ((3, 1) : Fin 4 × Fin 4) = (2, 0))),
+        if_neg (by decide : ¬(((3, 1) : Fin 4 × Fin 4) = (0, 3)
+            ∨ ((3, 1) : Fin 4 × Fin 4) = (3, 0)))]
+      simp [perturbEdgeLap, star4Adj, Matrix.vecHead, Matrix.vecTail]
+    · rw [if_neg (by decide : ¬(((3, 2) : Fin 4 × Fin 4) = (0, 1)
+            ∨ ((3, 2) : Fin 4 × Fin 4) = (1, 0))),
+        if_neg (by decide : ¬(((3, 2) : Fin 4 × Fin 4) = (0, 2)
+            ∨ ((3, 2) : Fin 4 × Fin 4) = (2, 0))),
+        if_neg (by decide : ¬(((3, 2) : Fin 4 × Fin 4) = (0, 3)
+            ∨ ((3, 2) : Fin 4 × Fin 4) = (3, 0)))]
+      simp [perturbEdgeLap, star4Adj, Matrix.vecHead, Matrix.vecTail]
+    · rw [if_neg (by decide : ¬(((3, 3) : Fin 4 × Fin 4) = (0, 1)
+            ∨ ((3, 3) : Fin 4 × Fin 4) = (1, 0))),
+        if_neg (by decide : ¬(((3, 3) : Fin 4 × Fin 4) = (0, 2)
+            ∨ ((3, 3) : Fin 4 × Fin 4) = (2, 0))),
+        if_neg (by decide : ¬(((3, 3) : Fin 4 × Fin 4) = (0, 3)
+            ∨ ((3, 3) : Fin 4 × Fin 4) = (3, 0)))]
+      simp [perturbEdgeLap, star4Adj, Matrix.vecHead, Matrix.vecTail]
+  rw [Fintype.sum_prod_type]
+  simp only [Fin.sum_univ_four, hsq]
+  simp (config := {decide := true})
+  rw [lap_star4_eq_rankOne_sum]
+  module
+
+theorem epStar4_lap_norm : ‖laplacian star4Adj‖ = 4 := by
+  have h := l2OpNorm_eq_max_abs_evals
+    (laplacian_symmetric star4Adj star4_symmetric) (by norm_num)
+  have h2 : (⟨Fintype.card (Fin 4) - 1, by simp⟩ :
+      Fin (Fintype.card (Fin 4))) = ⟨3, by norm_num⟩ :=
+    Fin.ext (by simp)
+  rw [h2, star4_evals_zero_QA, star4_evals_three_eq_four_QA] at h
+  simpa using h
+
+theorem epStar4_variance_norm :
+    ‖∑ e : Fin 4 × Fin 4, perturbEdgeLap star4Adj e * perturbEdgeLap star4Adj e‖
+      = 16 := by
+  rw [epStar4_variance_sum, norm_smul, Real.norm_eq_abs,
+    abs_of_nonneg (by norm_num), epStar4_lap_norm]
+  norm_num
+
+/-! The perturbed-graph stack at every outcome -/
+
+theorem epStar4_perturbed_apply (ω : (Fin 4 × Fin 4) → Bool) (i j : Fin 4) :
+    (star4Adj + perturbWeight star4Adj epStarQ ω) i j
+      = star4Adj i j * ((1 / 2 : ℝ)
+          + (if ω (i, j) then (1 : ℝ) else 0)
+          + (if ω (j, i) then (1 : ℝ) else 0)) := by
+  have hsymm : star4Adj j i = star4Adj i j := by
+    have hsymm' : ∀ a b : Fin 4, star4Adj b a = star4Adj a b := by
+      intro a b
+      fin_cases a <;> fin_cases b <;>
+        simp [star4Adj, Matrix.vecHead, Matrix.vecTail]
+    exact hsymm' i j
+  by_cases hij : i = j
+  · subst hij
+    have hd : star4Adj i i = 0 := by
+      fin_cases i <;> simp [star4Adj, Matrix.vecHead, Matrix.vecTail]
+    simp only [Matrix.add_apply, perturbWeight_apply_diag, hd]
+    simp
+  · rw [Matrix.add_apply, perturbWeight_apply_of_ne (hij := hij), hsymm]
+    simp only [epStarQ]
+    ring
+
+theorem epStar4_factor_pos (ω : (Fin 4 × Fin 4) → Bool) (i j : Fin 4) :
+    0 < (1 / 2 : ℝ)
+      + (if ω (i, j) then (1 : ℝ) else 0)
+      + (if ω (j, i) then (1 : ℝ) else 0) := by
+  cases h1 : ω (i, j) <;> cases h2 : ω (j, i) <;> simp [h1, h2] <;> norm_num
+
+theorem epStar4_perturbed_nonneg (ω : (Fin 4 × Fin 4) → Bool) (i j : Fin 4) :
+    0 ≤ (star4Adj + perturbWeight star4Adj epStarQ ω) i j := by
+  rw [epStar4_perturbed_apply]
+  exact mul_nonneg (star4_nonneg i j) (le_of_lt (epStar4_factor_pos ω i j))
+
+theorem epStar4_supportGraph (ω : (Fin 4 × Fin 4) → Bool) :
+    supportGraph (star4Adj + perturbWeight star4Adj epStarQ ω)
+      (star4_symmetric.add (perturbWeight_isSymm star4Adj epStarQ ω))
+      = supportGraph star4Adj star4_symmetric := by
+  ext i j
+  rw [supportGraph_adj, supportGraph_adj]
+  constructor
+  · rintro ⟨hij, hpos⟩
+    refine ⟨hij, ?_⟩
+    rw [epStar4_perturbed_apply] at hpos
+    by_contra hA
+    push_neg at hA
+    have hle : star4Adj i j * ((1 / 2 : ℝ)
+        + (if ω (i, j) then (1 : ℝ) else 0)
+        + (if ω (j, i) then (1 : ℝ) else 0))
+        ≤ 0 * ((1 / 2 : ℝ)
+          + (if ω (i, j) then (1 : ℝ) else 0)
+          + (if ω (j, i) then (1 : ℝ) else 0)) :=
+      mul_le_mul_of_nonneg_right hA (le_of_lt (epStar4_factor_pos ω i j))
+    linarith
+  · rintro ⟨hij, hpos⟩
+    exact ⟨hij, by
+      rw [epStar4_perturbed_apply]
+      exact mul_pos hpos (epStar4_factor_pos ω i j)⟩
+
+theorem star4_supportGraph_connected :
+    (supportGraph star4Adj star4_symmetric).Connected := by
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  refine ⟨0, ?_⟩
+  intro v
+  fin_cases v
+  · exact ⟨SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 1)
+      ⟨by decide, by simp [star4Adj]⟩ SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 2) (w := 2)
+      ⟨by decide, by simp [star4Adj]⟩ SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 3) (w := 3)
+      ⟨by decide, by simp [star4Adj]⟩ SimpleGraph.Walk.nil⟩
+
+theorem epStar4_hgap : (1 : ℝ) + 2
+      ≤ evals (laplacian_symmetric star4Adj star4_symmetric) ⟨3, by norm_num⟩
+      - evals (laplacian_symmetric star4Adj star4_symmetric)
+        ⟨2, by norm_num⟩ := by
+  rw [star4_evals_three_eq_four_QA, star4_evals_two_eq_one_QA]
+  norm_num
+
+theorem epStar4_hgap' : (3 : ℝ)
+      ≤ evals (laplacian_symmetric star4Adj star4_symmetric) ⟨3, by norm_num⟩
+      - evals (laplacian_symmetric star4Adj star4_symmetric)
+        ⟨2, by norm_num⟩ := by
+  rw [star4_evals_three_eq_four_QA, star4_evals_two_eq_one_QA]
+  norm_num
+
+/-- The star's second eigenvalue, by the trace route: the pinned
+spectrum `{0, ?, 1, 4}` against `star4_trace = 6` forces `? = 1`. -/
+theorem epStar4_evals_one_eq_one_QA :
+    evals (laplacian_symmetric star4Adj star4_symmetric) ⟨1, by norm_num⟩
+      = 1 := by
+  have hsum := evals_sum_eq_trace
+    (laplacian_symmetric star4Adj star4_symmetric)
+  rw [star4_trace] at hsum
+  have h4 : ∑ i : Fin 4,
+      evals (laplacian_symmetric star4Adj star4_symmetric) i = 6 := hsum
+  have p0 : evals (laplacian_symmetric star4Adj star4_symmetric)
+      (0 : Fin 4) = 0 := star4_evals_zero_QA
+  have p2 : evals (laplacian_symmetric star4Adj star4_symmetric)
+      (2 : Fin 4) = 1 := star4_evals_two_eq_one_QA
+  have p3 : evals (laplacian_symmetric star4Adj star4_symmetric)
+      (3 : Fin 4) = 4 := star4_evals_three_eq_four_QA
+  simp only [Fin.sum_univ_four, p0, p2, p3] at h4
+  norm_num at h4
+  have heq : evals (laplacian_symmetric star4Adj star4_symmetric)
+      ⟨1, by norm_num⟩
+      = evals (laplacian_symmetric star4Adj star4_symmetric) (1 : Fin 4) := rfl
+  linarith
+
+/-- **The rank-load-bearing pin**: at `k = ⟨1⟩` the star's gap is
+`evals ⟨2⟩ − evals ⟨1⟩ = 0` — the λ₂ = λ₃ tie means *no* positive `t + δ`
+fits, so the k=1 drift family is vacuous on this fixture; the
+`k = ⟨2⟩` cutoff is exactly what the tie structure demands. -/
+theorem epStar4_k1_vacuity_QA :
+    evals (laplacian_symmetric star4Adj star4_symmetric) ⟨2, by norm_num⟩
+      - evals (laplacian_symmetric star4Adj star4_symmetric)
+        ⟨1, by norm_num⟩ = 0 := by
+  rw [star4_evals_two_eq_one_QA, epStar4_evals_one_eq_one_QA]
+  ring
+
+/-- **The rank-2 spectral-encoding subspace drift instance, in closed
+form**: at `p ≡ ¼` (every outcome keeps the star connected with the
+same support graph) and `t = 1`, `δ = 2` (the gap discharge
+`1 + 2 ≤ 4 − 1`), the rank-3 encoding projector's rotation under random
+edge resampling exceeds `1/2` with probability at most
+`8 exp(−1/32)` — the dimension factor `2 · 4`, the variance norm `16`
+in the exponent's denominator `2 · 16`. CONDITIONAL ON THE
+`matrix_hoeffding` AXIOM (instantiated via the drift theorem, not
+re-proved). -/
+theorem epStar4_encodingSubspace_drift_QA :
+    (bernPMF epStarQ epStarQ_nonneg epStarQ_le_one).toMeasure
+      {ω : (Fin 4 × Fin 4) → Bool |
+        ‖initialProjector (laplacian (star4Adj
+              + perturbWeight star4Adj epStarQ ω))
+            (laplacian_symmetric (star4Adj
+              + perturbWeight star4Adj epStarQ ω)
+              (star4_symmetric.add
+                (perturbWeight_isSymm star4Adj epStarQ ω))) ⟨2, by norm_num⟩
+          - initialProjector (laplacian star4Adj)
+            (laplacian_symmetric star4Adj star4_symmetric)
+            ⟨2, by norm_num⟩‖ ≥ (1 : ℝ) / 2}
+      ≤ ENNReal.ofReal (8 * Real.exp (-(1 : ℝ) / 32)) := by
+  have h := edgePerturbation_spectralEncodingSubspace_drift star4Adj
+    star4_symmetric epStarQ epStarQ_nonneg epStarQ_le_one
+    ⟨2, by norm_num⟩ (by norm_num) 2 (by norm_num) 1 (by norm_num)
+    epStar4_hgap
+  rw [epStar4_variance_norm] at h
+  have hcard : (Fintype.card (Fin 4) : ℝ) = 4 := by norm_num
+  rw [hcard] at h
+  have hRHS : 2 * 4 * Real.exp (-((1 : ℝ) ^ 2) / (2 * 16))
+      = 8 * Real.exp (-(1 : ℝ) / 32) := by
+    have h1 : -((1 : ℝ) ^ 2) / (2 * 16) = -((1 : ℝ)) / 32 := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at h
+  simpa using h
+
+/-- **The sharpened matched-threshold instance**: at `γ = 3` (the base
+gap pinned exactly) and `s = 1`, the threshold is `s/(γ−s) = 1/2` and
+the tail sits at `s` — the same numbers as the `t/δ` instance above,
+now through the envelope-optimal interface. CONDITIONAL ON THE
+`matrix_hoeffding` AXIOM. -/
+theorem epStar4_encodingSubspace_drift'_QA :
+    (bernPMF epStarQ epStarQ_nonneg epStarQ_le_one).toMeasure
+      {ω : (Fin 4 × Fin 4) → Bool |
+        ‖initialProjector (laplacian (star4Adj
+              + perturbWeight star4Adj epStarQ ω))
+            (laplacian_symmetric (star4Adj
+              + perturbWeight star4Adj epStarQ ω)
+              (star4_symmetric.add
+                (perturbWeight_isSymm star4Adj epStarQ ω))) ⟨2, by norm_num⟩
+          - initialProjector (laplacian star4Adj)
+            (laplacian_symmetric star4Adj star4_symmetric)
+            ⟨2, by norm_num⟩‖ ≥ (1 : ℝ) / (3 - 1)}
+      ≤ ENNReal.ofReal (8 * Real.exp (-(1 : ℝ) / 32)) := by
+  have h := edgePerturbation_spectralEncodingSubspace_drift' star4Adj
+    star4_symmetric epStarQ epStarQ_nonneg epStarQ_le_one
+    ⟨2, by norm_num⟩ (by norm_num) 3 epStar4_hgap' 1 (by norm_num)
+    (by norm_num)
+  rw [epStar4_variance_norm] at h
+  have hcard : (Fintype.card (Fin 4) : ℝ) = 4 := by norm_num
+  rw [hcard] at h
+  have hRHS : 2 * 4 * Real.exp (-((1 : ℝ) ^ 2) / (2 * 16))
+      = 8 * Real.exp (-(1 : ℝ) / 32) := by
+    have h1 : -((1 : ℝ) ^ 2) / (2 * 16) = -((1 : ℝ)) / 32 := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at h
+  simpa using h
+
+/-- **The kernel-isolated encoding drift instance, sharpened form**: the
+ML-facing object (the informative rank-`k` component `P_k − P₀` of the
+positional encoding) at the same star fixture, stack, and numbers.
+CONDITIONAL ON THE `matrix_hoeffding` AXIOM. -/
+theorem epStar4_encoding_drift'_QA :
+    (bernPMF epStarQ epStarQ_nonneg epStarQ_le_one).toMeasure
+      {ω : (Fin 4 × Fin 4) → Bool |
+        ‖(initialProjector (laplacian (star4Adj
+                + perturbWeight star4Adj epStarQ ω))
+            (laplacian_symmetric (star4Adj
+              + perturbWeight star4Adj epStarQ ω)
+              (star4_symmetric.add
+                (perturbWeight_isSymm star4Adj epStarQ ω)))
+            ⟨2, by norm_num⟩
+          - initialProjector (laplacian (star4Adj
+              + perturbWeight star4Adj epStarQ ω))
+            (laplacian_symmetric (star4Adj
+              + perturbWeight star4Adj epStarQ ω)
+              (star4_symmetric.add
+                (perturbWeight_isSymm star4Adj epStarQ ω)))
+            ⟨0, by norm_num⟩)
+        - (initialProjector (laplacian star4Adj)
+            (laplacian_symmetric star4Adj star4_symmetric)
+            ⟨2, by norm_num⟩
+          - initialProjector (laplacian star4Adj)
+            (laplacian_symmetric star4Adj star4_symmetric)
+            ⟨0, by norm_num⟩)‖ ≥ (1 : ℝ) / (3 - 1)}
+      ≤ ENNReal.ofReal (8 * Real.exp (-(1 : ℝ) / 32)) := by
+  have h := edgePerturbation_spectralEncoding_drift' star4Adj
+    star4_symmetric epStarQ epStarQ_nonneg epStarQ_le_one star4_nonneg
+    epStar4_perturbed_nonneg star4_supportGraph_connected
+    (fun ω => by rw [epStar4_supportGraph ω]; exact star4_supportGraph_connected)
+    ⟨2, by norm_num⟩ (by norm_num) 3 epStar4_hgap' 1 (by norm_num)
+    (by norm_num)
+  rw [epStar4_variance_norm] at h
+  have hcard : (Fintype.card (Fin 4) : ℝ) = 4 := by norm_num
+  rw [hcard] at h
+  have hRHS : 2 * 4 * Real.exp (-((1 : ℝ) ^ 2) / (2 * 16))
+      = 8 * Real.exp (-(1 : ℝ) / 32) := by
+    have h1 : -((1 : ℝ) ^ 2) / (2 * 16) = -((1 : ℝ)) / 32 := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at h
+  simpa using h
 
 end Scaffold.QA.Derived.EdgePerturbation

@@ -243,3 +243,94 @@ delivered: the genuine over-squashing floor via
 `eigvecOf_dotProduct_degreeSqrt_mulVec_pow_walkTransitionMatrix` (the
 exact eigen-component equality) — a different derivation with a
 different hypothesis structure, still awaiting a consumer.
+
+## Follow-on delivery record (2026-08-31, run `20260831T072600Z-run-1`): the per-pair `effectiveResistance` refinement
+
+The Deferred section's first item — "a per-node-pair refinement using
+`effectiveResistance` … instead of a single graph-global rate" —
+delivered as a same-file follow-on, selected per the standing handoff
+after the Active table held no actionable rows above the
+human-decision gates. Zero new axioms (count stays 5; `#print axioms`
+via `wip/pairres_axcheck.lean` on all 30 audited declarations — 11
+shelf + 19 QA — every one exactly `propext, Classical.choice,
+Quot.sound`). QA 3275 → 3306 (+31, `Mixing_QA.lean`'s per-pair
+section).
+
+**Statement design (pinned before any Lean — the deferred item's own
+open question):** on a `d`-regular graph the walk law admits the
+entrywise eigenbasis expansion
+`ν_t x y = ∑_k (1 − λ_k/d)^t u_k(x) u_k(y)` over the *combinatorial*
+Laplacian's orthonormal basis (the walk factor is `1 − λ_k/d` because
+`P = A/d = 1 − L/d` under regularity; kernel modes carry factor `1`
+and reconstruct the stationary weight — the identity is
+connectivity-free). Splitting each summand's walk factor as
+`(λ_k · (1 − λ_k/d)^t) · (Δx_k/λ_k) · (Δy_k/λ_k)` and applying
+Cauchy–Schwarz isolates exactly Foster's spectral resistance weights:
+the **four-point contrast bound**
+`|(ν_t x₁ y − ν_t x₂ y) − (ν_t x₁ y' − ν_t x₂ y')| ≤ ρ_t · √R(x₁,x₂) · √R(y,y')`
+with the hypothesis-shaped mode-rate `λ_k |1 − λ_k/d|^t ≤ ρ_t`, plus
+the packaged `2 d r^t` corollary at the family's own `|1 − λ_k/d| ≤ r`
+certificate shape (λ_k ≤ 2d through a new Dirichlet-sum engine).
+
+**Two negative statement-design findings, recorded so they are not
+re-attempted:** (1) *no single-target pure-resistance form exists* —
+`|ν_t x y − π y|` pairs one eigen-coordinate difference against the
+pseudoinverse diagonal `∑_k u_k(x)²/λ_k`, which is not a resistance;
+verified numerically that this diagonal is not bounded by any incident
+resistance on C₆ (`G(0) = 8/9 > 5/6 = R(0, neighbor)`), so the
+two-pair contrast is the honest pure-resistance statement. (2) *the
+tempting universal polynomial rate is dead*: `sup_λ λ(1−λ/d)^t ≤
+d/(t+1)` needs all walk factors nonnegative, i.e. λ ≤ d — but
+`λ_max > d` always (`trace L = dn > d(n−1)`), so only the
+hypothesis-shaped rate is honest.
+
+**Falsification content:** exact attainment on K₃ at `t = 1` **and**
+`t = 2` — the contrast at the adjacent pair is *exactly* the theorem's
+bound (`1 = (3/2)·√(2/3)·√(2/3)`, `1/2 = (3/4)·√(2/3)·√(2/3)`; value
+pinned by raw walk-law iteration, bound pinned by the pinned
+resistance `R = 2/3` and the pinned mode equality
+`λ|1−λ/2|^t = 3(1/2)^t`); the packaged corollary's instance with
+honest slack (`2·2·(1/2)²·(2/3) = 2/3 ≥ 1/2`); the engine pinned `3 ≤
+4` by both the engine and the spectrum cases; and the **C₄
+mode-coverage fence** — the rate hypothesis restricted to the mid
+modes `λ = 2` (where `ρ = 0` genuinely certifies, the walk factor
+being `0`) is refuted by the `t = 1` contrast `1` against the bound
+`ρ·√R·√R = 0`, proving the mode quantifier must cover every decaying
+mode. The C₄ spectrum `{0,2,4}` itself is derived in QA from the
+minimal-polynomial fact `A³ = 4A` (pinned by raw Fin 4 enumeration)
+applied at the eigenvector.
+
+**Technique findings (Lean):** the pinned Mathlib's `Finset.mul_sum`
+and friends are sensitive to elaboration-order metavars — rewrites
+that elaborate cleanly at abstract types can go instance-stuck
+in-context, and the robust route is small explicitly-argued helper
+lemmas (`sum_sub_help`/`mul_sum_help` in the QA file, the shelf's own
+`Finset.sum_congr` chains); `Finset.sum_mul_sq_le_sq_mul_sq` (root
+namespace) supplies the sum Cauchy–Schwarz directly, dissolving the
+discriminant route entirely; the `4 • M` scalar in statements must be
+`(4 : ℝ) • M` — bare `4` elaborates to the ℕ-action on functions and
+silently breaks later `rfl`s; `rw [abs_neg]` does not match `|-1/2|`
+because `-1 / 2` parses as `(-1)/2` — write `-(1/2)`; a `have :`
+ascription over bare numerals defaults to ℕ (`|1 - 3/2| = 1/2` needs
+`|(1:ℝ) - 3/2|`); and `d ≤ 2d`-style bounds with a `d ≠ 0`-only
+hypothesis should instead carry `0 < d` where positivity of derived
+rates is needed.
+
+**Verification:** spike `wip/pairres_spike.lean` (all five parts)
+iterated to zero errors/zero warnings before any shelf edit;
+`lake env lean` zero errors/zero warnings on both touched modules;
+explicit `lake build` targets ✔; `#print axioms` as above; full
+`lake build` ✔ (2407/2408) + `check_build_completeness.py` — 131
+source files, 131 fresh artifacts, 0 stale, 0 missing, exit 0 (after
+the documented single-module mtime remediation); `lint_axioms` (5),
+`check_refutation_independence` (10 tagged, clean),
+`check_public_reachability` (62 modules), `check_citations`,
+`check_markdown_links` pass; scoreboard **3306/5/0**; map freshness
+exit 0 after the 3275 → 3306 stats sync in both map files and SVG
+regeneration.
+
+The proposal's other deferred items stand unchanged: the genuine
+over-squashing floor (consumer-gated), the nonlinear/multi-channel
+extension (out of scope), and the Python certificate bridge
+(operator-gated). **Status remains COMPLETE** — this record delivers a
+deferred follow-on, not a new milestone.

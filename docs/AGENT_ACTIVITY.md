@@ -7788,3 +7788,294 @@ proposal's priced deferred follow-ons, or the empirical-stationary
 Step 2 bias-term consumer gate. Nothing committed; the worktree holds
 this delivery plus the two prior uncommitted ones for the commit
 steward.
+
+## 2026-08-31T05:49:30Z — Rank-k spectral-encoding drift pipeline (in progress)
+
+**Run:** `20260831T054849Z-run-1`  
+**Session:** `ses_fa9a8beb1ffeWamYPos5t3eNDE`  
+**Status:** in-progress  
+**Milestone:** the LapPE delivery's own priced deferred follow-on —
+automatic `δ` certification via Weyl — as the random-resampling drift
+pipeline at general encoding rank `k`: the rank-`k` generalization of
+the delivered k=1 Fiedler-drift pair
+(`edgePerturbation_spectralEncoding{Subspace,}_drift{'}`), separation
+discharged inline from the base graph's rank-`k` gap by proved Weyl on
+the tail complement. Zero new axioms; conditional on `matrix_hoeffding`
+via the tail alone. SGT leverage: the fresh general-rank stability pair
+(delivered 2026-08-31, one deterministic fixture so far) gets its first
+random, rank-parameterized consumer.
+
+**Changes:** none yet — recording intent before edits per protocol.
+**Next handoff:** spike in `wip/`, then
+`Derived/EdgePerturbationDrift.lean`, star-`K₁,₃` QA at `k = ⟨2⟩` in
+`EdgePerturbation_QA.lean`, proposal + records ladder.
+
+## 2026-08-31T06:18:40Z — Rank-k spectral-encoding drift pipeline delivered (terminal)
+
+**Run:** `20260831T054849Z-run-1`  
+**Session:** `ses_fa9a8beb1ffeWamYPos5t3eNDE`  
+**Status:** completed  
+**Milestone:** `proposals/spectral-encoding-drift-pipeline.md` (created
+and delivered this run) — the LapPE delivery's priced automatic-`δ`
+follow-on as the random-resampling composition at general encoding
+rank — **delivered**: the general-rank section of
+`Derived/EdgePerturbationDrift.lean` (the `weyl_inequality`-at-index-
+`k+1` helper `separation_of_norm_lt'` plus the four theorems
+`edgePerturbation_spectralEncodingSubspace_drift{'}`/
+`edgePerturbation_spectralEncoding_drift{'}`, the separation consumed
+inline from the base graph's rank-`k` gap) and the RankKDrift QA
+section of `EdgePerturbation_QA.lean`. Zero new axioms (count stays
+5), QA 3252 → 3275 (+23).
+
+**Changes:** selection per priority item 0 (no High rows; the Active
+table's only actionable row delivered 2026-08-31; the Medium-High
+empirical-stationary Step 2 consumer-gated; all Low rows
+decision-gated) — the run took the LapPE proposal's own Deferred
+follow-on ("any method for finding or tightening `δ` automatically,
+e.g. via Weyl-type bounds already in the shelf"). QA on the star
+`K₁,₃` at `k = ⟨2⟩` — a rank the k=1 drift family cannot express,
+with the **trace-route vacuity pin** (`evals ⟨2⟩ − evals ⟨1⟩ = 0`: the
+λ₂ = λ₃ tie makes `k = ⟨1⟩` vacuous on the fixture, the rank parameter
+load-bearing), the variance proxy pinned (`4 • L(K₁,₃)`, norm `16`),
+the gap pinned (`4 − 1 = 3`), and the three closed-form instances
+(subspace `t/δ`, sharpened `s/(γ−s)`, kernel-isolated) all
+`8 exp(−1/32)`. Records: the proposal (COMPLETE + delivery record with
+five technique findings), `proposals/README.md` (Delivered row),
+README (3275 + highlights extension + module-table clause), radar QA
+axis (4.0 held per protocol), `index/map/spectral_graph.md` (four
+rows), scoreboard verification row, both map data tables +
+regenerated SVG, the QA module's purpose header, the execution plan,
+this log. Nothing committed; the previous runs' uncommitted
+deliveries (oversmoothing, LapPE, GNN-sparsification Track A)
+preserved.
+
+**Verification:** spike `wip/lappedrift_spike.lean` to zero
+errors/zero warnings before any shelf edit; `lake env lean` zero
+errors on both touched modules with the QA warning baseline verified
+3 = 3 against HEAD by pair elaboration; explicit `lake build` targets
+✔ on both; `#print axioms` via `wip/lappedrift_axcheck.lean` (15
+audited: the four theorems at the standard three +
+`matrix_hoeffding` exactly; the hard-crust pins at the standard
+three); **full `lake build` ✔ (2407/2408) immediately followed by
+`check_build_completeness.py` — 131 source files, 131 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` (5, both PF
+findings allowlisted-confirmed); `check_refutation_independence`
+(10-tag clean); `check_public_reachability` (62 modules);
+`check_citations`, `check_markdown_links` pass; scoreboard
+regenerated at **3275/5/0**; `check_scaffold_map_freshness` exit 0
+after the 3252 → 3275 stats sync in both map files + SVG regeneration.
+
+**Remaining risk:** none owed — no axiom disposition changed, no
+existing public statement changed (the four k=1 theorems untouched).
+The four new theorems are conditional on `matrix_hoeffding` via the
+tail alone and must never be described as foundationally proved.
+
+**Next handoff:** the Active table holds no actionable rows above the
+human-decision gates; a directed run falls through to the center-out
+policy, the oversmoothing proposal's per-pair `effectiveResistance`
+refinement (statement design not yet pinned — a genuine Step-0
+question), or a consumer that prices the empirical-stationary
+bias-term shape. The operator-gated items (matrix master-bound Step 2,
+the Python certificate bridge) are unchanged.
+
+## 2026-08-31T07:26:00Z — Per-pair resistance oversmoothing refinement (in progress)
+
+**Run:** `20260831T072600Z-run-1`  
+**Session:** `ses_fa94fe34fffeWCk8XmClPyuRd4`  
+**Status:** in-progress  
+**Milestone:** the oversmoothing proposal's priced deferred follow-on —
+the per-pair `effectiveResistance` refinement replacing the graph-global
+initial constant in the walk-convergence bound. Statement pinned before
+Lean (worked through in the execution plan's active-milestone entry):
+the entrywise eigenbasis expansion
+`ν_t x y = ∑_k (1 − λ_k/d)^t u_k(x) u_k(y)` on d-regular graphs, then
+Cauchy–Schwarz against Foster's per-pair spectral resistance formula,
+giving the four-point contrast bound
+`|(ν x₁ y − ν x₂ y) − (ν x₁ y' − ν x₂ y')| ≤ ρ_t·√R(x₁,x₂)·√R(y,y')`
+plus the `2d·r^t` packaged corollary at the family's existing
+certificate shape. First bridge between the electrical axis
+(`effectiveResistance`) and the mixing axis (`walkDistribution`).
+Zero new axioms intended; QA designed around exact attainment on K₃
+and a C₄ mode-coverage fence.
+
+**Changes:** none yet — recording intent before edits per protocol.
+**Next handoff:** spike `wip/pairres_spike.lean` to zero errors, then
+the `Oversmoothing.lean` section, the `Mixing_QA.lean` QA section,
+and the records ladder.
+
+## 2026-08-31T09:18:00Z — Per-pair resistance oversmoothing refinement delivered (terminal)
+
+**Run:** `20260831T072600Z-run-1`  
+**Session:** `ses_fa94fe34fffeWCk8XmClPyuRd4`  
+**Status:** completed  
+**Milestone:** `proposals/message-passing-depth-mixing-bound.md`'s
+priced Deferred item 1 (the per-pair `effectiveResistance`
+refinement), delivered as a same-file follow-on record — **delivered**:
+the per-pair section of `Scaffold/Mathlib/GraphTheory/Oversmoothing.lean`
+(the entrywise eigenbasis expansion `walkDistribution_eq_sum_eigbasis`,
+the four-point contrast bound `walkDistribution_pair_contrast_abs_le`
+joined to Foster's spectral resistance formula through
+Cauchy–Schwarz — the first bridge between the electrical and mixing
+axes — the `λ ≤ 2d` engine, the packaged `2 d r^t` corollary, and the
+regularity plumbing) plus the per-pair QA section of
+`Mixing_QA.lean`. Zero new axioms (count stays 5), QA 3275 → 3306
+(+31).
+
+**Changes:** selection per priority item 0 (no High rows; the Active
+table's only actionable row delivered 2026-08-31; the Medium-High
+empirical-stationary Step 2 consumer-gated; all Low rows
+decision-gated) — the run took the standing handoff's first named
+natural frontier. Statement design pinned before any Lean, with two
+negative findings recorded (no single-target pure-resistance form —
+the pseudoinverse diagonal is unavoidable and unbounded by incident
+resistances, verified numerically on C₆; the universal `d/(t+1)`
+polynomial rate is dead since `λ_max > d` always). QA: exact
+attainment on K₃ at `t = 1` and `t = 2` (contrast = bound:
+`1 = (3/2)·√(2/3)·√(2/3)`, `1/2 = (3/4)·√(2/3)·√(2/3)` — the
+strongest QA shape a bound theorem can have), the
+combinatorial-spectrum mirror (triangle eigenvalues `{0, 3}`), the
+packaged instance with honest slack, the engine pinned `3 ≤ 4` by
+both routes, and the C₄ mode-coverage fence (a mid-modes-only
+certificate refuted by contrast `1` against bound `0`; C₄'s spectrum
+from `A³ = 4A` by raw Fin 4 enumeration). Records: the proposal's
+follow-on delivery record (with the technique findings — the pinned
+Mathlib's `Finset.mul_sum` metavar sensitivity and the
+explicit-helper route, `Finset.sum_mul_sq_le_sq_mul_sq` dissolving
+the discriminant route, the `(4 : ℝ)` function-smul type trap, the
+`-1/2` parse trap, the ℕ-defaulting of bare-numeral `have`
+ascriptions), `proposals/README.md` (Delivered row), README (3306 +
+highlight/module-table extensions), radar QA axis (4.0 held per
+protocol), `index/map/spectral_graph.md` (three rows), scoreboard
+verification row, both map data tables + regenerated SVG, the QA
+module's purpose header, the execution plan, this log. Nothing
+committed; the previous runs' uncommitted deliveries preserved.
+
+**Verification:** spike `wip/pairres_spike.lean` (all five parts) to
+zero errors/zero warnings before any shelf edit; `lake env lean` zero
+errors/zero warnings on both touched modules; explicit `lake build`
+targets ✔ on both; `#print axioms` via `wip/pairres_axcheck.lean` (30
+audited: 11 shelf + 19 QA — every one exactly
+`propext, Classical.choice, Quot.sound`, zero axiom contact); **full
+`lake build` ✔ (2407/2408) immediately followed by
+`check_build_completeness.py` — 131 source files, 131 fresh
+artifacts, 0 stale, 0 missing, exit 0** (after the documented
+single-module mtime remediation); `lint_axioms` (5, both PF findings
+allowlisted-confirmed); `check_refutation_independence` (10-tag
+clean); `check_public_reachability` (62 modules); `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated at **3306/5/0**;
+`check_scaffold_map_freshness` exit 0 after the 3275 → 3306 stats
+sync in both map files + SVG regeneration.
+
+**Remaining risk:** none owed — pure hard crust, no axiom disposition
+changed, no existing public statement changed. The contrast bound's
+rate is caller-certified exactly like the family's existing `r`
+certificates; the C₄ fence proves the mode quantifier load-bearing.
+
+**Next handoff:** the Active table holds no actionable rows above the
+human-decision gates; a directed run falls through to the center-out
+policy or the remaining priced deferred follow-ons (the oversmoothing
+proposal's over-squashing floor, consumer-gated, and the Python
+certificate bridge, operator-gated). The operator-gated items (matrix
+master-bound Step 2, the Python bridge) are unchanged.
+
+## 2026-08-31T10:30:57Z — Empirical-stationary Step 2: the stationarity-limit form (in progress)
+
+**Run:** `20260831T103057Z-run-1`  
+**Session:** (recorded at terminal entry)  
+**Status:** in-progress  
+**Milestone:** the Active priority table's own Medium-High row —
+`proposals/empirical-stationary-distribution-concentration.md`'s priced
+deferred Step 2 (concentration around `stationaryVec` with the mixing
+decay folded in as a bias term). The row's recorded gate ("a named
+consumer for the bias-term shape should price it first") is a pricing
+requirement this run discharges by naming the consumer: the
+oversmoothing ceiling's empirical counterpart — past the delivered
+depth certificate, `n` simulated walk trajectories estimate
+stationarity to `ε` at Hoeffding's exponent with the depth bias folded
+in. Pure hard crust (`hoeffding_empirical` retired 2026-08-30); an
+incidental honesty repair rides along (the shelf docstring and QA
+header still claim axiom conditionality the retirement removed).
+
+**Changes:** none yet — recording intent before edits per protocol.
+**Next handoff:** spike `wip/empstat2_spike.lean` to zero errors, then
+the `Derived/EmpiricalStationary.lean` section, the QA section, the
+axiom audit, and the records ladder.
+
+## 2026-08-31T11:04:54Z — Empirical-stationary Step 2 delivered: the stationarity-limit concentration (terminal)
+
+**Run:** `20260831T103057Z-run-1`  
+**Session:** `ses_fa8ab7b1effeOUPSpiLSSaY122`  
+**Status:** completed  
+**Milestone:** the Active priority table's own Medium-High row —
+`proposals/empirical-stationary-distribution-concentration.md`'s
+priced deferred Step 2 (concentration around `stationaryVec` with the
+mixing decay folded in as a bias term) — **delivered**: the
+`StationaryLimit` section of `Scaffold/Derived/EmpiricalStationary.lean`
+(`empiricalWalkDistribution_stationary_tail`, the bias-term form, and
+`empiricalWalkDistribution_stationary_tail_of_depth`, the depth-form
+capstone) plus the Step-2 QA section of `EmpiricalStationary_QA.lean`.
+Zero new axioms (count stays 5), pure hard crust, QA 3306 → 3313
+(+7). An incidental honesty repair rode along: the module and Step-1
+docstrings still claimed conditionality on the retired
+`hoeffding_empirical` — de-staled with the fact re-verified by
+`#print axioms`.
+
+**Changes:** selection per priority item 0 — no High rows; the
+Medium-High row is the top-ranked item and its recorded gate ("a named
+consumer for the bias-term shape should price it first") is a pricing
+requirement this run discharged by naming the consumer: **the
+oversmoothing ceiling's empirical counterpart** — past the delivered
+depth certificate, `n` simulated trajectories estimate `π i` to `ε`
+at `2 exp(−nε²/2)`, the depth certificate becoming a sampling
+guarantee for an agent that can only sample the walk (composing the
+two most recent mixing-axis deliveries). The statement is stated at
+the direct-subset bias form (`{|p̂−π| ≥ t} ⊆ {|p̂−ν_{t₀}| ≥ t − bias}`,
+one measure-monotonicity step, no union split). QA on the triangle at
+`r = 1/2`: raw deviation `1/6` vs bias `(1/2)²√(2/3)` with domination
+proved, the depth-form instance closing at exactly `2 exp(−1/16)` on
+the same depth-3 certificate the oversmoothing QA pinned sharp, the
+event-mass non-vacuity witness (cylinder mass `1/16`), the
+**bias-free naive-form refutation** at `t₀ = 0` (event measure `1`
+against `2 exp(−16/9) < 1` — the bias term load-bearing), and the
+`t₀ = 0` corner of the delivered form (graceful degradation). Records:
+the proposal (status → COMPLETE, the Step-2 delivery record with the
+consumer case, the corner analysis, and six technique findings),
+`proposals/README.md` (the Medium-High row retired to Delivered),
+README (3313 + the module-table row), the radar QA axis (4.0 held per
+protocol), `index/map/probability_concentration.md` (two rows + the
+stale axiom-backed lead repaired), the scoreboard verification row,
+both map data tables + regenerated SVG, the QA module's purpose
+header, the execution plan, this log. Nothing committed; the previous
+runs' uncommitted deliveries preserved.
+
+**Verification:** spike `wip/empstat2_spike.lean` iterated to zero
+errors/zero warnings before any shelf edit; `lake env lean` zero
+errors/zero warnings on both touched modules; explicit `lake build`
+targets ✔ on both; `#print axioms` via `wip/empstat2_axcheck.lean`
+(11 audited: both new theorems, the seven QA declarations, both
+de-staled Step-1 theorems) — every one exactly
+`propext, Classical.choice, Quot.sound`; **full `lake build` ✔
+(2407/2408) immediately followed by `check_build_completeness.py` —
+131 source files, 131 fresh artifacts, 0 stale, 0 missing, exit 0**
+(after the documented artifact-removal mtime remediation);
+`lint_axioms` (5, both PF findings allowlisted-confirmed);
+`check_refutation_independence` (10-tag clean);
+`check_public_reachability` (62 modules); `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated at **3313/5/0**
+(idempotent with the hand verification row);
+`check_scaffold_map_freshness` exit 0 after the 3306 → 3313 stats
+sync in both map files + SVG regeneration (the cited proposal's new
+status line reconciles at the station's "proved" tier).
+
+**Remaining risk:** none owed — pure hard crust, no axiom disposition
+changed, no existing public statement changed. The form's rate is
+caller-certified exactly like the oversmoothing family's `r`
+certificates; the naive-form fence proves the bias fold
+load-bearing.
+
+**Next handoff:** the Active table holds no rows above the
+human-decision gates (all remaining rows Low/decision-gated); a next
+run falls through to the center-out policy or the priced deferred
+follow-ons (the oversmoothing proposal's over-squashing floor,
+consumer-gated, and the Python certificate bridge, operator-gated).
+The operator-gated matrix master-bound Step 2 is unchanged.

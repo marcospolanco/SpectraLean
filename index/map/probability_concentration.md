@@ -200,12 +200,14 @@ weight matrix, the only load-bearing clause hypothesis `p ∈ [0, 1]`).
 | `freedman_inequality` | Martingale with variance process | Freedman (1975) |
 | `gaussian_matrix_concentration` | Gaussian matrix spectral norm | Vershynin Thm 5.3.1 |
 
-**Module**: `Scaffold.Derived.EmpiricalStationary` (derived layer; the two theorems below are axiom-backed, honestly reported by `#print axioms`)
+**Module**: `Scaffold.Derived.EmpiricalStationary` (derived layer; every theorem below **hard crust** — the tail engine was an admitted axiom until the 2026-08-30 retirement of `hoeffding_empirical`, verified by `#print axioms` at the standard three)
 
 | Declaration | Kind | Description | Consumes |
 |-------------|------|-------------|----------|
 | `hoeffding_empirical_iid` | derived (**hard crust since the 2026-08-30 retirement**; `#print axioms`-verified) | The empirical visit frequency of `i` in `n` i.i.d. `q`-samples concentrates around `q i` at `2 exp(−2nt²)`; `n ≠ 0` load-bearing at the centering collapse | — (proved) |
 | `empiricalWalkDistribution_tail` | derived (**hard crust since the 2026-08-30 retirement**; `#print axioms`-verified) | The graph instance at `q = walkDistribution A t₀ x`: `P{\|p̂_i(n) − ν_{t₀} i\| ≥ t} ≤ 2 exp(−2nt²)`; no symmetry/connectivity/mixing hypothesis | — (proved) |
+| `empiricalWalkDistribution_stationary_tail` | derived (hard crust; `#print axioms`-verified 2026-08-31, `wip/empstat2_axcheck.lean`) | The stationarity-limit form (the proposal's Step 2): at threshold strictly above the oversmoothing entrywise bias `r ^ t₀ √(π i ((π x)⁻¹ − 1))`, `P{\|p̂_i(n) − π i\| ≥ t} ≤ 2 exp(−2n(t − bias)²)` — the proved `walkDistribution_sub_stationaryVec_abs_le` folded in by the triangle-route event inclusion | — (proved) |
+| `empiricalWalkDistribution_stationary_tail_of_depth` | derived (hard crust; `#print axioms`-verified 2026-08-31, `wip/empstat2_axcheck.lean`) | The depth-form capstone — the oversmoothing ceiling's empirical counterpart: past the ceiling's own threshold at `ε/2`, `n` simulated trajectories estimate `π i` to `ε` at `2 exp(−nε²/2)` | — (proved) |
 
 ## Usage Patterns
 

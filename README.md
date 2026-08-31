@@ -22,7 +22,7 @@ As of August 31, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 5 |
-| QA theorems/lemmas | 3252, with no `sorry` or `admit` under `Scaffold/` |
+| QA theorems/lemmas | 3313, with no `sorry` or `admit` under `Scaffold/` |
 
 Recent highlights (full per-run history in
 [`docs/AGENT_ACTIVITY.md`](docs/AGENT_ACTIVITY.md); per-result detail in each
@@ -36,13 +36,28 @@ linked proposal):
   `spectralEncoding_stability`) — the first machine-checked instance of the
   LapPE/SAN subspace-stability class, with the `k = 1` Fiedler pair as
   corollaries and a `k = 2` QA where the bound is exactly attained
-  ([proposal](proposals/spectral-positional-encoding-stability.md)).
+  ([proposal](proposals/spectral-positional-encoding-stability.md)) —
+  with its **random-graph companion**, the rank-`k` drift pipeline
+  (`edgePerturbation_spectralEncoding_drift'`): under Bernoulli edge
+  resampling the encoding subspace stays within `s/(γ−s)` of the base's
+  with high probability, the separation discharged inline from the base
+  gap by proved Weyl — automatic `δ` certification, the delivery's own
+  priced follow-on
+  ([proposal](proposals/spectral-encoding-drift-pipeline.md)).
 - **Certified oversmoothing ceiling from mixing**: depth-form consumers of
   the χ² mixing bound — past a computable depth, every node's propagated
   view is provably within `ε` of stationarity, and any two starts'
   views within `2ε`; QA pins the same graph at two rate certificates
   (depth 3 vs 9 at the same `ε`)
-  ([proposal](proposals/message-passing-depth-mixing-bound.md)).
+  ([proposal](proposals/message-passing-depth-mixing-bound.md)), with
+  its **per-pair resistance refinement** — the four-point contrast of
+  the walk law bounded by the mode-rate times
+  `√R(x₁,x₂)·√R(y,y')` (the entrywise eigenbasis expansion joined to
+  Foster's spectral resistance formula; exact attainment proved on K₃,
+  the mode-coverage hypothesis fenced on C₄) — the first bridge
+  between the electrical and mixing axes
+  ([proposal](proposals/message-passing-depth-mixing-bound.md),
+  follow-on record).
 - **Spectral sparsification via leverage-score sampling**, complete —
   `matrix_bernstein`'s first real theorem consumer — with the
   **closed-form GNN sampling budget** (`sparsificationBudget`: the
@@ -220,7 +235,7 @@ The near-term center is general SGT. Public modules currently cover:
 | Decidable spectral certificates | `GraphTheory.SpectralCertificates` (ℚ and kernel-verifiable ℤ specification checkers, both soundness-proved) |
 | Electrical structure | `GraphTheory.Electrical`, `GraphTheory.ElectricalFlow`, `GraphTheory.Foster` — effective resistance as a genuine metric, Foster's theorem, leverage scores |
 | Heat semigroup | `GraphTheory.Heat` — the diffusion operator `e^{-tL}`: semigroup law, mass conservation, eigenmode decay, the connected-graph DC limit, and the derivative/remainder bounds at `t = 0`; program complete |
-| Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized`, `GraphTheory.Stationary`, `GraphTheory.Mixing` — the ℓ²-mixing proxy and the geometric-decay mixing bound — plus `GraphTheory.Oversmoothing`, the certified depth past which propagated views are provably ε-close to stationarity |
+| Walks and mixing | `GraphTheory.RandomWalk`, `GraphTheory.Normalized`, `GraphTheory.Stationary`, `GraphTheory.Mixing` — the ℓ²-mixing proxy and the geometric-decay mixing bound — plus `GraphTheory.Oversmoothing`, the certified depth past which propagated views are provably ε-close to stationarity, and the per-pair resistance contrast bound (the walk law's four-point contrast against `√R·√R` of the two pairs) |
 | Directed operators | `GraphTheory.Directed` — out/in-degree, directed handshaking, the directed normalized Laplacian |
 | Krylov methods and Chebyshev polynomials | `GraphTheory.Krylov` — the Lanczos/Kaniel–Paige program, complete end-to-end |
 | Polynomial filters and band projection | `GraphTheory.PolyFilter` — filter-agnostic band-projector approximation, with power-method and Chebyshev instantiations |
@@ -237,8 +252,8 @@ The near-term center is general SGT. Public modules currently cover:
 | Concentration | `Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*` |
 | Spectral sparsification | `GraphTheory.Sparsification`, `Derived.SparsificationTail`, `Probability.BernoulliProduct` — leverage-score sampling; `matrix_bernstein`'s first real theorem consumer; the `(1±ε)` sparsifier tail, its `q ~ log n/ε²` budget, and the graph-vector form on the sampled Laplacian |
 | Edge-perturbation concentration | `GraphTheory.EdgePerturbation`, `Derived.EdgePerturbationTail`, `Derived.EdgePerturbationDrift` — centered Bernoulli edge-Laplacian perturbations; `matrix_hoeffding`'s first theorem consumer; the norm/quadratic-form tails, the eigenvalue-level (spectral-gap) tail via proved Weyl, the high-probability Fiedler-drift pipeline (with its matched-threshold `s/(γ−s)` sharpening), the Cheeger-driven connectivity window, its irregular (normalized) sibling via the degree sandwich, and the swept-Fiedler-cut capstone (connected + certified cut of the resampled graph), the C₄ dropped-guard refutation of its floor-positivity hypothesis, and the per-vertex degree-deviation tail (`hoeffding_inequality`'s first theorem consumer, with the all-vertices union bound) plus its variance-adaptive Bernstein twin (`bernstein_inequality`'s and `bernstein_bounded_variance`'s first consumers, at the true variance statistic `∑ₑ w² p (1−p)`) and the admissibility dissolution (the unconditional connectivity window: `perturbAdmissible` derived from the pair design condition `p e + p eᵀ ≤ 1` plus the degree tails — completed across the family, the floor and swept-cut capstone unconditional too, with the strict-containment witness proving the measured event genuinely enlarged) |
-| Concentration → subspace-stability pipeline | `Derived.EdgePerturbationDrift` — high-probability Fiedler-subspace and Fiedler-line rotation under random edge resampling (`edgePerturbation_fiedlerLine_drift`), composing `fiedlerLine_stability` with `edgePerturbation_norm_tail` through the packaging identity `laplacian (perturbWeight A p ω) = ∑ₑ perturbSummand` and the Laplacian linearity package (`laplacian_smul`/`laplacian_sum`) |
-| Empirical stationary distribution | `Probability.IIDProduct`, `Derived.EmpiricalStationary` — `hoeffding_empirical`'s first theorem consumer |
+| Concentration → subspace-stability pipeline | `Derived.EdgePerturbationDrift` — high-probability Fiedler-subspace and Fiedler-line rotation under random edge resampling (`edgePerturbation_fiedlerLine_drift`), composing `fiedlerLine_stability` with `edgePerturbation_norm_tail` through the packaging identity `laplacian (perturbWeight A p ω) = ∑ₑ perturbSummand` and the Laplacian linearity package (`laplacian_smul`/`laplacian_sum`); since 2026-08-31 the **rank-`k` spectral-encoding drift pipeline** (`edgePerturbation_spectralEncodingSubspace_drift{'}`, `edgePerturbation_spectralEncoding_drift{'}`) — the same pipeline at arbitrary encoding rank, the separation discharged inline from the base graph's rank-`k` gap by proved Weyl at index `k+1` (automatic `δ` certification) |
+| Empirical stationary distribution | `Probability.IIDProduct`, `Derived.EmpiricalStationary` — the fixed-time empirical tail (`hoeffding_empirical`'s first theorem consumer, hard crust since that axiom's retirement) and the stationarity-limit form: past the oversmoothing depth, `n` sampled trajectories estimate `π` to `ε` at `2 exp(−nε²/2)` — the depth certificate as a sampling guarantee |
 | Finite-distribution entropy | `InformationTheory.Entropy` (relative entropy and Shannon entropy, Gibbs' inequality, the entropy maximum — all proved) |
 | Discrete-affine dynamics | `Dynamics.DiscreteAffine` (finite-vector geometric decay and affine-iteration convergence, all proved) |
 | Matrix updates | `Core.MatrixUpdates` (Woodbury, Sherman–Morrison) |

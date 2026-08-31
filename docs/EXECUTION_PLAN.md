@@ -6,20 +6,284 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**None queued — the next run selects per priority item 0.** The Active
-table's Medium GNN-sparsification Track A row was delivered 2026-08-31
-(retired to the Delivered table below); with it, the Active table holds
-no actionable rows above the human-decision gates: the Medium-High
-empirical-stationary Step 2 row is consumer-gated, and all Low rows are
-decision-gated. The matrix retirement route's Step 2 (the Lieb-class
-sum-MGF step, Tropp Thm 6.1) is **gated on an operator decision**
-between admitting the analytic core and proving it — recorded as the
-route's standing gate in `proposals/matrix-master-bound-first-slice.md`,
-not an autonomous default. A next run without direction falls through
-to the center-out SGT policy (`docs/6_SGT_BACKLOG.md`) or to the
-sparsification proposal's priced deferred follow-ons.
+**None queued — the next run selects per priority item 0.** This run
+delivered the empirical-stationary proposal's Step 2 — the Active
+table's own Medium-High row — retiring it to the Delivered table
+below; the Active table now holds no rows above the human-decision
+gates (all remaining rows are Low/decision-gated). The matrix
+retirement route's Step 2 stays gated on the recorded operator
+decision. A next run without direction falls through to the center-out
+SGT policy (`docs/6_SGT_BACKLOG.md`) or the priced deferred follow-ons
+the recent proposals record (the oversmoothing proposal's remaining
+items: the genuine over-squashing floor, consumer-gated, and the
+Python certificate bridge, operator-gated).
 
 ------
+
+## Delivered milestones (most recent first)
+
+**The empirical-stationary Step 2 — the stationarity-limit
+concentration, the Active table's own Medium-High row, its consumer
+gate discharged by naming the oversmoothing ceiling's empirical
+counterpart (`proposals/empirical-stationary-distribution-concentration.md`,
+follow-on delivery record; run `20260831T103057Z-run-1`). DELIVERED —
+zero new axioms (count stays 5; `#print axioms` via
+`wip/empstat2_axcheck.lean` on all 11 audited declarations — the two
+new theorems, the seven QA members, and both de-staled Step-1
+theorems — every one exactly `propext, Classical.choice, Quot.sound`,
+pure hard crust: the whole chain has been axiom-free since the
+2026-08-30 `hoeffding_empirical` retirement). QA 3306 → 3313 (+7,
+`EmpiricalStationary_QA.lean`'s Step-2 section).**
+
+The delivery's content: (1) **The consumer case recorded before the
+Lean** — the row's recorded gate ("a named consumer for the bias-term
+shape should price it first") is a pricing requirement, not a
+human-decision requirement; the consumer named is the oversmoothing
+ceiling's empirical counterpart: that ceiling bounds the *true* walk
+law's distance to stationarity past a computable depth, and Step 2 is
+the statement an agent that can only *sample* the walk needs — past
+the same depth, `n` i.i.d. simulated trajectories estimate `π i` to
+`ε` at `2 exp(−nε²/2)`, the depth certificate becoming a sampling
+guarantee (composing the two most recent mixing-axis deliveries). (2)
+**The shelf** — `Derived/EmpiricalStationary.lean`'s `StationaryLimit`
+section: `empiricalWalkDistribution_stationary_tail` (the bias-term
+form, the proved `walkDistribution_sub_stationaryVec_abs_le` folded in
+by the triangle-route event inclusion `{|p̂−π| ≥ t} ⊆ {|p̂−ν_{t₀}| ≥
+t − bias}` at exactly the ceiling's own hypothesis set — the
+direct-subset form, strictly cleaner than the sketched union split)
+and `empiricalWalkDistribution_stationary_tail_of_depth` (the
+capstone, the exponent collapsing `−2n(ε−ε/2)²` to `−nε²/2`). (3)
+**An incidental honesty repair** — the module and Step-1 theorem
+docstrings still claimed conditionality on the *admitted*
+`hoeffding_empirical`, stale since its 2026-08-30 retirement; de-staled
+with the hard-crust fact re-verified, not assumed (the index map
+already said so — the docstrings were the stragglers). (4) **The QA**
+on the triangle at the honest `r = 1/2`: the raw deviation `1/6`
+pinned beside the bias `(1/2)²√(2/3)` with the domination *proved*
+(honest slack witnessed), the bias-form instance at `t₀ = 2`, the
+depth-form instance closing at exactly `2 exp(−1/16)` with the
+threshold discharged by the delivered depth-3 certificate the
+oversmoothing QA pinned sharp, the event-mass non-vacuity witness
+(the both-at-`0` cylinder at `1/16` through `toMeasure_cyl_inter`),
+the **bias-free naive-form refutation** at `t₀ = 0` (the sampler law
+`δ₀`, the event the whole space at measure `1` against
+`2 exp(−16/9) < 1` — the bias term load-bearing), and the `t₀ = 0`
+corner of the delivered form itself (graceful degradation, not
+exclusion).
+
+**Verification:** spike first (`wip/empstat2_spike.lean` — both
+theorems and the full QA section iterated to zero errors/zero warnings
+before any shelf edit, six technique findings recorded in the
+proposal: the pinned Mathlib's `Real.add_one_le_exp` taking its value
+explicitly with no hypothesis while `add_one_lt_exp` takes `x ≠ 0`
+(the bare-`by norm_num`-where-a-value-is-expected trap leaving a
+`⊢ ℝ` goal), `inv_le_inv_of_le`'s deprecation to `inv_anti₀`,
+`Real.sqrt_lt_sqrt`'s two-hypothesis signature, the stale-olen
+Derived→QA boundary recurrence, the `toMeasure_cyl_inter`
+beta-reduction/`Decidable`-instance trap with the
+prod-const→sum_eq_single-on-the-goal robust order, and `push_cast`
+vs `norm_num` for cast normalization inside measures);
+`lake env lean` zero errors/zero warnings on both touched modules;
+explicit `lake build` targets ✔ on both; **full `lake build` ✔
+(2407/2408) immediately followed by `check_build_completeness.py` —
+131 source files, 131 fresh artifacts, 0 stale, 0 missing, exit 0**
+(after the documented artifact-removal mtime remediation);
+`lint_axioms` (5, both PF findings allowlisted-confirmed);
+`check_refutation_independence` (10-tag clean — no tags added, nothing
+here touches an axiom); `check_public_reachability` clean (62
+modules); `check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**3313/5/0**, idempotent with the hand verification row)
+; **map-freshness exit 0** after the 3306 → 3313 stats sync in both
+map files and SVG regeneration (the cited proposal's status line
+changed to COMPLETE in this delivery and the station's "proved" tier
+reconciles). Records updated: the proposal (status line + the Step-2
+delivery record with the consumer case, corner analysis, and technique
+findings), `proposals/README.md` (the Medium-High row retired, the
+Delivered row added), README (3313 + the empirical-stationary
+module-table row extended), the radar QA axis (synced, 4.0 held per
+protocol — a consumer composition of already-counted families plus
+one new negative-witness fence), `index/map/probability_concentration.md`
+(two new rows + the stale axiom-backed lead repaired), the scoreboard
+verification row, both map data tables + regenerated SVG, the QA
+module's purpose header, this plan, and the activity log. Nothing
+committed; the previous runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed. The
+stationarity-limit form is conditional on nothing; its rate is
+caller-certified exactly like the oversmoothing family's existing `r`
+certificates, and the naive-form fence proves the bias fold
+load-bearing. The oversmoothing proposal's remaining deferred items
+stand unchanged (the over-squashing floor, consumer-gated; the Python
+bridge, operator-gated).
+
+------
+
+## Delivered milestones (most recent first)
+
+**The per-pair `effectiveResistance` refinement of the oversmoothing
+ceiling — the oversmoothing proposal's priced Deferred item 1
+(`proposals/message-passing-depth-mixing-bound.md`, follow-on delivery
+record; run `20260831T072600Z-run-1`). DELIVERED — zero new axioms
+(count stays 5; `#print axioms` via `wip/pairres_axcheck.lean` on all
+30 audited declarations — 11 shelf + 19 QA — every one exactly
+`propext, Classical.choice, Quot.sound`, zero contact with any
+admitted axiom). QA 3275 → 3306 (+31, `Mixing_QA.lean`'s per-pair
+section).**
+
+The delivery's content: (1) **The statement design pinned before any
+Lean** (the deferred item's own open question) — on a `d`-regular
+graph the walk law has the entrywise eigenbasis expansion
+`ν_t x y = ∑_k (1 − λ_k/d)^t u_k(x) u_k(y)` over the combinatorial
+Laplacian's orthonormal basis (connectivity-free; kernel modes carry
+factor 1), and Cauchy–Schwarz against Foster's spectral resistance
+weights yields the four-point contrast bound
+`|(ν x₁ y − ν x₂ y) − (ν x₁ y' − ν x₂ y')| ≤ ρ_t·√R(x₁,x₂)·√R(y,y')`
+with the hypothesis-shaped mode-rate `λ_k|1 − λ_k/d|^t ≤ ρ_t`, plus
+the packaged `2 d r^t` corollary at the family's own certificate shape
+(`λ ≤ 2d` by a new Dirichlet-sum engine). **Two negative
+statement-design findings recorded so they are not re-attempted**: no
+single-target pure-resistance form exists (the pseudoinverse diagonal
+`∑ u_k(x)²/λ_k` is unavoidable there and unbounded by incident
+resistances — verified numerically on C₆, `8/9 > 5/6`), and the
+universal `d/(t+1)` polynomial rate is dead (`λ_max > d` always). (2)
+**The shelf** — `Oversmoothing.lean`'s new per-pair section: the
+expansion identity `walkDistribution_eq_sum_eigbasis`, the contrast
+bound `walkDistribution_pair_contrast_abs_le` (the first theorem
+anywhere connecting the electrical axis to the mixing axis), the
+engine pair, the packaged corollary, and the regularity plumbing. (3)
+**The QA** — exact attainment on K₃ at `t = 1` **and** `t = 2` (the
+contrast exactly the bound: `1 = (3/2)·√(2/3)·√(2/3)`,
+`1/2 = (3/4)·√(2/3)·√(2/3)` — the strongest QA shape a bound theorem
+can have), the combinatorial-spectrum mirror
+(`tri_lap_eigvalOf_cases`: every triangle Laplacian eigenvalue `0` or
+`3`), the packaged instance with honest slack (`2/3 ≥ 1/2`), the
+engine pinned `3 ≤ 4` by both routes, and the **C₄ mode-coverage
+fence** (a certificate covering only the decaying mid modes `λ = 2` —
+where `ρ = 0` genuinely certifies — is refuted by the `t = 1` contrast
+`1` against bound `0`; C₄'s spectrum `{0,2,4}` derived from `A³ = 4A`
+pinned by raw Fin 4 enumeration).
+
+**Verification:** spike first (`wip/pairres_spike.lean` — all five
+parts iterated to zero errors/zero warnings before any shelf edit,
+with five technique findings recorded in the proposal: the pinned
+Mathlib's `Finset.mul_sum`-family elaboration-order metavar
+sensitivity and the explicit-argued-helper route,
+`Finset.sum_mul_sq_le_sq_mul_sq` dissolving the discriminant route,
+the `(4 : ℝ)` scalar-type trap on function smuls, the `-1/2` parse
+trap breaking `abs_neg` matches, and the ℕ-defaulting of bare-numeral
+`have` ascriptions); `lake env lean` zero errors/zero warnings on both
+touched modules; explicit `lake build` targets ✔ on both (with the
+stale-olen rebuild the QA import needed); **full `lake build` ✔
+(2407/2408) immediately followed by `check_build_completeness.py` —
+131 source files, 131 fresh artifacts, 0 stale, 0 missing, exit 0**
+(after the documented single-module mtime remediation);
+`lint_axioms` (5, both PF findings allowlisted-confirmed);
+`check_refutation_independence` (10-tag clean — no tags added, nothing
+here touches an axiom); `check_public_reachability` clean (62
+modules); `check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**3306/5/0**) with the verification row added;
+**map-freshness exit 0** after the 3275 → 3306 stats sync in both map
+files and SVG regeneration (the cited oversmoothing proposal's status
+line stays COMPLETE — a follow-on record, not a tier change). Records
+updated: the proposal's follow-on delivery record (with the
+degenerate-corner analysis and the technique findings),
+`proposals/README.md` (Delivered row), README (3306 + the
+highlights/module-table extensions), the radar QA axis (synced, 4.0
+held per protocol — a per-pair consumer of already-counted families
+plus one new negative-witness fence), `index/map/spectral_graph.md`
+(three new rows), the scoreboard verification row, the QA module's
+purpose header, this plan, and the activity log. Nothing committed;
+the previous runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed. The
+contrast bound is conditional on nothing (pure hard crust) but its
+rate is caller-certified exactly like the family's existing `r`
+certificates; the C₄ fence proves the mode quantifier load-bearing.
+The proposal's remaining deferred items stand unchanged (the
+over-squashing floor, consumer-gated; the Python bridge,
+operator-gated).
+
+------
+
+## Delivered milestones (most recent first)
+
+**The rank-`k` spectral-encoding drift pipeline — automatic `δ`
+certification for the LapPE stability family, the random-resampling
+composition at general encoding rank
+(`proposals/spectral-encoding-drift-pipeline.md`, created and delivered
+this run per the same-run pattern; run `20260831T054849Z-run-1`).
+DELIVERED — zero new axioms (count stays 5; `#print axioms` via
+`wip/lappedrift_axcheck.lean` on 15 audited declarations: the four
+drift theorems at exactly `propext, Classical.choice, Quot.sound` +
+`matrix_hoeffding` — nothing else — and all hard-crust QA pins at
+exactly the standard three). QA 3252 → 3275 (+23,
+`EdgePerturbation_QA.lean`'s RankKDrift section).**
+
+The delivery's content: (1) **The shelf**
+(`Derived/EdgePerturbationDrift.lean`'s new general-rank section): the
+general-`k` separation helper `separation_of_norm_lt'` — the proved
+`weyl_inequality` at index `k+1`, its first rank-parameterized
+consumer, with `[Nonempty V]` derived from the statement's own
+`k + 1 < card V` — plus the four theorems
+`edgePerturbation_spectralEncodingSubspace_drift{'}` and
+`edgePerturbation_spectralEncoding_drift{'}`: the k=1 Fiedler-drift
+pipeline's exact structure at arbitrary encoding rank, the separation
+consumed *inline* from the base graph's deterministic rank-`k` gap
+`γ ≤ evals ⟨k+1⟩ − evals k` — the caller supplies only the base gap,
+never a perturbed-spectrum `δ` (the LapPE delivery's own honest scope
+limit, discharged). (2) **The QA** on the star `K₁,₃` at `k = ⟨2⟩` — a
+rank the k=1 drift family cannot express, with the
+**trace-route vacuity pin** (`evals ⟨2⟩ − evals ⟨1⟩ = 0`, derived via
+`evals_sum_eq_trace` at `star4_trace = 6`: the λ₂ = λ₃ tie makes
+`k = ⟨1⟩` vacuous on the fixture, so the `k = ⟨2⟩` cutoff is exactly
+what the tie structure demands — the rank parameter load-bearing) —
+the variance proxy pinned (`∑ₑ L_e² = 4 • L(K₁,₃)`, norm `16`), the
+per-outcome stack at `p ≡ ¼` (same connected support graph in every
+outcome), the gap pinned (`4 − 1 = 3`), and the three closed-form
+instances (subspace `t/δ` at `t = 1`, `δ = 2`; sharpened at `γ = 3`,
+`s = 1`; the kernel-isolated encoding form) all
+`μ{‖rotation‖ ≥ 1/2} ≤ 8 exp(−1/32)`.
+
+**Verification:** spike first (`wip/lappedrift_spike.lean` — the shelf
+theorems, the full QA section, and the axiom audit iterated to zero
+errors/zero warnings before any shelf edit, five technique findings
+recorded in the proposal — the stale-olen import-boundary recurrence,
+`Fintype.card_fin` not firing under `simp only` on the elaborated
+index type with the defeq-ascription bridge, the ascription's index
+re-typing breaking pin matches, the `!!`-literal `vecHead/vecTail`
+simp-set requirement at `Fin 4`, and the one-line `by rw; exact`
+parsing rule); `lake env lean` zero errors on both touched modules
+(the QA module at its recorded three-note `Try this: ring_nf`
+baseline, verified 3 = 3 against the HEAD file by pair elaboration);
+explicit `lake build` targets ✔ on both modules; **full `lake build` ✔
+(2407/2408) immediately followed by `check_build_completeness.py` —
+131 source files, 131 fresh artifacts, 0 stale, 0 missing, exit 0**;
+`lint_axioms` (5, both PF findings allowlisted-confirmed);
+`check_refutation_independence` (10-tag clean — no tags added, nothing
+here repairs an axiom); `check_public_reachability` clean (62 modules);
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+(**3275/5/0**) with the verification row added; **map-freshness exit
+0** after the 3252 → 3275 stats sync in both map files and SVG
+regeneration (the new proposal has no station). Records updated: the
+proposal (COMPLETE + delivery record with the degenerate-corner
+analysis and the technique findings), `proposals/README.md` (Delivered
+row), README (3275 + the highlights extension + the module-table
+clause), the radar QA axis (synced, 4.0 held per protocol — a random,
+rank-parameterized consumer of the already-counted Davis–Kahan
+family), `index/map/spectral_graph.md` (four new rows), the scoreboard
+verification row, the QA module's purpose header, this plan, and the
+activity log. Nothing committed; the previous runs' uncommitted
+deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — no axiom disposition
+changed, no existing public statement changed (the four k=1 theorems
+untouched). The four new theorems remain conditional on
+`matrix_hoeffding` via the tail alone and must never be described as
+foundationally proved. The oversmoothing proposal's per-pair
+`effectiveResistance` refinement and the operator-gated items (matrix
+master-bound Step 2, the Python bridge) stay exactly as recorded.
 
 ## Delivered milestones (most recent first)
 

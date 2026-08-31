@@ -26,6 +26,10 @@
 
   The triangle's eigen-facts (`tri_eigvalOf_cases`, `tri_kernel_const`,
   `tri_exists_kernel_index`) and the disconnected fixture's spectrum
+  serve the oversmoothing section; the per-pair resistance section
+  (2026-08-31) adds the combinatorial-spectrum mirror
+  (`tri_lap_eigvalOf_cases`), the exact-attainment contrast pins at
+  `t = 1, 2`, and the C₄ mode-coverage fence (`c4Adj`).
   (`disc_eigvalOf_cases`) are derived without any control over
   Mathlib's classically chosen eigenbasis: only the unit norm, the
   eigen equation entrywise, and linear arithmetic — the DavisKahan_QA
@@ -40,6 +44,7 @@
 
 import Scaffold.Mathlib.GraphTheory.Mixing
 import Scaffold.Mathlib.GraphTheory.Oversmoothing
+import Scaffold.Mathlib.GraphTheory.Electrical
 import Mathlib.Data.Matrix.Notation
 
 open scoped BigOperators Matrix
@@ -2007,5 +2012,474 @@ theorem tri_threshold_mono_QA :
   rwa [Real.sqrt_sq (by norm_num : (0:ℝ) ≤ 1/8)] at h
 
 end Triangle
+
+/-!
+## The per-pair resistance refinement of the oversmoothing ceiling
+
+`Oversmoothing.lean`'s per-pair follow-on (delivered 2026-08-31,
+`proposals/message-passing-depth-mixing-bound.md` Deferred item 1),
+exercised on the triangle and the 4-cycle:
+
+- **Exact attainment on K₃** at `t = 1` and `t = 2`: the four-point
+  contrast at the adjacent pair is exactly the theorem's bound
+  (`1 = (3/2) · √(2/3) · √(2/3)`, `1/2 = (3/4) · √(2/3) · √(2/3)`) —
+  the bound is tight on the fixture, the strongest QA shape a bound
+  theorem can have.
+- The packaged corollary's instance at the same fixture
+  (`2 · 2 · (1/2)² · (2/3) = 2/3 ≥ 1/2`, non-vacuous slack against the
+  tight bound), and the `λ ≤ 2d` engine pinned at `3 ≤ 4` both by the
+  engine and independently by the spectrum cases.
+- **The C₄ mode-coverage fence**: the contrast bound's rate hypothesis
+  must quantify over *every* decaying mode — a certificate covering
+  only the mid modes `λ = 2` (where it genuinely holds at `ρ = 0`)
+  makes the dropped-hypothesis statement false (the contrast is `1`
+  against the bound `0`).
+-/
+
+
+local notation "triLap" => laplacian triAdj
+local notation "triLapH" => laplacian_symmetric triAdj triAdj_isSymm
+
+/-- Sum-linearity helpers (elaboration-safe explicit forms of the
+`Finset` rewrites, avoiding the instance-stuck metavars). -/
+theorem sum_sub_help {ι : Type*} [Fintype ι] (X Y : ι → ℝ) :
+    ∑ j, (X j - Y j) = ∑ j, X j - ∑ j, Y j := Finset.sum_sub_distrib
+
+theorem mul_sum_help {ι : Type*} [Fintype ι] (a : ℝ) (f : ι → ℝ) :
+    a * ∑ j, f j = ∑ j, a * f j := Finset.mul_sum Finset.univ f a
+
+/-- Entry form of the triangle's combinatorian Laplacian action. -/
+theorem tri_lap_mulVec_apply (w : Fin 3 → ℝ) (j : Fin 3) :
+    (triLap *ᵥ w) j = 2 * w j - (∑ k, triAdj j k * w k) := by
+  simp only [laplacian, Matrix.mulVec, Matrix.dotProduct,
+    Matrix.sub_apply, sub_mul, Finset.sum_sub_distrib, degreeMatrix,
+    dite_eq_ite, ite_mul, zero_mul, Finset.sum_ite_eq, Finset.mem_univ,
+    if_true, triAdj_deg_eq]
+
+/-- **The triangle's combinatorial spectrum**: every Laplacian
+eigenvalue is `0` or `3` (the QA file's normalized
+`tri_eigvalOf_cases`, mirrored on the combinatorian operator). -/
+theorem tri_lap_eigvalOf_cases (i : Fin 3) :
+    eigvalOf triLap triLapH i = 0 ∨ eigvalOf triLap triLapH i = 3 := by
+  have hquad := quadForm_eigvecOf_self triLapH i
+  have hunit : ∑ k, eigvecOf triLap triLapH i k
+        * eigvecOf triLap triLapH i k = 1 := by
+    simpa using eigvecOf_inner triLap triLapH i i
+  have hrow : ∀ k : Fin 3, ∑ j, triAdj j k = 2 := by
+    intro k
+    fin_cases k <;>
+      simp [triAdj_apply, Fin.sum_univ_three] <;>
+      norm_num
+  have hsumrow : ∑ j, ∑ k, triAdj j k * eigvecOf triLap triLapH i k
+      = 2 * ∑ j, eigvecOf triLap triLapH i j := by
+    rw [Finset.sum_comm]
+    have hstep : ∑ k, (∑ j, triAdj j k * eigvecOf triLap triLapH i k)
+        = ∑ k, 2 * eigvecOf triLap triLapH i k := by
+      refine Finset.sum_congr rfl fun k _ => ?_
+      rw [Finset.sum_congr rfl
+          fun j _ => mul_comm (triAdj j k) (eigvecOf triLap triLapH i k),
+        ← Finset.mul_sum, hrow k]
+      ring
+    rw [hstep, ← Finset.mul_sum]
+  have hact : triLap *ᵥ (eigvecOf triLap triLapH i)
+      = eigvalOf triLap triLapH i • (eigvecOf triLap triLapH i) :=
+    (isHermitian_of_isSymm triLapH).mulVec_eigenvectorBasis i
+  have hzero : eigvalOf triLap triLapH i
+      * (∑ j, eigvecOf triLap triLapH i j) = 0 := by
+    have hsumact : ∑ j, (triLap *ᵥ eigvecOf triLap triLapH i) j
+        = ∑ j, eigvalOf triLap triLapH i * eigvecOf triLap triLapH i j :=
+      Finset.sum_congr rfl fun j _ => by rw [hact]; simp
+    rw [← mul_sum_help (eigvalOf triLap triLapH i)
+        (fun j => eigvecOf triLap triLapH i j)] at hsumact
+    have hLsum : ∑ j, (triLap *ᵥ eigvecOf triLap triLapH i) j = 0 := by
+      rw [Finset.sum_congr rfl
+          fun j _ => tri_lap_mulVec_apply (eigvecOf triLap triLapH i) j,
+        sum_sub_help (fun j => 2 * eigvecOf triLap triLapH i j)
+          (fun j => ∑ k, triAdj j k * eigvecOf triLap triLapH i k),
+        ← mul_sum_help 2 (fun j => eigvecOf triLap triLapH i j), hsumrow]
+      ring
+    rw [hLsum] at hsumact
+    linarith
+  have hvAv : ∑ j, eigvecOf triLap triLapH i j
+        * (∑ k, triAdj j k * eigvecOf triLap triLapH i k)
+      = (∑ j, eigvecOf triLap triLapH i j) ^ 2 - 1 := by
+    simp only [Fin.sum_univ_three] at hunit
+    have hrow0 : (∑ k, triAdj 0 k * eigvecOf triLap triLapH i k)
+        = eigvecOf triLap triLapH i 1 + eigvecOf triLap triLapH i 2 := by
+      simp [triAdj_apply, Fin.sum_univ_three]
+    have hrow1 : (∑ k, triAdj 1 k * eigvecOf triLap triLapH i k)
+        = eigvecOf triLap triLapH i 0 + eigvecOf triLap triLapH i 2 := by
+      simp [triAdj_apply, Fin.sum_univ_three]
+    have hrow2 : (∑ k, triAdj 2 k * eigvecOf triLap triLapH i k)
+        = eigvecOf triLap triLapH i 0 + eigvecOf triLap triLapH i 1 := by
+      simp [triAdj_apply, Fin.sum_univ_three]
+    rw [show (∑ j, eigvecOf triLap triLapH i j
+            * (∑ k, triAdj j k * eigvecOf triLap triLapH i k))
+          = eigvecOf triLap triLapH i 0 * (∑ k, triAdj 0 k * eigvecOf triLap triLapH i k)
+            + eigvecOf triLap triLapH i 1 * (∑ k, triAdj 1 k * eigvecOf triLap triLapH i k)
+            + eigvecOf triLap triLapH i 2 * (∑ k, triAdj 2 k * eigvecOf triLap triLapH i k)
+          from Fin.sum_univ_three _,
+      hrow0, hrow1, hrow2,
+      show (∑ j, eigvecOf triLap triLapH i j)
+          = eigvecOf triLap triLapH i 0 + eigvecOf triLap triLapH i 1
+            + eigvecOf triLap triLapH i 2 from Fin.sum_univ_three _]
+    linear_combination (-1) * hunit
+  have hqf : eigvalOf triLap triLapH i
+      = 3 - (∑ j, eigvecOf triLap triLapH i j) ^ 2 := by
+    have hexp : quadForm triLap (eigvecOf triLap triLapH i)
+        = 2 * 1 - ((∑ j, eigvecOf triLap triLapH i j) ^ 2 - 1) := by
+      have hsplit : quadForm triLap (eigvecOf triLap triLapH i)
+          = ∑ j, (eigvecOf triLap triLapH i j * (2 * eigvecOf triLap triLapH i j)
+              - eigvecOf triLap triLapH i j
+                * (∑ k, triAdj j k * eigvecOf triLap triLapH i k)) := by
+        simp only [quadForm, Matrix.dotProduct, tri_lap_mulVec_apply,
+          sub_mul]
+        exact Finset.sum_congr rfl fun j _ => by ring
+      rw [hsplit, sum_sub_help _ _,
+        Finset.sum_congr rfl fun j _ => show eigvecOf triLap triLapH i j
+          * (2 * eigvecOf triLap triLapH i j)
+          = 2 * (eigvecOf triLap triLapH i j * eigvecOf triLap triLapH i j)
+          from by ring,
+        ← mul_sum_help 2 (fun j => eigvecOf triLap triLapH i j
+          * eigvecOf triLap triLapH i j),
+        hunit, hvAv]
+    rw [← hquad, hexp]
+    ring
+  rcases mul_eq_zero.mp hzero with h0 | hs0
+  · exact Or.inl h0
+  · refine Or.inr ?_
+    rw [hqf, hs0]
+    ring
+
+/-- The triangle's mode-rate certificate, at equality: every decaying
+mode is the top mode `λ = 3` with walk factor `1 − 3/2 = −1/2`. -/
+theorem tri_lap_hrate (t : ℕ) (k : Fin 3)
+    (hk : eigvalOf triLap triLapH k ≠ 0) :
+    eigvalOf triLap triLapH k * |1 - eigvalOf triLap triLapH k / 2| ^ t
+      = 3 * (1 / 2) ^ t := by
+  rcases tri_lap_eigvalOf_cases k with h | h
+  · exact absurd h hk
+  · rw [h]
+    have habs : |(1 : ℝ) - 3 / 2| = 1 / 2 := by norm_num
+    rw [habs]
+
+/-- `f = ![1, 1/3, 2/3]` solves the `e 0 − e 1` unit demand on the
+triangle. -/
+theorem tri_pot01 :
+    triLap *ᵥ ![1, 1/3, 2/3]
+      = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [laplacian, degreeMatrix, deg, triAdj, Matrix.mulVec,
+      Matrix.dotProduct, Fin.sum_univ_three] <;>
+    try norm_num
+
+/-- **Triangle resistance:** `R 0 1 = 2/3` (the direct edge in parallel
+with the two-edge path of resistance `2`). -/
+theorem tri_R01 : effectiveResistance triAdj 0 1 = 2 / 3 :=
+  effectiveResistance_eq triAdj triAdj_isSymm triAdj_nonneg tri_connected
+    ⟨![1, 1/3, 2/3], tri_pot01, by norm_num [Matrix.cons_val']⟩
+
+/-- The one-step law from vertex 1 on the triangle: `(1/2, 0, 1/2)`. -/
+theorem tri_dist_one_one : walkDistribution triAdj 1 1 = ![1/2, 0, 1/2] := by
+  rw [walkDistribution_succ, walkDistribution_zero]
+  funext i
+  fin_cases i
+  all_goals simp [walkTransitionMatrix, deg, triAdj, Matrix.mulVec,
+    Matrix.dotProduct, Fin.sum_univ_three, Pi.single_apply]
+  all_goals norm_num
+
+/-- The two-step law from vertex 1: `(1/4, 1/2, 1/4)`. -/
+theorem tri_dist_two_one : walkDistribution triAdj 2 1 = ![1/4, 1/2, 1/4] := by
+  have h2 : walkDistribution triAdj 2 1
+      = (walkTransitionMatrix triAdj)ᵀ *ᵥ walkDistribution triAdj 1 1 :=
+    walkDistribution_succ triAdj 1 1
+  rw [h2, tri_dist_one_one]
+  funext i
+  fin_cases i
+  all_goals simp [walkTransitionMatrix_apply, triAdj_deg_eq, triAdj_apply,
+    Matrix.mulVec, Matrix.dotProduct, Matrix.transpose_apply,
+    Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons]
+  all_goals norm_num
+
+/-- **Exact attainment at `t = 1`**: the four-point contrast at the
+pair `((0,1), (0,1))` is exactly `1`, and so is the theorem's bound
+`(3/2) · √(2/3) · √(2/3)` — the resistance-contrast bound is tight on
+the triangle at the first step. -/
+theorem tri_contrast_one_val_QA :
+    |(walkDistribution triAdj 1 0 0 - walkDistribution triAdj 1 1 0)
+      - (walkDistribution triAdj 1 0 1 - walkDistribution triAdj 1 1 1)|
+      = 1 := by
+  rw [tri_dist_one_QA, tri_dist_one_one]
+  norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+theorem tri_contrast_one_bound_eq_QA :
+    3 * (1 / 2 : ℝ) ^ 1 * Real.sqrt (effectiveResistance triAdj 0 1)
+        * Real.sqrt (effectiveResistance triAdj 0 1) = 1 := by
+  rw [tri_R01]
+  have h2 : Real.sqrt (2 / 3) * Real.sqrt (2 / 3) = 2 / 3 :=
+    Real.mul_self_sqrt (by norm_num : (0:ℝ) ≤ 2 / 3)
+  linear_combination (3 / 2) * h2
+
+theorem tri_contrast_one_le_QA :
+    |(walkDistribution triAdj 1 0 0 - walkDistribution triAdj 1 1 0)
+      - (walkDistribution triAdj 1 0 1 - walkDistribution triAdj 1 1 1)|
+      ≤ 3 * (1 / 2 : ℝ) ^ 1 * Real.sqrt (effectiveResistance triAdj 0 1)
+          * Real.sqrt (effectiveResistance triAdj 0 1) :=
+  walkDistribution_pair_contrast_abs_le triAdj_isSymm triAdj_nonneg
+    triAdj_deg_eq (by norm_num) tri_connected _ (by norm_num) 1 0 1 0 1
+    (fun k hk => le_of_eq (tri_lap_hrate 1 k hk))
+
+/-- **Exact attainment at `t = 2`**: the contrast is `1/2` and so is
+the bound `(3/4) · √(2/3) · √(2/3)` — attained again. -/
+theorem tri_contrast_two_val_QA :
+    |(walkDistribution triAdj 2 0 0 - walkDistribution triAdj 2 1 0)
+      - (walkDistribution triAdj 2 0 1 - walkDistribution triAdj 2 1 1)|
+      = 1/2 := by
+  rw [tri_dist_two_QA, tri_dist_two_one]
+  norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+theorem tri_contrast_two_le_QA :
+    |(walkDistribution triAdj 2 0 0 - walkDistribution triAdj 2 1 0)
+      - (walkDistribution triAdj 2 0 1 - walkDistribution triAdj 2 1 1)|
+      ≤ 3 * (1 / 2 : ℝ) ^ 2 * Real.sqrt (effectiveResistance triAdj 0 1)
+          * Real.sqrt (effectiveResistance triAdj 0 1) :=
+  walkDistribution_pair_contrast_abs_le triAdj_isSymm triAdj_nonneg
+    triAdj_deg_eq (by norm_num) tri_connected _ (by norm_num) 2 0 1 0 1
+    (fun k hk => le_of_eq (tri_lap_hrate 2 k hk))
+
+/-- **The packaged corollary's instance at the same fixture**: with the
+walk family's own certificate `r = 1/2`, the `2d r^t` bound at `t = 2`
+is `2 · 2 · (1/2)² · (2/3) = 2/3 ≥ 1/2` — non-vacuous slack against the
+exact tight bound `1/2`. -/
+theorem tri_contrast_two_packaged_QA :
+    |(walkDistribution triAdj 2 0 0 - walkDistribution triAdj 2 1 0)
+      - (walkDistribution triAdj 2 0 1 - walkDistribution triAdj 2 1 1)|
+      ≤ 2 * (2 : ℝ) * (1 / 2) ^ 2 * Real.sqrt (effectiveResistance triAdj 0 1)
+          * Real.sqrt (effectiveResistance triAdj 0 1) :=
+  walkDistribution_pair_contrast_abs_le' triAdj_isSymm triAdj_nonneg
+    triAdj_deg_eq (by norm_num) tri_connected (1/2) (by norm_num) 2 0 1 0 1
+    (fun k hk => by
+      rcases tri_lap_eigvalOf_cases k with h | h
+      · exact absurd h hk
+      · rw [h, show (1 : ℝ) - 3 / 2 = -(1 / 2) from by norm_num, abs_neg,
+          abs_of_pos (by norm_num : (0 : ℝ) < 1 / 2)])
+
+/-- **The `λ ≤ 2d` engine pinned at the fixture**: the triangle's top
+eigenvalue `3` is at most `2 · 2 = 4` — both by the engine and
+independently by the spectrum cases. -/
+theorem tri_lam_le_four_engine_QA (k : Fin 3) :
+    eigvalOf triLap triLapH k ≤ 2 * (2 : ℝ) :=
+  eigvalOf_laplacian_le_two_mul triAdj_isSymm triAdj_nonneg triAdj_deg_eq k
+
+theorem tri_lam_le_four_cases_QA (k : Fin 3) :
+    eigvalOf triLap triLapH k ≤ 4 := by
+  rcases tri_lap_eigvalOf_cases k with h | h <;> rw [h] <;> norm_num
+
+/-!
+## The C₄ mode-coverage fence
+
+The contrast bound's rate hypothesis must cover **every** decaying
+mode. On the 4-cycle the decaying modes split into the mid modes
+`λ = 2` (walk factor `0`) and the top mode `λ = 4` (walk factor `−1`,
+`λ · |1 − λ/2| = 4`); the whole `t = 1` contrast at the adjacent pair
+is carried by the top mode. A certificate that covers only the mid
+modes (`ρ = 0` genuinely certifies `λ · |1 − λ/2| ≤ 0` at every
+`λ = 2` mode) makes the dropped-hypothesis statement false: the
+contrast is `1` against the bound `0`. The mode quantifier is
+load-bearing.
+-/
+
+section C4Fence
+
+/-- Adjacency of the 4-cycle `0 — 1 — 2 — 3 — 0`. -/
+def c4Adj : Matrix (Fin 4) (Fin 4) ℝ :=
+  Matrix.of !![0, 1, 0, 1; 1, 0, 1, 0; 0, 1, 0, 1; 1, 0, 1, 0]
+
+theorem c4Adj_isSymm : c4Adj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [c4Adj]
+
+theorem c4Adj_nonneg : ∀ i j, 0 ≤ c4Adj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [c4Adj]
+
+theorem c4Adj_deg_eq (i : Fin 4) : deg c4Adj i = 2 := by
+  fin_cases i <;> simp [deg, c4Adj, Fin.sum_univ_four] <;> norm_num
+
+theorem c4_adj01 : (supportGraph c4Adj c4Adj_isSymm).Adj (0 : Fin 4) 1 := by
+  rw [supportGraph_adj]
+  exact ⟨by decide, by simp [c4Adj]⟩
+
+theorem c4_adj12 : (supportGraph c4Adj c4Adj_isSymm).Adj (1 : Fin 4) 2 := by
+  rw [supportGraph_adj]
+  exact ⟨by decide, by simp [c4Adj]⟩
+
+theorem c4_adj23 : (supportGraph c4Adj c4Adj_isSymm).Adj (2 : Fin 4) 3 := by
+  rw [supportGraph_adj]
+  exact ⟨by decide, by simp [c4Adj]⟩
+
+theorem c4Adj_connected : (supportGraph c4Adj c4Adj_isSymm).Connected := by
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  refine ⟨0, ?_⟩
+  intro v
+  fin_cases v
+  · exact ⟨SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons c4_adj01 SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons c4_adj01
+      (SimpleGraph.Walk.cons c4_adj12 SimpleGraph.Walk.nil)⟩
+  · exact ⟨SimpleGraph.Walk.cons c4_adj01
+      (SimpleGraph.Walk.cons c4_adj12
+        (SimpleGraph.Walk.cons c4_adj23 SimpleGraph.Walk.nil))⟩
+
+/-- The minimal polynomial fact behind the cycle's spectrum:
+`A³ = 4A` (each vertex's two-step and three-step neighborhoods on the
+4-cycle collapse: `A e₀ = e₁ + e₃`, `A² e₀ = 2e₀ + 2e₂`,
+`A³ e₀ = 4 (e₁ + e₃)`). -/
+theorem c4Adj_cube : c4Adj * c4Adj * c4Adj = (4 : ℝ) • c4Adj := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [Matrix.mul_apply, Fin.sum_univ_four, c4Adj] <;>
+    norm_num
+
+local notation "c4Lap" => laplacian c4Adj
+local notation "c4LapH" => laplacian_symmetric c4Adj c4Adj_isSymm
+
+/-- **The cycle's combinatorial spectrum**: every Laplacian eigenvalue
+is `0`, `2`, or `4` — from `A³ = 4A` applied at the eigenvector (the
+walk factor `2 − λ` satisfies `(2 − λ)³ = 4 (2 − λ)`). -/
+theorem c4_lap_eigvalOf_cases (k : Fin 4) :
+    eigvalOf c4Lap c4LapH k = 0 ∨ eigvalOf c4Lap c4LapH k = 2
+      ∨ eigvalOf c4Lap c4LapH k = 4 := by
+  have hactA : c4Adj *ᵥ (eigvecOf c4Lap c4LapH k)
+      = (2 - eigvalOf c4Lap c4LapH k) • (eigvecOf c4Lap c4LapH k) :=
+    adjacency_mulVec_eigvecOf_laplacian c4Adj_isSymm c4Adj_deg_eq k
+  have hun : Matrix.dotProduct (eigvecOf c4Lap c4LapH k)
+      (eigvecOf c4Lap c4LapH k) = 1 := by
+    simpa [Matrix.dotProduct] using eigvecOf_inner c4Lap c4LapH k k
+  have hvne : eigvecOf c4Lap c4LapH k ≠ 0 := by
+    intro h0
+    rw [h0] at hun
+    norm_num at hun
+  have hcube : (c4Adj * c4Adj * c4Adj) *ᵥ (eigvecOf c4Lap c4LapH k)
+      = (4 : ℝ) • (c4Adj *ᵥ eigvecOf c4Lap c4LapH k) := by
+    rw [c4Adj_cube]
+    exact Matrix.smul_mulVec_assoc (4 : ℝ) c4Adj _
+  have hexp : (c4Adj * c4Adj * c4Adj) *ᵥ (eigvecOf c4Lap c4LapH k)
+      = (((2 - eigvalOf c4Lap c4LapH k) * (2 - eigvalOf c4Lap c4LapH k))
+          * (2 - eigvalOf c4Lap c4LapH k)) • (eigvecOf c4Lap c4LapH k) := by
+    rw [show (c4Adj * c4Adj * c4Adj) *ᵥ (eigvecOf c4Lap c4LapH k)
+          = c4Adj *ᵥ (c4Adj *ᵥ (c4Adj *ᵥ eigvecOf c4Lap c4LapH k)) from by
+        rw [← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec]]
+    rw [hactA, Matrix.mulVec_smul, hactA, Matrix.mulVec_smul,
+      Matrix.mulVec_smul, hactA, smul_smul, smul_smul]
+  have hkey : ((2 - eigvalOf c4Lap c4LapH k) * (2 - eigvalOf c4Lap c4LapH k))
+        * (2 - eigvalOf c4Lap c4LapH k)
+      = 4 * (2 - eigvalOf c4Lap c4LapH k) := by
+    have h1 : (((2 - eigvalOf c4Lap c4LapH k)
+            * (2 - eigvalOf c4Lap c4LapH k))
+            * (2 - eigvalOf c4Lap c4LapH k)
+          - 4 * (2 - eigvalOf c4Lap c4LapH k)) •
+        (eigvecOf c4Lap c4LapH k) = 0 := by
+      have hA3 : (((2 - eigvalOf c4Lap c4LapH k)
+              * (2 - eigvalOf c4Lap c4LapH k))
+            * (2 - eigvalOf c4Lap c4LapH k)) •
+          (eigvecOf c4Lap c4LapH k)
+          = (c4Adj * c4Adj * c4Adj) *ᵥ (eigvecOf c4Lap c4LapH k) :=
+        hexp.symm
+      have h4 : (4 * (2 - eigvalOf c4Lap c4LapH k))
+          • (eigvecOf c4Lap c4LapH k)
+          = (4 : ℝ) • (c4Adj *ᵥ eigvecOf c4Lap c4LapH k) := by
+        rw [(smul_smul (4 : ℝ) _ _).symm, ← hactA]
+      rw [sub_smul, hA3, h4, hcube]
+      exact sub_self _
+    rw [smul_eq_zero] at h1
+    rcases h1 with h2 | h3
+    · linarith
+    · exact absurd h3 hvne
+  have h3 : (2 - eigvalOf c4Lap c4LapH k)
+        * ((2 - eigvalOf c4Lap c4LapH k) ^ 2 - 4) = 0 := by
+    linear_combination hkey
+  rcases mul_eq_zero.mp h3 with h4 | h5
+  · exact Or.inr (Or.inl (by linarith))
+  · have h6 : ((2 - eigvalOf c4Lap c4LapH k) + 2)
+        * ((2 - eigvalOf c4Lap c4LapH k) - 2) = 0 := by
+      linear_combination h5
+    rcases mul_eq_zero.mp h6 with h7 | h8
+    · exact Or.inr (Or.inr (by linarith))
+    · exact Or.inl (by linarith)
+
+/-- `f = ![3/8, -3/8, -1/8, 1/8]` solves the `e 0 − e 1` unit demand on
+the cycle (the antisymmetric potential). -/
+theorem c4_pot01 :
+    c4Lap *ᵥ ![3/8, -3/8, -1/8, 1/8]
+      = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [laplacian, degreeMatrix, deg, c4Adj, Matrix.mulVec,
+      Matrix.dotProduct, Fin.sum_univ_four] <;>
+    try norm_num
+
+/-- **Cycle resistance:** `R 0 1 = 3/4` (the direct edge in parallel
+with the three-edge path: `1 ⊕ 3 = 3/4`). -/
+theorem c4_R01 : effectiveResistance c4Adj 0 1 = 3 / 4 :=
+  effectiveResistance_eq c4Adj c4Adj_isSymm c4Adj_nonneg c4Adj_connected
+    ⟨![3/8, -3/8, -1/8, 1/8], c4_pot01, by norm_num [Matrix.cons_val']⟩
+
+theorem c4_dist_one_zero :
+    walkDistribution c4Adj 1 0 = ![0, 1/2, 0, 1/2] := by
+  rw [walkDistribution_succ, walkDistribution_zero]
+  funext i
+  fin_cases i
+  all_goals simp [walkTransitionMatrix, deg, c4Adj, Matrix.mulVec,
+    Matrix.dotProduct, Fin.sum_univ_four, Pi.single_apply]
+  all_goals norm_num
+
+theorem c4_dist_one_one :
+    walkDistribution c4Adj 1 1 = ![1/2, 0, 1/2, 0] := by
+  rw [walkDistribution_succ, walkDistribution_zero]
+  funext i
+  fin_cases i
+  all_goals simp [walkTransitionMatrix, deg, c4Adj, Matrix.mulVec,
+    Matrix.dotProduct, Fin.sum_univ_four, Pi.single_apply]
+  all_goals norm_num
+
+/-- **The mode-coverage fence**: the contrast bound's rate hypothesis
+must quantify over *every* decaying mode. The statement below weakens
+it to the `λ ≠ 4` modes only — a certificate `ρ = 0` that genuinely
+holds there (the `λ = 2` modes have walk factor `0`) — and is refuted:
+the `t = 1` contrast at the adjacent pair is exactly `1` against the
+bound `ρ · √R · √R = 0`. -/
+theorem c4_contrast_dropped_hyp_refuted_QA :
+    ¬ (∀ ρ : ℝ, (∀ k : Fin 4, eigvalOf c4Lap c4LapH k ≠ 4 →
+          eigvalOf c4Lap c4LapH k
+            * |1 - eigvalOf c4Lap c4LapH k / 2| ^ 1 ≤ ρ) →
+        |(walkDistribution c4Adj 1 0 0 - walkDistribution c4Adj 1 1 0)
+          - (walkDistribution c4Adj 1 0 1 - walkDistribution c4Adj 1 1 1)|
+          ≤ ρ * Real.sqrt (effectiveResistance c4Adj 0 1)
+              * Real.sqrt (effectiveResistance c4Adj 0 1)) := by
+  intro h
+  have hcert : ∀ k : Fin 4, eigvalOf c4Lap c4LapH k ≠ 4 →
+      eigvalOf c4Lap c4LapH k
+        * |1 - eigvalOf c4Lap c4LapH k / 2| ^ 1 ≤ 0 := by
+    intro k hk
+    rcases c4_lap_eigvalOf_cases k with h0 | h2 | h4
+    · rw [h0]
+      norm_num
+    · rw [h2]
+      norm_num
+    · exact absurd h4 hk
+  have hbad := h 0 hcert
+  rw [c4_dist_one_zero, c4_dist_one_one, c4_R01] at hbad
+  have hzero : (0 : ℝ) * Real.sqrt (3 / 4) * Real.sqrt (3 / 4) = 0 := by
+    ring
+  rw [hzero] at hbad
+  norm_num at hbad
+
+
+
+
+end C4Fence
 
 end SpectralGraphTheory.QA

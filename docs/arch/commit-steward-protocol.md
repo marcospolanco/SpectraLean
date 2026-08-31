@@ -2,15 +2,39 @@
 
 **Status:** Operating procedure, formalizing a role performed manually in
 chat across the 2026-08-26 through 2026-08-29 sessions. Written so the
-role can be handed to a subagent, a scheduled script, or any future
-Claude Code session without re-deriving it from scratch.
+role can be handed to an isolated Antigravity 2.0 SDK process, a
+scheduled script, or any future agent session without re-deriving it
+from scratch.
 
 **Companion to:** `docs/arch/scaffold-agentic-architecture-review.md`,
 which names this function "the Isolated Read-Only Commit Steward" in
-its control-plane diagram (§1: "the control plane relies exclusively on
-synchronous deterministic linters and an isolated, read-only commit
-steward") but does not specify its procedure. This document is that
-specification.
+its control-plane diagram and specifies the adopted ADK + Antigravity
+mix in §7.0. This document is the steward's procedure; the ADK spine
+starts it after the generator has exited and does not become it.
+
+**Sequence 0 is not implemented.** Live unattended `--commit` still
+fails four criteria. The guarantee that would close them:
+
+> **The exact Git tree that passed the complete trusted verification
+> ladder is the exact tree committed.**
+
+1. **Verifies one state, commits another.** Ladder runs on the live
+   worktree; then `git add -A` stages whatever exists. No immutable
+   snapshot. Close: temp index → *T* → verify *T* → `commit-tree` /
+   `update-ref` (Step 7 replacement).
+2. **Verifier is inside the candidate change.** Worktree
+   `scripts/lint_axioms.py` (or `lakefile.lean`, toolchain pins) can
+   be the copy that blesses the same diff. Close: pinned verifier;
+   trust-root diffs fail closed to human review.
+3. **Unattended ladder is incomplete.** `verify_for_commit` omits
+   `check_refutation_independence.py` and
+   `check_public_reachability.py`. Close: the full Step 3 table as a
+   versioned fail-closed manifest.
+4. **No enforced internal time budget.** The 12-step brake is prompt
+   guidance. Close: host wall-clock/CPU on the generator.
+
+This protects against races, accidental edits, stale checks, and
+runaway runs. It does not assume a malicious agent.
 
 ## 1. Why this role exists
 
@@ -83,7 +107,7 @@ same function as a steward that reads no records at all.
 
 ## 3. Procedure: the mechanical verification gate
 
-### Step 0 — Liveness check
+### Step 0 — Liveness check (live; insufficient — see Adopted Sequence 0)
 
 ```sh
 scripts/isrunning
@@ -102,7 +126,13 @@ trigger rather than polling in a tight loop.
 
 If nothing is running, proceed. Note the process being absent is not
 proof the tree is stable for the whole duration of what follows — see
-Step 6.
+Step 6. **This check plus Step 6's one-second status diff is not an
+atomic lock** (architecture review R-07, R-13). Sequence 0 replaces both
+with a temporary index, tree OID *T* (`write-tree` serializes the
+index, not the worktree), verification of a checkout of *T*,
+`C=$(git commit-tree T -p P)`, and `git update-ref <ref> C P`.
+A cooperative lock is not a substitute for that compare-and-swap.
+Planned, not implemented.
 
 ### Step 1 — Read every unverified delivery record, in full
 
@@ -184,6 +214,18 @@ A record claiming these passed is not a substitute for running them.
 Every commit in this project's history that cites a verification
 ladder was re-run by the steward before being trusted, not copied from
 the agent's own log.
+
+The live `--commit` wrapper's `verify_for_commit` currently **omits**
+`check_refutation_independence.py` and `check_public_reachability.py`
+(architecture review R-09). Sequence 0 makes this entire table a
+versioned fail-closed manifest and runs the Python steps from a
+**pinned** verifier (last trusted commit or image), not from a
+worktree the generator may have edited. Unattended `--commit` fails
+closed (human review) if the **trust root** changed: `scripts/`
+(including the verification manifest), `lakefile.lean`,
+`lake-manifest.json`, `lean-toolchain`, and tracked hooks or other
+Lake/toolchain pins — not only `scripts/` and `lakefile.lean`.
+Planned, not implemented.
 
 ### Step 4 — Escalated verification for high-stakes changes
 
@@ -268,6 +310,26 @@ git commit -m "<message>"
 git push origin main
 ```
 
+**Adopted Sequence 0 replacement for this step (not implemented):**
+`git write-tree` serializes the **index**, not the working tree. Do not
+`git add -A` / `git commit` on the live worktree after the ladder.
+
+```sh
+# After generators (scoreboard, etc.) have finished — or prove they
+# leave T unchanged:
+export GIT_INDEX_FILE=/tmp/scaffold-verify.index
+git read-tree HEAD
+git add -A
+T=$(git write-tree)
+# pinned ladder against a checkout of T, not this worktree
+C=$(git commit-tree "$T" -p "$P" -m "$message")   # P = current tip
+git update-ref refs/heads/main "$C" "$P"          # atomic; fails if tip ≠ P
+```
+
+The steward may veto; a passing steward verdict is not a condition of
+this commit. `update-ref C P` is the compare-and-swap against an
+outside writer; a cooperative lock is not a substitute.
+
 Commit message content, every time:
 - what changed (the theorem/tool/proposal, one line each if there are
   several unrelated deliveries in one batch),
@@ -351,28 +413,73 @@ is license to skip the Lean-specific steps that don't apply.
 This document is written to be mechanically followable, which is what
 makes it portable off of "a human pastes `git status` into chat":
 
-- **As a subagent definition**: §3 is a linear procedure with explicit
-  pass/fail bars and no branching that requires creative judgment
-  except Step 4's "is this high-stakes" trigger list and §4's
-  three-way scope decision — both are checklists, not open questions.
-  A subagent given this document plus repo access could run it
-  unattended, escalating to a human exactly at the two points this
-  document names one (§3's Failure Handling for Lean-judgment fixes;
-  §4's third row for human-only decisions).
-- **As a scheduled check**: Step 0 through Step 7 could run on a timer
-  or on a filesystem watch of `.opencode/runs/`, rather than waiting
-  for a human to notice `git status` has changes.
+- **As an isolated Antigravity 2.0 SDK process**: the steward is a
+  sibling started by trusted host code after the pursuit agent has
+  exited — not a child `invoke_subagent` of the generator (dynamic
+  subagents inherit parent permissions). Configure `google.antigravity`
+  deny-by-default: allow `view_file` / grep and host-owned verification
+  tools only; deny `run_command`, `write_to_file`, and git. The model
+  returns a structured verdict (`commit` / `wait` / `escalate`, plus
+  Conventional Commit subject and records-gap flags). The host
+  validates that verdict and is the only process that runs `git add` /
+  `git commit` / `git push`. `agy -p` is not this role: print mode
+  auto-approves writes, and `--sandbox` does not block `write_file`.
+- **§3 as a linear procedure**: pass/fail bars and no branching that
+  requires creative judgment except Step 4's "is this high-stakes"
+  trigger list and §4's three-way scope decision — both are checklists,
+  not open questions. Escalate to a human exactly at the two points
+  this document names one (§3's Failure Handling for Lean-judgment
+  fixes; §4's third row for human-only decisions). Antigravity's
+  `ask_user` policy is the hook for that third row.
+- **As a scheduled check**: Step 0 through Step 7 can run on an SDK
+  `every(N)` trigger or a filesystem watch of `.opencode/runs/`, rather
+  than waiting for a human to notice `git status` has changes. Step 0
+  (`scripts/isrunning`) still gates the rest.
 - **What would still need a human in the loop even fully automated**:
   §4's human-decision row, and any Step 3/4 failure whose diagnosis
   concludes the autonomous agent's own proposal or math is wrong in a
   way that needs a strategic redirection rather than a retry.
 
-Nothing here presumes the automation exists yet. It is written so that
-building it is a mechanical translation of this document, not a fresh
-design exercise.
+The live `--commit` path in `scripts/opencode-pursue` still uses a
+thinner Codex subject-line stand-in (`codex exec --ephemeral --sandbox
+read-only`). This section names the Google-stack steward as an
+**advisory** Sequence 3 target; it does not claim the wrapper has
+already been retargeted, and it does not make the steward an
+authorizer. **Advisory means veto or escalate only:** after the
+deterministic ladder has passed on tree *T*, a passing steward
+verdict is never the positive condition that authorizes `commit-tree T`.
+SDK deny-policies are not OS isolation (R-10). When the Sequence 0
+host gate in `docs/arch/scaffold-agentic-architecture-review.md` §7.0
+exists, that gate verifies and commits *T*; ADK (Sequence 2) may wrap
+the gate later and still must not give this process git.
+
+Nothing here presumes that retargeting exists yet. It is written so
+that building it is a mechanical translation of this document, not a
+fresh design exercise.
 
 ## Revision history
 
 - 2026-08-29 — Initial version, written after roughly a dozen verify-
   and-commit cycles performed manually in a single chat session,
   formalizing the procedure that had by then stabilized in practice.
+- 2026-08-30 — §6 names an isolated Antigravity 2.0 Python SDK process
+  (`google.antigravity`, deny-by-default, host-only git) as the
+  steward runtime; records that the live `--commit` wrapper is still
+  the thinner Codex subject-line stand-in.
+- 2026-08-30 — Companion and §6 note the adopted ADK + Antigravity mix
+  (`scaffold-agentic-architecture-review.md` §7.0): ADK launches this
+  steward after the generator exits; ADK does not absorb the role.
+- 2026-08-30 — Sequence 0 planning: exclusive lock + snapshot replaces
+  Step 0/6; pinned verifier + full ladder; steward is advisory only.
+  No wrapper change in this revision.
+- 2026-08-30 — A− regrade: Step 7 adopted replacement is `commit-tree`
+  of the verified tree OID; trust root includes `lean-toolchain`,
+  `lake-manifest.json`, hooks, and the verification manifest; steward
+  is veto-only, never the go-signal.
+- 2026-08-30 — Step 7 recipe made index-explicit: temporary
+  `GIT_INDEX_FILE`, `write-tree` → *T*, `commit-tree T -p P`,
+  `update-ref <ref> C P`; generators before *T*.
+- 2026-08-30 — Sequence 0 acceptance is the four live failures: verify
+  vs commit mismatch; verifier in the candidate tree; incomplete
+  ladder; prompt-only time budget. Transactional guarantee is the
+  one-sentence test.

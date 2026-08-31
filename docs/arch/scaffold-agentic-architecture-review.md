@@ -2,7 +2,7 @@
 ## Comprehensive System Review, Epistemological Audit, and Operational Evaluation
 
 **Status:** Technical Architecture Review & Evaluation — self-assessed against the cited `@fde/media` rubric; not externally certified  
-**Date:** August 2026 · figures current as of `docs/5_QA_SCOREBOARD.md`, 2026-08-21 (see Revision History, §10)  
+**Date:** August 2026 · live axiom/QA counts: `docs/5_QA_SCOREBOARD.md` (do not freeze them here; see §7.0)  
 **Target Repository:** `scaffold` (`Scaffold/`, `docs/`, `scripts/`, `proposals/`, `governance/`)  
 **Evaluation Framework:** `@fde/media` (*Agentic Architecture Guide*, *The Agentic Design Palace*, *ELOS: The Lighthouse*, *Applied AI Evaluation & Safety*, and `fde_agentic_flow.py`)
 
@@ -44,9 +44,9 @@ graph TB
         QA --> Derived
     end
 
-    Linters & LeanKernel --> GatedDecision{"All 6 Checks<br/>Passed?"}
+    Linters & LeanKernel --> GatedDecision{"Versioned ladder<br/>Passed?"}
     GatedDecision -- "No" --> Reject["Reject / Revert Worktree"]
-    GatedDecision -- "Yes" --> Steward["Isolated Read-Only Commit Steward<br/><code>codex exec --sandbox read-only</code>"]
+    GatedDecision -- "Yes" --> Steward["Advisory Commit Steward<br/>(Antigravity SDK; host still commits)"]
     Steward --> GitCommit["Trusted Git Commit<br/>(Conventional Commit Subject)"]
 
     LeanKernel -.-> Workload
@@ -61,6 +61,8 @@ Scaffold solves this fundamental dilemma through two architectural breakthroughs
 2. **Absolute Separation of Generation and Authority:** The autonomous agent possesses zero authority to execute git commits, push code, or declare axioms valid on its own self-report. The control plane relies exclusively on synchronous deterministic linters and an isolated, read-only commit steward.
 
 The commit steward's own procedure — what it actually checks, in what order, and where it escalates to a human rather than deciding alone — is formalized in [`commit-steward-protocol.md`](commit-steward-protocol.md), written after the role had run manually across several sessions and stabilized in practice.
+
+The **live** control plane is still `launchd` plus `scripts/opencode-pursue` (bash, markdown state, prompted 12-step brake, incomplete `verify_for_commit`). The **adopted** contract — Sequence 0 host harden, then durable ledger, then ADK, Antigravity **advisory** — is §7.0. That is planning, not a wrapper rewrite. Unattended `--commit` is not Sequence-0-complete.
 
 ---
 
@@ -80,7 +82,7 @@ flowchart LR
 #### 1.1 The AI Justification Gate
 In `@fde/media`, the primary rule is: *Never use an LLM where deterministic code, search, or rules suffice.* Scaffold adheres to this with extreme discipline:
 - **Deterministic Work:** Typechecking, proof verification, syntax parsing, citation validation, axiom counting, and markdown link verification are strictly delegated to deterministic software (`lake build`, Lean kernel, and Python linters in `scripts/`).
-- **Bounded AI Work:** High-dimensional conjecture pathfinding, Mathlib theorem discovery, Lean syntax generation, tactic sequence search, and draft refactoring are delegated to the autonomous agent (`glm-5.3` / `Codex`).
+- **Bounded AI Work:** High-dimensional conjecture pathfinding, Mathlib theorem discovery, Lean syntax generation, tactic sequence search, and draft refactoring are delegated to the autonomous agent (`glm-5.3` via OpenCode). Commit-subject and record-vs-diff judgment sit in a separate Antigravity 2.0 steward, not in that generating agent.
 
 #### 1.2 Metric Tree Formulation
 Scaffold's operational governance mirrors the $L0 \rightarrow L1 \rightarrow L2$ metric tree structure:
@@ -99,7 +101,7 @@ L0 (North Star): Verified, Axiom-Transparent SGT Theorem Crust Expansion Rate
 #### 1.3 Counter-Metrics & Anti-Goodharting Defense
 In `@fde/media`, an $L0$ metric without counter-metrics invites system corruption. Scaffold enforces hard quality and safety floors:
 - **`sorry`/`admit` Counter-Metric:** Hard invariant of **0 placeholder tokens** in `Scaffold/QA/**` and `Scaffold/Mathlib/**` (`docs/5_QA_SCOREBOARD.md`). An agent cannot falsely inflate theorem velocity by inserting `sorry`.
-- **Axiom Surface Counter-Metric:** Total public axioms are tracked continuously (11; `docs/5_QA_SCOREBOARD.md` is the live authority). Any new axiom requires explicit justification under `docs/2_ARCHITECTURE.md` §5.
+- **Axiom Surface Counter-Metric:** Total public axioms are tracked continuously in `docs/5_QA_SCOREBOARD.md` (the live authority; this review does not freeze a count). Any new axiom requires explicit justification under `docs/2_ARCHITECTURE.md` §5.
 - **Citation Precision Counter-Metric:** Every public axiom must have verified locator metadata in `index/sources/**`.
 
 ---
@@ -112,7 +114,7 @@ In `@fde/media`, an $L0$ metric without counter-metrics invites system corruptio
 | Boundary | `@fde/media` Requirement | Scaffold Implementation | Operational Enforcement |
 | :--- | :--- | :--- | :--- |
 | **01. Cost / Spend** | Hard circuit breakers before runaway inference loops | `scripts/zquota` + `--quota-threshold 90` | Exits with status `75` if provider quota exceeds 90% before run starts. |
-| **02. Authority** | No autonomous writes to un-sandboxed or irreversible targets | `AGENTS.md` working rules + `--commit` wrapper | Agent cannot `git push`, publish, or commit; commits are handled by an isolated, read-only Codex steward. |
+| **02. Authority** | No autonomous writes to un-sandboxed or irreversible targets | `AGENTS.md` working rules + `--commit` wrapper | Agent cannot `git push` or commit. Unattended commit is **not** Sequence-0-complete: verifier is worktree-mutable (R-06), ladder is a subset (R-09). Adopted: pinned verifier, host-only git, Antigravity advisory. |
 | **03. Data / Provenance** | PII tokenization, clean-room boundary, copyright safety | `docs/2_ARCHITECTURE.md` §8 & `governance/CONTRIBUTING.md` | Prohibits bulk copyrighted textbook extracts; mandates structural citations and topic indices. |
 | **04. Confidence / Trust** | Uncertainty floors, explicit refusal, no disguised hallucination | Explicit `axiom` keyword vs disguised `theorem := by sorry` | Trust boundary is rendered 100% transparent to the Lean compiler and human review. |
 
@@ -126,8 +128,8 @@ In `@fde/media`, an $L0$ metric without counter-metrics invites system corruptio
 $$\text{Rules} \rightarrow \text{Heuristics} \rightarrow \text{Classical ML} \rightarrow \text{LLM/RAG} \rightarrow \text{Bounded Agent} \rightarrow \text{Multi-Agent}$$
 
 Scaffold operates at the **Bounded Autonomous Agent** tier:
-- A single autonomous runner (`scripts/opencode-pursue`) executes bounded turns.
-- Multi-agent complexity is not adopted prematurely; rather, the agent uses tool calls (`lake build`, `view_file`, `replace_file_content`) to interact with the repository environment.
+- **Live:** a single autonomous runner (`scripts/opencode-pursue`) executes bounded turns; the agent uses tool calls (`lake build`, `view_file`, `replace_file_content`) to interact with the repository.
+- **Adopted (§7.0):** Sequence 0 hardens the live shell gate first. ADK 2.0 is a later supervisor (quota, ledger consumers, role nodes), not a second LLM and not the next patch. Picking ADK does not move the system up the ladder into a multi-agent mesh. Multi-agent specialization remains earned (Station 3.2) and lands as ADK nodes only after Sequences 0–1.
 
 #### 3.2 When Multi-Agent Is Earned
 `@fde/media` states that multi-agent systems are earned only when single-agent systems suffer from context window poisoning, role overloading, or conflicting write scopes.
@@ -184,7 +186,7 @@ sequenceDiagram
     participant Agent as LLM Agent (Untrusted Proposer)
     participant Kernel as Lean 4 Kernel (lake build)
     participant Linters as Python Linter Suite
-    participant Steward as Codex Commit Steward (Read-Only)
+    participant Steward as Antigravity Commit Steward (Read-Only SDK)
     participant Git as Git Worktree
 
     Operator->>Wrapper: opencode-pursue [--commit]
@@ -204,9 +206,9 @@ sequenceDiagram
         Linters-->>Wrapper: 0 lint errors, 0 sorry tokens
         Wrapper->>Kernel: Run full umbrella compilation
         Kernel-->>Wrapper: Lake build OK (0 errors)
-        Wrapper->>Steward: Inspect diff & activity log (ephemeral sandbox)
-        Steward-->>Wrapper: Return Conventional Commit subject
-        Wrapper->>Git: Execute trusted git commit
+        Wrapper->>Steward: Inspect diff & activity log (deny-by-default SDK process)
+        Steward-->>Wrapper: Structured verdict (subject, gap flags, commit/wait/escalate)
+        Wrapper->>Git: Execute trusted git commit (host only; never the steward)
         Wrapper-->>Operator: Pursuit completed & committed
     end
 ```
@@ -214,11 +216,13 @@ sequenceDiagram
 #### 6.1 Untrusted Model vs. Trusted Authorizer
 `@fde/media` Chapter 9 & 10 establish that **the model is an untrusted parser and proposer; trusted code alone authorizes and executes**.
 - The LLM can propose any Lean syntax, tactic, or documentation edit.
-- No model output is trusted on self-report. The `verify_for_commit` routine in `scripts/opencode-pursue` executes six independent deterministic validators in sequence.
-- If a single check fails, the git commit is completely blocked.
+- No model output is trusted on self-report. The `verify_for_commit` routine in `scripts/opencode-pursue` runs a **subset** of the `AGENTS.md` ladder (R-09: it omits `check_refutation_independence.py` and `check_public_reachability.py`). Sequence 0 replaces that subset with a versioned fail-closed manifest.
+- If a single required check fails, the git commit is completely blocked.
 
-#### 6.2 The Read-Only Commit Steward
-Rather than letting the generating agent write its own commit history, Scaffold passes the staged diff and `AGENT_ACTIVITY.md` to an isolated, read-only Codex instance (`codex exec --ephemeral --sandbox read-only`). The steward generates a standardized Conventional Commit subject, which is validated by a strict regex before the host shell executes `git commit`.
+#### 6.2 The Read-Only Commit Steward (veto only, never a go-signal)
+The adopted steward is an isolated Antigravity 2.0 Python SDK process (`google.antigravity`). Deny-by-default tool policy is necessary and **not sufficient** (R-10). A steward verdict may **veto or escalate**. After the deterministic ladder has passed on tree OID *T*, a passing steward verdict is **not** a positive authorization condition — the host commits *T* because the ladder passed, or it does not commit. `agy -p` is not this role. The steward is never a child `invoke_subagent` of the generator.
+
+The live `--commit` path still calls `codex exec` for a subject line. That stand-in is also not a go-signal in the adopted contract (today the wrapper treats a valid subject as required before `git commit` — Sequence 0 removes that as an authorization condition). Neither Codex nor Antigravity closes R-06–R-09 or R-13. Procedure: [`commit-steward-protocol.md`](commit-steward-protocol.md).
 
 ---
 
@@ -320,12 +324,12 @@ Evaluating Scaffold across the core engineering dimensions and production readin
 | 3. CHOOSE (Topology)| PASS      | 9.0/10 | Simplest viable single-agent baseline.    |
 | 4. COORDINATE(State)| WEAK+     | 7.0/10 | Markdown state sync; lack of typed schema;|
 |                     |           |        | step-progress control not code-enforced.  |
-| 5. AUTHORIZE(Safety)| PASS      | 10/10  | Model proposes; trusted code authorizes.  |
+| 5. AUTHORIZE(Safety)| WEAK+     | 7.0/10  | Host git is right; verifier is mutable; |
+|                     |           |        | ladder incomplete; 1s TOCTOU (R-06–09). |
 | 6. PROVE (Evals)    | PASS      | 10/10  | Negative witnesses; zero-sorry floor.     |
 +---------------------+-----------+--------+-------------------------------------------+
-| COMPOSITE           | PASS      | 90.8%  | Overall Grade: A- (unweighted mean of the |
-|                     |           |        | six scores above; self-assessed, not      |
-|                     |           |        | externally reviewed)                      |
+| COMPOSITE           | WEAK+     | 85.8%  | Unweighted mean. Unattended-commit slice  |
+|                     |           |        | graded B externally until Sequence 0.    |
 +---------------------------------------------------------------------------------------+
 ```
 
@@ -348,23 +352,24 @@ Evaluating Scaffold across the core engineering dimensions and production readin
 #### Dimension 3: CHOOSE (Simplest Viable Architecture) — **PASS [9.0 / 10]**
 - **Criteria:** Avoid premature multi-agent complexity; adopt multi-agent only when earned by fan-out or write isolation.
 - **Strengths:** Avoided premature multi-agent complexity; operates as a robust, single-agent supervisor loop with external verification. Explicitly documents architectural choices, alternatives rejected, and technical debt in `docs/2_ARCHITECTURE.md` §12.
-- **Identified Gap (-1.0):** Multi-agent specialization (separating Mathlib retrieval from Lean formalization) is now earned by the complexity of recent SGT theorems, but has not yet been formalized.
+- **Identified Gap (-1.0):** Multi-agent specialization (separating Mathlib retrieval from Lean formalization) is earned by recent SGT theorem complexity. The adopted shape is ADK nodes plus an Antigravity steward sibling (§7.0 / Phase 2); it is not yet implemented.
 
 #### Dimension 4: COORDINATE (State, Roles & Write Scopes) — **WEAK+ [7.0 / 10]**
 - **Criteria:** Typed contracts; one writer per state; shared state not chat memory; bounded termination.
-- **Strengths:** Run count limits and clear failure traps (`SIGINT`/`SIGTERM` handling) are code-enforced. Clear separation of commit (agent drafts, shell lints, Codex commits).
+- **Strengths:** Run count limits and clear failure traps (`SIGINT`/`SIGTERM` handling) are code-enforced. Clear separation of commit (agent drafts, shell lints, isolated steward judges, host commits).
 - **Identified Gaps (-3.0):**
   - **Unstructured Markdown State:** State is synchronized via free-form markdown (`EXECUTION_PLAN.md` and `AGENT_ACTIVITY.md`) rather than typed JSON schemas.
   - **Interleaved Write Scopes:** The same agent edits Lean source code, updates execution plans, and appends to activity logs in a single turn, risking state inconsistency.
   - **Fine-grained termination is prompted, not enforced (R-05):** deterministic termination in this architecture reduces to the quota gate and `--runs N`; the finer-grained "notice you're stuck and pivot" control (the 12-tool-step convention) is a prompted instruction the agent applies to itself, with no wrapper-level enforcement. See R-05 in §6 for a directly observed case where a run ran for hours past that convention on a single stuck proof before stopping via an unrelated harness limit.
 
-#### Dimension 5: AUTHORIZE (Control Plane Separation) — **PASS [10 / 10]**
+#### Dimension 5: AUTHORIZE (Control Plane Separation) — **WEAK+ [7.0 / 10]**
 - **Criteria:** Model proposes, trusted code authorizes; credentials never in context; forensic audit trail.
-- **Strengths (Flawless):** Zero trust placed in model self-reports. `verify_for_commit` executes 6 synchronous deterministic validators (`git diff --check`, `generate_qa_scoreboard.py`, `lint_axioms.py`, `check_citations.py`, `check_markdown_links.py`, `lake build`). Sandboxed read-only Codex inspection ensures commit subjects conform to Conventional Commit standards without granting write authority to the generating model.
+- **Strengths:** The generator is barred from `git commit` / `git push`. Lean and the Python linters are the evidence plane. The *intent* of an isolated steward plus host-only Git is correct.
+- **Identified Gaps (-3.0):** Four live Sequence 0 failures (verify/commit mismatch; verifier in the candidate tree; incomplete `verify_for_commit`; prompt-only 12-step). Also R-10 (SDK policy ≠ OS isolation). A steward *subject line* does not repair those. Sequence 0 is the AUTHORIZE recovery; the steward may veto, never authorize.
 
 #### Dimension 6: PROVE (Evals & Falsification) — **PASS [10 / 10]**
 - **Criteria:** Catastrophic slice gating; refusal of aggregate averages; negative testing; upstream platform reuse.
-- **Strengths (Flawless):** Uncompromising Popperian falsification: "Height is not evidence" (`docs/1_STRATEGY.md`). Rejects aggregate scores in favor of exact invariant satisfaction. Hard invariant of zero `sorry`/`admit` tokens across 998 QA declarations. Mandates negative witnesses that actively prove false axiom statements are refuted before admission. Systematic 6-step lifecycle for retiring admitted axioms to proved theorems.
+- **Strengths:** Uncompromising Popperian falsification: "Height is not evidence" (`docs/1_STRATEGY.md`). Rejects aggregate scores in favor of exact invariant satisfaction. Hard invariant of zero `sorry`/`admit` tokens in QA and `Scaffold/Mathlib` (counts: `docs/5_QA_SCOREBOARD.md`, not a frozen figure in this file). Mandates negative witnesses. Systematic lifecycle for retiring admitted axioms to proved theorems.
 
 ---
 
@@ -376,8 +381,9 @@ Evaluation against the 4 core dimensions of `AGENTIC_ARCHITECTURE_GUIDE.md` § *
 +-------------------------------------------------------------------------------+
 | READINESS CATEGORY | WEIGHT   | STATUS | PASS CRITERIA & EVIDENCE             |
 +--------------------+----------+--------+--------------------------------------+
-| 1. SAFETY          | BLOCKER  | PASS   | 100% - Pre-commit gate; read-only    |
-|                    |          |        | commit steward; sandbox enforcement. |
+| 1. SAFETY          | BLOCKER  | FAIL   | Mutable verifier (R-06); incomplete   |
+|                    |          |        | ladder (R-09); 1s TOCTOU (R-07).      |
+|                    |          |        | Sequence 0 is the recovery.           |
 |                    |          |        |                                      |
 | 2. RELIABILITY     | HIGH     | PASS   | 88% - Session resume; dirty tree     |
 |                    |          |        | lock; test suites. The 12-step brake |
@@ -399,7 +405,7 @@ Evaluation against the 4 core dimensions of `AGENTIC_ARCHITECTURE_GUIDE.md` § *
 | :--- | :--- | :--- |
 | **Opening Move** | Sketches multi-agent mesh / picks framework | Bounds problem & defines mathematical constraints (`1_STRATEGY.md` center-out rule). |
 | **Multi-Agent** | Assumes more agents equal smarter system | Single-agent pursuit with strict external verification; multi-agent deferred until earned. |
-| **Safety & Writes** | Human confirmation as only gate | Synchronous policy gate before any write (`verify_for_commit` executes 6 deterministic tools). |
+| **Safety & Writes** | Human confirmation as only gate | Synchronous policy gate is the *intent*; live `verify_for_commit` is an incomplete subset of `AGENTS.md` and runs worktree scripts (R-06, R-09). |
 | **Scale Bottleneck**| Adds more compute / expands context window | Identifies Lean elaboration and Mathlib graph traversal as binding bottleneck (`8_MATHLIB_COVERAGE_MAP.md`). |
 | **State Sync** | Chat memory or unstructured text blobs | Append-only audit journal with strict timestamps (`AGENT_ACTIVITY.md`); roadmap to typed JSON state. |
 | **Evaluation** | Average aggregate benchmark accuracy | Catastrophic slice gating & falsification (0-`sorry` invariant; negative-witness refutations). |
@@ -408,7 +414,7 @@ Evaluation against the 4 core dimensions of `AGENTIC_ARCHITECTURE_GUIDE.md` § *
 
 ## 6. Comprehensive Gap Analysis & Risk Register
 
-While Scaffold demonstrates world-class rigor in formal mathematics and verification gating, evaluating it against the production agentic standards of `@fde/media` reveals five structural improvement areas:
+While Scaffold demonstrates world-class rigor in formal mathematics and verification gating, evaluating it against the production agentic standards of `@fde/media` — and against the 2026-08-30 agent-stack review of the ADK/Antigravity mix — reveals these structural gaps:
 
 ```text
 +---------------------------------------------------------------------------------------------------+
@@ -416,12 +422,29 @@ While Scaffold demonstrates world-class rigor in formal mathematics and verifica
 +---------------------------------------------------------------------------------------------------+
 | Risk ID | Category         | Description                               | Severity | Mitigation     |
 +---------+------------------+-------------------------------------------+----------+----------------+
-| R-01    | State Machine    | Unstructured Markdown State Interleaving  | Medium   | Structured JSON|
-| R-02    | Architecture     | Single-Agent Cognitive Overload           | Medium   | Multi-Agent    |
+| R-01    | State Machine    | Unstructured Markdown State Interleaving  | Medium   | Seq 1 ledger   |
+| R-02    | Architecture     | Single-Agent Cognitive Overload           | Medium   | Seq 2 ADK roles|
 | R-03    | Performance      | Lean 4 Elaboration Bottleneck             | Medium   | Module Slicing |
 | R-04    | Governance       | Manual Proposal Table Promotion           | Low      | CI Gate Script |
-| R-05    | Termination      | Progress Brake Is Prompted, Not Enforced  | Medium   | Wrapper-Level  |
-|         |                  |                                            |          | Step Counter   |
+| R-05    | Termination      | Progress Brake Is Prompted, Not Enforced  | Medium   | Seq 0 host cap |
+| R-06    | Authority        | Generator can edit the verifier scripts   | Critical | Pinned verifier|
+|         |                  | that then approve its own diff            |          | + CP human gate|
+| R-07    | Authority        | Liveness + 1s status diff is not a lock   | High     | Lock+snapshot  |
+| R-08    | Termination      | ADK cannot count OpenCode-internal tools  | High     | Host CPU/clock |
+| R-09    | Authority        | verify_for_commit omits two AGENTS.md     | High     | Versioned      |
+|         |                  | ladder steps                              |          | fail-closed    |
+|         |                  |                                           |          | manifest       |
+| R-10    | Isolation        | SDK deny-policies ≠ OS sandbox / creds /  | High     | OS containment;|
+|         |                  | egress                                    |          | steward=advice |
+| R-11    | State            | ADK session ≠ durable CAS ledger          | Medium   | Seq 1 spec     |
+| R-12    | Observability    | Review froze axiom/QA counts              | Medium   | Scoreboard is  |
+|         |                  |                                           |          | sole authority |
+| R-13    | Authority        | Lock without binding commit to tree OID   | High     | temp index; T; |
+|         |                  | leaves an outside-writer race; write-tree |          | commit-tree;   |
+|         |                  | serializes the index, not the worktree   |          | update-ref C P |
+| R-14    | Authority        | Trust root listed only scripts/lakefile   | High     | toolchain,     |
+|         |                  |                                           |          | lake-manifest, |
+|         |                  |                                           |          | hooks, manifest|
 +---------------------------------------------------------------------------------------------------+
 ```
 
@@ -429,11 +452,13 @@ While Scaffold demonstrates world-class rigor in formal mathematics and verifica
 - **Observed State:** State is synchronized via free-form text in `docs/EXECUTION_PLAN.md` and `docs/AGENT_ACTIVITY.md`.
 - **`@fde/media` Standard:** `fde_agentic_flow.py` utilizes a typed `SharedTaskState` with explicit field-level ACLs, JSON schema validation, and optimistic CAS version checks.
 - **Risk:** Agents occasionally format activity entries inconsistently, requiring regex scraping in bash wrappers.
+- **Adopted path:** Sequence 1 durable CAS ledger (§7.0), then optionally an ADK session as a consumer of that ledger. Markdown journals remain the operator-facing audit trail, not the machine state. An ADK session object is not by itself durable or CAS-safe (R-11).
 
 ### Gap 2: Single-Agent Cognitive Overload During Deep Proofs
 - **Observed State:** A single agent session performs literature retrieval, Mathlib API exploration, Lean formalization, QA authoring, and documentation logging.
 - **`@fde/media` Standard:** Separation of concerns into **Planner**, **Researcher**, **Formalizer/Executor**, and **Critic**.
 - **Risk:** Context exhaustion during long proof search attempts causes the agent to lose track of broader architectural invariants.
+- **Adopted path:** After Sequences 0–1, ADK `SequentialAgent` / workflow nodes for researcher, formalizer (GLM), and critic; Antigravity remains an **advisory** steward (§7.0 Sequence 3).
 
 ### Gap 3: Lean 4 Elaboration Latency on Large Dependency Graphs
 - **Observed State:** Running `lake build` after every minor tactic change introduces multi-second delays, consuming agent execution timeouts.
@@ -450,45 +475,136 @@ While Scaffold demonstrates world-class rigor in formal mathematics and verifica
 - **Directly observed failure instance:** A live pursuit run spent roughly 4–6 hours (far more than 12 tool-equivalent steps) attempting the Davis–Kahan equal-rank projector identity in a new module (`ProjectionGap.lean`), repeatedly hitting Lean elaborator heartbeat timeouts and patching the same proof, before stopping — not via a 12-step pivot, but via an unrelated, much larger harness-level step limit ("Maximum steps for this agent have been reached"). The 12-step convention did not fire at any point during that window.
 - **`@fde/media` Standard:** Deterministic termination controls should be enforced by the control plane, not left to the untrusted model's self-report (Station 4.2, Station 6.1 — "the model is an untrusted parser and proposer; trusted code alone authorizes and executes"). This applies to *pacing* decisions (when to stop and hand back), not only to *write* decisions (what to commit) — the current architecture only enforces the latter.
 - **Risk:** Quota exhaustion or wall-clock cost from a single agent grinding on one intractable proof step, undetected until the harness's own much coarser limit trips. Medium severity: `scripts/zquota`'s 90% threshold and `--runs N` still bound total exposure across runs, so this is a within-run inefficiency, not an unbounded-cost failure.
-- **Mitigation:** Add an actual tool-call (or wall-clock) counter to `scripts/opencode-pursue`'s per-run loop, comparable to the existing quota gate, that terminates or interrupts a stalled run at a configurable threshold rather than relying on the agent to notice its own lack of progress.
+- **Mitigation:** Sequence 0 binds the generator with a **host** wall-clock/CPU limit (ADK cannot count OpenCode-internal tool calls if OpenCode is one subprocess — R-08). Sequence 2 may add ADK `before_tool_callback` only for tools the supervisor owns, or by proxying every counted operation through the host. A prompted 12-step instruction is not a control.
 
 ---
 
 ## 7. Architectural Recommendations & Evolution Roadmap
 
-To evolve Scaffold into a reference-grade autonomous mathematical laboratory, we propose a four-phase upgrade roadmap directly derived from `@fde/media`:
+To evolve Scaffold into a reference-grade autonomous mathematical laboratory, we propose a four-phase upgrade roadmap directly derived from `@fde/media`. **§7.0 is the adopted control-plane contract.** Lean work and ordinary verification are strong. Unattended `--commit` is **B** because the live wrapper still fails the four Sequence 0 acceptance criteria below. The Git recipe, pinned verifier, and wall-clock cap exist to close those four — not as extra architecture. A+ stays a later closure target (Sequences 1–3 plus that implementation).
+
+### 7.0 Adopted mix: harden the host first, then ADK, Antigravity advisory
+
+**Status:** Planning contract, 2026-08-30. Not implemented. Live still fails all four Sequence 0 criteria. The path remains `launchd` → `scripts/opencode-pursue` → GLM via OpenCode → host `verify_for_commit` (worktree scripts; incomplete relative to `AGENTS.md`) → `git add -A` / `git commit`. Unattended `--commit` is **not** authorized against this contract until Sequence 0 lands.
+
+**Sequence 0 acceptance — four live failures (all still open).**
+
+The transactional guarantee Sequence 0 must add:
+
+> **The exact Git tree that passed the complete trusted verification ladder is the exact tree committed.**
+
+None of this implies the agent is malicious. It protects against races, accidental edits, stale checks, and runaway runs.
+
+| # | Live failure | Why it breaks the guarantee | Sequence 0 close | Risk |
+| :--- | :--- | :--- | :--- | :--- |
+| **1** | It verifies one state and commits another. Checks run against the live worktree; afterward `git add -A` stages whatever exists then. There is no immutable verified snapshot. | A race or a later generator rewrite can commit a tree the ladder never saw. | Temporary index → tree OID *T*; verify a checkout of *T*; `C=$(git commit-tree T -p P)`; `git update-ref <ref> C P`. Generators run before *T*, or regeneration must leave *T* unchanged. | R-07, R-13 |
+| **2** | The verifier is inside the candidate change. The agent can accidentally edit `scripts/lint_axioms.py`, build configuration, or another trust-root file, and the wrapper then uses that edited version for approval. | Approval is not from a trusted verifier. | Run the ladder from a pinned checkout/image of the last trusted verifier. Refuse unattended `--commit` (human review) if the **trust root** changed: `scripts/` (including the verification manifest), `lakefile.lean`, `lake-manifest.json`, `lean-toolchain`, tracked hooks, and other Lake/toolchain pins. | R-06, R-14 |
+| **3** | The unattended ladder is incomplete. It omits `check_refutation_independence.py` and `check_public_reachability.py`. | A “pass” is not the complete `AGENTS.md` ladder. | Versioned fail-closed manifest matching `AGENTS.md`; record every exit. | R-09 |
+| **4** | A run has no enforced internal time budget. The 12-step brake is prompt guidance. A stuck proof attempt can run for hours. | The host cannot bound a runaway generator. | Host wall-clock/CPU limit on the generator process. Prompted 12-step is not a control. | R-05 |
+
+External review (2026-08-30: **Grade B — adopt conditionally, not yet ship for unattended commits**) accepted Lean + deterministic QA as the evidence plane and host-only Git as the right shape. Sequence 0 is those four closures. Additional Sequence 0 rules (steward veto-only, never a go-signal; cooperative flock is not a substitute for `update-ref`) do not replace them.
+
+**Sequence 0 Git mechanics (how item 1 is implemented; specify before coding).**
+`git write-tree` serializes the **index**, not the working tree. A naive `write-tree` on the default index can therefore commit something other than the files the generator just wrote. Sequence 0 must:
+
+```text
+GIT_INDEX_FILE=<temp> git read-tree HEAD          # or empty, then
+GIT_INDEX_FILE=<temp> git add -A                  # populate temp index from the intended tree
+T=$(GIT_INDEX_FILE=<temp> git write-tree)         # tree OID
+# verify a checkout of T with the pinned ladder (not the live worktree)
+C=$(git commit-tree T -p P -m ...)                # P = current branch tip
+git update-ref <ref> C P                          # atomic: succeeds only if <ref> still names P
+```
+
+Any **content generator** (including `generate_qa_scoreboard.py` rewriting `docs/5_QA_SCOREBOARD.md`) runs **before** *T* is taken, or verification must prove that regeneration leaves *T* unchanged. Do not `git add -A` / `git commit` on the live worktree after the ladder. `update-ref C P` is the compare-and-swap; a cooperative flock is not a substitute for it.
+
+**Safe shape (every unattended commit):**
+
+```text
+1. Generator     dedicated writable worktree; no Git credential; host wall-clock/CPU bound
+2. Snapshot      exclusive lock held; **temporary index** → `git write-tree` → tree OID T
+                 (`write-tree` reads the index, not the working tree)
+3. Verification  pinned verifier runs the full manifest against a checkout of T
+4. Advice        steward may veto or escalate; never the positive authorize condition
+5. Commit        C = `git commit-tree T -p P`; `git update-ref <ref> C P`
+                 (atomic advance; fails if <ref> is no longer P)
+```
+
+**Build order — do not skip ahead:**
+
+| Seq | What | Closes | Not this |
+| :--- | :--- | :--- | :--- |
+| **0** | Close the four live failures: (1) temp index → *T* → verify checkout of *T* → `commit-tree` / `update-ref C P` (not `git add -A` after a live-worktree ladder); (2) pinned verifier + fail closed if trust root changed; (3) versioned ladder including `check_refutation_independence.py` and `check_public_reachability.py`; (4) host wall-clock/CPU on the generator. Steward may veto, never authorize. | R-05, R-06, R-07, R-09, R-13, R-14 | ADK; steward as go-signal |
+| **1** | Typed durable ledger: persistence backend, schema + migrations, monotonic transitions, recovery, concurrency tests. Not "an ADK session object" by itself | R-01, R-11 | ADK orchestration |
+| **2** | ADK 2.0 workflow as supervisor *on top of* 0+1. LiteLLM for GLM. `before_tool_callback` counts only supervisor-owned tools; if OpenCode remains one subprocess, ADK must not claim to count its internal calls — the Sequence 0 host budget still binds | R-02 (roles), R-08 (only if tools are proxied through ADK) | Replacing lake/git with LLM nodes |
+| **3** | Antigravity 2.0 SDK as **advisory** read-only steward: deny-by-default *plus* OS sandbox, read-only mount of tree *T*, no Git/network credentials, explicit egress, pinned SDK/runtime. A steward verdict may **veto or escalate**. It must **never** be the positive condition that authorizes commit after the deterministic ladder on *T* has passed. Host commits *T*. `agy -p` is not this role | R-10 | Steward as go-signal; deny-policies-as-sandbox |
+
+Google's split still holds for Sequence 2–3: ADK is the workflow runtime; Antigravity is a coding-agent harness with useful tool policies that are **not** OS isolation. Antigravity cannot plug GLM; the generator stays OpenCode/LiteLLM.
+
+```text
+launchd / Cloud Scheduler          ← keep the clock
+        │
+        ▼
+exclusive lock                     ← Sequence 0; entire generate→snapshot→verify→commit
+        │
+        ├─ GLM / OpenCode            writable worktree, no git creds, wall-clock/CPU cap
+        ├─ temp index → git write-tree → OID T
+        ├─ pinned verifier + full ladder on checkout of T
+        ├─ Antigravity may veto (never a go-signal)
+        └─ C=commit-tree T -p P; update-ref <ref> C P
+```
+
+Sequence 2 may wrap that spine in ADK. It may not reorder it.
+
+| Layer | Live | Adopted | Must not become |
+| :--- | :--- | :--- | :--- |
+| Clock | `launchd` hourly plist | Keep | An agent that "decides when to run" |
+| Mutual exclusion | `isrunning` + 1s `git status` diff (TOCTOU) | Exclusive lock **and** commit of the verified tree OID *T*; lock alone cannot stop an outside writer | Sleep-and-hope; lock without OID bind |
+| Verifier | Worktree `scripts/` | Pinned checkout/image of the last trusted verifier | Trusting dirty-tree linters |
+| Trust root | not a single list | `scripts/` (incl. verification manifest), `lakefile.lean`, `lake-manifest.json`, `lean-toolchain`, tracked hooks / Lake pins; diffs → human | Protecting only `scripts/` + `lakefile.lean` |
+| Ladder | `verify_for_commit` omits two `AGENTS.md` steps | Versioned fail-closed manifest; record every exit | A second incomplete list in bash |
+| Step budget | Prompted 12-step; ADK cannot see OpenCode-internal tools | Host wall-clock/CPU on the generator; ADK counts only tools it owns, or every counted op is proxied | Claiming ADK `maximum_remote_calls` covers OpenCode-as-one-process |
+| Ledger | Markdown journals | Sequence 1 durable CAS ledger | Equating "ADK session" with durability |
+| Steward | Codex subject line | **Veto/escalate only**; never the positive authorize condition after deterministic checks on *T* | Steward as go-signal; deny-policies-as-sandbox |
+| Git | Host after regex on subject | Temp index → *T* → verify *T* → `commit-tree T -p P` → `update-ref C P` | `git add -A` / `git commit` on a live worktree after verify; `write-tree` of the default index |
+
+**What this mix is not.** It is not "replace bash with ADK and call it done." Station 3 still forbids picking a framework as the opening move. It is not BYOK GLM inside Antigravity. It is not moving git into ADK's `LlmAgent` or the steward.
+
+Numeric claims in this review (axiom count, QA declaration count) are not restated here. The live authority is [`docs/5_QA_SCOREBOARD.md`](../5_QA_SCOREBOARD.md) (generated table).
+
+The steward *procedure* remains [`commit-steward-protocol.md`](commit-steward-protocol.md). Sequence 0 replaces that document's Step 0, Step 6, and Step 7's `git add -A` with the temporary-index / *T* / `commit-tree` / `update-ref` recipe above; it does not implement them in this revision.
 
 ```mermaid
 graph TD
-    subgraph CurrentState ["Current Architecture: Single-Agent Pursuit Loop"]
-        SingleAgent["Single Autonomous Agent<br/>(Researcher + Formalizer + Critic + Logger)"]
-        SingleAgent --> InterleavedFiles["Interleaved Writes<br/>(Lean source + Markdown activity)"]
-        InterleavedFiles --> ShellWrapper["Shell Pre-Commit Wrapper"]
+    subgraph CurrentState ["Live: Single-Agent Pursuit Loop"]
+        SingleAgent["OpenCode + GLM"]
+        SingleAgent --> DirtyTree["Dirty worktree including scripts/"]
+        DirtyTree --> IncompleteGate["verify_for_commit<br/>omits 2 AGENTS.md checks"]
     end
 
-    subgraph FutureState ["Target Architecture: Governed Multi-Role Laboratory"]
-        Supervisor["Supervisor Control Plane<br/>(TaskStore with CAS Versioning)"]
-        
-        Supervisor --> Researcher["Role 1: Mathlib Researcher<br/>(Read-Only API Scoped)"]
-        Supervisor --> Formalizer["Role 2: Lean Formalizer<br/>(Write Scoped to Lean Source)"]
-        Supervisor --> Critic["Role 3: Adversarial QA Critic<br/>(Write Scoped to QA Fixtures)"]
-        Supervisor --> StewardRole["Role 4: Commit Steward<br/>(Read-Only Diff Scoped)"]
-        
-        Researcher -.-> Output1["Minimal Theorem Signatures"]
-        Formalizer -.-> Output2["Elaborated Tactic Proofs"]
-        Critic -.-> Output3["Negative Witness Counterexamples"]
-        
-        Output1 & Output2 & Output3 --> SchemaState["Typed Task State Ledger<br/><code>.opencode/state.json</code>"]
-        SchemaState --> Supervisor
-        
-        Supervisor --> MCP["Discovery-Layer MCP Server<br/>(Certified SGT Invariants API)"]
+    subgraph SequenceZero ["Sequence 0: host A-grade gate"]
+        Lock["Exclusive lock"] --> Gen["Generator worktree + wall-clock"]
+        Gen --> Snap["temp index → write-tree T"]
+        Snap --> Pin["Pinned verifier + full ladder on T"]
+        Pin --> HostGit["commit-tree T -p P; update-ref C P"]
+        Pin -.-> Veto["Steward may veto / escalate"]
+        Veto -.-> HostGit
     end
 
-    CurrentState ==> FutureState
+    subgraph Later ["Sequence 1–3 after 0"]
+        Ledger["Durable CAS ledger"]
+        ADK["ADK supervisor"]
+        AG["Antigravity OS-sandboxed advisor"]
+        Ledger --> ADK
+        ADK --> AG
+    end
+
+    CurrentState ==> SequenceZero
+    SequenceZero ==> Later
 ```
 
-### Phase 1: Implement Structured Task State Governance
-Create a typed task store (mirroring `TaskStore` in `fde_agentic_flow.py`) that serializes active pursuit state to `.opencode/state.json`:
+### Phase 1: Typed durable ledger (Sequence 1 — after Sequence 0)
+Specify, then implement, a durable CAS ledger — **not** "an ADK session." Required before any ADK work: persistence backend, schema and migrations, monotonic state transitions, recovery, and concurrency tests. Operator dump may still be `.opencode/state.json`. Field contract, mirroring `TaskStore` in `fde_agentic_flow.py`:
 
 ```json
 {
@@ -506,17 +622,19 @@ Create a typed task store (mirroring `TaskStore` in `fde_agentic_flow.py`) that 
   },
   "write_scopes": {
     "agent": ["Scaffold/SpectralGraph/ElectricalFlow.lean", "Scaffold/QA/SpectralGraph/ElectricalFlow_QA.lean"],
-    "steward": ["git_commit"]
+    "steward": [],
+    "host": ["git_commit"]
   },
   "status": "in_progress"
 }
 ```
 
-### Phase 2: Introduce Multi-Role Supervisor Subagents
-Leverage the subagent harness (`invoke_subagent`) to instantiate specialized agent roles:
-1. **`mathlib-researcher` (Read-Only):** Explores `Mathlib` and returns only minimal theorem signatures and module paths.
-2. **`lean-formalizer` (Write-Scoped):** Receives the focused signatures and authors the Lean proof in `Scaffold/Mathlib/**` or `Scaffold/Derived/**`.
-3. **`adversarial-qa-critic` (QA-Scoped):** Instantiates edge cases, negative witnesses, and boundary graphs in `Scaffold/QA/**` to stress-test the formalizer's definitions.
+### Phase 2: ADK role nodes (Sequence 2) + Antigravity advisor (Sequence 3)
+Only after Sequences 0–1. Roles 1–3 are ADK `SequentialAgent` / workflow nodes. Role 4 is an Antigravity **advisor** (OS-sandboxed), never an authorizer, never `invoke_subagent` from GLM:
+1. **`mathlib-researcher` (Read-Only ADK node):** Explores `Mathlib` and returns only minimal theorem signatures and module paths.
+2. **`lean-formalizer` (Write-Scoped, GLM):** Receives the focused signatures and authors the Lean proof in `Scaffold/Mathlib/**` or `Scaffold/Derived/**`, via LiteLLM or by invoking OpenCode as a tool.
+3. **`adversarial-qa-critic` (QA-Scoped ADK node):** Instantiates edge cases, negative witnesses, and boundary graphs in `Scaffold/QA/**` to stress-test the formalizer's definitions.
+4. **`commit-steward` (advisory Antigravity SDK):** May veto or escalate. Must not be the positive condition that authorizes `commit-tree T`. SDK deny-lists do not replace OS isolation (R-10).
 
 ### Phase 3: Build a Formal Mathematical Trajectory Evaluation Suite
 Incorporate `fde-evaluations-guide.md` principles into a new evaluation harness (`scripts/eval_agent_trajectories.py`):
@@ -568,21 +686,23 @@ The architectural lessons distilled from Scaffold extend far beyond spectral gra
 
 ```text
 ================================================================================
-FINAL VERDICT: SHIP, WITH ONE OPEN TERMINATION-CONTROL GAP (R-05)
-COMPOSITE SCORE: 90.8 / 100  |  GRADE: A- (self-assessed; not externally reviewed)
+FINAL VERDICT: DO NOT SHIP UNATTENDED COMMITS UNTIL SEQUENCE 0 IS IMPLEMENTED
+LIVE UNATTENDED-COMMIT SLICE: B
+PLANNING CONTRACT: A− (four live failures named as Seq 0; not yet executed)
+A+: CONDITIONAL CLOSURE TARGET — NOT EARNED
+COMPOSITE (six @fde/media dimensions): 85.8 / 100  |  GRADE: B+ (self-assessed)
 ================================================================================
 
 KEY TAKEAWAY:
-Scaffold demonstrates that autonomous agency does not require sacrificing formal
-rigor or operational safety. By combining Lean 4's uncompromising kernel with
-disciplined, out-of-band verification and expenditure controls, Scaffold establishes
-a reference substrate for the future of verifiable, autonomous scientific AI. Every
-claim in this scorecard describes a control confirmed to be genuinely enforced in
-code (`scripts/opencode-pursue`, `scripts/zquota`, `verify_for_commit`) except one:
-the 12-tool-step progress convention (`AGENTS.md:77`) is prompted guidance the agent
-applies to itself, not a wrapper-level mechanism — R-05 (§6) records a directly
-observed run where it did not fire, and is the one open item standing between this
-architecture and a full AUTHORIZE-grade termination guarantee.
+Lean work and ordinary verification are strong. Live unattended commit is B
+because it still fails four Sequence 0 criteria: (1) verify worktree then
+git add -A another state; (2) verifier lives in the candidate tree;
+(3) ladder omits two AGENTS.md checks; (4) 12-step brake is prompt-only.
+The guarantee Sequence 0 must add: the exact Git tree that passed the
+complete trusted verification ladder is the exact tree committed. That
+protects against races, accidental edits, stale checks, and runaway runs
+— not against a malicious agent. A+ remains unearned until Sequence 0
+(and then 1–3) exist in code.
 ================================================================================
 ```
 
@@ -594,3 +714,9 @@ architecture and a full AUTHORIZE-grade termination guarantee.
 | :--- | :--- | :--- |
 | v1 | August 2026 | Original draft, written against an earlier commit. |
 | v2 | 2026-08-21 | Public axiom count and QA declaration count updated to the live `docs/5_QA_SCOREBOARD.md` figures (11 axioms, 998 QA declarations). The 12-tool-step control was re-characterized throughout — including the Station 1 diagram, Stations 2 and 4, the composite scorecard, the risk register (added R-05), and the verdict — from a code-enforced circuit breaker to what it actually is: a prompted convention in `AGENTS.md:77` with no counter in `scripts/opencode-pursue`, evidenced by a directly observed live run that exceeded it by hours before stopping via an unrelated harness limit. Dependent scores (BOUND, COORDINATE, RELIABILITY, composite) were recalculated accordingly. |
+| v3 | 2026-08-30 | Commit steward plane retargeted from Codex (`codex exec --sandbox read-only`) to an isolated Antigravity 2.0 Python SDK process (`google.antigravity`, deny-by-default, structured verdict, host-only `git commit`). Diagrams, Station 6, Dimension 4/5 prose, Phase 1 write-scopes, and Phase 2 roles updated. The live `--commit` wrapper is still the thinner Codex subject-line stand-in; this version names the Google-stack steward as architecture, not as a claim that `scripts/opencode-pursue` has been retargeted. |
+| v4 | 2026-08-30 | Adopted control-plane mix recorded as §7.0: ADK 2.0 workflow as supervisor (quota, session state, R-05 step budget, function nodes for `verify_for_commit` and git), GLM kept on the generator via LiteLLM or OpenCode-as-tool, Antigravity reserved for the isolated steward. Station 3 and R-05 mitigation updated. Phases 1–2 retargeted onto that mix. Live path is still `launchd` + `opencode-pursue`; this is architecture, not a wrapper rewrite. |
+| v5 | 2026-08-30 | External agent-stack review (B, not yet ship unattended commits) absorbed as R-06–R-12. §7.0 reordered: Sequence 0 host harden (pinned verifier, full ladder, lock/snapshot, wall-clock) → Sequence 1 durable CAS ledger → Sequence 2 ADK → Sequence 3 Antigravity as **advisory** steward with OS isolation. AUTHORIZE 10→7, composite 90.8%→85.8%. Frozen 11/998 axiom/QA figures removed (scoreboard is sole authority). Planning only; no wrapper change. |
+| v6 | 2026-08-30 | Regrade absorbed: live unattended-commit **B**, planning contract **A−**, **A+ not earned**. Sequence 0 now requires `write-tree` / verify / `commit-tree` of the same OID *T* (R-13); expanded trust root (`lean-toolchain`, `lake-manifest.json`, hooks, verification manifest — R-14); steward is veto/escalate only, never the positive authorize condition. §7.0 scoreboard counts are a link only. Planning only. |
+| v7 | 2026-08-30 | Sequence 0 Git mechanics made implementation-explicit: `write-tree` serializes the index, not the worktree; temporary index; `C=$(git commit-tree T -p P)`; `git update-ref <ref> C P`; content generators run before *T* or must leave *T* unchanged. Planning only. |
+| v8 | 2026-08-30 | Sequence 0 acceptance restated as the four live failures a critic must not have to reconstruct: (1) verify one state / commit another; (2) verifier inside the candidate change; (3) incomplete unattended ladder; (4) no host time budget. Transactional guarantee is the one-sentence test. Planning only. |

@@ -6,24 +6,321 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**None queued — the next run selects per priority item 0.** This run
-delivered heat-variance decay (record below), the Poincaré proposal's
-own named deferred follow-on and the heat family's λ₂-consumer. The
-Active table still holds no rows above the human-decision gates (all
-Low/decision-gated). A next run without direction falls through to the
-center-out SGT policy (`docs/6_SGT_BACKLOG.md`) or the priced deferred
-follow-ons the recent proposals record: axis 3's own remaining named
-gap log-Sobolev (needs a named consumer per its re-score-trigger note —
-the natural composition point is `InformationTheory.Entropy`'s Gibbs
-bound), the new heat-variance proposal's π-weighted `L_sym` twin
-(consumer-gated on a named walk/heat statement needing it), the
-oversmoothing proposal's remaining items (the over-squashing floor,
-consumer-gated; the Python certificate bridge, operator-gated), and the
+**The Poisson bridge — the continuous↔discrete mixing-time
+comparability** (`proposals/continuous-time-chi-square-mixing.md`'s
+named follow-on; run `20260901T024900Z-run-1`, session
+`ses_fa530f1c7ffeW47alc24ym1nW7`). **In progress.**
+
+**Leverage rationale.** The standing handoff's newly priced follow-on
+and the natural continuation of the repo's most active axis (5): the
+recorded statement that would justify the still-deferred discrete
+`t_mix` object. The delivery: the **Poissonization identity** (the
+continuous walk law is the Poisson mixture of the discrete laws,
+`ν^cont_t = ∑'_k (e^{−t}tᵏ/k!) • ν_k` — LPW ch. 20's `H_t = e^{−t}∑ tᵏ/k!·Pᵏ`
+read at the law level, the mixing layer's first tsum construction),
+proved through `Matrix.exp_add_of_commute` at the split
+`−t·(I−P) = tP − tI` plus the scalar-matrix exp `e^{−tI} = e^{−t}·I`;
+the **TV contraction toolkit** (the `Pᵀ` ℓ¹-contraction, discrete TV
+monotonicity `TV_{m+k} ≤ TV_m` — field-standard facts not yet on the
+shelf); **the comparability inequality**
+`TV_cont(t) ≤ ∑_{k<m} e^{−t}tᵏ/k! + TV_disc(m)` (mixture convexity +
+the Poisson lower-tail split at any threshold m); and **the
+discrete-certificate transfer corollary** — the shape the discrete
+`t_mix` object's witness condition will consume. QA carries the
+recorded hazard as a witness: on the periodic chain `K₂` the discrete
+walk never mixes (`TV_disc ≡ 1/2` at every m, so no discrete
+certificate exists and no reverse comparability can hold — the exact
+boundary the record names), the `t = 0` mixture corner collapses to
+`δ_x`, and the triangle instances close in exact closed form
+(`TV_disc(m) = (2/3)·2^{−m}` by the `triG` eigenroute,
+`TV_cont(t) = (2/3)e^{−3t/2}` reused). Zero new axioms planned (count
+stays 5; pure hard crust — `exp`-series machinery already proved on
+the shelf).
+
+**Next action:** spike `wip/poisson_spike.lean` first (all shelf
+declarations + the QA section + the `#print axioms` audit, iterated to
+zero errors/warnings before any shelf edit), then `Mixing.lean`'s
+Poisson-bridge section + `Heat.lean`'s scalar-exp/pow-smul helpers,
+then `Mixing_QA.lean`'s bridge section, then the records ladder.
+
+The Active table still holds no rows above the human-decision gates
+(all Low/decision-gated); other named follow-ons stand as recorded:
+log-Sobolev (axis 3's remaining named gap, consumer-gated), the
+over-squashing floor (consumer-gated), the Python bridge and the
 matrix retirement route's Step 2 (operator-gated).
 
 ------
 
 ## Delivered milestones (most recent first)
+
+**The continuous-time mixing time — the `t_mix(ε)` object for the
+heat walk with its TV/ceiling package
+(`proposals/continuous-time-chi-square-mixing.md`, Deferred items 1+2
+discharged together as a follow-on delivery record; run
+`20260831T234308Z-run-1`, session `ses_fa5d0d64bffeFq3NKI2tkhkmZV`).
+DELIVERED — zero new axioms (count stays 5; `#print axioms` via
+`wip/ctmixtime_axcheck.lean` on all 37 audited declarations — 10 shelf
++ 27 QA — every one exactly `propext, Classical.choice, Quot.sound`,
+pure hard crust). QA 3433 → 3459 (+26, `Mixing_QA.lean`'s
+`ContMixingTime` section). Radar QA axis held at 4.0 per protocol (a
+consumer composition of already-counted families plus exact/fence
+pins).**
+
+The delivery's content: (1) **Both consumer gates discharged by
+naming** (the repo's established idiom): the continuous TV twin's
+consumer is the mixing-time ceiling — the field-standard
+continuous-time mixing statement, which every textbook states in TV
+form (LPW ch. 20 defines `d(t)` as TV); the `t_mix` object's own
+consumers are the statements unstatable without it — the spectral
+ceiling `t_mix(ε) ≤ max 0 (ln(√((πx)⁻¹−1)/(2ε))/λ₂(L_sym))`
+(Montenegro–Tetali's standard bound) and ε-antitonicity — plus the
+exact K₂ closed form. The **discrete** `t_mix` object stays deferred
+with its gate unchanged; the continuous↔discrete comparability
+theorem is the recorded follow-on that would justify it. (2) **The
+shelf** (`Mixing.lean`'s ContinuousTime extension, 10 declarations):
+`contWalkDistribution` (the continuous walk *law* `π·h_t`) with its
+`t = 0` join to `walkDistribution` (the wrong-weight detector); the
+χ² sum-div bridge; **the continuous-time ℓ²→TV conversion**
+(unconditional — the delivered `tvDistance_le_half_sqrt` composed
+with the delivered `contChiSquareDistance`); **the decay form**
+(`TV ≤ (1/2)·e^{−t·λ₂(L_sym)}·√((πx)⁻¹−1)` at exactly
+`contChiSquareDistance_le`'s hypothesis set — no connectivity, no
+caller-certified rate); **`contMixingTimeFrom`** (the per-start
+`sInf` over witness times at exactly LPW ch. 20's `∀ s ≥ t` reading,
+the junk corner at unreachable `ε` documented — the repo's first
+defined `sInf` *time* object on the mixing axis);
+`contMixingTimeFrom_bddBelow`/`_le_of_cert` (the certificate
+interface, the discrete `pow_mul_le_of_log_threshold` analogue);
+**the spectral ceiling** (the honest two-case `max 0` shape,
+load-bearing on `secondEval_normalizedLaplacian_pos_of_connected` and
+the decay form); and ε-antitonicity (by `csInf_le_csInf` set
+inclusion under a witness hypothesis). (3) **The QA**: on `K₂` — the
+trace-route gap pin `λ₂(L_sym K₂) = 2`, **the exact TV value
+`e^{−2t}/2` at every time** (the ceiling attained at every time,
+Cauchy–Schwarz equality with `|h − 1|` constant), **the exact
+mixing-time closed form `t_mix(ε) = ln(1/(2ε))/2`** for
+`0 < ε < 1/2` (the `sInf` pinned in *both* directions: the closed
+form is a witness time whose TV is exactly `ε` there, and every
+witness time is ≥ it), the ceiling **attained exactly** at
+`ε = e^{−2}/2` (`t_mix = 1 = max 0 (ln(e²)/2)`), the **wrong-gap
+refutation** (pretend gap `3` claims `1 ≤ 2/3` at that threshold),
+the **big-`ε` corner** `t_mix(3/4) = 0`, and the antitone instance
+with its closed-form consistency pin (`ln 2/2 ≤ ln 4/2`); on the
+triangle — the exact TV values `(2/3)e^{−3t/2}` at every time with
+the Cauchy–Schwarz slack proved strict (`2/3 < √2/2`), and the
+`t = 0` law join to `(1,0,0)`.
+
+**Verification:** spike first (`wip/ctmixtime_spike.lean` — the shelf
+declarations, the full QA section, and the axiom audit iterated to
+zero errors/zero warnings before any shelf edit, eight technique
+findings recorded in the proposal's follow-on record — headline:
+`Real.sqrt_mul` carries a first-factor nonnegativity hypothesis that
+silently becomes a metavariable side goal under bare `rw`; plus the
+`Real.log_le_log`/`log_div` argument shapes, `one_le_div` for
+`1 ≤ x/y`, the by-block-inside-rw-bracket parse trap, the implicit-ε
+elaboration-order trap for positivity proofs, the
+`Fin (Fintype.card (Fin n))` sum-unfolding opacity, the rw-with-a-≤
+misuse, and the stale-olen import-boundary recurrence);
+`lake env lean` zero errors/zero warnings on both touched modules;
+explicit `lake build` targets ✔ on both; **full `lake build` ✔
+immediately followed by `check_build_completeness.py` — 133 source
+files, 133 fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms`
+exit 0 (5, both PF findings allowlisted-confirmed);
+`check_refutation_independence` (10-tag clean — no tags added,
+nothing here touches an axiom); `check_public_reachability` clean (63
+modules); `check_citations`, `check_markdown_links` pass; scoreboard
+regenerated (**3459/5/0**) with the verification row added;
+**map-freshness exit 0** after the 3433 → 3459 stats sync in both map
+files and SVG regeneration (no proposal status header changed — a
+follow-on record, no tier change). Records updated: the proposal
+(follow-on delivery record with the gate discharges, corner analysis,
+and technique findings; both Deferred bullets resolved),
+`proposals/README.md` (new Delivered row), README (3459 + the
+walks-and-mixing row extension), the radar QA axis (count synced
+3433 → 3459, score held per protocol), `index/map/spectral_graph.md`
+(eight new rows), the scoreboard verification row, both map data
+tables + regenerated SVG, the QA module's purpose header, this plan,
+and the activity log. Nothing committed; the previous runs'
+uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed. The
+named follow-ons stand as recorded: the continuous↔discrete
+comparability theorem (the discrete `t_mix` object's would-be
+consumer), log-Sobolev (axis 3's remaining named gap,
+consumer-gated), and the operator-gated items (over-squashing floor's
+Python bridge, matrix master-bound Step 2).
+
+------
+
+## Delivered milestones (most recent first)
+
+**The path-fixture continuous-time QA — the continuous-time χ²
+delivery's own deferred item, the P₃ (irregular, connected)
+exact-decay pin (`proposals/continuous-time-chi-square-mixing.md`,
+follow-on delivery record; run `20260831T221623Z-run-1`). DELIVERED —
+zero new axioms (count stays 5; `#print axioms` via the spike's audit
+block on all 13 new declarations: every one exactly `propext,
+Classical.choice, Quot.sound` — pure hard crust, QA-only, no shelf
+change, no existing public statement touched). QA 3420 → 3433 (+13,
+`Mixing_QA.lean`'s path continuous-time section). Radar QA axis held
+at 4.0 per protocol (completing the QA coverage of an already-counted
+family plus new negative-witness fences).**
+
+The delivery's content: (1) **The `λ₂(L_sym P₃) = 1` pin, trace
+route** (`path_secondEval_QA`) — the three witnesses (`0` at the
+kernel `√D·1`, `1` at `(1, 0, −1)`, `2` at `(−1, √2, −1)`) each
+pulled into the sorted spectrum through the composed bridge
+`exists_eigvalOf_eq_of_mulVec_eq_smul` + `eigvalOf_mem_evals`, the
+file's own SOS certificates bounding every entry into `[0, 2]`,
+sortedness forcing `evals 0 = 0` and `evals 2 = 2`, the trace `3`
+closing `evals 1 = 1`. (2) **The non-scalar conjugation pin**
+(`path_conj_centered_QA`: `√D(−1, 1, −1) = (−1, √2, −1)`) — P₃ is the
+only fixture class in the continuous-time QA set where `√D` is
+non-scalar *and* the gap is positive, so this is the pin that
+exercises the delivery's centerpiece conjugation shift
+`degreeSqrt_mulVec_contWalkDensity_sub_one` at a genuinely irregular
+connected input — the exact form is load-bearing on the delivered
+mechanism, not beside it. (3) **The exact single-mode decay**
+(`path_cont_chi2_exact_QA`: `χ²_cont(t, center) = e^{−4t}` exactly at
+every `t`) plus the **strict-slack witness** (`path_cont_slack_QA`:
+`e^{−4t} < e^{−2t}` for every `t > 0` — the center start is a pure
+top mode decaying at twice the certified rate; the triangle's
+exact-attainment pin's twin), the `t = 0` corner, mass preservation,
+and the wrong-constant fence (pretend gap `3` reads `e^{−4} ≤ e^{−6}`
+at `t = 1`, refuted).
+
+**Verification:** spike first (`wip/ctpath_spike.lean` — the full QA
+section plus the axiom audit iterated to zero errors/zero warnings
+before any shelf edit, seven technique findings recorded in the
+proposal's follow-on record — headline: rewriting a numeral RHS
+backward explodes hidden copies under `√`, and `norm_num` normalizes
+atom inverses but not nonlinear atom identities; plus the
+cardinal-coercion dependent-motive trap, the Fin-literal-coercion
+opacity to `omega`, the witness→spectrum membership chain, `norm_num`
+deciding small exp inequalities directly, and the `zero_smul` vs
+`smul_zero` direction); `lake env lean` zero errors/zero warnings on
+the touched QA module; explicit `lake build` target ✔; **full
+`lake build` ✔ immediately followed by `check_build_completeness.py`
+— 133 source files, 133 fresh artifacts, 0 stale, 0 missing, exit
+0**; `lint_axioms` exit 0 (5, both PF findings
+allowlisted-confirmed); `check_refutation_independence` (10-tag clean
+— no tags added, nothing here touches an axiom);
+`check_public_reachability` clean (63 modules); `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**3433/5/0**)
+with the verification row added; **map-freshness exit 0** after the
+3420 → 3433 stats sync in both map files and SVG regeneration (no
+proposal status header changed — a follow-on record, no tier change).
+Records updated: the proposal (follow-on delivery record + technique
+findings), `proposals/README.md` (the Delivered row's deferral
+sentence resolved), README (3433), the radar QA axis (count synced
+through both steps 3401 → 3420 → 3433, score held), the QA module's
+purpose header and section comment (deferral notes resolved), the
+scoreboard verification row, both map data tables + regenerated SVG,
+this plan, and the activity log. Nothing committed; the previous
+runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed. The
+named follow-ons stand as recorded: the continuous-time `t_mix`
+packaging and the heat-kernel TV-ceiling twin (both consumer-gated),
+log-Sobolev (axis 3's remaining named gap, consumer-gated), and the
+operator-gated items (over-squashing floor's Python bridge, matrix
+master-bound Step 2).
+
+------
+
+## Delivered milestones (most recent first)
+
+**Continuous-time χ² mixing — the π-weighted `L_sym` heat-variance twin
+with the field-standard consumer (`proposals/continuous-time-chi-square-mixing.md`,
+same-run proposal; run `20260831T194244Z-run-1`). DELIVERED — zero new
+axioms (count stays 5; `#print axioms` via the spike's audit block on
+all 46 audited declarations — 28 shelf + 18 QA — every one exactly
+`propext, Classical.choice, Quot.sound`, pure hard crust). QA
+3401 → 3420 (+19, `Mixing_QA.lean`'s continuous-time section). Radar
+axis 5 and the QA axis held (4.5 / 4.0) per protocol — a consumer
+composition of already-counted families plus new negative-witness
+fences.**
+
+The delivery's content: (1) **The consumer gate discharged by naming**
+— the heat-variance proposal's recorded gate ("consumer-gated on a
+named walk/heat statement needing it") is discharged by the
+field-standard continuous-time mixing bound (Levin–Peres–Wilmer ch. 20;
+Montenegro–Tetali), and the delivered consumer is *strictly stronger
+than planned*: no connectivity hypothesis (the twin is
+hypothesis-minimal; at `λ₂(L_sym) = 0` the true rate-1 statement) and
+**no caller-certified rate** — the continuous rate `e^{−λ₂t}` is
+intrinsic, where the discrete theorem needs an `r` certificate. (2)
+**The semigroup layer** (`Heat.lean`'s new walk-heat sections, 18
+declarations): `normalizedHeatKernel := e^{-tL_sym}` with the
+mode-decay/coordinate-damping/Parseval-exact clones at `L_sym`, the
+eigenvalue plumbing `secondEval_le_eigvalOf_normalizedLaplacian_of_ne_zero`
+and the positive-gap kernel lemma at `√D·1`, `walkHeatKernel :=
+e^{-tL_walk}`, the commutation `√D·L_walk = L_sym·√D`, **the exp
+conjugation lemma** `degreeSqrt_mulVec_walkHeatKernel` (the exact
+continuous analogue of the shelf's conjugated-power transfer, by
+per-power conjugation of the exponential series through
+`expSeries_hasSum_exp` + `HasSum.map`), the π-isometry pair, and the
+headline **`walkHeatKernel_variance_decay`** (two branches over one
+Parseval identity, no connectivity, no gap positivity). (3) **The
+consumer layer** (`Mixing.lean`'s `ContinuousTime` section, 10
+declarations): `contWalkDensity`, degree-mass preservation, the
+centered-density conjugation shift, `sum_stationaryVec_contWalkDensity`,
+`contChiSquareDistance` with its `t = 0` join to the discrete object,
+and **`contChiSquareDistance_le`**. (4) **The QA**: exact attainment at
+every time on the triangle (`χ²_cont(t,0) = 2e^{−3t}`, λ₂ pinned `3/2`
+by the cases + trace route), the `t = 0` corner, mass preservation, the
+wrong-constant refutation (pretend gap `2`: `2e^{−3} ≤ 2e^{−4}`
+refuted via `e^{−4} < e^{−3}`), and on the disconnected
+triangle⊕self-loop fixture the exact closed form
+`1/3 + (8/3)e^{−3t}` (limit `1/3`, not `0` — the walk never crosses
+components), the gap pinned exactly zero via the shelf's
+non-connectedness transfer, the rate-1 instance, and the positive-gap
+fence (pretend `λ₂ = 1` at `t = 2` refuted via `4/3 > 4e^{−4}` from
+`2 < e`).
+
+**Verification:** spike first (`wip/ctmix_spike.lean` — all three
+layers plus the axiom audit iterated to zero errors/zero warnings
+before any shelf edit, with seven technique findings recorded in the
+proposal — headline: unannotated smul-scalar literals default to ℕ and
+silently break every downstream instance match; plus the funext+fin_cases
+beta-redex idiom, the pin's swapped `mulVec_smul`/`sub_mulVec` names,
+the entrywise `hstep2`-landing route for smul chains, the `set`-atom
+discipline for exp arithmetic, the defeq-have spectrum-sum idiom, and
+the stale-olen import-boundary recurrence); `lake env lean` zero
+errors/zero warnings on all three touched modules; explicit `lake
+build` targets ✔ on all three; **full `lake build` ✔ (2408/2409)
+immediately followed by `check_build_completeness.py` — 133 source
+files, 133 fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms`
+exit 0 (5, both PF findings allowlisted-confirmed);
+`check_refutation_independence` (10-tag clean — no tags added, nothing
+here touches an axiom); `check_public_reachability` clean (63 modules);
+`check_citations`, `check_markdown_links` pass; scoreboard regenerated
+(**3420/5/0**) with the verification row added; **map-freshness exit
+0** after the 3401 → 3420 stats sync in both map files and SVG
+regeneration (the new proposal has no station). Records updated: the
+proposal (COMPLETE from birth, with the delivery record, the
+stronger-than-planned consumer note, the fixture correction
+`(8,−4,−4,0)/3`, and the technique findings), `heat-variance-decay.md`
+(delivered-pointer note on its Deferred twin — status header
+untouched), `proposals/README.md` (Delivered row), README (3420 + the
+heat-semigroup and walks-and-mixing row extensions), the radar (axis 5
+and the QA axis synced, both held per protocol),
+`index/map/spectral_graph.md` (the new module section + 12 rows), the
+scoreboard verification row, both map data tables + regenerated SVG,
+this plan, and the activity log. Nothing committed; the previous runs'
+uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed. The
+named follow-ons stand as recorded: the path-fixture continuous-time
+QA (deferred with its `λ₂(L_sym P₃) = 1` pin, the `DegreeSandwich_QA`
+twin route), a continuous-time `t_mix(ε)` packaging (joins the
+discrete program's own deferred `t_mix` object, consumer-gated there),
+log-Sobolev (axis 3's remaining named gap, consumer-gated), and the
+operator-gated items (over-squashing floor, Python bridge, matrix-route
+Step 2).
 
 **Heat-variance decay — the Poincaré delivery's named deferred
 follow-on, the heat family's consumer of λ₂

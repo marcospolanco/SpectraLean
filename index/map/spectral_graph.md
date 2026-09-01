@@ -1618,3 +1618,34 @@ These declarations feed the perturbation bridge
 ([Perturbation map](perturbation.md)) and a retained spectral-persistence
 example described in [docs/3_SPECTRAL_THEORY.md](../../docs/3_SPECTRAL_THEORY.md).
 That example is compatibility surface, not the SGT roadmap.
+
+### Continuous-time mixing (`GraphTheory.Heat` walk-heat sections + `GraphTheory.Mixing` `ContinuousTime`, 2026-08-31)
+
+The π-weighted `L_sym` twin of heat-variance decay with the
+continuous-time χ² mixing consumer
+(`proposals/continuous-time-chi-square-mixing.md`): the walk heat
+kernel conjugated to the normalized one, degree-weighted variance
+decay at rate `λ₂(L_sym)`, and the intrinsic-rate mixing bound. All
+proved hard crust; no axiom disposition changed.
+
+| Declaration | Area | Description |
+| --- | --- | --- |
+| `normalizedHeatKernel` | Heat (continuous-time mixing) | the normalized heat semigroup `e^{-tL_sym} := exp(−(t • normalizedLaplacian A))` — the π-weighted world's diffusion operator |
+| `normalizedHeatKernel_mulVec_eigvecOf` | Heat (continuous-time mixing) | mode decay at `L_sym`: every eigenbasis vector is an eigenvector of `e^{-tL_sym}` at factor `e^{−t·λᵢ}` |
+| `dotProduct_self_normalizedHeatKernel_mulVec` | Heat (continuous-time mixing) | the Parseval-exact norm identity at `L_sym` — the squared norm as the eigenvalue-weighted sum of squared eigencoordinates |
+| `secondEval_le_eigvalOf_normalizedLaplacian_of_ne_zero` | Heat (continuous-time mixing) | every nonzero `L_sym` eigenvalue dominates the normalized spectral gap (below-gap = kernel, via `normalizedLaplacian_evals_zero`) |
+| `eigvecOf_ker_eq_smul_degreeSqrt_onesVec_of_secondEval_pos` | Heat (continuous-time mixing) | at a positive gap every kernel eigenbasis vector is a `√D·1` multiple (the general-kernel Rayleigh bound at the normalized kernel vector) |
+| `walkHeatKernel` | Heat (continuous-time mixing) | the walk heat semigroup `e^{-tL_walk} := exp(−(t • walkLaplacian A))` — the continuous-time random walk's density evolution operator |
+| `degreeSqrt_mulVec_walkHeatKernel` | Heat (continuous-time mixing) | **the exp conjugation**: `√D *ᵥ (e^{-tL_walk} *ᵥ f) = e^{-tL_sym} *ᵥ (√D *ᵥ f)` — the continuous analogue of the conjugated-power transfer, by per-power conjugation of the exponential series |
+| `walkHeatKernel_variance_decay` | Heat (continuous-time mixing) | **the π-weighted twin**: `∑ deg·(e^{-tL_walk}f − mean_π f)² ≤ e^{−2tλ₂(L_sym)}·∑ deg·(f − mean_π f)²` — hypothesis-minimal (at `λ₂(L_sym) = 0` the true rate-1 statement) |
+| `contWalkDensity` | Mixing (continuous time) | the continuous-time walk's π-density started at `x`: the walk density evolved by `e^{-tL_walk}` |
+| `degreeSqrt_mulVec_contWalkDensity_sub_one` | Mixing (continuous time) | the centered-density conjugation shift `√D(h_t − 1) = e^{-tL_sym}(√D(h₀ − 1))` — the identity every exact computation runs through |
+| `contChiSquareDistance` | Mixing (continuous time) | the continuous-time χ² distance `∑ π (h_t − 1)²`, with the `t = 0` join `= ((πx)⁻¹ − 1)` to the discrete object |
+| `contChiSquareDistance_le` | Mixing (continuous time) | **the continuous-time mixing bound**: `χ²_cont(t,x) ≤ e^{−2tλ₂(L_sym)}·((πx)⁻¹ − 1)` — no connectivity, no caller-certified rate (the continuous rate is intrinsic; strictly stronger shape than the discrete sibling) |
+| `contWalkDistribution` | Mixing (continuous time) | the continuous walk **law** `ν_t(i) = π i · h_t(i)` — the actual probability vector of the walk run in continuous time, with the `t = 0` join `contWalkDistribution_zero` to `walkDistribution` |
+| `contWalkDistribution_tvDistance_le` | Mixing (continuous time) | **the continuous-time ℓ²→TV conversion**: `TV(ν_t x, π) ≤ (1/2)·√χ²_cont` — unconditional (the delivered conversion composed with the delivered continuous χ² through the sum-div bridge) |
+| `contWalkDistribution_tvDistance_le_of_decay` | Mixing (continuous time) | **the decay form**: `TV ≤ (1/2)·e^{−t·λ₂(L_sym)}·√((πx)⁻¹ − 1)` at exactly `contChiSquareDistance_le`'s hypothesis set — no caller-certified rate |
+| `contMixingTimeFrom` | Mixing (continuous time) | **the continuous-time mixing time**: the per-start `sInf{t | 0 ≤ t ∧ ∀ s ≥ t, TV(ν_s x, π) ≤ ε}` — exactly LPW ch. 20's `t_mix` reading (the honest form for a distance not assumed monotone in time); junk corner at unreachable `ε` documented |
+| `contMixingTimeFrom_le_of_cert` | Mixing (continuous time) | the certificate interface: any witness time `T` (`0 ≤ T`, `∀ s ≥ T, TV ≤ ε`) certifies `t_mix(ε) ≤ T` — the discrete `pow_mul_le_of_log_threshold` analogue |
+| `contMixingTimeFrom_le_of_connected` | Mixing (continuous time) | **the spectral ceiling**: `t_mix(ε) ≤ max 0 (ln(√((πx)⁻¹ − 1)/(2ε))/λ₂(L_sym))` — the field-standard continuous-time mixing bound (Montenegro–Tetali; LPW ch. 20), the `max 0` floor the honest two-case shape |
+| `contMixingTimeFrom_anti` | Mixing (continuous time) | ε-antitonicity: `ε ≤ δ` and a witness for `ε` give `t_mix(δ) ≤ t_mix(ε)` — the field-standard monotonicity in the threshold |

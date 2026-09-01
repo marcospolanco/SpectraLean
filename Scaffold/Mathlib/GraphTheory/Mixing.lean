@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -/
 import Scaffold.Mathlib.GraphTheory.Stationary
+import Scaffold.Mathlib.GraphTheory.Heat
 
 /-!
 # The ℓ²-mixing proxy of the simple random walk
@@ -102,6 +103,15 @@ Everything here is proved; no axiom is admitted. The pinned Mathlib
 has no chi-square, total-variation, or mixing-time objects (surveyed
 2026-08-22; `docs/8_MATHLIB_COVERAGE_MAP.md` records the upstream
 absence), so this module is original Scaffold surface.
+
+The Poisson-bridge section (2026-09-01, the same proposal's named
+follow-on) adds the Poissonization identity
+`contWalkDistribution_eq_tsum_walkDistribution` (the continuous walk
+law as the Poisson mixture of the discrete laws — LPW ch. 20's `H_t`
+at the law level, this module's first tsum construction), the TV
+contraction toolkit (`Pᵀ` ℓ¹-contraction, discrete TV monotonicity),
+the comparability `contWalkDistribution_tvDistance_add_le`, and the
+discrete-certificate transfer corollary.
 -/
 
 namespace SpectralGraphTheory
@@ -1074,5 +1084,1019 @@ theorem walkDistribution_tvDistance_le_of_connected (A : WAdj (V := V))
     (Real.sqrt_le_sqrt
       (chiSquareDistance_le_of_connected A hA hnn hd hconn r t x hrate))
     (by norm_num)
+
+/-!
+## Continuous time
+
+`proposals/continuous-time-chi-square-mixing.md` (2026-08-31): the
+continuous-time walk's π-density `contWalkDensity` (the walk density
+under `e^{-tL_walk}`), the centered-density conjugation shift
+`degreeSqrt_mulVec_contWalkDensity_sub_one` (the identity every exact
+computation runs through), the continuous χ² distance
+`contChiSquareDistance` with its `t = 0` join to the discrete object,
+and the consumer `contChiSquareDistance_le` — the field-standard
+continuous-time mixing bound at the discrete theorem's hypothesis set
+*minus connectivity* (at `λ₂(L_sym) = 0` the true rate-1 statement) and
+with *no caller-certified rate*: the continuous rate `e^{-λ₂ t}` is
+intrinsic. All proved, zero axioms.
+
+The mixing-time package (2026-08-31, the same proposal's deferred
+items 1+2): the continuous walk *law* `contWalkDistribution` with its
+`t = 0` join, the ℓ²→TV conversion's continuous twins
+`contWalkDistribution_tvDistance_le` / `_of_decay`, the mixing-time
+object `contMixingTimeFrom` (the per-start `sInf` at Levin–Peres–Wilmer
+ch. 20's `∀ s ≥ t` reading), its certificate interface
+`_le_of_cert`, the spectral ceiling `_le_of_connected`, and
+ε-antitonicity `_anti`. All proved, zero axioms.
+-/
+
+/-- Degree-weighted sums are preserved by the walk heat semigroup on
+symmetric input: `∑ deg·(e^{−tL_walk} f) = ∑ deg·f` — mass conservation
+in π-coordinates (the twin of `sum_heatKernel_mulVec`). Route: the
+π-isometry moves the sum to the `√D·1` pairing, the conjugation moves
+it to the normalized kernel, symmetry moves `√D·1` across, and the
+kernel fix returns it. -/
+theorem sum_deg_mul_walkHeatKernel (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hd : ∀ i, 0 < deg A i) (t : ℝ) (f : V → ℝ) :
+    ∑ i, deg A i * (walkHeatKernel A t *ᵥ f) i = ∑ j, deg A j * f j := by
+  have he : ∀ i : V, (degreeSqrt A *ᵥ onesVec : V → ℝ) i
+      * (degreeSqrt A *ᵥ (walkHeatKernel A t *ᵥ f) : V → ℝ) i
+      = deg A i * (walkHeatKernel A t *ᵥ f) i := by
+    intro i
+    rw [degreeSqrt_mulVec_apply, degreeSqrt_mulVec_apply]
+    simp only [onesVec, mul_one]
+    rw [← mul_assoc, Real.mul_self_sqrt (le_of_lt (hd i))]
+  calc ∑ i, deg A i * (walkHeatKernel A t *ᵥ f) i
+      = Matrix.dotProduct (degreeSqrt A *ᵥ onesVec)
+          (degreeSqrt A *ᵥ (walkHeatKernel A t *ᵥ f)) := by
+        rw [Matrix.dotProduct]
+        exact Finset.sum_congr rfl fun i _ => (he i).symm
+    _ = ∑ j, deg A j * f j := by
+        rw [degreeSqrt_mulVec_walkHeatKernel A hd t f,
+          Matrix.dotProduct_mulVec, ← Matrix.mulVec_transpose,
+          (normalizedHeatKernel_isSymm A hA t).eq,
+          normalizedHeatKernel_mulVec_degreeSqrt_onesVec A hd t,
+          ← sum_deg_mul_eq A hd f]
+
+/-- The continuous-time walk's π-density started at `x`: the discrete
+walk's initial density evolved by the walk heat semigroup
+`e^{−tL_walk}` — the density process of the continuous-time random
+walk (each vertex jumping at unit rate to a uniform neighbor). -/
+noncomputable def contWalkDensity (A : WAdj (V := V)) (t : ℝ) (x : V) :
+    V → ℝ :=
+  walkHeatKernel A t *ᵥ walkDensity A 0 x
+
+theorem contWalkDensity_zero (A : WAdj (V := V)) (x : V) :
+    contWalkDensity A 0 x = walkDensity A 0 x := by
+  rw [contWalkDensity, walkHeatKernel_zero, Matrix.one_mulVec]
+
+theorem walkHeatKernel_mulVec_one (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) (t : ℝ) :
+    walkHeatKernel A t *ᵥ (1 : V → ℝ) = 1 :=
+  walkHeatKernel_mulVec_onesVec A hd t
+
+/-- **The centered-density conjugation shift**: the `√D`-conjugate of
+the centered continuous-time density evolves by the *normalized* heat
+kernel — `√D (h_t − 1) = e^{−tL_sym} (√D (h₀ − 1))`. The identity the
+consumer proof and every QA exact closed form runs through: it makes
+the π-weighted χ² exactly the Euclidean contraction of the normalized
+kernel on the conjugated centered initial density. -/
+theorem degreeSqrt_mulVec_contWalkDensity_sub_one (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) (t : ℝ) (x : V) :
+    degreeSqrt A *ᵥ (contWalkDensity A t x - 1)
+      = normalizedHeatKernel A t *ᵥ
+          (degreeSqrt A *ᵥ (walkDensity A 0 x - 1)) := by
+  have hstep : walkHeatKernel A t *ᵥ (walkDensity A 0 x - 1)
+      = contWalkDensity A t x - 1 := by
+    rw [contWalkDensity, Matrix.mulVec_sub,
+      walkHeatKernel_mulVec_one A hd t]
+  calc degreeSqrt A *ᵥ (contWalkDensity A t x - 1)
+      = degreeSqrt A *ᵥ
+          (walkHeatKernel A t *ᵥ (walkDensity A 0 x - 1)) := by
+        rw [hstep]
+    _ = normalizedHeatKernel A t *ᵥ
+          (degreeSqrt A *ᵥ (walkDensity A 0 x - 1)) :=
+        degreeSqrt_mulVec_walkHeatKernel A hd t _
+
+/-- The continuous-time walk density stays a density: `∑ π h_t = 1`
+at every time. -/
+theorem sum_stationaryVec_contWalkDensity (A : WAdj (V := V))
+    (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i) [Nonempty V] (t : ℝ)
+    (x : V) :
+    ∑ i, stationaryVec A i * contWalkDensity A t x i = 1 := by
+  have h0 : ∑ i, stationaryVec A i * walkDensity A 0 x i = 1 := by
+    rw [← sum_walkDistribution A hd 0 x]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [walkDensity, mul_div_cancel₀ _ (ne_of_gt (stationaryVec_pos A hd i))]
+  have hconv : ∀ g : V → ℝ, ∑ i, stationaryVec A i * g i
+      = (vol A (Finset.univ : Finset V))⁻¹ * ∑ i, deg A i * g i := by
+    intro g
+    have h1 : ∀ i : V, stationaryVec A i * g i
+        = deg A i * g i / vol A (Finset.univ : Finset V) := by
+      intro i
+      simp only [stationaryVec, div_mul_eq_mul_div]
+    have hsum : ∑ i, stationaryVec A i * g i
+        = ∑ i, deg A i * g i / vol A (Finset.univ : Finset V) :=
+      Finset.sum_congr rfl fun i _ => h1 i
+    rw [hsum, ← Finset.sum_div, div_eq_inv_mul]
+  rw [contWalkDensity, hconv, sum_deg_mul_walkHeatKernel A hA hd t,
+    ← hconv, h0]
+
+/-- The continuous-time χ² mixing distance:
+`χ²_cont(t, x) = ∑ i, π i (h_t i − 1)²` — the same object as
+`chiSquareDistance` at real times, in the density form
+`chiSquareDistance_eq_sum_smul` already uses. -/
+noncomputable def contChiSquareDistance (A : WAdj (V := V)) (t : ℝ)
+    (x : V) : ℝ :=
+  ∑ i, stationaryVec A i * (contWalkDensity A t x i - 1) ^ 2
+
+theorem contChiSquareDistance_zero (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (x : V) :
+    contChiSquareDistance A 0 x = (stationaryVec A x)⁻¹ - 1 := by
+  have hdef : contChiSquareDistance A 0 x
+      = ∑ i, stationaryVec A i * (contWalkDensity A 0 x i - 1) ^ 2 := rfl
+  rw [hdef, contWalkDensity_zero A x,
+    ← chiSquareDistance_eq_sum_smul A hd 0 x, chiSquareDistance_zero A hd x]
+
+/-- The χ² distance in conjugated-norm form: `vol · χ²_cont(t, x)` is
+the squared Euclidean norm of the normalized heat kernel applied to the
+conjugated centered initial density — the form every exact QA
+computation evaluates. -/
+theorem contChiSquareDistance_eq_inv_mul (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (t : ℝ) (x : V) :
+    contChiSquareDistance A t x
+      = (vol A (Finset.univ : Finset V))⁻¹
+          * Matrix.dotProduct
+              (degreeSqrt A *ᵥ (contWalkDensity A t x - 1))
+              (degreeSqrt A *ᵥ (contWalkDensity A t x - 1)) := by
+  have hconv : ∀ g : V → ℝ, ∑ i, stationaryVec A i * (g i - 1) ^ 2
+      = (vol A (Finset.univ : Finset V))⁻¹
+          * ∑ i, deg A i * (g i - 1) ^ 2 := by
+    intro g
+    have h1 : ∀ i : V, stationaryVec A i * (g i - 1) ^ 2
+        = deg A i * (g i - 1) ^ 2 / vol A (Finset.univ : Finset V) := by
+      intro i
+      simp only [stationaryVec, div_mul_eq_mul_div]
+    have hsum : ∑ i, stationaryVec A i * (g i - 1) ^ 2
+        = ∑ i, deg A i * (g i - 1) ^ 2 / vol A (Finset.univ : Finset V) :=
+      Finset.sum_congr rfl fun i _ => h1 i
+    rw [hsum, ← Finset.sum_div, div_eq_inv_mul]
+  rw [contChiSquareDistance, hconv (contWalkDensity A t x),
+    ← sum_deg_mul_sq_eq A hd (contWalkDensity A t x - 1)]
+  congr 1
+  exact Finset.sum_congr rfl fun i _ => by
+    simp only [Pi.sub_apply, Pi.one_apply, pow_two]
+
+/-- **The continuous-time χ² mixing bound** — the field-standard
+statement the twin serves, at the discrete theorem's hypothesis set
+*minus connectivity* (the twin is hypothesis-minimal; on disconnected
+input `λ₂(L_sym) = 0` and the bound is the true rate-1 statement) and
+with **no caller-certified rate**: the continuous-time rate
+`e^{−λ₂(L_sym)·t}` is intrinsic, where the discrete theorem needs an
+`r` dominating every walk factor `|1 − μ|`.
+
+`χ²_cont(t, x) ≤ e^{−2t·λ₂(L_sym)} · ((π x)⁻¹ − 1)`
+
+Composition: the twin at the initial density (its π-mean is `1` by
+mass conservation), the π↔degree conversion, and the `t = 0`
+normalization joined to the discrete object. -/
+theorem contChiSquareDistance_le (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i) [Nonempty V]
+    (hcard : 2 ≤ Fintype.card V) {t : ℝ} (ht : 0 ≤ t) (x : V) :
+    contChiSquareDistance A t x
+      ≤ Real.exp (-(2 * t * secondEval (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) hcard))
+        * ((stationaryVec A x)⁻¹ - 1) := by
+  obtain ⟨v0⟩ : Nonempty V := ‹Nonempty V›
+  have hsumdeg : (0 : ℝ) < ∑ j, deg A j :=
+    Finset.sum_pos' (fun j _ => le_of_lt (hd j)) ⟨v0, Finset.mem_univ _, hd v0⟩
+  have hmass : (∑ j, deg A j * walkDensity A 0 x j) / (∑ j, deg A j) = 1 := by
+    have h1 : ∑ j, deg A j * (walkDensity A 0 x j - 1) = 0 :=
+      sum_deg_mul_walkDensity_sub_one_eq_zero A hd x
+    have hsplit : ∑ j, deg A j * walkDensity A 0 x j
+        = (∑ j, deg A j * walkDensity A 0 x j)
+          - ∑ j, deg A j * (walkDensity A 0 x j - 1) := by
+      rw [h1, sub_zero]
+    have h2 : ∑ j, deg A j * (walkDensity A 0 x j - 1)
+        = (∑ j, deg A j * walkDensity A 0 x j) - (∑ j, deg A j) := by
+      rw [← Finset.sum_sub_distrib]
+      exact Finset.sum_congr rfl fun j _ => by rw [mul_sub, mul_one]
+    rw [h2, sub_sub_cancel] at hsplit
+    rw [hsplit, div_self (ne_of_gt hsumdeg)]
+  have htw := walkHeatKernel_variance_decay A hA hnn hd hcard ht
+    (walkDensity A 0 x)
+  rw [hmass] at htw
+  have hconv : ∀ g : V → ℝ, ∑ i, stationaryVec A i * (g i - 1) ^ 2
+      = (vol A (Finset.univ : Finset V))⁻¹
+          * ∑ i, deg A i * (g i - 1) ^ 2 := by
+    intro g
+    have h1 : ∀ i : V, stationaryVec A i * (g i - 1) ^ 2
+        = deg A i * (g i - 1) ^ 2 / vol A (Finset.univ : Finset V) := by
+      intro i
+      simp only [stationaryVec, div_mul_eq_mul_div]
+    have hsum : ∑ i, stationaryVec A i * (g i - 1) ^ 2
+        = ∑ i, deg A i * (g i - 1) ^ 2 / vol A (Finset.univ : Finset V) :=
+      Finset.sum_congr rfl fun i _ => h1 i
+    rw [hsum, ← Finset.sum_div, div_eq_inv_mul]
+  have h0' : (vol A (Finset.univ : Finset V))⁻¹
+      * ∑ i, deg A i * (walkDensity A 0 x i - 1) ^ 2
+      = (stationaryVec A x)⁻¹ - 1 := by
+    rw [← hconv (walkDensity A 0 x)]
+    have hdef : contChiSquareDistance A 0 x
+        = ∑ i, stationaryVec A i * (contWalkDensity A 0 x i - 1) ^ 2 := rfl
+    rw [contWalkDensity_zero A x] at hdef
+    rw [← hdef, contChiSquareDistance_zero A hd x]
+  calc contChiSquareDistance A t x
+      = (vol A (Finset.univ : Finset V))⁻¹
+          * ∑ i, deg A i * (contWalkDensity A t x i - 1) ^ 2 := by
+        rw [contChiSquareDistance, hconv (contWalkDensity A t x)]
+    _ = (vol A (Finset.univ : Finset V))⁻¹
+          * ∑ i, deg A i
+              * ((walkHeatKernel A t *ᵥ walkDensity A 0 x) i - 1) ^ 2 := by
+        rw [contWalkDensity]
+    _ ≤ (vol A (Finset.univ : Finset V))⁻¹
+          * (Real.exp (-(2 * t * secondEval (normalizedLaplacian A)
+                (normalizedLaplacian_symmetric A hA) hcard))
+            * ∑ i, deg A i * (walkDensity A 0 x i - 1) ^ 2) := by
+        exact mul_le_mul_of_nonneg_left htw (by positivity)
+    _ = Real.exp (-(2 * t * secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard))
+        * ((stationaryVec A x)⁻¹ - 1) := by
+        rw [mul_left_comm, h0']
+
+/-- The continuous-time walk **law** at time `t` started at `x`: the
+stationary weighting of the π-density — `ν_t(i) = π i · h_t(i)`, the
+actual probability vector of the walk run in continuous time. The
+discrete programme's `walkDistribution` twin: there the law is
+primitive and the density derived; here the semigroup evolves the
+density (`contWalkDensity`), so the law is the weighting. -/
+noncomputable def contWalkDistribution (A : WAdj (V := V)) (t : ℝ) (x : V) :
+    V → ℝ :=
+  fun i => stationaryVec A i * contWalkDensity A t x i
+
+/-- The `t = 0` join to the discrete object: weighting the initial
+density returns the point mass `δ_x`. A wrong sign or weight in
+`contWalkDistribution` breaks exactly this identity. QA:
+`tri_contWalkDistribution_zero_QA`. -/
+theorem contWalkDistribution_zero (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (x : V) :
+    contWalkDistribution A 0 x = walkDistribution A 0 x := by
+  funext i
+  have hpos : stationaryVec A i ≠ 0 := ne_of_gt (stationaryVec_pos A hd i)
+  show stationaryVec A i * contWalkDensity A 0 x i
+      = walkDistribution A 0 x i
+  rw [contWalkDensity_zero A x]
+  show stationaryVec A i * (walkDistribution A 0 x i / stationaryVec A i)
+      = walkDistribution A 0 x i
+  field_simp
+
+/-- The continuous χ² in the `(ν − π)²/π` form the generic ℓ²→TV
+conversion consumes — the continuous twin of `chiSquareDistance`'s own
+defining shape, bridged from `contChiSquareDistance`'s density form
+(per-summand `π i (h i − 1)² = (π i h i − π i)²/π i`). -/
+theorem contChiSquareDistance_eq_sum_div (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (t : ℝ) (x : V) :
+    contChiSquareDistance A t x
+      = ∑ i, (contWalkDistribution A t x i - stationaryVec A i)^2
+          / stationaryVec A i := by
+  rw [contChiSquareDistance]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  have hpos : stationaryVec A i ≠ 0 := ne_of_gt (stationaryVec_pos A hd i)
+  show stationaryVec A i * (contWalkDensity A t x i - 1)^2
+      = (stationaryVec A i * contWalkDensity A t x i - stationaryVec A i)^2
+          / stationaryVec A i
+  field_simp
+  ring
+
+/-- **The continuous-time ℓ²→TV conversion**: the walk law's
+total-variation distance to stationarity is at most half the square
+root of the continuous χ² — the one-step composition of the delivered
+`tvDistance_le_half_sqrt` with the delivered `contChiSquareDistance`
+through the sum-div bridge. Unconditional: no connectivity, no rate,
+sign-free on the law (the conversion's own shape). QA: the exact value
+`k2_cont_tv_eq` (attained at every time on `K₂`) and the triangle
+instances `tri_cont_tv_le` / `tri_cont_tv_slack_QA`. -/
+theorem contWalkDistribution_tvDistance_le (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (t : ℝ) (x : V) :
+    tvDistance (contWalkDistribution A t x) (stationaryVec A)
+      ≤ (1/2) * Real.sqrt (contChiSquareDistance A t x) :=
+  (tvDistance_le_half_sqrt (stationaryVec_pos A hd)
+    (sum_stationaryVec A hd)).trans
+    (mul_le_mul_of_nonneg_left
+      (Real.sqrt_le_sqrt
+        (le_of_eq (contChiSquareDistance_eq_sum_div A hd t x).symm))
+      (by norm_num))
+
+/-- **The decay form** — the continuous-time TV ceiling at exactly
+`contChiSquareDistance_le`'s hypothesis set (no connectivity, no
+caller-certified rate: the continuous rate is intrinsic):
+`TV(ν_t x, π) ≤ (1/2)·e^{−t·λ₂(L_sym)}·√((π x)⁻¹ − 1)`. QA: attained
+at every time on `K₂` (`k2_cont_ceiling_attained_QA`); honest
+Cauchy–Schwarz slack on the triangle (`tri_cont_tv_slack_QA`). -/
+theorem contWalkDistribution_tvDistance_le_of_decay (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (hcard : 2 ≤ Fintype.card V) {t : ℝ} (ht : 0 ≤ t)
+    (x : V) :
+    tvDistance (contWalkDistribution A t x) (stationaryVec A)
+      ≤ (1/2) * Real.exp (-(t * secondEval (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) hcard))
+        * Real.sqrt ((stationaryVec A x)⁻¹ - 1) := by
+  set l : ℝ := secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard with hl
+  set C : ℝ := (stationaryVec A x)⁻¹ - 1 with hC
+  have hχ := contChiSquareDistance_le A hA hnn hd hcard ht x
+  have hTV := contWalkDistribution_tvDistance_le A hd t x
+  have hsplit : Real.exp (-(2 * t * l))
+      = Real.exp (-(t * l)) * Real.exp (-(t * l)) := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  have hinner : Real.sqrt (contChiSquareDistance A t x)
+      ≤ Real.exp (-(t * l)) * Real.sqrt C := by
+    have hnn2 : (0 : ℝ) ≤ Real.exp (-(t * l)) := Real.exp_nonneg _
+    refine (Real.sqrt_le_sqrt hχ).trans_eq ?_
+    rw [hsplit, Real.sqrt_mul (mul_nonneg hnn2 hnn2),
+      Real.sqrt_mul_self hnn2]
+  refine hTV.trans ?_
+  rw [mul_assoc]
+  exact mul_le_mul_of_nonneg_left hinner (by norm_num)
+
+/-- The **continuous-time mixing time** from `x` at threshold `ε`:
+the least time from which the walk law stays within `ε` of
+stationarity in total variation — exactly Levin–Peres–Wilmer ch. 20's
+`t_mix` reading (`inf{t : d(s) ≤ ε ∀ s ≥ t}`, the honest form for a
+distance not assumed monotone in time). Per-start, mirroring the
+repo's per-start oversmoothing family; the sup-over-starts uniform
+object is a trivial composition left consumer-gated. Junk corner: at
+an unreachable `ε` the time set is empty and `sInf ∅ = 0` in `ℝ` — no
+theorem below instantiates there (every statement either carries the
+connected ceiling's hypotheses, which make the set nonempty, or
+hypothesizes a witness). QA: the exact closed form
+`k2_contMixingTimeFrom_eq`. -/
+noncomputable def contMixingTimeFrom (A : WAdj (V := V)) (x : V) (ε : ℝ) :
+    ℝ :=
+  sInf {t : ℝ | 0 ≤ t ∧ ∀ s : ℝ, t ≤ s →
+    tvDistance (contWalkDistribution A s x) (stationaryVec A) ≤ ε}
+
+/-- The witness-time set is bounded below by `0` by construction. -/
+theorem contMixingTimeFrom_bddBelow (A : WAdj (V := V)) (x : V) (ε : ℝ) :
+    BddBelow {t : ℝ | 0 ≤ t ∧ ∀ s : ℝ, t ≤ s →
+      tvDistance (contWalkDistribution A s x) (stationaryVec A) ≤ ε} :=
+  ⟨0, fun _ ha => ha.1⟩
+
+/-- Any witness time certifies the mixing time: `0 ≤ T` and
+`∀ s ≥ T, TV ≤ ε` give `t_mix(ε) ≤ T` — the reusable certificate
+interface (the discrete ceiling's `pow_mul_le_of_log_threshold`
+analogue). -/
+theorem contMixingTimeFrom_le_of_cert (A : WAdj (V := V)) (x : V)
+    {ε T : ℝ} (hT0 : 0 ≤ T)
+    (hT : ∀ s : ℝ, T ≤ s →
+      tvDistance (contWalkDistribution A s x) (stationaryVec A) ≤ ε) :
+    contMixingTimeFrom A x ε ≤ T :=
+  csInf_le (contMixingTimeFrom_bddBelow A x ε) ⟨hT0, hT⟩
+
+/-- **The spectral ceiling** — the field-standard continuous-time
+mixing bound (Montenegro–Tetali's framework; LPW ch. 20's
+continuous-time reading): on a connected graph,
+`t_mix(ε) ≤ max 0 (ln(√((π x)⁻¹ − 1)/(2ε))/λ₂(L_sym))`. The `max 0`
+floor is the honest two-case shape: past `ε = √C/2` the bound goes
+negative while `t = 0` already certifies (the TV ceiling starts at
+`(1/2)√C`). QA: the ceiling attained exactly on `K₂` at `ε = e^{−2}/2`
+(`k2_contMixingTimeFrom_ceiling_le` beside the exact closed form
+`k2_contMixingTimeFrom_exp_eq`), and the wrong-gap fence
+`k2_contMixingTime_wrong_gap_refuted_QA`. -/
+theorem contMixingTimeFrom_le_of_connected (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected) {ε : ℝ} (hε : 0 < ε)
+    (x : V) :
+    contMixingTimeFrom A x ε
+      ≤ max 0 (Real.log (Real.sqrt ((stationaryVec A x)⁻¹ - 1) / (2 * ε))
+        / secondEval (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) hcard) := by
+  have hpos : 0 < secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard :=
+    secondEval_normalizedLaplacian_pos_of_connected A hA hnn hd hcard hconn
+  set C : ℝ := (stationaryVec A x)⁻¹ - 1 with hC
+  set l : ℝ := secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard with hl
+  rcases le_or_lt (2 * ε) (Real.sqrt C) with hle | hlt
+  · have h2ε : 0 < 2 * ε := by positivity
+    have hsqrt : 0 < Real.sqrt C := lt_of_lt_of_le h2ε hle
+    have hratio : (1 : ℝ) ≤ Real.sqrt C / (2 * ε) :=
+      (one_le_div h2ε).mpr hle
+    set T : ℝ := Real.log (Real.sqrt C / (2 * ε)) / l with hTdef
+    have hT0 : 0 ≤ T := div_nonneg (Real.log_nonneg hratio) (le_of_lt hpos)
+    refine (contMixingTimeFrom_le_of_cert A x hT0 ?_).trans (le_max_right 0 T)
+    intro s hs
+    have hs0 : 0 ≤ s := le_trans hT0 hs
+    have hTV := contWalkDistribution_tvDistance_le_of_decay A hA hnn hd
+      hcard hs0 x
+    have hsl : T * l ≤ s * l := mul_le_mul_of_nonneg_right hs (le_of_lt hpos)
+    have hmono : Real.exp (-(s * l)) ≤ Real.exp (-(T * l)) :=
+      Real.exp_le_exp.mpr (by linarith)
+    have hTl : T * l = Real.log (Real.sqrt C / (2 * ε)) := by
+      rw [hTdef]
+      field_simp
+    have hbound : (1/2) * Real.exp (-(T * l)) * Real.sqrt C = ε := by
+      rw [hTl, Real.exp_neg, Real.exp_log (div_pos hsqrt h2ε)]
+      field_simp
+    calc tvDistance (contWalkDistribution A s x) (stationaryVec A)
+        ≤ (1/2) * Real.exp (-(s * l)) * Real.sqrt C := hTV
+      _ ≤ (1/2) * Real.exp (-(T * l)) * Real.sqrt C := by
+          nlinarith [hmono, Real.sqrt_nonneg C]
+      _ = ε := hbound
+  · refine (contMixingTimeFrom_le_of_cert A x (le_refl 0) ?_).trans
+      (le_trans (le_refl 0) (le_max_left _ _))
+    intro s hs
+    have hTV := contWalkDistribution_tvDistance_le_of_decay A hA hnn hd
+      hcard hs x
+    have hone : Real.exp (-(s * l)) ≤ 1 := by
+      have h0le : -(s * l) ≤ (0 : ℝ) := by nlinarith [hpos]
+      have h := (Real.exp_le_exp.mpr h0le :
+        Real.exp (-(s * l)) ≤ Real.exp (0 : ℝ))
+      rwa [Real.exp_zero] at h
+    calc tvDistance (contWalkDistribution A s x) (stationaryVec A)
+        ≤ (1/2) * Real.exp (-(s * l)) * Real.sqrt C := hTV
+      _ ≤ (1/2) * 1 * Real.sqrt C := by nlinarith [Real.sqrt_nonneg C, hone]
+      _ ≤ ε := by nlinarith [hlt, Real.sqrt_nonneg C]
+
+/-- **ε-antitonicity**: a stricter threshold takes at least as long —
+`t_mix(δ) ≤ t_mix(ε)` whenever `ε ≤ δ` and `ε` is reachable from `x`
+(the witness hypothesis the connected ceiling always discharges).
+Field-standard monotonicity of the mixing time in its threshold. QA:
+`k2_contMixingTimeFrom_anti_QA` with the closed-form consistency pin
+`k2_contMixingTimeFrom_values`. -/
+theorem contMixingTimeFrom_anti (A : WAdj (V := V)) (x : V) {ε δ : ℝ}
+    (hεδ : ε ≤ δ)
+    (hne : ∃ t : ℝ, 0 ≤ t ∧ ∀ s : ℝ, t ≤ s →
+      tvDistance (contWalkDistribution A s x) (stationaryVec A) ≤ ε) :
+    contMixingTimeFrom A x δ ≤ contMixingTimeFrom A x ε :=
+  csInf_le_csInf (contMixingTimeFrom_bddBelow A x δ) hne
+    (fun _ ht => ⟨ht.1, fun s hs => (ht.2 s hs).trans hεδ⟩)
+
+/-!
+## The Poisson bridge: continuous↔discrete comparability
+
+`proposals/continuous-time-chi-square-mixing.md`'s named follow-on
+(2026-09-01): LPW ch. 20's Poissonization — the continuous-time walk law
+is the Poisson mixture of the discrete walk laws — and the TV
+comparability it yields. The identity
+`ν^cont_t = ∑'_k e^{−t}tᵏ/k! · ν_k` is proved through the exponential
+split `−t(I − P) = tP − tI` (`Matrix.exp_add_of_commute`, the scalar
+matrix commutes with everything) and the scalar-matrix exponential
+`e^{−tI} = e^{−t} • I` (`Heat.matrix_exp_smul_one`). The TV toolkit (the
+`Pᵀ` ℓ¹-contraction and discrete TV monotonicity) is field-standard and
+new to the shelf; the comparability
+`TV_cont(t) ≤ ∑_{k<m} e^{−t}tᵏ/k! + TV_disc(m)` splits the mixture at
+any threshold; the transfer corollary is the would-be consumer of the
+still-deferred discrete `t_mix` object. All proved, zero axioms.
+-/
+
+/-! ## The Poisson weight (destined for `Mixing.lean`) -/
+
+/-- The Poisson weight at time `t`: `e^{−t}·tᵏ/k!` — the probability
+that a rate-one Poisson clock rings exactly `k` times by time `t`. The
+mixture weights of the Poissonization identity. -/
+noncomputable def poissonWeight (t : ℝ) (k : ℕ) : ℝ :=
+  Real.exp (-t) * t ^ k / (Nat.factorial k : ℝ)
+
+theorem poissonWeight_nonneg {t : ℝ} (ht : 0 ≤ t) (k : ℕ) :
+    0 ≤ poissonWeight t k := by
+  unfold poissonWeight
+  positivity
+
+/-- The Poisson weights are a probability sequence:
+`∑' poissonWeight t = 1` at every time (negative times included) —
+`e^{−t} · e^{t} = 1`. -/
+theorem poissonWeight_hasSum_one (t : ℝ) :
+    HasSum (poissonWeight t) 1 := by
+  have hcore : HasSum (fun k => Real.exp (-t) * t ^ k / (Nat.factorial k : ℝ)) 1 := by
+    apply (hasSum_mul_left_iff (Real.exp_ne_zero t)).mp
+    simp only [mul_one]
+    have hfun : (fun k => Real.exp t * (Real.exp (-t) * t ^ k
+          / (Nat.factorial k : ℝ)))
+        = fun k => t ^ k / (Nat.factorial k : ℝ) := by
+      funext k
+      rw [mul_div_assoc, Real.exp_neg, ← mul_assoc, ← div_eq_mul_inv,
+        div_self (Real.exp_ne_zero t), one_mul]
+    rw [hfun, Real.exp_eq_exp_ℝ]
+    exact NormedSpace.expSeries_div_hasSum_exp ℝ t
+  have heq : poissonWeight t = fun k => Real.exp (-t) * t ^ k
+      / (Nat.factorial k : ℝ) := rfl
+  rw [heq]
+  exact hcore
+
+theorem poissonWeight_summable (t : ℝ) : Summable (poissonWeight t) :=
+  (poissonWeight_hasSum_one t).summable
+
+theorem poissonWeight_tsum_eq_one (t : ℝ) :
+    ∑' k, poissonWeight t k = 1 :=
+  (poissonWeight_hasSum_one t).tsum_eq
+
+/-! ## The Poissonization identity -/
+
+/-- The discrete density at `k` is the `k`-th walk power applied to the
+initial density — the uncentered twin of `walkDensity_sub_one`. -/
+theorem walkDensity_eq_pow_walkTransitionMatrix_mulVec
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (k : ℕ) (x : V) :
+    walkDensity A k x
+      = (walkTransitionMatrix A ^ k) *ᵥ walkDensity A 0 x := by
+  induction k with
+  | zero => simp [walkDensity, pow_zero, Matrix.one_mulVec]
+  | succ k ih =>
+    rw [walkDensity_succ A hA hd k x, ih, pow_succ',
+      ← Matrix.mulVec_mulVec]
+
+/-- **The Poissonized density**: the continuous-time walk density is the
+Poisson mixture of the discrete densities —
+`e^{−tL_walk} *ᵥ h₀ = ∑' k, poissonWeight t k • h_k`. Route: the
+exponential split `−t(I − P) = tP − tI` through
+`Matrix.exp_add_of_commute` (the scalar matrix `−tI` commutes with
+everything), the scalar-matrix exponential `e^{−tI} = e^{−t} • I`, and
+the shelf's `expSeries_hasSum_exp` at `tP` mapped through `*ᵥ h₀` with
+the power identity `(tP)ᵏ = tᵏ • Pᵏ`. -/
+theorem hasSum_poisson_walkDensity (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (t : ℝ) (x : V) :
+    HasSum (fun k : ℕ => poissonWeight t k • walkDensity A k x)
+      (walkHeatKernel A t *ᵥ walkDensity A 0 x) := by
+  have hsplit : -(t • walkLaplacian A)
+      = (t • walkTransitionMatrix A) + -((t : ℝ) • (1 : Matrix V V ℝ)) := by
+    rw [walkLaplacian, smul_sub, neg_sub, sub_eq_add_neg]
+  have hcomm : Commute ((t : ℝ) • walkTransitionMatrix A)
+      (-((t : ℝ) • (1 : Matrix V V ℝ))) := by
+    show (t • walkTransitionMatrix A) * -((t : ℝ) • (1 : Matrix V V ℝ))
+      = -((t : ℝ) • (1 : Matrix V V ℝ)) * (t • walkTransitionMatrix A)
+    have hn : -((t : ℝ) • (1 : Matrix V V ℝ))
+        = (-(t : ℝ)) • (1 : Matrix V V ℝ) := by rw [neg_smul]
+    rw [hn, Matrix.smul_mul, Matrix.mul_smul, Matrix.smul_mul,
+      Matrix.mul_smul, smul_smul, smul_smul, one_mul, mul_one]
+    congr 1
+    ring
+  have hadd := Matrix.exp_add_of_commute ℝ ((t : ℝ) • walkTransitionMatrix A)
+    (-((t : ℝ) • (1 : Matrix V V ℝ))) hcomm
+  have hscalar : NormedSpace.exp ℝ (-((t : ℝ) • (1 : Matrix V V ℝ)))
+      = Real.exp (-t) • 1 := by
+    rw [← neg_smul, matrix_exp_smul_one]
+  have hstep : walkHeatKernel A t *ᵥ walkDensity A 0 x
+      = Real.exp (-t)
+          • (NormedSpace.exp ℝ ((t : ℝ) • walkTransitionMatrix A)
+            *ᵥ walkDensity A 0 x) := by
+    rw [walkHeatKernel, hsplit, hadd, hscalar, ← Matrix.mulVec_mulVec,
+      Matrix.smul_mulVec_assoc, Matrix.one_mulVec, Matrix.mulVec_smul]
+  have h := (expSeries_hasSum_exp ((t : ℝ) • walkTransitionMatrix A)).map
+    ({ toFun := fun N => N *ᵥ walkDensity A 0 x
+       map_zero' := by simp [Matrix.zero_mulVec]
+       map_add' := fun N₁ N₂ => by simp [Matrix.add_mulVec] } :
+      Matrix V V ℝ →+ (V → ℝ))
+    (by
+      refine continuous_pi fun i => ?_
+      have hcont : Continuous fun N : Matrix V V ℝ
+          => ∑ j, N i j * walkDensity A 0 x j := by
+        refine continuous_finset_sum _ fun j _ => ?_
+        exact ((continuous_apply j).comp (continuous_apply i)).mul
+          continuous_const
+      simpa only [Matrix.mulVec, Matrix.dotProduct] using hcont)
+  have h' : HasSum (fun k : ℕ =>
+        ((Nat.factorial k : ℝ)⁻¹ • ((t : ℝ) • walkTransitionMatrix A) ^ k)
+          *ᵥ walkDensity A 0 x)
+      (NormedSpace.exp ℝ ((t : ℝ) • walkTransitionMatrix A)
+        *ᵥ walkDensity A 0 x) := h
+  have hterm : ∀ k : ℕ,
+      Real.exp (-t) • (((Nat.factorial k : ℝ)⁻¹
+        • ((t : ℝ) • walkTransitionMatrix A) ^ k) *ᵥ walkDensity A 0 x)
+      = poissonWeight t k • walkDensity A k x := by
+    intro k
+    rw [pow_smul_matrix, Matrix.smul_mulVec_assoc, Matrix.smul_mulVec_assoc,
+      smul_smul, smul_smul,
+      walkDensity_eq_pow_walkTransitionMatrix_mulVec A hA hd k x]
+    unfold poissonWeight
+    rw [div_eq_inv_mul]
+    congr 1
+    ring
+  have hsm := h'.const_smul (Real.exp (-t))
+  simp only [hterm] at hsm
+  rw [hstep]
+  exact hsm
+
+/-- **The Poissonization identity** at the density level. -/
+theorem contWalkDensity_eq_tsum (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (t : ℝ) (x : V) :
+    contWalkDensity A t x
+      = fun i => ∑' k : ℕ, poissonWeight t k * walkDensity A k x i := by
+  funext i
+  have h := ((Pi.hasSum.mp (hasSum_poisson_walkDensity A hA hd t x)) i)
+  calc contWalkDensity A t x i
+      = (walkHeatKernel A t *ᵥ walkDensity A 0 x) i := rfl
+    _ = ∑' k : ℕ, poissonWeight t k * walkDensity A k x i := by
+        rw [← h.tsum_eq]
+        exact tsum_congr fun k => by rw [Pi.smul_apply, smul_eq_mul]
+
+/-- **The Poissonization identity** at the law level: the continuous-time
+walk law is the Poisson mixture of the discrete walk laws —
+`ν^cont_t = ∑'_k e^{−t}tᵏ/k! · ν_k`. LPW ch. 20's `H_t = e^{−t}∑ tᵏ/k! Pᵏ`
+read at the law level. -/
+theorem contWalkDistribution_eq_tsum (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (t : ℝ) (x : V) :
+    contWalkDistribution A t x
+      = fun i => ∑' k : ℕ, poissonWeight t k * walkDistribution A k x i := by
+  funext i
+  have hpos : stationaryVec A i ≠ 0 := ne_of_gt (stationaryVec_pos A hd i)
+  show stationaryVec A i * contWalkDensity A t x i
+      = ∑' k : ℕ, poissonWeight t k * walkDistribution A k x i
+  rw [contWalkDensity_eq_tsum A hA hd t x]
+  show stationaryVec A i * ∑' k : ℕ, poissonWeight t k * walkDensity A k x i = _
+  rw [← tsum_mul_left]
+  exact tsum_congr fun k => by
+    rw [walkDensity]
+    field_simp
+
+/-! ## The TV contraction toolkit -/
+
+omit [DecidableEq V] in
+/-- The total-variation distance between two probability vectors is at
+most one — the diameter of the probability simplex in this metric. -/
+theorem tvDistance_le_one_of_nonneg_of_sum_eq_one {μ ν : V → ℝ}
+    (hμ : ∀ i, 0 ≤ μ i) (hμ1 : ∑ i, μ i = 1)
+    (hν : ∀ i, 0 ≤ ν i) (hν1 : ∑ i, ν i = 1) :
+    tvDistance μ ν ≤ 1 := by
+  have hpt : ∀ i : V, |μ i - ν i| ≤ μ i + ν i := by
+    intro i
+    exact abs_le.2 ⟨by linarith [hμ i, hν i], by linarith [hμ i, hν i]⟩
+  have hsum : ∑ i, |μ i - ν i| ≤ ∑ i, (μ i + ν i) :=
+    Finset.sum_le_sum fun i _ => hpt i
+  rw [Finset.sum_add_distrib, hμ1, hν1] at hsum
+  rw [tvDistance]
+  linarith
+
+/-- The walk law's TV distance to stationarity is at most one at every
+time (both are probability vectors under the standing hypotheses). -/
+theorem walkDistribution_tvDistance_le_one (A : WAdj (V := V))
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i) [Nonempty V] (t : ℕ)
+    (x : V) :
+    tvDistance (walkDistribution A t x) (stationaryVec A) ≤ 1 :=
+  tvDistance_le_one_of_nonneg_of_sum_eq_one
+    (walkDistribution_nonneg A hnn hd t x)
+    (sum_walkDistribution A hd t x)
+    (fun i => le_of_lt (stationaryVec_pos A hd i))
+    (sum_stationaryVec A hd)
+
+/-- **The adjoint walk is an ℓ¹-contraction**: applying `(Pᵀ)` to both
+arguments never increases the TV distance — the distributional action of
+one walk step is a contraction, since every row of `P` is a probability
+vector and the triangle inequality averages against them. The engine of
+discrete TV monotonicity. -/
+theorem tvDistance_walkTransitionMatrixTranspose_mulVec_le
+    (A : WAdj (V := V)) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (μ ν : V → ℝ) :
+    tvDistance ((walkTransitionMatrix A)ᵀ *ᵥ μ)
+        ((walkTransitionMatrix A)ᵀ *ᵥ ν)
+      ≤ tvDistance μ ν := by
+  have htri : ∀ i : V,
+      |((walkTransitionMatrix A)ᵀ *ᵥ (μ - ν)) i|
+      ≤ ∑ j, walkTransitionMatrix A j i * |(μ - ν) j| := by
+    intro i
+    have h0 := Finset.abs_sum_le_sum_abs
+      (fun j => (walkTransitionMatrix A)ᵀ i j * (μ - ν) j) Finset.univ
+    have hrw : ∀ j : V,
+        |(walkTransitionMatrix A)ᵀ i j * (μ - ν) j|
+        = walkTransitionMatrix A j i * |(μ - ν) j| := by
+      intro j
+      rw [Matrix.transpose_apply, abs_mul,
+        abs_of_nonneg (walkTransitionMatrix_nonneg A hnn hd j i)]
+    simp only [Matrix.mulVec, Matrix.dotProduct] at h0
+    rw [Finset.sum_congr rfl fun j _ => hrw j] at h0
+    exact h0
+  have hflip : ∑ i, ∑ j, walkTransitionMatrix A j i * |(μ - ν) j|
+      = ∑ i, |(μ - ν) i| := by
+    rw [Finset.sum_comm]
+    exact Finset.sum_congr rfl fun j _ => by
+      rw [← Finset.sum_mul, walkTransitionMatrix_row_sum A hd j, one_mul]
+  have hkey : ∑ i, |((walkTransitionMatrix A)ᵀ *ᵥ (μ - ν)) i|
+      ≤ ∑ i, |(μ - ν) i| := by
+    calc ∑ i, |((walkTransitionMatrix A)ᵀ *ᵥ (μ - ν)) i|
+        ≤ ∑ i, ∑ j, walkTransitionMatrix A j i * |(μ - ν) j| :=
+          Finset.sum_le_sum fun i _ => htri i
+      _ = ∑ i, |(μ - ν) i| := hflip
+  have hsplit : ((walkTransitionMatrix A)ᵀ *ᵥ μ)
+      - ((walkTransitionMatrix A)ᵀ *ᵥ ν)
+      = (walkTransitionMatrix A)ᵀ *ᵥ (μ - ν) := (Matrix.mulVec_sub _ _ _).symm
+  have hL : tvDistance ((walkTransitionMatrix A)ᵀ *ᵥ μ)
+        ((walkTransitionMatrix A)ᵀ *ᵥ ν)
+      = (1/2) * ∑ i, |((walkTransitionMatrix A)ᵀ *ᵥ (μ - ν)) i| := by
+    rw [tvDistance]
+    exact congrArg (fun s => (1/2) * s)
+      (Finset.sum_congr rfl fun i _ => congrArg abs (congrFun hsplit i))
+  rw [hL, tvDistance]
+  exact mul_le_mul_of_nonneg_left hkey (by norm_num)
+
+/-- The iterated contraction: the `k`-th adjoint-walk power is a TV
+contraction — the one-step lemma composed along the power. -/
+theorem tvDistance_walkTransitionMatrixTranspose_pow_mulVec_le
+    (A : WAdj (V := V)) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (k : ℕ) (μ ν : V → ℝ) :
+    tvDistance ((walkTransitionMatrix A)ᵀ ^ k *ᵥ μ)
+        ((walkTransitionMatrix A)ᵀ ^ k *ᵥ ν)
+      ≤ tvDistance μ ν := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    have hstep : ∀ w : V → ℝ,
+        (walkTransitionMatrix A)ᵀ ^ (k + 1) *ᵥ w
+          = (walkTransitionMatrix A)ᵀ *ᵥ ((walkTransitionMatrix A)ᵀ ^ k *ᵥ w) := by
+      intro w
+      rw [pow_succ', Matrix.mulVec_mulVec]
+    rw [hstep μ, hstep ν]
+    exact le_trans
+      (tvDistance_walkTransitionMatrixTranspose_mulVec_le A hnn hd _ _) ih
+
+/-- Stationarity iterated: the `k`-th adjoint-walk power fixes the
+stationary vector. -/
+theorem walkTransitionMatrixTranspose_pow_mulVec_stationaryVec
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (k : ℕ) :
+    (walkTransitionMatrix A)ᵀ ^ k *ᵥ stationaryVec A = stationaryVec A := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [pow_succ, ← Matrix.mulVec_mulVec, walk_isStationary A hA hd, ih]
+
+/-- The law's power evolution: `ν_{t+s} = (Pᵀ)ˢ *ᵥ ν_t`. -/
+theorem walkDistribution_add (A : WAdj (V := V)) (t s : ℕ) (x : V) :
+    walkDistribution A (t + s) x
+      = (walkTransitionMatrix A)ᵀ ^ s *ᵥ walkDistribution A t x := by
+  induction s with
+  | zero => simp
+  | succ s ih =>
+    calc walkDistribution A (t + (s + 1)) x
+        = (walkTransitionMatrix A)ᵀ *ᵥ walkDistribution A (t + s) x := by
+          rw [show t + (s + 1) = t + s + 1 from (Nat.add_assoc t s 1).symm,
+            walkDistribution_succ]
+      _ = (walkTransitionMatrix A)ᵀ *ᵥ ((walkTransitionMatrix A)ᵀ ^ s
+            *ᵥ walkDistribution A t x) := by rw [ih]
+      _ = (walkTransitionMatrix A)ᵀ ^ (s + 1)
+            *ᵥ walkDistribution A t x := by
+          rw [pow_succ', ← Matrix.mulVec_mulVec]
+
+/-- **Discrete TV monotonicity in time**: waiting longer never increases
+the walk law's TV distance to stationarity — the contraction composed
+with iterated stationarity. Field-standard (`d(k)` non-increasing), and
+the certificate the comparability split consumes. -/
+theorem walkDistribution_tvDistance_anti (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (t s : ℕ) (x : V) :
+    tvDistance (walkDistribution A (t + s) x) (stationaryVec A)
+      ≤ tvDistance (walkDistribution A t x) (stationaryVec A) := by
+  have key := tvDistance_walkTransitionMatrixTranspose_pow_mulVec_le A hnn hd s
+    (walkDistribution A t x) (stationaryVec A)
+  rwa [walkTransitionMatrixTranspose_pow_mulVec_stationaryVec A hA hd s,
+    ← walkDistribution_add A t s x] at key
+
+/-! ## TV convexity in mixtures, and the comparability -/
+
+/-- **Splitting a summable series at a threshold**: the head–tail
+decomposition at `m`, by iterated `tsum_eq_zero_add` (the pinned
+Mathlib has no direct `Finset.range` split at this generality). -/
+theorem tsum_eq_range_add (f : ℕ → ℝ) (hsm : Summable f) (m : ℕ) :
+    ∑' k, f k = ∑ k in Finset.range m, f k + ∑' k, f (k + m) := by
+  induction m with
+  | zero => simp
+  | succ m ih =>
+    have htail : Summable fun k => f (k + m) :=
+      hsm.comp_injective fun a b hab => by simpa using congrArg (· + m) hab
+    have htail2 : ∑' b : ℕ, f (b + 1 + m) = ∑' k : ℕ, f (k + (m + 1)) :=
+      tsum_congr fun k => congrArg f (by ring_nf)
+    rw [Finset.sum_range_succ, ih, tsum_eq_zero_add htail,
+      show Nat.zero + m = m from Nat.zero_add m, htail2]
+    ring
+
+omit [DecidableEq V] in
+/-- **TV convexity in countable mixtures**: if `c` is a probability
+sequence and every `ν k` a probability vector, the TV distance from the
+mixture to `π` is at most the `c`-weighted average of the TV distances —
+the triangle inequality averaged against the mixture weights. The
+Poissonization consumer. -/
+theorem tvDistance_tsum_le {c : ℕ → ℝ} {ν : ℕ → V → ℝ} {π : V → ℝ}
+    (hc : ∀ k, 0 ≤ c k) (hc1 : HasSum c 1)
+    (hπ : ∀ i, 0 ≤ π i) (hπ1 : ∑ i, π i = 1)
+    (hν : ∀ k i, 0 ≤ ν k i) (hν1 : ∀ k, ∑ i, ν k i = 1) :
+    tvDistance (fun i => ∑' k, c k * ν k i) π
+      ≤ ∑' k, c k * tvDistance (ν k) π := by
+  have hνle : ∀ k i, ν k i ≤ 1 := fun k i =>
+    le_trans (Finset.single_le_sum (fun j _ => hν k j) (Finset.mem_univ i))
+      (hν1 k).le
+  have hπle : ∀ i, π i ≤ 1 := fun i =>
+    le_trans (Finset.single_le_sum (fun j _ => hπ j) (Finset.mem_univ i))
+      hπ1.le
+  have habs : ∀ k i, |ν k i - π i| ≤ 1 := by
+    intro k i
+    exact abs_le.2 ⟨by linarith [hν k i, hπle i],
+      by linarith [hνle k i, hπ i]⟩
+  have hcsm : Summable c := hc1.summable
+  have hsmν : ∀ i, Summable fun k => c k * ν k i := fun i =>
+    Summable.of_norm_bounded c hcsm fun k => by
+      rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (hc k),
+        abs_of_nonneg (hν k i)]
+      simpa using mul_le_mul_of_nonneg_left (hνle k i) (hc k)
+  have hsmabs : ∀ i, Summable fun k => c k * |ν k i - π i| := fun i =>
+    Summable.of_norm_bounded c hcsm fun k => by
+      rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (hc k), abs_abs]
+      simpa using mul_le_mul_of_nonneg_left (habs k i) (hc k)
+  have hcent : ∀ i : V,
+      (∑' k, c k * ν k i) - π i = ∑' k, c k * (ν k i - π i) := by
+    intro i
+    have hA : HasSum (fun k => c k * ν k i) (∑' k, c k * ν k i) :=
+      (hsmν i).hasSum
+    have hB : HasSum (fun k => c k * π i) (π i) := by
+      have h := hc1.mul_right (π i)
+      simpa using h
+    have hsub : HasSum (fun k => c k * ν k i - c k * π i)
+        ((∑' k, c k * ν k i) - π i) := hA.sub hB
+    simp only [← mul_sub] at hsub
+    exact hsub.tsum_eq.symm
+  have htri2 : ∀ i : V,
+      |(∑' k, c k * ν k i) - π i| ≤ ∑' k, c k * |ν k i - π i| := by
+    intro i
+    rw [hcent i]
+    have hrew : ∀ k : ℕ,
+        ‖c k * (ν k i - π i)‖ = c k * |ν k i - π i| := by
+      intro k
+      rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (hc k)]
+    have hsmn : Summable fun k => ‖c k * (ν k i - π i)‖ := by
+      have h := hsmabs i
+      rwa [show (fun k => c k * |ν k i - π i|)
+        = fun k => ‖c k * (ν k i - π i)‖
+          from funext fun k => (hrew k).symm] at h
+    refine (norm_tsum_le_tsum_norm
+      (f := fun k => c k * (ν k i - π i)) hsmn).trans_eq ?_
+    exact tsum_congr fun k => hrew k
+  have hswap : ∑ i, ∑' k, c k * |ν k i - π i|
+      = ∑' k, ∑ i, c k * |ν k i - π i| :=
+    (tsum_sum (fun i _ => hsmabs i)).symm
+  have hinner : ∀ k : ℕ, ∑ i, c k * |ν k i - π i|
+      = c k * (2 * tvDistance (ν k) π) := by
+    intro k
+    have h2 : 2 * tvDistance (ν k) π = ∑ i, |ν k i - π i| := by
+      rw [tvDistance, ← mul_assoc,
+        show (2 : ℝ) * (1/2) = 1 from by norm_num, one_mul]
+    rw [h2, ← Finset.mul_sum]
+  have hsmTV : Summable fun k => c k * tvDistance (ν k) π :=
+    Summable.of_norm_bounded c hcsm fun k => by
+      rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (hc k),
+        abs_of_nonneg (tvDistance_nonneg _ _)]
+      calc c k * tvDistance (ν k) π
+          ≤ c k * 1 := mul_le_mul_of_nonneg_left
+            (tvDistance_le_one_of_nonneg_of_sum_eq_one (hν k) (hν1 k)
+              hπ hπ1) (hc k)
+        _ = c k := mul_one _
+  have hsm2 : Summable fun k => c k * (2 * tvDistance (ν k) π) := by
+    simpa only [smul_eq_mul, mul_left_comm] using hsmTV.const_smul (2 : ℝ)
+  have hhalf := (hsm2.hasSum).const_smul ((1/2 : ℝ))
+  have hcongr : ∀ k : ℕ, (1/2 : ℝ) • (c k * (2 * tvDistance (ν k) π))
+      = c k * tvDistance (ν k) π := by
+    intro k
+    rw [smul_eq_mul]
+    ring
+  simp only [hcongr] at hhalf
+  rw [tvDistance]
+  calc (1/2) * ∑ i, |(∑' k, c k * ν k i) - π i|
+      ≤ (1/2) * ∑ i, ∑' k, c k * |ν k i - π i| :=
+        mul_le_mul_of_nonneg_left
+          (Finset.sum_le_sum fun i _ => htri2 i) (by norm_num)
+    _ = (1/2) * ∑' k, c k * (2 * tvDistance (ν k) π) := by
+        rw [hswap]
+        exact congrArg (fun s => (1/2) * s) (tsum_congr hinner)
+    _ = ∑' k, c k * tvDistance (ν k) π := by
+        rw [show ((1/2 : ℝ) * ∑' k, c k * (2 * tvDistance (ν k) π))
+            = (1/2 : ℝ) • ∑' k, c k * (2 * tvDistance (ν k) π) from rfl,
+          ← hhalf.tsum_eq]
+
+/-- **The Poisson-averaged TV bound**: the continuous walk law's TV
+distance to stationarity is at most the Poisson average of the discrete
+TV distances. -/
+theorem contWalkDistribution_tvDistance_le_tsum (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] {t : ℝ} (ht : 0 ≤ t) (x : V) :
+    tvDistance (contWalkDistribution A t x) (stationaryVec A)
+      ≤ ∑' k, poissonWeight t k
+          * tvDistance (walkDistribution A k x) (stationaryVec A) := by
+  rw [contWalkDistribution_eq_tsum A hA hd t x]
+  exact tvDistance_tsum_le (poissonWeight_nonneg ht)
+    (poissonWeight_hasSum_one t)
+    (fun i => le_of_lt (stationaryVec_pos A hd i)) (sum_stationaryVec A hd)
+    (fun k i => walkDistribution_nonneg A hnn hd k x i)
+    (fun k => sum_walkDistribution A hd k x)
+
+set_option maxHeartbeats 800000 in
+/-- **The continuous↔discrete TV comparability**: at every threshold
+`m`, the continuous-time TV distance at time `t` is at most the Poisson
+lower-tail weight below `m` plus the discrete TV distance at `m` — LPW
+ch. 20's Poissonization comparison, with the tail term exact (no
+Chernoff rounding). At `m = 0` this is the worst-start bound
+`TV_cont(t) ≤ TV(δ_x, π)`; at `t = 0` it degrades to the trivial
+`TV ≤ 1 + TV₀`. -/
+theorem contWalkDistribution_tvDistance_add_le (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] {t : ℝ} (ht : 0 ≤ t) (m : ℕ) (x : V) :
+    tvDistance (contWalkDistribution A t x) (stationaryVec A)
+      ≤ ∑ k in Finset.range m, poissonWeight t k
+        + tvDistance (walkDistribution A m x) (stationaryVec A) := by
+  have hFsm : Summable fun k => poissonWeight t k
+      * tvDistance (walkDistribution A k x) (stationaryVec A) :=
+    Summable.of_norm_bounded (poissonWeight t) (poissonWeight_summable t)
+      fun k => by
+        rw [Real.norm_eq_abs, abs_mul,
+          abs_of_nonneg (poissonWeight_nonneg ht k),
+          abs_of_nonneg (tvDistance_nonneg _ _)]
+        simpa using mul_le_mul_of_nonneg_left
+          (walkDistribution_tvDistance_le_one A hnn hd k x)
+          (poissonWeight_nonneg ht k)
+  have hTV := contWalkDistribution_tvDistance_le_tsum A hA hnn hd ht x
+  rw [tsum_eq_range_add _ hFsm m] at hTV
+  have hone : ∑ k in Finset.range m, poissonWeight t k
+      + ∑' k, poissonWeight t (k + m) = 1 := by
+    have h := tsum_eq_range_add (poissonWeight t)
+      (poissonWeight_summable t) m
+    rw [poissonWeight_tsum_eq_one t] at h
+    exact h.symm
+  have hhead : ∑ k in Finset.range m,
+      (poissonWeight t k
+        * tvDistance (walkDistribution A k x) (stationaryVec A))
+      ≤ ∑ k in Finset.range m, poissonWeight t k := by
+    refine Finset.sum_le_sum fun k _ => ?_
+    simpa using mul_le_mul_of_nonneg_left
+      (walkDistribution_tvDistance_le_one A hnn hd k x)
+      (poissonWeight_nonneg ht k)
+  have htail : ∑' k,
+      (poissonWeight t (k + m)
+        * tvDistance (walkDistribution A (k + m) x) (stationaryVec A))
+      ≤ tvDistance (walkDistribution A m x) (stationaryVec A) := by
+    have hsmw : Summable fun k => poissonWeight t (k + m) :=
+      (poissonWeight_summable t).comp_injective
+        fun a b hab => by simpa using congrArg (· + m) hab
+    have hsmL : Summable fun i => poissonWeight t (i + m)
+        * tvDistance (walkDistribution A (i + m) x) (stationaryVec A) :=
+      Summable.of_norm_bounded (fun i => poissonWeight t (i + m)) hsmw
+        fun i => by
+          rw [Real.norm_eq_abs, abs_mul,
+            abs_of_nonneg (poissonWeight_nonneg ht (i + m)),
+            abs_of_nonneg (tvDistance_nonneg _ _)]
+          simpa using mul_le_mul_of_nonneg_left
+            (walkDistribution_tvDistance_le_one A hnn hd (i + m) x)
+            (poissonWeight_nonneg ht (i + m))
+    have hle : ∀ k : ℕ,
+        poissonWeight t (k + m)
+          * tvDistance (walkDistribution A (k + m) x) (stationaryVec A)
+        ≤ poissonWeight t (k + m)
+            * tvDistance (walkDistribution A m x) (stationaryVec A) := by
+      intro k
+      refine mul_le_mul_of_nonneg_left ?_ (poissonWeight_nonneg ht (k + m))
+      have hanti := walkDistribution_tvDistance_anti A hA hnn hd m k x
+      rw [Nat.add_comm m k] at hanti
+      exact hanti
+    have hstep : ∑' k,
+        (poissonWeight t (k + m)
+          * tvDistance (walkDistribution A (k + m) x) (stationaryVec A))
+        ≤ ∑' k,
+          (poissonWeight t (k + m)
+            * tvDistance (walkDistribution A m x) (stationaryVec A)) :=
+      tsum_le_tsum hle hsmL
+        (hsmw.mul_right (tvDistance (walkDistribution A m x) (stationaryVec A)))
+    have htailw : ∑' k, poissonWeight t (k + m) ≤ 1 := by
+      have hnn2 : 0 ≤ ∑ k in Finset.range m, poissonWeight t k :=
+        Finset.sum_nonneg fun k _ => poissonWeight_nonneg ht k
+      linarith
+    calc ∑' k, (poissonWeight t (k + m)
+          * tvDistance (walkDistribution A (k + m) x)
+            (stationaryVec A))
+        ≤ ∑' k, (poissonWeight t (k + m)
+            * tvDistance (walkDistribution A m x) (stationaryVec A)) :=
+          hstep
+      _ ≤ tvDistance (walkDistribution A m x) (stationaryVec A) := by
+          rw [tsum_mul_right]
+          nlinarith [htailw,
+            tvDistance_nonneg (walkDistribution A m x) (stationaryVec A)]
+  linarith
+
+/-- **The discrete-certificate transfer corollary** — the comparability
+in certificate form: if the discrete walk is within `ε₁` of stationarity
+from time `m` on, and the Poisson lower-tail weight below `m` at time
+`t` is at most `ε₂`, then the continuous walk is within `ε₁ + ε₂` at
+time `t`. The would-be consumer of the still-deferred discrete `t_mix`
+object: `hmix` is exactly its witness condition. -/
+theorem contWalkDistribution_tvDistance_le_of_discreteMixing
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] {t : ℝ} (ht : 0 ≤ t) (m : ℕ)
+    (x : V) {ε₁ ε₂ : ℝ}
+    (hmix : ∀ k : ℕ, m ≤ k →
+      tvDistance (walkDistribution A k x) (stationaryVec A) ≤ ε₁)
+    (htail : ∑ k in Finset.range m, poissonWeight t k ≤ ε₂) :
+    tvDistance (contWalkDistribution A t x) (stationaryVec A)
+      ≤ ε₁ + ε₂ := by
+  refine (contWalkDistribution_tvDistance_add_le A hA hnn hd ht m x).trans ?_
+  have h1 : tvDistance (walkDistribution A m x) (stationaryVec A) ≤ ε₁ :=
+    hmix m (Nat.le_refl m)
+  linarith
 
 end SpectralGraphTheory

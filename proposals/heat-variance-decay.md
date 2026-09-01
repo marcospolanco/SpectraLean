@@ -208,6 +208,13 @@ carries the `#print axioms` audit of every new declaration).
   every `x` on PSD input). This honesty is recorded in the proof, not
   hidden: the hypothesis is derived (centering), never assumed.
 
+> **Delivered-pointer (2026-08-31, later run
+> `20260831T194244Z-run-1`):** the π-weighted `L_sym` twin recorded
+> below is now delivered, with its consumer gate discharged by naming
+> the continuous-time χ² mixing bound — see
+> `continuous-time-chi-square-mixing.md` (COMPLETE). This note only
+> records the delivery; the section below is the historical pricing.
+
 ## Deferred (named, not queued)
 
 - A π-weighted twin at `L_sym`'s gap (the `poincare_inequality_normalized`

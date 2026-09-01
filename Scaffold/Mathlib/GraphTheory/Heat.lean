@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -/
 import Scaffold.Mathlib.GraphTheory.Spectral
+import Scaffold.Mathlib.GraphTheory.Normalized
+import Scaffold.Mathlib.GraphTheory.VariationalTransfer
 import Mathlib.Analysis.Normed.Algebra.MatrixExponential
 import Mathlib.Analysis.SpecificLimits.Normed
 import Mathlib.Analysis.Normed.Group.InfiniteSum
@@ -78,6 +80,9 @@ Pi topology only):
   converges to `NormedSpace.exp ℝ M` in the entrywise topology — the
   matrix-level summability content the pin's normed-section lemmas do
   not provide at matrix type (see the survey note below);
+- `pow_smul_matrix` / `matrix_exp_smul_one`: scalar-matrix algebra —
+  `(c • M)ⁿ = cⁿ • Mⁿ` and `e^{cI} = e^c • I` (the scalar half of the
+  mixing layer's Poissonization split, 2026-09-01);
 - `exp_mulVec_eq_of_mulVec_eq_zero`: whenever `M *ᵥ v = 0`, the
   exponential fixes `v` (`exp ℝ M *ᵥ v = v`) — mass conservation for
   *any* Laplacian-harmonic vector, not just `onesVec`;
@@ -167,6 +172,15 @@ technique transferred from `P^t` to `e^{-tL}`, no derivative machinery:
   symmetric nonnegative network at every `t ≥ 0` — hypothesis-minimal
   (no connectivity, no gap positivity: at `λ₂ = 0` the bound is the
   true rate-1 statement, and QA pins it *exact* there).
+
+The walk (normalized) heat semigroups and the π-weighted variance twin
+(2026-08-31, `proposals/continuous-time-chi-square-mixing.md`): the
+normalized kernel `e^{-tL_sym}` with its eigenmode/Parseval twins, the
+walk kernel `e^{-tL_walk}`, the `√D`-conjugation between them (the
+continuous analogue of `degreeSqrt_mulVec_pow_walkTransitionMatrix`),
+the π-isometry pair, and **`walkHeatKernel_variance_decay`** — the
+π-weighted `L_sym` twin of `heatKernel_variance_decay`, the
+heat-variance delivery's named deferred follow-on.
 
 ## Scope notes (recorded before stating, 2026-08-23)
 
@@ -418,6 +432,49 @@ theorem expSeries_hasSum_exp (M : Matrix V V ℝ) :
     exact key.tsum_eq
   rw [hE]
   exact key
+
+/-- Scalar-matrix powers: `(c • M) ^ n = c ^ n • M ^ n`. Generic
+matrix algebra; consumed by the Poissonization identity of the mixing
+layer's Poisson bridge (`Mixing.hasSum_poisson_walkDensity`). -/
+theorem pow_smul_matrix (c : ℝ) (M : Matrix V V ℝ) (n : ℕ) :
+    (c • M) ^ n = c ^ n • M ^ n := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    rw [pow_succ, ih, Matrix.smul_mul, Matrix.mul_smul, smul_smul,
+      ← pow_succ, ← pow_succ]
+
+/-- **The scalar-matrix exponential**: `e^{cI} = e^c • I`. Route: the
+shelf's `expSeries_hasSum_exp` at `c • 1`, the power identity above,
+and the real exponential series (`NormedSpace.expSeries_div_hasSum_exp`
+through `Real.exp_eq_exp_ℝ`) mapped along the continuous additive hom
+`a ↦ a • 1`. The scalar half of the Poissonization identity's
+exponential split `−t(I − P) = tP − tI`. -/
+theorem matrix_exp_smul_one (c : ℝ) :
+    NormedSpace.exp ℝ (c • (1 : Matrix V V ℝ)) = Real.exp c • 1 := by
+  have hpow : ∀ n : ℕ, (c • (1 : Matrix V V ℝ)) ^ n = c ^ n • 1 := by
+    intro n
+    rw [pow_smul_matrix, one_pow]
+  have hreal : HasSum (fun n : ℕ => c ^ n / (Nat.factorial n : ℝ)) (Real.exp c) := by
+    rw [Real.exp_eq_exp_ℝ]
+    exact NormedSpace.expSeries_div_hasSum_exp ℝ c
+  have hmap : HasSum (fun n : ℕ => (c ^ n / (Nat.factorial n : ℝ))
+      • (1 : Matrix V V ℝ)) (Real.exp c • 1) :=
+    hreal.map
+      ({ toFun := fun a => a • (1 : Matrix V V ℝ)
+         map_zero' := zero_smul _ _
+         map_add' := fun a b => add_smul _ _ _ } : ℝ →+ Matrix V V ℝ)
+      (by
+        refine continuous_pi fun i => continuous_pi fun j => ?_
+        exact continuous_id.smul continuous_const)
+  refine (HasSum.unique hmap ?_).symm
+  have h := expSeries_hasSum_exp (c • (1 : Matrix V V ℝ))
+  have heq : (fun n : ℕ => (Nat.factorial n : ℝ)⁻¹ • (c • (1 : Matrix V V ℝ)) ^ n)
+      = fun n : ℕ => (c ^ n / (Nat.factorial n : ℝ)) • (1 : Matrix V V ℝ) := by
+    funext n
+    rw [hpow n, smul_smul, div_eq_inv_mul]
+  rw [heq] at h
+  exact h
 
 /-!
 ## The heat semigroup, Step 3: mass conservation (with the generalized
@@ -1449,5 +1506,587 @@ theorem heatKernel_variance_decay (A : WAdj (V := V)) (hA : Matrix.IsSymm A)
             (Finset.mul_sum _ _ _).symm
       _ = Real.exp (-(2 * t * secondEval (laplacian A) hL hcard))
           * Matrix.dotProduct x x := by rw [hparse]
+
+/-!
+## The walk (normalized) heat semigroups and the π-weighted variance twin
+
+`proposals/continuous-time-chi-square-mixing.md` (2026-08-31): the
+normalized heat kernel `e^{-tL_sym}` (with the eigenmode-decay,
+coordinate-damping, and Parseval-exact clones at `L_sym`), the walk
+heat kernel `e^{-tL_walk}` (the continuous-time random walk's density
+evolution operator), the `√D`-conjugation `degreeSqrt_mulVec_walkHeatKernel`
+(the exact continuous analogue of the shelf's conjugated-power
+transfer), the π-isometry pair `sum_deg_mul_sq_eq`/`sum_deg_mul_eq`,
+and the headline `walkHeatKernel_variance_decay` — all proved, zero
+axioms.
+-/
+
+/-- The normalized heat kernel: the semigroup `e^{-tL_sym}` of the
+symmetric normalized Laplacian — the diffusion operator of the
+π-weighted world (Chung ch. 1). Clone of `heatKernel` at
+`normalizedLaplacian`. -/
+noncomputable def normalizedHeatKernel (A : WAdj (V := V)) (t : ℝ) :
+    Matrix V V ℝ :=
+  NormedSpace.exp ℝ (-(t • normalizedLaplacian A))
+
+theorem normalizedHeatKernel_isSymm (A : WAdj (V := V)) (hA : A.IsSymm)
+    (t : ℝ) : (normalizedHeatKernel A t).IsSymm :=
+  ((normalizedLaplacian_symmetric A hA).smul t).neg |>.exp ℝ
+
+theorem normalizedHeatKernel_zero (A : WAdj (V := V)) :
+    normalizedHeatKernel A 0 = 1 := by
+  rw [normalizedHeatKernel, zero_smul, neg_zero, NormedSpace.exp_zero]
+
+/-- The normalized heat kernel fixes the `L_sym`-kernel vector `√D·1`
+at every time (positive degrees) — the mass-conservation twin of
+`heatKernel_mulVec_onesVec`. -/
+theorem normalizedHeatKernel_mulVec_degreeSqrt_onesVec
+    (A : WAdj (V := V)) (hd : ∀ i, 0 < deg A i) (t : ℝ) :
+    normalizedHeatKernel A t *ᵥ (degreeSqrt A *ᵥ onesVec)
+      = degreeSqrt A *ᵥ onesVec := by
+  rw [normalizedHeatKernel]
+  refine exp_mulVec_eq_of_mulVec_eq_zero _ _ ?_
+  rw [Matrix.neg_mulVec, Matrix.smul_mulVec_assoc,
+    normalizedLaplacian_mulVec_degreeSqrt_onesVec A hd, smul_zero, neg_zero]
+
+/-- **Eigenmode decay at `L_sym`**: every eigenbasis vector of the
+normalized Laplacian is an eigenvector of the normalized heat kernel at
+every time, with eigenvalue the mode's decay factor. Clone of
+`heatKernel_mulVec_eigvecOf` through the generic eigenmode engine. -/
+theorem normalizedHeatKernel_mulVec_eigvecOf (A : WAdj (V := V))
+    (hA : A.IsSymm) (t : ℝ) (i : V) :
+    normalizedHeatKernel A t *ᵥ
+        eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i
+      = Real.exp (-(t * eigvalOf (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) i))
+        • eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i := by
+  rw [normalizedHeatKernel]
+  refine exp_mulVec_eq_smul_of_mulVec_eq_smul _ _ _ ?_
+  have hev : normalizedLaplacian A *ᵥ
+        eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i
+      = eigvalOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i
+        • eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i :=
+    (isHermitian_of_isSymm (normalizedLaplacian_symmetric A hA)).mulVec_eigenvectorBasis i
+  rw [Matrix.neg_mulVec, Matrix.smul_mulVec_assoc, hev, smul_smul, neg_smul]
+
+/-- **Coordinate damping at `L_sym`** — the clone of
+`eigvecOf_dotProduct_heatKernel_mulVec`. -/
+theorem eigvecOf_dotProduct_normalizedHeatKernel_mulVec
+    (A : WAdj (V := V)) (hA : A.IsSymm) (t : ℝ) (x : V → ℝ) (i : V) :
+    Matrix.dotProduct
+        (eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i)
+        (normalizedHeatKernel A t *ᵥ x)
+      = Real.exp (-(t * eigvalOf (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) i))
+        * Matrix.dotProduct
+            (eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i) x := by
+  rw [Matrix.dotProduct_mulVec, ← Matrix.mulVec_transpose,
+    (normalizedHeatKernel_isSymm A hA t).eq,
+    normalizedHeatKernel_mulVec_eigvecOf A hA t i,
+    Matrix.smul_dotProduct, smul_eq_mul]
+
+/-- **Parseval-exact identity at `L_sym`** — the clone of
+`dotProduct_self_heatKernel_mulVec`. -/
+theorem dotProduct_self_normalizedHeatKernel_mulVec
+    (A : WAdj (V := V)) (hA : A.IsSymm) (t : ℝ) (x : V → ℝ) :
+    Matrix.dotProduct (normalizedHeatKernel A t *ᵥ x)
+        (normalizedHeatKernel A t *ᵥ x)
+      = ∑ i, (Real.exp (-(t * eigvalOf (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) i))
+          * Matrix.dotProduct
+              (eigvecOf (normalizedLaplacian A)
+                (normalizedLaplacian_symmetric A hA) i) x) ^ 2 := by
+  rw [dotProduct_eigvecOf (normalizedLaplacian_symmetric A hA) _ _]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [eigvecOf_dotProduct_normalizedHeatKernel_mulVec A hA t x i, pow_two]
+
+/-- **Every nonzero `L_sym` eigenvalue dominates the normalized spectral
+gap** — the clone of `secondEval_le_eigvalOf_of_ne_zero`. -/
+theorem secondEval_le_eigvalOf_normalizedLaplacian_of_ne_zero
+    (A : WAdj (V := V)) (hA : Matrix.IsSymm A) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) (hcard : 2 ≤ Fintype.card V) {i : V}
+    (hne : eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i ≠ 0) :
+    secondEval (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) hcard
+      ≤ eigvalOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i := by
+  have hL := normalizedLaplacian_symmetric A hA
+  by_contra hcon
+  push_neg at hcon
+  obtain ⟨k, hk⟩ := eigvalOf_mem_evals hL i
+  rcases Nat.lt_or_ge (k : ℕ) 1 with hk0 | hk1
+  · have hkz : (k : ℕ) = 0 := by omega
+    have hzero : eigvalOf (normalizedLaplacian A) hL i = 0 := by
+      rw [← hk, show k = ⟨(0 : ℕ), by omega⟩ from Fin.ext hkz]
+      exact normalizedLaplacian_evals_zero A hA hnn hd (by omega)
+    exact hne hzero
+  · have hmono : evals hL ⟨(1 : ℕ), by omega⟩ ≤ evals hL k :=
+      evals_sorted hL (Fin.le_def.2 hk1)
+    have hSE : evals hL ⟨(1 : ℕ), by omega⟩
+        = secondEval (normalizedLaplacian A) hL hcard := rfl
+    rw [hSE, hk] at hmono
+    exact absurd hmono (not_le.2 hcon)
+
+/-- **Kernel modes at a positive gap are `√D·1` multiples** — the clone
+of `eigvecOf_ker_eq_smul_onesVec_of_secondEval_pos`, at the normalized
+Laplacian's kernel vector, through the general-kernel Rayleigh bound
+`secondEval_le_rayleigh_of_ker`. -/
+theorem eigvecOf_ker_eq_smul_degreeSqrt_onesVec_of_secondEval_pos
+    (A : WAdj (V := V)) (hA : Matrix.IsSymm A) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) (hcard : 2 ≤ Fintype.card V)
+    (hpos : 0 < secondEval (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) hcard)
+    {i : V} (hμ : eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i = 0) :
+    ∃ c : ℝ, eigvecOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i
+      = c • (degreeSqrt A *ᵥ onesVec) := by
+  have hL := normalizedLaplacian_symmetric A hA
+  have hwne : (degreeSqrt A *ᵥ onesVec : V → ℝ) ≠ 0 := by
+    have h1 : (onesVec : V → ℝ) ≠ 0 := by
+      intro h
+      obtain ⟨v⟩ : Nonempty V := Fintype.card_pos_iff.1 (by omega)
+      have hv := congrFun h v
+      simp [onesVec] at hv
+    exact degreeSqrt_mulVec_ne_zero A hd h1
+  have hww : Matrix.dotProduct (degreeSqrt A *ᵥ onesVec)
+      (degreeSqrt A *ᵥ onesVec) ≠ 0 := by
+    intro h
+    rw [Matrix.dotProduct_self_eq_zero] at h
+    exact hwne h
+  have hker : normalizedLaplacian A *ᵥ
+      (degreeSqrt A *ᵥ onesVec) = 0 :=
+    normalizedLaplacian_mulVec_degreeSqrt_onesVec A hd
+  have hkereig : normalizedLaplacian A *ᵥ
+      eigvecOf (normalizedLaplacian A) hL i = 0 := by
+    have h := (isHermitian_of_isSymm hL).mulVec_eigenvectorBasis i
+    have hμ' : (isHermitian_of_isSymm hL).eigenvalues i = 0 := hμ
+    rw [hμ', zero_smul] at h
+    exact h
+  refine ⟨Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+      (degreeSqrt A *ᵥ onesVec)
+      / Matrix.dotProduct (degreeSqrt A *ᵥ onesVec)
+          (degreeSqrt A *ᵥ onesVec), ?_⟩
+  by_cases hu : eigvecOf (normalizedLaplacian A) hL i
+      - (Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+          (degreeSqrt A *ᵥ onesVec)
+          / Matrix.dotProduct (degreeSqrt A *ᵥ onesVec)
+              (degreeSqrt A *ᵥ onesVec)) • (degreeSqrt A *ᵥ onesVec) = 0
+  · exact sub_eq_zero.1 hu
+  · exfalso
+    have huorth : Matrix.dotProduct
+        (eigvecOf (normalizedLaplacian A) hL i
+          - (Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+              (degreeSqrt A *ᵥ onesVec)
+              / Matrix.dotProduct (degreeSqrt A *ᵥ onesVec)
+                  (degreeSqrt A *ᵥ onesVec)) • (degreeSqrt A *ᵥ onesVec))
+        (degreeSqrt A *ᵥ onesVec) = 0 := by
+      rw [Matrix.sub_dotProduct, Matrix.smul_dotProduct, smul_eq_mul,
+        div_mul_cancel₀ _ hww, sub_self]
+    have huker : normalizedLaplacian A *ᵥ
+        (eigvecOf (normalizedLaplacian A) hL i
+          - (Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+              (degreeSqrt A *ᵥ onesVec)
+              / Matrix.dotProduct (degreeSqrt A *ᵥ onesVec)
+                  (degreeSqrt A *ᵥ onesVec)) • (degreeSqrt A *ᵥ onesVec)) = 0 := by
+      rw [Matrix.mulVec_sub, hkereig, Matrix.mulVec_smul, hker,
+        smul_zero, sub_zero]
+    have hR := secondEval_le_rayleigh_of_ker hL
+      (normalizedLaplacian_psd A hA hnn hd) hwne hker hcard hu huorth
+    rw [rayleigh, if_neg hu] at hR
+    have hq : quadForm (normalizedLaplacian A)
+        (eigvecOf (normalizedLaplacian A) hL i
+          - (Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+              (degreeSqrt A *ᵥ onesVec)
+              / Matrix.dotProduct (degreeSqrt A *ᵥ onesVec)
+                  (degreeSqrt A *ᵥ onesVec)) • (degreeSqrt A *ᵥ onesVec)) = 0 := by
+      rw [quadForm, huker, Matrix.dotProduct_zero]
+    rw [hq, zero_div] at hR
+    exact absurd hR (not_le.2 hpos)
+
+/-- The walk heat kernel: the semigroup `e^{-tL_walk}` of the walk
+Laplacian `I - D⁻¹A` — the continuous-time random walk's density
+evolution operator (non-symmetric at irregular degrees, similar to
+`L_sym` through `√D`). -/
+noncomputable def walkHeatKernel (A : WAdj (V := V)) (t : ℝ) :
+    Matrix V V ℝ :=
+  NormedSpace.exp ℝ (-(t • walkLaplacian A))
+
+theorem walkHeatKernel_zero (A : WAdj (V := V)) :
+    walkHeatKernel A 0 = 1 := by
+  rw [walkHeatKernel, zero_smul, neg_zero, NormedSpace.exp_zero]
+
+/-- The walk heat kernel fixes `onesVec` at every time: the walk
+Laplacian's row sums vanish at positive degrees. -/
+theorem walkHeatKernel_mulVec_onesVec (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) (t : ℝ) :
+    walkHeatKernel A t *ᵥ onesVec = onesVec := by
+  rw [walkHeatKernel]
+  refine exp_mulVec_eq_of_mulVec_eq_zero _ _ ?_
+  have hone : (onesVec : V → ℝ) = 1 := rfl
+  have h0 : walkLaplacian A *ᵥ (onesVec : V → ℝ) = 0 := by
+    rw [walkLaplacian, Matrix.sub_mulVec, Matrix.one_mulVec, hone,
+      walkTransitionMatrix_mulVec_one A hd, sub_self]
+  rw [Matrix.neg_mulVec, Matrix.smul_mulVec_assoc, h0, smul_zero, neg_zero]
+
+/-- **The commutation**: `√D · L_walk = L_sym · √D`, read off the proved
+similarity `√D · L_walk · (1/√D) = L_sym` by cancelling the right
+factor. The matrix engine of the conjugation lemma below. -/
+theorem degreeSqrt_mul_walkLaplacian (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) :
+    degreeSqrt A * walkLaplacian A
+      = normalizedLaplacian A * degreeSqrt A := by
+  calc degreeSqrt A * walkLaplacian A
+      = (degreeSqrt A * walkLaplacian A * degreeInvSqrt A) * degreeSqrt A := by
+        rw [Matrix.mul_assoc (degreeSqrt A * walkLaplacian A)
+          (degreeInvSqrt A) (degreeSqrt A), degreeInvSqrt_mul_degreeSqrt A hd,
+          Matrix.mul_one]
+    _ = normalizedLaplacian A * degreeSqrt A := by
+        rw [degreeSqrt_mul_walkLaplacian_mul_degreeInvSqrt A hd]
+
+theorem degreeSqrt_mul_pow_neg_smul_walkLaplacian (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) (t : ℝ) (n : ℕ) :
+    degreeSqrt A * (-(t • walkLaplacian A)) ^ n
+      = (-(t • normalizedLaplacian A)) ^ n * degreeSqrt A := by
+  have hstep : degreeSqrt A * (-(t • walkLaplacian A))
+      = (-(t • normalizedLaplacian A)) * degreeSqrt A := by
+    calc degreeSqrt A * (-(t • walkLaplacian A))
+        = -(t • (degreeSqrt A * walkLaplacian A)) := by
+          rw [Matrix.mul_neg, mul_smul_comm]
+      _ = -(t • (normalizedLaplacian A * degreeSqrt A)) := by
+          rw [degreeSqrt_mul_walkLaplacian A hd]
+      _ = (-(t • normalizedLaplacian A)) * degreeSqrt A := by
+          rw [Matrix.neg_mul, smul_mul_assoc]
+  induction n with
+  | zero => simp [pow_zero, Matrix.mul_one]
+  | succ m ih =>
+    calc degreeSqrt A * (-(t • walkLaplacian A)) ^ (m + 1)
+        = (degreeSqrt A * (-(t • walkLaplacian A)) ^ m)
+            * (-(t • walkLaplacian A)) := by
+          rw [pow_succ, Matrix.mul_assoc]
+      _ = ((-(t • normalizedLaplacian A)) ^ m * degreeSqrt A)
+            * (-(t • walkLaplacian A)) := by
+          rw [ih]
+      _ = (-(t • normalizedLaplacian A)) ^ m
+            * (degreeSqrt A * (-(t • walkLaplacian A))) := by
+          rw [← Matrix.mul_assoc]
+      _ = (-(t • normalizedLaplacian A)) ^ m
+            * ((-(t • normalizedLaplacian A)) * degreeSqrt A) := by
+          rw [hstep]
+      _ = (-(t • normalizedLaplacian A)) ^ m
+            * (-(t • normalizedLaplacian A)) * degreeSqrt A := by
+          rw [Matrix.mul_assoc]
+      _ = (-(t • normalizedLaplacian A)) ^ (m + 1) * degreeSqrt A := by
+          rw [← pow_succ]
+
+/-- **The conjugation lemma** (the delivery's new engine): the `√D`
+isometry conjugates the walk semigroup to the normalized one,
+`√D *ᵥ (e^{-tL_walk} *ᵥ f) = e^{-tL_sym} *ᵥ (√D *ᵥ f)` — the exact
+continuous-time analogue of the shelf's conjugated-power transfer
+`degreeSqrt_mulVec_pow_walkTransitionMatrix`. Route: per-power
+conjugation of the exponential series, both sides summed through the
+continuous additive action and matched by uniqueness of sums. -/
+theorem degreeSqrt_mulVec_walkHeatKernel (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) (t : ℝ) (f : V → ℝ) :
+    degreeSqrt A *ᵥ (walkHeatKernel A t *ᵥ f)
+      = normalizedHeatKernel A t *ᵥ (degreeSqrt A *ᵥ f) := by
+  have hΦT : Continuous fun N : Matrix V V ℝ =>
+      degreeSqrt A *ᵥ (N *ᵥ f) := by
+    have h1 : Continuous fun N : Matrix V V ℝ => degreeSqrt A * N := by
+      refine continuous_pi fun i => continuous_pi fun j => ?_
+      simp only [Matrix.mul_apply]
+      refine continuous_finset_sum _ fun k _ => ?_
+      have hik : Continuous fun N : V → V → ℝ => N k j :=
+        (continuous_apply j).comp (continuous_apply k)
+      exact continuous_const.mul hik
+    have h2 : Continuous fun N : Matrix V V ℝ => N *ᵥ f := by
+      refine continuous_pi fun i => ?_
+      have h : Continuous fun N : V → V → ℝ => ∑ j, N i j * f j := by
+        refine continuous_finset_sum _ fun j _ => ?_
+        have hij : Continuous fun N : V → V → ℝ => N i j :=
+          (continuous_apply j).comp (continuous_apply i)
+        exact hij.mul continuous_const
+      simpa only [Matrix.mulVec, Matrix.dotProduct] using h
+    exact Continuous.congr (h2.comp h1) fun N =>
+      (Matrix.mulVec_mulVec f (degreeSqrt A) N).symm
+  have hΨT : Continuous fun N : Matrix V V ℝ => N *ᵥ (degreeSqrt A *ᵥ f) := by
+    refine continuous_pi fun i => ?_
+    have h : Continuous fun N : V → V → ℝ
+        => ∑ j, N i j * (degreeSqrt A *ᵥ f) j := by
+      refine continuous_finset_sum _ fun j _ => ?_
+      have hij : Continuous fun N : V → V → ℝ => N i j :=
+        (continuous_apply j).comp (continuous_apply i)
+      exact hij.mul continuous_const
+    simpa only [Matrix.mulVec, Matrix.dotProduct] using h
+  have hL := (expSeries_hasSum_exp (-(t • walkLaplacian A))).map
+    ({ toFun := fun N => degreeSqrt A *ᵥ (N *ᵥ f)
+       map_zero' := by simp [Matrix.zero_mulVec, Matrix.mulVec_zero]
+       map_add' := fun N₁ N₂ => by
+         simp [Matrix.add_mulVec, Matrix.mulVec_add] } :
+      Matrix V V ℝ →+ (V → ℝ)) hΦT
+  have hR := (expSeries_hasSum_exp (-(t • normalizedLaplacian A))).map
+    ({ toFun := fun N => N *ᵥ (degreeSqrt A *ᵥ f)
+       map_zero' := by simp [Matrix.zero_mulVec]
+       map_add' := fun N₁ N₂ => by simp [Matrix.add_mulVec, Matrix.add_mul] } :
+      Matrix V V ℝ →+ (V → ℝ)) hΨT
+  have hconj : ∀ n : ℕ,
+      degreeSqrt A *ᵥ
+          (((Nat.factorial n : ℝ)⁻¹ • (-(t • walkLaplacian A)) ^ n) *ᵥ f)
+      = ((Nat.factorial n : ℝ)⁻¹ • (-(t • normalizedLaplacian A)) ^ n)
+          *ᵥ (degreeSqrt A *ᵥ f) := by
+    intro n
+    calc degreeSqrt A *ᵥ
+          (((Nat.factorial n : ℝ)⁻¹ • (-(t • walkLaplacian A)) ^ n) *ᵥ f)
+        = (Nat.factorial n : ℝ)⁻¹ • (degreeSqrt A *ᵥ
+            ((-(t • walkLaplacian A)) ^ n *ᵥ f)) := by
+          rw [Matrix.smul_mulVec_assoc, Matrix.mulVec_smul]
+      _ = (Nat.factorial n : ℝ)⁻¹ • ((degreeSqrt A
+            * (-(t • walkLaplacian A)) ^ n) *ᵥ f) := by
+          rw [Matrix.mulVec_mulVec]
+      _ = (Nat.factorial n : ℝ)⁻¹ • (((-(t • normalizedLaplacian A)) ^ n
+            * degreeSqrt A) *ᵥ f) := by
+          rw [degreeSqrt_mul_pow_neg_smul_walkLaplacian A hd t n]
+      _ = ((Nat.factorial n : ℝ)⁻¹ • (-(t • normalizedLaplacian A)) ^ n)
+            *ᵥ (degreeSqrt A *ᵥ f) := by
+          rw [Matrix.smul_mulVec_assoc, Matrix.mulVec_mulVec]
+  rw [walkHeatKernel, normalizedHeatKernel]
+  exact hL.unique (hasSum_of_eq (fun n => (hconj n).symm) hR)
+
+
+/-- **The π-isometry, squares**: degree-weighted squared sums are the
+Euclidean pairing of the `√D`-conjugate — `∑ deg·g² = ‖√D g‖²`. The
+identity that makes the π-weighted variance Parseval-exact. -/
+theorem sum_deg_mul_sq_eq (A : WAdj (V := V)) (hd : ∀ i, 0 < deg A i)
+    (g : V → ℝ) :
+    ∑ i, deg A i * (g i * g i)
+      = Matrix.dotProduct (degreeSqrt A *ᵥ g) (degreeSqrt A *ᵥ g) := by
+  have he : ∀ i, (degreeSqrt A *ᵥ g : V → ℝ) i * (degreeSqrt A *ᵥ g : V → ℝ) i
+      = deg A i * (g i * g i) := by
+    intro i
+    rw [degreeSqrt_mulVec_apply]
+    have h2 : Real.sqrt (deg A i) * g i * (Real.sqrt (deg A i) * g i)
+        = (Real.sqrt (deg A i) * Real.sqrt (deg A i)) * (g i * g i) := by
+      ring
+    rw [h2, Real.mul_self_sqrt (le_of_lt (hd i))]
+  rw [Matrix.dotProduct]
+  exact Finset.sum_congr rfl fun i _ => (he i).symm
+
+/-- **The π-isometry, cross terms**: degree-weighted sums are the
+pairing with the conjugated kernel direction —
+`∑ deg·g = (√D·1) ⬝ᵥ (√D g)`. -/
+theorem sum_deg_mul_eq (A : WAdj (V := V)) (hd : ∀ i, 0 < deg A i)
+    (g : V → ℝ) :
+    ∑ i, deg A i * g i
+      = Matrix.dotProduct (degreeSqrt A *ᵥ onesVec) (degreeSqrt A *ᵥ g) := by
+  have he : ∀ i, (degreeSqrt A *ᵥ onesVec : V → ℝ) i
+      * (degreeSqrt A *ᵥ g : V → ℝ) i = deg A i * g i := by
+    intro i
+    rw [degreeSqrt_mulVec_apply, degreeSqrt_mulVec_apply]
+    simp only [onesVec, mul_one]
+    rw [← mul_assoc, Real.mul_self_sqrt (le_of_lt (hd i))]
+  rw [Matrix.dotProduct]
+  exact Finset.sum_congr rfl fun i _ => (he i).symm
+
+/-- **The π-weighted `L_sym` twin of heat-variance decay** — the
+heat-variance delivery's named deferred follow-on:
+`∑ deg·(e^{−tL_walk}f − mean_π f)² ≤ e^{−2tλ₂(L_sym)}·∑ deg·(f − mean_π f)²`
+with `mean_π f = ∑ deg·f / ∑ deg` (π = deg/vol; the statement is
+vol-free). Hypothesis-minimal like the combinatorial twin: no
+connectivity, no gap positivity (at `λ₂(L_sym) = 0` the true rate-1
+statement). Route: the `√D`-conjugation moves the walk semigroup to
+the normalized one, where the eigenbasis contraction of the
+combinatorial delivery re-runs verbatim — Parseval over the `L_sym`
+eigenbasis, per-mode factors `e^{−2tλᵢ}` dominated by `e^{−2tλ₂}`. -/
+theorem walkHeatKernel_variance_decay (A : WAdj (V := V))
+    (hA : Matrix.IsSymm A) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) (hcard : 2 ≤ Fintype.card V)
+    {t : ℝ} (ht : 0 ≤ t) (f : V → ℝ) :
+    ∑ i, deg A i * ((walkHeatKernel A t *ᵥ f) i
+        - (∑ j, deg A j * f j) / (∑ j, deg A j)) ^ 2
+      ≤ Real.exp (-(2 * t * secondEval (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) hcard))
+        * ∑ i, deg A i * (f i - (∑ j, deg A j * f j) / (∑ j, deg A j)) ^ 2 := by
+  have hL := normalizedLaplacian_symmetric A hA
+  obtain ⟨v0⟩ : Nonempty V := Fintype.card_pos_iff.1 (by omega)
+  have hsumdeg : (0 : ℝ) < ∑ j, deg A j :=
+    Finset.sum_pos' (fun j _ => le_of_lt (hd j)) ⟨v0, Finset.mem_univ _, hd v0⟩
+  obtain ⟨x, hxdef⟩ : ∃ x : V → ℝ,
+      ∀ i, x i = f i - (∑ j, deg A j * f j) / (∑ j, deg A j) :=
+    ⟨_, fun _ => rfl⟩
+  have hcenter : x = f - ((∑ j, deg A j * f j) / (∑ j, deg A j)) • onesVec := by
+    funext i
+    rw [hxdef i]
+    simp only [Pi.sub_apply, Pi.smul_apply, onesVec, smul_eq_mul, mul_one]
+  have hxsum : ∑ i, deg A i * x i
+      = ∑ i, deg A i * (f i - (∑ j, deg A j * f j) / (∑ j, deg A j)) :=
+    Finset.sum_congr rfl fun i _ => by rw [hxdef i]
+  have hsplit : ∑ i, deg A i * (f i - (∑ j, deg A j * f j) / (∑ j, deg A j))
+      = (∑ i, deg A i * f i)
+        - ∑ i, deg A i * ((∑ j, deg A j * f j) / (∑ j, deg A j)) := by
+    rw [← Finset.sum_sub_distrib]
+    exact Finset.sum_congr rfl fun i _ => mul_sub _ _ _
+  have h2 : ∑ i, deg A i * ((∑ j, deg A j * f j) / (∑ j, deg A j))
+      = (∑ j, deg A j * f j) := by
+    rw [← Finset.sum_mul, mul_div_cancel₀ _ (ne_of_gt hsumdeg)]
+  have hsumx : ∑ i, deg A i * x i = 0 := by
+    rw [hxsum, hsplit, h2, sub_self]
+  have hcrossx : Matrix.dotProduct (degreeSqrt A *ᵥ onesVec)
+      (degreeSqrt A *ᵥ x) = 0 := by
+    rw [← sum_deg_mul_eq A hd x, hsumx]
+  have hvarR : ∑ i, deg A i * (f i - (∑ j, deg A j * f j) / (∑ j, deg A j)) ^ 2
+      = Matrix.dotProduct (degreeSqrt A *ᵥ x) (degreeSqrt A *ᵥ x) := by
+    rw [← sum_deg_mul_sq_eq A hd x]
+    exact Finset.sum_congr rfl fun i _ => by rw [← hxdef i, pow_two]
+  have hfix : walkHeatKernel A t *ᵥ
+      (((∑ j, deg A j * f j) / (∑ j, deg A j)) • onesVec)
+      = ((∑ j, deg A j * f j) / (∑ j, deg A j)) • onesVec := by
+    rw [Matrix.mulVec_smul, walkHeatKernel_mulVec_onesVec A hd t]
+  have hshift : degreeSqrt A *ᵥ (walkHeatKernel A t *ᵥ f
+      - ((∑ j, deg A j * f j) / (∑ j, deg A j)) • onesVec)
+      = normalizedHeatKernel A t *ᵥ (degreeSqrt A *ᵥ x) := by
+    calc degreeSqrt A *ᵥ (walkHeatKernel A t *ᵥ f
+          - ((∑ j, deg A j * f j) / (∑ j, deg A j)) • onesVec)
+        = degreeSqrt A *ᵥ (walkHeatKernel A t *ᵥ f
+            - walkHeatKernel A t *ᵥ
+                (((∑ j, deg A j * f j) / (∑ j, deg A j)) • onesVec)) := by
+          rw [hfix]
+      _ = degreeSqrt A *ᵥ (walkHeatKernel A t *ᵥ
+            (f - ((∑ j, deg A j * f j) / (∑ j, deg A j)) • onesVec)) := by
+          rw [← Matrix.mulVec_sub]
+      _ = normalizedHeatKernel A t *ᵥ (degreeSqrt A *ᵥ
+            (f - ((∑ j, deg A j * f j) / (∑ j, deg A j)) • onesVec)) :=
+          degreeSqrt_mulVec_walkHeatKernel A hd t _
+      _ = normalizedHeatKernel A t *ᵥ (degreeSqrt A *ᵥ x) := by
+          rw [hcenter]
+  have hLHS : ∑ i, deg A i * ((walkHeatKernel A t *ᵥ f) i
+        - (∑ j, deg A j * f j) / (∑ j, deg A j)) ^ 2
+      = Matrix.dotProduct (normalizedHeatKernel A t *ᵥ (degreeSqrt A *ᵥ x))
+          (normalizedHeatKernel A t *ᵥ (degreeSqrt A *ᵥ x)) := by
+    have hg : ∀ i : V, ((walkHeatKernel A t *ᵥ f
+        - ((∑ j, deg A j * f j) / (∑ j, deg A j)) • onesVec) : V → ℝ) i
+        = (walkHeatKernel A t *ᵥ f) i
+          - (∑ j, deg A j * f j) / (∑ j, deg A j) := by
+      intro i
+      simp only [Pi.sub_apply, Pi.smul_apply, onesVec, smul_eq_mul, mul_one]
+    rw [← hshift, ← sum_deg_mul_sq_eq A hd (walkHeatKernel A t *ᵥ f
+      - ((∑ j, deg A j * f j) / (∑ j, deg A j)) • onesVec)]
+    exact Finset.sum_congr rfl fun i _ => by rw [pow_two, hg i]
+  rw [hLHS, hvarR, dotProduct_self_normalizedHeatKernel_mulVec A hA t
+    (degreeSqrt A *ᵥ x)]
+  have hparse : ∑ i, (Matrix.dotProduct
+        (eigvecOf (normalizedLaplacian A) hL i) (degreeSqrt A *ᵥ x)) ^ 2
+      = Matrix.dotProduct (degreeSqrt A *ᵥ x) (degreeSqrt A *ᵥ x) := by
+    rw [dotProduct_eigvecOf hL _ _]
+    exact Finset.sum_congr rfl fun i _ => (pow_two _)
+  by_cases hpos : 0 < secondEval (normalizedLaplacian A) hL hcard
+  · have hzero : ∀ i : V, eigvalOf (normalizedLaplacian A) hL i = 0 →
+        Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+          (degreeSqrt A *ᵥ x) = 0 := by
+      intro i hμ
+      obtain ⟨c, hc⟩ :=
+        eigvecOf_ker_eq_smul_degreeSqrt_onesVec_of_secondEval_pos
+        A hA hnn hd hcard hpos hμ
+      rw [hc, Matrix.smul_dotProduct, smul_eq_mul, hcrossx, mul_zero]
+    have hterm : ∀ i : V,
+        (Real.exp (-(t * eigvalOf (normalizedLaplacian A) hL i))
+          * Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+              (degreeSqrt A *ᵥ x)) ^ 2
+        ≤ Real.exp (-(2 * t * secondEval (normalizedLaplacian A) hL hcard))
+          * (Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+              (degreeSqrt A *ᵥ x)) ^ 2 := by
+      intro i
+      by_cases hμ : eigvalOf (normalizedLaplacian A) hL i = 0
+      · rw [hzero i hμ]; simp
+      · have hle : secondEval (normalizedLaplacian A) hL hcard
+            ≤ eigvalOf (normalizedLaplacian A) hL i :=
+          secondEval_le_eigvalOf_normalizedLaplacian_of_ne_zero
+            A hA hnn hd hcard hμ
+        have hf : (Real.exp (-(t * eigvalOf (normalizedLaplacian A) hL i))) ^ 2
+            = Real.exp (-(2 * t * eigvalOf (normalizedLaplacian A) hL i)) := by
+          rw [pow_two, ← Real.exp_add]
+          congr 1
+          ring
+        rw [mul_pow, hf]
+        have hmono : Real.exp (-(2 * t * eigvalOf (normalizedLaplacian A) hL i))
+            ≤ Real.exp (-(2 * t * secondEval (normalizedLaplacian A) hL hcard)) :=
+          Real.exp_le_exp.2 (neg_le_neg
+            (mul_le_mul_of_nonneg_left hle (mul_nonneg zero_le_two ht)))
+        exact mul_le_mul_of_nonneg_right hmono (sq_nonneg _)
+    calc ∑ i, (Real.exp (-(t * eigvalOf (normalizedLaplacian A) hL i))
+          * Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+              (degreeSqrt A *ᵥ x)) ^ 2
+        ≤ ∑ i, Real.exp (-(2 * t * secondEval (normalizedLaplacian A) hL hcard))
+            * (Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+                (degreeSqrt A *ᵥ x)) ^ 2 :=
+          Finset.sum_le_sum fun i _ => hterm i
+      _ = Real.exp (-(2 * t * secondEval (normalizedLaplacian A) hL hcard))
+          * ∑ i, (Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+              (degreeSqrt A *ᵥ x)) ^ 2 :=
+            (Finset.mul_sum _ _ _).symm
+      _ = Real.exp (-(2 * t * secondEval (normalizedLaplacian A) hL hcard))
+          * Matrix.dotProduct (degreeSqrt A *ᵥ x) (degreeSqrt A *ᵥ x) := by
+            rw [hparse]
+  · push_neg at hpos
+    have hr1 : (1 : ℝ)
+        ≤ Real.exp (-(2 * t * secondEval (normalizedLaplacian A) hL hcard)) := by
+      have h0 : (1 : ℝ) = Real.exp 0 := Real.exp_zero.symm
+      rw [h0]
+      refine Real.exp_le_exp.2 ?_
+      rw [neg_nonneg]
+      exact mul_nonpos_of_nonneg_of_nonpos
+        (mul_nonneg zero_le_two ht) hpos
+    have hμnn : ∀ i : V, 0 ≤ eigvalOf (normalizedLaplacian A) hL i := by
+      intro i
+      rw [← quadForm_eigvecOf_self hL i]
+      exact normalizedLaplacian_psd A hA hnn hd _
+    have hterm : ∀ i : V,
+        (Real.exp (-(t * eigvalOf (normalizedLaplacian A) hL i))
+          * Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+              (degreeSqrt A *ᵥ x)) ^ 2
+        ≤ Real.exp (-(2 * t * secondEval (normalizedLaplacian A) hL hcard))
+          * (Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+              (degreeSqrt A *ᵥ x)) ^ 2 := by
+      intro i
+      have h1 : Real.exp (-(t * eigvalOf (normalizedLaplacian A) hL i)) ≤ 1 :=
+        le_trans (Real.exp_le_exp.2
+          (by rw [neg_nonpos]; exact mul_nonneg ht (hμnn i)))
+          (le_of_eq Real.exp_zero)
+      have hfac : (Real.exp (-(t * eigvalOf (normalizedLaplacian A) hL i))) ^ 2
+          ≤ 1 := pow_le_one₀ (Real.exp_nonneg _) h1
+      rw [mul_pow]
+      calc (Real.exp (-(t * eigvalOf (normalizedLaplacian A) hL i))) ^ 2
+            * (Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+                (degreeSqrt A *ᵥ x)) ^ 2
+          ≤ 1 * (Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+              (degreeSqrt A *ᵥ x)) ^ 2 :=
+            mul_le_mul_of_nonneg_right hfac (sq_nonneg _)
+        _ = (Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+            (degreeSqrt A *ᵥ x)) ^ 2 :=
+            one_mul _
+        _ ≤ Real.exp (-(2 * t * secondEval (normalizedLaplacian A) hL hcard))
+            * (Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+                (degreeSqrt A *ᵥ x)) ^ 2 := by
+          have hkey : (1 : ℝ)
+              * (Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+                  (degreeSqrt A *ᵥ x)) ^ 2
+              ≤ Real.exp (-(2 * t * secondEval (normalizedLaplacian A) hL hcard))
+              * (Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+                  (degreeSqrt A *ᵥ x)) ^ 2 :=
+            mul_le_mul_of_nonneg_right hr1 (sq_nonneg _)
+          rw [one_mul] at hkey
+          exact hkey
+    calc ∑ i, (Real.exp (-(t * eigvalOf (normalizedLaplacian A) hL i))
+          * Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+              (degreeSqrt A *ᵥ x)) ^ 2
+        ≤ ∑ i, Real.exp (-(2 * t * secondEval (normalizedLaplacian A) hL hcard))
+            * (Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+                (degreeSqrt A *ᵥ x)) ^ 2 :=
+          Finset.sum_le_sum fun i _ => hterm i
+      _ = Real.exp (-(2 * t * secondEval (normalizedLaplacian A) hL hcard))
+          * ∑ i, (Matrix.dotProduct (eigvecOf (normalizedLaplacian A) hL i)
+              (degreeSqrt A *ᵥ x)) ^ 2 :=
+            (Finset.mul_sum _ _ _).symm
+      _ = Real.exp (-(2 * t * secondEval (normalizedLaplacian A) hL hcard))
+          * Matrix.dotProduct (degreeSqrt A *ᵥ x) (degreeSqrt A *ᵥ x) := by
+            rw [hparse]
 
 end SpectralGraphTheory

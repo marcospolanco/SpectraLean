@@ -52,6 +52,32 @@
   (`tv_conversion_mass_guard_refuted_QA`: at a mass-2 weight the
   un-guarded conversion reads `1/2 ≤ (1/2)·√(1/2)`, refuted).
 
+  The continuous-time sections (2026-08-31,
+  `proposals/continuous-time-chi-square-mixing.md`, and its deferred
+  path follow-on landed the same day) exercise the consumer
+  `contChiSquareDistance_le`: exact attainment at every time on the
+  triangle (`2e^{−3t}`), the disconnected gap-zero closed form
+  `1/3 + (8/3)e^{−3t}` with its fences, and — on the only connected
+  *irregular* fixture, where the `√D` conjugation is non-scalar — the
+  path's exact single-mode decay `χ²_cont(t, center) = e^{−4t}` at the
+  pinned gap `λ₂(L_sym P₃) = 1` (trace route), with the strict-slack
+  witness `e^{−4t} < e^{−2t}` for `t > 0` and the wrong-constant fence.
+  The `ContMixingTime` section (2026-08-31, the same proposal's
+  Deferred items 1+2) exercises the mixing-time package: the exact
+  `K₂` closed form `t_mix(ε) = ln(1/(2ε))/2` (a `sInf` pinned in both
+  directions), the ceiling attained exactly at `ε = e^{−2}/2`, the
+  exact TV values on `K₂` (attained at every time) and the triangle
+  `(2/3)e^{−3t/2}` (Cauchy–Schwarz slack strict), the wrong-gap
+  refutation, the big-`ε` corner, and the antitone instance.
+  The Poisson-bridge section (2026-09-01, the same proposal's named
+  follow-on) exercises the Poissonization identity and the
+  comparability: the `K₂` periodic-chain fence (`TV_disc ≡ 1/2` at
+  every time — no discrete certificate exists, no reverse comparability
+  can hold), the `t = 0` mixture corner, and the triangle's exact
+  discrete closed form `TV_disc(m) = (2/3)·2^{−m}` (the `triG`
+  eigenroute) with both theorem instances at `t = 8`, `m = 2` and the
+  anti-monotonicity instance.
+
   Scoreboard: ../QA_SCOREBOARD.md
 -/
 
@@ -2808,5 +2834,1413 @@ theorem tri_tv_two_start_value_QA :
     Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one,
     Matrix.cons_val_two, Matrix.head_cons, neg_sub, abs_of_neg,
     abs_of_nonneg]
+
+/-!
+## Continuous-time χ² mixing
+
+ `proposals/continuous-time-chi-square-mixing.md` (2026-08-31): exact
+attainment at every time on the triangle (both nonzero modes at
+`3/2`, so value equals bound at every `t`), the `t = 0` corner, mass
+preservation, the wrong-constant refutation, and on the disconnected
+fixture the exact closed form `1/3 + (8/3)e^{-3t}` with the gap pinned
+exactly zero, the rate-1 instance, and the positive-gap fence. The
+path (irregular) exact-decay QA was delivered 2026-08-31 as the
+delivery's deferred follow-on (`path_cont_chi2_exact_QA`:
+`χ²_cont(t, center) = e^{−4t}` at every time, the conjugation
+`√D(−1, 1, −1) = (−1, √2, −1)` non-scalar, with the `λ₂(L_sym P₃) = 1`
+trace-route pin, the strict-slack witness, and the wrong-constant
+fence).
+-/
+
+local notation "triL" => normalizedLaplacian triAdj
+local notation "triH" => normalizedLaplacian_symmetric triAdj triAdj_isSymm
+local notation "pathL" => normalizedLaplacian pathAdj
+local notation "pathH" => normalizedLaplacian_symmetric pathAdj pathAdj_isSymm
+local notation "discL" => normalizedLaplacian discAdj
+local notation "discH" => normalizedLaplacian_symmetric discAdj discAdj_isSymm
+
+/-! ## Continuous-time χ²: the triangle (exact attainment) -/
+
+/-- The triangle's normalized spectral gap is exactly `3/2`: every
+sorted eigenvalue is `0` or `3/2` (`tri_eigvalOf_cases` +
+`evals_mem_eigvalOf`) and they sum to the trace `3`
+(`evals_sum_eq_trace` + `tri_trace`), forcing two `3/2`'s and one `0` —
+so the middle entry is `3/2`. -/
+theorem tri_secondEval_QA :
+    secondEval triL triH (by norm_num) = 3/2 := by
+  have hcases : ∀ k : Fin (Fintype.card (Fin 3)),
+      evals triH k = 0 ∨ evals triH k = 3/2 := by
+    intro k
+    obtain ⟨i, hi⟩ := evals_mem_eigvalOf triH k
+    rw [hi]
+    exact tri_eigvalOf_cases i
+  have hsum : ∑ k, evals triH k = 3 := by
+    rw [evals_sum_eq_trace triH, tri_trace]
+  have hsum3 : ∑ i : Fin 3, evals triH i = 3 := hsum
+  simp only [Fin.sum_univ_three] at hsum3
+  have hse : secondEval triL triH (by norm_num) = evals triH (1 : Fin 3) := rfl
+  rw [hse]
+  rcases hcases (1 : Fin 3) with h1 | h1
+  · exfalso
+    have hmono : evals triH (0 : Fin 3) ≤ evals triH (1 : Fin 3) :=
+      evals_sorted triH (by norm_num)
+    rw [h1] at hmono
+    rcases hcases (0 : Fin 3) with h0' | h0'
+    · have h2le : evals triH (2 : Fin 3) ≤ 3/2 := by
+        rcases hcases (2 : Fin 3) with h | h
+        · rw [h]; norm_num
+        · exact le_of_eq h
+      rw [h0', h1] at hsum3
+      linarith
+    · rw [h0'] at hmono
+      linarith
+  · exact h1
+
+/-- The centered initial density `triG` is a `3/2`-eigenvector of the
+triangle's normalized Laplacian (raw entrywise computation through the
+fixture's entrywise action table). -/
+theorem tri_lapsym_mulVec_triG_QA : triL *ᵥ triG = (3/2 : ℝ) • triG := by
+  have h : ∀ j : Fin 3, (triL *ᵥ triG) j = ((3/2 : ℝ) • triG) j := by
+    intro j
+    rw [Pi.smul_apply, smul_eq_mul, tri_normalizedLaplacian_mulVec_apply]
+    fin_cases j <;> simp [triAdj_apply, triG, Fin.sum_univ_three] <;> norm_num
+  funext j
+  exact h j
+
+/-- **Exact attainment at every time** on the triangle: both nonzero
+`L_sym`-modes sit at `3/2`, so the continuous-time χ² decays at exactly
+the bound's rate — `χ²_cont(t, 0) = 2·e^{−3t}` for every `t`, the
+strongest QA shape a bound theorem can have. Route: the conjugated
+centered density is `√2 • triG` (a single mode), the eigenmode engine
+damps it by `e^{−3t/2}`, and the π-isometry rescales by `1/vol = 1/6`. -/
+theorem tri_cont_chi2_exact_QA (t : ℝ) :
+    contChiSquareDistance triAdj t 0 = 2 * Real.exp (-(3 * t)) := by
+  have hcenter : (walkDensity triAdj 0 0 : Fin 3 → ℝ) - 1 = triG := by
+    funext i
+    exact congrFun tri_centered_density i
+  have hD : degreeSqrt triAdj *ᵥ triG = (Real.sqrt 2) • triG := by
+    funext i
+    rw [degreeSqrt_mulVec_apply, triAdj_deg_eq, Pi.smul_apply, smul_eq_mul]
+  have hkey : (t : ℝ) • ((3/2 : ℝ) • triG) = (t * (3/2)) • triG :=
+    smul_smul t (3/2) triG
+  have hmode : normalizedHeatKernel triAdj t *ᵥ triG
+      = Real.exp (-(t * (3/2 : ℝ))) • triG := by
+    rw [normalizedHeatKernel]
+    refine exp_mulVec_eq_smul_of_mulVec_eq_smul _ _ _ ?_
+    rw [Matrix.neg_mulVec, Matrix.smul_mulVec_assoc, tri_lapsym_mulVec_triG_QA]
+    have hstep2 : -(t • ((3/2 : ℝ) • triG)) = (-(t * (3/2 : ℝ))) • triG := by
+      funext i
+      rw [Pi.neg_apply, Pi.smul_apply, Pi.smul_apply, smul_eq_mul,
+        smul_eq_mul, Pi.smul_apply, smul_eq_mul]
+      ring
+    exact hstep2
+  have hn : Matrix.dotProduct triG triG = 6 := by
+    simp [Matrix.dotProduct, triG, Fin.sum_univ_three]
+    ring
+  set E : ℝ := Real.exp (-(3 * t)) with hEdef
+  have hpair : Real.exp (-(t * (3/2 : ℝ))) * Real.exp (-(t * (3/2 : ℝ)))
+      = E := by
+    rw [hEdef, ← Real.exp_add]
+    congr 1
+    ring
+  have hfinal : (6 : ℝ)⁻¹ * Matrix.dotProduct
+      ((Real.sqrt 2) • (Real.exp (-(t * (3/2))) • triG))
+      ((Real.sqrt 2) • (Real.exp (-(t * (3/2))) • triG))
+      = 2 * E := by
+    rw [smul_smul, Matrix.smul_dotProduct, Matrix.dotProduct_smul,
+      smul_eq_mul, smul_eq_mul, hn,
+      show ((Real.sqrt 2) * Real.exp (-(t * (3/2)))
+        * ((Real.sqrt 2) * Real.exp (-(t * (3/2))) * 6))
+        = ((Real.sqrt 2) * (Real.sqrt 2)) * 6
+          * (Real.exp (-(t * (3/2))) * Real.exp (-(t * (3/2)))) from by ring,
+      Real.mul_self_sqrt (by norm_num : (0 : ℝ) ≤ 2), hpair]
+    field_simp
+    ring
+  rw [contChiSquareDistance_eq_inv_mul triAdj triAdj_deg_pos t 0,
+    degreeSqrt_mulVec_contWalkDensity_sub_one triAdj triAdj_deg_pos t 0,
+    hcenter, hD, Matrix.mulVec_smul, hmode, tri_vol_QA]
+  exact hfinal
+
+/-- The consumer theorem instantiated on the triangle — the bound's RHS
+at the pinned gap `3/2`. -/
+theorem tri_cont_mixing_QA (t : ℝ) (ht : 0 ≤ t) :
+    contChiSquareDistance triAdj t 0
+      ≤ Real.exp (-(2 * t * secondEval triL triH (by norm_num)))
+        * ((stationaryVec triAdj 0)⁻¹ - 1) :=
+  contChiSquareDistance_le triAdj triAdj_isSymm triAdj_nonneg
+    triAdj_deg_pos (by norm_num) ht 0
+
+/-- **The bound is attained** on the triangle: value equals bound at
+every time (both reduce to `2·e^{−3t}`; the stationary weight is `1/3`,
+so the constant is `3 − 1 = 2`). -/
+theorem tri_cont_attained_QA (t : ℝ) :
+    contChiSquareDistance triAdj t 0
+      = Real.exp (-(2 * t * secondEval triL triH (by norm_num)))
+        * ((stationaryVec triAdj 0)⁻¹ - 1) := by
+  rw [tri_cont_chi2_exact_QA, tri_secondEval_QA, tri_pi_QA]
+  have hE : (2 * t * (3/2 : ℝ)) = 3 * t := by ring
+  rw [hE]
+  ring
+
+/-- **The `t = 0` corner**: the continuous χ² starts at the pinned
+initial value `((π 0)⁻¹ − 1) = 2`. -/
+theorem tri_cont_chi2_zero_QA : contChiSquareDistance triAdj 0 0 = 2 := by
+  rw [contChiSquareDistance_zero triAdj triAdj_deg_pos 0, tri_pi_QA]
+  norm_num
+
+/-- **Mass preservation instance**: the continuous-time density stays a
+density at every time. -/
+theorem tri_cont_mass_QA (t : ℝ) :
+    ∑ i, stationaryVec triAdj i * contWalkDensity triAdj t 0 i = 1 :=
+  sum_stationaryVec_contWalkDensity triAdj triAdj_isSymm triAdj_deg_pos t 0
+
+/-- **The wrong-constant refutation**: pretending the gap is `2` reads
+`2·e^{−3} ≤ 2·e^{−4}` at `t = 1` — refuted by `e^{−4} < e^{−3}`. The
+gap constant is load-bearing. -/
+theorem tri_wrong_gap_refuted_QA :
+    ¬ (∀ t : ℝ, 0 ≤ t → contChiSquareDistance triAdj t 0
+        ≤ Real.exp (-(2 * t * 2)) * ((stationaryVec triAdj 0)⁻¹ - 1)) := by
+  intro h
+  have h1 := h 1 (by norm_num)
+  rw [tri_cont_chi2_exact_QA, tri_pi_QA] at h1
+  norm_num at h1
+  have hlt : Real.exp (-(4 : ℝ)) < Real.exp (-(3 : ℝ)) :=
+    Real.exp_lt_exp.mpr (by norm_num)
+  linarith
+
+/-! ## Continuous-time χ²: the path (irregular input, exact
+single-mode decay) -/
+
+/-- The trace of the path's normalized Laplacian: each diagonal entry
+is `1 − 0 = 1` (no loops), so the trace is `3`. -/
+theorem path_trace : (normalizedLaplacian pathAdj).trace = 3 := by
+  have hz : ∀ j : Fin 3,
+      (degreeInvSqrt pathAdj * pathAdj * degreeInvSqrt pathAdj) j j = 0 := by
+    intro j
+    have h1 : (0:ℝ) ≤ 1 := by norm_num
+    have h2 : (0:ℝ) ≤ 2 := by norm_num
+    fin_cases j <;>
+      simp [Matrix.mul_apply, degreeInvSqrt, Matrix.diagonal_apply,
+        Fin.sum_univ_three, pathAdj, pathAdj_deg_zero, pathAdj_deg_one,
+        pathAdj_deg_two, Real.sqrt_one, Real.mul_self_sqrt h2,
+        Real.mul_self_sqrt h1]
+  simp [Matrix.trace, normalizedLaplacian, hz]
+
+/-- The path's `λ = 1` eigenvector witness: `(1, 0, −1)` (raw
+entrywise). -/
+theorem path_lapsym_mulVec_w1_QA :
+    pathL *ᵥ (![1, 0, -1] : Fin 3 → ℝ) = (1 : ℝ) • ![1, 0, -1] := by
+  funext j
+  rw [path_normalizedLaplacian_mulVec_apply]
+  fin_cases j <;>
+    simp [pathAdj, Fin.sum_univ_three, Pi.smul_apply, smul_eq_mul]
+
+/-- The path's `λ = 2` (top) eigenvector witness `(−1, √2, −1)`: raw
+entrywise, through the fixture's entrywise action table. -/
+theorem path_lapsym_mulVec_top_QA :
+    pathL *ᵥ (![-1, Real.sqrt 2, -1] : Fin 3 → ℝ)
+      = (2 : ℝ) • ![-1, Real.sqrt 2, -1] := by
+  have hsq : (Real.sqrt 2) * (Real.sqrt 2) = 2 :=
+    Real.mul_self_sqrt (by norm_num)
+  have h0 : (pathL *ᵥ (![-1, Real.sqrt 2, -1] : Fin 3 → ℝ)) 0
+      = ((2 : ℝ) • ![-1, Real.sqrt 2, -1] : Fin 3 → ℝ) 0 := by
+    rw [path_normalizedLaplacian_mulVec_apply, Pi.smul_apply, smul_eq_mul]
+    simp only [pathAdj, Fin.sum_univ_three, Matrix.cons_val_zero,
+      Matrix.head_cons, Matrix.cons_val_one, Matrix.cons_val_two,
+      Matrix.tail_cons]
+    norm_num
+  have h1 : (pathL *ᵥ (![-1, Real.sqrt 2, -1] : Fin 3 → ℝ)) 1
+      = ((2 : ℝ) • ![-1, Real.sqrt 2, -1] : Fin 3 → ℝ) 1 := by
+    rw [path_normalizedLaplacian_mulVec_apply, Pi.smul_apply, smul_eq_mul]
+    simp only [pathAdj, Fin.sum_univ_three, Matrix.cons_val_zero,
+      Matrix.head_cons, Matrix.cons_val_one, Matrix.cons_val_two,
+      Matrix.tail_cons]
+    norm_num
+    field_simp
+    nlinarith [hsq]
+  have h2 : (pathL *ᵥ (![-1, Real.sqrt 2, -1] : Fin 3 → ℝ)) 2
+      = ((2 : ℝ) • ![-1, Real.sqrt 2, -1] : Fin 3 → ℝ) 2 := by
+    rw [path_normalizedLaplacian_mulVec_apply, Pi.smul_apply, smul_eq_mul]
+    simp only [pathAdj, Fin.sum_univ_three, Matrix.cons_val_zero,
+      Matrix.head_cons, Matrix.cons_val_one, Matrix.cons_val_two,
+      Matrix.tail_cons]
+    norm_num
+  funext j
+  fin_cases j
+  exacts [h0, h1, h2]
+
+/-- **The path's normalized spectral gap is exactly `1`** — the trace
+route: the witnesses `0` (the kernel `√D·1`), `1` (`(1, 0, −1)`), and
+`2` (`(−1, √2, −1)`) all occur in the sorted spectrum, and the SOS
+certificates (`path_eigvalOf_nonneg`/`_le_two`) bound every entry into
+`[0, 2]`, so the three distinct member values exhaust the three-entry
+list; the sum is the trace `3`. -/
+theorem path_secondEval_QA :
+    secondEval pathL pathH (by norm_num) = 1 := by
+  have hkne : (![1, 0, -1] : Fin 3 → ℝ) ≠ 0 := by
+    intro h
+    have e := congrFun h 0
+    simp at e
+  have htne : (![-1, Real.sqrt 2, -1] : Fin 3 → ℝ) ≠ 0 := by
+    intro h
+    have e := congrFun h 0
+    simp at e
+  have hker : pathL *ᵥ (degreeSqrt pathAdj *ᵥ onesVec) = 0 :=
+    normalizedLaplacian_mulVec_degreeSqrt_onesVec pathAdj pathAdj_deg_pos
+  have hkzerone : (degreeSqrt pathAdj *ᵥ onesVec : Fin 3 → ℝ) ≠ 0 := by
+    intro h
+    have e := congrFun h 0
+    simp [degreeSqrt, Matrix.mulVec_diagonal, onesVec, pathAdj_deg_zero,
+      Real.sqrt_one] at e
+  -- the three witness values occur in the sorted spectrum
+  have hwit : ∀ μ : ℝ, (∃ v : Fin 3 → ℝ, v ≠ 0 ∧ pathL *ᵥ v = μ • v) →
+      ∃ k : Fin (Fintype.card (Fin 3)), evals pathH k = μ := by
+    intro μ ⟨v, hv0, hvμ⟩
+    obtain ⟨i, hi⟩ :=
+      exists_eigvalOf_eq_of_mulVec_eq_smul pathH hv0 hvμ
+    obtain ⟨k, hk⟩ := eigvalOf_mem_evals pathH i
+    exact ⟨k, hk.trans hi⟩
+  obtain ⟨k0, hk0⟩ := hwit 0 ⟨_, hkzerone, by simpa using hker⟩
+  obtain ⟨k1, hk1⟩ := hwit 1 ⟨_, hkne, path_lapsym_mulVec_w1_QA⟩
+  obtain ⟨k2, hk2⟩ := hwit 2 ⟨_, htne, path_lapsym_mulVec_top_QA⟩
+  -- every entry is bounded into [0, 2]
+  have hb : ∀ k : Fin (Fintype.card (Fin 3)),
+      0 ≤ evals pathH k ∧ evals pathH k ≤ 2 := by
+    intro k
+    obtain ⟨i, hi⟩ := evals_mem_eigvalOf pathH k
+    rw [hi]
+    exact ⟨path_eigvalOf_nonneg i, path_eigvalOf_le_two i⟩
+  have hmono : Monotone (evals pathH) := evals_sorted pathH
+  have hle : Fintype.card (Fin 3) ≤ 3 := by simp
+  have hk2lt : (k2 : ℕ) < 3 := lt_of_lt_of_le k2.isLt hle
+  have h2val : ((2 : Fin (Fintype.card (Fin 3))) : ℕ) = 2 := by
+    simp [Fintype.card_fin]
+  have hk2le : k2 ≤ (2 : Fin (Fintype.card (Fin 3))) :=
+    Fin.le_def.mpr (by rw [h2val]; omega)
+  have h2ge : (2 : ℝ) ≤ evals pathH (2 : Fin 3) := by
+    have hm := hmono hk2le
+    rw [hk2] at hm
+    exact hm
+  have h2eq : evals pathH (2 : Fin 3) = 2 :=
+    le_antisymm (hb _).2 h2ge
+  have h0le' : evals pathH (0 : Fin 3) ≤ 0 :=
+    (hmono (Fin.zero_le k0)).trans_eq hk0
+  have h0eq : evals pathH (0 : Fin 3) = 0 :=
+    le_antisymm h0le' (hb _).1
+  have hsum : ∑ k, evals pathH k = 3 := by
+    rw [evals_sum_eq_trace pathH, path_trace]
+  have hsum3 : ∑ i : Fin 3, evals pathH i = 3 := hsum
+  simp only [Fin.sum_univ_three] at hsum3
+  rw [show secondEval pathL pathH (by norm_num)
+      = evals pathH (1 : Fin 3) from rfl]
+  rw [h0eq, h2eq] at hsum3
+  have hone : evals pathH (1 : Fin 3) = 1 := by linarith
+  rw [hone]
+
+/-- The centered initial density of the path walk started at the
+center vertex: `h₀ − 1 = (−1, 1, −1)`. -/
+theorem path_centered_density :
+    (fun i => walkDensity pathAdj 0 1 i - 1) = ![-1, 1, -1] := by
+  funext i
+  fin_cases i
+  all_goals simp [walkDensity, walkDistribution_zero, path_pi_QA,
+    Pi.single_apply]
+  all_goals norm_num
+
+/-- The conjugation step, non-scalar on this fixture: `√D` sends the
+centered density `(−1, 1, −1)` to the top eigenvector
+`(−1, √2, −1)` — the identity that makes the π-weighted χ² exactly the
+Euclidean contraction of the normalized heat kernel. -/
+theorem path_conj_centered_QA :
+    degreeSqrt pathAdj *ᵥ (![-1, 1, -1] : Fin 3 → ℝ)
+      = ![-1, Real.sqrt 2, -1] := by
+  funext i
+  rw [degreeSqrt_mulVec_apply]
+  fin_cases i <;>
+    simp [degreeSqrt, Matrix.diagonal_apply, pathAdj_deg_zero,
+      pathAdj_deg_one, pathAdj_deg_two, Real.sqrt_one]
+
+/-- The normalized heat kernel damps the top mode at `e^{−2t}`. -/
+theorem path_heat_mulVec_top_QA (t : ℝ) :
+    normalizedHeatKernel pathAdj t *ᵥ (![-1, Real.sqrt 2, -1] : Fin 3 → ℝ)
+      = Real.exp (-(2 * t)) • ![-1, Real.sqrt 2, -1] := by
+  rw [normalizedHeatKernel]
+  refine exp_mulVec_eq_smul_of_mulVec_eq_smul _ _ _ ?_
+  rw [Matrix.neg_mulVec, Matrix.smul_mulVec_assoc, path_lapsym_mulVec_top_QA]
+  have hstep2 : -(t • ((2 : ℝ) • (![-1, Real.sqrt 2, -1] : Fin 3 → ℝ)))
+      = (-(2 * t)) • (![-1, Real.sqrt 2, -1] : Fin 3 → ℝ) := by
+    funext i
+    rw [Pi.neg_apply, Pi.smul_apply, Pi.smul_apply, smul_eq_mul,
+      smul_eq_mul, Pi.smul_apply, smul_eq_mul]
+    ring
+  exact hstep2
+
+/-- The top-mode norm pinned raw: `‖(−1, √2, −1)‖² = 1 + 2 + 1 = 4`. -/
+theorem path_top_dotProduct_QA :
+    Matrix.dotProduct (![-1, Real.sqrt 2, -1] : Fin 3 → ℝ)
+      (![-1, Real.sqrt 2, -1] : Fin 3 → ℝ) = 4 := by
+  have h2 : (Real.sqrt 2) * (Real.sqrt 2) = 2 :=
+    Real.mul_self_sqrt (by norm_num)
+  simp [Matrix.dotProduct, Fin.sum_univ_three, h2]
+  norm_num
+
+/-- **The exact single-mode decay** on the path: the conjugated
+centered initial density is the top eigenvector, so
+`χ²_cont(t, center) = e^{−4t}` exactly, at every time — the decay at
+twice the gap's rate, witnessed on the fixture where `√D` is
+genuinely non-scalar. -/
+theorem path_cont_chi2_exact_QA (t : ℝ) :
+    contChiSquareDistance pathAdj t 1 = Real.exp (-(4 * t)) := by
+  have hcenter : (walkDensity pathAdj 0 1 : Fin 3 → ℝ) - 1
+      = ![-1, 1, -1] := by
+    funext i
+    exact congrFun path_centered_density i
+  have hD : degreeSqrt pathAdj *ᵥ (![-1, 1, -1] : Fin 3 → ℝ)
+      = ![-1, Real.sqrt 2, -1] := path_conj_centered_QA
+  have hn := path_top_dotProduct_QA
+  set E2 : ℝ := Real.exp (-(2 * t)) with hE2def
+  set E4 : ℝ := Real.exp (-(4 * t)) with hE4def
+  have hpair : E2 * E2 = E4 := by
+    rw [hE2def, hE4def, ← Real.exp_add]
+    congr 1
+    ring
+  have hfinal : (4 : ℝ)⁻¹ * Matrix.dotProduct
+      (E2 • ![-1, Real.sqrt 2, -1])
+      (E2 • ![-1, Real.sqrt 2, -1] : Fin 3 → ℝ) = E4 := by
+    rw [Matrix.smul_dotProduct, Matrix.dotProduct_smul, smul_eq_mul,
+      smul_eq_mul, hn, ← hpair]
+    ring
+  rw [contChiSquareDistance_eq_inv_mul pathAdj pathAdj_deg_pos t 1,
+    degreeSqrt_mulVec_contWalkDensity_sub_one pathAdj pathAdj_deg_pos t 1,
+    hcenter, hD, path_heat_mulVec_top_QA, path_vol_QA]
+  exact hfinal
+
+/-- The consumer theorem instantiated on the path — the bound's RHS at
+the pinned gap `1`. -/
+theorem path_cont_mixing_QA (t : ℝ) (ht : 0 ≤ t) :
+    contChiSquareDistance pathAdj t 1
+      ≤ Real.exp (-(2 * t * secondEval pathL pathH (by norm_num)))
+        * ((stationaryVec pathAdj 1)⁻¹ - 1) :=
+  contChiSquareDistance_le pathAdj pathAdj_isSymm pathAdj_nonneg
+    pathAdj_deg_pos (by norm_num) ht 1
+
+/-- **Honest strict slack at every positive time**: the exact value
+`e^{−4t}` is strictly below the bound `e^{−2t·λ₂}·((π c)⁻¹−1) =
+e^{−2t}` for every `t > 0` — the center start is a pure top mode, so
+it decays at twice the certified rate. The twin of the triangle's
+exact-attainment pin. -/
+theorem path_cont_slack_QA (t : ℝ) (ht : 0 < t) :
+    contChiSquareDistance pathAdj t 1
+      < Real.exp (-(2 * t * secondEval pathL pathH (by norm_num)))
+        * ((stationaryVec pathAdj 1)⁻¹ - 1) := by
+  rw [path_cont_chi2_exact_QA, path_secondEval_QA, path_pi_QA]
+  norm_num
+  linarith
+
+/-- **The `t = 0` corner**: the continuous χ² starts at the pinned
+initial value `((π c)⁻¹ − 1) = 2 − 1 = 1`. -/
+theorem path_cont_chi2_zero_QA : contChiSquareDistance pathAdj 0 1 = 1 := by
+  rw [contChiSquareDistance_zero pathAdj pathAdj_deg_pos 1, path_pi_QA]
+  norm_num
+
+/-- **Mass preservation instance**: the continuous-time density stays
+a density at every time on the irregular fixture too. -/
+theorem path_cont_mass_QA (t : ℝ) :
+    ∑ i, stationaryVec pathAdj i * contWalkDensity pathAdj t 1 i = 1 :=
+  sum_stationaryVec_contWalkDensity pathAdj pathAdj_isSymm pathAdj_deg_pos t 1
+
+/-- **The wrong-constant refutation**: pretending the gap is `3` reads
+`e^{−4} ≤ e^{−6}` at `t = 1` — refuted by exp monotonicity. The gap
+constant is load-bearing on the irregular fixture as well. -/
+theorem path_wrong_gap_refuted_QA :
+    ¬ (∀ t : ℝ, 0 ≤ t → contChiSquareDistance pathAdj t 1
+        ≤ Real.exp (-(2 * t * 3)) * ((stationaryVec pathAdj 1)⁻¹ - 1)) := by
+  intro h
+  have h1 := h 1 (by norm_num)
+  rw [path_cont_chi2_exact_QA, path_pi_QA] at h1
+  norm_num at h1
+
+/-! ## Continuous-time χ²: the disconnected fixture
+(the gap-zero branch) -/
+
+/-- The disconnected fixture's normalized gap is exactly `0` — through
+the shelf's non-connectedness transfer (with PSD the other side). -/
+theorem disc_secondEval_zero_QA :
+    secondEval discL discH (by norm_num) = 0 :=
+  secondEval_normalizedLaplacian_eq_zero_of_not_connected discAdj
+    discAdj_isSymm discAdj_nonneg discAdj_deg_pos (by norm_num)
+    disc_not_connected
+
+/-- The start-at-0 density on the fixture: `h₀ = (4, 0, 0, 0)`
+(`π = 1/4` everywhere). -/
+theorem disc_density_zero_QA : walkDensity discAdj 0 0 = ![(4 : ℝ), 0, 0, 0] := by
+  funext i
+  fin_cases i
+  all_goals simp [walkDensity, walkDistribution_zero, disc_pi_QA,
+    Pi.single_apply]
+
+theorem disc_lapsym_mulVec_kerTri_QA :
+    discL *ᵥ (![(1 : ℝ), 1, 1, 0] : Fin 4 → ℝ) = 0 := by
+  have h : ∀ j : Fin 4, (discL *ᵥ (![(1 : ℝ), 1, 1, 0] : Fin 4 → ℝ)) j = 0 := by
+    intro j
+    rw [disc_normalizedLaplacian_mulVec_apply]
+    fin_cases j <;> simp [discAdj_apply, Fin.sum_univ_four] <;> norm_num
+  funext j
+  exact h j
+
+/-- The `3/2`-eigenvector witness on the fixture: the triangle block's
+centered direction `(8, −4, −4, 0)/3` (a scalar multiple of `triG`
+padded with the loop zero). -/
+theorem disc_lapsym_mulVec_mid_QA :
+    discL *ᵥ (![(8 : ℝ)/3, -4/3, -4/3, 0] : Fin 4 → ℝ)
+      = (3/2 : ℝ) • ![(8 : ℝ)/3, -4/3, -4/3, 0] := by
+  have h : ∀ j : Fin 4, (discL *ᵥ (![(8 : ℝ)/3, -4/3, -4/3, 0] : Fin 4 → ℝ)) j
+      = ((3/2 : ℝ) • ![(8 : ℝ)/3, -4/3, -4/3, 0] : Fin 4 → ℝ) j := by
+    intro j
+    rw [disc_normalizedLaplacian_mulVec_apply, Pi.smul_apply, smul_eq_mul]
+    fin_cases j <;> simp [discAdj_apply, Fin.sum_univ_four] <;> norm_num
+  funext j
+  exact h j
+
+theorem disc_lapsym_mulVec_kerLoop_QA :
+    discL *ᵥ (![(0 : ℝ), 0, 0, -1] : Fin 4 → ℝ) = 0 := by
+  have h : ∀ j : Fin 4, (discL *ᵥ (![(0 : ℝ), 0, 0, -1] : Fin 4 → ℝ)) j = 0 := by
+    intro j
+    rw [disc_normalizedLaplacian_mulVec_apply]
+    fin_cases j <;> simp [discAdj_apply, Fin.sum_univ_four]
+  funext j
+  exact h j
+
+/-- The normalized heat kernel's action on the fixture's conjugated
+centered start: the triangle block's kernel part stays, the `3/2` part
+damps by `e^{−3t/2}`, the loop coordinate stays — the closed form every
+exact value below evaluates. -/
+theorem disc_heat_mulVec_w_QA (t : ℝ) :
+    normalizedHeatKernel discAdj t *ᵥ (![(3 : ℝ), -1, -1, -1] : Fin 4 → ℝ)
+      = ![(1 : ℝ)/3 + (8/3) * Real.exp (-((3/2 : ℝ) * t)),
+          1/3 - (4/3) * Real.exp (-((3/2 : ℝ) * t)),
+          1/3 - (4/3) * Real.exp (-((3/2 : ℝ) * t)), -1] := by
+  have hfix : ∀ v : Fin 4 → ℝ, discL *ᵥ v = 0 →
+      normalizedHeatKernel discAdj t *ᵥ v = v := by
+    intro v hv
+    rw [normalizedHeatKernel]
+    refine exp_mulVec_eq_of_mulVec_eq_zero _ _ ?_
+    rw [Matrix.neg_mulVec, Matrix.smul_mulVec_assoc, hv, smul_zero, neg_zero]
+  have hmid : normalizedHeatKernel discAdj t *ᵥ
+      (![(8 : ℝ)/3, -4/3, -4/3, 0] : Fin 4 → ℝ)
+      = Real.exp (-((3/2 : ℝ) * t)) • ![(8 : ℝ)/3, -4/3, -4/3, 0] := by
+    rw [normalizedHeatKernel]
+    refine exp_mulVec_eq_smul_of_mulVec_eq_smul _ _ _ ?_
+    rw [Matrix.neg_mulVec, Matrix.smul_mulVec_assoc, disc_lapsym_mulVec_mid_QA]
+    have hstep2 : -(t • ((3/2 : ℝ)
+        • (![(8 : ℝ)/3, -4/3, -4/3, 0] : Fin 4 → ℝ)))
+        = (-((3/2 : ℝ) * t)) • (![(8 : ℝ)/3, -4/3, -4/3, 0] : Fin 4 → ℝ) := by
+      funext i
+      rw [Pi.neg_apply, Pi.smul_apply, Pi.smul_apply, smul_eq_mul,
+        smul_eq_mul, Pi.smul_apply, smul_eq_mul]
+      ring
+    exact hstep2
+  have hv : (![(3 : ℝ), -1, -1, -1] : Fin 4 → ℝ)
+      = ((1/3 : ℝ) • ![(1 : ℝ), 1, 1, 0]
+        + ![(8 : ℝ)/3, -4/3, -4/3, 0] + ![(0 : ℝ), 0, 0, -1] :
+          Fin 4 → ℝ) := by
+    funext i
+    fin_cases i <;> norm_num
+  rw [hv, Matrix.mulVec_add, Matrix.mulVec_add, Matrix.mulVec_smul,
+    hfix _ disc_lapsym_mulVec_kerTri_QA, hmid,
+    hfix _ disc_lapsym_mulVec_kerLoop_QA]
+  funext i
+  fin_cases i <;> simp <;> first
+  | rfl
+  | ring_nf
+
+/-- **The disconnected exact closed form**:
+`χ²_cont(t, 0) = 1/3 + (8/3)·e^{−3t}` on the triangle⊕self-loop
+fixture — decay at the *within-component* rate the theorem honestly
+does not claim, with limit `1/3` (not `0`: the walk never crosses
+components; `χ²(0) = 3` matches `(π 0)⁻¹ − 1`). -/
+theorem disc_cont_chi2_exact_QA (t : ℝ) :
+    contChiSquareDistance discAdj t 0
+      = 1/3 + (8/3) * Real.exp (-(3 * t)) := by
+  have hcenter : (walkDensity discAdj 0 0 : Fin 4 → ℝ) - 1
+      = ![(3 : ℝ), -1, -1, -1] := by
+    rw [disc_density_zero_QA]
+    funext i
+    fin_cases i
+    all_goals norm_num [walkDensity, walkDistribution_zero, disc_pi_QA,
+      Pi.single_apply]
+  have hD : degreeSqrt discAdj *ᵥ (![(3 : ℝ), -1, -1, -1] : Fin 4 → ℝ)
+      = (Real.sqrt 2) • ![(3 : ℝ), -1, -1, -1] := by
+    funext i
+    rw [degreeSqrt_mulVec_apply, discAdj_deg_eq, Pi.smul_apply, smul_eq_mul]
+  have hsq : (Real.sqrt 2) * (Real.sqrt 2) = 2 :=
+    Real.mul_self_sqrt (by norm_num)
+  have hpair : Real.exp (-((3/2 : ℝ) * t)) * Real.exp (-((3/2 : ℝ) * t))
+      = Real.exp (-(3 * t)) := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  have hr : Matrix.dotProduct
+      (![(1 : ℝ)/3 + (8/3) * Real.exp (-((3/2 : ℝ) * t)),
+          1/3 - (4/3) * Real.exp (-((3/2 : ℝ) * t)),
+          1/3 - (4/3) * Real.exp (-((3/2 : ℝ) * t)), -1] : Fin 4 → ℝ)
+      (![(1 : ℝ)/3 + (8/3) * Real.exp (-((3/2 : ℝ) * t)),
+          1/3 - (4/3) * Real.exp (-((3/2 : ℝ) * t)),
+          1/3 - (4/3) * Real.exp (-((3/2 : ℝ) * t)), -1] : Fin 4 → ℝ)
+      = 4/3 + (32/3) * Real.exp (-(3 * t)) := by
+    set e : ℝ := Real.exp (-((3/2 : ℝ) * t)) with hed
+    have hp2 : e * e = Real.exp (-(t * 3)) := by
+      rw [hed, ← Real.exp_add]
+      congr 1
+      ring
+    simp [Matrix.dotProduct, Fin.sum_univ_four]
+    nlinarith [hp2]
+  have hfinal : (8 : ℝ)⁻¹ * Matrix.dotProduct
+      ((Real.sqrt 2) • (![(1 : ℝ)/3 + (8/3) * Real.exp (-((3/2 : ℝ) * t)),
+          1/3 - (4/3) * Real.exp (-((3/2 : ℝ) * t)),
+          1/3 - (4/3) * Real.exp (-((3/2 : ℝ) * t)), -1] : Fin 4 → ℝ))
+      ((Real.sqrt 2) • (![(1 : ℝ)/3 + (8/3) * Real.exp (-((3/2 : ℝ) * t)),
+          1/3 - (4/3) * Real.exp (-((3/2 : ℝ) * t)),
+          1/3 - (4/3) * Real.exp (-((3/2 : ℝ) * t)), -1] : Fin 4 → ℝ))
+      = 1/3 + (8/3) * Real.exp (-(3 * t)) := by
+    rw [Matrix.smul_dotProduct, Matrix.dotProduct_smul, smul_eq_mul,
+      smul_eq_mul, hr,
+      show ((Real.sqrt 2) * ((Real.sqrt 2) * (4/3 + (32/3) * Real.exp (-(3 * t)))))
+        = ((Real.sqrt 2) * (Real.sqrt 2))
+          * (4/3 + (32/3) * Real.exp (-(3 * t))) from by ring, hsq]
+    field_simp
+    linarith
+  rw [contChiSquareDistance_eq_inv_mul discAdj discAdj_deg_pos t 0,
+    degreeSqrt_mulVec_contWalkDensity_sub_one discAdj discAdj_deg_pos t 0,
+    hcenter, hD, Matrix.mulVec_smul, disc_heat_mulVec_w_QA, disc_vol_QA]
+  exact hfinal
+
+/-- The consumer theorem instantiated at the gap-zero fixture: the
+rate is `e^{−2t·0} = 1` — the true rate-1 statement. -/
+theorem disc_cont_mixing_QA (t : ℝ) (ht : 0 ≤ t) :
+    contChiSquareDistance discAdj t 0
+      ≤ Real.exp (-(2 * t * secondEval discL discH (by norm_num)))
+        * ((stationaryVec discAdj 0)⁻¹ - 1) :=
+  contChiSquareDistance_le discAdj discAdj_isSymm discAdj_nonneg
+    discAdj_deg_pos (by norm_num) ht 0
+
+/-- **The rate-1 arithmetic at the exact value**: with
+`e^{−3t} ≤ 1`, the closed form `1/3 + (8/3)e^{−3t}` stays under `3` —
+the theorem's bound is honest on the disconnected fixture, with slack. -/
+theorem disc_rate_one_arith_QA (t : ℝ) (ht : 0 ≤ t) :
+    contChiSquareDistance discAdj t 0 ≤ (stationaryVec discAdj 0)⁻¹ - 1 := by
+  rw [disc_cont_chi2_exact_QA, disc_pi_QA]
+  norm_num
+  have hδ : Real.exp (-(3 * t)) ≤ 1 := by
+    have h0 : (-(3 * t)) ≤ 0 := neg_nonpos.2 (mul_nonneg (by norm_num) ht)
+    have h := Real.exp_le_exp.2 h0
+    rwa [Real.exp_zero] at h
+  linarith
+
+/-- **The positive-gap fence on the gap-zero fixture**: pretending
+`λ₂ = 1` reads `1/3 + (8/3)e^{−6} ≤ 4e^{−4}` at `t = 2` — refuted,
+since the value is at least `1/3 > 4e^{−4}` (the latter from the pin
+`2 < e`, giving `e⁴ > 16 > 12`). The gap hypothesis is load-bearing
+exactly at the connectivity boundary. -/
+theorem disc_gap_fence_QA :
+    ¬ (∀ t : ℝ, 0 ≤ t → contChiSquareDistance discAdj t 0
+        ≤ Real.exp (-(2 * t * 1)) * ((stationaryVec discAdj 0)⁻¹ - 1)) := by
+  intro h
+  have h2 := h 2 (by norm_num)
+  rw [disc_cont_chi2_exact_QA, disc_pi_QA] at h2
+  norm_num at h2
+  have he : (2 : ℝ) < Real.exp 1 := by
+    have h := Real.add_one_lt_exp one_ne_zero
+    norm_num at h
+    exact h
+  have he2 : Real.exp 1 * Real.exp 1 = Real.exp (2 : ℝ) := by
+    rw [← Real.exp_add]
+    norm_num
+  have he4 : Real.exp (4 : ℝ) = Real.exp 2 * Real.exp 2 := by
+    rw [← Real.exp_add]
+    norm_num
+  have hE4 : (12 : ℝ) < Real.exp 4 := by
+    rw [he4]
+    have hee : (2 : ℝ) * 2 < Real.exp 2 := by
+      rw [← he2]
+      nlinarith [he]
+    have h16 : ((2 : ℝ) * 2) * ((2 : ℝ) * 2) < Real.exp 2 * Real.exp 2 := by
+      nlinarith [hee]
+    norm_num at h16 ⊢
+    linarith
+  have hp4 : (0 : ℝ) < Real.exp 4 := Real.exp_pos 4
+  have hp12 : (0 : ℝ) < 12 := by norm_num
+  have hinve4 : Real.exp (-(4 : ℝ)) < 1/12 := by
+    rw [Real.exp_neg, inv_eq_one_div]
+    have h1 : (1 : ℝ) / Real.exp 4 < (1 : ℝ) / 12 := by
+      rw [div_lt_div_iff₀ hp4 hp12]
+      linarith [hE4]
+    exact h1
+  have hvnn : (0 : ℝ) ≤ 8/3 * Real.exp (-(6 : ℝ)) := by positivity
+  linarith [hvnn]
+
+/-! ## Continuous-time mixing time (2026-08-31)
+
+The `t_mix` package's QA (`contMixingTimeFrom`, the certificate
+interface, the spectral ceiling, and the TV twins feeding them —
+`proposals/continuous-time-chi-square-mixing.md`, Deferred items 1+2
+discharged together). On `K₂`: the exact TV value `e^{−2t}/2` (the
+continuous ceiling attained at every time, Cauchy–Schwarz equality),
+the exact mixing time closed form `t_mix(ε) = ln(1/(2ε))/2` (a `sInf`
+pinned exactly, both directions), the ceiling attained exactly at
+`ε = e^{−2}/2` (`t_mix = 1 = bound`), the wrong-gap refutation, the
+big-`ε` corner `t_mix = 0`, and the antitone instance with its
+closed-form consistency pin. On the triangle: the exact TV values
+`(2/3)e^{−3t/2}` against the ceiling's `(1/2)√2·e^{−3t/2}` with the
+Cauchy–Schwarz slack proved strict, and the `t = 0` join of the
+continuous law to the discrete initial law. -/
+
+section ContMixingTime
+
+local notation "k2L" => normalizedLaplacian k2Adj
+local notation "k2H" => normalizedLaplacian_symmetric k2Adj k2Adj_isSymm
+
+/-- The second centered mode of the edge: `k2G = (1, −1)`. -/
+def k2G : Fin 2 → ℝ := ![1, -1]
+
+theorem k2G_zero : k2G 0 = 1 := by simp [k2G]
+theorem k2G_one : k2G 1 = -1 := by simp [k2G]
+
+/-- The conjugated adjacency row on the edge: degree `1` makes the
+conjugator the identity, so the row is the adjacency row itself. -/
+theorem k2_conj_mulVec_apply (w : Fin 2 → ℝ) (j : Fin 2) :
+    (((degreeInvSqrt k2Adj * k2Adj * degreeInvSqrt k2Adj) *ᵥ w) j)
+      = ∑ k, k2Adj j k * w k := by
+  have hentry : ∀ k : Fin 2,
+      (degreeInvSqrt k2Adj * k2Adj * degreeInvSqrt k2Adj) j k
+        = k2Adj j k := by
+    intro k
+    fin_cases j <;> fin_cases k <;>
+      simp [Matrix.mul_apply, degreeInvSqrt, Matrix.diagonal_apply,
+        Fin.sum_univ_two, k2Adj_apply, k2Adj_deg_eq, Real.sqrt_one,
+        one_mul, mul_one]
+  simp only [Matrix.mulVec, Matrix.dotProduct]
+  rw [Finset.sum_congr rfl fun k _ => by rw [hentry k]]
+
+/-- The edge's normalized Laplacian in explicit row form:
+`(L_sym *ᵥ w) j = w j − ∑ k, A j k w k`. -/
+theorem k2_normalizedLaplacian_mulVec_apply (w : Fin 2 → ℝ) (j : Fin 2) :
+    ((normalizedLaplacian k2Adj *ᵥ w) j)
+      = w j - ∑ k, k2Adj j k * w k := by
+  rw [normalizedLaplacian, Matrix.sub_mulVec, Matrix.one_mulVec,
+    Pi.sub_apply]
+  congr 1
+  exact k2_conj_mulVec_apply w j
+
+/-- `k2G` is a `2`-eigenvector of the edge's normalized Laplacian. -/
+theorem k2_lapsym_mulVec_k2G : normalizedLaplacian k2Adj *ᵥ k2G
+    = (2 : ℝ) • k2G := by
+  funext j
+  rw [k2_normalizedLaplacian_mulVec_apply k2G j, Pi.smul_apply, smul_eq_mul]
+  fin_cases j <;>
+    simp only [k2Adj_apply, k2G, Fin.sum_univ_two, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.head_cons, Fin.zero_ne_one, if_false,
+      if_true]
+  all_goals norm_num
+
+/-- On the edge the conjugator is the identity action: `√D = √1 = 1`. -/
+theorem k2_degreeSqrt_mulVec (g : Fin 2 → ℝ) :
+    degreeSqrt k2Adj *ᵥ g = g := by
+  funext i
+  rw [degreeSqrt_mulVec_apply, k2Adj_deg_eq]
+  simp
+
+/-- The centered initial density of the edge walk: `h₀ − 1 = (1, −1)`. -/
+theorem k2_centered_density : walkDensity k2Adj 0 0 - 1 = k2G := by
+  funext i
+  fin_cases i
+  all_goals simp [walkDensity, walkDistribution_zero, k2_pi_QA,
+    Pi.single_apply, k2G]
+  all_goals norm_num
+
+/-- The trace of the edge's normalized Laplacian: `1 + 1 = 2`. -/
+theorem k2_trace : (normalizedLaplacian k2Adj).trace = 2 := by
+  have hz : ∀ j : Fin 2,
+      (degreeInvSqrt k2Adj * k2Adj * degreeInvSqrt k2Adj) j j = 0 := by
+    intro j
+    have h2 : (0 : ℝ) ≤ 1 := by norm_num
+    fin_cases j <;>
+      simp [Matrix.mul_apply, degreeInvSqrt, Matrix.diagonal_apply,
+        Fin.sum_univ_two, k2Adj_apply, k2Adj_deg_eq,
+        Real.mul_self_sqrt h2]
+  simp [Matrix.trace, normalizedLaplacian, hz]
+
+/-- The edge's normalized spectral gap is exactly `2`: the kernel pin
+`evals 0 = 0` plus the trace pin `∑ evals = 2` forces the top entry,
+and `secondEval` *is* the middle entry of the sorted list. -/
+theorem k2_secondEval_QA : secondEval k2L k2H (by norm_num) = 2 := by
+  have h0 : evals k2H (0 : Fin 2) = 0 :=
+    normalizedLaplacian_evals_zero k2Adj k2Adj_isSymm k2Adj_nonneg
+      k2Adj_deg_pos (by simp)
+  have hsum : ∑ k, evals k2H k = 2 := by
+    rw [evals_sum_eq_trace k2H, k2_trace]
+  have hsum' : ∑ k : Fin 2, evals k2H k = 2 := hsum
+  simp only [Fin.sum_univ_two] at hsum'
+  have hse : secondEval k2L k2H (by norm_num) = evals k2H (1 : Fin 2) := rfl
+  rw [hse]
+  linarith
+
+/-- The centered continuous-time density on the edge is the pure
+top mode: `h_t − 1 = e^{−2t}·(1, −1)` at every time — through the
+conjugation shift (trivial `√D`) and the eigenmode engine. -/
+theorem k2_contWalkDensity_sub_one (t : ℝ) :
+    contWalkDensity k2Adj t 0 - 1 = Real.exp (-(2 * t)) • k2G := by
+  have h1 := degreeSqrt_mulVec_contWalkDensity_sub_one k2Adj k2Adj_deg_pos t 0
+  rw [k2_degreeSqrt_mulVec, k2_degreeSqrt_mulVec, k2_centered_density] at h1
+  have hmode : normalizedHeatKernel k2Adj t *ᵥ k2G
+      = Real.exp (-(2 * t)) • k2G := by
+    rw [normalizedHeatKernel]
+    refine exp_mulVec_eq_smul_of_mulVec_eq_smul _ _ _ ?_
+    rw [Matrix.neg_mulVec, Matrix.smul_mulVec_assoc, k2_lapsym_mulVec_k2G]
+    funext i
+    rw [Pi.neg_apply, Pi.smul_apply, Pi.smul_apply, Pi.smul_apply,
+      smul_eq_mul, smul_eq_mul, smul_eq_mul]
+    ring
+  rw [hmode] at h1
+  exact h1
+
+/-- The continuous-time walk law on the edge, entrywise:
+`ν_t(i) = 1/2 ± e^{−2t}/2`. -/
+theorem k2_contWalkDistribution_apply (t : ℝ) (i : Fin 2) :
+    contWalkDistribution k2Adj t 0 i
+      = 1/2 + k2G i * Real.exp (-(2 * t)) / 2 := by
+  show stationaryVec k2Adj i * contWalkDensity k2Adj t 0 i
+      = 1/2 + k2G i * Real.exp (-(2 * t)) / 2
+  rw [k2_pi_QA i]
+  have h := congrFun (k2_contWalkDensity_sub_one t) i
+  rw [Pi.sub_apply, Pi.one_apply, Pi.smul_apply, smul_eq_mul] at h
+  have hkey : contWalkDensity k2Adj t 0 i
+      = 1 + k2G i * Real.exp (-(2 * t)) := by linarith
+  rw [hkey]
+  ring
+
+/-- **The exact TV value on the edge at every time**: the continuous
+ceiling's constant is attained at every time — `TV(ν_t, π) = e^{−2t}/2`
+(the law itself is `((1 ± e^{−2t})/2)`, so every deviation is
+`e^{−2t}/2`; Cauchy–Schwarz equality, `|h − 1|` constant). -/
+theorem k2_cont_tv_eq (t : ℝ) :
+    tvDistance (contWalkDistribution k2Adj t 0) (stationaryVec k2Adj)
+      = Real.exp (-(2 * t)) / 2 := by
+  have h0 : contWalkDistribution k2Adj t 0 0
+      = (1 + Real.exp (-(2 * t))) / 2 := by
+    rw [k2_contWalkDistribution_apply t 0, k2G_zero]
+    ring
+  have h1 : contWalkDistribution k2Adj t 0 1
+      = (1 - Real.exp (-(2 * t))) / 2 := by
+    rw [k2_contWalkDistribution_apply t 1, k2G_one]
+    ring
+  have hnn : (0 : ℝ) ≤ Real.exp (-(2 * t)) := Real.exp_nonneg _
+  have hpos2 : (0 : ℝ) < Real.exp (-(2 * t)) / 2 :=
+    div_pos (Real.exp_pos _) (by norm_num)
+  have hneg2 : -(Real.exp (-(2 * t)) / 2) < 0 := neg_lt_zero.mpr hpos2
+  rw [tvDistance, Fin.sum_univ_two, h0, h1,
+    k2_pi_QA (0 : Fin 2), k2_pi_QA (1 : Fin 2),
+    show (1 + Real.exp (-(2 * t))) / 2 - 1/2
+        = Real.exp (-(2 * t)) / 2 from by ring,
+    show (1 - Real.exp (-(2 * t))) / 2 - 1/2
+        = -(Real.exp (-(2 * t)) / 2) from by ring,
+    abs_of_nonneg hpos2.le, abs_of_neg hneg2]
+  ring
+
+/-- **The ceiling attained at every time on the edge** — the decay-form
+TV ceiling with the gap `2` and the constant `√1 = 1` reduces to the
+exact value: no slack anywhere in the continuous TV chain on `K₂`. -/
+theorem k2_cont_ceiling_attained_QA (t : ℝ) :
+    tvDistance (contWalkDistribution k2Adj t 0) (stationaryVec k2Adj)
+      = (1/2) * Real.exp (-(t * secondEval k2L k2H (by norm_num)))
+        * Real.sqrt ((stationaryVec k2Adj 0)⁻¹ - 1) := by
+  rw [k2_secondEval_QA, k2_pi_QA 0, k2_cont_tv_eq]
+  have h1 : (1/2 : ℝ) * Real.exp (-(t * 2)) * Real.sqrt ((1/2)⁻¹ - 1)
+      = Real.exp (-(2 * t)) / 2 := by
+    rw [show ((1/2 : ℝ))⁻¹ - 1 = 1 from by norm_num, Real.sqrt_one,
+      show -(t * (2 : ℝ)) = -(2 * t) from by ring]
+    ring
+  exact h1.symm
+
+/-- **The exact mixing time on the edge** — the closed form every
+textbook computes on the two-state chain: `t_mix(ε) = ln(1/(2ε))/2`
+for `0 < ε < 1/2`. Both directions: the closed form is a *witness
+time* (membership: `TV(s) = e^{−2s}/2` is exactly `ε` there), and it
+is a *lower bound* (every witness time `t` has `TV(t) ≤ ε`, i.e.
+`t ≥ ln(1/(2ε))/2`). A `sInf` object pinned exactly. -/
+theorem k2_contMixingTimeFrom_eq (ε : ℝ) (hε : 0 < ε) (hε' : ε < 1/2) :
+    contMixingTimeFrom k2Adj 0 ε = Real.log (1 / (2 * ε)) / 2 := by
+  have h2ε : 0 < 2 * ε := by positivity
+  have hratio : 1 < 1 / (2 * ε) := (one_lt_div h2ε).mpr (by nlinarith)
+  set T : ℝ := Real.log (1 / (2 * ε)) / 2 with hTdef
+  have hT0 : 0 ≤ T := div_nonneg
+    (Real.log_nonneg (le_of_lt hratio)) (by norm_num)
+  have hval : Real.exp (-(2 * T)) = 2 * ε := by
+    have h2T : 2 * T = Real.log (1 / (2 * ε)) := by
+      rw [hTdef]
+      field_simp
+    have hposr : (0 : ℝ) < 1 / (2 * ε) := div_pos (by norm_num) h2ε
+    rw [h2T, Real.exp_neg, Real.exp_log hposr]
+    field_simp
+  have hmem : T ∈ {t : ℝ | 0 ≤ t ∧ ∀ s : ℝ, t ≤ s →
+      tvDistance (contWalkDistribution k2Adj s 0) (stationaryVec k2Adj)
+        ≤ ε} := by
+    refine ⟨hT0, fun s hs => ?_⟩
+    have hmono : Real.exp (-(2 * s)) ≤ Real.exp (-(2 * T)) :=
+      Real.exp_le_exp.mpr (by linarith)
+    rw [hval] at hmono
+    have hstep := k2_cont_tv_eq s
+    linarith
+  refine le_antisymm ?_ ?_
+  · exact (csInf_le (contMixingTimeFrom_bddBelow k2Adj 0 ε) hmem).trans_eq
+      (by rw [hTdef])
+  · refine le_csInf ⟨T, hmem⟩ ?_
+    rintro t ⟨-, ht⟩
+    have hTT := ht t (le_refl t)
+    rw [k2_cont_tv_eq t] at hTT
+    have hlogle : Real.log (Real.exp (-(2 * t))) ≤ Real.log (2 * ε) :=
+      Real.log_le_log (Real.exp_pos _) (by linarith)
+    rw [Real.log_exp] at hlogle
+    have hT' : T = -(Real.log (2 * ε)) / 2 := by
+      rw [hTdef, Real.log_div (by norm_num : (1 : ℝ) ≠ 0) (ne_of_gt h2ε),
+        Real.log_one]
+      ring
+    linarith
+
+/-- The threshold instance of the closed form: at `ε = e^{−2}/2` the
+edge's mixing time is exactly `1` — the time at which the exact TV
+value `e^{−2}/2` crosses the threshold. -/
+theorem k2_contMixingTimeFrom_exp_eq :
+    contMixingTimeFrom k2Adj 0 (Real.exp (-(2 : ℝ)) / 2) = 1 := by
+  have hlt : Real.exp (-(2 : ℝ)) < 1 :=
+    Real.exp_lt_one_iff.mpr (by norm_num)
+  have heps : (0 : ℝ) < Real.exp (-(2 : ℝ)) / 2 :=
+    div_pos (Real.exp_pos _) (by norm_num)
+  rw [k2_contMixingTimeFrom_eq _ heps (by linarith)]
+  have h2 : 2 * (Real.exp (-(2 : ℝ)) / 2) = Real.exp (-(2 : ℝ)) := by
+    field_simp
+  have hr : 1 / (2 * (Real.exp (-(2 : ℝ)) / 2)) = Real.exp (2 : ℝ) := by
+    rw [h2, Real.exp_neg, one_div, inv_inv]
+  rw [hr, Real.log_exp]
+  norm_num
+
+/-- **The spectral ceiling instance** at the same threshold: the
+ceiling's `max 0 (ln(√1/e^{−2})/2)` is exactly `1` — and the closed
+form pins `t_mix = 1`, so **the ceiling is attained exactly** on the
+fixture (the strongest QA shape a bound theorem can have). -/
+theorem k2_contMixingTimeFrom_ceiling_le :
+    contMixingTimeFrom k2Adj 0 (Real.exp (-(2 : ℝ)) / 2) ≤ 1 := by
+  have heps : (0 : ℝ) < Real.exp (-(2 : ℝ)) / 2 :=
+    div_pos (Real.exp_pos _) (by norm_num)
+  have h := contMixingTimeFrom_le_of_connected k2Adj k2Adj_isSymm
+    k2Adj_nonneg k2Adj_deg_pos (by norm_num) k2_connected heps 0
+  have hpi : (stationaryVec k2Adj 0)⁻¹ - 1 = 1 := by
+    rw [k2_pi_QA 0]
+    norm_num
+  have h2 : 2 * (Real.exp (-(2 : ℝ)) / 2) = Real.exp (-(2 : ℝ)) := by
+    field_simp
+  have hr : Real.sqrt 1 / (2 * (Real.exp (-(2 : ℝ)) / 2))
+      = Real.exp (2 : ℝ) := by
+    rw [Real.sqrt_one, h2, Real.exp_neg, one_div, inv_inv]
+  rw [hpi, hr, Real.log_exp, k2_secondEval_QA] at h
+  rwa [max_eq_right (by norm_num : (0 : ℝ) ≤ 2 / 2),
+    show (2 : ℝ) / 2 = 1 from by norm_num] at h
+
+/-- **The wrong-gap refutation**: pretending the gap is `3` reads the
+ceiling as `t_mix ≤ ln(1/(2ε))/3`, which at `ε = e^{−2}/2` claims
+`1 ≤ 2/3` — refuted by the exact pin. The ceiling's gap constant is
+load-bearing. -/
+theorem k2_contMixingTime_wrong_gap_refuted_QA :
+    ¬ (∀ ε : ℝ, 0 < ε → ε < 1/2 →
+        contMixingTimeFrom k2Adj 0 ε ≤ Real.log (1 / (2 * ε)) / 3) := by
+  intro h
+  have hlt : Real.exp (-(2 : ℝ)) < 1 :=
+    Real.exp_lt_one_iff.mpr (by norm_num)
+  have h1 := h (Real.exp (-(2 : ℝ)) / 2)
+    (div_pos (Real.exp_pos _) (by norm_num)) (by linarith)
+  rw [k2_contMixingTimeFrom_exp_eq] at h1
+  have h2 : 2 * (Real.exp (-(2 : ℝ)) / 2) = Real.exp (-(2 : ℝ)) := by
+    field_simp
+  have hr : 1 / (2 * (Real.exp (-(2 : ℝ)) / 2)) = Real.exp (2 : ℝ) := by
+    rw [h2, Real.exp_neg, one_div, inv_inv]
+  rw [hr, Real.log_exp] at h1
+  norm_num at h1
+
+/-- **The big-`ε` corner**: at `ε = 3/4` (above the edge's maximal TV
+distance `1/2`) the mixing time is exactly `0` — time `0` already
+certifies, and no negative time is in the set. Graceful, not junk. -/
+theorem k2_contMixingTimeFrom_big_corner :
+    contMixingTimeFrom k2Adj 0 (3/4) = 0 := by
+  have hmem : (0 : ℝ) ∈ {t : ℝ | 0 ≤ t ∧ ∀ s : ℝ, t ≤ s →
+      tvDistance (contWalkDistribution k2Adj s 0) (stationaryVec k2Adj)
+        ≤ 3/4} := by
+    refine ⟨by norm_num, fun s hs => ?_⟩
+    have hstep := k2_cont_tv_eq s
+    have hnn : (0 : ℝ) ≤ Real.exp (-(2 * s)) := Real.exp_nonneg _
+    have hone : Real.exp (-(2 * s)) ≤ 1 := by
+      have h := (Real.exp_le_exp.mpr (by linarith) :
+        Real.exp (-(2 * s)) ≤ Real.exp (0 : ℝ))
+      rwa [Real.exp_zero] at h
+    linarith
+  refine le_antisymm ?_ ?_
+  · exact csInf_le (contMixingTimeFrom_bddBelow k2Adj 0 (3/4)) hmem
+  · exact le_csInf ⟨0, hmem⟩ (fun t ht => ht.1)
+
+/-- **The antitone instance on the edge**: `t_mix(1/4) ≤ t_mix(1/8)`,
+through the theorem (the witness supplied by the exact TV
+computation). -/
+theorem k2_contMixingTimeFrom_anti_QA :
+    contMixingTimeFrom k2Adj 0 (1/4) ≤ contMixingTimeFrom k2Adj 0 (1/8) := by
+  refine contMixingTimeFrom_anti k2Adj 0 (by norm_num) ?_
+  have hT0 : (0 : ℝ) ≤ Real.log (1 / (2 * (1/8 : ℝ))) / 2 :=
+    div_nonneg (Real.log_nonneg (by norm_num : (1 : ℝ) ≤ 1 / (2 * (1/8))))
+      (by norm_num)
+  refine ⟨Real.log (1 / (2 * (1/8 : ℝ))) / 2, hT0, ?_⟩
+  intro s hs
+  have hmono : Real.exp (-(2 * s))
+      ≤ Real.exp (-(2 * (Real.log (1 / (2 * (1/8 : ℝ))) / 2))) :=
+    Real.exp_le_exp.mpr (by linarith)
+  have hval : Real.exp (-(2 * (Real.log (1 / (2 * (1/8 : ℝ))) / 2)))
+      = 2 * (1/8 : ℝ) := by
+    have h2T : 2 * (Real.log (1 / (2 * (1/8 : ℝ))) / 2)
+        = Real.log (1 / (2 * (1/8 : ℝ))) := by
+      rw [show 2 * (Real.log (1 / (2 * (1/8 : ℝ))) / 2)
+          = Real.log (1 / (2 * (1/8 : ℝ))) / 2 * 2 from by ring]
+      field_simp
+    have hposr : (0 : ℝ) < 1 / (2 * (1/8 : ℝ)) := by norm_num
+    rw [h2T, Real.exp_neg, Real.exp_log hposr]
+    field_simp
+  rw [hval] at hmono
+  have hstep := k2_cont_tv_eq s
+  linarith
+
+/-- **The closed forms beside the antitone instance** (consistency:
+the instance reads `ln 2/2 ≤ ln 4/2`, both sides pinned) — the
+antitonicity is not vacuous on the fixture. -/
+theorem k2_contMixingTimeFrom_values :
+    contMixingTimeFrom k2Adj 0 (1/4) = Real.log 2 / 2 ∧
+      contMixingTimeFrom k2Adj 0 (1/8) = Real.log 4 / 2 := by
+  constructor
+  · rw [k2_contMixingTimeFrom_eq _ (by norm_num) (by norm_num)]
+    congr 1
+    norm_num
+  · rw [k2_contMixingTimeFrom_eq _ (by norm_num) (by norm_num)]
+    congr 1
+    norm_num
+
+/-- On the regular triangle the conjugator is the scalar `√2`:
+`√D *ᵥ g = √2 • g`. -/
+theorem tri_degreeSqrt_mulVec (g : Fin 3 → ℝ) :
+    degreeSqrt triAdj *ᵥ g = Real.sqrt 2 • g := by
+  funext i
+  rw [degreeSqrt_mulVec_apply, triAdj_deg_eq, Pi.smul_apply, smul_eq_mul]
+
+/-- The centered continuous-time density on the triangle is the pure
+`3/2`-mode at every time: `h_t − 1 = e^{−3t/2}·(2, −1, −1)` — the
+conjugation shift through the scalar `√2`, the eigenmode engine at
+`3/2`. -/
+theorem tri_contWalkDensity_sub_one (t : ℝ) :
+    contWalkDensity triAdj t 0 - 1 = Real.exp (-(t * (3/2 : ℝ))) • triG := by
+  have hc : walkDensity triAdj 0 0 - 1 = triG := tri_centered_density
+  have h1 := degreeSqrt_mulVec_contWalkDensity_sub_one triAdj triAdj_deg_pos t 0
+  rw [tri_degreeSqrt_mulVec, tri_degreeSqrt_mulVec, hc] at h1
+  have hmode : normalizedHeatKernel triAdj t *ᵥ (Real.sqrt 2 • triG)
+      = Real.exp (-(t * (3/2 : ℝ))) • (Real.sqrt 2 • triG) := by
+    rw [normalizedHeatKernel]
+    refine exp_mulVec_eq_smul_of_mulVec_eq_smul _ _ _ ?_
+    rw [Matrix.neg_mulVec, Matrix.smul_mulVec_assoc, Matrix.mulVec_smul,
+      tri_lapsym_mulVec_triG_QA]
+    funext i
+    simp only [Pi.neg_apply, Pi.smul_apply, smul_eq_mul]
+    ring
+  rw [hmode] at h1
+  funext i
+  have h := congrFun h1 i
+  simp only [Pi.sub_apply, Pi.smul_apply, smul_eq_mul] at h
+  rw [← mul_left_comm (Real.sqrt 2) (Real.exp (-(t * (3/2 : ℝ)))) (triG i)] at h
+  show contWalkDensity triAdj t 0 i - 1
+      = Real.exp (-(t * (3/2 : ℝ))) * triG i
+  exact mul_left_cancel₀ (show (Real.sqrt 2 : ℝ) ≠ 0 by norm_num) h
+
+/-- **The exact TV value on the triangle at every time**:
+`TV(ν_t, π) = (2/3)·e^{−3t/2}` — the law's deviations are
+`e^{−3t/2}(2/3, −1/3, −1/3)`. -/
+theorem tri_cont_tv_eq (t : ℝ) :
+    tvDistance (contWalkDistribution triAdj t 0) (stationaryVec triAdj)
+      = (2/3) * Real.exp (-(t * (3/2 : ℝ))) := by
+  have hterm : ∀ i : Fin 3,
+      contWalkDistribution triAdj t 0 i - stationaryVec triAdj i
+        = Real.exp (-(t * (3/2 : ℝ))) * triG i / 3 := by
+    intro i
+    have h := congrFun (tri_contWalkDensity_sub_one t) i
+    rw [Pi.sub_apply, Pi.one_apply, Pi.smul_apply, smul_eq_mul] at h
+    have hcd : contWalkDensity triAdj t 0 i
+        = 1 + Real.exp (-(t * (3/2 : ℝ))) * triG i := by linarith
+    show stationaryVec triAdj i * contWalkDensity triAdj t 0 i
+        - stationaryVec triAdj i
+      = Real.exp (-(t * (3/2 : ℝ))) * triG i / 3
+    rw [tri_pi_QA i, hcd]
+    ring
+  have habs : ∀ i : Fin 3,
+      |contWalkDistribution triAdj t 0 i - stationaryVec triAdj i|
+        = (Real.exp (-(t * (3/2 : ℝ))) / 3) * |triG i| := by
+    intro i
+    rw [hterm i, show Real.exp (-(t * (3/2 : ℝ))) * triG i / 3
+        = (Real.exp (-(t * (3/2 : ℝ))) / 3) * triG i from by ring,
+      abs_mul, abs_of_nonneg (by positivity)]
+  have hsumG : ∑ i, |triG i| = 4 := by
+    simp only [triG, Fin.sum_univ_three, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.cons_val_two, Matrix.head_cons]
+    norm_num
+  rw [tvDistance, Finset.sum_congr rfl fun i _ => habs i, ← Finset.mul_sum,
+    hsumG]
+  ring
+
+/-- **The decay-form ceiling instance on the triangle** at the pinned
+gap `3/2`. -/
+theorem tri_cont_tv_le (t : ℝ) (ht : 0 ≤ t) :
+    tvDistance (contWalkDistribution triAdj t 0) (stationaryVec triAdj)
+      ≤ (1/2) * Real.exp (-(t * secondEval triL triH (by norm_num)))
+        * Real.sqrt ((stationaryVec triAdj 0)⁻¹ - 1) :=
+  contWalkDistribution_tvDistance_le_of_decay triAdj triAdj_isSymm
+    triAdj_nonneg triAdj_deg_pos (by norm_num) ht 0
+
+/-- **The honest Cauchy–Schwarz slack pinned**: the triangle's exact TV
+value `(2/3)e^{−3t/2}` against the ceiling's `(1/2)√2·e^{−3t/2}` —
+`(2/3) ≤ √2/2`, strict (equality in the conversion needs `|h − 1|`
+constant, which fails on the triangle). -/
+theorem tri_cont_tv_slack_QA (t : ℝ) :
+    (2/3) * Real.exp (-(t * (3/2 : ℝ)))
+      ≤ (1/2) * Real.exp (-(t * secondEval triL triH (by norm_num)))
+        * Real.sqrt ((stationaryVec triAdj 0)⁻¹ - 1) := by
+  have h23 : (2/3 : ℝ) ≤ (1/2) * Real.sqrt 2 := by
+    have h43 : (4/3 : ℝ) ≤ Real.sqrt 2 :=
+      Real.le_sqrt_of_sq_le (by norm_num : ((4/3 : ℝ))^2 ≤ 2)
+    linarith
+  rw [tri_secondEval_QA, tri_pi_QA 0,
+    show ((1/3 : ℝ))⁻¹ - 1 = 2 from by norm_num]
+  calc (2/3) * Real.exp (-(t * (3/2 : ℝ)))
+      ≤ (1/2) * Real.sqrt 2 * Real.exp (-(t * (3/2 : ℝ))) :=
+        mul_le_mul_of_nonneg_right h23 (Real.exp_nonneg _)
+    _ = (1/2) * Real.exp (-(t * (3/2 : ℝ))) * Real.sqrt 2 := by ring
+
+/-- **The `t = 0` join**: the continuous walk law at time `0` is the
+discrete walk's initial law `(1, 0, 0)`, through the theorem and raw. -/
+theorem tri_contWalkDistribution_zero_QA :
+    contWalkDistribution triAdj 0 0 = ![1, 0, 0] := by
+  rw [contWalkDistribution_zero triAdj triAdj_deg_pos 0]
+  funext i
+  fin_cases i
+  all_goals simp [walkDistribution_zero, Pi.single_apply]
+
+end ContMixingTime
+
+/-!
+### The Poisson bridge (2026-09-01, `proposals/continuous-time-chi-square-mixing.md`)
+
+The Poissonization identity's and the comparability's QA: the `K₂`
+periodic-chain fence (the discrete TV distance is `1/2` at every time —
+no discrete mixing certificate exists, and no reverse comparability can
+hold), the `t = 0` mixture corner, and the triangle's exact closed forms
+(`TV_disc(m) = (2/3)·2^{−m}` by the `triG` eigenroute) with both theorem
+instances at `t = 8`, `m = 2`.
+-/
+
+section PoissonBridge
+
+/-! ### `K₂`: the periodic chain never mixes in discrete time -/
+
+/-- The `K₂` walk matrix is the swap: `Pᵀ² = 1`. -/
+theorem k2_walk_pow_two_QA :
+    (walkTransitionMatrix k2Adj)ᵀ ^ 2 = 1 := by
+  ext i j
+  simp only [pow_two, Matrix.mul_apply, Matrix.transpose_apply,
+    walkTransitionMatrix_apply, k2Adj_apply, k2Adj_deg_eq,
+    Fin.sum_univ_two]
+  fin_cases i <;> fin_cases j <;> norm_num
+
+/-- The `K₂` law is 2-periodic: `ν_{m+2} = ν_m`. -/
+theorem k2_dist_two_step_QA (m : ℕ) :
+    walkDistribution k2Adj (m + 2) 0 = walkDistribution k2Adj m 0 := by
+  rw [walkDistribution_add k2Adj m 2 0, k2_walk_pow_two_QA,
+    Matrix.one_mulVec]
+
+/-- The start point mass as a vector literal. -/
+theorem k2_even_law_QA :
+    (Pi.single 0 (1 : ℝ) : Fin 2 → ℝ) = ![1, 0] := by
+  funext i
+  fin_cases i <;> simp [Pi.single_apply]
+
+/-- The even-time laws are the start point mass. -/
+theorem k2_dist_even_QA (m : ℕ) :
+    walkDistribution k2Adj (2 * m) 0 = ![1, 0] := by
+  induction m with
+  | zero =>
+    rw [Nat.mul_zero, walkDistribution_zero, k2_even_law_QA]
+  | succ m ih =>
+    rw [show 2 * (m + 1) = 2 * m + 2 from (Nat.mul_succ 2 m).symm,
+      k2_dist_two_step_QA (2 * m), ih]
+
+/-- One step of the adjoint walk swaps the point masses. -/
+theorem k2_swap_law_QA :
+    (walkTransitionMatrix k2Adj)ᵀ *ᵥ ![1, 0] = ![0, 1] := by
+  funext i
+  fin_cases i
+  all_goals simp [walkTransitionMatrix, deg, k2Adj, Matrix.mulVec,
+    Matrix.dotProduct, Fin.sum_univ_two,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+/-- The odd-time laws are the opposite point mass. -/
+theorem k2_dist_odd_QA (m : ℕ) :
+    walkDistribution k2Adj (2 * m + 1) 0 = ![0, 1] := by
+  rw [walkDistribution_add k2Adj (2 * m) 1 0, k2_dist_even_QA m, pow_one,
+    k2_swap_law_QA]
+
+/-- **The discrete TV distance on `K₂` is `1/2` at every time** — the
+walk oscillates between the two point masses forever. -/
+theorem k2_disc_tv_eq_QA (m : ℕ) :
+    tvDistance (walkDistribution k2Adj m 0) (stationaryVec k2Adj)
+      = 1/2 := by
+  rcases Nat.even_or_odd m with ⟨k, hk⟩ | ⟨k, hk⟩
+  · rw [hk, show k + k = 2 * k from (Nat.two_mul k).symm, k2_dist_even_QA k,
+      tvDistance]
+    norm_num [k2_pi_QA, Fin.sum_univ_two, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.head_cons, neg_sub, abs_of_neg,
+      abs_of_nonneg]
+  · rw [hk, k2_dist_odd_QA k, tvDistance]
+    norm_num [k2_pi_QA, Fin.sum_univ_two, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.head_cons, neg_sub, abs_of_neg,
+      abs_of_nonneg]
+
+/-- **The periodic-chain fence**: no discrete mixing certificate exists
+on `K₂` — the transfer corollary's hypothesis set is empty here at every
+threshold below `1/2`. The recorded hazard ("the non-lazy discrete walk
+never mixes on periodic chains") as a witness. -/
+theorem k2_no_discrete_mixing_QA :
+    ¬ ∃ m : ℕ, ∀ k : ℕ, m ≤ k →
+      tvDistance (walkDistribution k2Adj k 0) (stationaryVec k2Adj)
+        ≤ 1/4 := by
+  intro h
+  obtain ⟨m, hm⟩ := h
+  have hbot := hm m (Nat.le_refl m)
+  rw [k2_disc_tv_eq_QA m] at hbot
+  norm_num at hbot
+
+/-- **The reverse comparability is dead**: at time `t = 2` the
+continuous TV distance is already `e^{−4}/2 < 1/4`, while the discrete
+TV distance is `1/2` at *every* time — no function of the continuous TV
+distance can bound the discrete one. The comparability's one-sidedness
+made a witness. -/
+theorem k2_reverse_comparability_QA :
+    ∀ m : ℕ,
+      tvDistance (contWalkDistribution k2Adj 2 0) (stationaryVec k2Adj)
+        + 1/4
+        < tvDistance (walkDistribution k2Adj m 0) (stationaryVec k2Adj) := by
+  intro m
+  have h2e : (2 : ℝ) < Real.exp 1 := by
+    have h := Real.add_one_lt_exp (by norm_num : (1 : ℝ) ≠ 0)
+    linarith
+  have h16 : (16 : ℝ) < Real.exp 4 := by
+    have h2e4 : (2 : ℝ) < Real.exp 4 :=
+      lt_of_le_of_lt (le_of_lt h2e)
+        (Real.exp_lt_exp.mpr (by norm_num : (1 : ℝ) < 4))
+    have hp := pow_lt_pow_left₀ h2e (by norm_num : (0 : ℝ) ≤ 2)
+      (by norm_num : (4 : ℕ) ≠ 0)
+    rw [show ((Real.exp 1 : ℝ)) ^ 4 = Real.exp 4 from by
+      rw [← Real.exp_nat_mul]
+      ring] at hp
+    norm_num at hp
+    exact hp
+  have hinv : Real.exp (-4) < 1 / 16 := by
+    rw [Real.exp_neg, one_div]
+    exact (inv_lt_inv₀ (Real.exp_pos 4)
+      (by norm_num : (0 : ℝ) < 16)).mpr h16
+  rw [k2_cont_tv_eq 2, k2_disc_tv_eq_QA m,
+    show -(2 * 2) = -(4 : ℝ) from by norm_num]
+  linarith
+
+/-- **The `t = 0` corner**: the Poisson mixture collapses to the initial
+law — `poissonWeight 0` is the point mass at `k = 0`. -/
+theorem k2_poisson_zero_corner_QA :
+    (fun i => ∑' k, poissonWeight 0 k * walkDistribution k2Adj k 0 i)
+      = walkDistribution k2Adj 0 0 := by
+  funext i
+  rw [tsum_eq_single 0 (fun k hk => by
+    unfold poissonWeight
+    rw [zero_pow hk]
+    simp)]
+  unfold poissonWeight
+  norm_num
+
+/-! ### The triangle: exact closed forms and both theorem instances -/
+
+/-- `triG` is a `−1/2`-eigenvector of the triangle walk matrix. -/
+theorem tri_walk_eigen_QA :
+    walkTransitionMatrix triAdj *ᵥ triG = -(1/2 : ℝ) • triG := by
+  funext i
+  fin_cases i <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three, triG,
+      walkTransitionMatrix_apply, triAdj_apply, triAdj_deg_eq] <;>
+    norm_num
+
+/-- The walk powers act on `triG` by the geometric factor. -/
+theorem tri_pow_mulVec_triG_QA (m : ℕ) :
+    (walkTransitionMatrix triAdj ^ m) *ᵥ triG
+      = (-(1/2 : ℝ)) ^ m • triG := by
+  induction m with
+  | zero => simp
+  | succ m ih =>
+    rw [pow_succ', ← Matrix.mulVec_mulVec, ih, Matrix.mulVec_smul,
+      tri_walk_eigen_QA, smul_smul, ← pow_succ]
+
+/-- The centered discrete density at every time: the single decaying
+mode with its sign alternation. -/
+theorem tri_centered_walkDensity_sub_one_QA (m : ℕ) (i : Fin 3) :
+    walkDensity triAdj m 0 i - 1 = (-(1/2 : ℝ)) ^ m * triG i := by
+  have h0 : walkDensity triAdj 0 0 - 1 = triG := tri_centered_density
+  have h := congrFun (walkDensity_sub_one triAdj triAdj_isSymm
+    triAdj_deg_pos m 0) i
+  show (walkDensity triAdj m 0 - 1) i = _
+  rw [h, h0, tri_pow_mulVec_triG_QA m]
+  simp
+
+/-- **The discrete TV closed form on the triangle**:
+`TV_disc(m) = (2/3)·2^{−m}` at every time. -/
+theorem tri_disc_tv_eq_QA (m : ℕ) :
+    tvDistance (walkDistribution triAdj m 0) (stationaryVec triAdj)
+      = (2/3) * (1/2 : ℝ) ^ m := by
+  have hdev : ∀ i : Fin 3,
+      walkDistribution triAdj m 0 i - stationaryVec triAdj i
+        = (-(1/2 : ℝ)) ^ m * (triG i / 3) := by
+    intro i
+    have hπ := tri_pi_QA i
+    have hc := tri_centered_walkDensity_sub_one_QA m i
+    have hlaw : walkDistribution triAdj m 0 i
+        = stationaryVec triAdj i * walkDensity triAdj m 0 i := by
+      rw [walkDensity]
+      field_simp
+    rw [hlaw, hπ,
+      show (1 : ℝ) / 3 * walkDensity triAdj m 0 i - 1 / 3
+        = 1 / 3 * (walkDensity triAdj m 0 i - 1) from by ring,
+      hc]
+    ring
+  have habs : ∀ i : Fin 3,
+      |walkDistribution triAdj m 0 i - stationaryVec triAdj i|
+        = (1/2 : ℝ) ^ m * |triG i| / 3 := by
+    intro i
+    rw [hdev i, abs_mul, abs_pow,
+      show |(-(1/2 : ℝ))| = 1/2 from by norm_num, abs_div,
+      abs_of_pos (by norm_num : (0 : ℝ) < 3)]
+    ring
+  rw [tvDistance, Finset.sum_congr rfl fun i _ => habs i,
+    Fin.sum_univ_three]
+  have hentries : |triG 0| = 2 ∧ |triG 1| = 1 ∧ |triG 2| = 1 := by
+    simp [triG]
+  obtain ⟨h0, h1, h2⟩ := hentries
+  rw [h0, h1, h2]
+  ring
+
+/-- The exact partial Poisson weight the triangle instance consumes:
+`∑_{k<2} poissonWeight 8 k = 9·e^{−8}`. -/
+theorem tri_poisson_range_two_sum_QA :
+    ∑ k in Finset.range 2, poissonWeight 8 k = 9 * Real.exp (-8) := by
+  rw [Finset.sum_range_succ, Finset.sum_range_one]
+  norm_num [poissonWeight]
+  ring
+
+/-- **The comparability instance on the triangle** at `t = 8`, `m = 2`,
+in closed form: `TV_cont(8) ≤ 9e^{−8} + 1/6`. -/
+theorem tri_comparability_closed_QA :
+    tvDistance (contWalkDistribution triAdj 8 0) (stationaryVec triAdj)
+      ≤ 9 * Real.exp (-8) + 1/6 := by
+  have h := contWalkDistribution_tvDistance_add_le triAdj triAdj_isSymm
+    triAdj_nonneg triAdj_deg_pos (by norm_num : (0 : ℝ) ≤ 8) 2 0
+  have h2 : (2/3 : ℝ) * (1/2)^2 = 1/6 := by norm_num
+  rw [tri_poisson_range_two_sum_QA, tri_disc_tv_eq_QA 2, h2] at h
+  exact h
+
+/-- **Both sides exact, the domination honest**: at the instance's
+parameters the continuous TV is exactly `(2/3)e^{−12}` (the delivered
+`tri_cont_tv_eq`), the discrete exactly `1/6`, and the comparability's
+tail-plus-bound dominates with visible slack. -/
+theorem tri_comparability_both_sides_QA :
+    tvDistance (contWalkDistribution triAdj 8 0) (stationaryVec triAdj)
+        = (2/3) * Real.exp (-12)
+      ∧ tvDistance (walkDistribution triAdj 2 0) (stationaryVec triAdj)
+        = 1/6
+      ∧ (2/3) * Real.exp (-12) ≤ 9 * Real.exp (-8) + 1/6 := by
+  refine ⟨?_, ?_, ?_⟩
+  · rw [tri_cont_tv_eq 8,
+    show -(8 * (3/2 : ℝ)) = -(12 : ℝ) from by norm_num]
+  · rw [tri_disc_tv_eq_QA 2]
+    norm_num
+  · have hmono : Real.exp (-12) ≤ Real.exp (-8) :=
+      Real.exp_le_exp.mpr (by norm_num)
+    have h1 : Real.exp (-8) ≤ 1 := by
+      have h := Real.exp_le_exp.mpr (by norm_num : (-8 : ℝ) ≤ 0)
+      rwa [Real.exp_zero] at h
+    nlinarith [hmono, h1,
+      Real.exp_nonneg (-12), Real.exp_nonneg (-8)]
+
+/-- **The transfer corollary instance on the triangle**: the discrete
+certificate `TV_disc(k) ≤ 1/6` for all `k ≥ 2` and the tail bound
+`9e^{−8} ≤ 1/24` (from `2 < e`, `e⁸ ≥ 2⁸ = 256 > 216`) give
+`TV_cont(8) ≤ 5/24`. -/
+theorem tri_mixing_transfer_QA :
+    tvDistance (contWalkDistribution triAdj 8 0) (stationaryVec triAdj)
+      ≤ 5/24 := by
+  have h2e : (2 : ℝ) < Real.exp 1 := by
+    have h := Real.add_one_lt_exp (by norm_num : (1 : ℝ) ≠ 0)
+    linarith
+  have h256 : (256 : ℝ) ≤ Real.exp 8 := by
+    have h2e8 : (2 : ℝ) < Real.exp 8 :=
+      lt_of_le_of_lt (le_of_lt h2e)
+        (Real.exp_lt_exp.mpr (by norm_num : (1 : ℝ) < 8))
+    have hp := pow_lt_pow_left₀ h2e (by norm_num : (0 : ℝ) ≤ 2)
+      (by norm_num : (8 : ℕ) ≠ 0)
+    rw [show ((Real.exp 1 : ℝ)) ^ 8 = Real.exp 8 from by
+      rw [← Real.exp_nat_mul]
+      ring] at hp
+    norm_num at hp
+    linarith
+  have hfinal :
+      tvDistance (contWalkDistribution triAdj 8 0) (stationaryVec triAdj)
+        ≤ 1/6 + 1/24 := by
+    refine contWalkDistribution_tvDistance_le_of_discreteMixing triAdj
+      triAdj_isSymm triAdj_nonneg triAdj_deg_pos
+      (by norm_num : (0 : ℝ) ≤ 8) 2 0 (ε₁ := 1/6) (ε₂ := 1/24) ?_ ?_
+    · intro k hk
+      rw [tri_disc_tv_eq_QA k]
+      have h4 : (4 : ℝ) ≤ (2 : ℝ) ^ k := by
+        have hp := pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) hk
+        norm_num at hp
+        exact hp
+      have hpos : (0 : ℝ) < (2 : ℝ) ^ k :=
+        pow_pos (by norm_num : (0 : ℝ) < 2) k
+      have hinv : (1/2 : ℝ) ^ k = 1 / ((2 : ℝ) ^ k) :=
+        _root_.one_div_pow 2 k
+      have hkey : (1 : ℝ) / ((2 : ℝ) ^ k) ≤ 1 / 4 :=
+        (one_div_le_one_div hpos (by norm_num : (0 : ℝ) < 4)).mpr h4
+      rw [hinv]
+      linarith
+    · rw [tri_poisson_range_two_sum_QA, Real.exp_neg, ← one_div,
+        ← div_eq_mul_one_div, div_le_iff₀ (Real.exp_pos 8)]
+      linarith
+  linarith
+
+/-- **The anti-monotonicity instance**: the discrete TV decreases from
+`2` to `3` on the triangle (strictly: `1/6 → 1/12`). -/
+theorem tri_tv_anti_QA :
+    tvDistance (walkDistribution triAdj 3 0) (stationaryVec triAdj)
+      ≤ tvDistance (walkDistribution triAdj 2 0) (stationaryVec triAdj)
+      ∧ tvDistance (walkDistribution triAdj 3 0) (stationaryVec triAdj)
+        = 1/12 := by
+  refine ⟨?_, by rw [tri_disc_tv_eq_QA 3]; norm_num⟩
+  have h := walkDistribution_tvDistance_anti triAdj triAdj_isSymm
+    triAdj_nonneg triAdj_deg_pos 2 1 0
+  have h3 : 2 + 1 = 3 := rfl
+  rwa [h3] at h
+
+end PoissonBridge
 
 end SpectralGraphTheory.QA

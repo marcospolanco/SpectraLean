@@ -8466,3 +8466,192 @@ consumer gate, the π-weighted twin, the operator-gated items).
 **Next handoff:** spike first (`wip/poisson_spike.lean`) to zero errors/warnings before any shelf edit.
 
 **Operator closing note (commit steward, 2026-09-01):** the run landed real, complete Lean work (the Poissonization identity `hasSum_poisson_walkDensity`, the Poisson weight package, the TV≤1/contraction/monotonicity toolkit, `walkDistribution_add`, `tsum_eq_range_add`, `tvDistance_tsum_le`, and the corresponding QA section in `Mixing_QA.lean`) but exited before writing its terminal entry or completing the records ladder it planned above. Independently re-verified rather than trusting the plan: `lake build` clean; `check_build_completeness.py` — 133 source files, 133 fresh artifacts, 0 stale, 0 missing; `#print axioms` via a fresh `wip/verify_batch5.lean` on all 38 new declarations across `Mixing.lean`/`Heat.lean` from this and the three preceding same-day sub-deliveries — every one exactly `propext, Classical.choice, Quot.sound`; `lint_axioms` unchanged at 5; `check_refutation_independence`, `check_public_reachability`, `check_citations`, `check_markdown_links` all pass; `sorry`/`admit` sweep clean. The scoreboard was stale (file on disk still read 3401 despite the actual source already at 3478 QA declarations) and has been regenerated; both map files' stat stamps were stale at 3459 and have been corrected to 3478 with the SVG regenerated; `README.md` and the radar's QA-axis row corrected to match. Not done here: the Poisson bridge's own delivery record (proposal status update in `continuous-time-chi-square-mixing.md`, a `proposals/README.md` Delivered row, `index/map/spectral_graph.md` rows, and a full radar narrative for this specific delivery) was left unwritten rather than fabricated by the operator — this is real, verified work, but its narrative record is still owed by a future pass.
+
+## 2026-09-01T05:46:37Z — The Poisson bridge's owed records ladder (in-progress)
+
+**Run:** `20260901T054637Z-run-1`  
+**Session:** `ses_fa4802e14ffeLPEwm9nmKEyckS`  
+**Status:** in-progress  
+**Milestone:** Complete the records ladder owed by the prior run's
+Poisson-bridge delivery (`20260901T024900Z-run-1` landed the Lean —
+the Poissonization identity, the TV contraction toolkit, the
+continuous↔discrete comparability, the transfer corollary, plus QA
+3459 → 3478 — and the operator independently re-verified the Lean
+before committing, leaving the narrative record explicitly owed by a
+future pass). Records-only: re-verify every claimed fact in this run
+before writing it; no new Lean, no status-tier change, zero axiom
+dispositions touched.
+
+**Next handoff:** re-run the verification ladder (targeted builds, the
+Poisson axcheck, the full script ladder), then the proposal's
+follow-on delivery record, `proposals/README.md`'s Delivered row,
+`index/map/spectral_graph.md` rows, the radar QA-axis narrative, the
+scoreboard verification row, this plan, and the terminal entry.
+
+## 2026-09-01T05:52:50Z — The Poisson bridge's records ladder completed (terminal)
+
+**Run:** `20260901T054637Z-run-1`  
+**Session:** `ses_fa4802e14ffeLPEwm9nmKEyckS`  
+**Status:** completed  
+**Milestone:** The prior run's Poisson-bridge delivery (the
+Poissonization identity, the TV contraction toolkit, the
+continuous↔discrete comparability, the discrete-certificate transfer
+corollary; QA 3459 → 3478) completed with the narrative record its
+run exited before writing — the operator's explicitly-owed list,
+discharged in full after re-verifying every claimed fact in this run.
+
+**Changes:** records only, no Lean source changes (the prior run's
+Lean stands as committed in `20a8d93`; the one wip edit completed
+`wip/poisson_axcheck.lean` to full section coverage — the two `K₂`
+vector-literal helpers added, 40 → 42 audited). The records: the
+proposal's second follow-on delivery record (shelf + QA content,
+verification, remaining risk) with the Deferred bullet resolved (the
+comparability delivered; the discrete `t_mix` object's gate reduced to
+a plain follow-on choice — its would-be witness condition `hmix` now
+on the shelf); `proposals/README.md`'s Delivered row;
+`index/map/spectral_graph.md`'s new Poisson-bridge section (15 rows:
+the `Heat.lean` helpers, the Poisson weight package, the identity, the
+toolkit, the comparability, the transfer corollary); the radar's
+axis-5 narrative extended with both the continuous-mixing-time and
+Poisson-bridge deliveries (the row had predated both) and the QA-axis
+"pending" note resolved with the fuller narrative; the scoreboard's
+verification row (dated 2026-09-01, recording this run's own ladder);
+README's walks-and-mixing module row extended with the Poisson bridge;
+this plan and this log.
+
+**Verification (this run's own, all before recording): `#print axioms`
+via the completed `wip/poisson_axcheck.lean` — all 42 audited
+declarations (23 shelf + 19 QA) exactly `propext, Classical.choice,
+Quot.sound`, zero contact with any admitted axiom; full `lake build` ✔
+immediately followed by `check_build_completeness.py` — 133 source
+files, 133 fresh artifacts, 0 stale, 0 missing, exit 0; `lint_axioms`
+exit 0 (5 axioms, both PF findings allowlisted-confirmed);
+`check_refutation_independence` OK (10 tags, 5 current axioms);
+`check_public_reachability` OK (63 repo modules); `check_citations`
+("All axioms have proper citations!"); `check_markdown_links` clean;
+scoreboard regenerated (3478/5/0, idempotent, hand verification row
+preserved); `check_scaffold_map_freshness` exit 0 after the records
+(45 stations, no proposal status header changed — a follow-on record,
+no tier change).**
+
+**Remaining risk:** none owed — records-only over already-verified
+Lean; no axiom disposition changed, no public statement changed,
+nothing committed. The comparability is one-sided by design (the `K₂`
+fence is the proof that no reverse bound exists); the discrete `t_mix`
+object stays undefined with its consumer named on the shelf.
+
+**Next handoff:** the Active table still holds no rows above the
+human-decision gates; a next run falls through to the center-out
+policy. The natural candidates, in the recorded order: the discrete
+`t_mix` object (newly unblocked — a plain follow-on choice, consumer
+on the shelf), log-Sobolev (axis 3's remaining named gap,
+consumer-gated), the over-squashing floor (consumer-gated), and the
+operator-gated items (Python bridge, matrix master-bound Step 2).
+
+## 2026-09-01T07:02:42Z — The discrete t_mix object: walkMixingTimeFrom and its package (in-progress)
+
+**Run:** `20260901T070242Z-run-1`  
+**Session:** `ses_fa440e80cffewormjlH0fJOv8F`  
+**Status:** in-progress  
+**Milestone:** The TV-conversion proposal's deferred discrete `t_mix` object — the standing handoff's first-named plain follow-on choice, its consumer gate discharged by the Poisson-bridge delivery (the transfer corollary's `hmix` clause is exactly the object's witness condition). The package: `walkMixingTimeFrom A x ε := sInf {t : ℕ | ∀ s ≥ t, TV_disc(s) ≤ ε}` (LPW ch. 20's per-start reading, the discrete twin of the delivered `contMixingTimeFrom`), the certificate interface `_le_of_cert`, the attainment fact `_spec` (by discrete TV monotonicity the witness set is upward closed, so the sInf is a minimum — a fact the continuous twin cannot have), the spectral ceiling `_le_of_connected` (`t_mix ≤ ⌈log(√C/(2ε))/log(1/r)⌉` at the depth-form TV certificate's own hypothesis set `0 < r < 1` — honest: the non-lazy walk never mixes on periodic chains), ε-antitonicity, and the bridge composition `contWalkDistribution_tvDistance_le_of_walkMixingTime` (the named consumer: continuous TV ≤ ε₁ + ε₂ with `hmix` discharged by the object, only the Poisson lower-tail hypothesis left to the caller). Zero new axioms planned (count stays 5; pure composition of proved engines). Placement: `Oversmoothing.lean` — the ceiling's certificate engine `walkDistribution_tvDistance_le_of_depth` lives there and its imports already point toward `Mixing.lean`'s transfer corollary (zero duplication, zero import changes); QA in `Mixing_QA.lean`'s new `DiscMixingTime` section (exact triangle closed forms pinned in both directions, the ceiling attained exactly at `ε = √2/4`, the K₂ periodicity fence at the object level, the bridge instance, the antitone instance). The previous runs' uncommitted deliveries preserved.
+
+**Changes (planned):** spike `wip/dtmix_spike.lean` first (shelf declarations + the full QA section + the `#print axioms` audit, iterated to zero errors/warnings before any shelf edit); then the `Oversmoothing.lean` section and `Mixing_QA.lean` section; then the records ladder (proposal follow-on record in `total-variation-mixing-conversion.md` — the object is that proposal's deferred item — with the Poisson-bridge record cited as the consumer discharge, `proposals/README.md` Delivered row, README counts, radar QA axis, `index/map/spectral_graph.md` rows, scoreboard, both map tables + SVG, execution plan, this log).
+
+**Next handoff:** spike first; resolve the `sInf`-on-`Set ℕ` API facts (`csInf_mem` availability, `sInf ∅` convention) before pinning the shelf statement shapes.
+
+## 2026-09-01T08:01:57Z — The discrete t_mix object delivered: walkMixingTimeFrom and its package (terminal)
+
+**Run:** `20260901T070242Z-run-1`  
+**Session:** `ses_fa440e80cffewormjlH0fJOv8F`  
+**Status:** completed  
+**Milestone:** The TV-conversion proposal's deferred discrete `t_mix` object — the standing handoff's first-named plain follow-on choice, its consumer gate discharged by the Poisson-bridge delivery (the transfer corollary's `hmix` clause is exactly the object's witness condition) — delivered with the consumer loop closed in *both* directions: the object's attainment specification now discharges that `hmix` clause. Zero new axioms (count stays 5), pure hard crust.
+
+**Changes:** the shelf — `Oversmoothing.lean`'s new discrete-mixing-time section (7 proved declarations, placed beside its certificate engine `walkDistribution_tvDistance_le_of_depth` with imports already pointing toward `Mixing.lean`'s transfer corollary — zero duplication, zero import changes): **the object** `walkMixingTimeFrom A x ε := sInf {t : ℕ | ∀ s ≥ t, TV_disc(s) ≤ ε}` (LPW ch. 20's per-start reading, the discrete twin of `contMixingTimeFrom`); the `bddBelow`/`_le_of_cert` certificate interface; **the attainment specification `walkMixingTimeFrom_spec`** (the discrete object's own advantage: `ℕ` is well-ordered so the witness infimum is a *member* — `csInf_mem`, no monotonicity argument needed — and membership is the uniform bound, the one-liner that composes with the transfer corollary); **the spectral ceiling** `t_mix(ε) ≤ ⌈log(√C/(2ε))/log(1/r)⌉` at the depth-form TV certificate's own `0 < r < 1` hypothesis set (two-line `Nat.le_ceil` composition; the strictness honest and load-bearing — periodic chains admit no such certificate); ε-antitonicity; and **the bridge composition** `contWalkDistribution_tvDistance_le_of_walkMixingTime` (the named consumer: a Poisson lower-tail bound below `t_mix(ε₁)` gives `TV_cont(t) ≤ ε₁ + ε₂`, the discrete certificate supplied by the object itself). The QA — `Mixing_QA.lean`'s new `DiscMixingTime` section (+9, 3478 → 3487): **the exact triangle closed forms `t_mix(1/3) = 1`, `t_mix(1/6) = 2`, `t_mix(1/12) = 3`, each pinned in both directions** (certificate interface above, attainment specification below — both load-bearing on the object's exact shape), the antitone instance at exact values `2 ≤ 3`, **the ceiling attained exactly** at `ε = √2/4` (threshold ratio exactly the power the certificate names; object = ceiling's right side = `1`), the ceiling computed with honest slack at `ε = 1/6` (`3` against the true `2`, via `4 < 3√2 ≤ 8`), **the `K₂` junk corner pinned and fenced** (`= 0` beside the no-certificate fence — `sInf ∅ = 0` looks anti-conservative, and the ceiling's undischargeable `0 < r < 1` on `K₂` is exactly why no theorem instantiates there), and the bridge instance re-deriving the hand-certified transfer bound `TV_cont(8) ≤ 5/24` with no hand-supplied certificate. Records: the proposal's follow-on delivery record (consumer-loop closure, corner analysis, eight technique findings — headline: `csInf_mem` through `[WellFoundedLT ℕ]` needs no monotonicity argument because the "∀ s ≥ t" lives in the membership predicate; plus `Nat.sInf_empty`, `Nat.le_ceil`'s one-term real→natural threshold bridge, `pow_le_pow_right₀`'s un-normalized `2^1`, the `lt_div_iff₀`/`div_lt_iff₀` direction trap, the counterproductive `by norm_num` coercion bridge that normalizes goal denominators and breaks iff-side matches, the `field_simp` unconditional `ring_nf` note and its `div_eq_iff` avoidance, and `nlinarith`'s tactic-block-only syntax; the Deferred `t_mix` bullet resolved with a delivered pointer, status header untouched), `proposals/README.md` (new Delivered row), README (3487 + the walks-and-mixing row's discrete-`t_mix` extension), the radar (QA axis synced to 3487 held at 4.0; axis 5 narrative extended with the forward-extension list updated, held at 4.5), `index/map/spectral_graph.md` (seven new shelf rows, the transfer-corollary row's consumer note, the section paragraph), the scoreboard verification row, both map data tables + regenerated SVG, the QA module's purpose header, the execution plan, this log. Nothing committed; the previous runs' uncommitted deliveries preserved.
+
+**Verification:** spike first (`wip/dtmix_spike.lean` — the shelf declarations, the full QA section, and the axiom audit iterated to zero errors before any shelf edit; the QA module carries its recorded benign `Try this: ring_nf` note class, now 3 notes, the third from the copied numeric block in `tri_bridge_mix_QA`); `lake env lean` zero errors on both touched modules; explicit `lake build` targets ✔ on both; **`#print axioms` via `wip/dtmix_axcheck.lean` on all 16 audited declarations (7 shelf + 9 QA): every one exactly `propext, Classical.choice, Quot.sound` — zero contact with any admitted axiom**; **full `lake build` ✔ immediately followed by `check_build_completeness.py` — 133 source files, 133 fresh artifacts, 0 stale, 0 missing, exit 0** (after the documented single-module mtime remediation — the stale-olen QA-imports-shelf boundary recurrence); `lint_axioms` exit 0 (5, both PF findings allowlisted-confirmed); `check_refutation_independence` (10-tag clean — no tags added, nothing here touches an axiom); `check_public_reachability` clean (63 repo modules); `check_citations` ("All axioms have proper citations!"); `check_markdown_links` clean; scoreboard regenerated (**3487/5/0**, idempotent across re-runs) with the verification row added; **map-freshness exit 0** after the 3478 → 3487 stats sync in both map files and SVG regeneration (no proposal status header changed — a follow-on record, no tier change).
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no axiom disposition changed, no existing public statement changed. The submultiplicivity-class `t_mix` statements and the reverse TV → χ² calculus stay undelivered with no consumer named; the sup-over-starts uniform `t_mix` is a trivial composition left consumer-gated.
+
+**Next handoff:** the Active table still holds no rows above the human-decision gates; a next run falls through to the center-out policy. The natural candidates now: log-Sobolev (axis 3's remaining named gap, consumer-gated on an entropy inequality composing `InformationTheory.Entropy`'s Gibbs bound), the over-squashing floor (consumer-gated), and the operator-gated items (Python bridge, matrix master-bound Step 2) — or a backlog item selected on its own leverage case, as the strategy's center-out policy directs.
+
+## 2026-09-01T09:19:23Z — The spectral mixing floor: the program's first lower-bound family (in-progress)
+
+**Run:** `20260901T091923Z-run-1`  
+**Session:** `ses_fa3cb0198ffecKrcJAxHCfAK6i`  
+**Status:** in-progress  
+**Milestone:** The message-passing proposal's deferred over-squashing floor, delivered on its own named route (the exact eigen-component equality) — the mixing program's first lower-bound family and the `t_mix` objects' missing lower half. The consumer gate is discharged by the deferral's own text: the ceiling's depth certificate completed into a two-sided bracket (enough layers vs provably insufficient layers), plus the classical eigenvalue lower bound on mixing time (the delivered ceiling's standard textbook companion). Every prior mixing delivery is an upper/domination bound; this is the first direction-reversed stress test of the same proved eigenbasis substrate. Zero new axioms planned (count stays 5). Package: the distinguishing-function lemma (TV toolkit, `Mixing.lean`), the exact law-level test-function evolution at an arbitrary `L_sym` eigenpair (`Oversmoothing.lean`), the TV and χ² spectral floors (kernel-orthogonality derived from `μ ≠ 0`, no connectivity), the `t_mix` floor gate, and the log-form floor mirroring the delivered ceiling. Hand-verified fixture math first: exact attainment on `K₂` at every time (the periodic chain no ceiling reaches), exact χ² attainment on the triangle at the `triG` pair, and the log-form floor hitting all three pinned `t_mix` closed forms exactly.
+
+**Changes (planned):** spike `wip/spectralfloor_spike.lean` first (shelf declarations + full QA section + `#print axioms` audit, iterated to zero errors/warnings); then `Mixing.lean`'s TV-toolkit lemma, `Oversmoothing.lean`'s `SpectralFloor` section, `Mixing_QA.lean`'s `SpectralFloor` QA section (exact attainment both fixtures, kernel-mode refutation fence, `K₂` witness-existence fence); then the records ladder (follow-on delivery record in `proposals/message-passing-depth-mixing-bound.md` — the deferred item's home — with the consumer-loop note, `proposals/README.md` Delivered row, README counts, radar QA axis, `index/map/spectral_graph.md` rows, scoreboard, both map tables + SVG, execution plan, this log).
+
+**Next handoff:** resolve the symmetric dot-product swap lemma names for arbitrary (non-`eigvecOf`) eigenpairs in the pinned Mathlib during the spike; watch the `Real.log` strict-direction arithmetic (the ceiling's `pow_mul_le_of_log_threshold` mirrored downward).
+
+## 2026-09-01T11:27:27Z — The spectral mixing floor delivered: the program's first lower-bound family (terminal)
+
+**Run:** `20260901T091923Z-run-1`  
+**Session:** `ses_fa3cb0198ffecKrcJAxHCfAK6i`  
+**Status:** completed  
+**Milestone:** The message-passing proposal's deferred over-squashing floor, delivered on its own named route (the exact eigen-component equality) — the mixing program's first *lower-bound* family and the `t_mix` objects' missing lower half. The consumer gate discharged by naming two consumers: the oversmoothing ceiling's depth certificate completed into a two-sided bracket (enough layers vs provably insufficient), and the classical eigenvalue lower bound on mixing time (LPW ch. 12's distinguishing-statistic technique) as the delivered ceiling's textbook companion. Zero new axioms (count stays 5), pure hard crust.
+
+**Changes:** the shelf — `tvDistance_ge_half_abs_sum` (the distinguishing-function bound `|(μ−ν)(f)| ≤ 2·TV`, hypothesis-minimal) in `Mixing.lean`'s TV toolkit; `Oversmoothing.lean`'s new `SpectralFloor` section (7 proved declarations): kernel orthogonality of nonzero modes **derived** from `μ ≠ 0` (no connectivity), the stationary-pairing vanishing, **the exact law-level test-function evolution** at arbitrary `L_sym` eigenpairs (the deferred item's own engine — an equality, not a bound), **the TV floor** `(1/2)|1−μ|^t·|v x|/(√D x·c) ≤ TV` (periodic modes never decay — exactly the chains no `r < 1` ceiling reaches), **the χ² floor** `(1−μ)^{2t}(v x)²/(π x·‖v‖²) ≤ χ²`, the **`t_mix` floor gate** (witness-existence load-bearing), the strict-direction calculus twin `pow_lt_of_lt_log_div`, and **the log-form spectral floor** `⌈log(|v x|/(√D x·2εc))/log(1/|1−μ|)⌉ ≤ t_mix` mirroring the delivered ceiling's display (`hv0` honestly dropped as unneeded). The QA — `Mixing_QA.lean`'s new `SpectralFloor` section (+30, 3487 → 3517): **both floors attained exactly at every time on `K₂`** (TV `1/2`, χ² `1` — certified non-mixing on the periodic chain, tight forever), **the χ² floor attained exactly at every time on the triangle** at the `triG` eigenpair (`2·(1/4)^m` — load-bearing on the eigenpair constant: a wrong conjugation would miss the exact value), **the log-form floor hitting all three pinned `t_mix` closed forms exactly** (`1`, `2`, `3` — the two-sided depth bracket complete on one fixture: floor `2` = truth `2` ≤ ceiling `3` at `ε = 1/6`), the honest-slack TV floor values beside the truth, **two kernel-mode refutation fences** (χ² and TV forms: the genuine eigenpair `(0, ![1,1,1])` with every other ingredient satisfiable reads `1 ≤ 1/8` and `1/2 ≤ 1/6` against the pins — `μ ≠ 0` load-bearing in both metrics), and **the `K₂` witness-existence fence** (`¬∃T, ∀s ≥ T, TV ≤ 1/4` — the gate's hypothesis exactly what fails at the junk corner). Records: the proposal's follow-on delivery record (consumer discharges, corner analysis, eight technique findings — headline: `Pi.single x (1 : ℝ)` under an untyped context leaves the dependent codomain as a metavariable and the smul TC search times out; plus `rw`-no-beta under applications, the `field_simp`-then-`ring` no-goals liability, `rw`'s trailing `rfl` closing goals mid-chain, `omega`'s inability to abstract `Nat.ceil (r : ℝ)` atoms, `pow_succ`'s right-factor order, `mul_div_mul_left`'s implicit `c`, and `subst`'s elimination direction; the Deferred over-squashing bullet resolved with a delivered pointer — status header untouched), `proposals/README.md` (new Delivered row), README (3517 + the walks-and-mixing row's spectral-floor extension), the radar (QA axis synced 3487 → 3517 held at 4.0; axis 5's narrative extended, held at 4.5), `index/map/spectral_graph.md` (the Oversmoothing section's paragraph + eight new floor rows), the scoreboard verification row, both map data tables + regenerated SVG, the QA module's purpose header, the execution plan, this log. Nothing committed; the previous runs' uncommitted deliveries preserved.
+
+**Verification:** spike first (`wip/spectralfloor_spike.lean` — shelf + QA + axiom audit iterated to zero errors/zero warnings before any shelf edit); `lake env lean` clean on both touched modules; explicit `lake build` targets ✔ on both (only the module's 3 recorded pre-existing benign `ring_nf` notes — none new); **`#print axioms` via `wip/spectralfloor_axcheck.lean` on all 39 audited declarations (9 shelf + 30 QA): every one exactly `propext, Classical.choice, Quot.sound` — zero contact with any admitted axiom**; **full `lake build` ✔ immediately followed by `check_build_completeness.py` — 133 source files, 133 fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (5, both PF findings allowlisted-confirmed); `check_refutation_independence` (10-tag clean — no tags added, nothing here touches an axiom); `check_public_reachability` clean (63 repo modules); `check_citations` ("All axioms have proper citations!"); `check_markdown_links` clean; scoreboard regenerated (**3517/5/0**, idempotent across re-runs) with the verification row added; **map-freshness exit 0** after the 3487 → 3517 stats sync in both map files and SVG regeneration (no proposal status header changed — a follow-on record, no tier change).
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no axiom disposition changed, no existing public statement changed. The floors are stated at caller-certified eigenpairs with the sup bound `c` hypothesis-shaped, mirroring the ceiling family's `r` certificates; the reverse TV → χ² calculus and the submultiplicivity `t_mix` statements remain undelivered with no consumer named.
+
+**Next handoff:** the Active table still holds no rows above the human-decision gates; a next run falls through to the center-out policy. The natural candidates now: log-Sobolev (axis 3's remaining named gap, consumer-gated on an entropy inequality composing `InformationTheory.Entropy`'s Gibbs bound), the sup-over-starts uniform `t_mix` (trivial composition, consumer-gated), the operator-gated items (Python bridge, matrix master-bound Step 2) — or a backlog item selected on its own leverage case, as the strategy's center-out policy directs.
+
+## 2026-09-01T12:44:10Z — LPW's uniform t_mix with the submultiplicativity class (in-progress)
+
+**Run:** `20260901T124410Z-run-1`  
+**Session:** `ses_fa30f0038ffe1l1HcVp1rsfv3r`  
+**Status:** in-progress  
+**Milestone:** The standing handoff's two remaining plain mixing items delivered as one package: the sup-over-starts uniform `t_mix` object (`walkMixingTime` — LPW ch. 20's field-standard reading, worst start to stationarity) together with the submultiplicativity class it unlocks (`walkTVPair`/`walkTVUniform`, LPW's `d(t)`/`d̄(t)` distances, the sharp Dobrushin contraction `TV(μ(Pᵀ)ᵗ, ν(Pᵀ)ᵗ) ≤ TV(μ,ν)·d(t)` at equal masses via recentering-pairing + the shelf's distinguishing-function bound, `d(s+t) ≤ d(s)d(t)`, `d̄(s+t) ≤ d̄(s)d(t)`, the ε-escalation `d̄((k+1)t₀) ≤ d̄(t₀)d(t₀)ᵏ` and the t_mix corollary `t_mix(ε) ≤ (k+1)t₀` at `ε₀·ρᵏ ≤ ε` plus its ⌈log⌉ display twin). Consumer gates discharged by naming each other: the uniform object's consumer is the submultiplicivity class (unstatable per-start), the escalation's consumer is LPW's canonical `t_mix(1/4)`-style bridge from one certified evaluation to every ε. Zero new axioms planned (count stays 5; pure hard crust — no spectra, no connectivity anywhere in the contraction chain). Placement: `Oversmoothing.lean`'s new uniform-mixing section beside `walkMixingTimeFrom`; QA in `Mixing_QA.lean`'s new section (triangle exact-attainment pins for every statement in the package — the fixture where `d(m) = (1/2)^m`, `d̄(m) = (2/3)2^{-m}` make every inequality an equality; the uniform object pinned in both directions at `1/3` and `1/6`; the `K₂` junk-corner fence at the uniform object). The previous runs' uncommitted deliveries preserved.
+
+**Changes (planned):** spike `wip/uniformmix_spike.lean` first (shelf + full QA + `#print axioms` audit, iterated to zero errors/warnings before any shelf edit); then the shelf and QA edits; then the records ladder (follow-on delivery record in `total-variation-mixing-conversion.md`, `proposals/README.md` Delivered row, README counts, radar QA axis, `index/map/spectral_graph.md` rows, scoreboard, both map tables + SVG regeneration, execution plan, this log).
+
+**Next handoff:** resolve the finite-sup plumbing (`Finset.sup'` over `V × V` and `V` on ℝ, `Finite.exists_min` for the pairing recentering) during the spike; the Dobrushin core's sign-function identity is the step to pin first.
+
+## 2026-09-01T16:32:00Z — LPW's uniform t_mix with the submultiplicativity class: spike confirmed, landing (in-progress)
+
+**Run:** `20260901T163200Z-run-1`  
+**Session:** `ses_fa2371b66ffe2wnNHemMpFNzNl`  
+**Status:** in-progress  
+**Milestone:** Continuing the active milestone started by run
+`20260901T124410Z-run-1` (the sup-over-starts uniform `t_mix` object
+`walkMixingTime` with the submultiplicativity class
+`walkTVPair`/`walkTVUniform`/`d(s+t) ≤ d(s)d(t)`/ε-escalation — LPW
+ch. 20's field-standard worst-case-start reading, the standing
+handoff's two remaining plain mixing items as one package). This run
+found the prior run's spike `wip/uniformmix_spike.lean` complete on
+disk (1112 lines: shelf + full QA) and **verified it elaborates clean
+— `lake env lean` exit 0, zero errors, zero warnings** against the
+built uncommitted shelf. Next: the `#print axioms` audit file, then
+landing the shelf section in `Oversmoothing.lean` beside
+`walkMixingTimeFrom` and the QA section in `Mixing_QA.lean`, then the
+full ladder and the records ladder (follow-on record in
+`total-variation-mixing-conversion.md` — home of the deferred `t_mix`
+family — `proposals/README.md`, README, radar, `index/map`, scoreboard,
+both map tables + SVG). One cleanup owed in passing: the uncommitted
+`Mixing.lean` diff carries a doubled `omit [DecidableEq V] in` line
+(spectral-floor run's accidental duplicate, harmless but unclean). The
+previous runs' uncommitted deliveries preserved.
+
+**Next handoff:** write `wip/uniformmix_axcheck.lean` covering every
+new declaration; land shelf + QA unchanged from the spike; run the
+narrow checks (`lake env lean` both touched modules, explicit build
+targets) then the full ladder.
+
+## 2026-09-01T16:43:00Z — LPW's uniform t_mix with the submultiplicativity class delivered (terminal)
+
+**Run:** `20260901T163200Z-run-1`  
+**Session:** `ses_fa2371b66ffe2wnNHemMpFNzNl`  
+**Status:** completed  
+**Milestone:** The active milestone's two halves — the sup-over-starts uniform `t_mix` object `walkMixingTime` (LPW ch. 20's field-standard worst-case-start reading) and the submultiplicativity class it unlocks — delivered, with the two halves discharging *each other's* recorded gates: the uniform object's consumer is the class (`d(s+t) ≤ d(s)d(t)` and the ε-escalation corollary are unstatable per-start), and the escalation's consumer is LPW's canonical `t_mix := t_mix(1/4)` bridge. Zero new axioms (count stays 5), pure hard crust. The prior run (`20260901T124410Z-run-1`) left the complete spike on disk; this run confirmed it elaborating clean and landed it unchanged.
+
+**Changes:** the shelf — `Oversmoothing.lean`'s new `UniformMixing` section (22 proved declarations, 19 public + 3 file-private cores): LPW's two distances `walkTVPair` (`d(t)`, the two-start sup) and `walkTVUniform` (`d̄(t)`, Montenegro–Tetali's worst-start sup) as `Finset.sup'` maxima with nonnegativity; **the sharp Dobrushin contraction** `tvDistance_pow_walkTransitionMatrixTranspose_mulVec_le` (`TV(μ(Pᵀ)ᵗ, ν(Pᵀ)ᵗ) ≤ TV(μ,ν)·d(t)` at equal masses — hypothesis-minimal, no stochasticity: the recentering-pairing private core [recentering `g` at its finite minimum is what makes the positive-part split valid; the naive triangle route loses the factor 2 there] closed against the delivered distinguishing-function bound `tvDistance_ge_half_abs_sum`, its second consumer); the submultiplicativity class — `walkTVPair_submul` (`d(s+t) ≤ d(s)d(t)`, pure Markovity), the stationary mixture identity, `walkTVUniform_le_walkTVPair` (`d̄ ≤ d`), `walkTVUniform_mul_walkTVPair_le` (`d̄(s+t) ≤ d̄(s)d(t)`), the escalation engine; **the uniform object** `walkMixingTime` with `bddBelow`/`_le_of_cert`/`_spec`, the witness-hypothesized per-start domination `walkMixingTimeFrom_le_walkMixingTime` (witness load-bearing — the un-witnessed statement is false at the junk corner), the finite-sup interchange `walkMixingTime_eq_sup_walkMixingTimeFrom`; **the ε-escalation corollary** in `k`- and ⌈log⌉-forms and the uniform spectral ceiling `walkMixingTime_le_of_connected`. The QA — `Mixing_QA.lean`'s new `UniformMixing` section (+27, 3517 → 3544): the triangle distance pins from raw law literals (`d(1) = 1/2`, `d(2) = 1/4`, `d̄(1) = 1/3`, `d̄(2) = 1/6`), **submultiplicativity attained with equality** in all three forms (the sharp Dobrushin constant load-bearing — a factor-2 statement would read `1/4 ≤ 1/2`), `d̄ ≤ d` with slack witnessed, **the uniform object's exact closed forms `t_mix(1/3) = 1`, `t_mix(1/6) = 2` pinned in both directions**, the sup-interchange and ceiling instances, and the `K₂` periodicity corner at the uniform level (`d(1) = 1` maximal so no `ρ < 1` certificate exists; no uniform witness at `1/4`; the empty-set infimum `= 0` pinned and fenced). One incidental cleanup: the uncommitted `Mixing.lean` diff's doubled `omit [DecidableEq V] in` line (an accidental duplicate from the spectral-floor run) removed. Records: the proposal's second follow-on delivery record (gate discharges, corner analysis, landing-run technique findings), `proposals/README.md` (new Delivered row), README (3544 + the walks-and-mixing row's uniform-`t_mix` extension), the radar (QA axis synced 3517 → 3544 held at 4.0; axis 5's narrative extended with the forward-extension list reduced, held at 4.5), `index/map/spectral_graph.md` (the Oversmoothing section's header + ten new rows), the scoreboard verification row, both map data tables + regenerated SVG, the QA module's purpose header, the execution plan, this log. Nothing committed; the previous runs' uncommitted deliveries preserved.
+
+**Verification:** the prior run's spike `wip/uniformmix_spike.lean` found complete on disk and confirmed elaborating clean (`lake env lean` exit 0, zero errors/warnings) before any landing; `lake env lean` zero errors/zero warnings on both touched modules (only the QA module's 3 recorded pre-existing benign `ring_nf` notes); explicit `lake build` targets ✔ on both; **`#print axioms` via `wip/uniformmix_axcheck.lean` on all 46 nameable declarations (19 public shelf + 27 QA; the 3 file-private cores audited transitively): every one exactly `propext, Classical.choice, Quot.sound` — zero contact with any admitted axiom**; **full `lake build` ✔ immediately followed by `check_build_completeness.py` — 133 source files, 133 fresh artifacts, 0 stale, 0 missing, exit 0** (re-verified after the QA module's purpose-header edit); `lint_axioms` exit 0 (5, both PF findings allowlisted-confirmed); `check_refutation_independence` (10-tag clean — no tags added, nothing here touches an axiom); `check_public_reachability` clean (63 repo modules); `check_citations` ("All axioms have proper citations!"); `check_markdown_links` clean; scoreboard regenerated (**3544/5/0**) with the verification row added; **map-freshness exit 0** after the 3517 → 3544 stats sync in both map files and SVG regeneration (45 stations, no proposal status header changed — a follow-on record, no tier change).
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no axiom disposition changed, no existing public statement changed. The deferral list's remainder is now only the reverse TV → χ² calculus (still no consumer named); LPW's `t_mix := t_mix(1/4)` convention packaging is a one-line consumer away rather than missing machinery.
+
+**Next handoff:** the Active table holds no rows above the human-decision gates; a next run falls through to the center-out policy. The natural candidates now: the reverse TV → χ² calculus (needs a consumer named first), log-Sobolev (axis 3's remaining named gap, consumer-gated on an entropy inequality composing `InformationTheory.Entropy`'s Gibbs bound), and the operator-gated items (over-squashing floor's Python bridge, matrix master-bound Step 2).

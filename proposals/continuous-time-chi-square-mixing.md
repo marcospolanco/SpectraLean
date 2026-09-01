@@ -333,8 +333,14 @@ intrinsic at the spectral gap).
   standard continuous-time bound, unstatable without the object) and
   ε-antitonicity — plus the exact K₂ closed form every textbook
   computes on the two-state chain. The *discrete* `t_mix` object
-  stays deferred with its gate unchanged; the continuous↔discrete
-  comparability theorem is the named follow-on that would justify it.
+  stays deferred; the continuous↔discrete comparability theorem — the
+  named follow-on that would justify it — **was delivered 2026-09-01**
+  (run `20260901T024900Z-run-1`, the Poisson-bridge follow-on delivery
+  record below), and its transfer corollary
+  `contWalkDistribution_tvDistance_le_of_discreteMixing` now carries
+  the object's would-be witness condition (`hmix`) on the shelf:
+  defining the discrete `t_mix` is a plain follow-on choice, no longer
+  blocked on missing machinery.
 - ~~The heat-kernel TV ceiling's continuous-time twin is a one-step
   composition of the delivered TV conversion with this delivery's
   consumer once a consumer names it (the discrete TV ceiling's own
@@ -492,3 +498,129 @@ These are theorems, not axioms, but the corner sweep was still run:
    against the edited-but-unrebuilt shelf resolves the new names to
    junk ("function expected … term has type ?m") — rebuild the shelf
    target first.
+
+## Follow-on delivery record — the Poisson bridge
+(2026-09-01; Lean by run `20260901T024900Z-run-1`, session
+`ses_fa530f1c7ffeW47alc24ym1nW7`; independently re-verified and
+recorded by continuation run `20260901T054637Z-run-1`, session
+`ses_fa4802e14ffeLPEwm9nmKEyckS`)
+
+**The named follow-on delivered: the continuous↔discrete mixing-time
+comparability.** Zero new axioms (count stays 5); `#print axioms` via
+`wip/poisson_axcheck.lean` (completed to full section coverage by the
+continuation run) on all 42 audited declarations — 23 shelf
+(`Heat.lean`'s two generic helpers + `Mixing.lean`'s Poisson-bridge
+section) and all 19 QA (`Mixing_QA.lean`'s `PoissonBridge` section):
+every one exactly `propext, Classical.choice, Quot.sound` — pure hard
+crust. QA 3459 → 3478 (+19). The Lean landed in the opening run, which
+exited before its records; the commit steward independently re-verified
+the build (completeness 133/133, all-new-declaration axiom audit,
+full ladder) before committing, and this continuation run re-ran the
+entire ladder itself before writing this record.
+
+### The shelf
+
+- `Heat.lean`'s two generic helpers: `pow_smul_matrix`
+  (`(c • M)ⁿ = cⁿ • Mⁿ`) and `matrix_exp_smul_one` (**the scalar-matrix
+  exponential** `e^{cI} = e^c • I`, through the shelf's
+  `expSeries_hasSum_exp` mapped along `a ↦ a • 1`).
+- `Mixing.lean`'s Poisson-bridge section (21 declarations):
+  - **The Poisson weight package**: `poissonWeight t k := e^{−t}tᵏ/k!`
+    with nonnegativity, `∑' poissonWeight t = 1` at *every* time
+    (negative times included — `e^{−t}·e^{t} = 1`), summability.
+  - **The Poissonization identity** `hasSum_poisson_walkDensity`:
+    `e^{−tL_walk} *ᵥ h₀ = ∑'ₖ poissonWeight t k • h_k` — proved through
+    the exponential split `−t(I − P) = tP − tI`
+    (`Matrix.exp_add_of_commute`; the scalar matrix commutes with
+    everything) plus the scalar-matrix exp, the shelf's
+    `expSeries_hasSum_exp` at `tP` mapped through the continuous
+    action `N ↦ N *ᵥ h₀` (`HasSum.map`), each series term collapsed by
+    the power identity — the mixing layer's first `tsum` construction.
+    Density-level and law-level forms follow
+    (`contWalkDensity_eq_tsum`, `contWalkDistribution_eq_tsum`):
+    `ν^cont_t = ∑'ₖ e^{−t}tᵏ/k! · ν_k`, LPW ch. 20's
+    `H_t = e^{−t}∑ tᵏ/k!·Pᵏ` read at the law.
+  - **The TV contraction toolkit** (field-standard facts new to the
+    shelf): `tvDistance_le_one_of_nonneg_of_sum_eq_one` (the simplex
+    diameter), the walk-law instance,
+    `tvDistance_walkTransitionMatrixTranspose_mulVec_le` (**the adjoint
+    walk is an ℓ¹-contraction** — every row of `P` a probability
+    vector, the triangle inequality averaged against them), the
+    iterated form, the stationary fixpoint, the power evolution
+    `walkDistribution_add` (`ν_{t+s} = (Pᵀ)ˢ *ᵥ ν_t`), and
+    `walkDistribution_tvDistance_anti` (**discrete TV monotonicity**:
+    `TV_{t+s} ≤ TV_t` — the contraction composed with iterated
+    stationarity).
+  - **Mixture convexity and the comparability**: `tsum_eq_range_add`
+    (the head–tail split at a threshold; the pinned Mathlib has no
+    direct `Finset.range` split at this generality),
+    `tvDistance_tsum_le` (**TV convexity in countable mixtures** —
+    honest summability constructed throughout, `Summable.of_norm_bounded`
+    against the simplex-diameter bound), the Poisson-averaged form
+    `contWalkDistribution_tvDistance_le_tsum`, and the headline
+    **`contWalkDistribution_tvDistance_add_le`**:
+    `TV_cont(t) ≤ ∑_{k<m} e^{−t}tᵏ/k! + TV_disc(m)` at every threshold
+    `m` — the Poisson lower-tail split with the tail term exact (no
+    Chernoff rounding), the head absorbed by the simplex diameter and
+    the tail by discrete monotonicity. At `m = 0`: the worst-start
+    bound `TV_cont(t) ≤ TV(δ_x, π)`; at `t = 0`: the trivial
+    `TV ≤ 1 + TV₀`.
+  - **The discrete-certificate transfer**
+    `contWalkDistribution_tvDistance_le_of_discreteMixing`: a discrete
+    mixing certificate (`∀ k ≥ m, TV_disc(k) ≤ ε₁`) plus a Poisson
+    lower-tail bound (`∑_{k<m} e^{−t}tᵏ/k! ≤ ε₂`) give
+    `TV_cont(t) ≤ ε₁ + ε₂`. **The would-be consumer of the still-deferred
+    discrete `t_mix` object** — `hmix` is exactly its witness
+    condition, so the gate recorded at the previous delivery ("the
+    comparability theorem is the named follow-on that would justify
+    it") now has its consumer half on the shelf; defining the discrete
+    object itself remains ungated-but-unadopted (a plain follow-on
+    choice, no longer blocked on missing machinery).
+
+### The QA (`Mixing_QA.lean`'s `PoissonBridge` section, +19)
+
+- **The periodic-chain fence** (the recorded hazard as a witness): on
+  `K₂` the walk oscillates between the two point masses forever —
+  `Pᵀ² = 1` pinned, even laws `δ₀`, odd laws `δ₁`,
+  `k2_disc_tv_eq_QA` (**`TV_disc ≡ 1/2` at every time**),
+  `k2_no_discrete_mixing_QA` (**no discrete mixing certificate
+  exists** — the transfer corollary's hypothesis set is empty here at
+  every threshold below `1/2`), and `k2_reverse_comparability_QA`
+  (**the reverse comparability is dead**: at `t = 2` the continuous TV
+  is already `e^{−4}/2 < 1/4` while the discrete TV is `1/2` at every
+  time — no function of the continuous TV can bound the discrete one;
+  the one-sidedness is load-bearing).
+- **The `t = 0` corner**: the mixture collapses to `δ_x`
+  (`poissonWeight 0` is the point mass at `k = 0`).
+- **The triangle closed forms**: `triG` a `−1/2`-eigenvector of the
+  walk matrix (the sign alternation), the geometric power action, the
+  centered density at every time, **`tri_disc_tv_eq_QA`
+  (`TV_disc(m) = (2/3)·2^{−m}` at every time)**, the exact partial
+  Poisson weight `∑_{k<2} poissonWeight 8 k = 9e^{−8}`, the
+  comparability instance `TV_cont(8) ≤ 9e^{−8} + 1/6` in closed form,
+  the both-sides-exact pin (`TV_cont(8) = (2/3)e^{−12}` beside
+  `TV_disc(2) = 1/6`, the domination honest with visible slack), the
+  **transfer-certificate instance** (`TV_disc(k) ≤ 1/6` for all `k ≥ 2`
+  plus `9e^{−8} ≤ 1/24` from `2 < e` give `TV_cont(8) ≤ 5/24`), and
+  the anti-monotonicity instance `1/6 → 1/12`.
+
+### Verification (the continuation run's own, before this record)
+
+`#print axioms` via `wip/poisson_axcheck.lean` (completed to all 42
+declarations by this run): every one exactly the standard three; full
+`lake build` ✔ immediately followed by `check_build_completeness.py`
+(133 source files, 133 fresh artifacts, 0 stale, 0 missing, exit 0);
+`lint_axioms` exit 0 (5 axioms, both PF findings allowlisted);
+`check_refutation_independence` (10 tags, clean); 
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; scoreboard regenerated (3478/5/0, idempotent);
+`check_scaffold_map_freshness` exit 0.
+
+### Remaining risk
+
+None owed — pure hard crust, no axiom disposition changed, no existing
+public statement changed. The comparability is one-sided by design
+(the `K₂` fence is the proof); the transfer corollary's `hmix`
+certificate is exactly as strong as the discrete side's laziness
+allows. The discrete `t_mix` object stays undefined with its consumer
+now named on the shelf.

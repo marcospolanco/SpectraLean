@@ -980,6 +980,30 @@ theorem tvDistance_triangle (μ ν ρ : V → ℝ) :
   linarith
 
 omit [DecidableEq V] in
+/-- **The distinguishing-function bound** — the classical lower-bound
+companion of the triangle inequality: a statistic bounded by `1`
+distinguishes two vectors by at most twice their total-variation
+distance, `|(μ − ν)(f)| ≤ 2 · TV(μ, ν)`. Hypothesis-minimal — no sign
+or mass assumptions on `μ`, `ν` (the proof is
+`|∑ (μ−ν)·f| ≤ ∑ |μ−ν|·|f| ≤ ∑ |μ−ν|`). This is the engine of every
+total-variation *floor*: the upper bound's Cauchy–Schwarz conversion
+`tvDistance_le_half_sqrt` has no reverse, and this lemma is the
+standard way around that. -/
+theorem tvDistance_ge_half_abs_sum {μ ν : V → ℝ} (f : V → ℝ)
+    (hc : ∀ i, |f i| ≤ 1) :
+    (1/2) * |∑ i, (μ i - ν i) * f i| ≤ tvDistance μ ν := by
+  have h1 : |∑ i, (μ i - ν i) * f i| ≤ ∑ i, |(μ i - ν i) * f i| :=
+    Finset.abs_sum_le_sum_abs _ _
+  have h2 : ∑ i, |(μ i - ν i) * f i| ≤ ∑ i, |μ i - ν i| := by
+    refine Finset.sum_le_sum fun i _ => ?_
+    calc |(μ i - ν i) * f i| = |μ i - ν i| * |f i| := (abs_mul _ _)
+      _ ≤ |μ i - ν i| * 1 :=
+          mul_le_mul_of_nonneg_left (hc i) (abs_nonneg _)
+      _ = |μ i - ν i| := mul_one _
+  rw [tvDistance]
+  linarith
+
+omit [DecidableEq V] in
 /-- **The ℓ² → total-variation conversion** — the classical
 Cauchy–Schwarz step, at its sharp constant: for a positive weight `w`
 of total mass one and any vector `ν`, the total-variation distance

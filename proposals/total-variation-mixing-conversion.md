@@ -262,13 +262,326 @@ upgrade this note):
 
 ## Deferred / out of scope
 
-- The **mixing time** `t_mix(ε) := sInf {t | ∀ s ≥ t, ...}` as a
-  defined object, and statements about it (monotonicity, submultiplicivity)
-  — the depth-form TV ceiling already carries the operative content
-  (an explicit certified depth); a defined `t_mix` has no consumer
-  yet. Not attempted.
+- ~~The **mixing time** `t_mix(ε) := sInf {t | ∀ s ≥ t, ...}` as a
+  defined object, and statements about it (monotonicity,
+  submultiplicivity) — the depth-form TV ceiling already carries the
+  operative content (an explicit certified depth); a defined `t_mix`
+  has no consumer yet. Not attempted.~~ **Delivered 2026-09-01** as
+  this file's own follow-on delivery (see the next section): the
+  consumer gate was discharged by the Poisson-bridge delivery, whose
+  transfer corollary's `hmix` clause is exactly the object's witness
+  condition.
 - The reverse (TV → χ²) direction and the `4TV² ≤ χ²`-class two-sided
   calculus — no consumer has named it.
 - The ℓ∞ (entrywise) distance form — already delivered as the
   oversmoothing family's `walkDistribution_sub_stationaryVec_abs_le`;
   nothing to add.
+
+## Follow-on delivery record: the discrete `t_mix` object (2026-09-01)
+
+Run `20260901T070242Z-run-1`. The Deferred item above delivered as this
+proposal's follow-on — zero new axioms (count stays 5; `#print axioms`
+via `wip/dtmix_axcheck.lean` on all 16 audited declarations — 7 shelf +
+9 QA — every one exactly `propext, Classical.choice, Quot.sound`, pure
+hard crust). QA 3478 → 3487 (+9, `Mixing_QA.lean`'s `DiscMixingTime`
+section).
+
+**The consumer gate, discharged.** This proposal deferred the object
+with "a defined `t_mix` has no consumer yet". The Poisson-bridge
+delivery (`proposals/continuous-time-chi-square-mixing.md`, 2026-09-01)
+then put the consumer on the shelf: the transfer corollary
+`contWalkDistribution_tvDistance_le_of_discreteMixing` hypothesizes
+`hmix : ∀ k ≥ m, TV_disc(k) ≤ ε₁` — exactly the object's witness
+condition. With that half in place, defining the object became the
+standing handoff's first-named plain follow-on choice, and this
+delivery closes the loop in the other direction: the object's own
+attainment fact now *discharges* the corollary's `hmix`.
+
+**The shelf** (`Oversmoothing.lean`'s new discrete-mixing-time section —
+placed there because the ceiling's certificate engine
+`walkDistribution_tvDistance_le_of_depth` lives in that module and its
+imports already point toward `Mixing.lean`'s transfer corollary; zero
+duplication, zero import changes; 7 declarations):
+
+- `walkMixingTimeFrom A x ε := sInf {t : ℕ | ∀ s ≥ t, TV_disc(s) ≤ ε}`
+  — Levin–Peres–Wilmer ch. 20's per-start `t_mix` reading, the discrete
+  twin of `Mixing.lean`'s `contMixingTimeFrom`, with the junk corner
+  documented (at an unreachable `ε`, `sInf ∅ = 0` on `ℕ` — pinned and
+  fenced in QA, see below).
+- `walkMixingTimeFrom_bddBelow` / `_le_of_cert` — the certificate
+  interface (any witness time certifies the mixing time), the
+  `pow_mul_le_of_log_threshold`/`contMixingTimeFrom_le_of_cert` family
+  idiom.
+- `walkMixingTimeFrom_spec` — **the attainment specification, the
+  discrete object's own advantage over its continuous twin**: `ℕ` is
+  well-ordered, so the infimum of a nonempty witness set is a *member*
+  (`csInf_mem` — no monotonicity needed, the "∀ s ≥ t" is in the
+  membership predicate), and membership *is* the uniform bound. Given
+  any witness, `t_mix` itself satisfies the certificate condition —
+  this one-liner is what composes with the transfer corollary.
+- `walkMixingTimeFrom_le_of_connected` — **the spectral ceiling**
+  `t_mix(ε) ≤ ⌈log(√C/(2ε))/log(1/r)⌉` at exactly the depth-form TV
+  certificate's hypothesis set (connected, `0 < r < 1`, rate
+  certificate): a two-line composition — `Nat.le_ceil` supplies the
+  threshold, `walkDistribution_tvDistance_le_of_depth` the bound. The
+  big-`ε` case is absorbed (a negative threshold ceilings to `0`). The
+  `0 < r < 1` restriction is honest and load-bearing: periodic chains
+  admit no such certificate (the `K₂` fence below), which is exactly why
+  the junk corner cannot be reached through this theorem.
+- `walkMixingTimeFrom_anti` — ε-antitonicity, the continuous twin's
+  `csInf_le_csInf` mirror with the witness hypothesis.
+- `contWalkDistribution_tvDistance_le_of_walkMixingTime` — **the bridge
+  composition, the named consumer**: on a connected graph with a rate
+  certificate, a Poisson lower-tail bound below `t_mix(ε₁)` gives
+  `TV_cont(t) ≤ ε₁ + ε₂` — the caller supplies only the Poisson tail;
+  `hmix` is discharged by the object (the ceiling supplies the witness
+  existence, `_spec` the certificate).
+
+**The QA** (`Mixing_QA.lean`'s `DiscMixingTime` section, +9):
+
+- **The exact closed forms on the triangle**, each pinned in *both*
+  directions: `t_mix(1/3) = 1` (`tri_mix_eq_third_QA`), `t_mix(1/6) = 2`
+  (`tri_mix_eq_sixth_QA`), `t_mix(1/12) = 3` (`tri_mix_eq_twelfth_QA`)
+  — the certificate interface gives `≤` from the exact TV values
+  `TV(m) = (2/3)·2^{−m}`, the attainment specification refutes the
+  smaller values (e.g. `t_mix(1/6) ≠ 1` because `TV(1) = 1/3 > 1/6`).
+  Both interfaces load-bearing on the object's exact shape.
+- **The antitone instance** `t_mix(1/6) ≤ t_mix(1/12)` with exact values
+  `2 ≤ 3` on both sides (`tri_mix_anti_QA`).
+- **The ceiling attained exactly** (`tri_mix_ceiling_attained_QA`): at
+  rate `1/2` and `ε = √2/4` — where the threshold ratio
+  `√C/(2ε) = √2/(√2/2) = 2` sits exactly at the power the certificate
+  names — the object is `1` and the ceiling's own right side evaluates
+  to `1`: no slack anywhere in the package. Plus **the ceiling computed
+  with honest slack** (`tri_mix_ceiling_slack_QA`): at the working
+  threshold `ε = 1/6` the right side evaluates to exactly `3` against
+  the true `2` — one wasted step, the Cauchy–Schwarz conversion's price
+  on the triangle, pinned by the two strict log inequalities
+  `4 < 3√2 ≤ 8`.
+- **The `K₂` junk corner pinned and fenced** (`k2_mix_junk_corner_QA`):
+  no witness time exists at `ε = 1/4` (the periodic chain's
+  `TV_disc ≡ 1/2`), so the object's defining set is empty and
+  `sInf ∅ = 0` — a value that *looks* anti-conservative. The QA pins it
+  beside the existing no-certificate fence, and the docstring records
+  why no theorem instantiates there: the ceiling's `0 < r < 1` is
+  undischargeable on `K₂` (the edge's normalized gap `2` forces
+  `r ≥ 1`).
+- **The bridge instance** (`tri_bridge_mix_QA`): the same bound the
+  hand-certified `tri_mixing_transfer_QA` derives (`TV_cont(8) ≤ 5/24`)
+  re-derived through the new theorem — the caller supplies only the
+  Poisson tail bound, the discrete certificate is the object's own.
+
+**Verification** (the run's own ladder, before any record was written):
+spike first (`wip/dtmix_spike.lean` — the shelf declarations, the full
+QA section, and the axiom audit iterated to zero errors before any
+shelf edit; the QA module carries its recorded benign `Try this:
+ring_nf` note class, now 3 notes, from the copied numeric block in
+`tri_bridge_mix_QA`); `lake env lean` zero errors on both touched
+modules; explicit `lake build` targets ✔ on both; **full `lake build` ✔
+immediately followed by `check_build_completeness.py` — 133 source
+files, 133 fresh artifacts, 0 stale, 0 missing, exit 0** (after the
+documented single-module mtime remediation — the stale-olen
+QA-imports-shelf boundary recurrence); `lint_axioms` exit 0 (5, both PF
+findings allowlisted-confirmed); `check_refutation_independence`
+(10-tag clean — no tags added, nothing here touches an axiom);
+`check_public_reachability` clean (63 modules); `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (**3487/5/0**) with
+the verification row added; `check_scaffold_map_freshness` exit 0 after
+the 3478 → 3487 stats sync in both map files and SVG regeneration (no
+proposal status header changed — a follow-on record, no tier change).
+
+**Technique findings** (recorded so they are not re-attempted):
+
+- `csInf_mem` exists for `ℕ` through `[WellFoundedLT ℕ]` — the
+  attainment specification needs no monotonicity argument at all,
+  because the "∀ s ≥ t" lives in the membership predicate itself;
+  designing the statement shape before checking this would have
+  produced a needless `walkDistribution_tvDistance_anti` detour.
+- `Nat.sInf_empty : sInf ∅ = 0` is the ℕ-valued junk-corner idiom (vs.
+  the ℝ-valued twin's `sInf ∅ = 0` documentation).
+- `Nat.le_ceil : a ≤ ↑⌈a⌉₊` supplies the real→natural threshold bridge
+  in one term, with `exact_mod_cast` carrying the natural side.
+- `pow_le_pow_right₀` does not normalize `2 ^ 1` to `2` on delivery —
+  `norm_num at hp` first, then `exact hp` (the direct term-mode
+  application type-mismatches).
+- `div_lt_iff₀` vs. `lt_div_iff₀` for `c < a / b` goals: the mpr
+  argument shape is `c * b < a`, and the two lemmas' iff directions
+  read opposite to intuition under bare `rw`.
+- A `by norm_num` bridge between `↑n` (the `Nat.lt_ceil`/`Nat.ceil_le`
+  iff sides) and a numeral is counterproductive — norm_num normalizes
+  the *goal's* denominators (`2 * (1/6)` → `1/3`) and breaks the match;
+  the bare defeq unification `Nat.lt_ceil.mpr hltx` works directly.
+- `field_simp` on a goal with an atom denominator prints an
+  unconditional `Try this: ring_nf` note; `refine (div_eq_iff _).mpr
+  (by ring)` avoids it (the module's recorded note baseline stays at
+  the copied-block minimum).
+- `nlinarith` is tactic-block-only — `have h : P := nlinarith [...]`
+  fails with "function expected"; `:= by nlinarith [...]` is required.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed. The
+submultiplicivity-class statements the original deferral named remain
+undelivered with no consumer named; the sup-over-starts uniform `t_mix`
+remains a trivial composition left consumer-gated.
+
+## Follow-on delivery record: the uniform `t_mix` and the
+submultiplicativity class (2026-09-01)
+
+**Status: DELIVERED** — the deferral's own named remainder (the
+submultiplicivity-class `t_mix` statements and the sup-over-starts
+uniform object, both recorded in the previous record's remaining-risk
+line as "no consumer named" / "consumer-gated") delivered as one
+package whose two halves discharge *each other's* gates: the uniform
+object's named consumer is the submultiplicativity class — LPW's
+`d(s+t) ≤ d(s)d(t)` and the ε-escalation corollary it powers are
+theorems about the worst-case-start object, unstatable per-start — and
+the escalation corollary's own consumer is the field's canonical
+bridge (LPW's `t_mix := t_mix(1/4)` convention: one certified
+evaluation time yields every ε-level mixing time; Montenegro–Tetali
+state their bounds at the worst-case start). Zero new axioms (count
+stays 5), pure hard crust: `#print axioms` via `wip/uniformmix_axcheck.lean`
+on all 46 nameable declarations (19 public shelf + 27 QA; the 3
+file-private cores audited transitively through their public
+consumers) reads exactly `propext, Classical.choice, Quot.sound`.
+Spike by run `20260901T124410Z-run-1` (`wip/uniformmix_spike.lean`,
+iterated to zero errors/warnings); the landing run
+`20260901T163200Z-run-1` found the spike complete on disk, confirmed
+it elaborating clean, and landed it unchanged.
+
+### The shelf (`Oversmoothing.lean`'s new `UniformMixing` section)
+
+- **LPW's two distances** — `walkTVPair` (`d(t) = max_{x,y}
+  TV(ν_t^x, ν_t^y)`, the two-start distance the submultiplicativity
+  class lives on) and `walkTVUniform` (`d̄(t) = max_x TV(ν_t^x, π)`,
+  Montenegro–Tetali's distance, the one whose threshold curve *is* the
+  mixing time), both `Finset.sup'` maxima (genuine maxima on a finite
+  type) with nonnegativity.
+- **The sharp Dobrushin contraction**
+  `tvDistance_pow_walkTransitionMatrixTranspose_mulVec_le`:
+  `TV(μ(Pᵀ)ᵗ, ν(Pᵀ)ᵗ) ≤ TV(μ,ν) · d(t)` at equal masses —
+  hypothesis-minimal (no stochasticity, no signs; only the
+  recentering mass-zero condition). The engine is the private
+  pairing core `abs_sum_mul_le_of_pairwise` (recentering `g` at its
+  finite minimum is exactly what makes the positive-part split
+  valid — the naive triangle route loses the factor `2` here) plus
+  the sign-statistic core `tvDistance_mulVec_le_pair`, closed against
+  the delivered distinguishing-function bound
+  `tvDistance_ge_half_abs_sum` (the spectral-floor delivery's own TV
+  toolkit lemma — its second consumer).
+- **The submultiplicativity class** — `walkTVPair_submul`
+  (`d(s+t) ≤ d(s)d(t)`; the Dobrushin contraction at the pair of
+  `s`-step laws, equal masses by walk conservation — pure Markovity,
+  no connectivity, no rates), the stationary mixture identity
+  `stationaryVec_eq_sum_smul_walkDistribution` (π as the π-weighted
+  mixture of the `t`-step laws, its fixed-point property expanded
+  through linearity), the finite TV-convexity core,
+  `walkTVUniform_le_walkTVPair` (`d̄ ≤ d`, no reversibility needed),
+  `walkTVUniform_mul_walkTVPair_le` (`d̄(s+t) ≤ d̄(s)d(t)`), and the
+  escalation engine `walkTVUniform_succ_mul_le`
+  (`d̄((k+1)t₀) ≤ d̄(t₀)d(t₀)^k`).
+- **The uniform object** — `walkMixingTime A ε := sInf {t | ∀ s ≥ t,
+  ∀ x, TV(ν_s^x, π) ≤ ε}` (LPW ch. 20's field-standard reading), with
+  `walkMixingTime_bddBelow`/`_le_of_cert`/`_spec` (the
+  certificate-and-attainment interface mirroring the per-start
+  object's), the witness-hypothesized per-start domination
+  `walkMixingTimeFrom_le_walkMixingTime` (the witness is load-bearing
+  and not decorative: at the junk corner — no uniform witness,
+  `sInf ∅ = 0` — the un-witnessed statement is false, fenced in QA),
+  and the finite-sup interchange `walkMixingTime_eq_sup_walkMixingTimeFrom`
+  (on a finite type the uniform object *is* the worst start's
+  per-start object — hypothesis-light, no graph structure).
+- **The ε-escalation corollary** — `walkMixingTime_le_mul_of_escalation`
+  (`t_mix(ε) ≤ (k+1)t₀` whenever `d̄(t₀) ≤ ε₀`, `d(t₀) ≤ ρ < 1`,
+  `ε₀ρᵏ ≤ ε`) and its ⌈log⌉ display twin
+  `walkMixingTime_le_of_escalation` (the threshold discharged through
+  the shelf's own `pow_mul_le_of_log_threshold`); plus the uniform
+  spectral ceiling `walkMixingTime_le_of_connected` (the per-start
+  ceiling's uniform form at uniformly bounded start constants `C`).
+
+### The QA (`Mixing_QA.lean`'s new `UniformMixing` section, +27,
+3517 → 3544)
+
+The triangle is the fixture where every statement in the package is
+*tight* (`d(m) = (1/2)^m`, `d̄(m) = (2/3)·2^{−m}`):
+
+- **The distance pins from raw law literals** — the one- and two-step
+  laws from all three starts (the sup terms' raw material),
+  `d(1) = 1/2`, `d(2) = 1/4` (the two-start sup over nine pairs),
+  `d̄(1) = 1/3`, `d̄(2) = 1/6` (the worst-start sup over three
+  starts), each `le` side proved per-pair/per-start and each `ge`
+  side by the exhibited maximizing pair/start.
+- **Submultiplicativity attained with equality** —
+  `d(2) = d(1)·d(1)` (`1/4 = (1/2)(1/2)`), `d̄(2) = d̄(1)·d(1)`
+  (`1/6 = (1/3)(1/2)`), and the escalation engine at `k = 1`: no
+  slack anywhere in the package, and the sharp Dobrushin constant
+  load-bearing (a factor-`2` statement would read `1/4 ≤ 1/2`, true
+  with slack — the equality pins the constant).
+- **`d̄ ≤ d` with honest slack witnessed** (`1/3 ≤ 1/2`, both sides
+  independently pinned).
+- **The uniform object's exact closed forms** — `t_mix(1/3) = 1` and
+  `t_mix(1/6) = 2`, each pinned in both directions (the escalation
+  certificate above — at `ε = 1/3` closing *exactly* at `k = 0` —
+  and the per-start pins `t_mix⁰(1/3) = 1`, `t_mix⁰(1/6) = 2` below,
+  through the domination with the uniform witness supplied); the
+  sup-interchange instantiated structurally; the uniform ceiling
+  instance at `C = 2`.
+- **The `K₂` periodicity corner at the uniform level** — `d(1) = 1`
+  maximal (the two one-step laws sit on opposite vertices), so no
+  escalation certificate `ρ < 1` exists and submultiplicativity
+  degenerates to `1 ≤ 1·1`; no uniform mixing witness at `1/4`; and
+  the object's empty-set infimum `walkMixingTime k2Adj (1/4) = 0`
+  pinned and fenced — the anti-conservative-looking junk corner that
+  every theorem in the package guards against by carrying a witness
+  or a `ρ < 1` certificate.
+
+### Technique findings (recorded so they are not re-attempted)
+
+The spike was completed by the prior run, so this landing run's
+findings are about *landing*, not proving:
+
+- Splitting a spike into shelf/QA landings is safest with a script
+  over line ranges (namespace boilerplate stripped once, section
+  wrappers added once); hand-editing 600-line insertions invites
+  dropped `omit` lines.
+- The partial-line edit idiom for newest-first Markdown tables
+  (oldString ending mid-row) preserves the following row exactly,
+  but the row must be re-verified afterward — the truncation point is
+  invisible in a diff review.
+- A spike whose three namespace blocks were grown iteratively can be
+  merged into one landed section without re-elaboration risk only
+  because each block was independently closed; keep that property
+  when authoring.
+- `#print axioms` cannot name `private` declarations from an import —
+  the three private cores are audited transitively through their
+  public consumers, and the axcheck header says so explicitly.
+
+### Verification (the ladder, run by the landing run
+`20260901T163200Z-run-1`)
+
+Spike found complete and confirmed elaborating clean (`lake env lean`
+exit 0, zero errors/warnings) before landing; `lake env lean` zero
+errors/zero warnings on both touched modules (only the QA module's 3
+recorded pre-existing benign `ring_nf` notes); explicit `lake build`
+targets ✔ on both; `#print axioms` via `wip/uniformmix_axcheck.lean`
+on all 46 nameable declarations — every one exactly `propext,
+Classical.choice, Quot.sound`; full `lake build` ✔ immediately
+followed by `check_build_completeness.py` — 133 source files, 133
+fresh artifacts, 0 stale, 0 missing, exit 0; `lint_axioms` exit 0
+(5, both PF findings allowlisted-confirmed); `check_refutation_independence`
+(10-tag clean — no tags added, nothing here touches an axiom);
+`check_public_reachability` clean (63 repo modules); `check_citations`,
+`check_markdown_links` pass; scoreboard regenerated (3544/5/0) with
+the verification row added; `check_scaffold_map_freshness` exit 0
+after the 3517 → 3544 stats sync in both map files and SVG
+regeneration (no proposal status header changed — a follow-on record,
+no tier change).
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed (one
+incidental cleanup: the uncommitted `Mixing.lean` diff's doubled
+`omit [DecidableEq V] in` line, an accidental duplicate from the
+spectral-floor run, removed). The deferral list's remainder is now
+only the reverse TV → χ² calculus (still no consumer named). LPW's
+`t_mix := t_mix(1/4)` convention itself (the packaging of the
+escalation corollary at the canonical threshold) is now a one-line
+consumer away rather than missing machinery.

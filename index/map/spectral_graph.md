@@ -738,7 +738,7 @@ Parseval-exact); the plain Euclidean distance is a corollary bridge.
 | `walkDistribution_tvDistance_le` | the unconditional walk-level shadow: `TV(ν_t x, π) ≤ (1/2)·√χ²(t, x)` for every walk — no connectivity, no rate |
 | `walkDistribution_tvDistance_le_of_connected` | **the rate form:** `TV(ν_t x, π) ≤ (1/2)·√(r^{2t} · ((π x)⁻¹ − 1))` at exactly the χ² theorem's hypothesis set — the closing mixing bound restated in the field-standard distance |
 
-### `Scaffold.Mathlib.GraphTheory.Oversmoothing` (the certified oversmoothing ceiling)
+### `Scaffold.Mathlib.GraphTheory.Oversmoothing` (the certified oversmoothing ceiling, the `t_mix` objects, and the submultiplicativity class)
 
 All statements proved (2026-08-31,
 `proposals/message-passing-depth-mixing-bound.md`), no axioms — the
@@ -750,7 +750,13 @@ proposal's original (retracted) over-squashing floor. Honest scope in
 the module docstring: the linearized mean-aggregation propagation
 operator (a linear GCN-style layer up to weights/nonlinearity), a
 single global rate, and no reach at all on graphs admitting no
-`r < 1` certificate (bipartite graphs).
+`r < 1` certificate (bipartite graphs). The discrete mixing-time
+section (2026-09-01, `proposals/total-variation-mixing-conversion.md`'s
+deferred `t_mix` object, consumer gate discharged by the Poisson
+bridge) is also proved, zero axioms — see the table's last rows. The
+spectral-floor section (2026-09-01, the message-passing proposal's
+deferred over-squashing item delivered on its own named route — the
+program's first lower-bound family) is proved as well, zero axioms.
 
 | Declaration | Content |
 |-------------|---------|
@@ -766,6 +772,29 @@ single global rate, and no reach at all on graphs admitting no
 | `walkDistribution_tvDistance_le_of_rate` | **the TV twin, split-constant rate form:** `TV(ν_t x, π) ≤ (1/2)·r^t·√C` with `C = (π x)⁻¹ − 1 ≥ 0` (`stationaryVec_le_one` supplying the nonnegativity) — the shape the depth threshold consumes |
 | `walkDistribution_tvDistance_le_of_depth` | **the TV ceiling:** past the threshold `log (√C/(2ε))/log (1/r)` (the entrywise ceiling's own at `2ε`), the walk law is within `ε` of stationarity *in total variation* — the field-standard `t_mix(ε)` statement form, now expressible on the shelf |
 | `walkDistribution_tvDistance_sub_le_of_depth` | **two-start indistinguishability in TV:** past both starts' thresholds, the two `t`-step laws are within `2ε` of each other in total variation (triangle + symmetry) |
+| `walkMixingTimeFrom` | **the discrete mixing time** `t_mix(ε)` — the least number of steps from which the walk law stays within `ε` of stationarity in TV (LPW ch. 20's per-start reading, the discrete twin of `contMixingTimeFrom`; delivered 2026-09-01, `proposals/total-variation-mixing-conversion.md`'s deferred object, consumer gate discharged by the Poisson bridge) |
+| `walkMixingTimeFrom_bddBelow` / `walkMixingTimeFrom_le_of_cert` | the witness-set boundedness and the certificate interface: any witness time certifies the mixing time (`t_mix(ε) ≤ T`) |
+| `walkMixingTimeFrom_spec` | **the attainment specification** — the discrete object's own advantage: `ℕ` is well-ordered, so the witness infimum is a *member* (`csInf_mem`) and membership is the uniform bound — this discharges the Poisson-bridge transfer corollary's `hmix` clause, closing the recorded consumer loop |
+| `walkMixingTimeFrom_le_of_connected` | **the spectral ceiling** `t_mix(ε) ≤ ⌈log(√C/(2ε))/log(1/r)⌉` at the depth-form TV certificate's own hypothesis set (`0 < r < 1` — honest: periodic chains admit no such certificate; big-`ε` absorbed by `⌈·⌉ = 0`) |
+| `walkMixingTimeFrom_anti` | ε-antitonicity (`ε ≤ δ → t_mix(δ) ≤ t_mix(ε)` under a witness), the continuous twin's `csInf_le_csInf` mirror |
+| `contWalkDistribution_tvDistance_le_of_walkMixingTime` | **the bridge composition** — the named consumer: a Poisson lower-tail bound below `t_mix(ε₁)` gives `TV_cont(t) ≤ ε₁ + ε₂`, the discrete certificate supplied by the object itself |
+| `tvDistance_ge_half_abs_sum` (Mixing) | **the distinguishing-function bound** `|(μ−ν)(f)| ≤ 2·TV(μ,ν)` for `‖f‖∞ ≤ 1`, hypothesis-minimal — no sign or mass assumptions; the standard route around the Cauchy–Schwarz conversion's missing reverse, and the engine of every total-variation *floor* |
+| `degreeSqrt_onesVec_dotProduct_of_eigenpair` / `stationaryVec_dotProduct_degreeInvSqrt_of_eigenpair` | **kernel orthogonality of nonzero modes, derived** (not assumed): `μ ≠ 0` forces `⟨√D·1, v⟩ = 0` through symmetry and `L_sym(√D·1) = 0` — no connectivity; the conjugated eigenvector is π-mean-zero |
+| `walkDistribution_dotProduct_degreeInvSqrt_of_eigenpair` | **the exact law-level test-function evolution** (the deferred over-squashing item's own engine): pairing the walk law against `(1/√D)•v` at *any* genuine `L_sym` eigenpair evolves exactly geometrically at `1 − μ` — an equality, not a bound, no `eigvecOf` indexing |
+| `walkDistribution_tvDistance_ge_of_eigenpair` | **the TV spectral floor** `(1/2)·\|1−μ\|^t·\|v x\|/(√D x·c) ≤ TV(ν_t, π)` at a caller-certified sup bound `c` — no connectivity, no aperiodicity: periodic `\|1−μ\| = 1` modes never decay, exactly the chains no `r < 1` ceiling reaches (QA: attained exactly on `K₂` at every time) |
+| `chiSquareDistance_ge_of_eigenpair` | **the χ² spectral floor** `(1−μ)^{2t}·(v x)²/(π x·‖v‖²) ≤ χ²(t,x)` — the √D-conjugated initial centered density pairs with `v` in coordinate exactly `vol/√D x·v x`, and Cauchy–Schwarz extracts that mode's slice of the Parseval identity (QA: attained exactly at every time on both `K₂` and the triangle) |
+| `walkMixingTimeFrom_gt_of_tv_gt` | **the `t_mix` floor gate**: a witness at `ε` plus `ε < TV_t` gives `t < t_mix(ε,x)` — the witness-existence hypothesis load-bearing exactly at the periodic junk corner (fenced in QA) |
+| `pow_lt_of_lt_log_div` | **the strict log-threshold calculus bridge, floor direction** — the downward twin of `pow_mul_le_of_log_threshold`: `t < log b/log r` (negative denominator — the sign of `log` is the trap here too) gives `b < r^t` |
+| `walkMixingTimeFrom_ge_of_eigenpair` | **the log-form spectral floor** `⌈log(\|v x\|/(√D x·2εc))/log(1/\|1−μ\|)⌉ ≤ t_mix(ε,x)` under `0 < \|1−μ\| < 1` and a witness at `ε` (certified from above, e.g. by the ceiling) — the classical eigenvalue lower bound on mixing time, the delivered ceiling's textbook companion; QA hits all three pinned triangle `t_mix` closed forms exactly, completing the two-sided depth bracket |
+| `walkTVPair` / `walkTVUniform` | **LPW's two distances** — the two-start distance `d(t) = max_{x,y} TV(ν_t^x, ν_t^y)` and the worst-start distance `d̄(t) = max_x TV(ν_t^x, π)` (Montenegro–Tetali's, the one whose threshold curve *is* the mixing time), `Finset.sup'` maxima on a finite type, with nonnegativity (delivered 2026-09-01, `proposals/total-variation-mixing-conversion.md`'s deferred uniform-`t_mix` family) |
+| `tvDistance_pow_walkTransitionMatrixTranspose_mulVec_le` | **the sharp Dobrushin contraction** `TV(μ(Pᵀ)ᵗ, ν(Pᵀ)ᵗ) ≤ TV(μ,ν)·d(t)` at equal masses — hypothesis-minimal (no stochasticity, no signs): the sign statistic of the evolved difference paired through the recentering-pairing core against the delivered distinguishing-function bound, avoiding the factor-`2`-losing naive triangle route (QA: the submultiplicativity equalities it powers are attained with *equality* on the triangle) |
+| `walkTVPair_submul` | **submultiplicativity of the two-start distance** — LPW's classical `d(s+t) ≤ d(s)·d(t)`: the Dobrushin contraction at the pair of `s`-step laws, equal masses by walk conservation; pure Markovity, no connectivity, no rates |
+| `stationaryVec_eq_sum_smul_walkDistribution` / `walkTVUniform_le_walkTVPair` | the stationary mixture identity (`π` as the π-weighted mixture of the `t`-step laws) and **`d̄(t) ≤ d(t)`** — the TV-convexity-in-mixtures route, `d̄` vs `d` needing no reversibility |
+| `walkTVUniform_mul_walkTVPair_le` / `walkTVUniform_succ_mul_le` | **the mixed submultiplicativity** `d̄(s+t) ≤ d̄(s)·d(t)` and its iteration **the escalation engine** `d̄((k+1)t₀) ≤ d̄(t₀)·d(t₀)^k` — the certificate-free geometric decay powering the ε-escalation corollary |
+| `walkMixingTime` | **the uniform mixing time** — LPW ch. 20's field-standard worst-case-start `t_mix(ε)`: the least time from which *every* start's law stays within `ε` of stationarity in TV; on a finite type it is the worst start's per-start object (`walkMixingTime_eq_sup_walkMixingTimeFrom`, the sup-inf interchange), with the `bddBelow`/`_le_of_cert`/`_spec` certificate-and-attainment interface mirroring the per-start object's |
+| `walkMixingTimeFrom_le_walkMixingTime` | per-start times are dominated by the uniform time *given a uniform witness* — the witness hypothesis load-bearing (at the junk corner the un-witnessed statement is false; fenced in QA) |
+| `walkMixingTime_le_mul_of_escalation` / `walkMixingTime_le_of_escalation` | **the ε-escalation corollary** — the class's consumer capstone: one evaluation time `t₀` with `d̄(t₀) ≤ ε₀` and `d(t₀) ≤ ρ < 1` yields *every* ε-level mixing time (`t_mix(ε) ≤ (k+1)t₀` at `ε₀·ρᵏ ≤ ε`), LPW's canonical `t_mix := t_mix(1/4)` bridge, in both the `k`-form and the ⌈log⌉ display form |
+| `walkMixingTime_le_of_connected` | **the uniform spectral ceiling** — the per-start ceiling's uniform form: under the depth-form TV certificate's own hypothesis set with start constants uniformly bounded by `C`, every start mixes within `⌈log(√C/(2ε))/log(1/r)⌉` steps |
 
 Supporting additions elsewhere: `Spectral.eigvecOf_dotProduct_one_sub_mulVec`
 (the generic eigenaction at `1 − M`, composed from
@@ -1649,3 +1678,31 @@ proved hard crust; no axiom disposition changed.
 | `contMixingTimeFrom_le_of_cert` | Mixing (continuous time) | the certificate interface: any witness time `T` (`0 ≤ T`, `∀ s ≥ T, TV ≤ ε`) certifies `t_mix(ε) ≤ T` — the discrete `pow_mul_le_of_log_threshold` analogue |
 | `contMixingTimeFrom_le_of_connected` | Mixing (continuous time) | **the spectral ceiling**: `t_mix(ε) ≤ max 0 (ln(√((πx)⁻¹ − 1)/(2ε))/λ₂(L_sym))` — the field-standard continuous-time mixing bound (Montenegro–Tetali; LPW ch. 20), the `max 0` floor the honest two-case shape |
 | `contMixingTimeFrom_anti` | Mixing (continuous time) | ε-antitonicity: `ε ≤ δ` and a witness for `ε` give `t_mix(δ) ≤ t_mix(ε)` — the field-standard monotonicity in the threshold |
+
+### The Poisson bridge (`GraphTheory.Mixing` Poisson-bridge section + `GraphTheory.Heat` generic helpers, 2026-09-01)
+
+The continuous↔discrete mixing-time comparability
+(`proposals/continuous-time-chi-square-mixing.md`'s named follow-on):
+LPW ch. 20's Poissonization — the continuous-time walk law is the
+Poisson mixture of the discrete walk laws — with the TV contraction
+toolkit it yields. All proved hard crust; no axiom disposition
+changed.
+
+| Declaration | Area | Description |
+| --- | --- | --- |
+| `pow_smul_matrix` | Heat (matrix algebra) | scalar-matrix powers: `(c • M) ^ n = c ^ n • M ^ n` — generic algebra consumed by the Poissonization identity |
+| `matrix_exp_smul_one` | Heat (matrix algebra) | **the scalar-matrix exponential**: `e^{cI} = e^c • I` — the scalar half of the Poissonization exponential split `−t(I − P) = tP − tI` |
+| `poissonWeight` | Mixing (Poisson bridge) | the Poisson weight `e^{−t}·tᵏ/k!` — the probability a rate-one clock rings `k` times by `t` (definition) |
+| `poissonWeight_nonneg` / `poissonWeight_hasSum_one` / `poissonWeight_summable` / `poissonWeight_tsum_eq_one` | Mixing (Poisson bridge) | the probability-sequence package: `∑' poissonWeight t = 1` at every time (`e^{−t}·e^{t} = 1`) |
+| `walkDensity_eq_pow_walkTransitionMatrix_mulVec` | Mixing (Poisson bridge) | the discrete density at `k` is `Pᵏ *ᵥ h₀` — the uncentered power identity the mixture consumes |
+| `hasSum_poisson_walkDensity` | Mixing (Poisson bridge) | **the Poissonization identity** (`HasSum` form): `e^{−tL_walk} *ᵥ h₀ = ∑'ₖ poissonWeight t k • h_k` — through `Matrix.exp_add_of_commute` at `−t(I−P) = tP − tI` plus the scalar-matrix exp, the mixing layer's first tsum construction |
+| `contWalkDensity_eq_tsum` / `contWalkDistribution_eq_tsum` | Mixing (Poisson bridge) | the identity at density and law level: `ν^cont_t = ∑'ₖ e^{−t}tᵏ/k! · ν_k` — LPW ch. 20's `H_t = e^{−t}∑ tᵏ/k!·Pᵏ` read at the law |
+| `tvDistance_le_one_of_nonneg_of_sum_eq_one` / `walkDistribution_tvDistance_le_one` | Mixing (Poisson bridge) | the TV diameter of the probability simplex; the walk law's TV distance to stationarity `≤ 1` at every time |
+| `tvDistance_walkTransitionMatrixTranspose_mulVec_le` | Mixing (Poisson bridge) | **the adjoint walk is an ℓ¹-contraction**: `TV(Pᵀμ, Pᵀν) ≤ TV(μ, ν)` — every row of `P` a probability vector, the triangle inequality averaged against them |
+| `tvDistance_walkTransitionMatrixTranspose_pow_mulVec_le` / `walkTransitionMatrixTranspose_pow_mulVec_stationaryVec` / `walkDistribution_add` | Mixing (Poisson bridge) | the iterated contraction, the stationary fixpoint, and the power evolution `ν_{t+s} = (Pᵀ)ˢ *ᵥ ν_t` |
+| `walkDistribution_tvDistance_anti` | Mixing (Poisson bridge) | **discrete TV monotonicity in time**: `TV_{t+s} ≤ TV_t` — the field-standard `d(k)` non-increasing, new to the shelf |
+| `tsum_eq_range_add` | Mixing (Poisson bridge) | splitting a summable series at a threshold `m`: the head–tail decomposition |
+| `tvDistance_tsum_le` | Mixing (Poisson bridge) | **TV convexity in countable mixtures**: the mixture's TV distance ≤ the weight-averaged TV distances — the Poissonization consumer |
+| `contWalkDistribution_tvDistance_le_tsum` | Mixing (Poisson bridge) | the Poisson-averaged bound: `TV_cont(t) ≤ ∑'ₖ e^{−t}tᵏ/k! · TV_disc(k)` |
+| `contWalkDistribution_tvDistance_add_le` | Mixing (Poisson bridge) | **the continuous↔discrete comparability**: `TV_cont(t) ≤ ∑_{k<m} e^{−t}tᵏ/k! + TV_disc(m)` at every threshold `m` — LPW ch. 20's Poissonization comparison, tail term exact (no Chernoff rounding) |
+| `contWalkDistribution_tvDistance_le_of_discreteMixing` | Mixing (Poisson bridge) | **the discrete-certificate transfer**: a discrete mixing certificate (`∀ k ≥ m, TV_disc(k) ≤ ε₁`) plus a Poisson lower-tail bound (`∑_{k<m} e^{−t}tᵏ/k! ≤ ε₂`) give `TV_cont(t) ≤ ε₁ + ε₂` — was the would-be consumer of the still-deferred discrete `t_mix` object (`hmix` is exactly its witness condition); that object is now delivered (`walkMixingTimeFrom`, the Oversmoothing table), and its attainment specification discharges this `hmix` clause |

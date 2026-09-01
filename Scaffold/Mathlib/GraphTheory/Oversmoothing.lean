@@ -109,6 +109,27 @@ Everything here is proved — zero new axioms; the only external inputs
 are the mixing bound's own hypotheses, with the rate `r` supplied by
 the caller exactly as `davis_kahan_sin_theta`'s `δ` is.
 
+## The discrete mixing time (delivered 2026-09-01)
+
+The TV-conversion proposal's deferred `t_mix` object, its consumer gate
+discharged by the Poisson-bridge delivery (`Mixing.lean`'s transfer
+corollary — its `hmix` clause is exactly the object's witness
+condition). `walkMixingTimeFrom A x ε` is the least number of steps
+from which the walk law stays within `ε` of stationarity in total
+variation (Levin–Peres–Wilmer ch. 20's per-start reading, the discrete
+twin of `Mixing.lean`'s `contMixingTimeFrom`), with the certificate
+interface `_le_of_cert`, the attainment specification `_spec` (a
+*minimum* — `ℕ` is well-ordered, so the witness infimum is attained, a
+fact the continuous twin cannot have; this is what discharges the
+transfer corollary's `hmix` clause), the spectral ceiling
+`_le_of_connected` at the depth-form TV certificate's own hypothesis
+set `0 < r < 1` (honest: periodic chains admit no such certificate —
+the `K₂` fence), ε-antitonicity, and the bridge composition
+`contWalkDistribution_tvDistance_le_of_walkMixingTime` (the named
+consumer: the continuous walk's TV bound with the discrete certificate
+supplied by the object itself, only the Poisson lower-tail left to the
+caller).
+
 ## Honest scope
 
 This bounds the **linearized, mean-aggregation propagation operator**
@@ -964,5 +985,1303 @@ theorem walkDistribution_tvDistance_sub_le_of_depth
         tvDistance_triangle _ _ _
     _ ≤ ε + ε := add_le_add h1 h2
     _ = 2 * ε := by ring
+
+/-! ## The discrete mixing time (the `t_mix` object) -/
+
+/-- The **discrete mixing time** from `x` at threshold `ε`: the least
+number of steps from which the walk law stays within `ε` of stationarity
+in total variation — Levin–Peres–Wilmer ch. 20's `t_mix` reading for
+the discrete walk, the twin of the delivered `contMixingTimeFrom`.
+Per-start, mirroring the repo's per-start oversmoothing family; the
+sup-over-starts uniform object is a trivial composition left
+consumer-gated. Discrete TV monotonicity (`walkDistribution_tvDistance_anti`)
+makes this the least `t` with `TV_t ≤ ε` as well — the witness set is
+upward closed. Junk corner: at an unreachable `ε` the time set is empty
+and `sInf ∅ = 0` on `ℕ` (`Nat.sInf_empty`) — no theorem below
+instantiates there (the ceiling's `0 < r < 1` rate certificate is exactly
+what periodic chains cannot discharge; see the `K₂` fence
+`k2_mix_junk_corner_QA`). QA: the exact closed forms
+`tri_mix_eq_third_QA`, `tri_mix_eq_sixth_QA`. -/
+noncomputable def walkMixingTimeFrom (A : WAdj (V := V)) (x : V) (ε : ℝ) : ℕ :=
+  sInf {t : ℕ | ∀ s : ℕ, t ≤ s →
+    tvDistance (walkDistribution A s x) (stationaryVec A) ≤ ε}
+
+/-- The witness-time set is bounded below by `0` by construction. -/
+theorem walkMixingTimeFrom_bddBelow (A : WAdj (V := V)) (x : V) (ε : ℝ) :
+    BddBelow {t : ℕ | ∀ s : ℕ, t ≤ s →
+      tvDistance (walkDistribution A s x) (stationaryVec A) ≤ ε} :=
+  ⟨0, fun _ _ => Nat.zero_le _⟩
+
+/-- Any witness time certifies the mixing time: `∀ s ≥ T, TV ≤ ε` give
+`t_mix(ε) ≤ T` — the reusable certificate interface, the discrete twin
+of `contMixingTimeFrom_le_of_cert`. -/
+theorem walkMixingTimeFrom_le_of_cert (A : WAdj (V := V)) (x : V)
+    {ε : ℝ} (T : ℕ)
+    (hT : ∀ s : ℕ, T ≤ s →
+      tvDistance (walkDistribution A s x) (stationaryVec A) ≤ ε) :
+    walkMixingTimeFrom A x ε ≤ T :=
+  csInf_le (walkMixingTimeFrom_bddBelow A x ε) hT
+
+/-- **The mixing time is attained** — the discrete object's own
+specification, a fact the continuous twin cannot have: `ℕ` is
+well-ordered, so the infimum of a nonempty witness set is a *member* of
+it (`csInf_mem`), and membership is exactly the uniform bound. Given any
+witness, `t_mix` itself satisfies `∀ s ≥ t_mix, TV_s ≤ ε` — this is the
+statement that discharges the Poisson bridge transfer corollary's `hmix`
+clause, closing the recorded consumer loop. -/
+theorem walkMixingTimeFrom_spec (A : WAdj (V := V)) (x : V) {ε : ℝ}
+    (hne : ∃ t : ℕ, ∀ s : ℕ, t ≤ s →
+      tvDistance (walkDistribution A s x) (stationaryVec A) ≤ ε) :
+    ∀ s : ℕ, walkMixingTimeFrom A x ε ≤ s →
+      tvDistance (walkDistribution A s x) (stationaryVec A) ≤ ε :=
+  csInf_mem hne
+
+/-- **The spectral ceiling** — the field-standard discrete mixing bound
+in ceiling form: under the depth-form TV certificate's own hypothesis
+set (connected, rate certificate `0 < r < 1`),
+`t_mix(ε) ≤ ⌈log(√C/(2ε))/log(1/r)⌉`. The honest strictness: the non-lazy
+discrete walk never mixes on periodic chains, and no `r < 1` certificate
+exists there (the `K₂` fence) — the hypothesis is load-bearing, not
+decorative. The big-`ε` case is absorbed: a negative threshold ceilings
+to `⌈·⌉ = 0`, and the depth certificate at `s = 0` carries it. QA: the
+ceiling attained exactly on the triangle at `ε = √2/4`
+(`tri_mix_ceiling_attained_QA`) and computed with honest slack at
+`ε = 1/6` (`tri_mix_ceiling_slack_QA`). -/
+theorem walkMixingTimeFrom_le_of_connected (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (hconn : (supportGraph A hA).Connected) (r ε : ℝ)
+    (hr : 0 < r) (hr1 : r < 1) (hε : 0 < ε)
+    (hrate : ∀ i : V, eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i ≠ 0 →
+      |1 - eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i| ≤ r)
+    (x : V) :
+    walkMixingTimeFrom A x ε
+      ≤ Nat.ceil (Real.log (Real.sqrt ((stationaryVec A x)⁻¹ - 1)
+          / (2 * ε)) / Real.log (1 / r)) := by
+  set thr : ℝ := Real.log (Real.sqrt ((stationaryVec A x)⁻¹ - 1)
+    / (2 * ε)) / Real.log (1 / r) with hthrdef
+  refine walkMixingTimeFrom_le_of_cert A x (Nat.ceil thr) ?_
+  intro s hs
+  exact walkDistribution_tvDistance_le_of_depth A hA hnn hd hconn r ε
+    hr hr1 hε hrate s x
+    (le_trans (Nat.le_ceil thr) (by exact_mod_cast hs))
+
+/-- **ε-antitonicity**: a stricter threshold takes at least as long —
+`t_mix(δ) ≤ t_mix(ε)` whenever `ε ≤ δ` and `ε` is reachable from `x`
+(the witness hypothesis the connected ceiling always discharges).
+Twin of `contMixingTimeFrom_anti`. QA: `tri_mix_anti_QA`. -/
+theorem walkMixingTimeFrom_anti (A : WAdj (V := V)) (x : V) {ε δ : ℝ}
+    (hεδ : ε ≤ δ)
+    (hne : ∃ t : ℕ, ∀ s : ℕ, t ≤ s →
+      tvDistance (walkDistribution A s x) (stationaryVec A) ≤ ε) :
+    walkMixingTimeFrom A x δ ≤ walkMixingTimeFrom A x ε :=
+  csInf_le_csInf (walkMixingTimeFrom_bddBelow A x δ) hne
+    (fun _ ht => fun s hs => (ht s hs).trans hεδ)
+
+/-- **The bridge composition** — the discrete `t_mix` object's named
+consumer: the Poisson-bridge transfer corollary with its `hmix` clause
+*discharged by the object*. On a connected graph with a rate certificate
+`0 < r < 1`, if the Poisson lower-tail weight below `t_mix(ε₁)` at time
+`t` is at most `ε₂`, then the continuous walk is within `ε₁ + ε₂` of
+stationarity at time `t`. The caller supplies only the Poisson tail —
+the discrete certificate is the object's own attainment. QA:
+`tri_bridge_mix_QA` re-derives `tri_mixing_transfer_QA`'s bound `5/24`
+through this theorem with no hand-supplied certificate. -/
+theorem contWalkDistribution_tvDistance_le_of_walkMixingTime
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V]
+    (hconn : (supportGraph A hA).Connected) (r : ℝ)
+    (hr : 0 < r) (hr1 : r < 1)
+    (hrate : ∀ i : V, eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i ≠ 0 →
+      |1 - eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i| ≤ r)
+    {ε₁ ε₂ : ℝ} (hε₁ : 0 < ε₁) (x : V) {t : ℝ} (ht : 0 ≤ t)
+    (htail : ∑ k in Finset.range (walkMixingTimeFrom A x ε₁),
+        poissonWeight t k ≤ ε₂) :
+    tvDistance (contWalkDistribution A t x) (stationaryVec A)
+      ≤ ε₁ + ε₂ := by
+  have hthr : Real.log (Real.sqrt ((stationaryVec A x)⁻¹ - 1)
+      / (2 * ε₁)) / Real.log (1 / r)
+      ≤ ((Nat.ceil (Real.log (Real.sqrt ((stationaryVec A x)⁻¹ - 1)
+        / (2 * ε₁)) / Real.log (1 / r)) : ℕ) : ℝ) :=
+    Nat.le_ceil _
+  have hwit : ∃ T : ℕ, ∀ s : ℕ, T ≤ s →
+      tvDistance (walkDistribution A s x) (stationaryVec A) ≤ ε₁ :=
+    ⟨Nat.ceil _, fun s hs =>
+      walkDistribution_tvDistance_le_of_depth A hA hnn hd hconn r ε₁
+        hr hr1 hε₁ hrate s x
+        (le_trans hthr (by exact_mod_cast hs))⟩
+  exact contWalkDistribution_tvDistance_le_of_discreteMixing A hA hnn hd ht
+    (walkMixingTimeFrom A x ε₁) x
+    (walkMixingTimeFrom_spec A x hwit) htail
+/-!
+## The uniform mixing time and the submultiplicativity class
+
+LPW ch. 20's field-standard worst-case-start reading of `t_mix`
+(`walkMixingTime` — Montenegro–Tetali's distance `d̄`), together with
+the submultiplicativity class that needs it: the two-start distance
+`walkTVPair` (LPW's `d(t)`), the sharp Dobrushin contraction
+`TV(μ(Pᵀ)ᵗ, ν(Pᵀ)ᵗ) ≤ TV(μ,ν) · d(t)` at equal masses, the classical
+`d(s+t) ≤ d(s)d(t)` and `d̄(s+t) ≤ d̄(s)d(t)`, and the ε-escalation
+corollary — one certified evaluation time yields every ε-level mixing
+time (LPW's `t_mix := t_mix(1/4)` convention's engine). Pure hard
+crust: no spectra, no connectivity anywhere in the contraction chain.
+-/
+
+section UniformMixing
+
+
+omit [DecidableEq V] in
+/-- **The pairing bound** — the engine of the sharp Dobrushin
+contraction: for a zero-mass signed vector `c`, pairing the positive
+and negative parts against any `g` bounds the pairing by *half* the
+total absolute mass times the oscillation bound `D` of `g`. The
+recentering at a minimum of `g` (which exists: `V` is finite) is what
+makes the positive-part split valid; the naive triangle route loses a
+factor of `2` exactly here. Sharp: at `c = (1, −1)`, `g = (0, 1)` the
+bound is attained. -/
+private theorem abs_sum_mul_le_of_pairwise [Nonempty V] {c g : V → ℝ}
+    {D : ℝ} (hD : ∀ z z', |g z - g z'| ≤ D) (hc : ∑ z, c z = 0) :
+    |∑ z, c z * g z| ≤ ((∑ z, |c z|) / 2) * D := by
+  obtain ⟨z₀, hz₀⟩ := Finite.exists_min (α := V) g
+  have hm : ∀ z, 0 ≤ g z - g z₀ := fun z => sub_nonneg.2 (hz₀ z)
+  have hD' : ∀ z, g z - g z₀ ≤ D := fun z =>
+    le_trans (le_abs_self _) (hD z z₀)
+  have hone : ∀ cc : V → ℝ, ∑ z, cc z = 0 →
+      ∑ z, cc z * g z ≤ ((∑ z, |cc z|) / 2) * D := by
+    intro cc hcc
+    have hzero : ∑ z, cc z * g z₀ = 0 := by
+      rw [← Finset.sum_mul, hcc]
+      ring
+    have hrc : ∑ z, cc z * g z = ∑ z, cc z * (g z - g z₀) := by
+      have heq : ∑ z, cc z * (g z - g z₀)
+          = ∑ z, cc z * g z - ∑ z, cc z * g z₀ := by
+        rw [← Finset.sum_sub_distrib]
+        exact Finset.sum_congr rfl fun z _ => by ring
+      rw [heq, hzero, sub_zero]
+    rw [hrc]
+    have hsplit := Finset.sum_filter_add_sum_filter_not
+      (Finset.univ : Finset V) (fun z => 0 < cc z)
+      (fun z => cc z * (g z - g z₀))
+    have hneg : ∑ z ∈ (Finset.univ : Finset V).filter (fun z => ¬ 0 < cc z),
+          cc z * (g z - g z₀) ≤ 0 := by
+      refine Finset.sum_nonpos fun z hz => ?_
+      have hcz : cc z ≤ 0 := by simpa [Finset.mem_filter] using hz
+      rw [mul_comm]
+      exact mul_nonpos_of_nonneg_of_nonpos (hm z) hcz
+    have hpossum : ∑ z ∈ (Finset.univ : Finset V).filter (fun z => 0 < cc z),
+          cc z = (∑ z, |cc z|) / 2 := by
+      have hposabs : ∑ z ∈ (Finset.univ : Finset V).filter
+            (fun z => 0 < cc z), |cc z|
+          = ∑ z ∈ (Finset.univ : Finset V).filter (fun z => 0 < cc z), cc z :=
+        Finset.sum_congr rfl fun z hz =>
+          abs_of_pos (by simpa [Finset.mem_filter] using hz)
+      have hnegabs : ∑ z ∈ (Finset.univ : Finset V).filter
+            (fun z => ¬ 0 < cc z), |cc z|
+          = ∑ z ∈ (Finset.univ : Finset V).filter (fun z => ¬ 0 < cc z),
+              (-cc z) := by
+        refine Finset.sum_congr rfl fun z hz => ?_
+        have hcz : cc z ≤ 0 := by simpa [Finset.mem_filter] using hz
+        rw [abs_of_nonpos hcz]
+      have hsum := Finset.sum_filter_add_sum_filter_not
+        (Finset.univ : Finset V) (fun z => 0 < cc z) (fun z => |cc z|)
+      have huniv : ∑ z ∈ (Finset.univ : Finset V).filter (fun z => 0 < cc z),
+            cc z + ∑ z ∈ (Finset.univ : Finset V).filter
+              (fun z => ¬ 0 < cc z), cc z = 0 := by
+        rw [Finset.sum_filter_add_sum_filter_not
+          (Finset.univ : Finset V) (fun z => 0 < cc z) cc]
+        exact hcc
+      have hnegsum : ∑ z ∈ (Finset.univ : Finset V).filter
+            (fun z => ¬ 0 < cc z), (-cc z)
+          = ∑ z ∈ (Finset.univ : Finset V).filter (fun z => 0 < cc z),
+              cc z := by
+        rw [Finset.sum_neg_distrib]
+        have hpair : ∑ z ∈ (Finset.univ : Finset V).filter
+              (fun z => ¬ 0 < cc z), cc z
+            = -∑ z ∈ (Finset.univ : Finset V).filter
+              (fun z => 0 < cc z), cc z := by linarith [huniv]
+        rw [hpair]
+        exact neg_neg _
+      rw [← hsum, hposabs, hnegabs, hnegsum]
+      ring
+    have hle : ∑ z, cc z * (g z - g z₀)
+        ≤ ∑ z ∈ (Finset.univ : Finset V).filter (fun z => 0 < cc z),
+          cc z * (g z - g z₀) := by linarith [hsplit, hneg]
+    calc ∑ z, cc z * (g z - g z₀)
+        ≤ ∑ z ∈ (Finset.univ : Finset V).filter (fun z => 0 < cc z),
+              cc z * (g z - g z₀) := hle
+      _ ≤ ∑ z ∈ (Finset.univ : Finset V).filter (fun z => 0 < cc z),
+              cc z * D :=
+          Finset.sum_le_sum fun z hz =>
+            mul_le_mul_of_nonneg_left (hD' z)
+              (le_of_lt (by simpa [Finset.mem_filter] using hz : 0 < cc z))
+      _ = (∑ z ∈ (Finset.univ : Finset V).filter (fun z => 0 < cc z),
+              cc z) * D := by
+          rw [← Finset.sum_mul]
+      _ = ((∑ z, |cc z|) / 2) * D := by rw [hpossum]
+  have hmain := hone c hc
+  have hnegc : ∑ z, (-c z) = 0 := by
+    rw [Finset.sum_neg_distrib, hc, neg_zero]
+  have hmain' := hone (-c) hnegc
+  have habsneg : ∑ z, |(-c) z| = ∑ z, |c z| :=
+    Finset.sum_congr rfl fun z _ => abs_neg _
+  rw [habsneg] at hmain'
+  have hval : ∑ z, (-c z) * g z = -∑ z, c z * g z := by
+    rw [← Finset.sum_neg_distrib]
+    exact Finset.sum_congr rfl fun z _ => by ring
+  simp only [Pi.neg_apply] at hmain'
+  rw [hval] at hmain'
+  exact abs_le.2 ⟨by linarith, hmain⟩
+
+/-- **The two-start walk distance** — Levin–Peres–Wilmer's `d(t)`: the
+worst-case total-variation distance between the `t`-step laws from two
+starts, `d(t) = max_{x,y} TV(ν_t^x, ν_t^y)`. The distance the
+submultiplicativity class lives on; on a finite type it is a genuine
+maximum (`Finset.sup'`). -/
+noncomputable def walkTVPair (A : WAdj (V := V)) [Nonempty V] (t : ℕ) : ℝ :=
+  (Finset.univ : Finset (V × V)).sup'
+    ⟨(‹Nonempty V›.some, ‹Nonempty V›.some), Finset.mem_univ _⟩ fun p =>
+    tvDistance (walkDistribution A t p.1) (walkDistribution A t p.2)
+
+/-- **The worst-start walk distance** — the `d̄(t)` of the mixing
+literature: the worst-case total-variation distance from the `t`-step
+law to stationarity, `d̄(t) = max_x TV(ν_t^x, π)` — Montenegro–Tetali's
+distance, the one whose threshold curve *is* the mixing time. -/
+noncomputable def walkTVUniform (A : WAdj (V := V)) [Nonempty V] (t : ℕ) : ℝ :=
+  (Finset.univ : Finset V).sup'
+    ⟨‹Nonempty V›.some, Finset.mem_univ _⟩ fun x =>
+    tvDistance (walkDistribution A t x) (stationaryVec A)
+
+/-- Both distances are nonnegative — the pointwise terms are. -/
+theorem walkTVPair_nonneg (A : WAdj (V := V)) [Nonempty V] (t : ℕ) :
+    0 ≤ walkTVPair A t :=
+  le_trans (tvDistance_nonneg _ _)
+    (Finset.le_sup' (f := fun p : V × V =>
+      tvDistance (walkDistribution A t p.1) (walkDistribution A t p.2))
+      (Finset.mem_univ (‹Nonempty V›.some, ‹Nonempty V›.some)))
+
+theorem walkTVUniform_nonneg (A : WAdj (V := V)) [Nonempty V] (t : ℕ) :
+    0 ≤ walkTVUniform A t :=
+  le_trans (tvDistance_nonneg (walkDistribution A t ‹Nonempty V›.some)
+      (stationaryVec A))
+    (Finset.le_sup' (f := fun x =>
+      tvDistance (walkDistribution A t x) (stationaryVec A))
+      (Finset.mem_univ ‹Nonempty V›.some))
+
+omit [DecidableEq V] in
+/-- **The Dobrushin core at a sign statistic** — evolved TV through
+the pairing, at the statistic the caller supplies: `2 · TV(Mμ, Mν)`
+is the ℓ¹ norm of the evolved difference, evaluated through the sign
+statistic `s` as a pairing `∑ (μ − ν) g` against the evolved
+statistic `g`, then paired (the private pairing lemma above) against
+`g`'s oscillation bound `D`. -/
+private theorem tvDistance_mulVec_le_pair [Nonempty V]
+    {M : Matrix V V ℝ} {μ ν : V → ℝ} (s : V → ℝ)
+    (hsval : ∀ w, s w * ((M *ᵥ (μ - ν)) w) = |((M *ᵥ (μ - ν)) w)|)
+    (D : ℝ) (hosc : ∀ z z' : V,
+      |∑ w, M w z * s w - ∑ w, M w z' * s w| ≤ D)
+    (hmass : ∑ i, μ i = ∑ i, ν i) :
+    tvDistance (M *ᵥ μ) (M *ᵥ ν) ≤ tvDistance μ ν * (D / 2) := by
+  have hmass0 : ∑ z, (μ - ν) z = 0 := by
+    simp only [Pi.sub_apply]
+    rw [Finset.sum_sub_distrib, hmass, sub_self]
+  have hpairing : ∑ w, |((M *ᵥ (μ - ν)) w)|
+      = ∑ z, (μ - ν) z * (∑ w, M w z * s w) := by
+    calc ∑ w, |((M *ᵥ (μ - ν)) w)|
+        = ∑ w, s w * ((M *ᵥ (μ - ν)) w) :=
+          Finset.sum_congr rfl fun w _ => (hsval w).symm
+      _ = ∑ w, ∑ z, s w * (M w z * (μ - ν) z) := by
+          refine Finset.sum_congr rfl fun w _ => ?_
+          simp only [Matrix.mulVec, Matrix.dotProduct]
+          rw [Finset.mul_sum]
+      _ = ∑ z, ∑ w, s w * (M w z * (μ - ν) z) := Finset.sum_comm
+      _ = ∑ z, (μ - ν) z * (∑ w, M w z * s w) := by
+          refine Finset.sum_congr rfl fun z _ => ?_
+          rw [Finset.mul_sum]
+          exact Finset.sum_congr rfl fun w _ => by ring
+  have hp := abs_sum_mul_le_of_pairwise (c := μ - ν)
+    (g := fun z => ∑ w, M w z * s w) hosc hmass0
+  have hL1 : ∑ z, |(μ - ν) z| = 2 * tvDistance μ ν := by
+    simp only [Pi.sub_apply, tvDistance]
+    ring
+  have hsplit : ∀ w : V, (M *ᵥ μ) w - (M *ᵥ ν) w = ((M *ᵥ (μ - ν)) w) := by
+    intro w
+    rw [← Pi.sub_apply, Matrix.mulVec_sub]
+  calc tvDistance (M *ᵥ μ) (M *ᵥ ν)
+      = (1 / 2) * ∑ w, |((M *ᵥ (μ - ν)) w)| := by
+          rw [tvDistance]
+          congr 1
+          exact Finset.sum_congr rfl fun w _ => by rw [hsplit w]
+    _ = (1 / 2) * ∑ z, (μ - ν) z * (∑ w, M w z * s w) := by
+          rw [hpairing]
+    _ ≤ (1 / 2) * |∑ z, (μ - ν) z * (∑ w, M w z * s w)| := by
+          exact mul_le_mul_of_nonneg_left (le_abs_self _) (by norm_num)
+    _ ≤ (1 / 2) * (((∑ z, |(μ - ν) z|) / 2) * D) := by
+          exact mul_le_mul_of_nonneg_left hp (by norm_num)
+    _ = tvDistance μ ν * (D / 2) := by
+          rw [hL1]
+          ring
+
+/-- **The sharp Dobrushin contraction** — the engine of the whole
+submultiplicativity class: applying the `t`-step walk evolution to two
+equal-mass vectors contracts their TV distance by the two-start
+distance `d(t)` itself, `TV(μ(Pᵀ)ᵗ, ν(Pᵀ)ᵗ) ≤ TV(μ, ν) · d(t)`.
+Hypothesis-minimal — no stochasticity, no signs, only equal masses
+(the recentering mass-zero condition). Proof: the sign statistic of
+the evolved difference, transported to a pairing against the evolved
+statistic whose oscillation is bounded by `2 d(t)` through the
+delivered distinguishing-function bound (`|s| ≤ 1`), closed by the
+private pairing core. -/
+theorem tvDistance_pow_walkTransitionMatrixTranspose_mulVec_le
+    (A : WAdj (V := V)) [Nonempty V] (t : ℕ) (μ ν : V → ℝ)
+    (hmass : ∑ i, μ i = ∑ i, ν i) :
+    tvDistance ((walkTransitionMatrix A)ᵀ ^ t *ᵥ μ)
+        ((walkTransitionMatrix A)ᵀ ^ t *ᵥ ν)
+      ≤ tvDistance μ ν * walkTVPair A t := by
+  have hrow : ∀ (z w : V), walkDistribution A t z w
+      = ((walkTransitionMatrix A)ᵀ ^ t) w z := by
+    intro z w
+    rw [walkDistribution]
+    simp [Matrix.mulVec, Matrix.dotProduct, Pi.single_apply]
+  set s : V → ℝ :=
+    fun w => if 0 ≤ (((walkTransitionMatrix A)ᵀ ^ t) *ᵥ (μ - ν)) w then 1 else -1 with hsdef
+  have hsabs : ∀ w, |s w| ≤ 1 := by
+    intro w
+    by_cases h : 0 ≤ (((walkTransitionMatrix A)ᵀ ^ t) *ᵥ (μ - ν)) w
+    · simp only [hsdef, if_pos h]
+      norm_num
+    · simp only [hsdef, if_neg h]
+      norm_num
+  have hsval : ∀ w, s w * (((walkTransitionMatrix A)ᵀ ^ t) *ᵥ (μ - ν)) w
+      = |(((walkTransitionMatrix A)ᵀ ^ t) *ᵥ (μ - ν)) w| := by
+    intro w
+    by_cases h : 0 ≤ (((walkTransitionMatrix A)ᵀ ^ t) *ᵥ (μ - ν)) w
+    · simp only [hsdef, if_pos h, abs_of_nonneg h]
+      ring
+    · simp only [hsdef, if_neg h, abs_of_neg (lt_of_not_ge h)]
+      ring
+  have hosc : ∀ z z' : V,
+      |(∑ w, ((walkTransitionMatrix A)ᵀ ^ t) w z * s w)
+        - ∑ w, ((walkTransitionMatrix A)ᵀ ^ t) w z' * s w|
+        ≤ 2 * walkTVPair A t := by
+    intro z z'
+    have hgg : (∑ w, ((walkTransitionMatrix A)ᵀ ^ t) w z * s w)
+        - ∑ w, ((walkTransitionMatrix A)ᵀ ^ t) w z' * s w
+        = ∑ w, (walkDistribution A t z w - walkDistribution A t z' w) * s w := by
+      rw [← Finset.sum_sub_distrib]
+      refine Finset.sum_congr rfl fun w _ => ?_
+      rw [hrow z w, hrow z' w]
+      ring
+    have hd := tvDistance_ge_half_abs_sum
+      (μ := walkDistribution A t z) (ν := walkDistribution A t z') s hsabs
+    rw [hgg]
+    have hsup : tvDistance (walkDistribution A t z)
+        (walkDistribution A t z') ≤ walkTVPair A t :=
+      Finset.le_sup'
+        (f := fun p : V × V =>
+          tvDistance (walkDistribution A t p.1) (walkDistribution A t p.2))
+        (Finset.mem_univ (z, z'))
+    calc |∑ w, (walkDistribution A t z w - walkDistribution A t z' w) * s w|
+        ≤ 2 * tvDistance (walkDistribution A t z)
+            (walkDistribution A t z') := by linarith
+      _ ≤ 2 * walkTVPair A t := mul_le_mul_of_nonneg_left hsup (by norm_num)
+  have hcore := tvDistance_mulVec_le_pair
+    (M := (walkTransitionMatrix A)ᵀ ^ t) s hsval (2 * walkTVPair A t) hosc hmass
+  calc tvDistance ((walkTransitionMatrix A)ᵀ ^ t *ᵥ μ)
+        ((walkTransitionMatrix A)ᵀ ^ t *ᵥ ν)
+      ≤ tvDistance μ ν * (2 * walkTVPair A t / 2) := hcore
+    _ = tvDistance μ ν * walkTVPair A t := by ring
+
+
+/-- **Submultiplicativity of the two-start distance** — LPW's
+classical `d(s + t) ≤ d(s) · d(t)`: the Dobrushin contraction
+instantiated at the pair of `s`-step laws, with the equal-mass
+hypothesis discharged by mass conservation of the walk evolution. No
+connectivity, no rates — pure Markovity. -/
+theorem walkTVPair_submul (A : WAdj (V := V)) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (s t : ℕ) :
+    walkTVPair A (s + t) ≤ walkTVPair A s * walkTVPair A t := by
+  refine Finset.sup'_le
+    (⟨(‹Nonempty V›.some, ‹Nonempty V›.some), Finset.mem_univ _⟩ :
+      (Finset.univ : Finset (V × V)).Nonempty)
+    (f := fun p : V × V =>
+      tvDistance (walkDistribution A (s + t) p.1)
+        (walkDistribution A (s + t) p.2))
+    ?_
+  intro p _
+  have hev1 : walkDistribution A (s + t) p.1
+      = (walkTransitionMatrix A)ᵀ ^ t *ᵥ walkDistribution A s p.1 :=
+    walkDistribution_add A s t p.1
+  have hev2 : walkDistribution A (s + t) p.2
+      = (walkTransitionMatrix A)ᵀ ^ t *ᵥ walkDistribution A s p.2 :=
+    walkDistribution_add A s t p.2
+  have hmass : ∑ i, walkDistribution A s p.1 i
+      = ∑ i, walkDistribution A s p.2 i := by
+    rw [sum_walkDistribution A hd s p.1, sum_walkDistribution A hd s p.2]
+  calc tvDistance (walkDistribution A (s + t) p.1)
+          (walkDistribution A (s + t) p.2)
+        = tvDistance ((walkTransitionMatrix A)ᵀ ^ t *ᵥ walkDistribution A s p.1)
+            ((walkTransitionMatrix A)ᵀ ^ t *ᵥ walkDistribution A s p.2) := by
+          rw [hev1, hev2]
+      _ ≤ tvDistance (walkDistribution A s p.1) (walkDistribution A s p.2)
+            * walkTVPair A t :=
+          tvDistance_pow_walkTransitionMatrixTranspose_mulVec_le A t _ _ hmass
+      _ ≤ walkTVPair A s * walkTVPair A t := by
+          refine mul_le_mul_of_nonneg_right ?_ (walkTVPair_nonneg A t)
+          exact Finset.le_sup'
+            (f := fun p : V × V =>
+              tvDistance (walkDistribution A s p.1) (walkDistribution A s p.2))
+            (Finset.mem_univ p)
+
+/-- **The stationary mixture identity** — stationarity read as: `π` is
+the `π`-weighted mixture of the `t`-step laws (its own defining
+fixed-point property, expanded through the evolution's linearity). The
+engine of `d̄ ≤ d`. -/
+theorem stationaryVec_eq_sum_smul_walkDistribution
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (t : ℕ) :
+    ∑ y, stationaryVec A y • walkDistribution A t y = stationaryVec A := by
+  have hlin : (walkTransitionMatrix A)ᵀ ^ t *ᵥ
+        (∑ y, stationaryVec A y • (Pi.single y (1 : ℝ) : V → ℝ))
+      = ∑ y, stationaryVec A y • ((walkTransitionMatrix A)ᵀ ^ t
+          *ᵥ (Pi.single y (1 : ℝ) : V → ℝ)) := by
+    funext w
+    simp only [Matrix.mulVec, Matrix.dotProduct, Finset.sum_apply,
+      Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
+    rw [Finset.sum_comm]
+    exact Finset.sum_congr rfl fun y _ =>
+      Finset.sum_congr rfl fun x _ => by ring
+  have hmass : ∑ y, stationaryVec A y • (Pi.single y (1 : ℝ) : V → ℝ)
+      = stationaryVec A := by
+    funext w
+    simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Pi.single_apply,
+      mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
+  calc ∑ y, stationaryVec A y • walkDistribution A t y
+      = ∑ y, stationaryVec A y • ((walkTransitionMatrix A)ᵀ ^ t
+            *ᵥ (Pi.single y (1 : ℝ) : V → ℝ)) := by
+        refine Finset.sum_congr rfl fun y _ => ?_
+        rw [walkDistribution]
+    _ = (walkTransitionMatrix A)ᵀ ^ t *ᵥ
+          (∑ y, stationaryVec A y • (Pi.single y (1 : ℝ) : V → ℝ)) := hlin.symm
+    _ = (walkTransitionMatrix A)ᵀ ^ t *ᵥ stationaryVec A := by rw [hmass]
+    _ = stationaryVec A :=
+        walkTransitionMatrixTranspose_pow_mulVec_stationaryVec A hA hd t
+
+omit [DecidableEq V] in
+/-- **Finite TV convexity in mixtures**: the TV distance to a convex
+combination dominates the convex combination of the TV distances —
+the finite form of the Poisson bridge's countable convexity, proved
+directly by the pointwise triangle inequality. -/
+private theorem tvDistance_le_sum_smul {ν : V → ℝ} {w : V → ℝ} {μ : V → V → ℝ}
+    (hw : ∀ y, 0 ≤ w y) (hw1 : ∑ y, w y = 1) :
+    tvDistance ν (∑ y, w y • μ y) ≤ ∑ y, w y * tvDistance ν (μ y) := by
+  have hpt : ∀ w' : V, ν w' - (∑ y, w y • μ y) w'
+      = ∑ y, w y * (ν w' - μ y w') := by
+    intro w'
+    have h1 : (∑ y, w y • μ y) w' = ∑ y, w y * μ y w' := by
+      rw [Finset.sum_apply]
+      exact Finset.sum_congr rfl fun y _ => by rw [Pi.smul_apply, smul_eq_mul]
+    have h2 : ∑ y, w y * (ν w' - μ y w')
+        = (∑ y, w y) * ν w' - ∑ y, w y * μ y w' := by
+      have hsplit : ∑ y, w y * (ν w' - μ y w')
+          = ∑ y, (w y * ν w' - w y * μ y w') :=
+        Finset.sum_congr rfl fun y _ => (mul_sub _ _ _)
+      rw [hsplit, Finset.sum_sub_distrib, ← Finset.sum_mul]
+    rw [h1, h2, hw1, one_mul]
+  have hterm : ∀ (y w' : V), |w y * (ν w' - μ y w')| = w y * |ν w' - μ y w'| := by
+    intro y w'
+    rw [abs_mul, abs_of_nonneg (hw y)]
+  calc tvDistance ν (∑ y, w y • μ y)
+      = (1 / 2) * ∑ w', |∑ y, w y * (ν w' - μ y w')| := by
+          rw [tvDistance]
+          congr 1
+          exact Finset.sum_congr rfl fun w' _ => by rw [hpt w']
+    _ ≤ (1 / 2) * ∑ w', ∑ y, |w y * (ν w' - μ y w')| := by
+          refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
+          exact Finset.sum_le_sum fun w' _ => Finset.abs_sum_le_sum_abs _ _
+    _ = (1 / 2) * ∑ y, ∑ w', w y * |ν w' - μ y w'| := by
+          refine congrArg ((1 / 2) * ·) ?_
+          rw [Finset.sum_comm]
+          exact Finset.sum_congr rfl fun y _ =>
+            Finset.sum_congr rfl fun w' _ => by rw [hterm y w']
+    _ = (1 / 2) * ∑ y, w y * (∑ w', |ν w' - μ y w'|) := by
+          refine congrArg ((1 / 2) * ·) ?_
+          exact Finset.sum_congr rfl fun y _ => by rw [Finset.mul_sum]
+    _ ≤ (1 / 2) * ∑ y, w y * (2 * tvDistance ν (μ y)) := by
+          refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
+          exact Finset.sum_le_sum fun y _ =>
+            mul_le_mul_of_nonneg_left (le_of_eq (by
+              simp only [Pi.sub_apply, tvDistance]
+              ring)) (hw y)
+    _ = ∑ y, w y * tvDistance ν (μ y) := by
+          calc (1 / 2 : ℝ) * ∑ y, w y * (2 * tvDistance ν (μ y))
+              = (1 / 2 : ℝ) * ((∑ y, w y * tvDistance ν (μ y)) * 2) := by
+                  have hterm2 : ∑ y, w y * (2 * tvDistance ν (μ y))
+                      = (∑ y, w y * tvDistance ν (μ y)) * 2 := by
+                    rw [Finset.sum_mul]
+                    exact Finset.sum_congr rfl fun y _ => by ring
+                  rw [hterm2]
+            _ = ∑ y, w y * tvDistance ν (μ y) := by ring
+
+/-- **The worst-start distance is dominated by the two-start
+distance** — the classical `d̄(t) ≤ d(t)`: the TV distance to the
+stationary mixture is at most the mixture of the pairwise TV
+distances (`d̄` vs `d` need no reversibility here — the mixture reads
+`π` as a stationary combination of the laws). -/
+theorem walkTVUniform_le_walkTVPair (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (t : ℕ) :
+    walkTVUniform A t ≤ walkTVPair A t := by
+  have hnnπ : ∀ y, 0 ≤ stationaryVec A y := fun y =>
+    le_of_lt (stationaryVec_pos A hd y)
+  have hstat : ∑ y, stationaryVec A y • walkDistribution A t y
+      = stationaryVec A :=
+    stationaryVec_eq_sum_smul_walkDistribution A hA hd t
+  refine Finset.sup'_le
+    (⟨‹Nonempty V›.some, Finset.mem_univ _⟩ :
+      (Finset.univ : Finset V).Nonempty)
+    (f := fun x => tvDistance (walkDistribution A t x) (stationaryVec A))
+    fun x _ => ?_
+  have hcvx := tvDistance_le_sum_smul (ν := walkDistribution A t x)
+    (w := stationaryVec A) (μ := walkDistribution A t) hnnπ
+    (sum_stationaryVec A hd)
+  rw [hstat] at hcvx
+  calc tvDistance (walkDistribution A t x) (stationaryVec A)
+      ≤ ∑ y, stationaryVec A y * tvDistance (walkDistribution A t x)
+            (walkDistribution A t y) := hcvx
+    _ ≤ ∑ y, stationaryVec A y * walkTVPair A t := by
+          exact Finset.sum_le_sum fun y _ => mul_le_mul_of_nonneg_left
+            (Finset.le_sup'
+              (f := fun p : V × V =>
+                tvDistance (walkDistribution A t p.1)
+                  (walkDistribution A t p.2))
+              (Finset.mem_univ (x, y))) (hnnπ y)
+    _ = (∑ y, stationaryVec A y) * walkTVPair A t := by rw [Finset.sum_mul]
+    _ = walkTVPair A t := by rw [sum_stationaryVec A hd, one_mul]
+
+/-- **The mixed submultiplicativity** — the classical companion
+`d̄(s + t) ≤ d̄(s) · d(t)`: the Dobrushin contraction with the
+stationary vector as the second argument (both masses one — the walk
+law's by conservation, stationarity's by construction). -/
+theorem walkTVUniform_mul_walkTVPair_le (A : WAdj (V := V))
+    (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i) [Nonempty V] (s t : ℕ) :
+    walkTVUniform A (s + t) ≤ walkTVUniform A s * walkTVPair A t := by
+  refine Finset.sup'_le
+    (⟨‹Nonempty V›.some, Finset.mem_univ _⟩ :
+      (Finset.univ : Finset V).Nonempty)
+    (f := fun x =>
+      tvDistance (walkDistribution A (s + t) x) (stationaryVec A))
+    fun x _ => ?_
+  have hev : walkDistribution A (s + t) x
+      = (walkTransitionMatrix A)ᵀ ^ t *ᵥ walkDistribution A s x :=
+    walkDistribution_add A s t x
+  have hstat : (walkTransitionMatrix A)ᵀ ^ t *ᵥ stationaryVec A
+      = stationaryVec A :=
+    walkTransitionMatrixTranspose_pow_mulVec_stationaryVec A hA hd t
+  have hmass : ∑ i, walkDistribution A s x i = ∑ i, stationaryVec A i := by
+    rw [sum_walkDistribution A hd s x, sum_stationaryVec A hd]
+  calc tvDistance (walkDistribution A (s + t) x) (stationaryVec A)
+      = tvDistance ((walkTransitionMatrix A)ᵀ ^ t *ᵥ walkDistribution A s x)
+            ((walkTransitionMatrix A)ᵀ ^ t *ᵥ stationaryVec A) := by
+          rw [hev, hstat]
+    _ ≤ tvDistance (walkDistribution A s x) (stationaryVec A)
+          * walkTVPair A t :=
+        tvDistance_pow_walkTransitionMatrixTranspose_mulVec_le A t _ _ hmass
+    _ ≤ walkTVUniform A s * walkTVPair A t := by
+          refine mul_le_mul_of_nonneg_right ?_ (walkTVPair_nonneg A t)
+          exact Finset.le_sup'
+            (f := fun x =>
+              tvDistance (walkDistribution A s x) (stationaryVec A))
+            (Finset.mem_univ x)
+
+/-- **The escalation engine** — `d̄((k + 1)·t₀) ≤ d̄(t₀) · d(t₀)^k`: the
+mixed submultiplicativity iterated, the certificate-free geometric
+decay powering the ε-escalation corollary. -/
+theorem walkTVUniform_succ_mul_le (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (k t₀ : ℕ) :
+    walkTVUniform A ((k + 1) * t₀)
+      ≤ walkTVUniform A t₀ * (walkTVPair A t₀) ^ k := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    have hsplit : (k + 1 + 1) * t₀ = (k + 1) * t₀ + t₀ := by ring
+    rw [hsplit]
+    calc walkTVUniform A ((k + 1) * t₀ + t₀)
+        ≤ walkTVUniform A ((k + 1) * t₀) * walkTVPair A t₀ :=
+          walkTVUniform_mul_walkTVPair_le A hA hd ((k + 1) * t₀) t₀
+      _ ≤ (walkTVUniform A t₀ * (walkTVPair A t₀) ^ k) * walkTVPair A t₀ :=
+          mul_le_mul_of_nonneg_right ih (walkTVPair_nonneg A t₀)
+      _ = walkTVUniform A t₀ * (walkTVPair A t₀) ^ (k + 1) := by
+          rw [pow_succ, mul_assoc]
+
+
+/-! ### The uniform mixing-time object -/
+
+/-- **The uniform mixing time** — Levin–Peres–Wilmer's `t_mix(ε)`
+itself, at its field-standard reading (Montenegro–Tetali's distance):
+the least number of steps from which *every* start's walk law stays
+within `ε` of stationarity in total variation — the worst-case-start
+twin of the delivered per-start `walkMixingTimeFrom`. Junk corner: at
+an unreachable `ε` the time set is empty and `sInf ∅ = 0` on `ℕ` (the
+`K₂` fence below pins and fences this). On a finite type the object is
+the worst start's per-start mixing time
+(`walkMixingTime_eq_sup_walkMixingTimeFrom`). -/
+noncomputable def walkMixingTime (A : WAdj (V := V)) (ε : ℝ) : ℕ :=
+  sInf {t : ℕ | ∀ s : ℕ, t ≤ s → ∀ x : V,
+    tvDistance (walkDistribution A s x) (stationaryVec A) ≤ ε}
+
+/-- The witness-time set is bounded below by `0` by construction. -/
+theorem walkMixingTime_bddBelow (A : WAdj (V := V)) (ε : ℝ) :
+    BddBelow {t : ℕ | ∀ s : ℕ, t ≤ s → ∀ x : V,
+      tvDistance (walkDistribution A s x) (stationaryVec A) ≤ ε} :=
+  ⟨0, fun _ _ => Nat.zero_le _⟩
+
+/-- Per-start times are dominated by the uniform time, *given a
+uniform witness*: the worst start takes at least as long as any single
+start (set inclusion — the uniform predicate implies the per-start
+one). The witness hypothesis is load-bearing, not decorative: at the
+junk corner (no uniform witness, `sInf ∅ = 0`) the inequality can
+fail — a graph mixing on one component while another stays periodic
+has genuinely-mixing per-start times against a junk-`0` uniform
+object, so the un-witnessed statement is false there and no theorem
+below instantiates without a witness (the escalation and the connected
+ceiling both supply one). -/
+theorem walkMixingTimeFrom_le_walkMixingTime (A : WAdj (V := V))
+    (x : V) {ε : ℝ}
+    (hne : ∃ t : ℕ, ∀ s : ℕ, t ≤ s → ∀ y : V,
+      tvDistance (walkDistribution A s y) (stationaryVec A) ≤ ε) :
+    walkMixingTimeFrom A x ε ≤ walkMixingTime A ε := by
+  obtain ⟨t, ht⟩ := hne
+  exact csInf_le_csInf (walkMixingTimeFrom_bddBelow A x ε)
+    ⟨t, ht⟩ (fun t' ht' s hs => ht' s hs x)
+
+/-- Any uniform witness time certifies the uniform mixing time. -/
+theorem walkMixingTime_le_of_cert (A : WAdj (V := V)) {ε : ℝ} (T : ℕ)
+    (hT : ∀ s : ℕ, T ≤ s → ∀ x : V,
+      tvDistance (walkDistribution A s x) (stationaryVec A) ≤ ε) :
+    walkMixingTime A ε ≤ T :=
+  csInf_le (walkMixingTime_bddBelow A ε) hT
+
+/-- **The uniform mixing time is attained** — `ℕ` is well-ordered, so
+given any witness the infimum is a member, and membership is the
+uniform bound (the statement the escalation corollary composes). -/
+theorem walkMixingTime_spec (A : WAdj (V := V)) {ε : ℝ}
+    (hne : ∃ t : ℕ, ∀ s : ℕ, t ≤ s → ∀ x : V,
+      tvDistance (walkDistribution A s x) (stationaryVec A) ≤ ε) :
+    ∀ s : ℕ, walkMixingTime A ε ≤ s → ∀ x : V,
+      tvDistance (walkDistribution A s x) (stationaryVec A) ≤ ε :=
+  csInf_mem hne
+
+/-- **The uniform object is the worst start's per-start object** — on
+a finite type the sup over starts commutes with the infimum over
+times, through each per-start attainment (given any uniform witness).
+Hypothesis-light: no graph structure at all. -/
+theorem walkMixingTime_eq_sup_walkMixingTimeFrom (A : WAdj (V := V))
+    [Nonempty V] {ε : ℝ}
+    (hne : ∃ t : ℕ, ∀ s : ℕ, t ≤ s → ∀ x : V,
+      tvDistance (walkDistribution A s x) (stationaryVec A) ≤ ε) :
+    walkMixingTime A ε = (Finset.univ : Finset V).sup'
+      ⟨‹Nonempty V›.some, Finset.mem_univ _⟩
+      (fun x => walkMixingTimeFrom A x ε) := by
+  obtain ⟨t₀, ht₀⟩ := hne
+  refine le_antisymm ?_ ?_
+  · refine walkMixingTime_le_of_cert A _ fun s hs x => ?_
+    have hxle : walkMixingTimeFrom A x ε ≤ s := by
+      have h1 : walkMixingTimeFrom A x ε
+          ≤ (Finset.univ : Finset V).sup'
+            ⟨‹Nonempty V›.some, Finset.mem_univ _⟩
+            (fun y => walkMixingTimeFrom A y ε) :=
+        Finset.le_sup' (f := fun y => walkMixingTimeFrom A y ε)
+          (Finset.mem_univ x)
+      exact le_trans h1 hs
+    exact walkMixingTimeFrom_spec A x ⟨t₀, fun s' hs' => ht₀ s' hs' x⟩ s hxle
+  · refine Finset.sup'_le
+      (⟨‹Nonempty V›.some, Finset.mem_univ _⟩ :
+        (Finset.univ : Finset V).Nonempty)
+      (f := fun x => walkMixingTimeFrom A x ε) fun x _ => ?_
+    exact walkMixingTimeFrom_le_walkMixingTime A x ⟨t₀, ht₀⟩
+
+/-- **The ε-escalation corollary** — the submultiplicativity class's
+consumer capstone: one evaluation time `t₀` with both distances
+certified (`d̄(t₀) ≤ ε₀`, `d(t₀) ≤ ρ < 1`) yields *every* ε-level
+mixing time — `t_mix(ε) ≤ (k + 1) · t₀` whenever `ε₀ · ρᵏ ≤ ε`. This
+is LPW's canonical bridge from a single certified evaluation (the
+`t_mix := t_mix(1/4)` convention) to arbitrary accuracy, and the
+statement that needs the *uniform* object: per-start escalation is
+not this (the worst start's certificate is what iterates). -/
+theorem walkMixingTime_le_mul_of_escalation (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] {ε ε₀ ρ : ℝ} (t₀ k : ℕ)
+    (hunif : walkTVUniform A t₀ ≤ ε₀) (hpair : walkTVPair A t₀ ≤ ρ)
+    (hk : ε₀ * ρ ^ k ≤ ε) :
+    walkMixingTime A ε ≤ (k + 1) * t₀ := by
+  refine walkMixingTime_le_of_cert A _ fun s hs x => ?_
+  obtain ⟨j, hj⟩ := Nat.exists_eq_add_of_le hs
+  have hpow : (walkTVPair A t₀) ^ k ≤ ρ ^ k :=
+    pow_le_pow_left₀ (walkTVPair_nonneg A t₀) hpair k
+  have hesc := walkTVUniform_succ_mul_le A hA hd k t₀
+  have hsup : tvDistance (walkDistribution A ((k + 1) * t₀) x)
+      (stationaryVec A) ≤ walkTVUniform A ((k + 1) * t₀) :=
+    Finset.le_sup' (f := fun x =>
+      tvDistance (walkDistribution A ((k + 1) * t₀) x) (stationaryVec A))
+      (Finset.mem_univ x)
+  rw [hj]
+  calc tvDistance (walkDistribution A ((k + 1) * t₀ + j) x)
+          (stationaryVec A)
+      ≤ tvDistance (walkDistribution A ((k + 1) * t₀) x)
+          (stationaryVec A) :=
+        walkDistribution_tvDistance_anti A hA hnn hd ((k + 1) * t₀) j x
+    _ ≤ walkTVUniform A ((k + 1) * t₀) := hsup
+    _ ≤ walkTVUniform A t₀ * (walkTVPair A t₀) ^ k := hesc
+    _ ≤ ε₀ * ρ ^ k :=
+        mul_le_mul hunif hpow (pow_nonneg (walkTVPair_nonneg A t₀) k)
+          (le_trans (walkTVUniform_nonneg A t₀) hunif)
+    _ ≤ ε := hk
+
+/-- **The ⌈log⌉ display form** — the escalation corollary at its
+field-standard display: `t_mix(ε) ≤ (⌈log(ε₀/ε)/log(1/ρ)⌉ + 1) · t₀`
+under `0 < ε₀`, `0 < ε`, `0 < ρ < 1`, the threshold discharged through
+the shelf's own `pow_mul_le_of_log_threshold`. -/
+theorem walkMixingTime_le_of_escalation (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] {ε ε₀ ρ : ℝ} (hε₀ : 0 < ε₀) (hε : 0 < ε) (t₀ : ℕ)
+    (hρ : 0 < ρ) (hρ1 : ρ < 1)
+    (hunif : walkTVUniform A t₀ ≤ ε₀) (hpair : walkTVPair A t₀ ≤ ρ) :
+    walkMixingTime A ε
+      ≤ (Nat.ceil (Real.log (ε₀ / ε) / Real.log (1 / ρ)) + 1) * t₀ := by
+  have hkey := pow_mul_le_of_log_threshold hρ hρ1 (le_of_lt hε₀) hε
+    (Nat.ceil (Real.log (ε₀ / ε) / Real.log (1 / ρ))) (Nat.le_ceil _)
+  exact walkMixingTime_le_mul_of_escalation A hA hnn hd t₀
+    (Nat.ceil (Real.log (ε₀ / ε) / Real.log (1 / ρ))) hunif hpair
+    (by rw [mul_comm]; exact hkey)
+
+/-- **The uniform spectral ceiling** — the per-start ceiling's uniform
+form: under the depth-form TV certificate's own hypothesis set (with
+the start constants uniformly bounded by `C`, e.g. `C = 1/min π − 1`),
+every start mixes within `⌈log(√C/(2ε))/log(1/r)⌉` steps. -/
+theorem walkMixingTime_le_of_connected (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (hconn : (supportGraph A hA).Connected) (r ε : ℝ)
+    (hr : 0 < r) (hr1 : r < 1) (hε : 0 < ε)
+    (hrate : ∀ i : V, eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i ≠ 0 →
+      |1 - eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i| ≤ r)
+    (C : ℝ) (hC : ∀ x, (stationaryVec A x)⁻¹ - 1 ≤ C) :
+    walkMixingTime A ε
+      ≤ Nat.ceil (Real.log (Real.sqrt C / (2 * ε))
+          / Real.log (1 / r)) := by
+  refine walkMixingTime_le_of_cert A
+    (Nat.ceil (Real.log (Real.sqrt C / (2 * ε)) / Real.log (1 / r)))
+    fun s hs x => ?_
+  have hring : Real.sqrt C / 2 / ε = Real.sqrt C / (2 * ε) := by ring
+  have hthr : Real.log (Real.sqrt C / 2 / ε) / Real.log (1 / r)
+      ≤ (s : ℝ) := by
+    have h1 : Real.log (Real.sqrt C / (2 * ε)) / Real.log (1 / r)
+        ≤ ((Nat.ceil (Real.log (Real.sqrt C / (2 * ε))
+          / Real.log (1 / r)) : ℕ) : ℝ) :=
+      Nat.le_ceil _
+    have h2 : ((Nat.ceil (Real.log (Real.sqrt C / (2 * ε))
+        / Real.log (1 / r)) : ℕ) : ℝ) ≤ (s : ℝ) := by
+      exact_mod_cast hs
+    rw [hring]
+    exact le_trans h1 h2
+  have hkey := pow_mul_le_of_log_threshold hr hr1
+    (by positivity : (0 : ℝ) ≤ Real.sqrt C / 2) hε s hthr
+  calc tvDistance (walkDistribution A s x) (stationaryVec A)
+      ≤ (1/2) * r ^ s * Real.sqrt ((stationaryVec A x)⁻¹ - 1) :=
+        walkDistribution_tvDistance_le_of_rate A hA hnn hd hconn r
+          (le_of_lt hr) hrate s x
+    _ ≤ (1/2) * r ^ s * Real.sqrt C := by
+        refine mul_le_mul_of_nonneg_left (Real.sqrt_le_sqrt (hC x)) ?_
+        exact mul_nonneg (by norm_num) (pow_nonneg (le_of_lt hr) s)
+    _ = r ^ s * (Real.sqrt C / 2) := by ring
+    _ ≤ ε := hkey
+
+
+end UniformMixing
+
+/-!
+## The spectral floor — the program's first lower-bound family
+
+The exact eigen-component evolution is an *equality*, so it pins the
+walk law from below: at any genuine `L_sym`-eigenpair `(μ, v)` with
+`μ ≠ 0`, the TV and χ² distances to stationarity stay above the
+mode's exact share — the message-passing proposal's deferred
+over-squashing floor delivered on its own named route, and the
+classical eigenvalue lower bound on mixing time (the delivered
+ceiling's textbook companion; Levin–Peres–Wilmer ch. 12's
+distinguishing-statistic technique, chapter-level locator per the
+repo convention). Every prior mixing delivery is an upper bound; this
+section is the first direction-reversed stress test of the same proved
+eigenbasis substrate.
+-/
+
+section SpectralFloor
+
+omit [DecidableEq V] in
+private theorem dotProduct_mulVec_symm_floor {M : Matrix V V ℝ}
+    (hM : M.IsSymm) (x y : V → ℝ) :
+    x ⬝ᵥ (M *ᵥ y) = (M *ᵥ x) ⬝ᵥ y := by
+  rw [Matrix.dotProduct_mulVec, ← Matrix.mulVec_transpose, hM.eq]
+
+/-- **The eigenpair power action**: for a symmetric matrix `M` and a
+genuine eigenpair `(μ, v)`, the operator power `(1 − M)ᵗ` acts on the
+pairing as the scalar `(1 − μ)ᵗ`, on either side of the dot product.
+Generic — any eigenpair, no orthonormality, no `eigvecOf` indexing. -/
+private theorem dotProduct_pow_one_sub_mulVec_of_eigenpair
+    {M : Matrix V V ℝ} (hM : M.IsSymm) {μ : ℝ} {v : V → ℝ}
+    (hv : M *ᵥ v = μ • v) (t : ℕ) (w : V → ℝ) :
+    ((1 - M) ^ t *ᵥ w) ⬝ᵥ v = (1 - μ) ^ t * (w ⬝ᵥ v) := by
+  have h1M : (1 - M).IsSymm := by
+    unfold Matrix.IsSymm
+    rw [Matrix.transpose_sub, Matrix.transpose_one, hM.eq]
+  induction t with
+  | zero => simp
+  | succ t ih =>
+      rw [pow_succ', ← Matrix.mulVec_mulVec,
+        ← dotProduct_mulVec_symm_floor h1M,
+        show (1 - M) *ᵥ v = v - μ • v from by
+          rw [Matrix.sub_mulVec, one_mulVec, ← hv],
+        Matrix.dotProduct_sub, Matrix.dotProduct_smul, ih, smul_eq_mul]
+      ring
+
+/-- The pairing bridge: testing the walk *law* against the conjugated
+vector `(1/√D) • v` is the conjugated-density pairing against `v`,
+rescaled by `vol⁻¹` — the density/law dictionary in one dot product.
+Entrywise, so no nonemptiness hypothesis. -/
+private theorem dotProduct_walkDistribution_degreeInvSqrt_eq
+    (A : WAdj (V := V)) (hd : ∀ i, 0 < deg A i) [Nonempty V] (t : ℕ)
+    (x : V) (v : V → ℝ) :
+    (walkDistribution A t x) ⬝ᵥ (degreeInvSqrt A *ᵥ v)
+      = (vol A (Finset.univ : Finset V))⁻¹
+          * ((degreeSqrt A *ᵥ walkDensity A t x) ⬝ᵥ v) := by
+  have hentry : ∀ i : V,
+      walkDistribution A t x i * (degreeInvSqrt A *ᵥ v) i
+        = (vol A (Finset.univ : Finset V))⁻¹
+            * ((degreeSqrt A *ᵥ walkDensity A t x) i * v i) := by
+    intro i
+    have hs : Real.sqrt (deg A i) ≠ 0 := Real.sqrt_ne_zero'.mpr (hd i)
+    have hvv : vol A (Finset.univ : Finset V) ≠ 0 :=
+      ne_of_gt (vol_univ_pos A hd)
+    rw [degreeInvSqrt_mulVec_apply, degreeSqrt_mulVec_apply, walkDensity,
+      stationaryVec,
+      show deg A i = Real.sqrt (deg A i) * Real.sqrt (deg A i) from
+        (Real.mul_self_sqrt (le_of_lt (hd i))).symm]
+    field_simp
+    ring
+  rw [Matrix.dotProduct, Matrix.dotProduct, Finset.mul_sum]
+  exact Finset.sum_congr rfl fun i _ => hentry i
+
+omit [DecidableEq V] in
+/-- Strict positive-definiteness of the dot product, the manual
+`Finset` route (the pinned Mathlib has no
+`dotProduct_self_pos_of_ne_zero`). -/
+private theorem dotProduct_self_pos_of_ne_zero_floor {v : V → ℝ}
+    (hv0 : v ≠ 0) : 0 < v ⬝ᵥ v := by
+  obtain ⟨i, hi⟩ : ∃ i, v i ≠ 0 := by
+    by_contra hcon
+    push_neg at hcon
+    exact hv0 (funext hcon)
+  have hnn : ∀ j ∈ (Finset.univ : Finset V), (0:ℝ) ≤ v j * v j :=
+    fun j _ => mul_self_nonneg _
+  have hsum : (0:ℝ) ≤ ∑ j, v j * v j := Finset.sum_nonneg hnn
+  refine lt_of_le_of_ne hsum (Ne.symm ?_)
+  intro hzero
+  have hterm := (Finset.sum_eq_zero_iff_of_nonneg hnn).mp hzero i
+    (Finset.mem_univ i)
+  exact hi (by nlinarith [hterm])
+
+/-- **Kernel orthogonality of nonzero modes, law-level form**: for a
+genuine `L_sym`-eigenpair at `μ ≠ 0`, the stretched-constant kernel
+direction `√D · 1` is orthogonal to `v`. Derived, not assumed — the
+pairing transfers onto `μ • v` through symmetry and cancels against
+`L_sym (√D · 1) = 0`. No connectivity: `μ ≠ 0` is the honest gate. -/
+theorem degreeSqrt_onesVec_dotProduct_of_eigenpair
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i)
+    {μ : ℝ} {v : V → ℝ}
+    (hv : normalizedLaplacian A *ᵥ v = μ • v) (hμ : μ ≠ 0) :
+    (degreeSqrt A *ᵥ onesVec) ⬝ᵥ v = 0 := by
+  have hM : (normalizedLaplacian A).IsSymm :=
+    normalizedLaplacian_symmetric A hA
+  have hstep : μ * ((degreeSqrt A *ᵥ onesVec) ⬝ᵥ v) = 0 := by
+    calc μ * ((degreeSqrt A *ᵥ onesVec) ⬝ᵥ v)
+        = (degreeSqrt A *ᵥ onesVec) ⬝ᵥ (μ • v) := by
+              rw [Matrix.dotProduct_smul, smul_eq_mul]
+      _ = (degreeSqrt A *ᵥ onesVec)
+              ⬝ᵥ (normalizedLaplacian A *ᵥ v) := by rw [hv]
+      _ = (normalizedLaplacian A *ᵥ (degreeSqrt A *ᵥ onesVec)) ⬝ᵥ v :=
+            dotProduct_mulVec_symm_floor hM (degreeSqrt A *ᵥ onesVec) v
+      _ = (0 : V → ℝ) ⬝ᵥ v := by
+            rw [normalizedLaplacian_mulVec_degreeSqrt_onesVec A hd]
+      _ = 0 := Matrix.zero_dotProduct _
+  exact (mul_eq_zero.mp hstep).resolve_left hμ
+
+/-- The stationary pairing of the conjugated eigenvector — the
+π-mean-zero fact the floors consume, bridged from the kernel
+orthogonality above. -/
+theorem stationaryVec_dotProduct_degreeInvSqrt_of_eigenpair
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] {μ : ℝ} {v : V → ℝ}
+    (hv : normalizedLaplacian A *ᵥ v = μ • v) (hμ : μ ≠ 0) :
+    (stationaryVec A) ⬝ᵥ (degreeInvSqrt A *ᵥ v) = 0 := by
+  have hentry : ∀ i : V,
+      stationaryVec A i * (degreeInvSqrt A *ᵥ v) i
+        = (vol A (Finset.univ : Finset V))⁻¹
+            * ((degreeSqrt A *ᵥ onesVec) i * v i) := by
+    intro i
+    have hs : Real.sqrt (deg A i) ≠ 0 := Real.sqrt_ne_zero'.mpr (hd i)
+    have hvv : vol A (Finset.univ : Finset V) ≠ 0 :=
+      ne_of_gt (vol_univ_pos A hd)
+    rw [degreeInvSqrt_mulVec_apply, degreeSqrt_mulVec_apply, stationaryVec,
+      show onesVec i = 1 from rfl,
+      show deg A i = Real.sqrt (deg A i) * Real.sqrt (deg A i) from
+        (Real.mul_self_sqrt (le_of_lt (hd i))).symm]
+    field_simp
+    ring
+  have hbr : (stationaryVec A) ⬝ᵥ (degreeInvSqrt A *ᵥ v)
+      = (vol A (Finset.univ : Finset V))⁻¹
+          * ((degreeSqrt A *ᵥ onesVec) ⬝ᵥ v) := by
+    rw [Matrix.dotProduct, Matrix.dotProduct, Finset.mul_sum]
+    exact Finset.sum_congr rfl fun i _ => hentry i
+  rw [hbr, degreeSqrt_onesVec_dotProduct_of_eigenpair A hA hd hv hμ,
+    mul_zero]
+
+/-- **The exact law-level test-function evolution** — the deferred
+over-squashing item's own engine, restated at the law level: pairing
+the walk law against the conjugated eigenvector `(1/√D) • v` of
+`L_sym` evolves *exactly* geometrically at the walk factor `1 − μ`,
+with no connectivity and no mode exclusion. An equality, not a bound —
+the same fact the χ² decay engine consumes, now pointed downward: a
+slow mode pins the law. -/
+theorem walkDistribution_dotProduct_degreeInvSqrt_of_eigenpair
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (t : ℕ) (x : V) {μ : ℝ} {v : V → ℝ}
+    (hv : normalizedLaplacian A *ᵥ v = μ • v) :
+    (walkDistribution A t x) ⬝ᵥ (degreeInvSqrt A *ᵥ v)
+      = (1 - μ) ^ t * ((walkDistribution A 0 x) ⬝ᵥ (degreeInvSqrt A *ᵥ v)) := by
+  rw [dotProduct_walkDistribution_degreeInvSqrt_eq A hd t x v,
+    dotProduct_walkDistribution_degreeInvSqrt_eq A hd 0 x v,
+    walkDensity_eq_pow_walkTransitionMatrix_mulVec A hA hd t x,
+    degreeSqrt_mulVec_pow_walkTransitionMatrix A hd t
+      (walkDensity A 0 x),
+    dotProduct_pow_one_sub_mulVec_of_eigenpair
+      (normalizedLaplacian_symmetric A hA) hv t
+      (degreeSqrt A *ᵥ walkDensity A 0 x)]
+  ring
+
+/-- **The TV spectral floor** — the deferred over-squashing statement
+in its total-variation form: at any genuine `L_sym`-eigenpair
+`(μ, v)` with `μ ≠ 0`, the walk law from `x` stays at total-variation
+distance at least
+`(1/2) · |1−μ|^t · |v x| / (√D x · c)` from stationarity, where `c`
+bounds the conjugated test function `|(1/√D) • v|` above. The
+distinguishing-function bound applied to the exactly-evolving test
+function `(1/c) · (1/√D) • v`. No connectivity, no aperiodicity: at
+`|1 − μ| = 1` (periodic modes) the floor never decays — which is the
+point, exactly the chains no `r < 1` ceiling can reach. -/
+theorem walkDistribution_tvDistance_ge_of_eigenpair
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (t : ℕ) (x : V) {μ : ℝ} {v : V → ℝ}
+    (hv : normalizedLaplacian A *ᵥ v = μ • v) (hμ : μ ≠ 0)
+    {c : ℝ} (hc : ∀ y, |(degreeInvSqrt A *ᵥ v) y| ≤ c) (hc0 : 0 < c) :
+    (1/2) * |1 - μ| ^ t * |(degreeInvSqrt A *ᵥ v) x| / c
+      ≤ tvDistance (walkDistribution A t x) (stationaryVec A) := by
+  have hdisc := tvDistance_ge_half_abs_sum
+    (μ := walkDistribution A t x) (ν := stationaryVec A)
+    ((c⁻¹) • (degreeInvSqrt A *ᵥ v))
+    (fun i => by
+      rw [Pi.smul_apply, smul_eq_mul, abs_mul,
+        abs_of_pos (inv_pos.mpr hc0)]
+      exact le_trans (mul_le_mul_of_nonneg_left (hc i)
+        (le_of_lt (inv_pos.mpr hc0))) (by rw [inv_mul_cancel₀ hc0.ne']))
+  have hsum : ∑ i, (walkDistribution A t x i - stationaryVec A i)
+        * ((c⁻¹) • (degreeInvSqrt A *ᵥ v)) i
+      = c⁻¹ * ((1 - μ) ^ t * (degreeInvSqrt A *ᵥ v) x) := by
+    have hsplit : ∀ i : V,
+        (walkDistribution A t x i - stationaryVec A i)
+          * ((c⁻¹) • (degreeInvSqrt A *ᵥ v)) i
+        = c⁻¹ * (walkDistribution A t x i * (degreeInvSqrt A *ᵥ v) i
+            - stationaryVec A i * (degreeInvSqrt A *ᵥ v) i) := by
+      intro i
+      rw [Pi.smul_apply, smul_eq_mul]
+      ring
+    rw [Finset.sum_congr rfl fun i _ => hsplit i, ← Finset.mul_sum,
+      Finset.sum_sub_distrib,
+      ← Matrix.dotProduct, ← Matrix.dotProduct,
+      walkDistribution_dotProduct_degreeInvSqrt_of_eigenpair A hA hd t x hv,
+      stationaryVec_dotProduct_degreeInvSqrt_of_eigenpair A hA hd hv hμ,
+      sub_zero, walkDistribution_zero A x,
+      Matrix.dotProduct_comm (Pi.single x (1 : ℝ) : V → ℝ)
+        (degreeInvSqrt A *ᵥ v),
+      Matrix.dotProduct_single, mul_one]
+  rw [hsum] at hdisc
+  have hgoal : (1/2) * |1 - μ| ^ t * |(degreeInvSqrt A *ᵥ v) x| / c
+      = (1/2) * |c⁻¹ * ((1 - μ) ^ t * (degreeInvSqrt A *ᵥ v) x)| := by
+    rw [abs_mul, abs_mul, abs_of_pos (inv_pos.mpr hc0), abs_pow,
+      inv_mul_eq_div]
+    ring
+  rw [hgoal]
+  exact hdisc
+
+/-- **The χ² spectral floor** — the Parseval twin: at any genuine
+eigenpair `(μ, v)` with `μ ≠ 0` and `v ≠ 0`, the χ² distance of the
+walk law from stationarity is at least the single mode's exact share
+`(1−μ)^{2t} · (v x)²/(π x · ‖v‖²)`: the √D-conjugated initial centered
+density pairs with `v` in coordinate exactly `vol/√D x · v x`
+(kernel-orthogonal remainder), and Cauchy–Schwarz against the evolving
+vector extracts that mode's slice of the exact Parseval identity. The
+`|1 − μ| = 1` corner is honest: the floor is then the constant
+`v(x)²/(π x ‖v‖²)` at every time — certified non-mixing on periodic
+chains. -/
+theorem chiSquareDistance_ge_of_eigenpair
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (t : ℕ) (x : V) {μ : ℝ} {v : V → ℝ}
+    (hv : normalizedLaplacian A *ᵥ v = μ • v) (hμ : μ ≠ 0)
+    (hv0 : v ≠ 0) :
+    (1 - μ) ^ (2 * t) * (v x) ^ 2
+      / (stationaryVec A x * (v ⬝ᵥ v))
+      ≤ chiSquareDistance A t x := by
+  have hM : (normalizedLaplacian A).IsSymm :=
+    normalizedLaplacian_symmetric A hA
+  have hvol : vol A (Finset.univ : Finset V) ≠ 0 :=
+    ne_of_gt (vol_univ_pos A hd)
+  have hπx2 : (0:ℝ) < stationaryVec A x := stationaryVec_pos A hd x
+  set w : V → ℝ := degreeSqrt A *ᵥ (walkDensity A 0 x - 1) with hwdef
+  set X : V → ℝ := (1 - normalizedLaplacian A) ^ t *ᵥ w with hxdef
+  have hX : degreeSqrt A *ᵥ (walkDensity A t x - 1) = X := by
+    rw [hxdef, hwdef, ← degreeSqrt_mulVec_pow_walkTransitionMatrix A hd t
+      (walkDensity A 0 x - 1), walkDensity_sub_one A hA hd t x]
+  have hchi : chiSquareDistance A t x
+      = (vol A (Finset.univ : Finset V))⁻¹ * (X ⬝ᵥ X) := by
+    rw [chiSquareDistance_eq_sum_smul A hd t x,
+      sum_stationaryVec_smul_sq_eq A hd,
+      show (fun i => walkDensity A t x i - 1) = walkDensity A t x - 1 from rfl,
+      hX]
+  have hpair : v ⬝ᵥ X = (1 - μ) ^ t * (v ⬝ᵥ w) := by
+    rw [Matrix.dotProduct_comm v X, hxdef,
+      dotProduct_pow_one_sub_mulVec_of_eigenpair hM hv t
+        (degreeSqrt A *ᵥ (walkDensity A 0 x - 1))]
+    congr 1
+    exact Matrix.dotProduct_comm _ _
+  have hmass : v ⬝ᵥ (degreeSqrt A *ᵥ walkDensity A 0 x)
+      = (Real.sqrt (deg A x) / stationaryVec A x) * v x := by
+    have hsingle : (degreeSqrt A *ᵥ walkDensity A 0 x)
+        = (Real.sqrt (deg A x) / stationaryVec A x)
+          • ((Pi.single x (1 : ℝ)) : V → ℝ) := by
+      funext z
+      by_cases hxz : x = z
+      · subst hxz
+        have hz : (Pi.single x (1 : ℝ) : V → ℝ) x = 1 := by
+          simp [Pi.single_apply]
+        have hwd : walkDensity A 0 x x
+            = walkDistribution A 0 x x / stationaryVec A x := rfl
+        rw [Pi.smul_apply, smul_eq_mul, degreeSqrt_mulVec_apply, hwd,
+          walkDistribution_zero A x, hz]
+        field_simp
+      · have hz : (Pi.single x (1 : ℝ) : V → ℝ) z = 0 := by
+          simp [Pi.single_apply, hxz]
+        have hwd : walkDensity A 0 x z
+            = walkDistribution A 0 x z / stationaryVec A z := rfl
+        simp only [Pi.smul_apply, smul_eq_mul, degreeSqrt_mulVec_apply,
+          hwd, walkDistribution_zero, hz, zero_div, mul_zero]
+    rw [hsingle, Matrix.dotProduct_smul, smul_eq_mul,
+      Matrix.dotProduct_single, mul_one]
+  have hker : v ⬝ᵥ (degreeSqrt A *ᵥ onesVec) = 0 := by
+    rw [Matrix.dotProduct_comm,
+      degreeSqrt_onesVec_dotProduct_of_eigenpair A hA hd hv hμ]
+  have hinit : v ⬝ᵥ w
+      = (vol A (Finset.univ : Finset V) / Real.sqrt (deg A x)) * v x := by
+    have hsplit : degreeSqrt A *ᵥ (walkDensity A 0 x - 1)
+        = (degreeSqrt A *ᵥ walkDensity A 0 x)
+          - (degreeSqrt A *ᵥ onesVec) := by
+      rw [show (1 : V → ℝ) = onesVec from rfl, Matrix.mulVec_sub]
+    calc v ⬝ᵥ w = v ⬝ᵥ ((degreeSqrt A *ᵥ walkDensity A 0 x)
+          - (degreeSqrt A *ᵥ onesVec)) := by rw [hwdef, hsplit]
+      _ = (Real.sqrt (deg A x) / stationaryVec A x) * v x - 0 := by
+            rw [Matrix.dotProduct_sub, hmass, hker]
+      _ = (vol A (Finset.univ : Finset V) / Real.sqrt (deg A x)) * v x := by
+            rw [sub_zero]
+            have hs : Real.sqrt (deg A x) ≠ 0 :=
+              Real.sqrt_ne_zero'.mpr (hd x)
+            have hπ : stationaryVec A x
+                = deg A x / vol A (Finset.univ : Finset V) := rfl
+            have hscalar : Real.sqrt (deg A x) / stationaryVec A x
+                = vol A (Finset.univ : Finset V)
+                    / Real.sqrt (deg A x) := by
+              rw [hπ, show deg A x
+                    = Real.sqrt (deg A x) * Real.sqrt (deg A x) from
+                    (Real.mul_self_sqrt (le_of_lt (hd x))).symm]
+              field_simp
+              ring
+            rw [hscalar]
+  have hvv : 0 < v ⬝ᵥ v := dotProduct_self_pos_of_ne_zero_floor hv0
+  have hcs : (v ⬝ᵥ X)^2 ≤ (v ⬝ᵥ v) * (X ⬝ᵥ X) := by
+    have hgen := Finset.sum_mul_sq_le_sq_mul_sq (Finset.univ : Finset V) v X
+    simpa only [Matrix.dotProduct, sq] using hgen
+  have key : (1 - μ) ^ (2 * t) * (v ⬝ᵥ w)^2
+      ≤ (v ⬝ᵥ v) * (X ⬝ᵥ X) := by
+    have hsq : ((1 - μ) ^ t * (v ⬝ᵥ w))^2
+        = (1 - μ) ^ (2 * t) * (v ⬝ᵥ w)^2 := by
+      rw [mul_pow, ← pow_mul, mul_comm 2 t]
+    calc (1 - μ) ^ (2 * t) * (v ⬝ᵥ w)^2
+        = ((1 - μ) ^ t * (v ⬝ᵥ w))^2 := hsq.symm
+      _ = (v ⬝ᵥ X)^2 := by rw [← hpair]
+      _ ≤ (v ⬝ᵥ v) * (X ⬝ᵥ X) := hcs
+  have hwx : (v ⬝ᵥ w)^2 * deg A x
+      = (vol A (Finset.univ : Finset V))^2 * (v x)^2 := by
+    have hD : deg A x ≠ 0 := ne_of_gt (hd x)
+    rw [hinit, mul_pow, div_pow, Real.sq_sqrt (le_of_lt (hd x))]
+    field_simp
+  have hstep1 : (v x)^2 * vol A (Finset.univ : Finset V)
+      = (v ⬝ᵥ w)^2 * stationaryVec A x := by
+    have hπ : stationaryVec A x
+        = deg A x / vol A (Finset.univ : Finset V) := rfl
+    rw [hπ]
+    field_simp
+    nlinarith [hwx]
+  have hfin0 : (1 - μ) ^ (2 * t) * (v x)^2
+        * vol A (Finset.univ : Finset V)
+      ≤ (X ⬝ᵥ X) * (stationaryVec A x * (v ⬝ᵥ v)) := by
+    calc (1 - μ) ^ (2 * t) * (v x)^2 * vol A (Finset.univ : Finset V)
+        = (1 - μ) ^ (2 * t) * ((v x)^2
+            * vol A (Finset.univ : Finset V)) := by ring
+      _ = (1 - μ) ^ (2 * t) * ((v ⬝ᵥ w)^2 * stationaryVec A x) := by
+            rw [hstep1]
+      _ = (1 - μ) ^ (2 * t) * (v ⬝ᵥ w) ^ 2 * stationaryVec A x := by
+            ring
+      _ ≤ (v ⬝ᵥ v) * (X ⬝ᵥ X) * stationaryVec A x :=
+            mul_le_mul_of_nonneg_right key (le_of_lt hπx2)
+      _ = (X ⬝ᵥ X) * (stationaryVec A x * (v ⬝ᵥ v)) := by ring
+  rw [hchi, inv_mul_eq_div, div_le_div_iff₀ (mul_pos hπx2 hvv)
+    (vol_univ_pos A hd)]
+  exact hfin0
+
+/-- **The mixing-time floor gate**: if some witness time exists at
+`ε` (the upward-closed set is nonempty) and time `t` provably fails
+the threshold — `TV_t > ε` — then `t` is strictly below the mixing
+time. The witness-existence hypothesis is load-bearing exactly at the
+junk corner: on a periodic chain the witness set is empty, `t_mix = 0`
+by `sInf ∅`, and no strict floor can be read (the `K₂` fence
+`k2_mix_gate_hwit_fence_QA`). -/
+theorem walkMixingTimeFrom_gt_of_tv_gt (A : WAdj (V := V)) (x : V)
+    {ε : ℝ}
+    (hwit : ∃ T : ℕ, ∀ s : ℕ, T ≤ s →
+      tvDistance (walkDistribution A s x) (stationaryVec A) ≤ ε)
+    {t : ℕ}
+    (htv : ε < tvDistance (walkDistribution A t x) (stationaryVec A)) :
+    t < walkMixingTimeFrom A x ε := by
+  by_contra hnl
+  have hle := walkMixingTimeFrom_spec A x hwit t (by omega)
+  exact absurd hle (not_le.mpr htv)
+
+/-- **The strict log-threshold calculus bridge, floor direction** —
+the downward twin of `pow_mul_le_of_log_threshold`: for a rate
+`0 < r < 1`, a positive budget `b`, and a depth *strictly below* the
+threshold `log b / log r` (a *negative* denominator — that is the
+whole content), the decay has not yet consumed the budget:
+`b < r ^ t`. The sign of `log` is the trap in this direction too:
+dividing by the negative `log r` flips the inequality. -/
+theorem pow_lt_of_lt_log_div {r b : ℝ} (hr : 0 < r) (hr1 : r < 1)
+    (hb : 0 < b) (t : ℕ)
+    (hthr : (t : ℝ) < Real.log b / Real.log r) :
+    b < r ^ t := by
+  have hrinv : 0 < 1 / r := div_pos (by norm_num) hr
+  have hrinv1 : 1 < 1 / r := (one_lt_div hr).mpr hr1
+  have hlogpos : 0 < Real.log (1 / r) := Real.log_pos hrinv1
+  have hlogr : Real.log r = -Real.log (1 / r) := by
+    have h1 : Real.log (1 / r) = -Real.log r := by
+      rw [show (1 / r : ℝ) = r⁻¹ from (inv_eq_one_div r).symm,
+        Real.log_inv]
+    linarith
+  rw [hlogr, div_neg, ← neg_div] at hthr
+  have hstep : Real.log b < -((t : ℝ) * Real.log (1 / r)) := by
+    have hmul := (lt_div_iff₀ hlogpos).mp hthr
+    linarith
+  have hexp : Real.exp (Real.log b)
+      < Real.exp ((t : ℝ) * Real.log r) := by
+    refine Real.exp_lt_exp.mpr ?_
+    rw [hlogr, mul_neg]
+    exact hstep
+  rw [Real.exp_log hb, ← Real.log_pow r t,
+    Real.exp_log (pow_pos hr t)] at hexp
+  exact hexp
+
+/-- **The spectral floor on the mixing time** — the classical
+eigenvalue lower bound on `t_mix` (the delivered ceiling's textbook
+companion), at a genuine aperiodic eigenpair: under a certified sup
+bound `c` on the conjugated test function, a nonzero test value at the
+start, `0 < |1 − μ| < 1`, and *some* witness time at `ε` (existence
+certified from above — e.g. by the `r < 1` ceiling; the hypothesis is
+exactly what fails on periodic chains), the mixing time is at least
+`⌈log(|v x|/(√D x · 2 ε c))/log(1/|1−μ|)⌉`. Mirror of
+`walkMixingTimeFrom_le_of_connected`'s ⌈·⌉ display. -/
+theorem walkMixingTimeFrom_ge_of_eigenpair
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] {ε : ℝ} (hε : 0 < ε) (x : V) {μ : ℝ} {v : V → ℝ}
+    (hv : normalizedLaplacian A *ᵥ v = μ • v) (hμ : μ ≠ 0)
+    {c : ℝ} (hc : ∀ y, |(degreeInvSqrt A *ᵥ v) y| ≤ c) (hc0 : 0 < c)
+    (hfx : (degreeInvSqrt A *ᵥ v) x ≠ 0)
+    (hr0 : 0 < |1 - μ|) (hr1 : |1 - μ| < 1)
+    (hwit : ∃ T : ℕ, ∀ s : ℕ, T ≤ s →
+      tvDistance (walkDistribution A s x) (stationaryVec A) ≤ ε) :
+    Nat.ceil (Real.log (|(degreeInvSqrt A *ᵥ v) x| / (2 * ε * c))
+        / Real.log (1 / |1 - μ|))
+      ≤ walkMixingTimeFrom A x ε := by
+  set L : ℝ := Real.log (|(degreeInvSqrt A *ᵥ v) x| / (2 * ε * c))
+      / Real.log (1 / |1 - μ|) with hLdef
+  rcases le_or_lt L 0 with hL | hL
+  · have hzc : Nat.ceil L ≤ 0 := Nat.ceil_le.mpr (by simpa using hL)
+    omega
+  · have hbx : 0 < |(degreeInvSqrt A *ᵥ v) x| := abs_pos.mpr hfx
+    have hbud : 0 < 2 * ε * c := by positivity
+    set b : ℝ := 2 * ε * c / |(degreeInvSqrt A *ᵥ v) x| with hbdef
+    have hb : 0 < b := by positivity
+    have hLeq : L = Real.log b / Real.log |1 - μ| := by
+      have hinvb : b = (|(degreeInvSqrt A *ᵥ v) x| / (2 * ε * c))⁻¹ := by
+        rw [hbdef, inv_div]
+      have hinvr : (1 : ℝ) / |1 - μ| = |1 - μ|⁻¹ :=
+        (inv_eq_one_div _).symm
+      rw [hLdef, hinvb, Real.log_inv, hinvr, Real.log_inv, div_neg,
+        neg_div]
+    have hceil1 : 1 ≤ Nat.ceil L := by
+      have := (Nat.ceil_pos).mpr hL
+      omega
+    have h0L : 0 ≤ L := le_of_lt hL
+    have hT : ((Nat.ceil L - 1 : ℕ) : ℝ) < L := by
+      have hc1 : ((Nat.ceil L : ℕ) : ℝ) < L + 1 := Nat.ceil_lt_add_one h0L
+      have hcast : ((Nat.ceil L - 1 : ℕ) : ℝ)
+          = ((Nat.ceil L : ℕ) : ℝ) - 1 := by
+        rw [Nat.cast_sub hceil1]
+        norm_num
+      rw [hcast]
+      linarith
+    have hpow : b < |1 - μ| ^ (Nat.ceil L - 1) :=
+      pow_lt_of_lt_log_div hr0 hr1 hb (Nat.ceil L - 1)
+        (lt_of_lt_of_eq hT hLeq)
+    have hflr := walkDistribution_tvDistance_ge_of_eigenpair A hA hd
+      (Nat.ceil L - 1) x hv hμ hc hc0
+    have hA' : (0:ℝ) < |(degreeInvSqrt A *ᵥ v) x| / c := by positivity
+    have hmono : (|(degreeInvSqrt A *ᵥ v) x| / c) * b
+        < (|(degreeInvSqrt A *ᵥ v) x| / c)
+          * |1 - μ| ^ (Nat.ceil L - 1) :=
+      mul_lt_mul_of_pos_left hpow hA'
+    have hval : (|(degreeInvSqrt A *ᵥ v) x| / c) * b = 2 * ε := by
+      rw [hbdef]
+      field_simp
+      ring
+    have hz : (2:ℝ) * ((1/2) * |1 - μ| ^ (Nat.ceil L - 1)
+          * |(degreeInvSqrt A *ᵥ v) x| / c)
+        = (|(degreeInvSqrt A *ᵥ v) x| / c)
+            * |1 - μ| ^ (Nat.ceil L - 1) := by ring
+    have hkey : ε < tvDistance (walkDistribution A (Nat.ceil L - 1) x)
+        (stationaryVec A) := by
+      linarith [hval, hmono, hz, hflr]
+    have hlt := walkMixingTimeFrom_gt_of_tv_gt A x hwit hkey
+    omega
+
+end SpectralFloor
+
 
 end SpectralGraphTheory

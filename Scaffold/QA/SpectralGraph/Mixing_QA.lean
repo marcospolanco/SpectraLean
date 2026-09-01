@@ -77,6 +77,37 @@
   discrete closed form `TV_disc(m) = (2/3)·2^{−m}` (the `triG`
   eigenroute) with both theorem instances at `t = 8`, `m = 2` and the
   anti-monotonicity instance.
+  The `DiscMixingTime` section (2026-09-01,
+  `proposals/total-variation-mixing-conversion.md`'s deferred `t_mix`
+  object, consumer gate discharged by the Poisson bridge) pins the
+  object at closed forms on the triangle (`t_mix(1/3) = 1`,
+  `t_mix(1/6) = 2`, `t_mix(1/12) = 3`, each in both directions — the
+  certificate interface above, the attainment specification below), the
+  ceiling attained exactly at `ε = √2/4` and computed with honest slack
+  at `ε = 1/6` (`3` against the true `2`), the `K₂` junk corner pinned
+  (`sInf ∅ = 0` beside the no-certificate fence that excludes it), the
+  antitone instance, and the bridge composition re-deriving the
+  hand-certified transfer bound `5/24` with the certificate discharged
+  by the object.
+  The `SpectralFloor` section (2026-09-01, the message-passing
+  proposal's deferred over-squashing item delivered on its own named
+  route — the mixing program's first lower-bound family) pins the
+  floors attained *exactly* at every time on `K₂` (TV `1/2`, χ² `1` —
+  certified non-mixing on the periodic chain) and the χ² floor
+  attained exactly at every time on the triangle at the `triG`
+  eigenpair, the exact law-level evolution instances at both hand
+  eigenpairs, the log-form floor hitting all three pinned `t_mix`
+  closed forms exactly (completing the two-sided depth bracket:
+  floor `2` = truth `2` ≤ ceiling `3` at `ε = 1/6`), the kernel-mode
+  refutation fences in both metrics, and the `K₂` witness-existence
+  fence for the floor gate. The `UniformMixing` section (2026-09-01,
+  `proposals/total-variation-mixing-conversion.md`'s second follow-on)
+  QA's LPW's uniform `t_mix` and its submultiplicativity class: the
+  triangle distance pins from raw law literals, submultiplicativity
+  attained with equality in all three forms (the sharp Dobrushin
+  constant load-bearing), the uniform object's exact closed forms
+  pinned in both directions, and the `K₂` periodicity corner at the
+  uniform level (the empty-set infimum pinned and fenced).
 
   Scoreboard: ../QA_SCOREBOARD.md
 -/
@@ -4242,5 +4273,1173 @@ theorem tri_tv_anti_QA :
   rwa [h3] at h
 
 end PoissonBridge
+
+section DiscMixingTime
+
+/-! ### The exact closed forms on the triangle -/
+
+/-- The triangle's witness arithmetic at threshold `1/3`: from time `1`
+on, `TV ≤ (2/3)·2^{−s} ≤ 1/3` — the reusable `2^s` domination pattern. -/
+theorem tri_mix_le_third_cert_QA :
+    ∀ s : ℕ, 1 ≤ s →
+      tvDistance (walkDistribution triAdj s 0) (stationaryVec triAdj)
+        ≤ 1/3 := by
+  intro s hs
+  rw [tri_disc_tv_eq_QA s]
+  have h2 : (2 : ℝ) ≤ (2 : ℝ)^s := by
+    have hp := pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) hs
+    norm_num at hp
+    exact hp
+  have hpos : (0 : ℝ) < (2 : ℝ)^s := pow_pos (by norm_num) s
+  have hinv : (1/2 : ℝ)^s = 1 / ((2 : ℝ)^s) := _root_.one_div_pow 2 s
+  have hkey : (1 : ℝ) / ((2 : ℝ)^s) ≤ 1/2 :=
+    (one_div_le_one_div hpos (by norm_num : (0 : ℝ) < 2)).mpr h2
+  rw [hinv]
+  calc (2/3 : ℝ) * (1 / ((2 : ℝ)^s)) ≤ (2/3) * (1/2) :=
+        mul_le_mul_of_nonneg_left hkey (by norm_num)
+    _ = 1/3 := by norm_num
+
+/-- **The exact mixing-time closed form `t_mix(1/3) = 1`** — the `sInf`
+pinned in both directions: the certificate interface gives `≤ 1`, and
+the attainment specification at `s = 0` refutes `0` (the true value
+`TV(0) = 2/3` exceeds `1/3`). Both interfaces load-bearing on the
+object's exact shape. -/
+theorem tri_mix_eq_third_QA :
+    walkMixingTimeFrom triAdj 0 (1/3) = 1 := by
+  have hle : walkMixingTimeFrom triAdj 0 (1/3) ≤ 1 :=
+    walkMixingTimeFrom_le_of_cert triAdj 0 1 tri_mix_le_third_cert_QA
+  by_contra hne
+  have hzero : walkMixingTimeFrom triAdj 0 (1/3) = 0 := by omega
+  have hspec := walkMixingTimeFrom_spec triAdj 0 (ε := 1/3)
+    ⟨1, tri_mix_le_third_cert_QA⟩ 0 (by omega)
+  rw [tri_disc_tv_eq_QA 0] at hspec
+  norm_num at hspec
+
+/-- **The exact mixing-time closed form `t_mix(1/6) = 2`** — the same
+two-direction pin at the transfer corollary's own working threshold:
+`TV(2) = 1/6` attains the threshold exactly, `TV(1) = 1/3` refutes `1`. -/
+theorem tri_mix_eq_sixth_QA :
+    walkMixingTimeFrom triAdj 0 (1/6) = 2 := by
+  have hcert : ∀ s : ℕ, 2 ≤ s →
+      tvDistance (walkDistribution triAdj s 0) (stationaryVec triAdj)
+        ≤ 1/6 := by
+    intro s hs
+    rw [tri_disc_tv_eq_QA s]
+    have h4 : (4 : ℝ) ≤ (2 : ℝ)^s := by
+      have hp := pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) hs
+      norm_num at hp
+      exact hp
+    have hpos : (0 : ℝ) < (2 : ℝ)^s := pow_pos (by norm_num) s
+    have hinv : (1/2 : ℝ)^s = 1 / ((2 : ℝ)^s) := _root_.one_div_pow 2 s
+    have hkey : (1 : ℝ) / ((2 : ℝ)^s) ≤ 1/4 :=
+      (one_div_le_one_div hpos (by norm_num : (0 : ℝ) < 4)).mpr h4
+    rw [hinv]
+    nlinarith
+  have hle : walkMixingTimeFrom triAdj 0 (1/6) ≤ 2 :=
+    walkMixingTimeFrom_le_of_cert triAdj 0 2 hcert
+  by_contra hne
+  have hlt : walkMixingTimeFrom triAdj 0 (1/6) < 2 := by omega
+  have hspec := walkMixingTimeFrom_spec triAdj 0 (ε := 1/6)
+    ⟨2, hcert⟩ 1 (by omega)
+  rw [tri_tv_one_eq_QA] at hspec
+  norm_num at hspec
+
+/-- **The exact mixing-time closed form `t_mix(1/12) = 3`** — the third
+pin, for the antitone instance below. -/
+theorem tri_mix_eq_twelfth_QA :
+    walkMixingTimeFrom triAdj 0 (1/12) = 3 := by
+  have hcert : ∀ s : ℕ, 3 ≤ s →
+      tvDistance (walkDistribution triAdj s 0) (stationaryVec triAdj)
+        ≤ 1/12 := by
+    intro s hs
+    rw [tri_disc_tv_eq_QA s]
+    have h8 : (8 : ℝ) ≤ (2 : ℝ)^s := by
+      have hp := pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) hs
+      norm_num at hp
+      exact hp
+    have hpos : (0 : ℝ) < (2 : ℝ)^s := pow_pos (by norm_num) s
+    have hinv : (1/2 : ℝ)^s = 1 / ((2 : ℝ)^s) := _root_.one_div_pow 2 s
+    have hkey : (1 : ℝ) / ((2 : ℝ)^s) ≤ 1/8 :=
+      (one_div_le_one_div hpos (by norm_num : (0 : ℝ) < 8)).mpr h8
+    rw [hinv]
+    nlinarith
+  have hle : walkMixingTimeFrom triAdj 0 (1/12) ≤ 3 :=
+    walkMixingTimeFrom_le_of_cert triAdj 0 3 hcert
+  by_contra hne
+  have hlt : walkMixingTimeFrom triAdj 0 (1/12) < 3 := by omega
+  have hspec := walkMixingTimeFrom_spec triAdj 0 (ε := 1/12)
+    ⟨3, hcert⟩ 2 (by omega)
+  rw [tri_tv_two_eq_QA] at hspec
+  norm_num at hspec
+
+/-- **The antitone instance with exact values**: `1/12 ≤ 1/6` gives
+`t_mix(1/6) = 2 ≤ 3 = t_mix(1/12)` — the field-standard monotonicity
+pinned at closed forms on both sides. -/
+theorem tri_mix_anti_QA :
+    walkMixingTimeFrom triAdj 0 (1/6)
+      ≤ walkMixingTimeFrom triAdj 0 (1/12) := by
+  have h := walkMixingTimeFrom_anti triAdj 0 (ε := 1/12) (δ := 1/6)
+    (by norm_num) ⟨3, by
+      intro s hs
+      rw [tri_disc_tv_eq_QA s]
+      have h8 : (8 : ℝ) ≤ (2 : ℝ)^s := by
+        have hp := pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) hs
+        norm_num at hp
+        exact hp
+      have hpos : (0 : ℝ) < (2 : ℝ)^s := pow_pos (by norm_num) s
+      have hinv : (1/2 : ℝ)^s = 1 / ((2 : ℝ)^s) := _root_.one_div_pow 2 s
+      have hkey : (1 : ℝ) / ((2 : ℝ)^s) ≤ 1/8 :=
+        (one_div_le_one_div hpos (by norm_num : (0 : ℝ) < 8)).mpr h8
+      rw [hinv]
+      nlinarith⟩
+  rw [tri_mix_eq_sixth_QA, tri_mix_eq_twelfth_QA] at h ⊢
+  exact h
+
+/-! ### The ceiling: attained exactly, and computed with slack -/
+
+/-- **The ceiling attained exactly**: on the triangle at rate `1/2` and
+`ε = √2/4`, the object is `1` and the ceiling's own right side
+evaluates to `1` — no slack anywhere in the package. (The threshold
+ratio `√C/(2ε) = √2/(√2/2) = 2` sits exactly at the power of `2` the
+rate certificate names.) -/
+theorem tri_mix_ceiling_attained_QA :
+    walkMixingTimeFrom triAdj 0 (Real.sqrt 2 / 4) = 1
+      ∧ Nat.ceil (Real.log ((Real.sqrt 2 : ℝ) / (2 * (Real.sqrt 2 / 4)))
+          / Real.log (1 / (1/2))) = 1 := by
+  have hpi : (stationaryVec triAdj 0)⁻¹ - 1 = 2 := by
+    rw [tri_pi_QA 0]
+    norm_num
+  have hratio : (Real.sqrt 2 : ℝ) / (2 * (Real.sqrt 2 / 4)) = 2 := by
+    refine (div_eq_iff (by
+      exact ne_of_gt (by positivity))).mpr ?_
+    ring
+  have hone : (1 : ℝ) / (1/2) = 2 := by norm_num
+  -- the ceiling bound at this fixture: RHS = Nat.ceil (log 2 / log 2)
+  have hRHS : Nat.ceil (Real.log ((Real.sqrt 2 : ℝ) / (2 * (Real.sqrt 2 / 4)))
+      / Real.log (1 / (1/2))) = 1 := by
+    have hlog2 : Real.log (2 : ℝ) ≠ 0 :=
+      ne_of_gt (Real.log_pos (by norm_num : (1 : ℝ) < 2))
+    have hdiv : Real.log ((2 : ℝ)) / Real.log (2 : ℝ) = 1 :=
+      div_self hlog2
+    have heq : Real.log ((Real.sqrt 2 : ℝ) / (2 * (Real.sqrt 2 / 4)))
+        / Real.log (1 / (1/2 : ℝ)) = 1 := by
+      rw [hratio, hone, hdiv]
+    rw [heq]
+    norm_num
+  -- the object: ≤ 1 by the ceiling, ≠ 0 by attainment at s = 0
+  have hcert : ∀ s : ℕ, 1 ≤ s →
+      tvDistance (walkDistribution triAdj s 0) (stationaryVec triAdj)
+        ≤ Real.sqrt 2 / 4 := by
+    intro s hs
+    have h1 := tri_mix_le_third_cert_QA s hs
+    have h34 : (1/3 : ℝ) ≤ Real.sqrt 2 / 4 := by
+      have hsq : ((4/3 : ℝ))^2 ≤ 2 := by norm_num
+      have h43 : (4/3 : ℝ) ≤ Real.sqrt 2 := Real.le_sqrt_of_sq_le hsq
+      linarith
+    exact le_trans h1 h34
+  have hceil := walkMixingTimeFrom_le_of_connected triAdj triAdj_isSymm
+    triAdj_nonneg triAdj_deg_pos tri_connected (1/2) (Real.sqrt 2 / 4)
+    (by norm_num) (by norm_num) (by positivity) tri_rate_QA 0
+  rw [hpi, hRHS] at hceil
+  refine ⟨?_, hRHS⟩
+  by_contra hne
+  have hzero : walkMixingTimeFrom triAdj 0 (Real.sqrt 2 / 4) = 0 := by omega
+  have hspec := walkMixingTimeFrom_spec triAdj 0 (ε := Real.sqrt 2 / 4)
+    ⟨1, hcert⟩ 0 (by omega)
+  rw [tri_disc_tv_eq_QA 0] at hspec
+  norm_num at hspec
+  linarith [sqrt_two_le_two_QA]
+
+/-- **The ceiling computed with honest slack**: at the working threshold
+`ε = 1/6` the ceiling's right side evaluates to exactly `3` against the
+true `t_mix = 2` — one wasted step, the price of the Cauchy–Schwarz
+conversion's slack on the triangle. -/
+theorem tri_mix_ceiling_slack_QA :
+    Nat.ceil (Real.log ((Real.sqrt 2 : ℝ) / (2 * (1/6 : ℝ)))
+      / Real.log (1 / (1/2 : ℝ))) = 3
+      ∧ walkMixingTimeFrom triAdj 0 (1/6) = 2 := by
+  have hlog2 : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hratio : (Real.sqrt 2 : ℝ) / (2 * (1/6 : ℝ)) = 3 * Real.sqrt 2 := by
+    refine (div_eq_iff (by norm_num)).mpr ?_
+    ring
+  have hone : (1 : ℝ) / (1/2) = 2 := by norm_num
+  have hlog4 : Real.log ((4 : ℝ)) = 2 * Real.log 2 := by
+    rw [show ((4 : ℝ)) = (2 : ℝ) * (2 : ℝ) from by norm_num,
+      Real.log_mul (by norm_num : (2 : ℝ) ≠ 0) (by norm_num : (2 : ℝ) ≠ 0)]
+    ring
+  have hlog8 : Real.log ((8 : ℝ)) = 3 * Real.log 2 := by
+    rw [show ((8 : ℝ)) = (2 : ℝ) * (2 : ℝ) * (2 : ℝ) from by norm_num,
+      Real.log_mul (by norm_num : ((2 : ℝ) * (2 : ℝ)) ≠ 0)
+        (by norm_num : (2 : ℝ) ≠ 0),
+      Real.log_mul (by norm_num : (2 : ℝ) ≠ 0) (by norm_num : (2 : ℝ) ≠ 0)]
+    ring
+  -- 3√2 ≤ 8
+  have hup : (3 : ℝ) * Real.sqrt 2 ≤ 8 := by
+    nlinarith [sqrt_two_le_two_QA, Real.sqrt_nonneg (2 : ℝ)]
+  have hle : Real.log ((3 : ℝ) * Real.sqrt 2) / Real.log 2
+      ≤ (3 : ℝ) := by
+    rw [div_le_iff₀ hlog2, ← hlog8]
+    exact Real.log_le_log (by positivity) hup
+  -- 4 < 3√2
+  have h43 : (4/3 : ℝ) < Real.sqrt 2 := by
+    nlinarith [Real.sqrt_nonneg (2 : ℝ),
+      Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
+  have hdown : (2 : ℝ) * Real.log 2
+      < Real.log ((3 : ℝ) * Real.sqrt 2) := by
+    rw [← hlog4]
+    exact Real.log_lt_log (by norm_num : (0 : ℝ) < 4)
+      (by nlinarith [h43, Real.sqrt_nonneg (2 : ℝ)])
+  -- the two log facts in the shape the ceiling needs
+  have hxle : Real.log ((Real.sqrt 2 : ℝ) / (2 * (1/6 : ℝ)))
+      / Real.log (1 / (1/2 : ℝ)) ≤ (3 : ℝ) := by
+    rw [hratio, hone]
+    exact hle
+  have hltx : (2 : ℝ) < Real.log ((Real.sqrt 2 : ℝ) / (2 * (1/6 : ℝ)))
+      / Real.log (1 / (1/2 : ℝ)) := by
+    rw [hratio, hone]
+    exact (lt_div_iff₀ hlog2).mpr hdown
+  refine ⟨?_, tri_mix_eq_sixth_QA⟩
+  have h2lt : (2 : ℕ) < Nat.ceil (Real.log ((Real.sqrt 2 : ℝ)
+      / (2 * (1/6 : ℝ))) / Real.log (1 / (1/2 : ℝ))) :=
+    Nat.lt_ceil.mpr hltx
+  have hle3 : Nat.ceil (Real.log ((Real.sqrt 2 : ℝ) / (2 * (1/6 : ℝ)))
+      / Real.log (1 / (1/2 : ℝ))) ≤ 3 :=
+    Nat.ceil_le.mpr hxle
+  omega
+
+/-! ### The `K₂` periodicity fence at the object level -/
+
+/-- **The junk corner pinned**: on the periodic chain `K₂` at
+`ε = 1/4` no witness time exists (`k2_no_discrete_mixing_QA`), so the
+object's defining set is empty and `sInf ∅ = 0` on `ℕ` — the value
+*looks* anti-conservative ("mixes instantly"), and this is exactly why
+every consumer carries hypotheses that exclude the corner: the ceiling's
+`0 < r < 1` rate certificate is undischargeable on `K₂` (the edge's
+normalized gap is `2`, forcing `r ≥ 1`). The fence is the proof that
+the junk corner is fenced, not inhabited. -/
+theorem k2_mix_junk_corner_QA :
+    walkMixingTimeFrom k2Adj 0 (1/4) = 0 := by
+  have hempty : {t : ℕ | ∀ s : ℕ, t ≤ s →
+      tvDistance (walkDistribution k2Adj s 0) (stationaryVec k2Adj)
+        ≤ 1/4} = ∅ := by
+    refine Set.eq_empty_iff_forall_not_mem.mpr ?_
+    intro t ht
+    exact k2_no_discrete_mixing_QA ⟨t, ht⟩
+  rw [walkMixingTimeFrom, hempty, Nat.sInf_empty]
+
+/-! ### The bridge: the transfer corollary through the object -/
+
+/-- **The bridge instance** — the same bound the hand-certified
+`tri_mixing_transfer_QA` derives (`TV_cont(8) ≤ 5/24`), now through the
+discrete `t_mix` object: the caller supplies only the Poisson lower-tail
+bound, the discrete certificate `hmix` is the object's own attainment
+(`t_mix(1/6) = 2`, discharged internally from the rate certificate and
+the ceiling). -/
+theorem tri_bridge_mix_QA :
+    tvDistance (contWalkDistribution triAdj 8 0) (stationaryVec triAdj)
+      ≤ 5/24 := by
+  have h2e : (2 : ℝ) < Real.exp 1 := by
+    have h := Real.add_one_lt_exp (by norm_num : (1 : ℝ) ≠ 0)
+    linarith
+  have h256 : (256 : ℝ) ≤ Real.exp 8 := by
+    have h2e8 : (2 : ℝ) < Real.exp 8 :=
+      lt_of_le_of_lt (le_of_lt h2e)
+        (Real.exp_lt_exp.mpr (by norm_num : (1 : ℝ) < 8))
+    have hp := pow_lt_pow_left₀ h2e (by norm_num : (0 : ℝ) ≤ 2)
+      (by norm_num : (8 : ℕ) ≠ 0)
+    rw [show ((Real.exp 1 : ℝ)) ^ 8 = Real.exp 8 from by
+      rw [← Real.exp_nat_mul]
+      ring] at hp
+    norm_num at hp
+    linarith
+  have hfinal :
+      tvDistance (contWalkDistribution triAdj 8 0) (stationaryVec triAdj)
+        ≤ 1/6 + 1/24 := by
+    refine contWalkDistribution_tvDistance_le_of_walkMixingTime triAdj
+      triAdj_isSymm triAdj_nonneg triAdj_deg_pos tri_connected (1/2)
+      (by norm_num) (by norm_num) tri_rate_QA (by norm_num) 0
+      (by norm_num : (0 : ℝ) ≤ 8) ?_
+    rw [tri_mix_eq_sixth_QA, tri_poisson_range_two_sum_QA,
+      Real.exp_neg, ← one_div, ← div_eq_mul_one_div,
+      div_le_iff₀ (Real.exp_pos 8)]
+    linarith
+  linarith
+
+end DiscMixingTime
+
+section SpectralFloorQA
+
+/-! ### The `K₂` exact-attainment family: certified non-mixing on the periodic chain -/
+
+/-- The conjugated test function on `K₂` is the eigenvector itself
+(degrees `1`, so `1/√D = 1`). -/
+theorem k2_conj_f_QA :
+    degreeInvSqrt k2Adj *ᵥ k2G = k2G := by
+  funext i
+  rw [degreeInvSqrt_mulVec_apply, k2Adj_deg_eq]
+  simp [k2G]
+
+/-- The exact law-level evolution instantiated at `K₂`'s nontrivial
+mode: pairing the law against `(1/√D) • k2G` reads `(-1)^m` at every
+time — the sign alternation itself, theorem-mediated, with the
+initial pairing `⟨ν₀, k2G⟩ = 1` pinned by the point-mass law. -/
+theorem k2_evolution_QA (m : ℕ) :
+    walkDistribution k2Adj m 0 ⬝ᵥ (degreeInvSqrt k2Adj *ᵥ k2G)
+      = (-1 : ℝ) ^ m * 1 := by
+  rw [walkDistribution_dotProduct_degreeInvSqrt_of_eigenpair k2Adj
+    k2Adj_isSymm k2Adj_deg_pos m 0 k2_lapsym_mulVec_k2G,
+    show (1:ℝ) - 2 = -1 from by norm_num, walkDistribution_zero,
+    Matrix.dotProduct_comm, Matrix.dotProduct_single, k2_conj_f_QA,
+    k2G_zero, mul_one]
+
+/-- The floor instance on `K₂` at `c = 1`: `(1/2)·|1−2|^m·|k2G 0|/1`
+is *at most* the TV distance — the theorem. -/
+theorem k2_tv_floor_le_QA (m : ℕ) :
+    (1/2) * |1 - 2| ^ m * |(degreeInvSqrt k2Adj *ᵥ k2G) 0| / 1
+      ≤ tvDistance (walkDistribution k2Adj m 0) (stationaryVec k2Adj) :=
+  walkDistribution_tvDistance_ge_of_eigenpair k2Adj k2Adj_isSymm
+    k2Adj_deg_pos m 0 k2_lapsym_mulVec_k2G (by norm_num)
+    (c := 1) (fun y => by
+      rw [k2_conj_f_QA]
+      fin_cases y <;> simp [k2G]) (by norm_num)
+
+/-- **The TV floor is attained exactly at every time on `K₂`**: the
+floor value is `1/2` and so is the TV distance (the pinned closed
+form) — certified non-mixing, tight forever, on the chain where no
+`r < 1` ceiling can reach. -/
+theorem k2_tv_floor_attained_QA (m : ℕ) :
+    (1/2) * |1 - 2| ^ m * |(degreeInvSqrt k2Adj *ᵥ k2G) 0| / 1
+      = tvDistance (walkDistribution k2Adj m 0) (stationaryVec k2Adj) := by
+  rw [k2_conj_f_QA, k2G_zero, k2_disc_tv_eq_QA]
+  norm_num
+
+/-- The χ² closed form on `K₂`: constant `1` at every time (the
+alternating point masses both sit at χ²-distance `1`). -/
+theorem k2_chi2_all_QA (m : ℕ) :
+    chiSquareDistance k2Adj m 0 = 1 := by
+  rcases Nat.even_or_odd m with ⟨k, hk⟩ | ⟨k, hk⟩
+  · rw [hk, show k + k = 2 * k from by omega]
+    simp only [chiSquareDistance, k2_dist_even_QA, k2_pi_QA,
+      Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons]
+    norm_num
+  · rw [hk]
+    simp only [chiSquareDistance, k2_dist_odd_QA, k2_pi_QA,
+      Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons]
+    norm_num
+
+/-- The χ² floor instance on `K₂`. -/
+theorem k2_chi2_floor_le_QA (m : ℕ) :
+    (1 - 2) ^ (2 * m) * (k2G 0) ^ 2
+      / (stationaryVec k2Adj 0 * (k2G ⬝ᵥ k2G))
+      ≤ chiSquareDistance k2Adj m 0 :=
+  chiSquareDistance_ge_of_eigenpair k2Adj k2Adj_isSymm k2Adj_deg_pos m 0
+    k2_lapsym_mulVec_k2G (by norm_num)
+    (by intro h; have h0 := congrFun h 0; simp [k2G] at h0)
+
+/-- **The χ² floor is attained exactly at every time on `K₂`**: both
+sides read `1` — the periodic chain pinned at non-mixing from below
+and above. -/
+theorem k2_chi2_floor_attained_QA (m : ℕ) :
+    (1 - 2) ^ (2 * m) * (k2G 0) ^ 2
+      / (stationaryVec k2Adj 0 * (k2G ⬝ᵥ k2G))
+      = chiSquareDistance k2Adj m 0 := by
+  rw [k2_chi2_all_QA, k2G_zero, k2_pi_QA (0 : Fin 2)]
+  have hnorm : k2G ⬝ᵥ k2G = 2 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two, k2G]
+    norm_num
+  rw [hnorm]
+  norm_num
+
+/-- **The gate's witness-existence hypothesis is load-bearing**: on
+`K₂` at threshold `1/4` no witness time exists (TV is `1/2` at every
+time), so the floor gate cannot fire — and the junk-corner `t_mix = 0`
+(`k2_mix_junk_corner_QA`'s mechanism) makes every strict floor
+statement false there. The negation is proved, not assumed. -/
+theorem k2_mix_gate_hwit_fence_QA :
+    ¬ ∃ T : ℕ, ∀ s : ℕ, T ≤ s →
+      tvDistance (walkDistribution k2Adj s 0) (stationaryVec k2Adj)
+        ≤ 1/4 := by
+  intro h
+  obtain ⟨T, hT⟩ := h
+  have hself := hT T (le_refl T)
+  rw [k2_disc_tv_eq_QA T] at hself
+  norm_num at hself
+
+/-! ### The triangle: exact floors at the `triG` eigenpair -/
+
+/-- The conjugated test function on the triangle: `triG/√2`. -/
+noncomputable def triF : Fin 3 → ℝ :=
+  degreeInvSqrt triAdj *ᵥ triG
+
+theorem triF_zero : triF 0 = 2 * (Real.sqrt 2)⁻¹ := by
+  rw [triF, degreeInvSqrt_mulVec_apply, triAdj_deg_eq]
+  simp only [triG, Matrix.cons_val_zero, Matrix.head_cons]
+  ring
+
+theorem triF_abs_le (j : Fin 3) : |triF j| ≤ 2 * (Real.sqrt 2)⁻¹ := by
+  have hpos : (0:ℝ) < (Real.sqrt 2)⁻¹ := by positivity
+  rw [triF, degreeInvSqrt_mulVec_apply, triAdj_deg_eq, abs_mul,
+    abs_of_pos hpos]
+  fin_cases j
+  all_goals simp only [triG, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons]
+  all_goals norm_num
+  all_goals linarith [hpos]
+
+/-- The exact evolution at the triangle's `3/2` mode, theorem-mediated. -/
+theorem tri_evolution_QA (m : ℕ) :
+    walkDistribution triAdj m 0 ⬝ᵥ triF
+      = (-(1/2 : ℝ)) ^ m * (2 * (Real.sqrt 2)⁻¹) := by
+  rw [triF, walkDistribution_dotProduct_degreeInvSqrt_of_eigenpair
+    triAdj triAdj_isSymm triAdj_deg_pos m 0 tri_lapsym_mulVec_triG_QA,
+    show (1:ℝ) - 3/2 = -(1/2) from by norm_num, walkDistribution_zero,
+    Matrix.dotProduct_comm, Matrix.dotProduct_single,
+    degreeInvSqrt_mulVec_apply, triAdj_deg_eq]
+  simp only [triG, Matrix.cons_val_zero, Matrix.head_cons]
+  ring
+
+/-- The TV floor instance on the triangle at `c = 2/√2`. -/
+theorem tri_tv_floor_le_QA (m : ℕ) :
+    (1/2) * |1 - 3/2| ^ m * |triF 0| / (2 * (Real.sqrt 2)⁻¹)
+      ≤ tvDistance (walkDistribution triAdj m 0) (stationaryVec triAdj) :=
+  walkDistribution_tvDistance_ge_of_eigenpair triAdj triAdj_isSymm
+    triAdj_deg_pos m 0 tri_lapsym_mulVec_triG_QA (by norm_num)
+    (c := 2 * (Real.sqrt 2)⁻¹) triF_abs_le (by positivity)
+
+/-- **The floor value and the truth, side by side**: the floor reads
+`(1/2)^(m+1)` — `|triF 0|` exactly attains the sup bound — against
+the pinned closed form `TV = (2/3)·2^{−m}`; the slack is honest and
+strict at every time. -/
+theorem tri_tv_floor_value_QA (m : ℕ) :
+    (1/2) * |1 - 3/2| ^ m * |triF 0| / (2 * (Real.sqrt 2)⁻¹)
+      = (1/2) ^ (m + 1)
+      ∧ (1/2) ^ (m + 1)
+        < tvDistance (walkDistribution triAdj m 0)
+            (stationaryVec triAdj) := by
+  have hne : (2:ℝ) * (Real.sqrt 2)⁻¹ ≠ 0 :=
+    mul_ne_zero two_ne_zero
+      (inv_ne_zero (Real.sqrt_ne_zero'.mpr (by norm_num)))
+  have hab : |1 - (3/2:ℝ)| = 1/2 := by norm_num
+  have hf : |triF 0| = 2 * (Real.sqrt 2)⁻¹ := by
+    rw [triF_zero, abs_of_pos (by positivity)]
+  refine ⟨?_, ?_⟩
+  · have hcancel : (1/2:ℝ) * (1/2) ^ m * (2 * (Real.sqrt 2)⁻¹)
+          / (2 * (Real.sqrt 2)⁻¹) = (1/2) * (1/2) ^ m := by
+      field_simp
+      ring
+    rw [hf, hab, hcancel, pow_succ]
+    ring
+  · rw [tri_disc_tv_eq_QA m,
+      show (1/2:ℝ) ^ (m + 1) = (1/2) ^ m * (1/2) from by
+        rw [pow_succ]]
+    nlinarith [pow_pos (by norm_num : (0:ℝ) < 1/2) m]
+
+/-- The χ² closed form on the triangle at every time. -/
+theorem tri_chi2_all_QA (m : ℕ) :
+    chiSquareDistance triAdj m 0 = 2 * (1/2) ^ (2 * m) := by
+  rw [chiSquareDistance_eq_sum_smul triAdj triAdj_deg_pos m 0]
+  have hdev : ∀ i : Fin 3,
+      stationaryVec triAdj i * (walkDensity triAdj m 0 i - 1) ^ 2
+      = (1/2:ℝ) ^ (2 * m) * (stationaryVec triAdj i * (triG i)^2) := by
+    intro i
+    have hsign : ((-(1/2:ℝ)) ^ m) ^ 2 = (1/2:ℝ) ^ (2 * m) := by
+      have h1 : ((-(1/2:ℝ)) ^ m) ^ 2 = (-(1/2:ℝ)) ^ (m * 2) := by
+        rw [← pow_mul]
+      have h2 : (-(1/2:ℝ)) ^ (m * 2) = (-(1/2:ℝ)) ^ (2 * m) := by
+        congr 1
+        omega
+      have h3 : (-(1/2:ℝ)) ^ (2 * m) = (1/2:ℝ) ^ (2 * m) := by
+        rw [pow_mul, pow_mul]
+        norm_num
+      rw [h1, h2, h3]
+    rw [tri_centered_walkDensity_sub_one_QA m i, mul_pow, hsign]
+    ring
+  rw [Finset.sum_congr rfl fun i _ => hdev i, ← Finset.mul_sum,
+    tri_l2_zero_QA, mul_comm (2:ℝ)]
+
+/-- The χ² floor instance on the triangle. -/
+theorem tri_chi2_floor_le_QA (m : ℕ) :
+    (1 - 3/2) ^ (2 * m) * (triG 0) ^ 2
+      / (stationaryVec triAdj 0 * (triG ⬝ᵥ triG))
+      ≤ chiSquareDistance triAdj m 0 :=
+  chiSquareDistance_ge_of_eigenpair triAdj triAdj_isSymm triAdj_deg_pos
+    m 0 tri_lapsym_mulVec_triG_QA (by norm_num)
+    (by intro h; have h0 := congrFun h 0; simp [triG] at h0)
+
+/-- **The χ² floor is attained exactly at every time on the triangle**:
+the floor value is `2·(1/4)^m` — so is the truth (the centered
+density from vertex `0` is a pure `3/2`-mode, and the floor at that
+mode captures all the mass). Load-bearing on the eigenpair constant:
+a wrong conjugation would miss the exact value. -/
+theorem tri_chi2_floor_attained_QA (m : ℕ) :
+    (1 - 3/2) ^ (2 * m) * (triG 0) ^ 2
+      / (stationaryVec triAdj 0 * (triG ⬝ᵥ triG))
+      = chiSquareDistance triAdj m 0 := by
+  have hnorm : triG ⬝ᵥ triG = 6 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_three, triG]
+    norm_num
+  have h0 : triG 0 = 2 := by simp [triG]
+  have hsign : (1 - 3/2) ^ (2 * m) = (1/2:ℝ) ^ (2 * m) := by
+    rw [show (1:ℝ) - 3/2 = -(1/2) from by norm_num, pow_mul, pow_mul]
+    congr 1
+    norm_num
+  rw [tri_chi2_all_QA, h0, hnorm, tri_pi_QA (0 : Fin 3), hsign]
+  field_simp
+  ring
+
+/-! ### The mixing-time floor: exact at all three pinned thresholds -/
+
+/-- The depth-`3` certificate (the witness-existence input the floor
+theorems consume; one cert serves all three thresholds by
+monotonicity `1/12 ≤ 1/6 ≤ 1/3`). -/
+theorem tri_mix_cert_QA :
+    ∀ s : ℕ, 3 ≤ s →
+      tvDistance (walkDistribution triAdj s 0) (stationaryVec triAdj)
+        ≤ 1/12 := by
+  intro s hs
+  rw [tri_disc_tv_eq_QA s]
+  have h8 : (8 : ℝ) ≤ (2 : ℝ)^s := by
+    have hp := pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) hs
+    norm_num at hp
+    exact hp
+  have hpos : (0 : ℝ) < (2 : ℝ)^s := pow_pos (by norm_num) s
+  have hinv : (1/2 : ℝ)^s = 1 / ((2 : ℝ)^s) := _root_.one_div_pow 2 s
+  have hkey : (1 : ℝ) / ((2 : ℝ)^s) ≤ 1/8 :=
+    (one_div_le_one_div hpos (by norm_num : (0 : ℝ) < 8)).mpr h8
+  rw [hinv]
+  nlinarith
+
+theorem tri_floor_thr_third :
+    Real.log (|triF 0| / (2 * (1/3) * (2 * (Real.sqrt 2)⁻¹)))
+      / Real.log (1 / |1 - 3/2|)
+      = Real.log (3/2) / Real.log 2 := by
+  rw [triF_zero, abs_of_pos (by positivity),
+    show |1 - (3/2:ℝ)| = 1/2 from by norm_num]
+  have hne : (2 : ℝ) * (Real.sqrt 2)⁻¹ ≠ 0 := by positivity
+  have hrw : (2 : ℝ) * (Real.sqrt 2)⁻¹
+      / (2 * (1/3) * (2 * (Real.sqrt 2)⁻¹)) = 3/2 := by
+    field_simp
+    ring
+  rw [hrw, show (1:ℝ) / (1/2) = 2 from by norm_num]
+
+theorem tri_floor_thr_sixth :
+    Real.log (|triF 0| / (2 * (1/6) * (2 * (Real.sqrt 2)⁻¹)))
+      / Real.log (1 / |1 - 3/2|)
+      = Real.log 3 / Real.log 2 := by
+  rw [triF_zero, abs_of_pos (by positivity),
+    show |1 - (3/2:ℝ)| = 1/2 from by norm_num]
+  have hne : (2 : ℝ) * (Real.sqrt 2)⁻¹ ≠ 0 := by positivity
+  have hrw : (2 : ℝ) * (Real.sqrt 2)⁻¹
+      / (2 * (1/6) * (2 * (Real.sqrt 2)⁻¹)) = 3 := by
+    field_simp
+    ring
+  rw [hrw, show (1:ℝ) / (1/2) = 2 from by norm_num]
+
+theorem tri_floor_thr_twelfth :
+    Real.log (|triF 0| / (2 * (1/12) * (2 * (Real.sqrt 2)⁻¹)))
+      / Real.log (1 / |1 - 3/2|)
+      = Real.log 6 / Real.log 2 := by
+  rw [triF_zero, abs_of_pos (by positivity),
+    show |1 - (3/2:ℝ)| = 1/2 from by norm_num]
+  have hne : (2 : ℝ) * (Real.sqrt 2)⁻¹ ≠ 0 := by positivity
+  have hrw : (2 : ℝ) * (Real.sqrt 2)⁻¹
+      / (2 * (1/12) * (2 * (Real.sqrt 2)⁻¹)) = 6 := by
+    field_simp
+    ring
+  rw [hrw, show (1:ℝ) / (1/2) = 2 from by norm_num]
+
+/-- **The floor is attained exactly at `ε = 1/3`**: the spectral floor
+theorem gives `⌈L⌉ ≤ t_mix`, the pinned closed form gives
+`t_mix = 1`, and `0 < log(3/2)/log 2 ≤ 1` gives `⌈L⌉ = 1`. -/
+theorem tri_abs_halves : |1 - (3/2 : ℝ)| = 1/2 := by norm_num
+
+theorem triF_zero_ne : triF 0 ≠ 0 := by
+  rw [triF_zero]
+  exact mul_ne_zero two_ne_zero
+    (inv_ne_zero (Real.sqrt_ne_zero'.mpr (by norm_num)))
+
+theorem tri_conj_eigvec_zero_ne : (degreeInvSqrt triAdj *ᵥ triG) 0 ≠ 0 := by
+  rw [show (degreeInvSqrt triAdj *ᵥ triG) 0 = triF 0 from rfl]
+  exact triF_zero_ne
+
+theorem tri_rate_abs_pos : 0 < |1 - (3/2 : ℝ)| := by
+  rw [tri_abs_halves]
+  norm_num
+
+theorem tri_rate_abs_lt : |1 - (3/2 : ℝ)| < 1 := by
+  rw [tri_abs_halves]
+  norm_num
+
+theorem tri_mix_floor_third_attained_QA :
+    Nat.ceil (Real.log (|triF 0| / (2 * (1/3) * (2 * (Real.sqrt 2)⁻¹)))
+        / Real.log (1 / |1 - 3/2|))
+      = walkMixingTimeFrom triAdj 0 (1/3) := by
+  have hle : Nat.ceil (Real.log (|triF 0|
+        / (2 * (1/3) * (2 * (Real.sqrt 2)⁻¹)))
+        / Real.log (1 / |1 - 3/2|))
+      ≤ walkMixingTimeFrom triAdj 0 (1/3) :=
+    walkMixingTimeFrom_ge_of_eigenpair triAdj triAdj_isSymm
+      triAdj_deg_pos (by norm_num) 0 tri_lapsym_mulVec_triG_QA
+      (by norm_num)
+      (c := 2 * (Real.sqrt 2)⁻¹) triF_abs_le (by positivity)
+      tri_conj_eigvec_zero_ne tri_rate_abs_pos tri_rate_abs_lt
+      ⟨1, tri_mix_le_third_cert_QA⟩
+  rw [tri_floor_thr_third, tri_mix_eq_third_QA]
+  rw [tri_floor_thr_third] at hle
+  rw [tri_mix_eq_third_QA] at hle
+  have hlog2 : 0 < Real.log 2 := by
+    apply Real.log_pos
+    norm_num
+  have hlog32 : 0 < Real.log (3/2) := by
+    apply Real.log_pos
+    norm_num
+  have hlow : 0 < Real.log (3/2) / Real.log 2 :=
+    div_pos hlog32 hlog2
+  have hhigh : Real.log (3/2) / Real.log 2 ≤ 1 := by
+    rw [div_le_iff₀ hlog2, one_mul]
+    exact Real.log_le_log (by norm_num) (by norm_num)
+  have h1 : 1 ≤ Nat.ceil (Real.log (3/2) / Real.log 2) := by
+    have := (Nat.ceil_pos).mpr hlow
+    omega
+  have h2 : Nat.ceil (Real.log (3/2) / Real.log 2) ≤ 1 :=
+    Nat.ceil_le.mpr (by exact_mod_cast hhigh)
+  exact le_antisymm h2 h1
+
+theorem tri_mix_floor_sixth_attained_QA :
+    Nat.ceil (Real.log (|triF 0| / (2 * (1/6) * (2 * (Real.sqrt 2)⁻¹)))
+        / Real.log (1 / |1 - 3/2|))
+      = walkMixingTimeFrom triAdj 0 (1/6) := by
+  have hle : Nat.ceil (Real.log (|triF 0|
+        / (2 * (1/6) * (2 * (Real.sqrt 2)⁻¹)))
+        / Real.log (1 / |1 - 3/2|))
+      ≤ walkMixingTimeFrom triAdj 0 (1/6) :=
+    walkMixingTimeFrom_ge_of_eigenpair triAdj triAdj_isSymm
+      triAdj_deg_pos (by norm_num) 0 tri_lapsym_mulVec_triG_QA
+      (by norm_num)
+      (c := 2 * (Real.sqrt 2)⁻¹) triF_abs_le (by positivity)
+      tri_conj_eigvec_zero_ne tri_rate_abs_pos tri_rate_abs_lt
+      ⟨3, fun s hs => le_trans (tri_mix_cert_QA s hs) (by norm_num)⟩
+  rw [tri_floor_thr_sixth, tri_mix_eq_sixth_QA]
+  rw [tri_floor_thr_sixth] at hle
+  rw [tri_mix_eq_sixth_QA] at hle
+  have hlog2 : 0 < Real.log 2 := by
+    apply Real.log_pos
+    norm_num
+  have hlow : 1 < Real.log 3 / Real.log 2 := by
+    rw [lt_div_iff₀ hlog2, one_mul]
+    exact Real.log_lt_log (by norm_num) (by norm_num)
+  have hhigh : Real.log 3 / Real.log 2 ≤ 2 := by
+    rw [div_le_iff₀ hlog2]
+    have h3 : Real.log ((2:ℝ)^2) = (2:ℝ) * Real.log 2 := by
+      rw [Real.log_pow]
+      norm_num
+    rw [← h3]
+    exact Real.log_le_log (by norm_num) (by norm_num)
+  have hge : 2 ≤ Nat.ceil (Real.log 3 / Real.log 2) := by
+    have hc := Nat.le_ceil (Real.log 3 / Real.log 2)
+    have hlt : (1:ℝ) < ((Nat.ceil (Real.log 3 / Real.log 2) : ℕ) : ℝ) :=
+      lt_of_lt_of_le hlow hc
+    have hnat : (1:ℕ) < Nat.ceil (Real.log 3 / Real.log 2) := by
+      exact_mod_cast hlt
+    omega
+  have h2 : Nat.ceil (Real.log 3 / Real.log 2) ≤ 2 :=
+    Nat.ceil_le.mpr (by exact_mod_cast hhigh)
+  exact le_antisymm h2 hge
+
+theorem tri_mix_floor_twelfth_attained_QA :
+    Nat.ceil (Real.log (|triF 0| / (2 * (1/12) * (2 * (Real.sqrt 2)⁻¹)))
+        / Real.log (1 / |1 - 3/2|))
+      = walkMixingTimeFrom triAdj 0 (1/12) := by
+  have hle : Nat.ceil (Real.log (|triF 0|
+        / (2 * (1/12) * (2 * (Real.sqrt 2)⁻¹)))
+        / Real.log (1 / |1 - 3/2|))
+      ≤ walkMixingTimeFrom triAdj 0 (1/12) :=
+    walkMixingTimeFrom_ge_of_eigenpair triAdj triAdj_isSymm
+      triAdj_deg_pos (by norm_num) 0 tri_lapsym_mulVec_triG_QA
+      (by norm_num)
+      (c := 2 * (Real.sqrt 2)⁻¹) triF_abs_le (by positivity)
+      tri_conj_eigvec_zero_ne tri_rate_abs_pos tri_rate_abs_lt
+      ⟨3, tri_mix_cert_QA⟩
+  rw [tri_floor_thr_twelfth, tri_mix_eq_twelfth_QA]
+  rw [tri_floor_thr_twelfth] at hle
+  rw [tri_mix_eq_twelfth_QA] at hle
+  have hlog2 : 0 < Real.log 2 := by
+    apply Real.log_pos
+    norm_num
+  have hlow : 2 < Real.log 6 / Real.log 2 := by
+    rw [lt_div_iff₀ hlog2]
+    have h4 : Real.log ((2:ℝ)^2) = (2:ℝ) * Real.log 2 := by
+      rw [Real.log_pow]
+      norm_num
+    rw [← h4]
+    exact Real.log_lt_log (by norm_num) (by norm_num)
+  have hhigh : Real.log 6 / Real.log 2 ≤ 3 := by
+    rw [div_le_iff₀ hlog2]
+    have h8 : Real.log ((2:ℝ)^3) = (3:ℝ) * Real.log 2 := by
+      rw [Real.log_pow]
+      norm_num
+    rw [← h8]
+    exact Real.log_le_log (by norm_num) (by norm_num)
+  have h3 : 3 ≤ Nat.ceil (Real.log 6 / Real.log 2) := by
+    have hc := Nat.le_ceil (Real.log 6 / Real.log 2)
+    have hkey : (2:ℝ) < ((Nat.ceil (Real.log 6 / Real.log 2) : ℕ) : ℝ) :=
+      lt_of_lt_of_le hlow hc
+    have hnat : (2:ℕ) < Nat.ceil (Real.log 6 / Real.log 2) := by
+      exact_mod_cast hkey
+    omega
+  have h4 : Nat.ceil (Real.log 6 / Real.log 2) ≤ 3 :=
+    Nat.ceil_le.mpr (by exact_mod_cast hhigh)
+  exact le_antisymm h4 h3
+
+/-! ### The kernel-mode fences -/
+
+/-- **The χ² floor's `μ ≠ 0` hypothesis is load-bearing**: at the
+kernel eigenpair `(0, ![1,1,1])` — a genuine eigenpair — every other
+ingredient is satisfiable, and the dropped-hypothesis statement reads
+`1 ≤ χ²(2)` against the pinned `χ²(2) = 1/8`. -/
+theorem tri_floor_kernel_refuted_QA :
+    ¬ ((1 - (0:ℝ)) ^ (2 * 2) * ((![1, 1, 1] : Fin 3 → ℝ) 0) ^ 2
+      / (stationaryVec triAdj 0
+          * ((![1, 1, 1] : Fin 3 → ℝ) ⬝ᵥ (![1, 1, 1] : Fin 3 → ℝ)))
+      ≤ chiSquareDistance triAdj 2 0) := by
+  intro h
+  have hpair : ((![1, 1, 1] : Fin 3 → ℝ) ⬝ᵥ (![1, 1, 1] : Fin 3 → ℝ))
+      = 3 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_three]
+    norm_num
+  rw [tri_pi_QA (0 : Fin 3), hpair, tri_chi2_two_QA] at h
+  simp only [Matrix.cons_val_zero, Matrix.head_cons] at h
+  norm_num at h
+
+/-- **The TV floor's `μ ≠ 0` hypothesis is load-bearing**, the same
+fence in total-variation form: the dropped-hypothesis statement reads
+`1/2 ≤ TV(2)` against the pinned `TV(2) = 1/6`. -/
+theorem tri_floor_kernel_tv_refuted_QA :
+    ¬ ((1/2) * |1 - (0:ℝ)| ^ 2
+        * |(degreeInvSqrt triAdj *ᵥ (![1, 1, 1] : Fin 3 → ℝ)) 0|
+        / ((Real.sqrt 2)⁻¹)
+      ≤ tvDistance (walkDistribution triAdj 2 0) (stationaryVec triAdj)) := by
+  intro h
+  have hf : (degreeInvSqrt triAdj *ᵥ (![1, 1, 1] : Fin 3 → ℝ)) 0
+      = (Real.sqrt 2)⁻¹ := by
+    rw [degreeInvSqrt_mulVec_apply, triAdj_deg_eq]
+    simp
+  have hnn : (0:ℝ) < (Real.sqrt 2)⁻¹ := by positivity
+  rw [hf, tri_tv_two_eq_QA, sub_zero, abs_of_pos (by norm_num), one_pow,
+    abs_of_pos hnn] at h
+  have hval : (1/2:ℝ) * 1 * (Real.sqrt 2)⁻¹ / (Real.sqrt 2)⁻¹ = 1/2 := by
+    field_simp
+    ring
+  rw [hval] at h
+  norm_num at h
+
+end SpectralFloorQA
+section UniformMixing
+
+/-! ### The triangle's walk-law pins from the other starts -/
+
+/-- The one-step law from vertex `1`: `(1/2, 0, 1/2)`. -/
+theorem tri_dist_one_one_QA :
+    walkDistribution triAdj 1 1 = ![1/2, 0, 1/2] := by
+  rw [walkDistribution_succ, walkDistribution_zero]
+  funext i
+  fin_cases i
+  all_goals simp [walkTransitionMatrix_apply, triAdj_deg_eq, triAdj_apply,
+    Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three, Pi.single_apply]
+
+/-- The two-step law from vertex `1`: `(1/4, 1/2, 1/4)`. -/
+theorem tri_dist_two_one_QA :
+    walkDistribution triAdj 2 1 = ![1/4, 1/2, 1/4] := by
+  rw [walkDistribution_succ, tri_dist_one_one_QA]
+  funext i
+  fin_cases i
+  all_goals simp [walkTransitionMatrix_apply, triAdj_deg_eq, triAdj_apply,
+    Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three]
+  all_goals norm_num
+
+/-- The one-step law from vertex `2`: `(1/2, 1/2, 0)`. -/
+theorem tri_dist_one_two_QA :
+    walkDistribution triAdj 1 2 = ![1/2, 1/2, 0] := by
+  rw [walkDistribution_succ, walkDistribution_zero]
+  funext i
+  fin_cases i
+  all_goals simp [walkTransitionMatrix_apply, triAdj_deg_eq, triAdj_apply,
+    Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three, Pi.single_apply]
+
+/-- The two-step law from vertex `2`: `(1/4, 1/4, 1/2)`. -/
+theorem tri_dist_two_two_QA :
+    walkDistribution triAdj 2 2 = ![1/4, 1/4, 1/2] := by
+  rw [walkDistribution_succ, tri_dist_one_two_QA]
+  funext i
+  fin_cases i
+  all_goals simp [walkTransitionMatrix_apply, triAdj_deg_eq, triAdj_apply,
+    Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three]
+  all_goals norm_num
+
+/-- The one-step law from vertex `1` on the edge: `(1, 0)`. -/
+theorem k2_dist_one_one_QA :
+    walkDistribution k2Adj 1 1 = ![1, 0] := by
+  rw [walkDistribution_succ, walkDistribution_zero]
+  funext i
+  fin_cases i
+  all_goals simp [walkTransitionMatrix_apply, k2Adj_deg_eq, k2Adj_apply,
+    Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, Pi.single_apply]
+
+/-! ### The distance pins -/
+
+/-- Every start pair's TV distance at `t = 1` is at most `1/2` — the
+sup bound's per-pair engine (`omega`'s `Fin` support supplies the
+numeral case split; `norm_num` then computes from the raw law
+literals). -/
+theorem tri_pair_tv_one_le_QA : ∀ (a b : Fin 3),
+    tvDistance (walkDistribution triAdj 1 a) (walkDistribution triAdj 1 b)
+      ≤ 1/2 := by
+  intro a b
+  rcases (show a = 0 ∨ a = 1 ∨ a = 2 by omega) with h | h | h <;> rw [h]
+  all_goals rcases (show b = 0 ∨ b = 1 ∨ b = 2 by omega) with h | h | h <;>
+    rw [h]
+  all_goals norm_num [tri_dist_one_QA, tri_dist_one_one_QA,
+    tri_dist_one_two_QA, tvDistance, Fin.sum_univ_three,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+    Matrix.head_cons, neg_sub, abs_of_neg, abs_of_nonneg]
+
+/-- **`d(1) = 1/2` on the triangle** — the two-start distance's sup
+over the nine start pairs, pinned from the raw law literals (the six
+off-diagonal pairs each `(1/2)^1`, the diagonal `0`). -/
+theorem tri_pair_one_eq_QA : walkTVPair triAdj 1 = 1/2 := by
+  refine le_antisymm ?_ ?_
+  · refine Finset.sup'_le
+      (⟨(0, 1), Finset.mem_univ _⟩ :
+        (Finset.univ : Finset (Fin 3 × Fin 3)).Nonempty)
+      (f := fun p : Fin 3 × Fin 3 =>
+        tvDistance (walkDistribution triAdj 1 p.1)
+          (walkDistribution triAdj 1 p.2))
+      fun p _ => tri_pair_tv_one_le_QA p.1 p.2
+  · have h0 : (1/2 : ℝ) = tvDistance (walkDistribution triAdj 1 0)
+          (walkDistribution triAdj 1 1) := by
+      rw [tri_dist_one_QA, tri_dist_one_one_QA, tvDistance]
+      norm_num [Fin.sum_univ_three, neg_sub, abs_of_neg, abs_of_nonneg]
+    rw [h0]
+    exact Finset.le_sup'
+      (f := fun p : Fin 3 × Fin 3 =>
+        tvDistance (walkDistribution triAdj 1 p.1)
+          (walkDistribution triAdj 1 p.2))
+      (Finset.mem_univ (0, 1))
+
+/-- Every start pair's TV distance at `t = 2` is at most `1/4`. -/
+theorem tri_pair_tv_two_le_QA : ∀ (a b : Fin 3),
+    tvDistance (walkDistribution triAdj 2 a) (walkDistribution triAdj 2 b)
+      ≤ 1/4 := by
+  intro a b
+  rcases (show a = 0 ∨ a = 1 ∨ a = 2 by omega) with h | h | h <;> rw [h]
+  all_goals rcases (show b = 0 ∨ b = 1 ∨ b = 2 by omega) with h | h | h <;>
+    rw [h]
+  all_goals norm_num [tri_dist_two_QA, tri_dist_two_one_QA,
+    tri_dist_two_two_QA, tvDistance, Fin.sum_univ_three,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+    Matrix.head_cons, neg_sub, abs_of_neg, abs_of_nonneg]
+
+/-- **`d(2) = 1/4` on the triangle** — the same pin at `t = 2`. -/
+theorem tri_pair_two_eq_QA : walkTVPair triAdj 2 = 1/4 := by
+  refine le_antisymm ?_ ?_
+  · refine Finset.sup'_le
+      (⟨(0, 1), Finset.mem_univ _⟩ :
+        (Finset.univ : Finset (Fin 3 × Fin 3)).Nonempty)
+      (f := fun p : Fin 3 × Fin 3 =>
+        tvDistance (walkDistribution triAdj 2 p.1)
+          (walkDistribution triAdj 2 p.2))
+      fun p _ => tri_pair_tv_two_le_QA p.1 p.2
+  · have h0 : (1/4 : ℝ) = tvDistance (walkDistribution triAdj 2 0)
+          (walkDistribution triAdj 2 1) := by
+      rw [tri_dist_two_QA, tri_dist_two_one_QA, tvDistance]
+      norm_num [Fin.sum_univ_three, neg_sub, abs_of_neg, abs_of_nonneg]
+    rw [h0]
+    exact Finset.le_sup'
+      (f := fun p : Fin 3 × Fin 3 =>
+        tvDistance (walkDistribution triAdj 2 p.1)
+          (walkDistribution triAdj 2 p.2))
+      (Finset.mem_univ (0, 1))
+
+/-- Every start's TV distance to stationarity at `t = 1` is at most
+`1/3`. -/
+theorem tri_unif_tv_one_le_QA : ∀ (x : Fin 3),
+    tvDistance (walkDistribution triAdj 1 x) (stationaryVec triAdj)
+      ≤ 1/3 := by
+  intro x
+  rcases (show x = 0 ∨ x = 1 ∨ x = 2 by omega) with h | h | h <;> rw [h]
+  all_goals norm_num [tri_dist_one_QA, tri_dist_one_one_QA,
+    tri_dist_one_two_QA, tri_pi_QA, tvDistance, Fin.sum_univ_three,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+    Matrix.head_cons, neg_sub, abs_of_neg, abs_of_nonneg]
+
+/-- **`d̄(1) = 1/3` on the triangle** — the worst-start distance's sup
+over the three starts, each `1/3` by the vertex-transitive symmetry
+here witnessed by raw law arithmetic. -/
+theorem tri_unif_one_eq_QA : walkTVUniform triAdj 1 = 1/3 := by
+  refine le_antisymm ?_ ?_
+  · refine Finset.sup'_le
+      (⟨(0 : Fin 3), Finset.mem_univ _⟩ :
+        (Finset.univ : Finset (Fin 3)).Nonempty)
+      (f := fun x : Fin 3 =>
+        tvDistance (walkDistribution triAdj 1 x) (stationaryVec triAdj))
+      fun x _ => tri_unif_tv_one_le_QA x
+  · have h0 : (1/3 : ℝ) = tvDistance (walkDistribution triAdj 1 0)
+          (stationaryVec triAdj) := by
+      rw [tri_dist_one_QA, tvDistance]
+      norm_num [tri_pi_QA, Fin.sum_univ_three, neg_sub, abs_of_neg,
+        abs_of_nonneg]
+    rw [h0]
+    exact Finset.le_sup'
+      (f := fun x : Fin 3 =>
+        tvDistance (walkDistribution triAdj 1 x) (stationaryVec triAdj))
+      (Finset.mem_univ 0)
+
+/-- Every start's TV distance to stationarity at `t = 2` is at most
+`1/6`. -/
+theorem tri_unif_tv_two_le_QA : ∀ (x : Fin 3),
+    tvDistance (walkDistribution triAdj 2 x) (stationaryVec triAdj)
+      ≤ 1/6 := by
+  intro x
+  rcases (show x = 0 ∨ x = 1 ∨ x = 2 by omega) with h | h | h <;> rw [h]
+  all_goals norm_num [tri_dist_two_QA, tri_dist_two_one_QA,
+    tri_dist_two_two_QA, tri_pi_QA, tvDistance, Fin.sum_univ_three,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+    Matrix.head_cons, neg_sub, abs_of_neg, abs_of_nonneg]
+
+/-- **`d̄(2) = 1/6` on the triangle** — the same pin at `t = 2`. -/
+theorem tri_unif_two_eq_QA : walkTVUniform triAdj 2 = 1/6 := by
+  refine le_antisymm ?_ ?_
+  · refine Finset.sup'_le
+      (⟨(0 : Fin 3), Finset.mem_univ _⟩ :
+        (Finset.univ : Finset (Fin 3)).Nonempty)
+      (f := fun x : Fin 3 =>
+        tvDistance (walkDistribution triAdj 2 x) (stationaryVec triAdj))
+      fun x _ => tri_unif_tv_two_le_QA x
+  · have h0 : (1/6 : ℝ) = tvDistance (walkDistribution triAdj 2 0)
+          (stationaryVec triAdj) := by
+      rw [tri_dist_two_QA, tvDistance]
+      norm_num [tri_pi_QA, Fin.sum_univ_three, neg_sub, abs_of_neg,
+        abs_of_nonneg]
+    rw [h0]
+    exact Finset.le_sup'
+      (f := fun x : Fin 3 =>
+        tvDistance (walkDistribution triAdj 2 x) (stationaryVec triAdj))
+      (Finset.mem_univ 0)
+
+/-! ### The theorem instances: every statement tight at the fixture -/
+
+/-- The uniform `1/3` certificate: from time `1` on, every start's TV
+distance is at most `1/3` — per-start monotonicity below the pinned
+`d̄(1) = 1/3`. -/
+theorem tri_unif_third_cert_QA : ∀ s : ℕ, 1 ≤ s → ∀ x : Fin 3,
+    tvDistance (walkDistribution triAdj s x) (stationaryVec triAdj)
+      ≤ 1/3 := by
+  intro s hs x
+  obtain ⟨j, hj⟩ := Nat.exists_eq_add_of_le hs
+  have h1 : tvDistance (walkDistribution triAdj 1 x)
+      (stationaryVec triAdj) ≤ 1/3 := by
+    have hsup := Finset.le_sup'
+      (f := fun y : Fin 3 =>
+        tvDistance (walkDistribution triAdj 1 y) (stationaryVec triAdj))
+      (Finset.mem_univ x)
+    exact le_trans hsup (le_of_eq tri_unif_one_eq_QA)
+  rw [hj]
+  exact le_trans
+    (walkDistribution_tvDistance_anti triAdj triAdj_isSymm triAdj_nonneg
+      triAdj_deg_pos 1 j x) h1
+
+/-- The uniform `1/6` certificate: from time `2` on, every start's TV
+distance is at most `1/6` — per-start monotonicity below the pinned
+`d̄(2) = 1/6`. -/
+theorem tri_unif_sixth_cert_QA : ∀ s : ℕ, 2 ≤ s → ∀ x : Fin 3,
+    tvDistance (walkDistribution triAdj s x) (stationaryVec triAdj)
+      ≤ 1/6 := by
+  intro s hs x
+  obtain ⟨j, hj⟩ := Nat.exists_eq_add_of_le hs
+  have h2 : tvDistance (walkDistribution triAdj 2 x)
+      (stationaryVec triAdj) ≤ 1/6 := by
+    have hsup := Finset.le_sup'
+      (f := fun y : Fin 3 =>
+        tvDistance (walkDistribution triAdj 2 y) (stationaryVec triAdj))
+      (Finset.mem_univ x)
+    exact le_trans hsup (le_of_eq tri_unif_two_eq_QA)
+  rw [hj]
+  exact le_trans
+    (walkDistribution_tvDistance_anti triAdj triAdj_isSymm triAdj_nonneg
+      triAdj_deg_pos 2 j x) h2
+
+/-- **Submultiplicativity attained with equality** on the triangle at
+`(s, t) = (1, 1)`: `d(2) = 1/4 = (1/2) · (1/2) = d(1) · d(1)` — no
+slack anywhere in the package (the sharp Dobrushin constant
+load-bearing: a factor-`2` statement would read `1/4 ≤ 1/2`). -/
+theorem tri_pair_submul_tight_QA :
+    walkTVPair triAdj 2 = walkTVPair triAdj 1 * walkTVPair triAdj 1 := by
+  have hinst := walkTVPair_submul triAdj triAdj_deg_pos 1 1
+  rw [show 1 + 1 = 2 from rfl] at hinst
+  rw [tri_pair_two_eq_QA, tri_pair_one_eq_QA] at hinst ⊢
+  linarith
+
+/-- **The mixed submultiplicativity attained with equality** on the
+triangle at `(s, t) = (1, 1)`: `d̄(2) = 1/6 = (1/3) · (1/2) =
+d̄(1) · d(1)`. -/
+theorem tri_unif_submul_tight_QA :
+    walkTVUniform triAdj 2
+      = walkTVUniform triAdj 1 * walkTVPair triAdj 1 := by
+  have hinst := walkTVUniform_mul_walkTVPair_le triAdj triAdj_isSymm
+    triAdj_deg_pos 1 1
+  rw [show 1 + 1 = 2 from rfl] at hinst
+  rw [tri_unif_two_eq_QA, tri_unif_one_eq_QA, tri_pair_one_eq_QA]
+    at hinst ⊢
+  norm_num
+
+/-- **The escalation engine attained with equality** on the triangle
+at `k = 1`, `t₀ = 1`: `d̄(2·1) = 1/6 = (1/3) · (1/2)¹ = d̄(1) · d(1)¹`. -/
+theorem tri_escalation_tight_QA :
+    walkTVUniform triAdj ((1 + 1) * 1)
+      = walkTVUniform triAdj 1 * (walkTVPair triAdj 1) ^ 1 := by
+  have hinst := walkTVUniform_succ_mul_le triAdj triAdj_isSymm
+    triAdj_deg_pos 1 1
+  rw [tri_unif_two_eq_QA, tri_unif_one_eq_QA, tri_pair_one_eq_QA]
+    at hinst ⊢
+  norm_num
+
+/-- **`d̄ ≤ d` with honest slack witnessed** on the triangle at
+`t = 1`: `1/3 ≤ 1/2`, both sides pinned independently. -/
+theorem tri_unif_le_pair_QA : walkTVUniform triAdj 1 ≤ walkTVPair triAdj 1 :=
+  walkTVUniform_le_walkTVPair triAdj triAdj_isSymm triAdj_deg_pos 1
+
+/-- **The uniform object's exact closed form `t_mix(1/3) = 1`** —
+pinned in both directions: the escalation certificate gives `≤`
+(`d̄(1) = ε₀ = 1/3`, `d(1) = ρ = 1/2`, `ε₀ · ρ⁰ ≤ 1/3`), and the
+per-start pin `t_mix^0(1/3) = 1` gives `≥` through the domination. -/
+theorem tri_mix_uniform_eq_third_QA :
+    walkMixingTime triAdj (1/3) = 1 := by
+  have hle : walkMixingTime triAdj (1/3) ≤ (0 + 1) * 1 := by
+    refine walkMixingTime_le_mul_of_escalation (ε := 1/3) (ε₀ := 1/3)
+      (ρ := 1/2) triAdj triAdj_isSymm triAdj_nonneg triAdj_deg_pos 1 0
+      ?_ ?_ ?_
+    · rw [tri_unif_one_eq_QA]
+    · rw [tri_pair_one_eq_QA]
+    · norm_num
+  have hge : walkMixingTimeFrom triAdj 0 (1/3)
+      ≤ walkMixingTime triAdj (1/3) :=
+    walkMixingTimeFrom_le_walkMixingTime triAdj 0 ⟨1, tri_unif_third_cert_QA⟩
+  rw [tri_mix_eq_third_QA] at hge
+  omega
+
+/-- **The uniform object's exact closed form `t_mix(1/6) = 2`** — the
+escalation certificate closes *exactly at the truth*: `≤ 2` from
+`d̄(1) = 1/3`, `d(1) = 1/2`, `k = 1` (`(1/3) · (1/2)¹ ≤ 1/6`), `≥ 2`
+from the per-start pin at the same threshold. -/
+theorem tri_mix_uniform_eq_sixth_QA :
+    walkMixingTime triAdj (1/6) = 2 := by
+  have hle : walkMixingTime triAdj (1/6) ≤ (1 + 1) * 1 := by
+    refine walkMixingTime_le_mul_of_escalation (ε := 1/6) (ε₀ := 1/3)
+      (ρ := 1/2) triAdj triAdj_isSymm triAdj_nonneg triAdj_deg_pos 1 1
+      ?_ ?_ ?_
+    · rw [tri_unif_one_eq_QA]
+    · rw [tri_pair_one_eq_QA]
+    · norm_num
+  have hge : walkMixingTimeFrom triAdj 0 (1/6)
+      ≤ walkMixingTime triAdj (1/6) :=
+    walkMixingTimeFrom_le_walkMixingTime triAdj 0 ⟨2, tri_unif_sixth_cert_QA⟩
+  rw [tri_mix_eq_sixth_QA] at hge
+  omega
+
+/-- **The uniform object is the worst start's per-start object** — the
+finite-sup interchange instantiated structurally at the triangle's
+`1/6` threshold, the escalation supplying the witness. -/
+theorem tri_uniform_eq_sup_QA :
+    walkMixingTime triAdj (1/6)
+      = (Finset.univ : Finset (Fin 3)).sup'
+        (⟨0, Finset.mem_univ _⟩ :
+          (Finset.univ : Finset (Fin 3)).Nonempty)
+        (fun x => walkMixingTimeFrom triAdj x (1/6)) := by
+  refine walkMixingTime_eq_sup_walkMixingTimeFrom triAdj ⟨2, ?_⟩
+  exact tri_unif_sixth_cert_QA
+
+/-- **The uniform spectral ceiling on the triangle** at `ε = 1/6`:
+with `C = 2` (every start's `(π x)⁻¹ − 1 = 2`), the ceiling is the
+same display as the per-start pinned ceiling at the same threshold
+(the uniform `t_mix = 2 ≤ ⌈·⌉` with honest slack). -/
+theorem tri_uniform_ceiling_QA :
+    walkMixingTime triAdj (1/6)
+      ≤ Nat.ceil (Real.log (Real.sqrt 2 / (2 * (1/6 : ℝ)))
+          / Real.log (1 / (1/2 : ℝ))) := by
+  refine walkMixingTime_le_of_connected triAdj triAdj_isSymm
+    triAdj_nonneg triAdj_deg_pos tri_connected (1/2) (1/6)
+    (by norm_num) (by norm_num) (by norm_num) tri_rate_QA 2 ?_
+  intro x
+  rw [tri_pi_QA x]
+  norm_num
+
+/-! ### The `K₂` corner: periodicity at the uniform object -/
+
+/-- Every start pair's TV distance at `t = 1` is at most `1`. -/
+theorem k2_pair_tv_one_le_QA : ∀ (a b : Fin 2),
+    tvDistance (walkDistribution k2Adj 1 a) (walkDistribution k2Adj 1 b)
+      ≤ 1 := by
+  intro a b
+  rcases (show a = 0 ∨ a = 1 by omega) with h | h <;> rw [h]
+  all_goals rcases (show b = 0 ∨ b = 1 by omega) with h | h <;> rw [h]
+  all_goals norm_num [k2_dist_one_QA, k2_dist_one_one_QA, tvDistance,
+    Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons, neg_sub, abs_of_neg, abs_of_nonneg]
+
+/-- **`d(1) = 1` on the edge** — the two-start distance is maximal at
+every time (the two laws sit on opposite vertices), so no escalation
+certificate `ρ < 1` exists: submultiplicativity degenerates to
+`1 ≤ 1 · 1`. -/
+theorem k2_pair_one_eq_QA : walkTVPair k2Adj 1 = 1 := by
+  refine le_antisymm ?_ ?_
+  · refine Finset.sup'_le
+      (⟨(0, 1), Finset.mem_univ _⟩ :
+        (Finset.univ : Finset (Fin 2 × Fin 2)).Nonempty)
+      (f := fun p : Fin 2 × Fin 2 =>
+        tvDistance (walkDistribution k2Adj 1 p.1)
+          (walkDistribution k2Adj 1 p.2))
+      fun p _ => k2_pair_tv_one_le_QA p.1 p.2
+  · have h0 : (1 : ℝ) = tvDistance (walkDistribution k2Adj 1 0)
+          (walkDistribution k2Adj 1 1) := by
+      rw [k2_dist_one_QA, k2_dist_one_one_QA, tvDistance]
+      norm_num [Fin.sum_univ_two, neg_sub, abs_of_neg, abs_of_nonneg]
+    rw [h0]
+    exact Finset.le_sup'
+      (f := fun p : Fin 2 × Fin 2 =>
+        tvDistance (walkDistribution k2Adj 1 p.1)
+          (walkDistribution k2Adj 1 p.2))
+      (Finset.mem_univ (0, 1))
+
+/-- **No uniform mixing witness exists on the edge** — the periodic
+chain's TV distance to stationarity is `1/2` at every time from the
+start that has moved, so no time dominates *all* starts' distances
+below `1/4`: the uniform object's witness set is empty. -/
+theorem k2_no_uniform_mixing_QA :
+    ¬ ∃ T : ℕ, ∀ s : ℕ, T ≤ s → ∀ x : Fin 2,
+      tvDistance (walkDistribution k2Adj s x) (stationaryVec k2Adj)
+        ≤ 1/4 := by
+  intro h
+  obtain ⟨T, hT⟩ := h
+  exact k2_no_discrete_mixing_QA ⟨T, fun s hs => hT s hs 0⟩
+
+/-- **The uniform junk corner pinned**: at the unreachable threshold
+`1/4`, the edge's uniform mixing time is the empty-set infimum `0` —
+anti-conservative-looking, and *exactly* why every theorem above
+carries a witness or a `ρ < 1` certificate (fenced by
+`k2_no_uniform_mixing_QA`). -/
+theorem k2_mix_uniform_junk_QA :
+    walkMixingTime k2Adj (1/4) = 0 := by
+  have hempty : {t : ℕ | ∀ s : ℕ, t ≤ s → ∀ x : Fin 2,
+      tvDistance (walkDistribution k2Adj s x) (stationaryVec k2Adj)
+        ≤ 1/4} = ∅ :=
+    Set.eq_empty_iff_forall_not_mem.mpr (by
+      rintro t ht
+      exact k2_no_uniform_mixing_QA ⟨t, ht⟩)
+  rw [walkMixingTime, hempty, Nat.sInf_empty]
+
+end UniformMixing
+
 
 end SpectralGraphTheory.QA

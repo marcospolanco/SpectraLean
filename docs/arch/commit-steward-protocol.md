@@ -193,6 +193,7 @@ python3 scripts/check_scaffold_map_freshness.py   # only strictly required
                                                     # status header changed,
                                                     # but cheap enough to
                                                     # run every time
+python3 scripts/check_backlog_freshness.py
 python3 scripts/check_citations.py
 python3 scripts/check_markdown_links.py
 ```
@@ -207,6 +208,7 @@ Pass bar, exactly:
 | `check_refutation_independence.py` | `OK: N tagged refutation/fence declarations checked; none consumes the axiom it refutes` |
 | `check_public_reachability.py` | `OK: public umbrella import closure is N repo modules; no non-public (wip.*) module reachable` |
 | `check_scaffold_map_freshness.py` | exit 0 |
+| `check_backlog_freshness.py` | exit 0 (backlog reviewed within 7 days of the latest activity-log entry) |
 | `check_citations.py` | "All axioms have proper citations!" |
 | `check_markdown_links.py` | "No broken local Markdown links" |
 

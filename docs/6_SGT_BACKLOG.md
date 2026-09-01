@@ -1,7 +1,7 @@
 # SGT Backlog
 
 **Status:** Canonical backlog for the broad spectral-graph-theory program  
-**Last reviewed:** August 17, 2026
+**Last reviewed:** September 1, 2026
 
 This is the bounded, center-first backlog required by the strategy's
 center-out policy. Items are ranked by concrete reuse: each names the
@@ -9,6 +9,20 @@ existing declarations it composes with, the consumers it unlocks, and
 its dependency path back to the SGT center. New bridge or application
 work is accepted only against an item listed here (or a revision of this
 document that argues the leverage case).
+
+**Reconciliation obligation:** whenever a delivery closes or opens a
+gate this document names, update the relevant item in the same
+delivery — the same records-ladder obligation `proposals/README.md`'s
+Active/Delivered tables already carry. Left unreconciled, this document
+drifts exactly the way it did between August 17 and September 1, 2026:
+dozens of completed deliveries landed (Poincaré, the heat-variance/
+mixing/entropy cascade, the spectral mixing floor) while several items'
+opening framing still read "conditional," "gated," or "entirely
+absent" long after those gates were satisfied. `scripts/check_backlog_freshness.py`
+mechanically enforces the reviewed-date half of this (wired into the
+standard verification ladder); it cannot verify that the prose itself
+is accurate, only that someone has looked recently — content
+reconciliation still needs an actual read.
 
 The center today: `GraphTheory.Spectral` (Laplacians, sorted spectra,
 Rayleigh forms, projectors, projector algebra — all proved where stated),
@@ -104,6 +118,29 @@ no exact-spectrum computation), and refutes the connectivity-dropped
 form on a triangle⊕self-loop fixture where the rate hypothesis
 provably holds yet the conclusion fails (`χ²(3) = 3/8 > 3/64`).
 Radar axis 5 re-scored 3.0 → 3.5 (the mixing statement's own landing).
+
+*Update (2026-09-01): the mixing program's second wave — TV, mixing-time
+objects, continuous time, entropy, and both a ceiling and a floor.* Far
+beyond the original three-step scope above, `GraphTheory.Mixing` and
+the new `GraphTheory.Oversmoothing` now carry: the ℓ²→TV conversion at
+the sharp classical constant and its depth-form oversmoothing ceiling;
+the per-pair `effectiveResistance` refinement — the first bridge
+between the electrical and mixing axes; the continuous-time analogue
+(intrinsic rate, no connectivity hypothesis) with its own TV/ceiling
+package, the mixing-time object `contMixingTimeFrom` (the repo's first
+defined `sInf` time object), and the Poisson bridge relating continuous
+and discrete walk laws; the sup-over-starts uniform `t_mix` object
+(`walkMixingTime`) with LPW's Dobrushin-contraction submultiplicativity
+class; **the spectral mixing floor** — the program's first lower-bound
+family, via the exact eigen-component-equality route, completing a
+genuine two-sided depth bracket (provably-insufficient vs.
+provably-enough layers); and the entropy leg (Pinsker's inequality,
+entropy decay, an entropy floor), which discharges log-Sobolev's
+consumer gate — see item 6's update below. Zero new axioms across the
+entire wave; QA now 3566. See `proposals/message-passing-depth-mixing-bound.md`,
+`proposals/total-variation-mixing-conversion.md`,
+`proposals/continuous-time-chi-square-mixing.md`, and
+`proposals/entropy-mixing-pinsker.md` for the full delivery records.
 
 ### 3. Expansion and cut interfaces
 
@@ -655,6 +692,18 @@ dropped hypothesis). The gate's remaining scope (graph-structured
 consensus dynamics, synchronization, general graph semigroups) is
 unchanged and still gated.
 
+*Update (2026-09-01):* the heat-semigroup instance extended into the
+mixing axis. `GraphTheory.Heat` now carries the walk-heat kernels
+(`normalizedHeatKernel`, `walkHeatKernel`) and their variance-decay
+theorems — the heat semigroup's first `λ₂` consumers — plus the
+continuous-time analogue of the discrete mixing bound and the
+Poissonization identity bridging continuous and discrete walk laws
+(`GraphTheory.Mixing`'s Poisson-bridge section); see item 2's
+2026-09-01 update above for the full account. This is still the
+heat-semigroup instance the 2026-08-19 gate opened, not a broadening of
+it: consensus maps, synchronization, and general graph semigroups
+remain gated as before.
+
 ### 6. Thermodynamics / statistical mechanics (conditional)
 
 *Gated on item 1–2 stability:* entropy and reversibility interfaces,
@@ -673,10 +722,25 @@ axioms). **The entropy half is delivered too** (2026-08-22,
 in the new `Scaffold.Mathlib.InformationTheory.Entropy`: `klDiv` and
 `shannonEntropy` with Gibbs' inequality in both directions and the
 entropy maximum with its equality case; backlog item 6's named
-interface set is complete). What remains gated on this item is the
-*inequality* layer — Dirichlet/functional inequalities, dissipation,
-log-Sobolev — which stays conditional on consumer demand per the
-icebox note.
+interface set is complete).
+
+**Update (2026-08-31/2026-09-01): the inequality layer is delivered
+too — this item's "what remains gated" claim above is now stale.** The
+Poincaré inequality family (`proposals/poincare-inequality.md`, zero
+new axioms) closed the Dirichlet/functional-inequality gap directly:
+the division-free spectral-gap bound `poincare_variance_mul_le`, its
+connected form, the degree-weighted normalized form, and
+`spectral_gap_edge_expansion` (linear in the gap; the family's first
+consumer outside `Multiway`). Heat-variance decay
+(`proposals/heat-variance-decay.md`) gave the heat semigroup its first
+`λ₂` consumer. The entropy leg (`proposals/entropy-mixing-pinsker.md`)
+added Pinsker's inequality, entropy decay, and an entropy floor, and
+explicitly discharges the log-Sobolev consumer gate: an LSI now has an
+on-shelf consumer it would improve, so **adopting one is an explicit
+operator decision, not a missing-machinery or missing-consumer gap.**
+What remains open on this item, if anything, is only the LSI statement
+itself, gated on that operator decision — not a backlog residual
+waiting on consumer demand.
 
 ### 7. Combinatorial and electrical structure (radar-driven candidate)
 

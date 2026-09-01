@@ -93,6 +93,7 @@ python3 scripts/check_markdown_links.py
 lake build
 python3 scripts/check_build_completeness.py
 python3 scripts/check_scaffold_map_freshness.py
+python3 scripts/check_backlog_freshness.py
 ```
 
 `check_build_completeness.py` runs after every full `lake build`: a
@@ -126,6 +127,18 @@ against each station's cited proposal's own status line — a delivery
 that changes a proposal's status header is not verified until it
 passes. The pre-commit hook runs it report-only; this ladder step is
 the blocking enforcement.
+
+`check_backlog_freshness.py` (2026-09-01, found stale by the commit
+steward after a two-week, dozens-of-deliveries gap) fails if
+`docs/6_SGT_BACKLOG.md`'s "Last reviewed" date has fallen more than
+seven days behind the latest `docs/AGENT_ACTIVITY.md` entry. It is a
+clock check, not a content check — it cannot verify the backlog's
+prose is accurate, only that someone has looked recently. A delivery
+that closes or opens a gate the backlog names should update that
+item's text in the same delivery (the records-ladder obligation
+`proposals/README.md` already carries) and then bump the reviewed
+date; this check only catches the case where that discipline lapses
+entirely.
 
 `lint_axioms.py` includes the degenerate-corner guard check
 (`proposals/lint-axiom-degenerate-corner-guards.md`) and the

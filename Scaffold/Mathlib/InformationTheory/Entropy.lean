@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -/
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+import Mathlib.MeasureTheory.Integral.FundThmCalculus
 
 /-!
 # Relative entropy and Shannon entropy for finite distributions
@@ -54,7 +56,22 @@ measure is the classical refinement of the same ℓ²(π) geometry;
 entropy H(t)" that `shannonEntropy` now gives a real definition to
 (spectral entropy itself stays deferred per the proposal).
 
-QA: `Scaffold/QA/InformationTheory/Entropy_QA.lean`.
+**The entropy leg of the mixing program** (2026-09-01,
+`proposals/entropy-mixing-pinsker.md`): the entropy–χ² bridge
+`klDiv_le_sum_sq_div`, the two-block log-sum bound
+`sum_klTerm_ge_klTerm` (the first internal consumption of Gibbs'
+inequality — the rescaling proof composes `sub_le_klTerm` on the
+block), and the binary two-point Pinsker bound
+`klTerm_add_klTerm_one_sub_ge_two_sq` (`2(a−b)² ≤ d(a‖b)`, proved by
+an explicit FTC identity — `d(a‖b) = ∫_b^a (a−t)/(t(1−t)) dt ≥
+∫_b^a 4(a−t) dt` through the AM-GM step `t(1−t) ≤ 1/4`; a genuinely
+second-order fact that the first-order log bounds cannot close).
+These are `GraphTheory.Mixing`'s Pinsker conversion and entropy-decay
+theorems' engines — `InformationTheory.Entropy`'s first graph-level
+consumers, recorded from birth as this module's intended downstream.
+
+QA: `Scaffold/QA/InformationTheory/Entropy_QA.lean` (the scalar pins)
+and `Scaffold/QA/SpectralGraph/Mixing_QA.lean` (the graph instances).
 -/
 
 open scoped Classical BigOperators
@@ -293,5 +310,371 @@ theorem shannonEntropy_nonneg {p : V → ℝ} (hp : ∀ i, 0 ≤ p i)
       exact mul_nonpos_of_nonneg_of_nonpos (le_of_lt hpos) hlog
   simp only [shannonEntropy]
   exact neg_nonneg.mpr (Finset.sum_nonpos fun i (_ : i ∈ Finset.univ) => hterm i)
+
+/-! ## The entropy–χ² bridge -/
+
+/-- Termwise entropy bound: one KL summand is at most `a·(a/b − 1)`,
+by `log u ≤ u − 1` at `u = a/b` (the junk corner `a = 0` contributes
+exactly `0`). The sum-level conversion to the χ² shape needs the two
+mass hypotheses — see `klDiv_le_sum_sq_div`. -/
+theorem klTerm_le_sub_one_mul {a b : ℝ} (ha : 0 ≤ a) (hb : 0 < b) :
+    klTerm a b ≤ a * (a / b - 1) := by
+  by_cases ha0 : a = 0
+  · rw [ha0]
+    simp [klTerm, zero_mul]
+  · have hapos : 0 < a := lt_of_le_of_ne ha (Ne.symm ha0)
+    simp only [klTerm, if_neg ha0]
+    have hlog : Real.log (a / b) ≤ a / b - 1 :=
+      Real.log_le_sub_one_of_pos (div_pos hapos hb)
+    exact mul_le_mul_of_nonneg_left hlog (le_of_lt hapos)
+
+/-- **The entropy–χ² bridge**: the relative entropy of a probability
+vector from a strictly positive one is at most its χ² distance
+`∑ (p − q)² / q`. The termwise bound gives `D ≤ ∑ p²/q − 1`, and the
+two mass hypotheses identify `∑ p²/q − 1` with `∑ (p − q)²/q` — the
+conversion is genuinely sum-level (termwise the shapes differ by
+`b − a`, so the mass hypotheses are load-bearing). Stated in exactly
+the sum shape the mixing layer's `chiSquareDistance` carries. -/
+theorem klDiv_le_sum_sq_div {p q : V → ℝ} (hp : ∀ i, 0 ≤ p i)
+    (hq : ∀ i, 0 < q i) (hp1 : ∑ i, p i = 1) (hq1 : ∑ i, q i = 1) :
+    klDiv p q ≤ ∑ i, (p i - q i) ^ 2 / q i := by
+  have hle : klDiv p q ≤ ∑ i, (p i * p i / q i - p i) :=
+    Finset.sum_le_sum fun i _ =>
+      (klTerm_le_sub_one_mul (hp i) (hq i)).trans_eq (by ring)
+  rw [Finset.sum_sub_distrib, hp1] at hle
+  have hsum : ∑ i, (p i - q i) ^ 2 / q i
+      = ∑ i, p i * p i / q i - 1 := by
+    calc ∑ i, (p i - q i) ^ 2 / q i
+        = ∑ i, (p i * p i / q i - (2 * p i - q i)) :=
+          Finset.sum_congr rfl fun i _ => by
+            have h0 : q i ≠ 0 := ne_of_gt (hq i)
+            field_simp
+            ring
+      _ = (∑ i, p i * p i / q i) - ∑ i, (2 * p i - q i) :=
+            Finset.sum_sub_distrib
+      _ = (∑ i, p i * p i / q i) - ((2:ℝ) * ∑ i, p i - ∑ i, q i) := by
+            rw [Finset.sum_sub_distrib, Finset.mul_sum]
+      _ = (∑ i, p i * p i / q i) - 1 := by
+            rw [hp1, hq1]
+            norm_num
+  rw [hsum]
+  exact hle
+
+/-! ## The two-block log-sum bound (Gibbs consumed) -/
+
+/-- **The two-block log-sum inequality**, junk-safe: the KL summands
+over a block dominate the single KL summand of the block sums. Proof:
+rescale to the block-conditional probability vectors `u = p/a`,
+`v = q/b` (each sums to one over `S`), split
+`klTerm (a·u) (b·v) = a·u·log(a/b) + a·klTerm u v` termwise, and apply
+Gibbs' inequality (`sub_le_klTerm`) on the block — the entropy
+module's machinery composing its own Gibbs bound, the first such
+internal consumption. -/
+theorem sum_klTerm_ge_klTerm {V : Type*} (S : Finset V) {p q : V → ℝ}
+    (hp : ∀ i, 0 ≤ p i) (hq : ∀ i, 0 < q i) :
+    klTerm (∑ i in S, p i) (∑ i in S, q i)
+      ≤ ∑ i in S, klTerm (p i) (q i) := by
+  rcases Finset.eq_empty_or_nonempty S with hS | hSn
+  · subst hS
+    simp [klTerm]
+  obtain ⟨i₀, hi₀⟩ := hSn
+  have hbpos : (0:ℝ) < ∑ i in S, q i :=
+    Finset.sum_pos' (fun i _ => le_of_lt (hq i)) ⟨i₀, hi₀, hq i₀⟩
+  by_cases ha : ∑ i in S, p i = 0
+  · have hpz : ∀ i ∈ S, p i = 0 :=
+      (Finset.sum_eq_zero_iff_of_nonneg
+        (fun i _ => hp i)).mp ha
+    have hR : ∑ i in S, klTerm (p i) (q i) = 0 := by
+      refine Finset.sum_eq_zero fun i hi => ?_
+      rw [hpz i hi]
+      simp [klTerm]
+    rw [hR, ha]
+    simp [klTerm]
+  · have hapos : (0:ℝ) < ∑ i in S, p i :=
+      lt_of_le_of_ne (Finset.sum_nonneg fun i _ => hp i) (Ne.symm ha)
+    obtain ⟨A, hAe⟩ : ∃ A, ∑ j in S, p j = A := ⟨_, rfl⟩
+    obtain ⟨B, hBe⟩ : ∃ B, ∑ j in S, q j = B := ⟨_, rfl⟩
+    have hA0 : (0:ℝ) < A := by rw [← hAe]; exact hapos
+    have hB0 : (0:ℝ) < B := by rw [← hBe]; exact hbpos
+    -- the per-term rescaling identity
+    have hterm : ∀ i ∈ S,
+        klTerm (p i) (q i)
+          = A * Real.log (A / B) * (p i / A)
+            + A * klTerm (p i / A) (q i / B) := by
+      intro i hi
+      by_cases hpi : p i = 0
+      · have hl0 : klTerm (0 : ℝ) (q i) = 0 := by simp [klTerm]
+        have hu0 : klTerm ((0:ℝ) / A) (q i / B) = 0 := by
+          rw [zero_div]
+          simp [klTerm]
+        rw [hpi, hl0, hu0, zero_div, mul_zero]
+        ring
+      · have hpii : (0:ℝ) < p i :=
+          lt_of_le_of_ne (hp i) (Ne.symm hpi)
+        have hqi : (0:ℝ) < q i := hq i
+        have hui : (0:ℝ) < p i / A := div_pos hpii hA0
+        have hvi : (0:ℝ) < q i / B := div_pos hqi hB0
+        simp only [klTerm, if_neg hpi, if_neg (ne_of_gt hui)]
+        rw [Real.log_div (ne_of_gt hpii) (ne_of_gt hqi),
+          Real.log_div (ne_of_gt hA0) (ne_of_gt hB0),
+          Real.log_div (ne_of_gt hui) (ne_of_gt hvi),
+          Real.log_div (ne_of_gt hpii) (ne_of_gt hA0),
+          Real.log_div (ne_of_gt hqi) (ne_of_gt hB0)]
+        field_simp
+        ring
+    -- sum the identity over S
+    have hsumid : ∑ i in S, klTerm (p i) (q i)
+        = A * Real.log (A / B) * ∑ i in S, (p i / A)
+          + A * ∑ i in S, klTerm (p i / A) (q i / B) := by
+      rw [Finset.sum_congr rfl (fun i hi => hterm i hi),
+        Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum]
+    have hu1 : ∑ i in S, p i / A = 1 := by
+      rw [← Finset.sum_div, hAe, div_self (ne_of_gt hA0)]
+    have hv1 : ∑ i in S, q i / B = 1 := by
+      rw [← Finset.sum_div, hBe, div_self (ne_of_gt hB0)]
+    -- Gibbs on the block
+    have hgibbs : (0:ℝ) ≤ ∑ i in S, klTerm (p i / A) (q i / B) := by
+      have htermwise : ∀ i ∈ S,
+          p i / A - q i / B ≤ klTerm (p i / A) (q i / B) :=
+        fun i _ => sub_le_klTerm (div_nonneg (hp i) (le_of_lt hA0))
+          (div_pos (hq i) hB0)
+      calc (0:ℝ)
+          = ∑ i in S, (p i / A - q i / B) := by
+            rw [Finset.sum_sub_distrib, hu1, hv1, sub_self]
+        _ ≤ ∑ i in S, klTerm (p i / A) (q i / B) :=
+            Finset.sum_le_sum htermwise
+    have hklab : klTerm A B = A * Real.log (A / B) := by
+      have hAne : A ≠ 0 := by
+        intro h
+        exact ha (by rw [hAe, h])
+      simp only [klTerm, if_neg hAne]
+    rw [hAe, hBe, hklab, hsumid, hu1, mul_one]
+    have hmul : (0:ℝ) ≤ A * ∑ i in S, klTerm (p i / A) (q i / B) :=
+      mul_nonneg (le_of_lt hA0) hgibbs
+    linarith
+
+/-! ## The binary two-point bound (the FTC route) -/
+
+/-- **The two-point bound, interior case**: for `0 < b ≤ a < 1`, the
+binary divergence `d(a‖b)` dominates `2(a−b)²`. Route (a genuinely
+second-order fact — the first-order scalar bounds `log t ≥ 1 − 1/t`
+and `log t ≤ t − 1` provably cannot close it): the FTC identity
+`d(a‖b) = ∫_b^a (a−t)/(t(1−t)) dt`, the integrand bounded below by
+`4(a−t)` through AM-GM (`t(1−t) ≤ 1/4`), and
+`∫_b^a 4(a−t) dt = 2(a−b)²`. -/
+private theorem two_point_aux {a b : ℝ} (_ha : 0 ≤ a) (ha1 : a < 1)
+    (hb : 0 < b) (hba : b ≤ a) :
+    2 * (a - b) ^ 2 ≤ klTerm a b + klTerm (1 - a) (1 - b) := by
+  have hapos : (0:ℝ) < a := lt_of_lt_of_le hb hba
+  have h1a : (0:ℝ) < 1 - a := sub_pos.2 ha1
+  have h1b : (0:ℝ) < 1 - b := sub_pos.2 (lt_of_le_of_lt hba ha1)
+  set F : ℝ → ℝ := fun t => a * Real.log t + (1 - a) * Real.log (1 - t)
+    with hFdef
+  set g : ℝ → ℝ := fun t => a * t⁻¹ - (1 - a) * (1 - t)⁻¹ with hgdef
+  have hbox : Set.uIcc b a = Set.Icc b a := Set.uIcc_of_le hba
+  -- the derivative identification on the whole closed box
+  have hderiv : ∀ t ∈ Set.uIcc b a, HasDerivAt F (g t) t := by
+    rw [hbox]
+    intro t ht
+    have ht0 : (0:ℝ) < t := lt_of_lt_of_le hb ht.1
+    have ht1 : t < 1 := lt_of_le_of_lt ht.2 ha1
+    have h1 : HasDerivAt (fun t => a * Real.log t) (a * t⁻¹) t :=
+      (Real.hasDerivAt_log (ne_of_gt ht0)).const_mul a
+    have hconst : HasDerivAt (fun _ : ℝ => (1:ℝ)) (0:ℝ) t :=
+      hasDerivAt_const t (1:ℝ)
+    have hid0 : HasDerivAt (fun t : ℝ => t) (1:ℝ) t :=
+      hasDerivAt_id t
+    have hid : HasDerivAt (fun t => 1 - t) (-(1:ℝ)) t :=
+      (hconst.sub hid0).congr_deriv (by norm_num)
+    have hlogd : HasDerivAt (fun t : ℝ => Real.log (1 - t))
+        ((-(1:ℝ)) / (1 - t)) t :=
+      hid.log (sub_ne_zero.mpr (Ne.symm (ne_of_lt ht1)))
+    have hconst2 : HasDerivAt (fun _ : ℝ => (1 - a)) (0:ℝ) t :=
+      hasDerivAt_const t (1 - a)
+    have h2 : HasDerivAt (fun t => (1 - a) * Real.log (1 - t))
+        ((1 - a) * (-(1 - t)⁻¹)) t :=
+      (hconst2.mul hlogd).congr_deriv (by
+        have hne : (1:ℝ) - t ≠ 0 :=
+          sub_ne_zero.mpr (Ne.symm (ne_of_lt ht1))
+        field_simp)
+    exact (h1.add h2).congr_deriv (by ring)
+  have hcontg : ContinuousOn g (Set.uIcc b a) := by
+    rw [hbox]
+    have h1 : ContinuousOn (fun t => a * t⁻¹) (Set.Icc b a) :=
+      ContinuousOn.mul continuousOn_const
+        (ContinuousOn.inv₀ continuousOn_id (fun t ht =>
+          ne_of_gt (lt_of_lt_of_le hb ht.1)))
+    have h2 : ContinuousOn (fun t => (1 - a) * (1 - t)⁻¹) (Set.Icc b a) :=
+      ContinuousOn.mul continuousOn_const
+        (ContinuousOn.inv₀
+          (ContinuousOn.sub continuousOn_const continuousOn_id)
+          (fun t ht =>
+            sub_ne_zero.mpr (Ne.symm (ne_of_lt (lt_of_le_of_lt ht.2 ha1)))))
+    exact h1.sub h2
+  -- FTC for F
+  have hftc := intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv
+    (ContinuousOn.intervalIntegrable hcontg)
+  -- the value identification: the binary divergence is F a − F b
+  have hkl : klTerm a b + klTerm (1 - a) (1 - b) = F a - F b := by
+    simp only [klTerm, if_neg (ne_of_gt hapos), if_neg (ne_of_gt h1a),
+      Real.log_div (ne_of_gt hapos) (ne_of_gt hb),
+      Real.log_div (ne_of_gt h1a) (ne_of_gt h1b), hFdef]
+    ring
+  -- the comparison integrand: g t ≥ 4 (a − t) on the box
+  have hpt : ∀ t ∈ Set.Icc b a, (fun t => 4 * (a - t)) t ≤ g t := by
+    intro t ht
+    have ht0 : (0:ℝ) < t := lt_of_lt_of_le hb ht.1
+    have ht1 : t < 1 := lt_of_le_of_lt ht.2 ha1
+    have ht0' : t ≠ 0 := ne_of_gt ht0
+    have ht1' : (1:ℝ) - t ≠ 0 := sub_ne_zero.mpr (Ne.symm (ne_of_lt ht1))
+    have hkey : g t - 4 * (a - t)
+        = (a - t) * (2 * t - 1) ^ 2 / (t * (1 - t)) := by
+      refine (eq_div_iff (mul_ne_zero ht0' ht1')).mpr ?_
+      rw [hgdef]
+      field_simp
+      ring
+    have hnn : (0:ℝ) ≤ g t - 4 * (a - t) := by
+      rw [hkey]
+      exact div_nonneg
+        (mul_nonneg (sub_nonneg.mpr ht.2) (sq_nonneg (2 * t - 1)))
+        (mul_nonneg (le_of_lt ht0) (sub_nonneg.mpr (le_of_lt ht1)))
+    exact sub_nonneg.mp hnn
+  -- FTC for the polynomial
+  have hderiv2 : ∀ t ∈ Set.uIcc b a,
+      HasDerivAt (fun t => 4 * a * t - 2 * (t * t)) (4 * (a - t)) t := by
+    intro t _
+    have h1 : HasDerivAt (fun t => 4 * a * t) (4 * a * (1:ℝ)) t :=
+      (hasDerivAt_id t).const_mul (4 * a)
+    have hsq : HasDerivAt (fun t : ℝ => t * t) (2 * t) t :=
+      ((hasDerivAt_id t).mul (hasDerivAt_id t)).congr_deriv (by simp; ring)
+    have h2 : HasDerivAt (fun t => 2 * (t * t)) (2 * (2 * t)) t :=
+      hsq.const_mul 2
+    exact (h1.sub h2).congr_deriv (by ring)
+  have hcont2 : ContinuousOn (fun t => 4 * (a - t)) (Set.uIcc b a) :=
+    ContinuousOn.mul continuousOn_const
+      (ContinuousOn.sub continuousOn_const continuousOn_id)
+  have hftc2 := intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv2
+    (ContinuousOn.intervalIntegrable hcont2)
+  -- assemble
+  calc 2 * (a - b) ^ 2
+      = (fun t => 4 * a * t - 2 * (t * t)) a
+          - (fun t => 4 * a * t - 2 * (t * t)) b := by
+          show 2 * (a - b) ^ 2
+            = 4 * a * a - 2 * (a * a) - (4 * a * b - 2 * (b * b))
+          ring
+    _ = ∫ t in b..a, (fun t => 4 * (a - t)) t := hftc2.symm
+    _ ≤ ∫ t in b..a, g t :=
+          intervalIntegral.integral_mono_on hba
+            (ContinuousOn.intervalIntegrable hcont2)
+            (ContinuousOn.intervalIntegrable hcontg)
+            (fun t ht => hpt t ht)
+    _ = klTerm a b + klTerm (1 - a) (1 - b) := by
+          rw [hftc]
+          exact hkl.symm
+
+/-- **The two-point bound, top corner** `a = 1`: `log(1/b) ≥ 2(1−b)²`
+by the same FTC route with the integrand `t⁻¹ ≥ 4(1−t)`. -/
+private theorem two_point_top {b : ℝ} (hb : 0 < b) (hb1 : b < 1) :
+    2 * (1 - b) ^ 2 ≤ klTerm (1:ℝ) b + klTerm (1 - (1:ℝ)) (1 - b) := by
+  have hbox : Set.uIcc b 1 = Set.Icc b 1 := Set.uIcc_of_le (le_of_lt hb1)
+  have hderiv : ∀ t ∈ Set.uIcc b 1,
+      HasDerivAt Real.log ((fun t => t⁻¹) t) t := by
+    rw [hbox]
+    intro t ht
+    exact Real.hasDerivAt_log (ne_of_gt (lt_of_lt_of_le hb ht.1))
+  have hcontg : ContinuousOn (fun t => t⁻¹) (Set.uIcc b 1) := by
+    rw [hbox]
+    exact ContinuousOn.inv₀ continuousOn_id (fun t ht =>
+      ne_of_gt (lt_of_lt_of_le hb ht.1))
+  have hftc := intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv
+    (ContinuousOn.intervalIntegrable hcontg)
+  have hderiv2 : ∀ t ∈ Set.uIcc b 1,
+      HasDerivAt (fun t => 4 * t - 2 * (t * t)) (4 * (1 - t)) t := by
+    intro t _
+    have h1 : HasDerivAt (fun t => 4 * t) (4 * (1:ℝ)) t :=
+      (hasDerivAt_id t).const_mul (4:ℝ)
+    have hsq : HasDerivAt (fun t : ℝ => t * t) (2 * t) t :=
+      ((hasDerivAt_id t).mul (hasDerivAt_id t)).congr_deriv (by simp; ring)
+    have h2 : HasDerivAt (fun t => 2 * (t * t)) (2 * (2 * t)) t :=
+      hsq.const_mul 2
+    exact (h1.sub h2).congr_deriv (by ring)
+  have hcont2 : ContinuousOn (fun t => 4 * (1 - t)) (Set.uIcc b 1) :=
+    ContinuousOn.mul continuousOn_const
+      (ContinuousOn.sub continuousOn_const continuousOn_id)
+  have hftc2 := intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv2
+    (ContinuousOn.intervalIntegrable hcont2)
+  have hpt : ∀ t ∈ Set.Icc b 1,
+      (fun t => 4 * (1 - t)) t ≤ (fun t => t⁻¹) t := by
+    intro t ht
+    have ht0 : (0:ℝ) < t := lt_of_lt_of_le hb ht.1
+    have hkey : t⁻¹ - 4 * (1 - t) = (2 * t - 1) ^ 2 / t := by
+      field_simp
+      ring
+    have hnn : (0:ℝ) ≤ t⁻¹ - 4 * (1 - t) := by
+      rw [hkey]
+      exact div_nonneg (sq_nonneg (2 * t - 1)) (le_of_lt ht0)
+    exact sub_nonneg.mp hnn
+  have hkl : Real.log 1 - Real.log b
+      = klTerm (1:ℝ) b + klTerm (1 - (1:ℝ)) (1 - b) := by
+    have h1 : klTerm (1:ℝ) b = -Real.log b := by
+      simp only [klTerm, if_neg one_ne_zero, one_mul, one_div]
+      rw [Real.log_inv]
+    have h2 : klTerm (1 - (1:ℝ)) (1 - b) = 0 := by
+      simp [klTerm]
+    rw [Real.log_one, zero_sub, h1, h2, add_zero]
+  calc 2 * (1 - b) ^ 2
+      = (fun t => 4 * t - 2 * (t * t)) 1
+          - (fun t => 4 * t - 2 * (t * t)) b := by
+          show 2 * (1 - b) ^ 2
+            = (4 * 1 - 2 * ((1:ℝ) * 1)) - (4 * b - 2 * (b * b))
+          norm_num
+          ring
+    _ = ∫ t in b..1, (fun t => 4 * (1 - t)) t := hftc2.symm
+    _ ≤ ∫ t in b..1, (fun t => t⁻¹) t :=
+          intervalIntegral.integral_mono_on (le_of_lt hb1)
+            (ContinuousOn.intervalIntegrable hcont2)
+            (ContinuousOn.intervalIntegrable hcontg)
+            (fun t ht => hpt t ht)
+    _ = klTerm (1:ℝ) b + klTerm (1 - (1:ℝ)) (1 - b) := by
+          rw [hftc]
+          exact hkl
+
+/-- **The binary two-point Pinsker bound**: `2(a−b)² ≤ d(a‖b)` for
+`a ∈ [0,1]`, `b ∈ (0,1)` — symmetric under `(a,b) ↦ (1−a,1−b)`, so the
+`b ≤ a` instances close both directions. -/
+theorem klTerm_add_klTerm_one_sub_ge_two_sq {a b : ℝ} (ha : 0 ≤ a)
+    (ha1 : a ≤ 1) (hb : 0 < b) (hb1 : b < 1) :
+    2 * (a - b) ^ 2 ≤ klTerm a b + klTerm (1 - a) (1 - b) := by
+  rcases le_or_lt b a with hba | hab
+  · by_cases hatop : a = 1
+    · subst hatop
+      exact two_point_top hb hb1
+    · exact two_point_aux ha (lt_of_le_of_ne ha1 hatop) hb hba
+  · -- a < b: the mirrored pair (1−a, 1−b) satisfies b' ≤ a'
+    have h1a : (0:ℝ) ≤ 1 - a := sub_nonneg.mpr ha1
+    have h1b : (0:ℝ) < 1 - b := sub_pos.2 hb1
+    have h1b1 : 1 - b < 1 := sub_lt_self (1:ℝ) hb
+    have h1ba : 1 - b ≤ 1 - a := by linarith
+    by_cases hz : a = 0
+    · rw [hz]
+      have hbt := two_point_top h1b h1b1
+      have hid2 : klTerm (1 - (1:ℝ)) (1 - (1 - b)) = klTerm (0:ℝ) b := by
+        simp only [sub_sub_self, sub_self]
+      calc 2 * ((0:ℝ) - b) ^ 2 = 2 * (1 - (1 - b)) ^ 2 := by ring
+        _ ≤ klTerm (1:ℝ) (1 - b) + klTerm (1 - (1:ℝ)) (1 - (1 - b)) :=
+              hbt
+        _ = klTerm (0:ℝ) b + klTerm (1 - (0:ℝ)) (1 - b) := by
+              rw [hid2, sub_zero]
+              exact add_comm _ _
+    · have hapos : (0:ℝ) < a := lt_of_le_of_ne ha (Ne.symm hz)
+      have h1a1 : 1 - a < 1 := sub_lt_self (1:ℝ) hapos
+      have h := two_point_aux h1a h1a1 h1b h1ba
+      have hid1 : (a - b) ^ 2 = ((1 - a) - (1 - b)) ^ 2 := by ring
+      have hid2' : klTerm (1 - a) (1 - b)
+          + klTerm (1 - (1 - a)) (1 - (1 - b))
+          = klTerm a b + klTerm (1 - a) (1 - b) := by
+        rw [sub_sub_self, sub_sub_self, add_comm]
+      rw [hid1]
+      exact h.trans_eq hid2'
 
 end Scaffold.InformationTheory

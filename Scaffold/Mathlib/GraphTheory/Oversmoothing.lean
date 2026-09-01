@@ -15,6 +15,7 @@ limitations under the License.
 -/
 import Scaffold.Mathlib.GraphTheory.Mixing
 import Scaffold.Mathlib.GraphTheory.Foster
+import Scaffold.Mathlib.InformationTheory.Entropy
 
 /-!
 # The certified oversmoothing ceiling
@@ -2280,6 +2281,53 @@ theorem walkMixingTimeFrom_ge_of_eigenpair
       linarith [hval, hmono, hz, hflr]
     have hlt := walkMixingTimeFrom_gt_of_tv_gt A x hwit hkey
     omega
+
+open Scaffold.InformationTheory in
+/-- **The entropy floor** — Pinsker composed with the spectral TV
+floor: at a genuine `L_sym` eigenpair `(μ, v)` with sup bound `c`, the
+relative entropy of the walk law from stationarity is at least twice
+the squared TV floor — periodic `|1−μ| = 1` modes pin entropy bounded
+away from zero forever, the floor family's first non-TV member. -/
+theorem klDiv_walkDistribution_ge_of_eigenpair (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (t : ℕ) (x : V) {μ : ℝ} {v : V → ℝ}
+    (hv : normalizedLaplacian A *ᵥ v = μ • v) (hμ : μ ≠ 0)
+    {c : ℝ} (hc : ∀ y, |(degreeInvSqrt A *ᵥ v) y| ≤ c) (hc0 : 0 < c) :
+    2 * ((1/2) * |1 - μ| ^ t * |(degreeInvSqrt A *ᵥ v) x| / c) ^ 2
+      ≤ klDiv (walkDistribution A t x) (stationaryVec A) := by
+  have hfl : (1/2) * |1 - μ| ^ t * |(degreeInvSqrt A *ᵥ v) x| / c
+      ≤ tvDistance (walkDistribution A t x) (stationaryVec A) :=
+    walkDistribution_tvDistance_ge_of_eigenpair A hA hd t x hv hμ hc hc0
+  have hpin := tvDistance_le_sqrt_half_klDiv
+    (p := walkDistribution A t x) (q := stationaryVec A)
+    (walkDistribution_nonneg A hnn hd t x) (sum_walkDistribution A hd t x)
+    (fun i => stationaryVec_pos A hd i) (sum_stationaryVec A hd)
+  have hTV0 : (0:ℝ) ≤ tvDistance (walkDistribution A t x)
+      (stationaryVec A) :=
+    tvDistance_nonneg _ _
+  have hfl0 : (0:ℝ) ≤ (1/2) * |1 - μ| ^ t
+      * |(degreeInvSqrt A *ᵥ v) x| / c :=
+    div_nonneg (mul_nonneg (by positivity) (abs_nonneg _)) (le_of_lt hc0)
+  have hD0 : (0:ℝ) ≤ klDiv (walkDistribution A t x) (stationaryVec A) :=
+    klDiv_nonneg (walkDistribution_nonneg A hnn hd t x)
+      (sum_walkDistribution A hd t x) (fun i => stationaryVec_pos A hd i)
+      (sum_stationaryVec A hd)
+  have hs1 : ((1/2) * |1 - μ| ^ t * |(degreeInvSqrt A *ᵥ v) x| / c) ^ 2
+      ≤ (tvDistance (walkDistribution A t x) (stationaryVec A)) ^ 2 := by
+    rw [pow_two, pow_two]
+    exact mul_self_le_mul_self hfl0 hfl
+  have hs2 : (tvDistance (walkDistribution A t x) (stationaryVec A)) ^ 2
+      ≤ klDiv (walkDistribution A t x) (stationaryVec A) / 2 := by
+    have h1 : (tvDistance (walkDistribution A t x)
+          (stationaryVec A)) ^ 2
+        ≤ (Real.sqrt (klDiv (walkDistribution A t x)
+            (stationaryVec A) / 2)) ^ 2 :=
+      sq_le_sq' (le_trans (neg_nonpos.mpr (Real.sqrt_nonneg _)) hTV0) hpin
+    rw [Real.sq_sqrt (div_nonneg hD0 (by norm_num))] at h1
+    exact h1
+  nlinarith [hs1, hs2]
+
+
 
 end SpectralFloor
 

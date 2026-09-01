@@ -737,6 +737,11 @@ Parseval-exact); the plain Euclidean distance is a corollary bridge.
 | `tvDistance_le_half_sqrt` | **the ℓ² → TV conversion:** for a positive weight `w` of total mass one and *any* vector `ν` (sign-free), `TV ≤ (1/2)·√(∑ (ν − w)²/w)` — the classical Cauchy–Schwarz step at its sharp constant (attained exactly on `K₂`), mass-one hypothesis load-bearing (fenced in QA) |
 | `walkDistribution_tvDistance_le` | the unconditional walk-level shadow: `TV(ν_t x, π) ≤ (1/2)·√χ²(t, x)` for every walk — no connectivity, no rate |
 | `walkDistribution_tvDistance_le_of_connected` | **the rate form:** `TV(ν_t x, π) ≤ (1/2)·√(r^{2t} · ((π x)⁻¹ − 1))` at exactly the χ² theorem's hypothesis set — the closing mixing bound restated in the field-standard distance |
+| `tvDistance_le_sqrt_half_klDiv` | **Pinsker's inequality (2026-09-01, `proposals/entropy-mixing-pinsker.md`):** `tvDistance p q ≤ √(klDiv p q / 2)` for a probability vector against a strictly positive one — TV-as-positive-part at `S = {q < p}` (`TV = a − b`), the two-block decomposition of `klDiv` through the two-block log-sum, and the binary two-point bound; the strict q-positivity load-bearing (refuted at the q-zero junk corner in QA) |
+| `walkDensity_nonneg` / `contWalkDensity_nonneg` / `contWalkDistribution_nonneg` / `sum_contWalkDistribution` | the entropy leg's nonnegativity plumbing: the discrete density's entrywise nonnegativity; the continuous density's by the Poissonization identity + `tsum_nonneg` (the identity's first nonnegativity consumer); the continuous law's; and the continuous law's mass conservation packaged |
+| `klDiv_walkDistribution_le` | **entropy decay, discrete:** `D(ν_t ‖ π) ≤ r^{2t}·((πx)⁻¹ − 1)` at exactly `chiSquareDistance_le_of_connected`'s hypothesis set — the entropy–χ² bridge composed with the delivered χ² theorem |
+| `klDiv_contWalkDistribution_le` | **entropy decay, continuous-time twin:** `D ≤ e^{−2tλ₂(L_sym)}·((πx)⁻¹ − 1)` at `contChiSquareDistance_le`'s hypothesis set — the intrinsic-rate entropy bound, no caller certificate |
+
 
 ### `Scaffold.Mathlib.GraphTheory.Oversmoothing` (the certified oversmoothing ceiling, the `t_mix` objects, and the submultiplicativity class)
 
@@ -805,6 +810,8 @@ transfer — `√D *ᵥ (Pᵗ *ᵥ g) = (1 − L_sym)ᵗ *ᵥ (√D *ᵥ g)`), p
 χ²-assembly entry lemmas `walkTransitionMatrix_mulVec_one`
 (the constant fix `P *ᵥ 1 = 1`), `degreeSqrt_mulVec_apply`, and
 `degreeInvSqrt_mulVec_apply` (the conjugating actions' entry forms).
+| `klDiv_walkDistribution_ge_of_eigenpair` | **the entropy floor (2026-09-01, `proposals/entropy-mixing-pinsker.md`):** `2·((1/2)·\|1−μ\|^t·\|(√D⁻¹ v) x\|/c)² ≤ D(ν_t ‖ π)` at the spectral TV floor's exact hypothesis set — Pinsker composed with `walkDistribution_tvDistance_ge_of_eigenpair`, the floor family's first non-TV member (periodic modes pin entropy bounded away from zero forever; `D = log 2` on `K₂` exactly, pinned in QA) |
+
 
 ### `Scaffold.Mathlib.GraphTheory.Poincare` (the Poincaré inequality family)
 

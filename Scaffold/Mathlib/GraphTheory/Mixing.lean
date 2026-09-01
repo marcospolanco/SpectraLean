@@ -15,6 +15,7 @@ limitations under the License.
 -/
 import Scaffold.Mathlib.GraphTheory.Stationary
 import Scaffold.Mathlib.GraphTheory.Heat
+import Scaffold.Mathlib.InformationTheory.Entropy
 
 /-!
 # The ℓ²-mixing proxy of the simple random walk
@@ -57,6 +58,13 @@ The declarations:
   *via detailed balance*: the first consumer of the Phase A interface
   `walk_detailed_balance_measure`), hence the coordinate Step 3
   expands on the transferred eigenbasis.
+- `tvDistance_le_sqrt_half_klDiv`, `klDiv_walkDistribution_le`,
+  `klDiv_contWalkDistribution_le` (2026-09-01,
+  `proposals/entropy-mixing-pinsker.md`): **Pinsker's inequality** in
+  the shelf's vector TV form and the **entropy-decay** family — the
+  entropy leg of the mixing program, the third classical distance
+  (beside TV and χ²) with a decay bound and a floor
+  (`Oversmoothing.lean`'s `klDiv_walkDistribution_ge_of_eigenpair`).
 - `chiSquareDistance`: the χ² mixing distance itself, with
   nonnegativity, the vanishing characterization
   `chiSquareDistance_eq_zero_iff`, the `t = 0` value
@@ -2122,5 +2130,250 @@ theorem contWalkDistribution_tvDistance_le_of_discreteMixing
   have h1 : tvDistance (walkDistribution A m x) (stationaryVec A) ≤ ε₁ :=
     hmix m (Nat.le_refl m)
   linarith
+
+open Scaffold.InformationTheory
+
+/-! ## The entropy leg of the mixing program
+
+`proposals/entropy-mixing-pinsker.md` (2026-09-01): Pinsker's
+inequality in the shelf's vector TV form, the entropy–χ² bridge's
+walk-level decay family (discrete certificate form + continuous-time
+intrinsic-rate twin), and the nonnegativity plumbing the continuous
+twin needs. Every declaration here is proved hard crust — zero
+axioms; the binary two-point engine lives in
+`InformationTheory.Entropy`.
+-/
+
+/-! ## The entropy leg: nonnegativity plumbing -/
+
+/-- The walk density is entrywise nonnegative: the walk law is
+nonnegative and `π` is strictly positive. -/
+theorem walkDensity_nonneg (A : WAdj (V := V)) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (t : ℕ) (x i : V) :
+    0 ≤ walkDensity A t x i :=
+  div_nonneg (walkDistribution_nonneg A hnn hd t x i)
+    (le_of_lt (stationaryVec_pos A hd i))
+
+/-- The continuous-time walk density is entrywise nonnegative at
+nonnegative times: the Poissonization identity exhibits it as a series
+of nonneg scalars times nonneg discrete densities (`tsum_nonneg`). -/
+theorem contWalkDensity_nonneg (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i) [Nonempty V]
+    {t : ℝ} (ht : 0 ≤ t) (x i : V) :
+    0 ≤ contWalkDensity A t x i := by
+  have hpi := (Pi.hasSum.mp (hasSum_poisson_walkDensity A hA hd t x)) i
+  have hdc : contWalkDensity A t x i
+      = (walkHeatKernel A t *ᵥ walkDensity A 0 x) i := rfl
+  rw [hdc]
+  rw [← hpi.tsum_eq]
+  refine tsum_nonneg fun k => ?_
+  rw [Pi.smul_apply, smul_eq_mul]
+  exact mul_nonneg (poissonWeight_nonneg ht k)
+    (walkDensity_nonneg A hnn hd k x i)
+
+/-- The continuous-time walk law is entrywise nonnegative: `π ≥ 0`
+weights a nonnegative density. -/
+theorem contWalkDistribution_nonneg (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] {t : ℝ} (ht : 0 ≤ t) (x i : V) :
+    0 ≤ contWalkDistribution A t x i := by
+  simp only [contWalkDistribution]
+  exact mul_nonneg (le_of_lt (stationaryVec_pos A hd i))
+    (contWalkDensity_nonneg A hA hnn hd ht x i)
+
+/-- The continuous-time walk law is a probability vector: `∑ π h = 1`,
+the `contWalkDistribution` packaging of the shelf's mass conservation. -/
+theorem sum_contWalkDistribution (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (t : ℝ) (x : V) :
+    ∑ i, contWalkDistribution A t x i = 1 := by
+  simp only [contWalkDistribution]
+  exact sum_stationaryVec_contWalkDensity A hA hd t x
+
+/-! ## Pinsker's inequality and the decay/floor theorems -/
+
+/-- **Pinsker's inequality** in the shelf's vector TV form: the
+total-variation distance between a probability vector and a strictly
+positive one is at most the square root of half the relative entropy.
+Assembly: the TV-as-positive-part identity (`TV = ∑_{q<p}(p−q) = a − b`
+at `a = p(S)`, `b = q(S)` for `S = {q < p}`), the two-block
+decomposition of `klDiv` through the two-block log-sum bound, and the
+binary two-point bound. The strict `0 < q i` hypothesis is
+load-bearing: at `q = (1, 0)` the junk `klTerm (1/2) 0 = 0` makes the
+un-guarded statement read `1/2 ≤ (1/2)·|log (1/2)|`-scale falsities
+(refuted in QA). -/
+theorem tvDistance_le_sqrt_half_klDiv {p q : V → ℝ}
+    (hp : ∀ i, 0 ≤ p i) (hp1 : ∑ i, p i = 1)
+    (hq : ∀ i, 0 < q i) (hq1 : ∑ i, q i = 1) :
+    tvDistance p q ≤ Real.sqrt (klDiv p q / 2) := by
+  classical
+  set S : Finset V := Finset.univ.filter fun i => q i < p i with hSdef
+  have hmem : ∀ i : V, i ∈ S ↔ q i < p i := by
+    intro i
+    simp [hSdef, Finset.mem_filter]
+  have hScard : ∀ (f : V → ℝ), ∑ i in S, f i + ∑ i in Sᶜ, f i = ∑ i, f i :=
+    fun f => Finset.sum_add_sum_compl S f
+  rcases S.eq_empty_or_nonempty with hSe | hSn
+  · -- S = ∅: p ≤ q pointwise with equal mass forces p = q
+    have hle : ∀ i : V, p i ≤ q i := by
+      intro i
+      by_contra hcon
+      push_neg at hcon
+      exact absurd ((hmem i).mpr hcon) (by
+        intro hm
+        rw [hSe] at hm
+        simp at hm)
+    have hsub : ∀ i : V, (0:ℝ) ≤ q i - p i := fun i => sub_nonneg.mpr (hle i)
+    have hsum0 : ∑ i, (q i - p i) = 0 := by
+      rw [Finset.sum_sub_distrib, hq1, hp1, sub_self]
+    have hqpe : ∀ i : V, q i - p i = 0 := fun i =>
+      (Finset.sum_eq_zero_iff_of_nonneg
+        (fun j _ => hsub j)).mp hsum0 i (Finset.mem_univ i)
+    have hpe : p = q := by
+      funext i
+      have := hqpe i
+      linarith [this]
+    have hTV0 : tvDistance p q = 0 := by
+      rw [hpe]
+      simp [tvDistance]
+    rw [hTV0]
+    positivity
+  · -- S nonempty: TV = a − b, klDiv ≥ 2(a−b)²
+    obtain ⟨a, ha⟩ : ∃ a, ∑ i in S, p i = a := ⟨_, rfl⟩
+    obtain ⟨b, hb⟩ : ∃ b, ∑ i in S, q i = b := ⟨_, rfl⟩
+    obtain ⟨i₀, hi₀⟩ := hSn
+    have hb0 : (0:ℝ) < b := by
+      rw [← hb]
+      exact Finset.sum_pos' (fun i _ => le_of_lt (hq i)) ⟨i₀, hi₀, hq i₀⟩
+    have hSne : S ≠ Finset.univ := by
+      intro hSu
+      have hle : ∀ i ∈ (Finset.univ : Finset V), q i ≤ p i :=
+        fun i _ =>
+          le_of_lt ((hmem i).mp (by rw [hSu]; exact Finset.mem_univ i))
+      have hstrict : ∃ i ∈ (Finset.univ : Finset V), q i < p i :=
+        ⟨i₀, Finset.mem_univ i₀,
+          (hmem i₀).mp (by rw [hSu]; exact Finset.mem_univ i₀)⟩
+      have hlt := Finset.sum_lt_sum hle hstrict
+      rw [hq1, hp1] at hlt
+      exact absurd hlt (by norm_num)
+    have hcompne : (Sᶜ).Nonempty := by
+      rcases Finset.eq_empty_or_nonempty Sᶜ with hc | hc
+      · exfalso
+        refine hSne (Finset.eq_univ_of_forall fun i => ?_)
+        by_contra hcon
+        exact absurd (Finset.mem_compl.mpr hcon) (by
+          rw [hc]
+          simp)
+      · exact hc
+    have hcp : ∑ i in Sᶜ, p i = 1 - a := by
+      have h2 := hScard p
+      rw [ha, hp1] at h2
+      linarith
+    have hcq : ∑ i in Sᶜ, q i = 1 - b := by
+      have h2 := hScard q
+      rw [hb, hq1] at h2
+      linarith
+    have hb1 : b < 1 := by
+      obtain ⟨j₀, hj₀⟩ := hcompne
+      have hpos : (0:ℝ) < ∑ i in Sᶜ, q i :=
+        Finset.sum_pos' (fun i _ => le_of_lt (hq i)) ⟨j₀, hj₀, hq j₀⟩
+      rw [hcq] at hpos
+      linarith
+    -- TV = a − b
+    have honS : ∀ i ∈ S, |p i - q i| = p i - q i := fun i hi =>
+      abs_of_pos (sub_pos.2 ((hmem i).mp hi))
+    have honC : ∀ i ∈ Sᶜ, |p i - q i| = q i - p i := by
+      intro i hi
+      have hle : p i ≤ q i :=
+        le_of_not_gt fun h => (Finset.mem_compl.mp hi) ((hmem i).mpr h)
+      exact (abs_of_nonpos (sub_nonpos.mpr hle)).trans (by ring)
+    have hab0 : (0:ℝ) ≤ a - b := by
+      have h2 : (0:ℝ) ≤ ∑ i in S, (p i - q i) :=
+        Finset.sum_nonneg fun i (hi : i ∈ S) =>
+          sub_nonneg.mpr (le_of_lt ((hmem i).mp hi))
+      rw [Finset.sum_sub_distrib, ha, hb] at h2
+      linarith
+    have hTV : tvDistance p q = a - b := by
+      have hsumS : ∑ i in S, (p i - q i) = a - b := by
+        rw [Finset.sum_sub_distrib, ha, hb]
+      have hsumC : ∑ i in Sᶜ, (q i - p i) = a - b := by
+        rw [Finset.sum_sub_distrib, hcq, hcp]
+        ring
+      have e1 : ∑ i in S, |p i - q i| = ∑ i in S, (p i - q i) :=
+        Finset.sum_congr rfl fun i hi => honS i hi
+      have e2 : ∑ i in Sᶜ, |p i - q i| = ∑ i in Sᶜ, (q i - p i) :=
+        Finset.sum_congr rfl fun i hi => honC i hi
+      have hsplit : ∑ i, |p i - q i|
+          = (∑ i in S, (p i - q i)) + ∑ i in Sᶜ, (q i - p i) := by
+        rw [(hScard fun i => |p i - q i|).symm, e1, e2]
+      rw [tvDistance, hsplit, hsumS, hsumC]
+      linarith
+    -- klDiv ≥ 2 (a − b)²
+    have hkl1 := sum_klTerm_ge_klTerm S hp hq
+    have hkl2 := sum_klTerm_ge_klTerm Sᶜ hp hq
+    rw [hcp] at hkl2
+    rw [hcq] at hkl2
+    have hsplitK : klDiv p q
+        = (∑ i in S, klTerm (p i) (q i)) + ∑ i in Sᶜ, klTerm (p i) (q i) :=
+      (hScard fun i => klTerm (p i) (q i)).symm
+    have ha1 : (0:ℝ) ≤ a := by
+      rw [← ha]
+      exact Finset.sum_nonneg fun i _ => hp i
+    have ha2 : a ≤ 1 := by
+      have h2 := hScard p
+      rw [hp1] at h2
+      have hcomp : (0:ℝ) ≤ ∑ i in Sᶜ, p i :=
+        Finset.sum_nonneg fun i _ => hp i
+      rw [ha] at h2
+      linarith
+    have hbin := klTerm_add_klTerm_one_sub_ge_two_sq ha1 ha2 hb0 hb1
+    have hS' : klTerm a b ≤ ∑ i in S, klTerm (p i) (q i) := by
+      rw [← ha, ← hb]
+      exact hkl1
+    have hge : 2 * (a - b) ^ 2 ≤ klDiv p q := by
+      rw [hsplitK]
+      linarith [hbin, hS', hkl2]
+    -- finish
+    rw [hTV, ← Real.sqrt_sq hab0]
+    refine Real.sqrt_le_sqrt ?_
+    linarith [hge]
+
+/-- **Entropy decay along the walk**: the relative entropy of the walk
+law from the stationary distribution is at most `r^{2t}·((πx)⁻¹−1)` at
+exactly the χ² mixing bound's hypothesis set — the bridge composed
+with the delivered `chiSquareDistance_le_of_connected`. Entropy decays
+at the χ² rate because `D ≤ χ²` termwise. -/
+theorem klDiv_walkDistribution_le (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i) [Nonempty V]
+    (hconn : (supportGraph A hA).Connected) (r : ℝ) (t : ℕ) (x : V)
+    (hrate : ∀ i : V, eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i ≠ 0 →
+      |1 - eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i| ≤ r) :
+    klDiv (walkDistribution A t x) (stationaryVec A)
+      ≤ r ^ (2 * t) * ((stationaryVec A x)⁻¹ - 1) :=
+  (klDiv_le_sum_sq_div (walkDistribution_nonneg A hnn hd t x)
+    (fun i => stationaryVec_pos A hd i)
+    (sum_walkDistribution A hd t x) (sum_stationaryVec A hd)).trans
+    (chiSquareDistance_le_of_connected A hA hnn hd hconn r t x hrate)
+
+/-- **Entropy decay, continuous-time twin**: at exactly
+`contChiSquareDistance_le`'s hypothesis set, `D ≤ e^{−2tλ₂(L_sym)}·
+((πx)⁻¹−1)` — the intrinsic-rate version, no caller certificate. -/
+theorem klDiv_contWalkDistribution_le (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (hcard : 2 ≤ Fintype.card V) {t : ℝ} (ht : 0 ≤ t)
+    (x : V) :
+    klDiv (contWalkDistribution A t x) (stationaryVec A)
+      ≤ Real.exp (-(2 * t * secondEval (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) hcard))
+        * ((stationaryVec A x)⁻¹ - 1) := by
+  have h1 : klDiv (contWalkDistribution A t x) (stationaryVec A)
+      ≤ ∑ i, (contWalkDistribution A t x i - stationaryVec A i)^2
+          / stationaryVec A i :=
+    klDiv_le_sum_sq_div (fun i => contWalkDistribution_nonneg A hA hnn hd ht x i)
+      (fun i => stationaryVec_pos A hd i)
+      (sum_contWalkDistribution A hA hd t x) (sum_stationaryVec A hd)
+  rw [← contChiSquareDistance_eq_sum_div A hd t x] at h1
+  exact h1.trans (contChiSquareDistance_le A hA hnn hd hcard ht x)
 
 end SpectralGraphTheory

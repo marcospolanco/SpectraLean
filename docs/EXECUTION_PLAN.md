@@ -6,14 +6,106 @@ holds the append-only narrative.
 
 ## Active milestone
 
-None in flight — the queue is the center-out fall-through. The natural
-candidates, in the recorded order: the reverse TV → χ² calculus (no
-consumer named — needs one before admission), log-Sobolev (axis 3's
-remaining named gap, consumer-gated on an entropy inequality composing
-`InformationTheory.Entropy`'s Gibbs bound), and the operator-gated
-items (over-squashing floor's Python bridge, matrix master-bound
-Step 2). Check `proposals/README.md`'s Active table first per the
-priority order.
+None in flight — the queue is the center-out fall-through. The
+remaining recorded candidates: the reverse TV → χ² calculus (still no
+consumer named), log-Sobolev (its consumer gate **discharged
+2026-09-01** by the entropy-mixing delivery — the entropy-decay family
+is the named on-shelf consumer an LSI would improve; *adoption* is now
+an operator decision, not missing machinery, so an autonomous run
+should not admit it without direction), and the operator-gated items
+(over-squashing floor's Python bridge, matrix master-bound Step 2).
+Check `proposals/README.md`'s Active table first per the priority
+order.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The entropy leg of the mixing program — Pinsker's inequality, the
+entropy–χ² bridge, entropy decay, and the entropy floor**
+(`proposals/entropy-mixing-pinsker.md`, same-run proposal; run
+`20260901T174415Z-run-1`, session `ses_fa1ee00b0ffehfb6e5wqiiijBT`).
+DELIVERED — zero new axioms (count stays 5; `#print axioms` via
+`wip/entropymix_axcheck.lean` on all 34 nameable new declarations —
+12 shelf + 22 QA — every one exactly `propext, Classical.choice,
+Quot.sound`, pure hard crust). QA 3544 → 3566 (+22:
+`Entropy_QA.lean`'s binary pins + `Mixing_QA.lean`'s EntropyMixing
+section). Radar QA axis held at 4.0 and axes 3/5 held (4.5) per
+protocol; axis 3's log-Sobolev consumer-gate note updated to
+discharged.**
+
+The delivery's content: (1) **`InformationTheory.Entropy`'s first
+graph-level consumers** — the module docstring's recorded intent,
+never materialized until now — and **the mixing program's third
+distance**: TV and χ² already had decay + floor families; entropy now
+has both. (2) **The generic layer** (`Entropy.lean`): the termwise
+`klTerm_le_sub_one_mul`; **the entropy–χ² bridge**
+`klDiv_le_sum_sq_div` (in exactly `chiSquareDistance`'s sum shape;
+genuinely sum-level — the first draft's termwise shape was refuted by
+the elaborator, the mass hypotheses load-bearing); **the two-block
+log-sum** `sum_klTerm_ge_klTerm` (rescaling to block-conditional
+vectors + Gibbs on the block — the first internal Gibbs consumption);
+and **the binary two-point Pinsker bound** by an explicit FTC identity
+(`d = ∫_b^a (a−t)/(t(1−t)) dt ≥ ∫_b^a 4(a−t) dt = 2(a−b)²`, the
+AM-GM step; a genuinely second-order fact — the first-order route
+yields only `(a−b)²/(a+b)` and was worked through and recorded). (3)
+**`Mixing.lean`'s entropy-leg section**: **Pinsker's inequality**
+`tvDistance_le_sqrt_half_klDiv` (TV-as-positive-part + two-block
+decomposition + the binary bound; strict q-positivity load-bearing,
+refuted at the q-zero junk corner), **entropy decay**
+`klDiv_walkDistribution_le` (the χ² theorem's exact hypothesis set)
+and `klDiv_contWalkDistribution_le` (the continuous twin), plus the
+nonnegativity plumbing (`contWalkDensity_nonneg` by Poissonization +
+`tsum_nonneg`). (4) **The entropy floor**
+`klDiv_walkDistribution_ge_of_eigenpair` (`Oversmoothing.lean`, beside
+its TV-floor engine — Pinsker × the delivered spectral floor; the
+floor family's first non-TV member). (5) **The QA**: the triangle's
+exact entropies `log(3/2)` / `(1/2)log(9/8)` from raw laws, the
+bridge instance `log(3/2) ≤ χ²(1) = 1/2` both sides pinned, decay
+instances with honest slack, the numeric Pinsker pin
+`TV(1) = 1/3 ≤ √(log(3/2)/2)`, the entropy-floor instance
+`2·((1/2)^{m+1})² ≤ D`, **the `K₂` never-decay exact pin
+`D = log 2` at every time** (the entropy twin of `TV ≡ 1/2`), the
+one-way fence `¬(χ² ≤ D)`, the continuous `t = 0` join `log 3`, and
+the q-zero refutation of the un-guarded Pinsker statement. Ten
+technique findings recorded in the proposal (headline: the pinned
+Mathlib parses `∑ i in s, f i - g i` as `(∑ i in s, f i) − g i` —
+parenthesize; the cascade of misleading `unknown identifier 'i'`
+errors pointed far from the cause).
+
+**Verification:** spike first (`wip/entropymix_spike.lean` — all
+shelf declarations + the full QA + the audit iterated to zero
+errors/zero warnings before any shelf edit; the elaborator caught two
+real statement bugs there — the falsifiability discipline working);
+`lake env lean` zero errors on all five touched modules; explicit
+`lake build` targets ✔; **`#print axioms` on all 34 new declarations:
+every one exactly `propext, Classical.choice, Quot.sound`**; **full
+`lake build` ✔ immediately followed by `check_build_completeness.py`
+— 133 source files, 133 fresh artifacts, 0 stale, 0 missing, exit
+0**; `lint_axioms` exit 0 (5, both PF findings
+allowlisted-confirmed); `check_refutation_independence` (10-tag clean
+— no tags added, nothing here touches an axiom);
+`check_public_reachability` clean (63 repo modules); `check_citations`
+("All axioms have proper citations!"); `check_markdown_links` clean;
+scoreboard regenerated (**3566/5/0**) with the verification row added;
+**map-freshness exit 0** after the 3544 → 3566 stats sync in both map
+files and SVG regeneration (no station tier change — the proposal has
+no station). Records updated: the proposal (COMPLETE + delivery
+record with the two statement corrections, corner analysis, and
+technique findings), `proposals/README.md` (new Delivered row), README
+(3566 + the walks-and-mixing row's entropy-leg extension), the radar
+(QA axis synced 3544 → 3566 held at 4.0; axis 3's log-Sobolev gate
+note discharged; axis 5's narrative extended, both held 4.5),
+`index/map/spectral_graph.md` (five new rows in the Mixing section +
+the Oversmoothing floor row), the scoreboard verification row, both
+map data tables + regenerated SVG, both QA modules' purpose headers,
+this plan, and the activity log. Nothing committed; the previous
+runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed. The
+log-Sobolev *adoption* decision is the named open operator choice;
+the reverse TV → χ² calculus still lacks a named consumer.
 
 ------
 

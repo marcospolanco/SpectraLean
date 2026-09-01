@@ -273,4 +273,38 @@ theorem shannon_delta_lt_log4 : shannonEntropy pDelta < Real.log 4 := by
   rw [shannon_delta_eq_zero]
   exact (Real.log_pos_iff (by norm_num)).mpr (by norm_num)
 
+/-! ## The binary two-point Pinsker bound (`proposals/entropy-mixing-pinsker.md`)
+
+The exact value at `(a, b) = (1/2, 3/4)`: `d = (1/2)·log(4/3)`, the
+bound `1/8` holding with honest slack (`log(4/3) ≥ 1/4`, the
+one-step Gibbs bound attained at equality).
+-/
+
+theorem bin_two_point_value_QA :
+    klTerm (1/2 : ℝ) (3/4) + klTerm (1/2 : ℝ) (1/4)
+      = (1/2) * Real.log (4/3) := by
+  have h1 : klTerm (1/2 : ℝ) (3/4) = (1/2) * Real.log (2/3) := by
+    simp only [klTerm, if_neg (by norm_num : (1/2 : ℝ) ≠ 0)]
+    congr 1
+    norm_num
+  have h2 : klTerm (1/2 : ℝ) (1/4) = (1/2) * Real.log 2 := by
+    simp only [klTerm, if_neg (by norm_num : (1/2 : ℝ) ≠ 0)]
+    congr 1
+    norm_num
+  have hsum : (1/2 : ℝ) * Real.log (2/3) + (1/2) * Real.log 2
+      = (1/2) * (Real.log (2/3) + Real.log 2) := by ring
+  rw [h1, h2, hsum, ← Real.log_mul (by norm_num : (2:ℝ)/3 ≠ 0) two_ne_zero,
+    show (2/3 : ℝ) * 2 = 4/3 from by norm_num]
+
+theorem bin_two_point_le_QA :
+    2 * ((1/2 : ℝ) - 3/4) ^ 2
+      ≤ klTerm (1/2 : ℝ) (3/4) + klTerm (1/2 : ℝ) (1/4) := by
+  rw [bin_two_point_value_QA]
+  have h : (1:ℝ) - (4/3)⁻¹ ≤ Real.log (4/3) :=
+    Real.one_sub_inv_le_log_of_pos (by norm_num)
+  have hinv : (4/3 : ℝ)⁻¹ = 3/4 := by norm_num
+  rw [hinv] at h
+  norm_num
+  linarith
+
 end Scaffold.InformationTheory.QA

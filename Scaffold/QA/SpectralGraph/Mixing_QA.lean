@@ -118,6 +118,7 @@ import Scaffold.Mathlib.GraphTheory.Electrical
 import Mathlib.Data.Matrix.Notation
 
 open scoped BigOperators Matrix
+open Scaffold.InformationTheory
 
 namespace SpectralGraphTheory.QA
 
@@ -5441,5 +5442,318 @@ theorem k2_mix_uniform_junk_QA :
 
 end UniformMixing
 
+
+/-! ## The entropy leg of the mixing program (2026-09-01, `proposals/entropy-mixing-pinsker.md`)
+
+Pinsker's inequality (`tvDistance_le_sqrt_half_klDiv`) and the
+entropy-decay family (`klDiv_walkDistribution_le`,
+`klDiv_contWalkDistribution_le`), with the entropy floor
+(`klDiv_walkDistribution_ge_of_eigenpair`) beside its TV-floor engine:
+the triangle's exact entropies `log(3/2)` / `(1/2)·log(9/8)` from raw
+law literals, the bridge instance `log(3/2) ≤ χ²(1) = 1/2` with both
+sides pinned, the decay instances with honest slack, the numeric
+Pinsker pin `TV(1) = 1/3 ≤ √(log(3/2)/2)`, the entropy-floor instance
+`2·(1/8) ≤ log(3/2)` — and on `K₂` the **exact never-decay pin**
+`D = log 2` at every time (the entropy twin of `TV ≡ 1/2`), Pinsker's
+`1/2 ≤ log 2` at the Gibbs equality, the one-way fence
+`¬(χ² ≤ D)`, the continuous-time `t = 0` join `D_cont(0) = log 3`,
+and the q-zero refutation of the un-guarded Pinsker statement (the
+junk `klTerm (1/2) 0 = 0` makes it read `1/2 ≤ 0`).
+-/
+
+/-- The triangle's exact entropy at `t = 1`: `D(ν₁ ‖ π) = log(3/2)`
+from the raw law literal. -/
+theorem tri_kl_one_QA :
+    klDiv (walkDistribution triAdj 1 0) (stationaryVec triAdj)
+      = Real.log (3/2) := by
+  have h0 : klTerm (0 : ℝ) (1/3) = 0 := by simp [klTerm]
+  have hA : klTerm (1/2 : ℝ) (1/3) = (1/2) * Real.log (3/2) := by
+    simp only [klTerm, if_neg (by norm_num : (1/2 : ℝ) ≠ 0)]
+    congr 1
+    norm_num
+  rw [klDiv, tri_dist_one_QA]
+  simp only [Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.head_cons,
+    Matrix.cons_val_one, Matrix.tail_cons, Matrix.cons_val_two, tri_pi_QA]
+  rw [h0, hA]
+  ring
+
+/-- The triangle's exact entropy at `t = 2`: `D(ν₂ ‖ π) =
+(1/2)·log(9/8)`. -/
+theorem tri_kl_two_QA :
+    klDiv (walkDistribution triAdj 2 0) (stationaryVec triAdj)
+      = (1/2) * Real.log (9/8) := by
+  have hA : klTerm (1/2 : ℝ) (1/3) = (1/2) * Real.log (3/2) := by
+    simp only [klTerm, if_neg (by norm_num : (1/2 : ℝ) ≠ 0)]
+    congr 1
+    norm_num
+  have hB : klTerm (1/4 : ℝ) (1/3) = (1/4) * Real.log (3/4) := by
+    simp only [klTerm, if_neg (by norm_num : (1/4 : ℝ) ≠ 0)]
+    congr 1
+    norm_num
+  have hsum : (1/2 : ℝ) * Real.log (3/2) + (1/4) * Real.log (3/4)
+      + (1/4) * Real.log (3/4)
+      = (1/2) * (Real.log (3/2) + Real.log (3/4)) := by ring
+  have hcomb : Real.log (3/2) + Real.log (3/4) = Real.log (9/8) := by
+    rw [← Real.log_mul (by norm_num : (3:ℝ)/2 ≠ 0)
+      (by norm_num : (3:ℝ)/4 ≠ 0)]
+    congr 1
+    norm_num
+  rw [klDiv, tri_dist_two_QA]
+  simp only [Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.head_cons,
+    Matrix.cons_val_one, Matrix.tail_cons, Matrix.cons_val_two, tri_pi_QA]
+  rw [hA, hB, hsum, hcomb]
+
+/-- The bridge instance at `t = 1`: `log(3/2) ≤ χ²(1) = 1/2`, both
+sides independently pinned — `log(3/2) ≤ 3/2 − 1` attained. -/
+theorem tri_kl_le_chi2_one_QA :
+    klDiv (walkDistribution triAdj 1 0) (stationaryVec triAdj)
+      ≤ chiSquareDistance triAdj 1 0 := by
+  rw [tri_kl_one_QA, tri_chi2_all_QA 1]
+  have h : Real.log (3/2) ≤ 3/2 - 1 :=
+    Real.log_le_sub_one_of_pos (by norm_num)
+  norm_num
+  linarith
+
+/-- The decay instance at `t = 1`: `log(3/2) ≤ (1/2)²·2 = 1/2`. -/
+theorem tri_kl_decay_one_QA :
+    klDiv (walkDistribution triAdj 1 0) (stationaryVec triAdj)
+      ≤ (1/2 : ℝ) ^ (2 * 1) * ((stationaryVec triAdj 0)⁻¹ - 1) :=
+  klDiv_walkDistribution_le triAdj triAdj_isSymm triAdj_nonneg
+    triAdj_deg_pos tri_connected (1/2) 1 0 tri_rate_QA
+
+/-- The decay instance at `t = 2`, with honest slack:
+`(1/2)·log(9/8) ≤ 1/16 < 1/8`. -/
+theorem tri_kl_decay_two_QA :
+    klDiv (walkDistribution triAdj 2 0) (stationaryVec triAdj)
+      ≤ (1/2 : ℝ) ^ (2 * 2) * ((stationaryVec triAdj 0)⁻¹ - 1)
+        ∧ klDiv (walkDistribution triAdj 2 0) (stationaryVec triAdj)
+          ≤ 1/16 := by
+  refine ⟨klDiv_walkDistribution_le triAdj triAdj_isSymm triAdj_nonneg
+    triAdj_deg_pos tri_connected (1/2) 2 0 tri_rate_QA, ?_⟩
+  rw [tri_kl_two_QA]
+  have h : Real.log (9/8) ≤ 9/8 - 1 :=
+    Real.log_le_sub_one_of_pos (by norm_num)
+  norm_num
+  linarith
+
+/-- The vector-Pinsker instance on the triangle, numeric:
+`TV(1) = 1/3 ≤ √(log(3/2)/2)` (squaring: `2/9 ≤ log(3/2)`, three
+Gibbs steps). -/
+theorem tri_pinsker_one_QA :
+    tvDistance (walkDistribution triAdj 1 0) (stationaryVec triAdj)
+      ≤ Real.sqrt (klDiv (walkDistribution triAdj 1 0)
+          (stationaryVec triAdj) / 2) :=
+  tvDistance_le_sqrt_half_klDiv
+    (walkDistribution_nonneg triAdj triAdj_nonneg triAdj_deg_pos 1 0)
+    (sum_walkDistribution triAdj triAdj_deg_pos 1 0)
+    (fun i => stationaryVec_pos triAdj triAdj_deg_pos i)
+    (sum_stationaryVec triAdj triAdj_deg_pos)
+
+theorem tri_pinsker_one_numeric_QA :
+    tvDistance (walkDistribution triAdj 1 0) (stationaryVec triAdj)
+      = 1/3
+      ∧ (1/3 : ℝ) ≤ Real.sqrt (Real.log (3/2) / 2) := by
+  refine ⟨by rw [tri_disc_tv_eq_QA 1]; norm_num, ?_⟩
+  rw [← Real.sqrt_sq (by norm_num : (0:ℝ) ≤ 1/3)]
+  refine Real.sqrt_le_sqrt ?_
+  have h : (1:ℝ) - (3/2)⁻¹ ≤ Real.log (3/2) :=
+    Real.one_sub_inv_le_log_of_pos (by norm_num)
+  have hinv : (3/2 : ℝ)⁻¹ = 2/3 := by norm_num
+  rw [hinv] at h
+  norm_num
+  linarith
+
+/-- The entropy floor instance on the triangle: the floor reads
+`2·((1/2)^{m+1})²` against the exact entropy. -/
+theorem tri_kl_floor_le_QA (m : ℕ) :
+    2 * ((1/2 : ℝ) ^ (m + 1)) ^ 2
+      ≤ klDiv (walkDistribution triAdj m 0) (stationaryVec triAdj) := by
+  have hfl := klDiv_walkDistribution_ge_of_eigenpair triAdj triAdj_isSymm
+    triAdj_nonneg triAdj_deg_pos m 0 tri_lapsym_mulVec_triG_QA
+    (by norm_num : (3/2 : ℝ) ≠ 0)
+    (c := 2 * (Real.sqrt 2)⁻¹) triF_abs_le (by positivity)
+  have hval : (1/2) * |1 - 3/2| ^ m * |triF 0| / (2 * (Real.sqrt 2)⁻¹)
+      = (1/2) ^ (m + 1) := (tri_tv_floor_value_QA m).1
+  rw [← hval]
+  exact hfl
+
+theorem tri_kl_floor_one_QA :
+    2 * ((1/2 : ℝ) ^ (1 + 1)) ^ 2 = 1/8
+      ∧ (1/8 : ℝ) ≤ Real.log (3/2) := by
+  refine ⟨by norm_num, ?_⟩
+  have h : (1:ℝ) - (3/2)⁻¹ ≤ Real.log (3/2) :=
+    Real.one_sub_inv_le_log_of_pos (by norm_num)
+  have hinv : (3/2 : ℝ)⁻¹ = 2/3 := by norm_num
+  rw [hinv] at h
+  norm_num
+  linarith
+
+/-- The exact `K₂` entropy summand: `klTerm 1 (1/2) = log 2`. -/
+theorem klTerm_one_half_QA : klTerm (1:ℝ) (1/2) = Real.log 2 := by
+  simp only [klTerm, if_neg one_ne_zero, one_mul]
+  congr 1
+  norm_num
+
+theorem klTerm_zero_half_QA : klTerm (0:ℝ) (1/2) = 0 := by
+  simp [klTerm]
+
+/-- **The exact never-decay pin on `K₂`**: entropy is `log 2` at every
+time — the periodic chain pinned at non-mixing in the entropy metric
+(the entropy twin of `TV ≡ 1/2`). -/
+theorem k2_kl_all_QA (m : ℕ) :
+    klDiv (walkDistribution k2Adj m 0) (stationaryVec k2Adj)
+      = Real.log 2 := by
+  rcases Nat.even_or_odd m with ⟨k, hk⟩ | ⟨k, hk⟩
+  · rw [hk, show k + k = 2 * k from by omega, klDiv, k2_dist_even_QA k]
+    simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.head_cons,
+      Matrix.cons_val_one, k2_pi_QA]
+    rw [klTerm_one_half_QA, klTerm_zero_half_QA, add_zero]
+  · rw [hk, k2_dist_odd_QA k, klDiv]
+    simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.head_cons,
+      Matrix.cons_val_one, k2_pi_QA]
+    rw [klTerm_zero_half_QA, klTerm_one_half_QA, zero_add]
+
+/-- Pinsker's instance on `K₂`: `2·(1/2)² = 1/2 ≤ log 2`, the Gibbs
+bound `log 2 ≥ 1 − 1/2` attained at equality. -/
+theorem k2_pinsker_QA (m : ℕ) :
+    2 * (tvDistance (walkDistribution k2Adj m 0)
+        (stationaryVec k2Adj)) ^ 2
+      ≤ klDiv (walkDistribution k2Adj m 0) (stationaryVec k2Adj) := by
+  have h := k2_kl_all_QA m
+  have hlog : (1:ℝ) - (2:ℝ)⁻¹ ≤ Real.log 2 :=
+    Real.one_sub_inv_le_log_of_pos (by norm_num)
+  have htv := k2_disc_tv_eq_QA m
+  rw [htv]
+  have hinv : (2 : ℝ)⁻¹ = 1/2 := by norm_num
+  rw [hinv] at hlog
+  norm_num
+  linarith
+
+/-- **The entropy never decays on `K₂`**: `D ≥ 1/4` at every time —
+the entropy floor's ultimate instance (the fence the χ²-piggyback
+decay bound can never reach on a periodic chain). -/
+theorem k2_kl_never_decays_QA (m : ℕ) :
+    1/4 ≤ klDiv (walkDistribution k2Adj m 0) (stationaryVec k2Adj) := by
+  rw [k2_kl_all_QA m]
+  have hlog : (1:ℝ) - (2:ℝ)⁻¹ ≤ Real.log 2 :=
+    Real.one_sub_inv_le_log_of_pos (by norm_num)
+  have hinv : (2 : ℝ)⁻¹ = 1/2 := by norm_num
+  rw [hinv] at hlog
+  norm_num
+  linarith
+
+/-- **The bridge is one-way**: `χ² ≤ D` is false on `K₂` — `χ² = 1` at
+every time while `D = log 2 < 1` strictly (`log_lt_sub_one`). -/
+theorem k2_chi2_not_le_kl_QA :
+    ¬ (chiSquareDistance k2Adj 1 0
+        ≤ klDiv (walkDistribution k2Adj 1 0) (stationaryVec k2Adj)) := by
+  intro h
+  rw [k2_chi2_all_QA 1, k2_kl_all_QA 1] at h
+  have hlt : Real.log 2 < 2 - 1 :=
+    Real.log_lt_sub_one_of_pos (by norm_num) (by norm_num)
+  have h2 : (2:ℝ) - 1 = 1 := by ring
+  rw [h2] at hlt
+  linarith
+
+/-- The q-zero junk pin: at `q = (1, 0)` the junk convention
+`klTerm (1/2) 0 = (1/2)·log 0 = 0` plus the negative first summand
+make the relative entropy *negative* — `D = −(1/2)·log 2`. -/
+theorem zero_q_klDiv_QA :
+    klDiv (![1/2, 1/2] : Fin 2 → ℝ) (![1, 0] : Fin 2 → ℝ)
+      = -(1/2) * Real.log 2 := by
+  have h1 : klTerm (1/2 : ℝ) 1 = -(1/2) * Real.log 2 := by
+    have hpos : (0:ℝ) < 1/2 := by norm_num
+    have hlog : Real.log ((1:ℝ)/2) = -Real.log 2 := by
+      rw [show ((1:ℝ)/2) = (2:ℝ)⁻¹ from by norm_num, Real.log_inv]
+    simp only [klTerm, if_neg (ne_of_gt hpos), div_one, hlog]
+    ring
+  have h2 : klTerm (1/2 : ℝ) 0 = 0 := by
+    simp only [klTerm, if_neg (by norm_num : (1/2:ℝ) ≠ 0),
+      div_zero, Real.log_zero, mul_zero]
+  rw [klDiv]
+  simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.head_cons,
+    Matrix.cons_val_one]
+  rw [h1, h2]
+  ring
+
+/-- **Pinsker's q-positivity hypothesis is load-bearing**: the
+un-guarded statement at `p = (1/2, 1/2)`, `q = (1, 0)` reads
+`TV = 1/2 ≤ √(D/2) = √(negative) = 0` — refuted. -/
+theorem pinsker_q_guard_refuted_QA :
+    ¬ (tvDistance (![1/2, 1/2] : Fin 2 → ℝ) (![1, 0] : Fin 2 → ℝ)
+        ≤ Real.sqrt (klDiv (![1/2, 1/2] : Fin 2 → ℝ)
+          (![1, 0] : Fin 2 → ℝ) / 2)) := by
+  intro h
+  have hTV : tvDistance (![1/2, 1/2] : Fin 2 → ℝ) (![1, 0] : Fin 2 → ℝ)
+      = 1/2 := by
+    have e0 : |(![1/2, 1/2] : Fin 2 → ℝ) 0 - (![1, 0] : Fin 2 → ℝ) 0|
+        = 1/2 := by
+      simp only [Matrix.cons_val_zero, Matrix.head_cons]
+      rw [abs_of_nonpos (by norm_num : (1:ℝ)/2 - 1 ≤ 0)]
+      norm_num
+    have e1 : |(![1/2, 1/2] : Fin 2 → ℝ) 1 - (![1, 0] : Fin 2 → ℝ) 1|
+        = 1/2 := by
+      simp only [Matrix.cons_val_one, Matrix.cons_val_zero,
+        Matrix.head_cons]
+      rw [abs_of_pos (by norm_num : (0:ℝ) < 1/2 - 0)]
+      norm_num
+    rw [tvDistance, Fin.sum_univ_two, e0, e1]
+    norm_num
+  rw [hTV, zero_q_klDiv_QA] at h
+  have hlog : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hsqrt : Real.sqrt (-(1/2) * Real.log 2 / 2) = 0 :=
+    Real.sqrt_eq_zero_of_nonpos (by nlinarith)
+  rw [hsqrt] at h
+  norm_num at h
+
+/-- The continuous-time `t = 0` join on the triangle: `D_cont(0) =
+log 3` at the point mass. -/
+theorem tri_cont_kl_zero_QA :
+    klDiv (contWalkDistribution triAdj 0 0) (stationaryVec triAdj)
+      = Real.log 3 := by
+  have hlaw : walkDistribution triAdj 0 0 = ![1, 0, 0] := by
+    funext i
+    fin_cases i
+    all_goals simp [walkDistribution_zero, Pi.single_apply]
+  have h1 : klTerm (1 : ℝ) (1/3) = Real.log 3 := by
+    simp only [klTerm, if_neg one_ne_zero, one_mul]
+    congr 1
+    norm_num
+  have h0 : klTerm (0 : ℝ) (1/3) = 0 := by simp [klTerm]
+  rw [contWalkDistribution_zero triAdj triAdj_deg_pos 0, hlaw, klDiv]
+  simp only [Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.head_cons,
+    Matrix.cons_val_one, Matrix.tail_cons, Matrix.cons_val_two, tri_pi_QA]
+  rw [h1, h0]
+  ring
+
+/-- The continuous-time bridge instance (the piggyback made visible):
+`D_cont(t) ≤ χ²_cont(t)` at every nonnegative time — the first QA
+consumer of `contWalkDistribution_nonneg`. -/
+theorem tri_cont_kl_le_chi2_QA (t : ℝ) (ht : 0 ≤ t) :
+    klDiv (contWalkDistribution triAdj t 0) (stationaryVec triAdj)
+      ≤ contChiSquareDistance triAdj t 0 :=
+  (klDiv_le_sum_sq_div (fun i => contWalkDistribution_nonneg triAdj
+    triAdj_isSymm triAdj_nonneg triAdj_deg_pos ht 0 i)
+    (fun i => stationaryVec_pos triAdj triAdj_deg_pos i)
+    (sum_contWalkDistribution triAdj triAdj_isSymm triAdj_deg_pos t 0)
+    (sum_stationaryVec triAdj triAdj_deg_pos)).trans
+    (le_of_eq (contChiSquareDistance_eq_sum_div triAdj triAdj_deg_pos t 0).symm)
+
+/-- The continuous-time decay instance through the pinned spectrum:
+`D_cont(t) ≤ 2·e^{−3t}`. -/
+theorem tri_cont_kl_decay_QA (t : ℝ) (ht : 0 ≤ t) :
+    klDiv (contWalkDistribution triAdj t 0) (stationaryVec triAdj)
+      ≤ 2 * Real.exp (-(3 * t)) := by
+  have h := klDiv_contWalkDistribution_le triAdj triAdj_isSymm
+    triAdj_nonneg triAdj_deg_pos (by norm_num : 2 ≤ Fintype.card (Fin 3))
+    ht 0
+  rw [tri_secondEval_QA, tri_pi_QA 0] at h
+  rw [show (2:ℝ) * t * (3/2) = 3 * t from by ring] at h
+  have hfin : Real.exp (-(3 * t)) * ((1/3 : ℝ)⁻¹ - 1)
+      = 2 * Real.exp (-(3 * t)) := by
+    have h2 : ((1/3 : ℝ)⁻¹ - 1) = 2 := by norm_num
+    rw [h2, mul_comm]
+  rw [hfin] at h
+  exact h
 
 end SpectralGraphTheory.QA

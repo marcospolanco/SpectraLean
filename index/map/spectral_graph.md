@@ -1026,6 +1026,24 @@ the matrix-level Dobrushin-coefficient engine
 `tvDobrushinCoeff_pow_add_le`, and the promoted public pairing core
 `abs_sum_mul_le_of_pairwise`) — the `Mixing` rows above.
 
+### Mixing — the primitivity supplier and the plain walk's Doeblin rate (`GraphTheory.Mixing` + `LinearAlgebra.PrimitiveConvergence`, 2026-09-02, `proposals/primitivity-supplier-plain-walk.md`)
+
+The standing handoff's named blocker — an irreducibility+primitivity
+supplier for the undirected plain walk — delivered with its consumer
+chain. The engine lives at matrix level (`PrimitiveConvergence.lean`),
+the wrapper and consumers at the walk level (`Mixing.lean`). All hard
+crust (`#print axioms`-verified at the standard three).
+
+| Declaration | Content |
+|-------------|---------|
+| `pow_entry_pos_of_pos` | **concatenation positivity** (matrix level): a positive `M^a` entry through `k` followed by a positive `M^b` entry gives a positive `M^(a+b)` entry — one term of the defining sum |
+| `pow_entry_pos_bounce` | the `+2` bounce chain: a positive `e`-step entry `u → v` extends by any even length, bouncing `v → z → v` along a positive 2-cycle |
+| `isPrimitive_of_pow_pos_of_odd_loop` | **the supplier** (matrix level): strong connectivity + every index on a positive 2-cycle (`htwo`) and an odd closed walk (`hodd`) ⟹ `IsPrimitive`, by the two-parity covering (reach, bounce for one parity, run the odd closed walk first for the other; witness `m := 1 + ∑ (d + L₀)` — the `1 +` keeps the empty index type case split-free). Support-level hypotheses, deliberately not `IsSymm`: `walkTransitionMatrix = D⁻¹A` is not symmetric on irregular graphs |
+| `pow_walkTransitionMatrix_pos_of_walk` | **the walk→power bridge**: every support-graph walk of length `t` gives a positive `(i, j)` entry of `P^t` — `SimpleGraph.Walk` induction, each adjacency step one positive product term |
+| `walkTransitionMatrix_isPrimitive_of_connected_of_odd_walk` | **the wrapper**: connected support graph + a single odd closed walk ⟹ the walk matrix is primitive; the odd walk transports to every vertex by concatenating a walk there, the odd walk, and the *reversed* walk back (`2\|q\| + \|p\|`, odd). `Odd p.length` is the honest interface — the pinned Mathlib has no `SimpleGraph.Bipartite` |
+| `walkDistribution_tvDistance_le_of_pos_power` | **the plain walk's first mixing rate with no spectral certificate**: at a positive-power certificate `δ ≤ (P^m) i j`, `TV(ν_t x, π) ≤ (1 − \|V\|δ)^{t/m}` — the intrinsic-rate family's non-bipartite member (the entrywise lazy ceiling being its bipartite member), consuming the same Doeblin engine as the directed PageRank rate with `TV(δ_x, π) ≤ 1` folded in through the simplex diameter |
+| `walkDistribution_tendsto_stationaryVec` | **the retired `primitive_power_tendsto`'s first undirected consumer**: the plain walk law converges to stationarity on the supplier's hypothesis set, composed from the proved `primitive_vecMul_tendsto` through the law/power bridge |
+
 ### `Scaffold.Mathlib.GraphTheory.Magnetic` (the magnetic Laplacian — the directed-native Hermitian operator)
 
 The directed axis' third spectral toolkit (delivered 2026-08-25,
@@ -1309,6 +1327,38 @@ claim.
 | --- | --- | --- |
 | `smul_one_sub_eq_smul_regularNormalizedLaplacian` | Expansion ceiling | The operator identity joining the two families' spellings: `d • 1 − A = d • regularNormalizedLaplacian A d` under regularity and `d ≠ 0` (Cheeger's `smul_regularNormalizedLaplacian` plus the `degreeMatrix = d • 1` half) |
 | `ramanujan_expansion_ceiling` | Expansion ceiling | **The headline**: `cheegerConstant A ≤ √(2 (1 − 2√(d−1)/d + 2√(d−1)/(d (k+1))))` under exactly `alonBoppana_nilli_classical`'s hypotheses — the Alon–Boppana upper bound chained below the Cheeger hard direction through the scaling engine; consumed `cheeger_lower_bound` (its first cross-module AlonBoppana-side consumer) |
+
+### `Scaffold.Mathlib.GraphTheory.AlonBoppana` (the cycle family — the asymptotic corollary)
+
+The program's first *parametric* (arbitrary-`n`) instantiation, delivered
+2026-09-02 (`proposals/cycle-family-alon-boppana-asymptotic.md`, zero new
+axioms): the canonical 2-regular family — the cycles `C_n`, carried by
+Mathlib's own `SimpleGraph.cycleGraph` through the `toWAdj` adapter —
+names the d-regular family with `diam → ∞` that the program's completion
+note required, and Nilli's two-edge method discharges on it at every
+scale `k`. The new mathematical content is the **exact cycle distance
+formula** (the walk route up, the integer-potential route down), from
+which the tree-ball hypothesis and the far-apart condition follow at
+arbitrary scale. QA pinned at `C₁₂` at delivery, then made parametric
+(every lemma `∀`-quantified over the scale, the tree-ball truth boundary
+bracketed at every `n`) by the follow-on
+`proposals/parametric-cycle-qa.md` (`AlonBoppana_QA.lean` Steps 7–8).
+
+| Declaration | Content |
+| --- | --- |
+| `cycleAdj` | **the family's weighted adjacency**: `cycleAdj n := SimpleGraph.toWAdj (SimpleGraph.cycleGraph n)` — Mathlib's own cycle graph entering the SGT center through the adapter, the `Matrix (Fin n) (Fin n) ℝ` representation every center theorem consumes |
+| `cycleAdj_isSymm` / `cycleAdj_nonneg` / `cycleAdj_apply` / `cycleAdj_h01` | the adapter interface re-expressed on the family: symmetry, nonnegativity, the `0`/`1` entry form (`if (cycleGraph n).Adj i j then 1 else 0`), and the `0`-or-`≥ 1` weight discipline — exactly the `h01` hypothesis idiom `radialVec_quadForm_ge` and the headline consume |
+| `supportGraph_cycleAdj` | the adapter roundtrip on the family: `supportGraph (cycleAdj n) = SimpleGraph.cycleGraph n` — every `supportGraph`-stated theorem on the family reduces to Mathlib's own cycle graph |
+| `cycleAdj_connected` / `cycleAdj_isDRegular` | the structural hypotheses supplied at the family level: connectivity at `1 ≤ n`, and `IsDRegular (cycleAdj n) 2` at `3 ≤ n` — the degree the Alon–Boppana error term `d − 2√(d−1)` vanishes at |
+| `cycleAdj_dist_eq` | **the exact cycle distance formula**: `dist a b = min ((b−a).val) (n − (b−a).val)` at `2 ≤ n` — the short orientation bound by an explicit walk (`cycleGraph_dist_le_up`, private), the long orientation by the ℤ-potential route (`cycle_walk_potential`, private: every walk realizes a residue representative of `b − start` of absolute value ≤ its length, in `Int.ModEq` form); the engine from which both structural hypotheses of the two-edge method discharge at arbitrary scale, and the program's first parametric distance fact (before this, `dist` on the shelf was pinned only at fixed literal fixtures) |
+| `cycle_levE_eq` | **the BFS level formula at a cycle edge**: `levE a (a+1) z = 0` at the endpoints, `min ((z−a).val − 1) (n − (z−a).val)` otherwise — the level machinery of Step 2 computed in closed form on the family |
+| `cycle_levClass_eq` | **the level class in closed form**: at `1 ≤ j` and the strict `2(j+1) < n`, the level-`j` class of the edge `(a, a+1)` is exactly the two vertices at cyclic offsets `j+1` forward and `n−j` backward — `{a+(j+1), a+(n−j)}`; the strictness is proof-forced, not truth-forced (the parametric QA computed the boundary classes raw from `cycle_levE_eq` exactly where this hypothesis refuses: the even tie `2(j+1) = n` still carries the adjacent antipodal *pair*, card `2` — the cardinality equation holds there — while the odd boundary `n = 2j+1` merges the two branches into one vertex, card `1 < 2`, the genuine strictness bite) |
+| `isTreeBall_cycle` | **the tree-ball hypothesis at arbitrary scale**: `IsTreeBall (cycleAdj n) … 2 (k+1)` at `2(k+1) < n` — the cardinality equations `2·(d−1)^j = 2` reading off the level-class closed form; the strict threshold is proof-forced (QA pins `IsTreeBall` *holding* one radius past the certified one at the antipodal tie, and failing one past the truth with the empty class — the bracket at every scale) |
+| `cycleAdj_distEdge_gt` | **the far-apart condition at the antipodal edge**: on `C_{4k+8}`, `(k+1)+(k+1) < distEdge (0,1) (2k+4, 2k+5)` — the two-edge method's separation hypothesis, with the family's `4k+8` sizing buying exactly slack `1` (QA pins the exact value `distEdge = 2k+3` against the required `2(k+1) = 2k+2`, slack exactly `1` at every scale) |
+| `alonBoppana_cycle` | **the headline**: `secondEval (2•1 − cycleAdj (4k+8)) ≤ 1/(k+1)` — Nilli's theorem instantiated at `d = 2` where the barrier `d − 2√(d−1) = 0`, every hypothesis (regularity, the genuine edges, connectivity, far-apart, both tree balls) discharged at every scale `k` |
+| `laplacian_cycleAdj` | the spelling bridge: `laplacian (cycleAdj n) = 2•1 − cycleAdj n` at `3 ≤ n` (2-regularity: `degreeMatrix = 2•1`), joining the adjacency-facing statement to the Laplacian |
+| `alonBoppana_cycle_laplacian` | **the Laplacian form**: `λ₂ (L (C_{4k+8})) ≤ 1/(k+1)` — the headline transported through `laplacian_cycleAdj` and `secondEval_congr` at an unchanged bound; the statement form the asymptotic corollary consumes |
+| `alonBoppana_cycle_asymptotic` | **the asymptotic corollary**: `∀ ε > 0, ∃ k, λ₂ (L (C_{4k+8})) ≤ ε` — the Alon–Boppana error term tending to zero along the named family with `diam → ∞` (witness `k := ⌈1/ε⌉`, pinned explicitly in QA); the d-regular family the program's completion note asked to be named |
 
 ### `Scaffold.Mathlib.GraphTheory.Spectral` (positive scaling — the expansion ceiling's engine)
 

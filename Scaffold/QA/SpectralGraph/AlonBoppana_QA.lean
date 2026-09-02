@@ -36,7 +36,16 @@ family: the exact distance formula, the level class, and the theorem
 instance pinned at `C₁₂` (the program's first parametric fixture,
 beyond every prior literal matrix), the Laplacian spelling, the
 asymptotic corollary at a concrete `ε`, and the far-apart fence
-isolating what the family's `4k+8` sizing buys.
+isolating what the family's `4k+8` sizing buys. — Step 8 (2026-09-02,
+`proposals/parametric-cycle-qa.md`) — the repository's first
+*parametric* QA: every lemma `∀`-quantified over the scale and
+consuming the shelf theorems at symbolic `n`/`k`/`m` — the
+translate-invariant edge distance, the antipodal-tie short branch,
+the family's own antipode, the exact far-apart value, the tree-ball
+truth boundary bracketed at every scale (even boundary class computed
+raw, holds one past the certified radius, fails one past the truth),
+the odd-boundary singleton, and the asymptotic corollary's witness
+pinned at symbolic `ε`.
 
 ## Step 1: the d-regularity interface
 
@@ -2761,5 +2770,353 @@ theorem cyc12_far_fence_QA :
   omega
 
 end Step7
+
+/-!
+## Step 8: parametric (arbitrary-scale) QA — the cycle family at symbolic scale
+
+The repository's first QA section whose lemmas quantify over the
+scale (`proposals/parametric-cycle-qa.md`): every pin consumes a
+shelf theorem at `∀ n` / `∀ k` / `∀ m`, so a scale-dependent error in
+a parametric statement — an antipodal-tie off-by-one, a boundary
+mishandling at `2(j+1) = n`, a wraparound branch wrong only past the
+midpoint — fails here at *every* scale at once, where a fixed fixture
+(the largest ever pinned is `C₁₂`) can only fail below its own size.
+
+The centerpiece is the **tree-ball truth boundary, bracketed at every
+scale**: on `C_{2m}` the tree-ball predicate holds at radius `m`
+(`cycn_isTreeBall_half_QA`) — one past the radius the shelf's
+`isTreeBall_cycle` certifies, whose hypothesis `2(k+1) < n` maxes out
+at radius `m − 1` on even cycles — and fails at radius `m + 1`
+(`cycn_not_isTreeBall_half_succ_QA`, the empty boundary class). The
+strictness of the shelf hypothesis is thereby witnessed
+proof-forced, not truth-forced. The even boundary class keeps *two*
+(adjacent) vertices around the antipode
+(`cycn_levClass_half_boundary_QA`, computed raw from `cycle_levE_eq`
+exactly where `cycle_levClass_eq`'s strict hypothesis refuses to
+apply) — the singleton is the odd boundary
+(`cycn_levClass_odd_singleton_QA`, where the two offset branches
+merge at `j + 1 = n − j`), correcting the cycle-family delivery
+record's boundary note.
+-/
+
+section Step8
+
+/-! ### Symbolic-offset calculators (private) -/
+
+/-- The cyclic offset of `a + ⟨m⟩` from `a` is `m` itself, at every
+scale `m < n` (the symbolic twin of the shelf's private
+`fin_val_sub_add_self`). -/
+private theorem pqa_off {n : ℕ} (a : Fin n) {m : ℕ} (hm : m < n) :
+    (a + ⟨m, hm⟩ - a).val = m := by
+  simp only [Fin.add_def, Fin.sub_def, Fin.val_mk]
+  have hE0 : n - a.val + (a.val + m) % n
+      = (a.val + m) % n + (n - a.val) := Nat.add_comm _ _
+  rw [hE0, Nat.mod_add_mod]
+  have hE : a.val + m + (n - a.val) = m + n := by omega
+  rw [hE, Nat.add_mod_right]
+  exact Nat.mod_eq_of_lt hm
+
+/-- The cyclic offset between two value-literal vertices, at every
+scale. -/
+private theorem pqa_subval (n c d : ℕ) (hc : c < n) (hd : d ≤ c) :
+    (⟨c, by omega⟩ - ⟨d, by omega⟩ : Fin n).val = c - d := by
+  simp only [Fin.sub_def, Fin.val_mk]
+  have hE : n - d + c = (c - d) + n := by omega
+  rw [hE, Nat.add_mod_right]
+  exact Nat.mod_eq_of_lt (by omega)
+
+/-- Adding an offset to the zero vertex: the value-literal form, at
+every scale. -/
+private theorem pqa_add_zero {n : ℕ} (m : ℕ) (hm : m < n) :
+    (⟨0, by omega⟩ : Fin n) + ⟨m, hm⟩ = ⟨m, hm⟩ := by
+  apply Fin.ext
+  simp only [Fin.add_def, Fin.val_mk, Nat.zero_add]
+  exact Nat.mod_eq_of_lt hm
+
+/-- The numeral `1` as a value literal, at every scale (the honest
+bridge between statement-level `+ 1` numerals and value-literal
+pins). -/
+private theorem pqa_add_one (n : ℕ) [NeZero n] (hn : 2 ≤ n) :
+    (⟨0, by omega⟩ : Fin n) + 1 = ⟨1, by omega⟩ := by
+  apply Fin.ext
+  show ((0 : ℕ) + (1 : ℕ) % n) % n = 1
+  have h1lt : (1 : ℕ) < n := by omega
+  have h2 : (1 : ℕ) % n = 1 := Nat.mod_eq_of_lt h1lt
+  rw [Nat.zero_add, h2]
+  exact Nat.mod_eq_of_lt h1lt
+
+/-! ### The distance formula at arbitrary scale -/
+
+/-- **Parametric pin 1 (the short branch, antipodal tie included)**:
+at any scale `n ≥ 2` and any offset `m` with `2m ≤ n`, the vertex at
+cyclic offset `m` from `a` is at distance exactly `m` — the tie
+`2m = n` (the antipode) is *in* the hypothesis set, so a
+strict-vs-nonstrict branch error in the distance formula fails here.
+Symbolic in scale, offset, and translate. -/
+theorem cycn_dist_short_QA (n : ℕ) (hn : 2 ≤ n) (m : ℕ) (hm : 2 * m ≤ n)
+    (a : Fin n) :
+    (supportGraph (cycleAdj n) (cycleAdj_isSymm n)).dist a
+        (a + ⟨m, by omega⟩) = m := by
+  rw [cycleAdj_dist_eq hn, pqa_off a (by omega)]
+  omega
+
+/-- **Parametric pin 2 (the edge, every translate, every scale)**:
+on `C_n` at any `n ≥ 2`, the base-`a` edge vertex `a + 1` is at
+distance exactly `1` — symbolic in both the scale and the translate.
+Consumes `cycleAdj_dist_eq`; a wrong branch or wraparound term at any
+scale fails here. -/
+theorem cycn_dist_edge_QA (n : ℕ) [NeZero n] (hn : 2 ≤ n) (a : Fin n) :
+    (supportGraph (cycleAdj n) (cycleAdj_isSymm n)).dist a (a + 1) = 1 := by
+  have hone : (1 : Fin n) = ⟨1, by omega⟩ := by
+    apply Fin.ext
+    show (1 : ℕ) % n = 1
+    exact Nat.mod_eq_of_lt (by omega)
+  rw [hone]
+  exact cycn_dist_short_QA n hn 1 (by omega) a
+
+/-- **Parametric pin 3 (the family's own antipode, the exact tie)**:
+on the delivered family `C_{4k+8}`, the vertex `2k+4` is the antipode
+of `0` — distance exactly `2k+4`, both min branches agreeing, at
+every scale `k`. -/
+theorem cycfam_antipode_dist_QA (k : ℕ) :
+    (supportGraph (cycleAdj (4 * k + 8)) (cycleAdj_isSymm _)).dist
+        ⟨0, by omega⟩ ⟨2 * k + 4, by omega⟩ = 2 * k + 4 := by
+  rw [← pqa_add_zero (2 * k + 4) (by omega)]
+  exact cycn_dist_short_QA (4 * k + 8) (by omega) (2 * k + 4) (by omega)
+    ⟨0, by omega⟩
+
+/-- **Parametric pin 4 (the exact far-apart value)**: the separation
+of the two edges the family's theorem uses is exactly `2k+3` at every
+scale — the shelf certifies only `2k+2 < distEdge`
+(`cycleAdj_distEdge_gt`), so the strictness slack is exactly `1`,
+witnessed at every scale. -/
+theorem cycfam_distEdge_exact_QA (k : ℕ) :
+    distEdge (cycleAdj (4 * k + 8)) (cycleAdj_isSymm _)
+        ⟨0, by omega⟩ ⟨1, by omega⟩ ⟨2 * k + 4, by omega⟩
+        ⟨2 * k + 5, by omega⟩ = 2 * k + 3 := by
+  have hn : 2 ≤ 4 * k + 8 := by omega
+  have d1 : (supportGraph (cycleAdj (4 * k + 8)) (cycleAdj_isSymm _)).dist
+        ⟨0, by omega⟩ ⟨2 * k + 4, by omega⟩ = 2 * k + 4 := by
+    rw [cycleAdj_dist_eq hn,
+      pqa_subval (4 * k + 8) (2 * k + 4) 0 (by omega) (by omega)]
+    omega
+  have d2 : (supportGraph (cycleAdj (4 * k + 8)) (cycleAdj_isSymm _)).dist
+        ⟨1, by omega⟩ ⟨2 * k + 4, by omega⟩ = 2 * k + 3 := by
+    rw [cycleAdj_dist_eq hn,
+      pqa_subval (4 * k + 8) (2 * k + 4) 1 (by omega) (by omega)]
+    omega
+  have d3 : (supportGraph (cycleAdj (4 * k + 8)) (cycleAdj_isSymm _)).dist
+        ⟨0, by omega⟩ ⟨2 * k + 5, by omega⟩ = 2 * k + 3 := by
+    rw [cycleAdj_dist_eq hn,
+      pqa_subval (4 * k + 8) (2 * k + 5) 0 (by omega) (by omega)]
+    omega
+  have d4 : (supportGraph (cycleAdj (4 * k + 8)) (cycleAdj_isSymm _)).dist
+        ⟨1, by omega⟩ ⟨2 * k + 5, by omega⟩ = 2 * k + 4 := by
+    rw [cycleAdj_dist_eq hn,
+      pqa_subval (4 * k + 8) (2 * k + 5) 1 (by omega) (by omega)]
+    omega
+  simp only [distEdge, d1, d2, d3, d4]
+  omega
+
+/-! ### The tree-ball truth boundary at every scale -/
+
+/-- **Parametric pin 5 (the even boundary class, raw)**: on `C_{2m}`,
+the top level class `m − 1` of the base edge is exactly the adjacent
+antipodal pair `{m, m+1}` — cardinality `2`, computed raw from
+`cycle_levE_eq` exactly where `cycle_levClass_eq`'s strict hypothesis
+`2(j+1) < n` refuses to apply (at `j = m − 1` it reads `2m < 2m`).
+This corrects the cycle-family delivery record's boundary note: on
+the *even* boundary the class keeps two (adjacent) vertices; the
+singleton is the odd boundary (pin 7). -/
+theorem cycn_levClass_half_boundary_QA (m : ℕ) (hm : 2 ≤ m)
+    [NeZero (2 * m)] :
+    levClass (cycleAdj (2 * m)) (cycleAdj_isSymm _)
+        ⟨0, by omega⟩ (⟨0, by omega⟩ + 1) (m - 1)
+      = insert (⟨m, by omega⟩ : Fin (2 * m)) (insert ⟨m + 1, by omega⟩ ∅) := by
+  have hn : 2 ≤ 2 * m := by omega
+  have hz : ∀ z : Fin (2 * m),
+      (z - (⟨0, by omega⟩ : Fin (2 * m))).val = z.val :=
+    fun z => pqa_subval (2 * m) z.val 0 z.isLt (by omega)
+  ext z
+  simp only [levClass, Finset.mem_filter, Finset.mem_univ, true_and,
+    Finset.mem_insert, Finset.not_mem_empty, or_false]
+  rw [cycle_levE_eq hn ⟨0, by omega⟩ z, hz z]
+  constructor
+  · intro hmem
+    rcases Nat.eq_zero_or_pos z.val with h0 | hpos
+    · rw [if_pos h0] at hmem
+      omega
+    · rw [if_neg (by omega : ¬(z.val = 0))] at hmem
+      have hd : z.val = m ∨ z.val = m + 1 := by omega
+      rcases hd with hd | hd
+      · left
+        apply Fin.ext
+        simpa only [Fin.val_mk] using hd
+      · right
+        apply Fin.ext
+        simpa only [Fin.val_mk] using hd
+  · rintro (h | h)
+    · rw [h]
+      simp only [Fin.val_mk]
+      rw [if_neg (by omega : ¬((m : ℕ) = 0))]
+      omega
+    · rw [h]
+      simp only [Fin.val_mk]
+      rw [if_neg (by omega : ¬((m + 1 : ℕ) = 0))]
+      omega
+
+set_option maxHeartbeats 4000000 in
+/-- **Parametric pin 6 (the truth one past the certified radius)**:
+the tree-ball predicate on `C_{2m}` *holds* at radius `m = n/2`, at
+every scale — one past the radius `isTreeBall_cycle` certifies (its
+hypothesis `2(k+1) < n` maxes out at radius `m − 1` on even cycles).
+The strictness of the shelf hypothesis is proof-forced, not
+truth-forced: witnessed at every scale. -/
+theorem cycn_isTreeBall_half_QA (m : ℕ) (hm : 2 ≤ m) [NeZero (2 * m)] :
+    IsTreeBall (cycleAdj (2 * m)) (cycleAdj_isSymm _)
+        ⟨0, by omega⟩ (⟨0, by omega⟩ + 1) 2 m := by
+  have hn : 2 ≤ 2 * m := by omega
+  intro j hj
+  rcases Nat.eq_zero_or_pos j with rfl | hj1
+  · have h01 : (⟨0, by omega⟩ : Fin (2 * m)) ≠ ⟨1, by omega⟩ := by
+      intro hcon
+      have hv : (⟨0, by omega⟩ : Fin (2 * m)).val
+          = (⟨1, by omega⟩ : Fin (2 * m)).val := congrArg Fin.val hcon
+      simp only [Fin.val_mk] at hv
+      omega
+    have hone := pqa_add_one (2 * m) hn
+    rw [hone, levClass_zero_card (cycleAdj_connected (by omega)) h01]
+    norm_num
+  · rcases Nat.lt_or_ge (j + 1) m with hlt | hge
+    · have hjn : 2 * (j + 1) < 2 * m := by omega
+      have hne : ((⟨0, by omega⟩ : Fin (2 * m)) + ⟨j + 1, by omega⟩)
+          ≠ (⟨0, by omega⟩ : Fin (2 * m)) + ⟨2 * m - j, by omega⟩ := by
+        intro heq
+        have h1 : ((⟨0, by omega⟩ : Fin (2 * m)) + ⟨j + 1, by omega⟩
+            - (⟨0, by omega⟩ : Fin (2 * m))).val
+            = ((⟨0, by omega⟩ : Fin (2 * m)) + ⟨2 * m - j, by omega⟩
+            - (⟨0, by omega⟩ : Fin (2 * m))).val := by rw [heq]
+        rw [pqa_off _ (by omega : (j + 1 : ℕ) < 2 * m),
+          pqa_off _ (by omega : (2 * m - j : ℕ) < 2 * m)] at h1
+        omega
+      rw [cycle_levClass_eq hn hj1 hjn ⟨0, by omega⟩,
+        Finset.card_insert_of_not_mem (by simp [hne]),
+        Finset.card_insert_of_not_mem (by simp),
+        Finset.card_empty]
+      norm_num
+    · have hjm' : j = m - 1 := by omega
+      have hb := cycn_levClass_half_boundary_QA m hm
+      rw [hjm']
+      rw [hb, Finset.card_insert_of_not_mem (by simp),
+        Finset.card_insert_of_not_mem (by simp), Finset.card_empty]
+      norm_num
+
+/-- **Parametric pin 6b (the failure one past the truth)**: the
+tree-ball predicate on `C_{2m}` fails at radius `m + 1`, at every
+scale — the level-`m` class is empty (both offset branches overshoot
+each other). With pin 6 this brackets the truth (`radius ≤ n/2` on
+the even family) at arbitrary scale. -/
+theorem cycn_not_isTreeBall_half_succ_QA (m : ℕ) (hm : 2 ≤ m)
+    [NeZero (2 * m)] :
+    ¬ IsTreeBall (cycleAdj (2 * m)) (cycleAdj_isSymm _)
+        ⟨0, by omega⟩ (⟨0, by omega⟩ + 1) 2 (m + 1) := by
+  have hn : 2 ≤ 2 * m := by omega
+  intro h
+  have hcard := h m (by omega)
+  have hempty : (levClass (cycleAdj (2 * m)) (cycleAdj_isSymm _)
+        ⟨0, by omega⟩ (⟨0, by omega⟩ + 1) m) = ∅ := by
+    refine Finset.eq_empty_iff_forall_not_mem.mpr ?_
+    intro z hzmem
+    simp only [levClass, Finset.mem_filter, Finset.mem_univ, true_and] at hzmem
+    have hz : (z - (⟨0, by omega⟩ : Fin (2 * m))).val = z.val :=
+      pqa_subval (2 * m) z.val 0 z.isLt (by omega)
+    have hlt : z.val < 2 * m := z.isLt
+    rw [cycle_levE_eq hn ⟨0, by omega⟩ z, hz] at hzmem
+    rcases Nat.eq_zero_or_pos z.val with h0 | hpos
+    · rw [if_pos h0] at hzmem
+      omega
+    · rw [if_neg (by omega : ¬(z.val = 0))] at hzmem
+      omega
+  rw [hempty, Finset.card_empty] at hcard
+  simp at hcard
+
+/-- **Parametric pin 7 (the odd boundary singleton)**: on the odd
+cycle `C_{2j+1}`, the level-`j` class of the base edge is the single
+vertex at offset `j + 1` — the two offset branches genuinely merge
+(`j + 1 = n − j` iff `n = 2j + 1`), so the cardinality drops to `1`.
+This is the genuine strictness bite of `cycle_levClass_eq`'s
+hypothesis `2(j+1) < n`, at every scale. -/
+theorem cycn_levClass_odd_singleton_QA (j : ℕ) (hj : 1 ≤ j)
+    [NeZero (2 * j + 1)] :
+    levClass (cycleAdj (2 * j + 1)) (cycleAdj_isSymm _)
+        ⟨0, by omega⟩ (⟨0, by omega⟩ + 1) j
+      = insert (⟨j + 1, by omega⟩ : Fin (2 * j + 1)) ∅ := by
+  have hn : 2 ≤ 2 * j + 1 := by omega
+  have hz : ∀ z : Fin (2 * j + 1),
+      (z - (⟨0, by omega⟩ : Fin (2 * j + 1))).val = z.val :=
+    fun z => pqa_subval (2 * j + 1) z.val 0 z.isLt (by omega)
+  ext z
+  simp only [levClass, Finset.mem_filter, Finset.mem_univ, true_and,
+    Finset.mem_insert, Finset.not_mem_empty, or_false]
+  rw [cycle_levE_eq hn ⟨0, by omega⟩ z, hz z]
+  constructor
+  · intro hmem
+    rcases Nat.eq_zero_or_pos z.val with h0 | hpos
+    · rw [if_pos h0] at hmem
+      omega
+    · rw [if_neg (by omega : ¬(z.val = 0))] at hmem
+      have hd : z.val = j + 1 := by omega
+      apply Fin.ext
+      simpa only [Fin.val_mk] using hd
+  · rintro h
+    rw [h]
+    simp only [Fin.val_mk]
+    rw [if_neg (by omega : ¬((j + 1 : ℕ) = 0))]
+    omega
+
+/-- **Parametric pin 7b**: the odd-boundary singleton breaks the
+tree-ball predicate — cardinality `1 ≠ 2` at level `j`, radius `j + 1`,
+at every scale. -/
+theorem cycn_not_isTreeBall_odd_QA (j : ℕ) (hj : 1 ≤ j)
+    [NeZero (2 * j + 1)] :
+    ¬ IsTreeBall (cycleAdj (2 * j + 1)) (cycleAdj_isSymm _)
+        ⟨0, by omega⟩ (⟨0, by omega⟩ + 1) 2 (j + 1) := by
+  intro h
+  have hcard := h j (by omega)
+  rw [cycn_levClass_odd_singleton_QA j hj,
+    Finset.card_insert_of_not_mem (by simp),
+    Finset.card_empty] at hcard
+  simp at hcard
+
+/-! ### The asymptotic witness at symbolic `ε` -/
+
+/-- **Parametric pin 8 (the asymptotic corollary's witness, pinned)**:
+for every `ε > 0` — symbolic — the scale the shelf proof of
+`alonBoppana_cycle_asymptotic` actually produces (`k = ⌈1/ε⌉`)
+certifies `λ₂(L(C_{4k+8})) ≤ ε`. The shelf's `∃ k` is opaque; this
+re-certifies the ceiling arithmetic `1/(k+1) ≤ ε` at symbolic `ε`
+through `alonBoppana_cycle_laplacian`. -/
+theorem cycfam_asymptotic_witness_QA {ε : ℝ} (hε : 0 < ε) :
+    secondEval (laplacian (cycleAdj (4 * (Nat.ceil ((1 : ℝ) / ε)) + 8)))
+      (laplacian_symmetric (cycleAdj (4 * (Nat.ceil ((1 : ℝ) / ε)) + 8))
+        (cycleAdj_isSymm (4 * (Nat.ceil ((1 : ℝ) / ε)) + 8)))
+      (by simp)
+      ≤ ε := by
+  have h1 : (1 : ℝ) / ε
+      ≤ ((Nat.ceil ((1 : ℝ) / ε) : ℕ) : ℝ) := Nat.le_ceil _
+  have h2 : (1 : ℝ)
+      ≤ ε * ((Nat.ceil ((1 : ℝ) / ε) : ℕ) : ℝ) := by
+    calc (1 : ℝ) = ε * ((1 : ℝ) / ε) := by field_simp
+      _ ≤ ε * ((Nat.ceil ((1 : ℝ) / ε) : ℕ) : ℝ) :=
+        mul_le_mul_of_nonneg_left h1 (le_of_lt hε)
+  have h4 : ε * (((Nat.ceil ((1 : ℝ) / ε) : ℕ) : ℝ) + 1)
+      = ε * ((Nat.ceil ((1 : ℝ) / ε) : ℕ) : ℝ) + ε := by ring
+  have h3 : (1 : ℝ) / (((Nat.ceil ((1 : ℝ) / ε) : ℕ) : ℝ) + 1) ≤ ε := by
+    rw [div_le_iff₀ (by positivity)]
+    linarith
+  exact le_trans
+    (alonBoppana_cycle_laplacian (Nat.ceil ((1 : ℝ) / ε))) h3
+
+end Step8
 
 end SpectralGraphTheory.QA

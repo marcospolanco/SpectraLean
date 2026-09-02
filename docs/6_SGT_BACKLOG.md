@@ -261,6 +261,29 @@ than the theorem routes' `≤ 1`, fully raw arithmetic). With Steps
 needs a named d-regular family with `diam → ∞` and stays a Plan
 entry until one is named.
 
+*Update (2026-09-02, records reconciliation by a later run):* the
+closing sentence above is stale — **the follow-on named its family and
+was delivered 2026-09-02** (`proposals/cycle-family-alon-boppana-asymptotic.md`,
+run `20260902T021120Z-run-1`, zero new axioms): the cycles `C_n` as
+`cycleAdj n := SimpleGraph.toWAdj (SimpleGraph.cycleGraph n)` (Mathlib's
+own cycle graph through the adapter), the **exact cycle distance
+formula** `cycleAdj_dist_eq` (`dist a b = min ((b−a).val) (n −
+(b−a).val)`, walk route up + ℤ-potential route down), the tree-ball and
+far-apart hypotheses discharged at arbitrary scale
+(`isTreeBall_cycle`, `cycleAdj_distEdge_gt`, the `4k+8` sizing buying
+exactly slack `1`), and the headlines `alonBoppana_cycle`
+(`secondEval (2•1 − C_{4k+8}) ≤ 1/(k+1)`, the error term
+`d − 2√(d−1) = 0` at `d = 2`),
+`alonBoppana_cycle_laplacian` (`λ₂ (L (C_{4k+8})) ≤ 1/(k+1)`), and
+`alonBoppana_cycle_asymptotic` (`∀ ε > 0, ∃ k, λ₂ (L (C_{4k+8})) ≤ ε`)
+— the program's first parametric (arbitrary-`n`) instantiation. QA
+pinned at `C₁₂` at delivery, then made parametric (all-scale, the
+tree-ball truth boundary bracketed at every `n`) by
+`proposals/parametric-cycle-qa.md` the same day. The delivery run
+updated the scoreboard, map, and README but missed this item's closing
+note — this update closes that records gap; item 3's Alon–Boppana
+program, follow-on included, is now fully delivered hard crust.
+
 *Update (2026-08-27, the expansion ceiling delivered):* **the
 Alon–Boppana theorem has its first theorem consumer — the composition
 with the Cheeger hard direction** (run `20260827T220230Z-run-1`,
@@ -1279,6 +1302,41 @@ admitted at its own full statement (rootMultiplicity +
 complex-domination clauses untouched, its QA still exercising it);
 whether to open the §9 deprecation window is an operator decision,
 flagged in `index/load_bearing_axioms.md`.
+*Thirteenth update (2026-09-02):* **the directed sampling program is
+now self-contained** (`proposals/selfcontained-empirical-pagerank.md`,
+zero new axioms): `empiricalPageRank_tail_selfcontained_of_depth`
+produces the program's target itself — `∃ π` strictly positive, mass
+one, stationary at the Google walk (through the re-proved
+`exists_pageRankVec`) — such that past the single
+`(α, ε)`-computable display threshold `⌈log(2/ε)/log(1/α)⌉`, `n`
+simulated trajectories estimate `π i` to `ε` for *every* start
+simultaneously. The sibling capstones' caller-supplied `π` hypotheses
+(a design forced by the PF-conditional era) are gone: the agent that
+can only simulate the walk needs to know nothing about the target in
+advance, closing the directed family's asymmetry against the plain
+and lazy families (whose targets are definitional via `stationaryVec`).
+*Fourteenth update (2026-09-02):* **the undirected plain-walk sampling
+family is self-contained too, and the retired
+`primitive_power_tendsto` has its first undirected consumer**
+(`proposals/primitivity-supplier-plain-walk.md`, zero new axioms): the
+primitivity supplier `isPrimitive_of_pow_pos_of_odd_loop` (strong
+connectivity + every index on a positive 2-cycle and an odd closed
+walk ⟹ `IsPrimitive`, the two-parity covering) with the walk-level
+wrapper `walkTransitionMatrix_isPrimitive_of_connected_of_odd_walk`
+(connected + a single odd closed walk; reversal at the `Walk` level,
+`Odd p.length` the honest interface since the pinned Mathlib has no
+`SimpleGraph.Bipartite`), the plain walk's first mixing rate with no
+spectral certificate and no caller-supplied `r`
+(`walkDistribution_tvDistance_le_of_pos_power`, the intrinsic-rate
+family's non-bipartite member — complementary to the lazy family's
+bipartite class), `walkDistribution_tendsto_stationaryVec`, and the
+plain family's self-contained twin
+`empiricalWalkDistribution_tail_selfcontained_of_depth` (`∃ t₀` past
+which `n` simulated trajectories estimate `π i` to `ε` for every
+start; the produced `(m, δ)` honestly existential). The sharp
+`|λ₂| = α` layer and the spectral-certificate route
+(non-bipartite ⟹ `λ_max(L_sym) < 2`) both remain consumer-gated
+exactly as before.
 
 ### 9. Bounded-window ("band") Davis–Kahan (2026-08-21, opened by the Davis–Kahan Step-0/1 survey)
 

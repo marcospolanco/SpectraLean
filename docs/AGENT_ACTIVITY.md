@@ -9566,3 +9566,408 @@ hard-crust composition), the QA axis's still-open parametric-QA gap,
 or an audit-shaped pass over any surface the mixing cascade left
 unreviewed. Nothing committed; the worktree's uncommitted deliveries
 preserved for the operator's commit.
+
+## 2026-09-02T15:01:23Z — The self-contained empirical PageRank capstone: in progress
+
+**Run:** `20260902T150123Z-run-1`  
+**Session:** `ses_f9d618a3fffeLZR7gnarjSLb58`  
+**Status:** in-progress  
+**Milestone:** the standing handoff's first-named frontier — a
+load-bearing consumer of the now-unconditional stationary layer: the
+empirical PageRank capstone's target `π` produced by the theorem
+itself (`exists_pageRankVec`, hard crust since the 2026-09-02 Cesàro
+re-proof), the single display threshold from the uniform α-ceiling's
+display form, and the per-start guarantee from the delivered
+worst-start capstone — the previously-conditional composition (the
+capstone's `π` was a caller hypothesis the PF-conditional `∃!` layer
+could not honestly discharge) stated with no caller-supplied
+stationarity anywhere. QA: the vector-identification pin through the
+proved `∃!`'s uniqueness clause (any vector carrying the certificate
+clauses equals the hand value `u2`), the display-threshold pin, the
+display-slack witness against the exact uniform object, and the
+fully-self-contained instance at `t₀ = 3`, every start, bound
+`2 exp(−1/32)`. Proposal
+`proposals/selfcontained-empirical-pagerank.md`; spike first
+(`wip/selfpr_spike.lean`), then the shelf edit + full ladder.
+
+Next action: write the proposal, then the spike.
+
+## 2026-09-02T15:18:42Z — The self-contained empirical PageRank capstone delivered (terminal)
+
+**Run:** `20260902T150123Z-run-1`  
+**Session:** `ses_f9d618a3fffeLZR7gnarjSLb58`  
+**Status:** completed  
+**Milestone:** the previous run's handoff first-named frontier — a
+load-bearing consumer of the now-unconditional stationary layer —
+delivered as **`empiricalPageRank_tail_selfcontained_of_depth`**:
+`∃ π` (strictly positive, mass one, stationary at the Google walk,
+supplied by the re-proved `exists_pageRankVec`) such that past the
+single `(α, ε)`-computable display threshold
+`⌈log(2/ε)/log(1/α)⌉`, `n` i.i.d. simulated random-surfer
+trajectories estimate `π i` to `ε` at `2 exp(−nε²/2)` for *every*
+start simultaneously. The previously-conditional composition made
+honest: the sibling capstones take `π` as caller hypotheses precisely
+because their `∃!` supplier was PF-conditional until 2026-09-02; now
+the agent that can only simulate the walk needs to know nothing about
+the target in advance, closing the directed sampling family's
+asymmetry against the plain and lazy families (whose targets are
+definitional via `stationaryVec`).
+
+**Changes:** `Scaffold/Derived/EmpiricalStationary.lean` — the
+`PageRankLimit` section's new capstone theorem (a five-line
+composition supplier → ceiling → capstone, which is the point: the
+whole loop is hard crust, so the self-contained statement should be
+short) plus the section-doc extension;
+`Scaffold/QA/Derived/EmpiricalStationary_QA.lean` — the new
+`PageRankSelfContained` section (+4, 3734 → 3738): **the
+identification pin** (any vector carrying the theorem's three
+certificate clauses equals the hand-verified `u2`, through the proved
+`∃!`'s uniqueness clause — the composition's falsification surface),
+the display-threshold pin (`⌈log 8/log 2⌉ = 3` at `ε = 1/4`), the
+display-slack witness (the exact uniform object `2 < 3` = the display
+threshold), and **the fully-self-contained instance** (vector
+identified as `u2`, guarantee discharged at `t₀ = 3` for every start,
+bound `2 exp(−1/32)`), plus the module-header purpose note. Records:
+the same-run proposal (COMPLETE + delivery record with four technique
+findings), `proposals/README.md` (new Delivered row), README (3738 +
+the empirical-stationary row's self-contained extension), the radar
+(QA axis synced 3734 → 3738 held 4.0),
+`index/map/probability_concentration.md` (the new capstone row), the
+backlog item-8 thirteenth update, the scoreboard verification row,
+both map data tables + regenerated SVG, the execution plan, and this
+log.
+
+**Verification:** spike first (`wip/selfpr_spike.lean` — theorem +
+full QA + the axiom audit, iterated to zero errors/zero warnings
+before any shelf edit); `lake env lean` zero errors/zero warnings on
+both touched modules; explicit `lake build` targets ✔; **`#print
+axioms` via `wip/selfpr_axcheck.lean` on all 9 audited declarations
+(1 shelf + 4 QA + the 4 composed suppliers): every one exactly
+`propext, Classical.choice, Quot.sound`**; **full `lake build` ✔
+immediately followed by `check_build_completeness.py` — 133 source
+files, 133 fresh artifacts, 0 stale, 0 missing, exit 0**;
+`lint_axioms` exit 0 (4 current axioms, unchanged; only the
+allowlisted-confirmed PF finding); `check_refutation_independence`
+(9-tag clean — no tags touched); `check_public_reachability` clean
+(63 repo modules); `check_citations` ("All axioms have proper
+citations!"); `check_markdown_links` clean; `check_backlog_freshness`
+clean; scoreboard regenerated (**3738/4/0**); map-freshness exit 0
+after the 3734 → 3738 stats sync in both map files and SVG
+regeneration (no station — no tier change).
+
+**Remaining risk:** none owed — pure hard crust, no axiom disposition
+changed, no existing public statement changed. Honest scope: the
+display threshold is the start-free Doeblin bound, deliberately
+coarser than the exact uniform object by the simplex diameter (the
+slack witnessed in QA); the sharp `|λ₂| = α` layer stays
+consumer-gated exactly as before.
+
+**Next handoff:** the queue is empty again — check
+`proposals/README.md`'s Active table first (all Low/human-gated).
+Natural autonomous frontiers: the QA axis's still-open parametric-QA
+gap (no QA section exercises a theorem at an arbitrary-`n` fixture),
+an audit-shaped pass over any surface the mixing cascade left
+unreviewed, or the first undirected sampling capstone with a produced
+target (the plain family's certificate hypothesis is provably
+unsatisfiable on bipartite input — a self-contained plain statement
+would need an irreducibility+primitivity supplier that does not exist
+yet). Nothing committed; the worktree's uncommitted deliveries
+preserved for the operator's commit.
+
+## 2026-09-02T16:26:00Z — Parametric (arbitrary-scale) QA for the cycle family (in-progress)
+
+**Run:** `20260902T161908Z-run-1`  
+**Session:** `ses_f9d153357ffe8wg52HLdL6e7ge`  
+**Status:** in-progress  
+**Milestone:** Close the QA axis's named remainder — "parametric
+property QA", the reason every recent sync holds the axis at 4.0 — by
+exercising the cycle family's theorems (`cycleAdj_dist_eq`,
+`cycle_levE_eq`, `cycle_levClass_eq`, `isTreeBall_cycle`,
+`cycleAdj_distEdge_gt`, `alonBoppana_cycle_laplacian`,
+`alonBoppana_cycle_asymptotic`) at symbolic scale (`∀ n`/`∀ k`/`∀ m`
+fixtures), where a scale-dependent error in a parametric statement
+(an antipodal-tie off-by-one, a boundary mishandling at
+`2(j+1) = n`) fails a pin that no fixed fixture — the largest ever
+pinned is `C₁₂` — can reach.
+
+**Plan:** a `Step 8` QA section in `AlonBoppana_QA.lean` (QA-only, no
+shelf changes): the translate-invariant edge-distance pin
+`dist a (a+1) = 1` at every scale; the short-branch antipodal-tie pin
+`dist a (a+m) = m` at `2m ≤ n` (symbolic base vertex and scale); the
+family's own antipode `dist 0 ⟨2k+4⟩ = 2k+4` at the exact tie; the
+exact `distEdge = 2k+3` (the shelf certifies only `2k+2 <`); the
+tree-ball truth boundary bracketed at every scale — `IsTreeBall`
+holds at radius `n/2` on even cycles (one past the shelf theorem's
+certified radius, computed raw from `cycle_levE_eq` exactly where
+`cycle_levClass_eq`'s strict hypothesis refuses) and fails at
+`n/2 + 1` (empty boundary class); the odd-cycle singleton boundary
+(the two branches merge, card `1 < 2`); and the asymptotic
+corollary's witness pinned explicitly at symbolic `ε`
+(`k = ⌈1/ε⌉`). Spike first in `wip/`, then land, then the full
+verification ladder and records sync (QA axis re-score eligible
+4.0 → 4.5 per the "named absent category gains its first occupant"
+protocol; the randomized half of the named gap to be recorded as
+still absent).
+
+## 2026-09-02T16:55:00Z — Parametric (arbitrary-scale) QA for the cycle family: the QA axis's named remainder closed (terminal)
+
+**Run:** `20260902T161908Z-run-1`  
+**Session:** `ses_f9d153357ffe8wg52HLdL6e7ge`  
+**Status:** completed  
+**Milestone:** The repository's first QA section whose lemmas
+quantify over the scale — the QA axis's named remainder ("parametric
+property QA," cited by every score-hold since 2026-08-22) closed on
+the cycle family, and the axis re-scored 4.0 → 4.5 per the "named
+absent category gains its first occupant" protocol.
+
+**Changes:** `Scaffold/QA/SpectralGraph/AlonBoppana_QA.lean` — the
+new `Step8` section (+10 public declarations, 3738 → 3748, plus 4
+private symbolic-offset calculators not counted by the metric), QA-only,
+no shelf changes, zero axiom contact. Every lemma `∀`-quantified over
+`n`/`k`/`m` and consuming the shelf theorems at symbolic scale:
+`cycn_dist_short_QA` (`dist a (a+⟨m⟩) = m` at `2m ≤ n` — the
+antipodal tie *in* the hypothesis set, symbolic scale, offset, and
+translate), `cycn_dist_edge_QA` (`dist a (a+1) = 1` at every scale
+and translate), `cycfam_antipode_dist_QA` (the `C_{4k+8}` family's
+own antipode at the exact tie), `cycfam_distEdge_exact_QA` (the exact
+separation `2k+3` at every scale — the shelf certifies only
+`2k+2 <`, so the strictness slack is exactly `1`), the centerpiece
+**tree-ball truth boundary bracketed at every scale**
+(`cycn_levClass_half_boundary_QA` — the even boundary class is the
+adjacent antipodal pair, card `2`, computed raw from `cycle_levE_eq`
+exactly where `cycle_levClass_eq`'s strict hypothesis refuses,
+**correcting the cycle-family delivery record's boundary note**;
+`cycn_isTreeBall_half_QA` — the predicate holds at radius `n/2`, one
+past the shelf theorem's certified radius: strictness proof-forced,
+not truth-forced; `cycn_not_isTreeBall_half_succ_QA` — fails one past
+the truth, the empty class), the odd-boundary pair
+(`cycn_levClass_odd_singleton_QA` — the branches merge at `n = 2j+1`,
+card `1`, the genuine strictness bite; `cycn_not_isTreeBall_odd_QA`),
+and `cycfam_asymptotic_witness_QA` (the asymptotic corollary's
+witness pinned explicitly at symbolic `ε`: `k = ⌈1/ε⌉` certifies
+`λ₂ ≤ ε` through `alonBoppana_cycle_laplacian`). Records: the
+same-run proposal `proposals/parametric-cycle-qa.md` (COMPLETE +
+delivery record with six technique findings — headline: the `rcases`
+second-branch identifier trap, the shelf's `if_neg (by omega …)`
+idiom is load-bearing style), `proposals/README.md` (new Delivered
+row), README (3748 + the Alon–Boppana highlight's parametric-QA
+extension), the radar (QA axis synced 3738 → 3748 and **re-scored
+4.0 → 4.5**, the re-score history note extended, the *randomized*
+half of the named gap honestly recorded as still absent), the
+scoreboard verification row, both map data tables + regenerated SVG,
+the execution plan, and this log.
+
+**Verification:** spike first (`wip/paramqa_spike.lean` — the full
+section plus the axiom audit, iterated to zero errors/zero warnings
+before any shelf edit); `lake env lean` zero errors/zero warnings on
+the touched QA module; explicit `lake build` target ✔; **`#print
+axioms` via `wip/paramqa_axcheck.lean` on all 17 audited
+declarations (10 QA pins + the 4 private calculators audited
+transitively + the 7 consumed shelf theorems re-checked): every one
+exactly `propext, Classical.choice, Quot.sound`**; **full `lake
+build` ✔ immediately followed by `check_build_completeness.py` — 133
+source files, 133 fresh artifacts, 0 stale, 0 missing, exit 0**;
+`lint_axioms` exit 0 (4 current axioms, unchanged; only the
+allowlisted-confirmed PF finding); `check_refutation_independence`
+(9-tag clean — no tags touched); `check_public_reachability` clean
+(63 repo modules); `check_citations` ("All axioms have proper
+citations!"); `check_markdown_links` clean; `check_backlog_freshness`
+clean; scoreboard regenerated (**3748/4/0**); map-freshness exit 0
+after the 3738 → 3748 stats sync in both map files and SVG
+regeneration (no station — no tier change).
+
+**Remaining risk:** none owed — pure hard crust, no axiom disposition
+changed, no public statement changed. Honest scope: the randomized
+half of the QA axis's named gap remains absent (needs a design
+decision on `#eval`/native_decide policy the repo has excluded
+before); the cycle-family shelf theorems' index-map rows remain a
+pre-existing coverage gap (observed this run, recorded in the
+execution plan as a records-hygiene item); the shelf's strict
+hypotheses are untouched — tightening `isTreeBall_cycle` to
+`2(k+1) ≤ n` would be a real shelf change with consumers to
+re-verify, deliberately not bundled.
+
+**Next handoff:** the queue is empty again — check
+`proposals/README.md`'s Active table first (all Low/human-gated).
+Natural autonomous frontiers: an audit-shaped pass over surfaces the
+mixing cascade left unreviewed; the undirected plain-walk
+self-contained sampling twin (blocked on the
+irreducibility+primitivity supplier); the QA axis's randomized half
+(policy-gated); plus the small index-coverage gap named above.
+Nothing committed; the worktree's uncommitted deliveries preserved
+for the operator's commit.
+
+## 2026-09-02T18:10:38Z — The primitivity supplier: opening the plain-walk self-contained sampling twin (in-progress)
+
+**Run:** `20260902T181038Z-run-1`  
+**Session:** `ses_f9cbd0940ffe6Bj0uvGqF8TIxF`  
+**Status:** in-progress  
+**Milestone:** the standing handoff's named first-magnitude frontier —
+the undirected plain-walk sampling-capstone twin, blocked on the
+irreducibility+primitivity supplier (connected+odd-closed-walk ⟹ a
+strictly positive walk power). Proposal
+`proposals/primitivity-supplier-plain-walk.md` opened with the
+statement design (support-level `htwo`/`hodd` hypotheses instead of
+`IsSymm` — `walkTransitionMatrix` is not symmetric on irregular graphs,
+so reversal must live at the `Walk` level of the wrapper; the pinned
+Mathlib has no `SimpleGraph.Bipartite`, so the odd-closed-walk form is
+the honest interface), the corner analysis, and the QA plan (triangle
+exact-attainment pins for the Doeblin rate at `m = 2`, the `K₂`
+periodicity fence, the capstone instance with the produced threshold's
+slack witnessed). Next action: the `wip/primsup_spike.lean` spike.
+
+## 2026-09-02T19:15:04Z — The primitivity supplier and the self-contained plain-walk sampling capstone delivered (terminal)
+
+**Run:** `20260902T181038Z-run-1`  
+**Session:** `ses_f9cbd0940ffe6Bj0uvGqF8TIxF`  
+**Status:** completed  
+**Milestone:** the standing handoff's named first-magnitude frontier —
+the undirected plain-walk sampling-capstone twin, with its named
+blocker (connected + odd closed walk ⟹ a strictly positive walk
+power) delivered as the same package's engine.
+
+**Changes:** `proposals/primitivity-supplier-plain-walk.md` (same-run
+proposal, COMPLETE with delivery record + six technique findings);
+shelf: `PrimitiveConvergence.lean`'s primitivity-supplier section
+(`pow_entry_pos_of_pos`, `pow_entry_pos_bounce`,
+**`isPrimitive_of_pow_pos_of_odd_loop`** — the two-parity covering at
+support level, deliberately not `IsSymm` since `walkTransitionMatrix
+= D⁻¹A` is not symmetric on irregular graphs), `Mixing.lean`'s
+walk-level section (the `Walk`-induction bridge,
+**`walkTransitionMatrix_isPrimitive_of_connected_of_odd_walk`** with
+reversal at the `Walk` level,
+**`walkDistribution_tvDistance_le_of_pos_power`** — the plain walk's
+first mixing rate with no spectral certificate and no caller-supplied
+`r` — and **`walkDistribution_tendsto_stationaryVec`**, the retired
+`primitive_power_tendsto`'s first undirected consumer), and
+`EmpiricalStationary.lean`'s capstone pair
+(`empiricalWalkDistribution_stationary_tail_of_pos_power` at bias
+`ρ^{t₀/m}·TV(δ_x,π)`; **`empiricalWalkDistribution_tail_selfcontained_of_depth`**
+— `∃ t₀` past which `n` simulated trajectories estimate `π i` to `ε`
+at `2 exp(−nε²/2)` for every start, the PageRank twin's `(α, ε)`
+display honestly existential). QA +20 (3748 → 3768,
+`EmpiricalStationary_QA.lean`'s Primitivity section): the primitive
+square pinned (`P² = (1/4)(J−I)`, `m = 1` fence), the supplier
+instantiated through the odd walk `0→1→2→0`, **the Doeblin rate
+attained exactly at the even time `t = 2`** (truth `1/6` = engine
+`(1/4)^{2/2}·(2/3)`), the odd-time factor-`2` slack pinned, the `K₂`
+periodicity fence (`(P^t) 0 0 = 0` at every odd `t` — `hodd` exactly
+isolating the bipartite class), the capstone instance at `ε = 1/4`
+with the produced threshold's arithmetic (`⌈log 8/log 4⌉ = 2`) and
+honest slack witnessed (`TV(ν₂) = 1/6 > 1/8`), and the convergence
+instance. Records: README (3768 + three module-table extensions), the
+radar (QA axis synced, held 4.5), both index maps, the coverage map's
+PF row, the backlog item-8 fourteenth update, the scoreboard
+verification row, both map data tables + regenerated SVG, the
+execution plan, this log.
+
+**Verification:** spike first (`wip/primsup_spike.lean`, zero
+errors/zero warnings before any shelf edit); `lake env lean` zero
+errors/zero warnings on all four touched modules; explicit `lake
+build` targets ✔; **`#print axioms` via `wip/primsup_axcheck.lean` on
+39 audited declarations (9 new shelf + 20 QA + 10 consumed-layer
+spot-checks incl. `primitive_power_tendsto` itself): every one exactly
+`propext, Classical.choice, Quot.sound`**; **full `lake build` ✔
+immediately followed by `check_build_completeness.py` — the QA module
+flagged stale once, remediated per the script's documented
+`lake build <module>` route, then 133 source files, 133 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+current axioms, unchanged; only the allowlisted-confirmed PF finding);
+`check_refutation_independence` (9-tag clean); `check_public_reachability`
+clean (63 repo modules); `check_citations`; `check_markdown_links`;
+`check_backlog_freshness` clean; scoreboard regenerated
+(**3768/4/0**); map-freshness exit 0 after the stats sync and SVG
+regeneration.
+
+**Remaining risk:** none owed — pure hard crust, no axiom disposition
+changed, no existing public statement changed. Honest scope: the
+odd-closed-walk interface is weaker than "non-bipartite" (the
+classical dichotomy unbundled — no `SimpleGraph.Bipartite` in the
+pinned Mathlib, no consumer asking); the rate is the Doeblin bound
+(typically loose, exact on the triangle at even times as pinned); the
+spectral certificate route (non-bipartite ⟹ `λ_max(L_sym) < 2`) stays
+ungated.
+
+**Next handoff:** the queue is empty again — check
+`proposals/README.md`'s Active table first (all Low/human-gated).
+Natural autonomous frontiers: an audit-shaped pass over surfaces the
+mixing cascade left unreviewed; the QA axis's randomized half
+(policy-gated); the plain family's spectral-certificate route (now
+named but consumer-less against the delivered Doeblin rate); the
+cycle-family index-coverage records-hygiene item. Nothing committed;
+the worktree's uncommitted deliveries preserved for the operator's
+commit.
+
+## 2026-09-02T20:18:26Z — Cycle-family records debt: index rows plus backlog reconciliation (in-progress)
+
+**Run:** `20260902T201826Z-run-1`  
+**Session:** `ses_f9c3c72baffeQ4AldfXZkzoPfA`  
+**Status:** in-progress  
+**Milestone:** the standing ungated records-hygiene item named by two
+prior runs' handoffs — the 2026-09-02 cycle-family delivery's 17 public
+declarations (`cycleAdj` through `alonBoppana_cycle_asymptotic`) missing
+from `index/map/spectral_graph.md`, plus the same backlog item-3 closing
+note still listing the asymptotic family corollary as an unnamed Plan
+entry though it was named and delivered 2026-09-02. Zero axiom contact,
+no shelf changes; index-coverage and records-ladder work on the
+Alon–Boppana surface (already stress-tested twice: its own C₁₂ QA and
+the parametric all-scale QA). Next action: the index section, quoting
+exact Lean statements.
+
+## 2026-09-02T20:21:37Z — Cycle-family records debt delivered: index rows plus backlog reconciliation (terminal)
+
+**Run:** `20260902T201826Z-run-1`  
+**Session:** `ses_f9c3c72baffeQ4AldfXZkzoPfA`  
+**Status:** completed  
+**Milestone:** the standing ungated records-hygiene item (named by two
+prior runs' handoffs) — the 2026-09-02 cycle-family delivery's records
+debt, closed as one coherent milestone.
+
+**Changes:** `index/map/spectral_graph.md` — the new
+`### Scaffold.Mathlib.GraphTheory.AlonBoppana (the cycle family — the
+asymptotic corollary)` section after the expansion ceiling: opening
+provenance (delivery + parametric-QA follow-on proposals) and 13 table
+rows covering all 17 public declarations `cycleAdj` through
+`alonBoppana_cycle_asymptotic`, exact statements quoted from the
+source, private route helpers marked private per house style.
+`docs/6_SGT_BACKLOG.md` — item 3's stale closing sentence ("stays a
+Plan entry until one is named") reconciled with a dated update
+paragraph: the asymptotic family corollary was named (the cycles,
+through `SimpleGraph.cycleGraph` and the `toWAdj` adapter) and
+delivered 2026-09-02, headlines and QA provenance recorded; the drift
+class the backlog's own header obliges deliveries to prevent, missed
+by the delivery run and closed here. This plan and this log. Nothing
+committed; the prior runs' uncommitted deliveries preserved.
+
+**Verification:** 17/17 indexed names checked 1:1 against
+`AlonBoppana.lean` public declarations by exact-pattern grep; every
+QA claim cited in a row verified against a real pin in
+`AlonBoppana_QA.lean` (distEdge = 2k+3 slack 1; IsTreeBall holding
+one radius past certified and failing one past the truth with the
+empty class; the odd-boundary singleton; the `k = ⌈1/ε⌉` asymptotic
+witness). One factual error caught and fixed on row re-read: the
+first draft's `cycle_levClass_eq` boundary note conflated the even
+tie (adjacent antipodal pair, card 2 — the equation still holds) with
+the odd boundary (`n = 2j+1`, merge to singleton, card 1 < 2) — the
+same error the parametric-QA run had corrected in the delivery
+record. `check_markdown_links` clean; `check_backlog_freshness` clean
+(0 days); `check_scaffold_map_freshness` clean (45 stations, no
+status change owed); `check_citations` clean; `lint_axioms` exit 0
+(4 axioms, unchanged). No Lean source changed, so no build step owed;
+`lake build`, `check_build_completeness`,
+`check_refutation_independence`, and `check_public_reachability`
+stand at the prior runs' green state over unchanged inputs.
+
+**Remaining risk:** none owed — no mathematical content changed, no
+axiom disposition changed, no public statement changed. The index
+rows are descriptive metadata; statement fidelity was the
+load-bearing check and was performed.
+
+**Next handoff:** the queue is empty again — check
+`proposals/README.md`'s Active table first (all Low/human-gated).
+Natural autonomous frontiers: the audit-shaped pass over
+mixing-cascade QA surfaces the deliveries never adversarially
+re-read (now the top unstarted item); the QA axis's randomized half
+(policy-gated); the plain family's spectral-certificate route and the
+sharp `|λ₂| = α` layer (consumer-gated); the undirected `walkTVPair`
+join onto the Dobrushin engine (priced, needs a consumer).

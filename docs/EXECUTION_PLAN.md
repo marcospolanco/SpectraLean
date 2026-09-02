@@ -6,62 +6,353 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**None queued — the standing queue is empty again.** This run
-delivered the Cesàro stationary-existence engine (below):
-`perron_frobenius`'s entire theorem-consumer surface is now hard
-crust, the axiom itself stays admitted at its own full statement but
-has **zero non-QA consumers**, and whether to open its §9 deprecation
-window is flagged as an explicit operator decision in
-`index/load_bearing_axioms.md` — the natural operator-facing item, not
-one an autonomous Lean-work run should take (deprecation windows and
-release notes are release decisions). The other named items remain
-gated exactly as before: the sharp `|λ₂| = α` layer for general
-primitive chains (no consumer named), the reverse TV → χ² calculus (no
-consumer named), log-Sobolev adoption (operator decision), the
-over-squashing floor's Python bridge and the matrix master-bound Step 2
-(Lieb concavity — operator-gated), and the undirected `walkTVPair`
-join onto the Dobrushin engine (priced, needs a consumer). Natural
-frontiers for the next run's center-out selection: a load-bearing
-consumer of the newly-proved stationary layer now that it is
-unconditional (e.g. instantiating the empirical PageRank capstone's
-`π` through the proved `∃!` — previously conditional composition),
-the QA axis's still-open parametric-QA gap, or an audit-shaped pass
-over any surface the mixing cascade left unreviewed. Check
-`proposals/README.md`'s Active table first, as always.
+**None queued — the standing queue is empty again.** This run closed
+the cycle-family records debt below. Check `proposals/README.md`'s
+Active table first (all items there remain Low/human- or
+operator-gated). Natural frontiers for the next run's center-out
+selection, in rough leverage order: an audit-shaped pass over any
+surface the mixing cascade left unreviewed (several delivered
+families' QA never got an adversarial re-read); the QA axis's
+*randomized* half (needs a design decision on `#eval`/native_decide
+policy, which the repo's own Step-0 rules have excluded before); the
+spectral certificate route for the plain family (non-bipartite ⟹
+`λ_max(L_sym) < 2` ⟹ an `r < 1` certificate — named as the ungated
+alternative to the Doeblin route, but still without a consumer that
+the delivered rate does not already serve); the sharp `|λ₂| = α` layer
+(no consumer named); the reverse TV → χ² calculus (no consumer
+named); the undirected `walkTVPair` join onto the Dobrushin engine
+(priced, needs a consumer).
 
-*Leverage rationale:* the last run completed the `t_mix` object family
-and left the queue empty; `proposals/README.md`'s Active table is all
-Low/human-gated, so the center-out fallback selects this milestone
-under priority 4 (reduce the explicit trust surface) — the single
-highest-leverage bounded item now available. The admitted
-`perron_frobenius` axiom's entire non-QA consumer surface is the
-stationary-distribution layer (`IrreducibleStationary.lean`'s engine +
-four theorems, `PageRank.lean`'s three, and every `DirectedMixing`
-instantiation that produces `π` through them) — all conditional on the
-axiom today. The classical elementary route needs none of Perron–
-Frobenius: (1) *power positivity* — strong connectivity gives, for
-every pair, a power with a strictly positive entry (induction on
-`ReflTransGen`); (2) *existence* — Krylov–Bogoliubov-style Cesàro
-averaging of the walk iterates over the compact simplex
-(`isCompact_univ_pi` + `IsCompact.tendsto_subseq`, no metric
-machinery), with the telescoping defect
-`μ_t − μ_t ᵥ* P = t⁻¹(ν − ν ᵥ* P^t)` vanishing entrywise; (3) *strict
-positivity* of any nonzero nonneg stationary vector from (1); (4)
-*uniqueness up to scale* by the min-ratio trick (the difference
-`σ − cτ` at the minimizing ratio is nonneg stationary with a zero
-entry, hence zero). Every existing public statement keeps its exact
-name/shape/hypotheses — only proofs and conditional-status docstrings
-change. The axiom itself stays admitted at its own full statement
-(rootMultiplicity + complex domination are untouched, and its QA
-keeps exercising it) but drops to zero non-QA consumers — a state
-change to record across `index/load_bearing_axioms.md`, the coverage
-map, README, the radar, the map data, and the backlog, flagging the
-deprecation decision as the operator's.
+------
 
-*Next action:* write the proposal, then spike
-`wip/cesaro_spike.lean` (engine + re-proofs + the new QA section +
-the axiom audit iterated to zero errors/zero warnings) before any
-shelf edit.
+**Cycle-family records debt — the index-coverage gap closed and the
+backlog item-3 closing note reconciled** (records hygiene, no proposal
+opened — the gap was named by two prior runs' handoffs; run
+`20260902T201826Z-run-1`, session `ses_f9c3c72baffeQ4AldfXZkzoPfA`).
+DELIVERED — zero axiom contact, no Lean source changed (axiom count
+stays 4, QA stays 3768, scoreboard unchanged).
+
+The delivery's content: (1) **The index section**
+(`index/map/spectral_graph.md`, placed after the expansion-ceiling
+section keeping the AlonBoppana sections contiguous): a new
+`### … (the cycle family — the asymptotic corollary)` section with
+opening provenance (the 2026-09-02 delivery + the parametric-QA
+follow-on) and 13 table rows covering all 17 public declarations
+(`cycleAdj` through `alonBoppana_cycle_asymptotic`, grouped in the
+established `Name / Name | Content` style) — the program's first
+parametric instantiation now discoverable through the index surface.
+(2) **The backlog reconciliation** (`docs/6_SGT_BACKLOG.md` item 3): a
+dated update paragraph correcting the stale closing sentence that
+still listed the asymptotic family corollary as an unnamed Plan entry
+(named and delivered 2026-09-02) — exactly the drift class the
+backlog's own reconciliation-obligation header warns about, missed by
+the delivery run, closed here with the run identifier, the headline
+statements, and the QA provenance (C₁₂ at delivery, parametric the
+same day).
+
+**Verification:** every one of the 17 indexed names checked against
+`AlonBoppana.lean` by exact-pattern grep (17/17 present, 1:1 with
+public declarations; private route helpers named in rows marked
+private per house style); every QA claim cited in a row verified
+against a real pin in `AlonBoppana_QA.lean` (`cycfam_distEdge_exact_QA`
+distEdge = 2k+3 slack 1; `cycn_isTreeBall_half_QA` holding one radius
+past certified; `cycn_not_isTreeBall_half_succ_QA` the empty-class
+failure one past the truth; `cycn_levClass_odd_singleton_QA` /
+`cycn_not_isTreeBall_odd_QA` the odd-boundary singleton;
+the `k = ⌈1/ε⌉` asymptotic-witness pin); **one factual error caught
+and fixed on row re-read** — the first draft's `cycle_levClass_eq`
+boundary note conflated the even tie (adjacent antipodal *pair*, card
+2, the cardinality equation still holds) with the odd boundary
+(`n = 2j+1`, the branches merge to the singleton, card 1 < 2), the
+exact error the parametric-QA run had corrected in the cycle-family
+delivery record; the `cycleAdj_distEdge_gt` row's slack arithmetic
+similarly cleaned (`distEdge = 2k+3` against required `2k+2`).
+`check_markdown_links` clean; `check_backlog_freshness` clean
+(reviewed date September 2, 0 days behind); `check_scaffold_map_freshness`
+clean (45 stations, no status change — none owed);
+`check_citations` clean; `lint_axioms` exit 0 (4 current axioms,
+unchanged; only the allowlisted-confirmed PF finding). No Lean source
+changed, so no build step owed: `lake build`,
+`check_build_completeness`, `check_refutation_independence`, and
+`check_public_reachability` are untouched by this change set and stand
+at the prior runs' green state.
+
+**Remaining risk:** none owed — no mathematical content changed, no
+axiom disposition changed, no public statement changed. Honest scope:
+the index rows are descriptive metadata (the load-bearing check was
+statement fidelity, performed above), and the audit-shaped pass over
+the mixing cascade's unreviewed QA families remains the standing
+open-ended frontier for a future run.
+
+------
+
+**The primitivity supplier and the self-contained plain-walk sampling
+capstone — the standing handoff's named first-magnitude frontier with
+its blocker** (`proposals/primitivity-supplier-plain-walk.md`,
+same-run proposal; run `20260902T181038Z-run-1`, session
+`ses_f9cbd0940ffe6Bj0uvGqF8TIxF`). DELIVERED — zero new axioms (count
+stays 4; `#print axioms` via `wip/primsup_axcheck.lean` on all 39
+audited declarations — 9 new shelf + 20 QA + 10 consumed-layer
+spot-checks including `primitive_power_tendsto` itself — every one
+exactly `propext, Classical.choice, Quot.sound`, pure hard crust). QA
+3748 → 3768 (+20, `EmpiricalStationary_QA.lean`'s Primitivity
+section). Radar QA axis synced to 3768, score held 4.5 per protocol
+(QA witnesses of a composition family; the randomized half of the
+axis's named gap remains absent).**
+
+The delivery's content: (1) **The matrix-level engine**
+(`PrimitiveConvergence.lean`): `pow_entry_pos_of_pos` (single-term
+concatenation positivity), `pow_entry_pos_bounce` (the `+2` bounce
+chain along a positive 2-cycle), and **`isPrimitive_of_pow_pos_of_odd_loop`**
+— the two-parity covering (reach; bounce for one parity; run the odd
+closed walk first for the other; the witness `m := 1 + ∑ (d + L₀)`
+keeping the empty index-type corner split-free), stated at *support*
+level (`htwo`/`hodd`), deliberately not through `IsSymm` — the first
+draft's symmetric shape would have been inapplicable at the point of
+use, since `walkTransitionMatrix = D⁻¹A` is not symmetric on
+irregular graphs. (2) **The walk level** (`Mixing.lean`): the
+`Walk`-induction bridge; **`walkTransitionMatrix_isPrimitive_of_connected_of_odd_walk`**
+(connected support graph + a single odd closed walk, transported to
+every vertex by *reversal at the `Walk` level* — `Odd p.length` the
+honest interface, the pinned Mathlib having no `SimpleGraph.Bipartite`);
+**`walkDistribution_tvDistance_le_of_pos_power`** — the plain walk's
+first mixing rate with no spectral certificate and no caller-supplied
+`r` (`TV(ν_t x, π) ≤ (1 − |V|δ)^{t/m}`, the intrinsic-rate family's
+non-bipartite member, complementary to the lazy family's bipartite
+class); and **`walkDistribution_tendsto_stationaryVec`** — the
+retired `primitive_power_tendsto`'s first undirected consumer. (3)
+**The named consumer** (`EmpiricalStationary.lean`): the bias-term
+form at `ρ^{t₀/m}·TV(δ_x, π)` and **the self-contained twin**
+`empiricalWalkDistribution_tail_selfcontained_of_depth` — `∃ t₀` past
+which `n` simulated trajectories estimate `π i` to `ε` at
+`2 exp(−nε²/2)` for every start, no caller certificate anywhere (the
+PageRank twin's `(α, ε)` display honestly existential here; the
+`ρ = 0` vs `0 < ρ < 1` case split on threshold production). (4)
+**The QA**: the primitive square pinned on the triangle
+(`P² = (1/4)(J−I)` with the `m = 1` zero-diagonal fence), the supplier
+instantiated through the explicit odd walk `0→1→2→0`, **the Doeblin
+rate attained exactly at the even time `t = 2`** (truth `1/6` =
+engine `(1/4)^{2/2}·(2/3)`), the odd-time factor-`2` slack pinned,
+the `K₂` periodicity fence (`(P^t) 0 0 = 0` at every odd `t` — `hodd`
+exactly isolating the bipartite class the lazy program patches), the
+capstone instance at `ε = 1/4` with the produced threshold's
+arithmetic (`⌈log 8/log 4⌉ = 2`) and honest slack witnessed on the
+truth side (`TV(ν₂) = 1/6 > 1/8`), and the convergence instance. Six
+technique findings recorded in the proposal (headline: `Pi.single`
+applied in a standalone `have` elaborates with a stuck higher-order
+metavariable — pins must reduce through `simp only [Pi.single_apply,
+…]` in the goal; the three-entry TV pin computes each difference
+explicitly then applies `abs_of_nonneg`/`abs_neg` per sign class).
+
+**Verification:** spike first (`wip/primsup_spike.lean` — all
+declarations + full QA + the audit, iterated to zero errors/zero
+warnings before any shelf edit); `lake env lean` zero errors/zero
+warnings on all four touched modules; explicit `lake build` targets ✔;
+**the 39-declaration axiom audit above**; **full `lake build` ✔
+immediately followed by `check_build_completeness.py` — the QA module
+flagged stale once, remediated per the script's documented
+`lake build <module>` route, then 133 source files, 133 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+current axioms, unchanged; only the allowlisted-confirmed PF finding);
+`check_refutation_independence` (9-tag clean — no tags touched);
+`check_public_reachability` clean (63 repo modules); `check_citations`
+("All axioms have proper citations!"); `check_markdown_links` clean;
+`check_backlog_freshness` clean; scoreboard regenerated (**3768/4/0**)
+with the verification row; map-freshness exit 0 after the 3748 → 3768
+stats sync in both map files and SVG regeneration (no station — no
+tier change). Records updated: the proposal (COMPLETE + delivery
+record with technique findings), `proposals/README.md` (new Delivered
+row), README (3768 + three module-table row extensions), the radar (QA
+axis synced 3748 → 3768 held 4.5), `index/map/spectral_graph.md` (the
+new primitivity-supplier section), `index/map/probability_concentration.md`
+(the two capstone rows), the coverage map's PF/nonnegative-matrix row,
+the backlog item-8 fourteenth update, the scoreboard verification row,
+both map data tables + regenerated SVG, this plan, and the activity
+log. Nothing committed; the prior runs' uncommitted deliveries
+preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed.
+Honest scope: the odd-closed-walk interface is *weaker* than
+"non-bipartite" (the classical dichotomy is true but unbundled — no
+`SimpleGraph.Bipartite` in the pin, no consumer asking); the rate is
+the Doeblin bound (typically loose, exact on the triangle at even
+times as pinned); the spectral route to the plain family's
+certificate (non-bipartite ⟹ `λ_max(L_sym) < 2`) remains ungated and
+undelivered.
+
+------
+
+## Delivered milestones (most recent first)
+
+**Parametric (arbitrary-scale) QA for the cycle family — the QA
+axis's named remainder closed** (`proposals/parametric-cycle-qa.md`,
+same-run proposal; run `20260902T161908Z-run-1`, session
+`ses_f9d153357ffe8wg52HLdL6e7ge`). DELIVERED — QA-only, zero axiom
+contact (count stays 4; `#print axioms` via `wip/paramqa_axcheck.lean`
+on all 17 audited declarations — 10 QA pins + the 4 private
+calculators audited transitively + the 7 consumed shelf theorems
+re-checked — every one exactly `propext, Classical.choice,
+Quot.sound`, pure hard crust). QA 3738 → 3748 (+10,
+`AlonBoppana_QA.lean`'s `Step8` section). **Radar QA axis re-scored
+4.0 → 4.5** per the "named absent category gains its first occupant"
+protocol — the *parametric* half of the axis's named gap
+("parametric/randomized QA," cited by every score-hold since
+2026-08-22) closed; the *randomized* half recorded as still absent.**
+
+The delivery's content: the repository's first QA section whose
+lemmas quantify over the scale — every pin `∀`-quantified over
+`n`/`k`/`m` and consuming the shelf theorems at symbolic scale, so a
+scale-dependent error in a parametric statement (an antipodal-tie
+off-by-one, a boundary mishandling at `2(j+1) = n`, a wraparound
+branch wrong only past the midpoint) fails at *every* scale at once,
+where a fixed fixture (largest ever pinned: `C₁₂`) can only fail
+below its own size — `1_STRATEGY.md`'s load-bearing-growth principle
+applied to the QA layer itself. The pins: the short-branch distance
+with the antipodal tie *in* the hypothesis set (`dist a (a+⟨m⟩) = m`
+at `2m ≤ n`, symbolic scale, offset, and translate), the
+translate-invariant edge pin, the family's own antipode at the exact
+tie, the exact far-apart value `distEdge = 2k+3` (the shelf
+certifies only `2k+2 <` — strictness slack exactly `1` at every
+scale), the centerpiece **tree-ball truth boundary bracketed at every
+scale** — the even boundary class computed raw from `cycle_levE_eq`
+exactly where `cycle_levClass_eq`'s strict hypothesis `2(j+1) < n`
+refuses (the adjacent antipodal pair, card `2` — **correcting the
+cycle-family delivery record's boundary note**, which had described
+the even-boundary class as a singleton), `IsTreeBall` *holding* at
+radius `n/2`, one past the shelf theorem's certified radius (the
+strictness is proof-forced, not truth-forced), and failing one past
+the truth with the empty class — the odd-boundary singleton (`n =
+2j+1`, the two offset branches merge, card `1 < 2`, the genuine
+strictness bite), and the asymptotic corollary's witness pinned
+explicitly at symbolic `ε` (`k = ⌈1/ε⌉` certifies `λ₂ ≤ ε` through
+`alonBoppana_cycle_laplacian`). Six technique findings in the
+proposal (headline: the `rcases` second-branch identifier trap — the
+shelf's `if_neg (by omega …)` idiom is load-bearing style, and
+"simplifying" it to `if_neg h0` is a silent wrong-branch bug; also:
+`Fin` numeral statements need the `[NeZero n]` binder in the
+signature, `Fin.val_one` is not a reliable `rw` on OfNat-shaped
+terms, symbolic-modulus `%` needs explicit `Nat.mod_add_mod` chains
+before `omega`, rewriting a `+ 1` numeral through a large goal can
+time out at default heartbeats, and the scoreboard metric counts
+public declarations only).
+
+**Verification:** spike first (`wip/paramqa_spike.lean` — the full
+section plus the axiom audit, iterated to zero errors/zero warnings
+before any shelf edit); `lake env lean` zero errors/zero warnings on
+the touched QA module; explicit `lake build` target ✔; **the
+17-declaration axiom audit above**; **full `lake build` ✔ immediately
+followed by `check_build_completeness.py` — 133 source files, 133
+fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0
+(4 current axioms, unchanged; only the allowlisted-confirmed PF
+finding); `check_refutation_independence` (9-tag clean — no tags
+touched); `check_public_reachability` clean (63 repo modules);
+`check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; `check_backlog_freshness` clean;
+scoreboard regenerated (**3748/4/0**) with the verification row;
+map-freshness exit 0 after the 3738 → 3748 stats sync in both map
+files and SVG regeneration (no station — no tier change). Records
+updated: the proposal (COMPLETE + delivery record with technique
+findings), `proposals/README.md` (new Delivered row), README (3748 +
+the Alon–Boppana highlight's parametric-QA extension), the radar (QA
+axis count synced 3738 → 3748 and **re-scored 4.0 → 4.5**, the
+re-score history note extended), the scoreboard verification row,
+both map data tables + regenerated SVG, this plan, and the activity
+log. Nothing committed; the prior runs' uncommitted deliveries
+preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no public statement changed. Honest
+scope: the randomized half of the QA axis's named gap remains absent
+(needs a design decision the repo has excluded before); the
+cycle-family shelf theorems' index-map rows remain a pre-existing
+coverage gap (observed this run, left open); the shelf's strict
+hypotheses (`cycle_levClass_eq`, `isTreeBall_cycle`) are untouched —
+tightening `isTreeBall_cycle` to `2(k+1) ≤ n` would be a real shelf
+change with consumers to re-verify, deliberately not bundled.
+
+------
+
+**The self-contained empirical PageRank capstone — the sampling
+program's target produced by the theorem itself**
+(`proposals/selfcontained-empirical-pagerank.md`, same-run proposal;
+run `20260902T150123Z-run-1`, session
+`ses_f9d618a3fffeLZR7gnarjSLb58`). DELIVERED — zero new axioms (count
+stays 4; `#print axioms` via `wip/selfpr_axcheck.lean` on all 9
+audited declarations — 1 shelf + 4 QA + the 4 composed suppliers
+(`exists_pageRankVec`, `existsUnique_pageRankVec`,
+`pageRankMixingTime_le_of_rate'`,
+`empiricalPageRank_uniform_tail_of_depth`) — every one exactly
+`propext, Classical.choice, Quot.sound`, pure hard crust). QA
+3734 → 3738 (+4, `EmpiricalStationary_QA.lean`'s
+`PageRankSelfContained` section). Radar QA axis synced to 3738 held
+at 4.0 per protocol (the QA witnesses of a composition theorem, not a
+new theorem family).**
+
+The delivery's content: (1) **The previously-conditional composition
+made honest** — the sibling capstones take `π` as caller hypotheses
+(`hπsum`/`hπstat`/`hπnn`) precisely because their `∃!` supplier was
+PF-conditional until the Cesàro re-proof; a self-contained statement
+then would have been an axiom-mediated packaging. (2) **The shelf
+theorem** `empiricalPageRank_tail_selfcontained_of_depth`
+(`Derived/EmpiricalStationary.lean`'s `PageRankLimit` section):
+`∃ π` (strictly positive, mass one, stationary at the Google walk —
+supplied by the re-proved `exists_pageRankVec`) such that past the
+single `(α, ε)`-computable display threshold
+`⌈log(2/ε)/log(1/α)⌉` (the uniform α-ceiling's display form at
+`ε/2`, chosen because the caller no longer holds `π` — the refined
+form's `d̄(0)` mentions it), `n` i.i.d. simulated random-surfer
+trajectories estimate `π i` to `ε` at `2 exp(−nε²/2)` for **every
+start simultaneously** — a five-line composition (supplier → ceiling
+→ capstone), which is the point: the whole loop is hard crust, so the
+self-contained statement *should* be short. (3) **The QA**, on the
+periodic 2-cycle Google fixture: **the identification pin** (any
+vector carrying the theorem's three certificate clauses equals the
+hand-verified `u2`, through the proved `∃!`'s uniqueness clause — the
+composition's falsification surface, load-bearing on the stationary
+layer's exact statement), the display-threshold pin
+(`⌈log 8/log 2⌉ = 3` at `ε = 1/4`), the display-slack witness (the
+exact uniform object `2 < 3`), and **the fully-self-contained
+instance** (the theorem instantiated, the produced vector identified
+as `u2`, the guarantee discharged at `t₀ = 3` for every start, bound
+`2 exp(−1/32)`). Four technique findings recorded in the proposal
+(headline: the `1/(ε/2)`-vs-`2/ε` display-spelling join is a
+`field_simp` identity rewritten *into the goal*, keeping the composed
+ceiling untouched for `exact`; supplier-produced opaque vectors must
+stay out of the sampling-space arguments or the `rw`-identification
+pattern dies).
+
+**Verification:** spike first (`wip/selfpr_spike.lean` — theorem +
+full QA + the axiom audit, iterated to zero errors/zero warnings
+before any shelf edit); `lake env lean` zero errors/zero warnings on
+both touched modules; explicit `lake build` targets ✔; **the
+9-declaration axiom audit above**; **full `lake build` ✔ immediately
+followed by `check_build_completeness.py` — 133 source files, 133
+fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0
+(4 current axioms, unchanged; only the allowlisted-confirmed PF
+finding); `check_refutation_independence` (9-tag clean — no tags
+touched); `check_public_reachability` clean (63 repo modules);
+`check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; `check_backlog_freshness` clean;
+scoreboard regenerated (**3738/4/0**) with the verification row;
+map-freshness exit 0 after the 3734 → 3738 stats sync in both map
+files and SVG regeneration (no station — no tier change). Records
+updated: the proposal (COMPLETE + delivery record with technique
+findings), `proposals/README.md` (new Delivered row), README (3738 +
+the empirical-stationary row's self-contained extension), the radar
+(QA axis synced 3734 → 3738 held 4.0),
+`index/map/probability_concentration.md` (the self-contained capstone
+row), the backlog item-8 thirteenth update, the scoreboard
+verification row, both map data tables + regenerated SVG, this plan,
+and the activity log. Nothing committed; the prior runs' uncommitted
+deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed. The
+display threshold is the start-free Doeblin bound, deliberately
+coarser than the exact uniform object by the simplex diameter (the
+slack witnessed in QA); the sharp `|λ₂| = α` layer stays
+consumer-gated exactly as before.
 
 ------
 

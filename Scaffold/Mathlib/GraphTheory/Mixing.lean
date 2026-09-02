@@ -2524,6 +2524,201 @@ theorem walkDistribution_tvDistance_anti (A : WAdj (V := V))
   rwa [walkTransitionMatrixTranspose_pow_mulVec_stationaryVec A hA hd s,
     ← walkDistribution_add A t s x] at key
 
+/-!
+### The primitivity supplier at the walk, the Doeblin rate, and the
+convergence corollary (2026-09-02,
+`proposals/primitivity-supplier-plain-walk.md`)
+
+The standing handoff's named blocker delivered: on a connected support
+graph containing a single odd closed walk, the walk transition matrix
+is primitive — `walkTransitionMatrix_isPrimitive_of_connected_of_odd_walk`
+(reversal handled at the `Walk` level, since `P = D⁻¹A` is not
+symmetric on irregular graphs; `Odd p.length` is the honest interface,
+the pinned Mathlib having no `SimpleGraph.Bipartite`). Two consumers:
+`walkDistribution_tvDistance_le_of_pos_power` — the plain walk's first
+mixing rate with no spectral certificate and no caller-supplied `r`
+(the intrinsic-rate family's non-bipartite member), and
+`walkDistribution_tendsto_stationaryVec` — the retired
+`primitive_power_tendsto`'s first undirected consumer. All proved,
+zero axioms.
+-/
+
+open Filter Topology
+
+/-- **The walk-to-power bridge**: every support-graph walk of length `t`
+from `i` to `j` gives a strictly positive `(i, j)` entry of the `t`-th
+power of the walk transition matrix. Induction over
+`SimpleGraph.Walk`; each adjacency step contributes one positive
+product term `(P^s) i k · P k l` of the defining sum. -/
+theorem pow_walkTransitionMatrix_pos_of_walk (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    {i j : V} (w : (supportGraph A hA).Walk i j) :
+    0 < (walkTransitionMatrix A ^ w.length) i j := by
+  induction w with
+  | nil =>
+    simp [Matrix.one_apply, SimpleGraph.Walk.length_nil]
+  | @cons u k v hadj rest ih =>
+    rw [SimpleGraph.Walk.length_cons]
+    have hcomb : 0 < (walkTransitionMatrix A ^ (1 + rest.length)) u v := by
+      have hedge : 0 < (walkTransitionMatrix A ^ 1) u k := by
+        rw [pow_one, walkTransitionMatrix_apply]
+        exact mul_pos (inv_pos.mpr (hd u)) ((supportGraph_adj.1 hadj).2)
+      exact Scaffold.LinearAlgebra.pow_entry_pos_of_pos
+        (fun a b => walkTransitionMatrix_nonneg A hnn hd a b) hedge ih
+    exact (Nat.add_comm 1 rest.length) ▸ hcomb
+
+/-- **The walk-level primitivity supplier** — the standing handoff's
+named blocker: on a connected support graph containing a single odd
+closed walk, the walk transition matrix is primitive. Connectivity
+supplies the reachability witnesses through the walk-to-power bridge;
+positive degrees supply the positive 2-cycles (a positive row sum of
+nonnegative entries has a positive entry, both directions along the
+symmetric `A`); and the odd closed walk at *one* vertex transports to
+every vertex by concatenating a walk there, the odd walk, and the
+*reversed* walk back — total length `2·|q| + |p|`, odd. The reversal
+must live here, at the `Walk` level: `walkTransitionMatrix` is not
+symmetric on irregular graphs. `Odd p.length` is the honest interface —
+the pinned Mathlib has no `SimpleGraph.Bipartite` to state
+"non-bipartite" through. -/
+theorem walkTransitionMatrix_isPrimitive_of_connected_of_odd_walk
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i)
+    (hconn : (supportGraph A hA).Connected)
+    {w : V} (p : (supportGraph A hA).Walk w w) (hp : Odd p.length) :
+    (walkTransitionMatrix A).IsPrimitive := by
+  refine Scaffold.LinearAlgebra.isPrimitive_of_pow_pos_of_odd_loop
+    (fun a b => walkTransitionMatrix_nonneg A hnn hd a b) ?_ ?_ ?_
+  · intro u v
+    obtain ⟨q⟩ := hconn.1 u v
+    exact ⟨q.length, pow_walkTransitionMatrix_pos_of_walk A hA hnn hd q⟩
+  · intro v
+    obtain ⟨z, hz⟩ : ∃ z, 0 < A v z := by
+      by_contra hcon
+      push_neg at hcon
+      have h0 : deg A v = 0 := by
+        simp only [deg]
+        exact Finset.sum_eq_zero fun j _ => le_antisymm (hcon j) (hnn v j)
+      have hv := hd v
+      rw [h0] at hv
+      exact absurd hv (by norm_num)
+    have hzv : 0 < A z v := by
+      have hzs := hz
+      rwa [hA.apply z v] at hzs
+    refine ⟨z, ?_, ?_⟩
+    · rw [walkTransitionMatrix_apply]
+      exact mul_pos (inv_pos.mpr (hd v)) hz
+    · rw [walkTransitionMatrix_apply]
+      exact mul_pos (inv_pos.mpr (hd z)) hzv
+  · intro v
+    obtain ⟨q⟩ := hconn.1 v w
+    have hq : 0 < (walkTransitionMatrix A ^ q.length) v w :=
+      pow_walkTransitionMatrix_pos_of_walk A hA hnn hd q
+    have hqr : 0 < (walkTransitionMatrix A ^ q.length) w v := by
+      rw [← SimpleGraph.Walk.length_reverse q]
+      exact pow_walkTransitionMatrix_pos_of_walk A hA hnn hd q.reverse
+    have hloop : 0 < (walkTransitionMatrix A ^ p.length) w w :=
+      pow_walkTransitionMatrix_pos_of_walk A hA hnn hd p
+    obtain ⟨k, hk⟩ := hp
+    refine ⟨q.length + (p.length + q.length), ⟨q.length + k, by rw [hk]; omega⟩, ?_⟩
+    have hs1 := Scaffold.LinearAlgebra.pow_entry_pos_of_pos
+      (a := q.length) (b := p.length)
+      (fun a b => walkTransitionMatrix_nonneg A hnn hd a b) hq hloop
+    have hfin := Scaffold.LinearAlgebra.pow_entry_pos_of_pos
+      (a := q.length + p.length) (b := q.length)
+      (fun a b => walkTransitionMatrix_nonneg A hnn hd a b) hs1 hqr
+    rwa [Nat.add_assoc] at hfin
+
+/-! ### The Doeblin rate at the produced positive power -/
+
+
+/-- **The plain walk's Doeblin rate**: at a strictly-positive-power
+certificate `δ ≤ (P^m) i j`, the walk law's TV distance to stationarity
+is at most `(1 − |V|δ)^(t/m)` — with `TV(δ_x, π) ≤ 1` folded in through
+the simplex diameter. The plain walk's first mixing rate with no
+spectral certificate and no caller-supplied `r`: the intrinsic-rate
+family's non-bipartite member (the entrywise lazy ceiling being its
+bipartite member), consuming the same engine as the directed PageRank
+rate. -/
+theorem walkDistribution_tvDistance_le_of_pos_power (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] {m : ℕ} {δ : ℝ}
+    (hle : ∀ i j, δ ≤ (walkTransitionMatrix A ^ m) i j)
+    (t : ℕ) (x : V) :
+    tvDistance (walkDistribution A t x) (stationaryVec A)
+      ≤ (1 - (Fintype.card V : ℝ) * δ) ^ (t / m) := by
+  have hPnn : ∀ i j, 0 ≤ walkTransitionMatrix A i j :=
+    walkTransitionMatrix_nonneg A hnn hd
+  have hProw : ∀ i, ∑ j, walkTransitionMatrix A i j = 1 :=
+    walkTransitionMatrix_row_sum A hd
+  have hπstat : stationaryVec A ᵥ* walkTransitionMatrix A
+      = stationaryVec A := by
+    rw [← Matrix.mulVec_transpose]
+    exact walk_isStationary A hA hd
+  have hlaw : walkDistribution A t x
+      = (Pi.single x (1 : ℝ)) ᵥ* (walkTransitionMatrix A ^ t) := by
+    rw [walkDistribution, ← Matrix.transpose_pow, ← Matrix.mulVec_transpose]
+  have hνsum : ∑ i, (Pi.single x (1 : ℝ)) i = 1 := by
+    simp [Pi.single_apply]
+  have hρ : 0 ≤ 1 - (Fintype.card V : ℝ) * δ := by
+    obtain ⟨i₀⟩ := ‹Nonempty V›
+    have h1 : (Fintype.card V : ℝ) * δ ≤ 1 := by
+      calc (Fintype.card V : ℝ) * δ = ∑ j : V, δ := by simp
+        _ ≤ ∑ j, (walkTransitionMatrix A ^ m) i₀ j :=
+            Finset.sum_le_sum fun j _ => hle i₀ j
+        _ = 1 := Scaffold.LinearAlgebra.pow_row_sum hProw m i₀
+    linarith
+  have hmain := tvDistance_vecMul_pow_le_of_pos_power hPnn hProw hle
+    (sum_stationaryVec A hd) hπstat hνsum t
+  calc tvDistance (walkDistribution A t x) (stationaryVec A)
+      = tvDistance ((Pi.single x (1 : ℝ)) ᵥ* (walkTransitionMatrix A ^ t))
+          (stationaryVec A) := by rw [hlaw]
+    _ ≤ (1 - (Fintype.card V : ℝ) * δ) ^ (t / m)
+        * tvDistance (Pi.single x (1 : ℝ)) (stationaryVec A) := hmain
+    _ ≤ (1 - (Fintype.card V : ℝ) * δ) ^ (t / m) * 1 := by
+        refine mul_le_mul_of_nonneg_left ?_ (pow_nonneg hρ _)
+        exact tvDistance_le_one_of_nonneg_of_sum_eq_one
+          (fun i => by
+            by_cases hi : i = x <;> simp [Pi.single_apply, hi])
+          hνsum
+          (fun i => le_of_lt (stationaryVec_pos A hd i))
+          (sum_stationaryVec A hd)
+    _ = (1 - (Fintype.card V : ℝ) * δ) ^ (t / m) := mul_one _
+
+/-- **The retired `primitive_power_tendsto`'s first undirected
+consumer**: on the supplier's hypothesis set, the plain walk law
+converges to stationarity — the classical finite-Markov-chain
+convergence theorem on every connected graph with an odd closed walk,
+composed from the proved `primitive_vecMul_tendsto` through the
+law/power bridge. -/
+theorem walkDistribution_tendsto_stationaryVec (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (hconn : (supportGraph A hA).Connected)
+    {w : V} (p : (supportGraph A hA).Walk w w) (hp : Odd p.length)
+    (x : V) :
+    Filter.Tendsto (fun t : ℕ => walkDistribution A t x) Filter.atTop
+      (𝓝 (stationaryVec A)) := by
+  have hprim := walkTransitionMatrix_isPrimitive_of_connected_of_odd_walk
+    A hA hnn hd hconn p hp
+  have hPnn : ∀ i j, 0 ≤ walkTransitionMatrix A i j :=
+    walkTransitionMatrix_nonneg A hnn hd
+  have hProw : ∀ i, ∑ j, walkTransitionMatrix A i j = 1 :=
+    walkTransitionMatrix_row_sum A hd
+  have hπstat : stationaryVec A ᵥ* walkTransitionMatrix A
+      = stationaryVec A := by
+    rw [← Matrix.mulVec_transpose]
+    exact walk_isStationary A hA hd
+  have hνsum : ∑ i, (Pi.single x (1 : ℝ)) i = 1 := by
+    simp [Pi.single_apply]
+  have hmain := Scaffold.LinearAlgebra.primitive_vecMul_tendsto
+    (walkTransitionMatrix A) hPnn
+    hProw hprim (fun i => le_of_lt (stationaryVec_pos A hd i))
+    (sum_stationaryVec A hd) hπstat (Pi.single x (1 : ℝ)) hνsum
+  have hlaw : ∀ t : ℕ, (Pi.single x (1 : ℝ)) ᵥ* (walkTransitionMatrix A ^ t)
+      = walkDistribution A t x := by
+    intro t
+    rw [walkDistribution, ← Matrix.transpose_pow, ← Matrix.mulVec_transpose]
+  exact hmain.congr hlaw
+
 /-! ## TV convexity in mixtures, and the comparability -/
 
 /-- **Splitting a summable series at a threshold**: the head–tail

@@ -692,4 +692,111 @@ theorem primitive_vecMul_tendsto (P : Matrix V V ℝ)
   rw [hfac] at hsum
   simpa only [Matrix.vecMul, Matrix.dotProduct] using hsum
 
+/-!
+### The primitivity supplier (2026-09-02,
+`proposals/primitivity-supplier-plain-walk.md`)
+
+The missing supplier for `IsPrimitive` on structured input: a
+nonnegative matrix whose support digraph is strongly connected, every
+vertex of which lies on a positive 2-cycle and an odd closed walk, is
+primitive. The covering argument is elementary — reach, then bounce
+`+2` along the 2-cycle for one parity and run the odd closed walk first
+for the other — but it is exactly the combinatorial fact the retired
+`primitive_power_tendsto` needed to reach *undirected* walks (its
+Google-walk consumer discharged `hprim` through teleportation
+positivity instead). No symmetry hypothesis: the ingredients are
+support-level, exactly what `Mixing`'s walk wrapper can discharge
+(`walkTransitionMatrix` is not symmetric on irregular graphs).
+-/
+/-- **Concatenation positivity**: a positive entry of `M^a` followed by
+a positive entry of `M^b` through a common intermediate gives a
+positive entry of `M^(a+b)` — one term of the defining sum. The
+walk-concatenation step at matrix level, and the engine of the
+primitivity supplier below. -/
+theorem pow_entry_pos_of_pos {M : Matrix V V ℝ} (hnn : ∀ i j, 0 ≤ M i j)
+    {a b : ℕ} {i k j : V} (h1 : 0 < (M ^ a) i k) (h2 : 0 < (M ^ b) k j) :
+    0 < (M ^ (a + b)) i j := by
+  rw [pow_add, Matrix.mul_apply]
+  exact lt_of_lt_of_le (mul_pos h1 h2)
+    (Finset.single_le_sum (fun x _ => mul_nonneg
+      (pow_nonneg_entries hnn a i x) (pow_nonneg_entries hnn b x j))
+      (Finset.mem_univ k))
+
+/-- **The two-step bounce**: a positive `e`-step entry `u → v` extends
+by any even number of steps, bouncing `v → z → v` along a positive
+2-cycle. Support for the primitivity supplier's parity covering. -/
+theorem pow_entry_pos_bounce {M : Matrix V V ℝ} (hnn : ∀ i j, 0 ≤ M i j)
+    {e : ℕ} {u v z : V} (h1 : 0 < (M ^ e) u v)
+    (hz1 : 0 < M v z) (hz2 : 0 < M z v) (n : ℕ) :
+    0 < (M ^ (e + 2 * n)) u v := by
+  induction n with
+  | zero => simpa using h1
+  | succ n ih =>
+    have hs1 : 0 < (M ^ ((e + 2 * n) + 1)) u z :=
+      pow_entry_pos_of_pos (a := e + 2 * n) (b := 1) hnn ih
+        (by rw [pow_one]; exact hz1)
+    have hs2 : 0 < (M ^ ((e + 2 * n) + 2)) u v :=
+      pow_entry_pos_of_pos (a := (e + 2 * n) + 1) (b := 1) hnn hs1
+        (by rw [pow_one]; exact hz2)
+    have hrw : e + 2 * (n + 1) = (e + 2 * n) + 2 := by ring
+    rw [hrw]
+    exact hs2
+
+/-- **The primitivity supplier** (the standing handoff's named blocker):
+a nonnegative matrix whose support digraph is strongly connected
+(`hreach`), every vertex of which lies on a positive 2-cycle (`htwo`)
+and an odd closed walk (`hodd`), is primitive — some strictly positive
+power is strictly positive entrywise.
+
+The covering argument: for each pair `(u, v)` with reachability witness
+`d = d(u,v)` and odd closed-walk length `L₀ = L₀(v) ≥ 1` at `v`, the
+positive entries of the powers include both parities of every length
+`≥ d + L₀` — the same-parity lengths by bouncing `v → z(v) → v`, the
+opposite-parity ones by first running the odd closed walk at `v`. The
+witness `m := 1 + ∑ (d u v + L₀ v)` dominates every pair's base (a
+single term of a sum of naturals), and the `1 +` keeps the empty index
+type case split-free (`IsPrimitive` demands `0 < k`).
+
+No symmetry hypothesis: the ingredients are stated at support level,
+exactly what the walk wrapper can discharge (`walkTransitionMatrix` is
+not symmetric on irregular graphs, so matrix-level symmetry is not
+available at the point of use). -/
+theorem isPrimitive_of_pow_pos_of_odd_loop {M : Matrix V V ℝ}
+    (hnn : ∀ i j, 0 ≤ M i j)
+    (hreach : ∀ u v : V, ∃ a : ℕ, 0 < (M ^ a) u v)
+    (htwo : ∀ v : V, ∃ z : V, 0 < M v z ∧ 0 < M z v)
+    (hodd : ∀ v : V, ∃ t : ℕ, Odd t ∧ 0 < (M ^ t) v v) :
+    M.IsPrimitive := by
+  classical
+  choose! d hd using hreach
+  choose! z hz1 hz2 using htwo
+  choose! L hLodd hLpos using hodd
+  refine ⟨1 + ∑ u, ∑ v, (d u v + L v), by positivity, ?_⟩
+  intro i j
+  have hle : d i j + L j ≤ ∑ u, ∑ v, (d u v + L v) := by
+    have hB : d i j + L j ≤ ∑ v, (d i v + L v) :=
+      Finset.single_le_sum (f := fun v => d i v + L v)
+        (fun v _ => Nat.zero_le _) (Finset.mem_univ j)
+    have hA : ∑ v, (d i v + L v) ≤ ∑ u, ∑ v, (d u v + L v) :=
+      Finset.single_le_sum (f := fun u => ∑ v, (d u v + L v))
+        (fun u _ => Finset.sum_nonneg fun v _ => Nat.zero_le _)
+        (Finset.mem_univ i)
+    exact hB.trans hA
+  rcases Nat.even_or_odd ((1 + ∑ u, ∑ v, (d u v + L v)) - d i j) with
+    ⟨a, ha⟩ | ⟨a, ha⟩
+  · have hmd : d i j + 2 * ((1 + ∑ u, ∑ v, (d u v + L v) - d i j) / 2)
+        = 1 + ∑ u, ∑ v, (d u v + L v) := by omega
+    have hb := pow_entry_pos_bounce hnn (hd i j) (hz1 j) (hz2 j)
+      ((1 + ∑ u, ∑ v, (d u v + L v) - d i j) / 2)
+    rwa [hmd] at hb
+  · obtain ⟨k, hk⟩ := hLodd j
+    have hstep : 0 < (M ^ (d i j + L j)) i j :=
+      pow_entry_pos_of_pos hnn (hd i j) (hLpos j)
+    have hmd : d i j + L j
+        + 2 * ((1 + ∑ u, ∑ v, (d u v + L v) - d i j - L j) / 2)
+        = 1 + ∑ u, ∑ v, (d u v + L v) := by omega
+    have hb := pow_entry_pos_bounce hnn hstep (hz1 j) (hz2 j)
+      ((1 + ∑ u, ∑ v, (d u v + L v) - d i j - L j) / 2)
+    rwa [hmd] at hb
+
 end Scaffold.LinearAlgebra

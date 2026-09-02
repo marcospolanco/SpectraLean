@@ -60,11 +60,37 @@
       exact-stationary contrast from the center start (true deviation
       `0` at every `t₀ ≥ 1`, the quoted bias honestly positive).
 
+  6. the self-contained PageRank capstone section
+      (`proposals/selfcontained-empirical-pagerank.md`, delivered
+      2026-09-02) — the theorem that *produces* its own target `π`,
+      QA'd on the identification obligation first: **any vector
+      carrying the theorem's certificate clauses equals the
+      hand-verified `u2`** (through the proved `∃!`'s uniqueness
+      clause — the composition's falsification surface), the display
+      threshold pinned (`⌈log 8/log 2⌉ = 3` at `ε = 1/4`), the
+      display form's slack witnessed against the exact uniform object
+      (`2 < 3`), and the fully-self-contained instance at `t₀ = 3`,
+      every start, bound `2 exp (−1/32)`.
+
+7. the primitivity-supplier section
+   (`proposals/primitivity-supplier-plain-walk.md`, 2026-09-02): the
+   supplier's `IsPrimitive` output instantiated on the triangle through
+   the odd walk `0 → 1 → 2 → 0`, the primitive square pinned
+   (`P² = (1/4)(J − I)` with the `m = 1` diagonal-zero fence), the
+   Doeblin rate attained *exactly* at the even time `t = 2` (both the
+   truth `1/6` and the engine's `(1/4)^{2/2} · (2/3)` evaluate equal)
+   with the odd-time factor-`2` slack pinned beside it, the `K₂`
+   periodicity fence (no odd power of the edge's walk matrix returns —
+   the `hodd` hypothesis exactly isolating the bipartite class), the
+   self-contained capstone instantiated at `ε = 1/4` with the produced
+   threshold's arithmetic (`K = ⌈log 8/log 4⌉ = 2`) and its honest
+   slack witnessed on the truth side (`TV(ν₂) = 1/6 > 1/8`), and the
+   convergence corollary instantiated;
+
   All proofs are real Lean proofs (no `sorry`/`admit`).
 
   Scoreboard: ../QA_SCOREBOARD.md
 -/
-
 import Scaffold.Derived.EmpiricalStationary
 import Scaffold.QA.SpectralGraph.Mixing_QA
 import Scaffold.QA.Probability.IIDProduct_QA
@@ -938,4 +964,335 @@ theorem PRU_capstone_instance_QA :
   exact h1
 
 end PageRankCapstone
+
+/-!
+## The self-contained PageRank capstone section
+
+The self-contained composition's QA
+(`proposals/selfcontained-empirical-pagerank.md`, 2026-09-02): the
+theorem produces its own target `π`, so the QA's first obligation is
+to prove the produced vector is *the right one* — the identification
+pin runs any vector carrying the theorem's three certificate clauses
+through the proved `∃!`'s uniqueness clause against the hand-verified
+`u2`. Beside it: the display threshold pinned (`⌈log 8/log 2⌉ = 3` at
+`ε = 1/4`), the display form's slack witnessed against the exact
+uniform object (`2 < 3`), and the fully-self-contained instance (the
+theorem instantiated, the vector identified, the guarantee discharged
+at `t₀ = 3` for *every* start, closing at `2 exp (−1/32)`).
+-/
+section PageRankSelfContained
+
+open scoped Matrix
+open Scaffold.Mathlib.Probability.IIDProduct MeasureTheory
+open Scaffold.QA.SpectralGraph SpectralGraphTheory
+
+/-- **The identification pin**: any vector carrying the self-contained
+theorem's three certificate clauses (strict positivity, mass one,
+stationarity at the fixture's Google matrix) equals the hand-verified
+`u2` — through the proved `existsUnique_pageRankVec`'s uniqueness
+clause. This is the composition's falsification surface: the theorem
+hands the agent an opaque vector, and this pin proves the certificate
+clauses pin it exactly. Load-bearing on the re-proved stationary
+layer's exact statement. -/
+theorem PR_selfcontained_vec_QA {π : Fin 2 → ℝ}
+    (hpos : ∀ j, 0 < π j) (hsum : ∑ j, π j = 1)
+    (hstat : π ᵥ* googleMatrix A2 (1/2) = π) : π = u2 := by
+  obtain ⟨π', -, huniq⟩ := existsUnique_pageRankVec A2 A2_nonneg_QA A2_deg_QA
+    (by norm_num : (0 : ℝ) ≤ 1/2) (by norm_num : (1/2 : ℝ) < 1)
+  exact (huniq π ⟨fun j => le_of_lt (hpos j), hsum, hstat⟩).trans
+    (huniq u2 ⟨u2_nonneg, u2_sum, u2_stationary_Gd⟩).symm
+
+/-- **The threshold pin**: the self-contained theorem's display
+threshold at `ε = 1/4` is exactly `⌈log 8 / log 2⌉ = 3` — the
+`(α, ε)`-computable bound the agent uses, pinned (joining the uniform
+display ceiling's own arithmetic at `2/ε = 8 = 1/(1/8)`). -/
+theorem PR_selfcontained_threshold_QA :
+    Nat.ceil (Real.log (2 / (1/4:ℝ)) / Real.log (1 / (1/2:ℝ))) = 3 := by
+  have h2 : (2:ℝ) / (1/4) = 8 := by norm_num
+  have h8 : (8:ℝ) = 1 / (1/8:ℝ) := by norm_num
+  rw [h2, h8]
+  exact PRU_display_ceiling_arith_QA
+
+/-- **The display-slack witness**: the start-free display threshold
+(`3`) is strictly coarser than the exact uniform object (`2`, the
+pinned `t_mix^unif(1/8)`) — the simplex diameter's price made visible
+on the fixture where the exact object is known. The self-contained
+theorem's threshold is honest about being the display bound. -/
+theorem PR_selfcontained_display_slack_QA :
+    pageRankMixingTime A2 (1/2) u2 (1/8)
+      < Nat.ceil (Real.log (2 / (1/4:ℝ)) / Real.log (1 / (1/2:ℝ))) := by
+  rw [PRU_tmix_eighth_QA, PR_selfcontained_threshold_QA]
+  norm_num
+
+/-- **The fully-self-contained instance**: the theorem instantiated at
+the fixture (`ε = 1/4`, `n = 1`, `i = 1`) — the produced vector is
+exactly `u2` (the identification pin) and the guarantee clause
+discharges at `t₀ = 3` (the pinned display threshold) for *every*
+start, closing at `2 exp (−1/32)`. No hypothesis about `π` anywhere:
+the theorem supplies it, the QA proves it is the right one. -/
+theorem PR_selfcontained_instance_QA :
+    ∃ π : Fin 2 → ℝ, π = u2 ∧
+      ∀ (x : Fin 2),
+        (iidPMF (pageRankDistribution A2 (1/2) 3 x)
+            (fun j => pageRankDistribution_nonneg A2 A2_nonneg_QA A2_deg_QA
+              (by norm_num) (by norm_num) 3 x j)
+            (sum_pageRankDistribution A2 A2_deg_QA (1/2) 3 x)).toMeasure
+          {ω : Fin 1 → Fin 2 | |(1 / (1 : ℝ)) * ∑ k : Fin 1,
+              (if ω k = 1 then (1 : ℝ) else 0) - u2 1| ≥ 1/4}
+          ≤ ENNReal.ofReal (2 * Real.exp (-(1 : ℝ) / 32)) := by
+  obtain ⟨π, hpos, hsum, hstat, hguar⟩ :=
+    empiricalPageRank_tail_selfcontained_of_depth (A := A2) A2_nonneg_QA A2_deg_QA
+      (by norm_num : (0 : ℝ) < 1/2) (by norm_num : (1/2 : ℝ) < 1)
+      (by norm_num : (0 : ℝ) < 1/4) 1 one_ne_zero
+  have hπu2 : π = u2 := PR_selfcontained_vec_QA hpos hsum hstat
+  refine ⟨π, hπu2, fun x => ?_⟩
+  have h := hguar 3 (by rw [PR_selfcontained_threshold_QA]) x
+  rw [hπu2] at h
+  push_cast at h
+  have e : (-(1 : ℝ)) * (1/4) ^ 2 / 2 = -(1 : ℝ) / 32 := by norm_num
+  rw [e] at h
+  exact h
+
+end PageRankSelfContained
+
+section Primitivity
+
+open Filter
+
+/-! ## The primitivity supplier and the self-contained plain-walk
+capstone QA -/
+
+/-! ### The triangle's walk matrix, its primitive square, and the odd
+closed walk witness -/
+
+theorem triP_apply (i j : Fin 3) :
+    walkTransitionMatrix triAdj i j = (1/2) * triAdj i j := by
+  rw [walkTransitionMatrix_apply, triAdj_deg_eq]
+  norm_num
+
+/-- The primitive square's entry table: `P² = (1/4)(J − I)` — diagonal
+`1/2`, off-diagonal `1/4`, so `m = 2` is a primitive power with floor
+`δ = 1/4` (`triP_one_diag_zero_QA` below shows `m = 1` is not). -/
+theorem triP_two_apply (i j : Fin 3) :
+    (walkTransitionMatrix triAdj ^ 2) i j = if i = j then 1/2 else 1/4 := by
+  rw [pow_two, Matrix.mul_apply]
+  fin_cases i <;> fin_cases j <;>
+    simp [triP_apply, triAdj_apply, Fin.sum_univ_three] <;> norm_num
+
+theorem triP_one_diag_zero_QA : (walkTransitionMatrix triAdj ^ 1) 0 0 = 0 := by
+  rw [pow_one, triP_apply, triAdj_apply, if_pos rfl, mul_zero]
+
+/-- The triangle's odd closed walk: around `0 → 1 → 2 → 0`. -/
+def triWalk3 : (supportGraph triAdj triAdj_isSymm).Walk 0 0 := by
+  have e01 : (supportGraph triAdj triAdj_isSymm).Adj 0 1 :=
+    supportGraph_adj.mpr ⟨by decide, by
+      rw [triAdj_apply, if_neg (show ¬((0 : Fin 3) = 1) from by decide)];
+      norm_num⟩
+  have e12 : (supportGraph triAdj triAdj_isSymm).Adj 1 2 :=
+    supportGraph_adj.mpr ⟨by decide, by
+      rw [triAdj_apply, if_neg (show ¬((1 : Fin 3) = 2) from by decide)];
+      norm_num⟩
+  have e20 : (supportGraph triAdj triAdj_isSymm).Adj 2 0 :=
+    supportGraph_adj.mpr ⟨by decide, by
+      rw [triAdj_apply, if_neg (show ¬((2 : Fin 3) = 0) from by decide)];
+      norm_num⟩
+  exact SimpleGraph.Walk.cons e01
+    (SimpleGraph.Walk.cons e12 (SimpleGraph.Walk.cons e20
+      SimpleGraph.Walk.nil))
+
+theorem triWalk3_length : triWalk3.length = 3 := by
+  simp [triWalk3]
+
+theorem triWalk3_odd : Odd triWalk3.length := ⟨1, by
+  rw [triWalk3_length]; norm_num⟩
+
+/-- **The supplier instantiated**: the triangle's walk matrix is
+primitive — the standing handoff's blocker discharged on the canonical
+non-bipartite fixture. -/
+theorem tri_isPrimitive_QA : (walkTransitionMatrix triAdj).IsPrimitive :=
+  walkTransitionMatrix_isPrimitive_of_connected_of_odd_walk triAdj
+    triAdj_isSymm triAdj_nonneg triAdj_deg_pos tri_connected triWalk3 triWalk3_odd
+
+/-! ### The rate: attainment at even times, slack at odd -/
+
+theorem tri_tv_zero_eq_QA :
+    tvDistance (Pi.single (0 : Fin 3) (1 : ℝ)) (stationaryVec triAdj) = 2/3 := by
+  have h1 : ¬((1 : Fin 3) = 0) := by decide
+  have h2 : ¬((2 : Fin 3) = 0) := by decide
+  simp only [tvDistance, Pi.single_apply, tri_pi_QA, Fin.sum_univ_three,
+    if_pos rfl, if_neg h1, if_neg h2, if_true]
+  rw [show ((1 : ℝ) - 1/3) = 2/3 from by norm_num,
+    show ((0 : ℝ) - 1/3) = -(1/3) from by norm_num, abs_neg,
+    abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 2/3),
+    abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 1/3)]
+  norm_num
+
+theorem tri_tv_two_eq_QA :
+    tvDistance (walkDistribution triAdj 2 0) (stationaryVec triAdj) = 1/6 := by
+  have e0 : walkDistribution triAdj 2 0 0 = 1/2 := by
+    rw [tri_dist_two_QA]; rfl
+  have e1 : walkDistribution triAdj 2 0 1 = 1/4 := by
+    rw [tri_dist_two_QA]; rfl
+  have e2 : walkDistribution triAdj 2 0 2 = 1/4 := by
+    rw [tri_dist_two_QA]; rfl
+  rw [tvDistance, Fin.sum_univ_three, e0, e1, e2, tri_pi_QA, tri_pi_QA,
+    tri_pi_QA, show ((1 : ℝ)/2 - 1/3) = 1/6 from by norm_num,
+    show ((1 : ℝ)/4 - 1/3) = -(1/12) from by norm_num, abs_neg,
+    abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 1/6),
+    abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 1/12)]
+  norm_num
+
+theorem tri_tv_three_eq_QA :
+    tvDistance (walkDistribution triAdj 3 0) (stationaryVec triAdj) = 1/12 := by
+  have e0 : walkDistribution triAdj 3 0 0 = 1/4 := by
+    rw [tri_dist_three_zero_QA]; rfl
+  have e1 : walkDistribution triAdj 3 0 1 = 3/8 := by
+    rw [tri_dist_three_zero_QA]; rfl
+  have e2 : walkDistribution triAdj 3 0 2 = 3/8 := by
+    rw [tri_dist_three_zero_QA]; rfl
+  rw [tvDistance, Fin.sum_univ_three, e0, e1, e2, tri_pi_QA, tri_pi_QA,
+    tri_pi_QA, show ((1 : ℝ)/4 - 1/3) = -(1/12) from by norm_num,
+    show ((3 : ℝ)/8 - 1/3) = 1/24 from by norm_num, abs_neg,
+    abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 1/12),
+    abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 1/24)]
+  norm_num
+
+/-- **The engine attained exactly at the even time `t = 2`**: both the
+truth `TV(ν₂, π) = 1/6` and the engine's right side
+`(1 − 3·(1/4))^{2/2} · TV(δ₀, π) = (1/4)(2/3)` evaluate to `1/6` —
+the Doeblin rate's start factor is exactly right on the fixture, not
+merely an upper bound. -/
+theorem tri_engine_two_attained_QA :
+    tvDistance (walkDistribution triAdj 2 0) (stationaryVec triAdj)
+      = (1 - (Fintype.card (Fin 3) : ℝ) * (1/4)) ^ (2 / 2)
+        * tvDistance (Pi.single (0 : Fin 3) (1 : ℝ)) (stationaryVec triAdj) := by
+  rw [tri_tv_two_eq_QA, tri_tv_zero_eq_QA]
+  simp only [Fintype.card_fin]
+  norm_num
+
+theorem tri_rate_le_QA (t : ℕ) (x : Fin 3) :
+    tvDistance (walkDistribution triAdj t x) (stationaryVec triAdj)
+      ≤ (1 - (Fintype.card (Fin 3) : ℝ) * (1/4)) ^ (t / 2) := by
+  refine walkDistribution_tvDistance_le_of_pos_power triAdj triAdj_isSymm
+    triAdj_nonneg triAdj_deg_pos ?_ t x
+  intro a b
+  rw [triP_two_apply]
+  split <;> norm_num
+
+/-- **The odd-time slack pinned**: at `t = 3` the bound is `(1/4)^1 =
+1/4` against the truth `1/12` — exactly the factor `2` the `t/m` floor
+leaves on the table at odd times (the truth decays as `(1/2)^t`,
+the block rate as `(1/4)^{⌊t/2⌋}`). -/
+theorem tri_rate_three_slack_QA :
+    (1/12 : ℝ)
+      < (1 - (Fintype.card (Fin 3) : ℝ) * (1/4)) ^ (3 / 2) := by
+  norm_num
+
+/-! ### The periodicity fence: the odd-walk hypothesis load-bearing -/
+
+theorem k2P_apply (i j : Fin 2) :
+    walkTransitionMatrix k2Adj i j = k2Adj i j := by
+  rw [walkTransitionMatrix_apply, k2Adj_deg_eq]
+  norm_num
+
+theorem k2P_two_eq_one : walkTransitionMatrix k2Adj ^ 2 = 1 := by
+  funext i j
+  rw [pow_two, Matrix.mul_apply, Matrix.one_apply]
+  fin_cases i <;> fin_cases j <;>
+    simp [k2P_apply, k2Adj_apply, Fin.sum_univ_two]
+
+/-- **No odd power of the edge's walk matrix returns**: `(P^t) 0 0 = 0`
+at every odd `t` — the supplier's `hodd` hypothesis is unsatisfiable
+on the bipartite fixture, exactly the class the lazy program was built
+to patch. The supplier's hypothesis set is what separates the triangle
+from the edge. -/
+theorem k2_odd_diag_zero_QA (t : ℕ) (ht : Odd t) :
+    (walkTransitionMatrix k2Adj ^ t) 0 0 = 0 := by
+  obtain ⟨q, hq⟩ := ht
+  have hsplit : walkTransitionMatrix k2Adj ^ t
+      = (walkTransitionMatrix k2Adj ^ 2) ^ q * walkTransitionMatrix k2Adj := by
+    rw [hq, pow_add, pow_one, ← pow_mul]
+  rw [hsplit, k2P_two_eq_one, one_pow, Matrix.one_mul, k2P_apply,
+    k2Adj_apply, if_pos rfl]
+
+/-! ### The self-contained capstone instantiated -/
+
+/-- The produced threshold's arithmetic: `K = ⌈log (2/ε) / log (1/ρ)⌉`
+at `ε = 1/4`, `ρ = 1/4` is `⌈log 8 / log 4⌉ = ⌈3/2⌉ = 2`. -/
+theorem tri_threshold_arith_QA :
+    Nat.ceil (Real.log (2 / (1/4 : ℝ))
+      / Real.log (1 / (1 - (3 : ℝ) * (1/4)))) = 2 := by
+  have hr1 : (2 : ℝ) / (1/4) = 8 := by norm_num
+  have hr2 : (1 : ℝ) / (1 - (3:ℝ) * (1/4)) = 4 := by norm_num
+  have hlog8 : Real.log 8 = 3 * Real.log 2 := by
+    rw [show (8 : ℝ) = 2 ^ 3 from by norm_num, Real.log_pow (2 : ℝ) 3]
+    push_cast
+    ring
+  have hlog4 : Real.log 4 = 2 * Real.log 2 := by
+    rw [show (4 : ℝ) = 2 ^ 2 from by norm_num, Real.log_pow (2 : ℝ) 2]
+    push_cast
+    ring
+  have hlog2ne : Real.log 2 ≠ 0 :=
+    ne_of_gt (Real.log_pos (by norm_num : (1 : ℝ) < 2))
+  have hdiv : (3 : ℝ) * Real.log 2 / (2 * Real.log 2) = 3/2 := by
+    field_simp
+    ring
+  have hle : (3 : ℝ) / 2 ≤ 2 := by norm_num
+  have hge : (1 : ℝ) < 3/2 := by norm_num
+  rw [hr1, hr2, hlog8, hlog4, hdiv]
+  have hceil_le : Nat.ceil ((3 : ℝ) / 2) ≤ 2 := Nat.ceil_le.mpr hle
+  have hceil_ge : 2 ≤ Nat.ceil ((3 : ℝ) / 2) := by
+    have h1 : (1 : ℕ) < Nat.ceil ((3 : ℝ) / 2) := by
+      rw [Nat.lt_ceil]
+      norm_num
+    omega
+  omega
+
+/-- The bias half at the produced threshold: past `s = 4` the bias term
+`ρ^{s/2} · TV(δ₀, π)` is at most `(1/4)²·(2/3) = 1/24 ≤ 1/8 = ε/2`. -/
+theorem tri_bias_four_le_QA :
+    (1 - (Fintype.card (Fin 3) : ℝ) * (1/4)) ^ (4 / 2)
+      * tvDistance (Pi.single (0 : Fin 3) (1 : ℝ)) (stationaryVec triAdj)
+      ≤ (1/4) / 2 := by
+  rw [tri_tv_zero_eq_QA]
+  simp only [Fintype.card_fin]
+  norm_num
+
+/-- **The produced threshold's honest slack**: at `s = 2` the true TV
+distance is still `1/6 > 1/8 = ε/2` — no threshold below `3` could
+make the truth-side concentration premise hold, so the produced `t₀ =
+4` (from `K = 2`, `m = 2`) is one past the truth's minimum, not a
+loose display artifact hiding a much smaller certificate. -/
+theorem tri_tv_two_gt_half_QA :
+    (1/4) / 2 < tvDistance (walkDistribution triAdj 2 0)
+      (stationaryVec triAdj) := by
+  rw [tri_tv_two_eq_QA]
+  norm_num
+
+/-- **The fully-self-contained instance**: the theorem's `∃ t₀`
+instantiated on the triangle at `ε = 1/4`, target `i = 0` — no
+caller-supplied rate, no caller-supplied stationarity: connectivity
+and the odd walk `0 → 1 → 2 → 0` are the entire hypothesis set. -/
+theorem tri_selfcontained_instance_QA {n : ℕ} (hn : n ≠ 0) :
+    ∃ t₀ : ℕ, ∀ s : ℕ, t₀ ≤ s → ∀ x : Fin 3,
+      (iidPMF (walkDistribution triAdj s x)
+        (walkDistribution_nonneg triAdj triAdj_nonneg triAdj_deg_pos s x)
+        (sum_walkDistribution triAdj triAdj_deg_pos s x)).toMeasure
+        {ω : Fin n → Fin 3 | |(1 / (n : ℝ)) * ∑ k : Fin n,
+            (if ω k = 0 then (1 : ℝ) else 0) - stationaryVec triAdj 0| ≥ 1/4}
+        ≤ ENNReal.ofReal (2 * Real.exp (-(n : ℝ) * (1/4) ^ 2 / 2)) :=
+  empiricalWalkDistribution_tail_selfcontained_of_depth (A := triAdj)
+    triAdj_isSymm triAdj_nonneg triAdj_deg_pos tri_connected
+    (w := 0) triWalk3 triWalk3_odd (by norm_num : (0:ℝ) < 1/4) 0 hn
+
+/-- The convergence corollary instantiated: the plain walk law on the
+triangle converges to the uniform stationary vector — the retired
+`primitive_power_tendsto`'s first undirected consumer on its fixture. -/
+theorem tri_tendsto_instance_QA :
+    Filter.Tendsto (fun t : ℕ => walkDistribution triAdj t 0) Filter.atTop
+      (nhds (stationaryVec triAdj)) :=
+  walkDistribution_tendsto_stationaryVec (A := triAdj) triAdj_isSymm
+    triAdj_nonneg triAdj_deg_pos tri_connected (w := 0) triWalk3 triWalk3_odd 0
+
+end Primitivity
 end Scaffold.Derived.EmpiricalStationary.QA

@@ -60,6 +60,23 @@ guarantee for an agent that can only simulate the walk) — is the
   capstone — past the ceiling's own threshold at `ε / 2`, `n` sampled
   trajectories estimate `π i` to `ε` at `2 exp (− n ε² / 2)`.
 
+The lazy twins of all three (2026-09-01,
+`proposals/empirical-lazy-stationary-sampling.md` — the lazy program's
+named follow-on; the plain capstone's own "agent that can only simulate
+the walk" framing instantiated on the bipartite class — paths, trees,
+grids — where the plain `r < 1` certificate is provably unsatisfiable,
+fenced in QA) are the `LazyStationaryLimit` section below, at
+`q = lazyWalkDistribution A t₀ x` with the bias **computed at the
+intrinsic rate** `(1 − λ₂/2)^t₀` under connectivity alone — no
+caller-supplied rate certificate anywhere:
+
+- `empiricalLazyWalkDistribution_tail`: the fixed-time form;
+- `empiricalLazyWalkDistribution_stationary_tail`: the bias-term form
+  at the computed intrinsic-rate bias;
+- `empiricalLazyWalkDistribution_stationary_tail_of_depth`: the
+  depth-form capstone (the honest visible `λ₂ < 2`, mirroring the
+  depth-form lazy TV ceiling — K₂'s rate-0 corner excluded).
+
 QA: `Scaffold/QA/Derived/EmpiricalStationary_QA.lean`.
 -/
 
@@ -245,5 +262,161 @@ theorem empiricalWalkDistribution_stationary_tail_of_depth
       (by positivity))
 
 end StationaryLimit
+
+/-!
+## The lazy stationarity-limit form
+
+The lazy twins of the section above, at `q = lazyWalkDistribution A t₀
+x` — the lazy program's named follow-on
+(`proposals/empirical-lazy-stationary-sampling.md`, 2026-09-01): the
+plain capstone's hypothesis supplier is unsatisfiable on every
+connected bipartite graph (its `r < 1` certificate must dominate the
+`|1 − 2| = 1` top mode), so the plain sampling guarantee never
+instantiates on paths, trees, or grids; the delivered entrywise lazy
+ceiling `lazyWalkDistribution_sub_stationaryVec_abs_le` — connectivity
+the only graph hypothesis, the rate computed as `1 − λ₂/2` — is the
+hypothesis supplier that works there. See each theorem's docstring.
+-/
+section LazyStationaryLimit
+
+/-- The graph instance at the lazy law: for `n` i.i.d. samples of the
+fixed-time *lazy* walk law `lazyWalkDistribution A t₀ x`, the empirical
+visit frequency of vertex `i` concentrates around the lazy law's own
+mass at `i` at Hoeffding's `2 exp (-2 n t²)`. The law's
+probability-vector certification is proved
+(`lazyWalkDistribution_nonneg`/`sum_lazyWalkDistribution`) — no
+symmetry, no connectivity, no mixing. -/
+theorem empiricalLazyWalkDistribution_tail
+    {V : Type} [Fintype V] [DecidableEq V] [MeasurableSpace V]
+    [MeasurableSingletonClass V] {A : WAdj (V := V)}
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (t₀ : ℕ) (x : V) {n : ℕ} (hn : n ≠ 0) (i : V) (t : ℝ) (ht : 0 ≤ t) :
+    (iidPMF (lazyWalkDistribution A t₀ x)
+        (lazyWalkDistribution_nonneg A hnn hd t₀ x)
+        (sum_lazyWalkDistribution A hd t₀ x)).toMeasure
+      {ω : Fin n → V | |(1 / (n : ℝ)) * ∑ k : Fin n,
+          (if ω k = i then (1 : ℝ) else 0) - lazyWalkDistribution A t₀ x i| ≥ t}
+      ≤ ENNReal.ofReal (2 * Real.exp (-2 * (n : ℝ) * t ^ 2)) :=
+  hoeffding_empirical_iid (lazyWalkDistribution_nonneg A hnn hd t₀ x)
+    (sum_lazyWalkDistribution A hd t₀ x) hn i t ht
+
+/-- **The lazy stationarity-limit concentration (the bias-term form)**:
+on a connected graph, the empirical visit frequency of `i` in `n` i.i.d.
+samples of the `t₀`-step *lazy* walk law from `x` concentrates around
+the stationary value with the lazy law's own distance to stationarity
+folded in as a deterministic bias term — the bias **computed at the
+intrinsic rate** `(1 − λ₂/2)^t₀ √(π i ((π x)⁻¹ − 1))`, not certified by
+a caller-supplied `r`: connectivity is the only graph hypothesis, which
+is the entire point of the lazy program (on every connected bipartite
+graph — paths, trees, grids — the plain twin's `r < 1` certificate is
+provably unsatisfiable, so the plain twin never instantiates there;
+fenced in QA). Pure hard crust: the fixed-time tail is proved, the bias
+is the proved entrywise lazy ceiling
+`lazyWalkDistribution_sub_stationaryVec_abs_le`. -/
+theorem empiricalLazyWalkDistribution_stationary_tail
+    {V : Type} [Fintype V] [DecidableEq V] [MeasurableSpace V]
+    [MeasurableSingletonClass V] {A : WAdj (V := V)}
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected)
+    (t₀ : ℕ) (x i : V) {n : ℕ} (hn : n ≠ 0) {t : ℝ}
+    (hbias : (1 - secondEval (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) hcard / 2) ^ t₀
+      * Real.sqrt (stationaryVec A i * ((stationaryVec A x)⁻¹ - 1)) < t) :
+    (iidPMF (lazyWalkDistribution A t₀ x)
+        (lazyWalkDistribution_nonneg A hnn hd t₀ x)
+        (sum_lazyWalkDistribution A hd t₀ x)).toMeasure
+      {ω : Fin n → V | |(1 / (n : ℝ)) * ∑ k : Fin n,
+          (if ω k = i then (1 : ℝ) else 0) - stationaryVec A i| ≥ t}
+      ≤ ENNReal.ofReal (2 * Real.exp (-2 * (n : ℝ)
+          * (t - (1 - secondEval (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) hcard / 2) ^ t₀
+            * Real.sqrt (stationaryVec A i
+                * ((stationaryVec A x)⁻¹ - 1))) ^ 2)) := by
+  set b : ℝ := (1 - secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard / 2) ^ t₀
+    * Real.sqrt (stationaryVec A i * ((stationaryVec A x)⁻¹ - 1)) with hb_def
+  have hπν := lazyWalkDistribution_sub_stationaryVec_abs_le A hA hnn hd hcard
+    hconn t₀ x i
+  refine le_trans (measure_mono ?_)
+    (empiricalLazyWalkDistribution_tail hnn hd t₀ x hn i (t - b) (by linarith))
+  intro ω hω
+  simp only [Set.mem_setOf_eq] at hω ⊢
+  have hsplit : ((1 / (n : ℝ)) * ∑ k : Fin n, (if ω k = i then (1 : ℝ) else 0)
+      - stationaryVec A i)
+      = ((1 / (n : ℝ)) * ∑ k : Fin n, (if ω k = i then (1 : ℝ) else 0)
+          - lazyWalkDistribution A t₀ x i)
+        + (lazyWalkDistribution A t₀ x i - stationaryVec A i) := by
+    ring
+  rw [hsplit] at hω
+  have htri := abs_add_le
+    ((1 / (n : ℝ)) * ∑ k : Fin n, (if ω k = i then (1 : ℝ) else 0)
+      - lazyWalkDistribution A t₀ x i)
+    (lazyWalkDistribution A t₀ x i - stationaryVec A i)
+  linarith
+
+/-- **The depth-form capstone, lazy form — the oversmoothing ceiling's
+empirical counterpart on the bipartite class**: past the same depth
+`log (√(π i ((π x)⁻¹ − 1)) / (ε / 2)) / log (1 / (1 − λ₂/2))` at which
+the depth-form lazy TV ceiling certifies the *true* lazy walk law within
+`ε / 2` of stationarity, `n` i.i.d. simulated lazy trajectories of
+length `t₀` estimate the stationary value at `i` to `ε` with failure
+probability at most `2 exp (− n ε² / 2)`. The `λ₂ < 2` strictness is
+honest and visible, mirroring the depth-form lazy TV ceiling: `K₂`'s
+rate-0 corner is excluded (there the bias-term form still instantiates,
+the bias being exactly `0` at `t₀ ≥ 1`). An agent that can only sample
+the lazy walk inherits the depth certificate as a sampling guarantee —
+on exactly the graphs where the plain program's certificate is provably
+unsatisfiable. -/
+theorem empiricalLazyWalkDistribution_stationary_tail_of_depth
+    {V : Type} [Fintype V] [DecidableEq V] [MeasurableSpace V]
+    [MeasurableSingletonClass V] {A : WAdj (V := V)}
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected)
+    (hslt : secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard < 2)
+    {ε : ℝ} (hε : 0 < ε)
+    (t₀ : ℕ) (x i : V) {n : ℕ} (hn : n ≠ 0)
+    (hthr : Real.log (Real.sqrt (stationaryVec A i
+        * ((stationaryVec A x)⁻¹ - 1)) / (ε / 2))
+      / Real.log (1 / (1 - secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard / 2)) ≤ (t₀ : ℝ)) :
+    (iidPMF (lazyWalkDistribution A t₀ x)
+        (lazyWalkDistribution_nonneg A hnn hd t₀ x)
+        (sum_lazyWalkDistribution A hd t₀ x)).toMeasure
+      {ω : Fin n → V | |(1 / (n : ℝ)) * ∑ k : Fin n,
+          (if ω k = i then (1 : ℝ) else 0) - stationaryVec A i| ≥ ε}
+      ≤ ENNReal.ofReal (2 * Real.exp (-(n : ℝ) * ε ^ 2 / 2)) := by
+  set b : ℝ := (1 - secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard / 2) ^ t₀
+    * Real.sqrt (stationaryVec A i * ((stationaryVec A x)⁻¹ - 1)) with hb_def
+  have hsltpos : 0 < secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard :=
+    secondEval_normalizedLaplacian_pos_of_connected A hA hnn hd hcard hconn
+  have hr0 : 0 < (1 - secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard / 2) := by linarith
+  have hr1 : (1 - secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard / 2) < 1 := by linarith
+  have hble : b ≤ ε / 2 :=
+    pow_mul_le_of_log_threshold hr0 hr1 (Real.sqrt_nonneg _)
+      (by positivity) t₀ hthr
+  have hmain := empiricalLazyWalkDistribution_stationary_tail (V := V) hA hnn hd
+    hcard hconn t₀ x i hn (t := ε) (by linarith)
+  rw [← hb_def] at hmain
+  refine le_trans hmain ?_
+  have hres : ε / 2 ≤ ε - b := by linarith
+  have h1 : (ε / 2) ^ 2 ≤ (ε - b) ^ 2 := by
+    nlinarith [hres, sq_nonneg (ε - b), sq_nonneg (ε / 2)]
+  have h2 : (2 : ℝ) * (n : ℝ) * (ε / 2) ^ 2
+      ≤ 2 * (n : ℝ) * (ε - b) ^ 2 :=
+    mul_le_mul_of_nonneg_left h1 (by positivity)
+  have h3 : (2 : ℝ) * (n : ℝ) * (ε / 2) ^ 2 = (n : ℝ) * ε ^ 2 / 2 := by
+    ring
+  exact ENNReal.ofReal_le_ofReal
+    (mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr (by linarith))
+      (by positivity))
+
+end LazyStationaryLimit
 
 end Scaffold.Derived.EmpiricalStationary

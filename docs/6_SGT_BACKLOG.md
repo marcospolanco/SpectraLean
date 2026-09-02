@@ -1,7 +1,7 @@
 # SGT Backlog
 
 **Status:** Canonical backlog for the broad spectral-graph-theory program  
-**Last reviewed:** September 1, 2026
+**Last reviewed:** September 2, 2026
 
 This is the bounded, center-first backlog required by the strategy's
 center-out policy. Items are ranked by concrete reuse: each names the
@@ -153,8 +153,16 @@ junk corner on bipartite graphs closed by genuine lazy mixing times,
 with `λ₂(L_sym) ≤ 2` capping the whole normalized spectrum; the
 follow-ons' consumer gate discharged by naming the
 empirical-stationary agent's bipartite setting, whose lazy extension
-is the recorded next follow-on). Zero new axioms across the
-entire wave; QA now 3600. See `proposals/message-passing-depth-mixing-bound.md`,
+**is now delivered** — `proposals/empirical-lazy-stationary-sampling.md`
+(2026-09-02): `Derived/EmpiricalStationary.lean`'s `LazyStationaryLimit`
+section clones the empirical-stationary capstone at the lazy law with
+the bias computed at the intrinsic rate `(1 − λ₂/2)^t₀` under
+connectivity alone — the sampling guarantee (`n` simulated lazy
+trajectories estimate `π i` to `ε` past the lazy ceiling's own depth
+threshold) instantiating on exactly the bipartite class where the
+plain program's certificate is provably unsatisfiable, fenced in QA).
+Zero new axioms across the
+entire wave; QA now 3612. See `proposals/message-passing-depth-mixing-bound.md`,
 `proposals/total-variation-mixing-conversion.md`,
 `proposals/continuous-time-chi-square-mixing.md`,
 `proposals/entropy-mixing-pinsker.md`,

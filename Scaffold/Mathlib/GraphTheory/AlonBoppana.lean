@@ -15,8 +15,10 @@ limitations under the License.
 -/
 import Scaffold.Mathlib.GraphTheory.Spectral
 import Scaffold.Mathlib.GraphTheory.Cheeger
+import Scaffold.Mathlib.GraphTheory.SimpleGraphAdapter
 import Mathlib.Combinatorics.SimpleGraph.Metric
 import Mathlib.Combinatorics.SimpleGraph.Diam
+import Mathlib.Combinatorics.SimpleGraph.Circulant
 
 /-!
 # Alon–Boppana, Steps 1–5 (program complete): the d-regularity
@@ -1874,5 +1876,756 @@ theorem ramanujan_expansion_ceiling {d k : ℕ} {x y u v : V}
   exact Real.sqrt_le_sqrt h2
 
 end ExpansionCeiling
+
+section CycleFamily
+
+/-!
+## The cycle family: the asymptotic Alon–Boppana corollary
+
+The d-regular family the program's completion note asked for
+("needs a named d-regular family with `diam → ∞`"): the cycles
+`C_n`, carried by Mathlib's own `SimpleGraph.cycleGraph n` through the
+delivered `toWAdj` adapter. The new mathematical content is the exact
+cycle distance formula — the walk route up, the integer-potential
+route down — from which the tree-ball hypothesis and the far-apart
+condition discharge at arbitrary scale, and the two-edge machinery
+yields `λ₂(C_{4k+8}) ≤ 1/(k+1) → 0`: the Alon–Boppana error term
+attained on the canonical 2-regular family.
+-/
+
+/-! ### Cyclic `Fin` arithmetic helpers
+
+`(z - a).val` (cyclic `Fin` subtraction) is a complete invariant of
+`z` modulo translation by `a`: it decomposes (`fin_val_decomp`),
+injects (`fin_eq_of_val_sub_eq`), and its arithmetic reduces to
+`omega`-friendly decompositions through `mod_decomp`. -/
+
+private theorem mod_decomp {n : ℕ} {X c : ℕ} (hc : c < n)
+    (h : ∃ q : ℕ, X = c + q * n) : X % n = c := by
+  obtain ⟨q, rfl⟩ := h
+  rw [Nat.add_mul_mod_self_right, Nat.mod_eq_of_lt hc]
+
+/-- The definitional form of cyclic `Fin` subtraction. -/
+private theorem fin_val_sub_eq {n : ℕ} (a b : Fin n) :
+    (a - b).val = (n - b.val + a.val) % n := by
+  simp [Fin.sub_def]
+
+private theorem fin_val_sub_of_le {n : ℕ} {x y : Fin n} (h : y.val ≤ x.val) :
+    (x - y).val = x.val - y.val := by
+  have hx := x.isLt
+  have hX : ∃ q : ℕ, n - y.val + x.val = (x.val - y.val) + q * n := ⟨1, by omega⟩
+  rw [fin_val_sub_eq, mod_decomp (by omega) hX]
+
+/-- Adding then subtracting the same amount on the cycle is the
+identity: the decomposition half of the invariant. -/
+private theorem fin_val_sub_add_self {n : ℕ} (a : Fin n) {c : ℕ} (hc : c < n) :
+    (a + ⟨c, hc⟩ - a).val = c := by
+  have ha := a.isLt
+  have h1 : (a + ⟨c, hc⟩).val = (a.val + c) % n := by
+    simp [Fin.val_add]
+  rw [fin_val_sub_eq, h1]
+  rcases Nat.lt_or_ge (a.val + c) n with hlt | hge
+  · have hX : ∃ q : ℕ, n - a.val + ((a.val + c) % n) = c + q * n := by
+      rw [Nat.mod_eq_of_lt hlt]
+      exact ⟨1, by omega⟩
+    rw [mod_decomp hc hX]
+  · rw [Nat.mod_eq_sub_mod hge]
+    have hsub : a.val + c - n < n := by omega
+    rw [Nat.mod_eq_of_lt hsub]
+    have hX : ∃ q : ℕ, n - a.val + (a.val + c - n) = c + q * n := ⟨0, by omega⟩
+    rw [mod_decomp hc hX]
+
+/-- Every vertex decomposes through the cyclic difference. -/
+private theorem fin_val_decomp {n : ℕ} (a z : Fin n) :
+    z = a + ⟨(z - a).val, Fin.isLt _⟩ := by
+  have ha := a.isLt
+  have hz := z.isLt
+  apply Fin.ext
+  rw [Fin.val_add, fin_val_sub_eq]
+  rcases Nat.lt_or_ge z.val a.val with hlt | hge
+  · have hu : n - a.val + z.val < n := by omega
+    rw [Nat.mod_eq_of_lt hu]
+    have hX : ∃ q : ℕ, a.val + (n - a.val + z.val) = z.val + q * n := ⟨1, by omega⟩
+    rw [mod_decomp hz hX]
+  · rw [show n - a.val + z.val = n + (z.val - a.val) by omega, Nat.add_mod_left,
+      Nat.mod_eq_of_lt (by omega : z.val - a.val < n),
+      show a.val + (z.val - a.val) = z.val by omega, Nat.mod_eq_of_lt hz]
+
+/-- The cyclic difference determines the vertex: the injectivity half. -/
+private theorem fin_eq_of_val_sub_eq {n : ℕ} {a z w : Fin n}
+    (h : (z - a).val = (w - a).val) : z = w := by
+  rw [fin_val_decomp a z, fin_val_decomp a w]
+  apply Fin.ext
+  simp only [Fin.val_add, Fin.val_mk]
+  rw [h]
+
+private theorem fin_val_sub_self {n : ℕ} (a : Fin n) : (a - a).val = 0 := by
+  have ha := a.isLt
+  have hX : ∃ q : ℕ, n - a.val + a.val = 0 + q * n := ⟨1, by omega⟩
+  rw [fin_val_sub_eq, mod_decomp (by omega : (0 : ℕ) < n) hX]
+
+/-- The two orientations of the cyclic difference add to `n` (when
+nonzero). -/
+private theorem fin_val_sub_swap_of_pos {n : ℕ} {a b : Fin n}
+    (h : (b - a).val ≠ 0) : (a - b).val = n - (b - a).val := by
+  have ha := a.isLt
+  have hb := b.isLt
+  rcases Nat.lt_or_ge b.val a.val with hlt | hge
+  · have hX : ∃ q : ℕ, n - a.val + b.val = (n - a.val + b.val) + q * n :=
+      ⟨0, by omega⟩
+    have h1 : (b - a).val = n - a.val + b.val :=
+      mod_decomp (by omega : n - a.val + b.val < n) hX
+    have h2 : (a - b).val = a.val - b.val := fin_val_sub_of_le (by omega)
+    rw [h2, h1]
+    omega
+  · have h1 : (b - a).val = b.val - a.val := fin_val_sub_of_le (by omega)
+    have hpos : 0 < b.val - a.val := by rw [← h1]; exact Nat.pos_of_ne_zero h
+    have hY : ∃ q : ℕ, n - b.val + a.val = (n - b.val + a.val) + q * n :=
+      ⟨0, by omega⟩
+    have h2 : (a - b).val = n - b.val + a.val :=
+      mod_decomp (by omega : n - b.val + a.val < n) hY
+    rw [h2, h1]
+    omega
+
+/-- The value of the successor vertex: `1` short of the wrap, `0` at
+it. -/
+private theorem fin_val_add_one {n : ℕ} [NeZero n] (a : Fin n) :
+    (a + 1 : Fin n).val = if a.val + 1 < n then a.val + 1 else 0 := by
+  rcases Nat.lt_or_ge (a.val + 1) n with h | h
+  · have h1 : (a + 1 : Fin n).val = (a.val + 1) % n := by simp [Fin.val_add]
+    rw [h1, Nat.mod_eq_of_lt h, if_pos h]
+  · have h1 : (a + 1 : Fin n).val = (a.val + 1) % n := by simp [Fin.val_add]
+    have h2 : a.val + 1 = n := by omega
+    rw [h1, h2, Nat.mod_self, if_neg (by omega)]
+
+/-- The backward step: `(z − (a+1)).val` from `(z − a).val`. -/
+private theorem fin_val_sub_succ {n : ℕ} [NeZero n] (a z : Fin n) :
+    (z - (a + 1 : Fin n)).val
+      = if (z - a).val = 0 then n - 1 else (z - a).val - 1 := by
+  have ha := a.isLt
+  have hz := z.isLt
+  have hδlt : (z - a).val < n := Fin.isLt _
+  obtain ⟨q, hq⟩ : ∃ q : ℕ, n - a.val + z.val = (z - a).val + q * n := by
+    obtain ⟨q, hq⟩ : ∃ q : ℕ, (n - a.val + z.val) / n = q := ⟨_, rfl⟩
+    have hd := Nat.mod_add_div (n - a.val + z.val) n
+    rw [hq, Nat.mul_comm] at hd
+    have hsub : (z - a).val = (n - a.val + z.val) % n := fin_val_sub_eq z a
+    exact ⟨q, by omega⟩
+  rw [fin_val_sub_eq, fin_val_add_one]
+  rcases Nat.eq_zero_or_pos (z - a).val with h0 | hpos
+  · -- z = a
+    have hza : z = a := by
+      have : (z - a).val = (a - a).val := by rw [h0, fin_val_sub_self a]
+      exact fin_eq_of_val_sub_eq this
+    rw [if_pos h0, hza]
+    rcases Nat.lt_or_ge (a.val + 1) n with hlt | hge
+    · rw [if_pos hlt]
+      have hX : ∃ Q : ℕ, n - (a.val + 1) + a.val = (n - 1) + Q * n := ⟨0, by omega⟩
+      exact mod_decomp (by omega : n - 1 < n) hX
+    · rw [if_neg (by omega)]
+      have hX : ∃ Q : ℕ, n - 0 + a.val = (n - 1) + Q * n := ⟨1, by omega⟩
+      exact mod_decomp (by omega : n - 1 < n) hX
+  · rw [if_neg (by omega : ¬((z - a).val = 0))]
+    rcases Nat.lt_or_ge (a.val + 1) n with hlt | hge
+    · rw [if_pos hlt]
+      have hX : ∃ Q : ℕ, n - (a.val + 1) + z.val = ((z - a).val - 1) + Q * n :=
+        ⟨q, by omega⟩
+      exact mod_decomp (by omega) hX
+    · rw [if_neg (by omega)]
+      have hexp : (q + 1) * n = q * n + n := by ring
+      have hX : ∃ Q : ℕ, n - 0 + z.val = ((z - a).val - 1) + Q * n :=
+        ⟨q + 1, by omega⟩
+      exact mod_decomp (by omega) hX
+
+/-! ### The cycle family and its regularity interface -/
+
+/-- The `n`-cycle as a weighted adjacency matrix: Mathlib's
+`SimpleGraph.cycleGraph n` through the delivered `toWAdj` adapter —
+no duplicated graph model. -/
+def cycleAdj (n : ℕ) : Matrix (Fin n) (Fin n) ℝ :=
+  SimpleGraph.toWAdj (SimpleGraph.cycleGraph n)
+
+theorem cycleAdj_isSymm (n : ℕ) : (cycleAdj n).IsSymm :=
+  SimpleGraph.toWAdj_symm _
+
+theorem cycleAdj_nonneg (n : ℕ) : ∀ i j, 0 ≤ cycleAdj n i j :=
+  SimpleGraph.toWAdj_nonneg _
+
+theorem cycleAdj_apply (n : ℕ) (i j : Fin n) :
+    cycleAdj n i j = if (SimpleGraph.cycleGraph n).Adj i j then 1 else 0 :=
+  SimpleGraph.toWAdj_apply _ i j
+
+/-- Entries are `0` or `1`: the `0`-or-`≥ 1` weight discipline. -/
+theorem cycleAdj_h01 (n : ℕ) : ∀ i j, cycleAdj n i j = 0 ∨ 1 ≤ cycleAdj n i j := by
+  intro i j
+  by_cases h : (SimpleGraph.cycleGraph n).Adj i j
+  · rw [cycleAdj_apply, if_pos h]
+    exact Or.inr (by norm_num)
+  · rw [cycleAdj_apply, if_neg h]
+    exact Or.inl rfl
+
+/-- The support graph of the adapter weights is Mathlib's cycle. -/
+theorem supportGraph_cycleAdj (n : ℕ) :
+    supportGraph (cycleAdj n) (cycleAdj_isSymm n) = SimpleGraph.cycleGraph n :=
+  supportGraph_toWAdj_eq_self _
+
+theorem cycleAdj_connected {n : ℕ} (hn : 1 ≤ n) :
+    (supportGraph (cycleAdj n) (cycleAdj_isSymm n)).Connected := by
+  rw [supportGraph_cycleAdj]
+  obtain ⟨m, rfl⟩ : ∃ m : ℕ, n = m + 1 := ⟨n - 1, by omega⟩
+  exact SimpleGraph.cycleGraph_connected
+
+theorem cycleAdj_isDRegular {n : ℕ} (hn : 3 ≤ n) :
+    IsDRegular (cycleAdj n) 2 := by
+  intro i
+  have hdeg : deg (SimpleGraph.toWAdj (SimpleGraph.cycleGraph n)) i
+      = ((SimpleGraph.cycleGraph n).degree i : ℝ) := deg_toWAdj _ i
+  obtain ⟨m, rfl⟩ : ∃ m : ℕ, n = m + 3 := ⟨n - 3, by omega⟩
+  rw [show cycleAdj (m + 3) = SimpleGraph.toWAdj (SimpleGraph.cycleGraph (m + 3)) from rfl,
+    hdeg, SimpleGraph.cycleGraph_degree_three_le]
+  norm_num
+
+/-! ### The exact cycle distance formula -/
+
+/-- Consecutive vertices around the cycle are adjacent. -/
+private theorem cycleGraph_adj_add_one {n : ℕ} [NeZero n] (hn : 2 ≤ n)
+    (a : Fin n) :
+    (SimpleGraph.cycleGraph n).Adj a (a + 1) := by
+  have ha := a.isLt
+  rw [SimpleGraph.cycleGraph_adj']
+  right
+  rw [fin_val_sub_eq, fin_val_add_one]
+  rcases Nat.lt_or_ge (a.val + 1) n with hlt | hge
+  · rw [if_pos hlt]
+    have hX : ∃ q : ℕ, n - a.val + (a.val + 1) = 1 + q * n := ⟨1, by omega⟩
+    exact mod_decomp (by omega : (1 : ℕ) < n) hX
+  · rw [if_neg (by omega), show n - a.val + 0 = 1 by omega,
+      Nat.mod_eq_of_lt (by omega : (1 : ℕ) < n)]
+
+/-- The up-route bound: walking forward is a genuine route, so the
+distance to the `c`-steps-forward vertex is at most `c` — by induction
+appending one adjacency step at a time. -/
+private theorem cycleGraph_dist_le_up {n : ℕ} [NeZero n] (hn : 2 ≤ n)
+    (hconn : (SimpleGraph.cycleGraph n).Connected) (a : Fin n) :
+    ∀ c : ℕ, (hc : c < n) →
+      (SimpleGraph.cycleGraph n).dist a (a + ⟨c, by omega⟩) ≤ c := by
+  intro c
+  induction c with
+  | zero =>
+    intro _
+    have h0 : ∀ P : (0 : ℕ) < n, a + ⟨0, P⟩ = a := by
+      intro P
+      apply Fin.ext
+      have hval := a.isLt
+      simp only [Fin.val_add, Fin.val_mk, Nat.add_zero, Nat.mod_eq_of_lt hval]
+    rw [h0 _]
+    exact le_of_eq (by simp)
+  | succ c ih =>
+    intro hc
+    have hstep : (SimpleGraph.cycleGraph n).Adj (a + ⟨c, by omega⟩)
+        (a + ⟨c + 1, by omega⟩) := by
+      have h := cycleGraph_adj_add_one hn (a + ⟨c, by omega⟩)
+      have hkey : (a + ⟨c, by omega⟩) + 1 = a + ⟨c + 1, by omega⟩ := by
+        apply Fin.ext
+        have hvo : (1 : Fin n).val = 1 % n := Fin.val_one' n
+        have h2 : 2 ≤ n := hn
+        have e1 : (1 : Fin n).val = 1 := by
+          rw [hvo, Nat.mod_eq_of_lt (by omega : (1 : ℕ) < n)]
+        simp only [Fin.val_add, Fin.val_mk, e1, Nat.mod_add_mod, Nat.add_assoc]
+      rwa [hkey] at h
+    have h1 : (SimpleGraph.cycleGraph n).dist (a + ⟨c, by omega⟩)
+        (a + ⟨c + 1, by omega⟩) ≤ 1 :=
+      SimpleGraph.dist_le (SimpleGraph.Walk.cons hstep SimpleGraph.Walk.nil)
+    have h2 := hconn.dist_triangle (u := a) (v := (a + ⟨c, by omega⟩))
+      (w := (a + ⟨c + 1, by omega⟩))
+    have h3 := ih (by omega : c < n)
+    omega
+
+/-- The distance on the cycle is at most each orientation's step
+count. -/
+private theorem cycleGraph_dist_le_delta {n : ℕ} [NeZero n] (hn : 2 ≤ n)
+    (a b : Fin n) :
+    (SimpleGraph.cycleGraph n).dist a b ≤ (b - a).val := by
+  have hconn : (SimpleGraph.cycleGraph n).Connected := by
+    obtain ⟨m, rfl⟩ : ∃ m : ℕ, n = m + 1 := ⟨n - 1, by omega⟩
+    exact SimpleGraph.cycleGraph_connected
+  have hδlt := (b - a).isLt
+  have h := cycleGraph_dist_le_up hn hconn a (b - a).val hδlt
+  have hb : a + ⟨(b - a).val, hδlt⟩ = b := (fin_val_decomp a b).symm
+  calc (SimpleGraph.cycleGraph n).dist a b
+      = (SimpleGraph.cycleGraph n).dist a (a + ⟨(b - a).val, hδlt⟩) := by rw [hb]
+    _ ≤ (b - a).val := h
+
+/-- The integer-potential invariant: every walk realizes a residue
+representative of `b − start` of absolute value at most its length. -/
+private theorem cycle_walk_potential {n : ℕ} [NeZero n] (hn : 2 ≤ n) (b : Fin n) :
+    ∀ (a : Fin n) (p : (SimpleGraph.cycleGraph n).Walk a b),
+      ∃ s : ℤ, |s| ≤ p.length ∧ ∃ t : ℤ, ((b : ℤ) - (a : ℤ)) = s + (n : ℤ) * t := by
+  have stepFac : ∀ u w : Fin n, (w - u).val = 1 →
+      ∃ r : ℤ, ((w : ℤ) - (u : ℤ)) = 1 + (n : ℤ) * r := by
+    intro u w h
+    have hc : ((w - u : Fin n) : ℤ) = (((w : ℤ) - (u : ℤ)) % (n : ℤ)) :=
+      Fin.coe_int_sub_eq_mod w u
+    have hv : ((w - u : Fin n) : ℤ) = 1 := by exact_mod_cast h
+    have hlt : (1 : ℤ) < (n : ℤ) := by
+      have := (w - u).isLt
+      have h2 : 2 ≤ n := hn
+      omega
+    rw [hv] at hc
+    refine Int.modEq_iff_add_fac.1 ?_
+    show (1 : ℤ) % (n : ℤ) = ((w : ℤ) - (u : ℤ)) % (n : ℤ)
+    rw [Int.emod_eq_of_lt (by norm_num) (by omega : (1 : ℤ) < (n : ℤ))]
+    exact hc
+  intro a p
+  induction p with
+  | nil =>
+    refine ⟨0, by simp, 0, by simp⟩
+  | @cons u w b hadj tail ih =>
+    obtain ⟨s, hslen, t, ht⟩ := ih
+    rw [SimpleGraph.cycleGraph_adj'] at hadj
+    -- (b − u) = (b − w) + (w − u) in every case; the step contributes ±1
+    have hsplit : ((b : ℤ) - (u : ℤ))
+        = ((b : ℤ) - (w : ℤ)) + ((w : ℤ) - (u : ℤ)) := by ring
+    have habs := abs_le.1 (le_refl (|s|))
+    rcases hadj with h | h
+    · -- (u − w).val = 1 : the step moves the potential down by 1
+      obtain ⟨r, hr⟩ := stepFac w u h
+      have hr' : ((w : ℤ) - (u : ℤ)) = (-1 : ℤ) + (n : ℤ) * (-r) := by
+        have hwu : ((w : ℤ) - (u : ℤ)) = -(((u : ℤ)) - ((w : ℤ))) := by ring
+        rw [hwu, hr]
+        ring
+      refine ⟨s - 1, ?_, t - r, ?_⟩
+      · have hlen : (SimpleGraph.Walk.cons hadj tail).length = tail.length + 1 := rfl
+        rw [abs_le]
+        constructor <;> linarith
+      · rw [hsplit, ht, hr']
+        ring
+    · -- (w − u).val = 1 : the step moves the potential up by 1
+      obtain ⟨r, hr⟩ := stepFac u w h
+      refine ⟨s + 1, ?_, t + r, ?_⟩
+      · have hlen : (SimpleGraph.Walk.cons hadj tail).length = tail.length + 1 := rfl
+        rw [abs_le]
+        constructor <;> linarith
+      · rw [hsplit, ht, hr]
+        ring
+
+/-- **The integer-potential lower bound**: any walk from `a` to `b`
+on the cycle is at least the cyclic distance
+`min ((b-a).val) (n - (b-a).val)` long. Each step moves the integer
+potential `b - start` by `±1` up to a multiple of `n`, so a walk of
+length `L` realizes a residue representative of absolute value at
+most `L`. -/
+private theorem cycleGraph_walk_length_ge {n : ℕ} [NeZero n] (hn : 2 ≤ n)
+    (a b : Fin n)
+    (p : (SimpleGraph.cycleGraph n).Walk a b) :
+    min ((b - a).val) (n - (b - a).val) ≤ p.length := by
+  have hnpos : (0 : ℤ) < (n : ℤ) := by
+    have : 0 < n := NeZero.pos n
+    omega
+  obtain ⟨s, hslen, t, ht⟩ := cycle_walk_potential hn b a p
+  have hcform : ((b : ℤ) - (a : ℤ)) = ((b - a).val : ℤ) ∨
+      ((b : ℤ) - (a : ℤ)) = ((b - a).val : ℤ) - (n : ℤ) := by
+    rcases Nat.lt_or_ge b.val a.val with hlt | hge
+    · have hb := b.isLt
+      have ha := a.isLt
+      have hX : ∃ q : ℕ, n - a.val + b.val = (n - a.val + b.val) + q * n :=
+        ⟨0, by omega⟩
+      have h1 : (b - a).val = n - a.val + b.val :=
+        mod_decomp (by omega : n - a.val + b.val < n) hX
+      rw [h1]
+      omega
+    · have h1 : (b - a).val = b.val - a.val := fin_val_sub_of_le (by omega)
+      rw [h1]
+      omega
+  have hδlt : (b - a).val < n := Fin.isLt _
+  have hδlt' : (((b - a).val : ℤ)) < ((n : ℤ)) := by exact_mod_cast hδlt
+  have hprod : ∀ u : ℤ, (1 : ℤ) ≤ u → ((n : ℤ)) ≤ (n : ℤ) * u := by
+    intro u _
+    have h1 : (n : ℤ) * (u - 1) ≥ 0 := Int.mul_nonneg (by omega) (by omega)
+    linarith [show ((n : ℤ)) * u = (n : ℤ) + (n : ℤ) * (u - 1) by ring]
+  have hZ : ((min ((b - a).val) (n - (b - a).val) : ℕ) : ℤ) ≤ |s| := by
+    have hcast : ((min ((b - a).val) (n - (b - a).val) : ℕ) : ℤ)
+        = min ((b - a).val : ℤ) ((n : ℤ) - ((b - a).val : ℤ)) := by
+      push_cast [Nat.cast_min, Nat.cast_sub (Nat.le_of_lt hδlt)]
+      rfl
+    rw [hcast]
+    have hminL : min ((b - a).val : ℤ) ((n : ℤ) - ((b - a).val : ℤ))
+        ≤ ((b - a).val : ℤ) := Int.min_le_left _ _
+    have hminR : min ((b - a).val : ℤ) ((n : ℤ) - ((b - a).val : ℤ))
+        ≤ ((n : ℤ) - ((b - a).val : ℤ)) := Int.min_le_right _ _
+    have hnt0 : ∀ u : ℤ, u ≤ 0 → (n : ℤ) * u ≤ 0 := by
+      intro u _
+      have hx0 : (n : ℤ) * (-u) ≥ 0 := Int.mul_nonneg (by omega) (by omega)
+      linarith [show (n : ℤ) * u = -((n : ℤ) * (-u)) by ring]
+    rcases hcform with hc | hc
+    · -- s = δ − n*t
+      have hst : s = ((b - a).val : ℤ) - (n : ℤ) * t := by linarith
+      rcases lt_or_ge ((n : ℤ) * t) ((b - a).val : ℤ) with h1 | h1
+      · -- n*t < δ : t ≤ 0, so n*t ≤ 0 and s = δ − n*t ≥ δ ≥ min
+        have ht0 : t ≤ 0 := by
+          by_contra hcon
+          have hnt1 : (n : ℤ) ≤ (n : ℤ) * t := hprod t (by omega)
+          omega
+        have hx := hnt0 t ht0
+        rw [abs_of_nonneg (by omega : (0 : ℤ) ≤ s)]
+        omega
+      · -- δ ≤ n*t : s ≤ 0
+        rcases lt_trichotomy t 0 with htn | hte | htp
+        · -- t < 0 : n*t ≤ 0 ≤ δ ≤ n*t forces δ = 0, and |s| ≥ 0 ≥ min
+          have hx := hnt0 t (by omega)
+          have hδ0 : ((b - a).val : ℤ) = 0 := by omega
+          have hmin0 : min ((b - a).val : ℤ) ((n : ℤ) - ((b - a).val : ℤ))
+              ≤ (0 : ℤ) := by
+            rw [hδ0]
+            exact Int.min_le_left (0 : ℤ) ((n : ℤ) - 0)
+          exact le_trans hmin0 (abs_nonneg s)
+        · subst hte
+          have hz : (n : ℤ) * 0 = 0 := by ring
+          have hδ0 : ((b - a).val : ℤ) = 0 := by omega
+          have hs0 : s = 0 := by omega
+          rw [hs0, abs_zero, hδ0]
+          simp
+        · have hnt1 : (n : ℤ) ≤ (n : ℤ) * t := hprod t (by omega)
+          rw [abs_of_nonpos (by omega : s ≤ 0)]
+          omega
+    · -- s = δ − n − n*t = δ − n(1+t)
+      have hst : s = ((b - a).val : ℤ) - (n : ℤ) - (n : ℤ) * t := by linarith
+      have hrew : ((n : ℤ)) * (1 + t) = (n : ℤ) + (n : ℤ) * t := by ring
+      rcases lt_or_ge ((n : ℤ) * (1 + t)) ((b - a).val : ℤ) with h1 | h1
+      · -- n(1+t) < δ : 1+t ≤ 0, so n(1+t) ≤ 0 and s ≥ δ ≥ min
+        have hu0 : 1 + t ≤ 0 := by
+          by_contra hcon
+          have hnt1 : (n : ℤ) ≤ (n : ℤ) * (1 + t) := hprod (1 + t) (by omega)
+          omega
+        have hx := hnt0 (1 + t) hu0
+        rw [abs_of_nonneg (by omega : (0 : ℤ) ≤ s)]
+        omega
+      · -- δ ≤ n(1+t) : s ≤ 0
+        rcases lt_trichotomy (1 + t) 0 with htn | hte | htp
+        · -- 1+t < 0 : forces δ = 0, and |s| ≥ 0 ≥ min
+          have hx := hnt0 (1 + t) (by omega)
+          have hδ0 : ((b - a).val : ℤ) = 0 := by omega
+          have hmin0 : min ((b - a).val : ℤ) ((n : ℤ) - ((b - a).val : ℤ))
+              ≤ (0 : ℤ) := by
+            rw [hδ0]
+            exact Int.min_le_left (0 : ℤ) ((n : ℤ) - 0)
+          exact le_trans hmin0 (abs_nonneg s)
+        · have hz2 : (n : ℤ) * (1 + t) = 0 := by rw [hte, mul_zero]
+          have hδ0 : ((b - a).val : ℤ) = 0 := by omega
+          have hs0 : s = 0 := by omega
+          rw [hs0, abs_zero, hδ0]
+          simp
+        · have hnt1 : (n : ℤ) ≤ (n : ℤ) * (1 + t) := hprod (1 + t) (by omega)
+          rw [abs_of_nonpos (by omega : s ≤ 0)]
+          omega
+  exact Nat.cast_le.1 (le_trans hZ hslen)
+
+/-- **The sInf half of the distance formula**: every walk is at least
+the cyclic distance long, so the infimum of walk lengths is too. -/
+private theorem cycleGraph_dist_ge_min {n : ℕ} [NeZero n] (hn : 2 ≤ n)
+    (hconn : (SimpleGraph.cycleGraph n).Connected) (a b : Fin n) :
+    min ((b - a).val) (n - (b - a).val) ≤ (SimpleGraph.cycleGraph n).dist a b := by
+  rw [SimpleGraph.dist_eq_sInf]
+  obtain ⟨w⟩ : Nonempty ((SimpleGraph.cycleGraph n).Walk a b) := hconn.preconnected a b
+  refine le_csInf ⟨w.length, ⟨w, rfl⟩⟩ ?_
+  rintro x ⟨p, rfl⟩
+  exact cycleGraph_walk_length_ge hn a b p
+
+/-- **The exact cycle distance**: the BFS distance between two
+vertices of the cycle is the shorter of the two orientation step
+counts. -/
+theorem cycleAdj_dist_eq {n : ℕ} (hn : 2 ≤ n) (a b : Fin n) :
+    (supportGraph (cycleAdj n) (cycleAdj_isSymm n)).dist a b
+      = min ((b - a).val) (n - (b - a).val) := by
+  haveI : NeZero n := ⟨by omega⟩
+  have hconn : (SimpleGraph.cycleGraph n).Connected := by
+    obtain ⟨m, rfl⟩ : ∃ m : ℕ, n = m + 1 := ⟨n - 1, by omega⟩
+    exact SimpleGraph.cycleGraph_connected
+  rw [supportGraph_cycleAdj]
+  refine le_antisymm ?_ ?_
+  · have h1 : (SimpleGraph.cycleGraph n).dist a b ≤ (b - a).val :=
+      cycleGraph_dist_le_delta hn a b
+    have h2 : (SimpleGraph.cycleGraph n).dist a b ≤ n - (b - a).val := by
+      rcases Nat.eq_zero_or_pos (b - a).val with h0 | hpos
+      · have hba : b = a := by
+          have : (b - a).val = (a - a).val := by rw [h0, fin_val_sub_self a]
+          exact fin_eq_of_val_sub_eq this
+        rw [hba]
+        have hd0 : (SimpleGraph.cycleGraph n).dist a a = 0 := SimpleGraph.dist_self
+        have haa : (a - a).val = 0 := fin_val_sub_self a
+        omega
+      · have hswap : (a - b).val = n - (b - a).val := fin_val_sub_swap_of_pos hpos.ne'
+        rw [SimpleGraph.dist_comm, ← hswap]
+        exact cycleGraph_dist_le_delta hn b a
+    omega
+  · exact cycleGraph_dist_ge_min hn hconn a b
+
+/-! ### The tree ball on the cycle -/
+
+/-- A positive cyclic-offset pair carries a genuine edge. -/
+private theorem cycleAdj_ne_zero_of_sub_one {n : ℕ} [NeZero n] {a b : Fin n}
+    (h : (b - a).val = 1) : cycleAdj n a b ≠ 0 := by
+  rw [cycleAdj_apply, if_pos (SimpleGraph.cycleGraph_adj'.2 (Or.inr h))]
+  norm_num
+
+/-- The endpoint pair of the base edge. -/
+private theorem cycleAdj_edge_zero_one {n : ℕ} [NeZero n] (hn : 2 ≤ n) :
+    cycleAdj n ⟨0, by omega⟩ ⟨1, by omega⟩ ≠ 0 := by
+  refine cycleAdj_ne_zero_of_sub_one ?_
+  have hX : ∃ q : ℕ, n - 0 + 1 = 1 + q * n := ⟨1, by omega⟩
+  exact mod_decomp (by omega : (1 : ℕ) < n) hX
+
+/-- **The BFS level formula at a cycle edge**: the level of `z` from
+the edge `(a, a+1)` is `0` at the endpoints and
+`min ((z−a).val − 1) (n − (z−a).val)` otherwise. -/
+theorem cycle_levE_eq {n : ℕ} [NeZero n] (hn : 2 ≤ n) (a z : Fin n) :
+    levE (cycleAdj n) (cycleAdj_isSymm n) a (a + 1) z
+      = (if (z - a).val = 0 then 0
+         else min ((z - a).val - 1) (n - (z - a).val)) := by
+  have hda : (supportGraph (cycleAdj n) (cycleAdj_isSymm n)).dist z a
+      = min ((a - z).val) (n - (a - z).val) := cycleAdj_dist_eq hn z a
+  have hda' : (supportGraph (cycleAdj n) (cycleAdj_isSymm n)).dist z (a + 1)
+      = min ((z - (a + 1 : Fin n)).val) (n - (z - (a + 1 : Fin n)).val) := by
+    rw [SimpleGraph.dist_comm]
+    exact cycleAdj_dist_eq hn (a + 1) z
+  -- (a − z).val in terms of δ := (z − a).val
+  have hswap : (a - z).val
+      = if (z - a).val = 0 then 0 else n - (z - a).val := by
+    rcases Nat.eq_zero_or_pos (z - a).val with h0 | hpos
+    · rw [if_pos h0]
+      have hza : z = a := by
+        have : (z - a).val = (a - a).val := by rw [h0, fin_val_sub_self a]
+        exact fin_eq_of_val_sub_eq this
+      rw [hza, fin_val_sub_self]
+    · rw [if_neg (by omega), fin_val_sub_swap_of_pos (by omega)]
+  rw [levE, hda, hda', hswap, fin_val_sub_succ a z]
+  rcases Nat.eq_zero_or_pos (z - a).val with h0 | hpos
+  · rw [if_pos h0, if_pos h0, if_pos h0]
+    omega
+  · rw [if_neg (by omega : ¬((z - a).val = 0)),
+      if_neg (by omega : ¬((z - a).val = 0)), if_neg (by omega : ¬((z - a).val = 0))]
+    have hδlt : (z - a).val < n := Fin.isLt _
+    omega
+
+/-- **The level class at a cycle edge**: exactly the two vertices at
+cyclic offsets `j+1` forward and `j` backward from `a`. -/
+theorem cycle_levClass_eq {n : ℕ} [NeZero n] (hn : 2 ≤ n) {j : ℕ} (hj1 : 1 ≤ j)
+    (hjn : 2 * (j + 1) < n) (a : Fin n) :
+    levClass (cycleAdj n) (cycleAdj_isSymm n) a (a + 1) j
+      = insert (a + ⟨j + 1, by omega⟩) (insert (a + ⟨n - j, by omega⟩) ∅) := by
+  ext z
+  simp only [levClass, Finset.mem_filter, Finset.mem_univ, true_and,
+    Finset.mem_insert, Finset.not_mem_empty, or_false]
+  rw [cycle_levE_eq hn a z]
+  have hoff : ∀ d : ℕ, (hd : d < n) → (a + ⟨d, hd⟩ - a).val = d :=
+    fun d hd => fin_val_sub_add_self a hd
+  constructor
+  · intro hmem
+    rcases Nat.eq_zero_or_pos (z - a).val with h0 | hpos
+    · rw [if_pos h0] at hmem
+      omega
+    · rw [if_neg (by omega : ¬((z - a).val = 0))] at hmem
+      rcases Nat.lt_or_ge ((z - a).val) (n - (z - a).val) with hlt | hge
+      · have hd : (z - a).val = j + 1 := by omega
+        left
+        rw [fin_val_decomp a z]
+        apply Fin.ext
+        rw [Fin.val_add, Fin.val_add, Fin.val_mk, Fin.val_mk, hd]
+      · have hd : (z - a).val = n - j := by omega
+        right
+        rw [fin_val_decomp a z]
+        apply Fin.ext
+        rw [Fin.val_add, Fin.val_add, Fin.val_mk, Fin.val_mk, hd]
+  · rintro (h | h)
+    · rw [h, hoff (j + 1) (by omega : (j + 1 : ℕ) < n)]
+      rw [if_neg (by omega : ¬((j + 1 : ℕ) = 0))]
+      omega
+    · rw [h, hoff (n - j) (by omega : (n - j : ℕ) < n)]
+      rw [if_neg (by omega : ¬((n - j : ℕ) = 0))]
+      omega
+
+/-- **The tree-ball hypothesis on the cycle**: the radius-`(k+1)` ball
+around any cycle edge is a full BFS tree whenever `2(k+1) ≤ n` — the
+program's structural hypothesis discharging at arbitrary scale. -/
+theorem isTreeBall_cycle {n : ℕ} [NeZero n] (hn : 2 ≤ n) {k : ℕ}
+    (hk : 2 * (k + 1) < n) (a : Fin n) :
+    IsTreeBall (cycleAdj n) (cycleAdj_isSymm n) a (a + 1) 2 (k + 1) := by
+  intro j hj
+  rcases Nat.eq_zero_or_pos j with rfl | hj1
+  · have hxy : a ≠ a + 1 := by
+      intro hcon
+      have hval : a.val = (a + 1 : Fin n).val := congrArg Fin.val hcon
+      rw [fin_val_add_one a] at hval
+      have ha := a.isLt
+      rcases Nat.lt_or_ge (a.val + 1) n with hlt | hge
+      · rw [if_pos hlt] at hval
+        omega
+      · rw [if_neg (by omega)] at hval
+        omega
+    rw [levClass_zero_card (cycleAdj_connected (by omega)) hxy]
+    norm_num
+  · have hjn : 2 * (j + 1) < n := by omega
+    have hne : (a + ⟨j + 1, by omega⟩ : Fin n) ≠ (a + ⟨n - j, by omega⟩) := by
+      intro heq
+      have h1 : (a + ⟨j + 1, by omega⟩ - a).val
+          = (a + ⟨n - j, by omega⟩ - a).val := by rw [heq]
+      rw [fin_val_sub_add_self a (by omega), fin_val_sub_add_self a (by omega)] at h1
+      omega
+    rw [cycle_levClass_eq hn hj1 hjn a,
+      Finset.card_insert_of_not_mem (by simp [hne]),
+      Finset.card_insert_of_not_mem (by simp),
+      Finset.card_empty]
+    norm_num
+
+/-! ### The far-apart edge and the headline theorems -/
+
+/-- **The far-apart condition at the antipodal edge**: on
+`C_{4k+8}`, the edges `(0, 1)` and `(2k+4, 2k+5)` are more than
+`2(k+1)` apart — the two-edge method's separation hypothesis, with the
+family's `4k+8` sizing exactly what buys it. -/
+theorem cycleAdj_distEdge_gt (k : ℕ) :
+    (k + 1) + (k + 1) < distEdge (cycleAdj (4 * k + 8)) (cycleAdj_isSymm _)
+      ⟨0, by omega⟩ ⟨1, by omega⟩ ⟨2 * k + 4, by omega⟩ ⟨2 * k + 5, by omega⟩ := by
+  have hn : 2 ≤ 4 * k + 8 := by omega
+  have hm : (2 * k + 5 : ℕ) < 4 * k + 8 := by omega
+  have hδ : ∀ c : ℕ, (hc : c ≤ 2 * k + 5) →
+      (⟨c, by omega⟩ - ⟨0, by omega⟩ : Fin (4 * k + 8)).val = c := by
+    intro c hc
+    rw [fin_val_sub_eq]
+    have hX : ∃ q : ℕ, 4 * k + 8 - 0 + c = c + q * (4 * k + 8) := ⟨1, by omega⟩
+    exact mod_decomp (by omega) hX
+  have hδ' : ∀ c : ℕ, (hc : c ≤ 2 * k + 4) →
+      (⟨c + 1, by omega⟩ - ⟨1, by omega⟩ : Fin (4 * k + 8)).val = c := by
+    intro c hc
+    rw [fin_val_sub_eq]
+    have hX : ∃ q : ℕ, 4 * k + 8 - 1 + (c + 1) = c + q * (4 * k + 8) := ⟨1, by omega⟩
+    exact mod_decomp (by omega) hX
+  have d1 : (supportGraph (cycleAdj (4 * k + 8)) (cycleAdj_isSymm _)).dist
+      ⟨0, by omega⟩ ⟨2 * k + 4, by omega⟩ = 2 * k + 4 := by
+    rw [cycleAdj_dist_eq hn, hδ (2 * k + 4) (by omega)]
+    omega
+  have d2 : (supportGraph (cycleAdj (4 * k + 8)) (cycleAdj_isSymm _)).dist
+      ⟨1, by omega⟩ ⟨2 * k + 4, by omega⟩ = 2 * k + 3 := by
+    rw [cycleAdj_dist_eq hn, hδ' (2 * k + 3) (by omega)]
+    omega
+  have d3 : (supportGraph (cycleAdj (4 * k + 8)) (cycleAdj_isSymm _)).dist
+      ⟨0, by omega⟩ ⟨2 * k + 5, by omega⟩ = 2 * k + 3 := by
+    rw [cycleAdj_dist_eq hn, hδ (2 * k + 5) (by omega)]
+    omega
+  have d4 : (supportGraph (cycleAdj (4 * k + 8)) (cycleAdj_isSymm _)).dist
+      ⟨1, by omega⟩ ⟨2 * k + 5, by omega⟩ = 2 * k + 4 := by
+    rw [cycleAdj_dist_eq hn, hδ' (2 * k + 4) (by omega)]
+    omega
+  simp only [distEdge]
+  omega
+
+set_option maxHeartbeats 4000000 in
+/-- **The Alon–Boppana bound on the cycle family**: `λ₂` of the
+`4k+8`-cycle is at most `1/(k+1)` — the Alon–Boppana error term
+`d − 2√(d−1) = 0` at `d = 2`, attained with rate `1/(k+1)` on the
+canonical family. The tree-ball and far-apart hypotheses of Nilli's
+two-edge method discharge at every scale `k`. -/
+theorem alonBoppana_cycle (k : ℕ) :
+    secondEval (((2 : ℕ) : ℝ) • (1 : Matrix (Fin (4 * k + 8)) (Fin (4 * k + 8)) ℝ)
+        - cycleAdj (4 * k + 8))
+      (smul_one_sub_isSymm (cycleAdj_isSymm (4 * k + 8)) 2)
+      (by rw [Fintype.card_fin]; omega)
+      ≤ 1 / ((k : ℝ) + 1) := by
+  haveI : NeZero (4 * k + 8) := ⟨by omega⟩
+  have hnn : 2 ≤ 4 * k + 8 := by omega
+  -- the successor spelling of the far edge's second endpoint
+  have hkey : (⟨2 * k + 4, by omega⟩ : Fin (4 * k + 8)) + 1 = ⟨2 * k + 5, by omega⟩ := by
+    apply Fin.ext
+    have hv1 : (⟨2 * k + 5, by omega⟩ : Fin (4 * k + 8)).val = 2 * k + 5 := rfl
+    rw [fin_val_add_one, if_pos (by omega : (2 * k + 4 : ℕ) + 1 < 4 * k + 8)]
+  have hedge2 : cycleAdj (4 * k + 8) (⟨2 * k + 4, by omega⟩ :
+      Fin (4 * k + 8)) ⟨2 * k + 5, by omega⟩ ≠ 0 := by
+    refine cycleAdj_ne_zero_of_sub_one ?_
+    rw [fin_val_sub_eq]
+    have hX : ∃ q : ℕ, 4 * k + 8 - (2 * k + 4) + (2 * k + 5)
+        = 1 + q * (4 * k + 8) := ⟨1, by omega⟩
+    exact mod_decomp (by omega : (1 : ℕ) < 4 * k + 8) hX
+  have hxy01 : (⟨0, by omega⟩ : Fin (4 * k + 8)) ≠ ⟨1, by omega⟩ := by
+    intro hcon
+    have hv : (0 : ℕ) = (1 : ℕ) := congrArg Fin.val hcon
+    simp only [Fin.val_mk] at hv
+    omega
+  have huv45 : (⟨2 * k + 4, by omega⟩ : Fin (4 * k + 8)) ≠ ⟨2 * k + 5, by omega⟩ := by
+    intro hcon
+    have hv : (2 * k + 4 : ℕ) = (2 * k + 5 : ℕ) := congrArg Fin.val hcon
+    simp only [Fin.val_mk] at hv
+    omega
+  have htb2 := isTreeBall_cycle hnn (by omega : 2 * (k + 1) < 4 * k + 8)
+    ⟨2 * k + 4, by omega⟩
+  rw [hkey] at htb2
+  have h := alonBoppana_nilli (d := 2) (k := k)
+    (x := ⟨0, by omega⟩) (y := ⟨1, by omega⟩)
+    (u := ⟨2 * k + 4, by omega⟩) (v := ⟨2 * k + 5, by omega⟩)
+    (cycleAdj_h01 _)
+    (cycleAdj_isDRegular (by omega))
+    hxy01 (cycleAdj_edge_zero_one hnn)
+    huv45 hedge2
+    (cycleAdj_connected (by omega))
+    (cycleAdj_distEdge_gt k)
+    (by norm_num)
+    (isTreeBall_cycle hnn (by omega : 2 * (k + 1) < 4 * k + 8) ⟨0, by omega⟩)
+    htb2
+    (by rw [Fintype.card_fin]; omega)
+  have hsqrt : Real.sqrt (((2 - 1 : ℕ) : ℝ)) = 1 := by norm_num
+  rw [hsqrt] at h
+  simp only [mul_one] at h
+  have heq : ((2 : ℕ) : ℝ) - (1 + 2 * (k : ℝ)) / ((k : ℝ) + 1)
+      = 1 / ((k : ℝ) + 1) := by
+    have hk : ((k : ℝ) + 1) ≠ 0 := by positivity
+    field_simp
+    ring
+  rw [heq] at h
+  exact h
+
+theorem laplacian_cycleAdj {n : ℕ} (hn : 3 ≤ n) :
+    laplacian (cycleAdj n) = (2 : ℝ) • (1 : Matrix (Fin n) (Fin n) ℝ) - cycleAdj n := by
+  have hd := cycleAdj_isDRegular hn
+  ext i j
+  simp only [Matrix.sub_apply, Matrix.smul_apply, Matrix.one_apply, smul_eq_mul]
+  by_cases hij : i = j
+  · subst hij
+    simp [laplacian, degreeMatrix, hd i]
+  · simp [laplacian, degreeMatrix, hij]
+
+/-- **The Laplacian form of the cycle bound**: `λ₂(L(C_{4k+8})) ≤
+1/(k+1)`. -/
+theorem alonBoppana_cycle_laplacian (k : ℕ) :
+    secondEval (laplacian (cycleAdj (4 * k + 8)))
+      (laplacian_symmetric (cycleAdj (4 * k + 8)) (cycleAdj_isSymm (4 * k + 8)))
+      (by simp)
+      ≤ 1 / ((k : ℝ) + 1) := by
+  rw [secondEval_congr
+    (laplacian_symmetric (cycleAdj (4 * k + 8)) (cycleAdj_isSymm (4 * k + 8)))
+    (smul_one_sub_isSymm (cycleAdj_isSymm (4 * k + 8)) 2)
+    (laplacian_cycleAdj (by omega)) (by simp)]
+  exact alonBoppana_cycle k
+
+/-- **The asymptotic Alon–Boppana corollary on the named family**: for
+every `ε > 0` there is a cycle whose Laplacian's second eigenvalue is
+at most `ε` — the Alon–Boppana error term tends to zero along the
+cycle family, the d-regular family with diameter tending to infinity
+that the program's completion note asked to be named. -/
+theorem alonBoppana_cycle_asymptotic {ε : ℝ} (hε : 0 < ε) :
+    ∃ k : ℕ, secondEval (laplacian (cycleAdj (4 * k + 8)))
+      (laplacian_symmetric (cycleAdj (4 * k + 8)) (cycleAdj_isSymm (4 * k + 8)))
+      (by simp)
+      ≤ ε := by
+  obtain ⟨k, hk⟩ : ∃ k : ℕ, 1 / ε ≤ k := ⟨Nat.ceil (1 / ε), Nat.le_ceil _⟩
+  refine ⟨k, ?_⟩
+  have hkpos : (0 : ℝ) < (k : ℝ) + 1 := by positivity
+  have hke : 1 / ε ≤ ((k : ℕ) : ℝ) + 1 :=
+    le_trans hk (by exact_mod_cast Nat.le_succ k)
+  have h1 : 1 / ((k : ℝ) + 1) ≤ ε := by
+    rw [div_le_iff₀ hkpos]
+    calc (1 : ℝ) = ε * (1 / ε) := by field_simp
+      _ ≤ ε * ((k : ℝ) + 1) := mul_le_mul_of_nonneg_left hke (le_of_lt hε)
+  exact le_trans (alonBoppana_cycle_laplacian k) h1
+
+end CycleFamily
 
 end SpectralGraphTheory

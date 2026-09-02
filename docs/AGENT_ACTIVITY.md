@@ -8853,3 +8853,140 @@ walk law, a multi-file composition. The standing queue otherwise:
 reverse TV → χ² calculus (no consumer named), log-Sobolev adoption
 (operator decision), and the operator-gated items (over-squashing
 floor's Python bridge, matrix master-bound Step 2).
+
+
+## 2026-09-02T00:40:00Z — The empirical lazy sampling guarantee: in progress
+
+**Run:** `20260902T003639Z-run-1`  
+**Session:** `ses_fa07700d6ffeRxNVr7j371SX0A`  
+**Status:** in-progress  
+**Milestone:** the lazy program's named follow-on — the plain
+empirical-stationary capstone cloned at the lazy law
+(`empiricalLazyWalkDistribution_tail` / `_stationary_tail` at the
+computed intrinsic-rate bias / `_stationary_tail_of_depth`), with QA on
+the bipartite path where the plain program's `r < 1` certificate is
+provably unsatisfiable (fenced). Proposal
+`proposals/empirical-lazy-stationary-sampling.md`; spike first
+(`wip/lazystat_spike.lean`), then `Derived/EmpiricalStationary.lean`'s
+new `LazyStationaryLimit` section and the QA section of
+`EmpiricalStationary_QA.lean`.
+
+
+## 2026-09-02T00:56:31Z — The empirical lazy sampling guarantee delivered (terminal)
+
+**Run:** `20260902T003639Z-run-1`  
+**Session:** `ses_fa07700d6ffeRxNVr7j371SX0A`  
+**Status:** completed  
+**Milestone:** the lazy program's named follow-on — the plain
+empirical-stationary capstone cloned at the lazy law with the bias
+computed at the intrinsic rate — the queue's only named, ungated,
+hypothesis-supplied item (the plain capstone's own "agent that can
+only simulate the walk" framing instantiated on paths/trees/grids,
+where its `r < 1` certificate is provably unsatisfiable; the delivered
+entrywise lazy ceiling is the hypothesis supplier).
+
+**Changes:** `Derived/EmpiricalStationary.lean`'s new
+`LazyStationaryLimit` section — `empiricalLazyWalkDistribution_tail`
+(the fixed-time form at the lazy law, probability-vector certification
+proved), **`empiricalLazyWalkDistribution_stationary_tail`** (the
+bias-term form at the **computed** intrinsic-rate bias `(1 −
+λ₂/2)^t₀ √(π i ((π x)⁻¹ − 1))` — connectivity the only graph
+hypothesis, no caller-supplied rate certificate anywhere: the plain
+twin's certificate hypothesis replaced by the computed rate, the lazy
+program's whole point delivered at the sampling level), and
+**`empiricalLazyWalkDistribution_stationary_tail_of_depth`** (the
+capstone: past the lazy ceiling's own threshold at `ε/2`, `n`
+simulated lazy trajectories estimate `π i` to `ε` at `2 exp(−nε²/2)`;
+honest visible `λ₂ < 2`, K₂'s rate-0 corner excluded — the bias-term
+form still instantiating there). QA +12 (3600 → 3612,
+`EmpiricalStationary_QA.lean`'s lazy section) on the bipartite path
+P₃ at the pinned gap λ₂ = 1: **the plain-certificate
+unsatisfiability fence** (no `r ∈ (0,1)` exists for the plain walk
+there — `chiSquareDistance_le_of_connected` at a would-be certificate
+against the pinned `χ²_plain(center) ≡ 1` forces `r² ≥ 1`), the
+bias-term instance at `(1/2)²·√3/2 = √3/8` with the raw true deviation
+`1/8` dominated with honest slack beside it, the capstone instance
+closing at `2 exp(−1/16)` past the same `log(4√3)/log 2 ≤ 3` threshold
+the lazy-ceiling QA pinned, the event-mass non-vacuity witness
+`25/256`, and the exact-stationary contrast (true deviation `0` at
+every `t₀ ≥ 1` from the center start against the honestly positive
+quoted bias). The elaborator caught one real arithmetic error in the
+spike (a `−1/8` that should be `−1/16`) before any shelf edit; eight
+technique findings recorded in the proposal. Records: the proposal
+(COMPLETE + delivery record), `proposals/README.md` (Delivered row),
+README (3612 + the walks-and-mixing row's lazy-sampling extension),
+the radar (QA axis synced 3600 → 3612, held 4.0),
+`index/map/probability_concentration.md` (three lazy-twin rows), the
+scoreboard verification row, both map data tables + regenerated SVG,
+the QA module's purpose header, the backlog item-2 update + reviewed
+date, the execution plan, this log.
+
+**Verification:** spike first (`wip/lazystat_spike.lean` — shelf +
+full QA + the axiom audit at zero errors/zero warnings before any
+shelf edit); `lake env lean` zero errors on both touched modules (the
+QA-imports-shelf stale-olen boundary met once, remediated per the
+completeness script's docstring); explicit `lake build` targets ✔ on
+both; `#print axioms` via `wip/lazystat_axcheck.lean` on all 15 new
+declarations (3 shelf + 12 QA): exactly `propext, Classical.choice,
+Quot.sound` — pure hard crust, zero axiom contact; full `lake build` ✔
+immediately followed by `check_build_completeness.py` — 133 source
+files, 133 fresh artifacts, 0 stale, 0 missing, exit 0; `lint_axioms`
+exit 0 (5 axioms, both PF findings allowlisted-confirmed);
+`check_refutation_independence` (10-tag clean — no tags added, nothing
+touches an axiom); `check_public_reachability` clean (63 modules);
+`check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; `check_backlog_freshness` clean;
+scoreboard regenerated (3612/5/0); map-freshness exit 0 after the
+3600 → 3612 stats sync + SVG regeneration (no proposal status header
+changed for a mapped station — no station, no tier change).
+
+**Remaining risk:** none owed — pure hard crust, no axiom disposition
+changed, no existing public statement changed; the depth-form
+statement's `λ₂ < 2` strictness is honest (K₂'s rate-0 corner outside
+its hypothesis set, covered by the bias-term form whose bias is
+exactly `0` at `t₀ ≥ 1` there).
+
+**Next handoff:** the lazy program's follow-on chain is closed — no
+named, ungated, hypothesis-supplied item remains on the queue. The
+standing queue: the reverse TV → χ² calculus (no consumer named),
+log-Sobolev adoption (operator decision), and the operator-gated items
+(over-squashing floor's Python bridge, matrix master-bound Step 2).
+
+
+## 2026-09-02T02:11:20Z — The cycle family / asymptotic Alon–Boppana corollary: in progress
+
+**Run:** `20260902T021120Z-run-1`  
+**Session:** `ses_fa02a5eaaffemYEa5nqMLuq94z`  
+**Status:** Lean complete, verified; records incomplete (see operator closing note)  
+**Milestone:** backlog item 3's named follow-on delivered by naming the
+canonical family — the cycles C_n (Mathlib's `SimpleGraph.cycleGraph`
+through the delivered `toWAdj` adapter): the exact cycle distance
+formula, `IsTreeBall`/far-apart at arbitrary scale, and the asymptotic
+Alon–Boppana corollary (`secondEval (2•1 − C_{4k+8}) ≤ 1/(k+1)`; `∀ ε >
+0, ∃ 2-regular A with λ₂ ≤ ε`) — the program's first parametric
+(arbitrary-n) instantiation. Spike first (`wip/cyclefam_spike.lean`),
+then `GraphTheory/AlonBoppana.lean`'s `CycleFamily` section + the QA
+section; zero new axioms expected (count stays 5).
+
+**Operator closing note (commit steward, 2026-09-02):** the run
+completed the actual Lean work and wrote a full, accurate delivery
+record into `proposals/cycle-family-alon-boppana-asymptotic.md`
+(status COMPLETE, with its own Verification section) but exited before
+writing this log's terminal entry or syncing the scoreboard/map stat
+stamps it had already regenerated to. Independently re-verified rather
+than trusting the proposal's own claim: `lake build` clean;
+`check_build_completeness.py` — 133 source files, 133 fresh artifacts,
+0 stale, 0 missing; `#print axioms` via a fresh `wip/verify_batch9.lean`
+on all 23 new declarations (17 shelf + 6 QA) plus the 3 new empirical-
+lazy-sampling declarations from the preceding delivery — every one
+exactly `propext, Classical.choice, Quot.sound`; `lint_axioms`
+unchanged at 5; `check_refutation_independence`,
+`check_public_reachability`, `check_citations`, `check_markdown_links`,
+`check_backlog_freshness` all pass; `sorry`/`admit` sweep clean. The
+scoreboard and both map files' stat stamps were stale at 3612 despite
+the actual source already at 3618 QA declarations (the proposal's own
+record claims the sync was done; it wasn't persisted) — regenerated
+and corrected here. Not done here: the `proposals/README.md` Delivered
+row and the README module-table mention were left unwritten rather
+than fabricated by the operator — added below from the proposal's own
+already-complete, independently-verified record, not invented.

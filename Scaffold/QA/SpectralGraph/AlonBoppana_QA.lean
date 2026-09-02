@@ -18,7 +18,7 @@ import Mathlib.Data.Matrix.Notation
 import Mathlib.Combinatorics.SimpleGraph.Metric
 
 /-!
-# QA for `GraphTheory.AlonBoppana` (Steps 1–6)
+# QA for `GraphTheory.AlonBoppana` (Steps 1–7)
 
 QA obligations for the Alon–Boppana program's first three steps
 (`proposals/alon-boppana-bound.md`): instances of the top-eigenvalue
@@ -30,7 +30,13 @@ positive instance, negative witness, and tightness fence, — Step 3
 independent routes and fenced at the `d = 1` degeneracy, and —
 Step 3b (second slice) — the energy half's numerator pinned tight by
 two independent routes with the three hypothesis fences the
-from-below harvest needs.
+from-below harvest needs. — Step 7 (2026-09-02,
+`proposals/cycle-family-alon-boppana-asymptotic.md`) — the cycle
+family: the exact distance formula, the level class, and the theorem
+instance pinned at `C₁₂` (the program's first parametric fixture,
+beyond every prior literal matrix), the Laplacian spelling, the
+asymptotic corollary at a concrete `ε`, and the far-apart fence
+isolating what the family's `4k+8` sizing buys.
 
 ## Step 1: the d-regularity interface
 
@@ -2639,5 +2645,121 @@ theorem abC8_ceiling_improves_arith :
   exact Real.sqrt_lt_sqrt (by norm_num : (0 : ℝ) ≤ 1) (by norm_num : (1 : ℝ) < 2)
 
 end Step6
+
+/-!
+## Step 7: the cycle family (the asymptotic Alon–Boppana corollary)
+
+The program's first *parametric* (arbitrary-`n`) instantiation, pinned
+at `C₁₂` — a fixture size no literal-matrix QA had reached (the
+largest before was `C₈`): the exact distance formula (short way,
+wraparound, antipodal tie, degenerate self), the level class at the
+base edge, the theorem instance at `k = 1`, the Laplacian spelling,
+the asymptotic corollary at a concrete `ε`, and the far-apart fence
+isolating exactly what the family's `4k+8` sizing buys — on `C₁₂` at
+`k = 2` both radius-`3` tree balls are genuine yet the antipodal edges
+are only `5` apart, so `hfar` fails by exactly the slack.
+-/
+section Step7
+
+/-- The distance formula as a `C₁₂` calculator: `(12 − a + b) % 12`
+computed by `omega` (literal modulus). -/
+private theorem dist12 (a b c : ℕ) (ha : a < 12) (hb : b < 12)
+    (hc : (12 - a + b) % 12 = c) :
+    (supportGraph (cycleAdj 12) (cycleAdj_isSymm 12)).dist ⟨a, ha⟩ ⟨b, hb⟩
+      = min c (12 - c) := by
+  rw [cycleAdj_dist_eq (by norm_num)]
+  have hva : (⟨a, ha⟩ : Fin 12).val = a := rfl
+  have hvb : (⟨b, hb⟩ : Fin 12).val = b := rfl
+  have h : (⟨b, hb⟩ - ⟨a, ha⟩ : Fin 12).val = c := by
+    simp only [Fin.sub_def, Fin.val_mk, hva, hvb]
+    omega
+  rw [h]
+
+/-- The exact distance formula pinned at `C₁₂`: the short way, the
+wraparound, the antipodal tie, and the degenerate self case. -/
+theorem cyc12_dist_pins_QA :
+    (supportGraph (cycleAdj 12) (cycleAdj_isSymm 12)).dist ⟨0, by norm_num⟩
+        ⟨4, by norm_num⟩ = 4
+      ∧ (supportGraph (cycleAdj 12) (cycleAdj_isSymm 12)).dist ⟨7, by norm_num⟩
+        ⟨2, by norm_num⟩ = 5
+      ∧ (supportGraph (cycleAdj 12) (cycleAdj_isSymm 12)).dist ⟨5, by norm_num⟩
+        ⟨11, by norm_num⟩ = 6
+      ∧ (supportGraph (cycleAdj 12) (cycleAdj_isSymm 12)).dist ⟨3, by norm_num⟩
+        ⟨3, by norm_num⟩ = 0 := by
+  refine ⟨dist12 0 4 4 (by norm_num) (by norm_num) (by decide), ?_, ?_, ?_⟩
+  · exact dist12 7 2 7 (by norm_num) (by norm_num) (by decide)
+  · exact dist12 5 11 6 (by norm_num) (by norm_num) (by decide)
+  · exact dist12 3 3 0 (by norm_num) (by norm_num) (by decide)
+
+/-- The level class at the base edge: level `3` of `(0, 1)` in `C₁₂`
+is exactly the two vertices at cyclic offsets `4` and `9`. -/
+theorem cyc12_levClass_pin_QA :
+    levClass (cycleAdj 12) (cycleAdj_isSymm 12) ⟨0, by norm_num⟩
+        (⟨0, by norm_num⟩ + 1) 3
+      = insert (⟨0, by norm_num⟩ + ⟨4, by norm_num⟩)
+          (insert (⟨0, by norm_num⟩ + ⟨9, by norm_num⟩) ∅) :=
+  cycle_levClass_eq (n := 12) (by norm_num) (by norm_num) (by norm_num)
+    ⟨0, by norm_num⟩
+
+/-- The theorem instance at `k = 1` (the `12`-cycle):
+`secondEval (2•1 − C₁₂) ≤ 1/2`. -/
+theorem cyc_theorem_instance_QA :
+    secondEval (((2 : ℕ) : ℝ) • (1 : Matrix (Fin 12) (Fin 12) ℝ)
+        - cycleAdj 12)
+      (smul_one_sub_isSymm (cycleAdj_isSymm 12) 2)
+      (by norm_num)
+      ≤ 1 / 2 := by
+  have h := alonBoppana_cycle 1
+  norm_num at h ⊢
+  exact h
+
+/-- The Laplacian-spelling instance at `k = 1`. -/
+theorem cyc_laplacian_instance_QA :
+    secondEval (laplacian (cycleAdj 12))
+      (laplacian_symmetric (cycleAdj 12) (cycleAdj_isSymm 12))
+      (by norm_num)
+      ≤ 1 / 2 := by
+  have h := alonBoppana_cycle_laplacian 1
+  norm_num at h ⊢
+  exact h
+
+/-- The asymptotic corollary instantiated at a concrete `ε`. -/
+theorem cyc_asymptotic_instance_QA :
+    ∃ k : ℕ, secondEval (laplacian (cycleAdj (4 * k + 8)))
+      (laplacian_symmetric (cycleAdj (4 * k + 8)) (cycleAdj_isSymm (4 * k + 8)))
+      (by simp)
+      ≤ 1 / 2 :=
+  alonBoppana_cycle_asymptotic (by norm_num)
+
+/-- **The far-apart fence**: on `C₁₂` at `k = 2` (`n = 12 < 16`), both
+radius-`3` tree balls are genuine, yet the antipodal edges `(0, 1)`
+and `(6, 7)` are only `5` apart — the far-apart hypothesis of the
+two-edge method fails by exactly the slack the family's `4k+8` sizing
+buys. The parametric counterpart of the `C₈` `hfar` fence. -/
+theorem cyc12_far_fence_QA :
+    IsTreeBall (cycleAdj 12) (cycleAdj_isSymm 12) ⟨0, by norm_num⟩
+        (⟨0, by norm_num⟩ + 1) 2 (2 + 1)
+      ∧ IsTreeBall (cycleAdj 12) (cycleAdj_isSymm 12) ⟨6, by norm_num⟩
+        (⟨6, by norm_num⟩ + 1) 2 (2 + 1)
+      ∧ ¬ ((2 + 1) + (2 + 1) < distEdge (cycleAdj 12) (cycleAdj_isSymm 12)
+            ⟨0, by norm_num⟩ ⟨1, by norm_num⟩ ⟨6, by norm_num⟩
+            (⟨6, by norm_num⟩ + 1)) := by
+  refine ⟨isTreeBall_cycle (by norm_num) (by norm_num) ⟨0, by norm_num⟩,
+    isTreeBall_cycle (by norm_num) (by norm_num) ⟨6, by norm_num⟩, ?_⟩
+  have d1 := dist12 0 6 6 (by norm_num) (by norm_num) (by decide)
+  have d2 := dist12 1 6 5 (by norm_num) (by norm_num) (by decide)
+  have d3 := dist12 0 7 7 (by norm_num) (by norm_num) (by decide)
+  have d4 := dist12 1 7 6 (by norm_num) (by norm_num) (by decide)
+  -- the far edge is (6, 6+1) = (6, 7)
+  have h7 : (⟨6, by norm_num⟩ : Fin 12) + 1 = ⟨7, by norm_num⟩ := by
+    apply Fin.ext
+    show ((6 : ℕ) + (1 : Fin 12).val) % 12 = 7
+    have e1 : (1 : Fin 12).val = 1 := by decide
+    rw [e1]
+  rw [h7]
+  simp only [distEdge, d1, d2, d3, d4]
+  omega
+
+end Step7
 
 end SpectralGraphTheory.QA

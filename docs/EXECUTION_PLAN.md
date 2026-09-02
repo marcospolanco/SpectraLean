@@ -6,21 +6,125 @@ holds the append-only narrative.
 
 ## Active milestone
 
-None in flight — the queue is the center-out fall-through. The
-remaining recorded candidates: the reverse TV → χ² calculus (still no
-consumer named), log-Sobolev (its consumer gate **discharged
-2026-09-01** by the entropy-mixing delivery — the entropy-decay family
-is the named on-shelf consumer an LSI would improve; *adoption* is now
-an operator decision, not missing machinery, so an autonomous run
-should not admit it without direction), the lazy program's newly named
-follow-on (the empirical-stationary sampling guarantee at the lazy law
-— `empiricalLazyWalkDistribution_stationary_tail_of_depth`, unlocked
-by the delivered entrywise lazy ceiling as its hypothesis supplier;
-rests on the `Derived/EmpiricalStationary.lean` machinery being cloned
-at the lazy walk law, a multi-file composition), and the
-operator-gated items (over-squashing floor's Python bridge, matrix
-master-bound Step 2). Check `proposals/README.md`'s Active table first
-per the priority order.
+**The cycle family and the asymptotic Alon–Boppana corollary** —
+backlog item 3's own named follow-on ("the asymptotic family corollary
+needs a named d-regular family with `diam → ∞` and stays a Plan entry
+until one is named"), closed by naming the canonical family: the cycles
+C_n. Selected under the center-out fall-through (proposals' Active
+table all Low/blocked; every other queue item consumer-less or
+operator-gated). Leverage: (1) the Alon–Boppana program's asymptotic
+reading — `∀ ε > 0, ∃ n A, IsDRegular A 2 ∧ λ₂ ≤ ε` — the statement
+the whole two-edge machinery exists for, unstatable without a family;
+(2) the shelf's first **parametric** (arbitrary-n) instantiation of
+`IsTreeBall`/`distEdge`/`levE` — until now exercised only on fixed
+literal fixtures (C₈), exactly the QA axis's named "parametric QA" gap;
+(3) maximal Mathlib reuse: `SimpleGraph.cycleGraph n` through the
+delivered `toWAdj` adapter (roundtrip + 2-regularity from
+`cycleGraph_degree_three_le` are free), so the new content is the exact
+cycle distance formula (walk construction + ℤ-potential sInf bound) and
+the level-cardinality assembly. Zero new axioms.
+
+Next action: spike `wip/cyclefam_spike.lean` (shelf declarations + QA +
+axiom audit iterated to zero errors) before any shelf edit; then land
+the `CycleFamily` section in `GraphTheory/AlonBoppana.lean` and the QA
+section in `AlonBoppana_QA.lean`; proposal
+`proposals/cycle-family-alon-boppana-asymptotic.md`.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The empirical lazy sampling guarantee — the plain
+empirical-stationary capstone cloned at the lazy law, with the bias
+computed at the intrinsic rate**
+(`proposals/empirical-lazy-stationary-sampling.md`, same-run proposal;
+run `20260902T003639Z-run-1`, session
+`ses_fa07700d6ffeRxNVr7j371SX0A`). DELIVERED — zero new axioms (count
+stays 5; `#print axioms` via `wip/lazystat_axcheck.lean` on all 15
+audited declarations — 3 shelf + 12 QA — every one exactly `propext,
+Classical.choice, Quot.sound`, pure hard crust). QA 3600 → 3612 (+12,
+`EmpiricalStationary_QA.lean`'s lazy section). Radar QA axis synced
+and held at 4.0 per protocol (the lazy twins of already-counted
+sampling families instantiated on the fixture class the plain program
+cannot reach, plus exact/fence pins — not a new theorem family).**
+
+The delivery's content: (1) **The consumer gate was already
+discharged** — the lazy-mixing-time delivery named the
+bipartite-input instance (the plain capstone's own "agent that can
+only simulate the walk" setting on paths/trees/grids, where the plain
+`r < 1` certificate is provably unsatisfiable) and delivered the
+entrywise lazy ceiling as this extension's hypothesis supplier; this
+run is that named follow-on. (2) **The shelf**
+(`Derived/EmpiricalStationary.lean`'s new `LazyStationaryLimit`
+section): `empiricalLazyWalkDistribution_tail` (the fixed-time form at
+the lazy law, the probability-vector certification proved);
+`empiricalLazyWalkDistribution_stationary_tail` — **the bias-term form
+at the computed intrinsic-rate bias** `(1 − λ₂/2)^t₀ √(π i ((π x)⁻¹ −
+1))`, connectivity the only graph hypothesis, *no caller-supplied rate
+certificate anywhere* (the plain twin's certificate hypothesis
+replaced by the computed rate — the lazy program's whole point,
+delivered at the sampling level); and
+`empiricalLazyWalkDistribution_stationary_tail_of_depth` — the
+capstone (`n` simulated lazy trajectories estimate `π i` to `ε` at
+`2 exp(−nε²/2)` past the lazy ceiling's own threshold at `ε/2`, the
+`λ₂ < 2` strictness honest and visible, K₂'s rate-0 corner excluded —
+the bias-term form still instantiating there). (3) **The QA** (12
+lemmas on the bipartite path P₃ at the pinned gap λ₂ = 1): the
+**plain-certificate unsatisfiability fence** (no `r ∈ (0,1)` exists
+for the plain walk on P₃ — `chiSquareDistance_le_of_connected` at a
+would-be certificate against the pinned `χ²_plain(center) ≡ 1` forces
+`r² ≥ 1` — the leverage case made negative); the fixed-time instance;
+the **bias-term instance** at `(1/2)²·√3/2 = √3/8` with the raw true
+deviation `1/8` pinned beside it and dominated with honest slack; the
+**depth-form capstone instance** closing at `2 exp(−1/16)` past the
+same `log(4√3)/log 2 ≤ 3` threshold the delivered lazy-ceiling QA
+pinned; the event-mass non-vacuity witness `25/256` (at the pinned
+`t₀ = 3` law entry `5/16`); and the **exact-stationary contrast**
+(true deviation `0` at every `t₀ ≥ 1` from the center start, against
+the honestly positive quoted bias). The elaborator caught one real
+arithmetic error in the spike (a `−1/8` that should be `−1/16` — the
+capstone exponent `−n·ε²/2` normalization) before any shelf edit;
+eight technique findings recorded in the proposal (headline:
+`chiSquareDistance_le_of_connected`'s binder order takes the start
+vertex before the certificate; `Real.log_mul` with explicit `≠ 0`
+proofs pins the pattern's `a`, so `Real.log_pow` is the robust route
+to `log 8 = 3·log 2`; `rw [hk]` with `hk : (2:ℕ) = 1 + 1` fails on
+goals carrying ℝ numerals — the `show ... (1 + 1) ...` defeq route
+instead; and `norm_num` folds `r^(2·1)·1` to `|r|`).
+
+**Verification:** spike first (`wip/lazystat_spike.lean` — shelf + full
+QA + the axiom audit iterated to zero errors/zero warnings before any
+shelf edit, including the arithmetic correction); `lake env lean` zero
+errors on both touched modules (the QA-imports-shelf stale-olen
+boundary met once and remediated per the completeness script's
+docstring); explicit `lake build` targets ✔ on both; **full `lake
+build` ✔ immediately followed by `check_build_completeness.py` — 133
+source files, 133 fresh artifacts, 0 stale, 0 missing, exit 0**;
+`lint_axioms` exit 0 (5, both PF findings allowlisted-confirmed);
+`check_refutation_independence` (10-tag clean — no tags added, nothing
+touches an axiom); `check_public_reachability` clean (63 repo
+modules); `check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; `check_backlog_freshness` clean;
+scoreboard regenerated (**3612/5/0**) with the verification row;
+**map-freshness exit 0** after the 3600 → 3612 stats sync in both map
+files and SVG regeneration (no station — no tier change). Records
+updated: the proposal (COMPLETE + delivery record with the technique
+findings), `proposals/README.md` (new Delivered row), README (3612 +
+the walks-and-mixing row's lazy-sampling extension), the radar (QA axis
+synced 3600 → 3612 held at 4.0), `index/map/probability_concentration.md`
+(the three lazy-twin rows), the scoreboard verification row, both map
+data tables + regenerated SVG, the QA module's purpose header, the
+backlog item-2 update and reviewed-date bump, this plan, and the
+activity log. Nothing committed; the previous runs' uncommitted
+deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed. The
+depth-form statement's `λ₂ < 2` strictness is honest (K₂'s rate-0
+corner outside its hypothesis set; the bias-term form still
+instantiates there since the bias is exactly `0` at `t₀ ≥ 1`). The
+lazy program's follow-on chain is now closed: no named, ungated,
+hypothesis-supplied item remains on the queue.
 
 ------
 

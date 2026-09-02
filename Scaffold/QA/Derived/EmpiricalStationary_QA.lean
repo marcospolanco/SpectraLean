@@ -32,17 +32,33 @@
   the interface and the classical numbers.
 
   4. the Step-2 QA section (`proposals/
-  empirical-stationary-distribution-concentration.md`'s deferred
-  stationarity-limit form, delivered 2026-08-31) — the raw deviation
-  and bias pins on the triangle, both theorem instances (the
-  bias-folded exponent at `t₀ = 2`; the depth-form capstone at
-  `t₀ = 3` closing at exactly `2 exp (−1/16)`), the event-mass
-  non-vacuity witness (the both-samples-at-`0` cylinder at mass
-  `1/16`), the **bias-free naive-form refutation** at `t₀ = 0` (the
-  sampler law is `δ₀`, the event is the whole space at measure `1`
-  against `2 exp (−16/9) < 1` — the bias term load-bearing), and the
-  `t₀ = 0` corner instance of the delivered form itself (admitted
-  with honest large bias, not excluded).
+      empirical-stationary-distribution-concentration.md`'s deferred
+      stationarity-limit form, delivered 2026-08-31) — the raw deviation
+      and bias pins on the triangle, both theorem instances (the
+      bias-folded exponent at `t₀ = 2`; the depth-form capstone at
+      `t₀ = 3` closing at exactly `2 exp (−1/16)`), the event-mass
+      non-vacuity witness (the both-samples-at-`0` cylinder at mass
+      `1/16`), the **bias-free naive-form refutation** at `t₀ = 0` (the
+      sampler law is `δ₀`, the event is the whole space at measure `1`
+      against `2 exp (−16/9) < 1` — the bias term load-bearing), and the
+      `t₀ = 0` corner instance of the delivered form itself (admitted
+      with honest large bias, not excluded).
+
+  5. the lazy section (`proposals/
+      empirical-lazy-stationary-sampling.md`, delivered 2026-09-01) —
+      the lazy twins' instances on the **bipartite path**, the fixture
+      class the plain program cannot reach: the fixed-time instance,
+      **the plain-certificate unsatisfiability fence** (no `r ∈ (0, 1)`
+      rate certificate for the plain walk exists on the path —
+      `chiSquareDistance_le_of_connected` at a would-be certificate
+      against the pinned `χ²_plain(center) ≡ 1` forces `r² ≥ 1`), the
+      bias-term instance at the pinned intrinsic rate `(1/2)² · √3/2`
+      with the raw true deviation `1/8` dominated beside it, the
+      depth-form capstone instance closing at `2 exp (−1/16)` past the
+      same `log (4√3)/log 2 ≤ 3` threshold the delivered lazy-ceiling
+      QA pinned, the event-mass non-vacuity witness (`25/256`), and the
+      exact-stationary contrast from the center start (true deviation
+      `0` at every `t₀ ≥ 1`, the quoted bias honestly positive).
 
   All proofs are real Lean proofs (no `sorry`/`admit`).
 
@@ -511,5 +527,318 @@ theorem tri_stationary_tail_zero_depth_QA :
   rw [pow_zero, one_mul, tri_oversmoothingConstant_eq_QA 0 0] at h
   push_cast at h
   exact h
+
+/-!
+## The lazy twins on the bipartite path (2026-09-01)
+
+`proposals/empirical-lazy-stationary-sampling.md`: the lazy
+stationarity-limit theorems instantiated on the three-vertex path — the
+fixture class where the plain program's `r < 1` certificate is provably
+unsatisfiable (fenced below), so only the lazy twins certify anything.
+-/
+
+local notation "pathL" => normalizedLaplacian pathAdj
+local notation "pathH" => normalizedLaplacian_symmetric pathAdj pathAdj_isSymm
+
+/-- The fixed-time instance on the bipartite path: `n = 2` samples of
+the one-step lazy law from the corner, threshold `1`, bound
+`2 exp (−4)` — the lazy law's probability-vector certification
+exercised at a genuinely lazy input. -/
+theorem path_lazy_tail_instance_QA :
+    (iidPMF (lazyWalkDistribution pathAdj 1 0)
+        (lazyWalkDistribution_nonneg pathAdj pathAdj_nonneg
+          pathAdj_deg_pos 1 0)
+        (sum_lazyWalkDistribution pathAdj pathAdj_deg_pos 1 0)).toMeasure
+      {ω : Fin 2 → Fin 3 | |(1 / (2 : ℝ)) * ∑ k : Fin 2,
+          (if ω k = 0 then (1 : ℝ) else 0)
+          - lazyWalkDistribution pathAdj 1 0 0| ≥ 1}
+      ≤ ENNReal.ofReal (2 * Real.exp (-4)) := by
+  have h := empiricalLazyWalkDistribution_tail (V := Fin 3)
+    pathAdj_nonneg pathAdj_deg_pos 1 0 two_ne_zero 0 1
+    zero_le_one
+  have h' : -2 * ((2 : ℕ) : ℝ) * (1 : ℝ) ^ 2 = -4 := by norm_num
+  rw [h'] at h
+  exact h
+
+/-- **The leverage case made negative**: no `r ∈ (0, 1)` rate
+certificate for the *plain* walk exists on the bipartite path — the
+plain capstone `empiricalWalkDistribution_stationary_tail_of_depth`'s
+hypothesis set is provably unsatisfiable there. Route: a would-be
+certificate fed to the proved `chiSquareDistance_le_of_connected`
+bounds the plain χ² from the center start by `r² · ((π center)⁻¹ − 1) =
+r²`, against the pinned `path_plain_never_QA` (`χ²_plain(center, t)
+≡ 1` at every time) — forcing `r² ≥ 1`. The lazy capstone instantiates
+on this same fixture (`path_lazy_capstone_depth_QA` below): the
+periodicity fix read at the sampling level. -/
+theorem path_plain_cert_fenced_QA :
+    ¬ ∃ r : ℝ, 0 < r ∧ r < 1 ∧ ∀ i : Fin 3,
+      eigvalOf pathL pathH i ≠ 0 →
+        |1 - eigvalOf pathL pathH i| ≤ r := by
+  rintro ⟨r, hr0, hr1, hrate⟩
+  have h := chiSquareDistance_le_of_connected pathAdj pathAdj_isSymm
+    pathAdj_nonneg pathAdj_deg_pos path_connected r 1 1 hrate
+  rw [path_plain_never_QA 1] at h
+  have hπ : stationaryVec pathAdj 1 = 1/2 := by
+    rw [path_pi_QA]; rfl
+  rw [hπ] at h
+  norm_num at h
+  rw [abs_of_pos hr0] at h
+  linarith
+
+/-- The corner-start bias constant, raw: `√(π 0 · ((π 0)⁻¹ − 1)) =
+√3/2` at the pinned stationary vector. -/
+theorem path_lazy_corner_biasConstant_QA :
+    Real.sqrt (stationaryVec pathAdj 0 * ((stationaryVec pathAdj 0)⁻¹ - 1))
+      = Real.sqrt 3 / 2 := by
+  have hπ0 : stationaryVec pathAdj 0 = 1/4 := by
+    rw [path_pi_QA]; rfl
+  have hin : stationaryVec pathAdj 0 * ((stationaryVec pathAdj 0)⁻¹ - 1)
+      = 3/4 := by
+    rw [hπ0]
+    norm_num
+  have h2 : Real.sqrt ((4 : ℝ)) = 2 := by
+    rw [show ((4 : ℝ)) = (2 : ℝ) ^ 2 from by norm_num,
+      Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 2)]
+  rw [hin, Real.sqrt_div (by norm_num : (0 : ℝ) ≤ 3) 4, h2]
+
+/-- **The bias-term instance on the bipartite path** — the fixture class
+the plain twin cannot reach: corner start, `t₀ = 2`, `n = 2`, threshold
+`1/2`, the bias computed at the pinned intrinsic rate `(1/2)^2 · √3/2
+= √3/8` (the true deviation `|ν_lazy(2) − π 0|` pinned raw beside it
+in `path_lazy_corner_deviation_two_QA`, dominated with honest slack in
+`path_lazy_corner_bias_two_le_QA`). -/
+theorem path_lazy_stationary_tail_bias_QA :
+    (iidPMF (lazyWalkDistribution pathAdj 2 0)
+        (lazyWalkDistribution_nonneg pathAdj pathAdj_nonneg
+          pathAdj_deg_pos 2 0)
+        (sum_lazyWalkDistribution pathAdj pathAdj_deg_pos 2 0)).toMeasure
+      {ω : Fin 2 → Fin 3 | |(1 / (2 : ℝ)) * ∑ k : Fin 2,
+          (if ω k = 0 then (1 : ℝ) else 0) - stationaryVec pathAdj 0| ≥ 1/2}
+      ≤ ENNReal.ofReal (2 * Real.exp (-2 * (2 : ℝ)
+          * (1/2 - (1/2 : ℝ) ^ (2 : ℕ) * (Real.sqrt 3 / 2)) ^ 2)) := by
+  have hs3 : Real.sqrt 3 ≤ 2 := by
+    have h := Real.sqrt_le_sqrt (by norm_num : (3 : ℝ) ≤ 4)
+    rwa [show ((4 : ℝ)) = 2 ^ 2 from by norm_num,
+      Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 2)] at h
+  have hb : (1 - secondEval pathL pathH
+        (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2) ^ (2 : ℕ)
+      * Real.sqrt (stationaryVec pathAdj 0
+          * ((stationaryVec pathAdj 0)⁻¹ - 1)) < 1/2 := by
+    rw [path_lazy_corner_biasConstant_QA]
+    have hrate : (1 - secondEval pathL pathH
+        (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2) = 1/2 := by
+      rw [path_secondEval_QA]
+      norm_num
+    rw [hrate]
+    have he : (1/2 : ℝ) ^ (2 : ℕ) * (Real.sqrt 3 / 2) = Real.sqrt 3 / 8 := by
+      ring
+    rw [he, div_lt_iff₀ (by norm_num : (0 : ℝ) < 8)]
+    linarith
+  have h := empiricalLazyWalkDistribution_stationary_tail (V := Fin 3)
+    pathAdj_isSymm pathAdj_nonneg pathAdj_deg_pos
+    (by norm_num : 2 ≤ Fintype.card (Fin 3)) path_connected 2 0 0 two_ne_zero hb
+  have hrate : (1 - secondEval pathL pathH
+      (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2) = 1/2 := by
+    rw [path_secondEval_QA]
+    norm_num
+  have hπ0 : stationaryVec pathAdj 0 = 1/4 := by
+    rw [path_pi_QA]; rfl
+  rw [path_lazy_corner_biasConstant_QA, hrate, hπ0] at h
+  rw [hπ0]
+  push_cast at h
+  exact h
+
+/-- The lazy law on the path from the corner at `t = 2` (one more
+adjoint lazy step applied to the pinned `t = 1` law). -/
+theorem path_lazy_corner_law_two_QA :
+    lazyWalkDistribution pathAdj 2 0 = ![3/8, 1/2, 1/8] := by
+  show lazyWalkDistribution pathAdj (1 + 1) 0 = ![3/8, 1/2, 1/8]
+  rw [lazyWalkDistribution_succ, path_lazy_corner_law_one_QA]
+  funext i
+  fin_cases i
+  all_goals simp [lazyWalkTransitionMatrix, walkTransitionMatrix, deg, pathAdj,
+    Matrix.mulVec, Matrix.dotProduct, Matrix.transpose_apply,
+    Fin.sum_univ_three]
+  all_goals norm_num
+
+theorem path_lazy_corner_deviation_two_QA :
+    |lazyWalkDistribution pathAdj 2 0 0 - stationaryVec pathAdj 0| = 1/8 := by
+  have h : lazyWalkDistribution pathAdj 2 0 0 = 3/8 := by
+    rw [path_lazy_corner_law_two_QA]; simp
+  have hπ0 : stationaryVec pathAdj 0 = 1/4 := by
+    rw [path_pi_QA]; rfl
+  rw [h, hπ0]
+  norm_num
+
+/-- The bias term dominates the true deviation at the fixture — the
+fold-in is honest slack, not tightness: `1/8 ≤ √3/8`. -/
+theorem path_lazy_corner_bias_two_le_QA :
+    |lazyWalkDistribution pathAdj 2 0 0 - stationaryVec pathAdj 0|
+      ≤ (1/2 : ℝ) ^ (2 : ℕ) * (Real.sqrt 3 / 2) := by
+  rw [path_lazy_corner_deviation_two_QA]
+  have hq : (1/2 : ℝ) ^ (2 : ℕ) = 1/4 := by norm_num
+  have hs : (1 : ℝ) ≤ Real.sqrt 3 := by
+    have h := Real.sqrt_le_sqrt (by norm_num : (1 : ℝ) ≤ 3)
+    rwa [Real.sqrt_one] at h
+  rw [hq]
+  calc (1/8 : ℝ) = (1/8) * 1 := by norm_num
+    _ ≤ (1/8) * Real.sqrt 3 := mul_le_mul_of_nonneg_left hs (by norm_num)
+    _ = (1/4) * (Real.sqrt 3 / 2) := by ring
+
+/-- The capstone's threshold on the path's corner start, at the pinned
+intrinsic rate: `log (√3/2 / (1/8)) / log 2 = log (4√3)/log 2 ≤ 3` —
+the same threshold the delivered lazy-ceiling QA pinned
+(`path_lazy_corner_ceiling_slack_QA`). -/
+theorem path_lazy_capstone_threshold_QA :
+    Real.log (Real.sqrt (stationaryVec pathAdj 0
+        * ((stationaryVec pathAdj 0)⁻¹ - 1)) / ((1/4 : ℝ) / 2))
+      / Real.log (1 / (1 - secondEval pathL pathH
+          (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2))
+      ≤ ((3 : ℕ) : ℝ) := by
+  have hrate : (1 - secondEval pathL pathH
+      (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2) = 1/2 := by
+    rw [path_secondEval_QA]
+    norm_num
+  have hone : (1 : ℝ) / (1/2) = 2 := by norm_num
+  rw [path_lazy_corner_biasConstant_QA, hrate, hone]
+  have he : ((1/4 : ℝ)) / 2 = 1/8 := by norm_num
+  rw [he]
+  have hratio : (Real.sqrt 3 / 2) / ((1/8 : ℝ)) = 4 * Real.sqrt 3 := by
+    field_simp
+    ring
+  rw [hratio]
+  have hlog2 : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hlog8 : Real.log ((8 : ℝ)) = 3 * Real.log 2 := by
+    rw [show ((8 : ℝ)) = ((2 : ℝ)) ^ 3 from by norm_num, Real.log_pow 2 3]
+    push_cast
+    ring
+  have hs3 : Real.sqrt 3 ≤ 2 := by
+    have h := Real.sqrt_le_sqrt (by norm_num : (3 : ℝ) ≤ 4)
+    rwa [show ((4 : ℝ)) = 2 ^ 2 from by norm_num,
+      Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 2)] at h
+  have hup : (4 : ℝ) * Real.sqrt 3 ≤ 8 := by nlinarith
+  have hle3 : Real.log ((4 : ℝ) * Real.sqrt 3) / Real.log 2 ≤ (3 : ℝ) := by
+    rw [div_le_iff₀ hlog2, ← hlog8]
+    exact Real.log_le_log (by positivity) hup
+  exact_mod_cast hle3
+
+/-- **The depth-form capstone instance on the bipartite path**: past
+the `log(4√3)/log 2 ≤ 3` threshold at `ε = 1/4`, two simulated lazy
+trajectories of length `3` estimate `π 0` to `1/4` with failure
+probability at most `2 exp (−1/16)`. On the fixture where the plain
+capstone's hypothesis set is provably unsatisfiable
+(`path_plain_cert_fenced_QA`) — the periodicity fix delivered at the
+sampling level. -/
+theorem path_lazy_capstone_depth_QA :
+    (iidPMF (lazyWalkDistribution pathAdj 3 0)
+        (lazyWalkDistribution_nonneg pathAdj pathAdj_nonneg
+          pathAdj_deg_pos 3 0)
+        (sum_lazyWalkDistribution pathAdj pathAdj_deg_pos 3 0)).toMeasure
+      {ω : Fin 2 → Fin 3 | |(1 / (2 : ℝ)) * ∑ k : Fin 2,
+          (if ω k = 0 then (1 : ℝ) else 0) - stationaryVec pathAdj 0| ≥ 1/4}
+      ≤ ENNReal.ofReal (2 * Real.exp (-(1 : ℝ) / 16)) := by
+  have hslt : secondEval pathL pathH
+      (by norm_num : 2 ≤ Fintype.card (Fin 3)) < 2 := by
+    rw [path_secondEval_QA]
+    norm_num
+  have h := empiricalLazyWalkDistribution_stationary_tail_of_depth (V := Fin 3)
+    pathAdj_isSymm pathAdj_nonneg pathAdj_deg_pos
+    (by norm_num : 2 ≤ Fintype.card (Fin 3)) path_connected hslt (ε := 1/4)
+    (by norm_num) 3 0 0 two_ne_zero path_lazy_capstone_threshold_QA
+  push_cast at h
+  have e : (-(2 : ℝ) * (1/4) ^ 2 / 2) = -(1 : ℝ) / 16 := by norm_num
+  rw [e] at h
+  exact h
+
+/-- The corner-start lazy law at `t = 3`, one entry: `5/16` (one more
+adjoint lazy step applied to the pinned `t = 2` law). -/
+theorem path_lazy_corner_entry_three_QA :
+    lazyWalkDistribution pathAdj 3 0 0 = 5/16 := by
+  show lazyWalkDistribution pathAdj (2 + 1) 0 0 = 5/16
+  rw [lazyWalkDistribution_succ, path_lazy_corner_law_two_QA]
+  simp [lazyWalkTransitionMatrix, walkTransitionMatrix, deg, pathAdj,
+    Matrix.mulVec, Matrix.dotProduct, Matrix.transpose_apply,
+    Fin.sum_univ_three]
+  norm_num
+
+/-- **Non-vacuity**: the capstone instance's measured event genuinely
+carries mass — the both-samples-at-`0` cylinder (mass `(5/16)² =
+25/256` at the `t₀ = 3` law) sits inside it (`p̂ = 1`, deviation
+`3/4 ≥ 1/4`), so the `2 exp (−1/16)` bound bounds a real event, not an
+empty one. -/
+theorem path_lazy_capstone_event_ge_QA :
+    ENNReal.ofReal (25 / 256) ≤
+      (iidPMF (lazyWalkDistribution pathAdj 3 0)
+        (lazyWalkDistribution_nonneg pathAdj pathAdj_nonneg
+          pathAdj_deg_pos 3 0)
+        (sum_lazyWalkDistribution pathAdj pathAdj_deg_pos 3 0)).toMeasure
+      {ω : Fin 2 → Fin 3 | |(1 / (2 : ℝ)) * ∑ k : Fin 2,
+          (if ω k = 0 then (1 : ℝ) else 0) - stationaryVec pathAdj 0| ≥ 1/4} := by
+  have hq0 : lazyWalkDistribution pathAdj 3 0 0 = 5/16 :=
+    path_lazy_corner_entry_three_QA
+  have hcyl : (iidPMF (lazyWalkDistribution pathAdj 3 0)
+      (lazyWalkDistribution_nonneg pathAdj pathAdj_nonneg
+        pathAdj_deg_pos 3 0)
+      (sum_lazyWalkDistribution pathAdj pathAdj_deg_pos 3 0)).toMeasure
+      (⋂ k ∈ (Finset.univ : Finset (Fin 2)),
+        (fun ω : Fin 2 → Fin 3 => ω k) ⁻¹' ({0} : Set (Fin 3)))
+      = ENNReal.ofReal (25 / 256) := by
+    rw [toMeasure_cyl_inter _ _ _ Finset.univ
+      (fun _ => ({0} : Set (Fin 3)))]
+    rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
+    rw [Finset.sum_eq_single (0 : Fin 3)]
+    · rw [if_pos (Set.mem_singleton_iff.mpr rfl), hq0, one_mul, pow_two,
+        ← ENNReal.ofReal_mul (by norm_num : (0 : ℝ) ≤ 5/16)]
+      norm_num
+    · intro b _ hb
+      rw [if_neg (fun h => hb (Set.mem_singleton_iff.mp h))]
+      exact zero_mul _
+    · intro h
+      exact absurd (Finset.mem_univ _) h
+  refine le_trans (le_of_eq hcyl.symm) (measure_mono ?_)
+  intro ω hω
+  simp only [Set.mem_iInter, Set.mem_preimage, Set.mem_singleton_iff] at hω
+  simp only [Set.mem_setOf_eq]
+  have hsum : ∑ k : Fin 2, (if ω k = 0 then (1 : ℝ) else 0) = 2 := by
+    simp [hω]
+  have hπ0 : stationaryVec pathAdj 0 = 1/4 := by
+    rw [path_pi_QA]; rfl
+  rw [hsum, hπ0]
+  have e : (1 / (2 : ℝ)) * 2 - 1/4 = 3/4 := by norm_num
+  rw [e, abs_of_nonneg (by norm_num)]
+  norm_num
+
+/-- **The exact-stationary contrast**: from the path's center start the
+lazy law is *exactly* stationary at every `t₀ ≥ 1` (the pinned
+`path_lazy_center_mix_all_QA` — the true deviation is `0`), while the
+bias-term theorem still quotes the honest *positive* bias
+`(1/2)^t₀ · √(π i · 1)` — the theorem never claims the bias vanishes,
+even where the truth does. The slack is the price of the certificate's
+generality, witnessed on the fixture where it is maximal. -/
+theorem path_lazy_center_contrast_QA (t₀ : ℕ) (i : Fin 3) (ht : 1 ≤ t₀) :
+    |lazyWalkDistribution pathAdj t₀ 1 i - stationaryVec pathAdj i| = 0
+      ∧ 0 < (1 - secondEval pathL pathH
+          (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2) ^ t₀
+          * Real.sqrt (stationaryVec pathAdj i
+              * ((stationaryVec pathAdj 1)⁻¹ - 1)) := by
+  obtain ⟨k, hk⟩ : ∃ k : ℕ, t₀ = 1 + k := ⟨t₀ - 1, by omega⟩
+  rw [hk]
+  refine ⟨?_, ?_⟩
+  · rw [path_lazy_center_mix_all_QA k]
+    simp
+  · have hrate : (1 - secondEval pathL pathH
+        (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2) = 1/2 := by
+      rw [path_secondEval_QA]
+      norm_num
+    have hπ : (stationaryVec pathAdj 1)⁻¹ - 1 = 1 := by
+      have h : stationaryVec pathAdj 1 = 1/2 := by
+        rw [path_pi_QA]; rfl
+      rw [h]
+      norm_num
+    have hπpos : 0 < stationaryVec pathAdj i :=
+      stationaryVec_pos pathAdj pathAdj_deg_pos i
+    rw [hrate, hπ]
+    exact mul_pos (pow_pos (by norm_num) _)
+      (Real.sqrt_pos.mpr (by rw [mul_one]; exact hπpos))
 
 end Scaffold.Derived.EmpiricalStationary.QA

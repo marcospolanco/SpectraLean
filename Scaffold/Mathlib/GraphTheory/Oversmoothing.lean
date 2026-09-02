@@ -2331,5 +2331,251 @@ theorem klDiv_walkDistribution_ge_of_eigenpair (A : WAdj (V := V))
 
 end SpectralFloor
 
+/-! ## The lazy mixing time: the periodicity fix at the object level
+
+`proposals/lazy-mixing-time-objects.md` (2026-09-01): the lazy-walk
+delivery's recorded follow-on compositions — the depth-form lazy
+ceiling and the `t_mix` object at `lazyWalkDistribution` — with the
+consumer gate discharged by naming the bipartite-input instance: the
+empirical-stationary capstone's own "agent that can only simulate the
+walk" setting on paths/trees/grids, where the plain family's
+`r < 1` certificate is provably unsatisfiable (`lazy-walk-mixing.md`'s
+leverage case, fenced as never-decay pins). The plain `t_mix` objects
+are junk exactly on that class (empty witness set → `sInf = 0` with no
+mixing, the `k2_mix_junk_corner_QA` fence); these twins carry the
+genuine, finite mixing times, at the intrinsic rate `1 − λ₂/2`. -/
+
+section LazyMixingTime
+
+/-- **The entrywise lazy ceiling at the intrinsic rate** — the named
+consumer's interface (the empirical-stationary capstone's lazy
+extension): a single vertex's deviation of the `t`-step *lazy* walk law
+from stationarity is at most `(1 − λ₂/2)^t` times
+`√(π y · ((π x)⁻¹ − 1))` — the plain twin's `r`-certificate hypothesis
+replaced by the computed intrinsic rate, which is the entire point of
+the lazy program: on every connected bipartite graph, where the plain
+twin's hypothesis set is provably unsatisfiable, this bound holds with
+connectivity as the only graph hypothesis. One χ² summand against the
+whole sum, then the delivered `lazyChiSquareDistance_le_of_connected`;
+the rate's nonnegativity is the λ₂ ≤ 2 cap. -/
+theorem lazyWalkDistribution_sub_stationaryVec_abs_le (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected) (t : ℕ) (x y : V) :
+    |lazyWalkDistribution A t x y - stationaryVec A y|
+      ≤ (1 - secondEval (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) hcard / 2) ^ t
+        * Real.sqrt (stationaryVec A y * ((stationaryVec A x)⁻¹ - 1)) := by
+  have hπy := stationaryVec_pos A hd y
+  have hnon : 0 ≤ stationaryVec A y * ((stationaryVec A x)⁻¹ - 1) := by
+    have hle : stationaryVec A x ≤ 1 := stationaryVec_le_one A hd x
+    have hpos := stationaryVec_pos A hd x
+    have hon : (1 : ℝ) ≤ (stationaryVec A x)⁻¹ :=
+      (one_le_inv₀ hpos).mpr hle
+    exact mul_nonneg (le_of_lt hπy) (by linarith)
+  have hone : (lazyWalkDistribution A t x y - stationaryVec A y) ^ 2
+      / stationaryVec A y ≤ lazyChiSquareDistance A t x := by
+    rw [lazyChiSquareDistance]
+    exact Finset.single_le_sum
+      (f := fun i => (lazyWalkDistribution A t x i - stationaryVec A i)^2
+        / stationaryVec A i)
+      (fun i _ => div_nonneg (sq_nonneg _)
+        (le_of_lt (stationaryVec_pos A hd i))) (Finset.mem_univ y)
+  rw [div_le_iff₀ hπy] at hone
+  have htwo := lazyChiSquareDistance_le_of_connected A hA hnn hd hcard
+    hconn t x
+  have hrate0 : 0 ≤ (1 - secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard / 2) := by
+    have h := secondEval_normalizedLaplacian_le_two A hA hnn hd hcard
+    linarith
+  have hle : (lazyWalkDistribution A t x y - stationaryVec A y) ^ 2
+      ≤ ((1 - secondEval (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) hcard / 2) ^ t
+          * Real.sqrt (stationaryVec A y
+            * ((stationaryVec A x)⁻¹ - 1))) ^ 2 := by
+    have hsq : ((1 - secondEval (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) hcard / 2) ^ t
+        * Real.sqrt (stationaryVec A y
+          * ((stationaryVec A x)⁻¹ - 1))) ^ 2
+        = ((1 - secondEval (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) hcard / 2) ^ (2 * t)
+            * ((stationaryVec A x)⁻¹ - 1)) * stationaryVec A y := by
+      have h2t : (1 - secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard / 2) ^ (2 * t)
+          = ((1 - secondEval (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) hcard / 2) ^ t) ^ 2 := by
+        rw [show (2 * t : ℕ) = t + t from by omega, pow_add, pow_two]
+      rw [mul_pow, Real.sq_sqrt hnon, h2t]
+      ring
+    calc (lazyWalkDistribution A t x y - stationaryVec A y) ^ 2
+        ≤ lazyChiSquareDistance A t x * stationaryVec A y := hone
+      _ ≤ ((1 - secondEval (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) hcard / 2) ^ (2 * t)
+            * ((stationaryVec A x)⁻¹ - 1)) * stationaryVec A y :=
+            mul_le_mul_of_nonneg_right htwo (le_of_lt hπy)
+      _ = ((1 - secondEval (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) hcard / 2) ^ t
+          * Real.sqrt (stationaryVec A y
+            * ((stationaryVec A x)⁻¹ - 1))) ^ 2 := hsq.symm
+  exact abs_le_of_sq_le_sq hle
+    (mul_nonneg (pow_nonneg hrate0 t) (Real.sqrt_nonneg _))
+
+/-- **The depth-form TV lazy ceiling** — the plain family's
+`walkDistribution_tvDistance_le_of_depth` at the lazy law, at the
+intrinsic rate `1 − λ₂/2` in place of the caller's `r` certificate. The
+strictness is honest and visible: `0 < r` needs `λ₂ < 2` (exactly `K₂`'s
+rate-0 corner is excluded — there the object is exact in one step, see
+the QA), `r < 1` is derived from connectivity through the Fiedler
+mirror. -/
+theorem lazyWalkDistribution_tvDistance_le_of_depth (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected)
+    (hslt : secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard < 2)
+    {ε : ℝ} (hε : 0 < ε)
+    (t : ℕ) (x : V)
+    (hthr : Real.log (Real.sqrt ((stationaryVec A x)⁻¹ - 1) / (2 * ε))
+      / Real.log (1 / (1 - secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard / 2)) ≤ (t : ℝ)) :
+    tvDistance (lazyWalkDistribution A t x) (stationaryVec A) ≤ ε := by
+  have hsltpos : 0 < secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard :=
+    secondEval_normalizedLaplacian_pos_of_connected A hA hnn hd hcard hconn
+  have hr0 : 0 < (1 - secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard / 2) := by linarith
+  have hr1 : (1 - secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard / 2) < 1 := by linarith
+  have hC0 : 0 ≤ (stationaryVec A x)⁻¹ - 1 := by
+    have hle : stationaryVec A x ≤ 1 := stationaryVec_le_one A hd x
+    have hpos := stationaryVec_pos A hd x
+    have hon : (1 : ℝ) ≤ (stationaryVec A x)⁻¹ :=
+      (one_le_inv₀ hpos).mpr hle
+    linarith
+  have hTV := lazyWalkDistribution_tvDistance_le_of_connected A hA hnn hd
+    hcard hconn t x
+  have hsplit : (1/2) * Real.sqrt ((1 - secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard / 2) ^ (2 * t)
+        * ((stationaryVec A x)⁻¹ - 1))
+      = (1 - secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard / 2) ^ t
+        * (Real.sqrt ((stationaryVec A x)⁻¹ - 1) / 2) := by
+    have h2t : (1 - secondEval (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) hcard / 2) ^ (2 * t)
+        = ((1 - secondEval (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) hcard / 2) ^ t) ^ 2 := by
+      rw [show (2 * t : ℕ) = t + t from by omega, pow_add, pow_two]
+    have hp : (0 : ℝ) ≤ (1 - secondEval (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) hcard / 2) ^ t :=
+      pow_nonneg (le_of_lt hr0) t
+    rw [h2t, Real.sqrt_mul (sq_nonneg ((1 - secondEval
+        (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA)
+          hcard / 2) ^ t)) _, Real.sqrt_sq hp]
+    ring
+  have hthr' : Real.log ((Real.sqrt ((stationaryVec A x)⁻¹ - 1) / 2) / ε)
+      / Real.log (1 / (1 - secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard / 2)) ≤ (t : ℝ) := by
+    have hEq : (Real.sqrt ((stationaryVec A x)⁻¹ - 1) / 2) / ε
+        = Real.sqrt ((stationaryVec A x)⁻¹ - 1) / (2 * ε) := by
+      rw [div_div]
+    rw [hEq]
+    exact hthr
+  have hfin := pow_mul_le_of_log_threshold hr0 hr1
+    (div_nonneg (Real.sqrt_nonneg _) (by norm_num)) hε t hthr'
+  calc tvDistance (lazyWalkDistribution A t x) (stationaryVec A)
+      ≤ (1/2) * Real.sqrt ((1 - secondEval (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) hcard / 2) ^ (2 * t)
+          * ((stationaryVec A x)⁻¹ - 1)) := hTV
+    _ = (1 - secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard / 2) ^ t
+        * (Real.sqrt ((stationaryVec A x)⁻¹ - 1) / 2) := hsplit
+    _ ≤ ε := hfin
+
+/-- The **lazy mixing time** from `x` at threshold `ε`: the least
+number of steps from which the *lazy* walk law stays within `ε` of
+stationarity in total variation — the plain `walkMixingTimeFrom` object
+at the lazy law. On every connected bipartite graph the plain object is
+junk (its witness set is empty at every reachable `ε`: the plain walk
+provably never mixes there, the `K₂` fence), and this twin carries the
+genuine, finite mixing time — the periodicity fix at the object level,
+which is where LPW's `t_mix := t_mix(1/4)` convention and the empirical
+simulating agent read it. Junk corner unchanged: at an unreachable `ε`
+the time set is empty and `sInf ∅ = 0` on `ℕ`. QA: the exact closed
+forms `path_lazy_corner_mix_eq_eighth_QA`, `path_lazy_center_mix_eq_one_QA`,
+`k2_lazy_mix_eq_fourth_QA`, and the object-level contrast
+`k2_lazy_mix_contrast_QA`. -/
+noncomputable def lazyWalkMixingTimeFrom (A : WAdj (V := V)) (x : V)
+    (ε : ℝ) : ℕ :=
+  sInf {t : ℕ | ∀ s : ℕ, t ≤ s →
+    tvDistance (lazyWalkDistribution A s x) (stationaryVec A) ≤ ε}
+
+/-- The witness-time set is bounded below by `0` by construction. -/
+theorem lazyWalkMixingTimeFrom_bddBelow (A : WAdj (V := V)) (x : V)
+    (ε : ℝ) :
+    BddBelow {t : ℕ | ∀ s : ℕ, t ≤ s →
+      tvDistance (lazyWalkDistribution A s x) (stationaryVec A) ≤ ε} :=
+  ⟨0, fun _ _ => Nat.zero_le _⟩
+
+/-- Any witness time certifies the lazy mixing time — the reusable
+certificate interface, the lazy twin of `walkMixingTimeFrom_le_of_cert`. -/
+theorem lazyWalkMixingTimeFrom_le_of_cert (A : WAdj (V := V)) (x : V)
+    {ε : ℝ} (T : ℕ)
+    (hT : ∀ s : ℕ, T ≤ s →
+      tvDistance (lazyWalkDistribution A s x) (stationaryVec A) ≤ ε) :
+    lazyWalkMixingTimeFrom A x ε ≤ T :=
+  csInf_le (lazyWalkMixingTimeFrom_bddBelow A x ε) hT
+
+/-- **The lazy mixing time is attained** — `ℕ` is well-ordered, so the
+infimum of a nonempty witness set is a *member* of it, and membership
+is exactly the uniform bound. The lazy twin of
+`walkMixingTimeFrom_spec`. -/
+theorem lazyWalkMixingTimeFrom_spec (A : WAdj (V := V)) (x : V)
+    {ε : ℝ}
+    (hne : ∃ t : ℕ, ∀ s : ℕ, t ≤ s →
+      tvDistance (lazyWalkDistribution A s x) (stationaryVec A) ≤ ε) :
+    ∀ s : ℕ, lazyWalkMixingTimeFrom A x ε ≤ s →
+      tvDistance (lazyWalkDistribution A s x) (stationaryVec A) ≤ ε :=
+  csInf_mem hne
+
+/-- **ε-antitonicity**, the lazy twin of `walkMixingTimeFrom_anti`. -/
+theorem lazyWalkMixingTimeFrom_anti (A : WAdj (V := V)) (x : V)
+    {ε δ : ℝ}
+    (hεδ : ε ≤ δ)
+    (hne : ∃ t : ℕ, ∀ s : ℕ, t ≤ s →
+      tvDistance (lazyWalkDistribution A s x) (stationaryVec A) ≤ ε) :
+    lazyWalkMixingTimeFrom A x δ ≤ lazyWalkMixingTimeFrom A x ε :=
+  csInf_le_csInf (lazyWalkMixingTimeFrom_bddBelow A x δ) hne
+    (fun _ ht => fun s hs => (ht s hs).trans hεδ)
+
+/-- **The intrinsic-rate spectral ceiling** — the field-standard
+discrete mixing bound at the lazy law:
+`t_mix_lazy(ε) ≤ ⌈log(√((π x)⁻¹ − 1)/(2ε))/log(1/(1−λ₂/2))⌉` under
+exactly the depth-form lazy ceiling's hypothesis set (connectivity plus
+the honest `λ₂ < 2` — the `K₂` rate-0 corner is outside, and pinned
+exactly in QA instead). QA: attained exactly on the path's center start
+(`path_lazy_center_ceiling_attained_QA`), computed with honest slack on
+the corner start (`path_lazy_corner_ceiling_slack_QA`). -/
+theorem lazyWalkMixingTimeFrom_le_of_connected (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected)
+    (hslt : secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard < 2)
+    {ε : ℝ} (hε : 0 < ε) (x : V) :
+    lazyWalkMixingTimeFrom A x ε
+      ≤ Nat.ceil (Real.log (Real.sqrt ((stationaryVec A x)⁻¹ - 1)
+          / (2 * ε)) / Real.log (1 / (1 - secondEval (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) hcard / 2))) := by
+  set thr : ℝ := Real.log (Real.sqrt ((stationaryVec A x)⁻¹ - 1)
+    / (2 * ε)) / Real.log (1 / (1 - secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard / 2)) with hthrdef
+  refine lazyWalkMixingTimeFrom_le_of_cert A x (Nat.ceil thr) ?_
+  intro s hs
+  exact lazyWalkDistribution_tvDistance_le_of_depth A hA hnn hd hcard
+    hconn hslt hε s x
+    (le_trans (Nat.le_ceil thr) (by exact_mod_cast hs))
+
+end LazyMixingTime
+
 
 end SpectralGraphTheory

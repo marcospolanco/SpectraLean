@@ -108,6 +108,31 @@
   constant load-bearing), the uniform object's exact closed forms
   pinned in both directions, and the `K₂` periodicity corner at the
   uniform level (the empty-set infimum pinned and fenced).
+  The `LazyWalk` section (2026-09-01, `proposals/lazy-walk-mixing.md`)
+  witnesses the periodicity fix and its engine: on `K₂` (bipartite,
+  certificate-free for the plain family) **the headline attained
+  exactly at every time** (`χ²_lazy ≡ 0` at the intrinsic rate
+  `1 − 2/2 = 0`, both sides pinned) and the TV contrast pair (plain
+  `1/2` against lazy `0`); on the path `P₃` the center start (the pure
+  `λ = 2` periodic mode) exactly stationary after one lazy step
+  against the proved plain never-decay pin `χ²_plain ≡ 1` at every
+  time, the corner values `1/2`, `1/8` with the bound instance
+  evaluated at the pinned gap, and the `t = 0` normalization; and the
+  signless engine's tightness at the `K₂` top mode (`0` exactly — the
+  bipartite boundary) beside the `hnn` fence at the negative-diagonal
+  fixture (`-4 < 0` with every other hypothesis holding).
+
+  The `LazyMixingTime` section (2026-09-01,
+  `proposals/lazy-mixing-time-objects.md`) completes the fix at the
+  object level: the exact corner-start TV closed form
+  `TV_lazy(1+t) = (1/2)^{t+2}` at every time on the bipartite path,
+  **`t_mix_lazy(corner, 1/8) = 2` pinned in both directions** where
+  the plain walk provably never mixes, `t_mix_lazy(center, 1/4) = 1`
+  with the intrinsic-rate ceiling attained exactly, the corner ceiling
+  with honest slack (`3` against the true `2`), **the object-level
+  periodicity contrast** (plain `t_mix(K₂, 1/8) = 0` junk — empty
+  witness set — against lazy `= 1` genuine), and the entrywise lazy
+  ceiling attained exactly on `K₂` (both sides zero at rate `0`).
 
   Scoreboard: ../QA_SCOREBOARD.md
 -/
@@ -5755,5 +5780,764 @@ theorem tri_cont_kl_decay_QA (t : ℝ) (ht : 0 ≤ t) :
     rw [h2, mul_comm]
   rw [hfin] at h
   exact h
+
+/-! ## The lazy walk: the periodicity fix witnessed -/
+
+/-- The lazy matrix on the path `P₃`, pinned entrywise: the diagonal
+entries are all `1/2` (the stay probability), and the off-diagonal
+entries are `1/4` on the support edges and `0` off-support — the
+average of the walk matrix with the identity. -/
+theorem path_lazy_matrix_diag_QA :
+    lazyWalkTransitionMatrix pathAdj 1 1 = 1/2 := by
+  simp [lazyWalkTransitionMatrix_apply, walkTransitionMatrix_apply, deg,
+    pathAdj, Fin.sum_univ_three]
+
+theorem path_lazy_matrix_edge01_QA :
+    lazyWalkTransitionMatrix pathAdj 0 1 = 1/2 := by
+  simp [lazyWalkTransitionMatrix_apply, walkTransitionMatrix_apply, deg,
+    pathAdj, Fin.sum_univ_three]
+
+theorem path_lazy_matrix_edge12_QA :
+    lazyWalkTransitionMatrix pathAdj 1 2 = 1/4 := by
+  simp [lazyWalkTransitionMatrix_apply, walkTransitionMatrix_apply, deg,
+    pathAdj, Fin.sum_univ_three]
+  norm_num
+
+theorem path_lazy_matrix_edge02_QA :
+    lazyWalkTransitionMatrix pathAdj 0 2 = 0 := by
+  simp [lazyWalkTransitionMatrix_apply, walkTransitionMatrix_apply, deg,
+    pathAdj, Fin.sum_univ_three]
+
+/-- The `t = 0` normalization on the path's corner start: the same
+point-mass value `3 = (1/4)⁻¹ − 1` as the plain walk. -/
+theorem path_lazy_zero_QA :
+    lazyChiSquareDistance pathAdj 0 0 = 3 := by
+  rw [lazyChiSquareDistance_zero pathAdj pathAdj_deg_pos 0, path_pi_QA]
+  norm_num
+
+/-- The lazy law on the path from the center after one step: exactly
+the stationary distribution — the pure periodic mode (`λ = 2`) is
+killed in a single lazy step. -/
+theorem path_lazy_center_law_one_QA :
+    lazyWalkDistribution pathAdj 1 1 = stationaryVec pathAdj := by
+  rw [lazyWalkDistribution_succ, lazyWalkDistribution_zero]
+  funext i
+  fin_cases i
+  all_goals simp [lazyWalkTransitionMatrix, walkTransitionMatrix, deg,
+    vol, pathAdj, Matrix.mulVec, Matrix.dotProduct,
+    Matrix.transpose_apply, Fin.sum_univ_three, Pi.single_apply,
+    stationaryVec]
+  all_goals norm_num
+
+/-- Attainment persists (the shelf lemma): the center start's law is
+stationary at every time `t ≥ 1`. -/
+theorem path_lazy_center_mix_all_QA (t : ℕ) :
+    lazyWalkDistribution pathAdj (1 + t) 1 = stationaryVec pathAdj :=
+  lazyWalkDistribution_add_stationary pathAdj pathAdj_isSymm
+    pathAdj_deg_pos 1 t 1 path_lazy_center_law_one_QA
+
+/-- The lazy χ² from the center start is exactly zero at every
+`t ≥ 1` — one-step exact mixing on the bipartite path. -/
+theorem path_lazy_center_chi2_all_QA (t : ℕ) :
+    lazyChiSquareDistance pathAdj (1 + t) 1 = 0 := by
+  rw [lazyChiSquareDistance, path_lazy_center_mix_all_QA t]
+  simp
+
+/-- The lazy TV from the center start is exactly zero at every
+`t ≥ 1`. -/
+theorem path_lazy_center_tv_all_QA (t : ℕ) :
+    tvDistance (lazyWalkDistribution pathAdj (1 + t) 1)
+        (stationaryVec pathAdj) = 0 := by
+  rw [path_lazy_center_mix_all_QA t]
+  simp [tvDistance]
+
+/-- **The contrast pair on the same start**: the *plain* walk from the
+path's center never decays — `χ²_plain(t, center) = 1` at every time
+(the law alternates `δ₁ ↔ (1/2, 0, 1/2)` with period two, the
+`λ_max = 2` mode oscillating) — while the lazy walk is exactly
+stationary after one step (`path_lazy_center_chi2_all_QA`). This is
+the periodicity defect and its fix on one fixture. -/
+theorem path_plain_never_QA (t : ℕ) :
+    chiSquareDistance pathAdj t 1 = 1 := by
+  have hbase1 : walkDistribution pathAdj 1 1 = ![1/2, 0, 1/2] := by
+    rw [walkDistribution_succ, walkDistribution_zero]
+    funext i
+    fin_cases i
+    all_goals simp [walkTransitionMatrix, deg, pathAdj, Matrix.mulVec,
+      Matrix.dotProduct, Matrix.transpose_apply, Fin.sum_univ_three,
+      Pi.single_apply]
+    all_goals norm_num
+  have hper : ∀ t : ℕ,
+      walkDistribution pathAdj (t + 2) 1 = walkDistribution pathAdj t 1 := by
+    intro t
+    induction t with
+    | zero =>
+      have h1 : walkDistribution pathAdj ((0 : ℕ) + 2) 1
+          = (walkTransitionMatrix pathAdj)ᵀ *ᵥ
+              walkDistribution pathAdj ((0 : ℕ) + 1) 1 :=
+        walkDistribution_succ _ _ _
+      have h2 : walkDistribution pathAdj ((0 : ℕ) + 1) 1
+          = (walkTransitionMatrix pathAdj)ᵀ *ᵥ
+              walkDistribution pathAdj (0 : ℕ) 1 :=
+        walkDistribution_succ _ _ _
+      rw [h1, h2, walkDistribution_zero]
+      funext i
+      fin_cases i
+      all_goals simp [walkTransitionMatrix, deg, pathAdj, Matrix.mulVec,
+        Matrix.dotProduct, Matrix.transpose_apply, Fin.sum_univ_three,
+        Pi.single_apply]
+      all_goals norm_num
+    | succ t ih =>
+      have h1 : walkDistribution pathAdj (t + 1 + 2) 1
+          = (walkTransitionMatrix pathAdj)ᵀ *ᵥ
+              walkDistribution pathAdj (t + 2) 1 :=
+        walkDistribution_succ _ _ _
+      rw [h1, ih, walkDistribution_succ]
+  have hstep : ∀ t : ℕ,
+      chiSquareDistance pathAdj (t + 2) 1
+        = chiSquareDistance pathAdj t 1 := by
+    intro t
+    simp only [chiSquareDistance]
+    rw [hper t]
+  have heven : ∀ k : ℕ, chiSquareDistance pathAdj (2 * k) 1 = 1 := by
+    intro k
+    induction k with
+    | zero =>
+      rw [chiSquareDistance_zero pathAdj pathAdj_deg_pos 1, path_pi_QA]
+      norm_num
+    | succ k ih =>
+      rw [show 2 * (k + 1) = 2 * k + 2 from by omega, hstep]
+      exact ih
+  have hodd : ∀ k : ℕ, chiSquareDistance pathAdj (2 * k + 1) 1 = 1 := by
+    intro k
+    induction k with
+    | zero =>
+      have hlaw : walkDistribution pathAdj (2 * 0 + 1) 1
+          = ![1/2, 0, 1/2] := by
+        rw [show 2 * 0 + 1 = 1 from rfl]
+        exact hbase1
+      simp only [chiSquareDistance, hlaw, path_pi_QA]
+      norm_num [Fin.sum_univ_three]
+    | succ k ih =>
+      rw [show 2 * (k + 1) + 1 = (2 * k + 1) + 2 from by omega, hstep]
+      exact ih
+  rcases Nat.even_or_odd t with ⟨k, hk⟩ | ⟨k, hk⟩
+  · have hk' : k + k = 2 * k := by ring
+    rw [hk, hk']
+    exact heven k
+  · rw [hk]
+    exact hodd k
+
+/-- The lazy law on the path from the corner after one step. -/
+theorem path_lazy_corner_law_one_QA :
+    lazyWalkDistribution pathAdj 1 0 = ![1/2, 1/2, 0] := by
+  rw [lazyWalkDistribution_succ, lazyWalkDistribution_zero]
+  funext i
+  fin_cases i
+  all_goals simp [lazyWalkTransitionMatrix, walkTransitionMatrix, deg,
+    pathAdj, Matrix.mulVec, Matrix.dotProduct,
+    Matrix.transpose_apply, Fin.sum_univ_three, Pi.single_apply]
+
+/-- The lazy χ² from the corner at `t = 1`: `1/2` — the honest
+intrinsic rate `1 − 1/2` at work on the surviving mode. -/
+theorem path_lazy_corner_chi2_one_QA :
+    lazyChiSquareDistance pathAdj 1 0 = 1/2 := by
+  rw [lazyChiSquareDistance, path_lazy_corner_law_one_QA, path_pi_QA]
+  norm_num [Fin.sum_univ_three]
+
+/-- The bound instance at `t = 1`, evaluated at the pinned gap
+`λ₂ = 1`: `1/2 ≤ 3/4`, slack witnessed. -/
+theorem path_lazy_corner_bound_one_QA :
+    lazyChiSquareDistance pathAdj 1 0 ≤ 3/4 := by
+  have hval : (1 - secondEval (normalizedLaplacian pathAdj)
+        (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm)
+        (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2) ^ (2 * 1)
+      * ((stationaryVec pathAdj 0)⁻¹ - 1) = 3/4 := by
+    rw [path_secondEval_QA, path_pi_QA]
+    norm_num
+  rw [show (3/4 : ℝ) = (1 - secondEval (normalizedLaplacian pathAdj)
+        (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm)
+        (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2) ^ (2 * 1)
+      * ((stationaryVec pathAdj 0)⁻¹ - 1) from hval.symm]
+  exact lazyChiSquareDistance_le_of_connected pathAdj pathAdj_isSymm
+    pathAdj_nonneg pathAdj_deg_pos
+    (by norm_num : 2 ≤ Fintype.card (Fin 3)) path_connected 1 0
+
+/-- The `K₂` lazy law after one step: exactly `π`. -/
+theorem k2_lazy_law_one_QA :
+    lazyWalkDistribution k2Adj 1 0 = stationaryVec k2Adj := by
+  have hπ : stationaryVec k2Adj = ![1/2, 1/2] := by
+    funext i
+    fin_cases i <;> simp [k2_pi_QA]
+  rw [lazyWalkDistribution_succ, lazyWalkDistribution_zero, hπ]
+  funext i
+  fin_cases i
+  all_goals simp [lazyWalkTransitionMatrix, walkTransitionMatrix, deg,
+    k2Adj, Matrix.mulVec, Matrix.dotProduct,
+    Matrix.transpose_apply, Fin.sum_univ_two, Pi.single_apply]
+
+/-- The `K₂` lazy χ² is exactly zero at every `t ≥ 1` — the rate
+`1 − λ₂/2` is exactly `0` at the pinned gap `λ₂ = 2`, and the walk
+mixes in one step on the chain where the plain walk's certificates are
+provably unsatisfiable. -/
+theorem k2_lazy_chi2_all_QA (t : ℕ) :
+    lazyChiSquareDistance k2Adj (1 + t) 0 = 0 := by
+  have hstays : lazyWalkDistribution k2Adj (1 + t) 0
+      = stationaryVec k2Adj :=
+    lazyWalkDistribution_add_stationary k2Adj k2Adj_isSymm
+      k2Adj_deg_pos 1 t 0 k2_lazy_law_one_QA
+  rw [lazyChiSquareDistance, hstays]
+  simp
+
+/-- **The bound attained exactly, at every time**: on `K₂` the
+headline reads `0 ≤ (1 − 2/2)^{2t} · ((1/2)⁻¹ − 1) = 0`, and the
+left side is exactly `0` — the strongest QA shape a bound theorem can
+have, on the fixture where the plain family is certificate-free. -/
+theorem k2_lazy_bound_attained_QA (t : ℕ) :
+    lazyChiSquareDistance k2Adj (1 + t) 0
+      = (1 - secondEval (normalizedLaplacian k2Adj)
+            (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)
+            (by norm_num) / 2) ^ (2 * (1 + t))
+          * ((stationaryVec k2Adj 0)⁻¹ - 1) := by
+  have hval : (1 - secondEval (normalizedLaplacian k2Adj)
+        (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)
+        (by norm_num) / 2) ^ (2 * (1 + t))
+      * ((stationaryVec k2Adj 0)⁻¹ - 1) = 0 := by
+    rw [k2_secondEval_QA, k2_pi_QA 0]
+    have hz : ((1 : ℝ) - 2 / 2) ^ (2 * (1 + t)) = 0 := by
+      have h0 : ((1 : ℝ) - 2 / 2) = 0 := by norm_num
+      rw [h0, zero_pow (by omega)]
+    have h1 : ((1/2 : ℝ)⁻¹ - 1) = 1 := by norm_num
+    rw [hz, h1]
+    norm_num
+  rw [k2_lazy_chi2_all_QA t, hval]
+
+/-- **The periodicity fix on the edge, TV form**: the plain walk's TV
+is `1/2` at every time (fenced on file), the lazy walk's is exactly
+`0` after one step. -/
+theorem k2_periodicity_fixed_QA :
+    tvDistance (walkDistribution k2Adj 1 0) (stationaryVec k2Adj) = 1/2
+      ∧ tvDistance (lazyWalkDistribution k2Adj 1 0)
+          (stationaryVec k2Adj) = 0 := by
+  constructor
+  · rw [k2_dist_one_QA]
+    have hπ : ∀ i : Fin 2, stationaryVec k2Adj i = 1/2 :=
+      fun i => k2_pi_QA i
+    simp only [tvDistance, Fin.sum_univ_two, hπ, Matrix.cons_val_zero,
+      Matrix.head_cons, Matrix.cons_val_one]
+    rw [show |((0:ℝ) - 1/2)| = 1/2 from by norm_num,
+      show |((1:ℝ) - 1/2)| = 1/2 from by norm_num]
+    norm_num
+  · rw [k2_lazy_law_one_QA]
+    simp only [tvDistance, sub_self]
+    simp
+
+/-- The signless certificate saturates on the edge's top mode:
+`xᵀ(2·1 − L_sym)x = 0` at `x = (1, −1)` — the bipartite mode is
+exactly the `μ = 2` boundary. -/
+theorem sos_k2_top_mode_QA :
+    quadForm ((2 : ℝ) • 1 - normalizedLaplacian k2Adj) ![1, -1] = 0 := by
+  rw [quadForm_two_sub_normalizedLaplacian_eq k2Adj k2Adj_deg_pos _]
+  have hu : degreeInvSqrt k2Adj *ᵥ (![1, -1] : Fin 2 → ℝ)
+      = ![1, -1] := by
+    funext i
+    rw [degreeInvSqrt_mulVec_apply]
+    fin_cases i <;> simp [k2Adj_deg_eq]
+  rw [hu, quadForm_add_eq, quadForm_degreeMatrix_eq, quadForm_eq_sum]
+  have hdeg : ∀ i : Fin 2, deg k2Adj i = 1 := fun i => k2Adj_deg_eq i
+  simp only [hdeg, k2Adj_apply, Fin.sum_univ_two]
+  norm_num
+
+/-- The fence fixture: symmetric, positive degrees (`deg = 1`), with
+nonnegativity violated only at the diagonal. -/
+def negDiagAdj : Matrix (Fin 2) (Fin 2) ℝ :=
+  !![-1, 2; 2, -1]
+
+theorem negDiagAdj_isSymm : negDiagAdj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [negDiagAdj]
+
+theorem negDiagAdj_apply (i j : Fin 2) :
+    negDiagAdj i j = if i = j then -1 else 2 := by
+  rw [negDiagAdj]
+  fin_cases i <;> fin_cases j <;> rfl
+
+theorem negDiagAdj_deg_eq (i : Fin 2) : deg negDiagAdj i = 1 := by
+  rw [deg, negDiagAdj]
+  fin_cases i <;> simp [Matrix.of_apply, Fin.sum_univ_two] <;> norm_num
+
+theorem negDiagAdj_deg_pos (i : Fin 2) : 0 < deg negDiagAdj i := by
+  rw [negDiagAdj_deg_eq i]
+  norm_num
+
+/-- **The `hnn` fence for the signless certificate**: at the
+negative-diagonal fixture (symmetric, positive degrees — every
+hypothesis except entrywise nonnegativity), the quadratic form of
+`2·1 − L_sym` at the top mode is `-4 < 0` — the dropped conclusion
+refuted in proved form. -/
+theorem sos_nonneg_fence_QA :
+    ¬ (0 ≤ quadForm ((2 : ℝ) • 1 - normalizedLaplacian negDiagAdj)
+        ![1, -1]) := by
+  rw [quadForm_two_sub_normalizedLaplacian_eq negDiagAdj
+    negDiagAdj_deg_pos _]
+  have hu : degreeInvSqrt negDiagAdj *ᵥ (![1, -1] : Fin 2 → ℝ)
+      = ![1, -1] := by
+    funext i
+    rw [degreeInvSqrt_mulVec_apply]
+    fin_cases i <;> simp [negDiagAdj_deg_eq]
+  rw [hu, quadForm_add_eq, quadForm_degreeMatrix_eq, quadForm_eq_sum]
+  have hdeg : ∀ i : Fin 2, deg negDiagAdj i = 1 :=
+    fun i => negDiagAdj_deg_eq i
+  simp only [hdeg, negDiagAdj_apply, Fin.sum_univ_two]
+  norm_num
+
+/-! ### The lazy mixing-time objects: the periodicity fix at the object
+level (`proposals/lazy-mixing-time-objects.md`): the exact closed forms
+pinned in both directions on the bipartite fixtures, the ceiling
+attained exactly and with honest slack, and the object-level contrast —
+the plain `t_mix` junk corner against the lazy twin's genuine value. -/
+
+section LazyMixingTimeQA
+
+/-- The lazy operator's transpose kills the antisymmetric mode by
+exactly one half: `P_Lᵀ · (1, 0, −1) = (1/2, 0, −1/2)` — the `μ = 2`
+periodic mode is dead after one lazy step, and the surviving `μ = 1`
+mode halves per step. The corner-start law's engine, computed entrywise
+from the raw operator. -/
+theorem path_lazy_transpose_antisym_QA :
+    (lazyWalkTransitionMatrix pathAdj)ᵀ *ᵥ
+        (![1, 0, -1] : Fin 3 → ℝ) = ![1/2, 0, -1/2] := by
+  funext i
+  fin_cases i
+  all_goals simp [Matrix.mulVec, Matrix.dotProduct,
+    Matrix.transpose_apply, lazyWalkTransitionMatrix_apply,
+    walkTransitionMatrix_apply, deg, pathAdj, Fin.sum_univ_three,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_succ,
+    Matrix.head_cons]
+  all_goals norm_num
+
+/-- **The corner-start law in closed form at every time**: after the
+first lazy step the law is `π + (1/2)^{t+2} · (1, 0, −1)` — stationarity
+plus a purely antisymmetric deviation halving per step (`π`'s
+stationarity under `P_Lᵀ` is the shelf lemma; the antisymmetric mode's
+halving is the lemma above). -/
+theorem path_lazy_corner_dev_all_QA (t : ℕ) :
+    lazyWalkDistribution pathAdj (1 + t) 0
+      = (stationaryVec pathAdj)
+        + (1/2 : ℝ)^(t+2) • (![1, 0, -1] : Fin 3 → ℝ) := by
+  have hbase : lazyWalkDistribution pathAdj (1 + 0) 0
+      = (stationaryVec pathAdj)
+        + (1/2 : ℝ)^(0+2) • (![1, 0, -1] : Fin 3 → ℝ) := by
+    have hπ : (stationaryVec pathAdj)
+        + (1/2 : ℝ)^(0+2) • (![1, 0, -1] : Fin 3 → ℝ)
+        = ![1/2, 1/2, 0] := by
+      rw [path_pi_QA]
+      funext i
+      fin_cases i <;>
+        simp [Pi.add_apply, Pi.smul_apply, smul_eq_mul] <;> norm_num
+    rw [show (1 : ℕ) + 0 = 1 from rfl, path_lazy_corner_law_one_QA, hπ]
+  induction t with
+  | zero => exact hbase
+  | succ t ih =>
+    have hstep : lazyWalkDistribution pathAdj (1 + t + 1) 0
+        = (lazyWalkTransitionMatrix pathAdj)ᵀ *ᵥ
+            lazyWalkDistribution pathAdj (1 + t) 0 :=
+      lazyWalkDistribution_succ pathAdj (1 + t) 0
+    have hst : (lazyWalkTransitionMatrix pathAdj)ᵀ *ᵥ
+        (stationaryVec pathAdj) = stationaryVec pathAdj :=
+      lazyWalkTransitionMatrixTranspose_mulVec_stationaryVec pathAdj
+        pathAdj_isSymm pathAdj_deg_pos
+    have hsmul : (lazyWalkTransitionMatrix pathAdj)ᵀ *ᵥ
+        ((1/2 : ℝ)^(t+2) • (![1, 0, -1] : Fin 3 → ℝ))
+        = (1/2 : ℝ)^(t+2) •
+            ((lazyWalkTransitionMatrix pathAdj)ᵀ *ᵥ
+              (![1, 0, -1] : Fin 3 → ℝ)) :=
+      Matrix.mulVec_smul _ _ _
+    have hw : (![1/2, 0, -1/2] : Fin 3 → ℝ)
+        = (1/2 : ℝ) • (![1, 0, -1] : Fin 3 → ℝ) := by
+      funext i
+      fin_cases i
+      all_goals simp [Pi.smul_apply, smul_eq_mul]
+      all_goals norm_num
+    have hexp : (1/2 : ℝ)^(t+2) • (![1/2, 0, -1/2] : Fin 3 → ℝ)
+        = (1/2 : ℝ)^(t+1+2) • (![1, 0, -1] : Fin 3 → ℝ) := by
+      have h : (1/2 : ℝ)^(t+1+2) = (1/2 : ℝ) * (1/2 : ℝ)^(t+2) := by
+        rw [show t + 1 + 2 = t + 2 + 1 from by omega, pow_succ,
+          mul_comm ((1/2 : ℝ)^(t+2)) (1/2 : ℝ)]
+      rw [h]
+      set c : ℝ := (1/2 : ℝ)^(t+2) with hc
+      funext i
+      fin_cases i
+      all_goals simp [Pi.smul_apply, smul_eq_mul]
+      all_goals ring
+    rw [show 1 + (t + 1) = 1 + t + 1 from by omega, hstep, ih,
+      Matrix.mulVec_add, hst, hsmul,
+      path_lazy_transpose_antisym_QA, hexp]
+
+/-- **The corner-start TV closed form at every time**:
+`TV_lazy(1 + t, corner) = (1/2)^{t+2}` — exact at every time on the
+bipartite path, decaying at exactly the intrinsic rate `1 − λ₂/2 = 1/2`
+(the pure `μ = 2` mode dead after one lazy step, the `μ = 1` mode
+halving). -/
+theorem path_lazy_corner_tv_all_QA (t : ℕ) :
+    tvDistance (lazyWalkDistribution pathAdj (1 + t) 0)
+        (stationaryVec pathAdj) = (1/2 : ℝ)^(t+2) := by
+  have hc : 0 ≤ (1/2 : ℝ)^(t+2) := pow_nonneg (by norm_num) _
+  rw [path_lazy_corner_dev_all_QA t, tvDistance, path_pi_QA]
+  have hterm : ∀ i : Fin 3,
+      |((![1/4, 1/2, 1/4] : Fin 3 → ℝ)
+          + (1/2 : ℝ)^(t+2) • (![1, 0, -1] : Fin 3 → ℝ)) i
+        - (![1/4, 1/2, 1/4] : Fin 3 → ℝ) i|
+        = (1/2 : ℝ)^(t+2) * |(![1, 0, -1] : Fin 3 → ℝ) i| := by
+    intro i
+    rw [Pi.add_apply, Pi.smul_apply, smul_eq_mul, add_sub_cancel_left,
+      abs_mul, abs_of_nonneg hc]
+  have hsum : ∑ i, |((![1/4, 1/2, 1/4] : Fin 3 → ℝ)
+        + (1/2 : ℝ)^(t+2) • (![1, 0, -1] : Fin 3 → ℝ)) i
+      - (![1/4, 1/2, 1/4] : Fin 3 → ℝ) i|
+      = ∑ i, (1/2 : ℝ)^(t+2) * |(![1, 0, -1] : Fin 3 → ℝ) i| :=
+    Finset.sum_congr rfl fun i _ => hterm i
+  have hw0 : |(![1, 0, -1] : Fin 3 → ℝ) 0| = 1 := by
+    simp [Matrix.cons_val_zero, abs_of_nonneg]
+  have hw1 : |(![1, 0, -1] : Fin 3 → ℝ) 1| = 0 := by
+    simp [Matrix.cons_val_one, abs_of_nonneg]
+  have hw2 : |(![1, 0, -1] : Fin 3 → ℝ) 2| = 1 := by
+    simp [Matrix.cons_val_succ, abs_of_nonneg]
+  rw [hsum]
+  simp only [Fin.sum_univ_three]
+  rw [hw0, hw1, hw2]
+  ring
+
+/-- **The exact lazy mixing-time closed form on the path's corner
+start**: `t_mix_lazy(corner, 1/8) = 2`, pinned in both directions —
+`TV(2) = 1/8` attains the threshold exactly, `TV(1) = 1/4` refutes
+`1`. On the bipartite fixture where the plain walk provably never
+mixes. -/
+theorem path_lazy_corner_mix_eq_eighth_QA :
+    lazyWalkMixingTimeFrom pathAdj 0 (1/8) = 2 := by
+  have hcert : ∀ s : ℕ, 2 ≤ s →
+      tvDistance (lazyWalkDistribution pathAdj s 0)
+        (stationaryVec pathAdj) ≤ 1/8 := by
+    intro s hs
+    obtain ⟨k, hk⟩ : ∃ k : ℕ, s = 1 + k := ⟨s - 1, by omega⟩
+    rw [hk, path_lazy_corner_tv_all_QA k]
+    have h8 : (8 : ℝ) ≤ (2 : ℝ)^(k+2) := by
+      have hp := pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2)
+        (by omega : (3 : ℕ) ≤ k + 2)
+      norm_num at hp
+      exact hp
+    have hpos : (0 : ℝ) < (2 : ℝ)^(k+2) := pow_pos (by norm_num) _
+    have hinv : (1/2 : ℝ)^(k+2) = 1 / ((2 : ℝ)^(k+2)) :=
+      _root_.one_div_pow 2 (k+2)
+    have hkey : (1 : ℝ) / ((2 : ℝ)^(k+2)) ≤ 1/8 :=
+      (one_div_le_one_div hpos (by norm_num : (0 : ℝ) < 8)).mpr h8
+    rw [hinv]
+    linarith
+  refine le_antisymm ?_ ?_
+  · exact lazyWalkMixingTimeFrom_le_of_cert pathAdj 0 2 hcert
+  · by_contra hne
+    have hle1 : lazyWalkMixingTimeFrom pathAdj 0 (1/8) ≤ 1 := by omega
+    have hspec := lazyWalkMixingTimeFrom_spec pathAdj 0 (ε := 1/8)
+      ⟨2, hcert⟩ (1 + 0) (by simpa using hle1)
+    rw [path_lazy_corner_tv_all_QA 0] at hspec
+    norm_num at hspec
+
+/-- **The exact lazy mixing-time closed form on the path's center
+start**: `t_mix_lazy(center, 1/4) = 1` — the pure periodic mode is
+stationary after one lazy step. -/
+theorem path_lazy_center_mix_eq_one_QA :
+    lazyWalkMixingTimeFrom pathAdj 1 (1/4) = 1 := by
+  have hcert : ∀ s : ℕ, 1 ≤ s →
+      tvDistance (lazyWalkDistribution pathAdj s 1)
+        (stationaryVec pathAdj) ≤ 1/4 := by
+    intro s hs
+    obtain ⟨k, hk⟩ : ∃ k : ℕ, s = 1 + k := ⟨s - 1, by omega⟩
+    rw [hk, path_lazy_center_mix_all_QA k]
+    have hself : tvDistance (stationaryVec pathAdj)
+        (stationaryVec pathAdj) = 0 := by simp [tvDistance]
+    rw [hself]
+    norm_num
+  refine le_antisymm (lazyWalkMixingTimeFrom_le_of_cert pathAdj 1 1 hcert) ?_
+  by_contra hne
+  have hzero : lazyWalkMixingTimeFrom pathAdj 1 (1/4) = 0 := by omega
+  have hspec := lazyWalkMixingTimeFrom_spec pathAdj 1 (ε := 1/4)
+    ⟨1, hcert⟩ 0 (by omega)
+  have hvec : (Pi.single (1 : Fin 3) (1 : ℝ) : Fin 3 → ℝ)
+      = ![0, 1, 0] := by
+    funext i
+    fin_cases i <;> simp
+  have hTV0 : tvDistance (lazyWalkDistribution pathAdj 0 1)
+      (stationaryVec pathAdj) = 1/2 := by
+    norm_num [tvDistance, lazyWalkDistribution_zero, hvec, path_pi_QA,
+      Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.cons_val_succ, Matrix.head_cons, neg_sub, abs_of_neg,
+      abs_of_nonneg]
+  rw [hTV0] at hspec
+  norm_num at hspec
+
+/-- **The ceiling attained exactly**: on the path's center start at
+`ε = 1/4` and the pinned gap `λ₂ = 1`, the object is `1` and the
+ceiling's own right side evaluates to `1` — no slack anywhere in the
+package (both the threshold ratio `1/(2·(1/4)) = 2` and the rate base
+`1/(1−1/2) = 2` sit exactly at `2`, cancelling in the log ratio). -/
+theorem path_lazy_center_ceiling_attained_QA :
+    lazyWalkMixingTimeFrom pathAdj 1 (1/4)
+      = Nat.ceil (Real.log (Real.sqrt ((stationaryVec pathAdj 1)⁻¹ - 1)
+          / (2 * (1/4 : ℝ))) / Real.log (1 / (1 - secondEval
+            (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm)
+            (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2)))
+      ∧ Nat.ceil (Real.log (Real.sqrt ((stationaryVec pathAdj 1)⁻¹ - 1)
+          / (2 * (1/4 : ℝ))) / Real.log (1 / (1 - secondEval
+            (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm)
+            (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2))) = 1 := by
+  have hpi1 : (stationaryVec pathAdj 1)⁻¹ - 1 = 1 := by
+    have h : stationaryVec pathAdj 1 = 1/2 := by rw [path_pi_QA]; rfl
+    rw [h]
+    norm_num
+  have hsqrt : Real.sqrt ((stationaryVec pathAdj 1)⁻¹ - 1) = 1 := by
+    rw [hpi1, Real.sqrt_one]
+  have hrate : (1 - secondEval (normalizedLaplacian pathAdj)
+      (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm)
+      (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2) = 1/2 := by
+    rw [path_secondEval_QA]
+    norm_num
+  have hceil : Nat.ceil (Real.log (Real.sqrt
+        ((stationaryVec pathAdj 1)⁻¹ - 1) / (2 * (1/4 : ℝ)))
+        / Real.log (1 / (1/2 : ℝ))) = 1 := by
+    rw [show (2 * (1/4 : ℝ)) = 1/2 from by norm_num,
+      show (1 : ℝ) / (1/2) = 2 from by norm_num, hsqrt,
+      show (1 : ℝ) / (1/2) = 2 from by norm_num]
+    have hlog2 : Real.log (2 : ℝ) ≠ 0 :=
+      ne_of_gt (Real.log_pos (by norm_num : (1 : ℝ) < 2))
+    rw [div_self hlog2]
+    norm_num
+  rw [hrate, hceil]
+  exact ⟨path_lazy_center_mix_eq_one_QA, rfl⟩
+
+/-- **The ceiling computed with honest slack**: at the corner start and
+`ε = 1/8` the ceiling's right side evaluates to exactly `3` against
+the true `t_mix = 2` — the Cauchy–Schwarz conversion's price, on the
+bipartite fixture. -/
+theorem path_lazy_corner_ceiling_slack_QA :
+    Nat.ceil (Real.log (Real.sqrt ((stationaryVec pathAdj 0)⁻¹ - 1)
+        / (2 * (1/8 : ℝ))) / Real.log (1 / (1 - secondEval
+          (normalizedLaplacian pathAdj)
+          (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm)
+          (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2))) = 3
+      ∧ lazyWalkMixingTimeFrom pathAdj 0 (1/8) = 2 := by
+  have hlog2 : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hπ0 : (stationaryVec pathAdj 0)⁻¹ - 1 = 3 := by
+    have h : stationaryVec pathAdj 0 = 1/4 := by rw [path_pi_QA]; rfl
+    rw [h]
+    norm_num
+  have hratio : Real.sqrt ((stationaryVec pathAdj 0)⁻¹ - 1)
+      / (2 * (1/8 : ℝ)) = 4 * Real.sqrt 3 := by
+    rw [hπ0, show (2 * (1/8 : ℝ)) = 1/4 from by norm_num]
+    refine (div_eq_iff (by norm_num)).mpr (by ring)
+  have hrate : (1 - secondEval (normalizedLaplacian pathAdj)
+      (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm)
+      (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2) = 1/2 := by
+    rw [path_secondEval_QA]
+    norm_num
+  have hone : (1 : ℝ) / (1/2) = 2 := by norm_num
+  have hlog4 : Real.log ((4 : ℝ)) = 2 * Real.log 2 := by
+    rw [show ((4 : ℝ)) = (2 : ℝ) * (2 : ℝ) from by norm_num,
+      Real.log_mul (by norm_num : (2 : ℝ) ≠ 0) (by norm_num : (2 : ℝ) ≠ 0)]
+    ring
+  have hlog8 : Real.log ((8 : ℝ)) = 3 * Real.log 2 := by
+    rw [show ((8 : ℝ)) = (2 : ℝ) * (2 : ℝ) * (2 : ℝ) from by norm_num,
+      Real.log_mul (by norm_num : ((2 : ℝ) * (2 : ℝ)) ≠ 0)
+        (by norm_num : (2 : ℝ) ≠ 0),
+      Real.log_mul (by norm_num : (2 : ℝ) ≠ 0) (by norm_num : (2 : ℝ) ≠ 0)]
+    ring
+  have hs3 : Real.sqrt 3 ≤ 2 := by
+    have h := Real.sqrt_le_sqrt (by norm_num : (3 : ℝ) ≤ 4)
+    rwa [show (4 : ℝ) = 2 ^ 2 from by norm_num,
+      Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 2)] at h
+  have hup : (4 : ℝ) * Real.sqrt 3 ≤ 8 := by nlinarith [hs3]
+  have hle : Real.log ((4 : ℝ) * Real.sqrt 3) / Real.log 2
+      ≤ (3 : ℝ) := by
+    rw [div_le_iff₀ hlog2, ← hlog8]
+    exact Real.log_le_log (by positivity) hup
+  have hsq3 : (Real.sqrt 3)^2 = 3 :=
+    Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 3)
+  have h13 : (1 : ℝ) < Real.sqrt 3 := by
+    nlinarith [hsq3, Real.sqrt_nonneg (3 : ℝ)]
+  have hdown : (2 : ℝ) * Real.log 2
+      < Real.log ((4 : ℝ) * Real.sqrt 3) := by
+    rw [← hlog4]
+    exact Real.log_lt_log (by norm_num : (0 : ℝ) < 4)
+      (by nlinarith [h13])
+  have hxle : Real.log (Real.sqrt ((stationaryVec pathAdj 0)⁻¹ - 1)
+      / (2 * (1/8 : ℝ))) / Real.log (1 / (1 - secondEval
+        (normalizedLaplacian pathAdj)
+        (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm)
+        (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2)) ≤ (3 : ℝ) := by
+    rw [hrate, hone, hratio]
+    exact hle
+  have hltx : (2 : ℝ) < Real.log (Real.sqrt ((stationaryVec pathAdj 0)⁻¹
+      - 1) / (2 * (1/8 : ℝ))) / Real.log (1 / (1 - secondEval
+        (normalizedLaplacian pathAdj)
+        (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm)
+        (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2)) := by
+    rw [hrate, hone, hratio]
+    exact (lt_div_iff₀ hlog2).mpr hdown
+  refine ⟨?_, path_lazy_corner_mix_eq_eighth_QA⟩
+  have h2lt : (2 : ℕ) < Nat.ceil (Real.log (Real.sqrt
+      ((stationaryVec pathAdj 0)⁻¹ - 1) / (2 * (1/8 : ℝ)))
+      / Real.log (1 / (1 - secondEval (normalizedLaplacian pathAdj)
+        (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm)
+        (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2))) :=
+    Nat.lt_ceil.mpr hltx
+  have hle3 : Nat.ceil (Real.log (Real.sqrt ((stationaryVec pathAdj 0)⁻¹
+      - 1) / (2 * (1/8 : ℝ))) / Real.log (1 / (1 - secondEval
+        (normalizedLaplacian pathAdj)
+        (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm)
+        (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2))) ≤ 3 :=
+    Nat.ceil_le.mpr hxle
+  omega
+
+/-- **The exact lazy mixing-time closed form on the edge**:
+`t_mix_lazy(K₂, 0, 1/4) = 1` — the lazy walk mixes exactly in one step
+on the chain where the plain object is junk. -/
+theorem k2_lazy_mix_eq_fourth_QA :
+    lazyWalkMixingTimeFrom k2Adj 0 (1/4) = 1 := by
+  have hstays : ∀ k : ℕ, lazyWalkDistribution k2Adj (1 + k) 0
+      = stationaryVec k2Adj :=
+    fun k => lazyWalkDistribution_add_stationary k2Adj k2Adj_isSymm
+      k2Adj_deg_pos 1 k 0 k2_lazy_law_one_QA
+  have hcert : ∀ s : ℕ, 1 ≤ s →
+      tvDistance (lazyWalkDistribution k2Adj s 0)
+        (stationaryVec k2Adj) ≤ 1/4 := by
+    intro s hs
+    obtain ⟨k, hk⟩ : ∃ k : ℕ, s = 1 + k := ⟨s - 1, by omega⟩
+    rw [hk, hstays k]
+    have hself : tvDistance (stationaryVec k2Adj)
+        (stationaryVec k2Adj) = 0 := by simp [tvDistance]
+    rw [hself]
+    norm_num
+  refine le_antisymm (lazyWalkMixingTimeFrom_le_of_cert k2Adj 0 1 hcert) ?_
+  by_contra hne
+  have hzero : lazyWalkMixingTimeFrom k2Adj 0 (1/4) = 0 := by omega
+  have hspec := lazyWalkMixingTimeFrom_spec k2Adj 0 (ε := 1/4)
+    ⟨1, hcert⟩ 0 (by omega)
+  have hvec : (Pi.single (0 : Fin 2) (1 : ℝ) : Fin 2 → ℝ)
+      = ![1, 0] := by
+    funext i
+    fin_cases i <;> simp
+  have hTV0 : tvDistance (lazyWalkDistribution k2Adj 0 0)
+      (stationaryVec k2Adj) = 1/2 := by
+    norm_num [tvDistance, lazyWalkDistribution_zero, hvec,
+      Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, k2_pi_QA, neg_sub, abs_of_neg, abs_of_nonneg]
+  rw [hTV0] at hspec
+  norm_num at hspec
+
+/-- **The object-level periodicity contrast**: on the bipartite edge at
+`ε = 1/8`, the *plain* object is the junk corner (`sInf ∅ = 0`, no
+mixing — the witness set is empty because the plain TV is `1/2` at
+every time) while the *lazy* object is the genuine `1`. The fix, read
+at the object level every consumer consumes. -/
+theorem k2_lazy_mix_contrast_QA :
+    walkMixingTimeFrom k2Adj 0 (1/8) = 0
+      ∧ lazyWalkMixingTimeFrom k2Adj 0 (1/8) = 1 := by
+  have hempty : {t : ℕ | ∀ s : ℕ, t ≤ s →
+      tvDistance (walkDistribution k2Adj s 0) (stationaryVec k2Adj)
+        ≤ 1/8} = ∅ := by
+    refine Set.eq_empty_iff_forall_not_mem.mpr ?_
+    intro t ht
+    have hbot := ht t (Nat.le_refl t)
+    rw [k2_disc_tv_eq_QA t] at hbot
+    norm_num at hbot
+  have hstays : ∀ k : ℕ, lazyWalkDistribution k2Adj (1 + k) 0
+      = stationaryVec k2Adj :=
+    fun k => lazyWalkDistribution_add_stationary k2Adj k2Adj_isSymm
+      k2Adj_deg_pos 1 k 0 k2_lazy_law_one_QA
+  have hcert : ∀ s : ℕ, 1 ≤ s →
+      tvDistance (lazyWalkDistribution k2Adj s 0)
+        (stationaryVec k2Adj) ≤ 1/8 := by
+    intro s hs
+    obtain ⟨k, hk⟩ : ∃ k : ℕ, s = 1 + k := ⟨s - 1, by omega⟩
+    rw [hk, hstays k]
+    have hself : tvDistance (stationaryVec k2Adj)
+        (stationaryVec k2Adj) = 0 := by simp [tvDistance]
+    rw [hself]
+    norm_num
+  refine ⟨?_, ?_⟩
+  · rw [walkMixingTimeFrom, hempty, Nat.sInf_empty]
+  · refine le_antisymm (lazyWalkMixingTimeFrom_le_of_cert k2Adj 0 1 hcert) ?_
+    by_contra hne
+    have hzero : lazyWalkMixingTimeFrom k2Adj 0 (1/8) = 0 := by omega
+    have hspec := lazyWalkMixingTimeFrom_spec k2Adj 0 (ε := 1/8)
+      ⟨1, hcert⟩ 0 (by omega)
+    have hvec : (Pi.single (0 : Fin 2) (1 : ℝ) : Fin 2 → ℝ)
+        = ![1, 0] := by
+      funext i
+      fin_cases i <;> simp
+    have hTV0 : tvDistance (lazyWalkDistribution k2Adj 0 0)
+        (stationaryVec k2Adj) = 1/2 := by
+      rw [lazyWalkDistribution_zero, hvec, tvDistance]
+      norm_num [Fin.sum_univ_two, Matrix.cons_val_zero,
+        Matrix.cons_val_one, Matrix.head_cons, k2_pi_QA, neg_sub,
+        abs_of_neg, abs_of_nonneg]
+    rw [hTV0] at hspec
+    norm_num at hspec
+
+/-- **The entrywise bound attained exactly at every time's mechanism**:
+on `K₂` the rate is exactly `0` (pinned gap `λ₂ = 2`), and the lazy law
+*is* `π` after one step — both sides of the entrywise lazy ceiling are
+exactly zero. -/
+theorem k2_lazy_entrywise_attained_QA :
+    |lazyWalkDistribution k2Adj 1 0 1 - stationaryVec k2Adj 1|
+      = (1 - secondEval (normalizedLaplacian k2Adj)
+            (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)
+            (by norm_num) / 2) ^ 1
+        * Real.sqrt (stationaryVec k2Adj 1
+            * ((stationaryVec k2Adj 0)⁻¹ - 1)) := by
+  rw [k2_lazy_law_one_QA]
+  have hrate : (1 - secondEval (normalizedLaplacian k2Adj)
+      (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)
+      (by norm_num) / 2) ^ 1 = 0 := by
+    rw [k2_secondEval_QA]
+    norm_num
+  rw [hrate, sub_self, abs_zero, zero_mul]
+
+/-- **The entrywise bound instance with slack witnessed**: on the
+path's corner start at `t = 1`, target vertex `2`, the deviation is
+`1/4` against the bound's `√3/4` — the pinned gap `λ₂ = 1` at the
+intrinsic rate `1/2`. -/
+theorem path_lazy_entrywise_slack_QA :
+    |lazyWalkDistribution pathAdj 1 0 2 - stationaryVec pathAdj 2| = 1/4
+      ∧ (1/4 : ℝ) < (1 - secondEval (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm)
+            (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2) ^ 1
+        * Real.sqrt (stationaryVec pathAdj 2
+            * ((stationaryVec pathAdj 0)⁻¹ - 1)) := by
+  have hπ2 : stationaryVec pathAdj 2 = 1/4 := by rw [path_pi_QA]; rfl
+  have hπ0 : stationaryVec pathAdj 0 = 1/4 := by rw [path_pi_QA]; rfl
+  have hlaw : lazyWalkDistribution pathAdj 1 0 2 = 0 := by
+    rw [path_lazy_corner_law_one_QA]
+    simp [Matrix.cons_val_succ]
+  have hrate : (1 - secondEval (normalizedLaplacian pathAdj)
+      (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm)
+      (by norm_num : 2 ≤ Fintype.card (Fin 3)) / 2) ^ 1 = (1/2 : ℝ) := by
+    rw [path_secondEval_QA]
+    norm_num
+  refine ⟨?_, ?_⟩
+  · rw [hlaw, hπ2]
+    simp
+  · rw [hrate, hπ2, hπ0]
+    have hC : (0 : ℝ) ≤ (1/4) * 3 := by norm_num
+    have hnn : 0 ≤ Real.sqrt ((1/4 : ℝ) * 3) := Real.sqrt_nonneg _
+    have hsq : ((1/2 : ℝ) * Real.sqrt ((1/4 : ℝ) * 3))^2
+        = (1/4) * ((1/4 : ℝ) * 3) := by
+      rw [mul_pow, Real.sq_sqrt hC]
+      ring
+    have h14 : (0 : ℝ) ≤ 1/4 := by norm_num
+    nlinarith [hsq, hnn, h14]
+
+end LazyMixingTimeQA
 
 end SpectralGraphTheory.QA

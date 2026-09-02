@@ -1713,3 +1713,50 @@ changed.
 | `contWalkDistribution_tvDistance_le_tsum` | Mixing (Poisson bridge) | the Poisson-averaged bound: `TV_cont(t) ≤ ∑'ₖ e^{−t}tᵏ/k! · TV_disc(k)` |
 | `contWalkDistribution_tvDistance_add_le` | Mixing (Poisson bridge) | **the continuous↔discrete comparability**: `TV_cont(t) ≤ ∑_{k<m} e^{−t}tᵏ/k! + TV_disc(m)` at every threshold `m` — LPW ch. 20's Poissonization comparison, tail term exact (no Chernoff rounding) |
 | `contWalkDistribution_tvDistance_le_of_discreteMixing` | Mixing (Poisson bridge) | **the discrete-certificate transfer**: a discrete mixing certificate (`∀ k ≥ m, TV_disc(k) ≤ ε₁`) plus a Poisson lower-tail bound (`∑_{k<m} e^{−t}tᵏ/k! ≤ ε₂`) give `TV_cont(t) ≤ ε₁ + ε₂` — was the would-be consumer of the still-deferred discrete `t_mix` object (`hmix` is exactly its witness condition); that object is now delivered (`walkMixingTimeFrom`, the Oversmoothing table), and its attainment specification discharges this `hmix` clause |
+
+### Mixing — the lazy walk (`GraphTheory.Mixing`, 2026-09-01, `proposals/lazy-walk-mixing.md`)
+
+The discrete mixing program's periodicity fix: LPW ch. 5's lazy chain
+`P_L = (P + I)/2`, whose mode factors `1 − λ/2` lie in `[0, 1]` — the
+intrinsic-rate mixing family on the side of the program where every
+caller-certified family is provably unsatisfiable (bipartite graphs).
+
+| Declaration | Area | Description |
+| --- | --- | --- |
+| `lazyWalkTransitionMatrix` | Mixing (lazy walk) | the lazy operator `2⁻¹ • (P + 1)` — stay or move, probability `1/2` each (definition) |
+| `lazyWalkTransitionMatrix_apply` / `_mulVec_one` / `_nonneg` | Mixing (lazy walk) | the entry interface, the constant fix `P_L *ᵥ 1 = 1`, and entrywise nonnegativity |
+| `lazyWalkDistribution` / `_zero` / `_succ` / `sum_` / `_nonneg` | Mixing (lazy walk) | the lazy walk law `(P_Lᵀ)ᵗ *ᵥ δₓ` with its evolution, mass conservation, and nonnegativity — the plain object's exact definition at the lazy operator |
+| `stationaryVec_mul_lazyWalkTransitionMatrix` | Mixing (lazy walk) | **detailed balance, lazy form**: `π` is reversible for `P_L` (the average of two π-reversible operators) |
+| `lazyWalkTransitionMatrixTranspose_mulVec_stationaryVec` / `lazyWalkDistribution_add_stationary` | Mixing (lazy walk) | `π` stationary for the lazy walk; **attainment persists** — once at stationarity, forever |
+| `lazyWalkDensity` / `_zero` / `_succ` / `_sub_one` | Mixing (lazy walk) | the π-density objects: the join to the plain initial density (the connectivity mode derivation applies verbatim), the density evolution `h_{t+1} = P_L *ᵥ h_t`, and the centered evolution |
+| `lazyChiSquareDistance` / `_eq_sum_smul` / `_zero` | Mixing (lazy walk) | the lazy χ² distance in sum-div shape (composable with the entropy bridge), density form, and `t = 0` normalization |
+| `quadForm_sub_eq` / `quadForm_add_eq` / `quadForm_degreeMatrix_eq` | Mixing (lazy walk) | generic quadratic-form splitting + the degree-matrix entry identity |
+| `quadForm_degreeMatrix_add_eq_half_sum` | Mixing (lazy walk) | **the signless sum-of-squares**: `uᵀ(D+A)u = (1/2) ∑ i j, A i j (u i + u j)²` — the positivity certificate bounding the normalized spectrum above by `2` |
+| `quadForm_two_sub_normalizedLaplacian_eq` / `_nonneg` | Mixing (lazy walk) | the conjugation identity `xᵀ(2·1 − L_sym)x = uᵀ(D+A)u` at `u = (1/√D) *ᵥ x`, and its nonnegativity at nonnegative weights (`hnn` load-bearing, fenced) |
+| `eigvalOf_normalizedLaplacian_nonneg` / `eigvalOf_normalizedLaplacian_le_two` | Mixing (lazy walk) | **the two-sided normalized-spectrum bound** `0 ≤ μ ≤ 2` — PSD at the unit eigenvector, the signless certificate at the unit eigenvector (bipartite top mode = the boundary) |
+| `degreeSqrt_mul_lazyWalkTransitionMatrix_eq` / `degreeSqrt_mulVec_pow_lazyWalkTransitionMatrix` | Mixing (lazy walk) | the lazy commutation `√D P_L = (1 − (1/2)L_sym) √D` and the conjugated-power transfer |
+| `eigvecOf_dotProduct_one_sub_half_normalizedLaplacian_mulVec` | Mixing (lazy walk) | the eigenaction of the symmetric lazy operator on the `L_sym` eigenbasis — mode factor `1 − μ/2` |
+| `eigvecOf_dotProduct_degreeSqrt_mulVec_pow_lazyWalkTransitionMatrix` / `dotProduct_self_...` / `..._contraction` / `sum_stationaryVec_smul_sq_pow_lazyWalkTransitionMatrix_le` | Mixing (lazy walk) | the lazy decay engine: eigencoordinate evolution at `(1 − μ/2)^t`, the Parseval-exact identity, the conjugated-norm and ℓ²(π) contractions (mode/rate shape inherited from the plain engine) |
+| `abs_one_sub_half_eigvalOf_le_one_sub_half_secondEval` | Mixing (lazy walk) | **the intrinsic rate assembled**: `|1 − μ/2| ≤ 1 − λ₂/2` for every nonzero mode — PSD + signless + the below-gap plumbing, no sign hypothesis anywhere |
+| `lazyChiSquareDistance_le_of_connected` | Mixing (lazy walk) | **the headline**: `χ²_lazy(t,x) ≤ (1 − λ₂(L_sym)/2)^{2t}·((πx)⁻¹ − 1)` with connectivity the only graph hypothesis — the continuous family's intrinsic-rate advantage on the discrete side; satisfiable on every bipartite graph where the plain families are not |
+| `lazyWalkDistribution_tvDistance_le_of_connected` | Mixing (lazy walk) | the TV corollary: `TV ≤ (1/2)·(1 − λ₂/2)^t·√((πx)⁻¹ − 1)` |
+| `klDiv_lazyWalkDistribution_le` | Mixing (lazy walk) | the entropy corollary: `D(ν^L_t ‖ π) ≤ (1 − λ₂/2)^{2t}·((πx)⁻¹ − 1)` — the delivered bridge composed with the lazy bound |
+
+### Mixing — the lazy mixing time (`GraphTheory.Oversmoothing`, 2026-09-01, `proposals/lazy-mixing-time-objects.md`)
+
+The periodicity fix completed at the object level: the `t_mix(ε)` object
+and the depth/entrywise ceilings at the lazy law, at the intrinsic rate
+`1 − λ₂/2` — with the consumer gate discharged by naming the
+bipartite-input instance (the empirical-stationary capstone's "agent
+that can only simulate the walk" on paths/trees/grids, where the plain
+family's certificate is provably unsatisfiable; the entrywise ceiling
+is that extension's hypothesis supplier, the named follow-on).
+
+| Declaration | Area | Description |
+| --- | --- | --- |
+| `secondEval_normalizedLaplacian_le_two` | Mixing (lazy walk) | **the spectrum cap**: `λ₂(L_sym) ≤ 2` — sortedness + membership + the pointwise signless bound; with the pointwise twin the whole normalized spectrum lives in `[0, 2]`, and the lazy rate is nonnegative by theorem |
+| `lazyWalkDistribution_sub_stationaryVec_abs_le` | Mixing (lazy walk) | **the entrywise lazy ceiling at the intrinsic rate**: `|ν_lazy(t) x y − π y| ≤ (1−λ₂/2)^t·√(π y ((πx)⁻¹−1))`, connectivity the only graph hypothesis — the plain twin's certificate hypothesis replaced by the computed rate |
+| `lazyWalkDistribution_tvDistance_le_of_depth` | Mixing (lazy walk) | the depth-form TV lazy ceiling past `log(√((πx)⁻¹−1)/(2ε))/log(1/(1−λ₂/2))` at the honest visible `λ₂ < 2` (K₂'s rate-0 corner excluded and documented) |
+| `lazyWalkMixingTimeFrom` | Mixing (lazy walk) | **the lazy `t_mix(ε)` object**: the `sInf` over witness times of the lazy TV (the plain object at the lazy law — genuine and finite on the bipartite class where the plain object is junk) |
+| `lazyWalkMixingTimeFrom_bddBelow` / `_le_of_cert` / `_spec` / `_anti` | Mixing (lazy walk) | the object's package: the certificate interface, the `csInf_mem` attainment (membership itself the uniform bound), ε-antitonicity |
+| `lazyWalkMixingTimeFrom_le_of_connected` | Mixing (lazy walk) | **the intrinsic-rate spectral ceiling**: `t_mix_lazy(ε) ≤ ⌈log(√((πx)⁻¹−1)/(2ε))/log(1/(1−λ₂/2))⌉` under the depth ceiling's hypothesis set |

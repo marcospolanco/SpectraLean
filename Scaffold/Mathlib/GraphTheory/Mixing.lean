@@ -120,6 +120,15 @@ at the law level, this module's first tsum construction), the TV
 contraction toolkit (`Pᵀ` ℓ¹-contraction, discrete TV monotonicity),
 the comparability `contWalkDistribution_tvDistance_add_le`, and the
 discrete-certificate transfer corollary.
+
+The lazy-walk section (2026-09-01,
+`proposals/lazy-walk-mixing.md`) adds the lazy operator
+`lazyWalkTransitionMatrix = (P + 1)/2` with its law/density/χ² objects
+and the intrinsic-rate mixing family
+`lazyChiSquareDistance_le_of_connected` (plus TV and entropy
+corollaries) — the discrete program's periodicity fix, with the
+signless-Laplacian SOS engine `eigvalOf_normalizedLaplacian_le_two`
+(`μ ≤ 2`) as its new inner layer.
 -/
 
 namespace SpectralGraphTheory
@@ -2375,5 +2384,1012 @@ theorem klDiv_contWalkDistribution_le (A : WAdj (V := V))
       (sum_contWalkDistribution A hA hd t x) (sum_stationaryVec A hd)
   rw [← contChiSquareDistance_eq_sum_div A hd t x] at h1
   exact h1.trans (contChiSquareDistance_le A hA hnn hd hcard ht x)
+
+
+/-!
+## The lazy walk — the discrete mixing program's periodicity fix
+
+`proposals/lazy-walk-mixing.md` (2026-09-01): the lazy walk operator
+`P_L = (P + 1)/2` (Levin–Peres–Wilmer ch. 5's canonical convention for
+discrete-time mixing) with its law, density, and χ² distance; the
+signless-Laplacian sum-of-squares engine bounding the normalized
+spectrum above by `2`; the lazy decay engine (conjugation, eigencoordinate
+evolution, Parseval, ℓ²(π) contraction) at mode factors `1 − μ/2`; and
+the headline `lazyChiSquareDistance_le_of_connected` — the χ² mixing
+bound at the *intrinsic* rate `1 − λ₂(L_sym)/2` with connectivity the
+only graph hypothesis, the continuous family's recorded advantage
+delivered on the discrete side. On bipartite graphs (every path, tree,
+even cycle), where the plain family's rate hypothesis is provably
+unsatisfiable (`λ_max = 2` mode, factor `|1 − 2| = 1`), the lazy rate
+still contracts. TV and entropy corollaries at the same rate.
+-/
+
+/-! ## The lazy walk operator and its law -/
+
+/-- **The lazy walk transition matrix** `P_L = (P + 1)/2` —
+Levin–Peres–Wilmer ch. 5's canonical convention for discrete-time
+mixing (stay or move, probability `1/2` each). The operator whose mode
+factors `1 − λ/2` lie in `[0, 1]`, exactly the property the plain walk
+lacks on bipartite graphs (`|1 − 2| = 1`). Noncomputable because
+`walkTransitionMatrix` is. -/
+noncomputable def lazyWalkTransitionMatrix (A : WAdj (V := V)) :
+    Matrix V V ℝ :=
+  (2 : ℝ)⁻¹ • (walkTransitionMatrix A + 1)
+
+/-- Entry form: `P_L i j = 2⁻¹ * (P i j + δ i j)` — the entry-level
+interface the raw QA computations consume. -/
+theorem lazyWalkTransitionMatrix_apply (A : WAdj (V := V)) (i j : V) :
+    lazyWalkTransitionMatrix A i j
+      = (2 : ℝ)⁻¹ * (walkTransitionMatrix A i j
+          + (if i = j then 1 else 0)) := by
+  simp [lazyWalkTransitionMatrix, Matrix.one_apply]
+
+/-- The constant fix, lazy form: `P_L *ᵥ 1 = 1` (the average of two
+row-stochastic operators is row-stochastic). -/
+theorem lazyWalkTransitionMatrix_mulVec_one (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) :
+    lazyWalkTransitionMatrix A *ᵥ (1 : V → ℝ) = 1 := by
+  have hP : walkTransitionMatrix A *ᵥ (1 : V → ℝ) = 1 :=
+    walkTransitionMatrix_mulVec_one A hd
+  have h1 : (1 : Matrix V V ℝ) *ᵥ (1 : V → ℝ) = 1 := by simp
+  calc lazyWalkTransitionMatrix A *ᵥ (1 : V → ℝ)
+      = (2 : ℝ)⁻¹ • (walkTransitionMatrix A *ᵥ (1 : V → ℝ)
+          + (1 : Matrix V V ℝ) *ᵥ (1 : V → ℝ)) := by
+            rw [lazyWalkTransitionMatrix, Matrix.smul_mulVec_assoc,
+              Matrix.add_mulVec]
+      _ = 1 := by
+            rw [hP, h1]
+            ext i
+            have h2 : (2 : ℝ)⁻¹ * ((1 : ℝ) + 1) = 1 := by
+              field_simp
+            simpa [Pi.smul_apply, Pi.add_apply, smul_eq_mul] using h2
+
+/-- Entrywise nonnegativity of the lazy operator at nonnegative
+weights and positive degrees. -/
+theorem lazyWalkTransitionMatrix_nonneg (A : WAdj (V := V))
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i) (i j : V) :
+    0 ≤ lazyWalkTransitionMatrix A i j := by
+  have hP := walkTransitionMatrix_nonneg A hnn hd i j
+  rw [lazyWalkTransitionMatrix_apply]
+  rcases Decidable.em (i = j) with h | h
+  · rw [if_pos h]
+    exact mul_nonneg (by positivity) (by linarith)
+  · rw [if_neg h, add_zero]
+    exact mul_nonneg (by positivity) hP
+
+/-- **The lazy walk law**: the distribution of the lazy walk started at
+`x` after `t` steps, `(P_Lᵀ)ᵗ *ᵥ δₓ` — the plain object's exact
+definition at the lazy operator. Noncomputable because
+`lazyWalkTransitionMatrix` is. -/
+noncomputable def lazyWalkDistribution (A : WAdj (V := V)) (t : ℕ)
+    (x : V) : V → ℝ :=
+  ((lazyWalkTransitionMatrix A)ᵀ ^ t) *ᵥ (Pi.single x (1 : ℝ))
+
+/-- At time zero the lazy walk sits at its start. -/
+theorem lazyWalkDistribution_zero (A : WAdj (V := V)) (x : V) :
+    lazyWalkDistribution A 0 x = Pi.single x (1 : ℝ) := by
+  simp only [lazyWalkDistribution]
+  rw [pow_zero, Matrix.one_mulVec]
+
+/-- The evolution equation: one more lazy step applies the adjoint lazy
+operator to the current law. -/
+theorem lazyWalkDistribution_succ (A : WAdj (V := V)) (t : ℕ) (x : V) :
+    lazyWalkDistribution A (t + 1) x
+      = (lazyWalkTransitionMatrix A)ᵀ *ᵥ lazyWalkDistribution A t x := by
+  simp only [lazyWalkDistribution]
+  rw [pow_succ', ← Matrix.mulVec_mulVec]
+
+/-- Conservation of mass: the lazy walk's law is a probability vector
+at every time (the average of two mass-preserving steps). -/
+theorem sum_lazyWalkDistribution (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) (t : ℕ) (x : V) :
+    ∑ i, lazyWalkDistribution A t x i = 1 := by
+  have hstep : ∀ ν : V → ℝ,
+      ∑ i, ((lazyWalkTransitionMatrix A)ᵀ *ᵥ ν) i = ∑ i, ν i := by
+    intro ν
+    have hexp : ∀ i : V, ((lazyWalkTransitionMatrix A)ᵀ *ᵥ ν) i
+        = (2 : ℝ)⁻¹ * (((walkTransitionMatrix A)ᵀ *ᵥ ν) i + ν i) := by
+      intro i
+      have h1 : ((1 : Matrix V V ℝ) *ᵥ ν) i = ν i := by simp
+      calc ((lazyWalkTransitionMatrix A)ᵀ *ᵥ ν) i
+          = (((2 : ℝ)⁻¹ • ((walkTransitionMatrix A)ᵀ
+              + (1 : Matrix V V ℝ))) *ᵥ ν) i := by
+                rw [lazyWalkTransitionMatrix, Matrix.transpose_smul,
+                  Matrix.transpose_add, Matrix.transpose_one]
+          _ = ((2 : ℝ)⁻¹ • (((walkTransitionMatrix A)ᵀ *ᵥ ν
+              + (1 : Matrix V V ℝ) *ᵥ ν))) i := by
+                rw [Matrix.smul_mulVec_assoc, Matrix.add_mulVec]
+          _ = (2 : ℝ)⁻¹ * (((walkTransitionMatrix A)ᵀ *ᵥ ν) i
+              + ((1 : Matrix V V ℝ) *ᵥ ν) i) := by
+                rw [Pi.smul_apply, Pi.add_apply, smul_eq_mul]
+          _ = (2 : ℝ)⁻¹ * (((walkTransitionMatrix A)ᵀ *ᵥ ν) i + ν i) := by
+                rw [h1]
+    have hplain : ∑ i, ((walkTransitionMatrix A)ᵀ *ᵥ ν) i = ∑ i, ν i := by
+      simp only [Matrix.mulVec, Matrix.dotProduct, Matrix.transpose_apply]
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl fun j _ => ?_
+      rw [← Finset.sum_mul, walkTransitionMatrix_row_sum A hd j, one_mul]
+    rw [Finset.sum_congr rfl fun i _ => hexp i, ← Finset.mul_sum,
+      Finset.sum_add_distrib, hplain]
+    ring
+  induction t with
+  | zero =>
+    rw [lazyWalkDistribution_zero]
+    simp [Pi.single_apply]
+  | succ t ih => rw [lazyWalkDistribution_succ, hstep, ih]
+
+/-- Entrywise nonnegativity of the lazy walk law. -/
+theorem lazyWalkDistribution_nonneg (A : WAdj (V := V))
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i) (t : ℕ) (x i : V) :
+    0 ≤ lazyWalkDistribution A t x i := by
+  have hall : ∀ j, 0 ≤ lazyWalkDistribution A t x j := by
+    induction t with
+    | zero =>
+      intro j
+      rw [lazyWalkDistribution_zero]
+      rcases Decidable.em (j = x) with h | h <;> simp [Pi.single_apply, h]
+    | succ t ih =>
+      intro j
+      rw [lazyWalkDistribution_succ]
+      simp only [Matrix.mulVec, Matrix.dotProduct, Matrix.transpose_apply]
+      exact Finset.sum_nonneg fun k _ =>
+        mul_nonneg (lazyWalkTransitionMatrix_nonneg A hnn hd k j) (ih k)
+  exact hall i
+
+/-- **Detailed balance, lazy form**: the stationary distribution
+`π = deg/vol` is reversible for the lazy operator — the average of two
+reversible-for-π operators (the identity trivially so). This is the
+interface the lazy density evolution consumes. -/
+theorem stationaryVec_mul_lazyWalkTransitionMatrix (A : WAdj (V := V))
+    (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i) (i j : V) :
+    stationaryVec A i * lazyWalkTransitionMatrix A i j
+      = stationaryVec A j * lazyWalkTransitionMatrix A j i := by
+  have hDB : stationaryVec A i * walkTransitionMatrix A i j
+      = stationaryVec A j * walkTransitionMatrix A j i :=
+    walk_detailed_balance_measure A hA hd i j
+  rcases Decidable.em (i = j) with h | h
+  · subst h
+    ring
+  · rw [lazyWalkTransitionMatrix_apply, lazyWalkTransitionMatrix_apply,
+      if_neg h, if_neg (fun hh => h hh.symm), add_zero, add_zero]
+    linear_combination (2 : ℝ)⁻¹ * hDB
+
+/-- The adjoint lazy operator fixes the stationary distribution: `π` is
+stationary for the lazy walk. -/
+theorem lazyWalkTransitionMatrixTranspose_mulVec_stationaryVec
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i)
+    [Nonempty V] :
+    (lazyWalkTransitionMatrix A)ᵀ *ᵥ stationaryVec A
+      = stationaryVec A := by
+  have hplain : (walkTransitionMatrix A)ᵀ *ᵥ stationaryVec A
+      = stationaryVec A := walk_isStationary A hA hd
+  calc (lazyWalkTransitionMatrix A)ᵀ *ᵥ stationaryVec A
+      = (2 : ℝ)⁻¹ • ((walkTransitionMatrix A)ᵀ *ᵥ stationaryVec A
+          + (1 : Matrix V V ℝ) *ᵥ stationaryVec A) := by
+            rw [lazyWalkTransitionMatrix, Matrix.transpose_smul,
+              Matrix.transpose_add, Matrix.transpose_one,
+              Matrix.smul_mulVec_assoc, Matrix.add_mulVec]
+      _ = stationaryVec A := by
+            rw [hplain, Matrix.one_mulVec]
+            ext i
+            have h2 : (2 : ℝ)⁻¹ * (stationaryVec A i + stationaryVec A i)
+                = stationaryVec A i := by
+              field_simp
+            simpa [Pi.smul_apply, Pi.add_apply, smul_eq_mul] using h2
+
+/-- **Attainment persists**: once the lazy law has reached the
+stationary distribution it stays there forever. The QA's every-time
+exact-mixing pins run through this. -/
+theorem lazyWalkDistribution_add_stationary (A : WAdj (V := V))
+    (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i) [Nonempty V]
+    (t s : ℕ) (x : V)
+    (h : lazyWalkDistribution A t x = stationaryVec A) :
+    lazyWalkDistribution A (t + s) x = stationaryVec A := by
+  induction s with
+  | zero => simpa using h
+  | succ s ih =>
+    have hshift : t + (s + 1) = t + s + 1 := Nat.add_assoc t s 1
+    rw [hshift]
+    have hstep : lazyWalkDistribution A (t + s + 1) x
+        = (lazyWalkTransitionMatrix A)ᵀ *ᵥ lazyWalkDistribution A (t + s) x :=
+      lazyWalkDistribution_succ A (t + s) x
+    rw [hstep, ih,
+      lazyWalkTransitionMatrixTranspose_mulVec_stationaryVec A hA hd]
+
+/-! ## The density and the χ² distance, lazy forms -/
+
+/-- The π-density of the lazy walk law. Junk value `0` wherever
+`π i = 0` (positive degrees rule that out). -/
+noncomputable def lazyWalkDensity (A : WAdj (V := V)) (t : ℕ) (x : V) :
+    V → ℝ :=
+  fun i => lazyWalkDistribution A t x i / stationaryVec A i
+
+/-- The lazy density agrees with the plain one at time zero — the two
+walks share their initial condition, so the delivered connectivity mode
+derivation (a statement about `walkDensity A 0 x − 1`) applies to the
+lazy centered density verbatim. -/
+theorem lazyWalkDensity_zero (A : WAdj (V := V)) (x : V) :
+    lazyWalkDensity A 0 x = walkDensity A 0 x := by
+  funext i
+  simp only [lazyWalkDensity, walkDensity]
+  rw [lazyWalkDistribution_zero, walkDistribution_zero]
+
+/-- **The density evolution equation, lazy form**: `h_{t+1} =
+P_L *ᵥ h_t` — detailed balance for the lazy operator in action. -/
+theorem lazyWalkDensity_succ (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (t : ℕ) (x : V) :
+    lazyWalkDensity A (t + 1) x
+      = lazyWalkTransitionMatrix A *ᵥ lazyWalkDensity A t x := by
+  have hpos : ∀ i, stationaryVec A i ≠ 0 := fun i =>
+    ne_of_gt (stationaryVec_pos A hd i)
+  have hterm : ∀ (j i : V),
+      lazyWalkTransitionMatrix A i j * lazyWalkDistribution A t x i
+          / stationaryVec A j
+      = lazyWalkTransitionMatrix A j i
+          * (lazyWalkDistribution A t x i / stationaryVec A i) := by
+    intro j i
+    have hDB : stationaryVec A i * lazyWalkTransitionMatrix A i j
+        = stationaryVec A j * lazyWalkTransitionMatrix A j i :=
+      stationaryVec_mul_lazyWalkTransitionMatrix A hA hd i j
+    have hπi := hpos i
+    have hπj := hpos j
+    rw [← mul_div_assoc, div_eq_div_iff hπj hπi]
+    linear_combination lazyWalkDistribution A t x i * hDB
+  funext j
+  simp only [lazyWalkDensity]
+  rw [lazyWalkDistribution_succ A t x]
+  simp only [Matrix.mulVec, Matrix.dotProduct, Matrix.transpose_apply]
+  rw [Finset.sum_div]
+  exact Finset.sum_congr rfl fun i _ => hterm j i
+
+/-- **Centered evolution, lazy form**: `h_t − 1 = P_Lᵗ *ᵥ (h₀ − 1)`. -/
+theorem lazyWalkDensity_sub_one (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (t : ℕ) (x : V) :
+    lazyWalkDensity A t x - 1
+      = (lazyWalkTransitionMatrix A ^ t) *ᵥ (lazyWalkDensity A 0 x - 1) := by
+  induction t with
+  | zero => simp
+  | succ t ih =>
+    have hP1 : lazyWalkTransitionMatrix A *ᵥ (1 : V → ℝ) = 1 :=
+      lazyWalkTransitionMatrix_mulVec_one A hd
+    rw [lazyWalkDensity_succ A hA hd t x, pow_succ',
+      ← Matrix.mulVec_mulVec]
+    calc lazyWalkTransitionMatrix A *ᵥ lazyWalkDensity A t x - 1
+        = lazyWalkTransitionMatrix A *ᵥ lazyWalkDensity A t x
+            - lazyWalkTransitionMatrix A *ᵥ (1 : V → ℝ) := by rw [hP1]
+      _ = lazyWalkTransitionMatrix A *ᵥ (lazyWalkDensity A t x - 1) :=
+            (Matrix.mulVec_sub _ _ _).symm
+      _ = lazyWalkTransitionMatrix A *ᵥ
+          ((lazyWalkTransitionMatrix A ^ t) *ᵥ
+              (lazyWalkDensity A 0 x - 1)) := by
+            rw [ih]
+
+/-- **The χ² mixing distance, lazy form** — stated in the sum-div
+shape so the delivered `klDiv_le_sum_sq_div` composes by `.trans`
+(the scoping lesson of the continuous twin's `_eq_sum_div`). -/
+noncomputable def lazyChiSquareDistance (A : WAdj (V := V)) (t : ℕ)
+    (x : V) : ℝ :=
+  ∑ i, (lazyWalkDistribution A t x i - stationaryVec A i)^2
+    / stationaryVec A i
+
+/-- The χ² distance in density form — the π-weighted inner product of
+the centered density with itself. -/
+theorem lazyChiSquareDistance_eq_sum_smul (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (t : ℕ) (x : V) :
+    lazyChiSquareDistance A t x
+      = ∑ i, stationaryVec A i * (lazyWalkDensity A t x i - 1)^2 := by
+  have hpos : ∀ i, stationaryVec A i ≠ 0 := fun i =>
+    ne_of_gt (stationaryVec_pos A hd i)
+  simp only [lazyChiSquareDistance, lazyWalkDensity]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  have hπi := hpos i
+  field_simp
+  ring
+
+/-- The `t = 0` value: the same point-mass normalization as the plain
+walk, `(π x)⁻¹ − 1`. -/
+theorem lazyChiSquareDistance_zero (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (x : V) :
+    lazyChiSquareDistance A 0 x = (stationaryVec A x)⁻¹ - 1 := by
+  have hπx : stationaryVec A x ≠ 0 :=
+    ne_of_gt (stationaryVec_pos A hd x)
+  have hmem : x ∈ (Finset.univ : Finset V) := Finset.mem_univ x
+  have hon : (Pi.single x (1 : ℝ) : V → ℝ) x = 1 := by
+    rw [Pi.single_apply, if_pos rfl]
+  have hoff : ∀ i ∈ Finset.univ.erase x,
+      ((Pi.single x (1 : ℝ) : V → ℝ) i - stationaryVec A i)^2
+        / stationaryVec A i = stationaryVec A i := by
+    intro i hi
+    have hne : i ≠ x := Finset.ne_of_mem_erase hi
+    have hπi : stationaryVec A i ≠ 0 :=
+      ne_of_gt (stationaryVec_pos A hd i)
+    have hsingle : (Pi.single x (1 : ℝ) : V → ℝ) i = 0 := by
+      rw [Pi.single_apply, if_neg hne]
+    have hsq : (0 - stationaryVec A i)^2
+        = stationaryVec A i * stationaryVec A i := by ring
+    rw [hsingle, hsq, mul_div_assoc, div_self hπi, mul_one]
+  have hsplit : ∀ F : V → ℝ, ∑ i, F i
+      = F x + ∑ i in Finset.univ.erase x, F i := by
+    intro F
+    rw [← Finset.insert_erase hmem,
+      Finset.sum_insert (Finset.not_mem_erase x _)]
+    simp
+  have hrest : ∑ i in Finset.univ.erase x, stationaryVec A i
+      = 1 - stationaryVec A x := by
+    have h1 := hsplit (stationaryVec A)
+    rw [sum_stationaryVec A hd] at h1
+    linarith
+  have herase : ∑ i in Finset.univ.erase x,
+      ((Pi.single x (1 : ℝ) : V → ℝ) i - stationaryVec A i)^2
+        / stationaryVec A i
+      = 1 - stationaryVec A x := by
+    rw [Finset.sum_congr rfl fun i hi => hoff i hi, hrest]
+  rw [lazyChiSquareDistance, lazyWalkDistribution_zero,
+    hsplit fun i =>
+      ((Pi.single x (1 : ℝ) : V → ℝ) i - stationaryVec A i)^2
+        / stationaryVec A i]
+  rw [hon, Finset.sum_congr rfl fun i hi => hoff i hi, hrest]
+  have hfin : stationaryVec A x * (((1 - stationaryVec A x)^2
+        / stationaryVec A x) + (1 - stationaryVec A x))
+      = stationaryVec A x * ((stationaryVec A x)⁻¹ - 1) := by
+    field_simp
+    ring
+  exact mul_left_cancel₀ hπx hfin
+
+/-! ## The signless engine: `μ ≤ 2` -/
+
+/-- Entrywise quadratic form of the degree matrix: `∑ i, deg i · u i²`. -/
+theorem quadForm_degreeMatrix_eq (A : WAdj (V := V)) (u : V → ℝ) :
+    quadForm (degreeMatrix A) u = ∑ i, deg A i * u i * u i := by
+  have h0 : ∀ i j : V, j ≠ i →
+      (degreeMatrix A) i j * u i * u j = 0 := by
+    intro i j hj
+    rw [degreeMatrix, dif_neg (fun hh => hj hh.symm)]
+    simp
+  rw [quadForm_eq_sum]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [Finset.sum_eq_single
+    (f := fun j => (degreeMatrix A) i j * u i * u j) i
+    (fun j _ hj => h0 i j hj)
+    (fun hi => absurd (Finset.mem_univ i) hi),
+    degreeMatrix, dif_pos rfl]
+
+omit [DecidableEq V] in
+/-- The quadratic form of a matrix difference splits. -/
+theorem quadForm_sub_eq (M N : Matrix V V ℝ) (y : V → ℝ) :
+    quadForm (M - N) y = quadForm M y - quadForm N y := by
+  rw [quadForm, Matrix.sub_mulVec, Matrix.dotProduct_sub, quadForm,
+    quadForm]
+
+omit [DecidableEq V] in
+/-- The quadratic form of a matrix sum splits. -/
+theorem quadForm_add_eq (M N : Matrix V V ℝ) (y : V → ℝ) :
+    quadForm (M + N) y = quadForm M y + quadForm N y := by
+  rw [quadForm, Matrix.add_mulVec, Matrix.dotProduct_add, quadForm,
+    quadForm]
+
+/-- **The signless sum-of-squares**: the quadratic form of the signless
+Laplacian `D + A` is half the edge sum of squared *sums* —
+`uᵀ(D + A)u = (1/2) ∑ i, ∑ j, A i j (u i + u j)²` at any symmetric `A`.
+This is the positivity certificate that bounds the normalized spectrum
+above by `2`. -/
+theorem quadForm_degreeMatrix_add_eq_half_sum (A : WAdj (V := V))
+    (hA : A.IsSymm) (u : V → ℝ) :
+    quadForm (degreeMatrix A + A) u
+      = (1/2) * ∑ i, ∑ j, A i j * (u i + u j)^2 := by
+  have hsym : ∀ i j : V, A j i = A i j := by
+    intro i j
+    rw [← Matrix.transpose_apply A i j, hA.eq]
+  have hdeg2 : ∑ i, ∑ j, A i j * (u j * u j)
+      = ∑ j, deg A j * u j * u j := by
+    rw [Finset.sum_comm (s := (Finset.univ : Finset V))
+      (t := (Finset.univ : Finset V))
+      (f := fun i j => A i j * (u j * u j))]
+    refine Finset.sum_congr rfl fun j _ => ?_
+    rw [Finset.sum_congr rfl fun i _ => mul_comm (A i j) (u j * u j),
+      ← Finset.mul_sum]
+    have hcol : ∑ i, A i j = deg A j := by
+      have hrw : deg A j = ∑ i, A j i := rfl
+      rw [hrw]
+      exact Finset.sum_congr rfl fun i _ => (hsym i j).symm
+    rw [hcol]
+    ring
+  have hsplit : quadForm (degreeMatrix A + A) u
+      = ∑ i, deg A i * u i * u i + ∑ i, ∑ j, A i j * u i * u j := by
+    rw [quadForm_add_eq, quadForm_degreeMatrix_eq, quadForm_eq_sum]
+  have hexp : ∀ i j : V, A i j * (u i + u j)^2
+      = A i j * (u i * u i) + A i j * (u j * u j)
+        + 2 * (A i j * u i * u j) := by
+    intro i j
+    ring
+  have hdeg : ∑ i, ∑ j, A i j * (u i * u i)
+      = ∑ i, deg A i * u i * u i := by
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [Finset.sum_congr rfl fun j _ => mul_comm (A i j) (u i * u i),
+      ← Finset.mul_sum]
+    have hd : deg A i = ∑ j, A i j := rfl
+    rw [hd]
+    ring
+  have hrhs : (1/2) * ∑ i, ∑ j, A i j * (u i + u j)^2
+      = ∑ i, deg A i * u i * u i + ∑ i, ∑ j, A i j * u i * u j := by
+    have h1 : ∑ i, ∑ j, A i j * (u i + u j)^2
+        = ∑ i, ∑ j, (A i j * (u i * u i) + A i j * (u j * u j)
+            + 2 * (A i j * u i * u j)) :=
+      Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => hexp i j
+    have h2 : ∑ i, ∑ j, (A i j * (u i * u i) + A i j * (u j * u j)
+            + 2 * (A i j * u i * u j))
+        = (∑ i, ∑ j, A i j * (u i * u i)
+              + ∑ i, ∑ j, A i j * (u j * u j))
+          + 2 * ∑ i, ∑ j, (A i j * u i * u j) := by
+      simp only [Finset.sum_add_distrib, Finset.mul_sum]
+    rw [h1, h2, hdeg, hdeg2]
+    ring
+  rw [hsplit, hrhs]
+
+/-- **The two-sided spectral bound's conjugation identity**:
+`xᵀ(2·1 − L_sym)x = uᵀ(D + A)u` at `u = (1/√D) *ᵥ x` — the quadratic
+form of `2·1 − L_sym` is the signless form of the unstretched vector,
+through the proved congruence `√D L_sym √D = L` and `D − L = A`. -/
+theorem quadForm_two_sub_normalizedLaplacian_eq (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) (x : V → ℝ) :
+    quadForm ((2 : ℝ) • 1 - normalizedLaplacian A) x
+      = quadForm (degreeMatrix A + A) (degreeInvSqrt A *ᵥ x) := by
+  have hstretch : degreeSqrt A *ᵥ (degreeInvSqrt A *ᵥ x) = x := by
+    rw [Matrix.mulVec_mulVec, degreeSqrt_mul_degreeInvSqrt A hd,
+      Matrix.one_mulVec]
+  have hdx : Matrix.dotProduct x x
+      = ∑ i, deg A i * (degreeInvSqrt A *ᵥ x) i
+          * (degreeInvSqrt A *ᵥ x) i := by
+    have h := dotProduct_degreeSqrt_mulVec A
+      (fun i => le_of_lt (hd i)) (degreeInvSqrt A *ᵥ x)
+    rw [hstretch] at h
+    exact h
+  have hqs : quadForm (normalizedLaplacian A) x
+      = quadForm (laplacian A) (degreeInvSqrt A *ᵥ x) := by
+    have h := quadForm_laplacian_eq_quadForm_normalizedLaplacian A hd
+      (degreeInvSqrt A *ᵥ x)
+    rw [hstretch] at h
+    exact h.symm
+  have hq2 : quadForm ((2 : ℝ) • 1 - normalizedLaplacian A) x
+      = 2 * Matrix.dotProduct x x - quadForm (normalizedLaplacian A) x := by
+    rw [quadForm_sub_eq, quadForm, Matrix.smul_mulVec_assoc,
+      Matrix.one_mulVec, Matrix.dotProduct_smul, smul_eq_mul]
+  have hL : quadForm (laplacian A) (degreeInvSqrt A *ᵥ x)
+      = (∑ i, deg A i * (degreeInvSqrt A *ᵥ x) i
+            * (degreeInvSqrt A *ᵥ x) i)
+        - ∑ i, ∑ j, A i j * (degreeInvSqrt A *ᵥ x) i
+            * (degreeInvSqrt A *ᵥ x) j := by
+    have hlap : laplacian A = degreeMatrix A - A := rfl
+    rw [hlap, quadForm_sub_eq, quadForm_degreeMatrix_eq, quadForm_eq_sum]
+  have hR : quadForm (degreeMatrix A + A) (degreeInvSqrt A *ᵥ x)
+      = (∑ i, deg A i * (degreeInvSqrt A *ᵥ x) i
+            * (degreeInvSqrt A *ᵥ x) i)
+        + ∑ i, ∑ j, A i j * (degreeInvSqrt A *ᵥ x) i
+            * (degreeInvSqrt A *ᵥ x) j := by
+    rw [quadForm_add_eq, quadForm_degreeMatrix_eq, quadForm_eq_sum]
+  rw [hq2, hqs, hL, hdx]
+  linarith
+
+/-- **The signless positivity certificate**: at nonnegative weights,
+`xᵀ(2·1 − L_sym)x ≥ 0` — every normalized-Laplacian eigenvalue is at
+most `2`. The `hnn` hypothesis is load-bearing (fenced in QA at a
+negative-diagonal fixture with positive degrees). -/
+theorem quadForm_two_sub_normalizedLaplacian_nonneg
+    (A : WAdj (V := V)) (hnn : ∀ i j, 0 ≤ A i j) (hA : A.IsSymm)
+    (hd : ∀ i, 0 < deg A i) (x : V → ℝ) :
+    0 ≤ quadForm ((2 : ℝ) • 1 - normalizedLaplacian A) x := by
+  rw [quadForm_two_sub_normalizedLaplacian_eq A hd x,
+    quadForm_degreeMatrix_add_eq_half_sum A hA (degreeInvSqrt A *ᵥ x)]
+  refine mul_nonneg (by norm_num)
+    (Finset.sum_nonneg fun i _ =>
+      Finset.sum_nonneg fun j _ => ?_)
+  exact mul_nonneg (hnn i j) (sq_nonneg _)
+
+/-- Every normalized-Laplacian eigenvalue is nonnegative (PSD at the
+unit eigenvector). -/
+theorem eigvalOf_normalizedLaplacian_nonneg (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) (i : V) :
+    0 ≤ eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i := by
+  rw [← quadForm_eigvecOf_self (normalizedLaplacian_symmetric A hA) i]
+  exact normalizedLaplacian_psd A hA hnn hd _
+
+/-- **Every normalized-Laplacian eigenvalue is at most `2`** — the
+signless certificate at the unit eigenvector. On bipartite graphs the
+bound is attained (the top mode `|1 − μ| = 1` is exactly the boundary
+the plain walk's certificates die on; QA pins the saturation on `K₂`). -/
+theorem eigvalOf_normalizedLaplacian_le_two (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) (i : V) :
+    eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i ≤ 2 := by
+  have hn := quadForm_two_sub_normalizedLaplacian_nonneg A hnn hA hd
+    (eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i)
+  have hq : quadForm ((2 : ℝ) • 1 - normalizedLaplacian A)
+      (eigvecOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i)
+      = 2 - eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i := by
+    have hev : normalizedLaplacian A *ᵥ
+        (eigvecOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i)
+      = eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i •
+        (eigvecOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i) :=
+      (isHermitian_of_isSymm
+        (normalizedLaplacian_symmetric A hA)).mulVec_eigenvectorBasis i
+    have hun : Matrix.dotProduct
+        (eigvecOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i)
+        (eigvecOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i) = 1 := by
+      simpa [Matrix.dotProduct] using
+        eigvecOf_inner (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i i
+    rw [quadForm, Matrix.sub_mulVec, Matrix.smul_mulVec_assoc,
+      Matrix.one_mulVec, hev, Matrix.dotProduct_sub,
+      Matrix.dotProduct_smul, Matrix.dotProduct_smul, smul_eq_mul,
+      smul_eq_mul, hun, mul_one, mul_one]
+  rw [hq] at hn
+  linarith
+
+/-- **The spectral-gap cap**: `λ₂(L_sym) ≤ 2` — sortedness gives
+`evals ⟨1⟩ ≤ evals ⟨last⟩`, the last entry is some `eigvalOf i`
+(`evals_mem_eigvalOf`), and the pointwise signless bound above closes.
+Together with `eigvalOf_normalizedLaplacian_le_two` this says the whole
+normalized spectrum lives in `[0, 2]`; the cap is what makes the lazy
+rate `1 − λ₂/2` nonnegative without a strictness hypothesis (it is
+exactly `0` on `K₂`, where the lazy walk mixes in one step). -/
+theorem secondEval_normalizedLaplacian_le_two (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    (hcard : 2 ≤ Fintype.card V) :
+    secondEval (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) hcard ≤ 2 := by
+  have h1 : (1 : ℕ) < Fintype.card V := lt_of_lt_of_le (by omega) hcard
+  have h2 : Fintype.card V - 1 < Fintype.card V := by omega
+  have hlast : evals (normalizedLaplacian_symmetric A hA) ⟨1, h1⟩
+      ≤ evals (normalizedLaplacian_symmetric A hA)
+        ⟨Fintype.card V - 1, h2⟩ :=
+    evals_sorted _ (Fin.mk_le_mk.mpr (by omega))
+  obtain ⟨i, hi⟩ := evals_mem_eigvalOf
+    (normalizedLaplacian_symmetric A hA)
+    ⟨Fintype.card V - 1, h2⟩
+  calc secondEval (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) hcard
+      = evals (normalizedLaplacian_symmetric A hA) ⟨1, h1⟩ := rfl
+    _ ≤ evals (normalizedLaplacian_symmetric A hA)
+        ⟨Fintype.card V - 1, h2⟩ := hlast
+    _ = eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i := hi
+    _ ≤ 2 := eigvalOf_normalizedLaplacian_le_two A hA hnn hd i
+
+/-! ## The lazy decay engine -/
+
+/-- **The lazy commutation**: `√D · P_L = (1 − (1/2)·L_sym) · √D` — the
+average of the plain commutation `√D P = (1 − L_sym) √D` with the
+trivial `√D · 1 = √D`. -/
+theorem degreeSqrt_mul_lazyWalkTransitionMatrix_eq (A : WAdj (V := V))
+    (hd : ∀ i, 0 < deg A i) :
+    degreeSqrt A * lazyWalkTransitionMatrix A
+      = (1 - (2 : ℝ)⁻¹ • normalizedLaplacian A) * degreeSqrt A := by
+  have hP := degreeSqrt_mul_walkTransitionMatrix_eq A hd
+  have htwo : ∀ M : Matrix V V ℝ,
+      ((1 : Matrix V V ℝ) - M) + 1 = (2 : ℝ) • 1 - M := by
+    intro M
+    ext i j
+    rcases Decidable.em (i = j) with h | h
+    · simp [h]
+      ring
+    · simp [h]
+  calc degreeSqrt A * lazyWalkTransitionMatrix A
+      = (2 : ℝ)⁻¹ • (degreeSqrt A * walkTransitionMatrix A
+          + degreeSqrt A) := by
+            rw [lazyWalkTransitionMatrix, Matrix.mul_smul,
+              Matrix.mul_add, Matrix.mul_one]
+      _ = (2 : ℝ)⁻¹ • ((1 - normalizedLaplacian A) * degreeSqrt A
+          + degreeSqrt A) := by
+            rw [hP]
+      _ = (2 : ℝ)⁻¹ • ((1 - normalizedLaplacian A) * degreeSqrt A
+          + (1 : Matrix V V ℝ) * degreeSqrt A) := by
+            rw [Matrix.one_mul]
+      _ = (2 : ℝ)⁻¹ • (((1 : Matrix V V ℝ) - normalizedLaplacian A)
+            * degreeSqrt A
+          + (1 : Matrix V V ℝ) * degreeSqrt A) := by
+            rfl
+      _ = (2 : ℝ)⁻¹ • ((((1 : Matrix V V ℝ) - normalizedLaplacian A)
+            + 1) * degreeSqrt A) := by
+            rw [← Matrix.add_mul]
+      _ = (2 : ℝ)⁻¹ • (((2 : ℝ) • 1 - normalizedLaplacian A)
+          * degreeSqrt A) := by
+            rw [htwo _]
+      _ = ((1 : Matrix V V ℝ)
+            - (2 : ℝ)⁻¹ • normalizedLaplacian A) * degreeSqrt A := by
+            rw [← Matrix.smul_mul, smul_sub, smul_smul,
+              inv_mul_cancel₀ two_ne_zero, one_smul]
+
+/-- **The conjugated-power transfer, lazy form**: `√D *ᵥ (P_Lᵗ *ᵥ g)`
+is the `t`-th power of the symmetric lazy operator
+`1 − (1/2)·L_sym` acting on `√D *ᵥ g`. -/
+theorem degreeSqrt_mulVec_pow_lazyWalkTransitionMatrix
+    (A : WAdj (V := V)) (hd : ∀ i, 0 < deg A i) (t : ℕ) (g : V → ℝ) :
+    degreeSqrt A *ᵥ ((lazyWalkTransitionMatrix A ^ t) *ᵥ g)
+      = ((1 - (2 : ℝ)⁻¹ • normalizedLaplacian A) ^ t)
+          *ᵥ (degreeSqrt A *ᵥ g) := by
+  induction t with
+  | zero => simp
+  | succ t ih =>
+    calc degreeSqrt A *ᵥ ((lazyWalkTransitionMatrix A ^ (t + 1)) *ᵥ g)
+        = degreeSqrt A *ᵥ (lazyWalkTransitionMatrix A *ᵥ
+            ((lazyWalkTransitionMatrix A ^ t) *ᵥ g)) := by
+              rw [pow_succ', Matrix.mulVec_mulVec g
+                (lazyWalkTransitionMatrix A)
+                (lazyWalkTransitionMatrix A ^ t)]
+      _ = (degreeSqrt A * lazyWalkTransitionMatrix A) *ᵥ
+            ((lazyWalkTransitionMatrix A ^ t) *ᵥ g) :=
+              Matrix.mulVec_mulVec _ _ _
+      _ = ((1 - (2 : ℝ)⁻¹ • normalizedLaplacian A) * degreeSqrt A) *ᵥ
+            ((lazyWalkTransitionMatrix A ^ t) *ᵥ g) := by
+              rw [degreeSqrt_mul_lazyWalkTransitionMatrix_eq A hd]
+      _ = (1 - (2 : ℝ)⁻¹ • normalizedLaplacian A) *ᵥ
+            (degreeSqrt A *ᵥ ((lazyWalkTransitionMatrix A ^ t) *ᵥ g)) :=
+              (Matrix.mulVec_mulVec _ _ _).symm
+      _ = (1 - (2 : ℝ)⁻¹ • normalizedLaplacian A) *ᵥ
+            (((1 - (2 : ℝ)⁻¹ • normalizedLaplacian A) ^ t) *ᵥ
+              (degreeSqrt A *ᵥ g)) := by rw [ih]
+      _ = ((1 - (2 : ℝ)⁻¹ • normalizedLaplacian A) ^ (t + 1)) *ᵥ
+            (degreeSqrt A *ᵥ g) := by
+              rw [pow_succ', ← Matrix.mulVec_mulVec (degreeSqrt A *ᵥ g)
+                (1 - (2 : ℝ)⁻¹ • normalizedLaplacian A)
+                ((1 - (2 : ℝ)⁻¹ • normalizedLaplacian A) ^ t)]
+
+/-- **The eigenaction of the symmetric lazy operator** on the
+normalized-Laplacian eigenbasis: the mode factor is `1 − μ/2` — the
+number the whole lazy program runs on. -/
+theorem eigvecOf_dotProduct_one_sub_half_normalizedLaplacian_mulVec
+    (A : WAdj (V := V)) (hA : A.IsSymm) (i : V) (x : V → ℝ) :
+    Matrix.dotProduct
+        (eigvecOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i)
+        ((1 - (2 : ℝ)⁻¹ • normalizedLaplacian A) *ᵥ x)
+      = (1 - eigvalOf (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) i / 2)
+          * Matrix.dotProduct
+              (eigvecOf (normalizedLaplacian A)
+                (normalizedLaplacian_symmetric A hA) i) x := by
+  have hev : normalizedLaplacian A *ᵥ
+      (eigvecOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i)
+    = eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i •
+      (eigvecOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i) :=
+    (isHermitian_of_isSymm
+      (normalizedLaplacian_symmetric A hA)).mulVec_eigenvectorBasis i
+  rw [Matrix.sub_mulVec, Matrix.one_mulVec, Matrix.dotProduct_sub,
+    Matrix.dotProduct_mulVec, ← Matrix.mulVec_transpose,
+    Matrix.transpose_smul, (normalizedLaplacian_symmetric A hA).eq,
+    Matrix.smul_mulVec_assoc, hev, smul_smul,
+    Matrix.smul_dotProduct, smul_eq_mul, sub_mul, one_mul]
+  ring
+
+/-- **Eigencoordinate evolution, lazy form**: the `i`-th eigencoefficient
+of the conjugated `t`-step lazy evolution is the initial coefficient
+multiplied by `(1 − μ i/2)^t`. -/
+theorem eigvecOf_dotProduct_degreeSqrt_mulVec_pow_lazyWalkTransitionMatrix
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i)
+    (t : ℕ) (g : V → ℝ) (i : V) :
+    Matrix.dotProduct
+        (eigvecOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i)
+        (degreeSqrt A *ᵥ ((lazyWalkTransitionMatrix A ^ t) *ᵥ g))
+      = (1 - eigvalOf (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) i / 2) ^ t
+          * Matrix.dotProduct
+              (eigvecOf (normalizedLaplacian A)
+                (normalizedLaplacian_symmetric A hA) i)
+              (degreeSqrt A *ᵥ g) := by
+  induction t with
+  | zero => simp
+  | succ t ih =>
+    rw [degreeSqrt_mulVec_pow_lazyWalkTransitionMatrix A hd (t + 1) g,
+      pow_succ', ← Matrix.mulVec_mulVec,
+      eigvecOf_dotProduct_one_sub_half_normalizedLaplacian_mulVec A hA i,
+      ← degreeSqrt_mulVec_pow_lazyWalkTransitionMatrix A hd t g, ih,
+      pow_succ', mul_assoc]
+
+/-- **The Parseval-exact decay identity, lazy form**: the squared
+Euclidean norm of the conjugated `t`-step lazy evolution is the
+eigenvalue-weighted sum of squared initial eigencoordinates, each
+weight `(1 − μ i/2)^t`. No inequality is lost here. -/
+theorem dotProduct_self_degreeSqrt_mulVec_pow_lazyWalkTransitionMatrix
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i)
+    (t : ℕ) (g : V → ℝ) :
+    Matrix.dotProduct
+        (degreeSqrt A *ᵥ ((lazyWalkTransitionMatrix A ^ t) *ᵥ g))
+        (degreeSqrt A *ᵥ ((lazyWalkTransitionMatrix A ^ t) *ᵥ g))
+      = ∑ i, ((1 - eigvalOf (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) i / 2) ^ t
+          * Matrix.dotProduct
+              (eigvecOf (normalizedLaplacian A)
+                (normalizedLaplacian_symmetric A hA) i)
+              (degreeSqrt A *ᵥ g)) ^ 2 := by
+  rw [dotProduct_eigvecOf (normalizedLaplacian_symmetric A hA) _ _]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [eigvecOf_dotProduct_degreeSqrt_mulVec_pow_lazyWalkTransitionMatrix
+      A hA hd t g i, pow_two]
+
+/-- **The ℓ² contraction in conjugated-norm form, lazy form** — the
+clone of `dotProduct_self_degreeSqrt_mulVec_pow_walkTransitionMatrix_le`
+at the lazy factors: under the mode hypothesis (no component on the
+zero-eigenvalue modes of `L_sym`) and the rate hypothesis (`r`
+dominating every lazy factor `|1 − μ/2|`), the `t`-step lazy evolution
+contracts the conjugated norm at rate `r ^ (2t)`. No sign hypothesis on
+`r` — inherited from the plain engine's recorded design decision. -/
+theorem dotProduct_self_degreeSqrt_mulVec_pow_lazyWalkTransitionMatrix_contraction
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i)
+    (g : V → ℝ) (r : ℝ) (t : ℕ)
+    (hmode : ∀ i : V, eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i = 0 →
+        Matrix.dotProduct
+          (eigvecOf (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) i)
+          (degreeSqrt A *ᵥ g) = 0)
+    (hrate : ∀ i : V, eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i ≠ 0 →
+        |1 - eigvalOf (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) i / 2| ≤ r) :
+    Matrix.dotProduct
+        (degreeSqrt A *ᵥ ((lazyWalkTransitionMatrix A ^ t) *ᵥ g))
+        (degreeSqrt A *ᵥ ((lazyWalkTransitionMatrix A ^ t) *ᵥ g))
+      ≤ r ^ (2 * t)
+        * Matrix.dotProduct (degreeSqrt A *ᵥ g) (degreeSqrt A *ᵥ g) := by
+  classical
+  rw [dotProduct_self_degreeSqrt_mulVec_pow_lazyWalkTransitionMatrix
+    A hA hd t g]
+  have hterm : ∀ i : V,
+      ((1 - eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i / 2) ^ t
+        * Matrix.dotProduct
+            (eigvecOf (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) i)
+            (degreeSqrt A *ᵥ g)) ^ 2
+      ≤ r ^ (2 * t) * (Matrix.dotProduct
+          (eigvecOf (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) i)
+          (degreeSqrt A *ᵥ g)) ^ 2 := by
+    intro i
+    by_cases hμ : eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i = 0
+    · rw [hmode i hμ]
+      simp
+    · have hr0 : 0 ≤ r :=
+        le_trans (abs_nonneg _) (hrate i hμ)
+      have hrt : 0 ≤ r ^ t := pow_nonneg hr0 t
+      have habspow : |(1 - eigvalOf (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) i / 2) ^ t|
+          = |1 - eigvalOf (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) i / 2| ^ t :=
+        abs_pow _ _
+      have hle : |(1 - eigvalOf (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) i / 2) ^ t| ≤ r ^ t := by
+        rw [habspow]
+        exact pow_le_pow_left₀ (abs_nonneg _) (hrate i hμ) t
+      have key : ((1 - eigvalOf (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) i / 2) ^ t) ^ 2
+          ≤ (r ^ t) ^ 2 := by
+        rw [← sq_abs ((1 - eigvalOf (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) i / 2) ^ t)]
+        refine sq_le_sq' ?_ hle
+        linarith [abs_nonneg ((1 - eigvalOf (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) i / 2) ^ t), hrt]
+      have hrw : r ^ (2 * t) = (r ^ t) ^ 2 := by
+        rw [mul_comm 2 t, pow_mul]
+      rw [hrw, mul_pow]
+      exact mul_le_mul_of_nonneg_right key (sq_nonneg _)
+  calc ∑ i, ((1 - eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i / 2) ^ t
+        * Matrix.dotProduct
+            (eigvecOf (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) i)
+            (degreeSqrt A *ᵥ g)) ^ 2
+      ≤ ∑ i, r ^ (2 * t) * (Matrix.dotProduct
+          (eigvecOf (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) i)
+          (degreeSqrt A *ᵥ g)) ^ 2 :=
+        Finset.sum_le_sum fun i _ => hterm i
+    _ = r ^ (2 * t) * ∑ i, (Matrix.dotProduct
+        (eigvecOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i)
+        (degreeSqrt A *ᵥ g)) ^ 2 :=
+          (Finset.mul_sum _ _ _).symm
+    _ = r ^ (2 * t) * Matrix.dotProduct (degreeSqrt A *ᵥ g)
+        (degreeSqrt A *ᵥ g) := by
+          refine congrArg _ ?_
+          rw [dotProduct_eigvecOf (normalizedLaplacian_symmetric A hA)
+            (degreeSqrt A *ᵥ g) (degreeSqrt A *ᵥ g)]
+          exact Finset.sum_congr rfl fun i _ => (pow_two _)
+
+/-- **The ℓ²(π) contraction, lazy form** — under the same mode/rate
+shape as the plain engine, at the lazy factors. No sign hypothesis on
+`r` (the plain engine's recorded design decision, inherited). -/
+theorem sum_stationaryVec_smul_sq_pow_lazyWalkTransitionMatrix_le
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hd : ∀ i, 0 < deg A i)
+    (g : V → ℝ) (r : ℝ) (t : ℕ)
+    (hmode : ∀ i : V, eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i = 0 →
+        Matrix.dotProduct
+          (eigvecOf (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) i)
+          (degreeSqrt A *ᵥ g) = 0)
+    (hrate : ∀ i : V, eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i ≠ 0 →
+        |1 - eigvalOf (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) i / 2| ≤ r) :
+    ∑ i, stationaryVec A i
+        * (((lazyWalkTransitionMatrix A ^ t) *ᵥ g) i) ^ 2
+      ≤ r ^ (2 * t) * ∑ i, stationaryVec A i * (g i) ^ 2 := by
+  have hvol : 0 ≤ vol A (Finset.univ : Finset V) :=
+    Finset.sum_nonneg fun i _ => le_of_lt (hd i)
+  have heng := dotProduct_self_degreeSqrt_mulVec_pow_lazyWalkTransitionMatrix_contraction
+    A hA hd g r t hmode hrate
+  have hL := sum_stationaryVec_smul_sq_eq A hd
+    fun i => ((lazyWalkTransitionMatrix A ^ t) *ᵥ g) i
+  have hR := sum_stationaryVec_smul_sq_eq A hd g
+  rw [hL, hR]
+  calc (vol A (Finset.univ : Finset V))⁻¹
+        * Matrix.dotProduct
+            (degreeSqrt A *ᵥ ((lazyWalkTransitionMatrix A ^ t) *ᵥ g))
+            (degreeSqrt A *ᵥ ((lazyWalkTransitionMatrix A ^ t) *ᵥ g))
+      ≤ (vol A (Finset.univ : Finset V))⁻¹
+          * (r ^ (2 * t)
+            * Matrix.dotProduct (degreeSqrt A *ᵥ g)
+              (degreeSqrt A *ᵥ g)) :=
+        mul_le_mul_of_nonneg_left heng (inv_nonneg.mpr hvol)
+    _ = r ^ (2 * t) * ((vol A (Finset.univ : Finset V))⁻¹
+        * Matrix.dotProduct (degreeSqrt A *ᵥ g)
+          (degreeSqrt A *ᵥ g)) := by ring
+
+/-- **The intrinsic rate**: every nonzero mode's lazy factor is bounded
+by `1 − λ₂(L_sym)/2` — PSD gives `0 ≤ μ`, the signless certificate
+gives `μ ≤ 2`, and the delivered below-gap plumbing gives `λ₂ ≤ μ`. No
+sign hypothesis on the rate is needed anywhere. -/
+theorem abs_one_sub_half_eigvalOf_le_one_sub_half_secondEval
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) (hcard : 2 ≤ Fintype.card V) {i : V}
+    (hne : eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i ≠ 0) :
+    |1 - eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i / 2|
+      ≤ 1 - secondEval (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) hcard / 2 := by
+  have h0 := eigvalOf_normalizedLaplacian_nonneg A hA hnn hd i
+  have h2 := eigvalOf_normalizedLaplacian_le_two A hA hnn hd i
+  have hgap := secondEval_le_eigvalOf_normalizedLaplacian_of_ne_zero
+    A hA hnn hd hcard hne
+  have hdiv : secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard / 2
+      ≤ eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i / 2 := by
+    have h2 : (0 : ℝ) < 2 := by norm_num
+    exact (div_le_div_iff₀ h2 h2).2 (mul_le_mul_of_nonneg_right hgap h2.le)
+  have hpos : (0 : ℝ) ≤ 1 - eigvalOf (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) i / 2 := by linarith
+  rw [abs_of_nonneg hpos]
+  exact sub_le_sub (le_refl 1) hdiv
+
+/-! ## The headline: the lazy χ² mixing bound at the intrinsic rate -/
+
+/-- **The lazy χ² mixing bound** — the discrete mixing program's
+periodicity fix: on every connected symmetric-nonnegative
+positive-degree network with `2 ≤ card V`,
+`χ²_lazy(t, x) ≤ (1 − λ₂(L_sym)/2)^{2t} · ((π x)⁻¹ − 1)`.
+Connectivity is the only graph hypothesis — the rate is *intrinsic*
+(the continuous family's recorded advantage, delivered on the discrete
+side): on bipartite graphs, where the plain family's rate hypothesis is
+provably unsatisfiable (`λ_max = 2` mode), the lazy rate `1 − λ₂/2`
+still contracts. Pure hard crust. -/
+theorem lazyChiSquareDistance_le_of_connected (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V]
+    (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected) (t : ℕ) (x : V) :
+    lazyChiSquareDistance A t x
+      ≤ (1 - secondEval (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) hcard / 2) ^ (2 * t)
+          * ((stationaryVec A x)⁻¹ - 1) := by
+  have hmode : ∀ i : V, eigvalOf (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) i = 0 →
+      Matrix.dotProduct
+        (eigvecOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i)
+        (degreeSqrt A *ᵥ (lazyWalkDensity A 0 x - 1)) = 0 := by
+    intro i hμ
+    have hjoin : lazyWalkDensity A 0 x - 1
+        = walkDensity A 0 x - 1 := by
+      rw [lazyWalkDensity_zero]
+    rw [hjoin]
+    exact eigvecOf_dotProduct_degreeSqrt_walkDensity_sub_one_of_eigvalOf_eq_zero
+      A hA hnn hd hconn x hμ
+  have hctr := sum_stationaryVec_smul_sq_pow_lazyWalkTransitionMatrix_le
+    A hA hd (lazyWalkDensity A 0 x - 1)
+    (1 - secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard / 2) t hmode
+    (fun i hi =>
+      abs_one_sub_half_eigvalOf_le_one_sub_half_secondEval
+        A hA hnn hd hcard hi)
+  have hcenter : ∀ i : V, (lazyWalkDensity A t x i - 1)
+      = ((lazyWalkTransitionMatrix A ^ t) *ᵥ
+          (lazyWalkDensity A 0 x - 1)) i := by
+    intro i
+    rw [← congrFun (lazyWalkDensity_sub_one A hA hd t x) i,
+      Pi.sub_apply, Pi.one_apply]
+  rw [lazyChiSquareDistance_eq_sum_smul A hd t x]
+  have hsum : ∑ i, stationaryVec A i * (lazyWalkDensity A t x i - 1)^2
+      = ∑ i, stationaryVec A i
+          * (((lazyWalkTransitionMatrix A ^ t) *ᵥ
+              (lazyWalkDensity A 0 x - 1)) i)^2 :=
+    Finset.sum_congr rfl fun i _ => by rw [hcenter i]
+  rw [hsum]
+  have h0 : ∑ i, stationaryVec A i * ((lazyWalkDensity A 0 x - 1) i)^2
+      = lazyChiSquareDistance A 0 x := by
+    rw [lazyChiSquareDistance_eq_sum_smul A hd 0 x]
+    exact Finset.sum_congr rfl fun i _ => by
+      rw [Pi.sub_apply, Pi.one_apply]
+  calc ∑ i, stationaryVec A i
+        * (((lazyWalkTransitionMatrix A ^ t) *ᵥ
+            (lazyWalkDensity A 0 x - 1)) i)^2
+      ≤ (1 - secondEval (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) hcard / 2) ^ (2 * t)
+          * ∑ i, stationaryVec A i
+              * ((lazyWalkDensity A 0 x - 1) i)^2 :=
+            hctr
+    _ = (1 - secondEval (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) hcard / 2) ^ (2 * t)
+          * lazyChiSquareDistance A 0 x := by rw [h0]
+    _ = (1 - secondEval (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) hcard / 2) ^ (2 * t)
+          * ((stationaryVec A x)⁻¹ - 1) := by
+            rw [lazyChiSquareDistance_zero A hd x]
+
+/-- **The TV corollary at the intrinsic rate** — the lazy twin of
+`walkDistribution_tvDistance_le_of_connected`. -/
+theorem lazyWalkDistribution_tvDistance_le_of_connected
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V]
+    (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected) (t : ℕ) (x : V) :
+    tvDistance (lazyWalkDistribution A t x) (stationaryVec A)
+      ≤ (1/2) * Real.sqrt
+          ((1 - secondEval (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) hcard / 2) ^ (2 * t)
+            * ((stationaryVec A x)⁻¹ - 1)) := by
+  refine (tvDistance_le_half_sqrt (stationaryVec_pos A hd)
+    (sum_stationaryVec A hd)).trans ?_
+  exact mul_le_mul_of_nonneg_left
+    (Real.sqrt_le_sqrt
+      (lazyChiSquareDistance_le_of_connected A hA hnn hd hcard hconn t x))
+    (by norm_num)
+
+open Scaffold.InformationTheory in
+/-- **Entropy decay, lazy twin**: `D(ν_t^L ‖ π) ≤
+(1 − λ₂/2)^{2t} · ((π x)⁻¹ − 1)` at the headline's exact hypothesis
+set — the delivered bridge composed with the lazy bound. -/
+theorem klDiv_lazyWalkDistribution_le (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V]
+    (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected) (t : ℕ) (x : V) :
+    klDiv (lazyWalkDistribution A t x) (stationaryVec A)
+      ≤ (1 - secondEval (normalizedLaplacian A)
+            (normalizedLaplacian_symmetric A hA) hcard / 2) ^ (2 * t)
+          * ((stationaryVec A x)⁻¹ - 1) :=
+  (klDiv_le_sum_sq_div
+      (lazyWalkDistribution_nonneg A hnn hd t x)
+    (fun i => stationaryVec_pos A hd i)
+    (sum_lazyWalkDistribution A hd t x)
+    (sum_stationaryVec A hd)).trans
+    (lazyChiSquareDistance_le_of_connected A hA hnn hd hcard hconn t x)
 
 end SpectralGraphTheory

@@ -12,10 +12,195 @@ consumer named), log-Sobolev (its consumer gate **discharged
 2026-09-01** by the entropy-mixing delivery — the entropy-decay family
 is the named on-shelf consumer an LSI would improve; *adoption* is now
 an operator decision, not missing machinery, so an autonomous run
-should not admit it without direction), and the operator-gated items
-(over-squashing floor's Python bridge, matrix master-bound Step 2).
-Check `proposals/README.md`'s Active table first per the priority
-order.
+should not admit it without direction), the lazy program's newly named
+follow-on (the empirical-stationary sampling guarantee at the lazy law
+— `empiricalLazyWalkDistribution_stationary_tail_of_depth`, unlocked
+by the delivered entrywise lazy ceiling as its hypothesis supplier;
+rests on the `Derived/EmpiricalStationary.lean` machinery being cloned
+at the lazy walk law, a multi-file composition), and the
+operator-gated items (over-squashing floor's Python bridge, matrix
+master-bound Step 2). Check `proposals/README.md`'s Active table first
+per the priority order.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The lazy `t_mix` object and the depth-form lazy ceiling — the
+periodicity fix completed at the object level**
+(`proposals/lazy-mixing-time-objects.md`, same-run proposal; run
+`20260901T224217Z-run-1`, session
+`ses_fa0e1059dffehBtu1Ti2TEZoVa`). DELIVERED — zero new axioms (count
+stays 5; `#print axioms` via `wip/lazymix_axcheck.lean` on all 20
+audited declarations — 9 shelf + 11 QA — every one exactly `propext,
+Classical.choice, Quot.sound`, pure hard crust). QA 3589 → 3600 (+11,
+`Mixing_QA.lean`'s lazy-mixing-time section). Radar QA axis held at
+4.0 and axis 5 held (4.5) per protocol (the field-standard packaging
+of the already-counted lazy rate and `t_mix` families plus the
+spectrum cap, not a new theorem family).**
+
+The delivery's content: (1) **The consumer gate discharged by naming
+the bipartite-input instance** — the empirical-stationary capstone's
+own framing ("an agent that can only simulate the walk") instantiated
+on paths/trees/grids, where the plain entrywise ceiling's `r < 1`
+certificate is provably unsatisfiable (the K₂ fence: plain TV ≡ 1/2 at
+every time); the delivered entrywise lazy ceiling at the intrinsic
+rate is exactly that extension's hypothesis supplier, recorded as the
+named follow-on (`empiricalLazyWalkDistribution…`). (2) **The engine**
+— `secondEval_normalizedLaplacian_le_two` (`λ₂(L_sym) ≤ 2`): sortedness
++ `evals_mem_eigvalOf` + the pointwise signless bound; with the
+pointwise twin the whole normalized spectrum now lives in `[0, 2]`, and
+the lazy rate is nonnegative by theorem rather than hypothesis.
+(3) **The shelf** (`Oversmoothing.lean`'s `LazyMixingTime` section):
+the entrywise lazy ceiling `|ν_lazy − π y| ≤ (1−λ₂/2)^t·√(π y ((π
+x)⁻¹−1))` with connectivity the only graph hypothesis (the plain
+twin's certificate hypothesis *replaced by the computed rate* — the
+lazy program's whole point, on the class where the plain twin is
+provably unusable); the depth-form TV lazy ceiling (the honest visible
+`λ₂ < 2` — K₂'s rate-0 corner excluded and documented, its object
+pinned exactly instead); `lazyWalkMixingTimeFrom` with the certificate
+interface, the inherited `csInf_mem` attainment, ε-antitonicity, and
+the intrinsic-rate spectral ceiling in ⌈log⌉ form. (4) **The QA** —
+the exact corner-start TV closed form `TV_lazy(1+t) = (1/2)^{t+2}` at
+every time on the bipartite path (induction through the transpose's
+halving action on the antisymmetric mode), giving `t_mix_lazy(corner,
+1/8) = 2` **pinned in both directions** on the fixture where the plain
+walk provably never mixes; `t_mix_lazy(center, 1/4) = 1` with **the
+ceiling attained exactly** (object `1` = ceiling's own right side at
+the pinned gap `λ₂ = 1`); the corner ceiling with honest slack (`3` vs
+`2`, the threshold `log(4√3)/log 2` strictly between); **the
+object-level periodicity contrast** (plain `t_mix(K₂, 1/8) = 0` junk —
+empty witness set, `sInf ∅ = 0` — against lazy `= 1` genuine); and
+the entrywise bound **attained exactly on `K₂`** (both sides zero at
+rate `0`) with slack witnessed on the path. Nine technique findings
+recorded in the proposal (headline: the pinned Mathlib's `pow_succ`
+carries the reversed product order `a^n * a`, leaving a `mul_comm`
+residue rw's closing `rfl` cannot discharge; `ring` cannot close
+commutativity goals carrying division-form pow atoms while `ring_nf`
+fails on the inverse-normalized twin — the robust idiom is `set`-opaque
+scalars or the shipped `1/(2^n)` form; 2D matrix literals do not
+entry-reduce reliably — state vector equalities or `mulVec` actions;
+`Matrix.mulVec_smul` replaces fragile scalar-extraction simps; and the
+stale-olen recurrence met at the shelf-imports-shelf boundary).
+
+**Verification:** spike first (`wip/lazymix_spike.lean` — the shelf
+declarations, the full QA section, and the axiom audit iterated to
+zero errors/zero warnings/zero sorries before any shelf edit);
+`lake env lean` clean on all three touched modules (only the QA
+module's 3 recorded pre-existing benign `ring_nf` notes); explicit
+`lake build` targets ✔ on all three; **full `lake build` ✔ immediately
+followed by `check_build_completeness.py` — 133 source files, 133
+fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0
+(5, both PF findings allowlisted-confirmed);
+`check_refutation_independence` (10-tag clean — no tags added, nothing
+touches an axiom); `check_public_reachability` clean (63 repo
+modules); `check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; `check_backlog_freshness` clean;
+scoreboard regenerated (**3600/5/0**) with the verification row; **map
+freshness exit 0** after the 3589 → 3600 stats sync in both map files
+and SVG regeneration (no station — no tier change). Records updated:
+the proposal (COMPLETE + delivery record with the technique findings
+and the scope reduction — the 2D matrix pin replaced by the `mulVec`
+action statement), `proposals/README.md` (new Delivered row), README
+(3600 + the walks-and-mixing row's lazy-mixing extension), the radar
+(QA axis synced 3589 → 3600 held at 4.0; axis 5's narrative extended,
+held 4.5), `index/map/spectral_graph.md` (the new lazy-mixing-time
+section, 6 rows), the QA module's purpose header, the backlog item-2
+update, this plan, and the activity log. Nothing committed; the
+previous runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed. The
+named follow-on (the empirical lazy sampling guarantee) is recorded;
+the depth/ceiling statements' `λ₂ < 2` strictness is honest (K₂'s
+rate-0 corner outside, covered by the direct object pins).
+
+------
+
+## Delivered milestones (most recent first)
+
+**The lazy random walk — the discrete mixing program's periodicity fix,
+with the intrinsic-rate χ²/TV/entropy family and the signless-Laplacian
+SOS engine** (`proposals/lazy-walk-mixing.md`, same-run proposal; run
+`20260901T202735Z-run-1`, session `ses_fa1583607ffesbV61DnEEpEvRN`).
+DELIVERED — zero new axioms (count stays 5; `#print axioms` via
+`wip/lazywalk_spike.lean` on all 62 new declarations — 38 shelf + 24
+QA — every one exactly `propext, Classical.choice, Quot.sound`, pure
+hard crust). QA 3566 → 3589 (+23, `Mixing_QA.lean`'s `LazyWalk`
+section). Radar QA axis held at 4.0 and axis 5 held (4.5) per
+protocol (the already-counted mixing families' lazy time-change plus
+one new elementary engine, not a new theorem family).**
+
+The delivery's content: (1) **The leverage case made concrete** — every
+discrete mixing certificate family on the shelf (χ² decay's `r < 1`
+rate, the depth ceiling, both `t_mix` ceilings, the uniform witness)
+is provably unsatisfiable on connected bipartite graphs (`λ_max =
+2` mode, factor `|1 − 2| = 1` — fenced never-decay pins in three
+metrics); the lazy chain `P_L = (P + I)/2` (LPW ch. 5's canonical
+convention) has mode factors `1 − λ/2 ∈ [0, 1]`, and the delivery's
+headline `lazyChiSquareDistance_le_of_connected` — `χ²_lazy ≤
+(1 − λ₂/2)^{2t}·((πx)⁻¹ − 1)` — carries **connectivity as the only
+graph hypothesis** (the continuous family's recorded intrinsic-rate
+advantage, delivered on the discrete side), with TV and entropy
+corollaries at the same rate. (2) **The new engine** — the
+signless-Laplacian sum-of-squares `uᵀ(D+A)u = (1/2)∑ A i j (u i +
+u j)²`, giving `eigvalOf_normalizedLaplacian_le_two` (`μ ≤ 2`; the
+bipartite top mode is exactly the boundary, and the `hnn` hypothesis
+is fenced at a negative-diagonal two-vertex fixture where the form
+reads `−4 < 0` with every other hypothesis holding). (3) **The lazy
+decay engine** — commutation `√D P_L = (1 − (1/2)L_sym)√D`, the
+conjugated-power transfer, the eigenaction at factor `1 − μ/2`,
+Parseval-exact identity, both contractions (mode/rate shape inherited;
+the delivered connectivity mode derivation reused *verbatim* through
+the `lazyWalkDensity_zero` join), and the intrinsic-rate assembly
+`|1 − μ/2| ≤ 1 − λ₂/2` (PSD + signless + the delivered below-gap
+plumbing — no sign hypothesis anywhere). (4) **The QA** — on `K₂`
+(bipartite, cert-free for the plain family): **the bound attained
+exactly at every time** (`χ²_lazy ≡ 0` at the pinned rate `1 − 2/2 =
+0`, both sides pinned zero — the strongest QA shape a bound theorem
+can have) and the TV contrast pair (plain `1/2` against lazy `0`);
+on `P₃`: the center start — the pure periodic `λ = 2` mode —
+**exactly stationary after one lazy step**, against the proved plain
+never-decay pin `χ²_plain(t, center) = 1` at every time (the law's
+period-two oscillation by induction), the corner values `1/2`/`1/8`
+with the bound instance evaluated at the pinned gap `λ₂ = 1`
+(`1/2 ≤ 3/4`, slack witnessed), the `t = 0` normalization, and the
+signless tightness pin at the `K₂` top mode (`0` exactly). Eight
+technique findings recorded in the proposal (headline: `∑ i j,` is
+not valid Lean 4 notation — multi-binder sugar exists for `∀` but
+not `∑`; `λ` is a reserved token and cannot appear in identifiers
+while `μ` can; `Matrix.diagonal`'s entries are a dependent `dite`;
+and the elaborator caught a real arithmetic error in the first QA
+draft — a wrong `1/4` claim simp-refuted to `False`).
+
+**Verification:** spike first (`wip/lazywalk_spike.lean` — the shelf
+section, the full QA section, and the axiom audit iterated to zero
+errors/zero warnings before any shelf edit); `lake env lean` clean on
+both touched modules; explicit `lake build` targets ✔ on both; **full
+`lake build` ✔ immediately followed by `check_build_completeness.py`
+— 133 source files, 133 fresh artifacts, 0 stale, 0 missing, exit
+0**; `lint_axioms` exit 0 (5, both PF findings allowlisted-confirmed);
+`check_refutation_independence` (10-tag clean — no tags added, nothing
+here touches an axiom); `check_public_reachability` clean (63 repo
+modules); `check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; scoreboard regenerated (**3589/5/0**)
+with the verification row; **map-freshness exit 0** after the
+3566 → 3589 stats sync in both map files and SVG regeneration (no
+station — no tier change). Records updated: the proposal (COMPLETE +
+delivery record with technique findings), `proposals/README.md` (new
+Delivered row), README (3589 + the walks-and-mixing row's lazy-walk
+extension), the radar (QA axis synced held 4.0; axis 5 narrative
+held 4.5), `index/map/spectral_graph.md` (18 new rows in the new
+Mixing/lazy-walk table), the scoreboard verification row, both map
+data tables + regenerated SVG, both QA modules' purpose headers, the
+backlog item-2 update, this plan, and the activity log. Nothing
+committed; the previous runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed. The
+lazy follow-ons (depth-form lazy ceiling, `t_mix` at the lazy law)
+are gated on a consumer naming a bipartite-input instance; the plain
+families' statements are untouched.
 
 ------
 

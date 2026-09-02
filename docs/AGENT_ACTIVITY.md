@@ -8679,3 +8679,177 @@ targets) then the full ladder.
 **Remaining risk:** none owed by the delivery — pure hard crust, no axiom disposition changed, no existing public statement changed. The decay bound inherits the χ² route's shape honestly (the QA makes the piggyback visible: `D ≤ χ²` instantiated on both fixtures); the floor is stated at caller-certified eigenpairs mirroring the ceiling family's certificate idiom.
 
 **Next handoff:** the Active table holds no rows above the human-decision gates; a next run falls through to the center-out policy. The natural candidates: the reverse TV → χ² calculus (still no consumer named), log-Sobolev **adoption** (an explicit operator decision now that its consumer is on the shelf — not for an autonomous run to take alone), and the operator-gated items (over-squashing floor's Python bridge, matrix master-bound Step 2).
+
+## 2026-09-01T20:31:00Z — The lazy walk: the discrete mixing program's periodicity fix (in-progress)
+
+**Run:** `20260901T202735Z-run-1`  
+**Session:** `ses_fa1583607ffesbV61DnEEpEvRN`  
+**Status:** in-progress  
+**Milestone:** deliver the lazy random walk `P_L = (P + I)/2` with the
+intrinsic-rate χ²/TV/entropy mixing family
+(`lazyChiSquareDistance_le_of_connected` at rate `1 − λ₂(L_sym)/2`,
+connectivity the only graph hypothesis) — the field-standard (LPW ch. 5)
+fix that makes the discrete mixing program's certificate families
+satisfiable on bipartite graphs, where they are provably unsatisfiable
+today (fenced never-decay pins in χ²/TV/entropy on K₂, the P₃
+oscillation, the uniform `d(1) = 1` fence). Zero new axioms; new
+engine: the signless-Laplacian SOS giving `eigvalOf L_sym ≤ 2`.
+
+**Changes:** none yet — proposal `proposals/lazy-walk-mixing.md` written
+(statement design and corner analysis settled before any Lean); intent
+recorded in the execution plan.
+
+**Next handoff:** spike all shelf declarations + the QA section + the
+axiom audit in `wip/lazywalk_spike.lean` to zero errors, then land in
+`Mixing.lean`/`Mixing_QA.lean` and run the full ladder.
+
+## 2026-09-01T21:36:31Z — The lazy walk delivered: the discrete mixing program's periodicity fix at the intrinsic rate (terminal)
+
+**Run:** `20260901T202735Z-run-1`  
+**Session:** `ses_fa1583607ffesbV61DnEEpEvRN`  
+**Status:** completed  
+**Milestone:** LPW ch. 5's lazy chain `P_L = (P + I)/2` with the
+intrinsic-rate χ²/TV/entropy mixing family
+(`lazyChiSquareDistance_le_of_connected`: `χ²_lazy ≤
+(1 − λ₂(L_sym)/2)^{2t}·((πx)⁻¹ − 1)`, connectivity the only graph
+hypothesis) and the signless-Laplacian SOS engine (`μ(L_sym) ≤ 2`) —
+the fix that makes the discrete mixing program's certificate families
+satisfiable on every bipartite graph, where they are provably
+unsatisfiable today.
+
+**Changes:** `Mixing.lean`'s new `LazyWalk` section (38 declarations:
+the lazy operator/law/density/χ² objects with detailed balance and
+attainment-persistence, the signless SOS engine, the lazy decay
+engine at mode factors `1 − μ/2`, the intrinsic-rate assembly, the
+headline, TV and entropy corollaries) and `Mixing_QA.lean`'s new
+`LazyWalk` section (23 QA theorems + the `negDiagAdj` fence fixture:
+the `K₂` every-time exact attainment `χ²_lazy ≡ 0` at the pinned rate
+`0`, the TV periodicity-fix contrast pair, the `P₃` periodic center
+start exactly stationary in one lazy step against the proved plain
+never-decay pin, corner values with the bound instance at the pinned
+gap, signless tightness at the bipartite top mode, and the `hnn`
+fence). Proposal `proposals/lazy-walk-mixing.md` (COMPLETE, same-run,
+with the delivery record and eight technique findings), records
+ladder: `proposals/README.md`, README (3589), radar (QA axis synced
+held 4.0, axis 5 held 4.5), `index/map/spectral_graph.md` (18 rows),
+backlog item 2, both map data tables + regenerated SVG, scoreboard
+verification row, both QA modules' purpose headers, the execution
+plan, and this log.
+
+**Verification:** spike first (`wip/lazywalk_spike.lean` iterated to
+zero errors/zero warnings before any shelf edit); `lake env lean`
+clean on both touched modules; explicit `lake build` targets ✔ on
+both; **`#print axioms` on all 62 new declarations: every one exactly
+`propext, Classical.choice, Quot.sound`** (zero axiom contact); full
+`lake build` ✔ + `check_build_completeness.py` — 133/133 fresh, 0
+stale, 0 missing, exit 0; `lint_axioms` exit 0 (5);
+`check_refutation_independence` 10-tag clean;
+`check_public_reachability` 63 modules clean; `check_citations`,
+`check_markdown_links`, `check_backlog_freshness` pass; scoreboard
+regenerated 3589/5/0 idempotent; `check_scaffold_map_freshness` exit
+0 after the stats sync + SVG regen.
+
+**Remaining risk:** none owed — pure hard crust, no axiom disposition
+changed, no existing public statement changed. The lazy follow-ons
+(depth-form lazy ceiling, `t_mix` at the lazy law) are gated on a
+consumer naming a bipartite-input instance.
+
+**Next handoff:** the queue returns to the center-out fall-through
+(reverse TV → χ² has no consumer named; log-Sobolev adoption and the
+master-bound Step 2 are operator decisions; the over-squashing
+Python bridge is operator-gated).
+
+## 2026-09-01T22:42:17Z — The lazy t_mix object and depth-form lazy ceiling: in progress
+
+**Run:** `20260901T224217Z-run-1`  
+**Session:** `ses_fa0e1059dffehBtu1Ti2TEZoVa`  
+**Status:** in-progress  
+**Milestone:** the lazy program's two recorded follow-on compositions
+(the depth-form lazy ceiling and the `t_mix` object at
+`lazyWalkDistribution`), consumer gate discharged by naming the
+bipartite-input instance: the empirical-stationary sampling capstone's
+own "agent that can only simulate the walk" setting on paths/trees
+(where the plain `r < 1` certificate is provably unsatisfiable), plus
+the missing `secondEval ≤ 2` spectrum cap. Proposal
+`proposals/lazy-mixing-time-objects.md`; spike first
+(`wip/lazymix_spike.lean`), then `Oversmoothing.lean`'s new
+`LazyMixingTime` section, one engine lemma in `Mixing.lean`, and the
+QA on the K₂/P₃ bipartite fixtures.
+
+
+## 2026-09-01T23:33:00Z — The lazy t_mix object and depth-form lazy ceiling delivered (terminal)
+
+**Run:** `20260901T224217Z-run-1`  
+**Session:** `ses_fa0e1059dffehBtu1Ti2TEZoVa`  
+**Status:** completed  
+**Milestone:** the lazy-walk delivery's two recorded follow-on
+compositions — the depth-form lazy ceiling and the `t_mix` object at
+`lazyWalkDistribution` — with the consumer gate discharged by naming
+the bipartite-input instance (the empirical-stationary capstone's own
+"agent that can only simulate the walk" setting on paths/trees/grids,
+where the plain `r < 1` certificate is provably unsatisfiable; the
+delivered entrywise lazy ceiling is that extension's hypothesis
+supplier, recorded as the named follow-on).
+
+**Changes:** `Mixing.lean` gains the spectral-gap cap
+`secondEval_normalizedLaplacian_le_two` (`λ₂(L_sym) ≤ 2` — with the
+pointwise signless twin, the whole normalized spectrum now capped in
+`[0, 2]`, and the lazy rate nonnegative by theorem);
+`Oversmoothing.lean`'s new `LazyMixingTime` section — the entrywise
+lazy ceiling at the intrinsic rate (connectivity the only graph
+hypothesis, the plain twin's certificate hypothesis replaced by the
+computed rate), the depth-form TV lazy ceiling (honest visible
+`λ₂ < 2`; K₂'s rate-0 corner excluded and documented), and
+`lazyWalkMixingTimeFrom` with the certificate interface, the inherited
+`csInf_mem` attainment, ε-antitonicity, and the intrinsic-rate
+spectral ceiling. QA +11 (3589 → 3600): the exact corner-start TV
+closed form `TV_lazy(1+t) = (1/2)^{t+2}` at every time on the
+bipartite path, `t_mix_lazy(corner, 1/8) = 2` pinned in both
+directions (the fixture where the plain walk provably never mixes),
+`t_mix_lazy(center, 1/4) = 1` with the ceiling attained exactly, the
+corner ceiling with honest slack (`3` vs `2`), the object-level
+periodicity contrast (plain `t_mix(K₂, 1/8) = 0` junk — empty witness
+set — against lazy `= 1` genuine), and the entrywise bound attained
+exactly on `K₂` (both sides zero at rate `0`). Records: the proposal
+(COMPLETE + delivery record with nine technique findings and one scope
+reduction — the 2D-matrix pin replaced by the `mulVec` action
+statement), `proposals/README.md` (Delivered row), README (3600 + the
+walks-and-mixing row extension), the radar (QA axis synced held 4.0;
+axis 5 extended held 4.5), `index/map/spectral_graph.md` (the new
+section, 6 rows), the scoreboard verification row, both map data
+tables + regenerated SVG, the QA module's purpose header, the backlog
+item-2 update, the execution plan, this log.
+
+**Verification:** spike first (`wip/lazymix_spike.lean` — shelf + full
+QA + axiom audit at zero errors/zero warnings/zero sorries before any
+shelf edit); `lake env lean` clean on all three touched modules (only
+the QA module's 3 recorded pre-existing benign `ring_nf` notes, count
+verified unchanged); explicit `lake build` targets ✔; `#print axioms`
+via `wip/lazymix_axcheck.lean` on all 20 new declarations (9 shelf +
+11 QA): exactly `propext, Classical.choice, Quot.sound`, pure hard
+crust; full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 133 source files, 133 fresh artifacts,
+0 stale, 0 missing, exit 0 (after the documented single-module mtime
+remediation for the post-build purpose-header edit); `lint_axioms`
+exit 0 (5 axioms, both PF findings allowlisted-confirmed);
+`check_refutation_independence` (10-tag clean — no tags added, nothing
+touches an axiom); `check_public_reachability` clean (63 modules);
+`check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; `check_backlog_freshness` clean;
+scoreboard regenerated (3600/5/0); map-freshness exit 0 after the
+3589 → 3600 stats sync + SVG regeneration (no proposal status header
+changed — no station, no tier change).
+
+**Remaining risk:** none owed — pure hard crust, no axiom disposition
+changed, no existing public statement changed; the depth/ceiling
+statements' `λ₂ < 2` strictness is honest (K₂'s rate-0 corner outside
+their hypothesis set, covered by the direct object pins instead).
+
+**Next handoff:** the newly named follow-on is the empirical lazy
+sampling guarantee (`empiricalLazyWalkDistribution…`) — the delivered
+entrywise ceiling is its hypothesis supplier; its delivery rests on
+cloning `Derived/EmpiricalStationary.lean`'s machinery at the lazy
+walk law, a multi-file composition. The standing queue otherwise:
+reverse TV → χ² calculus (no consumer named), log-Sobolev adoption
+(operator decision), and the operator-gated items (over-squashing
+floor's Python bridge, matrix master-bound Step 2).

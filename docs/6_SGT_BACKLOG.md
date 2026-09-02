@@ -120,7 +120,8 @@ provably holds yet the conclusion fails (`χ²(3) = 3/8 > 3/64`).
 Radar axis 5 re-scored 3.0 → 3.5 (the mixing statement's own landing).
 
 *Update (2026-09-01): the mixing program's second wave — TV, mixing-time
-objects, continuous time, entropy, and both a ceiling and a floor.* Far
+objects, continuous time, entropy, both a ceiling and a floor, and the
+lazy time-change.* Far
 beyond the original three-step scope above, `GraphTheory.Mixing` and
 the new `GraphTheory.Oversmoothing` now carry: the ℓ²→TV conversion at
 the sharp classical constant and its depth-form oversmoothing ceiling;
@@ -134,13 +135,31 @@ and discrete walk laws; the sup-over-starts uniform `t_mix` object
 class; **the spectral mixing floor** — the program's first lower-bound
 family, via the exact eigen-component-equality route, completing a
 genuine two-sided depth bracket (provably-insufficient vs.
-provably-enough layers); and the entropy leg (Pinsker's inequality,
+provably-enough layers); the entropy leg (Pinsker's inequality,
 entropy decay, an entropy floor), which discharges log-Sobolev's
-consumer gate — see item 6's update below. Zero new axioms across the
-entire wave; QA now 3566. See `proposals/message-passing-depth-mixing-bound.md`,
+consumer gate — see item 6's update below; and **the lazy walk**
+(`proposals/lazy-walk-mixing.md`: `P_L = (P + I)/2` with the
+intrinsic-rate χ²/TV/entropy family and the signless-Laplacian SOS
+`μ(L_sym) ≤ 2`) — LPW ch. 5's periodicity fix, making the discrete
+certificate families satisfiable on every bipartite graph (the plain
+families' `r < 1` rate hypotheses are provably unsatisfiable there;
+the lazy rate `1 − λ₂/2` is intrinsic and the `K₂` QA attains the
+bound exactly at every time, `χ²_lazy ≡ 0`), and **the lazy mixing
+time** (`proposals/lazy-mixing-time-objects.md`: the `t_mix(ε)` object
+at the lazy law with the certificate/attainment package and the
+intrinsic-rate spectral ceiling, the depth-form TV lazy ceiling, and
+the entrywise lazy ceiling at the intrinsic rate — the plain objects'
+junk corner on bipartite graphs closed by genuine lazy mixing times,
+with `λ₂(L_sym) ≤ 2` capping the whole normalized spectrum; the
+follow-ons' consumer gate discharged by naming the
+empirical-stationary agent's bipartite setting, whose lazy extension
+is the recorded next follow-on). Zero new axioms across the
+entire wave; QA now 3600. See `proposals/message-passing-depth-mixing-bound.md`,
 `proposals/total-variation-mixing-conversion.md`,
-`proposals/continuous-time-chi-square-mixing.md`, and
-`proposals/entropy-mixing-pinsker.md` for the full delivery records.
+`proposals/continuous-time-chi-square-mixing.md`,
+`proposals/entropy-mixing-pinsker.md`,
+`proposals/lazy-walk-mixing.md`, and
+`proposals/lazy-mixing-time-objects.md` for the full delivery records.
 
 ### 3. Expansion and cut interfaces
 

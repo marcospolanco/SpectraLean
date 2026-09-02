@@ -38,8 +38,11 @@ QA-to-QA import precedent of `KernelBridge_QA`/`Tikhonov_QA`):
   `∃!` refuted by two distinct stationary distributions with row
   stochasticity *still holding* (it is `α`-free — exactly `hα`).
 
-Nothing here proves or validates the `perron_frobenius` axiom; the
-axiom-route theorems check that the interfaces compose, the raw routes
+Nothing here proves or validates the `perron_frobenius` axiom; since
+2026-09-02 (`proposals/cesaro-stationary-existence.md`) the theorems
+below are themselves hard crust (the stationary layer was re-proved
+without axiom contact by the Cesàro/power-positivity route), so the
+theorem routes check that the interfaces compose while the raw routes
 check the mathematics independently of the theorems.
 -/
 
@@ -205,8 +208,8 @@ theorem u4_ne_zero_QA : u4 ≠ 0 := by
 theorem u4_pred_QA : (∀ i, 0 ≤ u4 i) ∧ (∑ i, u4 i = 1) ∧ u4 ᵥ* A4G = u4 :=
   ⟨u4_nonneg_QA, u4_sum_QA, u4_stationary_raw_QA⟩
 
-/-- **The `∃!` instantiated on reducible input** (conditional on
-`perron_frobenius` through the delivered consumer layer): the
+/-- **The `∃!` instantiated on reducible input** (hard crust since
+2026-09-02, formerly conditional on `perron_frobenius`): the
 teleportation-regularized walk of the two-block fixture has exactly
 one nonnegative stationary distribution — the statement the raw walk's
 `A4_existsUnique_refuted_QA` refutes on the same fixture. -/
@@ -315,8 +318,8 @@ theorem pr3_ne_zero_QA : pr3 ≠ 0 := by
 theorem pr3_pred_QA : (∀ i, 0 ≤ pr3 i) ∧ (∑ i, pr3 i = 1) ∧ pr3 ᵥ* A3G = pr3 :=
   ⟨pr3_nonneg_QA, pr3_sum_QA, pr3_stationary_raw_QA⟩
 
-/-- **The `∃!` instantiated on the asymmetric fixture** (conditional on
-`perron_frobenius` through the delivered consumer layer). -/
+/-- **The `∃!` instantiated on the asymmetric fixture** (hard crust
+since 2026-09-02, formerly conditional on `perron_frobenius`). -/
 theorem A3G_existsUnique_QA :
     ∃! π : Fin 3 → ℝ, (∀ i, 0 ≤ π i) ∧ (∑ i, π i = 1) ∧ π ᵥ* A3G = π :=
   existsUnique_pageRankVec A3 A3_nonneg_QA A3_deg_QA

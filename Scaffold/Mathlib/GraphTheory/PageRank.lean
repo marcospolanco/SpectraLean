@@ -19,17 +19,17 @@ reducibility of the input, the obstruction that motivates the
 construction, is thereby dissolved rather than assumed away: no
 irreducibility hypothesis appears in any statement below.
 
-**Trust boundary.** The three PageRank theorems
-(`exists_pageRankVec`, `existsUnique_pageRankVec`, `pageRankVec_pos`)
-are *conditional on the `perron_frobenius` axiom* — Lean-checked
-deductions through the delivered consumer layer, never foundationally
-proved. They make no new axiom contact: the two axiom applications
-happen inside `IrreducibleStationary`'s engine; this module composes
-that layer at the Google matrix through the row-stochasticity bridge
-`walkTransitionMatrix_eq_of_row_sum_one` (a row-stochastic matrix is
-its own walk transition matrix). Everything else here — the
-teleportation floor, irreducibility, row sums, the bridge — is
-unconditional hard crust.
+**Hard crust since 2026-09-02**
+(`proposals/cesaro-stationary-existence.md`): the three PageRank
+theorems (`exists_pageRankVec`, `existsUnique_pageRankVec`,
+`pageRankVec_pos`) are *proved* with no axiom contact — the
+`IrreducibleStationary` engine they compose through was re-proved that
+day by the Cesàro/power-positivity/min-ratio route, and this module
+composes that layer at the Google matrix through the row-stochasticity
+bridge `walkTransitionMatrix_eq_of_row_sum_one` (a row-stochastic
+matrix is its own walk transition matrix). Everything here — the
+teleportation floor, irreducibility, row sums, the bridge, and now the
+stationary conclusions — is unconditional hard crust.
 
 ## Statement shapes (recorded in `proposals/pagerank-distributions.md`)
 
@@ -46,10 +46,12 @@ unconditional hard crust.
   exists at all.
 - Nothing about power iteration, rates, or mixing: geometric
   convergence of `π_{t+1} = π_t ᵥ* G` needs strict spectral dominance,
-  which the axiom deliberately does not claim (the
-  `strict_dominance_refuted_QA` imprimitivity fence). The rank-one
+  a genuinely spectral statement outside the elementary
+  Cesàro/power-positivity route (the
+  `strict_dominance_refuted_QA` imprimitivity fence in the
+  Perron–Frobenius QA records why no such clause is free). The rank-one
   update structure also makes `G`'s Perron root `1` with multiplicity
-  structure the axiom does not pin down; those are separate future
+  structure no delivered theorem pins down; those are separate future
   obligations, not smuggled in here.
 
 ## Source and conventions
@@ -215,8 +217,9 @@ theorem walkTransitionMatrix_eq_of_row_sum_one (M : Matrix V V ℝ)
   intro i j
   rw [walkTransitionMatrix_apply, show deg M i = 1 from hrow i, inv_one, one_mul]
 
-/-- **Existence of the PageRank distribution** (conditional on
-`perron_frobenius`): every nonnegative network with positive
+/-- **Existence of the PageRank distribution** (hard crust since
+2026-09-02, formerly conditional on `perron_frobenius`): every
+nonnegative network with positive
 out-degrees — reducible or not, asymmetric or not — has a stationary
 distribution for its teleportation-regularized walk `π ᵥ* G = π` that
 is strictly positive and normalized to total mass one. Composition:
@@ -249,8 +252,9 @@ theorem exists_pageRankVec (A : WAdj (V := V)) (hnn : ∀ i j, 0 ≤ A i j)
   rw [hb] at hπs
   exact hπs
 
-/-- **The PageRank distribution exists and is unique** (conditional on
-`perron_frobenius`): there is exactly one nonnegative mass-one vector
+/-- **The PageRank distribution exists and is unique** (hard crust
+since 2026-09-02, formerly conditional on `perron_frobenius`): there
+is exactly one nonnegative mass-one vector
 fixed by the Google walk `π ᵥ* G = π` — **with no irreducibility
 hypothesis on the input network**. This is the statement the raw walk
 cannot support: on reducible input the raw stationary distributions
@@ -289,7 +293,8 @@ theorem existsUnique_pageRankVec (A : WAdj (V := V)) (hnn : ∀ i j, 0 ≤ A i j
   exact hτ.2.2
 
 /-- **Full support: no stationary vector of the Google walk can vanish
-anywhere** (conditional on `perron_frobenius`). Every nonzero
+anywhere** (hard crust since 2026-09-02, formerly conditional on
+`perron_frobenius`). Every nonzero
 nonnegative vector fixed by `π ᵥ* G = π` is strictly positive — the
 teleportation floor's trace on the stationary distribution: even a
 vertex with no inbound walk arcs receives teleportation mass.

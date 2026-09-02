@@ -1194,6 +1194,91 @@ its mathematical core on the shelf; the complex spectral layer
 (eigenvalues of `M`, magnetic Cheeger, synchronization functionals)
 is the priced follow-on when a consumer names a bound. What remains
 on the directed axis is the *rate* layer and that spectral layer.
+*Eighth update (2026-09-02):* **the convergence layer is no longer
+admitted — `primitive_power_tendsto` retired to a proved theorem**
+(`proposals/retire-primitive-power-convergence.md`, zero new axioms,
+count 5 → 4): the admission's own "Replacement path" note had left
+the local route unpriced, and the elementary Doeblin/Dobrushin
+entrywise-range contraction (no Perron–Frobenius machinery) proves
+the statement unchanged — the contraction landing as a reusable
+public engine (`entryRange_mulVec_le_of_pos_entries`:
+`range (Q *ᵥ y) ≤ (1 - |V|δ)·range y` for row-stochastic `Q` with
+entries `≥ δ`), with the PageRank power iteration and both generic
+corollaries now hard crust at `#print axioms` standard-three. The
+proof's byproduct rate is the Doeblin bound — explicit but
+typically loose; the *sharp* `|λ₂|`-type rate layer stays exactly
+as gated above (complex spectral theory of non-symmetric matrices,
+a named consumer required), and the magnetic spectral layer is
+unchanged. *Ninth update (2026-09-02):* **the coarse rate layer is
+now delivered at the TV level** — `proposals/doeblintv-tv-contraction-
+pagerank-rate.md`: the Doeblin engine's second consumer
+(`tvDistance_vecMul_le_of_pos_entries`, `TV(μ ᵥ* Q, ν ᵥ* Q) ≤
+(1 − |V|δ)·TV(μ, ν)` at equal masses, hypothesis-minimal) with the
+block assembly `tvDistance_vecMul_pow_le_of_pos_power` and the named
+consumer **`pageRank_tvDistance_le`** — `TV(ν ᵥ* G^t, π) ≤ α^t·TV(ν,
+π)`, the field-standard PageRank power-method rate, attained exactly
+at every time on the periodic 2-cycle QA where the plain walk
+provably never mixes. The gated remainder is unchanged and now
+precisely the *sharp* layer: a sharpness theorem for general
+primitive chains (`|λ₂| = α` on the Google matrix is
+Haveliwala–Kamvar), the ⌈log⌉-threshold depth form, and a directed
+`t_mix` object — each still gated on a named consumer. *Tenth update
+(2026-09-02):* **two of those three gated items delivered — the
+directed `t_mix` object and the ⌈log⌉-threshold depth form, as one
+package with the consumer gate discharged by naming the empirical
+PageRank capstone** (`proposals/directed-mixing-time-object.md`, zero
+new axioms): `DirectedMixing.lean`'s per-start Google-walk law
+`pageRankDistribution` (probability-certified), the depth form
+`pageRank_tvDistance_le_of_depth`, and the object
+`pageRankMixingTimeFrom` with its α-ceiling `t_mix(ε) ≤
+⌈log(TV(δ_x,π)/ε)/log(1/α)⌉` (attained exactly in QA) and attainment
+package; the named consumer is `Derived/EmpiricalStationary.lean`'s
+**`empiricalPageRank_stationary_tail_of_depth`** — `n` simulated
+random-surfer trajectories estimate `π i` to `ε` at
+`2 exp(−nε²/2)` past the object's own threshold, on directed input the
+only mixing route (the symmetric `evals`/`eigvecOf` toolkit being
+unavailable there); plus `Mixing.lean`'s equal-mass entrywise TV
+extraction `|μ i − ν i| ≤ TV(μ, ν)` (constant sharp), the directed
+bias term's engine. The gated remainder narrows to precisely the
+*sharp* layer: a sharpness theorem for general primitive chains
+(`|λ₂| = α`, Haveliwala–Kamvar) and the directed uniform
+(worst-start) twin — each still gated on a named consumer. *Eleventh
+update (2026-09-02):* **the directed uniform twin delivered — the
+`t_mix` object family is complete**
+(`proposals/directed-uniform-mixing-time.md`, zero new axioms):
+`DirectedMixing.lean`'s uniform-mixing-time section carries LPW's two
+distances `d`/`d̄` at the Google law, the submultiplicativity class and
+ε-escalation corollaries through `Mixing.lean`'s new **matrix-level
+Dobrushin-coefficient engine** (`tvDobrushinCoeff` + the sharp
+contraction `TV(μ ᵥ* Q, ν ᵥ* Q) ≤ TV(μ,ν)·δ(Q)` at equal masses +
+generic power submultiplicativity — the undirected uniform delivery's
+mechanism promoted from bespoke-at-the-walk-matrix to any row action,
+with the pairing core promoted public from Oversmoothing-private),
+the refined α-ceiling `t_mix(ε) ≤ ⌈log(d̄(0)/ε)/log(1/α)⌉` (attained
+exactly in QA on the fixture where the per-start one is), and the
+worst-start sampling capstone `empiricalPageRank_uniform_tail_of_depth`
+— one start-independent threshold certifying `n` simulated trajectories
+for every start. The gated remainder is now the *sharp* layer alone
+(`|λ₂| = α`, still gated on a named consumer).
+*Twelfth update (2026-09-02):* **the stationary layer left the axiom —
+`perron_frobenius` now has zero non-QA consumers**
+(`proposals/cesaro-stationary-existence.md`, zero new axioms): the
+fourth update's conditional layer — `IrreducibleStationary`'s engine
+plus its four stationary theorems, `PageRank`'s three, and every
+`DirectedMixing`/empirical instantiation producing `π` through them —
+was **re-proved at unchanged statements** by the elementary route the
+admission's own "Replacement path" note had left unpriced: power
+positivity from strong connectivity (`exists_pow_pos_of_isIrreducible`),
+existence by Krylov–Bogoliubov Cesàro averaging of the orbit of `1`
+over the compact simplex (`exists_cluster_stationary_of_orbit` +
+`exists_nonneg_stationary_of_row_stochastic` — the latter with *no*
+irreducibility, the honest scope statement), strict positivity, and
+min-ratio uniqueness-up-to-scale — `#print axioms` exactly the
+standard three across 37 audited declarations. The axiom itself stays
+admitted at its own full statement (rootMultiplicity +
+complex-domination clauses untouched, its QA still exercising it);
+whether to open the §9 deprecation window is an operator decision,
+flagged in `index/load_bearing_axioms.md`.
 
 ### 9. Bounded-window ("band") Davis–Kahan (2026-08-21, opened by the Davis–Kahan Step-0/1 survey)
 

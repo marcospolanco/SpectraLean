@@ -68,6 +68,7 @@
 import Scaffold.Derived.EmpiricalStationary
 import Scaffold.QA.SpectralGraph.Mixing_QA
 import Scaffold.QA.Probability.IIDProduct_QA
+import Scaffold.QA.SpectralGraph.DirectedMixing_QA
 
 open MeasureTheory ProbabilityTheory
 open scoped ENNReal
@@ -841,4 +842,100 @@ theorem path_lazy_center_contrast_QA (t₀ : ℕ) (i : Fin 3) (ht : 1 ≤ t₀) 
     exact mul_pos (pow_pos (by norm_num) _)
       (Real.sqrt_pos.mpr (by rw [mul_one]; exact hπpos))
 
+
+/-!
+## The PageRank capstone instances
+
+The directed `t_mix` object's named consumer
+(`proposals/directed-mixing-time-object.md`, 2026-09-02), instantiated
+on `DirectedMixing_QA`'s Section G fixture (the periodic 2-cycle's
+Google matrix at `α = 1/2`, uniform stationary `u2`, the object pinned
+`t_mix(1/8) = 2`): the bias-term instance at `2 exp (−1/8)` and the
+depth-form capstone instance at `2 exp (−1/32)` — one simulated
+random-surfer trajectory of length `2` estimates the PageRank weight
+`u2 1 = 1/2` to `1/4`. The **uniform capstone instance**
+(`PRU_capstone_instance_QA`, 2026-09-02,
+`proposals/directed-uniform-mixing-time.md`) instantiates the
+worst-start twin at the same numbers, at the start `x = 1` — the same
+*uniform* threshold pin `t_mix^unif(1/8) = 2` certifying the start
+whose per-start pin it subsumes.
+-/
+section PageRankCapstone
+
+open Scaffold.Mathlib.Probability.IIDProduct MeasureTheory
+open Scaffold.QA.SpectralGraph SpectralGraphTheory
+
+/-- **The bias-term instance**: on the fixture at `t₀ = 1`, the quoted
+bias is `α^1 · TV(δ_0, u2) = 1/4` and the bound at threshold `1/2`
+reads `2 exp (−2 · (1/2 − 1/4)²) = 2 exp (−1/8)`. -/
+theorem PR_bias_instance_QA :
+    (iidPMF (pageRankDistribution A2 (1/2) 1 0)
+        (fun j => pageRankDistribution_nonneg A2 A2_nonneg_QA A2_deg_QA
+          (by norm_num) (by norm_num) 1 0 j)
+        (sum_pageRankDistribution A2 A2_deg_QA (1/2) 1 0)).toMeasure
+      {ω : Fin 1 → Fin 2 | |(1 / (1 : ℝ)) * ∑ k : Fin 1,
+          (if ω k = 1 then (1 : ℝ) else 0) - u2 1| ≥ 1/2}
+      ≤ ENNReal.ofReal (2 * Real.exp (-(1/8))) := by
+  have htv : tvDistance (Pi.single (0 : Fin 2) (1 : ℝ)) u2 = 1/2 := by
+    rw [piSingle_zero_eq_e0]; exact tv_e0_u2
+  have h := empiricalPageRank_stationary_tail (A := A2) (t := 1/2)
+    A2_nonneg_QA A2_deg_QA (by norm_num) (by norm_num) u2_sum
+    u2_stationary_Gd 1 0 1 one_ne_zero (by rw [pow_one, htv]; norm_num)
+  rw [pow_one, htv] at h
+  push_cast at h
+  have e : (1/2 : ℝ) - (1/2) * (1/2) = 1/4 := by norm_num
+  rw [e] at h
+  have e2 : (-2 : ℝ) * (1 : ℝ) * (1/4) ^ 2 = -(1/8) := by norm_num
+  rw [e2] at h
+  exact h
+
+/-- **The capstone instance**: past the directed mixing time at
+`ε/2 = 1/8` — exactly the pinned `t_mix = 2` — one simulated
+random-surfer trajectory of length `2` estimates the PageRank weight
+`u2 1 = 1/2` to `ε = 1/4` with failure probability at most
+`2 exp (−1/32)`. -/
+theorem PR_capstone_instance_QA :
+    (iidPMF (pageRankDistribution A2 (1/2) 2 0)
+        (fun j => pageRankDistribution_nonneg A2 A2_nonneg_QA A2_deg_QA
+          (by norm_num) (by norm_num) 2 0 j)
+        (sum_pageRankDistribution A2 A2_deg_QA (1/2) 2 0)).toMeasure
+      {ω : Fin 1 → Fin 2 | |(1 / (1 : ℝ)) * ∑ k : Fin 1,
+          (if ω k = 1 then (1 : ℝ) else 0) - u2 1| ≥ 1/4}
+      ≤ ENNReal.ofReal (2 * Real.exp (-(1 : ℝ) / 32)) := by
+  have h := empiricalPageRank_stationary_tail_of_depth (A := A2)
+    A2_nonneg_QA A2_deg_QA (by norm_num) (by norm_num) u2_sum
+    u2_stationary_Gd (by norm_num : (0 : ℝ) < 1/4) 2 0 1 one_ne_zero
+    (by rw [show ((1/4 : ℝ) / 2) = 1/8 from by norm_num]
+        rw [PR_tmix_eighth_QA])
+  push_cast at h
+  have e : (-(1 : ℝ)) * (1/4) ^ 2 / 2 = -(1 : ℝ) / 32 := by norm_num
+  rw [e] at h
+  exact h
+
+/-- **The worst-start capstone instance**: the *same* uniform threshold
+pin `t_mix^unif(1/8) = 2` certifies one simulated random-surfer
+trajectory of length `2` from *either* start to estimate the PageRank
+weight `u2 1 = 1/2` to `ε = 1/4` at `2 exp (−1/32)` — instantiated
+here at the start `x = 1`, the start whose per-start pin the uniform
+certificate subsumes. -/
+theorem PRU_capstone_instance_QA :
+    (iidPMF (pageRankDistribution A2 (1/2) 2 1)
+        (fun j => pageRankDistribution_nonneg A2 A2_nonneg_QA A2_deg_QA
+          (by norm_num) (by norm_num) 2 1 j)
+        (sum_pageRankDistribution A2 A2_deg_QA (1/2) 2 1)).toMeasure
+      {ω : Fin 1 → Fin 2 | |(1 / (1 : ℝ)) * ∑ k : Fin 1,
+          (if ω k = 1 then (1 : ℝ) else 0) - u2 1| ≥ 1/4}
+      ≤ ENNReal.ofReal (2 * Real.exp (-(1 : ℝ) / 32)) := by
+  have h := empiricalPageRank_uniform_tail_of_depth (A := A2)
+    A2_nonneg_QA A2_deg_QA (by norm_num) (by norm_num) u2_nonneg u2_sum
+    u2_stationary_Gd (by norm_num : (0 : ℝ) < 1/4) 2 1 one_ne_zero
+    (by rw [show ((1/4 : ℝ) / 2) = 1/8 from by norm_num]
+        rw [PRU_tmix_eighth_QA])
+  have h1 := h 1
+  push_cast at h1
+  have e : (-(1 : ℝ)) * (1/4) ^ 2 / 2 = -(1 : ℝ) / 32 := by norm_num
+  rw [e] at h1
+  exact h1
+
+end PageRankCapstone
 end Scaffold.Derived.EmpiricalStationary.QA

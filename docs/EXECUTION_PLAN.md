@@ -6,29 +6,580 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**The cycle family and the asymptotic Alon–Boppana corollary** —
-backlog item 3's own named follow-on ("the asymptotic family corollary
-needs a named d-regular family with `diam → ∞` and stays a Plan entry
-until one is named"), closed by naming the canonical family: the cycles
-C_n. Selected under the center-out fall-through (proposals' Active
-table all Low/blocked; every other queue item consumer-less or
-operator-gated). Leverage: (1) the Alon–Boppana program's asymptotic
-reading — `∀ ε > 0, ∃ n A, IsDRegular A 2 ∧ λ₂ ≤ ε` — the statement
-the whole two-edge machinery exists for, unstatable without a family;
-(2) the shelf's first **parametric** (arbitrary-n) instantiation of
-`IsTreeBall`/`distEdge`/`levE` — until now exercised only on fixed
-literal fixtures (C₈), exactly the QA axis's named "parametric QA" gap;
-(3) maximal Mathlib reuse: `SimpleGraph.cycleGraph n` through the
-delivered `toWAdj` adapter (roundtrip + 2-regularity from
-`cycleGraph_degree_three_le` are free), so the new content is the exact
-cycle distance formula (walk construction + ℤ-potential sInf bound) and
-the level-cardinality assembly. Zero new axioms.
+**None queued — the standing queue is empty again.** This run
+delivered the Cesàro stationary-existence engine (below):
+`perron_frobenius`'s entire theorem-consumer surface is now hard
+crust, the axiom itself stays admitted at its own full statement but
+has **zero non-QA consumers**, and whether to open its §9 deprecation
+window is flagged as an explicit operator decision in
+`index/load_bearing_axioms.md` — the natural operator-facing item, not
+one an autonomous Lean-work run should take (deprecation windows and
+release notes are release decisions). The other named items remain
+gated exactly as before: the sharp `|λ₂| = α` layer for general
+primitive chains (no consumer named), the reverse TV → χ² calculus (no
+consumer named), log-Sobolev adoption (operator decision), the
+over-squashing floor's Python bridge and the matrix master-bound Step 2
+(Lieb concavity — operator-gated), and the undirected `walkTVPair`
+join onto the Dobrushin engine (priced, needs a consumer). Natural
+frontiers for the next run's center-out selection: a load-bearing
+consumer of the newly-proved stationary layer now that it is
+unconditional (e.g. instantiating the empirical PageRank capstone's
+`π` through the proved `∃!` — previously conditional composition),
+the QA axis's still-open parametric-QA gap, or an audit-shaped pass
+over any surface the mixing cascade left unreviewed. Check
+`proposals/README.md`'s Active table first, as always.
 
-Next action: spike `wip/cyclefam_spike.lean` (shelf declarations + QA +
-axiom audit iterated to zero errors) before any shelf edit; then land
-the `CycleFamily` section in `GraphTheory/AlonBoppana.lean` and the QA
-section in `AlonBoppana_QA.lean`; proposal
-`proposals/cycle-family-alon-boppana-asymptotic.md`.
+*Leverage rationale:* the last run completed the `t_mix` object family
+and left the queue empty; `proposals/README.md`'s Active table is all
+Low/human-gated, so the center-out fallback selects this milestone
+under priority 4 (reduce the explicit trust surface) — the single
+highest-leverage bounded item now available. The admitted
+`perron_frobenius` axiom's entire non-QA consumer surface is the
+stationary-distribution layer (`IrreducibleStationary.lean`'s engine +
+four theorems, `PageRank.lean`'s three, and every `DirectedMixing`
+instantiation that produces `π` through them) — all conditional on the
+axiom today. The classical elementary route needs none of Perron–
+Frobenius: (1) *power positivity* — strong connectivity gives, for
+every pair, a power with a strictly positive entry (induction on
+`ReflTransGen`); (2) *existence* — Krylov–Bogoliubov-style Cesàro
+averaging of the walk iterates over the compact simplex
+(`isCompact_univ_pi` + `IsCompact.tendsto_subseq`, no metric
+machinery), with the telescoping defect
+`μ_t − μ_t ᵥ* P = t⁻¹(ν − ν ᵥ* P^t)` vanishing entrywise; (3) *strict
+positivity* of any nonzero nonneg stationary vector from (1); (4)
+*uniqueness up to scale* by the min-ratio trick (the difference
+`σ − cτ` at the minimizing ratio is nonneg stationary with a zero
+entry, hence zero). Every existing public statement keeps its exact
+name/shape/hypotheses — only proofs and conditional-status docstrings
+change. The axiom itself stays admitted at its own full statement
+(rootMultiplicity + complex domination are untouched, and its QA
+keeps exercising it) but drops to zero non-QA consumers — a state
+change to record across `index/load_bearing_axioms.md`, the coverage
+map, README, the radar, the map data, and the backlog, flagging the
+deprecation decision as the operator's.
+
+*Next action:* write the proposal, then spike
+`wip/cesaro_spike.lean` (engine + re-proofs + the new QA section +
+the axiom audit iterated to zero errors/zero warnings) before any
+shelf edit.
+
+------
+
+## Delivered milestones (most recent first)
+
+**The Cesàro stationary-existence engine — `perron_frobenius`'s entire
+theorem-consumer surface re-proved** (`proposals/cesaro-stationary-existence.md`,
+same-run proposal; run `20260902T125928Z-run-1`, session
+`ses_f9dd39978ffeMCIXqi4ylgfxZX`). DELIVERED — zero new axioms (count
+stays 4; `#print axioms` via `wip/cesaro_axcheck.lean` on all 37
+audited declarations — 10 engine + 5 re-proved stationary + 3 PageRank
++ 3 directed-mixing consumers + 16 QA — every one exactly `propext,
+Classical.choice, Quot.sound`). QA 3712 → 3734 (+22,
+`IrreducibleStationary_QA.lean`'s Section E). Radar QA axis synced to
+3734 held at 4.0 per protocol; axiom-minimization axis narrative
+extended with the zero-consumer state (score held 4.5).**
+
+The delivery's content: (1) **The elementary route the admission's own
+"Replacement path" note had left unpriced** — power positivity from
+strong connectivity (`exists_pow_pos_of_isIrreducible`, the
+`ReflTransGen` induction along the arcs); existence by
+Krylov–Bogoliubov Cesàro averaging (`exists_cluster_stationary_of_orbit`,
+the finite-form cluster lemma: Tychonoff + `IsCompact.tendsto_subseq`
+in the product topology with the telescoping action-defect
+`t⁻¹•(g₀ − g_t) → 0` entrywise, and
+`exists_nonneg_stationary_of_row_stochastic`, the orbit-of-`1` engine
+with *no* irreducibility — the honest scope statement, existence holds
+on reducible chains too); strict positivity (a zero coordinate forces
+every mass coordinate to zero through power positivity); and min-ratio
+uniqueness-up-to-scale (the difference at the minimizing ratio is
+nonnegative stationary with a zero entry, hence zero). Four generic
+public `vecMul` helpers joined the shelf (including `vecMul_mul`, the
+`ᵥ*`-shaped associativity absent from the pin). (2) **The re-proofs**:
+`exists_walkPerronVector` + the four stationary theorems at unchanged
+statements (public API untouched); `PageRank`'s three theorems proved
+(compositions unchanged, trust boundaries de-staled);
+`DirectedMixing`'s "producing `π` needs that axiom" docstring lines
+de-staled. (3) **The QA**: orbit pins `g₁ = (2, 1/2, 1/2)`, `g₂ = 1`,
+the **oscillation fence** `g₁ ≠ g₂` (the engine's input sequence never
+converges — only its averages do), **the one-period Cesàro mean
+exactly stationary** with the value pin `μ₁ = 3•π₃`, power positivity
+at the pinned return arc `(P²) 1 1 = 1/2`, **the engine's output
+identified** against the hand value, **the min-ratio scalar `c = 1/4`
+pinned exactly**, and **reducible-input existence instantiated** (the
+existing fences double as the uniqueness/positivity-dropped
+refutations). Seven technique findings recorded in the proposal
+(headline: `rw` silently fails on higher-order-shaped lemmas —
+`Matrix.mul_apply`, `Finset.sum_apply`, `Pi.sub_apply` — that
+`simp only` matches freely).
+
+**Verification:** spike first (`wip/cesaro_spike.lean` — engine +
+downstream re-proofs + full QA + the axiom audit iterated to zero
+errors/zero warnings before any shelf edit); `lake env lean` zero
+errors/zero warnings on all touched modules; explicit `lake build`
+targets ✔; **the 37-declaration axiom audit above**; **full `lake
+build` ✔ immediately followed by `check_build_completeness.py` — 133
+source files, 133 fresh artifacts, 0 stale, 0 missing, exit 0**;
+`lint_axioms` exit 0 (4 current axioms, unchanged; only the
+allowlisted-confirmed PF finding); `check_refutation_independence`
+(9-tag clean — no tags touched); `check_public_reachability` clean (63
+repo modules); `check_citations` ("All axioms have proper
+citations!"); `check_markdown_links` clean; `check_backlog_freshness`
+clean; scoreboard regenerated (**3734/4/0**) with the verification row;
+map-freshness exit 0 after the 3712 → 3734 stats sync in both map
+files and SVG regeneration (no station — no tier change). Records
+updated: the proposal (COMPLETE + delivery record with technique
+findings), `proposals/README.md` (new Delivered row), README (3734 +
+the directed-axis bullet + both module-table rows), the radar (QA axis
+synced 3712 → 3734 held 4.0; axiom-minimization narrative extended,
+held 4.5), `index/map/spectral_graph.md` (the IrreducibleStationary and
+PageRank sections rewritten to hard-crust status + 10 new engine rows),
+`index/load_bearing_axioms.md` (PF's zero-consumer state change with
+the operator-decision flag), the coverage map's PF row, the backlog
+item-8 twelfth update, the scoreboard verification row, both map data
+tables + regenerated SVG, this plan, and the activity log. Nothing
+committed; the prior runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed (the
+PageRank/directed-mixing proofs are unchanged compositions of the
+re-proved layer). Honest scope: the *full* Perron–Frobenius statement
+(rootMultiplicity one, complex-charpoly domination) remains admitted
+and now zero-consumer; retiring it would be a genuine spectral-theory
+program (Frobenius normal form or a matrix spectral radius, neither in
+the pin), and this delivery claims nothing about it. The deprecation
+decision for the zero-consumer axiom is the operator's.
+
+**The directed uniform (worst-start) `t_mix` object — the family's
+last missing member, on a newly public matrix-level
+Dobrushin-coefficient engine**
+(`proposals/directed-uniform-mixing-time.md`, same-run proposal; run
+`20260902T110117Z-run-1`, session
+`ses_f9e3e9a44ffe4KnUjXii6DPDXw`). DELIVERED — zero new axioms (count
+stays 4; `#print axioms` via `wip/unifdtv_axcheck.lean` on all 56
+audited declarations — 25 shelf + 31 QA — every one exactly
+`propext, Classical.choice, Quot.sound`, pure hard crust). QA
+3683 → 3712 (+29, `DirectedMixing_QA.lean`'s Section H +
+`EmpiricalStationary_QA.lean`'s uniform capstone instance). Radar QA
+axis synced to 3712, score held at 4.0 per protocol (the
+field-standard packaging of the already-counted directed rate family
+into its worst-start object plus a reusable engine promotion, not a
+new theorem family); axis 5 held at 4.5 with the family-completion
+note.**
+
+The delivery's content: (1) **The genuinely new reusable engine** —
+`Mixing.lean`'s Dobrushin-coefficient section: `tvDobrushinCoeff Q :=
+max_{x,y} TV(Q_x, Q_y)` with the sharp contraction
+`tvDistance_vecMul_le_tvDobrushinCoeff` (`TV(μ ᵥ* Q, ν ᵥ* Q) ≤
+TV(μ,ν)·δ(Q)` at equal masses only — sign statistic → row-statistic
+pairing → oscillation `2δ(Q)` via the distinguishing-function bound)
+and `tvDobrushinCoeff_pow_add_le` (generic power submultiplicativity
+at row stochasticity), with the pairing core
+`abs_sum_mul_le_of_pairwise` promoted public from
+Oversmoothing-private (that module's own promotion note anticipated a
+second consumer; the private original deleted and Oversmoothing
+rebuilt clean against the promoted copy). (2) **The Google layer**
+(`DirectedMixing.lean`'s uniform-mixing-time section): LPW's `d(t)`
+(`pageRankTVPair`, law form, joined to the engine by
+`_eq_tvDobrushinCoeff`) and `d̄(t)` (`pageRankTVUniform`, given-`π`),
+the law evolution `pageRankDistribution_add`, the Google contraction
+instance, `d`-submultiplicativity, `d̄ ≤ d` **by the contraction at
+`(δ_x, π)` plus the simplex diameter** (no mixture identity, no TV
+convexity, no reversibility — hypothesis-lighter than the undirected
+twin's route), discrete TV monotonicity
+(`pageRankDistribution_tvDistance_anti`), the mixed form, the
+escalation engine, and **the object `pageRankMixingTime`** with its
+package (`_bddBelow`, `_le_of_cert`, `_spec`, the witness-load-bearing
+`pageRankMixingTimeFrom_le_pageRankMixingTime`, the sup interchange
+`_eq_sup_pageRankMixingTimeFrom`, the well-posedness supplier
+`exists_pageRankMixingTime_witness`, **the refined α-ceiling
+`t_mix(ε) ≤ ⌈log(d̄(0)/ε)/log(1/α)⌉`** plus its display form, and
+LPW's ε-escalation corollaries in both forms). (3) **The named
+consumer** (`EmpiricalStationary.lean`):
+`empiricalPageRank_uniform_tail_of_depth` — past *one*
+start-independent threshold, `n` simulated random-surfer trajectories
+estimate `π i` to `ε` at `2 exp(−nε²/2)` **for every start
+simultaneously** (the uniform `_spec` + the supplier + the delivered
+per-start capstone composed). (4) **The QA** on the periodic 2-cycle
+Google fixture: **the exact closed form `d(t) = (1/2)^t` with
+submultiplicativity attained with equality at every time**, **the
+matrix-level Dobrushin contraction attained exactly** at the basis
+pair (both sides `1/2` — the new engine's sharp constant
+load-bearing), `d̄ = d/2` pinned beside the domination instance, the
+mixed form attained at every time, **the uniform object
+`t_mix^unif(1/8) = 2` pinned in both directions** (both starts
+independently `2` via the sup interchange), **the refined α-ceiling
+attained exactly** (`⌈log 4/log 2⌉ = 2` = the object) with the display
+form's slack witnessed (`2 < 3`), **the escalation corollary attained
+exactly** (`t_mix(1/32) = 4 = (1+1)·2` at the fixture's own pinned
+certificate constants `d̄(2) = 1/8`, `d(2) = 1/4`), the `ε = 0` junk
+corner fenced, and the capstone instance at `2 exp(−1/32)`
+instantiated at the start whose per-start pin the uniform certificate
+subsumes. Seven technique findings recorded in the proposal (headline:
+`rw` cannot act inside an un-beta-reduced `sup'` goal — open with
+`show`; higher-order unification against a bare vector fails with only
+a misleading "failed to synthesize Nonempty V" — pass `μ ν`
+explicitly; `omit … in` must precede the docstring; `rw` of a numeric
+closed form can close the goal by `rfl`, erroring later tactics).
+
+**Verification:** spike first (`wip/unifdtv_spike.lean` — shelf +
+full QA + the axiom audit iterated to zero errors/zero warnings before
+any shelf edit); `lake env lean` zero errors/zero warnings on all five
+touched modules (`Mixing.lean`, `Oversmoothing.lean` after the
+promotion, `DirectedMixing.lean`, `EmpiricalStationary.lean`, both QA
+modules); explicit `lake build` targets ✔; **`#print axioms` via
+`wip/unifdtv_axcheck.lean` on 56 audited declarations (25 shelf + 31
+QA): every one exactly `propext, Classical.choice, Quot.sound`**;
+**full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 133 source files, 133 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+current axioms, unchanged; only the allowlisted-confirmed PF finding);
+`check_refutation_independence` (9-tag clean — no tags added, nothing
+touches an axiom); `check_public_reachability` clean (63 repo
+modules); `check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; `check_backlog_freshness` clean;
+scoreboard regenerated (**3712/4/0**) with the verification row; **map
+freshness exit 0** after the 3683 → 3712 stats sync in both map files
+and SVG regeneration (no station — no tier change). Records updated:
+the proposal (COMPLETE from birth, with the statement design, corner
+analysis, and technique findings), `proposals/README.md` (new
+Delivered row), README (3712 + the walks-and-mixing row's engine
+extension + the directed-mixing row's uniform-object extension), the
+radar (QA axis synced 3683 → 3712 held 4.0; axis 5's narrative
+extended with the family-completion note, held 4.5),
+`index/map/spectral_graph.md` (four new DirectedMixing rows + the
+Dobrushin-engine note + the QA-module count de-staled 103 → 132),
+`index/map/probability_concentration.md` (the worst-start capstone
+row), the backlog item-8 eleventh update, the scoreboard verification
+row, both map data tables + regenerated SVG, this plan, and the
+activity log. Nothing committed; the prior runs' uncommitted
+deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed (the
+Oversmoothing edit only *deletes* a private lemma whose public twin
+now lives in `Mixing.lean`, verified by that module rebuilding clean).
+Honest scope: the α-ceiling is the Doeblin bound — the refined uniform
+form is tight on the fixture, but no sharpness *theorem* for general
+primitive chains is delivered; the sharp `|λ₂| = α` layer stays
+consumer-gated, now the directed-rate program's only remaining item.
+The undirected `walkTVPair` family is not refactored onto the new
+engine (a priced follow-on needing a named consumer).
+
+**The directed (PageRank) `t_mix` object and its empirical sampling
+capstone** (`proposals/directed-mixing-time-object.md`, same-run
+proposal; run `20260902T085334Z-run-1`, session
+`ses_f9eb22f83ffeDSq0pMZtCO5W5H`). DELIVERED — zero new axioms (count
+stays 4; `#print axioms` via `wip/dtaxcheck.lean` on all 34 audited
+declarations — 15 shelf + 19 QA — every one exactly
+`propext, Classical.choice, Quot.sound`, pure hard crust). QA
+3668 → 3683 (+15, `DirectedMixing_QA.lean`'s Section G +
+`EmpiricalStationary_QA.lean`'s capstone section). Radar QA axis
+synced to 3683, score held at 4.0 per protocol (the field-standard
+packaging of the already-counted directed rate family into its
+`t_mix` object plus the sampling capstone's twins and exact/fence
+pins, not a new theorem family).**
+
+The delivery's content: (1) **The standing handoff's named frontier** —
+the `t_mix` object family's missing directed sibling, with its
+consumer gate discharged by naming the empirical PageRank capstone
+(the repo's name-the-consumer idiom): on directed input the entire
+symmetric `evals`/`eigvecOf` mixing toolkit is unavailable, so the
+α-rate Doeblin certificate is the only mixing route the sampling
+program can consume there. Two of the three consumer-gated
+directed-rate items landed as one package whose halves discharge each
+other's gates. (2) **The shelf**: `Mixing.lean`'s equal-mass entrywise
+TV extraction **`abs_sub_le_tvDistance`** (`|μ i − ν i| ≤ TV` by the
+zero-mass triangle route — the complement's deviation mass is exactly
+`−d i` — the constant sharp; the directed bias term's engine, since
+the directed program bounds TV, not χ²); `DirectedMixing.lean`'s
+directed-mixing-time section — the per-start Google-walk law
+`pageRankDistribution` (probability-certified through the power
+plumbing), **the depth form `pageRank_tvDistance_le_of_depth`** (at a
+private twin of the Oversmoothing calculus bridge, import-minimal),
+and **the object `pageRankMixingTimeFrom`** with `_bddBelow`,
+`_le_of_cert`, **`_spec`** (the well-ordered attainment — `csInf_mem`),
+**`_le_of_rate`** (the α-ceiling `t_mix(ε) ≤
+⌈log(TV(δ_x,π)/ε)/log(1/α)⌉`), `_anti`; `EmpiricalStationary.lean`'s
+`PageRankLimit` section — `empiricalPageRank_tail`,
+`empiricalPageRank_stationary_tail` (the bias-term form at the quoted
+bias `α^{t₀}·TV(δ_x,π)`), and **the capstone
+`empiricalPageRank_stationary_tail_of_depth`** — `n` simulated
+random-surfer trajectories estimate `π i` to `ε` at
+`2 exp(−nε²/2)` past the object's own threshold at `ε/2`, the
+hypothesis being the object's attainment condition discharged through
+`_spec` (the same loop the Poisson bridge closed for the discrete
+object). (3) **The QA** on the Section-F Google fixture: **the object
+`t_mix(1/8) = 2` pinned in both directions** (witness from the exact
+closed form `TV_t = (1/2)^{t+1}`; the lower bound from attainment —
+no time `≤ 1` is a witness since `TV_1 = 1/4 > 1/8`), **the α-ceiling
+attained exactly** (`⌈log 4/log 2⌉ = ⌈2⌉ = 2` = the object, through
+`Real.log_pow`), **the depth form attained with equality at the
+threshold time** (`TV_2 = 1/8`), the **entrywise extraction attained**
+(both sides `1/4` — the constant sharp, a factor-`2` statement would
+read `1/4 ≤ 1/2`), the junk corner fenced at `ε = 0`, and the
+bias/capstone instances at `2 exp(−1/8)` / `2 exp(−1/32)` past the
+pinned threshold. Nine technique findings recorded in the proposal
+(headline: `refine le_trans (measure_mono ?_) ?_` with a
+later-determined middle dies in a deterministic `isDefEq` timeout —
+elaborate the tail theorem as a standalone `have` first, the
+delivered QA's own idiom; missing scoped notation (`ᵥ*` without
+`open scoped Matrix`) reports "expected token" at a misleading column;
+`Pi.single` needs its value argument; and the `unusedSectionVars`
+linter's suggestions during a partially-broken elaboration are
+unreliable — fix errors first).
+
+**Verification:** spike first (`wip/dtspike.lean` — shelf + full QA
++ the axiom audit iterated to zero errors/zero warnings before any
+shelf edit); `lake env lean` zero errors/zero warnings on all five
+touched modules; explicit `lake build` targets ✔; **`#print axioms`
+via `wip/dtaxcheck.lean` on 34 audited declarations (15 shelf + 19
+QA): every one exactly `propext, Classical.choice, Quot.sound`**;
+**full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 133 source files, 133 fresh
+artifacts, 0 stale, 0 missing, exit 0** (the Derived-imports-shelf
+stale-olen boundary met once and remediated per the completeness
+script's docstring); `lint_axioms` exit 0 (4 current axioms,
+unchanged; only the allowlisted-confirmed PF finding);
+`check_refutation_independence` (9-tag clean — no tags added, nothing
+touches an axiom); `check_public_reachability` clean (63 repo
+modules); `check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; `check_backlog_freshness` clean;
+scoreboard regenerated (**3683/4/0**) with the verification row;
+**map-freshness exit 0** after the 3668 → 3683 stats sync in both map
+files and SVG regeneration (no station — no tier change). Records
+updated: the proposal (COMPLETE from birth, with the statement-design
+and corner analysis and the technique findings), `proposals/README.md`
+(new Delivered row), README (3683 + the walks-and-mixing row's
+entrywise-extraction extension + the directed-mixing row's object
+mention), the radar (QA axis synced 3668 → 3683, held 4.0),
+`index/map/spectral_graph.md` (the new DirectedMixing rows + the
+Mixing TV-toolkit row + the QA-module count de-staled),
+`index/map/probability_concentration.md` (the three PageRank capstone
+rows), the coverage map's PF/nonnegative-matrix row, the backlog
+item-8 tenth update, the scoreboard verification row, both map data
+tables + regenerated SVG, this plan, and the activity log. Nothing
+committed; the prior runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed.
+Honest scope: the α-ceiling is the Doeblin bound — attained exactly on
+the Google fixture (and spectrally sharp there by
+Haveliwala–Kamvar), but no sharpness *theorem* for general chains is
+delivered; the directed uniform (worst-start) twin and the sharp
+`|λ₂| = α` layer stay consumer-gated exactly as before.
+
+------
+
+------
+
+## Delivered milestones (most recent first)
+
+**The Doeblin TV contraction and the PageRank `α^t` rate**
+(`proposals/doeblintv-tv-contraction-pagerank-rate.md`, same-run
+proposal; run `20260902T071252Z-run-1`, session
+`ses_f9f10ddd4ffezAgpRkIbHhMHoF`). DELIVERED — zero new axioms
+(count stays 4; `#print axioms` via `wip/doeblintv_axcheck.lean` on
+all 38 audited declarations — 7 shelf + 31 QA — every one exactly
+`propext, Classical.choice, Quot.sound`, pure hard crust). QA
+3637 → 3668 (+31, `DirectedMixing_QA.lean`'s Section F). Radar QA
+axis synced to 3668, score held at 4.0 per protocol (the Doeblin
+engine's second consumer plus mechanism witnesses and exact/fence
+pins of an already-counted family, not a new theorem family).**
+
+The delivery's content: (1) **The standing handoff's first-named
+frontier** — `entryRange_mulVec_le_of_pos_entries` had exactly one
+consumer since the retirement; the TV contraction consumes it on a
+*different mathematical surface* (TV between laws, not coordinate
+convergence), through the dual/test-function pairing
+`z ⬝ᵥ s = w ⬝ᵥ (Q *ᵥ s)` at the sign statistic `s` plus the
+zero-sum interval-pinning lemma
+(`abs_dotProduct_le_half_entryRange_mul_sum_abs`) — so a wrong engine
+constant now fails a second family of QA attainment pins. (2) **The
+shelf** (`Mixing.lean`'s new Doeblin TV-contraction section — the
+mixing program's TV toolkit's first directed-axis member): mass
+preservation, the pinning lemma, row-action TV non-expansiveness,
+**`tvDistance_vecMul_le_of_pos_entries`** — `TV(μ ᵥ* Q, ν ᵥ* Q) ≤
+(1 − |V|δ)·TV(μ, ν)` at equal masses, hypothesis-minimal (sign-free
+on both vectors) — the iterated form, and the assembly
+`tvDistance_vecMul_pow_le_of_pos_power` (sign-free on `ν`, `π`
+through stationarity and mass alone; uniqueness of the stationary
+vector deliberately not needed). (3) **The named consumer**
+(`DirectedMixing.lean`): **`pageRank_tvDistance_le`** — `TV(ν ᵥ*
+(G^t), π) ≤ α^t·TV(ν, π)`, the field-standard PageRank power-method
+rate, the teleportation floor read as a Doeblin floor of coefficient
+exactly `α` — the directed layer's recorded "no rate" scope gap
+discharged at the coarse level, with the module's scope-honesty
+section updated honestly (the sharp `|λ₂|` layer stays gated). (4)
+**The QA**: the contraction attained exactly at the `Qd` basis pair
+(`1/2 = (1 − 2·(1/4))·1`), the iterated bound attained at every time
+through the mode closed form `e₀ ᵥ* Qd^t = ud + (1/2)^{t+1}•yd`, the
+**floor-free refutation fence** on the permutation `P₂` (exactly
+`hle` isolated), and the **Google rate attained exactly at every
+time on the periodic 2-cycle** (the alternating mode factor
+`−α = −1/2`; truth `(1/2)^{t+1}` = bound at every `t`), with the
+plain walk's **never-decay contrast** `TV ≡ 1/2` beside it — the
+periodicity fix in one picture, joining Section B's `P2_no_limit` at
+the TV level. Nine technique findings recorded in the proposal
+(headline: `Matrix.vecMul_add` is the *matrix*-addition lemma, the
+vector one is `add_vecMul`; `norm_num` does not evaluate `|·|` of
+numerals — the robust idiom rewrites the inner value first and
+applies `abs_of_nonneg`/`abs_neg` explicitly; matrix `pow` in a
+statement blocks `omit [DecidableEq V]`; and implicit
+conclusion-only function arguments must be passed by name).
+
+**Verification:** spike first (`wip/doeblintv_spike.lean` — all shelf
+declarations, the full QA section, and the axiom audit iterated to
+zero errors/zero warnings before any shelf edit); `lake env lean`
+zero errors/zero warnings on all three touched modules; explicit
+`lake build` targets ✔ on all three; **`#print axioms` via
+`wip/doeblintv_axcheck.lean` on 38 audited declarations (7 shelf +
+31 QA): every one exactly `propext, Classical.choice, Quot.sound`**;
+**full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 133 source files, 133 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+current axioms, unchanged; only the allowlisted-confirmed PF
+finding); `check_refutation_independence` (9-tag clean — no tags
+added, nothing touches an axiom); `check_public_reachability` clean
+(63 repo modules); `check_citations` ("All axioms have proper
+citations!"); `check_markdown_links` clean; `check_backlog_freshness`
+clean; scoreboard regenerated (**3668/4/0**) with the verification
+row; **map-freshness exit 0** after the 3637 → 3668 stats sync in
+both map files and SVG regeneration (no station — no tier change).
+Records updated: the proposal (COMPLETE from birth, with the
+statement-design/corner analysis and the technique findings),
+`proposals/README.md` (new Delivered row), README (3668 + the
+walks-and-mixing row's Doeblin-TV extension + the directed-mixing
+row's rate mention), the radar (QA axis synced 3637 → 3668, held
+4.0), `index/map/spectral_graph.md` (six new Mixing-section rows +
+the DirectedMixing row + the section paragraph + the QA-module count
+de-staled), the coverage map's PF/nonnegative-matrix row, the
+backlog item-8 ninth update, the scoreboard verification row, both
+map data tables + regenerated SVG, this plan, and the activity log.
+Nothing committed; the prior runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed.
+Honest scope: `α^t` is the Doeblin bound — coarse for general
+primitive chains (attained on the Google fixture, and spectrally
+sharp there by Haveliwala–Kamvar, but no sharpness *theorem* for
+general chains is delivered — that remains the gated sharp layer
+with the ⌈log⌉ depth form and a directed `t_mix` object).
+
+------
+
+## Delivered milestones (most recent first)
+
+**The retirement of `primitive_power_tendsto` — the Doeblin/Dobrushin
+contraction route** (`proposals/retire-primitive-power-convergence.md`,
+same-run proposal; run `20260902T052318Z-run-1`, session
+`ses_f9f72cfc9ffeqGbyE8xuzCFttV`). DELIVERED — one of the five
+admitted axioms proved at its **unchanged statement** and retired
+(axiom count 5 → 4; `lint_axioms` now naming four:
+`perron_frobenius` + the matrix trio; `#print axioms` via
+`wip/primpow_axcheck.lean` on all 41 audited declarations — 17
+engine + the retired theorem + 7 formerly-conditional consumers +
+16 QA — every one exactly `propext, Classical.choice, Quot.sound`:
+the entire directed mixing layer (the PageRank power iteration, both
+generic corollaries, the three Google-matrix forms) now has zero
+admitted-axiom contact). QA 3618 → 3637 (+19,
+`DirectedMixing_QA.lean`'s Section E). Radar axiom-minimization and
+QA axes synced, scores held per protocol.**
+
+The delivery's content: (1) **The priced route the admission's own
+"Replacement path" note had missed** — no Perron–Frobenius machinery:
+a primitive matrix has a strictly positive power `Q = P^m` with every
+entry `≥ δ > 0`; splitting each row as `δ` (uniform part, shifts all
+entries equally) plus a remainder of row mass `1 − |V|δ` puts every
+entry of `Q *ᵥ y` in one common interval, so the entrywise range
+contracts — `range (Q *ᵥ y) ≤ (1 − |V|δ)·range y`, the classical
+Doeblin/Dobrushin coefficient bound, landed as a **public reusable
+engine** (`entrySup`/`entryInf`/`entryRange` +
+`entryRange_mulVec_le_of_pos_entries` — the same Dobrushin mechanism
+as the undirected uniform-`t_mix` submultiplicativity family).
+(2) **The assembly** — block iteration `range ≤ ρ^(t/m)·range` with
+stochastic non-expansiveness on the `t mod m` remainder, the
+invariant π-pairing (`π ⬝ᵥ (P^t *ᵥ x) = π ⬝ᵥ x`), and
+convex-combination interval pinning (both the entry and the limit
+coefficient lie in the vanishing range) — a direct ε–N proof.
+(3) **The QA** on the strictly positive fixture `Qd` (min entry `1/4`,
+coefficient `1/2`): the contraction **attained exactly**
+(`1 = (1−2·(1/4))·2`), the iterated contraction attained at every
+time via the exact closed form `Qd^t *ᵥ yd = (1/2)^t • yd`, the
+theorem instance joined to the raw closed form at the zero limit, and
+the **wrong-δ refutation fence** (pretend `δ = 1/2` claims zero range
+after one step — refuted at pinned values, the entries-bound
+hypothesis exactly what fails, `Qd 0 1 = 1/4 < 1/2` proved). (4)
+**Bookkeeping** — the retired axiom's `-- @refutes` tag removed (9
+tags remain), the `lint_axioms.py` allowlist entry removed, and the
+conditional-status docstrings de-staled across `DirectedMixing.lean`
+and its QA. Honest scope: the statement still carries no rate clause;
+the proof's `ρ^(t/m)` byproduct is the Doeblin bound — explicit but
+typically loose; the sharp `|λ₂|`-type rate layer stays gated exactly
+as before.
+
+**Verification:** spike first (`wip/primpow_spike.lean` — engine +
+the retired statement under a primed name + the full QA + the audit,
+iterated to zero errors/zero warnings before any shelf edit);
+`lake env lean` zero errors/zero warnings on all three touched
+modules (the QA-imports-shelf stale-olen boundary met once,
+remediated per the completeness script's docstring); explicit `lake
+build` targets ✔ on all three; **full `lake build` ✔ immediately
+followed by `check_build_completeness.py` — 133 source files, 133
+fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0
+(**4 current axioms**, only the allowlisted-confirmed PF finding);
+`check_refutation_independence` (9-tag clean — the tenth tag was this
+axiom's, removed with the retirement); `check_public_reachability`
+clean (63 repo modules); `check_citations` ("All axioms have proper
+citations!"); `check_markdown_links` clean; `check_backlog_freshness`
+clean; scoreboard regenerated (**3637/4/0**) with the verification
+row; **map-freshness exit 0** after the 3618 → 3637 / 5 → 4 stats
+sync in both map files and SVG regeneration (no station — no tier
+change). Records updated: the proposal (COMPLETE from birth), the
+`proposals/README.md` Delivered row, both index maps
+(`linear_algebra.md`'s axiom row → proved + the engine rows +
+consumers; `spectral_graph.md`'s DirectedMixing section), the
+Horn–Johnson source index (axiom → proved 2026-09-02),
+`index/load_bearing_axioms.md` (the HIGH list at four), README
+(4/3637 + the two module-table rows), the radar (axiom-minimization
+4 explicit + the QA axis 3637, scores held), the coverage map's
+PF/nonnegative-matrix row, the backlog's item-8 eighth update, the
+scoreboard verification row, both map data tables + regenerated SVG,
+this plan, and the activity log. Nothing committed; the prior runs'
+uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — the retired statement
+is genuinely proved (no residual axiom contact, verified on 41
+declarations), and no existing public statement changed. The `P₂`
+periodicity fence stays live against the proved theorem's hypothesis
+set. The sharp-rate follow-on stays consumer-gated.
+
+## Delivered milestones (most recent first)
+
+**The cycle family and the asymptotic Alon–Boppana corollary**
+(`proposals/cycle-family-alon-boppana-asymptotic.md`, same-run
+proposal; run `20260902T021120Z-run-1`, session
+`ses_fa02a5eaaffemYEa5nqMLuq94z`; Lean complete and verified, records
+closed by the commit steward per the activity log's operator closing
+note of 2026-09-02, commit `246659b`). DELIVERED — zero new axioms
+(count stays 5; `#print axioms` on all 23 nameable new declarations —
+17 shelf + 6 QA — exactly `propext, Classical.choice, Quot.sound`).
+QA 3612 → 3618 (`AlonBoppana_QA.lean`'s Step 7). The delivery: the
+**exact cycle distance formula**
+`dist a b = min ((b−a).val) (n − (b−a).val)` (walk route up +
+ℤ-potential route down in `Int.ModEq` form), the tree-ball level
+classes at arbitrary scale with the honest strict threshold
+`2(k+1) < n`, the far-apart condition, **`alonBoppana_cycle`**
+(`secondEval (2•1 − C_{4k+8}) ≤ 1/(k+1)`) and the asymptotic corollary
+**`alonBoppana_cycle_asymptotic`** (`∀ ε > 0, ∃ 2-regular A with
+λ₂ ≤ ε`) — the program's first parametric (arbitrary-`n`)
+instantiation, carried by Mathlib's `SimpleGraph.cycleGraph` through
+the delivered `toWAdj` adapter. QA pinned at `C₁₂` (four distance
+shapes, the level class, theorem instances, the far-apart fence). Full
+verification ladder per the proposal's delivery record; the scoreboard
+and map stamps at 3618/5/0. **Remaining risk:** none owed — pure hard
+crust; the exact `C_n` spectrum pins stay consumer-gated follow-ons.
+
+------
 
 ------
 

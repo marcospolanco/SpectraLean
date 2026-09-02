@@ -103,21 +103,7 @@ ALLOWLIST = {
             'conclusion pinned to the hand Perron data 1)'
         ),
     },
-    'primitive_power_tendsto': {
-        'index-type-guard': (
-            'Lean-confirmed 2026-08-28 (proposals/'
-            'audit-perron-frobenius-family-degenerate-corner.md): at '
-            'Fintype.card V = 0 the hypothesis hπsum : ∑ i, π i = 1 is '
-            'UNSATISFIABLE — the empty sum is 0 — proved unconditionally '
-            'as Scaffold.QA.SpectralGraph.mass_one_unsat_card_zero_QA '
-            '(standard three axioms only). The axiom has no instantiation '
-            'at the degenerate dimension: safe by unsatisfiability, no '
-            'guard needed. The card V = 1 corner was also audited '
-            '(P1_singleton_axiom_QA / P1_singleton_hand_QA: every '
-            'hypothesis satisfiable, the limit hand-provable as the '
-            'constant sequence)'
-        ),
-    },
+
 }
 
 # Finding kinds and the guard families each recognizes.

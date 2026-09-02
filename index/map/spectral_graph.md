@@ -737,6 +737,13 @@ Parseval-exact); the plain Euclidean distance is a corollary bridge.
 | `tvDistance_le_half_sqrt` | **the ℓ² → TV conversion:** for a positive weight `w` of total mass one and *any* vector `ν` (sign-free), `TV ≤ (1/2)·√(∑ (ν − w)²/w)` — the classical Cauchy–Schwarz step at its sharp constant (attained exactly on `K₂`), mass-one hypothesis load-bearing (fenced in QA) |
 | `walkDistribution_tvDistance_le` | the unconditional walk-level shadow: `TV(ν_t x, π) ≤ (1/2)·√χ²(t, x)` for every walk — no connectivity, no rate |
 | `walkDistribution_tvDistance_le_of_connected` | **the rate form:** `TV(ν_t x, π) ≤ (1/2)·√(r^{2t} · ((π x)⁻¹ − 1))` at exactly the χ² theorem's hypothesis set — the closing mixing bound restated in the field-standard distance |
+| `sum_vecMul_eq_of_row_sum` | **mass preservation** under a row-stochastic row action (the Doeblin TV section, 2026-09-02, `proposals/doeblintv-tv-contraction-pagerank-rate.md`) |
+| `abs_dotProduct_le_half_entryRange_mul_sum_abs` | **zero-sum interval pinning:** a zero-mass functional pairs with any function to at most half its entrywise range times the `ℓ¹` mass — the dual step behind the Doeblin TV contraction |
+| `tvDistance_vecMul_le` | **row-action TV non-expansiveness** at the generic-matrix level — the adjoint-walk `mulVec` contraction's row-action twin |
+| `tvDistance_vecMul_le_of_pos_entries` | **the Doeblin TV contraction:** `TV(μ ᵥ* Q, ν ᵥ* Q) ≤ (1 − \|V\|δ)·TV(μ, ν)` for row-stochastic `Q` with entries `≥ δ` at equal masses — hypothesis-minimal (sign-free on both vectors), the entrywise-range engine's second consumer through the dual/test-function pairing `z ⬝ᵥ s = w ⬝ᵥ (Q *ᵥ s)`; the directed axis' first TV statement |
+| `tvDistance_vecMul_pow_le_of_pos_entries` | the block-iterated contraction at `(1 − \|V\|δ)^q` |
+| `tvDistance_vecMul_pow_le_of_pos_power` | **the Doeblin mixing bound:** with `P^m` entrywise `≥ δ`, `TV(ν ᵥ* P^t, π) ≤ (1 − \|V\|δ)^(t/m)·TV(ν, π)` for any mass-one start against any mass-one stationary `π` — the rate clause the retired convergence theorem did not carry, at its proof's own byproduct rate |
+| `abs_sub_le_tvDistance` | **the equal-mass entrywise TV extraction** (2026-09-02, `proposals/directed-mixing-time-object.md`): `\|μ i − ν i\| ≤ TV(μ, ν)` at equal masses, by the zero-mass triangle route (the complement's deviation mass is exactly `−d i`); the constant sharp — the directed bias term's engine, since the directed program bounds TV, not χ² |
 | `tvDistance_le_sqrt_half_klDiv` | **Pinsker's inequality (2026-09-01, `proposals/entropy-mixing-pinsker.md`):** `tvDistance p q ≤ √(klDiv p q / 2)` for a probability vector against a strictly positive one — TV-as-positive-part at `S = {q < p}` (`TV = a − b`), the two-block decomposition of `klDiv` through the two-block log-sum, and the binary two-point bound; the strict q-positivity load-bearing (refuted at the q-zero junk corner in QA) |
 | `walkDensity_nonneg` / `contWalkDensity_nonneg` / `contWalkDistribution_nonneg` / `sum_contWalkDistribution` | the entropy leg's nonnegativity plumbing: the discrete density's entrywise nonnegativity; the continuous density's by the Poissonization identity + `tsum_nonneg` (the identity's first nonnegativity consumer); the continuous law's; and the continuous law's mass conservation packaged |
 | `klDiv_walkDistribution_le` | **entropy decay, discrete:** `D(ν_t ‖ π) ≤ r^{2t}·((πx)⁻¹ − 1)` at exactly `chiSquareDistance_le_of_connected`'s hypothesis set — the entropy–χ² bridge composed with the delivered χ² theorem |
@@ -874,33 +881,43 @@ refutes PSD-ness of the new operator (the calibration boundary).
 
 The first *theorem* consumer of the admitted `perron_frobenius` axiom
 (delivered 2026-08-24, `proposals/irreducible-stationary-distributions.md`,
-Steps 0+1 in one run). The five stationary-distribution theorems are
-**conditional on that axiom** — Lean-checked deductions whose trust
-cost is the axiom's, never to be described as foundationally proved;
-the two transfer lemmas are unconditional. The derivation consumes the
-axiom's eigenvalue-identification clause (any nonnegative eigenvector's
-eigenvalue is the Perron root — pinning the walk's root to `1` through
-the shelf's row-stochasticity at `onesVec`) and its uniqueness clause
-structurally, with the transposed application's root pinned by the
-bilinear pairing through the pin's `Matrix.dotProduct_mulVec`/
-`Matrix.mulVec_transpose` — no charpoly, rootMultiplicity, or complex
-domination anywhere. QA at
-`Scaffold/QA/SpectralGraph/IrreducibleStationary_QA.lean` (94
+Steps 0+1 in one run). **Hard crust since 2026-09-02**
+(`proposals/cesaro-stationary-existence.md`): the five
+stationary-distribution theorems were re-proved without the axiom by
+the elementary Cesàro route — power positivity from strong
+connectivity, existence by Krylov–Bogoliubov averaging of the orbit of
+`1` over the compact simplex (Tychonoff + subsequential cluster point,
+the telescoping action-defect `t⁻¹(1 − 1 ᵥ* P^t)` vanishing
+entrywise), strict positivity, and min-ratio uniqueness-up-to-scale —
+`#print axioms` exactly the standard three across the whole layer.
+The two transfer lemmas were always unconditional. QA at
+`Scaffold/QA/SpectralGraph/IrreducibleStationary_QA.lean` (116
 declarations: the asymmetric directed star with the hand value
 identified through the `∃!`, the symmetric-cone `K₂` agreement with
-`stationaryVec` through the shelf's detailed-balance chain, and the
+`stationaryVec` through the shelf's detailed-balance chain, the
 reducibility fence refuting the hypothesis-free `∃!` and
-scale-uniqueness conclusions).
+scale-uniqueness conclusions, and the Section E engine-mechanism pins —
+orbit/oscillation values, the one-period Cesàro mean exactly
+stationary, power-positivity instances, the engine output identified,
+the min-ratio scalar, reducible-input existence).
 
 | Declaration | Content |
 |-------------|---------|
 | `isIrreducible_transpose` | strong connectivity is arc-reversal invariant: `M.IsIrreducible → Mᵀ.IsIrreducible` (unconditional; the private `ReflTransGen` flip induction behind it) |
 | `walkTransitionMatrix_isIrreducible` | positive row scaling preserves the support digraph: `A.IsIrreducible` + positive out-degrees → the walk matrix irreducible (unconditional; the private `ReflTransGen` congruence — the pin has `mono` for `ReflGen` only) |
-| `exists_walkPerronVector` | **the transposed Perron engine** (conditional): a strictly positive vector fixed by `Pᵀ *ᵥ ·`, unique up to positive scalars among nonzero nonnegative fixed vectors — the Perron vector of `Pᵀ` with the root computed to be `1` |
-| `exists_stationaryVec_of_irreducible` | **existence with full support** (conditional): a strictly positive, mass-one stationary distribution `π ᵥ* P = π` for every irreducible nonnegative walk — the directed-axis statement the undirected shelf cannot reach |
-| `stationaryVec_smul_of_irreducible` | **uniqueness up to positive scale** (conditional) among all nonzero nonnegative stationary vectors, the scale-free form |
-| `existsUnique_stationaryVec_of_irreducible` | **the textbook `∃!`** (conditional): exactly one nonnegative mass-one vector fixed by the walk, positivity derived rather than hypothesized |
-| `stationaryVec_pos_of_irreducible` | **full support** (conditional): every nonzero nonnegative stationary vector is strictly positive — no stationary distribution of an irreducible chain can vanish anywhere |
+| `vecMul_mul` | vector-matrix-matrix associativity in `vecMul` form — the `ᵥ*`-shaped associate of `Matrix.mulVec_mulVec`, absent from the pinned Mathlib (new 2026-09-02) |
+| `vecMul_entry` | the entry form of the row action (new 2026-09-02) |
+| `sum_vecMul_eq_of_row_sum` | mass preservation under a row-stochastic action (new 2026-09-02) |
+| `vecMul_sum` | the row action commutes with finite sums of vectors (new 2026-09-02) |
+| `pow_row_sum` / `pow_entry_nonneg` / `pow_entry_le_one` | powers of a nonnegative row-stochastic matrix keep row sums `1` and entries in `[0, 1]` (new 2026-09-02) |
+| `exists_pow_pos_of_isIrreducible` | **power positivity**: for a nonnegative irreducible matrix every index pair is joined by a power with a strictly positive entry — the `ReflTransGen` induction along the arcs (new 2026-09-02) |
+| `exists_cluster_stationary_of_orbit` | **the Krylov–Bogoliubov cluster lemma** (finite form): for any action and any nonnegative fixed-mass orbit, some cluster point of the Cesàro means is stationary of the same mass — compactness + the telescoping defect `t⁻¹(g 0 − g t) → 0` (new 2026-09-02) |
+| `exists_nonneg_stationary_of_row_stochastic` | **existence for any nonnegative row-stochastic matrix** — no irreducibility: the Cesàro means of the orbit of `1` supply the stationary vector (mass `\|V\|`) (new 2026-09-02) |
+| `exists_walkPerronVector` | **the transposed stationary engine** (hard crust since 2026-09-02): a strictly positive vector fixed by `Pᵀ *ᵥ ·`, unique up to positive scalars among nonzero nonnegative fixed vectors |
+| `exists_stationaryVec_of_irreducible` | **existence with full support** (hard crust since 2026-09-02): a strictly positive, mass-one stationary distribution `π ᵥ* P = π` for every irreducible nonnegative walk — the directed-axis statement the undirected shelf cannot reach |
+| `stationaryVec_smul_of_irreducible` | **uniqueness up to positive scale** (hard crust since 2026-09-02) among all nonzero nonnegative stationary vectors, the scale-free form |
+| `existsUnique_stationaryVec_of_irreducible` | **the textbook `∃!`** (hard crust since 2026-09-02): exactly one nonnegative mass-one vector fixed by the walk, positivity derived rather than hypothesized |
+| `stationaryVec_pos_of_irreducible` | **full support** (hard crust since 2026-09-02): every nonzero nonnegative stationary vector is strictly positive — no stationary distribution of an irreducible chain can vanish anywhere |
 
 ### `Scaffold.Mathlib.GraphTheory.PageRank` (the teleportation-regularized walk — the second Perron–Frobenius consumer)
 
@@ -912,10 +929,10 @@ entry positive on the damping window `[0, 1)`, so irreducibility is
 `IrreducibleStationary` layer composes at `G` through the general
 row-stochasticity bridge — extending the stationary theory to
 **reducible** input with no irreducibility hypothesis in any
-statement. The three PageRank theorems are **conditional on the
-`perron_frobenius` axiom** (no new axiom contact — the composition
-consumes the delivered layer); the nine structural declarations are
-unconditional. QA at
+statement. The three PageRank theorems are **hard crust since
+2026-09-02** (the `IrreducibleStationary` layer they compose was
+re-proved that day, `proposals/cesaro-stationary-existence.md`); the
+nine structural declarations are unconditional. QA at
 `Scaffold/QA/SpectralGraph/PageRank_QA.lean` (89 declarations by the
 generator metric: the reducible two-edge fixture's uniform PageRank
 verified completely raw with the `∃!` join, the asymmetric star's
@@ -935,9 +952,9 @@ row stochasticity pinned intact at both).
 | `googleMatrix_deg_eq_one` | all degrees one — the consumer layer's positive-degree hypothesis discharged unconditionally |
 | `googleMatrix_isIrreducible` | **irreducibility derived, not assumed**: every pair one positive arc apart through the floor, `ReflTransGen.single` per pair — reducible input included (unconditional) |
 | `walkTransitionMatrix_eq_of_row_sum_one` | **the general bridge**: any row-stochastic matrix is its own walk transition matrix — the composition point for any row-stochastic consumer, the Google matrix the first (unconditional) |
-| `exists_pageRankVec` | **existence** (conditional on `perron_frobenius`): a strictly positive, mass-one `π ᵥ* G = π` for every nonnegative positive-degree network — reducible or not |
-| `existsUnique_pageRankVec` | **the `∃!`** (conditional): exactly one nonnegative stationary distribution of the Google walk, **no irreducibility hypothesis on the input** — the statement the raw walk cannot support on reducible input |
-| `pageRankVec_pos` | **full support** (conditional): every nonzero nonnegative vector fixed by `G` is strictly positive — even a vertex with no inbound walk arcs receives teleportation mass |
+| `exists_pageRankVec` | **existence** (hard crust since 2026-09-02): a strictly positive, mass-one `π ᵥ* G = π` for every nonnegative positive-degree network — reducible or not |
+| `existsUnique_pageRankVec` | **the `∃!`** (hard crust since 2026-09-02): exactly one nonnegative stationary distribution of the Google walk, **no irreducibility hypothesis on the input** — the statement the raw walk cannot support on reducible input |
+| `pageRankVec_pos` | **full support** (hard crust since 2026-09-02): every nonzero nonnegative vector fixed by `G` is strictly positive — even a vertex with no inbound walk arcs receives teleportation mass |
 
 ### `Scaffold.Mathlib.GraphTheory.DirectedMixing` (the PageRank power iteration — the first primitive-power-convergence consumer)
 
@@ -952,11 +969,15 @@ convergence level: the teleportation floor makes the Google matrix
 strictly positive hence **primitive at `k = 1`** (aperiodicity
 derived, never assumed), so the power iteration converges and the
 PageRank distribution is *computable*. The three convergence theorems
-are **conditional on `primitive_power_tendsto` alone** — no
-`perron_frobenius` contact (`#print axioms`-verified): producing `π`
-needs PF, concluding convergence does not, the two trust costs
-independent. QA at `Scaffold/QA/SpectralGraph/DirectedMixing_QA.lean`
-(30 declarations by the generator metric: the reducible-fixture
+are **hard crust since the 2026-09-02 retirement of the
+`primitive_power_tendsto` admission**
+(`proposals/retire-primitive-power-convergence.md`: the
+Doeblin/Dobrushin contraction route proved the axiom at its unchanged
+statement; `#print axioms` on all of them exactly the standard three)
+— and they make no `perron_frobenius` contact: producing `π` needs
+that axiom, concluding convergence needs none. QA at
+`Scaffold/QA/SpectralGraph/DirectedMixing_QA.lean`
+(132 declarations by the generator metric: the reducible-fixture
 positive witness with the limit pinned to the raw-verified uniform
 value and the second iterate computed raw at `3/16 < 1/4`; the
 periodicity refutation — the directed 2-cycle nonnegative,
@@ -968,15 +989,42 @@ the axiom against the raw sum).
 | Declaration | Content |
 |-------------|---------|
 | `googleMatrix_isPrimitive` | the Google matrix is primitive on `[0, 1)` — `isPrimitive_of_pos` at the teleportation floor; strictly stronger than the delivered irreducibility (unconditional) |
-| `pageRank_powerIteration` | **the classical PageRank algorithm as a theorem** (conditional on `primitive_power_tendsto` alone): `(G ^ t) *ᵥ x → (π ⬝ᵥ x) • 1` at any nonnegative mass-one stationary `π` — of which the delivered `∃!` says there is exactly one |
-| `pageRank_entrywise_tendsto` | the `t`-step transition probability `(G ^ t) i j → π j`, independent of the start (conditional, same axiom alone) |
-| `pageRank_walk_tendsto` | the Markov-chain mixing first slice: `ν ᵥ* (G ^ t) → π` for every start summing to one, entrywise topology (conditional, same axiom alone; rates out of scope) |
+| `pageRank_powerIteration` | **the classical PageRank algorithm as a theorem** (hard crust since the 2026-09-02 retirement): `(G ^ t) *ᵥ x → (π ⬝ᵥ x) • 1` at any nonnegative mass-one stationary `π` — of which the delivered `∃!` says there is exactly one |
+| `pageRank_entrywise_tendsto` | the `t`-step transition probability `(G ^ t) i j → π j`, independent of the start (hard crust since the retirement) |
+| `pageRank_walk_tendsto` | the Markov-chain mixing first slice: `ν ᵥ* (G ^ t) → π` for every start summing to one, entrywise topology (hard crust since the retirement; rates out of scope) |
 | `googleMatrix_pow_mulVec_onesVec` | powers of the Google matrix fix `onesVec` — the mass bookkeeping translation (unconditional; the QA coherence join's other half) |
+| `pageRank_tvDistance_le` | **the rate form** (2026-09-02, `proposals/doeblintv-tv-contraction-pagerank-rate.md`): `TV(ν ᵥ* (G ^ t), π) ≤ α^t · TV(ν, π)` — the field-standard PageRank power-method rate, the teleportation floor read as a Doeblin floor of coefficient exactly `α` through the mixing layer's new directed TV contraction; sign-free on `ν`, `π` through stationarity and mass alone (hard crust) |
+| `pageRankDistribution` (+ `_apply`, `_nonneg`, `sum_`, `_zero`, `piSingle_vecMul_apply`) | **the per-start Google-walk law** (2026-09-02, `proposals/directed-mixing-time-object.md`): the random surfer's position distribution after `t` steps from `x` — the directed twin of `walkDistribution`, probability-certified through the power plumbing (`0 ≤` entries and row-sums preserved under powers) |
+| `pageRank_tvDistance_le_of_depth` | **the ⌈log⌉-threshold depth form of the rate**: past `log(TV(ν,π)/ε)/log(1/α)` the evolved law is within `ε` of stationarity — the depth packaging of `pageRank_tvDistance_le`, at a private twin of the Oversmoothing calculus bridge (import-minimal) |
+| `pageRankMixingTimeFrom` (+ `_bddBelow`, `_le_of_cert`, `_spec`, `_le_of_rate`, `_anti`) | **the directed mixing time** — the `t_mix` object family's missing sibling (plain/lazy/discrete/continuous/uniform all existed undirected): LPW ch. 20's per-start `t_mix` at the Google law against the caller-held stationary `π`; `_spec` the well-ordered attainment, `_le_of_rate` the α-ceiling `t_mix(ε) ≤ ⌈log(TV(δ_x,π)/ε)/log(1/α)⌉` (attained exactly in QA); the named consumer is the empirical PageRank capstone in `Derived/EmpiricalStationary.lean` |
+| `pageRankTVPair` / `pageRankTVUniform` (+ `_nonneg`, `_eq_tvDobrushinCoeff`, `pageRankDistribution_add`/`_eq_row`, `piSingle_nonneg`) | **LPW's two distances at the Google law** (2026-09-02, `proposals/directed-uniform-mixing-time.md`): `d(t) = max_{x,y} TV(ν_t^x, ν_t^y)` (the two-start distance) and `d̄(t) = max_x TV(ν_t^x, π)` (Montenegro–Tetali's worst-start distance) against the caller-held `π`; the engine join identifies `d(t)` with the matrix-level Dobrushin coefficient of `G^t` |
+| `tvDistance_vecMul_pow_googleMatrix_le`, `pageRankTVPair_submul` | **the Google-walk Dobrushin contraction and `d`-submultiplicativity**: `TV(μ ᵥ* G^t, ν ᵥ* G^t) ≤ TV(μ,ν)·d(t)` at equal masses, and `d(s+t) ≤ d(s)·d(t)` — pure Markovity (row stochasticity of `G` the only graph input) |
+| `pageRankTVUniform_le_pageRankTVPair`, `pageRankDistribution_tvDistance_anti`, `pageRankTVUniform_mul_pageRankTVPair_le`, `pageRankTVUniform_succ_mul_le` | **the domination and the escalation engine**: `d̄ ≤ d` by the contraction at `(δ_x, π)` plus the simplex diameter (no mixture identity, no reversibility), discrete TV monotonicity in time, the mixed form `d̄(s+t) ≤ d̄(s)·d(t)`, and the iterated engine `d̄((k+1)t₀) ≤ d̄(t₀)·d(t₀)^k` |
+| `pageRankMixingTime` (+ `_bddBelow`, `_le_of_cert`, `_spec`, `pageRankMixingTimeFrom_le_pageRankMixingTime`, `_eq_sup_pageRankMixingTimeFrom`, `exists_pageRankMixingTime_witness`, `_le_of_rate`, `_le_of_rate'`, `_le_mul_of_escalation`, `_le_of_escalation`) | **the directed uniform (worst-start) mixing time** — the `t_mix` object family's last missing member: LPW's `∀ s ≥ t, ∀ x` reading at the Google law; `_spec` the well-ordered attainment, the witness-load-bearing per-start domination, the sup interchange, the well-posedness supplier (every `ε` reachable from every start simultaneously), **the refined α-ceiling `t_mix(ε) ≤ ⌈log(d̄(0)/ε)/log(1/α)⌉`** (attained exactly in QA) and its display form, and LPW's ε-escalation corollaries (one certified evaluation yields every ε-level); the named consumer is the worst-start sampling capstone `empiricalPageRank_uniform_tail_of_depth` in `Derived/EmpiricalStationary.lean` (one start-independent threshold for every start) |
 
-The admission's own module is
-`Scaffold.Mathlib.LinearAlgebra.PrimitiveConvergence` (the axiom,
-`Matrix.IsPrimitive`, and the unconditional transfer layer — see the
-[Linear Algebra map](linear_algebra.md)).
+The retired admission's own module is
+`Scaffold.Mathlib.LinearAlgebra.PrimitiveConvergence` (the
+Doeblin-contraction engine and the proved convergence theorem,
+`Matrix.IsPrimitive`, and the transfer layer — see the
+[Linear Algebra map](linear_algebra.md)). The retirement's mechanism
+QA (Section E of the QA module) pins the contraction attained
+exactly on the strictly positive `2×2` fixture and refutes the
+wrong-`δ` form; the rate layer's QA (Section F, 2026-09-02) pins the
+TV contraction attained exactly at the basis pair and the Google
+`α^t` rate attained exactly at *every* time on the periodic 2-cycle —
+with the plain walk's never-decay `TV ≡ 1/2` pin beside it (the
+periodicity fix in one picture). The uniform object's QA (Section H,
+2026-09-02) pins the two-start closed form `d(t) = (1/2)^t` with
+submultiplicativity attained with equality at every time, the
+matrix-level Dobrushin contraction attained exactly, `d̄ = d/2`, the
+uniform object in both directions, the refined α-ceiling attained
+exactly with the display form's slack witnessed, and the escalation
+corollary attained exactly. The TV-contraction shelf lives in
+`Mixing.lean`'s Doeblin TV-contraction section — now also the home of
+the matrix-level Dobrushin-coefficient engine
+(`tvDobrushinCoeff`, `tvDistance_vecMul_le_tvDobrushinCoeff`,
+`tvDobrushinCoeff_pow_add_le`, and the promoted public pairing core
+`abs_sum_mul_le_of_pairwise`) — the `Mixing` rows above.
 
 ### `Scaffold.Mathlib.GraphTheory.Magnetic` (the magnetic Laplacian — the directed-native Hermitian operator)
 

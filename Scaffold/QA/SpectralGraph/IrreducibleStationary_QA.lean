@@ -2,9 +2,10 @@
   IrreducibleStationary_QA.lean
 
   QA for `Scaffold.Mathlib.GraphTheory.IrreducibleStationary`
-  (`proposals/irreducible-stationary-distributions.md`) — the first
-  theorem consumer of the admitted `perron_frobenius` axiom. The QA
-  obligations are the proposal's three mandated witnesses:
+  (`proposals/irreducible-stationary-distributions.md`; the theorem
+  layer was re-proved without axiom contact 2026-09-02 by
+  `proposals/cesaro-stationary-existence.md`). The QA obligations are
+  the original proposal's three mandated witnesses:
 
   1. *The asymmetric directed fixture* — the star
      `A₃ = !![0,1,1; 1,0,0; 1,0,0]` on `Fin 3` (on two vertices row
@@ -35,9 +36,14 @@
      Irreducibility is thereby exercised as a fence, not decoration.
 
   All fixtures are rational, so every quantity is pinned by
-  `norm_num`-class arithmetic. The axiom-consuming declarations below
-  inherit `perron_frobenius` (checked by `#print axioms`); the raw
-  entry/predicate lemmas do not.
+  `norm_num`-class arithmetic. Since the 2026-09-02 Cesàro re-proof no
+  declaration below consumes `perron_frobenius` (checked by
+  `#print axioms`); the raw entry/predicate lemmas never did. The
+  Section E mechanism lemmas pin the new engine's behavior: the
+  orbit/oscillation pins, the one-period Cesàro mean exactly
+  stationary, the power-positivity instances, the engine-output
+  identification, the min-ratio scalar, and the reducible-input
+  existence instantiation.
 
   Pin-technique notes (the run's recorded traps): entry and degree
   lemmas at *literal* indices match `simp only`/`rw` freely, but under
@@ -485,5 +491,216 @@ theorem A4_smul_unique_refuted_QA :
     exact h00.symm
   have hpos : 0 < c * (1 / 2) := by positivity
   linarith
+
+/-! ### Section E: the Cesàro engine's mechanism
+
+The new engine's behavior pinned on the asymmetric star (the Section A
+fixture): the orbit of `1` and its oscillation, the one-period Cesàro
+mean exactly stationary (the engine's whole point — the powers
+oscillate forever, the average over a period does not move at all),
+power positivity at the pinned return arc, the engine's output
+identified against the hand value, the min-ratio scalar pinned
+exactly, and existence instantiated on the reducible fixture where
+uniqueness and positivity provably fail. -/
+
+/-- The orbit's first step, entry 0, raw. -/
+theorem A3g1_0 : ((1 : Fin 3 → ℝ) ᵥ* walkTransitionMatrix A3) 0 = 2 := by
+  simp only [Matrix.vecMul, Matrix.dotProduct, Pi.one_apply, Fin.sum_univ_three,
+    A3P_00, A3P_10, A3P_20]
+  norm_num
+
+/-- The orbit's first step, entry 1, raw. -/
+theorem A3g1_1 : ((1 : Fin 3 → ℝ) ᵥ* walkTransitionMatrix A3) 1 = 1 / 2 := by
+  simp only [Matrix.vecMul, Matrix.dotProduct, Pi.one_apply, Fin.sum_univ_three,
+    A3P_01, A3P_11, A3P_21]
+  norm_num
+
+/-- The orbit's first step, entry 2, raw. -/
+theorem A3g1_2 : ((1 : Fin 3 → ℝ) ᵥ* walkTransitionMatrix A3) 2 = 1 / 2 := by
+  simp only [Matrix.vecMul, Matrix.dotProduct, Pi.one_apply, Fin.sum_univ_three,
+    A3P_02, A3P_12, A3P_22]
+  norm_num
+
+/-- **The orbit's first step, assembled**: the walk's column sums. -/
+theorem A3_orbit_step_QA :
+    ((1 : Fin 3 → ℝ) ᵥ* walkTransitionMatrix A3) = ![2, 1 / 2, 1 / 2] := by
+  funext j
+  fin_cases j
+  · exact A3g1_0
+  · exact A3g1_1
+  · exact A3g1_2
+
+theorem A3g2_0 : ((1 : Fin 3 → ℝ) ᵥ* (walkTransitionMatrix A3 ^ 2)) 0 = 1 := by
+  rw [pow_two, ← vecMul_mul, A3_orbit_step_QA]
+  simp only [Matrix.vecMul, Matrix.dotProduct, Fin.sum_univ_three,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+    A3P_00, A3P_10, A3P_20]
+  norm_num
+
+theorem A3g2_1 : ((1 : Fin 3 → ℝ) ᵥ* (walkTransitionMatrix A3 ^ 2)) 1 = 1 := by
+  rw [pow_two, ← vecMul_mul, A3_orbit_step_QA]
+  simp only [Matrix.vecMul, Matrix.dotProduct, Fin.sum_univ_three,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+    A3P_01, A3P_11, A3P_21]
+  norm_num
+
+theorem A3g2_2 : ((1 : Fin 3 → ℝ) ᵥ* (walkTransitionMatrix A3 ^ 2)) 2 = 1 := by
+  rw [pow_two, ← vecMul_mul, A3_orbit_step_QA]
+  simp only [Matrix.vecMul, Matrix.dotProduct, Fin.sum_univ_three,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+    A3P_02, A3P_12, A3P_22]
+  norm_num
+
+/-- **The orbit's second step, assembled**: after one period the orbit
+of `1` returns to `1`. -/
+theorem A3_orbit_two_QA :
+    ((1 : Fin 3 → ℝ) ᵥ* (walkTransitionMatrix A3 ^ 2)) = 1 := by
+  funext j
+  fin_cases j
+  · exact A3g2_0
+  · exact A3g2_1
+  · exact A3g2_2
+
+/-- **The orbit provably oscillates** — the raw walk's orbit of `1` is
+genuinely period-two, so the engine's input sequence never converges;
+only its averages do (the finite-chain echo of `DirectedMixing_QA`'s
+`P2_no_limit`). -/
+theorem A3_orbit_oscillates_QA :
+    ((1 : Fin 3 → ℝ) ᵥ* walkTransitionMatrix A3)
+      ≠ ((1 : Fin 3 → ℝ) ᵥ* (walkTransitionMatrix A3 ^ 2)) := by
+  intro h
+  have h0 := congrFun h 0
+  rw [A3_orbit_step_QA, A3_orbit_two_QA, Pi.one_apply] at h0
+  simp only [Matrix.cons_val_zero] at h0
+  norm_num at h0
+
+/-- **The Cesàro mean over one full period is exactly stationary** on
+the periodic fixture — the engine's mechanism in one line: the powers
+oscillate forever (the fence above), the average over a period does
+not move at all. -/
+theorem A3_mean_period_stationary_QA :
+    (((2 : ℕ) : ℝ)⁻¹ • ((1 : Fin 3 → ℝ) + (1 : Fin 3 → ℝ) ᵥ* walkTransitionMatrix A3)) ᵥ*
+        walkTransitionMatrix A3
+      = ((2 : ℕ) : ℝ)⁻¹ • ((1 : Fin 3 → ℝ) + (1 : Fin 3 → ℝ) ᵥ* walkTransitionMatrix A3) := by
+  have hstep : ((1 : Fin 3 → ℝ) ᵥ* walkTransitionMatrix A3) ᵥ* walkTransitionMatrix A3
+      = (1 : Fin 3 → ℝ) := by
+    rw [vecMul_mul, ← pow_two]
+    exact A3_orbit_two_QA
+  rw [Matrix.vecMul_smul, Matrix.add_vecMul, hstep]
+  congr 1
+  exact add_comm _ _
+
+/-- The mean's entry values, raw. -/
+theorem A3mean_0 :
+    (((2 : ℕ) : ℝ)⁻¹ • ((1 : Fin 3 → ℝ) + (1 : Fin 3 → ℝ) ᵥ* walkTransitionMatrix A3)) 0
+      = 3 / 2 := by
+  simp only [Pi.smul_apply, smul_eq_mul, Pi.add_apply, Pi.one_apply, A3g1_0]
+  norm_num
+
+theorem A3mean_1 :
+    (((2 : ℕ) : ℝ)⁻¹ • ((1 : Fin 3 → ℝ) + (1 : Fin 3 → ℝ) ᵥ* walkTransitionMatrix A3)) 1
+      = 3 / 4 := by
+  simp only [Pi.smul_apply, smul_eq_mul, Pi.add_apply, Pi.one_apply, A3g1_1]
+  norm_num
+
+theorem A3mean_2 :
+    (((2 : ℕ) : ℝ)⁻¹ • ((1 : Fin 3 → ℝ) + (1 : Fin 3 → ℝ) ᵥ* walkTransitionMatrix A3)) 2
+      = 3 / 4 := by
+  simp only [Pi.smul_apply, smul_eq_mul, Pi.add_apply, Pi.one_apply, A3g1_2]
+  norm_num
+
+theorem pi3x3_0 : ((3 : ℝ) • pi3) 0 = 3 / 2 := by
+  simp only [Pi.smul_apply, smul_eq_mul, pi3_0]; norm_num
+theorem pi3x3_1 : ((3 : ℝ) • pi3) 1 = 3 / 4 := by
+  simp only [Pi.smul_apply, smul_eq_mul, pi3_1]; norm_num
+theorem pi3x3_2 : ((3 : ℝ) • pi3) 2 = 3 / 4 := by
+  simp only [Pi.smul_apply, smul_eq_mul, pi3_2]; norm_num
+
+/-- **The mean's value**: exactly three times the hand-verified
+stationary distribution (mass `3 = card (Fin 3)`, the engine's
+normalization of the orbit of `1`). -/
+theorem A3_mean_val_QA :
+    ((2 : ℕ) : ℝ)⁻¹ • ((1 : Fin 3 → ℝ) + (1 : Fin 3 → ℝ) ᵥ* walkTransitionMatrix A3)
+      = (3 : ℝ) • pi3 := by
+  funext j
+  fin_cases j
+  · exact A3mean_0.trans pi3x3_0.symm
+  · exact A3mean_1.trans pi3x3_1.symm
+  · exact A3mean_2.trans pi3x3_2.symm
+
+/-- **Power positivity instantiated, the pinned return arc**: the
+leaf's return needs the second power, pinned raw at the exact entry
+`(P²) 1 1 = 1/2`. -/
+theorem A3_pow_pos_return_QA : 0 < (walkTransitionMatrix A3 ^ 2) 1 1 := by
+  simp only [pow_two, Matrix.mul_apply, Fin.sum_univ_three,
+    A3P_10, A3P_11, A3P_12, A3P_01, A3P_11, A3P_21]
+  norm_num
+
+/-- **Power positivity, the existence form**: every pair joined by
+some strictly-positive power on the irreducible fixture. -/
+theorem A3_pow_pos_QA (i j : Fin 3) :
+    ∃ m : ℕ, 0 < (walkTransitionMatrix A3 ^ m) i j :=
+  exists_pow_pos_of_isIrreducible
+    (walkTransitionMatrix_nonneg A3 A3_nonneg_QA A3_deg_QA)
+    (walkTransitionMatrix_isIrreducible A3 A3_irreducible_QA A3_deg_QA) i j
+
+/-- **The engine's output identified**: every nonnegative mass-three
+stationary vector of the fixture is exactly three times the hand
+value. -/
+theorem A3_engine_identified_QA (σ : Fin 3 → ℝ) (hσnn : ∀ i, 0 ≤ σ i)
+    (hσmass : ∑ i, σ i = 3) (hσs : σ ᵥ* walkTransitionMatrix A3 = σ) :
+    σ = (3 : ℝ) • pi3 := by
+  have hνsum : ∑ i, ((3 : ℝ)⁻¹ • σ) i = 1 := by
+    simp only [Pi.smul_apply, smul_eq_mul, ← Finset.mul_sum]
+    rw [hσmass, inv_mul_cancel₀ (by norm_num : ((3 : ℝ) ≠ 0))]
+  have hνstat : ((3 : ℝ)⁻¹ • σ) ᵥ* walkTransitionMatrix A3 = (3 : ℝ)⁻¹ • σ := by
+    rw [Matrix.vecMul_smul, hσs]
+  have hνeq : (3 : ℝ)⁻¹ • σ = pi3 :=
+    A3_stationary_eq_hand_QA _
+      (fun i => mul_nonneg (inv_nonneg.mpr (by norm_num)) (hσnn i)) hνsum hνstat
+  have hback : σ = (3 : ℝ) • ((3 : ℝ)⁻¹ • σ) := by
+    rw [smul_smul, mul_inv_cancel₀ (by norm_num : ((3 : ℝ) ≠ 0)), one_smul]
+  rw [hback, hνeq]
+
+/-- **The min-ratio clause pinned**: two stationary multiples, the
+produced scalar is exactly the ratio `1/4`. -/
+theorem A3_smul_ratio_QA :
+    ∃ c : ℝ, 0 < c ∧ (3 : ℝ) • pi3 = c • ((12 : ℝ) • pi3) ∧ c = 1 / 4 := by
+  have hstat : ∀ k : ℝ, (k • pi3) ᵥ* walkTransitionMatrix A3 = k • pi3 := fun k => by
+    rw [Matrix.vecMul_smul, pi3_stationary_raw_QA]
+  have hnn : ∀ k : ℝ, 0 < k → ∀ i, 0 ≤ (k • pi3) i := fun k hk i => by
+    simp only [Pi.smul_apply, smul_eq_mul]
+    exact mul_nonneg (le_of_lt hk) (pi3_nonneg_QA i)
+  have hne : ∀ k : ℝ, 0 < k → (k • pi3) ≠ 0 := by
+    intro k hk h
+    have h0 : pi3 0 = 0 := by
+      have happ : (k • pi3) 0 = 0 := congrFun h 0
+      simp only [Pi.smul_apply, smul_eq_mul] at happ
+      exact (mul_eq_zero.mp happ).resolve_left (fun hk0 => absurd hk0 (ne_of_gt hk))
+    rw [pi3_0] at h0
+    norm_num at h0
+  obtain ⟨c, hc, heq⟩ := stationaryVec_smul_of_irreducible A3 A3_nonneg_QA
+    A3_irreducible_QA A3_ex_QA A3_deg_QA
+    (hnn 12 (by norm_num)) (hne 12 (by norm_num)) (hstat 12)
+    (hnn 3 (by norm_num)) (hne 3 (by norm_num)) (hstat 3)
+  refine ⟨c, hc, heq, ?_⟩
+  have h0 : (3 : ℝ) * pi3 0 = c * (12 * pi3 0) := by
+    have happ := congrFun heq 0
+    simp only [Pi.smul_apply, smul_eq_mul] at happ
+    exact happ
+  rw [pi3_0] at h0
+  norm_num at h0
+  linarith
+
+/-- **The existence engine needs no irreducibility**: it instantiates
+unconditionally on the reducible two-block fixture — where uniqueness
+and positivity provably fail (the fences above) — the honest scope
+pin: existence is strictly weaker than what irreducibility buys. -/
+theorem A4_engine_existence_QA :
+    ∃ σ : Fin 4 → ℝ, (∀ i, 0 ≤ σ i) ∧ (∑ i, σ i = 4) ∧
+      σ ᵥ* walkTransitionMatrix A4 = σ :=
+  exists_nonneg_stationary_of_row_stochastic
+    (walkTransitionMatrix_nonneg A4 A4_nonneg_QA A4_deg_QA)
+    (fun i => walkTransitionMatrix_row_sum A4 A4_deg_QA i)
 
 end Scaffold.QA.SpectralGraph

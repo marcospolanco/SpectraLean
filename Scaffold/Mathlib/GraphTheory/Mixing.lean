@@ -16,6 +16,7 @@ limitations under the License.
 import Scaffold.Mathlib.GraphTheory.Stationary
 import Scaffold.Mathlib.GraphTheory.Heat
 import Scaffold.Mathlib.InformationTheory.Entropy
+import Scaffold.Mathlib.LinearAlgebra.PrimitiveConvergence
 
 /-!
 # The ℓ²-mixing proxy of the simple random walk
@@ -133,7 +134,7 @@ signless-Laplacian SOS engine `eigvalOf_normalizedLaplacian_le_two`
 
 namespace SpectralGraphTheory
 
-open Matrix
+open Matrix Scaffold.LinearAlgebra
 
 variable {V : Type} [Fintype V] [DecidableEq V]
 
@@ -996,6 +997,52 @@ theorem tvDistance_triangle (μ ν ρ : V → ℝ) :
   simp only [tvDistance]
   linarith
 
+/-- **A single coordinate's deviation is at most the TV distance** (at
+equal masses): the zero-mass triangle route — the deviation mass on the
+complement of `i` sums to exactly `−d i`, so `2|d i| = |d i| +
+|∑_{j≠i} d j| ≤ ∑_j |d j| = 2·TV`. The constant is sharp (equality
+whenever the deviation mass is single-signed, e.g. at a Dirac-vs-uniform
+pair); this is the entrywise extraction through a *TV-level* rate — the
+directed mixing bias term's engine (`EmpiricalStationary.lean`'s
+PageRank capstone), since the directed program bounds TV, not χ². QA:
+`Scaffold.QA.SpectralGraph.PR_entrywise_both_QA` (both sides pinned
+`1/4`, equality attained at `t = 1` on the Google 2-cycle fixture). -/
+theorem abs_sub_le_tvDistance {μ ν : V → ℝ}
+    (hmass : ∑ i, μ i = ∑ i, ν i) (i : V) :
+    |μ i - ν i| ≤ tvDistance μ ν := by
+  have hzero : ∑ j, (μ - ν) j = 0 := by
+    simp only [Pi.sub_apply, Finset.sum_sub_distrib, hmass, sub_self]
+  have hpart : ∑ j, (μ - ν) j
+      = (μ - ν) i + ∑ j in Finset.univ.erase i, (μ - ν) j := by
+    conv_lhs => rw [show (Finset.univ : Finset V)
+        = insert i (Finset.univ.erase i) from
+        (Finset.insert_erase (Finset.mem_univ i)).symm]
+    rw [Finset.sum_insert (by simp : i ∉ Finset.univ.erase i)]
+  have herase : ∑ j in Finset.univ.erase i, (μ - ν) j = -((μ - ν) i) := by
+    have hsum' := hpart
+    rw [hzero] at hsum'
+    linarith
+  have htri := Finset.abs_sum_le_sum_abs (fun j => (μ - ν) j)
+    (Finset.univ.erase i)
+  have hj : ∑ j, |μ j - ν j|
+      = |μ i - ν i| + ∑ j in Finset.univ.erase i, |μ j - ν j| := by
+    conv_lhs => rw [show (Finset.univ : Finset V)
+        = insert i (Finset.univ.erase i) from
+        (Finset.insert_erase (Finset.mem_univ i)).symm]
+    rw [Finset.sum_insert (by simp : i ∉ Finset.univ.erase i)]
+  have hkey : |μ i - ν i| + |μ i - ν i| ≤ ∑ j, |μ j - ν j| := by
+    calc |μ i - ν i| + |μ i - ν i|
+        = |μ i - ν i| + |∑ j in Finset.univ.erase i, (μ - ν) j| := by
+          rw [herase, abs_neg]
+          rfl
+      _ ≤ |μ i - ν i| + ∑ j in Finset.univ.erase i, |(μ - ν) j| :=
+          add_le_add_left htri _
+      _ = ∑ j, |μ j - ν j| := by
+          rw [hj]
+          simp only [Pi.sub_apply]
+  unfold tvDistance
+  linarith
+
 omit [DecidableEq V] in
 /-- **The distinguishing-function bound** — the classical lower-bound
 companion of the triangle inequality: a statistic bounded by `1`
@@ -1125,6 +1172,589 @@ theorem walkDistribution_tvDistance_le_of_connected (A : WAdj (V := V))
     (Real.sqrt_le_sqrt
       (chiSquareDistance_le_of_connected A hA hnn hd hconn r t x hrate))
     (by norm_num)
+
+/-!
+## The Doeblin TV contraction (directed, matrix level)
+
+`proposals/doeblin-tv-contraction-pagerank-rate.md` (2026-09-02): the
+mixing program's TV toolkit's first *directed-axis* member — and the
+now-public Doeblin range engine's second consumer, on a different
+mathematical surface (TV between laws, not coordinate convergence to
+a limit). A row-stochastic `Q` with every entry `≥ δ` contracts the
+total-variation distance between any two equal-mass vectors by
+`1 - |V|·δ` (`tvDistance_vecMul_le_of_pos_entries`): the dual/
+test-function pairing `z ⬝ᵥ s = w ⬝ᵥ (Q *ᵥ s)` at the sign statistic
+`s` routes the evolved difference through the engine's entrywise-range
+contraction, with the zero-mass interval pinning
+(`abs_dotProduct_le_half_entryRange_mul_sum_abs`) closing the
+constant. Hypothesis-minimal: no sign hypothesis on either vector.
+The block-iterated form and the positive-power assembly
+`tvDistance_vecMul_pow_le_of_pos_power` (any mass-one start against
+any mass-one stationary vector — sign-free on both) give the rate
+clause the retired `primitive_power_tendsto` deliberately did not
+carry, at its proof's own byproduct rate. All proved, zero axioms.
+-/
+
+omit [DecidableEq V] in
+/-- Mass preservation under a row-stochastic row action: the mass of
+`μ ᵥ* M` is the mass of `μ`. -/
+theorem sum_vecMul_eq_of_row_sum {M : Matrix V V ℝ}
+    (hrow : ∀ i, ∑ j, M i j = 1) (μ : V → ℝ) :
+    ∑ j, (μ ᵥ* M) j = ∑ i, μ i := by
+  have hflip : ∑ j, (μ ᵥ* M) j = ∑ j, ∑ i, μ i * M i j := rfl
+  rw [hflip, Finset.sum_comm]
+  exact (Finset.sum_congr rfl fun i _ => by
+    rw [← Finset.mul_sum, hrow i, mul_one]).symm
+
+omit [DecidableEq V] in
+/-- **Zero-sum interval pinning**: a zero-mass functional `w` pairs with
+any function to at most half the function's entrywise range times the
+`ℓ¹` mass of `w` — the constant shift dies against zero mass, and what
+remains is bounded by the range's half-width. The dual step behind the
+Doeblin TV contraction. -/
+theorem abs_dotProduct_le_half_entryRange_mul_sum_abs [Nonempty V]
+    {w h : V → ℝ} (hwsum : ∑ i, w i = 0) :
+    |w ⬝ᵥ h| ≤ (1/2) * entryRange h * ∑ i, |w i| := by
+  have hmid : ∀ i : V,
+      |h i - (entrySup h + entryInf h) / 2| ≤ entryRange h / 2 := by
+    intro i
+    have h1 := entryInf_le h i
+    have h2 := le_entrySup h i
+    unfold entryRange
+    rw [abs_le]
+    constructor <;> linarith
+  have hzero : ∑ i, w i * ((entrySup h + entryInf h) / 2) = 0 := by
+    rw [← Finset.sum_mul, hwsum, zero_mul]
+  have hsplit : w ⬝ᵥ h
+      = ∑ i, w i * (h i - (entrySup h + entryInf h) / 2) := by
+    have heq : ∀ i : V, w i * h i
+        = w i * (h i - (entrySup h + entryInf h) / 2)
+          + w i * ((entrySup h + entryInf h) / 2) := fun _ => by ring
+    calc w ⬝ᵥ h = ∑ i, w i * h i := rfl
+      _ = ∑ i, (w i * (h i - (entrySup h + entryInf h) / 2)
+          + w i * ((entrySup h + entryInf h) / 2)) :=
+          Finset.sum_congr rfl fun i _ => heq i
+      _ = ∑ i, w i * (h i - (entrySup h + entryInf h) / 2)
+          + ∑ i, w i * ((entrySup h + entryInf h) / 2) := Finset.sum_add_distrib
+      _ = ∑ i, w i * (h i - (entrySup h + entryInf h) / 2) := by
+          rw [hzero, add_zero]
+  calc |w ⬝ᵥ h| = |∑ i, w i * (h i - (entrySup h + entryInf h) / 2)| := by
+        rw [hsplit]
+    _ ≤ ∑ i, |w i * (h i - (entrySup h + entryInf h) / 2)| :=
+        Finset.abs_sum_le_sum_abs _ _
+    _ ≤ ∑ i, |w i| * (entryRange h / 2) := by
+        refine Finset.sum_le_sum fun i _ => ?_
+        calc |w i * (h i - (entrySup h + entryInf h) / 2)|
+            = |w i| * |h i - (entrySup h + entryInf h) / 2| := abs_mul _ _
+          _ ≤ |w i| * (entryRange h / 2) :=
+              mul_le_mul_of_nonneg_left (hmid i) (abs_nonneg _)
+    _ = (1/2) * entryRange h * ∑ i, |w i| := by rw [← Finset.sum_mul]; ring
+
+omit [DecidableEq V] in
+/-- **Stochastic non-expansiveness of TV under the row action**: a
+nonnegative row-stochastic matrix never increases the total-variation
+distance between two vectors — the row-action twin of the delivered
+adjoint-walk `mulVec` contraction below, at the generic-matrix level
+(the engine `entryRange_mulVec_le`'s companion, in TV). -/
+theorem tvDistance_vecMul_le {M : Matrix V V ℝ} (hnn : ∀ i j, 0 ≤ M i j)
+    (hrow : ∀ i, ∑ j, M i j = 1) (μ ν : V → ℝ) :
+    tvDistance (μ ᵥ* M) (ν ᵥ* M) ≤ tvDistance μ ν := by
+  have htri : ∀ j : V,
+      |((μ - ν) ᵥ* M) j| ≤ ∑ i, |(μ - ν) i| * M i j := by
+    intro j
+    have h0 := Finset.abs_sum_le_sum_abs
+      (fun i => (μ - ν) i * M i j) Finset.univ
+    simp only [Matrix.vecMul, Matrix.dotProduct, Matrix.transpose_apply,
+      Pi.sub_apply] at h0 ⊢
+    calc |∑ i, (μ - ν) i * M i j| ≤ ∑ i, |(μ - ν) i * M i j| := h0
+      _ = ∑ i, |(μ - ν) i| * M i j := Finset.sum_congr rfl fun i _ => by
+          rw [abs_mul, abs_of_nonneg (hnn i j)]
+  have hflip : ∑ j, ∑ i, |(μ - ν) i| * M i j = ∑ i, |(μ - ν) i| := by
+    rw [Finset.sum_comm]
+    exact (Finset.sum_congr rfl fun i _ => by
+      rw [← Finset.mul_sum, hrow i, mul_one]).symm
+  have hsplit : (μ ᵥ* M) - (ν ᵥ* M) = (μ - ν) ᵥ* M :=
+    (Matrix.sub_vecMul _ _ _).symm
+  have hL : tvDistance (μ ᵥ* M) (ν ᵥ* M)
+      = (1/2) * ∑ j, |((μ - ν) ᵥ* M) j| := by
+    rw [tvDistance]
+    exact congrArg (fun s => (1/2) * s)
+      (Finset.sum_congr rfl fun j _ => congrArg abs (congrFun hsplit j))
+  have hkey : ∑ j, |((μ - ν) ᵥ* M) j| ≤ ∑ i, |(μ - ν) i| :=
+    le_trans (Finset.sum_le_sum fun j _ => htri j) hflip.le
+  rw [hL, tvDistance]
+  exact mul_le_mul_of_nonneg_left hkey (by norm_num)
+
+omit [DecidableEq V] in
+/-- **The Doeblin TV contraction.** A row-stochastic matrix whose
+entries are all at least `δ` contracts the total-variation distance
+between any two *equal-mass* vectors by the coefficient
+`1 - |V|·δ` — the classical Doeblin/Dobrushin bound at the law level
+(the same mechanism as the undirected uniform-`t_mix`
+submultiplicativity family, now at the entrywise floor). Hypothesis-
+minimal: no sign hypothesis on either vector (only the equal-mass
+pinning, which the proof makes zero-mass). The route is the dual/
+test-function pairing: `TV = (1/2)·(z ⬝ᵥ s)` at the sign statistic
+`s`, `z ⬝ᵥ s = w ⬝ᵥ (Q *ᵥ s)` by `Matrix.dotProduct_mulVec`, and the
+`Q *ᵥ s` entrywise range contracts by the engine
+`entryRange_mulVec_le_of_pos_entries` — the engine's second consumer,
+on a different mathematical surface (TV between laws, not coordinate
+convergence to a limit).
+
+QA: `DirectedMixing_QA`'s mechanism section pins this attained
+exactly on the strictly positive `2×2` fixture and refutes the
+floor-free form on the permutation fixture. -/
+theorem tvDistance_vecMul_le_of_pos_entries [Nonempty V]
+    {Q : Matrix V V ℝ} (hrow : ∀ i, ∑ j, Q i j = 1) {δ : ℝ}
+    (hle : ∀ i j, δ ≤ Q i j) (μ ν : V → ℝ)
+    (hsum : ∑ i, μ i = ∑ i, ν i) :
+    tvDistance (μ ᵥ* Q) (ν ᵥ* Q)
+      ≤ (1 - (Fintype.card V : ℝ) * δ) * tvDistance μ ν := by
+  have hρnn : 0 ≤ 1 - (Fintype.card V : ℝ) * δ := by
+    obtain ⟨i₀⟩ := ‹Nonempty V›
+    have h2 : (Fintype.card V : ℝ) * δ ≤ 1 :=
+      calc (Fintype.card V : ℝ) * δ = ∑ j : V, δ := by simp
+        _ ≤ ∑ j, Q i₀ j := Finset.sum_le_sum fun j _ => hle i₀ j
+        _ = 1 := hrow i₀
+    linarith
+  -- the sign statistic of the evolved difference
+  have hsign : ∀ j : V,
+      ((μ - ν) ᵥ* Q) j * (if ((μ - ν) ᵥ* Q) j < 0 then (-1 : ℝ) else 1)
+        = |((μ - ν) ᵥ* Q) j| := by
+    intro j
+    by_cases h : ((μ - ν) ᵥ* Q) j < 0
+    · rw [if_pos h, abs_of_neg h]; ring
+    · rw [if_neg h, abs_of_nonneg (by linarith)]; ring
+  have hz : ∑ j, |((μ - ν) ᵥ* Q) j| = (μ - ν) ᵥ* Q ⬝ᵥ
+      (fun j => if ((μ - ν) ᵥ* Q) j < 0 then (-1 : ℝ) else 1) := by
+    simp only [Matrix.dotProduct]
+    exact Finset.sum_congr rfl fun j _ => (hsign j).symm
+  have hdual : (μ - ν) ᵥ* Q ⬝ᵥ
+      (fun j => if ((μ - ν) ᵥ* Q) j < 0 then (-1 : ℝ) else 1)
+      = (μ - ν) ⬝ᵥ (Q *ᵥ (fun j => if ((μ - ν) ᵥ* Q) j < 0 then (-1 : ℝ) else 1)) :=
+    (Matrix.dotProduct_mulVec _ _ _).symm
+  have hR : entryRange (Q *ᵥ
+      (fun j => if ((μ - ν) ᵥ* Q) j < 0 then (-1 : ℝ) else 1))
+      ≤ (1 - (Fintype.card V : ℝ) * δ) * entryRange
+      (fun j => if ((μ - ν) ᵥ* Q) j < 0 then (-1 : ℝ) else 1) :=
+    entryRange_mulVec_le_of_pos_entries hrow hle _
+  have hsrange : entryRange
+      (fun j => if ((μ - ν) ᵥ* Q) j < 0 then (-1 : ℝ) else 1) ≤ 2 := by
+    have h1 : entrySup (fun j => if ((μ - ν) ᵥ* Q) j < 0 then (-1 : ℝ) else 1)
+        ≤ 1 := (Finset.sup'_le_iff Finset.univ_nonempty _).mpr
+      fun j _ => by by_cases h : ((μ - ν) ᵥ* Q) j < 0 <;> simp [h]
+    have h2 : -1 ≤ entryInf (fun j => if ((μ - ν) ᵥ* Q) j < 0 then (-1 : ℝ) else 1) :=
+      Finset.le_inf' Finset.univ_nonempty _ fun j _ => by
+        by_cases h : ((μ - ν) ᵥ* Q) j < 0 <;> simp [h]
+    unfold entryRange
+    linarith
+  have hw0 : ∑ i, (μ - ν) i = 0 := by
+    simp only [Pi.sub_apply]
+    rw [Finset.sum_sub_distrib, hsum, sub_self]
+  have hpin := abs_dotProduct_le_half_entryRange_mul_sum_abs
+    (h := Q *ᵥ (fun j => if ((μ - ν) ᵥ* Q) j < 0 then (-1 : ℝ) else 1)) hw0
+  have hLnn : 0 ≤ ∑ i, |(μ - ν) i| := Finset.sum_nonneg fun i _ => abs_nonneg _
+  have hR2 : entryRange (Q *ᵥ
+      (fun j => if ((μ - ν) ᵥ* Q) j < 0 then (-1 : ℝ) else 1))
+      ≤ 2 * (1 - (Fintype.card V : ℝ) * δ) := by
+    calc entryRange (Q *ᵥ
+        (fun j => if ((μ - ν) ᵥ* Q) j < 0 then (-1 : ℝ) else 1))
+        ≤ (1 - (Fintype.card V : ℝ) * δ) * entryRange
+          (fun j => if ((μ - ν) ᵥ* Q) j < 0 then (-1 : ℝ) else 1) := hR
+      _ ≤ (1 - (Fintype.card V : ℝ) * δ) * 2 :=
+          mul_le_mul_of_nonneg_left hsrange hρnn
+      _ = 2 * (1 - (Fintype.card V : ℝ) * δ) := by ring
+  have hsumz : ∑ j, |((μ - ν) ᵥ* Q) j|
+      ≤ (1 - (Fintype.card V : ℝ) * δ) * ∑ i, |(μ - ν) i| := by
+    calc ∑ j, |((μ - ν) ᵥ* Q) j| = (μ - ν) ᵥ* Q ⬝ᵥ
+        (fun j => if ((μ - ν) ᵥ* Q) j < 0 then (-1 : ℝ) else 1) := hz
+      _ = (μ - ν) ⬝ᵥ (Q *ᵥ
+          (fun j => if ((μ - ν) ᵥ* Q) j < 0 then (-1 : ℝ) else 1)) := hdual
+      _ ≤ |(μ - ν) ⬝ᵥ (Q *ᵥ
+          (fun j => if ((μ - ν) ᵥ* Q) j < 0 then (-1 : ℝ) else 1))| :=
+          le_abs_self _
+      _ ≤ (1/2) * entryRange (Q *ᵥ
+          (fun j => if ((μ - ν) ᵥ* Q) j < 0 then (-1 : ℝ) else 1))
+          * ∑ i, |(μ - ν) i| := hpin
+      _ ≤ (1/2) * (2 * (1 - (Fintype.card V : ℝ) * δ)) * ∑ i, |(μ - ν) i| := by
+          refine mul_le_mul_of_nonneg_right ?_ hLnn
+          exact mul_le_mul_of_nonneg_left hR2 (by norm_num)
+      _ = (1 - (Fintype.card V : ℝ) * δ) * ∑ i, |(μ - ν) i| := by ring
+  have hsplit : (μ ᵥ* Q) - (ν ᵥ* Q) = (μ - ν) ᵥ* Q :=
+    (Matrix.sub_vecMul _ _ _).symm
+  have hL : tvDistance (μ ᵥ* Q) (ν ᵥ* Q)
+      = (1/2) * ∑ j, |((μ - ν) ᵥ* Q) j| := by
+    rw [tvDistance]
+    exact congrArg (fun s => (1/2) * s)
+      (Finset.sum_congr rfl fun j _ => congrArg abs (congrFun hsplit j))
+  rw [hL, tvDistance]
+  simp only [Pi.sub_apply] at hsumz ⊢
+  linarith
+
+/-- **The iterated Doeblin TV contraction**: `q` steps of the strictly
+positive `Q` contract TV by `(1 - |V|δ)^q` at equal masses. -/
+theorem tvDistance_vecMul_pow_le_of_pos_entries [Nonempty V]
+    {Q : Matrix V V ℝ} (hrow : ∀ i, ∑ j, Q i j = 1) {δ : ℝ}
+    (hle : ∀ i j, δ ≤ Q i j) (μ ν : V → ℝ)
+    (hsum : ∑ i, μ i = ∑ i, ν i) (q : ℕ) :
+    tvDistance (μ ᵥ* Q ^ q) (ν ᵥ* Q ^ q)
+      ≤ (1 - (Fintype.card V : ℝ) * δ) ^ q * tvDistance μ ν := by
+  have hρnn : 0 ≤ 1 - (Fintype.card V : ℝ) * δ := by
+    obtain ⟨i₀⟩ := ‹Nonempty V›
+    have h2 : (Fintype.card V : ℝ) * δ ≤ 1 :=
+      calc (Fintype.card V : ℝ) * δ = ∑ j : V, δ := by simp
+        _ ≤ ∑ j, Q i₀ j := Finset.sum_le_sum fun j _ => hle i₀ j
+        _ = 1 := hrow i₀
+    linarith
+  induction q with
+  | zero => simp [tvDistance, pow_zero, Matrix.vecMul_one, mul_one]
+  | succ q ih =>
+    have hstep : ∀ x : V → ℝ, x ᵥ* Q ^ (q + 1) = (x ᵥ* Q ^ q) ᵥ* Q := by
+      intro x
+      rw [pow_succ, Matrix.vecMul_vecMul]
+    have hm : ∑ i, (μ ᵥ* Q ^ q) i = ∑ i, (ν ᵥ* Q ^ q) i := by
+      rw [sum_vecMul_eq_of_row_sum (pow_row_sum hrow q),
+        sum_vecMul_eq_of_row_sum (pow_row_sum hrow q), hsum]
+    rw [hstep μ, hstep ν]
+    have hone := tvDistance_vecMul_le_of_pos_entries hrow hle _ _ hm
+    calc tvDistance ((μ ᵥ* Q ^ q) ᵥ* Q) ((ν ᵥ* Q ^ q) ᵥ* Q)
+        ≤ (1 - (Fintype.card V : ℝ) * δ)
+          * tvDistance (μ ᵥ* Q ^ q) (ν ᵥ* Q ^ q) := hone
+      _ ≤ (1 - (Fintype.card V : ℝ) * δ)
+          * ((1 - (Fintype.card V : ℝ) * δ) ^ q * tvDistance μ ν) :=
+          mul_le_mul_of_nonneg_left ih hρnn
+      _ = (1 - (Fintype.card V : ℝ) * δ) ^ (q + 1) * tvDistance μ ν := by
+          rw [pow_succ]; ring
+
+/-- **The Doeblin mixing bound for a positive power.** If the `m`-th
+power of the row-stochastic nonnegative `P` is entrywise `≥ δ`, then
+after `t` steps any mass-one start is within
+`(1 - |V|δ)^(t/m) · TV(ν, π)` of any mass-one stationary `π` — the
+rate clause the retired `primitive_power_tendsto` deliberately did not
+carry, at its proof's own byproduct rate (explicit, typically loose).
+Sign-free on `ν`; `π` enters only through stationarity and mass (no
+nonnegativity needed — uniqueness of the stationary vector is a
+separate, PF-conditional question this bound does not touch).
+
+QA: `DirectedMixing_QA`'s Google section pins this attained exactly at
+every time on the 2-cycle fixture where the plain walk provably never
+mixes. -/
+theorem tvDistance_vecMul_pow_le_of_pos_power [Nonempty V]
+    {P : Matrix V V ℝ} (hnn : ∀ i j, 0 ≤ P i j)
+    (hrow : ∀ i, ∑ j, P i j = 1) {m : ℕ} {δ : ℝ}
+    (hle : ∀ i j, δ ≤ (P ^ m) i j)
+    {π : V → ℝ} (hπsum : ∑ i, π i = 1) (hπstat : π ᵥ* P = π)
+    {ν : V → ℝ} (hνsum : ∑ i, ν i = 1) (t : ℕ) :
+    tvDistance (ν ᵥ* P ^ t) π
+      ≤ (1 - (Fintype.card V : ℝ) * δ) ^ (t / m) * tvDistance ν π := by
+  have hQrow : ∀ i, ∑ j, (P ^ m) i j = 1 := pow_row_sum hrow m
+  have hρnn : 0 ≤ 1 - (Fintype.card V : ℝ) * δ := by
+    obtain ⟨i₀⟩ := ‹Nonempty V›
+    have h2 : (Fintype.card V : ℝ) * δ ≤ 1 :=
+      calc (Fintype.card V : ℝ) * δ = ∑ j : V, δ := by simp
+        _ ≤ ∑ j, (P ^ m) i₀ j := Finset.sum_le_sum fun j _ => hle i₀ j
+        _ = 1 := hQrow i₀
+    linarith
+  have hteq : t = t % m + m * (t / m) := (Nat.mod_add_div t m).symm
+  have hpow : P ^ t = P ^ (t % m) * P ^ (m * (t / m)) := by
+    conv_lhs => rw [hteq]
+    rw [pow_add]
+  have hsplit : ν ᵥ* P ^ t = (ν ᵥ* P ^ (t % m)) ᵥ* (P ^ m) ^ (t / m) := by
+    rw [hpow, ← pow_mul, Matrix.vecMul_vecMul]
+  have hmass : ∑ i, (ν ᵥ* P ^ (t % m)) i = ∑ i, π i := by
+    rw [sum_vecMul_eq_of_row_sum (pow_row_sum hrow (t % m)), hνsum, hπsum]
+  have hπfix : π ᵥ* (P ^ m) ^ (t / m) = π := by
+    rw [← pow_mul, vecMul_pow_eq_of_vecMul_eq hπstat]
+  have hpair := tvDistance_vecMul_pow_le_of_pos_entries hQrow hle
+    (ν ᵥ* P ^ (t % m)) π hmass (t / m)
+  have hrem : tvDistance (ν ᵥ* P ^ (t % m)) π ≤ tvDistance ν π := by
+    have hstep := tvDistance_vecMul_le (pow_nonneg_entries hnn (t % m))
+      (pow_row_sum hrow (t % m)) ν π
+    rwa [vecMul_pow_eq_of_vecMul_eq hπstat] at hstep
+  calc tvDistance (ν ᵥ* P ^ t) π
+      = tvDistance ((ν ᵥ* P ^ (t % m)) ᵥ* (P ^ m) ^ (t / m)) π := by rw [hsplit]
+    _ = tvDistance ((ν ᵥ* P ^ (t % m)) ᵥ* (P ^ m) ^ (t / m))
+        (π ᵥ* (P ^ m) ^ (t / m)) := by rw [hπfix]
+    _ ≤ (1 - (Fintype.card V : ℝ) * δ) ^ (t / m)
+        * tvDistance (ν ᵥ* P ^ (t % m)) π := hpair
+    _ ≤ (1 - (Fintype.card V : ℝ) * δ) ^ (t / m) * tvDistance ν π :=
+        mul_le_mul_of_nonneg_left hrem (pow_nonneg hρnn _)
+
+/-! ### The Dobrushin coefficient and the sharp matrix-level TV
+contraction (2026-09-02, `proposals/directed-uniform-mixing-time.md`)
+
+The Doeblin floor engine above contracts at the entrywise coefficient
+`1 - |V|δ`. This section adds the *sharp* matrix-level companion: the
+Dobrushin coefficient `δ(Q) = max_{x,y} TV(Q_x, Q_y)` of an arbitrary
+matrix, the contraction `TV(μ ᵥ* Q, ν ᵥ* Q) ≤ TV(μ, ν) · δ(Q)` at
+equal masses only, and the generic power submultiplicativity
+`δ(Q^(s+t)) ≤ δ(Q^s) · δ(Q^t)` for row-stochastic `Q` — LPW's
+`d(s+t) ≤ d(s) d(t)` in its matrix home. The undirected uniform-mixing
+delivery proved this mechanism bespoke at the walk matrix's powers (in
+`Oversmoothing.lean`); the matrix-level form is consumable by every
+chain on the shelf, and the directed uniform object is its first
+consumer. The pairing core is promoted here from `Oversmoothing.lean`'s
+private copy — that module's own promotion note anticipated a second
+consumer. -/
+
+omit [DecidableEq V] in
+/-- **The pairing core**: a zero-mass functional `c` paired against any
+function `g` is bounded by half its `ℓ¹` mass times the oscillation
+bound `D` of `g`. The recentering at a minimum of `g` (which exists:
+`V` is finite) is what makes the positive-part split valid; the naive
+triangle route loses a factor of `2` exactly here. Sharp: at
+`c = (1, −1)`, `g = (0, 1)` the bound is attained. -/
+theorem abs_sum_mul_le_of_pairwise [Nonempty V] {c g : V → ℝ}
+    {D : ℝ} (hD : ∀ z z', |g z - g z'| ≤ D) (hc : ∑ z, c z = 0) :
+    |∑ z, c z * g z| ≤ ((∑ z, |c z|) / 2) * D := by
+  obtain ⟨z₀, hz₀⟩ := Finite.exists_min (α := V) g
+  have hm : ∀ z, 0 ≤ g z - g z₀ := fun z => sub_nonneg.2 (hz₀ z)
+  have hD' : ∀ z, g z - g z₀ ≤ D := fun z =>
+    le_trans (le_abs_self _) (hD z z₀)
+  have hone : ∀ cc : V → ℝ, ∑ z, cc z = 0 →
+      ∑ z, cc z * g z ≤ ((∑ z, |cc z|) / 2) * D := by
+    intro cc hcc
+    have hzero : ∑ z, cc z * g z₀ = 0 := by
+      rw [← Finset.sum_mul, hcc]
+      ring
+    have hrc : ∑ z, cc z * g z = ∑ z, cc z * (g z - g z₀) := by
+      have heq : ∑ z, cc z * (g z - g z₀)
+          = ∑ z, cc z * g z - ∑ z, cc z * g z₀ := by
+        rw [← Finset.sum_sub_distrib]
+        exact Finset.sum_congr rfl fun z _ => by ring
+      rw [heq, hzero, sub_zero]
+    rw [hrc]
+    have hsplit := Finset.sum_filter_add_sum_filter_not
+      (Finset.univ : Finset V) (fun z => 0 < cc z)
+      (fun z => cc z * (g z - g z₀))
+    have hneg : ∑ z ∈ (Finset.univ : Finset V).filter (fun z => ¬ 0 < cc z),
+          cc z * (g z - g z₀) ≤ 0 := by
+      refine Finset.sum_nonpos fun z hz => ?_
+      have hcz : cc z ≤ 0 := by simpa [Finset.mem_filter] using hz
+      rw [mul_comm]
+      exact mul_nonpos_of_nonneg_of_nonpos (hm z) hcz
+    have hpossum : ∑ z ∈ (Finset.univ : Finset V).filter (fun z => 0 < cc z),
+          cc z = (∑ z, |cc z|) / 2 := by
+      have hposabs : ∑ z ∈ (Finset.univ : Finset V).filter
+            (fun z => 0 < cc z), |cc z|
+          = ∑ z ∈ (Finset.univ : Finset V).filter (fun z => 0 < cc z), cc z :=
+          Finset.sum_congr rfl fun z hz =>
+            abs_of_pos (by simpa [Finset.mem_filter] using hz)
+      have hnegabs : ∑ z ∈ (Finset.univ : Finset V).filter
+            (fun z => ¬ 0 < cc z), |cc z|
+          = ∑ z ∈ (Finset.univ : Finset V).filter (fun z => ¬ 0 < cc z),
+              (-cc z) := by
+        refine Finset.sum_congr rfl fun z hz => ?_
+        have hcz : cc z ≤ 0 := by simpa [Finset.mem_filter] using hz
+        rw [abs_of_nonpos hcz]
+      have hsum := Finset.sum_filter_add_sum_filter_not
+        (Finset.univ : Finset V) (fun z => 0 < cc z) (fun z => |cc z|)
+      have huniv : ∑ z ∈ (Finset.univ : Finset V).filter (fun z => 0 < cc z),
+            cc z + ∑ z ∈ (Finset.univ : Finset V).filter
+              (fun z => ¬ 0 < cc z), cc z = 0 := by
+        rw [Finset.sum_filter_add_sum_filter_not
+          (Finset.univ : Finset V) (fun z => 0 < cc z) cc]
+        exact hcc
+      have hnegsum : ∑ z ∈ (Finset.univ : Finset V).filter
+            (fun z => ¬ 0 < cc z), (-cc z)
+          = ∑ z ∈ (Finset.univ : Finset V).filter (fun z => 0 < cc z),
+              cc z := by
+        rw [Finset.sum_neg_distrib]
+        have hpair : ∑ z ∈ (Finset.univ : Finset V).filter
+              (fun z => ¬ 0 < cc z), cc z
+            = -∑ z ∈ (Finset.univ : Finset V).filter
+                (fun z => 0 < cc z), cc z := by linarith [huniv]
+        rw [hpair]
+        exact neg_neg _
+      rw [← hsum, hposabs, hnegabs, hnegsum]
+      ring
+    have hle : ∑ z, cc z * (g z - g z₀)
+        ≤ ∑ z ∈ (Finset.univ : Finset V).filter (fun z => 0 < cc z),
+          cc z * (g z - g z₀) := by linarith [hsplit, hneg]
+    calc ∑ z, cc z * (g z - g z₀)
+        ≤ ∑ z ∈ (Finset.univ : Finset V).filter (fun z => 0 < cc z),
+              cc z * (g z - g z₀) := hle
+      _ ≤ ∑ z ∈ (Finset.univ : Finset V).filter (fun z => 0 < cc z),
+              cc z * D :=
+          Finset.sum_le_sum fun z hz =>
+            mul_le_mul_of_nonneg_left (hD' z)
+              (le_of_lt (by simpa [Finset.mem_filter] using hz : 0 < cc z))
+      _ = (∑ z ∈ (Finset.univ : Finset V).filter (fun z => 0 < cc z),
+              cc z) * D := by
+          rw [← Finset.sum_mul]
+      _ = ((∑ z, |cc z|) / 2) * D := by rw [hpossum]
+  have hmain := hone c hc
+  have hnegc : ∑ z, (-c z) = 0 := by
+    rw [Finset.sum_neg_distrib, hc, neg_zero]
+  have hmain' := hone (-c) hnegc
+  have habsneg : ∑ z, |(-c) z| = ∑ z, |c z| :=
+    Finset.sum_congr rfl fun z _ => abs_neg _
+  rw [habsneg] at hmain'
+  have hval : ∑ z, (-c z) * g z = -∑ z, c z * g z := by
+    rw [← Finset.sum_neg_distrib]
+    exact Finset.sum_congr rfl fun z _ => by ring
+  simp only [Pi.neg_apply] at hmain'
+  rw [hval] at hmain'
+  exact abs_le.2 ⟨by linarith, hmain⟩
+
+omit [DecidableEq V] in
+/-- **The Dobrushin coefficient of a matrix**: the worst-case
+total-variation distance between two of its rows,
+`δ(Q) = max_{x,y} TV(Q_x, Q_y)` — the contraction coefficient of the
+classical Dobrushin ergodicity argument, at its matrix level (no
+stochasticity in the definition; on a finite type the sup is a genuine
+maximum). At a row-stochastic `Q` this is LPW's two-start distance
+`d(1)` of the chain `Q` drives. -/
+noncomputable def tvDobrushinCoeff (Q : Matrix V V ℝ) [Nonempty V] : ℝ :=
+  (Finset.univ : Finset (V × V)).sup'
+    ⟨(‹Nonempty V›.some, ‹Nonempty V›.some), Finset.mem_univ _⟩ fun p =>
+      tvDistance (Q p.1) (Q p.2)
+
+omit [DecidableEq V] in
+theorem tvDobrushinCoeff_nonneg (Q : Matrix V V ℝ) [Nonempty V] :
+    0 ≤ tvDobrushinCoeff Q :=
+  le_trans (tvDistance_nonneg _ _)
+    (Finset.le_sup'
+      (f := fun p : V × V => tvDistance (Q p.1) (Q p.2))
+      (Finset.mem_univ (‹Nonempty V›.some, ‹Nonempty V›.some)))
+
+omit [DecidableEq V] in
+/-- **The sharp Dobrushin contraction, matrix level**: applying a
+matrix `Q` to both sides of an equal-mass pair of vectors contracts
+their TV distance by the Dobrushin coefficient of `Q` —
+`TV(μ ᵥ* Q, ν ᵥ* Q) ≤ TV(μ, ν) · δ(Q)`. Hypothesis-minimal: no
+stochasticity, no signs, only equal masses. Proof: the sign statistic
+of the evolved difference, transported to a pairing against the row
+statistics `z ↦ Q_z ⬝ᵥ s`, whose oscillation is bounded by `2 δ(Q)`
+through the distinguishing-function bound (`|s| ≤ 1`), closed by the
+pairing core. The undirected uniform-mixing delivery proved this
+mechanism bespoke at the walk matrix's powers
+(`tvDistance_pow_walkTransitionMatrixTranspose_mulVec_le`); this is
+the same engine at the matrix level, consumable by every chain on the
+shelf (undirected, lazy, directed — any row action). The constant is
+sharp: QA pins it attained exactly at the basis pair on the Google
+fixture (`PRU_contraction_attained_QA`).
+
+QA: exercised by `Scaffold.QA.SpectralGraph.DirectedMixing_QA.*`
+(Section H). -/
+theorem tvDistance_vecMul_le_tvDobrushinCoeff [Nonempty V]
+    {Q : Matrix V V ℝ} (μ ν : V → ℝ)
+    (hmass : ∑ i, μ i = ∑ i, ν i) :
+    tvDistance (μ ᵥ* Q) (ν ᵥ* Q)
+      ≤ tvDistance μ ν * tvDobrushinCoeff Q := by
+  have hmass0 : ∑ z, (μ - ν) z = 0 := by
+    simp only [Pi.sub_apply]
+    rw [Finset.sum_sub_distrib, hmass, sub_self]
+  set s : V → ℝ :=
+    fun w => if 0 ≤ ((μ - ν) ᵥ* Q) w then 1 else -1 with hsdef
+  have hsabs : ∀ w, |s w| ≤ 1 := by
+    intro w
+    by_cases h : 0 ≤ ((μ - ν) ᵥ* Q) w
+    · simp only [hsdef, if_pos h]
+      norm_num
+    · simp only [hsdef, if_neg h]
+      norm_num
+  have hsval : ∀ w, s w * ((μ - ν) ᵥ* Q) w
+      = |((μ - ν) ᵥ* Q) w| := by
+    intro w
+    by_cases h : 0 ≤ ((μ - ν) ᵥ* Q) w
+    · simp only [hsdef, if_pos h, abs_of_nonneg h]
+      ring
+    · simp only [hsdef, if_neg h, abs_of_neg (lt_of_not_ge h)]
+      ring
+  have hosc : ∀ z z' : V,
+      |(∑ w, Q z w * s w) - ∑ w, Q z' w * s w|
+        ≤ 2 * tvDobrushinCoeff Q := by
+    intro z z'
+    have hgg : (∑ w, Q z w * s w) - ∑ w, Q z' w * s w
+        = ∑ w, (Q z w - Q z' w) * s w := by
+      rw [← Finset.sum_sub_distrib]
+      exact Finset.sum_congr rfl fun w _ => by ring
+    have hd := tvDistance_ge_half_abs_sum
+      (μ := fun j => Q z j) (ν := fun j => Q z' j) s hsabs
+    rw [hgg]
+    have hsup : tvDistance (fun j => Q z j) (fun j => Q z' j)
+        ≤ tvDobrushinCoeff Q :=
+      Finset.le_sup'
+        (f := fun p : V × V => tvDistance (Q p.1) (Q p.2))
+        (Finset.mem_univ (z, z'))
+    calc |∑ w, (Q z w - Q z' w) * s w|
+        ≤ 2 * tvDistance (fun j => Q z j) (fun j => Q z' j) := by linarith
+      _ ≤ 2 * tvDobrushinCoeff Q := mul_le_mul_of_nonneg_left hsup (by norm_num)
+  have hpairing : ∑ w, |((μ - ν) ᵥ* Q) w|
+      = ∑ z, (μ - ν) z * (∑ w, Q z w * s w) := by
+    calc ∑ w, |((μ - ν) ᵥ* Q) w|
+        = ∑ w, s w * ((μ - ν) ᵥ* Q) w :=
+          Finset.sum_congr rfl fun w _ => (hsval w).symm
+      _ = ∑ w, ∑ z, (μ - ν) z * (Q z w * s w) := by
+          refine Finset.sum_congr rfl fun w _ => ?_
+          simp only [Matrix.vecMul, Matrix.dotProduct]
+          rw [Finset.mul_sum]
+          exact Finset.sum_congr rfl fun z _ => by ring
+      _ = ∑ z, ∑ w, (μ - ν) z * (Q z w * s w) := Finset.sum_comm
+      _ = ∑ z, (μ - ν) z * (∑ w, Q z w * s w) := by
+          refine Finset.sum_congr rfl fun z _ => ?_
+          rw [Finset.mul_sum]
+  have hp := abs_sum_mul_le_of_pairwise (c := μ - ν)
+    (g := fun z => ∑ w, Q z w * s w) hosc hmass0
+  have hL1 : ∑ z, |(μ - ν) z| = 2 * tvDistance μ ν := by
+    simp only [Pi.sub_apply, tvDistance]
+    ring
+  have hsplit : ∀ w : V, (μ ᵥ* Q) w - (ν ᵥ* Q) w = ((μ - ν) ᵥ* Q) w := by
+    intro w
+    rw [← Pi.sub_apply, Matrix.sub_vecMul]
+  calc tvDistance (μ ᵥ* Q) (ν ᵥ* Q)
+      = (1 / 2) * ∑ w, |((μ - ν) ᵥ* Q) w| := by
+          rw [tvDistance]
+          congr 1
+          exact Finset.sum_congr rfl fun w _ => by rw [hsplit w]
+    _ = (1 / 2) * ∑ z, (μ - ν) z * (∑ w, Q z w * s w) := by
+          rw [hpairing]
+    _ ≤ (1 / 2) * |∑ z, (μ - ν) z * (∑ w, Q z w * s w)| := by
+          exact mul_le_mul_of_nonneg_left (le_abs_self _) (by norm_num)
+    _ ≤ (1 / 2) * (((∑ z, |(μ - ν) z|) / 2) * (2 * tvDobrushinCoeff Q)) := by
+          exact mul_le_mul_of_nonneg_left hp (by norm_num)
+    _ = tvDistance μ ν * tvDobrushinCoeff Q := by
+          rw [hL1]
+          ring
+
+/-- **Generic submultiplicativity of the Dobrushin coefficient** for
+row-stochastic powers: `δ(Q^(s+t)) ≤ δ(Q^s) · δ(Q^t)` — LPW's
+`d(s+t) ≤ d(s) d(t)` in its matrix home, pure Markovity (row
+stochasticity is the only hypothesis: it supplies the equal-mass
+condition of the contraction along the power's rows). QA pins it
+attained with equality at every time on the Google fixture
+(`PRU_pair_submul_attained_QA`).
+
+QA: exercised by `Scaffold.QA.SpectralGraph.DirectedMixing_QA.*`
+(Section H). -/
+theorem tvDobrushinCoeff_pow_add_le [Nonempty V] (Q : Matrix V V ℝ)
+    (hrow : ∀ i, ∑ j, Q i j = 1) (s t : ℕ) :
+    tvDobrushinCoeff (Q ^ (s + t))
+      ≤ tvDobrushinCoeff (Q ^ s) * tvDobrushinCoeff (Q ^ t) := by
+  have hrowid : ∀ x : V, (Q ^ (s + t)) x = ((Q ^ s) x) ᵥ* (Q ^ t) := by
+    intro x
+    funext j
+    simp only [Matrix.vecMul, Matrix.dotProduct, Matrix.mul_apply, pow_add]
+  refine Finset.sup'_le
+    (⟨(‹Nonempty V›.some, ‹Nonempty V›.some), Finset.mem_univ _⟩ :
+      (Finset.univ : Finset (V × V)).Nonempty)
+    (f := fun p : V × V =>
+      tvDistance ((Q ^ (s + t)) p.1) ((Q ^ (s + t)) p.2))
+    fun p _ => ?_
+  show tvDistance ((Q ^ (s + t)) p.1) ((Q ^ (s + t)) p.2)
+    ≤ tvDobrushinCoeff (Q ^ s) * tvDobrushinCoeff (Q ^ t)
+  rw [hrowid p.1, hrowid p.2]
+  have hmass : ∑ i, (Q ^ s) p.1 i = ∑ i, (Q ^ s) p.2 i := by
+    rw [pow_row_sum hrow s p.1, pow_row_sum hrow s p.2]
+  calc tvDistance (((Q ^ s) p.1) ᵥ* (Q ^ t)) (((Q ^ s) p.2) ᵥ* (Q ^ t))
+      ≤ tvDistance ((Q ^ s) p.1) ((Q ^ s) p.2) * tvDobrushinCoeff (Q ^ t) :=
+        tvDistance_vecMul_le_tvDobrushinCoeff _ _ hmass
+    _ ≤ tvDobrushinCoeff (Q ^ s) * tvDobrushinCoeff (Q ^ t) := by
+        refine mul_le_mul_of_nonneg_right ?_ (tvDobrushinCoeff_nonneg (Q ^ t))
+        exact Finset.le_sup'
+          (f := fun p : V × V => tvDistance ((Q ^ s) p.1) ((Q ^ s) p.2))
+          (Finset.mem_univ p)
 
 /-!
 ## Continuous time

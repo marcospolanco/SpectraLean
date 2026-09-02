@@ -25,7 +25,7 @@ directed axis' convergence toolkit (see §8.5 below).
 | Theorem | Lean Declaration | Kind | Module |
 |---------|-------------------|------|--------|
 | Theorem 8.4.4 (Perron–Frobenius, irreducible nonnegative matrices) | `perron_frobenius` | **axiom (admitted 2026-08-22)** | `Scaffold.Mathlib.LinearAlgebra.PerronFrobenius` |
-| §8.5 (primitive matrices; the Perron–Frobenius limit for primitive matrices), specialized to the row-stochastic case at Perron root `1` | `primitive_power_tendsto` | **axiom (admitted 2026-08-24)** | `Scaffold.Mathlib.LinearAlgebra.PrimitiveConvergence` |
+| §8.5 (primitive matrices; the Perron–Frobenius limit for primitive matrices), specialized to the row-stochastic case at Perron root `1` | `primitive_power_tendsto` | **theorem (proved 2026-09-02 by the Doeblin/Dobrushin contraction route; admitted 2026-08-24–2026-09-02)** | `Scaffold.Mathlib.LinearAlgebra.PrimitiveConvergence` |
 | Section 4.3 (Cauchy interlacing) | `eigen_interlacing_principal_submatrix` | **theorem (proved 2026-08-18; axiom before, retired)** | `Scaffold.Mathlib.GraphTheory.Spectral` |
 | Section 4.2 (Courant–Fischer, second-eigenvalue instance) | `lambda2_variational` | **theorem (proved 2026-08-18; axiom before, retired)** | `Scaffold.Mathlib.GraphTheory.Spectral` |
 | Section 4.2 (Courant–Fischer, general min–max at every index) | `evals_min_max` | **theorem (proved 2026-08-18; never admitted)** | `Scaffold.Mathlib.GraphTheory.Spectral` |
@@ -34,14 +34,13 @@ directed axis' convergence toolkit (see §8.5 below).
 
 - `perron_frobenius` is admitted (not proved): the directed axis' second
   spectral toolkit, absent from the pinned Mathlib.
-- `primitive_power_tendsto` is admitted (not proved): the directed
-  axis' first *convergence* axiom, deliberately complementary to
-  `perron_frobenius`'s no-dominance scope — that scope is exactly why
-  this admission exists, since convergence is genuinely false on the
-  irreducible-but-periodic input the first axiom honestly covers (the
-  `DirectedMixing_QA` 2-cycle fence re-proves the
-  `strict_dominance_refuted_QA` boundary in limit form, with every
-  other hypothesis of the new axiom verified on the fixture — exactly
+- `primitive_power_tendsto` is **proved** (retired 2026-09-02,
+  `proposals/retire-primitive-power-convergence.md`): the elementary
+  Doeblin/Dobrushin contraction route — no Perron–Frobenius machinery
+  — at the unchanged admitted statement. The primitivity hypothesis
+  remains load-bearing and fenced (the `DirectedMixing_QA` 2-cycle
+  fence re-proves the `strict_dominance_refuted_QA` boundary in limit
+  form, with every other hypothesis verified on the fixture — exactly
   `hprim` isolated). Statement differences from the source, recorded
   in the module documentation: the source's primitive limit is stated
   at the Perron data `lim (A/ρ(A))^m = x yᵀ`; the Lean statement is

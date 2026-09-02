@@ -30,13 +30,16 @@ column convergence, the row-action walk form).
 | `Matrix.IsIrreducible` | def | every index reaches every other through positive-weight directed arcs (`Relation.ReflTransGen`) | combinatorial form of H&J irreducibility |
 | `perron_frobenius` | **axiom** | for nonnegative irreducible `A` with a positive entry: a Perron root `r > 0` with a strictly positive eigenvector, `rootMultiplicity r A.charpoly = 1`, every nonzero nonnegative eigenvector is a positive multiple of the Perron vector (and its eigenvalue is `r`), and every complex charpoly root has modulus `≤ r`. **No strict-dominance clause** — that needs primitivity | [Horn & Johnson](../sources/horn_johnson_matrix_analysis.md), Theorem 8.4.4 |
 | `Matrix.IsPrimitive` | def | some strictly positive power is strictly positive, entrywise (H&J's definition of primitivity verbatim) | [Horn & Johnson](../sources/horn_johnson_matrix_analysis.md), §8.5 |
-| `primitive_power_tendsto` | **axiom** | powers of a primitive row-stochastic matrix converge entrywise to the rank-one stationary projector: `(P ^ t) *ᵥ x → (π ⬝ᵥ x) • 1` at any nonnegative mass-one stationary `π ᵥ* P = π` (given-π form). **The first convergence axiom** — the row-stochastic specialization of the primitive Perron–Frobenius limit at root `1`; no rate clause (see the module documentation) | [Horn & Johnson](../sources/horn_johnson_matrix_analysis.md), §8.5 (stochastic form cf. Levin–Peres–Wilmer Thm 4.9) |
+| `primitive_power_tendsto` | **theorem (retired from axiom 2026-09-02)** | powers of a primitive row-stochastic matrix converge entrywise to the rank-one stationary projector: `(P ^ t) *ᵥ x → (π ⬝ᵥ x) • 1` at any nonnegative mass-one stationary `π ᵥ* P = π` (given-π form) — the row-stochastic specialization of the primitive Perron–Frobenius limit at root `1`, **proved by the Doeblin/Dobrushin contraction route** (the entrywise-range engine below); no rate clause, the proof's `ρ^(t/m)` byproduct explicit but typically loose | [Horn & Johnson](../sources/horn_johnson_matrix_analysis.md), §8.5 (stochastic form cf. Levin–Peres–Wilmer Thm 4.9) |
 | `isPrimitive_of_pos` | theorem | a strictly positive matrix is primitive at `k = 1` | — |
 | `reachable_of_pow_pos` | theorem | an entry of a positive power is a sum over walks: positivity yields a positive-weight directed path (`ReflTransGen`) | — |
 | `isIrreducible_of_isPrimitive` | theorem | primitivity implies strong connectivity — the connective tissue to the `perron_frobenius` hypothesis form | — |
 | `pow_mulVec_one` | theorem | powers of a row-stochastic matrix fix the constant-one vector | — |
-| `primitive_entrywise_tendsto` | theorem | conditional on `primitive_power_tendsto`: every column of `Pᵗ` converges to `π` (at the basis vector, through `Matrix.mulVec_single`) | — |
-| `primitive_vecMul_tendsto` | theorem | conditional: `ν ᵥ* Pᵗ → π` for every start summing to one (finite-sum interchange; the pin has no tendsto-sum lemma) | — |
+| `primitive_entrywise_tendsto` | theorem | hard crust since the retirement: every column of `Pᵗ` converges to `π` (at the basis vector, through `Matrix.mulVec_single`) | — |
+| `primitive_vecMul_tendsto` | theorem | hard crust since the retirement: `ν ᵥ* Pᵗ → π` for every start summing to one (finite-sum interchange; the pin has no tendsto-sum lemma) | — |
+| `entrySup` / `entryInf` / `entryRange` | def | the entrywise supremum/infimum/range of a vector on a nonempty finite type — the quantity Doeblin's coefficient controls (2026-09-02) | — |
+| `entryRange_mulVec_le_of_pos_entries` | theorem | **the Doeblin/Dobrushin contraction**: if every entry of the row-stochastic `Q` is `≥ δ`, then `range (Q *ᵥ y) ≤ (1 - |V|δ) · range y` — the row split `δ` + remainder-of-mass `1-|V|δ` route; the retirement's engine, reusable for any stochastic action | — |
+| `entryRange_pow_mul_le` | theorem | the iterated block contraction: `range (P^(m·q) *ᵥ y) ≤ (1-|V|δ)^q · range y` when `P^m` is entrywise `≥ δ` | — |
 
 ## Usage Patterns
 
@@ -77,7 +80,9 @@ column convergence, the row-action walk form).
   2026-08-24** (`GraphTheory.PageRank`).
 - The PageRank power iteration / directed mixing — **delivered
   2026-08-24** (`GraphTheory.DirectedMixing`, the first
-  `primitive_power_tendsto` consumer; geometric *rates* remain a
+  `primitive_power_tendsto` consumer; **hard crust since the
+  2026-09-02 retirement** of that admission by the Doeblin/Dobrushin
+  contraction route; geometric *rates* remain a
   future admission gated on a named consumer).
 
 ## See Also

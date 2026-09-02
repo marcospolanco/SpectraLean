@@ -17,6 +17,7 @@ import Scaffold.Mathlib.Probability.IIDProduct
 import Scaffold.Mathlib.Probability.Concentration.Scalar.Hoeffding
 import Scaffold.Mathlib.GraphTheory.Mixing
 import Scaffold.Mathlib.GraphTheory.Oversmoothing
+import Scaffold.Mathlib.GraphTheory.DirectedMixing
 
 /-!
 # Concentration of the empirical walk distribution
@@ -81,7 +82,7 @@ QA: `Scaffold/QA/Derived/EmpiricalStationary_QA.lean`.
 -/
 
 open MeasureTheory ProbabilityTheory
-open scoped ENNReal
+open scoped ENNReal Matrix
 
 namespace Scaffold.Derived.EmpiricalStationary
 
@@ -418,5 +419,212 @@ theorem empiricalLazyWalkDistribution_stationary_tail_of_depth
       (by positivity))
 
 end LazyStationaryLimit
+
+/-!
+## The PageRank stationarity limit
+
+The directed `t_mix` object's named consumer
+(`proposals/directed-mixing-time-object.md`): the empirical-stationary
+capstone cloned at the Google-walk law. On directed input the entire
+symmetric `evals`/`eigvecOf` mixing toolkit is unavailable, so the
+α-rate Doeblin certificate (the delivered `pageRank_tvDistance_le`) is
+the only mixing route this sampling program can consume there — the
+same "agent that can only simulate the walk" setting as the plain and
+lazy sections, instantiated where no undirected machinery applies.
+All hard crust: the tail engine (`hoeffding_empirical`) is proved, the
+rate is proved, the entrywise bias comes through the new
+equal-mass TV extraction `abs_sub_le_tvDistance`, and the depth-form
+capstone consumes the directed object's own attainment specification
+`pageRankMixingTimeFrom_spec`.
+-/
+section PageRankLimit
+
+/-- **The fixed-time empirical PageRank tail**: for `n` i.i.d. samples
+of the `t₀`-step Google-walk law from `x` (one simulated random-surfer
+trajectory length, sampled independently `n` times), the empirical
+visit frequency of vertex `i` concentrates around the law's own mass at
+`i` at Hoeffding's `2 exp (−2 n t²)`. The law's probability-vector
+certification is proved (`_nonneg`, `sum_pageRankDistribution`) —
+nonnegative weights, positive degrees, the teleportation window; no
+symmetry anywhere. -/
+theorem empiricalPageRank_tail
+    {V : Type} [Fintype V] [DecidableEq V] [MeasurableSpace V]
+    [MeasurableSingletonClass V] {A : WAdj (V := V)}
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    {α : ℝ} (hα : 0 ≤ α) (hα' : α < 1) [Nonempty V]
+    (t₀ : ℕ) (x : V) {n : ℕ} (hn : n ≠ 0) (i : V) (t : ℝ) (ht : 0 ≤ t) :
+    (iidPMF (pageRankDistribution A α t₀ x)
+        (fun j => pageRankDistribution_nonneg A hnn hd hα hα' t₀ x j)
+        (sum_pageRankDistribution A hd α t₀ x)).toMeasure
+      {ω : Fin n → V | |(1 / (n : ℝ)) * ∑ k : Fin n,
+          (if ω k = i then (1 : ℝ) else 0) - pageRankDistribution A α t₀ x i| ≥ t}
+      ≤ ENNReal.ofReal (2 * Real.exp (-2 * (n : ℝ) * t ^ 2)) :=
+  hoeffding_empirical_iid
+    (fun j => pageRankDistribution_nonneg A hnn hd hα hα' t₀ x j)
+    (sum_pageRankDistribution A hd α t₀ x) hn i t ht
+
+/-- **The stationarity-limit concentration at the PageRank bias**: on
+the teleportation window with any mass-one stationary `π`, the
+empirical visit frequency of `i` in `n` i.i.d. samples of the `t₀`-step
+Google-walk law from `x` concentrates around the *stationary* value,
+the law's own distance to stationarity folded in as a deterministic
+bias term `α ^ t₀ · TV(δ_x, π)` (the rate theorem's own entrywise
+extraction through `abs_sub_le_tvDistance`). At any threshold strictly
+above the bias, the Hoeffking exponent pays only for the residual. -/
+theorem empiricalPageRank_stationary_tail
+    {V : Type} [Fintype V] [DecidableEq V] [MeasurableSpace V]
+    [MeasurableSingletonClass V] {A : WAdj (V := V)}
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    {α : ℝ} (hα : 0 < α) (hα' : α < 1) [Nonempty V]
+    {π : V → ℝ} (hπsum : ∑ i, π i = 1)
+    (hπstat : π ᵥ* googleMatrix A α = π)
+    (t₀ : ℕ) (x i : V) {n : ℕ} (hn : n ≠ 0) {t : ℝ}
+    (hbias : α ^ t₀ * tvDistance (Pi.single x (1 : ℝ) : V → ℝ) π < t) :
+    (iidPMF (pageRankDistribution A α t₀ x)
+        (fun j => pageRankDistribution_nonneg A hnn hd (le_of_lt hα) hα' t₀ x j)
+        (sum_pageRankDistribution A hd α t₀ x)).toMeasure
+      {ω : Fin n → V | |(1 / (n : ℝ)) * ∑ k : Fin n,
+          (if ω k = i then (1 : ℝ) else 0) - π i| ≥ t}
+      ≤ ENNReal.ofReal (2 * Real.exp (-2 * (n : ℝ)
+          * (t - α ^ t₀ * tvDistance (Pi.single x (1 : ℝ) : V → ℝ) π) ^ 2)) := by
+  set b : ℝ := α ^ t₀ * tvDistance (Pi.single x (1 : ℝ) : V → ℝ) π with hb_def
+  have hmass : ∑ j, pageRankDistribution A α t₀ x j = ∑ j, π j := by
+    rw [sum_pageRankDistribution A hd α t₀ x, hπsum]
+  have hentry : |pageRankDistribution A α t₀ x i - π i| ≤ b :=
+    le_trans (abs_sub_le_tvDistance hmass i)
+      (pageRank_tvDistance_le A hnn hd (le_of_lt hα) hα' hπsum hπstat
+        (sum_piSingle x) t₀)
+  refine le_trans (measure_mono ?_)
+    (empiricalPageRank_tail hnn hd (le_of_lt hα) hα' t₀ x hn i (t - b)
+      (by linarith))
+  intro ω hω
+  simp only [Set.mem_setOf_eq] at hω ⊢
+  have hsplit : ((1 / (n : ℝ)) * ∑ k : Fin n, (if ω k = i then (1 : ℝ) else 0)
+      - π i)
+      = ((1 / (n : ℝ)) * ∑ k : Fin n, (if ω k = i then (1 : ℝ) else 0)
+          - pageRankDistribution A α t₀ x i)
+        + (pageRankDistribution A α t₀ x i - π i) := by
+    ring
+  rw [hsplit] at hω
+  have htri := abs_add_le
+    ((1 / (n : ℝ)) * ∑ k : Fin n, (if ω k = i then (1 : ℝ) else 0)
+      - pageRankDistribution A α t₀ x i)
+    (pageRankDistribution A α t₀ x i - π i)
+  linarith
+
+/-- **The depth-form capstone — the directed `t_mix` object's named
+consumer**: past the directed mixing time at the half threshold
+`ε / 2` — certifiable by the object's own α-ceiling — `n` i.i.d.
+simulated random-surfer trajectories of length `t₀` estimate the
+PageRank weight `π i` to `ε` with failure probability at most
+`2 exp (− n ε² / 2)`. An agent that can only sample the Google walk
+(never observe its law exactly) inherits the directed mixing object as
+a sampling guarantee; on directed input the entire symmetric
+`evals`/`eigvecOf` mixing toolkit is unavailable, so the α-rate Doeblin
+certificate is the only route this sampling program can consume. The
+object is load-bearing: the hypothesis is the object's attainment
+condition, discharged through `pageRankMixingTimeFrom_spec`. -/
+theorem empiricalPageRank_stationary_tail_of_depth
+    {V : Type} [Fintype V] [DecidableEq V] [MeasurableSpace V]
+    [MeasurableSingletonClass V] {A : WAdj (V := V)}
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    {α : ℝ} (hα : 0 < α) (hα' : α < 1) [Nonempty V]
+    {π : V → ℝ} (hπsum : ∑ i, π i = 1)
+    (hπstat : π ᵥ* googleMatrix A α = π)
+    {ε : ℝ} (hε : 0 < ε) (t₀ : ℕ) (x i : V) {n : ℕ} (hn : n ≠ 0)
+    (htmix : pageRankMixingTimeFrom A α π x (ε / 2) ≤ t₀) :
+    (iidPMF (pageRankDistribution A α t₀ x)
+        (fun j => pageRankDistribution_nonneg A hnn hd (le_of_lt hα) hα' t₀ x j)
+        (sum_pageRankDistribution A hd α t₀ x)).toMeasure
+      {ω : Fin n → V | |(1 / (n : ℝ)) * ∑ k : Fin n,
+          (if ω k = i then (1 : ℝ) else 0) - π i| ≥ ε}
+      ≤ ENNReal.ofReal (2 * Real.exp (-(n : ℝ) * ε ^ 2 / 2)) := by
+  have hwit : ∃ T : ℕ, ∀ s : ℕ, T ≤ s →
+      tvDistance (pageRankDistribution A α s x) π ≤ ε / 2 := by
+    refine ⟨Nat.ceil (Real.log (tvDistance (Pi.single x (1 : ℝ) : V → ℝ) π
+      / (ε / 2)) / Real.log (1 / α)), fun s hs => ?_⟩
+    exact pageRank_tvDistance_le_of_depth A hnn hd hα hα' hπsum hπstat
+      (sum_piSingle x) (by positivity) s
+      (le_trans (Nat.le_ceil _) (by exact_mod_cast hs))
+  have hTV : tvDistance (pageRankDistribution A α t₀ x) π ≤ ε / 2 :=
+    pageRankMixingTimeFrom_spec A α π x hwit t₀ htmix
+  have hmass : ∑ j, pageRankDistribution A α t₀ x j = ∑ j, π j := by
+    rw [sum_pageRankDistribution A hd α t₀ x, hπsum]
+  have hentry : |pageRankDistribution A α t₀ x i - π i| ≤ ε / 2 :=
+    le_trans (abs_sub_le_tvDistance hmass i) hTV
+  have htail := empiricalPageRank_tail (V := V) hnn hd (le_of_lt hα) hα' t₀ x
+    hn i (ε - |pageRankDistribution A α t₀ x i - π i|) (by linarith)
+  refine le_trans (measure_mono ?_) (le_trans htail ?_)
+  · intro ω hω
+    simp only [Set.mem_setOf_eq] at hω ⊢
+    have hsplit : ((1 / (n : ℝ)) * ∑ k : Fin n, (if ω k = i then (1 : ℝ) else 0)
+        - π i)
+        = ((1 / (n : ℝ)) * ∑ k : Fin n, (if ω k = i then (1 : ℝ) else 0)
+            - pageRankDistribution A α t₀ x i)
+          + (pageRankDistribution A α t₀ x i - π i) := by
+      ring
+    rw [hsplit] at hω
+    have htri := abs_add_le
+      ((1 / (n : ℝ)) * ∑ k : Fin n, (if ω k = i then (1 : ℝ) else 0)
+        - pageRankDistribution A α t₀ x i)
+      (pageRankDistribution A α t₀ x i - π i)
+    linarith
+  · -- the exponent arithmetic: the deflated threshold is at least ε/2
+    have hres : ε / 2 ≤ ε - |pageRankDistribution A α t₀ x i - π i| := by
+      linarith
+    have h1 : (ε / 2) ^ 2
+        ≤ (ε - |pageRankDistribution A α t₀ x i - π i|) ^ 2 := by
+      nlinarith [hres, sq_nonneg (ε - |pageRankDistribution A α t₀ x i - π i|),
+        sq_nonneg (ε / 2)]
+    have h2 : (2 : ℝ) * (n : ℝ) * (ε / 2) ^ 2
+        ≤ 2 * (n : ℝ) * (ε - |pageRankDistribution A α t₀ x i - π i|) ^ 2 :=
+      mul_le_mul_of_nonneg_left h1 (by positivity)
+    have h3 : (2 : ℝ) * (n : ℝ) * (ε / 2) ^ 2 = (n : ℝ) * ε ^ 2 / 2 := by
+      ring
+    exact ENNReal.ofReal_le_ofReal
+      (mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr (by linarith))
+        (by positivity))
+
+/-- **The worst-start depth-form capstone — the uniform `t_mix`
+object's named consumer**: past the *uniform* directed mixing time at
+the half threshold `ε / 2` — one start-independent certificate — `n`
+i.i.d. simulated random-surfer trajectories of length `t₀` estimate
+the PageRank weight `π i` to `ε` with failure probability at most
+`2 exp (− n ε² / 2)`, *for every start `x` simultaneously*. The
+per-start capstone needs a per-start threshold; the agent that cannot
+control or does not know the surfer's start vertex gets one certificate
+for all of them. On directed input the entire symmetric
+`evals`/`eigvecOf` mixing toolkit is unavailable, so this uniform
+Doeblin certificate is the only route the sampling program can
+consume. The uniform object is load-bearing: the hypothesis is the
+object's attainment condition, discharged through
+`pageRankMixingTime_spec` at the witness the α-ceiling supplies. -/
+theorem empiricalPageRank_uniform_tail_of_depth
+    {V : Type} [Fintype V] [DecidableEq V] [MeasurableSpace V]
+    [MeasurableSingletonClass V] {A : WAdj (V := V)}
+    (hnn : ∀ i j, 0 ≤ A i j) (hd : ∀ i, 0 < deg A i)
+    {α : ℝ} (hα : 0 < α) (hα' : α < 1) [Nonempty V]
+    {π : V → ℝ} (hπnn : ∀ i, 0 ≤ π i) (hπsum : ∑ i, π i = 1)
+    (hπstat : π ᵥ* googleMatrix A α = π)
+    {ε : ℝ} (hε : 0 < ε) (t₀ : ℕ) (i : V) {n : ℕ} (hn : n ≠ 0)
+    (htmix : pageRankMixingTime A α π (ε / 2) ≤ t₀) :
+    ∀ x : V,
+      (iidPMF (pageRankDistribution A α t₀ x)
+        (fun j => pageRankDistribution_nonneg A hnn hd
+          (le_of_lt hα) hα' t₀ x j)
+        (sum_pageRankDistribution A hd α t₀ x)).toMeasure
+        {ω : Fin n → V | |(1 / (n : ℝ)) * ∑ k : Fin n,
+            (if ω k = i then (1 : ℝ) else 0) - π i| ≥ ε}
+        ≤ ENNReal.ofReal (2 * Real.exp (-(n : ℝ) * ε ^ 2 / 2)) := by
+  intro x
+  have hwit := exists_pageRankMixingTime_witness A hnn hd
+    hα hα' hπnn hπsum hπstat (by positivity : 0 < ε / 2)
+  have hspec := pageRankMixingTime_spec A α π hwit
+  exact empiricalPageRank_stationary_tail_of_depth hnn hd hα hα' hπsum hπstat
+    hε t₀ x i hn
+    (pageRankMixingTimeFrom_le_of_cert A α π x t₀
+      fun s hs => hspec s (Nat.le_trans htmix hs) x)
+
+end PageRankLimit
 
 end Scaffold.Derived.EmpiricalStationary

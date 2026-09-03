@@ -12,7 +12,7 @@ retirement of the `primitive_power_tendsto` admission
 Doeblin/Dobrushin contraction route, `#print axioms` on the retired
 theorem exactly the standard three) — together with the admission's
 own mandated fence, kept live against the now-proved statement's
-hypothesis set. Six sections, reusing `PageRank_QA`'s fixtures (the
+hypothesis set. Nine sections, reusing `PageRank_QA`'s fixtures (the
 QA-to-QA import precedent):
 
 - **Section A** (positive witness, the reducible `A4` fixture at
@@ -96,6 +96,20 @@ QA-to-QA import precedent):
   (1+1)·2` at the fixture's own pinned certificate constants), and the
   `ε = 0` junk corner fenced; the worst-start capstone instance lives
   in `Scaffold.QA.Derived.EmpiricalStationary_QA`.
+- **Section I** (the adversarial fence completion,
+  `proposals/adversarial-fences-tv-dobrushin-engines.md`, 2026-09-02):
+  negative witnesses for the seven load-bearing hypotheses of the
+  TV/Dobrushin engine family the 2026-09-02 deliveries left unfenced —
+  the equal-mass clauses of both TV contractions (refuted at the
+  all-half matrix, whose Dobrushin coefficient is exactly `0`:
+  `1/2 ≤ 0`), the row-sum and nonnegativity clauses of non-expansiveness
+  (the doubled identity doubles the basis pair's TV; the signed
+  stochastic fixture triples it), the row-sum clause of Dobrushin
+  submultiplicativity (`δ(Qx²) = 2 > δ(Qx)² = 1`), and the zero-mass
+  clauses of both pairing cores (`1 ≤ 1/2`) — each with an isolation
+  companion proving the refuted clause is exactly what fails at the
+  fixture. Pure hard crust: these refute *theorem* instantiations, so
+  no `-- @refutes` tags (nothing admitted is consumed).
 -/
 open scoped Matrix Topology
 
@@ -1503,5 +1517,369 @@ theorem PRU_tmix_zero_junk_QA : pageRankMixingTime A2 (1/2) u2 0 = 0 := by
   unfold pageRankMixingTime
   rw [hempty]
   exact Nat.sInf_empty
+
+/-! ## Section I: the adversarial fence completion for the TV/Dobrushin
+engines (`proposals/adversarial-fences-tv-dobrushin-engines.md`,
+2026-09-02)
+
+The 2026-09-02 directed-rate deliveries added `Mixing.lean`'s Doeblin
+TV-contraction and Dobrushin-coefficient sections but fenced only the
+entries-floor clause (Section F) and the junk corners (Section G/H).
+This section is the adversarial re-read's completion of the fence
+discipline: a negative witness for every remaining load-bearing
+hypothesis of the family, each with an isolation companion proving the
+refuted clause is exactly what fails at the fixture (the other
+hypotheses verified genuine). The refuting fixtures are new because the
+existing ones cannot kill these clauses: `Qd`/`Gd` are strictly positive
+with distinct rows (their contractions are the *attainment* pins), and
+`P2` kills the floor clause but is a genuine permutation (row sums one,
+mass-compatible — the mass-dropped conclusions still hold there). -/
+
+/-- The mass-`2` start: the equal-mass clauses' refuting vector. -/
+noncomputable def twoE0 : Fin 2 → ℝ := ![2, 0]
+
+/-- The all-half matrix: row-stochastic, strictly positive, identical
+rows — so its Dobrushin coefficient is exactly `0`. -/
+noncomputable def Qh : Matrix (Fin 2) (Fin 2) ℝ := !![1/2, 1/2; 1/2, 1/2]
+
+/-- The doubled identity: nonnegative, row sums `2` (row stochasticity
+fails). -/
+noncomputable def Mx : Matrix (Fin 2) (Fin 2) ℝ := !![2, 0; 0, 2]
+
+/-- The signed stochastic fixture: row sums `1`, negative off-diagonal
+(nonnegativity fails). -/
+noncomputable def Mn : Matrix (Fin 2) (Fin 2) ℝ := !![2, -1; -1, 2]
+
+/-- The submultiplicativity refuter: row sums `2` and `0`, square
+`2·I`. -/
+noncomputable def Qx : Matrix (Fin 2) (Fin 2) ℝ := !![1, 1; 1, -1]
+
+theorem Qh_apply (i j : Fin 2) : Qh i j = 1/2 := by
+  fin_cases i <;> fin_cases j <;> rfl
+
+theorem Qh_row_sum (i : Fin 2) : ∑ j, Qh i j = 1 := by
+  fin_cases i <;> norm_num [Qh, Fin.sum_univ_two]
+
+theorem Qh_half_le : ∀ i j, (1/2 : ℝ) ≤ Qh i j := fun i j => by rw [Qh_apply]
+
+theorem Mx_row_zero : Mx 0 = ![2, 0] := by funext j; fin_cases j <;> rfl
+
+theorem Mx_row_one : Mx 1 = ![0, 2] := by funext j; fin_cases j <;> rfl
+
+theorem Mx_nonneg : ∀ i j, 0 ≤ Mx i j := by
+  intro i j; fin_cases i <;> fin_cases j <;> norm_num [Mx]
+
+theorem Mn_row_sum (i : Fin 2) : ∑ j, Mn i j = 1 := by
+  fin_cases i <;> norm_num [Mn, Fin.sum_univ_two]
+
+theorem Mn_zero_one : Mn 0 1 = -1 := by rfl
+
+theorem Qx_row_zero : Qx 0 = ![1, 1] := by funext j; fin_cases j <;> rfl
+
+theorem Qx_row_one : Qx 1 = ![1, -1] := by funext j; fin_cases j <;> rfl
+
+theorem Qx_sq : Qx ^ 2 = Mx := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    norm_num [Qx, Mx, pow_two, Matrix.mul_apply, Fin.sum_univ_two]
+
+/-- TV of two explicit two-point vectors, the section's computation
+interface. -/
+theorem tv_lit (a b c d : ℝ) :
+    tvDistance (![a, b] : Fin 2 → ℝ) (![c, d] : Fin 2 → ℝ)
+      = (|a - c| + |b - d|) / 2 := by
+  rw [tvDistance, Fin.sum_univ_two]
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+  ring
+
+/-! ### The evolved vectors, pinned raw -/
+
+theorem twoE0_vecMul_Qh : twoE0 ᵥ* Qh = ![1, 1] := by
+  funext j
+  fin_cases j <;>
+    norm_num [twoE0, Qh, Matrix.vecMul, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+theorem e0_vecMul_Qh : e0 ᵥ* Qh = ![1/2, 1/2] := by
+  funext j
+  fin_cases j <;>
+    norm_num [e0, Qh, Matrix.vecMul, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+theorem e0_vecMul_Mx : e0 ᵥ* Mx = ![2, 0] := by
+  funext j
+  fin_cases j <;>
+    norm_num [e0, Mx, Matrix.vecMul, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+theorem e1_vecMul_Mx : e1 ᵥ* Mx = ![0, 2] := by
+  funext j
+  fin_cases j <;>
+    norm_num [e1, Mx, Matrix.vecMul, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+theorem e0_vecMul_Mn : e0 ᵥ* Mn = ![2, -1] := by
+  funext j
+  fin_cases j <;>
+    norm_num [e0, Mn, Matrix.vecMul, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+theorem e1_vecMul_Mn : e1 ᵥ* Mn = ![-1, 2] := by
+  funext j
+  fin_cases j <;>
+    norm_num [e1, Mn, Matrix.vecMul, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+/-! ### The scalar values, pinned raw -/
+
+theorem tv_twoE0_e0 : tvDistance twoE0 e0 = 1/2 := by
+  rw [show twoE0 = ![2, 0] from rfl, show e0 = ![1, 0] from rfl, tv_lit]; norm_num
+
+theorem tv_twoE0Qh_e0Qh :
+    tvDistance (twoE0 ᵥ* Qh) (e0 ᵥ* Qh) = 1/2 := by
+  rw [twoE0_vecMul_Qh, e0_vecMul_Qh, tv_lit]; norm_num
+
+theorem tv_e0Mx_e1Mx : tvDistance (e0 ᵥ* Mx) (e1 ᵥ* Mx) = 2 := by
+  rw [e0_vecMul_Mx, e1_vecMul_Mx, tv_lit]; norm_num
+
+theorem tv_e0Mn_e1Mn : tvDistance (e0 ᵥ* Mn) (e1 ᵥ* Mn) = 3 := by
+  rw [e0_vecMul_Mn, e1_vecMul_Mn, tv_lit]; norm_num
+
+/-! ### The Dobrushin coefficients of the fixtures -/
+
+theorem Qh_pair_zero : ∀ p : Fin 2 × Fin 2,
+    tvDistance (Qh p.1) (Qh p.2) = 0 := by
+  rintro ⟨a, b⟩
+  have h : Qh a = Qh b := by funext j; rw [Qh_apply, Qh_apply]
+  rw [h, tv_self_eq_zero]
+
+theorem Qh_dobrushin : tvDobrushinCoeff Qh = 0 := by
+  refine le_antisymm ?_ (tvDobrushinCoeff_nonneg Qh)
+  refine Finset.sup'_le
+    (⟨(0, 0), Finset.mem_univ _⟩ : (Finset.univ : Finset (Fin 2 × Fin 2)).Nonempty)
+    (f := fun p : Fin 2 × Fin 2 => tvDistance (Qh p.1) (Qh p.2))
+    fun p _ => (Qh_pair_zero p).le
+
+theorem tv_Mx_01 : tvDistance (Mx 0) (Mx 1) = 2 := by
+  rw [Mx_row_zero, Mx_row_one, tv_lit]; norm_num
+
+theorem Mx_pair_le : ∀ p : Fin 2 × Fin 2,
+    tvDistance (Mx p.1) (Mx p.2) ≤ 2 := by
+  rintro ⟨a, b⟩
+  simp only []
+  rcases (show a = 0 ∨ a = 1 by omega) with ha | ha <;> rw [ha]
+  all_goals rcases (show b = 0 ∨ b = 1 by omega) with hb | hb <;> rw [hb]
+  · rw [tv_self_eq_zero]; norm_num
+  · rw [Mx_row_zero, Mx_row_one, tv_lit]; norm_num
+  · rw [tvDistance_symm, Mx_row_zero, Mx_row_one, tv_lit]; norm_num
+  · rw [tv_self_eq_zero]; norm_num
+
+theorem Mx_dobrushin : tvDobrushinCoeff Mx = 2 := by
+  refine le_antisymm ?_ ?_
+  · refine Finset.sup'_le
+      (⟨(0, 0), Finset.mem_univ _⟩ : (Finset.univ : Finset (Fin 2 × Fin 2)).Nonempty)
+      (f := fun p : Fin 2 × Fin 2 => tvDistance (Mx p.1) (Mx p.2))
+      fun p _ => Mx_pair_le p
+  · have hle : tvDistance (Mx 0) (Mx 1) ≤ tvDobrushinCoeff Mx :=
+      Finset.le_sup'
+        (f := fun p : Fin 2 × Fin 2 => tvDistance (Mx p.1) (Mx p.2))
+        (Finset.mem_univ (0, 1))
+    exact tv_Mx_01.symm.le.trans hle
+
+theorem tv_Qx_01 : tvDistance (Qx 0) (Qx 1) = 1 := by
+  rw [Qx_row_zero, Qx_row_one, tv_lit]; norm_num
+
+theorem Qx_pair_le : ∀ p : Fin 2 × Fin 2,
+    tvDistance (Qx p.1) (Qx p.2) ≤ 1 := by
+  rintro ⟨a, b⟩
+  simp only []
+  rcases (show a = 0 ∨ a = 1 by omega) with ha | ha <;> rw [ha]
+  all_goals rcases (show b = 0 ∨ b = 1 by omega) with hb | hb <;> rw [hb]
+  · rw [tv_self_eq_zero]; norm_num
+  · rw [Qx_row_zero, Qx_row_one, tv_lit]; norm_num
+  · rw [tvDistance_symm, Qx_row_zero, Qx_row_one, tv_lit]; norm_num
+  · rw [tv_self_eq_zero]; norm_num
+
+theorem Qx_dobrushin : tvDobrushinCoeff Qx = 1 := by
+  refine le_antisymm ?_ ?_
+  · refine Finset.sup'_le
+      (⟨(0, 0), Finset.mem_univ _⟩ : (Finset.univ : Finset (Fin 2 × Fin 2)).Nonempty)
+      (f := fun p : Fin 2 × Fin 2 => tvDistance (Qx p.1) (Qx p.2))
+      fun p _ => Qx_pair_le p
+  · have hle : tvDistance (Qx 0) (Qx 1) ≤ tvDobrushinCoeff Qx :=
+      Finset.le_sup'
+        (f := fun p : Fin 2 × Fin 2 => tvDistance (Qx p.1) (Qx p.2))
+        (Finset.mem_univ (0, 1))
+    exact tv_Qx_01.symm.le.trans hle
+
+/-! ### The scalar values of the pairing-core fixtures -/
+
+theorem dot_e0_e0 : e0 ⬝ᵥ e0 = 1 := by
+  norm_num [e0, Matrix.dotProduct, Fin.sum_univ_two,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+theorem sum_abs_e0 : ∑ i, |e0 i| = 1 := by
+  norm_num [e0, Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons]
+
+theorem sum_mul_e0_e0 : ∑ z : Fin 2, e0 z * e0 z = 1 := by
+  norm_num [e0, Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons]
+
+theorem sum_e0 : ∑ i, e0 i = 1 := by
+  norm_num [e0, Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons]
+
+theorem sum_twoE0 : ∑ i, twoE0 i = 2 := by
+  norm_num [twoE0, Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons]
+
+theorem entryRange_e0 : entryRange e0 = 1 := by
+  have hs : entrySup e0 = 1 := by
+    refine le_antisymm ?_ (le_entrySup e0 0)
+    refine Finset.sup'_le (Finset.univ_nonempty)
+      (f := fun i => e0 i) fun i _ => ?_
+    fin_cases i <;> simp [e0]
+  have hi : entryInf e0 = 0 := by
+    refine le_antisymm (entryInf_le e0 1) ?_
+    refine Finset.le_inf' (Finset.univ_nonempty)
+      (f := fun i => e0 i) fun i _ => ?_
+    fin_cases i <;> simp [e0]
+  rw [entryRange, hs, hi]; norm_num
+
+theorem hD_e0 : ∀ z z' : Fin 2, |e0 z - e0 z'| ≤ 1 := by
+  intro z z'
+  fin_cases z <;> fin_cases z' <;> simp [e0]
+
+/-! ### The seven fences -/
+
+/-- **Fence 1: the equal-mass clause of the Doeblin TV contraction is
+load-bearing.** At the all-half matrix `Qh` (row-stochastic, every entry
+`≥ 1/2`) with the mass-`2` start `twoE0 = 2•e₀` against the mass-`1`
+start `e₀`, the un-guarded conclusion reads `1/2 ≤ 0` — the coefficient
+`1 - |V|·(1/2) = 0` collapses the bound while the evolved TV stays
+`1/2`. -/
+theorem fence_doeblin_tv_mass_refuted_QA :
+    ¬ (tvDistance (twoE0 ᵥ* Qh) (e0 ᵥ* Qh)
+      ≤ (1 - (Fintype.card (Fin 2) : ℝ) * (1/2)) * tvDistance twoE0 e0) := by
+  intro hcon
+  have hcard : (Fintype.card (Fin 2) : ℝ) = 2 := by norm_num
+  have hR : (1 - (Fintype.card (Fin 2) : ℝ) * (1/2)) * tvDistance twoE0 e0
+      = 0 := by
+    rw [hcard, tv_twoE0_e0]; norm_num
+  rw [tv_twoE0Qh_e0Qh, hR] at hcon
+  norm_num at hcon
+
+/-- **Fence 2: the equal-mass clause of the sharp Dobrushin contraction
+is load-bearing.** At the same fixture, `δ(Qh) = 0` exactly (identical
+rows), so the un-guarded conclusion reads `1/2 ≤ 0`. -/
+theorem fence_dobrushin_tv_mass_refuted_QA :
+    ¬ (tvDistance (twoE0 ᵥ* Qh) (e0 ᵥ* Qh)
+      ≤ tvDistance twoE0 e0 * tvDobrushinCoeff Qh) := by
+  intro hcon
+  rw [tv_twoE0Qh_e0Qh, tv_twoE0_e0, Qh_dobrushin] at hcon
+  norm_num at hcon
+
+/-- **Fence 3: the row-stochasticity clause of TV non-expansiveness is
+load-bearing.** At the doubled identity (nonnegative, row sums `2`), the
+basis pair's TV doubles: `2 ≤ 1` is false. -/
+theorem fence_nonexp_row_refuted_QA :
+    ¬ (tvDistance (e0 ᵥ* Mx) (e1 ᵥ* Mx) ≤ tvDistance e0 e1) := by
+  intro hcon
+  rw [tv_e0Mx_e1Mx, tv_e0_e1] at hcon
+  norm_num at hcon
+
+/-- **Fence 4: the nonnegativity clause of TV non-expansiveness is
+load-bearing.** At the signed stochastic fixture (row sums `1`, negative
+off-diagonal), the basis pair's TV triples: `3 ≤ 1` is false. -/
+theorem fence_nonexp_nonneg_refuted_QA :
+    ¬ (tvDistance (e0 ᵥ* Mn) (e1 ᵥ* Mn) ≤ tvDistance e0 e1) := by
+  intro hcon
+  rw [tv_e0Mn_e1Mn, tv_e0_e1] at hcon
+  norm_num at hcon
+
+/-- **Fence 5: the row-stochasticity clause of Dobrushin
+submultiplicativity is load-bearing.** At `Qx = !![1, 1; 1, -1]` (row
+sums `2, 0`) with `s = t = 1`: `δ(Qx²) = δ(2·I) = 2 > δ(Qx)² =
+TV((1,1),(1,-1))² = 1`. -/
+theorem fence_dobrushin_submul_row_refuted_QA :
+    ¬ (tvDobrushinCoeff (Qx ^ (1 + 1))
+      ≤ tvDobrushinCoeff (Qx ^ 1) * tvDobrushinCoeff (Qx ^ 1)) := by
+  intro hcon
+  rw [show Qx ^ (1 + 1) = Qx ^ 2 from by norm_num, Qx_sq,
+    show (Qx : Matrix (Fin 2) (Fin 2) ℝ) ^ 1 = Qx from pow_one Qx,
+    Mx_dobrushin, Qx_dobrushin] at hcon
+  norm_num at hcon
+
+/-- **Fence 6: the zero-mass clause of zero-sum interval pinning is
+load-bearing.** At `w = e₀` (mass `1`) against `h = e₀` (entrywise range
+`1`), the un-guarded conclusion reads `1 ≤ 1/2`. -/
+theorem fence_interval_pin_mass_refuted_QA :
+    ¬ (|e0 ⬝ᵥ e0| ≤ (1/2) * entryRange e0 * ∑ i, |e0 i|) := by
+  intro hcon
+  rw [dot_e0_e0, entryRange_e0, sum_abs_e0] at hcon
+  norm_num at hcon
+
+/-- **Fence 7: the zero-mass clause of the pairing core is
+load-bearing.** At `c = e₀` (mass `1`) against `g = e₀` (oscillation
+bound `D = 1`, every `hD` clause verified by `hD_e0`), the un-guarded
+conclusion reads `1 ≤ 1/2`. -/
+theorem fence_pairing_mass_refuted_QA :
+    ¬ (|∑ z : Fin 2, e0 z * e0 z| ≤ ((∑ z : Fin 2, |e0 z|) / 2) * (1 : ℝ)) := by
+  intro hcon
+  rw [sum_mul_e0_e0, sum_abs_e0] at hcon
+  norm_num at hcon
+
+/-! ### The isolation companions -/
+
+/-- **Isolation for fences 1 and 2**: every other hypothesis of both
+contraction lemmas holds genuinely at the fixture — row sums one,
+entries `≥ 1/2` (so the Doeblin coefficient `1 - |V|δ` is exactly `0`,
+and `δ(Qh) = 0` by identical rows) — the masses are `2` and `1`, and
+the equal-mass clause is exactly what fails. -/
+theorem fence_mass_isolation_QA :
+    (∀ i, ∑ j, Qh i j = 1) ∧ (∀ i j, (1/2 : ℝ) ≤ Qh i j)
+      ∧ ∑ i, twoE0 i = 2 ∧ ∑ i, e0 i = 1
+      ∧ ¬ (∑ i, twoE0 i = ∑ i, e0 i) := by
+  refine ⟨Qh_row_sum, Qh_half_le, sum_twoE0, sum_e0, ?_⟩
+  intro h
+  rw [sum_twoE0, sum_e0] at h
+  norm_num at h
+
+/-- **Isolation for fence 3**: the doubled identity is genuinely
+nonnegative and genuinely not row-stochastic (row sums `2`). -/
+theorem fence_nonexp_row_isolation_QA :
+    (∀ i j, 0 ≤ Mx i j) ∧ (2 : ℝ) = ∑ j, Mx 0 j := by
+  refine ⟨Mx_nonneg, ?_⟩
+  rw [Mx_row_zero]; norm_num [Fin.sum_univ_two]
+
+/-- **Isolation for fence 4**: the signed fixture has genuine row sums
+`1` and a genuinely negative entry. -/
+theorem fence_nonexp_nonneg_isolation_QA :
+    (∀ i, ∑ j, Mn i j = 1) ∧ Mn 0 1 = -1 ∧ ¬ (0 ≤ Mn 0 1) := by
+  refine ⟨Mn_row_sum, Mn_zero_one, ?_⟩
+  rw [Mn_zero_one]
+  norm_num
+
+/-- **Isolation for fence 5**: the submultiplicativity refuter has
+genuinely failing row sums (row `0` sums to `2`, row `1` to `0`). -/
+theorem fence_dobrushin_submul_isolation_QA :
+    (2 : ℝ) = ∑ j, Qx 0 j ∧ (0 : ℝ) = ∑ j, Qx 1 j
+      ∧ ¬ (∀ i, ∑ j, Qx i j = 1) := by
+  refine ⟨by rw [Qx_row_zero]; norm_num [Fin.sum_univ_two],
+    by rw [Qx_row_one]; norm_num [Fin.sum_univ_two], ?_⟩
+  intro h
+  have h0 := h 0
+  rw [Qx_row_zero] at h0
+  norm_num [Fin.sum_univ_two] at h0
+
+/-- **Isolation for fences 6 and 7**: the pairing-core fixture has every
+oscillation clause verified at `D = 1`, and its mass is genuinely `1`,
+not `0`. -/
+theorem fence_pairing_mass_isolation_QA :
+    (∀ z z', |e0 z - e0 z'| ≤ 1) ∧ ¬ (∑ z : Fin 2, e0 z = 0) := by
+  refine ⟨hD_e0, ?_⟩
+  rw [sum_e0]
+  norm_num
 
 end Scaffold.QA.SpectralGraph

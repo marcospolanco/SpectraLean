@@ -6,22 +6,380 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**None queued — the standing queue is empty again.** This run closed
-the cycle-family records debt below. Check `proposals/README.md`'s
-Active table first (all items there remain Low/human- or
-operator-gated). Natural frontiers for the next run's center-out
-selection, in rough leverage order: an audit-shaped pass over any
-surface the mixing cascade left unreviewed (several delivered
-families' QA never got an adversarial re-read); the QA axis's
-*randomized* half (needs a design decision on `#eval`/native_decide
-policy, which the repo's own Step-0 rules have excluded before); the
+**None queued — the standing queue is empty again.** This run executed
+the third family of the audit-shaped pass (the entropy family) named as
+the top continuation by the lazy-family handoff, delivered as the block
+below. Check `proposals/README.md`'s Active table first (all items there
+remain Low/human- or operator-gated). Natural frontiers for the next
+run's center-out selection, in rough leverage order: continue the
+audit-shaped pass over the *remaining* mixing-cascade families (the
+Poisson-bridge and primitivity-supplier QA families — same method, now
+thrice exercised; plus the lazy delivery's own priced follow-ons: the
+conjugated-norm contraction twin's two certificate fences and the lazy
+object's `_spec` junk corner at a disconnected bipartite fixture); the
+QA axis's *randomized* half (needs a design decision on
+`#eval`/native_decide policy, which the repo's own Step-0 rules have
+excluded before); the undirected `walkTVPair` join onto the
+now-fully-fenced Dobrushin engine (priced, needs a consumer); the
 spectral certificate route for the plain family (non-bipartite ⟹
-`λ_max(L_sym) < 2` ⟹ an `r < 1` certificate — named as the ungated
-alternative to the Doeblin route, but still without a consumer that
-the delivered rate does not already serve); the sharp `|λ₂| = α` layer
-(no consumer named); the reverse TV → χ² calculus (no consumer
-named); the undirected `walkTVPair` join onto the Dobrushin engine
-(priced, needs a consumer).
+`λ_max(L_sym) < 2` ⟹ an `r < 1` certificate — still without a consumer
+that the delivered rate does not already serve); the sharp `|λ₂| = α`
+layer (no consumer named); the reverse TV → χ² calculus (no consumer
+named).
+
+------
+
+**The adversarial fence audit of the entropy family — the standing
+handoff's top-named continuation, third mixing-cascade family audited**
+(`proposals/adversarial-fences-entropy-family.md`, same-run proposal;
+run `20260903T003946Z-run-1`, session
+`ses_f9b4b0d2bffe6FK8lA7drbTJPx`). DELIVERED — QA-only, zero axiom
+contact (count stays 4; `#print axioms` via `wip/entropyfences_axcheck.lean`
+on all 143 new declarations — 54 in `Entropy_QA.lean`'s Section F, 89 in
+`Mixing_QA.lean`'s `EntropyFences` section — every one exactly `propext,
+Classical.choice, Quot.sound`; no `-- @refutes` tags added, since these
+refute *theorem* instantiations and consume nothing admitted). QA
+3882 → 4012 (+130 by the generator metric, which counts
+theorems/lemmas only — the 143 declarations include 13 fixture `def`s).
+Radar QA axis synced to 4012, score held 4.5 per protocol (negative
+witnesses of an already-counted family, not a named-gap closure).**
+
+The delivery's content: the adversarial re-read (hypothesis necessity
+per `governance/ADVERSARIAL_REVIEW.md`, cross-checked against every
+existing fence) of the entropy family — `Entropy.lean`'s generic
+KL/entropy layer, `Mixing.lean`'s entropy leg (Pinsker, the decay
+forms, the nonnegativity plumbing), and `Oversmoothing.lean`'s entropy
+floor — the only mixing-cascade family whose QA (2026-09-01) predates
+the adversarial-review discipline. It found **28 load-bearing clauses
+with no negative witness anywhere in the repository** (exactly one was
+fenced before: Pinsker's `hq`), each closed with a fence plus
+isolation companion: **the generic layer's every mass clause** —
+`klDiv_nonneg` (both, divergences pinned `−log 2` and `−(1/2)·log 2`),
+`klDiv_eq_zero_iff` (both readings: the junk-zero divergence of two
+*different* point masses at `q = (0,1)` — `klTerm 1 0 = log 0 = 0` —
+and the mass-`2` `q = (1,1)` where every summand vanishes),
+`klDiv_apply_uniform`, `shannonEntropy_nonneg` (`H(2,2) = −4·log 2`),
+`shannonEntropy_le_log_card` (**the transcendental fence**
+`H(1/3,…) = (4/3)·log 3 > log 4` at mass `4/3`, by `3⁴ = 81 > 64 = 4³`
+through `log_lt_log` + `log_pow`), `shannonEntropy_eq_log_card_iff`
+(the half-vector at mass `2` attains `log 4` without being uniform),
+the termwise bridge's `b = 0` junk corner, the entropy–χ² bridge's
+`p`-mass clause (`D = (3/2)·log(3/2) ≥ 1/2 > 1/4 = χ²` — the
+sum-level conversion genuinely load-bearing), the two-block log-sum
+bound's `q`-zero corner, and both strict-positivity clauses of the
+binary two-point engine; **both mass clauses of Pinsker's inequality**
+(a junk-negative divergence makes the junk square root `0`, so the
+dropped statements read `1/4 ≤ 0` and `1/2 ≤ 0`); **the decay form's
+`hrate`** (the triangle at the failing certificate `r = 1/8`:
+`log(3/2) ≥ 1/3 > 1/32`, the failure witnessed by the existing
+`tri_exists_pos_mode_QA`); **the continuous plumbing** — `hnn` of
+`walkDensity_nonneg` (`−2` at `negOffAdj`), `hnn`/`ht` of
+`contWalkDensity_nonneg` and `contWalkDistribution_nonneg` through
+**closed-form heat kernels** (`Heat.lean`'s
+`exp_eq_one_add_of_mul_self_eq_smul` engine) at the negative
+off-diagonal fixture (`t = 1`) and the `K₂` *backward* semigroup
+(`t = −1`), both giving `h(1) = 1 − e² < 0`, plus `hA`/`hd` of
+`sum_contWalkDistribution` (a **new asymmetric-swap fixture
+`asymSwapAdj = !![2,0;4,0]`** whose walk Laplacian `[[0,0],[−1,1]]` is
+idempotent — mass `3 − 2e^{−1} ≠ 1` — and the `zdAdj` junk-zero law
+`0 ≠ 1`) and `hd` of `klDiv_contWalkDistribution_le` (the bound's
+right side is the junk `0⁻¹ − 1 = −1`, so the statement reads
+`0 ≤ −e^{−2λ₂}` by `exp_pos` alone, no eigenvalue pin needed); and
+**all four analytic clauses of the entropy floor**
+`klDiv_walkDistribution_ge_of_eigenpair` — `hμ` at the genuine kernel
+eigenpair (`1/2 > (1/2)·log(9/8)`), `hv` at a fake `μ = 3` mode
+amplifying the floor to `2` (without the eigen-equation the caller can
+amplify the mode factor arbitrarily), `hc` at an undershooting sup
+bound inflating it to `8` (the sup bound must *dominate*), and `hA` at
+the swap's genuine `(1, ![0,1])` eigenpair of its asymmetric
+`L_sym = [[0,0],[−√2,1]]` at `t = 0`, `x = 1` (the floor reads
+`1/2 > D(δ₁ ‖ π) = log(3/2)`, strictly — the floor's truth relies on
+`L_sym`'s self-adjointness for the Parseval step). Recorded
+non-fenceable, with reasons: every `p`-side nonnegativity clause (junk
+log-of-negative contamination), the empty-type `hn` corners (vacuous),
+`klDiv_walkDistribution_le`'s `hconn` (proof-shaped — the dropped
+statement stays true on disconnected input) and `hA` (structural —
+`eigvalOf` needs the symmetry proof), `klDiv_contWalkDistribution_le`'s
+`hcard`/`ht` (corner-satisfying/bound-inflating), the floor's `hc0`
+(junk-collapses) and `hd` at `zdAdj` (every zero-degree conjugate
+collapses, `hc0` unsatisfiable), and `sum_contWalkDistribution`'s `hnn`
+(mass survives negative entries at symmetric fixtures — only the
+fenced `hA`/`hd` break it). **Three removable-hypothesis findings**:
+`walkDensity_nonneg`'s `hd` (`D⁻¹A ≥ 0` given `hnn` including the junk
+`0⁻¹ = 0` — the plain twin of the lazy audit's finding), and the
+continuous nonneg clauses' `hA` **given `hnn`** — the heat kernel is
+`e^{−t}·e^{tP}` with `P ≥ 0` entrywise, hence nonnegative for *every*
+nonnegative adjacency, symmetric or not (the delivered proofs use `hA`
+through Poissonization; the truth does not). Eight technique findings
+in the proposal (headline: entry pins fire under `rw` but not as
+`simp only` rules; the Fin-literal shape mismatch third-confirmed, now
+for matrix entries — the `omega`-rcases variable-rewrite idiom is
+load-bearing for every 2×2 entry computation).
+
+**Verification:** spike first (`wip/entropyfences_spike.lean` — the
+full 143-declaration delivery, iterated to zero errors/zero warnings
+before any shelf edit); `lake env lean` on both touched QA modules
+(Entropy_QA absolutely clean; Mixing_QA's three positioned `ring_nf`
+hints and the ProjectorDrift unused-variable warning confirmed
+pre-existing by elaborating the HEAD baseline copies); explicit
+`lake build Scaffold.QA.InformationTheory.Entropy_QA
+Scaffold.QA.SpectralGraph.Mixing_QA` ✔; **the 143-declaration axiom
+audit above**; **full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 133 source files, 133 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+current axioms, unchanged; only the allowlisted-confirmed PF finding);
+`check_refutation_independence` (9-tag clean — no tags touched);
+`check_public_reachability` clean (63 repo modules);
+`check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; `check_backlog_freshness` clean;
+scoreboard regenerated (**4012/4/0**) with the verification row;
+map-freshness exit 0 after the 3882 → 4012 stats sync in both map
+files and SVG regeneration (no station — no tier change). Records
+updated: the proposal (COMPLETE + delivery record with eight technique
+findings), `proposals/README.md` (new Delivered row), README (4012 +
+the walks-and-mixing row's entropy-fence clause), the radar (QA axis
+synced 3882 → 4012, score held 4.5),
+`index/map/information_theory.md` (the Section-F paragraph),
+`index/map/spectral_graph.md` (the EntropyFences paragraph), the
+backlog item-8 seventeenth update + reviewed-date bump, the scoreboard
+verification row, both map data tables + regenerated SVG, this plan,
+and the activity log. One drive-by, same file: the lazy-audit section
+header in `Mixing_QA.lean` said "eight" where its own delivery record
+says ten — corrected. Nothing committed; the prior runs' uncommitted
+deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — QA-only, no axiom
+disposition changed, no public statement changed. Honest scope: the
+audit covered exactly one family; the Poisson-bridge and
+primitivity-supplier families remain the open audit frontiers with the
+method now thrice exercised; the recorded non-fenceables name their
+mechanisms precisely enough that a future engine (a small-`eigvalOf`
+pin route, or a decided policy on junk log-of-negative fixtures) could
+reopen them deliberately.
+
+------
+
+**The lazy family's adversarial fence audit (delivered 2026-09-02,
+terminal):** see the block below and
+`proposals/adversarial-fences-lazy-family.md`. Natural frontiers that
+remain after it, in rough leverage order: the Poisson-bridge and
+primitivity-supplier audit families (the entropy family is being
+delivered by the active block above); the lazy delivery's own priced
+follow-ons (the conjugated-norm contraction twin's two certificate
+fences and the lazy object's `_spec` junk corner at a disconnected
+bipartite fixture); the QA axis's *randomized* half (needs a design
+decision on `#eval`/native_decide policy, which the repo's own Step-0
+rules have excluded before); the undirected `walkTVPair` join onto the
+now-fully-fenced Dobrushin engine (priced, needs a consumer); the
+spectral certificate route for the plain family (non-bipartite ⟹
+`λ_max(L_sym) < 2` ⟹ an `r < 1` certificate — still without a consumer
+that the delivered rate does not already serve); the sharp `|λ₂| = α`
+layer (no consumer named); the reverse TV → χ² calculus (no consumer
+named).
+
+------
+
+**The adversarial fence audit of the lazy family — the standing
+handoff's top-named continuation, second mixing-cascade family
+audited** (`proposals/adversarial-fences-lazy-family.md`, same-run
+proposal; run `20260902T225627Z-run-1`, session
+`ses_f9bb3f57affeWs0Ep264nM0eze`). DELIVERED — QA-only, zero axiom
+contact (count stays 4; `#print axioms` via `wip/lazyfences_axcheck.lean`
+on all 68 new declarations — fixtures, value pins, spectrum pins,
+fences, isolations — every one exactly `propext, Classical.choice,
+Quot.sound`; no `-- @refutes` tags added, since these refute *theorem*
+instantiations and consume nothing admitted). QA 3817 → 3882 (+65 by
+the generator metric, `Mixing_QA.lean`'s `LazyFences` section). Radar
+QA axis synced to 3882, score held 4.5 per protocol (negative
+witnesses of an already-counted family, not a named-gap closure).**
+
+The delivery's content: the adversarial re-read (hypothesis necessity
+per `governance/ADVERSARIAL_REVIEW.md`, cross-checked against every
+existing fence) of the lazy family — `Mixing.lean`'s lazy sections
+(operator/law, density/χ², signless engine, decay engine, the headline
+`lazyChiSquareDistance_le_of_connected` with its TV/entropy
+corollaries) plus `Oversmoothing.lean`'s `LazyMixingTime` section —
+whose QA was delivered 2026-09-01 by its own run and never
+independently re-read. It found **ten load-bearing hypotheses with no
+negative witness anywhere in the repository**, each closed with a
+fence (the negation of the conclusion at a specific instantiation,
+both sides pinned to numerals) plus isolation companion (every other
+hypothesis verified genuine at the fixture, the dropped one verified
+failing): the **`hd` clauses of lazy row-stochasticity, mass
+conservation, and the `t = 0` χ² normalization** at the zero-degree
+fixture `zdAdj = !![0,0;0,1]]` (the `D⁻¹A` row junk-zero: `P_L *ᵥ 1`
+reads `1/2 ≠ 1`, the one-step law's mass `1/2 ≠ 1`, the
+normalization's right side the junk `0⁻¹ − 1 = −1` against the true
+`1`); the **`hnn` clauses of operator- and law-nonnegativity** at the
+negative off-diagonal fixture `negOffAdj = !![2,−1;−1,2]]`
+(`P_L 0 1 = ν₁ 0 1 = −1/2 < 0` — the existing negative-*diagonal*
+fixture cannot kill these: its off-diagonal `2` keeps every `P_L`
+entry nonnegative, which is exactly why a new fixture was needed);
+the **`hA` clauses of detailed balance (`3/16 ≠ 1/16`), stationarity
+(`5/8 ≠ 3/4`), and attainment persistence** at the asymmetric loop
+fixture `asymLoopAdj = !![3,3;1,1]]` — the persistence fence's
+hypothesis *genuine* (the lazy law from `0` hits `π = (3/4, 1/4)`
+exactly at `t = 1`, pinned `asym_lazy_law_one_QA`) while the
+conclusion fails at `t = 2`: the law passes through `π` and leaves
+it; and the **two certificate clauses of the public lazy ℓ²(π)
+contraction engine**
+(`sum_stationaryVec_smul_sq_pow_lazyWalkTransitionMatrix_le`):
+`hrate` refuted on the triangle at the genuine `3/2`-mode direction
+`g = (1,−1,0)` with `r = 1/8` below the mode's lazy factor `1/4`
+(`P_L *ᵥ g = (1/4) • g` pinned, `1/24 > 1/96`), `hmode` refuted on
+the edge at the constant mode with the genuine `r = 0` certificate
+(`P_L *ᵥ 1 = 1`, `1 > 0`) — the lazy twins of the plain family's C₄
+mode-coverage fence, with companions proving the *other* clause
+genuine at each fixture (the triangle's via the existing
+`tri_kernel_const`; the edge's via the new `k2_eigvalOf_cases_QA` —
+every edge eigenvalue `0` or `2`, pinned by the summed eigen equation
+and the unit-eigenvector quadratic form, no basis control). Recorded
+non-fenceable, with reasons: the headline's `hconn` (on disconnected
+input `λ₂ = 0` collapses the rate to `1` and every lazy factor still
+lies in `[0,1]` by PSD + the signless certificate alone — the dropped
+statement stays *true*: proof-shaped, not truth-shaped, the same class
+as the prior audit's `0 < δ` verdict); the depth ceiling's `hslt`
+(`λ₂ < 2` is junk-prevention on the threshold's log denominator — on
+the connected `λ₂ = 2` class the lazy law is exactly stationary after
+one step, so the conclusion holds anyway); and `hd` in the two
+nonnegativity lemmas — **a removable-hypothesis finding**
+(`D⁻¹A` stays entrywise nonnegative at zero degrees since
+`(deg i)⁻¹ ≥ 0` including the junk `0⁻¹ = 0`). Already fenced, no
+duplication: the signless certificate's `hnn` (`sos_nonneg_fence_QA`)
+serves the derived `μ ≤ 2` chain and the headline's own `hnn`. Six
+technique findings in the proposal (headline: the `fin_cases`
+id-motive wrapper trap strikes again — the `omega`-rcases
+variable-rewrite idiom is load-bearing style; a leading-dot method
+split across lines re-parses onto the outer term; `eigvalOf` vs raw
+`.eigenvalues` never match by `rw` though definitionally equal).
+
+**Verification:** spike first (`wip/lazyfences_spike.lean` — the full
+section, iterated to zero errors/zero warnings before any shelf
+edit); `lake env lean` zero new errors/warnings on the touched QA
+module (the two positioned info-level `ring_nf` hints confirmed
+pre-existing on the HEAD baseline by elaborating it separately);
+explicit `lake build Scaffold.QA.SpectralGraph.Mixing_QA` ✔; **the
+68-declaration axiom audit above**; **full `lake build` ✔ immediately
+followed by `check_build_completeness.py` — 133 source files, 133
+fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0
+(4 current axioms, unchanged; only the allowlisted-confirmed PF
+finding); `check_refutation_independence` (9-tag clean — no tags
+touched); `check_public_reachability` clean (63 repo modules);
+`check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; `check_backlog_freshness` clean;
+scoreboard regenerated (**3882/4/0**) with the verification row;
+map-freshness exit 0 after the 3817 → 3882 stats sync in both map
+files and SVG regeneration (no station — no tier change). Records
+updated: the proposal (COMPLETE + delivery record with technique
+findings), `proposals/README.md` (new Delivered row), README (3882 +
+the walks-and-mixing row's lazy-fence clause), the radar (QA axis
+synced 3817 → 3882, score held 4.5), `index/map/spectral_graph.md`
+(the LazyFences paragraph after the lazy section), the backlog
+item-8 sixteenth update, the scoreboard verification row, both map
+data tables + regenerated SVG, this plan, and the activity log.
+Nothing committed; the prior runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — QA-only, no axiom
+disposition changed, no public statement changed. Honest scope: the
+audit covered exactly one family; the conjugated-norm contraction
+twin shares both certificate clauses with the fenced ℓ²(π) twin but
+has no fence of its own (priced follow-on: the same two fixtures
+refute it), and the lazy object's `_spec` witness-clause junk corner
+at a disconnected bipartite fixture is priced in the proposal; the
+audit-shaped pass over the remaining mixing-cascade families
+(entropy, Poisson bridge, primitivity supplier) stays open with the
+method now twice exercised.
+
+------
+
+------
+
+------
+
+**The adversarial fence completion for the TV/Dobrushin engine family
+— the standing handoff's top unstarted frontier executed** (the
+audit-shaped pass over mixing-cascade QA;
+`proposals/adversarial-fences-tv-dobrushin-engines.md`, same-run
+proposal; run `20260902T212609Z-run-1`, session
+`ses_f9bffd049ffeZuJLtzRCQXynTv`). DELIVERED — QA-only, zero axiom
+contact (count stays 4; `#print axioms` via `wip/fences_axcheck.lean`
+on all 62 audited declarations — fixtures, value pins, coefficients,
+fences, isolations — every one exactly `propext, Classical.choice,
+Quot.sound`; no `-- @refutes` tags added, since these refute *theorem*
+instantiations and consume nothing admitted). QA 3768 → 3817 (+49,
+`DirectedMixing_QA.lean`'s Section I, the module 131 → 180). Radar QA
+axis synced to 3817, score held 4.5 per protocol (negative witnesses
+of an already-counted family, not a named-gap closure).**
+
+The delivery's content: the adversarial re-read (hypothesis necessity
+per `governance/ADVERSARIAL_REVIEW.md`, cross-checked against every
+existing fence) found **seven load-bearing hypotheses of the
+2026-09-02 directed TV/Dobrushin engine family with no negative
+witness anywhere in the repository**, each closed with a fence (the
+negation of the conclusion at a specific instantiation, both sides
+pinned to numerals) plus an isolation companion (every other
+hypothesis verified genuine at the fixture, the dropped one verified
+failing): the **equal-mass clauses of both TV contractions** (refuted
+at the new all-half fixture `Qh` — row-stochastic, every entry
+`≥ 1/2`, identical rows so `δ(Qh) = 0` exactly — with the mass-`2`
+start `twoE0` against `e0`: the mass-dropped contraction reads
+`1/2 ≤ 0`); the **row-sum and nonnegativity clauses of TV
+non-expansiveness** (the doubled identity `Mx` doubles the basis
+pair's TV, `2 ≤ 1` false; the signed stochastic fixture `Mn` triples
+it, `3 ≤ 1` false); the **row-sum clause of Dobrushin
+submultiplicativity** (`Qx = !![1,1;1,−1]`, `Qx² = 2I`:
+`δ(Qx²) = 2 > δ(Qx)² = 1` at `s = t = 1`); and the **zero-mass
+clauses of both pairing cores** (`|e₀ ⬝ᵥ e₀| = 1 > (1/2)·1·1`, every
+oscillation clause verified at `D = 1`). The fixtures are new because
+the existing ones cannot kill these clauses (`Qd`/`Gd` strictly
+positive with distinct rows — their contractions are the attainment
+pins; `P2` kills the floor clause but is a genuine permutation, so
+the mass-dropped conclusions still hold there). Recorded
+non-fenceable, with reasons: `0 < δ` (strength hypothesis — at
+`δ ≤ 0` the Doeblin contraction stays true by non-expansiveness) and
+the `[Nonempty V]` instance-arguments (structural). Five technique
+findings in the proposal (headline: `norm_num` **does** evaluate abs
+of numerals presented as subtraction-of-numerals in `tv_lit`-shaped
+goals — `rw [tv_lit]; norm_num` — refining the 2026-09-02 record's
+note; plus the `Finset.sup'_le` call shape, the `rintro` projection
+trap and its `rcases (show a = 0 ∨ a = 1 by omega)` idiom, the `Eq.le`
+orientation trap in `sup'` lower bounds, and the trailing-`rfl` gap on
+numeral subtraction).
+
+**Verification:** spike first (`wip/fences_spike.lean` — the full
+section, iterated to zero errors/zero warnings before any shelf edit);
+`lake env lean` zero errors/zero warnings on the touched QA module;
+explicit `lake build` target ✔; **the 62-declaration axiom audit
+above**; **full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 133 source files, 133 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+current axioms, unchanged; only the allowlisted-confirmed PF finding);
+`check_refutation_independence` (9-tag clean — no tags touched);
+`check_public_reachability` clean (63 repo modules); `check_citations`
+("All axioms have proper citations!"); `check_markdown_links` clean;
+`check_backlog_freshness` clean; scoreboard regenerated (**3817/4/0**)
+with the verification row; map-freshness exit 0 after the 3768 → 3817
+stats sync in both map files and SVG regeneration (no station — no
+tier change). Records updated: the proposal (COMPLETE + delivery
+record with technique findings), `proposals/README.md` (new Delivered
+row), README (3817 + the walks-and-mixing row's fence clause), the
+radar (QA axis synced 3768 → 3817 held 4.5), `index/map/spectral_graph.md`
+(the Section-I paragraph + the QA-module count de-staled 132 → 180),
+the backlog item-8 fifteenth update, the scoreboard verification row,
+both map data tables + regenerated SVG, this plan, and the activity
+log. Nothing committed; the prior runs' uncommitted deliveries
+preserved.
+
+**Remaining risk:** none owed by the delivery — QA-only, no axiom
+disposition changed, no public statement changed. Honest scope: the
+audit covered exactly one family (the TV/Dobrushin engines); the
+broader audit-shaped pass over the remaining mixing-cascade QA
+families (lazy, entropy, Poisson bridge, primitivity supplier) stays
+open with the method now recorded — the natural continuation. The
+priced undirected `walkTVPair` join would build on a now fully fenced
+engine, but keeps its consumer gate.
+
+------
 
 ------
 

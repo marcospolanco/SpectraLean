@@ -1,7 +1,7 @@
 # SGT Backlog
 
 **Status:** Canonical backlog for the broad spectral-graph-theory program  
-**Last reviewed:** September 2, 2026
+**Last reviewed:** September 3, 2026
 
 This is the bounded, center-first backlog required by the strategy's
 center-out policy. Items are ranked by concrete reuse: each names the
@@ -1337,6 +1337,66 @@ start; the produced `(m, δ)` honestly existential). The sharp
 `|λ₂| = α` layer and the spectral-certificate route
 (non-bipartite ⟹ `λ_max(L_sym) < 2`) both remain consumer-gated
 exactly as before.
+
+*Fifteenth update (2026-09-02):* **the directed TV/Dobrushin engine
+family's fence discipline is complete** — the audit-shaped pass two
+consecutive handoffs named as the top unstarted frontier, executed
+(`proposals/adversarial-fences-tv-dobrushin-engines.md`, QA-only, zero
+axioms): `DirectedMixing_QA.lean`'s Section I supplies negative
+witnesses for the seven load-bearing hypotheses the 2026-09-02
+directed-rate deliveries left unfenced — the equal-mass clauses of
+both TV contractions, the row-sum and nonnegativity clauses of
+non-expansiveness, the row-sum clause of Dobrushin submultiplicativity,
+and the zero-mass clauses of both pairing cores — each with an
+isolation companion proving the refuted clause is exactly what fails
+at the fixture. No gate named here opened or closed; the sharp
+`|λ₂| = α` layer and the spectral-certificate route stay
+consumer-gated exactly as before.
+
+*Sixteenth update (2026-09-02):* **the lazy family's fence discipline
+is complete** — the audit-shaped pass's second family
+(`proposals/adversarial-fences-lazy-family.md`, QA-only, zero
+axioms): `Mixing_QA.lean`'s `LazyFences` section supplies negative
+witnesses for the ten load-bearing hypotheses the 2026-09-01 lazy
+deliveries left unfenced — the `hd` clauses of lazy
+row-stochasticity, mass conservation, and the `t = 0` χ²
+normalization (zero-degree fixture), the `hnn` clauses of operator-
+and law-nonnegativity (negative off-diagonal fixture), the `hA`
+clauses of detailed balance, stationarity, and attainment
+persistence (asymmetric fixture whose lazy law hits `π` exactly at
+`t = 1` and leaves it at `t = 2`), and both certificate clauses of
+the public lazy ℓ²(π) contraction engine — each with an isolation
+companion; recorded non-fenceable with reasons (the headline's
+connectivity clause is proof-shaped, not truth-shaped). No gate
+named here opened or closed; the audit-shaped pass over the
+*remaining* mixing-cascade families (entropy, Poisson bridge,
+primitivity supplier) stays open with the method now twice
+exercised.
+
+*Seventeenth update (2026-09-03):* **the entropy family's fence
+discipline is complete** — the audit-shaped pass's third family
+(`proposals/adversarial-fences-entropy-family.md`, QA-only, zero
+axioms; 28 fences, +130 QA declarations): `Entropy_QA.lean`'s Section
+F and `Mixing_QA.lean`'s `EntropyFences` section supply negative
+witnesses for the entropy family's 28 load-bearing clauses the
+2026-09-01 entropy delivery left unfenced (the only family of the
+cascade whose QA predates the adversarial-review discipline) — every
+mass clause of the generic KL/entropy layer (including the
+transcendental `H(1/3,…) = (4/3)·log 3 > log 4` fence at mass `4/3`
+via `3⁴ > 4³`), both mass clauses of Pinsker, the decay form's rate
+certificate, `hnn`/`ht` of the continuous nonnegativity plumbing
+(closed-form heat kernels at a negative off-diagonal fixture and the
+`K₂` backward semigroup at `t = −1`), `hA`/`hd` of continuous mass
+conservation (a new asymmetric-swap fixture with an idempotent walk
+Laplacian; the `zdAdj` junk-zero law), and all four analytic clauses
+of the entropy floor — each with isolation companions; recorded
+non-fenceable with reasons (junk log-of-negative contamination,
+vacuous empty-type corners, the proof-shaped `hconn`) and three
+removable-hypothesis findings (notably: the continuous nonneg `hA`
+clauses — the heat kernel `e^{−t}·e^{tP}` is entrywise nonnegative
+for any nonnegative `P`, symmetric or not). No gate named here opened
+or closed; the Poisson-bridge and primitivity-supplier audit families
+stay open with the method now thrice exercised.
 
 ### 9. Bounded-window ("band") Davis–Kahan (2026-08-21, opened by the Davis–Kahan Step-0/1 survey)
 

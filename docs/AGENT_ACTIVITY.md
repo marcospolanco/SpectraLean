@@ -37,6 +37,100 @@ proposal's status header must also record
 that made this mandatory: the pre-commit hook re-rendered the map on
 every commit while its hand-maintained data tables drifted for days).
 
+## 2026-09-02T23:38:29Z — The lazy family's adversarial fence audit (terminal)
+
+**Run:** `20260902T225627Z-run-1`  
+**Session:** `ses_f9bb3f57affeWs0Ep264nM0eze`  
+**Status:** completed  
+**Milestone:** the audit-shaped adversarial pass over mixing-cascade
+QA, second family — the lazy family (`Mixing.lean`'s lazy sections
+plus `Oversmoothing.lean`'s `LazyMixingTime` section, the periodicity
+fix every bipartite input mixes through and the empirical lazy
+capstone's substrate) — **delivered**: `Mixing_QA.lean`'s new
+`LazyFences` section, pure hard crust, zero new axioms (count stays
+4), QA 3817 → 3882.
+
+**Changes:** ten hypothesis-form negative witnesses plus isolation
+companions for the family's unfenced load-bearing clauses: the `hd`
+clauses of lazy row-stochasticity, mass conservation, and the `t = 0`
+χ² normalization (zero-degree fixture `zdAdj`, the `D⁻¹A` row
+junk-zero — `1/2 ≠ 1`, mass `1/2 ≠ 1`, normalization `1 ≠ −1` at the
+junk `0⁻¹ − 1`); the `hnn` clauses of operator- and law-nonnegativity
+(negative off-diagonal fixture `negOffAdj`, `P_L 0 1 = −1/2` — the
+existing negative-diagonal fixture cannot kill them); the `hA`
+clauses of detailed balance (`3/16 ≠ 1/16`), stationarity
+(`5/8 ≠ 3/4`), and attainment persistence at the asymmetric loop
+fixture `asymLoopAdj` (hypothesis genuine: the lazy law hits `π`
+exactly at `t = 1`, pinned; conclusion fails at `t = 2`); and both
+certificate clauses of the public lazy ℓ²(π) contraction engine
+(`hrate` on the triangle at the genuine `3/2`-mode direction,
+`1/24 > 1/96`; `hmode` on the edge at the constant mode with the
+genuine `r = 0`, `1 > 0`) with the edge spectrum pinned by the new
+`k2_eigvalOf_cases_QA` (no basis control). Recorded non-fenceable
+with reasons (the headline's connectivity clause is proof-shaped —
+the dropped statement stays true on disconnected input; the depth
+ceiling's `λ₂ < 2` is junk-prevention) and one removable-hypothesis
+finding (the two nonnegativity `hd` clauses). Records: the proposal
+(COMPLETE + delivery record with six technique findings),
+`proposals/README.md` (new Delivered row), README (3882 + the
+walks-and-mixing row's lazy-fence clause), the radar (QA axis synced,
+held 4.5 per protocol), `index/map/spectral_graph.md` (the LazyFences
+paragraph), the backlog item-8 sixteenth update, the scoreboard
+verification row, both map data tables (3817 → 3882) + regenerated
+SVG, the execution plan, this log. Nothing committed; the prior runs'
+uncommitted deliveries preserved.
+
+**Verification:** spike first (`wip/lazyfences_spike.lean`, zero
+errors/zero warnings before any shelf edit); `lake env lean` on the
+touched QA module (zero new errors/warnings — the two positioned
+info-level `ring_nf` hints confirmed pre-existing on the HEAD
+baseline by elaborating the HEAD copy separately); explicit `lake
+build Scaffold.QA.SpectralGraph.Mixing_QA` ✔; `#print axioms` via
+`wip/lazyfences_axcheck.lean` — all 68 new declarations exactly
+`propext, Classical.choice, Quot.sound`; **full `lake build` ✔
+immediately followed by `check_build_completeness.py` — 133 source
+files, 133 fresh artifacts, 0 stale, 0 missing, exit 0**;
+`lint_axioms` exit 0 (4 current axioms, unchanged);
+`check_refutation_independence` (9-tag clean — no tags added, nothing
+touches an axiom); `check_public_reachability` clean (63 repo
+modules); `check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; `check_backlog_freshness` clean (0
+days); scoreboard regenerated (**3882/4/0**); map freshness exit 0
+after the stats sync (45 stations, no station's proposal status
+changed — this proposal has no station).
+
+**Remaining risk:** none owed — QA-only, no axiom disposition
+changed, no existing public statement changed. Honest scope: one
+family audited; the conjugated-norm contraction twin's two certificate
+fences and the lazy object's `_spec` junk corner are priced
+follow-ons in the proposal; the entropy, Poisson-bridge, and
+primitivity-supplier families' audits remain open.
+
+**Next handoff:** the queue is empty — check `proposals/README.md`'s
+Active table first (all Low/human- or operator-gated); otherwise the
+natural next run continues the audit-shaped pass over the remaining
+mixing-cascade families (entropy, Poisson bridge, primitivity
+supplier — method twice exercised), or the lazy proposal's own two
+priced follow-ons.
+
+## 2026-09-02T22:56:27Z — The lazy family's adversarial fence audit (opening)
+
+**Run:** `20260902T225627Z-run-1`  
+**Session:** `ses_f9bb3f57affeWs0Ep264nM0eze`  
+**Status:** in-progress  
+**Milestone:** the audit-shaped adversarial pass over the remaining
+mixing-cascade QA families (the standing handoff's top-named
+continuation), this run bounded to the **lazy family** —
+`Mixing.lean`'s lazy sections plus `Oversmoothing.lean`'s
+`LazyMixingTime` section — closing every unfenced load-bearing
+hypothesis with a hypothesis-form negative-witness fence plus
+isolation companion, per `governance/ADVERSARIAL_REVIEW.md` and the
+recorded audit template of
+`proposals/adversarial-fences-tv-dobrushin-engines.md`. Leverage: the
+lazy program is the only mixing route on the bipartite class and the
+empirical lazy capstone's substrate; its QA has never been
+independently re-read.
+
 ## 2026-08-31T03:24:11Z — The oversmoothing ceiling delivered: the mixing bound's depth-form consumers (terminal)
 
 **Run:** `20260831T025541Z-run-1`  
@@ -9971,3 +10065,182 @@ re-read (now the top unstarted item); the QA axis's randomized half
 (policy-gated); the plain family's spectral-certificate route and the
 sharp `|λ₂| = α` layer (consumer-gated); the undirected `walkTVPair`
 join onto the Dobrushin engine (priced, needs a consumer).
+
+## 2026-09-02T21:26:09Z — Adversarial fence audit of the TV/Dobrushin engines (in-progress)
+
+**Run:** `20260902T212609Z-run-1`  
+**Session:** `ses_f9bffd049ffeZuJLtzRCQXynTv`  
+**Status:** in-progress  
+**Milestone:** the standing handoff's top unstarted frontier — the
+audit-shaped adversarial pass over mixing-cascade QA surfaces. Scope
+chosen: the 2026-09-02 directed TV/Dobrushin engine family
+(`Mixing.lean`'s Doeblin TV-contraction and Dobrushin-coefficient
+sections — the mixing program's newest reusable engines and the priced
+undirected join's future substrate). The adversarial re-read (hypothesis
+necessity per `governance/ADVERSARIAL_REVIEW.md`, checked against every
+existing fence) found **seven load-bearing hypotheses with no negative
+witness anywhere in the repository**: the equal-mass clauses of
+`tvDistance_vecMul_le_of_pos_entries` and
+`tvDistance_vecMul_le_tvDobrushinCoeff`, the row-sum clause of
+`tvDobrushinCoeff_pow_add_le`, the row-sum and nonnegativity clauses of
+`tvDistance_vecMul_le` (non-expansiveness), and the zero-mass clauses of
+the two pairing cores (`abs_dotProduct_le_half_entryRange_mul_sum_abs`,
+`abs_sum_mul_le_of_pairwise`). Each refuting fixture is hand-verified
+(headline: the all-half matrix makes the Dobrushin coefficient exactly
+`0`, so the mass-dropped contraction reads `1/2 ≤ 0`). Next: proposal,
+wip spike, then Section I of `DirectedMixing_QA.lean`.
+
+## 2026-09-02T21:44:26Z — Adversarial fence audit of the TV/Dobrushin engines delivered (terminal)
+
+**Run:** `20260902T212609Z-run-1`  
+**Session:** `ses_f9bffd049ffeZuJLtzRCQXynTv`  
+**Status:** completed  
+**Milestone:** the standing handoff's top unstarted frontier — the
+audit-shaped adversarial pass over mixing-cascade QA — executed as a
+bounded audit of the 2026-09-02 directed TV/Dobrushin engine family,
+finding seven unfenced load-bearing hypotheses and closing every one
+(`proposals/adversarial-fences-tv-dobrushin-engines.md`, same-run
+proposal).
+
+**Changes:** `DirectedMixing_QA.lean`'s new Section I (+49 QA, 3768 →
+3817, the module 131 → 180) with five new fixtures (`Qh` the all-half
+matrix — row-stochastic, strictly positive, identical rows, Dobrushin
+coefficient exactly `0`; `Mx = 2I`; `Mn = !![2,−1;−1,2]`; `Qx =
+!![1,1;1,−1]`; `twoE0` the mass-`2` start), the `tv_lit` computation
+interface, the fixtures' coefficients pinned exactly, **the seven
+fences** — equal-mass clauses of both TV contractions (`1/2 ≤ 0` at
+`Qh`), row-sum and nonnegativity clauses of TV non-expansiveness (`2
+≤ 1` at `Mx`, `3 ≤ 1` at `Mn`), row-sum clause of Dobrushin
+submultiplicativity (`δ(Qx²) = 2 > δ(Qx)² = 1`), zero-mass clauses of
+both pairing cores (`1 ≤ 1/2` with every oscillation clause verified)
+— each the negated conclusion at pinned values, and **five isolation
+companions** proving each refuted clause is exactly what fails. The
+module docstring's section list extended (and its stale "Six sections"
+count corrected to nine). Records: the proposal (COMPLETE + delivery
+record with five technique findings), `proposals/README.md` (Delivered
+row), README (3817 + the walks-and-mixing row's fence clause), the
+radar (QA axis synced, held 4.5), `index/map/spectral_graph.md` (the
+Section-I paragraph, QA-module count de-staled 132 → 180), the backlog
+item-8 fifteenth update, the scoreboard verification row, both map
+data tables + regenerated SVG, the execution plan, this log. Nothing
+committed.
+
+**Verification:** spike first (`wip/fences_spike.lean`, zero
+errors/zero warnings before any shelf edit); `lake env lean` zero
+errors/zero warnings on the touched QA module; explicit `lake build`
+target ✔; **`#print axioms` via `wip/fences_axcheck.lean` on all 62
+audited declarations: every one exactly `propext, Classical.choice,
+Quot.sound`** (no `-- @refutes` tags — these refute *theorem*
+instantiations, nothing admitted is consumed); **full `lake build` ✔
+immediately followed by `check_build_completeness.py` — 133 source
+files, 133 fresh artifacts, 0 stale, 0 missing, exit 0**;
+`lint_axioms` exit 0 (4 axioms, unchanged); `check_refutation_independence`
+(9-tag clean); `check_public_reachability` (63 modules);
+`check_citations`; `check_markdown_links`; `check_backlog_freshness`
+(0 days); scoreboard regenerated (**3817/4/0**); map-freshness exit 0
+after the 3768 → 3817 sync and SVG regeneration (45 stations, no
+status change owed).
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. Honest scope: one family audited (the
+TV/Dobrushin engines); the remaining mixing-cascade QA families (lazy,
+entropy, Poisson bridge, primitivity supplier) stay open with the
+audit method now recorded as a template.
+
+**Next handoff:** the queue is empty — check `proposals/README.md`'s
+Active table first (all Low/human-gated). Natural frontiers: continue
+the audit-shaped pass on the remaining mixing-cascade QA families
+(the recorded method's direct continuation); the QA axis's randomized
+half (policy-gated); the undirected `walkTVPair` join onto the now
+fully fenced Dobrushin engine (priced, consumer-gated); the plain
+family's spectral-certificate route and the sharp `|λ₂| = α` layer
+(consumer-gated).
+
+## 2026-09-03T00:44:00Z — The entropy family's adversarial fence audit (in progress)
+
+**Run:** `20260903T003946Z-run-1`  
+**Session:** `ses_f9b4b0d2bffe6FK8lA7drbTJPx`  
+**Status:** in-progress  
+**Milestone:** the audit-shaped adversarial pass over mixing-cascade
+QA, third family — the entropy family (`Entropy.lean`'s generic
+KL/entropy layer, `Mixing.lean`'s entropy leg: Pinsker, the decay
+twins, the nonnegativity plumbing, and `Oversmoothing.lean`'s entropy
+floor), the mixing program's third distance, whose QA was delivered
+2026-09-01 before the adversarial-review discipline existed and has
+never been independently re-read. Recon: only one clause of the family
+is fenced today; ~20 load-bearing clauses have no negative witness
+anywhere in the repository. Plan: fence each unfenced clause in
+hypothesis form (negated conclusion at a pinned fixture) with
+isolation companions, record the non-fenceable corners with reasons,
+QA-only with zero axiom contact, via a `wip/` spike first.
+
+## 2026-09-03T02:10:30Z — The entropy family's adversarial fence audit (terminal)
+
+**Run:** `20260903T003946Z-run-1`  
+**Session:** `ses_f9b4b0d2bffe6FK8lA7drbTJPx`  
+**Status:** completed  
+**Milestone:** the audit-shaped adversarial pass over mixing-cascade
+QA, third family — the entropy family (`Entropy.lean`'s generic
+KL/entropy layer, `Mixing.lean`'s entropy leg, and `Oversmoothing.lean`'s
+entropy floor), the only cascade family whose QA (2026-09-01) predates
+the adversarial-review discipline — **delivered**: 28 hypothesis-form
+fences plus isolation companions, pure hard crust, zero new axioms
+(count stays 4), QA 3882 → 4012.
+
+**Changes:** `Entropy_QA.lean`'s new Section F (the generic layer: every
+mass clause fenced, including the transcendental `H(1/3,…) =
+(4/3)·log 3 > log 4` at mass `4/3` via `3⁴ > 4³`, and both
+strict-positivity readings of `klDiv_eq_zero_iff` — the junk-zero
+divergence of two different point masses) and `Mixing_QA.lean`'s new
+`EntropyFences` section (both mass clauses of Pinsker via
+junk-negative divergences; the continuous plumbing's `hnn`/`ht` through
+closed-form heat kernels at `negOffAdj`/`K₂`-backward-semigroup, both
+`h(1) = 1 − e² < 0`; mass conservation's `hA` at the new
+asymmetric-swap fixture `!![2,0;4,0]` (idempotent walk Laplacian, mass
+`3 − 2e^{−1} ≠ 1`) and `hd` at the `zdAdj` junk-zero law; the decay
+form's `hrate` at the triangle's failing `r = 1/8`; and all four
+analytic clauses of the entropy floor — `hμ`/`hv`/`hc`/`hA`, the last
+at the swap's genuine `(1, ![0,1])` eigenpair of its asymmetric
+`L_sym`, strict by `log < x − 1`). Recorded non-fenceable with reasons
+(junk log-of-negative contamination; vacuous empty-type corners;
+proof-shaped `hconn`; structural `hA`s) and three removable-hypothesis
+findings — notably the continuous nonneg `hA` clauses: the heat kernel
+`e^{−t}·e^{tP}` is entrywise nonnegative for any nonnegative `P`,
+symmetric or not. One drive-by in the same file: the lazy-audit
+header's "eight" corrected to its own record's "ten". Records: the
+proposal (COMPLETE, eight technique findings), `proposals/README.md`,
+README (4012 + the walks-and-mixing row's clause), the radar (QA axis
+synced, held 4.5), both index maps, the backlog item-8 seventeenth
+update + reviewed-date bump, the scoreboard verification row, both map
+data tables + regenerated SVG, the execution plan, this log. Nothing
+committed; the prior runs' uncommitted deliveries preserved.
+
+**Verification:** spike first (`wip/entropyfences_spike.lean`, the full
+143-declaration delivery at zero errors/zero warnings before any shelf
+edit); `lake env lean` on both touched QA modules (zero new
+errors/warnings — the three `ring_nf` hints and the ProjectorDrift
+unused-variable warning confirmed pre-existing on the HEAD baseline by
+elaborating it separately); explicit `lake build` targets ✔;
+`#print axioms` via `wip/entropyfences_axcheck.lean` — all 143 new
+declarations exactly `propext, Classical.choice, Quot.sound`; **full
+`lake build` ✔ immediately followed by `check_build_completeness.py` —
+133 source files, 133 fresh artifacts, 0 stale, 0 missing, exit 0**;
+`lint_axioms` exit 0 (4 current axioms, unchanged);
+`check_refutation_independence` (9-tag clean); `check_public_reachability`
+clean (63 repo modules); `check_citations` ("All axioms have proper
+citations!"); `check_markdown_links` clean; `check_backlog_freshness`
+clean (0 days); scoreboard regenerated (**4012/4/0**); map freshness
+exit 0 after the stats sync and SVG regeneration (45 stations, no
+station's proposal status changed — this proposal has no station).
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. Honest scope: one family audited; the
+Poisson-bridge and primitivity-supplier families stay open with the
+method now thrice exercised.
+
+**Next handoff:** the Poisson-bridge family is the next audit-shaped
+frontier (same method); alternatively the lazy delivery's priced
+follow-ons (the conjugated-norm contraction twin's two certificate
+fences; the lazy object's `_spec` junk corner at a disconnected
+bipartite fixture), both priced in
+`proposals/adversarial-fences-lazy-family.md`.

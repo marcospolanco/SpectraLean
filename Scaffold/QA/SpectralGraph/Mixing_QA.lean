@@ -134,6 +134,27 @@
   witness set — against lazy `= 1` genuine), and the entrywise lazy
   ceiling attained exactly on `K₂` (both sides zero at rate `0`).
 
+  The `LazyFences` section (2026-09-02,
+  `proposals/adversarial-fences-lazy-family.md`) is the audit-shaped
+  adversarial pass over the whole lazy family — hypothesis-form
+  negative witnesses for the clauses no earlier section pinned: the
+  `hd` clauses of lazy row-stochasticity, mass conservation, and the
+  `t = 0` χ² normalization at the zero-degree fixture (where the
+  `D⁻¹A` row is junk-zero, mass `1/2`, and the normalization's right
+  side the junk `0⁻¹ − 1 = −1`); the `hnn` clauses of operator- and
+  law-nonnegativity at the negative off-diagonal fixture (`P_L 0 1 =
+  −1/2`, which the existing negative-*diagonal* fixture cannot kill);
+  the `hA` clauses of detailed balance (`3/16 ≠ 1/16`), stationarity
+  (`5/8 ≠ 3/4`), and attainment persistence at the asymmetric loop
+  fixture whose lazy law hits `π` exactly at `t = 1` and leaves it at
+  `t = 2`; and the two certificate clauses of the public lazy ℓ²(π)
+  contraction engine — `hrate` refuted on the triangle at the genuine
+  `3/2`-mode direction with `r = 1/8` below the factor `1/4`
+  (`1/24 > 1/96`), `hmode` refuted on the edge at the constant mode
+  with the genuine `r = 0` certificate (`1 > 0`) — each with its
+  isolation companion proving every other hypothesis genuine and the
+  dropped one failing.
+
   Scoreboard: ../QA_SCOREBOARD.md
 -/
 
@@ -6538,6 +6559,1615 @@ theorem path_lazy_entrywise_slack_QA :
     have h14 : (0 : ℝ) ≤ 1/4 := by norm_num
     nlinarith [hsq, hnn, h14]
 
+
 end LazyMixingTimeQA
+
+/-! ## The lazy family's adversarial fences (2026-09-02)
+
+`proposals/adversarial-fences-lazy-family.md`: the audit-shaped
+adversarial pass over the lazy family (`Mixing.lean`'s lazy sections
+plus `Oversmoothing.lean`'s `LazyMixingTime` section), whose QA was
+delivered 2026-09-01 by its own run and never independently re-read.
+The audit found ten load-bearing hypotheses with no negative
+witness anywhere in the repository — the `hd` clauses of
+row-stochasticity, mass conservation, and the `t = 0` χ²
+normalization (killed at the zero-degree fixture `zdAdj`, where the
+`D⁻¹A` row is junk-zero); the `hnn` clauses of operator- and
+law-nonnegativity (killed at the negative *off*-diagonal fixture
+`negOffAdj` — the existing negative-diagonal `negDiagAdj` cannot kill
+them, its off-diagonal `2` keeping every `P_L` entry nonnegative);
+and the `hA` clauses of detailed balance, stationarity, and
+attainment persistence (killed at the asymmetric fixture
+`asymLoopAdj`, whose lazy law hits `π` *exactly* at `t = 1` so the
+attainment hypothesis is genuine while the conclusion fails at
+`t = 2`) — plus the two certificate clauses of the public lazy ℓ²(π)
+contraction engine (the `hrate` clause killed on the triangle at the
+genuine `3/2`-mode direction `g = (1, −1, 0)` with `r = 1/8` below
+the mode's lazy factor `1/4`; the `hmode` clause killed on the edge
+at `g = (1, 1)` with the genuine certificate `r = 0`). Each fence is
+the negation of the conclusion at a specific instantiation with both
+sides computed to numerals; each has an isolation companion proving
+every other hypothesis genuine and the dropped one failing. -/
+
+section LazyFences
+
+/-- Generic extraction: the adjoint action on a point mass picks the
+row — `((M)ᵀ *ᵥ Pi.single x 1) j = M x j`. -/
+theorem transpose_mulVec_single_apply {V : Type*} [Fintype V]
+    [DecidableEq V] (M : Matrix V V ℝ) (x j : V) :
+    ((M)ᵀ *ᵥ (Pi.single x (1 : ℝ))) j = M x j := by
+  simp only [Matrix.mulVec, Matrix.dotProduct, Matrix.transpose_apply,
+    Pi.single_apply, mul_ite, mul_one, mul_zero]
+  rw [Finset.sum_ite_eq' Finset.univ x _,
+    if_pos (Finset.mem_univ x)]
+
+/-- The lazy law after one step, adjoint form — the interface every
+`ν₁` computation below consumes. -/
+theorem lazyWalkDistribution_one {V : Type} [Fintype V] [DecidableEq V]
+    (A : WAdj (V := V)) (x : V) :
+    lazyWalkDistribution A 1 x
+      = (lazyWalkTransitionMatrix A)ᵀ *ᵥ (Pi.single x (1 : ℝ)) := by
+  simp only [lazyWalkDistribution, pow_one]
+
+/-! ### Fixture 1: the zero-degree corner `zdAdj` (kills the `hd` clauses) -/
+
+/-- Adjacency of the zero-degree fixture on `Fin 2`: symmetric,
+nonnegative, `deg = (0, 1)` — every lazy-family hypothesis except
+degree positivity holds. -/
+def zdAdj : Matrix (Fin 2) (Fin 2) ℝ :=
+  Matrix.of !![0, 0; 0, 1]
+
+theorem zdAdj_isSymm : zdAdj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [zdAdj]
+
+theorem zdAdj_nonneg (i j : Fin 2) : 0 ≤ zdAdj i j := by
+  fin_cases i <;> fin_cases j <;> simp [zdAdj]
+
+theorem zdAdj_00 : zdAdj 0 0 = 0 := by rw [zdAdj]; rfl
+theorem zdAdj_01 : zdAdj 0 1 = 0 := by rw [zdAdj]; rfl
+theorem zdAdj_10 : zdAdj 1 0 = 0 := by rw [zdAdj]; rfl
+theorem zdAdj_11 : zdAdj 1 1 = 1 := by rw [zdAdj]; rfl
+
+theorem zdAdj_deg_zero : deg zdAdj 0 = 0 := by
+  simp only [deg, Fin.sum_univ_two, zdAdj_00, zdAdj_01]
+  norm_num
+
+theorem zdAdj_deg_one : deg zdAdj 1 = 1 := by
+  simp only [deg, Fin.sum_univ_two, zdAdj_10, zdAdj_11]
+  norm_num
+
+/-- The dropped hypothesis genuinely fails: `deg 0 = 0`. -/
+theorem zdAdj_deg_not_pos : ¬ (∀ i : Fin 2, 0 < deg zdAdj i) := by
+  intro h
+  have := h 0
+  rw [zdAdj_deg_zero] at this
+  norm_num at this
+
+/-- The lazy operator at the zero-degree corner: the zero-degree row
+is `1/2 · I` (its `D⁻¹A` half is junk-zero), the positive-degree row
+is untouched. -/
+theorem zdAdj_lazy_00 : lazyWalkTransitionMatrix zdAdj 0 0 = 1/2 := by
+  rw [lazyWalkTransitionMatrix_apply, walkTransitionMatrix_apply,
+    zdAdj_deg_zero, inv_zero, zdAdj_00, zero_mul, if_pos rfl]
+  norm_num
+
+theorem zdAdj_lazy_01 : lazyWalkTransitionMatrix zdAdj 0 1 = 0 := by
+  rw [lazyWalkTransitionMatrix_apply, walkTransitionMatrix_apply,
+    zdAdj_deg_zero, inv_zero, zdAdj_01, zero_mul,
+    if_neg (by decide : ¬(0 : Fin 2) = 1)]
+  norm_num
+
+/-- **The `hd` fence for lazy row-stochasticity**: at the zero-degree
+fixture (symmetric, nonnegative — every hypothesis except degree
+positivity), the first entry of `P_L *ᵥ 1` is `1/2 ≠ 1`. -/
+theorem zd_lazy_rowsum_fence_QA :
+    ¬ (lazyWalkTransitionMatrix zdAdj *ᵥ (1 : Fin 2 → ℝ) = 1) := by
+  intro h
+  have h0 := congrFun h 0
+  simp only [Matrix.mulVec, Matrix.dotProduct, Pi.one_apply, mul_one,
+    Fin.sum_univ_two, zdAdj_lazy_00, zdAdj_lazy_01] at h0
+  norm_num at h0
+
+theorem zd_vol_QA : vol zdAdj (Finset.univ : Finset (Fin 2)) = 1 := by
+  simp only [vol, Fin.sum_univ_two, zdAdj_deg_zero, zdAdj_deg_one]
+  norm_num
+
+theorem zd_pi_zero : stationaryVec zdAdj 0 = 0 := by
+  simp only [stationaryVec, zd_vol_QA, zdAdj_deg_zero]
+  norm_num
+
+theorem zd_pi_one : stationaryVec zdAdj 1 = 1 := by
+  simp only [stationaryVec, zd_vol_QA, zdAdj_deg_one]
+  norm_num
+
+/-- The lazy law from the isolated vertex after one step: the point
+mass halved (the zero-degree walk row is junk-zero). -/
+theorem zd_lazy_law_one_zero :
+    lazyWalkDistribution zdAdj 1 0 0 = 1/2 := by
+  rw [lazyWalkDistribution_one, transpose_mulVec_single_apply,
+    zdAdj_lazy_00]
+
+theorem zd_lazy_law_one_one :
+    lazyWalkDistribution zdAdj 1 0 1 = 0 := by
+  rw [lazyWalkDistribution_one, transpose_mulVec_single_apply,
+    zdAdj_lazy_01]
+
+/-- **The `hd` fence for lazy mass conservation**: at the zero-degree
+fixture the lazy law's mass after one step is `1/2 ≠ 1`. -/
+theorem zd_lazy_mass_fence_QA :
+    ¬ (∑ i, lazyWalkDistribution zdAdj 1 0 i = 1) := by
+  intro h
+  rw [Fin.sum_univ_two, zd_lazy_law_one_zero, zd_lazy_law_one_one] at h
+  norm_num at h
+
+/-- **The `hd` fence for the `t = 0` χ² normalization**: at the
+zero-degree corner `π 0 = 0`, the identity's right side is the junk
+`0⁻¹ − 1 = −1` while the left side is `1`. -/
+theorem zd_lazy_chi2_zero_fence_QA :
+    ¬ (lazyChiSquareDistance zdAdj 0 0
+        = (stationaryVec zdAdj 0)⁻¹ - 1) := by
+  have hvec : (Pi.single (0 : Fin 2) (1 : ℝ)) = ![1, 0] := by
+    funext i
+    fin_cases i <;> simp
+  intro h
+  rw [lazyChiSquareDistance, lazyWalkDistribution_zero, hvec] at h
+  norm_num [stationaryVec, zd_vol_QA, zdAdj_deg_zero, zdAdj_deg_one,
+    inv_zero, Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.head_cons,
+    Matrix.cons_val_one] at h
+
+/-! ### Fixture 2: the negative off-diagonal corner `negOffAdj`
+(kills the `hnn` clauses of nonnegativity) -/
+
+/-- Adjacency of the negative off-diagonal fixture: symmetric,
+`deg = (1, 1)` positive, negative off-diagonal entries — every lazy
+hypothesis except entrywise nonnegativity. The existing `negDiagAdj`
+(negative diagonal) cannot kill these clauses: its off-diagonal `2`
+keeps every `P_L` entry nonnegative. -/
+def negOffAdj : Matrix (Fin 2) (Fin 2) ℝ :=
+  Matrix.of !![2, -1; -1, 2]
+
+theorem negOffAdj_isSymm : negOffAdj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [negOffAdj]
+
+theorem negOffAdj_deg (i : Fin 2) : deg negOffAdj i = 1 := by
+  rw [deg]
+  fin_cases i <;> simp [negOffAdj, Fin.sum_univ_two] <;> norm_num
+
+theorem negOffAdj_deg_pos (i : Fin 2) : 0 < deg negOffAdj i := by
+  rw [negOffAdj_deg]
+  norm_num
+
+theorem negOffAdj_not_nonneg : ¬ (∀ i j : Fin 2, 0 ≤ negOffAdj i j) := by
+  intro h
+  have := h 0 1
+  rw [negOffAdj] at this
+  norm_num at this
+
+/-- The lazy operator at the negative off-diagonal fixture:
+`D⁻¹A = A` (unit degrees), so the off-diagonal entries are
+`(−1 + 0)/2 = −1/2`. -/
+theorem negOffAdj_lazy_01 :
+    lazyWalkTransitionMatrix negOffAdj 0 1 = -1/2 := by
+  rw [lazyWalkTransitionMatrix_apply, walkTransitionMatrix_apply,
+    negOffAdj_deg 0, inv_one]
+  simp only [negOffAdj]
+  rw [if_neg (by decide : ¬(0 : Fin 2) = 1)]
+  norm_num
+
+/-- **The `hnn` fence for lazy-operator nonnegativity**: at the
+fixture (symmetric, positive degrees — every hypothesis except
+nonnegativity), `P_L 0 1 = −1/2 < 0`. -/
+theorem negOff_lazy_nonneg_fence_QA :
+    ¬ (0 ≤ lazyWalkTransitionMatrix negOffAdj 0 1) := by
+  rw [negOffAdj_lazy_01]
+  norm_num
+
+theorem negOff_lazy_law_one_one :
+    lazyWalkDistribution negOffAdj 1 0 1 = -1/2 := by
+  rw [lazyWalkDistribution_one, transpose_mulVec_single_apply,
+    negOffAdj_lazy_01]
+
+/-- **The `hnn` fence for lazy-law nonnegativity**: at the same
+fixture, `ν₁ 0 1 = P_L 0 1 = −1/2 < 0`. -/
+theorem negOff_lazy_law_nonneg_fence_QA :
+    ¬ (0 ≤ lazyWalkDistribution negOffAdj 1 0 1) := by
+  rw [negOff_lazy_law_one_one]
+  norm_num
+
+/-! ### Fixture 3: the asymmetric loop fixture `asymLoopAdj`
+(kills the `hA` clauses) -/
+
+/-- Adjacency of the asymmetric fixture: nonnegative with self-loops,
+degrees `(6, 2)` positive, `A 0 1 = 3 ≠ 1 = A 1 0` — every lazy
+hypothesis except symmetry. Designed so that the lazy law from `0`
+hits `π = (3/4, 1/4)` *exactly* at `t = 1` (row `0` of `P_L` is
+`π`), which makes the attainment-persistence hypothesis genuine
+here. -/
+def asymLoopAdj : Matrix (Fin 2) (Fin 2) ℝ :=
+  Matrix.of !![3, 3; 1, 1]
+
+theorem asymLoopAdj_nonneg (i j : Fin 2) : 0 ≤ asymLoopAdj i j := by
+  fin_cases i <;> fin_cases j <;> simp [asymLoopAdj]
+
+theorem asymLoopAdj_00 : asymLoopAdj 0 0 = 3 := by rw [asymLoopAdj]; rfl
+theorem asymLoopAdj_01 : asymLoopAdj 0 1 = 3 := by rw [asymLoopAdj]; rfl
+theorem asymLoopAdj_10 : asymLoopAdj 1 0 = 1 := by rw [asymLoopAdj]; rfl
+theorem asymLoopAdj_11 : asymLoopAdj 1 1 = 1 := by rw [asymLoopAdj]; rfl
+
+theorem asymLoopAdj_deg_zero : deg asymLoopAdj 0 = 6 := by
+  simp only [deg, Fin.sum_univ_two, asymLoopAdj_00, asymLoopAdj_01]
+  norm_num
+
+theorem asymLoopAdj_deg_one : deg asymLoopAdj 1 = 2 := by
+  simp only [deg, Fin.sum_univ_two, asymLoopAdj_10, asymLoopAdj_11]
+  norm_num
+
+theorem asymLoopAdj_deg_pos (i : Fin 2) : 0 < deg asymLoopAdj i := by
+  rcases (show i = 0 ∨ i = 1 by omega) with h | h <;> rw [h]
+  · rw [asymLoopAdj_deg_zero]; norm_num
+  · rw [asymLoopAdj_deg_one]; norm_num
+
+theorem asymLoopAdj_not_isSymm : ¬ asymLoopAdj.IsSymm := by
+  intro h
+  have hrow : asymLoopAdjᵀ 1 = asymLoopAdj 1 := congrFun h.eq 1
+  have h10 := congrFun hrow 0
+  simp only [Matrix.transpose_apply, asymLoopAdj_01, asymLoopAdj_10] at h10
+  norm_num at h10
+
+theorem asym_vol_QA : vol asymLoopAdj (Finset.univ : Finset (Fin 2)) = 8 := by
+  simp only [vol, Fin.sum_univ_two, asymLoopAdj_deg_zero, asymLoopAdj_deg_one]
+  norm_num
+
+theorem asym_pi_zero : stationaryVec asymLoopAdj 0 = 3/4 := by
+  simp only [stationaryVec, asym_vol_QA, asymLoopAdj_deg_zero]
+  norm_num
+
+theorem asym_pi_one : stationaryVec asymLoopAdj 1 = 1/4 := by
+  simp only [stationaryVec, asym_vol_QA, asymLoopAdj_deg_one]
+  norm_num
+
+/-- The lazy operator at the asymmetric fixture, entrywise: both walk
+rows are `(1/2, 1/2)` (each degree divides its own row exactly), so
+`P_L` is the symmetric `!![3/4, 1/4; 1/4, 3/4]`. -/
+theorem asymLoopAdj_lazy_00 : lazyWalkTransitionMatrix asymLoopAdj 0 0 = 3/4 := by
+  rw [lazyWalkTransitionMatrix_apply, walkTransitionMatrix_apply,
+    asymLoopAdj_deg_zero, asymLoopAdj_00, if_pos rfl]
+  norm_num
+
+theorem asymLoopAdj_lazy_01 : lazyWalkTransitionMatrix asymLoopAdj 0 1 = 1/4 := by
+  rw [lazyWalkTransitionMatrix_apply, walkTransitionMatrix_apply,
+    asymLoopAdj_deg_zero, asymLoopAdj_01,
+    if_neg (by decide : ¬(0 : Fin 2) = 1), add_zero]
+  norm_num
+
+theorem asymLoopAdj_lazy_10 : lazyWalkTransitionMatrix asymLoopAdj 1 0 = 1/4 := by
+  rw [lazyWalkTransitionMatrix_apply, walkTransitionMatrix_apply,
+    asymLoopAdj_deg_one, asymLoopAdj_10,
+    if_neg (by decide : ¬(1 : Fin 2) = 0), add_zero]
+  norm_num
+
+theorem asymLoopAdj_lazy_11 : lazyWalkTransitionMatrix asymLoopAdj 1 1 = 3/4 := by
+  rw [lazyWalkTransitionMatrix_apply, walkTransitionMatrix_apply,
+    asymLoopAdj_deg_one, asymLoopAdj_11, if_pos rfl]
+  norm_num
+
+/-- **The `hA` fence for lazy detailed balance**: at the fixture
+(nonnegative, positive degrees — every hypothesis except symmetry),
+`π 0 · P_L 0 1 = 3/16 ≠ 1/16 = π 1 · P_L 1 0`. -/
+theorem asym_lazy_balance_fence_QA :
+    ¬ (stationaryVec asymLoopAdj 0 * lazyWalkTransitionMatrix asymLoopAdj 0 1
+        = stationaryVec asymLoopAdj 1
+            * lazyWalkTransitionMatrix asymLoopAdj 1 0) := by
+  rw [asym_pi_zero, asymLoopAdj_lazy_01, asym_pi_one,
+    asymLoopAdj_lazy_10]
+  norm_num
+
+theorem asym_lazy_row00 :
+    lazyWalkTransitionMatrix asymLoopAdj 0 0 = stationaryVec asymLoopAdj 0 := by
+  rw [asymLoopAdj_lazy_00, asym_pi_zero]
+
+theorem asym_lazy_row01 :
+    lazyWalkTransitionMatrix asymLoopAdj 0 1 = stationaryVec asymLoopAdj 1 := by
+  rw [asymLoopAdj_lazy_01, asym_pi_one]
+
+theorem asym_lazy_law_one_QA :
+    lazyWalkDistribution asymLoopAdj 1 0 = stationaryVec asymLoopAdj := by
+  funext j
+  rw [lazyWalkDistribution_one, transpose_mulVec_single_apply]
+  fin_cases j
+  · exact asym_lazy_row00
+  · exact asym_lazy_row01
+
+/-- **The `hA` fence for lazy stationarity**: at the same fixture,
+`(P_Lᵀ *ᵥ π) 0 = 5/8 ≠ 3/4 = π 0`. -/
+theorem asym_lazy_stationary_fence_QA :
+    ¬ ((lazyWalkTransitionMatrix asymLoopAdj)ᵀ *ᵥ stationaryVec asymLoopAdj
+        = stationaryVec asymLoopAdj) := by
+  intro h
+  have h0 := congrFun h 0
+  simp only [Matrix.mulVec, Matrix.dotProduct, Matrix.transpose_apply,
+    Fin.sum_univ_two, asymLoopAdj_lazy_00, asymLoopAdj_lazy_10,
+    asym_pi_zero, asym_pi_one] at h0
+  norm_num at h0
+
+/-- **The `hA` fence for attainment persistence**: the hypothesis is
+*genuine* at this fixture (`ν₁ 0 = π` exactly, `asym_lazy_law_one_QA`),
+yet the conclusion at `s = 1` fails — the law passes through `π` at
+`t = 1` and leaves it at `t = 2`: `ν₂ 0 0 = 5/8 ≠ 3/4 = π 0`. -/
+theorem asym_lazy_attain_fence_QA :
+    ¬ (lazyWalkDistribution asymLoopAdj (1 + 1) 0
+        = stationaryVec asymLoopAdj) := by
+  intro h
+  have hstep : lazyWalkDistribution asymLoopAdj (1 + 1) 0
+      = (lazyWalkTransitionMatrix asymLoopAdj)ᵀ *ᵥ
+          lazyWalkDistribution asymLoopAdj 1 0 :=
+    lazyWalkDistribution_succ asymLoopAdj 1 0
+  rw [hstep, asym_lazy_law_one_QA] at h
+  exact asym_lazy_stationary_fence_QA h
+
+/-! ### The fixture isolation companions
+
+Each fence above drops exactly one hypothesis; the companions verify
+that every *other* hypothesis of the family is genuine at the fixture
+and the dropped one genuinely fails — the refutation isolates the
+clause, not an artifact of a degenerate fixture. -/
+
+theorem zd_fence_isolation_QA :
+    zdAdj.IsSymm ∧ (∀ i j : Fin 2, 0 ≤ zdAdj i j)
+      ∧ ¬ (∀ i : Fin 2, 0 < deg zdAdj i) :=
+  ⟨zdAdj_isSymm, zdAdj_nonneg, zdAdj_deg_not_pos⟩
+
+theorem negOff_fence_isolation_QA :
+    negOffAdj.IsSymm ∧ (∀ i : Fin 2, 0 < deg negOffAdj i)
+      ∧ ¬ (∀ i j : Fin 2, 0 ≤ negOffAdj i j) :=
+  ⟨negOffAdj_isSymm, negOffAdj_deg_pos, negOffAdj_not_nonneg⟩
+
+theorem asym_fence_isolation_QA :
+    (∀ i j : Fin 2, 0 ≤ asymLoopAdj i j)
+      ∧ (∀ i : Fin 2, 0 < deg asymLoopAdj i) ∧ ¬ asymLoopAdj.IsSymm :=
+  ⟨asymLoopAdj_nonneg, asymLoopAdj_deg_pos, asymLoopAdj_not_isSymm⟩
+
+/-- The attainment fence's hypothesis is genuine: the asymmetric
+fixture's lazy law from `0` equals `π` at `t = 1` exactly. -/
+theorem asym_attain_isolation_QA :
+    (∀ i j : Fin 2, 0 ≤ asymLoopAdj i j)
+      ∧ (∀ i : Fin 2, 0 < deg asymLoopAdj i) ∧ ¬ asymLoopAdj.IsSymm
+      ∧ (lazyWalkDistribution asymLoopAdj 1 0 = stationaryVec asymLoopAdj) :=
+  ⟨asymLoopAdj_nonneg, asymLoopAdj_deg_pos, asymLoopAdj_not_isSymm,
+    asym_lazy_law_one_QA⟩
+
+/-! ### The certificate fences for the lazy ℓ²(π) contraction engine -/
+
+/-- The triangle's lazy operator action on the mode `g = (1, −1, 0)`:
+`P_L *ᵥ g = (1/4) • g` — the eigenaction at the `3/2`-mode's lazy
+factor `1 − (3/2)/2 = 1/4`. -/
+theorem tri_lazy_mulVec_mode_QA :
+    (lazyWalkTransitionMatrix triAdj ^ (1 : ℕ)) *ᵥ
+        (![1, -1, 0] : Fin 3 → ℝ)
+      = (1/4 : ℝ) • (![1, -1, 0] : Fin 3 → ℝ) := by
+  rw [pow_one]
+  funext j
+  have hrow : ∀ j : Fin 3,
+      (∑ k, triAdj j k * (![1, -1, 0] : Fin 3 → ℝ) k)
+        = -((![1, -1, 0] : Fin 3 → ℝ) j) := by
+    intro j
+    fin_cases j <;> simp [triAdj_apply, Fin.sum_univ_three]
+  have hdiag : ∀ j : Fin 3,
+      (∑ k, ((if j = k then (1 : ℝ) else 0)
+          * (![1, -1, 0] : Fin 3 → ℝ) k))
+        = (![1, -1, 0] : Fin 3 → ℝ) j := by
+    intro j
+    rw [Finset.sum_eq_single
+        (f := fun k => (if j = k then (1 : ℝ) else 0)
+          * (![1, -1, 0] : Fin 3 → ℝ) k) j
+      (fun k _ hk => by
+        simp only []
+        rw [if_neg (fun h => hk h.symm), zero_mul])
+      (fun hj => absurd (Finset.mem_univ j) hj), if_pos rfl, one_mul]
+  have hterm : ∀ k : Fin 3,
+      ((1/2 : ℝ) * ((1/2) * triAdj j k
+            + (if j = k then 1 else 0)))
+          * (![1, -1, 0] : Fin 3 → ℝ) k
+      = (1/4) * (triAdj j k * (![1, -1, 0] : Fin 3 → ℝ) k)
+        + (1/2) * ((if j = k then (1 : ℝ) else 0)
+            * (![1, -1, 0] : Fin 3 → ℝ) k) := by
+    intro k
+    ring_nf
+  simp only [Matrix.mulVec, Matrix.dotProduct,
+    lazyWalkTransitionMatrix_apply, walkTransitionMatrix_apply,
+    triAdj_deg_eq, Pi.smul_apply, smul_eq_mul]
+  norm_num
+  rw [Finset.sum_congr rfl fun k _ => hterm k, Finset.sum_add_distrib,
+    ← Finset.mul_sum, ← Finset.mul_sum, hrow j, hdiag j]
+  ring_nf
+
+/-- **The `hrate` fence for the lazy ℓ²(π) contraction**: on the
+triangle at `g = (1, −1, 0)` (a genuine `3/2`-mode direction), the
+certificate `r = 1/8` is strictly below the mode's lazy factor `1/4`,
+and the conclusion is refuted: `LHS = 1/24 > 1/96 = RHS`. -/
+theorem tri_lazy_rate_fence_QA :
+    ¬ (∑ i, stationaryVec triAdj i
+          * (((lazyWalkTransitionMatrix triAdj ^ (1 : ℕ)) *ᵥ
+              (![1, -1, 0] : Fin 3 → ℝ)) i)^2
+        ≤ (1/8 : ℝ) ^ (2 * 1)
+          * ∑ i, stationaryVec triAdj i
+              * ((![1, -1, 0] : Fin 3 → ℝ) i)^2) := by
+  intro h
+  rw [tri_lazy_mulVec_mode_QA] at h
+  simp only [tri_pi_QA, Pi.smul_apply, smul_eq_mul, Fin.sum_univ_three,
+    mul_pow, neg_zero, zero_pow (by norm_num : (2 : ℕ) ≠ 0), pow_one] at h
+  norm_num at h
+
+/-- The conjugated vector at the triangle's mode direction: `√D *ᵥ w`
+is `√2 • w` (the unit degrees make the conjugator scalar). -/
+theorem tri_degreeSqrt_mulVec_eq (w : Fin 3 → ℝ) :
+    degreeSqrt triAdj *ᵥ w = (Real.sqrt 2) • w := by
+  funext i
+  rw [degreeSqrt_mulVec_apply, triAdj_deg_eq]
+  simp [Pi.smul_apply, smul_eq_mul]
+
+/-- **The `hmode` companion for the triangle rate fence**: the mode
+clause is *genuine* at the fixture — every zero-eigenvalue eigvec is
+constant (`tri_kernel_const`), and the constant direction pairs to
+zero against `√D *ᵥ g` (whose coordinate sum is `√2 · (1 − 1 + 0)`). -/
+theorem tri_lazy_mode_genuine_QA :
+    ∀ i : Fin 3, eigvalOf (normalizedLaplacian triAdj)
+        (normalizedLaplacian_symmetric triAdj triAdj_isSymm) i = 0 →
+      Matrix.dotProduct
+        (eigvecOf (normalizedLaplacian triAdj)
+          (normalizedLaplacian_symmetric triAdj triAdj_isSymm) i)
+        (degreeSqrt triAdj *ᵥ (![1, -1, 0] : Fin 3 → ℝ)) = 0 := by
+  intro i hi
+  obtain ⟨c, hc⟩ := tri_kernel_const i hi
+  have hsumg : ∑ x, ((Real.sqrt 2) • (![1, -1, 0] : Fin 3 → ℝ)) x = 0 := by
+    simp [Pi.smul_apply, smul_eq_mul, Fin.sum_univ_three]
+  rw [tri_degreeSqrt_mulVec_eq]
+  simp only [Matrix.dotProduct_smul, smul_eq_mul, Matrix.dotProduct, hc]
+  rw [← Finset.mul_sum, hsumg, mul_zero]
+
+/-- The triangle has a genuine `3/2` mode (its trace is `3`, and
+every eigenvalue is `0` or `3/2` — not all modes can vanish). -/
+theorem tri_exists_pos_mode_QA :
+    ∃ i : Fin 3, eigvalOf (normalizedLaplacian triAdj)
+        (normalizedLaplacian_symmetric triAdj triAdj_isSymm) i = 3/2 := by
+  by_contra hcon
+  push_neg at hcon
+  have hall : ∀ i : Fin 3, eigvalOf (normalizedLaplacian triAdj)
+      (normalizedLaplacian_symmetric triAdj triAdj_isSymm) i = 0 :=
+    fun i => by
+      rcases tri_eigvalOf_cases i with h0 | h32
+      · exact h0
+      · exact absurd h32 (hcon i)
+  have htr := eigvalOf_sum_eq_trace (normalizedLaplacian triAdj)
+    (normalizedLaplacian_symmetric triAdj triAdj_isSymm)
+  rw [Finset.sum_congr rfl fun i _ => hall i, tri_trace] at htr
+  norm_num at htr
+
+/-- **The `hrate` companion for the triangle rate fence**: the rate
+clause *fails* at the fixture — the `3/2` mode's lazy factor `1/4`
+exceeds `r = 1/8`. -/
+theorem tri_lazy_rate_fails_QA :
+    ¬ (∀ i : Fin 3, eigvalOf (normalizedLaplacian triAdj)
+          (normalizedLaplacian_symmetric triAdj triAdj_isSymm) i ≠ 0 →
+        |1 - eigvalOf (normalizedLaplacian triAdj)
+            (normalizedLaplacian_symmetric triAdj triAdj_isSymm) i / 2|
+          ≤ 1/8) := by
+  obtain ⟨i, hi⟩ := tri_exists_pos_mode_QA
+  intro h
+  have hle := h i (by rw [hi]; norm_num)
+  rw [hi, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 1 - 3/2/2)] at hle
+  norm_num at hle
+
+/-! ### The K₂ mode fence -/
+
+/-- **Every edge eigenvalue is `0` or `2`**: summing the eigen
+equation over coordinates gives `μ · (∑ v) = 0` (the adjacency
+column sums are `1`), and the quadratic form at the unit eigenvector
+pins `μ = 2 − (∑ v)²` — either the eigenvalue vanishes or the
+coordinate sum does. -/
+theorem k2_eigvalOf_cases_QA (i : Fin 2) :
+    eigvalOf (normalizedLaplacian k2Adj)
+        (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i = 0
+      ∨ eigvalOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i = 2 := by
+  have hEV := (isHermitian_of_isSymm
+    (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)).mulVec_eigenvectorBasis i
+  have hev : ∀ j : Fin 2,
+      eigvalOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i
+        * (eigvecOf (normalizedLaplacian k2Adj)
+            (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i j)
+      = (eigvecOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i j)
+        - ∑ k, k2Adj j k * (eigvecOf (normalizedLaplacian k2Adj)
+            (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i k) := by
+    intro j
+    have h := congrFun hEV j
+    rw [k2_normalizedLaplacian_mulVec_apply _ j, Pi.smul_apply,
+      smul_eq_mul] at h
+    exact h.symm
+  have hunit : ∑ k, (eigvecOf (normalizedLaplacian k2Adj)
+        (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i k)
+      * (eigvecOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i k) = 1 := by
+    simpa using eigvecOf_inner _ _ i i
+  have hcol : ∀ k : Fin 2, ∑ j, k2Adj j k = 1 := by
+    intro k
+    fin_cases k <;> simp [k2Adj_apply, Fin.sum_univ_two]
+  have hsum : eigvalOf (normalizedLaplacian k2Adj)
+      (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i
+      * (∑ j, eigvecOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i j) = 0 := by
+    have h1 : ∑ j, eigvalOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i
+          * (eigvecOf (normalizedLaplacian k2Adj)
+              (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i j)
+        = ∑ j, ((eigvecOf (normalizedLaplacian k2Adj)
+              (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i j)
+            - ∑ k, k2Adj j k * (eigvecOf (normalizedLaplacian k2Adj)
+                (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i k)) :=
+      Finset.sum_congr rfl fun j _ => hev j
+    rw [← Finset.mul_sum, Finset.sum_sub_distrib] at h1
+    have h2 : ∑ j, ∑ k, k2Adj j k * (eigvecOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i k)
+        = ∑ k, eigvecOf (normalizedLaplacian k2Adj)
+            (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i k := by
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl fun k _ => ?_
+      rw [Finset.sum_congr rfl fun j _ => mul_comm (k2Adj j k)
+          (eigvecOf (normalizedLaplacian k2Adj)
+            (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i k),
+        ← Finset.mul_sum, hcol k, mul_one]
+    rw [h2] at h1
+    linarith
+  have hrow0 : (∑ k, k2Adj 0 k * (eigvecOf (normalizedLaplacian k2Adj)
+        (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i k))
+      = eigvecOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i 1 := by
+    simp [k2Adj_apply, Fin.sum_univ_two]
+  have hrow1 : (∑ k, k2Adj 1 k * (eigvecOf (normalizedLaplacian k2Adj)
+        (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i k))
+      = eigvecOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i 0 := by
+    simp [k2Adj_apply, Fin.sum_univ_two]
+  have hcross : ∑ j, (eigvecOf (normalizedLaplacian k2Adj)
+        (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i j)
+      * (∑ k, k2Adj j k * (eigvecOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i k))
+      = (∑ j, eigvecOf (normalizedLaplacian k2Adj)
+            (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i j)^2 - 1 := by
+    have hexp : ∀ F : Fin 2 → ℝ, ∑ j, F j = F 0 + F 1 := fun F =>
+      Fin.sum_univ_two F
+    have hunit2 : (eigvecOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i 0)
+        * (eigvecOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i 0)
+      + (eigvecOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i 1)
+        * (eigvecOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i 1) = 1 := by
+      rw [← hexp (fun k => (eigvecOf (normalizedLaplacian k2Adj)
+            (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i k)
+          * (eigvecOf (normalizedLaplacian k2Adj)
+            (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i k))]
+      exact hunit
+    rw [hexp (fun j => (eigvecOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i j)
+        * (∑ k, k2Adj j k * (eigvecOf (normalizedLaplacian k2Adj)
+            (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i k))),
+      hrow0, hrow1,
+      hexp (fun j => eigvecOf (normalizedLaplacian k2Adj)
+        (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i j)]
+    linear_combination (-1) * hunit2
+  have hqf : eigvalOf (normalizedLaplacian k2Adj)
+      (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i
+      = 2 - (∑ j, eigvecOf (normalizedLaplacian k2Adj)
+            (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i j)^2 := by
+    have hquad := quadForm_eigvecOf_self
+      (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i
+    have hsplit : quadForm (normalizedLaplacian k2Adj)
+        (eigvecOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i)
+      = (∑ j, (eigvecOf (normalizedLaplacian k2Adj)
+            (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i j)
+          * (eigvecOf (normalizedLaplacian k2Adj)
+              (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i j))
+        - ∑ j, (eigvecOf (normalizedLaplacian k2Adj)
+              (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i j)
+            * (∑ k, k2Adj j k * (eigvecOf (normalizedLaplacian k2Adj)
+                (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i k)) := by
+      simp only [quadForm, Matrix.dotProduct,
+        k2_normalizedLaplacian_mulVec_apply _, mul_sub,
+        Finset.sum_sub_distrib]
+    rw [hsplit, hunit, hcross] at hquad
+    linarith
+  rcases mul_eq_zero.mp hsum with hμ0 | hS0
+  · exact Or.inl hμ0
+  · refine Or.inr ?_
+    rw [hS0] at hqf
+    linarith
+
+/-- **The `hmode` fence for the lazy ℓ²(π) contraction**: on the edge
+at `g = (1, 1)` — the constant zero mode itself — with the genuine
+certificate `r = 0` (the only nonzero mode is `μ = 2`, lazy factor
+`0`), the conclusion is refuted: `P_L *ᵥ 1 = 1`, so `LHS = 1 > 0 =
+RHS`. -/
+theorem k2_lazy_mode_fence_QA :
+    ¬ (∑ i, stationaryVec k2Adj i
+          * (((lazyWalkTransitionMatrix k2Adj ^ (1 : ℕ)) *ᵥ
+              (![1, 1] : Fin 2 → ℝ)) i)^2
+        ≤ (0 : ℝ) ^ (2 * 1)
+          * ∑ i, stationaryVec k2Adj i * ((![1, 1] : Fin 2 → ℝ) i)^2) := by
+  intro h
+  have hone : (![1, 1] : Fin 2 → ℝ) = 1 := by
+    funext i
+    fin_cases i <;> simp
+  have hfix : (lazyWalkTransitionMatrix k2Adj ^ (1 : ℕ)) *ᵥ
+      (![1, 1] : Fin 2 → ℝ) = (1 : Fin 2 → ℝ) := by
+    rw [pow_one, hone, lazyWalkTransitionMatrix_mulVec_one k2Adj k2Adj_deg_pos]
+  rw [hfix] at h
+  simp only [k2_pi_QA, Fin.sum_univ_two, Pi.one_apply, one_pow, mul_one,
+    zero_pow (by norm_num : (2 * 1 : ℕ) ≠ 0), zero_mul] at h
+  norm_num at h
+
+/-- **The `hrate` companion for the edge mode fence**: the rate clause
+is *genuine* at `r = 0` — every nonzero eigenvalue is `2`, whose lazy
+factor is exactly `0`. -/
+theorem k2_lazy_rate_genuine_QA :
+    ∀ i : Fin 2, eigvalOf (normalizedLaplacian k2Adj)
+        (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i ≠ 0 →
+      |1 - eigvalOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i / 2|
+        ≤ 0 := by
+  intro i hi
+  rcases k2_eigvalOf_cases_QA i with h0 | h2
+  · exact absurd h0 hi
+  · rw [h2]
+    norm_num
+
+/-- **The `hmode` companion for the edge mode fence**: the mode clause
+*fails* at the fixture — a kernel eigenvector exists, is constant
+nonzero, and pairs to a nonzero value against `√D *ᵥ (1, 1) = (1, 1)`. -/
+theorem k2_lazy_mode_fails_QA :
+    ¬ (∀ i : Fin 2, eigvalOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i = 0 →
+        Matrix.dotProduct
+          (eigvecOf (normalizedLaplacian k2Adj)
+            (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i)
+          (degreeSqrt k2Adj *ᵥ (![1, 1] : Fin 2 → ℝ)) = 0) := by
+  have hkern : (normalizedLaplacian k2Adj) *ᵥ (![1, 1] : Fin 2 → ℝ)
+      = (0 : ℝ) • (![1, 1] : Fin 2 → ℝ) := by
+    funext j
+    rw [k2_normalizedLaplacian_mulVec_apply _ j]
+    fin_cases j <;> simp [k2Adj_apply, Fin.sum_univ_two]
+  obtain ⟨i, hi⟩ := exists_eigvalOf_eq_of_mulVec_eq_smul
+    (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)
+    (by
+      intro h0
+      have h1 := congrFun h0 0
+      simp at h1)
+    hkern
+  intro hcontra
+  have hzero := hcontra i hi
+  have hEV0 : (normalizedLaplacian k2Adj) *ᵥ
+      (eigvecOf (normalizedLaplacian k2Adj)
+        (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i)
+      = (0 : ℝ) • (eigvecOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i) := by
+    have hEV := (isHermitian_of_isSymm
+      (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)).mulVec_eigenvectorBasis i
+    have hz : ((isHermitian_of_isSymm
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)).eigenvalues i) = 0 := hi
+    rw [hz] at hEV
+    exact hEV
+  have hconst : (eigvecOf (normalizedLaplacian k2Adj)
+        (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i) 0
+      = (eigvecOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i) 1 := by
+    have h0 := congrFun hEV0 0
+    rw [k2_normalizedLaplacian_mulVec_apply _ 0] at h0
+    simp only [Fin.sum_univ_two, k2Adj_apply, Pi.smul_apply, smul_eq_mul,
+      zero_mul, Matrix.cons_val_zero, Matrix.head_cons,
+      Matrix.cons_val_one, Fin.zero_ne_one, if_false, if_true,
+      sub_zero, sub_self] at h0
+    linarith
+  have hunit : ∑ k, (eigvecOf (normalizedLaplacian k2Adj)
+        (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i k)
+      * (eigvecOf (normalizedLaplacian k2Adj)
+          (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i k) = 1 := by
+    simpa using eigvecOf_inner _ _ i i
+  rw [Fin.sum_univ_two, hconst] at hunit
+  have hv1 : (eigvecOf (normalizedLaplacian k2Adj)
+      (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) i) 1 ≠ 0 := by
+    intro hz
+    rw [hz] at hunit
+    norm_num at hunit
+  rw [k2_degreeSqrt_mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+    hconst] at hzero
+  simp only [Matrix.cons_val_zero, Matrix.head_cons,
+    Matrix.cons_val_one, mul_one] at hzero
+  exact hv1 (by linarith)
+
+end LazyFences
+
+/-!
+## The entropy family's adversarial fences, walk level (2026-09-03)
+
+The audit continues at `Mixing.lean`'s entropy leg (Pinsker, the decay
+form, the nonnegativity plumbing) and `Oversmoothing.lean`'s entropy
+floor. Fixtures: the existing `negOffAdj`, `zdAdj`, `k2Adj`, `triAdj`
+plus the new asymmetric swap `asymSwapAdj`.
+-/
+
+section EntropyFences
+
+/-! ### Pinsker's two mass clauses -/
+
+/-- The half-mass fixture on `Fin 2` (self-contained: `Entropy_QA`'s
+fixtures are not imported here). -/
+noncomputable def efHalf : Fin 2 → ℝ := fun _ => 1/2
+noncomputable def efQuart : Fin 2 → ℝ := fun _ => 1/4
+noncomputable def efOne : Fin 2 → ℝ := fun _ => 1
+
+theorem efHalf_sum : ∑ i, efHalf i = 1 := by
+  rw [Fin.sum_univ_two]; simp only [efHalf]; norm_num
+theorem efQuart_nonneg : ∀ i, 0 ≤ efQuart i := fun _ => by norm_num [efQuart]
+theorem efQuart_sum : ∑ i, efQuart i = 1/2 := by
+  rw [Fin.sum_univ_two]; simp only [efQuart]; norm_num
+theorem efHalf_pos : ∀ i, 0 < efHalf i := fun _ => by norm_num [efHalf]
+theorem efHalf_sum' : ∑ i, efHalf i = 1 := efHalf_sum
+theorem efOne_pos : ∀ i, 0 < efOne i := fun _ => by norm_num [efOne]
+theorem efOne_sum : ∑ i, efOne i = 2 := by
+  rw [Fin.sum_univ_two]; simp only [efOne]; norm_num
+
+/-- The shared value pin: `D(1/4, 1/4 ‖ 1/2, 1/2) = −(1/2)·log 2`. -/
+theorem ef_klDiv_quart_half :
+    klDiv efQuart efHalf = -(1/2) * Real.log 2 := by
+  have h1 : klTerm (1/4 : ℝ) (1/2 : ℝ) = (1/4) * (-(Real.log 2)) := by
+    have hpos : (0:ℝ) < 1/4 := by norm_num
+    have hval : (1/4 : ℝ) / (1/2 : ℝ) = (2:ℝ)⁻¹ := by norm_num
+    simp only [klTerm, if_neg (ne_of_gt hpos), hval, Real.log_inv]
+  rw [klDiv, Fin.sum_univ_two]
+  simp only [efQuart, efHalf]
+  rw [h1]
+  ring
+
+/-- The shared value pin: `D(1/2, 1/2 ‖ 1, 1) = −log 2`. -/
+theorem ef_klDiv_half_one :
+    klDiv efHalf efOne = -(Real.log 2) := by
+  have h1 : klTerm (1/2 : ℝ) 1 = -(1/2) * Real.log 2 := by
+    have hpos : (0:ℝ) < 1/2 := by norm_num
+    have hlog : Real.log ((1:ℝ)/2) = -Real.log 2 := by
+      rw [show ((1:ℝ)/2) = (2:ℝ)⁻¹ from by norm_num, Real.log_inv]
+    simp only [klTerm, if_neg (ne_of_gt hpos), div_one, hlog]
+    ring
+  rw [klDiv, Fin.sum_univ_two]
+  simp only [efHalf, efOne]
+  rw [h1]
+  ring
+
+/-- **The `hp1` fence for `tvDistance_le_sqrt_half_klDiv`** (Pinsker):
+at `p = (1/4, 1/4)` (nonneg genuine, mass `1/2` dropped) against the
+genuine `q = (1/2, 1/2)`, the divergence is negative, its junk square
+root is `0`, and `TV = 1/4` — refuted. -/
+theorem pinsker_pmass_fence_QA :
+    ¬ (tvDistance efQuart efHalf
+        ≤ Real.sqrt (klDiv efQuart efHalf / 2)) := by
+  have hTV : tvDistance efQuart efHalf = 1/4 := by
+    rw [tvDistance, Fin.sum_univ_two]
+    simp only [efQuart, efHalf,
+      abs_of_nonpos (by norm_num : (1/4:ℝ) - 1/2 ≤ 0)]
+    norm_num
+  intro h
+  rw [hTV, ef_klDiv_quart_half] at h
+  rw [Real.sqrt_eq_zero_of_nonpos (by
+    have hlog : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+    nlinarith [hlog])] at h
+  norm_num at h
+
+/-- **The `hq1` fence for Pinsker**: at the genuine
+`p = (1/2, 1/2)` against `q = (1, 1)` (strictly positive, mass `2`
+dropped), the divergence is `−log 2` and `TV = 1/2` — refuted. -/
+theorem pinsker_qmass_fence_QA :
+    ¬ (tvDistance efHalf efOne
+        ≤ Real.sqrt (klDiv efHalf efOne / 2)) := by
+  have hTV : tvDistance efHalf efOne = 1/2 := by
+    rw [tvDistance, Fin.sum_univ_two]
+    simp only [efHalf, efOne,
+      abs_of_nonpos (by norm_num : (1/2:ℝ) - 1 ≤ 0)]
+    norm_num
+  intro h
+  rw [hTV, ef_klDiv_half_one] at h
+  rw [Real.sqrt_eq_zero_of_nonpos (by
+    have hlog : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+    nlinarith [hlog])] at h
+  norm_num at h
+
+/-! ### The asymmetric swap fixture `asymSwapAdj` (kills the `hA` of
+mass conservation and of the entropy floor) -/
+
+/-- Adjacency of the asymmetric swap: nonnegative, `deg = (2, 4)`
+positive, `A 0 1 = 0 ≠ 4 = A 1 0` — every hypothesis except symmetry.
+Two properties make it the fence fixture of choice: its normalized
+Laplacian is `[[0,0],[−√2,1]]`, so `![0,1]` is a genuine `μ = 1`
+eigenvector with all-radical-free arithmetic; and its walk Laplacian
+`[[0,0],[−1,1]]` is idempotent, so the heat kernel is exactly
+evaluable and the mass drift is visible in closed form. -/
+def asymSwapAdj : Matrix (Fin 2) (Fin 2) ℝ :=
+  Matrix.of !![2, 0; 4, 0]
+
+theorem asymSwapAdj_nonneg (i j : Fin 2) : 0 ≤ asymSwapAdj i j := by
+  fin_cases i <;> fin_cases j <;> simp [asymSwapAdj]
+
+theorem asymSwapAdj_00 : asymSwapAdj 0 0 = 2 := by rw [asymSwapAdj]; rfl
+theorem asymSwapAdj_01 : asymSwapAdj 0 1 = 0 := by rw [asymSwapAdj]; rfl
+theorem asymSwapAdj_10 : asymSwapAdj 1 0 = 4 := by rw [asymSwapAdj]; rfl
+theorem asymSwapAdj_11 : asymSwapAdj 1 1 = 0 := by rw [asymSwapAdj]; rfl
+
+theorem asymSwapAdj_deg_zero : deg asymSwapAdj 0 = 2 := by
+  simp only [deg, Fin.sum_univ_two, asymSwapAdj_00, asymSwapAdj_01]
+  norm_num
+
+theorem asymSwapAdj_deg_one : deg asymSwapAdj 1 = 4 := by
+  simp only [deg, Fin.sum_univ_two, asymSwapAdj_10, asymSwapAdj_11]
+  norm_num
+
+theorem asymSwapAdj_deg_pos (i : Fin 2) : 0 < deg asymSwapAdj i := by
+  rcases (show i = 0 ∨ i = 1 by omega) with h | h <;> rw [h]
+  · rw [asymSwapAdj_deg_zero]; norm_num
+  · rw [asymSwapAdj_deg_one]; norm_num
+
+theorem asymSwapAdj_not_isSymm : ¬ asymSwapAdj.IsSymm := by
+  intro h
+  have hrow : asymSwapAdjᵀ 1 = asymSwapAdj 1 := congrFun h.eq 1
+  have h10 := congrFun hrow 0
+  simp only [Matrix.transpose_apply, asymSwapAdj_01, asymSwapAdj_10] at h10
+  norm_num at h10
+
+theorem asymSwap_vol_QA : vol asymSwapAdj (Finset.univ : Finset (Fin 2)) = 6 := by
+  rw [vol, Fin.sum_univ_two, asymSwapAdj_deg_zero, asymSwapAdj_deg_one]
+  norm_num
+
+theorem asymSwap_pi_zero : stationaryVec asymSwapAdj 0 = 1/3 := by
+  rw [stationaryVec, asymSwap_vol_QA, asymSwapAdj_deg_zero]
+  norm_num
+
+theorem asymSwap_pi_one : stationaryVec asymSwapAdj 1 = 2/3 := by
+  rw [stationaryVec, asymSwap_vol_QA, asymSwapAdj_deg_one]
+  norm_num
+
+/-- The swap's walk matrix: `P = [[1,0],[1,0]]`. -/
+theorem asym_walk_00 : walkTransitionMatrix asymSwapAdj 0 0 = 1 := by
+  rw [walkTransitionMatrix_apply, asymSwapAdj_deg_zero, asymSwapAdj_00]
+  norm_num
+
+theorem asym_walk_01 : walkTransitionMatrix asymSwapAdj 0 1 = 0 := by
+  rw [walkTransitionMatrix_apply, asymSwapAdj_deg_zero, asymSwapAdj_01]
+  norm_num
+
+theorem asym_walk_10 : walkTransitionMatrix asymSwapAdj 1 0 = 1 := by
+  rw [walkTransitionMatrix_apply, asymSwapAdj_deg_one, asymSwapAdj_10]
+  norm_num
+
+theorem asym_walk_11 : walkTransitionMatrix asymSwapAdj 1 1 = 0 := by
+  rw [walkTransitionMatrix_apply, asymSwapAdj_deg_one, asymSwapAdj_11]
+  norm_num
+
+theorem asym_L_00 : walkLaplacian asymSwapAdj 0 0 = 0 := by
+  simp only [walkLaplacian, Matrix.sub_apply, Matrix.one_apply, asym_walk_00]
+  rw [if_true]
+  norm_num
+
+theorem asym_L_01 : walkLaplacian asymSwapAdj 0 1 = 0 := by
+  simp only [walkLaplacian, Matrix.sub_apply, Matrix.one_apply, asym_walk_01]
+  rw [if_neg (by decide : ¬(0 : Fin 2) = 1)]
+  norm_num
+
+theorem asym_L_10 : walkLaplacian asymSwapAdj 1 0 = -1 := by
+  simp only [walkLaplacian, Matrix.sub_apply, Matrix.one_apply, asym_walk_10]
+  rw [if_neg (by decide : ¬(1 : Fin 2) = 0)]
+  norm_num
+
+theorem asym_L_11 : walkLaplacian asymSwapAdj 1 1 = 1 := by
+  simp only [walkLaplacian, Matrix.sub_apply, Matrix.one_apply, asym_walk_11]
+  rw [if_true]
+  norm_num
+
+/-- The swap's walk Laplacian is idempotent. -/
+theorem asym_L_sq :
+    (walkLaplacian asymSwapAdj) * (walkLaplacian asymSwapAdj)
+      = 1 • (walkLaplacian asymSwapAdj) := by
+  ext i j
+  rcases (show i = 0 ∨ i = 1 by omega) with h | h <;> rw [h] <;>
+    rcases (show j = 0 ∨ j = 1 by omega) with h' | h' <;> rw [h']
+  all_goals
+    simp only [Matrix.mul_apply, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.smul_apply]
+  · rw [asym_L_00, asym_L_01, asym_L_10]; norm_num
+  · rw [asym_L_00, asym_L_01, asym_L_11]; norm_num
+  · rw [asym_L_10, asym_L_00, asym_L_11]; norm_num
+  · rw [asym_L_10, asym_L_01, asym_L_11]; norm_num
+
+theorem asym_density_zero :
+    walkDensity asymSwapAdj 0 0 = ![3, 0] := by
+  have hlaw : (Pi.single (0 : Fin 2) (1 : ℝ)) = ![1, 0] := by
+    funext i
+    fin_cases i <;> simp
+  funext i
+  rcases (show i = 0 ∨ i = 1 by omega) with h | h <;> rw [h]
+  · rw [walkDensity, walkDistribution_zero, hlaw]
+    simp only [Matrix.cons_val_zero, Matrix.head_cons, asymSwap_pi_zero]
+    norm_num
+  · rw [walkDensity, walkDistribution_zero, hlaw]
+    simp only [Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons,
+      asymSwap_pi_one]
+    norm_num
+
+/-- The swap's idempotent walk Laplacian makes the heat kernel exactly
+evaluable: `exp(−L) = 1 + (1 − e^{−1}) • (−L)`. -/
+theorem asym_heat_one :
+    walkHeatKernel asymSwapAdj 1
+      = 1 + ((1 - Real.exp (-(1:ℝ))))
+          • (-(walkLaplacian asymSwapAdj)) := by
+  have hsq : (-(walkLaplacian asymSwapAdj))
+      * (-(walkLaplacian asymSwapAdj))
+      = (-1 : ℝ) • (-(walkLaplacian asymSwapAdj)) := by
+    rw [neg_mul_neg, asym_L_sq, one_smul, neg_smul, one_smul, neg_neg]
+  rw [walkHeatKernel, one_smul]
+  rw [exp_eq_one_add_of_mul_self_eq_smul _ (by norm_num) hsq]
+  ring_nf
+
+/-- The exponent's action on the start density: `−L *ᵥ (3, 0) = (0, −3)`. -/
+theorem asym_negL_mulVec :
+    (-(walkLaplacian asymSwapAdj)) *ᵥ (![3, 0] : Fin 2 → ℝ)
+      = ![0, 3] := by
+  funext i
+  rcases (show i = 0 ∨ i = 1 by omega) with h | h <;> rw [h]
+  · simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.neg_apply, Pi.neg_apply, Matrix.cons_val_zero,
+      Matrix.head_cons]
+    rw [asym_L_00, asym_L_01]
+    norm_num
+  · simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.neg_apply, Pi.neg_apply, Matrix.cons_val_zero,
+      Matrix.head_cons, Matrix.cons_val_one]
+    rw [asym_L_10, asym_L_11]
+    norm_num
+
+/-- The swap's continuous density at `t = 1` from `0`:
+`(3, 3(1 − e^{−1}))`. -/
+theorem asym_cont_density_one :
+    contWalkDensity asymSwapAdj 1 0 = ![3, 3 * (1 - Real.exp (-(1:ℝ)))] := by
+  rw [contWalkDensity, asym_density_zero, asym_heat_one,
+    Matrix.add_mulVec, Matrix.one_mulVec, Matrix.smul_mulVec_assoc,
+    asym_negL_mulVec]
+  funext i
+  rcases (show i = 0 ∨ i = 1 by omega) with h | h <;> rw [h]
+  · simp only [Matrix.cons_val_zero, Matrix.head_cons, Pi.smul_apply,
+      smul_eq_mul, Pi.add_apply]
+    ring
+  · simp only [Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons,
+      Pi.smul_apply, smul_eq_mul, Pi.add_apply]
+    ring
+
+/-- The swap's continuous law at `t = 1` from `0`:
+`(1, 2(1 − e^{−1}))` — mass `3 − 2e^{−1} ≠ 1`. -/
+theorem asym_cont_law_one :
+    contWalkDistribution asymSwapAdj 1 0
+      = ![1, 2 * (1 - Real.exp (-(1:ℝ)))] := by
+  funext i
+  rw [contWalkDistribution, asym_cont_density_one]
+  rcases (show i = 0 ∨ i = 1 by omega) with h | h <;> rw [h]
+  · simp only [Matrix.cons_val_zero, Matrix.head_cons, asymSwap_pi_zero]
+    ring
+  · simp only [Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons,
+      asymSwap_pi_one]
+    ring
+
+/-- **The `hA` fence for `sum_contWalkDistribution`**: at the asymmetric
+swap (nonnegative, positive degrees — every hypothesis except
+symmetry), the law's mass at `t = 1` is `3 − 2e^{−1} ≠ 1` — refuted. -/
+theorem sum_contWalkDistribution_hA_fence_QA :
+    ¬ (∑ i, contWalkDistribution asymSwapAdj 1 0 i = 1) := by
+  intro h
+  rw [Fin.sum_univ_two, asym_cont_law_one] at h
+  simp only [Matrix.cons_val_zero, Matrix.head_cons,
+    Matrix.cons_val_one] at h
+  have hE : Real.exp (-(1:ℝ)) < 1 := by
+    have := Real.exp_lt_exp.mpr (by norm_num : -(1:ℝ) < 0)
+    rwa [Real.exp_zero] at this
+  have hpos : (0:ℝ) < Real.exp (-(1:ℝ)) := Real.exp_pos _
+  nlinarith [hE, hpos]
+
+
+/-! ### The negative off-diagonal fixture `negOffAdj` (kills the `hnn`
+of the plain density and the continuous density/law) -/
+
+theorem negOff_vol_QA : vol negOffAdj (Finset.univ : Finset (Fin 2)) = 2 := by
+  rw [vol, Fin.sum_univ_two, negOffAdj_deg 0, negOffAdj_deg 1]
+  norm_num
+
+theorem negOff_pi (i : Fin 2) : stationaryVec negOffAdj i = 1/2 := by
+  rw [stationaryVec, negOff_vol_QA, negOffAdj_deg i]
+
+theorem negOff_00 : negOffAdj 0 0 = 2 := by rw [negOffAdj]; rfl
+theorem negOff_01 : negOffAdj 0 1 = -1 := by rw [negOffAdj]; rfl
+theorem negOff_10 : negOffAdj 1 0 = -1 := by rw [negOffAdj]; rfl
+theorem negOff_11 : negOffAdj 1 1 = 2 := by rw [negOffAdj]; rfl
+
+theorem negOff_L00 : walkLaplacian negOffAdj 0 0 = -1 := by
+  rw [walkLaplacian, Matrix.sub_apply, Matrix.one_apply,
+    walkTransitionMatrix_apply, negOffAdj_deg 0, negOff_00, if_pos rfl,
+    inv_one]
+  norm_num
+
+theorem negOff_L01 : walkLaplacian negOffAdj 0 1 = 1 := by
+  rw [walkLaplacian, Matrix.sub_apply, Matrix.one_apply,
+    walkTransitionMatrix_apply, negOffAdj_deg 0, negOff_01,
+    if_neg (by decide : ¬(0 : Fin 2) = 1), inv_one]
+  norm_num
+
+theorem negOff_L10 : walkLaplacian negOffAdj 1 0 = 1 := by
+  rw [walkLaplacian, Matrix.sub_apply, Matrix.one_apply,
+    walkTransitionMatrix_apply, negOffAdj_deg 1, negOff_10,
+    if_neg (by decide : ¬(1 : Fin 2) = 0), inv_one]
+  norm_num
+
+theorem negOff_L11 : walkLaplacian negOffAdj 1 1 = -1 := by
+  rw [walkLaplacian, Matrix.sub_apply, Matrix.one_apply,
+    walkTransitionMatrix_apply, negOffAdj_deg 1, negOff_11, if_pos rfl,
+    inv_one]
+  norm_num
+
+/-- The plain one-step law from `0` at the negative off-diagonal
+fixture: the walk matrix is `D⁻¹A = A` (unit degrees), so the law is
+row `0` of `A`: `(2, −1)` — a mass-`1` vector with a negative entry. -/
+theorem negOff_dist_one :
+    walkDistribution negOffAdj 1 0 = ![2, -1] := by
+  rw [walkDistribution, pow_one]
+  funext i
+  rw [transpose_mulVec_single_apply]
+  rcases (show i = 0 ∨ i = 1 by omega) with h | h <;> rw [h]
+  · rw [walkTransitionMatrix_apply, negOffAdj_deg 0, negOff_00, inv_one]
+    simp only [Matrix.cons_val_zero, one_mul]
+  · rw [walkTransitionMatrix_apply, negOffAdj_deg 0, negOff_01, inv_one]
+    norm_num
+/-- **The `hnn` fence for `walkDensity_nonneg`**: at the fixture
+(symmetric, positive degrees — every hypothesis except entrywise
+nonnegativity), `h(1) = ν₁ 1 / π 1 = −1/(1/2) = −2` — refuted. -/
+theorem walkDensity_nonneg_hnn_fence_QA :
+    ¬ (0 ≤ walkDensity negOffAdj 1 0 1) := by
+  rw [walkDensity, negOff_dist_one, negOff_pi 1]
+  simp only [Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons]
+  norm_num
+
+theorem negOff_negL_sq :
+    (-(walkLaplacian negOffAdj)) * (-(walkLaplacian negOffAdj))
+      = (2 : ℝ) • (-(walkLaplacian negOffAdj)) := by
+  ext i j
+  rcases (show i = 0 ∨ i = 1 by omega) with h | h <;> rw [h] <;>
+    rcases (show j = 0 ∨ j = 1 by omega) with h' | h' <;> rw [h']
+  all_goals
+    simp only [Matrix.mul_apply, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.smul_apply, Matrix.neg_apply]
+  · rw [negOff_L00, negOff_L01, negOff_L10]; norm_num
+  · rw [negOff_L00, negOff_L01, negOff_L11]; norm_num
+  · rw [negOff_L10, negOff_L00, negOff_L11]; norm_num
+  · rw [negOff_L10, negOff_L01, negOff_L11]; norm_num
+
+theorem negOff_density_zero :
+    walkDensity negOffAdj 0 0 = ![2, 0] := by
+  have hlaw : (Pi.single (0 : Fin 2) (1 : ℝ)) = ![1, 0] := by
+    funext i
+    fin_cases i <;> simp
+  funext i
+  rcases (show i = 0 ∨ i = 1 by omega) with h | h <;> rw [h] <;>
+    rw [walkDensity, walkDistribution_zero, hlaw]
+  · simp only [Matrix.cons_val_zero, Matrix.head_cons, negOff_pi 0]
+    norm_num
+  · simp only [Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons,
+      negOff_pi 1]
+    norm_num
+
+/-- The negative off-diagonal heat kernel at `t = 1` in closed form:
+`exp(−L) = 1 + ((e² − 1)/2) • (−L)`. -/
+theorem negOff_heat_one :
+    walkHeatKernel negOffAdj 1
+      = 1 + ((Real.exp 2 - 1) / 2) • (-(walkLaplacian negOffAdj)) := by
+  rw [walkHeatKernel, one_smul]
+  rw [exp_eq_one_add_of_mul_self_eq_smul _
+    (show (2:ℝ) ≠ 0 by norm_num) negOff_negL_sq]
+
+theorem negOff_negL_mulVec :
+    (-(walkLaplacian negOffAdj)) *ᵥ (![2, 0] : Fin 2 → ℝ)
+      = ![2, -2] := by
+  funext i
+  rcases (show i = 0 ∨ i = 1 by omega) with h | h <;> rw [h]
+  · simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.neg_apply, Pi.neg_apply, Matrix.cons_val_zero,
+      Matrix.head_cons]
+    rw [negOff_L00, negOff_L01]
+    norm_num
+  · simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.neg_apply, Pi.neg_apply, Matrix.cons_val_zero,
+      Matrix.head_cons, Matrix.cons_val_one]
+    rw [negOff_L10, negOff_L11]
+    norm_num
+
+theorem negOff_cont_density_one :
+    contWalkDensity negOffAdj 1 0
+      = ![1 + Real.exp 2, 1 - Real.exp 2] := by
+  rw [contWalkDensity, negOff_density_zero, negOff_heat_one,
+    Matrix.add_mulVec, Matrix.one_mulVec, Matrix.smul_mulVec_assoc,
+    negOff_negL_mulVec]
+  funext i
+  rcases (show i = 0 ∨ i = 1 by omega) with h | h <;> rw [h]
+  · simp only [Matrix.cons_val_zero, Matrix.head_cons, Pi.smul_apply,
+      smul_eq_mul, Pi.add_apply]
+    ring
+  · simp only [Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons,
+      Pi.smul_apply, smul_eq_mul, Pi.add_apply]
+    ring
+
+/-- **The `hnn` fence for `contWalkDensity_nonneg`**: at the fixture
+(symmetric, positive degrees — every hypothesis except entrywise
+nonnegativity), the heat kernel's off-diagonal entry is
+`(1 − e²)/2 < 0`, so `h(1) = 1 − e² < 0` — refuted. -/
+theorem contWalkDensity_nonneg_hnn_fence_QA :
+    ¬ (0 ≤ contWalkDensity negOffAdj 1 0 1) := by
+  rw [negOff_cont_density_one]
+  simp only [Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons]
+  have h1 : (1:ℝ) < Real.exp 2 := by
+    have := Real.exp_lt_exp.mpr (by norm_num : (0:ℝ) < 2)
+    rwa [Real.exp_zero] at this
+  linarith
+
+/-- **The `hnn` fence for `contWalkDistribution_nonneg`**: the law is
+`π • h`, so `ν(1) = (1/2)(1 − e²) < 0` — refuted. -/
+theorem contWalkDistribution_nonneg_hnn_fence_QA :
+    ¬ (0 ≤ contWalkDistribution negOffAdj 1 0 1) := by
+  rw [contWalkDistribution, negOff_cont_density_one, negOff_pi 1]
+  simp only [Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons,
+    Pi.smul_apply, smul_eq_mul]
+  have h1 : (1:ℝ) < Real.exp 2 := by
+    have := Real.exp_lt_exp.mpr (by norm_num : (0:ℝ) < 2)
+    rwa [Real.exp_zero] at this
+  linarith
+
+/-! ### The `K₂` fixture (kills the `ht` of the continuous nonneg
+plumbing, at negative time) -/
+
+theorem k2_L00 : walkLaplacian k2Adj 0 0 = 1 := by
+  rw [walkLaplacian, Matrix.sub_apply, Matrix.one_apply,
+    walkTransitionMatrix_apply, k2Adj_deg_eq 0, k2Adj_apply,
+    if_pos rfl, inv_one]
+  norm_num
+
+theorem k2_L01 : walkLaplacian k2Adj 0 1 = -1 := by
+  rw [walkLaplacian, Matrix.sub_apply, Matrix.one_apply,
+    walkTransitionMatrix_apply, k2Adj_deg_eq 0, k2Adj_apply,
+    if_neg (by decide : ¬(0 : Fin 2) = 1), inv_one]
+  norm_num
+
+theorem k2_L10 : walkLaplacian k2Adj 1 0 = -1 := by
+  rw [walkLaplacian, Matrix.sub_apply, Matrix.one_apply,
+    walkTransitionMatrix_apply, k2Adj_deg_eq 1, k2Adj_apply,
+    if_neg (by decide : ¬(1 : Fin 2) = 0), inv_one]
+  norm_num
+
+theorem k2_L11 : walkLaplacian k2Adj 1 1 = 1 := by
+  rw [walkLaplacian, Matrix.sub_apply, Matrix.one_apply,
+    walkTransitionMatrix_apply, k2Adj_deg_eq 1, k2Adj_apply,
+    if_pos rfl, inv_one]
+  norm_num
+
+theorem k2_L_sq :
+    (walkLaplacian k2Adj) * (walkLaplacian k2Adj)
+      = (2 : ℝ) • (walkLaplacian k2Adj) := by
+  ext i j
+  rcases (show i = 0 ∨ i = 1 by omega) with h | h <;> rw [h] <;>
+    rcases (show j = 0 ∨ j = 1 by omega) with h' | h' <;> rw [h']
+  all_goals
+    simp only [Matrix.mul_apply, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.smul_apply]
+  · rw [k2_L00, k2_L01, k2_L10]; norm_num
+  · rw [k2_L00, k2_L01, k2_L11]; norm_num
+  · rw [k2_L10, k2_L00, k2_L11]; norm_num
+  · rw [k2_L10, k2_L01, k2_L11]; norm_num
+
+/-- The edge heat kernel at time `t = −1` in closed form: the exponent
+is `+L` (the backward semigroup), so `exp(L) = 1 + ((e²−1)/2) • L`. -/
+theorem k2_heat_neg_one :
+    walkHeatKernel k2Adj (-(1:ℝ))
+      = 1 + ((Real.exp 2 - 1) / 2) • (walkLaplacian k2Adj) := by
+  rw [walkHeatKernel, neg_smul, one_smul, neg_neg]
+  rw [exp_eq_one_add_of_mul_self_eq_smul _
+    (show (2:ℝ) ≠ 0 by norm_num) k2_L_sq]
+
+theorem k2_L_mulVec :
+    (walkLaplacian k2Adj) *ᵥ (![2, 0] : Fin 2 → ℝ) = ![2, -2] := by
+  funext i
+  rcases (show i = 0 ∨ i = 1 by omega) with h | h <;> rw [h]
+  · simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.cons_val_zero, Matrix.head_cons]
+    rw [k2_L00]
+    norm_num
+  · simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.cons_val_zero, Matrix.head_cons, Matrix.cons_val_one]
+    rw [k2_L10, k2_L11]
+    norm_num
+
+theorem k2_density_zero :
+    walkDensity k2Adj 0 0 = ![2, 0] := by
+  have hlaw : (Pi.single (0 : Fin 2) (1 : ℝ)) = ![1, 0] := by
+    funext i
+    fin_cases i <;> simp
+  funext i
+  rcases (show i = 0 ∨ i = 1 by omega) with h | h <;> rw [h] <;>
+    rw [walkDensity, walkDistribution_zero, hlaw]
+  · simp only [Matrix.cons_val_zero, Matrix.head_cons, k2_pi_QA 0]
+    norm_num
+  · simp only [Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons,
+      k2_pi_QA 1]
+    norm_num
+
+theorem k2_cont_density_neg_one :
+    contWalkDensity k2Adj (-(1:ℝ)) 0
+      = ![1 + Real.exp 2, 1 - Real.exp 2] := by
+  rw [contWalkDensity, k2_density_zero, k2_heat_neg_one,
+    Matrix.add_mulVec, Matrix.one_mulVec, Matrix.smul_mulVec_assoc,
+    k2_L_mulVec]
+  funext i
+  rcases (show i = 0 ∨ i = 1 by omega) with h | h <;> rw [h]
+  · simp only [Matrix.cons_val_zero, Matrix.head_cons, Pi.smul_apply,
+      smul_eq_mul, Pi.add_apply]
+    ring
+  · simp only [Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons,
+      Pi.smul_apply, smul_eq_mul, Pi.add_apply]
+    ring
+
+/-- **The `ht` fence for `contWalkDensity_nonneg`**: on the genuine
+edge (symmetric, nonnegative, positive degrees) at the negative time
+`t = −1`, the backward heat kernel's diagonal contraction makes
+`h(0) = 1 + e²` and `h(1) = 1 − e² < 0` — refuted. -/
+theorem contWalkDensity_nonneg_ht_fence_QA :
+    ¬ (0 ≤ contWalkDensity k2Adj (-(1:ℝ)) 0 1) := by
+  rw [k2_cont_density_neg_one]
+  simp only [Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons]
+  have h1 : (1:ℝ) < Real.exp 2 := by
+    have := Real.exp_lt_exp.mpr (by norm_num : (0:ℝ) < 2)
+    rwa [Real.exp_zero] at this
+  linarith
+
+/-- **The `ht` fence for `contWalkDistribution_nonneg`**: the law
+`ν(1) = π(1)·h(1) = (1/2)(1 − e²) < 0` — refuted. -/
+theorem contWalkDistribution_nonneg_ht_fence_QA :
+    ¬ (0 ≤ contWalkDistribution k2Adj (-(1:ℝ)) 0 1) := by
+  rw [contWalkDistribution, k2_cont_density_neg_one, k2_pi_QA 1]
+  simp only [Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons,
+    Pi.smul_apply, smul_eq_mul]
+  have h1 : (1:ℝ) < Real.exp 2 := by
+    have := Real.exp_lt_exp.mpr (by norm_num : (0:ℝ) < 2)
+    rwa [Real.exp_zero] at this
+  linarith
+
+/-! ### The zero-degree fixture `zdAdj` (kills the `hd` of mass
+conservation and of the continuous decay form) -/
+
+
+
+theorem zd_density_zero :
+    walkDensity zdAdj 0 0 = ![0, 0] := by
+  have hlaw : (Pi.single (0 : Fin 2) (1 : ℝ)) = ![1, 0] := by
+    funext i
+    fin_cases i <;> simp
+  funext i
+  rcases (show i = 0 ∨ i = 1 by omega) with h | h <;> rw [h] <;>
+    rw [walkDensity, walkDistribution_zero, hlaw]
+  · simp only [Matrix.cons_val_zero, Matrix.head_cons, zd_pi_zero,
+      div_zero]
+  · simp only [Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons]
+    norm_num
+
+/-- The continuous law at the zero-degree corner is the junk zero
+vector: the start density is junk (`1/0 = 0`) and the heat kernel
+cannot revive it. -/
+theorem zd_cont_law_zero :
+    contWalkDistribution zdAdj 1 0 = 0 := by
+  have h0 : contWalkDensity zdAdj 1 0 = 0 := by
+    rw [contWalkDensity, zd_density_zero]
+    have hz : (![0, 0] : Fin 2 → ℝ) = 0 := by
+      funext i
+      fin_cases i <;> rfl
+    rw [hz, Matrix.mulVec_zero]
+  funext i
+  rw [contWalkDistribution, h0]
+  simp [Pi.zero_apply]
+
+/-- **The `hd` fence for `sum_contWalkDistribution`**: at the
+zero-degree fixture (symmetric, nonnegative — every hypothesis except
+positive degrees), the law's mass is `0 ≠ 1` — refuted. -/
+theorem sum_contWalkDistribution_hd_fence_QA :
+    ¬ (∑ i, contWalkDistribution zdAdj 1 0 i = 1) := by
+  intro h
+  rw [zd_cont_law_zero] at h
+  simp only [Pi.zero_apply, Finset.sum_const_zero] at h
+  exact absurd h (by norm_num)
+
+theorem zd_klDiv_cont_law_zero :
+    klDiv (contWalkDistribution zdAdj 1 0) (stationaryVec zdAdj) = 0 := by
+  rw [zd_cont_law_zero, klDiv]
+  exact Finset.sum_eq_zero fun i _ => by simp [klTerm]
+
+/-- **The `hd` fence for `klDiv_contWalkDistribution_le`**: at the same
+fixture (with `hcard` genuine — `Fin 2`), the decay bound's right side
+carries the junk `((π 0)⁻¹ − 1) = (0⁻¹ − 1) = −1`, so the statement
+reads `0 ≤ −e^{−2λ₂}` — refuted, whatever `λ₂` is (`exp_pos`). -/
+theorem klDiv_contWalkDistribution_le_hd_fence_QA :
+    ¬ (klDiv (contWalkDistribution zdAdj 1 0) (stationaryVec zdAdj)
+        ≤ Real.exp (-(2 * (1:ℝ) * secondEval (normalizedLaplacian zdAdj)
+              (normalizedLaplacian_symmetric zdAdj zdAdj_isSymm)
+              (by norm_num : 2 ≤ Fintype.card (Fin 2))))
+          * ((stationaryVec zdAdj 0)⁻¹ - 1)) := by
+  intro h
+  rw [zd_klDiv_cont_law_zero] at h
+  simp only [stationaryVec, zd_vol_QA, zdAdj_deg_zero, zero_div, inv_zero,
+    zero_sub] at h
+  have hpos : (0:ℝ) < Real.exp (-(2 * (1:ℝ) * secondEval
+      (normalizedLaplacian zdAdj)
+      (normalizedLaplacian_symmetric zdAdj zdAdj_isSymm)
+      (by norm_num : 2 ≤ Fintype.card (Fin 2)))) := Real.exp_pos _
+  have : Real.exp (-(2 * (1:ℝ) * secondEval (normalizedLaplacian zdAdj)
+      (normalizedLaplacian_symmetric zdAdj zdAdj_isSymm)
+      (by norm_num : 2 ≤ Fintype.card (Fin 2)))) * (-1) < 0 := by
+    nlinarith [hpos]
+  linarith
+
+/-! ### The triangle (kills the `hrate` of the entropy decay form) -/
+
+/-- **The `hrate` companion**: the rate certificate at `r = 1/8` *fails*
+on the triangle — the `3/2` mode's factor `|1 − 3/2| = 1/2` exceeds
+`1/8` (witnessed by `tri_exists_pos_mode_QA`). -/
+theorem tri_kl_rate_fails_QA :
+    ¬ (∀ i : Fin 3, eigvalOf (normalizedLaplacian triAdj)
+          (normalizedLaplacian_symmetric triAdj triAdj_isSymm) i ≠ 0 →
+        |1 - eigvalOf (normalizedLaplacian triAdj)
+            (normalizedLaplacian_symmetric triAdj triAdj_isSymm) i|
+          ≤ 1/8) := by
+  obtain ⟨i, hi⟩ := tri_exists_pos_mode_QA
+  intro h
+  have hle := h i (by rw [hi]; norm_num)
+  rw [hi, abs_of_nonpos (by norm_num : (1:ℝ) - 3/2 ≤ 0)] at hle
+  norm_num at hle
+
+/-- **The `hrate` fence for `klDiv_walkDistribution_le`**: on the
+genuine triangle (symmetric, nonnegative, positive degrees, connected)
+at `r = 1/8` (a failing certificate), the dropped statement reads
+`log(3/2) ≤ (1/8)²·2 = 1/32` — refuted by Gibbs (`log(3/2) ≥ 1/3`). -/
+theorem klDiv_walkDistribution_le_hrate_fence_QA :
+    ¬ (klDiv (walkDistribution triAdj 1 0) (stationaryVec triAdj)
+        ≤ (1/8 : ℝ) ^ (2 * 1) * ((stationaryVec triAdj 0)⁻¹ - 1)) := by
+  intro h
+  rw [tri_kl_one_QA, tri_pi_QA (0 : Fin 3)] at h
+  norm_num at h
+  have hgibbs : (1:ℝ) - (3/2 : ℝ)⁻¹ ≤ Real.log (3/2) :=
+    Real.one_sub_inv_le_log_of_pos (by norm_num)
+  have hinv : (3/2 : ℝ)⁻¹ = 2/3 := by norm_num
+  rw [hinv] at hgibbs
+  linarith
+
+/-! ### The entropy floor's four fences -/
+
+/-- The kernel eigenvector pin: the constant vector is a genuine
+`μ = 0` eigenvector of the triangle's normalized Laplacian. -/
+theorem tri_nL_mulVec_one :
+    normalizedLaplacian triAdj *ᵥ (![1, 1, 1] : Fin 3 → ℝ)
+      = (0 : ℝ) • (![1, 1, 1] : Fin 3 → ℝ) := by
+  have h : ∀ j : Fin 3, (normalizedLaplacian triAdj *ᵥ
+      (![1, 1, 1] : Fin 3 → ℝ)) j = 0 := by
+    intro j
+    rw [tri_normalizedLaplacian_mulVec_apply]
+    fin_cases j <;>
+      simp [triAdj_apply, Fin.sum_univ_three, Matrix.cons_val_zero,
+        Matrix.head_cons, Matrix.cons_val_one, Matrix.cons_val_two,
+        Matrix.tail_cons] <;> norm_num
+  funext j
+  rw [h j, Pi.smul_apply, smul_eq_mul, zero_mul]
+
+/-- The constant vector's conjugate on the triangle: every entry
+`(√2)⁻¹` — so the sup bound is attained with equality at `c = (√2)⁻¹`. -/
+theorem tri_vconj_one (j : Fin 3) :
+    (degreeInvSqrt triAdj *ᵥ (![1, 1, 1] : Fin 3 → ℝ)) j
+      = (Real.sqrt 2)⁻¹ := by
+  rw [degreeInvSqrt_mulVec_apply, triAdj_deg_eq]
+  fin_cases j <;> simp
+
+/-- **The `hμ` fence for `klDiv_walkDistribution_ge_of_eigenpair`**: at
+the kernel eigenpair `(0, ![1,1,1])` — a genuine eigenpair, every other
+ingredient genuine (the sup bound attained with equality, `0 < c`) —
+the dropped statement reads `2·((1/2)·1²·1)² = 1/2 ≤ D(ν₂) =
+(1/2)·log(9/8) < 1/16` — refuted. -/
+theorem tri_kl_floor_hmu_fence_QA :
+    ¬ (2 * ((1/2 : ℝ) * |1 - (0:ℝ)| ^ (2:ℕ)
+          * |(degreeInvSqrt triAdj *ᵥ (![1,1,1] : Fin 3 → ℝ)) 0|
+            / (Real.sqrt 2)⁻¹) ^ 2
+        ≤ klDiv (walkDistribution triAdj 2 0) (stationaryVec triAdj)) := by
+  intro h
+  have hval : ((1/2 : ℝ) * |1 - (0:ℝ)| ^ (2:ℕ)
+      * |(degreeInvSqrt triAdj *ᵥ (![1,1,1] : Fin 3 → ℝ)) 0|
+        / (Real.sqrt 2)⁻¹) = 1/2 := by
+    rw [tri_vconj_one 0,
+      abs_of_pos (show (0:ℝ) < (Real.sqrt 2)⁻¹ by positivity)]
+    field_simp
+    ring_nf
+  rw [hval, tri_kl_two_QA] at h
+  norm_num at h
+  have hgibbs : Real.log ((9:ℝ)/8) ≤ (9:ℝ)/8 - 1 :=
+    Real.log_le_sub_one_of_pos (by norm_num)
+  norm_num at hgibbs
+  linarith
+
+/-- The point vector's conjugate on the triangle. -/
+theorem tri_vconj_e0 (j : Fin 3) :
+    (degreeInvSqrt triAdj *ᵥ (![1, 0, 0] : Fin 3 → ℝ)) j
+      = (if j = 0 then (Real.sqrt 2)⁻¹ else 0) := by
+  rw [degreeInvSqrt_mulVec_apply, triAdj_deg_eq]
+  fin_cases j <;> simp
+
+/-- **The `hv` fence for the entropy floor**: at `μ = 3` (nonzero,
+genuine), `v = ![1,0,0]` (NOT an eigenvector — the eigenvalues are
+`{0, 3/2, 3/2}`), `c = (√2)⁻¹` (the sup bound genuine, attained at
+coordinate `0`), `t = 1`, `x = 0`: the dropped statement reads
+`2·((1/2)·2·1)² = 2 ≤ log(3/2)` — refuted by `log(3/2) < 1/2`. -/
+theorem tri_kl_floor_hv_fence_QA :
+    ¬ (2 * ((1/2 : ℝ) * |1 - (3:ℝ)| ^ (1:ℕ)
+          * |(degreeInvSqrt triAdj *ᵥ (![1,0,0] : Fin 3 → ℝ)) 0|
+            / (Real.sqrt 2)⁻¹) ^ 2
+        ≤ klDiv (walkDistribution triAdj 1 0) (stationaryVec triAdj)) := by
+  intro h
+  have hv0 : (degreeInvSqrt triAdj *ᵥ (![1,0,0] : Fin 3 → ℝ)) 0
+      = (Real.sqrt 2)⁻¹ := by
+    rw [tri_vconj_e0 0]
+    simp
+  have hval : ((1/2 : ℝ) * |1 - (3:ℝ)| ^ (1:ℕ)
+      * |(degreeInvSqrt triAdj *ᵥ (![1,0,0] : Fin 3 → ℝ)) 0|
+        / (Real.sqrt 2)⁻¹) = 1 := by
+    rw [abs_of_nonpos (by norm_num : (1:ℝ) - 3 ≤ 0), hv0,
+      abs_of_pos (show (0:ℝ) < (Real.sqrt 2)⁻¹ by positivity)]
+    norm_num
+  rw [hval, tri_kl_one_QA] at h
+  have hvlt : Real.log (3/2 : ℝ) < 3/2 - 1 :=
+    Real.log_lt_sub_one_of_pos (by norm_num) (by norm_num)
+  norm_num at hvlt
+  norm_num at h
+  linarith
+
+/-- **The `hc` fence for the entropy floor**: same genuine fixture with
+the sup bound dropped to `c = (√2)⁻¹/2` (which coordinate `0` violates,
+`(√2)⁻¹ > (√2)⁻¹/2`): the floor inflates to
+`2·((1/2)·2·2)² = 8 ≤ log(3/2)` — refuted. -/
+theorem tri_kl_floor_hc_fence_QA :
+    ¬ (2 * ((1/2 : ℝ) * |1 - (3:ℝ)| ^ (1:ℕ)
+          * |(degreeInvSqrt triAdj *ᵥ (![1,0,0] : Fin 3 → ℝ)) 0|
+            / ((Real.sqrt 2)⁻¹ / 2)) ^ 2
+        ≤ klDiv (walkDistribution triAdj 1 0) (stationaryVec triAdj)) := by
+  intro h
+  have hv0 : (degreeInvSqrt triAdj *ᵥ (![1,0,0] : Fin 3 → ℝ)) 0
+      = (Real.sqrt 2)⁻¹ := by
+    rw [tri_vconj_e0 0]
+    simp
+  have hvlt : Real.log (3/2 : ℝ) < 3/2 - 1 :=
+    Real.log_lt_sub_one_of_pos (by norm_num) (by norm_num)
+  norm_num at hvlt
+  have hval : ((1/2 : ℝ) * |1 - (3:ℝ)| ^ (1:ℕ)
+      * |(degreeInvSqrt triAdj *ᵥ (![1,0,0] : Fin 3 → ℝ)) 0|
+        / ((Real.sqrt 2)⁻¹ / 2)) = 2 := by
+    rw [abs_of_nonpos (by norm_num : (1:ℝ) - 3 ≤ 0), hv0,
+      abs_of_pos (show (0:ℝ) < (Real.sqrt 2)⁻¹ by positivity)]
+    norm_num
+  rw [hval, tri_kl_one_QA] at h
+  norm_num at h
+  linarith
+
+/-- The swap's normalized Laplacian is `[[0,0],[−√2,1]]`, so
+`![0,1]` is a genuine `μ = 1` eigenvector. -/
+theorem asym_nL_mulVec :
+    normalizedLaplacian asymSwapAdj *ᵥ (![0, 1] : Fin 2 → ℝ)
+      = (1 : ℝ) • (![0, 1] : Fin 2 → ℝ) := by
+  have hs4 : Real.sqrt (4:ℝ) = 2 := by
+    have h := Real.mul_self_sqrt (by norm_num : (0:ℝ) ≤ 4)
+    have hnn := Real.sqrt_nonneg (4:ℝ)
+    nlinarith
+  have h0 : ∀ j : Fin 2, (normalizedLaplacian asymSwapAdj *ᵥ
+      (![0, 1] : Fin 2 → ℝ)) j = (![0, 1] : Fin 2 → ℝ) j := by
+    intro j
+    rcases (show j = 0 ∨ j = 1 by omega) with h | h <;> rw [h]
+  -- entry 0: 0·0 + 0·1 = 0 = (![0,1]) 0
+    · simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+        normalizedLaplacian, Matrix.sub_apply, Matrix.mul_apply,
+        Matrix.one_apply, degreeInvSqrt, Matrix.diagonal, Pi.zero_apply,
+        Matrix.cons_val_zero, Matrix.head_cons, Matrix.cons_val_one,
+        asymSwapAdj_00, asymSwapAdj_01, asymSwapAdj_deg_zero,
+        asymSwapAdj_deg_one, Real.mul_self_sqrt (by norm_num : (0:ℝ) ≤ 2),
+        hs4, zero_mul, mul_zero, sub_zero]
+      norm_num
+  -- entry 1: −√2·0 + 1·1 = 1
+    · simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+        normalizedLaplacian, Matrix.sub_apply, Matrix.mul_apply,
+        Matrix.one_apply, degreeInvSqrt, Matrix.diagonal,
+        Matrix.cons_val_zero, Matrix.head_cons, Matrix.cons_val_one,
+        asymSwapAdj_00, asymSwapAdj_01, asymSwapAdj_10, asymSwapAdj_11,
+        asymSwapAdj_deg_zero, asymSwapAdj_deg_one,
+        Real.mul_self_sqrt (by norm_num : (0:ℝ) ≤ 2), hs4,
+        zero_mul, mul_zero, sub_zero, Pi.smul_apply, smul_eq_mul]
+      norm_num
+  funext j
+  rw [h0 j]
+  simp [Pi.smul_apply]
+
+/-- The swap's conjugate of `![0,1]`: `(0, 1/2)` — the sup `1/2`
+attained with equality at coordinate `1`. -/
+theorem asym_vconj (j : Fin 2) :
+    (degreeInvSqrt asymSwapAdj *ᵥ (![0, 1] : Fin 2 → ℝ)) j
+      = (if j = 1 then 1/2 else 0) := by
+  have hs4 : Real.sqrt (4:ℝ) = 2 := by
+    have h := Real.mul_self_sqrt (by norm_num : (0:ℝ) ≤ 4)
+    have hnn := Real.sqrt_nonneg (4:ℝ)
+    nlinarith
+  rw [degreeInvSqrt_mulVec_apply]
+  rcases (show j = 0 ∨ j = 1 by omega) with h | h <;> rw [h]
+  · rw [asymSwapAdj_deg_zero]
+    simp [Real.mul_self_sqrt (by norm_num : (0:ℝ) ≤ 2)]
+  · rw [asymSwapAdj_deg_one, hs4]
+    simp
+
+/-- The start entropy at the swap, from `1`: `D(δ₁ ‖ π) = log(3/2)`. -/
+theorem asym_kl_zero :
+    klDiv (walkDistribution asymSwapAdj 0 1) (stationaryVec asymSwapAdj)
+      = Real.log (3/2) := by
+  have hlaw : (Pi.single (1 : Fin 2) (1 : ℝ)) = ![0, 1] := by
+    funext i
+    fin_cases i <;> simp
+  have he0 : klTerm ((![0, 1] : Fin 2 → ℝ) 0) (stationaryVec asymSwapAdj 0)
+      = 0 := by
+    rw [asymSwap_pi_zero]
+    simp [klTerm]
+  have he1 : klTerm ((![0, 1] : Fin 2 → ℝ) 1) (stationaryVec asymSwapAdj 1)
+      = Real.log (3/2) := by
+    rw [asymSwap_pi_one]
+    simp only [Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons,
+      klTerm, if_neg one_ne_zero, one_mul]
+    congr 1
+    norm_num
+  rw [walkDistribution_zero, hlaw, klDiv, Fin.sum_univ_two, he0, he1]
+  ring
+
+/-- **The `hA` fence for the entropy floor**: at the asymmetric swap
+(every hypothesis except symmetry genuine), the genuine eigenpair
+`(μ, v) = (1, ![0,1])` with the genuine sup bound `c = 1/2` attained
+with equality, at `t = 0`, `x = 1`: the dropped statement reads
+`2·((1/2)·|1−1|⁰·1)² = 1/2 ≤ D(δ₁ ‖ π) = log(3/2) < 1/2` —
+refuted (strictly, via `log < x − 1`). -/
+theorem klDiv_floor_hA_fence_QA :
+    ¬ (2 * ((1/2 : ℝ) * |1 - (1:ℝ)| ^ (0:ℕ)
+          * |(degreeInvSqrt asymSwapAdj *ᵥ (![0,1] : Fin 2 → ℝ)) 1|
+            / (1/2)) ^ 2
+        ≤ klDiv (walkDistribution asymSwapAdj 0 1)
+            (stationaryVec asymSwapAdj)) := by
+  intro h
+  rw [asym_kl_zero] at h
+  have hvlt : Real.log (3/2 : ℝ) < 3/2 - 1 :=
+    Real.log_lt_sub_one_of_pos (by norm_num) (by norm_num)
+  norm_num at hvlt
+  have hvc : (degreeInvSqrt asymSwapAdj *ᵥ (![0,1] : Fin 2 → ℝ)) 1 = 1/2 := by
+    rw [asym_vconj 1]
+    simp
+  rw [hvc] at h
+  norm_num at h
+  linarith
+
+end EntropyFences
 
 end SpectralGraphTheory.QA

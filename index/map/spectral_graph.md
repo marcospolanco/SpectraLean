@@ -977,7 +977,7 @@ statement; `#print axioms` on all of them exactly the standard three)
 — and they make no `perron_frobenius` contact: producing `π` needs
 that axiom, concluding convergence needs none. QA at
 `Scaffold/QA/SpectralGraph/DirectedMixing_QA.lean`
-(132 declarations by the generator metric: the reducible-fixture
+(180 declarations by the generator metric: the reducible-fixture
 positive witness with the limit pinned to the raw-verified uniform
 value and the second iterate computed raw at `3/16 < 1/4`; the
 periodicity refutation — the directed 2-cycle nonnegative,
@@ -1019,7 +1019,19 @@ submultiplicativity attained with equality at every time, the
 matrix-level Dobrushin contraction attained exactly, `d̄ = d/2`, the
 uniform object in both directions, the refined α-ceiling attained
 exactly with the display form's slack witnessed, and the escalation
-corollary attained exactly. The TV-contraction shelf lives in
+corollary attained exactly. The engines' adversarial fence QA (Section
+I, 2026-09-02,
+`proposals/adversarial-fences-tv-dobrushin-engines.md`) supplies
+negative witnesses for the seven load-bearing hypotheses the
+directed-rate deliveries had left unfenced — the equal-mass clauses of
+both TV contractions (the all-half matrix makes the Dobrushin
+coefficient exactly `0`, so the mass-dropped contraction reads
+`1/2 ≤ 0`), the row-sum and nonnegativity clauses of non-expansiveness
+(the doubled identity doubles the basis pair's TV; the signed
+stochastic fixture triples it), the row-sum clause of Dobrushin
+submultiplicativity, and the zero-mass clauses of both pairing cores —
+each with an isolation companion proving the refuted clause is exactly
+what fails at the fixture. The TV-contraction shelf lives in
 `Mixing.lean`'s Doeblin TV-contraction section — now also the home of
 the matrix-level Dobrushin-coefficient engine
 (`tvDobrushinCoeff`, `tvDistance_vecMul_le_tvDobrushinCoeff`,
@@ -1858,3 +1870,59 @@ is that extension's hypothesis supplier, the named follow-on).
 | `lazyWalkMixingTimeFrom` | Mixing (lazy walk) | **the lazy `t_mix(ε)` object**: the `sInf` over witness times of the lazy TV (the plain object at the lazy law — genuine and finite on the bipartite class where the plain object is junk) |
 | `lazyWalkMixingTimeFrom_bddBelow` / `_le_of_cert` / `_spec` / `_anti` | Mixing (lazy walk) | the object's package: the certificate interface, the `csInf_mem` attainment (membership itself the uniform bound), ε-antitonicity |
 | `lazyWalkMixingTimeFrom_le_of_connected` | Mixing (lazy walk) | **the intrinsic-rate spectral ceiling**: `t_mix_lazy(ε) ≤ ⌈log(√((πx)⁻¹−1)/(2ε))/log(1/(1−λ₂/2))⌉` under the depth ceiling's hypothesis set |
+
+The lazy family's adversarial fences (`Mixing_QA.lean`'s `LazyFences`
+section, 2026-09-02, `proposals/adversarial-fences-lazy-family.md`):
+the audit-shaped pass over the whole family above, closing its ten
+unfenced load-bearing hypotheses with hypothesis-form negative
+witnesses plus isolation companions — the `hd` clauses of
+row-stochasticity, mass conservation, and the `t = 0` χ²
+normalization at the zero-degree fixture `zdAdj` (the `D⁻¹A` row
+junk-zero); the `hnn` clauses of operator- and law-nonnegativity at
+the negative off-diagonal fixture `negOffAdj` (`P_L 0 1 = −1/2` —
+the existing negative-*diagonal* fixture cannot kill them); the `hA`
+clauses of detailed balance, stationarity, and attainment persistence
+at the asymmetric loop fixture `asymLoopAdj` (whose lazy law hits `π`
+exactly at `t = 1` and leaves it at `t = 2`, making the persistence
+hypothesis genuine while the conclusion fails); and both certificate
+clauses of the public lazy ℓ²(π) contraction engine (`hrate` on the
+triangle at the genuine `3/2`-mode direction with `r = 1/8` below the
+factor `1/4`; `hmode` on the edge at the constant mode with the
+genuine `r = 0` certificate — the edge spectrum pinned by the
+companion `k2_eigvalOf_cases_QA` with no basis control). Recorded
+non-fenceable with reasons: the headline's connectivity clause (the
+dropped statement stays *true* on disconnected input — proof-shaped,
+not truth-shaped) and the depth ceiling's `λ₂ < 2` (junk prevention);
+a removable-hypothesis finding recorded for the two nonnegativity
+`hd` clauses.
+
+### The entropy family's adversarial fences (2026-09-03)
+
+`proposals/adversarial-fences-entropy-family.md` (the third
+mixing-cascade audit; `Mixing_QA.lean`'s `EntropyFences` section holds
+the walk-level half, `Entropy_QA.lean`'s Section F the generic-layer
+half): negative witnesses for the entropy family's 28 unfenced
+load-bearing clauses — both mass clauses of Pinsker's inequality (a
+junk-negative divergence collapses `√(D/2)` to `0` against `TV = 1/4`
+and `1/2`), the `hnn` of `walkDensity_nonneg` (`−2` at `negOffAdj`),
+the `hnn`/`ht` of `contWalkDensity_nonneg` and
+`contWalkDistribution_nonneg` (closed-form heat kernels: the negative
+off-diagonal fixture at `t = 1`, and the `K₂` *backward* semigroup at
+`t = −1`, both giving `h(1) = 1 − e² < 0`), the `hA`/`hd` of
+`sum_contWalkDistribution` (a new asymmetric-swap fixture
+`asymSwapAdj = !![2,0;4,0]` whose walk Laplacian is idempotent — mass
+`3 − 2e^{−1} ≠ 1` — and the `zdAdj` junk-zero law against the
+`0⁻¹ − 1 = −1` bound), the `hd` of `klDiv_contWalkDistribution_le`
+(`0 ≤ −e^{−2λ₂}` by `exp_pos` alone), the `hrate` of
+`klDiv_walkDistribution_le` (the triangle at the failing `r = 1/8`:
+`log(3/2) ≥ 1/3 > 1/32`), and all four analytic clauses of the entropy
+floor `klDiv_walkDistribution_ge_of_eigenpair` (`hμ` at the genuine
+kernel eigenpair, `hv` at a fake `μ = 3` mode amplifying the floor to
+`2`, `hc` at an undershooting sup bound inflating it to `8`, `hA` at
+the swap's genuine `(1, ![0,1])` eigenpair with the strict
+`1/2 > log(3/2)`). Recorded non-fenceable: the junk log-of-negative
+corners of every `p`-side clause, the vacuous empty-type corners, the
+proof-shaped `hconn`, and three removable-hypothesis findings —
+notably the continuous nonneg `hA` clauses: the heat kernel
+`e^{−t}·e^{tP}` is entrywise nonnegative for any nonnegative `P`,
+symmetric or not.

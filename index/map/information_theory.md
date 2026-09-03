@@ -49,6 +49,25 @@ Quot.sound`).
 
 ## QA
 
+### The entropy family's adversarial fences (2026-09-03)
+
+`proposals/adversarial-fences-entropy-family.md` added `Entropy_QA.lean`'s
+Section F (the audit's generic-layer half): hypothesis-form negative
+witnesses for every mass clause and strict-positivity corner of the layer —
+`klDiv_nonneg` (both mass clauses, the divergences pinned `−log 2` and
+`−(1/2)·log 2`), `klDiv_eq_zero_iff` (both readings: the junk-zero
+divergence of two different point masses at `q = (0,1)`, and the mass-`2`
+`q = (1,1)` where every summand vanishes), `klDiv_apply_uniform`,
+`shannonEntropy_nonneg` (`H(2,2) = −4·log 2`),
+`shannonEntropy_le_log_card` (`H(1/3,…) = (4/3)·log 3 > log 4` at mass
+`4/3`, by `3⁴ > 4³`), `shannonEntropy_eq_log_card_iff` (the half-vector
+at mass `2` attains `log 4` without being uniform), the termwise bridge's
+`b = 0` junk corner, the entropy–χ² bridge's `p`-mass clause
+(`D ≥ 1/2 > 1/4 = χ²` at `(3/4,3/4) ‖ (1/2,1/2)`), the two-block log-sum
+bound's `q`-zero corner, and the binary two-point Pinsker engine's
+`b = 0` and `b = 1` corners. The walk-level half of the audit lives in
+`Mixing_QA.lean`'s `EntropyFences` section (see the spectral-graph map).
+
 `Scaffold/QA/InformationTheory/Entropy_QA.lean` (31 declarations): the
 divergence and entropy of the biased coin hand-computed, the equality
 case exercised in both directions against raw computations, the uniform

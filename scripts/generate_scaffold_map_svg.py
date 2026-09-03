@@ -50,6 +50,10 @@ SPOKES = [
         ("MCMC Mixing Time", "proved", "mixing-time-bound.md"),
         ("Subgaussian Tail Bound", "proved", "prove-subgaussian-tail-bound.md"),
         ("Finite Relative Entropy", "proved", "finite-relative-entropy.md"),
+        ("Doeblin Contraction Engine", "proved", "retire-primitive-power-convergence.md"),
+        ("Field-Standard TV Mixing", "proved", "total-variation-mixing-conversion.md"),
+        ("Mixing-Time Object Family", "proved", "directed-uniform-mixing-time.md"),
+        ("Adversarial Fence Audits", "proved", "adversarial-fences-entropy-family.md"),
         # Admitted-axiom station: the audit proposal tracking these axioms is
         # still Proposed, so linking it would misclassify; the admission itself
         # predates the proposal system's delivery records.

@@ -78,6 +78,13 @@
     connectivity hypothesized); and the certified decrease is strict,
     `3/2 < 2` against the adapter-bridged pinned value.
 
+  2026-09-04 addition — the adversarial fence audit (proposal
+  `adversarial-fences-electrical-flow-family.md`): the
+  hypothesis-necessity pass over every public theorem of
+  `ElectricalFlow.lean`, each load-bearing hypothesis closed with a
+  fence (negated conclusion at a fixture) plus isolation companion —
+  the method of `governance/ADVERSARIAL_REVIEW.md`.
+
   All proofs are real Lean proofs (no `sorry`/`admit`). These are
   theorems, not axioms; QA checks the interfaces where the arithmetic
   is fully evaluated.
@@ -1068,5 +1075,812 @@ theorem path3_reinforcement_strict_QA :
   rw [path3_reinforced_eq_pathDoubled_QA, pathDoubled_resistance_value_QA,
     path3_toWAdj_eq_connPathAdj, path_effectiveResistance_eq_two_QA]
   norm_num
+
+/-!
+## Adversarial fence audit (proposal
+`adversarial-fences-electrical-flow-family.md`, 2026-09-04)
+
+The hypothesis-necessity pass over `ElectricalFlow.lean`'s public
+theorems (the method of `governance/ADVERSARIAL_REVIEW.md`; eighth
+application, the electrical cluster's second). Each fence is the
+negation of a theorem's conclusion at a concrete instantiation where
+exactly one hypothesis is dropped; each isolation companion verifies
+every other hypothesis genuine and the dropped one failing. The
+Step-0 survey's priced list: 22 fences, the P4 records (the energy
+identity's `hnneg`/`hconn` truth-removable given `hA`+`hf`; Thomson's
+`hconn` implied by `hθ`; Rayleigh's `hnonnegB` by domination and its
+`hconnB` by the connectivity adapter — the review pilot's own
+finding), and the structural classifications — all in the proposal.
+-/
+
+/-!
+### The asymmetric 4-path fixture: the energy agreement's `hA`
+
+`asymPath4Adj` asymmetrically weights only the two end links
+(`2/1` and `1/2`); the interior link is symmetric. The unit demand
+`e 0 − e 3` is genuinely solvable — `f = ![3/2, 1, 1/2, 0]` — but the
+ordered-pair energy `(1/2)∑ A i j (f i − f j)²` and the quadratic form
+`fᵀ(D−A)f` differ by exactly the row-sum/column-sum correction
+`(1/2)∑ⱼ f j² (rowsum_j − colsum_j) = 1/2`: `1 ≠ 3/2`.
+-/
+
+/-- The asymmetric 4-path: end links weighted `2` down / `1` up, the
+interior link symmetric unit. The smallest fixture whose demand
+potential exists *and* whose row sums differ from its column sums on
+the potential's support. Entrywise definition (the repo's `Fin 4`
+fixture pattern). -/
+def asymPath4Adj : Matrix (Fin 4) (Fin 4) ℝ :=
+  Matrix.of fun i j =>
+    if (i = 0 ∧ j = 1) ∨ (i = 3 ∧ j = 2) then (2 : ℝ)
+    else if (i = 1 ∧ j = 0) ∨ (i = 1 ∧ j = 2) ∨ (i = 2 ∧ j = 1)
+      ∨ (i = 2 ∧ j = 3) then (1 : ℝ) else 0
+
+theorem asymPath4Adj_not_isSymm : ¬ asymPath4Adj.IsSymm := by
+  intro h
+  have h01 := h.apply 0 1
+  simp [asymPath4Adj] at h01
+
+/-- **The demand is genuinely solvable:** `f = ![3/2, 1, 1/2, 0]`
+solves `L *ᵥ f = e 0 − e 3` entrywise — the hypothesis the fence
+keeps. -/
+theorem asymPath4_potential_value_QA :
+    (laplacian asymPath4Adj).mulVec ![3 / 2, 1, 1 / 2, 0]
+      = Pi.single 0 (1 : ℝ) - Pi.single 3 (1 : ℝ) := by
+  funext i
+  rw [laplacian_mulVec_apply]
+  fin_cases i <;>
+    simp [asymPath4Adj, Fin.sum_univ_four, Pi.single_apply,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val',
+      Matrix.head_cons] <;>
+    norm_num
+
+/-- **Fixture-local voltage pinning:** every solution `g` of the
+demand has voltage difference `g 0 − g 3 = 3/2` — linarith over the
+row equations, no symmetry and no reachability needed. This is what
+pins the total function on asymmetric input, where no hypothesis-free
+uniqueness lemma exists. -/
+theorem asymPath4_voltage_fixed_QA {r : ℝ}
+    (h : IsEffectiveResistance asymPath4Adj 0 3 r) : r = 3 / 2 := by
+  obtain ⟨g, hg, hfr⟩ := h
+  have e0 := congrFun hg 0
+  have e1 := congrFun hg 1
+  have e3 := congrFun hg 3
+  rw [laplacian_mulVec_apply] at e0 e1 e3
+  simp [asymPath4Adj, Fin.sum_univ_four, Pi.single_apply,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val',
+    Matrix.head_cons] at e0 e1 e3
+  linarith
+
+/-- **The resistance, pinned:** `3/2` — the chosen witness's voltage
+difference, forced by the fixture-local pinning above. -/
+theorem asymPath4_resistance_QA :
+    effectiveResistance asymPath4Adj 0 3 = 3 / 2 := by
+  have hex : ∃ r : ℝ, IsEffectiveResistance asymPath4Adj 0 3 r :=
+    ⟨3 / 2, ![3 / 2, 1, 1 / 2, 0], asymPath4_potential_value_QA,
+      by norm_num [Matrix.cons_val', Matrix.cons_val_zero,
+        Matrix.head_cons]⟩
+  simp only [effectiveResistance, dif_pos hex]
+  exact asymPath4_voltage_fixed_QA (Classical.choose_spec hex)
+
+/-- **The ordered-pair energy:** `1`, computed from the raw
+definitions. -/
+theorem asymPath4_flowEnergy_value_QA :
+    flowEnergy asymPath4Adj (electricalCurrent asymPath4Adj ![3 / 2, 1, 1 / 2, 0])
+      = 1 := by
+  simp [flowEnergy, electricalCurrent, asymPath4Adj, Fin.sum_univ_four]
+  norm_num
+
+/-- **The quadratic form:** `3/2` — `f ⬝ᵥ (L *ᵥ f) = f 0 − f 3`, the
+solution-level identity's value, computed independently. -/
+theorem asymPath4_quadForm_value_QA :
+    quadForm (laplacian asymPath4Adj) ![3 / 2, 1, 1 / 2, 0] = 3 / 2 := by
+  rw [quadForm, asymPath4_potential_value_QA, Matrix.dotProduct_sub,
+    Matrix.dotProduct_single, Matrix.dotProduct_single]
+  norm_num [Matrix.cons_val', Matrix.cons_val_zero, Matrix.head_cons]
+
+/-- **Fence (`flowEnergy_electricalCurrent`, `hA`):** the energy
+agreement fails on the asymmetric fixture — `1 ≠ 3/2`. Symmetry is
+what identifies the quadratic form with the ordered-pair sum (row
+sums against column sums); the dropped statement is false. -/
+theorem effF_agreement_hA_fence_QA :
+    ¬ (flowEnergy asymPath4Adj (electricalCurrent asymPath4Adj ![3 / 2, 1, 1 / 2, 0])
+      = quadForm (laplacian asymPath4Adj) ![3 / 2, 1, 1 / 2, 0]) := by
+  rw [asymPath4_flowEnergy_value_QA, asymPath4_quadForm_value_QA]
+  norm_num
+
+/-- **Isolation:** the theorem's only hypothesis (`hA`) genuinely
+fails, and the potential equation is genuinely solved — the failure is
+exactly symmetry. -/
+theorem effF_agreement_hA_isolation_QA :
+    ¬ asymPath4Adj.IsSymm
+      ∧ (laplacian asymPath4Adj).mulVec ![3 / 2, 1, 1 / 2, 0]
+        = Pi.single 0 (1 : ℝ) - Pi.single 3 (1 : ℝ) :=
+  ⟨asymPath4Adj_not_isSymm, asymPath4_potential_value_QA⟩
+
+/-- **Fence (`flowEnergy_electricalCurrent_eq_effectiveResistance`,
+`hA`):** the routed energy is `1` against the pinned resistance `3/2`
+— the identity fails on asymmetric input even with the demand
+genuinely solved. -/
+theorem effF_energyIdentity_hA_fence_QA :
+    ¬ (flowEnergy asymPath4Adj (electricalCurrent asymPath4Adj ![3 / 2, 1, 1 / 2, 0])
+      = effectiveResistance asymPath4Adj 0 3) := by
+  rw [asymPath4_flowEnergy_value_QA, asymPath4_resistance_QA]
+  norm_num
+
+/-!
+### The cyclic phantom: the superposition lemma's support clause
+-/
+
+/-- The antisymmetric 3-cycle flow `0 → 1 → 2 → 0`: divergence-free
+at every vertex, but it rides every zero-conductance pair of a network
+without those edges. -/
+def cycleFlow : Matrix (Fin 3) (Fin 3) ℝ :=
+  Matrix.of !![0, 1, -1; -1, 0, 1; 1, -1, 0]
+
+theorem cycleFlow_antisymm_QA :
+    ∀ i j, cycleFlow i j = -cycleFlow j i := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [cycleFlow]
+
+/-- Divergence-free at every vertex — the hypothesis the fence keeps. -/
+theorem cycleFlow_divergence_zero_QA :
+    flowDivergence cycleFlow = 0 := by
+  funext i
+  fin_cases i <;> simp [flowDivergence, cycleFlow, Fin.sum_univ_three]
+
+/-- The cyclic phantom is excluded by support on the cheat network —
+it rides the zero-conductance pairs `(0, 2)` and `(1, 2)`. -/
+theorem cycleFlow_not_isFlowOn_cheat_QA :
+    ¬ IsFlowOn cheatWAdj cycleFlow := by
+  rintro ⟨-, hsupp⟩
+  have h02 : cheatWAdj 0 2 = 0 := by simp [cheatWAdj]
+  exact absurd (hsupp 0 2 h02) (by simp [cycleFlow])
+
+theorem cheat_current_energy_QA :
+    flowEnergy cheatWAdj (electricalCurrent cheatWAdj ![1, 0, 0]) = 1 := by
+  simp [flowEnergy, electricalCurrent, cheatWAdj, Fin.sum_univ_three]
+
+theorem cycleFlow_energy_QA : flowEnergy cheatWAdj cycleFlow = 1 := by
+  simp [flowEnergy, cheatWAdj, cycleFlow, Fin.sum_univ_three]
+
+theorem cheat_plus_cycle_energy_QA :
+    flowEnergy cheatWAdj (electricalCurrent cheatWAdj ![1, 0, 0] + cycleFlow)
+      = 4 := by
+  simp [flowEnergy, electricalCurrent, cheatWAdj, cycleFlow,
+    Matrix.add_apply, Fin.sum_univ_three]
+  norm_num
+
+/-- **Fence (`flowEnergy_add_of_flowDivergence_eq_zero`, `hd`):**
+perturbing the current by the cyclic phantom — divergence-free but
+*unsupported* — does not split the energy: `4 ≠ 2 = 1 + 1`. The
+integration-by-parts cross term dies only because a flow vanishes on
+zero branches; a phantom that rides them leaves it alive. -/
+theorem effF_superposition_hd_fence_QA :
+    ¬ (flowEnergy cheatWAdj (electricalCurrent cheatWAdj ![1, 0, 0] + cycleFlow)
+      = flowEnergy cheatWAdj (electricalCurrent cheatWAdj ![1, 0, 0])
+        + flowEnergy cheatWAdj cycleFlow) := by
+  rw [cheat_plus_cycle_energy_QA, cheat_current_energy_QA,
+    cycleFlow_energy_QA]
+  norm_num
+
+/-- **Isolation:** the divergence hypothesis is genuine (`= 0`
+pinned), every other flow property holds except support — exactly
+`IsFlowOn` fails. -/
+theorem effF_superposition_hd_isolation_QA :
+    flowDivergence cycleFlow = 0 ∧ ¬ IsFlowOn cheatWAdj cycleFlow :=
+  ⟨cycleFlow_divergence_zero_QA, cycleFlow_not_isFlowOn_cheat_QA⟩
+
+/-!
+### The doubled current: the superposition lemma's divergence clause
+-/
+
+/-- Twice the unit current on the edge: still antisymmetric and
+supported (a genuine flow), but its divergence is `[2, −2]`. -/
+def doubleCurrent : Matrix (Fin 2) (Fin 2) ℝ :=
+  Matrix.of !![0, 2; -2, 0]
+
+theorem doubleCurrent_isFlowOn_QA :
+    IsFlowOn edgeAdj doubleCurrent := by
+  refine ⟨fun i j => by
+      fin_cases i <;> fin_cases j <;> simp [doubleCurrent],
+    fun i j h => by
+      fin_cases i <;> fin_cases j <;> simp [edgeAdj] at h <;>
+        simp [doubleCurrent]⟩
+
+theorem doubleCurrent_divergence_QA :
+    flowDivergence doubleCurrent = ![2, -2] := by
+  funext i
+  fin_cases i <;> simp [flowDivergence, doubleCurrent, Fin.sum_univ_two]
+
+theorem doubleCurrent_energy_QA :
+    flowEnergy edgeAdj doubleCurrent = 4 := by
+  simp [flowEnergy, edgeAdj, doubleCurrent, Fin.sum_univ_two]
+  norm_num
+
+theorem triple_current_energy_QA :
+    flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0] + doubleCurrent)
+      = 9 := by
+  simp [flowEnergy, electricalCurrent, edgeAdj, doubleCurrent,
+    Matrix.add_apply, Fin.sum_univ_two]
+  norm_num
+
+/-- **Fence (`flowEnergy_add_of_flowDivergence_eq_zero`, `hdiv`):**
+perturbing by a genuine flow with *nonzero* divergence does not split
+the energy either: `9 ≠ 5 = 1 + 4`. -/
+theorem effF_superposition_hdiv_fence_QA :
+    ¬ (flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0] + doubleCurrent)
+      = flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0])
+        + flowEnergy edgeAdj doubleCurrent) := by
+  rw [triple_current_energy_QA, edge_flowEnergy_value_QA,
+    doubleCurrent_energy_QA]
+  norm_num
+
+/-- **Isolation:** `doubleCurrent` is a genuine flow on the edge
+(antisymmetric, supported); only the divergence clause fails. -/
+theorem effF_superposition_hdiv_isolation_QA :
+    IsFlowOn edgeAdj doubleCurrent ∧ flowDivergence doubleCurrent ≠ 0 :=
+  ⟨doubleCurrent_isFlowOn_QA, by
+    rw [doubleCurrent_divergence_QA]
+    intro h
+    have := congrFun h 0
+    norm_num at this⟩
+
+/-!
+### The both-negative-edges route: Thomson's `hnonneg`
+
+On the delivered signed fixture `sgnK4Adj` (symmetric, connected
+support — the two clauses the 2026-08-20 witness could not make
+genuine), the unit flow `0 → 3 → 1 → 2` rides *both* negative edges:
+antisymmetric, supported (negative is not zero), divergence exactly
+`e 0 − e 2`, and energy `−1 < 0` — below the delivered junk
+resistance `0` between those vertices.
+-/
+
+/-- The unit flow `0 → 3 → 1 → 2` on the signed 4-cycle: one unit
+across each of the two negative edges and the positive edge `(3, 1)`. -/
+def negRouteFlow : Matrix (Fin 4) (Fin 4) ℝ :=
+  Matrix.of fun i j =>
+    if (i = 0 ∧ j = 3) ∨ (i = 3 ∧ j = 1) ∨ (i = 1 ∧ j = 2) then (1 : ℝ)
+    else if (i = 3 ∧ j = 0) ∨ (i = 1 ∧ j = 3) ∨ (i = 2 ∧ j = 1) then (-1 : ℝ) else 0
+
+theorem negRouteFlow_antisymm_QA :
+    ∀ i j, negRouteFlow i j = -negRouteFlow j i := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [negRouteFlow]
+
+theorem negRouteFlow_isFlowOn_QA : IsFlowOn sgnK4Adj negRouteFlow :=
+  ⟨negRouteFlow_antisymm_QA, fun i j h => by
+    fin_cases i <;> fin_cases j <;> simp [sgnK4Adj] at h <;>
+      simp [negRouteFlow]⟩
+
+theorem negRouteFlow_divergence_QA :
+    flowDivergence negRouteFlow
+      = Pi.single 0 (1 : ℝ) - Pi.single 2 (1 : ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [flowDivergence, negRouteFlow, Fin.sum_univ_four]
+
+theorem negRouteFlow_isUnitFlow_QA :
+    IsUnitFlow sgnK4Adj 0 2 negRouteFlow :=
+  ⟨negRouteFlow_isFlowOn_QA, negRouteFlow_divergence_QA⟩
+
+theorem negRouteFlow_energy_QA :
+    flowEnergy sgnK4Adj negRouteFlow = -1 := by
+  simp [flowEnergy, sgnK4Adj, negRouteFlow, Fin.sum_univ_four]
+
+/-- **Fence (`effectiveResistance_le_flowEnergy`, `hnonneg`):** the
+dropped statement reads `0 ≤ −1` — the junk resistance between the
+signed fixture's `0` and `2` against the genuinely negative energy of
+a genuine unit flow. Nonnegativity is what keeps energies above
+resistances. -/
+theorem effF_thomson_hnn_fence_QA :
+    ¬ (effectiveResistance sgnK4Adj 0 2
+      ≤ flowEnergy sgnK4Adj negRouteFlow) := by
+  rw [sgnK4_fallback_zero_QA, negRouteFlow_energy_QA]
+  norm_num
+
+/-- **Isolation:** every other hypothesis is genuine at the fixture —
+symmetry and connectivity delivered, the unit-flow property pinned
+here — and nonnegativity fails, delivered. -/
+theorem effF_thomson_hnn_isolation_QA :
+    sgnK4Adj.IsSymm
+      ∧ (supportGraph sgnK4Adj sgnK4Adj_isSymm).Connected
+      ∧ IsUnitFlow sgnK4Adj 0 2 negRouteFlow
+      ∧ ¬ (∀ i j : Fin 4, 0 ≤ sgnK4Adj i j) :=
+  ⟨sgnK4Adj_isSymm, sgnK4_supportGraph_connected,
+    negRouteFlow_isUnitFlow_QA, sgnK4Adj_not_nonneg⟩
+
+/-!
+### Flow-space transfer (`isFlowOn_of_le`): nonnegativity and
+### domination
+-/
+
+/-- The phantom *is* a flow on the negative-conductance network: its
+only zero entries are diagonal, and the phantom carries nothing
+there. -/
+theorem phantom_isFlowOn_negWAdj_QA : IsFlowOn negWAdj phantomFlow :=
+  ⟨phantomFlow_antisymm_QA, fun i j h => by
+    fin_cases i <;> fin_cases j <;> simp [negWAdj] at h <;>
+      simp [phantomFlow]⟩
+
+theorem negWAdj_le_zeroWAdj : ∀ i j, negWAdj i j ≤ zeroWAdj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [negWAdj, zeroWAdj]
+
+/-- **Fence (`isFlowOn_of_le`, `hnonneg`):** transferring the phantom
+from the signed network into the dominating-but-zeroed network fails
+— the conclusion is the delivered `phantomFlow_not_isFlowOn_QA`. A
+zero of `B` above a *negative* entry of `A` is not a support edge,
+and the flow space does not transfer. -/
+theorem effF_flowSpace_hnn_fence_QA : ¬ IsFlowOn zeroWAdj phantomFlow :=
+  phantomFlow_not_isFlowOn_QA
+
+/-- **Isolation:** the phantom genuinely flows on `negWAdj`, the
+domination `negWAdj ≤ zeroWAdj` is genuine, nonnegativity of `A`
+fails (delivered). -/
+theorem effF_flowSpace_hnn_isolation_QA :
+    IsFlowOn negWAdj phantomFlow
+      ∧ (∀ i j, negWAdj i j ≤ zeroWAdj i j)
+      ∧ ¬ (∀ i j, 0 ≤ negWAdj i j) :=
+  ⟨phantom_isFlowOn_negWAdj_QA, negWAdj_le_zeroWAdj, negWAdj_not_nonneg⟩
+
+/-- **Fence (`isFlowOn_of_le`, `hle`):** without domination the
+conclusion fails for a genuine flow — the edge current carries `1`
+across the zero network's zero-conductance pair. -/
+theorem effF_flowSpace_hle_fence_QA :
+    ¬ IsFlowOn zeroWAdj (electricalCurrent edgeAdj ![1, 0]) := by
+  rintro ⟨-, hsupp⟩
+  have h01 : zeroWAdj 0 1 = 0 := by simp [zeroWAdj]
+  exact absurd (hsupp 0 1 h01) (by simp [electricalCurrent, edgeAdj])
+
+/-- **Isolation:** the current is a genuine flow on `edgeAdj`
+(delivered engine), `edgeAdj` is nonnegative, and the domination
+`edgeAdj ≤ zeroWAdj` genuinely fails. -/
+theorem effF_flowSpace_hle_isolation_QA :
+    IsFlowOn edgeAdj (electricalCurrent edgeAdj ![1, 0])
+      ∧ (∀ i j, 0 ≤ edgeAdj i j)
+      ∧ ¬ (∀ i j, edgeAdj i j ≤ zeroWAdj i j) :=
+  ⟨isFlowOn_electricalCurrent edgeAdj edgeAdj_isSymm _, edgeAdj_nonneg,
+    by
+    intro h
+    have h01 := h 0 1
+    simp [edgeAdj, zeroWAdj] at h01
+    norm_num at h01⟩
+
+/-!
+### Energy comparison (`flowEnergy_le_of_le`): support, sign,
+### domination
+-/
+
+theorem phantom_energy_edge_QA :
+    flowEnergy edgeAdj phantomFlow = 1 := by
+  simp [flowEnergy, edgeAdj, phantomFlow, Fin.sum_univ_two]
+
+theorem phantom_energy_negWAdj_QA :
+    flowEnergy negWAdj phantomFlow = -1 := by
+  simp [flowEnergy, negWAdj, phantomFlow, Fin.sum_univ_two]
+
+theorem zeroWAdj_le_edgeAdj : ∀ i j, zeroWAdj i j ≤ edgeAdj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [zeroWAdj, edgeAdj]
+
+theorem negWAdj_le_edgeAdj : ∀ i j, negWAdj i j ≤ edgeAdj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [negWAdj, edgeAdj]
+
+/-- **Fence (`flowEnergy_le_of_le`, `hθ`):** an unsupported flow's
+energy comparison inverts — the phantom dissipates `0` on the edgeless
+network (delivered) but `1` on the dominating edge: `1 ≤ 0` is false. -/
+theorem effF_energyComp_hθ_fence_QA :
+    ¬ (flowEnergy edgeAdj phantomFlow ≤ flowEnergy zeroWAdj phantomFlow) := by
+  rw [phantom_energy_edge_QA, phantom_flowEnergy_zero_QA]
+  norm_num
+
+/-- **Isolation:** domination and nonnegativity genuine; the flow
+hypothesis fails (delivered). -/
+theorem effF_energyComp_hθ_isolation_QA :
+    (∀ i j, zeroWAdj i j ≤ edgeAdj i j) ∧ (∀ i j, 0 ≤ zeroWAdj i j)
+      ∧ ¬ IsFlowOn zeroWAdj phantomFlow :=
+  ⟨zeroWAdj_le_edgeAdj, by
+    intro i j
+    fin_cases i <;> fin_cases j <;> simp [zeroWAdj],
+    phantomFlow_not_isFlowOn_QA⟩
+
+/-- **Fence (`flowEnergy_le_of_le`, `hnonneg`):** negative
+conductances make the *smaller* network's energy smaller still — the
+phantom dissipates `−1` on the signed network against `1` on the
+dominating edge: `1 ≤ −1` is false. -/
+theorem effF_energyComp_hnn_fence_QA :
+    ¬ (flowEnergy edgeAdj phantomFlow ≤ flowEnergy negWAdj phantomFlow) := by
+  rw [phantom_energy_edge_QA, phantom_energy_negWAdj_QA]
+  norm_num
+
+/-- **Isolation:** the phantom genuinely flows on the signed network,
+the domination is genuine, nonnegativity fails. -/
+theorem effF_energyComp_hnn_isolation_QA :
+    IsFlowOn negWAdj phantomFlow
+      ∧ (∀ i j, negWAdj i j ≤ edgeAdj i j)
+      ∧ ¬ (∀ i j, 0 ≤ negWAdj i j) :=
+  ⟨phantom_isFlowOn_negWAdj_QA, negWAdj_le_edgeAdj, negWAdj_not_nonneg⟩
+
+/-- **Fence (`flowEnergy_le_of_le`, `hle`):** without domination the
+comparison inverts — the unit current dissipates `1` on the edge but
+`1/2` on the doubled edge (delivered pin): `1 ≤ 1/2` is false. The
+orientation guard's numbers at the energy level. -/
+theorem effF_energyComp_hle_fence_QA :
+    ¬ (flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0])
+      ≤ flowEnergy edge2Adj (electricalCurrent edgeAdj ![1, 0])) := by
+  rw [edge_flowEnergy_value_QA, edge2_crossEnergy_value_QA]
+  norm_num
+
+/-- **Isolation:** the current genuinely flows on the doubled network
+(delivered transfer), the doubled network is nonnegative, and the
+reverse domination genuinely fails. -/
+theorem effF_energyComp_hle_isolation_QA :
+    IsFlowOn edge2Adj (electricalCurrent edgeAdj ![1, 0])
+      ∧ (∀ i j, 0 ≤ edge2Adj i j)
+      ∧ ¬ (∀ i j, edge2Adj i j ≤ edgeAdj i j) :=
+  ⟨edge_current_isUnitFlow_on_edge2_QA.1, edge2Adj_nonneg, by
+    intro h
+    have h01 := h 0 1
+    simp [edge2Adj, edgeAdj] at h01⟩
+
+/-!
+### Rayleigh monotonicity (`effectiveResistance_le_of_le`): the
+### sign and connectivity clauses
+
+The signed edge's demand is *genuinely solvable* — the voltage
+difference is real and negative (`−1`), not a junk fallback — so the
+dropped-`hnonnegA` statement reads `1 ≤ −1` against the delivered
+edge resistance `1`.
+-/
+
+theorem negWAdj_potential_value_QA :
+    (laplacian negWAdj).mulVec ![0, 1]
+      = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [laplacian, degreeMatrix, deg, negWAdj, Matrix.mulVec,
+      Matrix.dotProduct, Fin.sum_univ_two]
+
+theorem negWAdj_resistance_value_QA :
+    effectiveResistance negWAdj 0 1 = -1 := by
+  have hfix : ∀ r : ℝ, IsEffectiveResistance negWAdj 0 1 r → r = -1 := by
+    rintro r ⟨g, hg, hfr⟩
+    have e0 := congrFun hg 0
+    simp [laplacian, degreeMatrix, deg, negWAdj, Matrix.mulVec,
+      Matrix.dotProduct, Fin.sum_univ_two, Pi.single_apply] at e0
+    linarith
+  have hex : ∃ r : ℝ, IsEffectiveResistance negWAdj 0 1 r :=
+    ⟨-1, ![0, 1], negWAdj_potential_value_QA,
+      by norm_num [Matrix.cons_val']⟩
+  simp only [effectiveResistance, dif_pos hex]
+  exact hfix _ (Classical.choose_spec hex)
+
+/-- **Fence (`effectiveResistance_le_of_le`, `hnonnegA`):** the signed
+network's genuine negative resistance `−1` sits below the dominating
+edge's `1`: `1 ≤ −1` is false. -/
+theorem effF_rayleigh_hnnA_fence_QA :
+    ¬ (effectiveResistance edgeAdj 0 1 ≤ effectiveResistance negWAdj 0 1) := by
+  rw [edge_effectiveResistance_eq_one_QA, negWAdj_resistance_value_QA]
+  norm_num
+
+/-- **Isolation:** symmetry of both networks, nonnegativity of `B`,
+connectivity of both support graphs, and the domination are all
+genuine; only `A`'s nonnegativity fails. -/
+theorem effF_rayleigh_hnnA_isolation_QA :
+    negWAdj.IsSymm ∧ (∀ i j, negWAdj i j ≤ edgeAdj i j)
+      ∧ edgeAdj.IsSymm ∧ (∀ i j, 0 ≤ edgeAdj i j)
+      ∧ (supportGraph edgeAdj edgeAdj_isSymm).Connected
+      ∧ ¬ (∀ i j, 0 ≤ negWAdj i j) :=
+  ⟨negWAdj_isSymm, negWAdj_le_edgeAdj, edgeAdj_isSymm, edgeAdj_nonneg,
+    edge_supportGraph_connected, negWAdj_not_nonneg⟩
+
+/-!
+The connectivity clause: the cheat network's isolated vertex makes
+the cross demand unsolvable (row `2` is identically zero), so the
+total function takes its junk `0` there while the dominating path's
+resistance is the delivered `2`.
+-/
+
+theorem cheat_no_resistance02_QA :
+    ¬ ∃ r : ℝ, IsEffectiveResistance cheatWAdj 0 2 r := by
+  rintro ⟨r, f, hf, -⟩
+  have e2 := congrFun hf 2
+  simp [laplacian, degreeMatrix, deg, cheatWAdj, Matrix.mulVec,
+    Matrix.dotProduct, Fin.sum_univ_three, Pi.single_apply] at e2
+
+theorem cheat_resistance02_zero_QA :
+    effectiveResistance cheatWAdj 0 2 = 0 :=
+  effectiveResistance_eq_zero_of_not_exists cheatWAdj 0 2
+    cheat_no_resistance02_QA
+
+theorem cheat_le_path : ∀ i j, cheatWAdj i j ≤ connPathAdj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [cheatWAdj, connPathAdj]
+
+/-- **Fence (`effectiveResistance_le_of_le`, `hconnA`):** dominating a
+*disconnected* network cannot certify the resistance bound — the junk
+`0` between disconnected vertices sits below the dominating path's
+`2`: `2 ≤ 0` is false. -/
+theorem effF_rayleigh_hconn_fence_QA :
+    ¬ (effectiveResistance connPathAdj 0 2
+      ≤ effectiveResistance cheatWAdj 0 2) := by
+  rw [path_effectiveResistance_eq_two_QA, cheat_resistance02_zero_QA]
+  norm_num
+
+/-- Row and column `2` of the cheat network are identically zero —
+the isolated vertex. -/
+theorem cheatWAdj_row2_zero : ∀ x : Fin 3, cheatWAdj 2 x = 0 := by
+  intro x
+  fin_cases x <;> simp [cheatWAdj]
+
+theorem cheatWAdj_col2_zero : ∀ x : Fin 3, cheatWAdj x 2 = 0 := by
+  intro x
+  fin_cases x <;> simp [cheatWAdj]
+
+/-- No positive entry of the cheat network touches the isolated
+vertex — row or column. -/
+theorem cheat_pos_touching2_false {x : Fin 3}
+    (h : 0 < cheatWAdj 2 x ∨ 0 < cheatWAdj x 2) : False := by
+  rcases h with h | h
+  · rw [cheatWAdj_row2_zero x] at h; norm_num at h
+  · rw [cheatWAdj_col2_zero x] at h; norm_num at h
+
+/-- Support-graph walks of the cheat network never change block: a
+walk touching the isolated vertex `2` anywhere would need an adjacent
+positive entry, and row/column `2` is zero. -/
+theorem cheat_walk_blocks {u v : Fin 3}
+    (w : (supportGraph cheatWAdj cheatWAdj_isSymm).Walk u v) :
+    (u = 2 ↔ v = 2) := by
+  induction w with
+  | nil => rfl
+  | cons hadj _ ih =>
+    have hpos := (supportGraph_adj.1 hadj).2
+    have hpossymm := (supportGraph_adj.1 hadj.symm).2
+    exact iff_of_false
+      (fun h => cheat_pos_touching2_false (Or.inl (h ▸ hpos)))
+      (fun hw => by
+        have h2 := hpossymm
+        rw [ih.mpr hw] at h2
+        exact cheat_pos_touching2_false (Or.inl h2))
+
+theorem cheatWAdj_not_connected :
+    ¬ (supportGraph cheatWAdj cheatWAdj_isSymm).Connected := by
+  intro h
+  obtain ⟨w⟩ := h 2 0
+  have hb := cheat_walk_blocks w
+  rw [show (2 : Fin 3) = 2 from rfl] at hb
+  exact absurd (hb.mp rfl) (by decide)
+
+/-- **Isolation:** every hypothesis of the monotonicity theorem is
+genuine at the pair (`A = cheatWAdj`, `B = connPathAdj`) except `A`'s
+connectivity — the isolated vertex is exactly the failure. -/
+theorem effF_rayleigh_hconn_isolation_QA :
+    cheatWAdj.IsSymm ∧ (∀ i j, 0 ≤ cheatWAdj i j)
+      ∧ connPathAdj.IsSymm ∧ (∀ i j, 0 ≤ connPathAdj i j)
+      ∧ (supportGraph connPathAdj connPathAdj_isSymm).Connected
+      ∧ (∀ i j, cheatWAdj i j ≤ connPathAdj i j)
+      ∧ ¬ (supportGraph cheatWAdj cheatWAdj_isSymm).Connected :=
+  ⟨cheatWAdj_isSymm, cheatWAdj_nonneg, connPathAdj_isSymm,
+    connPathAdj_nonneg, connPath_supportGraph_connected, cheat_le_path,
+    cheatWAdj_not_connected⟩
+
+/-!
+### Support-graph monotonicity (`supportGraph_le_of_le`): domination
+-/
+
+/-- **Fence (`supportGraph_le_of_le`, `hle`):** without domination the
+support containment fails — the path's edge `{1, 2}` is lost in the
+cheat network. -/
+theorem effF_supportMono_hle_fence_QA :
+    ¬ (supportGraph connPathAdj connPathAdj_isSymm
+      ≤ supportGraph cheatWAdj cheatWAdj_isSymm) := by
+  intro h
+  have hpadj : (supportGraph connPathAdj connPathAdj_isSymm).Adj 1 2 :=
+    supportGraph_adj.2 ⟨by decide, by simp [connPathAdj]⟩
+  have hadj := h hpadj
+  have h12 := (supportGraph_adj.1 hadj).2
+  rw [cheatWAdj_col2_zero 1] at h12
+  norm_num at h12
+
+theorem effF_supportMono_hle_isolation_QA :
+    connPathAdj.IsSymm ∧ cheatWAdj.IsSymm
+      ∧ ¬ (∀ i j, connPathAdj i j ≤ cheatWAdj i j) :=
+  ⟨connPathAdj_isSymm, cheatWAdj_isSymm, by
+    intro h
+    have h12 := h 1 2
+    simp [connPathAdj, cheatWAdj] at h12
+    norm_num at h12⟩
+
+/-!
+### Connectivity growth (`supportGraph_connected_of_le`): both
+### clauses
+-/
+
+/-- **Fence (`supportGraph_connected_of_le`, `hconn`):** with `B = A`
+the domination is trivially genuine and the conclusion is exactly the
+delivered disconnectedness of the two-block fixture. -/
+theorem effF_supportConn_hconn_fence_QA :
+    ¬ (supportGraph connDiscAdj connDiscAdj_isSymm).Connected :=
+  connDisc_not_connected_QA
+
+theorem effF_supportConn_hconn_isolation_QA :
+    connDiscAdj.IsSymm ∧ connDiscAdj.IsSymm
+      ∧ (∀ i j, connDiscAdj i j ≤ connDiscAdj i j) :=
+  ⟨connDiscAdj_isSymm, connDiscAdj_isSymm, fun _ _ => le_refl _⟩
+
+/-- **Fence (`supportGraph_connected_of_le`, `hle`):** the connected
+path network dominating nothing — the cheat network does not dominate
+it — leaves the conclusion false: the cheat support graph is
+disconnected. -/
+theorem effF_supportConn_hle_fence_QA :
+    ¬ (supportGraph cheatWAdj cheatWAdj_isSymm).Connected :=
+  cheatWAdj_not_connected
+
+theorem effF_supportConn_hle_isolation_QA :
+    (supportGraph connPathAdj connPathAdj_isSymm).Connected
+      ∧ ¬ (∀ i j, connPathAdj i j ≤ cheatWAdj i j) :=
+  ⟨connPath_supportGraph_connected, by
+    intro h
+    have h12 := h 1 2
+    simp [connPathAdj, cheatWAdj] at h12
+    norm_num at h12⟩
+
+/-!
+### Capacity reinforcement: the entry lemmas
+-/
+
+/-- **Fence (`le_increaseConductance`, `hδ`):** a negative
+reinforcement *lowers* the reinforced entry — `1 ≤ 0` is false. -/
+theorem effF_leInc_hδ_fence_QA :
+    ¬ (edgeAdj 0 1 ≤ increaseConductance edgeAdj 0 1 (-1) 0 1) := by
+  rw [increaseConductance_apply_of_reinforced (Or.inl ⟨rfl, rfl⟩)]
+  simp [edgeAdj]
+
+theorem effF_leInc_hδ_isolation_QA : ¬ (0 ≤ (-1 : ℝ)) := by norm_num
+
+/-- **Fence (`increaseConductance_isSymm`, `hA`):** reinforcing an
+asymmetric network's pair raises both ordered entries by the same
+`δ` but from unequal bases — `3 ≠ 2`, still asymmetric. -/
+theorem effF_incSymm_hA_fence_QA :
+    ¬ (increaseConductance asymWAdj 0 1 1).IsSymm := by
+  intro h
+  have h01 := h.apply 0 1
+  rw [increaseConductance_apply_of_reinforced (Or.inl ⟨rfl, rfl⟩),
+    increaseConductance_apply_of_reinforced (Or.inr ⟨rfl, rfl⟩)] at h01
+  simp [asymWAdj] at h01
+
+theorem effF_incSymm_hA_isolation_QA : ¬ asymWAdj.IsSymm :=
+  asymWAdj_not_isSymm
+
+/-- **Fence (`increaseConductance_nonneg`, `hnonneg`):** raising a
+negative conductance by less than its magnitude stays negative —
+`−1 + 1/2 < 0`. -/
+theorem effF_incNonneg_hnn_fence_QA :
+    ¬ (∀ k l, 0 ≤ increaseConductance negWAdj 0 1 (1 / 2) k l) := by
+  intro h
+  have h01 := h 0 1
+  rw [increaseConductance_apply_of_reinforced (Or.inl ⟨rfl, rfl⟩)] at h01
+  simp [negWAdj] at h01
+  norm_num at h01
+
+/-- **Fence (`increaseConductance_nonneg`, `hδ`):** reinforcing by a
+negative `δ` can push a positive conductance below zero — `1 − 2 < 0`. -/
+theorem effF_incNonneg_hδ_fence_QA :
+    ¬ (∀ k l, 0 ≤ increaseConductance edgeAdj 0 1 (-2) k l) := by
+  intro h
+  have h01 := h 0 1
+  rw [increaseConductance_apply_of_reinforced (Or.inl ⟨rfl, rfl⟩)] at h01
+  simp [edgeAdj] at h01
+
+theorem effF_incNonneg_isolation_QA :
+    ¬ (∀ k l : Fin 2, 0 ≤ negWAdj k l) ∧ ¬ (0 ≤ (-2 : ℝ)) := by
+  refine ⟨negWAdj_not_nonneg, ?_⟩
+  norm_num
+
+/-!
+### The reinforcement headline: `hδ` and `hconn`
+-/
+
+/-- The conductance-`1/2` edge: the unit edge reinforced by `−1/2`. -/
+noncomputable def halfEdgeAdj : Matrix (Fin 2) (Fin 2) ℝ :=
+  Matrix.of !![0, 1/2; 1/2, 0]
+
+theorem halfEdgeAdj_isSymm : halfEdgeAdj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [halfEdgeAdj]
+
+theorem halfEdgeAdj_nonneg : ∀ i j, 0 ≤ halfEdgeAdj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [halfEdgeAdj]
+
+theorem halfEdge_supportGraph_connected :
+    (supportGraph halfEdgeAdj halfEdgeAdj_isSymm).Connected := by
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  refine ⟨0, ?_⟩
+  intro v
+  fin_cases v
+  · exact ⟨SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 1)
+      (supportGraph_adj.2 ⟨by decide, by simp [halfEdgeAdj]⟩)
+      SimpleGraph.Walk.nil⟩
+
+theorem halfEdge_potential_value_QA :
+    (laplacian halfEdgeAdj).mulVec ![2, 0]
+      = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [laplacian, degreeMatrix, deg, halfEdgeAdj, Matrix.mulVec,
+      Matrix.dotProduct, Fin.sum_univ_two]
+
+theorem halfEdge_resistance_value_QA :
+    effectiveResistance halfEdgeAdj 0 1 = 2 :=
+  effectiveResistance_eq halfEdgeAdj halfEdgeAdj_isSymm halfEdgeAdj_nonneg
+    halfEdge_supportGraph_connected
+    ⟨![2, 0], halfEdge_potential_value_QA,
+      by norm_num [Matrix.cons_val']⟩
+
+theorem edge_reinforce_neg_half_eq_halfEdge_QA :
+    increaseConductance edgeAdj 0 1 (-1/2) = halfEdgeAdj := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [increaseConductance, halfEdgeAdj, edgeAdj] <;>
+    norm_num
+
+/-- **Fence (`effectiveResistance_le_increaseConductance`, `hδ`):** a
+negative reinforcement *raises* the resistance — the conductance-`1/2`
+edge's resistance is genuinely `2`, above the original `1`: the
+dropped statement reads `2 ≤ 1`. -/
+theorem effF_reinforce_hδ_fence_QA :
+    ¬ (effectiveResistance (increaseConductance edgeAdj 0 1 (-1/2)) 0 1
+      ≤ effectiveResistance edgeAdj 0 1) := by
+  rw [edge_reinforce_neg_half_eq_halfEdge_QA, halfEdge_resistance_value_QA,
+    edge_effectiveResistance_eq_one_QA]
+  norm_num
+
+theorem effF_reinforce_hδ_isolation_QA :
+    edgeAdj.IsSymm ∧ (∀ i j, 0 ≤ edgeAdj i j)
+      ∧ (supportGraph edgeAdj edgeAdj_isSymm).Connected
+      ∧ ¬ (0 ≤ (-1/2 : ℝ)) := by
+  refine ⟨edgeAdj_isSymm, edgeAdj_nonneg, edge_supportGraph_connected, ?_⟩
+  norm_num
+
+theorem cheat_reinforce_eq_path_QA :
+    increaseConductance cheatWAdj 1 2 1 = connPathAdj := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [increaseConductance, connPathAdj, cheatWAdj]
+
+/-- **Fence (`effectiveResistance_le_increaseConductance`, `hconn`):**
+reinforcing a *disconnected* network can connect it — the reinforced
+cheat network is exactly the path, whose cross resistance `2` sits
+above the junk `0` of the isolated pair: `2 ≤ 0` is false. The
+one-hypothesis ICP form genuinely needs the original connectivity. -/
+theorem effF_reinforce_hconn_fence_QA :
+    ¬ (effectiveResistance (increaseConductance cheatWAdj 1 2 1) 0 2
+      ≤ effectiveResistance cheatWAdj 0 2) := by
+  rw [cheat_reinforce_eq_path_QA, path_effectiveResistance_eq_two_QA,
+    cheat_resistance02_zero_QA]
+  norm_num
+
+theorem effF_reinforce_hconn_isolation_QA :
+    cheatWAdj.IsSymm ∧ (∀ i j, 0 ≤ cheatWAdj i j)
+      ∧ (0 ≤ (1 : ℝ))
+      ∧ ¬ (supportGraph cheatWAdj cheatWAdj_isSymm).Connected :=
+  ⟨cheatWAdj_isSymm, cheatWAdj_nonneg, zero_le_one, cheatWAdj_not_connected⟩
+
+/-!
+### The flow-predicate engine's `hA` (derived from the delivered
+### witness)
+-/
+
+/-- **Fence (`isFlowOn_electricalCurrent`, `hA`):** on the asymmetric
+network the current is not a flow — `IsFlowOn`'s first conjunct is
+antisymmetry, refuted by the delivered witness. -/
+theorem effF_isFlowOn_hA_fence_QA :
+    ¬ IsFlowOn asymWAdj (electricalCurrent asymWAdj ![1, 0]) := by
+  rintro ⟨hanti, -⟩
+  exact asymWAdj_current_not_antisymm_QA hanti
 
 end SpectralGraphTheory.QA

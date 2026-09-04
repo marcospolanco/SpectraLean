@@ -231,6 +231,27 @@ All proved, no axioms.
 | `effectiveResistance_le_increaseConductance` | **capacity reinforcement cannot worsen certified routing cost (step-5 headline, the ICP example)**: `effectiveResistance (increaseConductance A i j δ) u v ≤ effectiveResistance A u v` for `δ ≥ 0`, with only the *original* network's connectivity hypothesized (the reinforced network's derived by the adapter); QA is the release example — the Mathlib `Fin 3` path graph through `toWAdj`, reinforcement computed to the doubled-path matrix, `2 → 3/2` strict |
 
 
+The family's **adversarial fence audit** (2026-09-04, proposal
+`adversarial-fences-electrical-flow-family.md`, QA-only): 22 fences +
+19 isolation companions in `ElectricalFlow_QA.lean`'s
+`AdversarialFences` section — the energy agreement's and the
+routed-energy identity's `hA` at the asymmetric 4-path `asymPath4Adj`
+(demand genuinely solvable, `flowEnergy = 1 ≠ 3/2 = quadForm`, the
+resistance pinned by fixture-local voltage pinning); the
+superposition lemma's `hd` (the cyclic phantom `cycleFlow`,
+divergence-free on the cheat network's zero-conductance pairs) and
+`hdiv` (the doubled current `doubleCurrent`); Thomson's `hnneg` (the
+unit flow `negRouteFlow` riding both negative edges of the signed
+4-cycle: energy `−1` against the junk resistance `0`); the flow-space
+transfer and energy-comparison clauses (the phantom's negative
+energies `1 ≤ −1`, `1 ≤ 0`); Rayleigh's `hnnegA` (the signed edge's
+genuine negative resistance `−1`) and `hconnA` (the cheat network's
+junk `0` under the dominating path); the support-graph and
+connectivity-adapter clauses; and the reinforcement family's
+`hδ`/`hA`/`hnneg`/`hconn` corners (the conductance-`1/2` edge
+`halfEdgeAdj`; the reinforced cheat network computing to exactly the
+path). Three P4 removable findings recorded in the proposal.
+
 ### `Scaffold.Mathlib.GraphTheory.Foster` (Foster's theorem, leverage scores)
 
 Foster's theorem for weighted graphs (proposal
@@ -250,6 +271,30 @@ matrix-Chernoff scope decision and is not developed.
 | `foster_theorem` | **Foster's theorem (1949):** `(∑ i, ∑ j, A i j * R i j) / 2 = card V − 1` on every connected symmetric-nonnegative network — in unordered-pair form `∑_{u<v} w_e R_e = n − 1`; the `/ 2` is the ordered-pair double count (QA-witnessed load-bearing: the ordered sums compute to `4 ≠ 2` on `K₃` and `6 ≠ 3` on `K₄`) |
 | `leverageScore` | the pair's share `A u v * R u v / (card V − 1)` of the Foster budget — the importance-sampling object of Spielman–Srivastava sparsification (Phase B, blocked); junk values below `2 ≤ card V` documented in the docstring |
 | `sum_leverageScore_eq_two` | **Foster in leverage form:** the ordered-pair leverage scores sum to exactly `2` (unordered: `1`), making them a probability distribution over edges; `2 ≤ card V` is the division guard |
+
+Adversarial fence audit (`proposals/adversarial-fences-foster-family.md`,
+2026-09-04, `Foster_QA.lean`'s `FosterFences` section): negative
+witnesses for the family's nine unfenced load-bearing clauses at the
+prior day's delivered fixtures plus a one-vertex fixture. The
+zero-eigenvalue count's `hnn`/`hconn` (two non-parallel kernel vectors —
+`1` with `![1,1,-1,-1]` at the signed rank-1 4-cycle, `1` with the
+component indicator at the disconnected fixture — force the count
+`≥ 2 ≠ 1`, inverting the theorem's own at-most-one orthogonality
+argument through the new generic kernel-onto-a-line engine); the
+spectral kernel's `hnn`/`hconn` (the junk-fallback LHS `0` against a
+*strictly positive* RHS — a genuine eigenvector with differing
+coordinates confines its expansion to the nonzero modes, all terms
+nonnegative; PSD at the signed fixture through the fixture-local rank-1
+SOS identity `quadForm L f = (s ⬝ f)²`, which does not need
+`laplacian_psd`'s nonnegativity hypothesis); `foster_theorem`'s `hnn`
+(every off-diagonal demand unsolvable — the kernel-generator coordinate
+map `x ↦ (w₁ x, w₂ x)` is injective on `Fin 4` — so the ordered sum is
+`0 ≠ 3`) and `hconn` (the ordered sum `4 ≠ 2·3`, within-block
+resistances genuinely pinned, no junk value entering); and the leverage
+layer's `hcard` junk corner (the `0/0` division guard at `card V = 1`:
+the score reads `0`, the sum `0 ≠ 2`) with its `hnn`/`hconn` mirrors.
+The four `hA` clauses recorded non-fenceable (consumed by the displays'
+`laplacian_symmetric A hA` or by `hconn`'s own `supportGraph A hA`).
 
 
 ### `Scaffold.Mathlib.GraphTheory.Expander` (edge weights, the centered-indicator decomposition, the Expander Mixing Lemma)
@@ -2064,3 +2109,128 @@ matrix-power growth; the transfer's `hnn` is screened by spectral
 escape `> 1`), and two removable-hypothesis findings. Helper shelf
 additions of note: `not_summable_of_abs_ge`, `exp_one_lt_three`, and
 the `pf_tv_lit` two-point TV closed form.
+
+### The regular Cheeger family's adversarial fences (2026-09-04)
+
+`proposals/adversarial-fences-regular-cheeger-family.md` (the audit
+method applied to the SGT center namesake — `Cheeger.lean`'s regular
+layer: the proved inequality pair at both spellings, the sweep lemma,
+the PSD engine, the cut-test-vector junk corners; `Cheeger_QA.lean`'s
+`RegularFences` section): negative witnesses for the 17 core + 4
+junk-corner load-bearing clauses the pre-discipline QA left unfenced,
+each with an isolation companion — the `hnn` clauses at the signed
+genuinely-`d = 2`-regular fixture `rcSAdj = !![3,-1;-1,3]]` (`λ₂ = 0`
+against `2φ = -1`, `φ²/2 = 1/8`, `d·φ²/2 = 1/4`, `2dφ = -2`, and the
+sweep mode's `R = -1`, all four statements refuted at one fixture);
+the `hd` clauses at the nonnegative genuinely-`d = 3`-regular
+`rcPosAdj = !![2,1;1,2]]` instantiated at claimed wrong degrees
+(`d' = 4`: the mode eigenvalue `3/4 > 2φ = 2/3`; `d' = 1`: the
+operator collapses to all-`-1`s with `λ₂ = 0 < φ²/2 = 1/18` and the
+mode's `R = 0`; `d' = 40`/`d' = 1/8` against the degree-independent
+combinatorial `λ₂(L) = 2`); the upper bound's `hdpos` at the zero
+matrix with genuine `d = 0` regularity (the identity operator,
+`λ₂ = 1 > 2φ = 0` — the junk-conductance `0/0 = 0` corner); the
+sweep's `hx0` (the definitional junk Rayleigh `0 < φ²/2 = 1/2`) and
+`horth` (the constant vector: in the kernel, `R = 0`, not
+self-orthogonal) at `edgeAdj`; the PSD engine's `hA` at the asymmetric
+row-regular `rcAsymPsdAdj = !![4,1;3,2]]` (the quadratic form sees the
+symmetric part `[[4,2],[2,2]]`, whose `![2,1]`-Rayleigh `26/5`
+exceeds the claimed degree `5`: `quadForm = -1/5 < 0`), plus its `hnn`
+and `hd`; and the four `cutTestVector_ne_zero` junk corners (the cut
+test vector identically `0` at the zero matrix's `hd`/`hdpos`
+instantiations, the empty cut, and the full cut). The pinning runs
+through two new private Fin 2 engines — the eigenvalue-witness route
+(`exists_eigvalOf_eq_of_mulVec_eq_smul` + `eigvalOf_le_evals_last`,
+where `secondEval` is the top sorted entry) for lower bounds, and the
+whole-space instance of `evals_le_of_linearIndependent` (no PSD, no
+kernel) for upper bounds. Recorded non-fenceables: the structural
+`hA`s of the five spectrum-carrying statements (consumed by the
+conclusions' own symmetry proofs) and `hcard`; and — the survey's
+decisive companion-audit finding — four `hdpos` clauses (sweep, lower
+bound, both `_laplacian` twins, PSD) whose signed-fixture pricing
+failed the isolation companion (`hnn` is a co-hypothesis) and whose
+satisfiable nonnegative corner collapses to the zero matrix with the
+dropped conclusions surviving. The sweep's genuinely-mathematical `hA`
+(`rayleigh`'s symmetry-free display) stays a priced follow-on with the
+2-vertex negative analysis recorded.
+
+### The irregular Cheeger family's adversarial fences (2026-09-04)
+
+`proposals/adversarial-fences-irregular-cheeger-family.md` (the audit
+method's first application beyond the mixing cascade — the irregular
+volume-weighted Cheeger program, the strategy's ring-1 namesake
+cluster; `IrregularCheeger_QA.lean`'s `IrregularFences` section):
+negative witnesses for the 19 load-bearing clauses the 2026-08-25/26
+delivery left unfenced, each with an isolation companion — the easy
+direction's `hnn` (`ichSigAdj`: `λ₂ = 0 ≤ 2φ = −2`); the sweep
+lemma's `horth` (`K₂`, `f = ![1,2]`: `1/2 ≤ R = 1/5`), `hf0` (`f = 0`:
+the definitional junk Rayleigh `0`, `1/2 ≤ 0`), and `hnn` (`f =
+![1,−1]`: `R = −2` through the entry-pinned `L_sym`); the cut
+theorem's `hf0` and `hnn` (no nonempty proper swept set of a constant
+exists; the bound clause `1 ≤ 2R = −4`); the kernel iff's `hconn` (the
+component indicator `![1,1,0,0]` at the two-edge fixture — a kernel
+vector not a multiple of the stretched constants); the
+disconnected-λ₂ theorem's `hnn` at `icSigDisc4Adj` (two disjoint
+signed blocks: both block-antisymmetric modes eigenvectors at exactly
+`−2` by the subspace Rayleigh–Ritz engine, `λ₂ ≤ −2 ≠ 0`) and `hd` at
+`icIsoAdj` (edge ⊕ isolated vertex: `λ₂ = 1 ≠ 0` by the variational
+engine with PSD and kernel supplied by hand — the isolated vertex's
+junk `D⁻¹ᐟ² = 0` row makes its `L_sym` eigenvalue `1`); the positivity
+corollary's `hconn` (`φ ≤ 0`) and `hnn` at the new connected
+negative-cut fixture `icNegCutAdj = !![3,1,−3;1,0,1;−3,1,3]` (degrees
+`(1,2,1)`, the cut `{0}` of boundary `−2` at unit volume, `φ ≤ −2`);
+the Fiedler capstone's `hnn` at the same fixture — λ₂ pinned exactly
+`0` (engine bounds `e₀ ≤ −5`, `e₁ ≤ 0`, `e₂ ≤ 2` plus trace `−3`),
+the 1-dimensional eigenspace characterized (`span (1, √2, 1)` with the
+three witness eigenvectors `(1,0,−1)`/`(1,√2,1)`/`(1,−√2,1)`), so the
+sweep vector is provably a nonzero constant and the dropped
+conclusion fails on the shape clauses; the sandwich interface's and
+the degree-window pair's wrong-constant clauses (`dmin = 5`:
+`5·λ₂(L_sym) = 10 ≤ λ₂(L) = 2`; `dmax = 1/2`: `2 ≤ 1` twice); the
+volume extraction's `hy` (`y = 1`: `y²` constant, shape) and `hM`
+(`y = 0`: every positive superlevel empty — the junk-division corner
+at the extraction's own display); and the attainment theorem's
+`hcard` at `icOneAdj` (no nonempty proper subset of `Fin 1` exists).
+
+### The effective-resistance core family's adversarial fences
+(`EffectiveResistance_QA.lean` and `ResistanceMetric_QA.lean`,
+`AdversarialFences` sections, 2026-09-04,
+`proposals/adversarial-fences-effective-resistance-family.md`)
+
+Negative witnesses for the electrical cluster's root family's 16
+unfenced load-bearing clauses — `Electrical.lean`'s definition,
+Dirichlet-bound, confinement, and metric layers — each with an
+isolation companion: the existence-flavored statements' `hnn` at the
+rank-1 signed 4-cycle `sgnK4Adj` (positive support the connected
+4-cycle `1—0—2—3—1`, negative diagonals, every degree `1`, kernel
+dimension 3 — the demand `e 0 − e 2` unsolvable through the
+kernel-vector pairing `2 ≠ 0`: connected support does not imply
+solvability once signs enter; the junk fallback pinned); the
+confinement max half's `hnn` at the signed overshoot fixture
+`sgnOverAdj` (support the path `0—1—3—2`, one negative edge `(0,2)`,
+kernel exactly constants so every demand solvable — the `e 0 − e 1`
+solution `![1/2, 0, 1, 1/2]` takes vertex `2` to `1 > max(1/2, 0)`;
+no three-vertex signed fixture can kill the max half, the interior
+value always solving to a weighted average of the boundary pair);
+both confinement halves' `hconn` at the disconnected fixture's
+free-constant mechanism (the same-component demand solutions
+`![1, 0, 7, 7]` / `![1, 0, -7, -7]` escaping above/below the boundary
+values); the Cauchy–Schwarz engine's `hA` (cross term `4² = 16 ≤
+(-4)·2 = -8` refuted) and the polarization engine's `hA` (`-4 = 2`
+refuted) at the asymmetric nonnegative `ecAsymAdj = !![0,2;1,0]]` —
+the family's only two `supportGraph`-free statements, so its only
+freely-fenceable symmetry clauses; the Cauchy–Schwarz engine's `hnn`
+(cross `1 ≤ 0`) and the Dirichlet bound's `hnn` (ratio `1/2 ≤
+R 0 1 = 0`) at the delivered signed fixture; the Dirichlet bound's
+`hconn` at the cross-component pair with the genuine-energy indicator
+`e 0` (`1 ≤ R 0 2 = 0`); and the metric residuals' junk corners
+(triangle `1 ≤ 0 + 0` through a foreign-component middle vertex with
+the mirrored demand `e 2 − e 1` unsolvability pinned; `0 < R 0 2 = 0`;
+the definiteness iff identifying distinct vertices on both the signed
+and disconnected fixtures; explicit `0 ≤ R 2 1 = -2`). Screened
+clauses cited rather than duplicated; non-fenceables recorded with
+mechanisms in the proposal (the structural `hA`s; the
+uniqueness/agreement `hnn` — solvability forces kernel-invariant
+voltage differences on symmetric input; `effectiveResistance_symm`'s
+`hnn`/`hconn`; `effectiveResistance_nonneg`'s `hconn`; the generic
+quadratic's `hE`).

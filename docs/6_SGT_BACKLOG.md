@@ -73,7 +73,72 @@ characteristic-polynomial interface needed, which is why the pinned
 Mathlib's lack of one (still true, re-surveyed 2026-08-22: no
 similar-matrices-share-eigenvalues lemma anywhere under
 `Mathlib/LinearAlgebra/`) stopped being the obstruction it appeared to
-be. The remaining open piece on this axis is the mixing-time program's
+be. The irregular family's falsification surface was completed
+2026-09-04 (`proposals/adversarial-fences-irregular-cheeger-family.md`):
+19 previously unfenced load-bearing clauses of the irregular Cheeger
+program closed with hypothesis-form negative witnesses plus isolation
+companions (QA-only, `IrregularCheeger_QA.lean`'s `IrregularFences`
+section), including the Fiedler capstone's `hnn` — λ₂ pinned exactly
+`0` at a connected negative-cut fixture with the eigenspace
+characterized, so the sweep vector is provably a nonzero constant. The
+*regular* family's falsification surface followed the same day
+(`proposals/adversarial-fences-regular-cheeger-family.md`): 17 core +
+4 junk-corner clauses of the proved regular Cheeger pair at both
+spellings, the sweep lemma, and the PSD engine closed with fences plus
+companions (`Cheeger_QA.lean`'s `RegularFences` section, QA-only), with
+the companion audit's recorded finding that four `hdpos` clauses are
+non-fenceable (the satisfiable nonnegative corner collapses to the
+zero matrix, where the junk conductance `0/0 = 0` lets the dropped
+conclusions survive). The *effective-resistance core* family's
+falsification surface followed the same day
+(`proposals/adversarial-fences-effective-resistance-family.md`): 16
+previously unfenced load-bearing clauses of `Electrical.lean`'s
+definition/Dirichlet/confinement/metric layers closed with fences
+plus companions (`AdversarialFences` sections in
+`EffectiveResistance_QA.lean` and `ResistanceMetric_QA.lean`,
+QA-only), with two structural findings recorded: a rank-1 signed
+4-cycle whose connected positive support coexists with a
+3-dimensional Laplacian kernel (connected support does not imply
+demand solvability once signs enter), and the confinement max half
+needing a fourth vertex to fence (every 3-vertex signed fixture's
+interior value solves to a boundary average); the electrical
+cluster's four remaining QA families (`ElectricalFlow`, `Foster`,
+`KernelBridge`, the `ResistanceMetric` consumers) are the audit
+method's next targets in consumption order. The *electrical-flow*
+family's falsification surface was completed the same day
+(`proposals/adversarial-fences-electrical-flow-family.md`): 22
+previously unfenced load-bearing clauses of the routing layer closed
+with fences plus companions (`ElectricalFlow_QA.lean`'s
+`AdversarialFences` section, QA-only) — the energy agreement and the
+routed-energy identity fail on an asymmetric 4-path even with the
+demand genuinely solved (the row-sum/column-sum correction `1 ≠ 3/2`,
+the resistance pinned `3/2` by fixture-local voltage pinning with no
+symmetry-free uniqueness lemma available), Thomson's nonnegativity
+clause falls to a unit flow riding both negative edges of the signed
+4-cycle (energy `−1` against the junk resistance `0`), and the signed
+edge's demand is *genuinely solvable* with negative voltage difference
+`−1` — a real negative resistance, not a junk fallback — so Rayleigh's
+dropped-`hnonnegA` statement reads `1 ≤ −1`; three P4 removable
+findings recorded (the identity's `hnneg`/`hconn` truth-removable
+given `hA`+`hf`; Thomson's `hconn` implied by the unit-flow
+hypothesis; Rayleigh's `hnonnegB` by entrywise domination); the
+*Foster* family's falsification surface was completed the same day
+(`proposals/adversarial-fences-foster-family.md`): nine previously
+unfenced load-bearing clauses of the spanning-tree-counting program
+closed with fences plus companions (`Foster_QA.lean`'s `FosterFences`
+section, QA-only) — the zero-eigenvalue count forced `≥ 2 ≠ 1` by two
+non-parallel kernel vectors (the inversion of the theorem's own
+at-most-one argument, via the generic kernel-onto-a-line engine), the
+spectral-kernel identity's junk-fallback LHS against a strictly positive
+RHS (the generic genuine-eigenvector expansion engine, with PSD at the
+signed fixture supplied by the fixture-local rank-1 SOS `quadForm L f =
+(s ⬝ f)²` rather than `laplacian_psd`'s nonnegativity hypothesis), the
+ordered sum itself `0 ≠ 3` at the signed fixture (every off-diagonal
+demand unsolvable — the kernel-generator coordinate map injective on
+`Fin 4`) and `4 ≠ 2·3` at the disconnected one, and the leverage
+corollary's `hcard` division-guard junk corner `0/0` at a one-vertex
+fixture; the cluster's two remaining QA families (`KernelBridge`, the
+`ResistanceMetric` consumers) are next in consumption order. The remaining open piece on this axis is the mixing-time program's
 Step 3 — the geometric decay bound. **Step 2 (the ℓ²-mixing proxy) was
 delivered 2026-08-22** in the new `GraphTheory.Mixing` (zero new
 axioms): the scoping gate decided and recorded first (ℓ² alone, with

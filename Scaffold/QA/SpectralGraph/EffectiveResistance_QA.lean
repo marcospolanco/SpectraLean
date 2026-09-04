@@ -52,6 +52,12 @@
   theorems, not axioms; QA checks interfaces where the arithmetic is
   fully evaluated.
 
+  Since 2026-09-04 this file also carries the effective-resistance core
+  family's adversarial fence audit (`AdversarialFences`,
+  `proposals/adversarial-fences-effective-resistance-family.md`):
+  hypothesis-form negative witnesses plus isolation companions for the
+  pre-discipline QA's unfenced load-bearing clauses.
+
   Scoreboard: ../QA_SCOREBOARD.md
 -/
 
@@ -360,5 +366,379 @@ theorem disc_zero_energy_guard_QA :
   · rw [quadForm, connDisc_indicator_in_kernel_QA, Matrix.dotProduct_zero]
   · rw [quadForm, connDisc_indicator_in_kernel_QA,
       Matrix.dotProduct_zero, div_zero]
+
+/-!
+## Adversarial fences (proposal `adversarial-fences-effective-resistance-family.md`)
+
+Hypothesis-form negative witnesses for the clauses of
+`Scaffold.Mathlib.GraphTheory.Electrical` that had no negative witness
+anywhere in the repository (per the audit method of
+`governance/ADVERSARIAL_REVIEW.md`): the existence-flavored statements'
+`hnonneg` at a rank-1 signed fixture whose connected positive support
+coexists with a three-dimensional Laplacian kernel; both confinement
+halves' `hconn` at the free-constant-on-a-foreign-component mechanism;
+the Dirichlet bound's `hconn` at the junk fallback; and the metric
+residuals' `hconn` corners — plus the Cauchy–Schwarz and polarization
+engines' `hA` at an asymmetric nonnegative fixture (their statements
+never mention `supportGraph`, so symmetry is genuinely fenceable there).
+Screened (already fenced by delivered witnesses): the min half's
+`hnonneg` (`signed_confine_refuted_QA`), existence's `hconn`
+(`disc_no_resistance_QA`), the Dirichlet `hpos` guard
+(`disc_zero_energy_guard_QA`), the triangle's and positivity's `hnonneg`
+(`signed_triangle_refuted_QA`, `signed_pos_refuted_QA` — the latter two
+live in `ResistanceMetric_QA.lean`, as do this audit's signed-fixture
+engine fences). Recorded non-fenceables with mechanisms live in the
+proposal.
+
+Entrywise Laplacian arithmetic on fixtures is routed through the shelf's
+`laplacian_mulVec_apply` (the diffusion form) rather than through
+`degreeMatrix`, whose dependent `if h : i = j` does not decide inside a
+summation over a variable index.
+-/
+
+/-- **Computation helper**: the energy of a potential against any
+adjacency (symmetric or not), in diffusion form — `quadForm` unfolded
+one `mulVec` entry at a time through `laplacian_mulVec_apply`. -/
+theorem ecf_quadForm_lap {V : Type} [Fintype V] [DecidableEq V]
+    (A : WAdj (V := V)) (f : V → ℝ) :
+    quadForm (laplacian A) f = ∑ i, f i * ∑ j, A i j * (f i - f j) := by
+  simp only [quadForm, Matrix.dotProduct]
+  exact Finset.sum_congr rfl fun i _ => by rw [laplacian_mulVec_apply]
+
+/-- **Computation helper**: the Laplacian bilinear cross term in
+diffusion form. -/
+theorem ecf_dot_lap {V : Type} [Fintype V] [DecidableEq V]
+    (A : WAdj (V := V)) (f g : V → ℝ) :
+    Matrix.dotProduct f (laplacian A *ᵥ g)
+      = ∑ i, f i * ∑ j, A i j * (g i - g j) := by
+  simp only [Matrix.dotProduct]
+  exact Finset.sum_congr rfl fun i _ => by rw [laplacian_mulVec_apply]
+
+/-! ### The asymmetric engine fixture `ecAsymAdj`: the engines' `hA` fences -/
+
+/-- The asymmetric nonnegative fixture: row sums `(2, 1)`, so the
+Laplacian `!![2, -2; -1, 1]` is asymmetric — symmetry is a genuine,
+freely-stateable hypothesis for the Cauchy–Schwarz and polarization
+engines, whose statements never mention `supportGraph`. -/
+def ecAsymAdj : Matrix (Fin 2) (Fin 2) ℝ := !![0, 2; 1, 0]
+
+theorem ecAsymAdj_not_isSymm : ¬ ecAsymAdj.IsSymm := by
+  intro h
+  have h01 := h.apply 0 1
+  simp only [ecAsymAdj] at h01
+  norm_num at h01
+
+theorem ecAsymAdj_nonneg : ∀ i j, 0 ≤ ecAsymAdj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [ecAsymAdj]
+
+theorem ecAsym_quadForm_56 :
+    quadForm (laplacian ecAsymAdj) (![5, 6] : Fin 2 → ℝ) = -4 := by
+  rw [ecf_quadForm_lap]
+  simp only [Fin.sum_univ_two, ecAsymAdj, Matrix.of_apply,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+  norm_num
+
+theorem ecAsym_quadForm_10 :
+    quadForm (laplacian ecAsymAdj) (![1, 0] : Fin 2 → ℝ) = 2 := by
+  rw [ecf_quadForm_lap]
+  simp only [Fin.sum_univ_two, ecAsymAdj, Matrix.of_apply,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+  norm_num
+
+theorem ecAsym_cross_56_10 :
+    Matrix.dotProduct (![5, 6] : Fin 2 → ℝ)
+      (laplacian ecAsymAdj *ᵥ (![1, 0] : Fin 2 → ℝ)) = 4 := by
+  rw [ecf_dot_lap]
+  simp only [Fin.sum_univ_two, ecAsymAdj, Matrix.of_apply,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+  norm_num
+
+theorem ecAsym_cross_10_56 :
+    Matrix.dotProduct (![1, 0] : Fin 2 → ℝ)
+      (laplacian ecAsymAdj *ᵥ (![5, 6] : Fin 2 → ℝ)) = -2 := by
+  rw [ecf_dot_lap]
+  simp only [Fin.sum_univ_two, ecAsymAdj, Matrix.of_apply,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+  norm_num
+
+theorem ecAsym_quadForm_sub :
+    quadForm (laplacian ecAsymAdj)
+      ((![1, 0] : Fin 2 → ℝ) - (1 : ℝ) • (![5, 6] : Fin 2 → ℝ)) = -4 := by
+  rw [ecf_quadForm_lap]
+  simp only [Fin.sum_univ_two, ecAsymAdj, Matrix.of_apply,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+    Pi.sub_apply, smul_eq_mul]
+  norm_num
+
+/-- **Fence (`laplacian_cauchy_schwarz`, `hA`)**: at the nonnegative
+asymmetric fixture the cross term squared is `16` while the right side is
+`(-4) * 2 = -8` — the semidefinite Cauchy–Schwarz engine's symmetry
+hypothesis is load-bearing, and being statement-free of `supportGraph`
+it is genuinely fenceable. -/
+theorem ecF_cauchy_schwarz_hA_fence_QA :
+    ¬ (Matrix.dotProduct (![5, 6] : Fin 2 → ℝ)
+          (laplacian ecAsymAdj *ᵥ (![1, 0] : Fin 2 → ℝ)) ^ 2
+        ≤ quadForm (laplacian ecAsymAdj) (![5, 6] : Fin 2 → ℝ)
+          * quadForm (laplacian ecAsymAdj) (![1, 0] : Fin 2 → ℝ)) := by
+  rw [ecAsym_cross_56_10, ecAsym_quadForm_56, ecAsym_quadForm_10]
+  norm_num
+
+theorem ecF_cauchy_schwarz_hA_isolation_QA :
+    (∀ i j, 0 ≤ ecAsymAdj i j) ∧ ¬ ecAsymAdj.IsSymm :=
+  ⟨ecAsymAdj_nonneg, ecAsymAdj_not_isSymm⟩
+
+/-- **Fence (`quadForm_laplacian_sub_smul`, `hA`)**: at the same fixture
+with `f = ![1, 0]`, `g = ![5, 6]`, `t = 1` the polarization identity
+reads `-4 = 2` — the reciprocity-based expansion needs symmetry. -/
+theorem ecF_polarization_hA_fence_QA :
+    ¬ (quadForm (laplacian ecAsymAdj)
+          ((![1, 0] : Fin 2 → ℝ) - (1 : ℝ) • (![5, 6] : Fin 2 → ℝ))
+        = quadForm (laplacian ecAsymAdj) (![1, 0] : Fin 2 → ℝ)
+          - 2 * (1 : ℝ)
+            * Matrix.dotProduct (![1, 0] : Fin 2 → ℝ)
+              (laplacian ecAsymAdj *ᵥ (![5, 6] : Fin 2 → ℝ))
+          + (1 : ℝ) * (1 : ℝ)
+            * quadForm (laplacian ecAsymAdj) (![5, 6] : Fin 2 → ℝ)) := by
+  rw [ecAsym_quadForm_sub, ecAsym_quadForm_10, ecAsym_cross_10_56,
+    ecAsym_quadForm_56]
+  norm_num
+
+/-! ### The rank-1 signed fixture `sgnK4Adj`: the existence layer's `hnn` fences -/
+
+/-- The signed 4-cycle-plus-diagonals fixture: positive edges
+`(0,1), (0,2), (1,3), (2,3)` (the support, a connected 4-cycle
+`1 — 0 — 2 — 3 — 1`), negative edges `(0,3), (1,2)`, every degree
+exactly `1`. Its Laplacian has rank 1 and a three-dimensional kernel
+(spanned by `1`, `![1,1,-1,-1]`, `![1,-1,1,-1]`): connected support does
+*not* imply demand solvability once signs enter, so the
+existence-flavored statements' nonnegativity hypothesis is load-bearing. -/
+def sgnK4Adj : Matrix (Fin 4) (Fin 4) ℝ :=
+  Matrix.of fun i j =>
+    if (i = 0 ∧ j = 1) ∨ (i = 1 ∧ j = 0) ∨ (i = 0 ∧ j = 2) ∨ (i = 2 ∧ j = 0) ∨
+      (i = 1 ∧ j = 3) ∨ (i = 3 ∧ j = 1) ∨ (i = 2 ∧ j = 3) ∨ (i = 3 ∧ j = 2) then (1 : ℝ)
+    else if (i = 0 ∧ j = 3) ∨ (i = 3 ∧ j = 0) ∨ (i = 1 ∧ j = 2) ∨ (i = 2 ∧ j = 1) then (-1 : ℝ)
+    else 0
+
+theorem sgnK4Adj_isSymm : sgnK4Adj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [sgnK4Adj]
+
+theorem sgnK4Adj_not_nonneg : ¬ (∀ i j : Fin 4, 0 ≤ sgnK4Adj i j) := by
+  intro h
+  have h03 : (0 : ℝ) ≤ sgnK4Adj 0 3 := h 0 3
+  have e : sgnK4Adj 0 3 = -1 := by simp [sgnK4Adj]
+  rw [e] at h03
+  norm_num at h03
+
+/-- The support graph of the signed fixture is connected: both other
+vertices are reachable from `0` along positive edges (the support is the
+4-cycle `1 — 0 — 2 — 3 — 1`; the two negative edges contribute
+nothing). -/
+theorem sgnK4_supportGraph_connected :
+    (supportGraph sgnK4Adj sgnK4Adj_isSymm).Connected := by
+  have hfrom0 : ∀ v : Fin 4,
+      (supportGraph sgnK4Adj sgnK4Adj_isSymm).Reachable 0 v := by
+    intro v
+    fin_cases v
+    · exact ⟨SimpleGraph.Walk.nil⟩
+    · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 1)
+        ⟨by decide, by simp [sgnK4Adj]⟩ SimpleGraph.Walk.nil⟩
+    · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 2) (w := 2)
+        ⟨by decide, by simp [sgnK4Adj]⟩ SimpleGraph.Walk.nil⟩
+    · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 3)
+        ⟨by decide, by simp [sgnK4Adj]⟩
+        (SimpleGraph.Walk.cons (u := 1) (v := 3) (w := 3)
+          ⟨by decide, by simp [sgnK4Adj]⟩ SimpleGraph.Walk.nil)⟩
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  exact ⟨0, hfrom0⟩
+
+theorem sgnK4_fence_isolation_QA :
+    sgnK4Adj.IsSymm ∧ (supportGraph sgnK4Adj sgnK4Adj_isSymm).Connected
+      ∧ ¬ (∀ i j : Fin 4, 0 ≤ sgnK4Adj i j) :=
+  ⟨sgnK4Adj_isSymm, sgnK4_supportGraph_connected, sgnK4Adj_not_nonneg⟩
+
+/-- A second kernel vector: the sign pattern `![1, 1, -1, -1]` lies in
+the Laplacian kernel alongside the constants — the rank-1 certificate. -/
+theorem sgnK4_kernel :
+    (laplacian sgnK4Adj).mulVec (![1, 1, -1, -1] : Fin 4 → ℝ) = 0 := by
+  funext i
+  rw [laplacian_mulVec_apply]
+  fin_cases i <;>
+    simp [sgnK4Adj, Fin.sum_univ_four, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.cons_val', Matrix.head_cons]
+
+/-- The demand `e 0 − e 2` is unsolvable on the signed fixture: the
+kernel vector above certifies it (its pairing with the demand is
+`2 ≠ 0`). -/
+theorem sgnK4_demand02_unsolvable_QA :
+    ¬ ∃ f : Fin 4 → ℝ, (laplacian sgnK4Adj).mulVec f
+      = Pi.single 0 (1 : ℝ) - Pi.single 2 (1 : ℝ) := by
+  rintro ⟨f, hf⟩
+  have h0 : Matrix.dotProduct (![1, 1, -1, -1] : Fin 4 → ℝ)
+      ((laplacian sgnK4Adj).mulVec f) = 0 :=
+    dotProduct_eq_zero_of_laplacian_mulVec_eq_zero sgnK4Adj sgnK4Adj_isSymm
+      sgnK4_kernel
+  rw [hf, Matrix.dotProduct_sub, Matrix.dotProduct_single,
+    Matrix.dotProduct_single] at h0
+  norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val',
+    Matrix.head_cons] at h0
+
+/-- **Fence (`exists_isEffectiveResistance`, `hnonneg`)**: symmetric with
+connected support, yet no resistance value exists between `0` and `2` —
+the existence theorem's nonnegativity hypothesis is load-bearing (the
+junk-free statement would demand a witness for an unsolvable equation). -/
+theorem sgnK4F_exists_hnn_fence_QA :
+    ¬ (∃ r : ℝ, IsEffectiveResistance sgnK4Adj 0 2 r) := by
+  rintro ⟨r, f, hf, hfr⟩
+  exact sgnK4_demand02_unsolvable_QA ⟨f, hf⟩
+
+/-- The total function's junk fallback on the signed fixture, pinned. -/
+theorem sgnK4_fallback_zero_QA :
+    effectiveResistance sgnK4Adj 0 2 = 0 :=
+  effectiveResistance_eq_zero_of_not_exists sgnK4Adj 0 2
+    sgnK4F_exists_hnn_fence_QA
+
+/-- **Fence (`effectiveResistance_eq_quadForm`, `hnonneg`)**: the
+energy-identity existence statement fails at the same fixture for the
+same mechanism — no potential solves the demand, so no energy identity
+can hold. -/
+theorem sgnK4F_energy_hnn_fence_QA :
+    ¬ (∃ f : Fin 4 → ℝ, (laplacian sgnK4Adj).mulVec f
+        = Pi.single 0 (1 : ℝ) - Pi.single 2 (1 : ℝ)
+        ∧ effectiveResistance sgnK4Adj 0 2
+          = quadForm (laplacian sgnK4Adj) f) := by
+  rintro ⟨f, hf, _⟩
+  exact sgnK4_demand02_unsolvable_QA ⟨f, hf⟩
+
+/-! ### The disconnected fixture: confinement, Dirichlet, and metric `hconn` fences -/
+
+/-- The `e 0 − e 1` demand on the disconnected fixture is solved by
+`![1, 0, 7, 7]` — the foreign component `{2, 3}` is free to sit at any
+constant, here `7`, strictly above both boundary values. -/
+theorem disc_demand01_seven_QA :
+    (laplacian connDiscAdj).mulVec ![1, 0, 7, 7]
+      = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ) := by
+  funext i
+  rw [laplacian_mulVec_apply]
+  fin_cases i <;>
+    simp [connDiscAdj, Fin.sum_univ_four, Pi.single_apply, Pi.sub_apply,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val',
+      Matrix.head_cons]
+
+/-- The min-side twin: the foreign constant `-7` sits strictly below
+both boundary values. -/
+theorem disc_demand01_negseven_QA :
+    (laplacian connDiscAdj).mulVec ![1, 0, -7, -7]
+      = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ) := by
+  funext i
+  rw [laplacian_mulVec_apply]
+  fin_cases i <;>
+    simp [connDiscAdj, Fin.sum_univ_four, Pi.single_apply, Pi.sub_apply,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val',
+      Matrix.head_cons]
+
+/-- **Fence (`laplacian_mulVec_eq_single_sub_single_le_max`, `hconn`)**:
+a genuine solution of a genuine same-component demand on the symmetric
+nonnegative disconnected fixture takes the foreign-component value `7`
+above its boundary maximum `max 1 0 = 1` — the flood argument needs the
+walk from the max-point to reach the boundary, which connectivity alone
+supplies. -/
+theorem discF_confinement_max_hconn_fence_QA :
+    ¬ ((laplacian connDiscAdj).mulVec ![1, 0, 7, 7]
+        = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ)
+        → (![1, 0, 7, 7] : Fin 4 → ℝ) 2
+          ≤ max ((![1, 0, 7, 7] : Fin 4 → ℝ) 0) ((![1, 0, 7, 7] : Fin 4 → ℝ) 1)) := by
+  intro h
+  have hcon := h disc_demand01_seven_QA
+  norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val',
+    Matrix.head_cons] at hcon
+
+/-- **Fence (`laplacian_mulVec_eq_single_sub_single_min_le`, `hconn`)**:
+the min-side twin at the foreign constant `-7`. -/
+theorem discF_confinement_min_hconn_fence_QA :
+    ¬ ((laplacian connDiscAdj).mulVec ![1, 0, -7, -7]
+        = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ)
+        → min ((![1, 0, -7, -7] : Fin 4 → ℝ) 0) ((![1, 0, -7, -7] : Fin 4 → ℝ) 1)
+          ≤ (![1, 0, -7, -7] : Fin 4 → ℝ) 2) := by
+  intro h
+  have hcon := h disc_demand01_negseven_QA
+  norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val',
+    Matrix.head_cons] at hcon
+
+/-- Independent energy computation: the indicator `![1, 0, 0, 0]` has
+energy exactly `1` on the disconnected fixture (one unit edge leaves
+vertex `0`). -/
+theorem disc_energy_e0_four_QA :
+    quadForm (laplacian connDiscAdj) (![1, 0, 0, 0] : Fin 4 → ℝ) = 1 := by
+  rw [ecf_quadForm_lap]
+  simp [Fin.sum_univ_four, connDiscAdj, Matrix.of_apply,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val',
+    Matrix.head_cons]
+
+/-- **Fence (`effectiveResistance_ge_sq_div_quadForm`, `hconn`)**: at
+the cross-component pair `(0, 2)` the test potential `e 0` has genuine
+positive energy `1` and voltage difference `1`, so the dropped-bound
+reads `1 / 1 = 1 ≤ R 0 2 = 0` — the junk fallback cannot bound a genuine
+Dirichlet ratio. -/
+theorem discF_dirichlet_hconn_fence_QA :
+    ¬ (0 < quadForm (laplacian connDiscAdj) (![1, 0, 0, 0] : Fin 4 → ℝ)
+        → ((![1, 0, 0, 0] : Fin 4 → ℝ) 0 - (![1, 0, 0, 0] : Fin 4 → ℝ) 2) ^ 2
+          / quadForm (laplacian connDiscAdj) (![1, 0, 0, 0] : Fin 4 → ℝ)
+          ≤ effectiveResistance connDiscAdj 0 2) := by
+  intro h
+  have hcon := h (by rw [disc_energy_e0_four_QA]; norm_num)
+  rw [disc_energy_e0_four_QA, disc_fallback_zero_QA] at hcon
+  norm_num [Matrix.cons_val_zero, Matrix.cons_val', Matrix.head_cons] at hcon
+
+/-- The mirrored cross-component demand `e 2 − e 1` is unsolvable too
+(the component indicator pairing is `-1 ≠ 0`). -/
+theorem disc_no_resistance_21_QA :
+    ¬ ∃ r : ℝ, IsEffectiveResistance connDiscAdj 2 1 r := by
+  rintro ⟨r, f, hf, hfr⟩
+  have h0 : Matrix.dotProduct (![1, 1, 0, 0] : Fin 4 → ℝ)
+      ((laplacian connDiscAdj).mulVec f) = 0 :=
+    dotProduct_eq_zero_of_laplacian_mulVec_eq_zero connDiscAdj
+      connDiscAdj_isSymm connDisc_indicator_in_kernel_QA
+  rw [hf, Matrix.dotProduct_sub, Matrix.dotProduct_single,
+    Matrix.dotProduct_single] at h0
+  norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val',
+    Matrix.head_cons] at h0
+
+theorem disc_fallback_21_zero_QA :
+    effectiveResistance connDiscAdj 2 1 = 0 :=
+  effectiveResistance_eq_zero_of_not_exists connDiscAdj 2 1
+    disc_no_resistance_21_QA
+
+/-- **Fence (`effectiveResistance_le_add`, `hconn`)**: routing the edge
+`0 — 1` through a foreign-component middle vertex reads
+`1 ≤ R 0 2 + R 2 1 = 0 + 0` — both detour terms are junk fallbacks, and
+the junk is not a metric. -/
+theorem discF_triangle_hconn_fence_QA :
+    ¬ (effectiveResistance connDiscAdj 0 1
+        ≤ effectiveResistance connDiscAdj 0 2
+          + effectiveResistance connDiscAdj 2 1) := by
+  rw [disc_same_component_effectiveResistance_eq_one_QA, disc_fallback_zero_QA,
+    disc_fallback_21_zero_QA]
+  norm_num
+
+/-- **Fence (`effectiveResistance_pos_of_ne`, `hconn`)**: distinct
+cross-component vertices have `R 0 2 = 0` — the junk fallback is not
+positive. -/
+theorem discF_pos_hconn_fence_QA :
+    ¬ ((0 : Fin 4) ≠ 2 → 0 < effectiveResistance connDiscAdj 0 2) := by
+  intro h
+  have h0 := h (by decide)
+  rw [disc_fallback_zero_QA] at h0
+  norm_num at h0
+
+/-- **Fence (`effectiveResistance_eq_zero_iff`, `hconn`)**: the
+definiteness residual's forward direction fails across components —
+`R 0 2 = 0` at `0 ≠ 2`, so the iff identifies distinct vertices. -/
+theorem discF_definiteness_hconn_fence_QA :
+    ¬ (effectiveResistance connDiscAdj 0 2 = 0 ↔ (0 : Fin 4) = 2) := by
+  intro h
+  have h0 := h.1 disc_fallback_zero_QA
+  exact absurd h0 (by decide)
 
 end SpectralGraphTheory.QA

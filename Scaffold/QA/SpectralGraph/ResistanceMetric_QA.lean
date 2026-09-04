@@ -374,4 +374,178 @@ theorem signed_confine_refuted_QA (f : Fin 3 → ℝ)
   rw [h1, min_self] at hle
   linarith
 
+/-!
+## Adversarial fences (proposal `adversarial-fences-effective-resistance-family.md`)
+
+The effective-resistance core family audit's signed-fixture half: the
+Cauchy–Schwarz engine's `hnonneg`, the Dirichlet bound's `hnonneg`, and
+explicit metric-residual `hnonneg` corners at the delivered `signedAdj`
+fixture, plus the confinement **max** half's `hnonneg` at a new signed
+overshoot fixture — the clause the delivered signed fence could not
+reach (it killed the min half; see `sgnOverAdj`'s docstring for why no
+three-vertex signed fixture can kill the max half).
+-/
+
+theorem signed_cross_QA :
+    Matrix.dotProduct (![0, 1, -1] : Fin 3 → ℝ)
+      (laplacian signedAdj *ᵥ (![0, 1, 0] : Fin 3 → ℝ)) = -1 := by
+  rw [ecf_dot_lap]
+  simp [Fin.sum_univ_three, signedAdj, Matrix.of_apply,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+theorem signed_quadForm_01m1 :
+    quadForm (laplacian signedAdj) (![0, 1, -1] : Fin 3 → ℝ) = -2 := by
+  rw [ecf_quadForm_lap]
+  simp [Fin.sum_univ_three, signedAdj, Matrix.of_apply,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+  norm_num
+
+theorem signed_quadForm_010 :
+    quadForm (laplacian signedAdj) (![0, 1, 0] : Fin 3 → ℝ) = 0 := by
+  rw [ecf_quadForm_lap]
+  simp [Fin.sum_univ_three, signedAdj, Matrix.of_apply,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+/-- **Fence (`laplacian_cauchy_schwarz`, `hnonneg`)**: on the symmetric,
+connectedly-supported signed fixture the cross term squared is `1` while
+the right side is `(-2) * 0 = 0` — the discriminant extraction needs the
+*nonnegative* PSD hypothesis, not symmetry alone. -/
+theorem sgF_cauchy_schwarz_hnn_fence_QA :
+    ¬ (Matrix.dotProduct (![0, 1, -1] : Fin 3 → ℝ)
+          (laplacian signedAdj *ᵥ (![0, 1, 0] : Fin 3 → ℝ)) ^ 2
+        ≤ quadForm (laplacian signedAdj) (![0, 1, -1] : Fin 3 → ℝ)
+          * quadForm (laplacian signedAdj) (![0, 1, 0] : Fin 3 → ℝ)) := by
+  rw [signed_cross_QA, signed_quadForm_01m1, signed_quadForm_010]
+  norm_num
+
+theorem sgF_cauchy_schwarz_hnn_isolation_QA :
+    signedAdj.IsSymm ∧ (supportGraph signedAdj signedAdj_isSymm).Connected
+      ∧ ¬ (∀ i j : Fin 3, 0 ≤ signedAdj i j) :=
+  ⟨signedAdj_isSymm, signed_supportGraph_connected, signedAdj_not_nonneg⟩
+
+theorem signed_energy_e0_two_QA :
+    quadForm (laplacian signedAdj) (![1, 0, 0] : Fin 3 → ℝ) = 2 := by
+  rw [ecf_quadForm_lap]
+  simp [Fin.sum_univ_three, signedAdj, Matrix.of_apply,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+  norm_num
+
+/-- **Fence (`effectiveResistance_ge_sq_div_quadForm`, `hnonneg`)**: on
+the signed fixture the pinned value `R 0 1 = 0` cannot bound the genuine
+Dirichlet ratio `(1 - 0)² / 2 = 1/2` of the indicator `e 0`. -/
+theorem sgF_dirichlet_hnn_fence_QA :
+    ¬ (0 < quadForm (laplacian signedAdj) (![1, 0, 0] : Fin 3 → ℝ)
+        → ((![1, 0, 0] : Fin 3 → ℝ) 0 - (![1, 0, 0] : Fin 3 → ℝ) 1) ^ 2
+          / quadForm (laplacian signedAdj) (![1, 0, 0] : Fin 3 → ℝ)
+          ≤ effectiveResistance signedAdj 0 1) := by
+  intro h
+  have hcon := h (by rw [signed_energy_e0_two_QA]; norm_num)
+  rw [signed_energy_e0_two_QA, signed_R01_QA] at hcon
+  norm_num [Matrix.cons_val_zero, Matrix.cons_val', Matrix.head_cons] at hcon
+
+/-- **Fence (`effectiveResistance_nonneg`, `hnonneg`)**: the signed
+triangle fence's pinned value `R 2 1 = -2` refutes nonnegativity
+directly — making the clause's negative witness explicit. -/
+theorem sgF_nonneg_hnn_fence_QA :
+    ¬ (0 ≤ effectiveResistance signedAdj 2 1) := by
+  rw [signed_R21_QA]
+  norm_num
+
+/-- **Fence (`effectiveResistance_eq_zero_iff`, `hnonneg`)**: the
+definiteness residual fails on the signed fixture — `R 0 1 = 0` at
+distinct vertices. -/
+theorem sgF_definiteness_hnn_fence_QA :
+    ¬ (effectiveResistance signedAdj 0 1 = 0 ↔ (0 : Fin 3) = 1) := by
+  intro h
+  have h0 := h.1 signed_R01_QA
+  exact absurd h0 (by decide)
+
+/-! ### The signed overshoot fixture `sgnOverAdj`: the confinement max half's `hnn` fence -/
+
+/-- The signed overshoot fixture: positive edges `(0,1), (1,3), (2,3)`
+(the support, the path `0 — 1 — 3 — 2`), one negative edge `(0,2)`,
+degrees `(0, 2, 0, 2)`. The kernel is exactly the constants (every
+demand is solvable), and the `e 0 − e 1` demand's solutions overshoot:
+the negative edge pushes the vertex `2` a full half-unit above the
+boundary maximum — the confinement *max* half's nonnegativity is
+load-bearing. (No three-vertex signed fixture can do this: with all
+edges from the interior vertex landing on the boundary pair, the
+diffusion row pins the interior value to a weighted *average* of the
+boundary values, which is always confined.) -/
+def sgnOverAdj : Matrix (Fin 4) (Fin 4) ℝ :=
+  Matrix.of fun i j =>
+    if (i = 0 ∧ j = 1) ∨ (i = 1 ∧ j = 0) ∨ (i = 1 ∧ j = 3) ∨ (i = 3 ∧ j = 1) ∨
+      (i = 2 ∧ j = 3) ∨ (i = 3 ∧ j = 2) then (1 : ℝ)
+    else if (i = 0 ∧ j = 2) ∨ (i = 2 ∧ j = 0) then (-1 : ℝ) else 0
+
+theorem sgnOverAdj_isSymm : sgnOverAdj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [sgnOverAdj]
+
+theorem sgnOverAdj_not_nonneg : ¬ (∀ i j : Fin 4, 0 ≤ sgnOverAdj i j) := by
+  intro h
+  have h02 : (0 : ℝ) ≤ sgnOverAdj 0 2 := h 0 2
+  have e : sgnOverAdj 0 2 = -1 := by simp [sgnOverAdj]
+  rw [e] at h02
+  norm_num at h02
+
+theorem sgnOver_supportGraph_connected :
+    (supportGraph sgnOverAdj sgnOverAdj_isSymm).Connected := by
+  have hfrom0 : ∀ v : Fin 4,
+      (supportGraph sgnOverAdj sgnOverAdj_isSymm).Reachable 0 v := by
+    intro v
+    fin_cases v
+    · exact ⟨SimpleGraph.Walk.nil⟩
+    · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 1)
+        ⟨by decide, by simp [sgnOverAdj]⟩ SimpleGraph.Walk.nil⟩
+    · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 2)
+        ⟨by decide, by simp [sgnOverAdj]⟩
+        (SimpleGraph.Walk.cons (u := 1) (v := 3) (w := 2)
+          ⟨by decide, by simp [sgnOverAdj]⟩
+          (SimpleGraph.Walk.cons (u := 3) (v := 2) (w := 2)
+            ⟨by decide, by simp [sgnOverAdj]⟩ SimpleGraph.Walk.nil))⟩
+    · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 3)
+        ⟨by decide, by simp [sgnOverAdj]⟩
+        (SimpleGraph.Walk.cons (u := 1) (v := 3) (w := 3)
+          ⟨by decide, by simp [sgnOverAdj]⟩ SimpleGraph.Walk.nil)⟩
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  exact ⟨0, hfrom0⟩
+
+theorem soF_isolation_QA :
+    sgnOverAdj.IsSymm ∧ (supportGraph sgnOverAdj sgnOverAdj_isSymm).Connected
+      ∧ ¬ (∀ i j : Fin 4, 0 ≤ sgnOverAdj i j) :=
+  ⟨sgnOverAdj_isSymm, sgnOver_supportGraph_connected, sgnOverAdj_not_nonneg⟩
+
+/-- The `e 0 − e 1` demand on the overshoot fixture is solved by
+`![1/2, 0, 1, 1/2]` — the negative edge carries vertex `2` strictly
+above the boundary maximum `1/2`. -/
+theorem sgnOver_demand01_QA :
+    (laplacian sgnOverAdj).mulVec ![(1 : ℝ) / 2, 0, 1, 1 / 2]
+      = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ) := by
+  funext i
+  rw [laplacian_mulVec_apply]
+  fin_cases i <;>
+    simp [sgnOverAdj, Fin.sum_univ_four, Pi.single_apply, Pi.sub_apply,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val',
+      Matrix.head_cons] <;>
+    norm_num
+
+/-- **Fence (`laplacian_mulVec_eq_single_sub_single_le_max`, `hnonneg`)**:
+a genuine solution of a genuinely solvable demand on the symmetric,
+connectedly-supported overshoot fixture takes the value `1` strictly
+above its boundary maximum `max (1/2) 0 = 1/2` — the max-half
+propagation needs nonnegative edge weights (the delivered signed fence
+killed only the min half; every three-vertex signed fixture leaves the
+max half intact, see the fixture's docstring). -/
+theorem soF_confinement_max_hnn_fence_QA :
+    ¬ ((laplacian sgnOverAdj).mulVec ![(1 : ℝ) / 2, 0, 1, 1 / 2]
+        = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ)
+        → (![(1 : ℝ) / 2, 0, 1, 1 / 2] : Fin 4 → ℝ) 2
+          ≤ max ((![(1 : ℝ) / 2, 0, 1, 1 / 2] : Fin 4 → ℝ) 0)
+            ((![(1 : ℝ) / 2, 0, 1, 1 / 2] : Fin 4 → ℝ) 1)) := by
+  intro h
+  have hcon := h sgnOver_demand01_QA
+  norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val',
+    Matrix.head_cons] at hcon
+
 end SpectralGraphTheory.QA

@@ -37,6 +37,408 @@ proposal's status header must also record
 that made this mandatory: the pre-commit hook re-rendered the map on
 every commit while its hand-maintained data tables drifted for days).
 
+## 2026-09-04T13:14:31Z — The Foster family's adversarial fence audit (terminal)
+
+**Run:** `20260904T125102Z-run-1`  
+**Session:** `ses_f938e9b51ffeRdmWnSpY1UCtgD`  
+**Status:** completed  
+**Milestone:** the opening entry's milestone delivered at the full
+priced scope — the adversarial fence audit of the Foster family
+(`Foster.lean`'s zero-eigenvalue count, spectral kernel, `foster_theorem`,
+the leverage corollary, and the `leverageScore` division guard), the
+prior terminal handoff's named next target. 9 fences + isolation
+companions + 2 generic eigen engines at the prior day's delivered
+fixtures plus a new one-vertex fixture. QA-only, pure hard crust: QA
+4780 → 4817 (+37), zero axiom contact (count stays 4).
+
+**Changes:** one pure insertion — the `FosterFences` section of
+`Scaffold/QA/SpectralGraph/Foster_QA.lean` (635/0 in numstat, plus the
+`EffectiveResistance_QA` import and a Purpose-block sentence); spiked
+first in `wip/fosterfences_spike.lean` to zero errors/zero warnings
+(four fix rounds, all in recorded trap classes). 39 new declarations.
+The fences: the zero-eigenvalue count's `hnn` (the signed rank-1
+fixture's kernel holds two non-parallel vectors `1` and
+`![1,1,-1,-1]`, so the count is forced `≥ 2 ≠ 1` — the inversion of
+the theorem's own at-most-one orthogonality argument, through the new
+generic engine `ff_two_kernel_filter_card_ge_two`: a filter of size
+`≤ 1` confines every kernel vector's eigen-expansion to one eigen-line)
+and `hconn` (constants + the component indicator at the disconnected
+fixture); the spectral-kernel identity's `hnn`/`hconn` (the
+junk-fallback LHS `0` against a *strictly positive* RHS through the
+second generic engine `ff_sum_eigbasis_pos` — a genuine eigenvector
+with differing coordinates confines its expansion to the nonzero
+modes, every term nonnegative; PSD at the signed fixture supplied by
+the **fixture-local rank-1 SOS identity** `quadForm L f = (s ⬝ f)²`,
+built from the new multiplication formula `L *ᵥ f = (s ⬝ f) • s`,
+which supplies what `laplacian_psd` cannot without the nonnegativity
+hypothesis the fixture violates); `foster_theorem`'s `hnn` (**every
+off-diagonal demand is unsolvable on the signed fixture** — the
+kernel-generator coordinate map `x ↦ (w₁ x, w₂ x)` is injective on
+`Fin 4`, a strengthening of the delivered single-pair unsolvability —
+so the entire ordered sum computes to `0 ≠ 3`) and `hconn` (ordered
+sum `4 ≠ 2·3`, three new within-block resistance pins, every
+cross-block weight zero so no junk value even enters); and the
+leverage layer's `hnn` (`0/3 = 0 ≠ 2`), `hconn` (`4/3 ≠ 2`), and
+**`hcard` — the `0/0` division-guard junk corner at a new one-vertex
+fixture** (the score is literally division by zero, reads `0`, the
+sum `0 ≠ 2`: the docstring's warning exercised at the object). The
+four `hA` clauses recorded non-fenceable (each consumed by its
+display's `laplacian_symmetric A hA` or by `hconn`'s own
+`supportGraph A hA`). Five technique findings in the proposal
+(headline: the self-substitution rewrite trap at its purest —
+`rw [hg₂]` with `hg₂ : g₂ = (v ⬝ g₂) • v` rewrites the `g₂` inside its
+own coefficient; the function-extensional `congrFun` + `field_simp`
+idiom is the robust route). Records: the proposal (COMPLETE +
+delivery record), `proposals/README.md`, README (4817 + the
+electrical-structure row's Foster-audit clause), the radar (QA axis
+synced, held 4.5), `index/map/spectral_graph.md`, the backlog item-2
+note, the scoreboard verification row, both map data tables +
+regenerated SVG, the execution plan, and this log. Nothing committed;
+prior runs' uncommitted deliveries preserved.
+
+**Verification:** `lake env lean` zero errors/zero warnings on the
+landed module; explicit `lake build
+Scaffold.QA.SpectralGraph.Foster_QA` ✔; **`#print axioms` via
+`wip/fosterfences_axcheck.lean` on all 39 new declarations — every
+one exactly `propext, Classical.choice, Quot.sound`**; **full
+`lake build` ✔ immediately followed by `check_build_completeness.py`
+— 133 source files, 133 fresh artifacts, 0 stale, 0 missing, exit
+0**; `lint_axioms` exit 0 (4 current axioms, unchanged);
+`check_refutation_independence` (9-tag clean — no tags touched);
+`check_public_reachability` clean (63 repo modules); `check_citations`
+✔; `check_markdown_links` ✔; `check_backlog_freshness` ✔; scoreboard
+regenerated (**4817/4/0**) with the verification row;
+`check_scaffold_map_freshness` exit 0 after the 4780 → 4817 stats
+sync in both map data tables and SVG regeneration (49 stations, no
+status change — none owed).
+
+**Remaining risk:** none owed by the delivery — QA-only, no axiom
+disposition changed, no public statement changed. Honest scope: the
+Foster family's falsification surface is complete; the electrical
+cluster's two remaining QA families (`KernelBridge_QA`, the smallest
+remainder; and the `ResistanceMetric` consumer set) are the audit
+method's next targets in the named consumption order.
+
+**Next handoff:** the Active table stays all-Low and the standing
+frontiers remain decision- or consumer-gated (the QA axis's
+randomized half; the priced undirected `walkTVPair` join; the sharp
+`|λ₂| = α` layer; the reverse TV → χ² calculus; the multiway hard
+direction and clean-room items behind human decisions). The audit
+method's natural next target: `KernelBridge_QA`, then the
+`ResistanceMetric` consumers — after which the electrical cluster's
+falsification surface is complete and a fresh Step-0 consumption
+survey should pick the next cluster. The two generic engines landed
+here (`ff_two_kernel_filter_card_ge_two`, `ff_sum_eigbasis_pos`) are
+statement-level reusable by any future audit touching eigenvalue-count
+or spectral-sum clauses.
+
+## 2026-09-04T11:40:00Z — The electrical-flow family's adversarial fence audit (terminal)
+
+**Run:** `20260904T112107Z-run-1`  
+**Session:** `ses_f93e20d9cffeCGvcs2oM7CGC5f`  
+**Status:** completed  
+**Milestone:** the opening entry's milestone delivered at the full
+priced scope — the adversarial fence audit of the electrical-flow
+family (`ElectricalFlow.lean`'s routing layer + its 1072-line QA),
+the prior terminal handoff's top-named next target, consuming the
+prior day's effective-resistance substrate. 22 fences + 19 isolation
+companions at five new fixtures. QA-only, pure hard crust: QA
+4695 → 4780 (+85), zero axiom contact (count stays 4).
+
+**Changes:** one pure insertion — the `AdversarialFences` section of
+`Scaffold/QA/SpectralGraph/ElectricalFlow_QA.lean` (814/0 in numstat)
+plus one Purpose-block sentence; spiked first in
+`wip/efflowfences_spike.lean` to zero errors/zero warnings (two fix
+rounds, all in recorded trap classes). 89 new declarations. The
+fences: the energy agreement's and the routed-energy identity's `hA`
+at the **asymmetric 4-path** `asymPath4Adj` (demand genuinely
+solvable at `f = ![3/2, 1, 1/2, 0]`; `flowEnergy = 1 ≠ 3/2 =
+quadForm`, the resistance pinned `3/2` by **fixture-local voltage
+pinning** — row-equation linarith, the symmetry-free route); the
+superposition lemma's `hd` at the **cyclic phantom** `cycleFlow`
+(divergence-free, riding the cheat network's zero-conductance pairs:
+`4 ≠ 2 = 1 + 1`) and its `hdiv` at the **doubled current**
+(`9 ≠ 5 = 1 + 4`); **Thomson's `hnneg`** at the unit flow
+`negRouteFlow` riding *both* negative edges of the delivered signed
+4-cycle (energy `−1` against the delivered junk resistance `0` —
+symmetry and connectivity genuine exactly there, which is why the
+2026-08-20 witness could not serve); the flow-space transfer pair and
+the energy-comparison trio (`1 ≤ 0`, `1 ≤ −1`, `1 ≤ 1/2`);
+**Rayleigh's `hnnegA`** at the signed edge's *genuine negative
+resistance* `−1` (`1 ≤ −1` — solvable demand, not a junk fallback)
+and its `hconnA` at the cheat network's junk `0` under the dominating
+path's `2`; the support-graph and connectivity-adapter clauses (a new
+cheat-network walk-blocks pin; the delivered two-block
+disconnectedness reused); and the reinforcement family's corners
+(the conductance-`1/2` edge `2 ≤ 1`; the reinforced cheat network
+computing entrywise to exactly the path, `2 ≤ 0`). Three P4 removable
+findings and the structural classifications recorded in the proposal;
+five technique findings (headline: the `degreeMatrix`
+diffusion-form route third-confirmed on `Fin 4`; matrix literals fail
+to evaluate at `Fin 4` while `Fin 2`/`Fin 3` evaluate — a
+scale-specific trap). Records: the proposal (COMPLETE + delivery
+record), `proposals/README.md`, README (4780 + the
+electrical-structure row's flow-audit clause), the radar (QA axis
+synced, held 4.5), `index/map/spectral_graph.md`, the backlog item-2
+note, the scoreboard verification row, both map data tables +
+regenerated SVG, the execution plan, and this log. Nothing committed;
+prior runs' uncommitted deliveries preserved.
+
+**Verification:** spike to zero errors/zero warnings; `lake env lean`
+on the landed module clean; explicit `lake build` target ✔; the
+89-declaration `#print axioms` audit via `wip/efflowfences_axcheck.lean`
+(all exactly `propext, Classical.choice, Quot.sound`); full
+`lake build` ✔ immediately followed by `check_build_completeness.py`
+(133/133 fresh, 0 stale, 0 missing, exit 0); `lint_axioms` (4
+unchanged); `check_refutation_independence` (9-tag);
+`check_public_reachability` (63); `check_citations`;
+`check_markdown_links`; `check_backlog_freshness`; scoreboard
+regenerated (4780/4/0); `check_scaffold_map_freshness` exit 0 after
+the stats sync + SVG regen (49 stations, no status change owed).
+
+**Remaining risk:** none owed — QA-only, no axiom disposition
+changed, no public statement changed. Honest scope: the
+electrical-flow family's falsification surface is complete; the
+electrical cluster's three remaining QA families (`Foster_QA`,
+`KernelBridge_QA`, the `ResistanceMetric` consumer set) are unaudited.
+
+**Next handoff:** the Active table stays all-Low; the standing
+frontiers remain decision- or consumer-gated. The audit method's next
+targets in the cluster's consumption order: `Foster_QA` (506 lines;
+`foster_theorem` itself is proved hard crust per the
+ADVERSARIAL_REVIEW pilot's own `#print axioms` check, so its family
+fences theorem instantiations) and `KernelBridge_QA` (240 lines, the
+smallest remainder). Technique findings worth citing: the
+`laplacian_mulVec_apply` diffusion-form route (third confirmation,
+now `Fin 4`), the `Fin 4` matrix-literal evaluation trap, the
+both-endpoint-iff `Walk`-induction idiom, and the term-mode
+`by norm_num`-inside-`⟨…⟩` elaborator skip.
+
+## 2026-09-04T11:21:07Z — The electrical-flow family's adversarial fence audit (opening)
+
+**Run:** `20260904T112107Z-run-1`  
+**Session:** `ses_f93e20d9cffeCGvcs2oM7CGC5f`  
+**Status:** in-progress  
+**Milestone:** the prior terminal handoff's top-named next target —
+the audit method's eighth application and the electrical cluster's
+second, over `ElectricalFlow.lean`'s routing layer (flow predicates,
+Kirchhoff bridge, flow energy, Thomson/superposition, Rayleigh
+monotonicity, capacity reinforcement) and its 1072-line QA, consuming
+the 2026-09-04 effective-resistance delivery's substrate. QA-only,
+zero axiom contact planned; Step-0 survey prices 22 fences, 3 P4
+records, and the structural set; spiked in `wip/` before any shelf
+edit; landed as pure insertion. Proposal:
+`proposals/adversarial-fences-electrical-flow-family.md`.
+
+## 2026-09-04T10:11:08Z — The effective-resistance core family's adversarial fence audit (terminal)
+
+**Run:** `20260904T095642Z-run-1`  
+**Session:** `ses_f942c6402fferk1SnBIjy3mNzf`  
+**Status:** completed  
+**Milestone:** the opening entry's milestone delivered at the full
+planned scope — the adversarial fence audit of the effective-resistance
+core family (`Electrical.lean`'s definition/Dirichlet/confinement/
+metric layers + its two QA files), the electrical cluster's root and
+the prior handoff's named next-highest-consumed unaudited target.
+16 fences + isolation companions at three new fixtures. QA-only, pure
+hard crust: QA 4648 → 4695 (+47), zero axiom contact (count stays 4).
+
+**Changes:** two pure insertions — the `AdversarialFences` sections of
+`Scaffold/QA/SpectralGraph/EffectiveResistance_QA.lean` (380/0 in
+numstat) and `Scaffold/QA/SpectralGraph/ResistanceMetric_QA.lean`
+(174/0), plus one header sentence each; spiked first in
+`wip/ecfences_spike.lean` to zero errors/zero warnings. 50 new
+declarations: the three fixtures (`sgnK4Adj` — the rank-1 signed
+4-cycle: positive support a connected 4-cycle, negative diagonals,
+every degree `1`, kernel dimension 3; `sgnOverAdj` — the signed
+overshoot fixture: support the path `0—1—3—2`, one negative edge,
+kernel exactly constants; `ecAsymAdj = !![0,2;1,0]]` — asymmetric
+nonnegative), the fences: existence's and the energy identity's `hnn`
+at `sgnK4Adj` (demand unsolvable by kernel-vector pairing `2 ≠ 0` —
+**connected support does not imply demand solvability once signs
+enter**), the confinement max half's `hnn` at `sgnOverAdj` (solution
+`![1/2,0,1,1/2]` overshooting to `1 > max(1/2,0)`; no 3-vertex signed
+fixture can — the interior value always solves to a boundary average),
+both confinement halves' `hconn` at the disconnected fixture's
+free-constant mechanism (`![1,0,7,7]`/`![1,0,−7,−7]`), the
+Cauchy–Schwarz (`16 ≤ −8`) and polarization (`−4 = 2`) engines' `hA`
+at `ecAsymAdj` (the family's only `supportGraph`-free statements), the
+CS and Dirichlet engines' `hnn` at the signed fixture, the Dirichlet
+`hconn` at the cross-component pair with a genuine-energy indicator,
+and the metric residuals' junk corners (triangle `1 ≤ 0 + 0` via a
+foreign middle vertex with the mirrored unsolvability pinned;
+`0 < 0`; the definiteness iff identifying distinct vertices; explicit
+`0 ≤ R 2 1 = −2`). Six clauses screened as already fenced;
+non-fenceables recorded with mechanisms in the new proposal
+(headline: the uniqueness `hnn` is *provable* dropped — solvability
+forces kernel-invariant voltage differences on symmetric input).
+Records: the proposal (COMPLETE + delivery record with four technique
+findings), `proposals/README.md`, README (4695 + the
+electrical-structure clause), the radar (QA axis synced, held 4.5),
+`index/map/spectral_graph.md`, the backlog item-2 note, the scoreboard
+verification row, both map data tables + regenerated SVG, the
+execution plan, and this log. Nothing committed; prior runs'
+uncommitted deliveries preserved.
+
+**Verification:** spike to zero errors/zero warnings; `lake env lean`
+on both landed modules clean; explicit `lake build` targets ✔; the
+50-declaration `#print axioms` audit (all exactly
+`propext, Classical.choice, Quot.sound`); full `lake build` ✔
+immediately followed by `check_build_completeness.py` (133/133 fresh,
+0 stale, 0 missing, exit 0); `lint_axioms` (4 unchanged);
+`check_refutation_independence` (9-tag); `check_public_reachability`
+(63); `check_citations`; `check_markdown_links`;
+`check_backlog_freshness`; scoreboard regenerated (4695/4/0);
+`check_scaffold_map_freshness` exit 0 after the stats sync + SVG regen
+(49 stations, no status change owed).
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. Honest scope: the electrical cluster's
+four remaining QA families (`ElectricalFlow_QA`, `Foster_QA`,
+`KernelBridge_QA`, the `ResistanceMetric` consumer set) are unaudited.
+
+**Next handoff:** the Active table stays all-Low; the standing
+frontiers remain decision- or consumer-gated. The audit method's next
+targets in the cluster's consumption order: `ElectricalFlow_QA` (the
+largest, 1072 lines) and `Foster_QA`, both on this delivery's
+substrate; `KernelBridge_QA` the smallest remainder. Technique
+findings worth citing: the `degreeMatrix` dependent-`if` stall and its
+`laplacian_mulVec_apply` diffusion-form route (delivered as the generic
+helpers `ecf_quadForm_lap`/`ecf_dot_lap`), `simp only` not running
+`reduceIte` on `Fin`-literal conditions, the
+`Matrix.dotProduct_single` route for demand-vs-kernel pairings, and
+`lake env lean` reading stale oleans for cross-QA imports.
+
+## 2026-09-04T09:56:42Z — The effective-resistance core family's adversarial fence audit (opening)
+
+**Run:** `20260904T095642Z-run-1`  
+**Session:** `ses_f942c6402fferk1SnBIjy3mNzf`  
+**Status:** in-progress  
+**Milestone:** the prior terminal handoff's named continuation class —
+the audit method (`governance/ADVERSARIAL_REVIEW.md`, seven precedents)
+applied to the electrical cluster's root family: `Electrical.lean`'s
+effective-resistance definition/Dirichlet/confinement/metric layers and
+its two QA files (`EffectiveResistance_QA`, `ResistanceMetric_QA`),
+the substrate every remaining electrical QA file
+(`ElectricalFlow`, `Foster`, `ResistanceMetric`'s consumers,
+`KernelBridge`) builds on. Step-0 survey prices 16 new fences at three
+new fixtures (a rank-1 signed 4-cycle with 3-dimensional kernel under a
+connected positive support; a signed overshoot fixture for the
+confinement max half; an asymmetric 2-vertex fixture for the
+CS/polarization engines' `hA`) plus the disconnected fixture's
+free-constant and junk-metric corners, with six clauses screened as
+already fenced and five non-fenceable classes recorded with mechanisms.
+QA-only, zero axiom contact planned (count stays 4); spike first in
+`wip/`, land as pure insertions.
+
+## 2026-09-04T08:49:38Z — The regular Cheeger family's adversarial fence audit (terminal)
+
+**Run:** `20260904T081201Z-run-1`  
+**Session:** `ses_f94971976ffeQBnoJ3RSeT9ZJQ`  
+**Status:** completed  
+**Milestone:** the opening entry's milestone delivered at the
+companion-audit-revised scope — the adversarial fence audit of the
+regular Cheeger family (`Cheeger.lean`'s regular layer: the proved
+inequality pair at both spellings, the sweep lemma, the PSD engine,
+the cut-test-vector junk corners), the SGT center namesake and the
+library's most-consumed unaudited cluster (six non-QA import
+consumers; its QA predating the adversarial-review discipline). 17
+core + 4 junk-corner fences with isolation companions. QA-only, pure
+hard crust: QA 4535 → 4648 (+113), zero axiom contact (count stays 4).
+
+**Changes:** one pure insertion — the `RegularFences` section of
+`Scaffold/QA/SpectralGraph/Cheeger_QA.lean` (939/0 in numstat; spiked
+first in `wip/regcheederfences_spike.lean` to zero errors/zero
+warnings). 120 new declarations: 21 fences + 21 companions, the four
+new fixtures (`rcSAdj = !![3,-1;-1,3]]` — signed, genuinely `d = 2`;
+`rcPosAdj = !![2,1;1,2]]` — nonnegative, genuinely `d = 3`, fenced at
+claimed wrong degrees `1/8, 1, 4, 40`; `rcAsymPsdAdj = !![4,1;3,2]]` —
+nonnegative row-regular asymmetric; `rcZeroAdj` — the zero matrix),
+the conductance/operator-literal/quadForm pins, and two private Fin 2
+pinning engines (the eigenvalue-witness route and the whole-space
+`evals_le_of_linearIndependent` instance). Headline fences: every
+`hnn` clause of the four inequality statements refuted at the one
+signed fixture (its `I − A/2` spectrum `{-1, 0}` pinned exactly both
+ways — `λ₂ = 0` against `2φ = -1`, `φ²/2 = 1/8`, `d·φ²/2 = 1/4`, and
+`2dφ = -2`); the sweep's `hx0`/`horth` junk clauses at `edgeAdj`; the
+PSD engine's `hA` at the asymmetric fixture (the quadratic form sees
+the symmetric part, whose `![2,1]`-Rayleigh `26/5` exceeds the claimed
+degree `5`: `quadForm = -1/5 < 0`). **The survey's decisive finding:**
+the companion audit invalidates the initial signed-fixture pricing of
+every `hdpos` clause (`hnn` is a co-hypothesis), and the satisfiable
+nonnegative corner collapses to the zero matrix where four of the five
+dropped `hdpos` conclusions survive — recorded non-fenceables with the
+corner mechanism, a pricing-revision section and a technique finding
+in the proposal. One drive-by, same file: the module header's stale
+"hard direction remains admitted" sentence (both directions proved
+since 2026-08-23) repaired. Records: the proposal (COMPLETE + pricing
+revision + delivery record with five technique findings),
+`proposals/README.md` (new Delivered row), README (4648 + the
+cuts-and-expansion row's regular-audit clause), the radar (QA axis
+synced, held 4.5 per protocol), `index/map/spectral_graph.md` (the
+RegularFences section), the backlog item-2 falsification-surface note,
+both map data tables (4535 → 4648) + regenerated SVG, the scoreboard
+verification row, the execution plan, and this log. Nothing committed;
+the prior runs' uncommitted deliveries preserved.
+
+**Verification:** spike first (`wip/regcheederfences_spike.lean`, the
+full 120-declaration delivery, zero errors/zero warnings before any
+shelf edit); `lake env lean` on the landed module (zero errors, zero
+warnings, re-verified after the drive-by header repair); explicit
+`lake build Scaffold.QA.SpectralGraph.Cheeger_QA` ✔; `#print axioms`
+via `wip/regcheederfences_axcheck.lean` — all 117 public declarations
+exactly `propext, Classical.choice, Quot.sound` (the 3 private helpers
+audited transitively); no `-- @refutes` tags (theorem instantiations,
+nothing admitted consumed); **full `lake build` ✔ immediately followed
+by `check_build_completeness.py` — 133 source files, 133 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+axioms unchanged); `check_refutation_independence` (9-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_backlog_freshness` clean; scoreboard
+regenerated (**4648/4/0**) with the verification row; map-freshness
+exit 0 after the stats sync and SVG regeneration (49 stations, no
+status change — none owed; this proposal has no station).
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. Honest scope: the sweep's
+genuinely-mathematical `hA` stays a priced follow-on (the 2-vertex
+analysis closes negatively, recorded); four `hdpos` clauses are
+recorded non-fenceable (corner-survives, mechanism recorded).
+
+**Next handoff:** the Active table stays all-Low and every standing
+frontier remains decision- or consumer-gated. The audit method's
+natural next targets are the remaining pre-discipline QA families
+outside the mixing cascade in consumption order — the electrical
+cluster (`EffectiveResistance_QA`/`ElectricalFlow_QA`/
+`ResistanceMetric_QA`/`Foster_QA`/`KernelBridge_QA`, feeding the
+sparsification program) is the next-highest-consumed unaudited cluster.
+
+## 2026-09-04T08:12:01Z — The regular Cheeger family's adversarial fence audit (in-progress)
+
+**Run:** `20260904T081201Z-run-1`  
+**Session:** `ses_f94971976ffeQBnoJ3RSeT9ZJQ`  
+**Status:** in-progress  
+**Milestone:** the audit-shaped adversarial pass over the **regular
+Cheeger family** — `Cheeger.lean`'s regular layer (the proved
+inequality pair at both spellings, the sweep lemma, the PSD engine, the
+cut-test-vector junk corners), the SGT center namesake and the
+library's most-consumed unaudited cluster (six non-QA import
+consumers), whose QA predates the adversarial-review discipline.
+Selection: the Active table is all-Low and every standing frontier
+stays decision- or consumer-gated, so this run takes the prior
+terminal handoff's named continuation class — the audit method applied
+to the next pre-discipline QA family outside the mixing cascade. The
+Step-0 survey (recorded in the new proposal
+`proposals/adversarial-fences-regular-cheeger-family.md`) prices 21
+core fences plus 4 junk corners (every `hnn`/`hd`/`hdpos` clause of
+the five inequality statements and the PSD engine, at six new small
+rational fixtures), records the structural `hA`/`hcard`
+non-fenceables, and prices the sweep's genuinely-mathematical `hA` as
+a follow-on (the 2-vertex analysis closes negatively). QA-only planned
+(zero axiom contact, count stays 4); spike first in
+`wip/regcheegerfences_spike.lean`; land as a pure insertion in
+`Cheeger_QA.lean`'s new `RegularFences` section.
+
 ## 2026-09-03T04:51:27Z — The Poisson-bridge family's adversarial fence audit (terminal)
 
 **Run:** `20260903T033044Z-run-1`  
@@ -10979,3 +11381,129 @@ the priced undirected `walkTVPair` join (needs a consumer), the sharp
 consumers). A named consumer or an operator decision is the cheapest
 unlock; absent one, the next run should re-check
 `proposals/README.md`'s Active table first as always.
+
+## 2026-09-04T02:30:25Z — The irregular Cheeger family's adversarial fence audit (in-progress)
+
+**Run:** `20260904T022027Z-run-1`  
+**Session:** `ses_f95d213b4ffePQ6s5Fg99s0yJM`  
+**Status:** in-progress  
+**Milestone:** the audit-shaped adversarial pass over the irregular
+(volume-weighted) Cheeger family — `VariationalTransfer.lean`'s pair,
+connectivity transfer, sweep extraction, Fiedler instantiation, and
+degree-window pair plus `Cheeger.lean`'s volume extraction/attainment
+layer — the most-consumed unaudited cluster in the library (the
+edge-perturbation capstones, the Ramanujan ceiling, and the Poincaré
+family all consume it), whose QA predates the adversarial-review
+discipline and carries only delivery-scoped fences. Selection: the
+Active table is all-Low and every handoff frontier is decision- or
+consumer-gated, so the run takes the repo's established audit method
+(five precedents over the mixing cascade) to this family rather than
+forcing a gate. Step-0 survey prices ~20 unfenced load-bearing
+clauses (headline: the *asymmetric* case of the sweep statements,
+where `rayleigh`'s symmetry-free statement shape makes `hA` genuinely
+mathematical — refutable at an upper-triangular fixture; the
+signed-fixture `hnn` clauses; the kernel iff's `hconn`; the sandwich
+interface's wrong-constant `dmin`/`dmax` clauses; the extraction's
+`hy`/`hM`; attainment's `hcard`) plus ~8 recorded non-fenceables.
+QA-only planned, zero axiom contact (count stays 4); spike first;
+land as pure insertion in `IrregularCheeger_QA.lean`.
+
+## 2026-09-04T05:33:27Z — The irregular Cheeger family's adversarial fence audit, delivery run (in-progress)
+
+**Run:** `20260904T052258Z-run-1`  
+**Session:** `ses_f9521383fffeC9LkyZav1cZJet`  
+**Status:** in-progress  
+**Milestone:** continuing `20260904T022027Z-run-1`'s recorded milestone
+(the prior run wrote the priced proposal
+`proposals/adversarial-fences-irregular-cheeger-family.md` and logged
+intent, but delivered no Lean work — worktree holds no QA/shelf
+changes). This run implements the proposal's QA plan: one
+`IrregularFences` section appended to
+`Scaffold/QA/SpectralGraph/IrregularCheeger_QA.lean` — the 19 priced
+fences each with an isolation companion, plus the new fixtures
+(`icSigDisc4Adj`, `icIsoAdj`, `icNegCutAdj`, `icOneAdj`) and their
+helper pins. Spike first in `wip/icfences_spike.lean`; land as a pure
+insertion; QA-only, zero axiom contact (count stays 4); no `-- @refutes`
+tags (these refute theorem instantiations, nothing admitted is
+consumed).
+
+## 2026-09-04T06:52:41Z — The irregular Cheeger family's adversarial fence audit (terminal)
+
+**Run:** `20260904T052258Z-run-1`  
+**Session:** `ses_f9521383fffeC9LkyZav1cZJet`  
+**Status:** completed  
+**Milestone:** `20260904T022027Z-run-1`'s recorded milestone delivered
+in full — the adversarial fence audit of the irregular (volume-weighted)
+Cheeger family, the audit method's first application beyond the mixing
+cascade (the strategy's ring-1 namesake cluster, consumed by the
+edge-perturbation capstones, the Ramanujan ceiling, and the Poincaré
+family; its QA predates the adversarial-review discipline). All 19
+priced fences closed with hypothesis-form negative witnesses plus
+isolation companions. QA-only, pure hard crust: QA 4434 → 4535 (+101),
+zero axiom contact (count stays 4).
+
+**Changes:** one pure insertion — the `IrregularFences` section of
+`Scaffold/QA/SpectralGraph/IrregularCheeger_QA.lean` (1560 lines, zero
+deletions; spiked first in `wip/icfences_spike.lean` to zero
+errors/zero warnings). 110 new declarations: 19 fences + 17 isolation
+companions, the four new fixtures (`icSigDisc4Adj` — two disjoint
+signed blocks; `icIsoAdj` — edge ⊕ isolated vertex; `icNegCutAdj` — the
+connected negative-cut `!![3,1,-3;1,0,1;-3,1,3]`; `icOneAdj` — one
+vertex), and the helper pins. Headline fences: the Fiedler capstone's
+`hnn` (λ₂ pinned exactly `0` via engine bounds + trace; the
+1-dimensional eigenspace characterized as `span (1,√2,1)`; so the
+sweep vector is provably a nonzero constant and the dropped conclusion
+fails on the shape clauses); the disconnected-λ₂ theorem's `hnn`
+(`λ₂ ≤ -2 ≠ 0` at two disjoint signed blocks, both
+block-antisymmetric modes pinned through the subspace Rayleigh–Ritz
+engine) and `hd` (`λ₂ = 1 ≠ 0` — the isolated vertex's junk `D⁻¹ᐟ² = 0`
+row, via the variational engine with PSD and kernel supplied by hand);
+the sweep/cut statements' `horth`/`hf0`/`hnn`; the kernel iff's
+`hconn`; the positivity corollary's `hconn`/`hnn`; the
+sandwich/window wrong-constant `dmin`/`dmax` clauses; the volume
+extraction's `hy`/`hM` junk corner; and the attainment `hcard` at one
+vertex. The sweep `hA` and sandwich `hnn` analyses stay priced
+follow-ons in the proposal, as recorded.
+
+**Verification:** `wip/icfences_spike.lean` iterated to zero
+errors/zero warnings before any shelf edit; `lake env lean` on the
+landed module (zero errors, zero warnings); explicit `lake build
+Scaffold.QA.SpectralGraph.IrregularCheeger_QA` ✔; `#print axioms` via
+`wip/icfences_axcheck.lean` — all 110 new declarations exactly
+`propext, Classical.choice, Quot.sound` (the 5 private helpers audited
+transitively); no `-- @refutes` tags (theorem instantiations, nothing
+admitted consumed); **full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 133 source files, 133 fresh artifacts,
+0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4 axioms
+unchanged); `check_refutation_independence` (9-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_backlog_freshness` clean; scoreboard
+regenerated (**4535/4/0**) with the verification row; map-freshness
+exit 0 after the 4434 → 4535 stats sync in both map data tables and
+SVG regeneration (49 stations, no status change — none owed). The
+landing verified as a pure insertion (1560/0 in numstat). Records: the
+proposal (COMPLETE + delivery record with six technique findings),
+`proposals/README.md` (new Delivered row), README (4535 + the
+cuts-and-expansion row's fence clause), the radar (QA axis synced,
+held 4.5 per protocol — negative witnesses of an already-counted
+family, not a named-gap closure), `index/map/spectral_graph.md` (the
+`IrregularFences` section), the backlog item-2 falsification-surface
+note, both map data tables + regenerated SVG, the execution plan, and
+this log. Nothing committed; the prior runs' uncommitted deliveries
+preserved.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. Honest scope: the sweep statements' `hA`
+clauses (where `rayleigh`'s symmetry-free shape makes `hA` genuinely
+mathematical) and the sandwich/window `hnn` clauses remain priced
+follow-ons — the 2-dimensional analyses close negatively, and a
+refutation needs fixtures the survey did not find.
+
+**Next handoff:** the Active table remains all-Low and every standing
+frontier stays decision- or consumer-gated exactly as the prior
+handoff recorded (the QA axis's randomized half; the priced undirected
+`walkTVPair` join; the sharp `|λ₂| = α` layer; the reverse TV → χ²
+calculus). The audit method's natural next targets, if no gate opens,
+are the other pre-discipline QA families outside the mixing cascade —
+priced but not pursued here (this run consumed its budget on the
+highest-consumption cluster).

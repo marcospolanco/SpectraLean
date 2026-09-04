@@ -2875,4 +2875,1564 @@ theorem ifc_disc_hinge_fence_QA :
     norm_num
 
 
+section IrregularFences
+
+/-! ### The signed fixture's easy-direction and sweep clauses -/
+
+/-- **Fence (easy direction, `hnn`)**: at the signed two-vertex fixture
+every other hypothesis of `cheeger_upper_bound_normalized` is genuine
+(symmetry, degrees `1 = 2 - 1 > 0`, two vertices), and the
+nonnegativity-dropped conclusion reads `λ₂ = 0 ≤ 2φ = -2` — false. -/
+theorem icf_easy_hnn_fence_QA :
+    ¬ (secondEval (normalizedLaplacian ichSigAdj)
+        (normalizedLaplacian_symmetric ichSigAdj ichSigAdj_symmetric)
+        (le_refl 2)
+      ≤ 2 * cheegerConstant ichSigAdj) := by
+  rw [ichSigAdj_secondEval, ichSigAdj_cheegerConstant]
+  norm_num
+
+/-- Isolation companion: every other clause genuine, `hnn` exactly the
+failure. -/
+theorem icf_easy_hnn_isolation_QA :
+    ichSigAdj.IsSymm
+      ∧ (∀ i, 0 < deg ichSigAdj i)
+      ∧ 2 ≤ Fintype.card (Fin 2)
+      ∧ ¬ (∀ i j, 0 ≤ ichSigAdj i j) :=
+  ⟨ichSigAdj_symmetric, ichSigAdj_pos_deg, by norm_num,
+    ichSigAdj_not_nonneg⟩
+
+/-- The degree stretch is the identity at the signed fixture (degrees
+`1`). -/
+theorem icf_sig_stretch (f : Fin 2 → ℝ) :
+    degreeSqrt ichSigAdj *ᵥ f = f := by
+  funext i
+  rw [degreeSqrt_mulVec_apply, ichSigAdj_deg i, Real.sqrt_one, one_mul]
+
+/-- The signed fixture's Rayleigh pin at the antisymmetric mode: `R =
+-2` (the PSD-broken spectral side goes negative). -/
+theorem icf_sig_rayleigh :
+    rayleigh (normalizedLaplacian ichSigAdj)
+      (degreeSqrt ichSigAdj *ᵥ (![1, -1] : Fin 2 → ℝ)) = -2 := by
+  have hne : (![1, -1] : Fin 2 → ℝ) ≠ 0 := by
+    intro h
+    have h0 := congrFun h 0
+    simp at h0
+  rw [icf_sig_stretch, rayleigh, if_neg hne, quadForm, ichSigAdj_normLap]
+  simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+    Matrix.of_apply]
+  norm_num
+
+/-- **Fence (sweep lemma, `hnn`)**: at the signed fixture with the
+degree-orthogonal mode `f = ![1, -1]` (orthogonality genuine:
+`∑ deg · f = 0`), the nonnegativity-dropped conclusion reads
+`φ²/2 = 1/2 ≤ R = -2` — false. -/
+theorem icf_sweep_hnn_fence_QA :
+    ¬ (cheegerConstant ichSigAdj ^ 2 / 2
+        ≤ rayleigh (normalizedLaplacian ichSigAdj)
+            (degreeSqrt ichSigAdj *ᵥ (![1, -1] : Fin 2 → ℝ))) := by
+  rw [ichSigAdj_cheegerConstant, icf_sig_rayleigh]
+  norm_num
+
+theorem icf_sweep_hnn_isolation_QA :
+    ichSigAdj.IsSymm
+      ∧ (∀ i, 0 < deg ichSigAdj i)
+      ∧ ((![1, -1] : Fin 2 → ℝ) ≠ 0)
+      ∧ ∑ i, deg ichSigAdj i * (![1, -1] : Fin 2 → ℝ) i = 0
+      ∧ ¬ (∀ i j, 0 ≤ ichSigAdj i j) :=
+  ⟨ichSigAdj_symmetric, ichSigAdj_pos_deg, by
+      intro h
+      have h0 := congrFun h 0
+      simp at h0, by
+      rw [Fin.sum_univ_two, ichSigAdj_deg 0, ichSigAdj_deg 1]
+      norm_num, ichSigAdj_not_nonneg⟩
+
+/-- **Fence (cut theorem, `hnn`)**: at the same instantiation the
+dropped conclusion fails for *every* candidate cut — the bound clause
+alone refutes it, since `2 * R = -4` while conductances square back
+nonnegative. -/
+theorem icf_cut_hnn_fence_QA :
+    ¬ (∃ S : Finset (Fin 2), S.Nonempty ∧ Sᶜ.Nonempty ∧
+      ((∃ t : ℝ, ∀ i, i ∈ S ↔ t ≤ (![1, -1] : Fin 2 → ℝ) i) ∨
+        (∃ t : ℝ, ∀ i, i ∈ S ↔ (![1, -1] : Fin 2 → ℝ) i ≤ t)) ∧
+      conductance ichSigAdj S ^ 2
+        ≤ 2 * rayleigh (normalizedLaplacian ichSigAdj)
+            (degreeSqrt ichSigAdj *ᵥ (![1, -1] : Fin 2 → ℝ))) := by
+  rintro ⟨S, -, -, -, hle⟩
+  rw [icf_sig_rayleigh] at hle
+  have hnn : (0 : ℝ) ≤ conductance ichSigAdj S ^ 2 := sq_nonneg _
+  linarith
+
+/-! ### The edge fixture's sweep and extraction clauses -/
+
+/-- The raw Rayleigh pin the `horth` fence reuses: `R = 1/5` at
+`f = ![1, 2]` on `K₂` (Dirichlet energy `1`, squared norm `5`). -/
+theorem icf_edge_rayleigh_f12 :
+    rayleigh (normalizedLaplacian edgeAdj)
+      (degreeSqrt edgeAdj *ᵥ (![1, 2] : Fin 2 → ℝ)) = 1 / 5 := by
+  have hne : (![1, 2] : Fin 2 → ℝ) ≠ 0 := by
+    intro h
+    have h0 := congrFun h 0
+    simp at h0
+  rw [rayleigh_normalizedLaplacian_degreeSqrt edgeAdj ichv_edge_pos_deg
+    hne, laplacian_quadForm edgeAdj edgeAdj_symmetric
+      (![1, 2] : Fin 2 → ℝ)]
+  norm_num [Fin.sum_univ_two, edgeAdj, deg, edgeAdj_regular,
+    Matrix.mul_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons, Matrix.one_apply]
+
+/-- **Fence (sweep lemma, `horth`)**: at `f = ![1, 2]` on `K₂` the
+degree-weighted zero-sum clause fails (`∑ deg · f = 3`), and the
+dropped conclusion reads `φ²/2 = 1/2 ≤ R = 1/5` — false. -/
+theorem icf_sweep_horth_fence_QA :
+    ¬ (cheegerConstant edgeAdj ^ 2 / 2
+        ≤ rayleigh (normalizedLaplacian edgeAdj)
+            (degreeSqrt edgeAdj *ᵥ (![1, 2] : Fin 2 → ℝ))) := by
+  rw [edge_cheegerConstant, icf_edge_rayleigh_f12]
+  norm_num
+
+theorem icf_sweep_horth_isolation_QA :
+    edgeAdj.IsSymm
+      ∧ (∀ i j, 0 ≤ edgeAdj i j)
+      ∧ (∀ i, 0 < deg edgeAdj i)
+      ∧ ((![1, 2] : Fin 2 → ℝ) ≠ 0)
+      ∧ ∑ i, deg edgeAdj i * (![1, 2] : Fin 2 → ℝ) i = 3 :=
+  ⟨edgeAdj_symmetric, edgeAdj_nonneg, ichv_edge_pos_deg, by
+      intro h
+      have h0 := congrFun h 0
+      simp at h0, by
+      rw [Fin.sum_univ_two, edgeAdj_regular 0, edgeAdj_regular 1]
+      norm_num⟩
+
+/-- **Fence (sweep lemma, `hf0`)**: at `f = 0` the orthogonality clause
+is trivially genuine (`∑ deg · 0 = 0`) while `rayleigh` at the zero
+vector is the definitional junk `0`, so the dropped conclusion reads
+`φ²/2 = 1/2 ≤ 0` — false. -/
+theorem icf_sweep_hf0_fence_QA :
+    ¬ (cheegerConstant edgeAdj ^ 2 / 2
+        ≤ rayleigh (normalizedLaplacian edgeAdj)
+            (degreeSqrt edgeAdj *ᵥ (0 : Fin 2 → ℝ))) := by
+  rw [edge_cheegerConstant]
+  simp only [Matrix.mulVec_zero, rayleigh, if_pos rfl]
+  norm_num
+
+theorem icf_sweep_hf0_isolation_QA :
+    edgeAdj.IsSymm
+      ∧ (∀ i j, 0 ≤ edgeAdj i j)
+      ∧ (∀ i, 0 < deg edgeAdj i)
+      ∧ ∑ i, deg edgeAdj i * (0 : Fin 2 → ℝ) i = 0 :=
+  ⟨edgeAdj_symmetric, edgeAdj_nonneg, ichv_edge_pos_deg, by
+    simp⟩
+
+/-- The shared shape refutation: no nonempty proper superlevel or
+sublevel set of a constant function exists. -/
+private theorem icf_no_proper_level_of_const {V₂ : Type} [Fintype V₂]
+    [DecidableEq V₂] (c : ℝ) (S : Finset V₂)
+    (hSne : S.Nonempty) (hSc : Sᶜ.Nonempty)
+    (hlev : (∃ t : ℝ, ∀ i, i ∈ S ↔ t ≤ c)
+      ∨ (∃ t : ℝ, ∀ i, i ∈ S ↔ c ≤ t)) : False := by
+  obtain ⟨i₀, hi₀⟩ := hSne
+  rcases hlev with ⟨t, ht⟩ | ⟨t, ht⟩
+  · have hti : t ≤ c := (ht i₀).1 hi₀
+    have hU : S = Finset.univ :=
+      Finset.eq_univ_iff_forall.2 fun i => (ht i).2 hti
+    rw [hU] at hSc
+    simp at hSc
+  · have hti : c ≤ t := (ht i₀).1 hi₀
+    have hU : S = Finset.univ :=
+      Finset.eq_univ_iff_forall.2 fun i => (ht i).2 hti
+    rw [hU] at hSc
+    simp at hSc
+
+/-- **Fence (cut theorem, `hf0`)**: the swept superlevel/sublevel
+family of a constant function contains no nonempty proper member at
+all, so the dropped conclusion fails on the *shape* clauses — a
+witness shape distinct from the `horth` fence's. -/
+theorem icf_cut_hf0_fence_QA :
+    ¬ (∃ S : Finset (Fin 2), S.Nonempty ∧ Sᶜ.Nonempty ∧
+      ((∃ t : ℝ, ∀ i, i ∈ S ↔ t ≤ (0 : Fin 2 → ℝ) i) ∨
+        (∃ t : ℝ, ∀ i, i ∈ S ↔ (0 : Fin 2 → ℝ) i ≤ t)) ∧
+      conductance edgeAdj S ^ 2
+        ≤ 2 * rayleigh (normalizedLaplacian edgeAdj)
+            (degreeSqrt edgeAdj *ᵥ (0 : Fin 2 → ℝ))) := by
+  rintro ⟨S, hSne, hSc, hlev, -⟩
+  rcases hlev with ⟨t, ht⟩ | ⟨t, ht⟩
+  · exact icf_no_proper_level_of_const (0 : ℝ) S hSne hSc
+      (Or.inl ⟨t, fun i => by simpa using ht i⟩)
+  · exact icf_no_proper_level_of_const (0 : ℝ) S hSne hSc
+      (Or.inr ⟨t, fun i => by simpa using ht i⟩)
+
+theorem icf_cut_hf0_isolation_QA :
+    edgeAdj.IsSymm
+      ∧ (∀ i j, 0 ≤ edgeAdj i j)
+      ∧ (∀ i, 0 < deg edgeAdj i)
+      ∧ ∑ i, deg edgeAdj i * (0 : Fin 2 → ℝ) i = 0 :=
+  icf_sweep_hf0_isolation_QA
+
+/-! ### The degree-window and sandwich clauses (wrong constants) -/
+
+/-- The combinatorial and normalized Laplacians coincide on `K₂`
+(degrees `1`), so the file's normalized pin `λ₂ (L_sym) = 2` transfers
+to `lambda2`. -/
+theorem icf_edge_lambda2 :
+    lambda2 edgeAdj edgeAdj_symmetric (le_refl 2) = 2 := by
+  have hL : (laplacian edgeAdj : Matrix (Fin 2) (Fin 2) ℝ)
+      = normalizedLaplacian edgeAdj := by
+    refine Matrix.ext fun i j => ?_
+    have hdeg : deg edgeAdj i = 1 := edgeAdj_regular i
+    have hl : laplacian edgeAdj i j
+        = (if i = j then (1 : ℝ) else 0) - edgeAdj i j := by
+      simp only [laplacian, degreeMatrix, Matrix.sub_apply,
+        Matrix.of_apply, hdeg]
+      congr 1
+    have hn : normalizedLaplacian edgeAdj i j
+        = (if i = j then (1 : ℝ) else 0) - edgeAdj i j := by
+      rw [normalizedLaplacian_eq_regularNormalizedLaplacian edgeAdj 1
+        edgeAdj_regular (by norm_num)]
+      simp only [regularNormalizedLaplacian, Matrix.sub_apply,
+        Matrix.one_apply, Matrix.smul_apply, inv_one, one_smul,
+        smul_eq_mul]
+    rw [hl, hn]
+  have h1 : lambda2 edgeAdj edgeAdj_symmetric (le_refl 2)
+      = evals (laplacian_symmetric edgeAdj edgeAdj_symmetric)
+          ⟨1, by norm_num⟩ := rfl
+  have h2 : evals (laplacian_symmetric edgeAdj edgeAdj_symmetric)
+        ⟨1, by norm_num⟩
+      = evals (normalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric)
+          ⟨1, by norm_num⟩ :=
+    evals_congr _ _ hL _
+  have h3 : evals (normalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric)
+        ⟨1, by norm_num⟩
+      = secondEval (normalizedLaplacian edgeAdj)
+          (normalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric)
+          (le_refl 2) := rfl
+  rw [h1, h2, h3]
+  exact icEdge_normLap_secondEval
+
+/-- **Fence (sandwich floor, `hdmin`)**: the wrong-constant fence — an
+overstating `dmin` cannot inflate the bound. At `dmin = 5` on `K₂`
+(every degree `1`, so `5 ≤ deg` fails) the dropped conclusion reads
+`5 · λ₂(L_sym) = 10 ≤ λ₂(L) = 2` — false. -/
+theorem icf_sandwich_hdmin_fence_QA :
+    ¬ (5 * secondEval (normalizedLaplacian edgeAdj)
+          (normalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric)
+          (le_refl 2)
+        ≤ lambda2 edgeAdj edgeAdj_symmetric (le_refl 2)) := by
+  rw [icEdge_normLap_secondEval, icf_edge_lambda2]
+  norm_num
+
+theorem icf_sandwich_hdmin_isolation_QA :
+    edgeAdj.IsSymm
+      ∧ (∀ i j, 0 ≤ edgeAdj i j)
+      ∧ (∀ i, 0 < deg edgeAdj i)
+      ∧ (0 < (5 : ℝ))
+      ∧ 2 ≤ Fintype.card (Fin 2)
+      ∧ ¬ (∀ i, (5 : ℝ) ≤ deg edgeAdj i) :=
+  ⟨edgeAdj_symmetric, edgeAdj_nonneg, ichv_edge_pos_deg, by norm_num,
+    by norm_num, by
+      intro h
+      have h0 := h 0
+      rw [edgeAdj_regular 0] at h0
+      norm_num at h0⟩
+
+/-- **Fence (sandwich ceiling, `hdmax`)**: at `dmax = 1/2` on `K₂`
+(every degree `1`, so `deg ≤ 1/2` fails) the dropped conclusion reads
+`λ₂(L) = 2 ≤ (1/2) · λ₂(L_sym) = 1` — false. -/
+theorem icf_sandwich_hdmax_fence_QA :
+    ¬ (lambda2 edgeAdj edgeAdj_symmetric (le_refl 2)
+        ≤ (1 / 2) * secondEval (normalizedLaplacian edgeAdj)
+            (normalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric)
+            (le_refl 2)) := by
+  rw [icf_edge_lambda2, icEdge_normLap_secondEval]
+  norm_num
+
+theorem icf_sandwich_hdmax_isolation_QA :
+    edgeAdj.IsSymm
+      ∧ (∀ i j, 0 ≤ edgeAdj i j)
+      ∧ (∀ i, 0 < deg edgeAdj i)
+      ∧ 2 ≤ Fintype.card (Fin 2)
+      ∧ ¬ (∀ i, deg edgeAdj i ≤ (1 / 2 : ℝ)) :=
+  ⟨edgeAdj_symmetric, edgeAdj_nonneg, ichv_edge_pos_deg, by norm_num,
+    by
+      intro h
+      have h0 := h 0
+      rw [edgeAdj_regular 0] at h0
+      norm_num at h0⟩
+
+/-- **Fence (window floor, `hdmin`)**: at `dmin = 5` on `K₂` the
+dropped conclusion reads `5 · φ²/2 = 5/2 ≤ λ₂(L) = 2` — false. -/
+theorem icf_window_floor_hdmin_fence_QA :
+    ¬ (5 * cheegerConstant edgeAdj ^ 2 / 2
+        ≤ lambda2 edgeAdj edgeAdj_symmetric (le_refl 2)) := by
+  rw [edge_cheegerConstant, icf_edge_lambda2]
+  norm_num
+
+theorem icf_window_floor_hdmin_isolation_QA :
+    edgeAdj.IsSymm
+      ∧ (∀ i j, 0 ≤ edgeAdj i j)
+      ∧ (∀ i, 0 < deg edgeAdj i)
+      ∧ (0 < (5 : ℝ))
+      ∧ 2 ≤ Fintype.card (Fin 2)
+      ∧ ¬ (∀ i, (5 : ℝ) ≤ deg edgeAdj i) :=
+  icf_sandwich_hdmin_isolation_QA
+
+/-- **Fence (window ceiling, `hdmax`)**: at `dmax = 1/2` on `K₂` the
+dropped conclusion reads `λ₂(L) = 2 ≤ 2 · ((1/2) · φ) = 1` — false. -/
+theorem icf_window_ceiling_hdmax_fence_QA :
+    ¬ (lambda2 edgeAdj edgeAdj_symmetric (le_refl 2)
+        ≤ 2 * ((1 / 2) * cheegerConstant edgeAdj)) := by
+  rw [icf_edge_lambda2, edge_cheegerConstant]
+  norm_num
+
+theorem icf_window_ceiling_hdmax_isolation_QA :
+    edgeAdj.IsSymm
+      ∧ (∀ i j, 0 ≤ edgeAdj i j)
+      ∧ (∀ i, 0 < deg edgeAdj i)
+      ∧ 2 ≤ Fintype.card (Fin 2)
+      ∧ ¬ (∀ i, deg edgeAdj i ≤ (1 / 2 : ℝ)) :=
+  icf_sandwich_hdmax_isolation_QA
+
+/-! ### The volume sweep extraction's `hy` and `hM` clauses -/
+
+/-- **Fence (`hy`)**: at `y = 1` on `K₂` the minority-volume clause
+fails at `t = 1` (the superlevel is everything: `2 · 2 ≤ 2`), and the
+dropped conclusion fails on the shape clauses — `y ^ 2` is constant,
+so no nonempty proper superlevel set exists. -/
+theorem icf_extract_hy_fence_QA :
+    ¬ (∃ S : Finset (Fin 2), ∃ t : ℝ, 0 < t ∧
+        (∀ i, i ∈ S ↔ t ≤ (1 : Fin 2 → ℝ) i ^ 2) ∧
+        S.Nonempty ∧ Sᶜ.Nonempty ∧
+        conductance edgeAdj S ^ 2
+          ≤ (∑ i, ∑ j, edgeAdj i j *
+              ((1 : Fin 2 → ℝ) i - (1 : Fin 2 → ℝ) j) ^ 2)
+            / (∑ i, deg edgeAdj i * (1 : Fin 2 → ℝ) i ^ 2)) := by
+  rintro ⟨S, t, ht, hmem, hSne, hSc, -⟩
+  have hsq : ∀ i : Fin 2, (1 : Fin 2 → ℝ) i ^ 2 = (1 : ℝ) := by
+    intro i
+    simp
+  exact icf_no_proper_level_of_const (1 : ℝ) S hSne hSc
+    (Or.inl ⟨t, fun i => (hmem i).trans (by rw [hsq i])⟩)
+
+theorem icf_extract_hy_isolation_QA :
+    edgeAdj.IsSymm
+      ∧ (∀ i j, 0 ≤ edgeAdj i j)
+      ∧ (∀ i, 0 < deg edgeAdj i)
+      ∧ 0 < ∑ i, deg edgeAdj i * (1 : Fin 2 → ℝ) i ^ 2
+      ∧ ¬ (∀ t : ℝ, 0 < t →
+          2 * vol edgeAdj
+              (Finset.univ.filter (fun i => t ≤ (1 : Fin 2 → ℝ) i ^ 2))
+            ≤ vol edgeAdj (Finset.univ : Finset (Fin 2))) :=
+  ⟨edgeAdj_symmetric, edgeAdj_nonneg, ichv_edge_pos_deg, by
+      have h2 : ∑ i, deg edgeAdj i * (1 : Fin 2 → ℝ) i ^ 2 = 2 := by
+        simp [edgeAdj_regular]
+      linarith, by
+      intro h
+      have h1 := h 1 (by norm_num)
+      have hfilt : (Finset.univ.filter
+          (fun i => (1 : ℝ) ≤ (1 : Fin 2 → ℝ) i ^ 2))
+          = (Finset.univ : Finset (Fin 2)) := by
+        ext i
+        rw [Finset.mem_filter]
+        simp
+      rw [hfilt, ichv_edge_vol_univ] at h1
+      norm_num at h1⟩
+
+/-- **Fence (`hM`)**: at `y = 0` the minority clause is trivially
+genuine (positive superlevels are empty) while the degree-weighted
+mass clause fails (`∑ deg · 0 = 0`), and the dropped conclusion's
+shape clauses fail outright — every superlevel at a positive level is
+empty, so `S.Nonempty` cannot hold. -/
+theorem icf_extract_hM_fence_QA :
+    ¬ (∃ S : Finset (Fin 2), ∃ t : ℝ, 0 < t ∧
+        (∀ i, i ∈ S ↔ t ≤ (0 : Fin 2 → ℝ) i ^ 2) ∧
+        S.Nonempty ∧ Sᶜ.Nonempty ∧
+        conductance edgeAdj S ^ 2
+          ≤ (∑ i, ∑ j, edgeAdj i j *
+              ((0 : Fin 2 → ℝ) i - (0 : Fin 2 → ℝ) j) ^ 2)
+            / (∑ i, deg edgeAdj i * (0 : Fin 2 → ℝ) i ^ 2)) := by
+  rintro ⟨S, t, ht, hmem, ⟨i₀, hi₀⟩, -, -⟩
+  have hle := (hmem i₀).1 hi₀
+  simp only [Pi.zero_apply, pow_zero] at hle
+  norm_num at hle
+  have hempty : S = ∅ :=
+    Finset.eq_empty_iff_forall_not_mem.2 fun i hi => by
+      have hle' := (hmem i).1 hi
+      simp only [Pi.zero_apply, pow_zero] at hle'
+      norm_num at hle'
+      linarith
+  rw [hempty] at hi₀
+  simp at hi₀
+
+theorem icf_extract_hM_isolation_QA :
+    edgeAdj.IsSymm
+      ∧ (∀ i j, 0 ≤ edgeAdj i j)
+      ∧ (∀ i, 0 < deg edgeAdj i)
+      ∧ (∀ t : ℝ, 0 < t →
+          2 * vol edgeAdj
+              (Finset.univ.filter (fun i => t ≤ (0 : Fin 2 → ℝ) i ^ 2))
+            ≤ vol edgeAdj (Finset.univ : Finset (Fin 2)))
+      ∧ ∑ i, deg edgeAdj i * (0 : Fin 2 → ℝ) i ^ 2 = 0 :=
+  ⟨edgeAdj_symmetric, edgeAdj_nonneg, ichv_edge_pos_deg, by
+      intro t ht
+      have hfilt : (Finset.univ.filter
+          (fun i => t ≤ (0 : Fin 2 → ℝ) i ^ 2)) = (∅ : Finset (Fin 2)) := by
+        ext i
+        rw [Finset.mem_filter]
+        constructor
+        · intro hi
+          have hle := hi.2
+          simp only [Pi.zero_apply, pow_zero] at hle
+          norm_num at hle
+          linarith
+        · intro hi
+          exact absurd hi (by simp)
+      rw [hfilt, vol_empty, ichv_edge_vol_univ]
+      norm_num, by
+      simp⟩
+
+/-! ### The kernel iff's `hconn` clause (disconnected fixture) -/
+
+/-- The block-indicator kernel witness at the combinatorial operator. -/
+theorem icf_disc_lap_kernel :
+    (laplacian icDiscAdj) *ᵥ (![1, 1, 0, 0] : Fin 4 → ℝ) = 0 := by
+  have hv : ∀ i j : Fin 4, 0 < icDiscAdj i j →
+      (![1, 1, 0, 0] : Fin 4 → ℝ) i = (![1, 1, 0, 0] : Fin 4 → ℝ) j := by
+    intro i j hij
+    have hb := icDiscAdj_blocks i j hij
+    fin_cases i <;> fin_cases j <;> simp_all
+  funext i
+  rw [laplacian_mulVec_apply]
+  refine Finset.sum_eq_zero (fun j _ => ?_)
+  rcases eq_or_lt_of_le (icDiscAdj_nonneg i j) with h0 | hpos
+  · rw [← h0, zero_mul]
+  · rw [hv i j hpos, sub_self, mul_zero]
+
+theorem icf_disc_kernel_witness :
+    normalizedLaplacian icDiscAdj *ᵥ (![1, 1, 0, 0] : Fin 4 → ℝ) = 0 := by
+  have h1 : degreeSqrt icDiscAdj *ᵥ (![1, 1, 0, 0] : Fin 4 → ℝ)
+      = (![1, 1, 0, 0] : Fin 4 → ℝ) := by
+    funext i
+    rw [degreeSqrt_mulVec_apply, ifc_disc_deg_one i, Real.sqrt_one,
+      one_mul]
+  rw [← h1]
+  exact normalizedLaplacian_mulVec_degreeSqrt_of_laplacian_mulVec_eq_zero
+    icDiscAdj icDiscAdj_pos_deg icf_disc_lap_kernel
+
+/-- **Fence (kernel iff, `hconn`)**: on the disconnected two-edge
+fixture the component indicator is a kernel vector of `L_sym` that is
+not a multiple of the stretched constants `√D · 1` (degrees all `1`,
+so the stretched constants are the constant vector) — the forward
+direction of the `hconn`-dropped iff fails. -/
+theorem icf_kernel_iff_hconn_fence_QA :
+    ¬ (normalizedLaplacian icDiscAdj *ᵥ (![1, 1, 0, 0] : Fin 4 → ℝ) = 0
+        ↔ ∃ c : ℝ, (![1, 1, 0, 0] : Fin 4 → ℝ)
+          = c • (degreeSqrt icDiscAdj *ᵥ (onesVec : Fin 4 → ℝ))) := by
+  intro hiff
+  obtain ⟨c, hc⟩ := hiff.1 icf_disc_kernel_witness
+  have hones : degreeSqrt icDiscAdj *ᵥ (onesVec : Fin 4 → ℝ)
+      = (1 : Fin 4 → ℝ) := by
+    funext i
+    rw [degreeSqrt_mulVec_apply, ifc_disc_deg_one i, Real.sqrt_one,
+      onesVec]
+    simp
+  rw [hones] at hc
+  have h0 := congrFun hc 0
+  have h2 := congrFun hc 2
+  simp at h0 h2
+  linarith
+
+theorem icf_kernel_iff_hconn_isolation_QA :
+    icDiscAdj.IsSymm
+      ∧ (∀ i j, 0 ≤ icDiscAdj i j)
+      ∧ (∀ i, 0 < deg icDiscAdj i)
+      ∧ ¬ (supportGraph icDiscAdj icDiscAdj_symmetric).Connected :=
+  ⟨icDiscAdj_symmetric, icDiscAdj_nonneg, icDiscAdj_pos_deg,
+    icDiscAdj_not_connected⟩
+
+/-! ### The Cheeger-consumer corollary's `hconn` and `hnn` clauses -/
+
+/-- **Fence (positivity corollary, `hconn`)**: on the disconnected
+two-edge fixture the first component `{0, 1}` is a nonempty proper cut
+of boundary `0` and positive volumes, so `φ ≤ 0` and the
+connectivity-dropped conclusion `0 < φ` fails. -/
+theorem icf_cheeger_pos_hconn_fence_QA :
+    ¬ (0 < cheegerConstant icDiscAdj) := by
+  have hcut : conductance icDiscAdj ({0, 1} : Finset (Fin 4)) = 0 := by
+    have hcompl : ({0, 1} : Finset (Fin 4))ᶜ = {2, 3} := by decide
+    have hbd : boundary icDiscAdj ({0, 1} : Finset (Fin 4)) = 0 := by
+      rw [boundary, hcompl]
+      refine Finset.sum_eq_zero fun i _ => ?_
+      rw [Finset.sum_eq_zero fun j _ => ?_]
+      fin_cases i <;> fin_cases j <;> simp_all [icDiscAdj] <;> omega
+    have hv1 : vol icDiscAdj ({0, 1} : Finset (Fin 4)) = 2 := by
+      simp [vol, ifc_disc_deg_one]
+    have hv2 : vol icDiscAdj ({0, 1} : Finset (Fin 4))ᶜ = 2 := by
+      rw [hcompl]
+      simp [vol, ifc_disc_deg_one]
+    rw [conductance, hbd, hv1, hv2]
+    norm_num
+  have hle := conductance_ge_cheegerConstant icDiscAdj icDiscAdj_nonneg
+    ({0, 1} : Finset (Fin 4)) (by decide) (by decide)
+  rw [hcut] at hle
+  exact not_lt.2 (hle.trans (by norm_num))
+
+theorem icf_cheeger_pos_hconn_isolation_QA :
+    icDiscAdj.IsSymm
+      ∧ (∀ i j, 0 ≤ icDiscAdj i j)
+      ∧ (∀ i, 0 < deg icDiscAdj i)
+      ∧ 2 ≤ Fintype.card (Fin 4)
+      ∧ ¬ (supportGraph icDiscAdj icDiscAdj_symmetric).Connected :=
+  ⟨icDiscAdj_symmetric, icDiscAdj_nonneg, icDiscAdj_pos_deg, by norm_num,
+    icDiscAdj_not_connected⟩
+
+/-- The negative-cut fixture: symmetric, connected through the positive
+edges `(0,1)` and `(1,2)`, degrees `(1, 2, 1)` all positive, one
+negative off-diagonal `(0,2) = -3`. -/
+def icNegCutAdj : Matrix (Fin 3) (Fin 3) ℝ :=
+  !![3, 1, -3; 1, 0, 1; -3, 1, 3]
+
+theorem icNegCutAdj_symmetric : icNegCutAdj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [icNegCutAdj]
+
+theorem icNegCutAdj_deg : ∀ i, deg icNegCutAdj i = if i = 1 then 2 else 1 := by
+  intro i
+  fin_cases i
+  all_goals simp [deg, icNegCutAdj, Fin.sum_univ_three]
+  all_goals norm_num
+
+theorem icNegCutAdj_pos_deg : ∀ i, 0 < deg icNegCutAdj i := by
+  intro i
+  rw [icNegCutAdj_deg]
+  fin_cases i <;> simp
+
+theorem icNegCutAdj_not_nonneg : ¬ (∀ i j, 0 ≤ icNegCutAdj i j) := by
+  intro h
+  have h02 := h 0 2
+  simp [icNegCutAdj] at h02
+  linarith
+
+theorem icNegCutAdj_adj01 :
+    (supportGraph icNegCutAdj icNegCutAdj_symmetric).Adj (0 : Fin 3) 1 := by
+  rw [supportGraph_adj]
+  exact ⟨by decide, by simp [icNegCutAdj]⟩
+
+theorem icNegCutAdj_adj12 :
+    (supportGraph icNegCutAdj icNegCutAdj_symmetric).Adj (1 : Fin 3) 2 := by
+  rw [supportGraph_adj]
+  exact ⟨by decide, by simp [icNegCutAdj]⟩
+
+theorem icNegCutAdj_connected :
+    (supportGraph icNegCutAdj icNegCutAdj_symmetric).Connected := by
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  refine ⟨0, fun v => ?_⟩
+  fin_cases v
+  · exact ⟨SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons icNegCutAdj_adj01 SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons icNegCutAdj_adj01
+      (SimpleGraph.Walk.cons icNegCutAdj_adj12 SimpleGraph.Walk.nil)⟩
+
+/-- **Fence (positivity corollary, `hnn`)**: on the connected
+negative-cut fixture the cut `{0}` has boundary `1 - 3 = -2` at unit
+volume, so `φ ≤ -2 < 0` and the nonnegativity-dropped conclusion
+`0 < φ` fails. -/
+theorem icf_cheeger_pos_hnn_fence_QA :
+    ¬ (0 < cheegerConstant icNegCutAdj) := by
+  have hcut : conductance icNegCutAdj ({0} : Finset (Fin 3)) = -2 := by
+    have hcompl : ({0} : Finset (Fin 3))ᶜ = {1, 2} := by decide
+    have hbd : boundary icNegCutAdj ({0} : Finset (Fin 3)) = -2 := by
+      rw [boundary, hcompl]
+      simp [icNegCutAdj]
+      norm_num
+    have hv1 : vol icNegCutAdj ({0} : Finset (Fin 3)) = 1 := by
+      rw [vol, Finset.sum_singleton, icNegCutAdj_deg]
+      norm_num
+    have hv2 : vol icNegCutAdj ({0} : Finset (Fin 3))ᶜ = 3 := by
+      rw [hcompl]
+      simp [vol, icNegCutAdj_deg]
+      norm_num
+    rw [conductance, hbd, hv1, hv2]
+    norm_num
+  have hbdd : BddBelow {c : ℝ | ∃ S : Finset (Fin 3), S.Nonempty ∧
+      Sᶜ.Nonempty ∧ conductance icNegCutAdj S = c} := by
+    have hsub : {c : ℝ | ∃ S : Finset (Fin 3), S.Nonempty ∧ Sᶜ.Nonempty ∧
+        conductance icNegCutAdj S = c}
+        ⊆ Set.range (fun S : Finset (Fin 3) => conductance icNegCutAdj S) := by
+      rintro c ⟨S, -, -, rfl⟩
+      exact ⟨S, rfl⟩
+    exact (Set.Finite.subset (Set.finite_range _) hsub).bddBelow
+  have hle : cheegerConstant icNegCutAdj
+      ≤ conductance icNegCutAdj ({0} : Finset (Fin 3)) :=
+    csInf_le hbdd ⟨{0}, by decide, by decide, rfl⟩
+  rw [hcut] at hle
+  exact not_lt.2 (hle.trans (by norm_num))
+
+theorem icf_cheeger_pos_hnn_isolation_QA :
+    icNegCutAdj.IsSymm
+      ∧ (∀ i, 0 < deg icNegCutAdj i)
+      ∧ 2 ≤ Fintype.card (Fin 3)
+      ∧ (supportGraph icNegCutAdj icNegCutAdj_symmetric).Connected
+      ∧ ¬ (∀ i j, 0 ≤ icNegCutAdj i j) :=
+  ⟨icNegCutAdj_symmetric, icNegCutAdj_pos_deg, by decide,
+    icNegCutAdj_connected, icNegCutAdj_not_nonneg⟩
+
+/-! ### The disconnected-λ₂ theorem's `hnn` and `hd` clauses -/
+
+/-- Two disjoint copies of the signed fixture on `Fin 4`: symmetric,
+degrees all `1`, disconnected, one negative entry per block. -/
+def icSigDisc4Adj : Matrix (Fin 4) (Fin 4) ℝ :=
+  !![2, -1, 0, 0; -1, 2, 0, 0; 0, 0, 2, -1; 0, 0, -1, 2]
+
+theorem icSigDisc4Adj_symmetric : icSigDisc4Adj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;>
+    simp [icSigDisc4Adj, Matrix.vecHead, Matrix.vecTail]
+
+theorem icSigDisc4Adj_deg : ∀ i, deg icSigDisc4Adj i = 1 := by
+  intro i
+  fin_cases i
+  all_goals simp [deg, icSigDisc4Adj, Fin.sum_univ_four]
+  all_goals norm_num
+
+theorem icSigDisc4Adj_pos_deg : ∀ i, 0 < deg icSigDisc4Adj i := by
+  intro i
+  rw [icSigDisc4Adj_deg]
+  norm_num
+
+theorem icSigDisc4Adj_not_nonneg : ¬ (∀ i j, 0 ≤ icSigDisc4Adj i j) := by
+  intro h
+  have h01 := h 0 1
+  simp [icSigDisc4Adj] at h01
+  linarith
+
+theorem icSigDisc4Adj_blocks (i j : Fin 4) (h : 0 < icSigDisc4Adj i j) :
+    decide ((i : ℕ) ≤ 1) = decide ((j : ℕ) ≤ 1) := by
+  fin_cases i <;> fin_cases j <;>
+    simp_all [icSigDisc4Adj, Matrix.vecHead, Matrix.vecTail]
+
+theorem icSigDisc4_walk_blocks {u v : Fin 4}
+    (w : (supportGraph icSigDisc4Adj icSigDisc4Adj_symmetric).Walk u v) :
+    decide ((u : ℕ) ≤ 1) = decide ((v : ℕ) ≤ 1) := by
+  induction w with
+  | nil => rfl
+  | cons hadj _ ih =>
+    exact (icSigDisc4Adj_blocks _ _ ((supportGraph_adj.1 hadj).2)).trans ih
+
+theorem icSigDisc4Adj_not_connected :
+    ¬(supportGraph icSigDisc4Adj icSigDisc4Adj_symmetric).Connected := by
+  intro hconn
+  obtain ⟨w⟩ := hconn 0 2
+  have hb := icSigDisc4_walk_blocks w
+  exact absurd hb (by decide)
+
+/-- The entry form of the fixture's normalized Laplacian (degrees all
+`1`, so the degree scaling is trivial): `L_sym = 1 - A`. -/
+theorem icSigDisc4Adj_normLap_entry (i j : Fin 4) :
+    normalizedLaplacian icSigDisc4Adj i j
+      = (if i = j then (1 : ℝ) else 0) - icSigDisc4Adj i j := by
+  simp only [normalizedLaplacian, Matrix.sub_apply, Matrix.one_apply,
+    Matrix.diagonal_mul, Matrix.mul_diagonal, degreeInvSqrt,
+    Matrix.diagonal_apply, icSigDisc4Adj_deg, Real.sqrt_one, inv_one,
+    one_mul, mul_one]
+
+/-- The two block-antisymmetric modes are eigenvectors at exactly
+`-2` (`L_sym` is block-diagonal with the signed fixture's blocks). -/
+theorem icSigDisc4Adj_mulVec_minus :
+    normalizedLaplacian icSigDisc4Adj *ᵥ (![1, -1, 0, 0] : Fin 4 → ℝ)
+      = (-2 : ℝ) • (![1, -1, 0, 0] : Fin 4 → ℝ) := by
+  have hentry : ∀ i j : Fin 4,
+      normalizedLaplacian icSigDisc4Adj i j
+        = (if i = j then (1 : ℝ) else 0) - icSigDisc4Adj i j :=
+    icSigDisc4Adj_normLap_entry
+  funext i
+  fin_cases i <;>
+    simp only [hentry, Matrix.mulVec, Matrix.dotProduct,
+      Fin.sum_univ_four, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.cons_val_succ, Matrix.head_cons, Pi.smul_apply, smul_eq_mul]
+  all_goals simp [icSigDisc4Adj_deg, icSigDisc4Adj, Real.sqrt_one, inv_one]
+  all_goals norm_num
+
+theorem icSigDisc4Adj_mulVec_minus' :
+    normalizedLaplacian icSigDisc4Adj *ᵥ (![0, 0, 1, -1] : Fin 4 → ℝ)
+      = (-2 : ℝ) • (![0, 0, 1, -1] : Fin 4 → ℝ) := by
+  have hentry : ∀ i j : Fin 4,
+      normalizedLaplacian icSigDisc4Adj i j
+        = (if i = j then (1 : ℝ) else 0) - icSigDisc4Adj i j :=
+    icSigDisc4Adj_normLap_entry
+  funext i
+  fin_cases i <;>
+    simp only [hentry, Matrix.mulVec, Matrix.dotProduct,
+      Fin.sum_univ_four, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.cons_val_succ, Matrix.head_cons, Pi.smul_apply, smul_eq_mul]
+  all_goals simp [icSigDisc4Adj_deg, icSigDisc4Adj, Real.sqrt_one, inv_one]
+  all_goals norm_num
+
+theorem icSigDisc4_dot_self_one :
+    Matrix.dotProduct (![1, -1, 0, 0] : Fin 4 → ℝ)
+      (![1, -1, 0, 0] : Fin 4 → ℝ) = 2 := by
+  simp [Matrix.dotProduct, Fin.sum_univ_four]
+  norm_num
+
+theorem icSigDisc4_dot_self_two :
+    Matrix.dotProduct (![0, 0, 1, -1] : Fin 4 → ℝ)
+      (![0, 0, 1, -1] : Fin 4 → ℝ) = 2 := by
+  simp [Matrix.dotProduct, Fin.sum_univ_four]
+  norm_num
+
+theorem icSigDisc4_dot_cross :
+    Matrix.dotProduct (![1, -1, 0, 0] : Fin 4 → ℝ)
+      (![0, 0, 1, -1] : Fin 4 → ℝ) = 0 := by
+  simp [Matrix.dotProduct, Fin.sum_univ_four]
+
+theorem icSigDisc4_dot_cross' :
+    Matrix.dotProduct (![0, 0, 1, -1] : Fin 4 → ℝ)
+      (![1, -1, 0, 0] : Fin 4 → ℝ) = 0 := by
+  rw [Matrix.dotProduct_comm]
+  exact icSigDisc4_dot_cross
+
+private theorem icSigDisc4_li :
+    LinearIndependent ℝ
+      (fun k : Fin 2 => (fun i : Fin 4 =>
+        if k = 0 then (![1, -1, 0, 0] : Fin 4 → ℝ) i
+        else (![0, 0, 1, -1] : Fin 4 → ℝ) i) :
+        Fin 2 → (Fin 4 → ℝ)) := by
+  rw [Fintype.linearIndependent_iff]
+  intro c hc i
+  have h0 := congrFun hc 0
+  have h2 := congrFun hc 2
+  simp [Fin.sum_univ_two] at h0 h2
+  fin_cases i
+  · exact h0
+  · exact h2
+
+/-- `evals ⟨1⟩ ≤ -2` by the subspace Rayleigh–Ritz engine at the two
+block-antisymmetric modes (both eigenvectors at exactly `-2`). -/
+theorem icSigDisc4_evals_one_le :
+    evals (normalizedLaplacian_symmetric icSigDisc4Adj
+      icSigDisc4Adj_symmetric) ⟨1, by norm_num⟩ ≤ -2 := by
+  refine evals_le_of_linearIndependent
+    (normalizedLaplacian_symmetric icSigDisc4Adj icSigDisc4Adj_symmetric)
+    (k := 2) (by norm_num) (by norm_num) icSigDisc4_li ?_
+  intro c
+  have hX : (∑ l : Fin 2, c l •
+      (fun k : Fin 2 => (fun i : Fin 4 =>
+        if k = 0 then (![1, -1, 0, 0] : Fin 4 → ℝ) i
+        else (![0, 0, 1, -1] : Fin 4 → ℝ) i) :
+        Fin 2 → (Fin 4 → ℝ)) l)
+      = c 0 • (![1, -1, 0, 0] : Fin 4 → ℝ)
+        + c 1 • (![0, 0, 1, -1] : Fin 4 → ℝ) := by
+    funext i
+    fin_cases i <;> simp [Fin.sum_univ_two]
+  have hMX : normalizedLaplacian icSigDisc4Adj *ᵥ
+      (c 0 • (![1, -1, 0, 0] : Fin 4 → ℝ)
+        + c 1 • (![0, 0, 1, -1] : Fin 4 → ℝ))
+      = (-2 * c 0) • (![1, -1, 0, 0] : Fin 4 → ℝ)
+        + (-2 * c 1) • (![0, 0, 1, -1] : Fin 4 → ℝ) := by
+    rw [Matrix.mulVec_add, Matrix.mulVec_smul, Matrix.mulVec_smul,
+      icSigDisc4Adj_mulVec_minus, icSigDisc4Adj_mulVec_minus',
+      smul_smul, smul_smul, mul_comm (c 0) (-2 : ℝ),
+      mul_comm (c 1) (-2 : ℝ)]
+  have hM : quadForm (normalizedLaplacian icSigDisc4Adj)
+      (∑ l : Fin 2, c l •
+        (fun k : Fin 2 => (fun i : Fin 4 =>
+          if k = 0 then (![1, -1, 0, 0] : Fin 4 → ℝ) i
+          else (![0, 0, 1, -1] : Fin 4 → ℝ) i) :
+          Fin 2 → (Fin 4 → ℝ)) l)
+      = -4 * (c 0 * c 0) - 4 * (c 1 * c 1) := by
+    rw [hX, quadForm, hMX]
+    simp only [Matrix.add_dotProduct, Matrix.dotProduct_add,
+      Matrix.smul_dotProduct, Matrix.dotProduct_smul, smul_eq_mul,
+      icSigDisc4_dot_self_one, icSigDisc4_dot_self_two,
+      icSigDisc4_dot_cross, icSigDisc4_dot_cross']
+    ring
+  have hD : Matrix.dotProduct (∑ l : Fin 2, c l •
+      (fun k : Fin 2 => (fun i : Fin 4 =>
+        if k = 0 then (![1, -1, 0, 0] : Fin 4 → ℝ) i
+        else (![0, 0, 1, -1] : Fin 4 → ℝ) i) :
+        Fin 2 → (Fin 4 → ℝ)) l)
+      (∑ l : Fin 2, c l •
+        (fun k : Fin 2 => (fun i : Fin 4 =>
+          if k = 0 then (![1, -1, 0, 0] : Fin 4 → ℝ) i
+          else (![0, 0, 1, -1] : Fin 4 → ℝ) i) :
+          Fin 2 → (Fin 4 → ℝ)) l)
+      = 2 * (c 0 * c 0) + 2 * (c 1 * c 1) := by
+    rw [hX]
+    simp only [Matrix.add_dotProduct, Matrix.dotProduct_add,
+      Matrix.smul_dotProduct, Matrix.dotProduct_smul, smul_eq_mul,
+      icSigDisc4_dot_self_one, icSigDisc4_dot_self_two,
+      icSigDisc4_dot_cross, icSigDisc4_dot_cross']
+    ring
+  rw [hM, hD]
+  linarith [sq_nonneg (c 0), sq_nonneg (c 1)]
+
+/-- **Fence (disconnected-λ₂ theorem, `hnn`)**: at the two disjoint
+signed blocks the spectrum of `L_sym` carries the signed fixture's
+`-2` twice (both block-antisymmetric modes are eigenvectors at exactly
+`-2`), so `λ₂ ≤ -2 ≠ 0` and the nonnegativity-dropped conclusion
+`λ₂ = 0` fails. -/
+theorem icf_disc4_hnn_fence_QA :
+    ¬ (secondEval (normalizedLaplacian icSigDisc4Adj)
+        (normalizedLaplacian_symmetric icSigDisc4Adj icSigDisc4Adj_symmetric)
+        (by norm_num)
+      = 0) := by
+  have hle : secondEval (normalizedLaplacian icSigDisc4Adj)
+      (normalizedLaplacian_symmetric icSigDisc4Adj icSigDisc4Adj_symmetric)
+      (by norm_num)
+      ≤ -2 := icSigDisc4_evals_one_le
+  intro heq
+  rw [heq] at hle
+  norm_num at hle
+
+theorem icf_disc4_hnn_isolation_QA :
+    icSigDisc4Adj.IsSymm
+      ∧ (∀ i, 0 < deg icSigDisc4Adj i)
+      ∧ 2 ≤ Fintype.card (Fin 4)
+      ∧ ¬ (supportGraph icSigDisc4Adj icSigDisc4Adj_symmetric).Connected
+      ∧ ¬ (∀ i j, 0 ≤ icSigDisc4Adj i j) :=
+  ⟨icSigDisc4Adj_symmetric, icSigDisc4Adj_pos_deg, by norm_num,
+    icSigDisc4Adj_not_connected, icSigDisc4Adj_not_nonneg⟩
+
+/-- The edge-plus-isolated-vertex fixture on `Fin 3`: symmetric,
+nonnegative, degrees `(1, 1, 0)`. -/
+def icIsoAdj : Matrix (Fin 3) (Fin 3) ℝ :=
+  Matrix.of fun i j => if (i : ℕ) = 0 ∧ (j : ℕ) = 1 ∨ (i : ℕ) = 1 ∧ (j : ℕ) = 0 then 1 else 0
+
+theorem icIsoAdj_symmetric : icIsoAdj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [icIsoAdj]
+
+theorem icIsoAdj_nonneg : ∀ i j, 0 ≤ icIsoAdj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [icIsoAdj]
+
+theorem icIsoAdj_deg : ∀ i, deg icIsoAdj i = if (i : ℕ) = 2 then 0 else 1 := by
+  intro i
+  fin_cases i
+  all_goals simp only [deg, Fin.sum_univ_three, icIsoAdj, Matrix.of_apply]
+  all_goals norm_num
+
+theorem icIsoAdj_not_pos_deg : ¬ (∀ i, 0 < deg icIsoAdj i) := by
+  intro h
+  have h2 := h 2
+  rw [icIsoAdj_deg] at h2
+  simp at h2
+
+theorem icIsoAdj_not_connected :
+    ¬(supportGraph icIsoAdj icIsoAdj_symmetric).Connected := by
+  have hadj : ∀ i j : Fin 3,
+      (supportGraph icIsoAdj icIsoAdj_symmetric).Adj i j → j ≠ 2 := by
+    intro i j hadj
+    rw [supportGraph_adj] at hadj
+    intro hj2
+    rw [hj2] at hadj
+    have := hadj.2
+    simp [icIsoAdj] at this
+  have hnot : ∀ (u v : Fin 3),
+      (supportGraph icIsoAdj icIsoAdj_symmetric).Walk u v → v = 2 → u = 2 := by
+    intro u v w
+    induction w with
+    | nil => intro hv; exact hv
+    | cons hadj' rest ih =>
+        intro hv
+        exact absurd (ih hv) (hadj _ _ hadj')
+  intro hconn
+  obtain ⟨w⟩ := hconn 0 2
+  exact absurd (hnot 0 2 w rfl) (by decide)
+
+/-- The entry form of the fixture's normalized Laplacian: the isolated
+vertex's junk `D⁻¹ᐟ² = 0` scaling makes its `L_sym` eigenvalue `1`,
+not `0`. -/
+theorem icIsoAdj_normLap (i j : Fin 3) :
+    normalizedLaplacian icIsoAdj i j
+      = if (i : ℕ) = 0 ∧ (j : ℕ) = 1 ∨ (i : ℕ) = 1 ∧ (j : ℕ) = 0 then -1
+        else if i = j then 1 else 0 := by
+  simp only [normalizedLaplacian, Matrix.sub_apply, Matrix.one_apply,
+    Matrix.diagonal_mul, Matrix.mul_diagonal, degreeInvSqrt,
+    Matrix.diagonal_apply, icIsoAdj_deg]
+  fin_cases i <;> fin_cases j <;>
+    simp [icIsoAdj, Real.sqrt_one, Real.sqrt_zero]
+
+theorem icIsoAdj_mulVec (x : Fin 3 → ℝ) :
+    normalizedLaplacian icIsoAdj *ᵥ x = ![x 0 - x 1, x 1 - x 0, x 2] := by
+  funext i
+  fin_cases i
+  all_goals simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three,
+    icIsoAdj_normLap]
+  all_goals ring
+
+theorem icIsoAdj_psd : ∀ x : Fin 3 → ℝ,
+    0 ≤ quadForm (normalizedLaplacian icIsoAdj) x := by
+  intro x
+  rw [quadForm, icIsoAdj_mulVec]
+  simp [Matrix.dotProduct, Fin.sum_univ_three, Matrix.cons_val_zero,
+    Matrix.cons_val_one, Matrix.head_cons]
+  nlinarith [sq_nonneg (x 0 - x 1), sq_nonneg (x 2)]
+
+theorem icIsoAdj_kernel :
+    normalizedLaplacian icIsoAdj *ᵥ (![1, 1, 0] : Fin 3 → ℝ) = 0 := by
+  rw [icIsoAdj_mulVec]
+  funext i
+  fin_cases i <;> simp
+
+theorem icIsoAdj_kernel_ne : (![1, 1, 0] : Fin 3 → ℝ) ≠ 0 := by
+  intro h
+  have h0 := congrFun h 0
+  simp at h0
+
+/-- `λ₂ (L_sym) ≥ 1` by the variational engine (PSD and the kernel
+supplied by hand — no shelf degree lemma applies at the failing `hd`):
+every admissible constraint quotient equals `(4 x₀² + x₂²)/(2 x₀² +
+x₂²) ≥ 1`. -/
+theorem icIsoAdj_secondEval_ge_one :
+    1 ≤ secondEval (normalizedLaplacian icIsoAdj)
+        (normalizedLaplacian_symmetric icIsoAdj icIsoAdj_symmetric)
+        (by decide) := by
+  rw [secondEval_variational_of_ker
+    (normalizedLaplacian_symmetric icIsoAdj icIsoAdj_symmetric)
+    icIsoAdj_psd icIsoAdj_kernel_ne icIsoAdj_kernel (by decide)]
+  refine le_csInf ?_ ?_
+  · refine ⟨1, ![0, 0, 1], by
+        intro h
+        have h2 := congrFun h 2
+        simp at h2, ?_, ?_⟩
+    · rw [show Matrix.dotProduct (![0, 0, 1] : Fin 3 → ℝ)
+          (![1, 1, 0] : Fin 3 → ℝ)
+          = (0 : ℝ) from by
+        simp [Matrix.dotProduct, Fin.sum_univ_three]]
+    · rw [rayleigh, if_neg (by
+          intro h
+          have h2 := congrFun h 2
+          simp at h2)]
+      have hq : quadForm (normalizedLaplacian icIsoAdj)
+          (![0, 0, 1] : Fin 3 → ℝ) = 1 := by
+        rw [quadForm, icIsoAdj_mulVec]
+        simp [Matrix.dotProduct, Fin.sum_univ_three]
+      have hd : Matrix.dotProduct (![0, 0, 1] : Fin 3 → ℝ)
+          (![0, 0, 1] : Fin 3 → ℝ) = 1 := by
+        simp [Matrix.dotProduct, Fin.sum_univ_three]
+      rw [hq, hd]
+      norm_num
+  · rintro r ⟨x, hx0, hxorth, hxr⟩
+    have hc : x 0 + x 1 = 0 := by
+      simpa [Matrix.dotProduct, Fin.sum_univ_three] using hxorth
+    have hx1 : x 1 = -(x 0) := by linarith
+    have hq : quadForm (normalizedLaplacian icIsoAdj) x
+        = 4 * (x 0 * x 0) + x 2 * x 2 := by
+      rw [quadForm, icIsoAdj_mulVec]
+      simp [Matrix.dotProduct, Fin.sum_univ_three, Matrix.cons_val_zero,
+        Matrix.cons_val_one, Matrix.head_cons]
+      rw [hx1]
+      ring
+    have hd : Matrix.dotProduct x x
+        = 2 * (x 0 * x 0) + x 2 * x 2 := by
+      simp [Matrix.dotProduct, Fin.sum_univ_three]
+      rw [hx1]
+      ring
+    have hdp : 0 < Matrix.dotProduct x x := by
+      obtain ⟨i, hi⟩ : ∃ i : Fin 3, x i ≠ 0 := by
+        by_contra hcon
+        push_neg at hcon
+        exact hx0 (funext hcon)
+      have h1 : ∀ j ∈ (Finset.univ : Finset (Fin 3)), 0 ≤ x j * x j :=
+        fun j _ => mul_self_nonneg (x j)
+      have h2 : 0 < x i * x i := mul_self_pos.2 hi
+      simpa [Matrix.dotProduct] using
+        Finset.sum_pos' h1 ⟨i, Finset.mem_univ i, h2⟩
+    rw [← hxr, rayleigh, if_neg hx0, hq, le_div_iff₀ hdp, hd]
+    nlinarith [sq_nonneg (x 0)]
+
+/-- **Fence (disconnected-λ₂ theorem, `hd`)**: at the
+edge-plus-isolated-vertex fixture every other hypothesis is genuine
+(symmetry, nonnegativity, at least two vertices, disconnected), while
+`λ₂ (L_sym) = 1 ≠ 0` — the isolated vertex's junk `D⁻¹ᐟ² = 0` row
+makes its eigenvalue `1`, not `0`, and the degree-dropped conclusion
+fails. -/
+theorem icf_iso_hd_fence_QA :
+    ¬ (secondEval (normalizedLaplacian icIsoAdj)
+        (normalizedLaplacian_symmetric icIsoAdj icIsoAdj_symmetric)
+        (by decide)
+      = 0) := by
+  intro heq
+  have h := icIsoAdj_secondEval_ge_one
+  rw [heq] at h
+  norm_num at h
+
+theorem icf_iso_hd_isolation_QA :
+    icIsoAdj.IsSymm
+      ∧ (∀ i j, 0 ≤ icIsoAdj i j)
+      ∧ 2 ≤ Fintype.card (Fin 3)
+      ∧ ¬ (supportGraph icIsoAdj icIsoAdj_symmetric).Connected
+      ∧ ¬ (∀ i, 0 < deg icIsoAdj i) :=
+  ⟨icIsoAdj_symmetric, icIsoAdj_nonneg, by decide,
+    icIsoAdj_not_connected, icIsoAdj_not_pos_deg⟩
+
+/-! ### The Fiedler capstone's `hnn` clause (the negative-cut fixture) -/
+
+theorem icNegCut_sq_sqrt_two : Real.sqrt 2 * Real.sqrt 2 = 2 :=
+  Real.mul_self_sqrt (by norm_num)
+
+theorem icNegCut_sqrt_two_ne : Real.sqrt 2 ≠ 0 :=
+  Real.sqrt_ne_zero'.2 (by norm_num)
+
+theorem icNegCut_inv_sqrt_two_mul_sqrt_two :
+    (Real.sqrt 2)⁻¹ * Real.sqrt 2 = 1 :=
+  inv_mul_cancel₀ icNegCut_sqrt_two_ne
+
+theorem icNegCut_two_inv_sqrt_two : 2 * (Real.sqrt 2)⁻¹ = Real.sqrt 2 := by
+  field_simp
+
+/-- The entry form of the fixture's normalized Laplacian (degrees
+`(1, 2, 1)`, so the middle row/column carries the `√2` scaling). -/
+theorem icNegCutAdj_normLap_entry (i j : Fin 3) :
+    normalizedLaplacian icNegCutAdj i j
+      = (if i = j then (1 : ℝ) else 0)
+        - (Real.sqrt (deg icNegCutAdj i))⁻¹ * icNegCutAdj i j
+          * (Real.sqrt (deg icNegCutAdj j))⁻¹ := by
+  simp only [normalizedLaplacian, Matrix.sub_apply, Matrix.one_apply,
+    Matrix.diagonal_mul, Matrix.mul_diagonal, degreeInvSqrt,
+    Matrix.diagonal_apply]
+
+/-- The three eigenvector witnesses: `(1, 0, -1)` at `-5`, `(1, √2, 1)`
+at `0`, `(1, -√2, 1)` at `2`. -/
+theorem icNegCutAdj_mulVec_minus :
+    normalizedLaplacian icNegCutAdj *ᵥ (![1, 0, -1] : Fin 3 → ℝ)
+      = (-5 : ℝ) • (![1, 0, -1] : Fin 3 → ℝ) := by
+  have hentry := icNegCutAdj_normLap_entry
+  funext i
+  fin_cases i <;>
+    simp only [hentry, Matrix.mulVec, Matrix.dotProduct,
+      Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.cons_val_succ, Matrix.head_cons, Pi.smul_apply, smul_eq_mul]
+  all_goals simp only [icNegCutAdj_deg, Real.sqrt_one, inv_one, mul_one,
+    one_mul]
+  all_goals simp [icNegCutAdj, icNegCut_inv_sqrt_two_mul_sqrt_two]
+  all_goals (try norm_num)
+
+theorem icNegCutAdj_mulVec_zero :
+    normalizedLaplacian icNegCutAdj *ᵥ (![1, Real.sqrt 2, 1] : Fin 3 → ℝ)
+      = 0 := by
+  have hentry := icNegCutAdj_normLap_entry
+  funext i
+  fin_cases i <;>
+    simp only [hentry, Matrix.mulVec, Matrix.dotProduct,
+      Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.cons_val_succ, Matrix.head_cons, Pi.zero_apply]
+  all_goals simp only [icNegCutAdj_deg, Real.sqrt_one, inv_one, mul_one,
+    one_mul]
+  all_goals simp [icNegCutAdj, icNegCut_inv_sqrt_two_mul_sqrt_two]
+  all_goals (try norm_num)
+  all_goals (try linarith [icNegCut_two_inv_sqrt_two])
+
+theorem icNegCutAdj_mulVec_plus :
+    normalizedLaplacian icNegCutAdj *ᵥ (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ)
+      = (2 : ℝ) • (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ) := by
+  have hentry := icNegCutAdj_normLap_entry
+  funext i
+  fin_cases i <;>
+    simp only [hentry, Matrix.mulVec, Matrix.dotProduct,
+      Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.cons_val_succ, Matrix.head_cons, Pi.smul_apply, smul_eq_mul]
+  all_goals simp only [icNegCutAdj_deg, Real.sqrt_one, inv_one, mul_one,
+    one_mul, neg_mul]
+  all_goals simp [icNegCutAdj, icNegCut_inv_sqrt_two_mul_sqrt_two]
+  all_goals (try norm_num)
+  all_goals (try linarith [icNegCut_two_inv_sqrt_two])
+
+/-- The pairwise dot products of the witness trio: self dots `2, 4, 4`,
+cross dots all zero. -/
+theorem icNegCutAdj_dot_minus_minus :
+    Matrix.dotProduct (![1, 0, -1] : Fin 3 → ℝ) (![1, 0, -1] : Fin 3 → ℝ)
+      = 2 := by
+  simp [Matrix.dotProduct, Fin.sum_univ_three]
+  norm_num
+
+theorem icNegCutAdj_dot_zero_zero :
+    Matrix.dotProduct (![1, Real.sqrt 2, 1] : Fin 3 → ℝ)
+      (![1, Real.sqrt 2, 1] : Fin 3 → ℝ) = 4 := by
+  have hexp : Matrix.dotProduct (![1, Real.sqrt 2, 1] : Fin 3 → ℝ)
+      (![1, Real.sqrt 2, 1] : Fin 3 → ℝ)
+      = (1 : ℝ) * 1 + Real.sqrt 2 * Real.sqrt 2 + 1 * 1 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_three]
+  rw [hexp, icNegCut_sq_sqrt_two]
+  norm_num
+
+theorem icNegCutAdj_dot_plus_plus :
+    Matrix.dotProduct (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ)
+      (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ) = 4 := by
+  have hexp : Matrix.dotProduct (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ)
+      (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ)
+      = (1 : ℝ) * 1 + (-Real.sqrt 2) * (-Real.sqrt 2) + 1 * 1 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_three]
+  rw [hexp, neg_mul_neg, icNegCut_sq_sqrt_two]
+  norm_num
+
+theorem icNegCutAdj_dot_minus_zero :
+    Matrix.dotProduct (![1, 0, -1] : Fin 3 → ℝ)
+      (![1, Real.sqrt 2, 1] : Fin 3 → ℝ) = 0 := by
+  simp [Matrix.dotProduct, Fin.sum_univ_three]
+
+theorem icNegCutAdj_dot_zero_minus :
+    Matrix.dotProduct (![1, Real.sqrt 2, 1] : Fin 3 → ℝ)
+      (![1, 0, -1] : Fin 3 → ℝ) = 0 := by
+  rw [Matrix.dotProduct_comm]
+  exact icNegCutAdj_dot_minus_zero
+
+theorem icNegCutAdj_dot_minus_plus :
+    Matrix.dotProduct (![1, 0, -1] : Fin 3 → ℝ)
+      (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ) = 0 := by
+  simp [Matrix.dotProduct, Fin.sum_univ_three]
+
+theorem icNegCutAdj_dot_plus_minus :
+    Matrix.dotProduct (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ)
+      (![1, 0, -1] : Fin 3 → ℝ) = 0 := by
+  rw [Matrix.dotProduct_comm]
+  exact icNegCutAdj_dot_minus_plus
+
+theorem icNegCutAdj_dot_zero_plus :
+    Matrix.dotProduct (![1, Real.sqrt 2, 1] : Fin 3 → ℝ)
+      (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ) = 0 := by
+  have hexp : Matrix.dotProduct (![1, Real.sqrt 2, 1] : Fin 3 → ℝ)
+      (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ)
+      = (1 : ℝ) * 1 + Real.sqrt 2 * (-Real.sqrt 2) + 1 * 1 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_three]
+  rw [hexp, mul_neg, icNegCut_sq_sqrt_two]
+  norm_num
+
+theorem icNegCutAdj_dot_plus_zero :
+    Matrix.dotProduct (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ)
+      (![1, Real.sqrt 2, 1] : Fin 3 → ℝ) = 0 := by
+  rw [Matrix.dotProduct_comm]
+  exact icNegCutAdj_dot_zero_plus
+
+private theorem icNegCut_li1 :
+    LinearIndependent ℝ
+      (fun _ : Fin 1 => (![1, 0, -1] : Fin 3 → ℝ) : Fin 1 → (Fin 3 → ℝ)) := by
+  rw [Fintype.linearIndependent_iff]
+  intro c hc i
+  have h0 := congrFun hc 0
+  simp at h0
+  fin_cases i
+  · exact h0
+
+private theorem icNegCut_li2 :
+    LinearIndependent ℝ
+      (fun k : Fin 2 => (fun i : Fin 3 =>
+        if k = 0 then (![1, 0, -1] : Fin 3 → ℝ) i
+        else (![1, Real.sqrt 2, 1] : Fin 3 → ℝ) i) :
+        Fin 2 → (Fin 3 → ℝ)) := by
+  rw [Fintype.linearIndependent_iff]
+  intro c hc i
+  have h0 := congrFun hc 0
+  have h2 := congrFun hc 2
+  simp [Fin.sum_univ_two] at h0 h2
+  fin_cases i
+  · show c 0 = 0
+    linarith
+  · show c 1 = 0
+    linarith
+
+private theorem icNegCut_li3 :
+    LinearIndependent ℝ
+      (fun k : Fin 3 => (fun i : Fin 3 =>
+        if k = 0 then (![1, 0, -1] : Fin 3 → ℝ) i
+        else if k = 1 then (![1, Real.sqrt 2, 1] : Fin 3 → ℝ) i
+        else (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ) i) :
+        Fin 3 → (Fin 3 → ℝ)) := by
+  rw [Fintype.linearIndependent_iff]
+  intro c hc i
+  have hE0 : c 0 + c 1 + c 2 = 0 := by
+    have hh := congrFun hc 0
+    simp [Fin.sum_univ_three] at hh
+    exact hh
+  have hE1 : Real.sqrt 2 * (c 1 - c 2) = 0 := by
+    have hh := congrFun hc 1
+    simp [Fin.sum_univ_three] at hh
+    linear_combination hh
+  have hE2 : -(c 0) + c 1 + c 2 = 0 := by
+    have hh := congrFun hc 2
+    simp [Fin.sum_univ_three] at hh
+    exact hh
+  have hc12 : c 1 - c 2 = 0 := by
+    rcases mul_eq_zero.1 hE1 with h | h
+    · exact absurd h icNegCut_sqrt_two_ne
+    · exact h
+  have hc0 : c 0 = 0 := by
+    have h2c0 : (2 : ℝ) * c 0 = 0 := by linear_combination hE0 - hE2
+    linarith
+  have hc1 : c 1 = 0 := by
+    have h2c1 : (2 : ℝ) * c 1 = 0 := by
+      linear_combination hE0 + hc12 - hc0
+    linarith
+  fin_cases i
+  · exact hc0
+  · exact hc1
+  · show c 2 = 0
+    linarith
+
+/-- `evals ⟨0⟩ ≤ -5`: the bottom mode alone (the engine at `k = 1`,
+its bound attained with equality on the mode's span). -/
+theorem icNegCut_evals_zero_le :
+    evals (normalizedLaplacian_symmetric icNegCutAdj icNegCutAdj_symmetric)
+      ⟨0, by norm_num⟩ ≤ -5 := by
+  refine evals_le_of_linearIndependent
+    (normalizedLaplacian_symmetric icNegCutAdj icNegCutAdj_symmetric)
+    (k := 1) (by norm_num) (by norm_num) icNegCut_li1 ?_
+  intro c
+  have hX : (∑ l : Fin 1, c l •
+      (fun _ : Fin 1 => (![1, 0, -1] : Fin 3 → ℝ) : Fin 1 → (Fin 3 → ℝ)) l)
+      = c 0 • (![1, 0, -1] : Fin 3 → ℝ) := by
+    simp
+  have hM : quadForm (normalizedLaplacian icNegCutAdj)
+      (∑ l : Fin 1, c l •
+        (fun _ : Fin 1 => (![1, 0, -1] : Fin 3 → ℝ) : Fin 1 → (Fin 3 → ℝ)) l)
+      = -10 * (c 0 * c 0) := by
+    rw [hX, quadForm, Matrix.mulVec_smul, icNegCutAdj_mulVec_minus,
+      smul_smul]
+    simp only [Matrix.dotProduct_smul, Matrix.smul_dotProduct,
+      smul_eq_mul, icNegCutAdj_dot_minus_minus]
+    ring
+  have hD : Matrix.dotProduct
+      (∑ l : Fin 1, c l •
+        (fun _ : Fin 1 => (![1, 0, -1] : Fin 3 → ℝ) : Fin 1 → (Fin 3 → ℝ)) l)
+      (∑ l : Fin 1, c l •
+        (fun _ : Fin 1 => (![1, 0, -1] : Fin 3 → ℝ) : Fin 1 → (Fin 3 → ℝ)) l)
+      = 2 * (c 0 * c 0) := by
+    rw [hX]
+    simp only [Matrix.dotProduct_smul, Matrix.smul_dotProduct,
+      smul_eq_mul, icNegCutAdj_dot_minus_minus]
+    ring
+  rw [hM, hD]
+  linarith [sq_nonneg (c 0)]
+
+/-- `evals ⟨1⟩ ≤ 0`: the bottom mode plus the kernel mode. -/
+theorem icNegCut_evals_one_le :
+    evals (normalizedLaplacian_symmetric icNegCutAdj icNegCutAdj_symmetric)
+      ⟨1, by norm_num⟩ ≤ 0 := by
+  refine evals_le_of_linearIndependent
+    (normalizedLaplacian_symmetric icNegCutAdj icNegCutAdj_symmetric)
+    (k := 2) (by norm_num) (by norm_num) icNegCut_li2 ?_
+  intro c
+  have hX : (∑ l : Fin 2, c l •
+      (fun k : Fin 2 => (fun i : Fin 3 =>
+        if k = 0 then (![1, 0, -1] : Fin 3 → ℝ) i
+        else (![1, Real.sqrt 2, 1] : Fin 3 → ℝ) i) :
+        Fin 2 → (Fin 3 → ℝ)) l)
+      = c 0 • (![1, 0, -1] : Fin 3 → ℝ)
+        + c 1 • (![1, Real.sqrt 2, 1] : Fin 3 → ℝ) := by
+    funext i
+    fin_cases i <;> simp [Fin.sum_univ_two]
+  have hMX : normalizedLaplacian icNegCutAdj *ᵥ
+      (c 0 • (![1, 0, -1] : Fin 3 → ℝ)
+        + c 1 • (![1, Real.sqrt 2, 1] : Fin 3 → ℝ))
+      = (-5 * c 0) • (![1, 0, -1] : Fin 3 → ℝ) := by
+    rw [Matrix.mulVec_add, Matrix.mulVec_smul, Matrix.mulVec_smul,
+      icNegCutAdj_mulVec_minus, icNegCutAdj_mulVec_zero, smul_zero,
+      add_zero, smul_smul, mul_comm (c 0) (-5 : ℝ)]
+  have hM : quadForm (normalizedLaplacian icNegCutAdj)
+      (∑ l : Fin 2, c l •
+        (fun k : Fin 2 => (fun i : Fin 3 =>
+          if k = 0 then (![1, 0, -1] : Fin 3 → ℝ) i
+          else (![1, Real.sqrt 2, 1] : Fin 3 → ℝ) i) :
+          Fin 2 → (Fin 3 → ℝ)) l)
+      = -10 * (c 0 * c 0) := by
+    rw [hX, quadForm, hMX]
+    simp only [Matrix.add_dotProduct, Matrix.dotProduct_add,
+      Matrix.smul_dotProduct, Matrix.dotProduct_smul, smul_eq_mul,
+      icNegCutAdj_dot_minus_minus, icNegCutAdj_dot_zero_minus]
+    ring
+  have hD : Matrix.dotProduct
+      (∑ l : Fin 2, c l •
+        (fun k : Fin 2 => (fun i : Fin 3 =>
+          if k = 0 then (![1, 0, -1] : Fin 3 → ℝ) i
+          else (![1, Real.sqrt 2, 1] : Fin 3 → ℝ) i) :
+          Fin 2 → (Fin 3 → ℝ)) l)
+      (∑ l : Fin 2, c l •
+        (fun k : Fin 2 => (fun i : Fin 3 =>
+          if k = 0 then (![1, 0, -1] : Fin 3 → ℝ) i
+          else (![1, Real.sqrt 2, 1] : Fin 3 → ℝ) i) :
+          Fin 2 → (Fin 3 → ℝ)) l)
+      = 2 * (c 0 * c 0) + 4 * (c 1 * c 1) := by
+    rw [hX]
+    simp only [Matrix.add_dotProduct, Matrix.dotProduct_add,
+      Matrix.smul_dotProduct, Matrix.dotProduct_smul, smul_eq_mul,
+      icNegCutAdj_dot_minus_minus, icNegCutAdj_dot_zero_zero,
+      icNegCutAdj_dot_minus_zero, icNegCutAdj_dot_zero_minus]
+    ring
+  rw [hM, hD]
+  linarith [sq_nonneg (c 0)]
+
+/-- `evals ⟨2⟩ ≤ 2`: the full witness trio (the spectrum is exactly
+`{-5, 0, 2}`). -/
+theorem icNegCut_evals_two_le :
+    evals (normalizedLaplacian_symmetric icNegCutAdj icNegCutAdj_symmetric)
+      ⟨2, by norm_num⟩ ≤ 2 := by
+  refine evals_le_of_linearIndependent
+    (normalizedLaplacian_symmetric icNegCutAdj icNegCutAdj_symmetric)
+    (k := 3) (by norm_num) (by norm_num) icNegCut_li3 ?_
+  intro c
+  have hX : (∑ l : Fin 3, c l •
+      (fun k : Fin 3 => (fun i : Fin 3 =>
+        if k = 0 then (![1, 0, -1] : Fin 3 → ℝ) i
+        else if k = 1 then (![1, Real.sqrt 2, 1] : Fin 3 → ℝ) i
+        else (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ) i) :
+        Fin 3 → (Fin 3 → ℝ)) l)
+      = c 0 • (![1, 0, -1] : Fin 3 → ℝ)
+        + c 1 • (![1, Real.sqrt 2, 1] : Fin 3 → ℝ)
+        + c 2 • (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ) := by
+    funext i
+    fin_cases i <;> simp [Fin.sum_univ_three]
+  have hMX : normalizedLaplacian icNegCutAdj *ᵥ
+      (c 0 • (![1, 0, -1] : Fin 3 → ℝ)
+        + c 1 • (![1, Real.sqrt 2, 1] : Fin 3 → ℝ)
+        + c 2 • (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ))
+      = (-5 * c 0) • (![1, 0, -1] : Fin 3 → ℝ)
+        + (2 * c 2) • (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ) := by
+    rw [Matrix.mulVec_add, Matrix.mulVec_add, Matrix.mulVec_smul,
+      Matrix.mulVec_smul, Matrix.mulVec_smul, icNegCutAdj_mulVec_minus,
+      icNegCutAdj_mulVec_zero, icNegCutAdj_mulVec_plus, smul_zero,
+      add_zero, smul_smul, smul_smul, mul_comm (c 0) (-5 : ℝ),
+      mul_comm (c 2) (2 : ℝ)]
+  have hM : quadForm (normalizedLaplacian icNegCutAdj)
+      (∑ l : Fin 3, c l •
+        (fun k : Fin 3 => (fun i : Fin 3 =>
+          if k = 0 then (![1, 0, -1] : Fin 3 → ℝ) i
+          else if k = 1 then (![1, Real.sqrt 2, 1] : Fin 3 → ℝ) i
+          else (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ) i) :
+          Fin 3 → (Fin 3 → ℝ)) l)
+      = -10 * (c 0 * c 0) + 8 * (c 2 * c 2) := by
+    rw [hX, quadForm, hMX]
+    simp only [Matrix.add_dotProduct, Matrix.dotProduct_add,
+      Matrix.smul_dotProduct, Matrix.dotProduct_smul, smul_eq_mul,
+      icNegCutAdj_dot_minus_minus, icNegCutAdj_dot_plus_plus,
+      icNegCutAdj_dot_minus_plus, icNegCutAdj_dot_plus_minus,
+      icNegCutAdj_dot_minus_zero, icNegCutAdj_dot_zero_minus,
+      icNegCutAdj_dot_zero_plus, icNegCutAdj_dot_plus_zero]
+    ring
+  have hD : Matrix.dotProduct
+      (∑ l : Fin 3, c l •
+        (fun k : Fin 3 => (fun i : Fin 3 =>
+          if k = 0 then (![1, 0, -1] : Fin 3 → ℝ) i
+          else if k = 1 then (![1, Real.sqrt 2, 1] : Fin 3 → ℝ) i
+          else (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ) i) :
+          Fin 3 → (Fin 3 → ℝ)) l)
+      (∑ l : Fin 3, c l •
+        (fun k : Fin 3 => (fun i : Fin 3 =>
+          if k = 0 then (![1, 0, -1] : Fin 3 → ℝ) i
+          else if k = 1 then (![1, Real.sqrt 2, 1] : Fin 3 → ℝ) i
+          else (![1, -Real.sqrt 2, 1] : Fin 3 → ℝ) i) :
+          Fin 3 → (Fin 3 → ℝ)) l)
+      = 2 * (c 0 * c 0) + 4 * (c 1 * c 1) + 4 * (c 2 * c 2) := by
+    rw [hX]
+    simp only [Matrix.add_dotProduct, Matrix.dotProduct_add,
+      Matrix.smul_dotProduct, Matrix.dotProduct_smul, smul_eq_mul,
+      icNegCutAdj_dot_minus_minus, icNegCutAdj_dot_zero_zero,
+      icNegCutAdj_dot_plus_plus, icNegCutAdj_dot_minus_zero,
+      icNegCutAdj_dot_zero_minus, icNegCutAdj_dot_minus_plus,
+      icNegCutAdj_dot_plus_minus, icNegCutAdj_dot_zero_plus,
+      icNegCutAdj_dot_plus_zero]
+    ring
+  rw [hM, hD]
+  nlinarith [sq_nonneg (c 0), sq_nonneg (c 1)]
+
+theorem icNegCut_trace :
+    (normalizedLaplacian icNegCutAdj).trace = -3 := by
+  rw [show (normalizedLaplacian icNegCutAdj).trace
+      = ∑ i, normalizedLaplacian icNegCutAdj i i from rfl,
+    Fin.sum_univ_three]
+  simp [icNegCutAdj_normLap_entry, icNegCutAdj_deg, Real.sqrt_one,
+    inv_one, mul_one]
+  norm_num [icNegCutAdj, Matrix.of_apply, Matrix.cons_val_zero,
+    Matrix.cons_val_one, Matrix.cons_val_succ, Matrix.head_cons]
+
+/-- **The exact pin: `λ₂ (L_sym) = 0`.** The three engine bounds
+(`e₀ ≤ -5`, `e₁ ≤ 0`, `e₂ ≤ 2`) plus the trace `-3` force
+`e₁ = -3 - e₀ - e₂ ≥ -3 + 5 - 2 = 0`. -/
+theorem icNegCut_secondEval_eq_zero :
+    secondEval (normalizedLaplacian icNegCutAdj)
+      (normalizedLaplacian_symmetric icNegCutAdj icNegCutAdj_symmetric)
+      (by decide) = 0 := by
+  have hM := normalizedLaplacian_symmetric icNegCutAdj icNegCutAdj_symmetric
+  have hsum3 : evals hM ⟨0, by norm_num⟩ + evals hM ⟨1, by norm_num⟩
+      + evals hM ⟨2, by norm_num⟩ = -3 := by
+    have ht := evals_sum_eq_trace hM
+    rw [icNegCut_trace, Finset.sum_fin_eq_sum_range] at ht
+    simp only [Fintype.card_fin] at ht
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one] at ht
+    simp only [Nat.lt_succ_self, reduceDIte] at ht
+    exact ht
+  have h0 : evals hM ⟨0, by norm_num⟩ ≤ -5 := icNegCut_evals_zero_le
+  have h1 : evals hM ⟨1, by norm_num⟩ ≤ 0 := icNegCut_evals_one_le
+  have h2 : evals hM ⟨2, by norm_num⟩ ≤ 2 := icNegCut_evals_two_le
+  have hsplit : evals hM ⟨1, by norm_num⟩
+      = -3 - evals hM ⟨0, by norm_num⟩ - evals hM ⟨2, by norm_num⟩ := by
+    linarith
+  rw [show secondEval (normalizedLaplacian icNegCutAdj) hM (by decide)
+      = evals hM ⟨1, by norm_num⟩ from rfl, hsplit]
+  linarith
+
+/-- The kernel characterization: every kernel vector is a multiple of
+`(1, √2, 1)` (rows `0` and `2` force `x₀ = x₂`; row `1` then forces
+`x₁ = √2 x₀`). -/
+theorem icNegCut_ker_eq (x : Fin 3 → ℝ)
+    (hx : normalizedLaplacian icNegCutAdj *ᵥ x = 0) :
+    ∃ c : ℝ, x = c • (![1, Real.sqrt 2, 1] : Fin 3 → ℝ) := by
+  have hentry := icNegCutAdj_normLap_entry
+  have hrow : ∀ i : Fin 3,
+      (∑ j, normalizedLaplacian icNegCutAdj i j * x j) = 0 := by
+    intro i
+    have hh := congrFun hx i
+    simpa only [Matrix.mulVec, Matrix.dotProduct, Pi.zero_apply] using hh
+  have e0 : -(2 : ℝ) * x 0 - (Real.sqrt 2)⁻¹ * x 1 + 3 * x 2 = 0 := by
+    have hh := hrow 0
+    simp only [hentry, Fin.sum_univ_three] at hh
+    rw [icNegCutAdj_deg 0, icNegCutAdj_deg 1, icNegCutAdj_deg 2] at hh
+    simp only [Real.sqrt_one, inv_one, mul_one, one_mul] at hh
+    simp [icNegCutAdj, icNegCut_inv_sqrt_two_mul_sqrt_two] at hh
+    linear_combination hh
+  have e1 : -(Real.sqrt 2)⁻¹ * x 0 + x 1 - (Real.sqrt 2)⁻¹ * x 2 = 0 := by
+    have hh := hrow 1
+    simp only [hentry, Fin.sum_univ_three] at hh
+    rw [icNegCutAdj_deg 0, icNegCutAdj_deg 1, icNegCutAdj_deg 2] at hh
+    simp only [Real.sqrt_one, inv_one, mul_one, one_mul] at hh
+    simp [icNegCutAdj, icNegCut_inv_sqrt_two_mul_sqrt_two] at hh
+    linear_combination hh
+  have e2 : 3 * x 0 - (Real.sqrt 2)⁻¹ * x 1 - 2 * x 2 = 0 := by
+    have hh := hrow 2
+    simp only [hentry, Fin.sum_univ_three] at hh
+    rw [icNegCutAdj_deg 0, icNegCutAdj_deg 1, icNegCutAdj_deg 2] at hh
+    simp only [Real.sqrt_one, inv_one, mul_one, one_mul] at hh
+    simp [icNegCutAdj, icNegCut_inv_sqrt_two_mul_sqrt_two] at hh
+    linear_combination hh
+  have h5 : 5 * (x 0 - x 2) = 0 := by linear_combination e2 - e0
+  have hx02 : x 0 = x 2 := by
+    rcases mul_eq_zero.1 h5 with h | h
+    · norm_num at h
+    · linarith
+  have hx1 : x 1 = (Real.sqrt 2)⁻¹ * (x 0 + x 2) := by linear_combination e1
+  refine ⟨x 0, ?_⟩
+  have hsum : x 0 + x 2 = 2 * x 0 := by rw [← hx02]; ring
+  have hx1' : x 1 = Real.sqrt 2 * x 0 := by
+    calc x 1 = (Real.sqrt 2)⁻¹ * (2 * x 0) := by rw [hx1, hsum]
+      _ = ((Real.sqrt 2)⁻¹ * 2) * x 0 := by ring
+      _ = (2 * (Real.sqrt 2)⁻¹) * x 0 := by ring
+      _ = Real.sqrt 2 * x 0 := by rw [icNegCut_two_inv_sqrt_two]
+  funext i
+  fin_cases i
+  · simp only [Pi.smul_apply, smul_eq_mul]
+    simp
+  · show x 1 = (x 0 • (![1, Real.sqrt 2, 1] : Fin 3 → ℝ)) 1
+    rw [hx1']
+    simp only [Pi.smul_apply, smul_eq_mul, Matrix.cons_val_one]
+    simp
+    ring
+  · show x 2 = (x 0 • (![1, Real.sqrt 2, 1] : Fin 3 → ℝ)) 2
+    rw [← hx02]
+    simp only [Pi.smul_apply, smul_eq_mul, Matrix.cons_val_succ,
+      Matrix.head_cons, Matrix.cons_val_zero]
+    simp
+
+/-- **The sweep vector is a nonzero constant** at the fixture: the
+Fiedler vector lies in the one-dimensional `λ₂ = 0` eigenspace, and
+`D⁻¹ᐟ² · (1, √2, 1) = (1, 1, 1)`. -/
+theorem icNegCut_sweep_const :
+    ∃ c : ℝ, c ≠ 0 ∧ fiedlerSweepVector icNegCutAdj icNegCutAdj_symmetric
+        (by decide) = c • (1 : Fin 3 → ℝ) := by
+  have hzero : normalizedLaplacian icNegCutAdj
+      *ᵥ fiedlerVectorNormalized icNegCutAdj icNegCutAdj_symmetric
+        (by decide) = 0 := by
+    have h := fiedlerVectorNormalized_eigen icNegCutAdj icNegCutAdj_symmetric
+      (by decide)
+    rw [icNegCut_secondEval_eq_zero] at h
+    rw [zero_smul] at h
+    exact h
+  obtain ⟨c, hc⟩ := icNegCut_ker_eq _ hzero
+  have hc0 : c ≠ 0 := by
+    intro h0
+    rw [h0, zero_smul] at hc
+    exact fiedlerVectorNormalized_ne_zero icNegCutAdj icNegCutAdj_symmetric
+      (by decide) hc
+  refine ⟨c, hc0, ?_⟩
+  have h1 : degreeInvSqrt icNegCutAdj *ᵥ (![1, Real.sqrt 2, 1] : Fin 3 → ℝ)
+      = (1 : Fin 3 → ℝ) := by
+    funext i
+    rw [degreeInvSqrt_mulVec_apply, icNegCutAdj_deg]
+    fin_cases i
+    · simp [Real.sqrt_one]
+    · simp [Matrix.cons_val_one,
+        icNegCut_inv_sqrt_two_mul_sqrt_two]
+    · simp [Real.sqrt_one, Matrix.cons_val_succ, Matrix.head_cons,
+        Matrix.cons_val_zero]
+  rw [fiedlerSweepVector, hc, Matrix.mulVec_smul_assoc, h1]
+
+/-- **Fence (Fiedler capstone, `hnn`)**: at the connected negative-cut
+fixture `λ₂ (L_sym) = 0` and the one-dimensional `λ₂`-eigenspace is
+spanned by `(1, √2, 1)`, so the sweep vector is a *nonzero constant*
+— its superlevel/sublevel family contains no nonempty proper member
+at all, and the nonnegativity-dropped conclusion fails on the shape
+clauses. -/
+theorem icf_fiedler_hnn_fence_QA :
+    ¬ (∃ S : Finset (Fin 3), S.Nonempty ∧ Sᶜ.Nonempty ∧
+      ((∃ t : ℝ, ∀ i, i ∈ S ↔ t ≤
+          fiedlerSweepVector icNegCutAdj icNegCutAdj_symmetric
+            (by decide) i) ∨
+        (∃ t : ℝ, ∀ i, i ∈ S ↔
+          fiedlerSweepVector icNegCutAdj icNegCutAdj_symmetric
+            (by decide) i ≤ t)) ∧
+      conductance icNegCutAdj S ^ 2
+        ≤ 2 * secondEval (normalizedLaplacian icNegCutAdj)
+            (normalizedLaplacian_symmetric icNegCutAdj icNegCutAdj_symmetric)
+            (by decide)) := by
+  obtain ⟨c, hc0, hsw⟩ := icNegCut_sweep_const
+  rintro ⟨S, hSne, hSc, hlev, -⟩
+  refine icf_no_proper_level_of_const c S hSne hSc ?_
+  rcases hlev with ⟨t, ht⟩ | ⟨t, ht⟩
+  · refine Or.inl ⟨t, fun i => ?_⟩
+    have hh := ht i
+    rw [hsw] at hh
+    simpa using hh
+  · refine Or.inr ⟨t, fun i => ?_⟩
+    have hh := ht i
+    rw [hsw] at hh
+    simpa using hh
+
+theorem icf_fiedler_hnn_isolation_QA :
+    icNegCutAdj.IsSymm
+      ∧ (∀ i, 0 < deg icNegCutAdj i)
+      ∧ 2 ≤ Fintype.card (Fin 3)
+      ∧ (supportGraph icNegCutAdj icNegCutAdj_symmetric).Connected
+      ∧ ¬ (∀ i j, 0 ≤ icNegCutAdj i j) :=
+  icf_cheeger_pos_hnn_isolation_QA
+
+/-! ### The attainment theorem's `hcard` clause -/
+
+/-- The one-vertex fixture: nonnegative by construction. -/
+def icOneAdj : Matrix (Fin 1) (Fin 1) ℝ := Matrix.of fun _ _ => 0
+
+theorem icOneAdj_nonneg : ∀ i j, 0 ≤ icOneAdj i j := by
+  intro i j
+  rfl
+
+/-- **Fence (attainment, `hcard`)**: on a one-element type no nonempty
+proper subset exists, so the cardinality-dropped conclusion's
+existential fails outright — the `2 ≤ card V` guard is what keeps the
+attainment statement's search space nonempty. -/
+theorem icf_attain_hcard_fence_QA :
+    ¬ (∃ S : Finset (Fin 1), S.Nonempty ∧ Sᶜ.Nonempty ∧
+        conductance icOneAdj S = cheegerConstant icOneAdj) := by
+  rintro ⟨S, hSne, hSc, -⟩
+  obtain ⟨i, hi⟩ := hSne
+  fin_cases i
+  have hU : S = Finset.univ :=
+    Finset.eq_univ_iff_forall.2 fun j => by
+      fin_cases j
+      simpa using hi
+  rw [hU, Finset.compl_univ] at hSc
+  exact absurd hSc (by simp)
+
+theorem icf_attain_hcard_isolation_QA :
+    (∀ i j, 0 ≤ icOneAdj i j) ∧ ¬ (2 ≤ Fintype.card (Fin 1)) :=
+  ⟨icOneAdj_nonneg, by norm_num⟩
+
+end IrregularFences
+
 end SpectralGraphTheory.QA

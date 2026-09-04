@@ -6,13 +6,16 @@
   QA lemmas for the Cheeger inequality interface of
   `Scaffold.Mathlib.GraphTheory.Cheeger`: structural conductance facts
   proved from the definitions, and coherence checks that derive
-  consequences from the bounds — since 2026-08-18 the *upper* bound
-  (easy direction) is a proved theorem; the *lower* bound (hard
-  direction) remains admitted.
+  consequences from the bounds — both directions are proved theorems
+  (the easy direction since 2026-08-18, the hard direction since
+  2026-08-23; the family is hard crust, no admitted axiom involved).
+  Since 2026-09-04 this file also carries the family's adversarial
+  fence audit (`RegularFences`): hypothesis-form negative witnesses
+  plus isolation companions for the pre-discipline QA's unfenced
+  load-bearing clauses.
 
-  All proofs are real Lean proofs (no `sorry`/`admit`). QA does not
-  prove the admitted lower-bound axiom; it checks that the interfaces
-  compose.
+  All proofs are real Lean proofs (no `sorry`/`admit`). QA checks that
+  the interfaces compose.
 
   Scoreboard: ../QA_SCOREBOARD.md
 -/
@@ -1762,5 +1765,944 @@ theorem sweep_extract_cycle_numeric_QA :
   exact ⟨S, h3, h2⟩
 
 end SweepExtractionQA
+
+section RegularFences
+
+/-!
+### Fixtures: the signed, wrong-degree, asymmetric, and zero matrices
+
+Five new small fixtures, all `2×2` with rational spectra (see the
+proposal `proposals/adversarial-fences-regular-cheeger-family.md` for
+the full pricing and the companion-audit note): the signed `d = 2`-regular
+`rcSAdj` (kills `hnn` clauses), the nonnegative `d = 3`-regular
+`rcPosAdj` (kills `hd` clauses at claimed wrong degrees), the
+nonnegative row-regular asymmetric `rcAsymPsdAdj` (kills the PSD
+engine's `hA`), and the zero matrix `rcZeroAdj` (the `hdpos` corner of
+the upper bound and the cut-test-vector junk corners).
+-/
+
+def rcSAdj : Matrix (Fin 2) (Fin 2) ℝ := !![3, -1; -1, 3]
+
+theorem rcSAdj_symmetric : rcSAdj.IsSymm := by
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [rcSAdj]
+
+theorem rcSAdj_not_nonneg : ¬ (∀ i j, 0 ≤ rcSAdj i j) := by
+  intro h
+  have h01 := h 0 1
+  simp only [rcSAdj] at h01
+  norm_num at h01
+
+theorem rcSAdj_regular : ∀ i, deg rcSAdj i = 2 := by
+  intro i
+  fin_cases i <;> norm_num [deg, rcSAdj, Fin.sum_univ_two]
+
+def rcPosAdj : Matrix (Fin 2) (Fin 2) ℝ := !![2, 1; 1, 2]
+
+theorem rcPosAdj_symmetric : rcPosAdj.IsSymm := by
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [rcPosAdj]
+
+theorem rcPosAdj_nonneg : ∀ i j, 0 ≤ rcPosAdj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [rcPosAdj]
+
+theorem rcPosAdj_regular : ∀ i, deg rcPosAdj i = 3 := by
+  intro i
+  fin_cases i <;> norm_num [deg, rcPosAdj, Fin.sum_univ_two]
+
+theorem rcPosAdj_not_regular_four : ¬ (∀ i, deg rcPosAdj i = 4) := by
+  intro h
+  have h0 := h 0
+  rw [rcPosAdj_regular 0] at h0
+  norm_num at h0
+
+theorem rcPosAdj_not_regular_one : ¬ (∀ i, deg rcPosAdj i = 1) := by
+  intro h
+  have h0 := h 0
+  rw [rcPosAdj_regular 0] at h0
+  norm_num at h0
+
+theorem rcPosAdj_not_regular_one_eighth : ¬ (∀ i, deg rcPosAdj i = 1 / 8) := by
+  intro h
+  have h0 := h 0
+  rw [rcPosAdj_regular 0] at h0
+  norm_num at h0
+
+theorem rcPosAdj_not_regular_forty : ¬ (∀ i, deg rcPosAdj i = 40) := by
+  intro h
+  have h0 := h 0
+  rw [rcPosAdj_regular 0] at h0
+  norm_num at h0
+
+def rcAsymPsdAdj : Matrix (Fin 2) (Fin 2) ℝ := !![4, 1; 3, 2]
+
+theorem rcAsymPsdAdj_not_isSymm : ¬ rcAsymPsdAdj.IsSymm := by
+  intro h
+  have h01 := h.apply 0 1
+  simp only [rcAsymPsdAdj] at h01
+  norm_num at h01
+
+theorem rcAsymPsdAdj_nonneg : ∀ i j, 0 ≤ rcAsymPsdAdj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [rcAsymPsdAdj]
+
+theorem rcAsymPsdAdj_regular : ∀ i, deg rcAsymPsdAdj i = 5 := by
+  intro i
+  fin_cases i <;> norm_num [deg, rcAsymPsdAdj, Fin.sum_univ_two]
+
+def rcZeroAdj : Matrix (Fin 2) (Fin 2) ℝ := !![0, 0; 0, 0]
+
+theorem rcZeroAdj_symmetric : rcZeroAdj.IsSymm := by
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [rcZeroAdj]
+
+theorem rcZeroAdj_nonneg : ∀ i j, 0 ≤ rcZeroAdj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [rcZeroAdj]
+
+theorem rcZeroAdj_regular_zero : ∀ i, deg rcZeroAdj i = 0 := by
+  intro i
+  fin_cases i <;> norm_num [deg, rcZeroAdj, Fin.sum_univ_two]
+
+theorem rcZeroAdj_not_regular_one : ¬ (∀ i, deg rcZeroAdj i = 1) := by
+  intro h
+  have h0 := h 0
+  rw [rcZeroAdj_regular_zero 0] at h0
+  norm_num at h0
+
+/-!
+### Conductance pins
+
+The Cheeger constant at each new fixture (the `edge_cheegerConstant`
+pattern: both singleton cuts have equal conductance by symmetry).
+-/
+
+theorem rcS_boundary_zero : boundary rcSAdj ({0} : Finset (Fin 2)) = -1 := by
+  simp only [boundary, Finset.sum_singleton]
+  rw [show (({0} : Finset (Fin 2))ᶜ) = {1} from by decide]
+  simp [rcSAdj]
+
+theorem rcS_boundary_one : boundary rcSAdj ({1} : Finset (Fin 2)) = -1 := by
+  simp only [boundary, Finset.sum_singleton]
+  rw [show (({1} : Finset (Fin 2))ᶜ) = {0} from by decide]
+  simp [rcSAdj]
+
+theorem rcS_vol_zero : vol rcSAdj ({0} : Finset (Fin 2)) = 2 := by
+  simp [vol, rcSAdj_regular]
+
+theorem rcS_vol_one : vol rcSAdj ({1} : Finset (Fin 2)) = 2 := by
+  simp [vol, rcSAdj_regular]
+
+theorem rcS_vol_compl_zero : vol rcSAdj (({0} : Finset (Fin 2))ᶜ) = 2 := by
+  rw [show (({0} : Finset (Fin 2))ᶜ) = {1} from by decide]
+  simp [vol, rcSAdj_regular]
+
+theorem rcS_conductance_single_zero : conductance rcSAdj ({0} : Finset (Fin 2)) = -1 / 2 := by
+  rw [conductance, rcS_boundary_zero, rcS_vol_zero, rcS_vol_compl_zero]
+  norm_num
+
+theorem rcS_vol_compl_one : vol rcSAdj (({1} : Finset (Fin 2))ᶜ) = 2 := by
+  rw [show (({1} : Finset (Fin 2))ᶜ) = {0} from by decide]
+  simp [vol, rcSAdj_regular]
+
+theorem rcS_conductance_single_one : conductance rcSAdj ({1} : Finset (Fin 2)) = -1 / 2 := by
+  rw [conductance, rcS_boundary_one, rcS_vol_one, rcS_vol_compl_one]
+  norm_num
+
+theorem rcS_cheegerConstant : cheegerConstant rcSAdj = -1 / 2 := by
+  have hset : {c : ℝ | ∃ S : Finset (Fin 2), S.Nonempty ∧ Sᶜ.Nonempty ∧
+      conductance rcSAdj S = c} = {-1 / 2} := by
+    ext c
+    constructor
+    · rintro ⟨S, hne, hcn, rfl⟩
+      fin_cases S
+      · exact absurd hne (by decide)
+      · simpa using rcS_conductance_single_zero
+      · simpa using rcS_conductance_single_one
+      · exact absurd hcn (by decide)
+    · rintro ⟨rfl⟩
+      exact ⟨{0}, by decide, by decide, rcS_conductance_single_zero⟩
+  rw [cheegerConstant, hset]
+  simp
+
+theorem rcPos_boundary_zero : boundary rcPosAdj ({0} : Finset (Fin 2)) = 1 := by
+  simp only [boundary, Finset.sum_singleton]
+  rw [show (({0} : Finset (Fin 2))ᶜ) = {1} from by decide]
+  simp [rcPosAdj]
+
+theorem rcPos_boundary_one : boundary rcPosAdj ({1} : Finset (Fin 2)) = 1 := by
+  simp only [boundary, Finset.sum_singleton]
+  rw [show (({1} : Finset (Fin 2))ᶜ) = {0} from by decide]
+  simp [rcPosAdj]
+
+theorem rcPos_vol_zero : vol rcPosAdj ({0} : Finset (Fin 2)) = 3 := by
+  simp [vol, rcPosAdj_regular]
+
+theorem rcPos_vol_one : vol rcPosAdj ({1} : Finset (Fin 2)) = 3 := by
+  simp [vol, rcPosAdj_regular]
+
+theorem rcPos_vol_compl_zero : vol rcPosAdj (({0} : Finset (Fin 2))ᶜ) = 3 := by
+  rw [show (({0} : Finset (Fin 2))ᶜ) = {1} from by decide]
+  simp [vol, rcPosAdj_regular]
+
+theorem rcPos_conductance_single_zero :
+    conductance rcPosAdj ({0} : Finset (Fin 2)) = 1 / 3 := by
+  rw [conductance, rcPos_boundary_zero, rcPos_vol_zero, rcPos_vol_compl_zero]
+  norm_num
+
+theorem rcPos_vol_compl_one : vol rcPosAdj (({1} : Finset (Fin 2))ᶜ) = 3 := by
+  rw [show (({1} : Finset (Fin 2))ᶜ) = {0} from by decide]
+  simp [vol, rcPosAdj_regular]
+
+theorem rcPos_conductance_single_one :
+    conductance rcPosAdj ({1} : Finset (Fin 2)) = 1 / 3 := by
+  rw [conductance, rcPos_boundary_one, rcPos_vol_one, rcPos_vol_compl_one]
+  norm_num
+
+theorem rcPos_cheegerConstant : cheegerConstant rcPosAdj = 1 / 3 := by
+  have hset : {c : ℝ | ∃ S : Finset (Fin 2), S.Nonempty ∧ Sᶜ.Nonempty ∧
+      conductance rcPosAdj S = c} = {1 / 3} := by
+    ext c
+    constructor
+    · rintro ⟨S, hne, hcn, rfl⟩
+      fin_cases S
+      · exact absurd hne (by decide)
+      · simpa using rcPos_conductance_single_zero
+      · simpa using rcPos_conductance_single_one
+      · exact absurd hcn (by decide)
+    · rintro ⟨rfl⟩
+      exact ⟨{0}, by decide, by decide, rcPos_conductance_single_zero⟩
+  rw [cheegerConstant, hset]
+  simp
+
+theorem rcZero_boundary_zero : boundary rcZeroAdj ({0} : Finset (Fin 2)) = 0 := by
+  simp only [boundary, Finset.sum_singleton]
+  rw [show (({0} : Finset (Fin 2))ᶜ) = {1} from by decide]
+  simp [rcZeroAdj]
+
+theorem rcZero_vol_zero : vol rcZeroAdj ({0} : Finset (Fin 2)) = 0 := by
+  simp [vol, rcZeroAdj_regular_zero]
+
+theorem rcZero_vol_compl_zero : vol rcZeroAdj (({0} : Finset (Fin 2))ᶜ) = 0 := by
+  rw [show (({0} : Finset (Fin 2))ᶜ) = {1} from by decide]
+  simp [vol, rcZeroAdj_regular_zero]
+
+/-- The junk-conductance pin: every cut of the zero matrix has
+conductance `0/0 = 0`. -/
+theorem rcZero_conductance_single_zero :
+    conductance rcZeroAdj ({0} : Finset (Fin 2)) = 0 := by
+  rw [conductance, rcZero_boundary_zero, rcZero_vol_zero, rcZero_vol_compl_zero]
+  norm_num
+
+theorem rcZero_boundary_one : boundary rcZeroAdj ({1} : Finset (Fin 2)) = 0 := by
+  simp only [boundary, Finset.sum_singleton]
+  rw [show (({1} : Finset (Fin 2))ᶜ) = {0} from by decide]
+  simp [rcZeroAdj]
+
+theorem rcZero_vol_one : vol rcZeroAdj ({1} : Finset (Fin 2)) = 0 := by
+  simp [vol, rcZeroAdj_regular_zero]
+
+theorem rcZero_vol_compl_one : vol rcZeroAdj (({1} : Finset (Fin 2))ᶜ) = 0 := by
+  rw [show (({1} : Finset (Fin 2))ᶜ) = {0} from by decide]
+  simp [vol, rcZeroAdj_regular_zero]
+
+theorem rcZero_conductance_single_one :
+    conductance rcZeroAdj ({1} : Finset (Fin 2)) = 0 := by
+  rw [conductance, rcZero_boundary_one, rcZero_vol_one, rcZero_vol_compl_one]
+  norm_num
+
+theorem rcZero_cheegerConstant : cheegerConstant rcZeroAdj = 0 := by
+  have hset : {c : ℝ | ∃ S : Finset (Fin 2), S.Nonempty ∧ Sᶜ.Nonempty ∧
+      conductance rcZeroAdj S = c} = {0} := by
+    ext c
+    constructor
+    · rintro ⟨S, hne, hcn, rfl⟩
+      fin_cases S
+      · exact absurd hne (by decide)
+      · simpa using rcZero_conductance_single_zero
+      · simpa using rcZero_conductance_single_one
+      · exact absurd hcn (by decide)
+    · rintro ⟨rfl⟩
+      exact ⟨{0}, by decide, by decide, rcZero_conductance_single_zero⟩
+  rw [cheegerConstant, hset]
+  simp
+
+/-!
+### Operator literals and quadratic-form identities
+
+The normalized/combinatorial operators at each fixture, pinned as
+literal matrices first (so later proofs never fight `if i = j` inside
+sums), then the pointwise quadratic-form identities the engines and
+Rayleigh pins consume.
+-/
+
+theorem rcS_regNL :
+    regularNormalizedLaplacian rcSAdj 2 = !![-1/2, 1/2; 1/2, -1/2] := by
+  ext i j
+  fin_cases i <;> fin_cases j
+  all_goals simp [regularNormalizedLaplacian, rcSAdj]
+  all_goals norm_num
+
+theorem rcPosD1_regNL :
+    regularNormalizedLaplacian rcPosAdj 1 = !![-1, -1; -1, -1] := by
+  ext i j
+  fin_cases i <;> fin_cases j
+  all_goals simp [regularNormalizedLaplacian, rcPosAdj]
+  all_goals norm_num
+
+theorem rcZero_regNL :
+    regularNormalizedLaplacian rcZeroAdj 0 = !![1, 0; 0, 1] := by
+  ext i j
+  fin_cases i <;> fin_cases j
+  all_goals simp [regularNormalizedLaplacian, rcZeroAdj, inv_zero]
+
+theorem rcS_lap :
+    laplacian rcSAdj = !![-1, 1; 1, -1] := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    norm_num [laplacian, degreeMatrix, deg, rcSAdj, Fin.sum_univ_two]
+
+theorem rcPos_lap :
+    laplacian rcPosAdj = !![1, -1; -1, 1] := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    norm_num [laplacian, degreeMatrix, deg, rcPosAdj, Fin.sum_univ_two]
+
+theorem rcAsym_regNL :
+    regularNormalizedLaplacian rcAsymPsdAdj 5 = !![1/5, -1/5; -3/5, 3/5] := by
+  ext i j
+  fin_cases i <;> fin_cases j
+  all_goals simp [regularNormalizedLaplacian, rcAsymPsdAdj]
+  all_goals norm_num
+
+theorem rcE_regNL :
+    regularNormalizedLaplacian edgeAdj 1 = !![1, -1; -1, 1] := by
+  ext i j
+  fin_cases i <;> fin_cases j
+  all_goals simp [regularNormalizedLaplacian, edgeAdj]
+
+theorem rcS_regNL_quadForm (x : Fin 2 → ℝ) :
+    quadForm (regularNormalizedLaplacian rcSAdj 2) x
+      = -((x 0 - x 1)^2)/2 := by
+  simp only [quadForm, Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+    rcS_regNL, Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons]
+  ring
+
+theorem rcPosD1_regNL_quadForm (x : Fin 2 → ℝ) :
+    quadForm (regularNormalizedLaplacian rcPosAdj 1) x
+      = -((x 0 + x 1)^2) := by
+  simp only [quadForm, Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+    rcPosD1_regNL, Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons]
+  ring
+
+theorem rcS_lap_quadForm (x : Fin 2 → ℝ) :
+    quadForm (laplacian rcSAdj) x = -((x 0 - x 1)^2) := by
+  simp only [quadForm, Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+    rcS_lap, Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons]
+  ring
+
+theorem rcPos_lap_quadForm (x : Fin 2 → ℝ) :
+    quadForm (laplacian rcPosAdj) x = (x 0 - x 1)^2 := by
+  simp only [quadForm, Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+    rcPos_lap, Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons]
+  ring
+
+private theorem rc_vec_ne_zero {v : Fin 2 → ℝ} (h : v 0 ≠ 0) : v ≠ 0 :=
+  fun hc => h (congrFun hc 0)
+
+/-!
+### The two Fin 2 pinning engines
+
+The eigenvalue-witness route for lower bounds (at two vertices
+`secondEval` is the top sorted entry) and the subspace engine route for
+upper bounds (the whole-space test family), both private.
+-/
+
+private theorem rc_secondEval_ge_of_eigvec {M : Matrix (Fin 2) (Fin 2) ℝ}
+    (hM : M.IsSymm) {x : Fin 2 → ℝ} {μ : ℝ}
+    (hxμ : M *ᵥ x = μ • x) (hx : x ≠ 0) :
+    μ ≤ secondEval M hM (le_refl 2) := by
+  obtain ⟨i, hi⟩ := exists_eigvalOf_eq_of_mulVec_eq_smul hM hx hxμ
+  have hlast := eigvalOf_le_evals_last hM (by norm_num) i
+  rw [hi] at hlast
+  exact hlast
+
+private theorem rc_evals_le_of_quadForm {M : Matrix (Fin 2) (Fin 2) ℝ}
+    (hM : M.IsSymm) {t : ℝ}
+    (hbnd : ∀ x : Fin 2 → ℝ, quadForm M x ≤ t * Matrix.dotProduct x x) :
+    secondEval M hM (le_refl 2) ≤ t := by
+  refine evals_le_of_linearIndependent hM (k := 2) (by norm_num) (by norm_num)
+    (g := (![![1, 0], ![0, 1]] : Fin 2 → (Fin 2 → ℝ))) ?_ ?_
+  · rw [Fintype.linearIndependent_iff]
+    intro c hc i
+    have h0 := congrFun hc 0
+    have h1 := congrFun hc 1
+    simp only [Finset.sum_apply, Fin.sum_univ_two, Pi.smul_apply, smul_eq_mul,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons] at h0 h1
+    fin_cases i
+    · norm_num at h0; exact h0
+    · norm_num at h1; exact h1
+  · intro c
+    have hvec : (∑ i, c i • (![![1, 0], ![0, 1]] : Fin 2 → (Fin 2 → ℝ)) i) = c := by
+      funext j
+      rw [Finset.sum_apply]
+      fin_cases j <;>
+        simp [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
+          Matrix.head_cons]
+    rw [hvec]
+    exact hbnd c
+
+/-!
+### Spectrum and Rayleigh pins
+-/
+
+theorem rcS_regNL_mulVec_ones :
+    (regularNormalizedLaplacian rcSAdj 2) *ᵥ (![1, 1] : Fin 2 → ℝ)
+      = (0 : ℝ) • (![1, 1] : Fin 2 → ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, rcS_regNL,
+      Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, smul_eq_mul]
+  <;> norm_num
+
+theorem rcS_regNL_secondEval_eq_zero :
+    secondEval (regularNormalizedLaplacian rcSAdj 2)
+      (regularNormalizedLaplacian_symmetric rcSAdj rcSAdj_symmetric 2)
+      (le_refl 2) = 0 := by
+  refine le_antisymm (rc_evals_le_of_quadForm _ ?_) ?_
+  · intro x
+    rw [rcS_regNL_quadForm x, zero_mul]
+    have h := sq_nonneg (x 0 - x 1)
+    linarith
+  · exact rc_secondEval_ge_of_eigvec
+      (regularNormalizedLaplacian_symmetric rcSAdj rcSAdj_symmetric 2)
+      rcS_regNL_mulVec_ones (rc_vec_ne_zero (by simp))
+
+theorem rcS_lap_mulVec_ones :
+    (laplacian rcSAdj) *ᵥ (![1, 1] : Fin 2 → ℝ)
+      = (0 : ℝ) • (![1, 1] : Fin 2 → ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, rcS_lap,
+      Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, smul_eq_mul]
+
+theorem rcS_lap_secondEval_eq_zero :
+    secondEval (laplacian rcSAdj) (laplacian_symmetric rcSAdj rcSAdj_symmetric)
+      (le_refl 2) = 0 := by
+  refine le_antisymm (rc_evals_le_of_quadForm _ ?_) ?_
+  · intro x
+    rw [rcS_lap_quadForm x, zero_mul]
+    have h := sq_nonneg (x 0 - x 1)
+    linarith
+  · exact rc_secondEval_ge_of_eigvec (laplacian_symmetric rcSAdj rcSAdj_symmetric)
+      rcS_lap_mulVec_ones (rc_vec_ne_zero (by simp))
+
+theorem rcPosD4_mulVec_mode :
+    (regularNormalizedLaplacian rcPosAdj 4) *ᵥ (![1, -1] : Fin 2 → ℝ)
+      = ((3 : ℝ)/4) • (![1, -1] : Fin 2 → ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+      regularNormalizedLaplacian, rcPosAdj, smul_eq_mul] <;> norm_num
+
+theorem rcPosD4_secondEval_ge :
+    (3/4) ≤ secondEval (regularNormalizedLaplacian rcPosAdj 4)
+      (regularNormalizedLaplacian_symmetric rcPosAdj rcPosAdj_symmetric 4)
+      (le_refl 2) := by
+  exact rc_secondEval_ge_of_eigvec
+    (regularNormalizedLaplacian_symmetric rcPosAdj rcPosAdj_symmetric 4)
+    rcPosD4_mulVec_mode (rc_vec_ne_zero (by simp))
+
+theorem rcPosD1_secondEval_le_zero :
+    secondEval (regularNormalizedLaplacian rcPosAdj 1)
+      (regularNormalizedLaplacian_symmetric rcPosAdj rcPosAdj_symmetric 1)
+      (le_refl 2) ≤ 0 := by
+  refine rc_evals_le_of_quadForm _ ?_
+  intro x
+  rw [rcPosD1_regNL_quadForm x, zero_mul]
+  have h := sq_nonneg (x 0 + x 1)
+  linarith
+
+theorem rcPos_lap_mulVec_mode :
+    (laplacian rcPosAdj) *ᵥ (![1, -1] : Fin 2 → ℝ)
+      = (2 : ℝ) • (![1, -1] : Fin 2 → ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, rcPos_lap,
+      Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, smul_eq_mul]
+  <;> norm_num
+
+theorem rcPos_lap_secondEval_ge_two :
+    2 ≤ secondEval (laplacian rcPosAdj)
+      (laplacian_symmetric rcPosAdj rcPosAdj_symmetric) (le_refl 2) := by
+  exact rc_secondEval_ge_of_eigvec
+    (laplacian_symmetric rcPosAdj rcPosAdj_symmetric)
+    rcPos_lap_mulVec_mode (rc_vec_ne_zero (by simp))
+
+theorem rcPos_lap_secondEval_le_two :
+    secondEval (laplacian rcPosAdj)
+      (laplacian_symmetric rcPosAdj rcPosAdj_symmetric) (le_refl 2) ≤ 2 := by
+  refine rc_evals_le_of_quadForm _ ?_
+  intro x
+  have hd : Matrix.dotProduct x x = x 0 * x 0 + x 1 * x 1 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+  rw [rcPos_lap_quadForm x, hd]
+  have h := sq_nonneg (x 0 + x 1)
+  nlinarith [h]
+
+theorem rcZero_regNL_mulVec_e0 :
+    (regularNormalizedLaplacian rcZeroAdj 0) *ᵥ (![1, 0] : Fin 2 → ℝ)
+      = (1 : ℝ) • (![1, 0] : Fin 2 → ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, rcZero_regNL,
+      Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, smul_eq_mul]
+
+theorem rcZero_regNL_secondEval_ge_one :
+    1 ≤ secondEval (regularNormalizedLaplacian rcZeroAdj 0)
+      (regularNormalizedLaplacian_symmetric rcZeroAdj rcZeroAdj_symmetric 0)
+      (le_refl 2) := by
+  exact rc_secondEval_ge_of_eigvec
+    (regularNormalizedLaplacian_symmetric rcZeroAdj rcZeroAdj_symmetric 0)
+    rcZero_regNL_mulVec_e0 (rc_vec_ne_zero (by simp))
+
+/-- Rayleigh pin at the antisymmetric mode of the signed fixture. -/
+theorem rcS_regNL_rayleigh_mode :
+    rayleigh (regularNormalizedLaplacian rcSAdj 2) (![1, -1] : Fin 2 → ℝ) = -1 := by
+  have hne : (![1, -1] : Fin 2 → ℝ) ≠ 0 := rc_vec_ne_zero (by simp)
+  have hd : Matrix.dotProduct (![1, -1] : Fin 2 → ℝ) (![1, -1] : Fin 2 → ℝ) = 2 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+    norm_num
+  rw [rayleigh, if_neg hne, rcS_regNL_quadForm, hd]
+  norm_num
+
+/-- Rayleigh pin at the constant vector of the wrong-degree-one
+fixture: the operator is `!![-1,-1;-1,-1]`, killing every vector. -/
+theorem rcPosD1_regNL_rayleigh_mode :
+    rayleigh (regularNormalizedLaplacian rcPosAdj 1) (![1, -1] : Fin 2 → ℝ) = 0 := by
+  have hne : (![1, -1] : Fin 2 → ℝ) ≠ 0 := rc_vec_ne_zero (by simp)
+  have hd : Matrix.dotProduct (![1, -1] : Fin 2 → ℝ) (![1, -1] : Fin 2 → ℝ) = 2 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+    norm_num
+  rw [rayleigh, if_neg hne, rcPosD1_regNL_quadForm, hd]
+  norm_num
+
+/-- Rayleigh of the junk argument `0` is the definitional branch `0`. -/
+theorem rcE_regNL_rayleigh_zero :
+    rayleigh (regularNormalizedLaplacian edgeAdj 1) (0 : Fin 2 → ℝ) = 0 := by
+  rw [rayleigh, if_pos rfl]
+
+/-- Rayleigh of the constant vector on the edge: the regular normalized
+Laplacian kills `onesVec`, so the quotient is `0`. -/
+theorem rcE_regNL_rayleigh_ones :
+    rayleigh (regularNormalizedLaplacian edgeAdj 1) (onesVec : Fin 2 → ℝ) = 0 := by
+  have hne : (onesVec : Fin 2 → ℝ) ≠ 0 := rc_vec_ne_zero (by simp [onesVec])
+  have hq : quadForm (regularNormalizedLaplacian edgeAdj 1) (onesVec : Fin 2 → ℝ) = 0 := by
+    have hmv : (regularNormalizedLaplacian edgeAdj 1) *ᵥ (onesVec : Fin 2 → ℝ) = 0 := by
+      funext i
+      fin_cases i <;>
+        simp [Matrix.mulVec, Matrix.dotProduct, onesVec, Fin.sum_univ_two,
+          rcE_regNL, Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
+          Matrix.head_cons]
+    rw [quadForm, hmv]
+    simp
+  rw [rayleigh, if_neg hne, hq]
+  norm_num
+
+
+/-!
+### The inequality fences: `cheeger_upper_bound`
+
+Hypothesis order on the shelf: `(hA) (hnonneg) (d) (hd) (hdpos)
+(hcard)`. Each fence negates the conclusion at a specific instantiation;
+each companion verifies every other clause genuine and the dropped
+clause failing.
+-/
+
+/-- **Fence (`cheeger_upper_bound`, `hnonneg`)**: at the signed
+`d = 2`-regular fixture every other hypothesis is genuine, and the
+nonnegativity-dropped conclusion reads `λ₂ = 0 ≤ 2φ = -1` — false. -/
+theorem rcF_upper_hnn_fence_QA :
+    ¬ (secondEval (regularNormalizedLaplacian rcSAdj 2)
+        (regularNormalizedLaplacian_symmetric rcSAdj rcSAdj_symmetric 2)
+        (le_refl 2)
+      ≤ 2 * cheegerConstant rcSAdj) := by
+  rw [rcS_regNL_secondEval_eq_zero, rcS_cheegerConstant]
+  norm_num
+
+/-- Isolation companion: every other clause genuine, `hnonneg` exactly
+the failure. -/
+theorem rcF_upper_hnn_isolation_QA :
+    rcSAdj.IsSymm ∧ (∀ i, deg rcSAdj i = 2) ∧ (0 < (2:ℝ))
+      ∧ 2 ≤ Fintype.card (Fin 2) ∧ ¬ (∀ i j, 0 ≤ rcSAdj i j) :=
+  ⟨rcSAdj_symmetric, rcSAdj_regular, by norm_num, le_refl 2, rcSAdj_not_nonneg⟩
+
+/-- **Fence (`cheeger_upper_bound`, `hd`)**: the nonnegative `d = 3`-regular
+fixture instantiated at the *claimed* wrong degree `d' = 4` (so
+`regularNormalizedLaplacian rcPosAdj 4` is the wrong operator): the
+genuine eigenvalue `3/4` at the mode `![1, -1]` exceeds `2φ = 2/3`. -/
+theorem rcF_upper_hd_fence_QA :
+    ¬ (secondEval (regularNormalizedLaplacian rcPosAdj 4)
+        (regularNormalizedLaplacian_symmetric rcPosAdj rcPosAdj_symmetric 4)
+        (le_refl 2)
+      ≤ 2 * cheegerConstant rcPosAdj) := by
+  rw [rcPos_cheegerConstant]
+  linarith [rcPosD4_secondEval_ge]
+
+theorem rcF_upper_hd_isolation_QA :
+    rcPosAdj.IsSymm ∧ (∀ i j, 0 ≤ rcPosAdj i j) ∧ (0 < (4:ℝ))
+      ∧ 2 ≤ Fintype.card (Fin 2) ∧ ¬ (∀ i, deg rcPosAdj i = 4) :=
+  ⟨rcPosAdj_symmetric, rcPosAdj_nonneg, by norm_num, le_refl 2,
+    rcPosAdj_not_regular_four⟩
+
+/-- **Fence (`cheeger_upper_bound`, `hdpos`)**: at the zero matrix with
+genuine regularity `d = 0` (every degree is `0`) and genuine
+nonnegativity, the operator is the identity, `λ₂ = 1`, while the junk
+conductance `0/0 = 0` collapses `2φ` to `0`. -/
+theorem rcF_upper_hdpos_fence_QA :
+    ¬ (secondEval (regularNormalizedLaplacian rcZeroAdj 0)
+        (regularNormalizedLaplacian_symmetric rcZeroAdj rcZeroAdj_symmetric 0)
+        (le_refl 2)
+      ≤ 2 * cheegerConstant rcZeroAdj) := by
+  rw [rcZero_cheegerConstant]
+  linarith [rcZero_regNL_secondEval_ge_one]
+
+theorem rcF_upper_hdpos_isolation_QA :
+    rcZeroAdj.IsSymm ∧ (∀ i j, 0 ≤ rcZeroAdj i j) ∧ (∀ i, deg rcZeroAdj i = 0)
+      ∧ 2 ≤ Fintype.card (Fin 2) ∧ ¬ (0 < (0:ℝ)) :=
+  ⟨rcZeroAdj_symmetric, rcZeroAdj_nonneg, rcZeroAdj_regular_zero,
+    le_refl 2, by norm_num⟩
+
+/-!
+### The inequality fences: `cheeger_lower_bound`
+-/
+
+/-- **Fence (`cheeger_lower_bound`, `hnonneg`)**: at the signed fixture
+the dropped conclusion reads `φ²/2 = 1/8 ≤ λ₂ = 0` — false. -/
+theorem rcF_lower_hnn_fence_QA :
+    ¬ ((cheegerConstant rcSAdj)^2 / 2
+        ≤ secondEval (regularNormalizedLaplacian rcSAdj 2)
+          (regularNormalizedLaplacian_symmetric rcSAdj rcSAdj_symmetric 2)
+          (le_refl 2)) := by
+  rw [rcS_cheegerConstant, rcS_regNL_secondEval_eq_zero]
+  norm_num
+
+theorem rcF_lower_hnn_isolation_QA :
+    rcSAdj.IsSymm ∧ (∀ i, deg rcSAdj i = 2) ∧ (0 < (2:ℝ))
+      ∧ 2 ≤ Fintype.card (Fin 2) ∧ ¬ (∀ i j, 0 ≤ rcSAdj i j) :=
+  ⟨rcSAdj_symmetric, rcSAdj_regular, by norm_num, le_refl 2, rcSAdj_not_nonneg⟩
+
+/-- **Fence (`cheeger_lower_bound`, `hd`)**: the wrong claimed degree
+`d' = 1` makes `regularNormalizedLaplacian rcPosAdj 1 = !![-1,-1;-1,-1]`,
+whose spectrum is `{-2, 0}`, so `λ₂ = 0 < φ²/2 = 1/18`. -/
+theorem rcF_lower_hd_fence_QA :
+    ¬ ((cheegerConstant rcPosAdj)^2 / 2
+        ≤ secondEval (regularNormalizedLaplacian rcPosAdj 1)
+          (regularNormalizedLaplacian_symmetric rcPosAdj rcPosAdj_symmetric 1)
+          (le_refl 2)) := by
+  rw [rcPos_cheegerConstant]
+  linarith [rcPosD1_secondEval_le_zero]
+
+theorem rcF_lower_hd_isolation_QA :
+    rcPosAdj.IsSymm ∧ (∀ i j, 0 ≤ rcPosAdj i j) ∧ (0 < (1:ℝ))
+      ∧ 2 ≤ Fintype.card (Fin 2) ∧ ¬ (∀ i, deg rcPosAdj i = 1) :=
+  ⟨rcPosAdj_symmetric, rcPosAdj_nonneg, by norm_num, le_refl 2,
+    rcPosAdj_not_regular_one⟩
+
+/-!
+### The inequality fences: `cheeger_sweep`
+
+Hypothesis order: `(hA) (hnn) (d) (hd) (hdpos) (hx0) (horth)`.
+-/
+
+/-- **Fence (`cheeger_sweep`, `hx0`)**: the junk Rayleigh branch —
+`rayleigh` is definitionally `0` at the zero vector, while `φ²/2 = 1/2`
+on the edge. -/
+theorem rcF_sweep_hx0_fence_QA :
+    ¬ (cheegerConstant edgeAdj ^ 2 / 2
+        ≤ rayleigh (regularNormalizedLaplacian edgeAdj 1) (0 : Fin 2 → ℝ)) := by
+  rw [edge_cheegerConstant, rcE_regNL_rayleigh_zero]
+  norm_num
+
+theorem rcF_sweep_hx0_isolation_QA :
+    edgeAdj.IsSymm ∧ (∀ i j, 0 ≤ edgeAdj i j) ∧ (∀ i, deg edgeAdj i = 1)
+      ∧ (0 < (1:ℝ)) ∧ 2 ≤ Fintype.card (Fin 2)
+      ∧ (Matrix.dotProduct (0 : Fin 2 → ℝ) onesVec = 0) ∧ ¬ ((0 : Fin 2 → ℝ) ≠ 0) :=
+  ⟨edgeAdj_symmetric, edgeAdj_nonneg, edgeAdj_regular, by norm_num,
+    le_refl 2, by simp [Matrix.dotProduct], by simp⟩
+
+/-- **Fence (`cheeger_sweep`, `horth`)**: the constant vector is in the
+operator's kernel (`R = 0`) but not orthogonal to itself — the dropped
+conclusion reads `1/2 ≤ 0`. -/
+theorem rcF_sweep_horth_fence_QA :
+    ¬ (cheegerConstant edgeAdj ^ 2 / 2
+        ≤ rayleigh (regularNormalizedLaplacian edgeAdj 1)
+            (onesVec : Fin 2 → ℝ)) := by
+  rw [edge_cheegerConstant, rcE_regNL_rayleigh_ones]
+  norm_num
+
+theorem rcF_sweep_horth_isolation_QA :
+    edgeAdj.IsSymm ∧ (∀ i j, 0 ≤ edgeAdj i j) ∧ (∀ i, deg edgeAdj i = 1)
+      ∧ (0 < (1:ℝ)) ∧ 2 ≤ Fintype.card (Fin 2)
+      ∧ ((onesVec : Fin 2 → ℝ) ≠ 0)
+      ∧ ¬ (Matrix.dotProduct (onesVec : Fin 2 → ℝ) onesVec = 0) :=
+  ⟨edgeAdj_symmetric, edgeAdj_nonneg, edgeAdj_regular, by norm_num,
+    le_refl 2, rc_vec_ne_zero (by simp [onesVec]),
+    by norm_num [onesVec, Matrix.dotProduct, Fin.sum_univ_two]⟩
+
+/-- **Fence (`cheeger_sweep`, `hnn`)**: at the signed fixture with the
+orthogonal mode `![1, -1]` (orthogonality genuine), the dropped
+conclusion reads `φ²/2 = 1/8 ≤ R = -1` — false. -/
+theorem rcF_sweep_hnn_fence_QA :
+    ¬ (cheegerConstant rcSAdj ^ 2 / 2
+        ≤ rayleigh (regularNormalizedLaplacian rcSAdj 2)
+            (![1, -1] : Fin 2 → ℝ)) := by
+  rw [rcS_cheegerConstant, rcS_regNL_rayleigh_mode]
+  norm_num
+
+theorem rcF_sweep_hnn_isolation_QA :
+    rcSAdj.IsSymm ∧ (∀ i, deg rcSAdj i = 2) ∧ (0 < (2:ℝ))
+      ∧ 2 ≤ Fintype.card (Fin 2)
+      ∧ ((![1, -1] : Fin 2 → ℝ) ≠ 0)
+      ∧ (Matrix.dotProduct (![1, -1] : Fin 2 → ℝ) onesVec = 0)
+      ∧ ¬ (∀ i j, 0 ≤ rcSAdj i j) :=
+  ⟨rcSAdj_symmetric, rcSAdj_regular, by norm_num, le_refl 2,
+    rc_vec_ne_zero (by simp),
+    by simp [onesVec, Matrix.dotProduct, Fin.sum_univ_two], rcSAdj_not_nonneg⟩
+
+/-- **Fence (`cheeger_sweep`, `hd`)**: the wrong claimed degree `d' = 1`
+at the mode `![1, -1]`: the operator kills the mode, `R = 0 < φ²/2 =
+1/18`. -/
+theorem rcF_sweep_hd_fence_QA :
+    ¬ (cheegerConstant rcPosAdj ^ 2 / 2
+        ≤ rayleigh (regularNormalizedLaplacian rcPosAdj 1)
+            (![1, -1] : Fin 2 → ℝ)) := by
+  rw [rcPos_cheegerConstant, rcPosD1_regNL_rayleigh_mode]
+  norm_num
+
+theorem rcF_sweep_hd_isolation_QA :
+    rcPosAdj.IsSymm ∧ (∀ i j, 0 ≤ rcPosAdj i j) ∧ (0 < (1:ℝ))
+      ∧ 2 ≤ Fintype.card (Fin 2)
+      ∧ ((![1, -1] : Fin 2 → ℝ) ≠ 0)
+      ∧ (Matrix.dotProduct (![1, -1] : Fin 2 → ℝ) onesVec = 0)
+      ∧ ¬ (∀ i, deg rcPosAdj i = 1) :=
+  ⟨rcPosAdj_symmetric, rcPosAdj_nonneg, by norm_num, le_refl 2,
+    rc_vec_ne_zero (by simp),
+    by simp [onesVec, Matrix.dotProduct, Fin.sum_univ_two],
+    rcPosAdj_not_regular_one⟩
+
+/-!
+### The inequality fences: the `_laplacian` twins
+-/
+
+/-- **Fence (`cheeger_lower_bound_laplacian`, `hnonneg`)**: at the
+signed fixture the combinatorial Laplacian is `!![-1,1;1,-1]` with
+`λ₂(L) = 0`, while `d φ²/2 = 2 · 1/8 = 1/4`. -/
+theorem rcF_lowerlap_hnn_fence_QA :
+    ¬ (2 * (cheegerConstant rcSAdj)^2 / 2
+        ≤ lambda2 rcSAdj rcSAdj_symmetric (le_refl 2)) := by
+  have h2 : lambda2 rcSAdj rcSAdj_symmetric (le_refl 2) = 0 :=
+    rcS_lap_secondEval_eq_zero
+  rw [h2, rcS_cheegerConstant]
+  norm_num
+
+theorem rcF_lowerlap_hnn_isolation_QA :
+    rcSAdj.IsSymm ∧ (∀ i, deg rcSAdj i = 2) ∧ (0 < (2:ℝ))
+      ∧ 2 ≤ Fintype.card (Fin 2) ∧ ¬ (∀ i j, 0 ≤ rcSAdj i j) :=
+  ⟨rcSAdj_symmetric, rcSAdj_regular, by norm_num, le_refl 2, rcSAdj_not_nonneg⟩
+
+/-- **Fence (`cheeger_lower_bound_laplacian`, `hd`)**: the wrong claimed
+degree `d' = 40` inflates the left side to `20/9` while the true
+combinatorial `λ₂(L) = 2` is degree-independent. -/
+theorem rcF_lowerlap_hd_fence_QA :
+    ¬ (40 * (cheegerConstant rcPosAdj)^2 / 2
+        ≤ lambda2 rcPosAdj rcPosAdj_symmetric (le_refl 2)) := by
+  have h2 : lambda2 rcPosAdj rcPosAdj_symmetric (le_refl 2) ≤ 2 :=
+    rcPos_lap_secondEval_le_two
+  rw [rcPos_cheegerConstant]
+  norm_num
+  linarith
+
+theorem rcF_lowerlap_hd_isolation_QA :
+    rcPosAdj.IsSymm ∧ (∀ i j, 0 ≤ rcPosAdj i j) ∧ (0 < (40:ℝ))
+      ∧ 2 ≤ Fintype.card (Fin 2) ∧ ¬ (∀ i, deg rcPosAdj i = 40) :=
+  ⟨rcPosAdj_symmetric, rcPosAdj_nonneg, by norm_num, le_refl 2,
+    rcPosAdj_not_regular_forty⟩
+
+/-- **Fence (`cheeger_upper_bound_laplacian`, `hnonneg`)**: at the
+signed fixture the dropped conclusion reads `λ₂(L) = 0 ≤ 2 d φ = -2` —
+false. -/
+theorem rcF_upperlap_hnn_fence_QA :
+    ¬ (lambda2 rcSAdj rcSAdj_symmetric (le_refl 2)
+        ≤ 2 * (2 * cheegerConstant rcSAdj)) := by
+  have h2 : lambda2 rcSAdj rcSAdj_symmetric (le_refl 2) = 0 :=
+    rcS_lap_secondEval_eq_zero
+  rw [h2, rcS_cheegerConstant]
+  norm_num
+
+theorem rcF_upperlap_hnn_isolation_QA :
+    rcSAdj.IsSymm ∧ (∀ i, deg rcSAdj i = 2) ∧ (0 < (2:ℝ))
+      ∧ 2 ≤ Fintype.card (Fin 2) ∧ ¬ (∀ i j, 0 ≤ rcSAdj i j) :=
+  ⟨rcSAdj_symmetric, rcSAdj_regular, by norm_num, le_refl 2, rcSAdj_not_nonneg⟩
+
+/-- **Fence (`cheeger_upper_bound_laplacian`, `hd`)**: the wrong claimed
+degree `d' = 1/8` deflates the right side to `1/12` against the true
+`λ₂(L) = 2`. -/
+theorem rcF_upperlap_hd_fence_QA :
+    ¬ (lambda2 rcPosAdj rcPosAdj_symmetric (le_refl 2)
+        ≤ 2 * ((1/8) * cheegerConstant rcPosAdj)) := by
+  have h2 : 2 ≤ lambda2 rcPosAdj rcPosAdj_symmetric (le_refl 2) :=
+    rcPos_lap_secondEval_ge_two
+  rw [rcPos_cheegerConstant]
+  norm_num
+  linarith
+
+theorem rcF_upperlap_hd_isolation_QA :
+    rcPosAdj.IsSymm ∧ (∀ i j, 0 ≤ rcPosAdj i j) ∧ (0 < ((1/8:ℝ)))
+      ∧ 2 ≤ Fintype.card (Fin 2) ∧ ¬ (∀ i, deg rcPosAdj i = 1/8) :=
+  ⟨rcPosAdj_symmetric, rcPosAdj_nonneg, by norm_num, le_refl 2,
+    rcPosAdj_not_regular_one_eighth⟩
+
+/-!
+### The PSD engine fences: `regularNormalizedLaplacian_psd`
+
+The conclusion is a universally quantified nonnegativity claim; each
+fence exhibits a witness with strictly negative quadratic form.
+-/
+
+/-- The negative-witness value at the asymmetric fixture: the quadratic
+form sees the symmetric part `[[4,2],[2,2]]`, whose `![2,1]`-Rayleigh
+`26/5` exceeds the claimed degree `5`. -/
+theorem rcAsym_regNL_quadForm_witness :
+    quadForm (regularNormalizedLaplacian rcAsymPsdAdj 5) (![2, 1] : Fin 2 → ℝ)
+      = -1/5 := by
+  simp only [quadForm, Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+    rcAsym_regNL, Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons]
+  norm_num
+
+/-- **Fence (`regularNormalizedLaplacian_psd`, `hA`)**: at the
+nonnegative row-regular asymmetric fixture, `quadForm = -1/5 < 0` at
+`![2, 1]`. -/
+theorem rcF_psd_hA_fence_QA :
+    ¬ (∀ x : Fin 2 → ℝ, 0 ≤ quadForm (regularNormalizedLaplacian rcAsymPsdAdj 5) x) := by
+  intro h
+  have h2 := h (![2, 1] : Fin 2 → ℝ)
+  rw [rcAsym_regNL_quadForm_witness] at h2
+  norm_num at h2
+
+theorem rcF_psd_hA_isolation_QA :
+    (∀ i j, 0 ≤ rcAsymPsdAdj i j) ∧ (∀ i, deg rcAsymPsdAdj i = 5)
+      ∧ (0 < (5:ℝ)) ∧ ¬ rcAsymPsdAdj.IsSymm :=
+  ⟨rcAsymPsdAdj_nonneg, rcAsymPsdAdj_regular, by norm_num, rcAsymPsdAdj_not_isSymm⟩
+
+/-- **Fence (`regularNormalizedLaplacian_psd`, `hnonneg`)**: at the
+signed fixture `quadForm = -2 < 0` at the mode `![1, -1]`. -/
+theorem rcF_psd_hnn_fence_QA :
+    ¬ (∀ x : Fin 2 → ℝ,
+        0 ≤ quadForm (regularNormalizedLaplacian rcSAdj 2) x) := by
+  intro h
+  have h2 := h (![1, -1] : Fin 2 → ℝ)
+  rw [rcS_regNL_quadForm] at h2
+  norm_num at h2
+
+theorem rcF_psd_hnn_isolation_QA :
+    rcSAdj.IsSymm ∧ (∀ i, deg rcSAdj i = 2) ∧ (0 < (2:ℝ))
+      ∧ ¬ (∀ i j, 0 ≤ rcSAdj i j) :=
+  ⟨rcSAdj_symmetric, rcSAdj_regular, by norm_num, rcSAdj_not_nonneg⟩
+
+/-- **Fence (`regularNormalizedLaplacian_psd`, `hd`)**: the wrong
+claimed degree `d' = 1` gives the all-`-1` operator, `quadForm 1 = -4`. -/
+theorem rcF_psd_hd_fence_QA :
+    ¬ (∀ x : Fin 2 → ℝ,
+        0 ≤ quadForm (regularNormalizedLaplacian rcPosAdj 1) x) := by
+  intro h
+  have h2 := h (![1, 1] : Fin 2 → ℝ)
+  rw [rcPosD1_regNL_quadForm] at h2
+  norm_num at h2
+
+theorem rcF_psd_hd_isolation_QA :
+    rcPosAdj.IsSymm ∧ (∀ i j, 0 ≤ rcPosAdj i j) ∧ (0 < (1:ℝ))
+      ∧ ¬ (∀ i, deg rcPosAdj i = 1) :=
+  ⟨rcPosAdj_symmetric, rcPosAdj_nonneg, by norm_num, rcPosAdj_not_regular_one⟩
+
+/-!
+### The cut-test-vector junk corners: `cutTestVector_ne_zero`
+
+Hypothesis order: `(d) (hd) (hdpos) (hS) (hSc)`.
+-/
+
+theorem rcZero_cutTestVector_zero :
+    cutTestVector rcZeroAdj ({0} : Finset (Fin 2)) = 0 := by
+  funext i
+  fin_cases i
+  · simp [cutTestVector, cutTestVector_apply, rcZero_vol_compl_zero]
+  · simp [cutTestVector, cutTestVector_apply, rcZero_vol_zero]
+
+/-- **Fence (`cutTestVector_ne_zero`, `hd`)**: at the zero matrix with
+claimed `d = 1` (regularity failing, positivity genuine), the cut test
+vector of `{0}` is identically `0`. -/
+theorem rcF_ctv_hd_fence_QA :
+    ¬ (cutTestVector rcZeroAdj ({0} : Finset (Fin 2)) ≠ 0) := by
+  intro h
+  exact h rcZero_cutTestVector_zero
+
+theorem rcF_ctv_hd_isolation_QA :
+    (0 < (1:ℝ)) ∧ (({0} : Finset (Fin 2)).Nonempty)
+      ∧ (({0} : Finset (Fin 2))ᶜ.Nonempty)
+      ∧ ¬ (∀ i, deg rcZeroAdj i = 1) :=
+  ⟨by norm_num, by decide, by decide, rcZeroAdj_not_regular_one⟩
+
+/-- **Fence (`cutTestVector_ne_zero`, `hdpos`)**: genuine regularity
+`d = 0` (every degree `0`), positivity dropped — the same junk corner. -/
+theorem rcF_ctv_hdpos_fence_QA :
+    ¬ (cutTestVector rcZeroAdj ({0} : Finset (Fin 2)) ≠ 0) := by
+  intro h
+  exact h rcZero_cutTestVector_zero
+
+theorem rcF_ctv_hdpos_isolation_QA :
+    (∀ i, deg rcZeroAdj i = 0) ∧ (({0} : Finset (Fin 2)).Nonempty)
+      ∧ (({0} : Finset (Fin 2))ᶜ.Nonempty) ∧ ¬ (0 < (0:ℝ)) :=
+  ⟨rcZeroAdj_regular_zero, by decide, by decide, by norm_num⟩
+
+/-- **Fence (`cutTestVector_ne_zero`, `hS`)**: the empty cut — the
+vector is constantly `-vol ∅ = 0`. -/
+theorem rcF_ctv_hS_fence_QA :
+    ¬ (cutTestVector edgeAdj (∅ : Finset (Fin 2)) ≠ 0) := by
+  intro h
+  apply h
+  funext i
+  simp [cutTestVector, cutTestVector_apply, vol]
+
+theorem rcF_ctv_hS_isolation_QA :
+    (∀ i, deg edgeAdj i = 1) ∧ (0 < (1:ℝ))
+      ∧ ((∅ : Finset (Fin 2))ᶜ.Nonempty) ∧ ¬ ((∅ : Finset (Fin 2)).Nonempty) :=
+  ⟨edgeAdj_regular, by norm_num, by decide, by simp⟩
+
+/-- **Fence (`cutTestVector_ne_zero`, `hSc`)**: the full cut — the
+vector is constantly `vol univᶜ = vol ∅ = 0`. -/
+theorem rcF_ctv_hSc_fence_QA :
+    ¬ (cutTestVector edgeAdj (Finset.univ : Finset (Fin 2)) ≠ 0) := by
+  intro h
+  apply h
+  funext i
+  simp [cutTestVector, cutTestVector_apply, vol, Finset.compl_univ]
+
+theorem rcF_ctv_hSc_isolation_QA :
+    (∀ i, deg edgeAdj i = 1) ∧ (0 < (1:ℝ))
+      ∧ (Finset.univ : Finset (Fin 2)).Nonempty
+      ∧ ¬ ((Finset.univ : Finset (Fin 2))ᶜ.Nonempty) :=
+  ⟨edgeAdj_regular, by norm_num, by simp, by simp⟩
+
+end RegularFences
 
 end SpectralGraphTheory.QA

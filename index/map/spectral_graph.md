@@ -1056,6 +1056,49 @@ crust (`#print axioms`-verified at the standard three).
 | `walkDistribution_tvDistance_le_of_pos_power` | **the plain walk's first mixing rate with no spectral certificate**: at a positive-power certificate `δ ≤ (P^m) i j`, `TV(ν_t x, π) ≤ (1 − \|V\|δ)^{t/m}` — the intrinsic-rate family's non-bipartite member (the entrywise lazy ceiling being its bipartite member), consuming the same Doeblin engine as the directed PageRank rate with `TV(δ_x, π) ≤ 1` folded in through the simplex diameter |
 | `walkDistribution_tendsto_stationaryVec` | **the retired `primitive_power_tendsto`'s first undirected consumer**: the plain walk law converges to stationarity on the supplier's hypothesis set, composed from the proved `primitive_vecMul_tendsto` through the law/power bridge |
 
+#### The primitivity-supplier family's adversarial fences (2026-09-03)
+
+`proposals/adversarial-fences-primitivity-supplier-family.md`,
+`EmpiricalStationary_QA.lean`'s `PrimitivityFences` section (QA-only,
+zero axiom contact, +197 by the generator metric): negative witnesses
+for the family's 21 unfenced load-bearing clauses, each with an
+isolation companion — the engine trio's `hnn`/seed/step clauses
+(`concatNeg`, `bounceNeg`, `bounceNoUp`/`bounceNoDown`, `swap2`), the
+supplier's four hypotheses (`ident2`, `cycle3` the directed 3-cycle
+permutation with `cycle3 ^ 3 = 1`, `swap2`, `rot2` the exact-cube
+rotation with `rot2 ^ 3 = −8·1` — `rot2_pow_three_mul` signs every
+power), the walk-to-power bridge's `hnn` (`negWalkAdj`: the
+negative-diagonal chord makes `(P²) 0 2 = −5` on the genuine walk
+`0 → 1 → 2`), the walk-level supplier's and corollary's `hnn`
+(`negDiagTri` with the eigenvalue-`−11/4` closed forms
+`negDiagTri_pow_mulVec_w` / `negDiagTri_row1_col0` — no power
+entrywise positive, the law divergent), their `hconn` (`triIso4`:
+`triIso4_pow_off` pins the identically-zero cross-block entry,
+`triIso4_pow_row3` the absorbed law, `π 3 = 1/7 ≠ 1`), their `hp`
+(`k2WalkEven` + `k2P_not_isPrimitive` + the alternating-law
+`k2_tendsto_hp_fence_QA`), and the Doeblin rate's `hle` (negative
+base at `δ = 1` on `K₂`) and `hA` (`asymLoopAdj`: the certificate
+genuine at equality on `P = (1/2)·J` but `π` not stationary). The
+generic `walkDistribution_apply_pow` (the law reads the power's row)
+and `dist_ge_entry` support lemmas are public.
+
+The proposal's priced follow-on (same file, the capstone subsection,
+2026-09-03, +6): negative witnesses for the self-contained capstone
+`empiricalWalkDistribution_tail_selfcontained_of_depth`'s two deferred
+graph clauses — `hp` at `K₂` (`k2_capstone_hp_fence_QA`: connectivity
+genuine, every closed walk even; past any threshold the even-time law
+from `0` is `δ₀`, the sampling measure concentrates on the all-zero
+trajectory, deviation `1/2` at full mass `1 > 2 exp(−4)`) and `hconn`
+at `triIso4` (`triIso4_capstone_hconn_fence_QA`: a genuine odd closed
+walk, but the absorbing vertex `3`'s law is `δ₃` at every time —
+deviation `6/7` at full mass) — both through the point-mass cylinder
+helper `toMeasure_cyl_singleton_one` (`toMeasure_cyl_inter` at a
+factor with `q v = 1`, collapsing to `1 ^ n`), with
+`two_mul_exp_neg_four_lt_one` the shared numeric and
+`_isolation_QA` companions attributing each failure to its clause
+alone. The capstone's falsification surface is complete: every
+hypothesis fenced or recorded non-fenceable.
+
 ### `Scaffold.Mathlib.GraphTheory.Magnetic` (the magnetic Laplacian — the directed-native Hermitian operator)
 
 The directed axis' third spectral toolkit (delivered 2026-08-25,
@@ -1896,6 +1939,54 @@ not truth-shaped) and the depth ceiling's `λ₂ < 2` (junk prevention);
 a removable-hypothesis finding recorded for the two nonnegativity
 `hd` clauses.
 
+The lazy audit's two priced follow-on fences (`Mixing_QA.lean`'s
+`LazyFollowOnFences` section, 2026-09-03, the same proposal's
+follow-on delivery record): the conjugated-norm contraction twin
+`dotProduct_self_degreeSqrt_mulVec_pow_lazyWalkTransitionMatrix_contraction`'s
+`hrate` and `hmode` certificate clauses (the √D-weighted mirrors of
+the delivered ℓ²(π) pair — `hrate` on the triangle at the `3/2`-mode
+direction with the below-mode `r = 1/8`: `LHS = (1/4)²·4 = 1/4 >
+1/16 = (1/8)²·4 = RHS`; `hmode` on the edge at the constant zero mode
+with the genuine `r = 0`: `LHS = 2 > 0 = RHS`; the companions reused
+verbatim — `conj_twin_isolation_QA` packages the delivered
+genuine/fails pairs, the two engines sharing `hmode`/`hrate`
+statement-identically) and the lazy `t_mix` object's `_spec`
+witness-clause junk corner at the disconnected bipartite fixture
+`dK2Adj = K₂ ⊕ K₂` on `Fin 4` (`dK2_lazy_law_succ_QA`: the lazy law
+is `δ₀` at time zero and the component-stationary `(1/2,1/2,0,0)` at
+every positive time — convergent to the wrong vector;
+`dK2_lazy_no_mixing_QA`: no witness exists at `ε = 1/8` since
+`TV(ν₀) = 3/4` and `TV(ν_t) = 1/2` at every `t ≥ 1`;
+`dK2_lazy_mix_junk_corner_QA`: `t_mix = sInf ∅ = 0`;
+`dK2_lazy_mix_spec_fence_QA`: the dropped-`hne` conclusion fails at
+`s = 0` — while `dK2_fence_isolation_QA` pins every structural
+hypothesis genuine and connectivity exactly the failure: laziness
+repairs periodicity, not disconnection). After this, no priced QA
+item remains anywhere in the mixing cascade.
+
+### The spectral certificate for the plain walk (the computed rate on non-bipartite input)
+
+*Delivered 2026-09-03 (`proposals/spectral-certificate-plain-walk.md`):
+the strict signless engine, the computed `∃ r < 1` certificates, and
+the plain family's max-rate joins — the caller-supplied rate hypothesis
+of the plain χ²/TV/entrywise ceilings becomes computed on exactly the
+class (connected, non-bipartite) where the plain walk mixes. Zero
+axioms; QA in `Mixing_QA.lean`'s `SpectralCertificate` section
+(certificate pins at the triangle and the looped `r = 0` corner,
+unsatisfiability at `C₄`, and the engine's `hnn`/`hconn` fences).*
+
+| Name | Content |
+| --- | --- |
+| `walk_eq_neg_one_pow_length_mul_of_forall_adj` | edge-sign-flipping potentials flip along walks (`u b = (−1)^|p|·u a`) |
+| `eigvalOf_normalizedLaplacian_lt_two_of_odd_walk` | connected + odd closed walk ⟹ every `L_sym` eigenvalue `< 2` (the bipartite dichotomy's strict half) |
+| `evals_normalizedLaplacian_lt_two_of_odd_walk` | the sorted-spectrum form of the strict bound |
+| `abs_one_sub_eigvalOf_le_max` | `|1 − μ| ≤ max (1 − λ₂) (λ_max − 1)` for every nonzero mode |
+| `exists_lt_one_rate_of_odd_walk` / `exists_pos_lt_one_rate_of_odd_walk` | the computed `∃ r < 1` certificate and its `(0,1)` display inflation |
+| `chiSquareDistance_le_max_rate` / `walkDistribution_tvDistance_le_max_rate` | the plain χ²/TV bounds at the computed rate (unconditional displays; contractive on the odd-walk class) |
+| `walkDistribution_sub_stationaryVec_abs_le_max_rate` | the entrywise plain ceiling at the computed rate (the named consumer, `Oversmoothing.lean`) |
+| `walkDistribution_sub_stationaryVec_le_of_depth_of_odd_walk` | the depth-form oversmoothing join at the computed rate (`Oversmoothing.lean`): the plain family's first certificate-free depth ceiling, at the inflated display rate `(max (max (1 − λ₂) (λ_max − 1)) 0 + 1)/2` — the recorded composition landed 2026-09-03; unlike the abs twins the odd-walk clause is load-bearing (on bipartite input the display saturates at `1` and the log threshold degenerates to junk — fenced at `C₄`) |
+| `walkDistribution_sub_walkDistribution_le_of_depth_of_odd_walk` | the two-start indistinguishability twin at the computed rate (`Oversmoothing.lean`, landed 2026-09-04): past *both* starts' own computed-rate thresholds any two `t`-step views are within `2ε` at every target vertex — the "representations become indistinguishable" statement certificate-free; the odd-walk clause load-bearing with a genuinely two-start `C₄` witness (opposite-parity starts — same-parity starts coincide at even times) |
+
 ### The entropy family's adversarial fences (2026-09-03)
 
 `proposals/adversarial-fences-entropy-family.md` (the third
@@ -1926,3 +2017,50 @@ proof-shaped `hconn`, and three removable-hypothesis findings —
 notably the continuous nonneg `hA` clauses: the heat kernel
 `e^{−t}·e^{tP}` is entrywise nonnegative for any nonnegative `P`,
 symmetric or not.
+
+### The Poisson-bridge family's adversarial fences (2026-09-03)
+
+`proposals/adversarial-fences-poisson-bridge-family.md` (the fourth
+mixing-cascade audit; `Mixing_QA.lean`'s `PoissonFences` section,
+placed after `EntropyFences` and reusing its fixtures): negative
+witnesses for the Poisson-bridge family's 28 unfenced load-bearing
+clauses — the continuous↔discrete hinge (the Poissonization identity,
+the TV convexity toolkit, the comparability/transfer pair) whose QA
+(2026-09-01) had never been independently re-read. The fences: the
+simplex-diameter lemma's four mass clauses; the head–tail split's
+summability clause (junk `0 = 1` at the constant-one sequence); the
+convexity bound's `hc` (the alternating geometric weights
+`(3/2)(−1/2)ᵏ` against a geometric law family: the signed mixture's
+TV `1/4` against the weighted average `3/20`) and `hc1` (a mass-`2`
+single-point weight: `1/2 > 1/5`); `hν`/`hν1` by the corpus's first
+**divergent-tsum junk** route (the summable weights `1/2·2⁻ᵏ` against
+the growing laws `(2ᵏ⁺¹, 1 − 2ᵏ⁺¹)` and `(2ᵏ⁺¹, 2ᵏ⁺¹ − 1)` make every
+series in the statement non-summable — both sides junk to `0` against
+the honest left TV `1/2`); the Poisson weight's negative time (`−e`);
+the `hnn` clauses of the TV ≤ 1 bound, the adjoint-walk contraction
+and its power twin (the basis pair's TV triples), and discrete TV
+monotonicity (`3/2 → 9/2` at the negative off-diagonal fixture, the
+two-step law `(5, −4)` pinned); the `hA` clauses of the whole
+Poissonization identity triple — at the asymmetric swap the
+constant-density mixture sums to `(3, 0)` against the heat kernel's
+genuine drift `(3, 3(1 − e⁻¹))`: the identity is reversibility — of
+the stationary power (`Pᵀπ = (1, 0) ≠ π`), and of monotonicity at a
+**new fixture** `asymFlowAdj = !![1,1;3,0]]` (`P = [[1/2,1/2],[1,0]]`,
+`π = (2/5, 3/5)`): TV rises `1/10 → 7/20`; the rate theorems' `hA` at
+the swap's `t = 2` (`1 − e⁻² > 2/3` from `e² > 4`, the mass-drift law
+`(1, 2(1 − e⁻²))` pinned through the idempotent-Laplacian kernel);
+the `ht` clauses at `t = −1` on the edge (the signed weights
+`e·(−1)ᵏ/k!` leave the continuous TV at `e²/2` against the average
+`1/2`); and the transfer corollary's `htail` on the triangle at
+`t = 1/2` (certificate `ε₁ = 1/6` genuine, tail budget `1/20`
+understating the honest head `(3/2)e^{−1/2}`, refuted from a new
+series bound `e < 3` — the range-5 partial sum plus the
+factorial-vs-geometric tail). `hmix` was already fenced
+(`k2_no_discrete_mixing_QA`). Sixteen non-fenceables recorded with
+mechanisms (the ten `hd` clauses survive on truth — with `hnn`
+retained the junk-collapsed chain is honestly substochastic; the
+convexity bound needs no target structure; the factorial beats
+matrix-power growth; the transfer's `hnn` is screened by spectral
+escape `> 1`), and two removable-hypothesis findings. Helper shelf
+additions of note: `not_summable_of_abs_ge`, `exp_one_lt_three`, and
+the `pf_tv_lit` two-point TV closed form.

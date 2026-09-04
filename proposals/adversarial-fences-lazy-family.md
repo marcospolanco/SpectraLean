@@ -1,7 +1,10 @@
 # Adversarial Fence Audit of the Lazy Family
 
 **Status:** COMPLETE — delivered 2026-09-02 (same-run proposal; run
-`20260902T225627Z-run-1`, session `ses_f9bb3f57affeWs0Ep264nM0eze`).
+`20260902T225627Z-run-1`, session `ses_f9bb3f57affeWs0Ep264nM0eze`);
+the two priced follow-ons below delivered 2026-09-03 (run
+`20260903T194348Z-run-1`, session `ses_f9739ea2fffe2gExHAhzQ4DVCN`)
+— the family's falsification surface is now complete.
 
 **Goal.** The standing handoff's top-named continuation, executed as a
 bounded audit: an adversarial re-read of the lazy family's QA
@@ -259,3 +262,132 @@ disconnected bipartite fixture is priced above; the broader
 audit-shaped pass over the *remaining* mixing-cascade families
 (entropy, Poisson bridge, primitivity supplier) stays open with the
 method now twice exercised.
+
+## Follow-on delivery record (2026-09-03)
+
+The two priced follow-ons above, delivered as `Mixing_QA.lean`'s
+`LazyFollowOnFences` section (+39 QA declarations by the generator
+metric, 4297 → 4336; the 40 new declarations include the `dK2Adj`
+fixture `def`):
+
+**(1) The conjugated-norm contraction twin's two certificate fences.**
+`tri_conj_rate_fence_QA` (`hrate` dropped): on the triangle at
+`g = (1,−1,0)` with `r = 1/8` and `t = 1`, the mode action
+`P_L *ᵥ g = (1/4) • g` (the delivered `tri_lazy_mulVec_mode_QA`)
+makes `LHS = (1/4)²·‖√D *ᵥ g‖² = (1/16)·4 = 1/4` against
+`RHS = (1/8)²·4 = 1/16` (`tri_conj_norm_mode_QA` pins the conjugated
+norm `4`: degrees `2`, so `√D = √2 • ·`, and `‖g‖² = 2` — the
+`Real.sq_sqrt` route with a `ring`-shuffled `√2·(√2·2) = 4`).
+`k2_conj_mode_fence_QA` (`hmode` dropped): on the edge at `g = (1,1)`
+with the genuine `r = 0` and `t = 1`, `P_L *ᵥ 1 = 1` and
+`√D = √1 = 1` (the delivered `k2_degreeSqrt_mulVec`), so
+`LHS = ‖1‖² = 2 > 0 = RHS`. The isolation is packaged rather than
+duplicated: **`conj_twin_isolation_QA`** bundles the four
+genuine/fails facts — and its four conjuncts close by *exact* the
+delivered ℓ²(π) companions (`tri_lazy_mode_genuine_QA`,
+`tri_lazy_rate_fails_QA`, `k2_lazy_rate_genuine_QA`,
+`k2_lazy_mode_fails_QA`), because the two engines share `hmode` and
+`hrate` **statement-identically** (a structural point the 2026-09-02
+audit's pricing implied and this delivery makes explicit: one fence
+pair now guards both contraction engines' certificate interface). One
+generic helper added: **`conj_norm_smul`** (`⟨M *ᵥ (c • v), M *ᵥ (c •
+v)⟩ = c² · ⟨M *ᵥ v, M *ᵥ v⟩` at any matrix — the `Finset.mul_sum` +
+per-summand `ring` route, avoiding any dependence on the
+smul-dotProduct lemma names).
+
+**(2) The lazy `_spec` junk corner at `K₂ ⊕ K₂`.** The new fixture
+**`dK2Adj`** on `Fin 4` (two disjoint edges, in the `triIso4` idiom:
+sixteen `rfl` entry pins, symmetry/nonnegativity/degree-one pins,
+`π = 1/4` uniform via `dK2Adj_vol`, the `supportGraph`-walk-stays
+block argument for disconnectedness). The engine: **`dK2_lazy_step`**
+— for any law supported on `{0,1}`, one lazy adjoint step gives
+`![(ν 0 + ν 1)/2, (ν 0 + ν 1)/2, 0, 0]` (proved through the
+`P_Lᵀ = 2⁻¹(Pᵀ + 1)` split mirroring `sum_lazyWalkDistribution`'s
+hexp, dodging all `if j = k` diagonal-term case splits), from which
+**`dK2_lazy_law_succ_QA`** derives the full closed form by one-step
+induction: `ν₀ = δ₀`, `ν_{t+1} = (1/2,1/2,0,0)` — the law converges
+to the *component*-stationary, not `π`. The witnesses:
+**`dK2_lazy_tv_zero_QA`** (`TV(ν₀, π) = 3/4`), **`dK2_lazy_tv_succ_QA`**
+(`TV(ν_t, π) = 1/2` at every `t ≥ 1` — the mass `1/2` stranded on the
+other component, never mixed away), **`dK2_lazy_no_mixing_QA`** (no
+`t` certifies threshold `1/8`), **`dK2_lazy_mix_junk_corner_QA`**
+(`t_mix = sInf ∅ = 0` — the plain twin's `k2_mix_junk_corner_QA`
+mechanism at the lazy object), and the fence itself
+**`dK2_lazy_mix_spec_fence_QA`**: with `hne` dropped the `_spec`
+conclusion fails at `s = 0` (`0 ≤ 0` holds, `3/4 ≤ 1/8` does not).
+**`dK2_fence_isolation_QA`** records the structural context: every
+axis the lazy family names genuine (symmetric, nonnegative, positive
+degrees), connectivity — the ceiling's own hypothesis — exactly the
+failure. The honest scope note: `_spec`'s only hypothesis is `hne`
+itself, so the "isolation" here is the fixture's structural
+genuineness, not a per-clause split.
+
+Zero axiom contact: `#print axioms` via `wip/lazyfollowon_axcheck.lean`
+on all 39 new theorems — every one exactly `propext,
+Classical.choice, Quot.sound` (`lfFin4` strictly smaller at
+`propext, Quot.sound`). No `-- @refutes` tags added (these refute
+*theorem* instantiations and consume nothing admitted;
+`check_refutation_independence` stays at its 9-tag clean state).
+
+**Technique findings** (recorded for future QA runs):
+
+1. The lazy adjoint step is cheapest through the `2⁻¹ • (Pᵀ + 1)`
+   decomposition (three `rw`s mirroring the shelf's own
+   `sum_lazyWalkDistribution` proof) — the `lazyWalkTransitionMatrix_apply`
+   route enters `if j = k` diagonal case splits per summand that
+   `simp`/`norm_num` do not reliably reduce for `Fin 4` literals.
+2. `norm_num` evaluates `|a − b|` for numerals but leaves `|3/4|` and
+   `|1/4|` (post-normalization abs) untouched — the fix is explicit
+   `rw [abs_of_nonneg (by norm_num : (0:ℝ) ≤ _)]` after the
+   `norm_num` pass. (Extends the 2026-09-02 TV/Dobrushin record's
+   `rw [tv_lit]; norm_num` finding: there the abs fired
+   pre-normalization; here the entries came from vector-literal pins.)
+3. Vector-literal entries at `Fin 4` indices `2`/`3` do not reduce
+   under the working `simp only`/`norm_num` sets — rfl-pins
+   (`have er : (![…] : Fin 4 → ℝ) 2 = 0 := rfl`) and rewriting with
+   them are the reliable route (the same gap the `triIso4` delivery
+   met at matrix entries; `Matrix.cons_val_zero`/`_one` cover only
+   the first two indices).
+4. `rw [lemma, lemma, lemma]` with an `∀`-quantified `?g` variable
+   stops with "did not find instance" once every occurrence is
+   consumed — instantiate to exactly as many copies as there are
+   *distinct* instantiations (two here: the `1`-vector and the
+   `![1,1]`-vector), not one per occurrence.
+
+**Verification** (all commands run this delivery, before recording):
+spike first (`wip/lazyfollowon_spike.lean`, iterated to zero
+errors/zero warnings before any shelf edit — six first-pass tactic
+failures, all in the classes above, fixed in one round);
+`lake env lean` on the landed QA module (zero errors, zero warnings —
+the three info-level `ring_nf` hints pre-existing on the HEAD
+baseline per the 2026-09-03 record); explicit `lake build
+Scaffold.QA.SpectralGraph.Mixing_QA` ✔; the 39-declaration axiom
+audit above; full `lake build` ✔ immediately followed by
+`check_build_completeness.py` (133 source files, 133 fresh artifacts,
+0 stale, 0 missing, exit 0); `lint_axioms` exit 0 (4 current axioms,
+unchanged; only the allowlisted-confirmed PF finding);
+`check_refutation_independence` (9-tag clean — no tags touched);
+`check_public_reachability` clean (63 repo modules); `check_citations`
+("All axioms have proper citations!"); `check_markdown_links` clean;
+`check_backlog_freshness` clean; scoreboard regenerated (**4336/4/0**)
+with the verification row; map stats synced 4297 → 4336 in both data
+tables, SVG regenerated, `check_scaffold_map_freshness` exit 0 (49
+stations, no status change owed — this proposal has no station).
+
+Records updated: this proposal (follow-on delivery record with four
+technique findings), `proposals/README.md` (new Delivered row), README
+(4336 + the walks-and-mixing row's follow-on clause), the radar (QA
+axis synced 4297 → 4336, score held 4.5), `index/map/spectral_graph.md`
+(the LazyFollowOnFences paragraph after the LazyFences paragraph), the
+backlog item-8 twenty-first update, the scoreboard verification row,
+both map data tables + regenerated SVG, the execution plan, and the
+activity log. Nothing committed; the prior runs' uncommitted
+deliveries preserved.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. With this delivery the lazy family's
+falsification surface is complete and no priced QA item remains
+anywhere in the mixing cascade; the standing frontiers are the ones
+the execution plan names (the QA axis's randomized half — gated on a
+design decision; the consumer-gated undirected `walkTVPair` join; the
+consumer-gated spectral-certificate route).

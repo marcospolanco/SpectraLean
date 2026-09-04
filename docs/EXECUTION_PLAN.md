@@ -6,26 +6,739 @@ holds the append-only narrative.
 
 ## Active milestone
 
-**None queued — the standing queue is empty again.** This run executed
-the third family of the audit-shaped pass (the entropy family) named as
-the top continuation by the lazy-family handoff, delivered as the block
-below. Check `proposals/README.md`'s Active table first (all items there
-remain Low/human- or operator-gated). Natural frontiers for the next
-run's center-out selection, in rough leverage order: continue the
-audit-shaped pass over the *remaining* mixing-cascade families (the
-Poisson-bridge and primitivity-supplier QA families — same method, now
-thrice exercised; plus the lazy delivery's own priced follow-ons: the
-conjugated-norm contraction twin's two certificate fences and the lazy
-object's `_spec` junk corner at a disconnected bipartite fixture); the
-QA axis's *randomized* half (needs a design decision on
+**None queued — the two-start twin below closed the prior handoff's
+last priced composition.** Check `proposals/README.md`'s Active
+table first (all items there remain Low/human- or operator-gated).
+Remaining natural frontiers, all decision- or consumer-gated: the QA
+axis's *randomized* half (needs a design decision on
 `#eval`/native_decide policy, which the repo's own Step-0 rules have
 excluded before); the undirected `walkTVPair` join onto the
-now-fully-fenced Dobrushin engine (priced, needs a consumer); the
-spectral certificate route for the plain family (non-bipartite ⟹
-`λ_max(L_sym) < 2` ⟹ an `r < 1` certificate — still without a consumer
-that the delivered rate does not already serve); the sharp `|λ₂| = α`
-layer (no consumer named); the reverse TV → χ² calculus (no consumer
-named).
+fully-fenced Dobrushin engine (priced, needs a consumer); the sharp
+`|λ₂| = α` layer (no consumer named); the reverse TV → χ² calculus
+(no consumer named). A named consumer for any of these, or an
+operator decision on the randomized-QA policy, is the cheapest way to
+unlock the next run.
+
+------
+
+**The two-start indistinguishability twin at the computed plain rate —
+the prior terminal handoff's recorded two-line composition, its
+consumer gate discharged from shelf evidence**
+(`proposals/spectral-certificate-plain-walk.md`, second follow-on
+delivery record; run `20260904T004657Z-run-1`, session
+`ses_f9620d93cffeoXAiD38p29dXzt`). DELIVERED — zero axiom contact
+(count stays 4; `#print axioms` via `wip/twostart_axcheck.lean` on
+all 7 new declarations — 1 shelf + 6 QA — every one exactly
+`propext, Classical.choice, Quot.sound`; no `-- @refutes` tags —
+nothing admitted is consumed). QA 4428 → 4434 (+6, `Mixing_QA.lean`'s
+`SpectralCertificate` two-start blocks). Radar QA axis synced to
+4434, score held 4.5 per protocol (the QA witnesses of a composition
+within the already-counted mixing cascade, not a named-gap
+closure).**
+
+The delivery's content: **`Oversmoothing.lean`'s
+`walkDistribution_sub_walkDistribution_le_of_depth_of_odd_walk`** —
+past *both* starts' own computed-rate depth thresholds (the one-start
+ceiling consumed twice, each start with its own threshold display),
+any two `t`-step views are within `2ε` at every target vertex: the
+"representations become indistinguishable" statement oversmoothing
+papers state informally, certificate-free on the odd-walk class. The
+consumer gate discharged from the shelf's own evidence — the
+caller-certificate twin's docstring has carried the consumer's name
+since 2026-08-31, and the computed-rate family's one-start ceiling
+was landed for exactly that consumer class; the twin completes the
+statement pair. The QA per the fence discipline: true-value pins at
+both certificate fixtures (the triangle at `t = 3`, `ε = 1/2`,
+starts `0`/`1`: the certified `2ε = 1` against the true
+`|1/4 − 3/8| = 1/8` — the one-start deviations `1/12` and `1/24` in
+opposite directions summing to exactly the two-start value; the
+looped triangle at `t = 1`, every pair: exactly `0` by one-step
+mixing) and **the C₄ two-start fence**: both threshold hypotheses
+junk-satisfiable at every time (reusing the delivered
+`c4_depth_threshold_junk_QA`), the conclusion failing for the
+*opposite-parity* pair `(x₁, x₂) = (0, 1)` at `(t, y, ε) =
+(2, 1, 1/8)` — `|ν(2) 0 1 − ν(2) 1 1| = |0 − 1/2| = 1/2 > 1/4 = 2ε`,
+through the new opposite-parity two-step law pin `c4_dist_two_one_QA`
+(from `1`: `(0, 1/2, 0, 1/2)`). The witness shape is genuinely
+two-start and recorded as such: same-parity starts coincide at even
+times on bipartite input, so the one-start fence's witness cannot
+refute the two-start statement — the fence must take opposite
+parities, a discrimination the one-start display cannot express.
+Isolation cited, not duplicated (`c4_fence_isolation_QA`). Three
+technique findings in the second follow-on record (the auto-bind
+notation trap re-confirmed in spikes — a file-local notation
+referenced from undeclared scope silently elaborates as a bound
+variable, surfacing as a distant `rw` motive failure; standalone
+threshold lemmas cannot be `exact`-ed against theorem displays even
+across the defeq that holds — the robust idiom is inline `refine ?_`
+goals elaborated from the theorem; `abs_of_nonneg` must come *after*
+`norm_num`'s arithmetic normalization, `linarith` closing). Folded-in
+records repair, verified against the generated scoreboard: README's
+two prose axiom-count mentions repaired 5 → 4 (stale since the
+2026-09-02 `primitive_power_tendsto` retirement), the status block's
+date and QA count refreshed.
+
+**Verification:** spike first (`wip/twostart_spike.lean` — the full
+7-declaration delivery, iterated to zero errors/zero warnings before
+any shelf edit; two fix rounds, all in recorded trap classes);
+`lake env lean` on both landed modules (zero errors, zero warnings;
+the three info-level `ring_nf` hints confirmed pre-existing, count
+3 = 3); explicit `lake build` targets ✔ on `Oversmoothing` and the
+QA module; **the 7-declaration axiom audit above**; **full
+`lake build` ✔ (2412/2413) immediately followed by
+`check_build_completeness.py` — 133 source files, 133 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+current axioms, unchanged; only the allowlisted-confirmed PF
+finding); `check_refutation_independence` (9-tag clean — no tags
+touched); `check_public_reachability` clean (63 repo modules);
+`check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; `check_backlog_freshness` clean
+(reviewed date bumped with the item-8 update); scoreboard
+regenerated (**4434/4/0**) with the verification row;
+map-freshness exit 0 after the 4428 → 4434 stats sync in both map
+files and SVG regeneration (49 stations, no status change — none
+owed). The landing verified a pure insertion in both Lean files
+(zero deletions in numstat). Records updated: the proposal (second
+follow-on delivery record with three technique findings),
+`proposals/README.md` (new Delivered row), README (4434 + the
+walks-and-mixing row's two-start clause + the axiom-count repair),
+the radar (QA axis synced, held 4.5), `index/map/spectral_graph.md`
+(the two-start row), the backlog item-8 twenty-fourth update +
+reviewed-date bump, the scoreboard verification row, both map data
+tables + regenerated SVG, this plan, and the activity log. Nothing
+committed; the prior runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed (the
+caller-certificate two-start family is untouched and still
+available). Honest scope: the twin inherits the one-start ceiling's
+conservative inflation (the computed display buys fewer layers than a
+sharp caller certificate would), and on the triangle fixture the
+uniform stationary vector makes the two threshold slots literally
+identical — the two-slot generality is exercised by the statement,
+not by that fixture.
+
+------
+
+**The depth-form oversmoothing join at the computed plain rate — the
+prior terminal handoff's named guaranteed-small increment, the
+spectral-certificate proposal's recorded composition landed as a
+theorem** (`proposals/spectral-certificate-plain-walk.md`, follow-on
+delivery record; run `20260903T232202Z-run-1`, session
+`ses_f966f94f7ffeVhWzf0ASxaaV11`). DELIVERED — zero axiom contact
+(count stays 4; `#print axioms` via `wip/depthjoin_axcheck.lean` on
+all 18 new declarations — 1 shelf + 17 QA — every one exactly
+`propext, Classical.choice, Quot.sound`; no `-- @refutes` tags —
+nothing admitted is consumed). QA 4411 → 4428 (+17, `Mixing_QA.lean`'s
+`SpectralCertificate` depth blocks). Radar QA axis synced to 4428,
+score held 4.5 per protocol (the QA witnesses of a composition within
+the already-counted mixing cascade, not a named-gap closure).**
+
+The delivery's content: **`Oversmoothing.lean`'s
+`walkDistribution_sub_stationaryVec_le_of_depth_of_odd_walk`** — the
+plain family's first certificate-free depth ceiling, stated at the
+inflated computed rate `(max (max (1 − λ₂) (λ_max − 1)) 0 + 1)/2`
+with the threshold display `log (√(π_y((π_x)⁻¹−1))/ε) / log (1/r*)`.
+Two deliberate design decisions: the rate facts are proved *directly
+from the constituents* (connectivity's `0 < λ₂` via
+`secondEval_normalizedLaplacian_pos_of_connected`, `λ_max < 2` via
+the strict signless engine, and the below-gap workhorse
+`abs_one_sub_eigvalOf_le_max`) rather than obtained from the
+existential certificates — so nothing depends on rcases witness
+unfolding; and the `_of_odd_walk` suffix is honest, because unlike
+the abs twins the depth display *cannot* be stated unconditionally —
+on bipartite input the computed rate is exactly `1`, the displayed
+denominator degenerates to `log 1 = 0`, and the threshold hypothesis
+degenerates to junk. The QA per the fence discipline: the inflated
+display rate pinned exact at both certificate fixtures (triangle
+`3/4` against the pinned `r = 1/2`; looped triangle `1/2` — the
+`r = 0` corner the inflation exists for); the ceiling instantiated
+with genuinely verified thresholds at both (the triangle at `t = 3`,
+`ε = 1/2` — denominator `log(4/3)`, threshold `2√(2/3) ≤ 2 ≤
+(4/3)³ = 64/27` with the corpus's `√(2/3) ≤ 1` doing the analytic
+work, true value `1/24` pinned against `tri_dist_three_zero_QA`; the
+looped triangle at `t = 1` — denominator `log 2`, the threshold
+inequality literally the corpus's `tri_ceiling_threshold_one_QA`
+reused, both fixtures uniform `π = 1/3`, conclusion `0` by exact
+one-step mixing); and **the C₄ junk-threshold fence**: the top
+spectrum entry pinned `= 2` (the alternating mode through
+`eigvalOf_le_evals_last` against the signless `≤ 2` ceiling), the
+display rate pinned to saturate at exactly `1`, the two-step law
+pinned `(1/2, 0, 1/2, 0)` — so the dropped-odd-walk statement's
+threshold hypothesis is *junk-satisfiable* (`x/0 = 0 ≤ t` at every
+`t`) while the conclusion fails at `(t, ε) = (2, 1/8)` with
+`|1/2 − 1/4| = 1/4 > 1/8` — the junk-division hazard class exercised
+at the new display itself (isolation cited to the delivered
+`c4_fence_isolation_QA`, not duplicated). Three technique findings in
+the proposal's follow-on record (identifiers cannot contain `λ` —
+`have hλ2` is a parse error surfacing far from its cause; `rw` will
+not match a Fin literal `⟨2, _⟩` against the shelf display's
+`⟨Fintype.card V − 1, _⟩` at reducible transparency — repaired by an
+explicit `rfl`-lemma rewritten in first, `exact` being forgiving;
+`((1 : ℕ) : ℝ)` is not defeq to `(1 : ℝ)` — close casts with
+`exact_mod_cast`).
+
+**Verification:** spike first (`wip/depthjoin_spike.lean` — the full
+18-declaration delivery, iterated to zero errors/zero warnings before
+any shelf edit, four small fix rounds); `lake env lean` on both
+landed modules (zero errors, zero warnings; `Oversmoothing` rebuilt
+first so the QA import sees the new theorem; the three positioned
+info-level `ring_nf` hints in Mixing_QA confirmed pre-existing);
+explicit `lake build` targets ✔ on `Oversmoothing` and the QA module;
+**the 18-declaration axiom audit above**; **full `lake build` ✔
+(2412/2413) immediately followed by `check_build_completeness.py` —
+133 source files, 133 fresh artifacts, 0 stale, 0 missing, exit 0**;
+`lint_axioms` exit 0 (4 current axioms, unchanged; only the
+allowlisted-confirmed PF finding); `check_refutation_independence`
+(9-tag clean — no tags touched); `check_public_reachability` clean
+(63 repo modules); `check_citations` clean; `check_markdown_links`
+clean; `check_backlog_freshness` clean; scoreboard regenerated
+(**4428/4/0**) with the verification row; map-freshness exit 0 after
+the 4411 → 4428 stats sync in both map files and SVG regeneration (49
+stations, no status change — none owed). The landing verified a pure
+insertion in both Lean files (zero deletions against the prior
+uncommitted state). Records updated: the proposal (scope note
+discharged + follow-on delivery record with three technique
+findings), `proposals/README.md` (new Delivered row), README (4428 +
+the walks-and-mixing row's depth-join clause), the radar (QA axis
+synced, held 4.5), `index/map/spectral_graph.md` (the depth-join
+row), the backlog item-8 twenty-third update, the scoreboard
+verification row, both map data tables + regenerated SVG, this plan,
+and the activity log. Nothing committed; the prior runs' uncommitted
+deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed (the
+new theorem is an addition; the caller-certificate depth family is
+untouched and still available). Honest scope: the inflated rate is
+conservative at both ends (the `max ... 0` and the `+1)/2`
+averaging), so the computed display buys fewer layers than a sharp
+caller certificate would; the two-start indistinguishability twin at
+the computed rate is now a two-line composition of the landed theorem
+with `walkDistribution_sub_walkDistribution_le_of_depth`-style
+triangles, recorded here rather than landed (no consumer named).
+
+------
+
+**The plain walk's spectral certificate — the standing handoff's named
+third frontier, the plain family's computed rate on the non-bipartite
+class** (`proposals/spectral-certificate-plain-walk.md`, same-run
+proposal; run `20260903T211920Z-run-1`, session
+`ses_f96e42945ffexR4Z56PmINSMcE`). DELIVERED — zero axiom contact
+(count stays 4; `#print axioms` via `wip/speccert_axcheck.lean` on all
+84 audited declarations — 9 shelf + 75 QA — every one exactly
+`propext, Classical.choice, Quot.sound`; no `-- @refutes` tags —
+nothing admitted is consumed). QA 4336 → 4411 (+75 by the generator
+metric, `Mixing_QA.lean`'s `SpectralCertificate` section). Radar QA
+axis synced to 4411, score held 4.5 per protocol (the QA witnesses of
+a new theorem family within the already-counted mixing cascade, not a
+named-gap closure).**
+
+The delivery's content, with the recorded consumer gate discharged by
+naming the plain family's entrywise oversmoothing ceiling (the
+message-passing depth setting's non-lazy walk — the same consumer class
+the lazy intrinsic rate's delivery named on the bipartite side):
+**(1) the strict signless engine** `eigvalOf_normalizedLaplacian_lt_two_of_odd_walk`
+— connected support graph + an odd closed walk (the primitivity
+supplier's exact `Odd p.length` interface) ⟹ every normalized-Laplacian
+eigenvalue `< 2`: a `μ = 2` unit eigenvector unstretches through the
+delivered congruence and signless SOS into an edge-flipping potential,
+the odd closed walk zeroes it at its base vertex (the new
+`walk_eq_neg_one_pow_length_mul_of_forall_adj` flip-propagation lemma),
+connectivity propagates zero everywhere, contradicting
+`√D *ᵥ u = v` — the classical bipartite-dichotomy strict half; **(2)
+the computed certificates** `exists_lt_one_rate_of_odd_walk` /
+`exists_pos_lt_one_rate_of_odd_walk` at
+`r := max (1 − λ₂) (λ_max − 1)` — connectivity's `0 < λ₂`, the
+engine's `λ_max < 2`, and the below-gap plumbing, with the `(0,1)`
+inflation `(max r 0 + 1)/2` because `r = 0` is an honest corner;
+**(3) the joins** — `chiSquareDistance_le_max_rate` and its TV shadow
+(the plain family's display twins, unconditional statements whose
+displayed rate the certificate makes contractive on the odd-walk class,
+saturating at `1` on bipartite input) plus the Oversmoothing consumer
+`walkDistribution_sub_stationaryVec_abs_le_max_rate` (the entrywise
+plain ceiling with no caller certificate, the max's nonnegativity
+itself derived); **(4) the QA per the fence discipline** — the
+triangle certificate pin `1/2` exact (both max branches attained via
+the sorted-spectrum pins `evals ⟨1⟩ = evals ⟨2⟩ = 3/2`) with the
+max-rate bound attained at `χ²(1) = 1/2`; the looped triangle's
+`r = 0` corner (spectrum `{0,1,1}` by the eigen-equation route, the
+one-step law exactly stationary, `χ²(1) = 0` attained, the `(0,1)`
+inflation instantiated — and the loops-are-not-support-edges subtlety
+exercised); the **C₄ unsatisfiability fence** (the alternating mode's
+`eigvalOf = 2` forbids every `r < 1`, with the every-closed-walk-even
+isolation through the flip lemma at the parity function); the strict
+engine's **`hnn` fence** at `negDiagTriAdj` (the signless form `−6 < 0`
+at `(3,−1,−1)`, an eigenvalue escaping above `2` through
+`evals_first_mul_dotProduct_le_quadForm` and the eigenvector shift);
+and its **`hconn` fence** at `triK2Adj` on `Fin 5` (triangle ⊕ `K₂`,
+walk-stays-in-block isolation, the `K₂` block's `μ = 2` mode surviving
+the genuine triangle odd walk — connectivity exactly the failure). Six
+technique findings in the proposal (headline: file-local notations do
+not export and undefined identifiers silently auto-bind as variables in
+theorem statements — the spike's first triangle block elaborated
+`triL`/`triH` as metas until local notations were redeclared; also the
+`evals`-takes-only-the-symmetry-proof call shape, classical-`decide`
+over ℝ, the wrapper-literal `rfl` wall and its `revert`+`simp` /
+`match`-fixture routes, `Finset.sum_mul`'s reversed orientation, and
+`Matrix.IsSymm` being a def).
+
+**Verification:** spike first (`wip/speccert_spike.lean` — the full
+84-declaration delivery, iterated to zero errors/zero warnings before
+any shelf edit); `lake env lean` on the landed QA module (zero errors,
+zero warnings — the three positioned info-level `ring_nf` hints
+confirmed pre-existing); explicit `lake build` targets ✔ on
+`Mixing`, `Oversmoothing`, and the QA module; **the 84-declaration
+axiom audit above**; **full `lake build` ✔ (2412/2413) immediately
+followed by `check_build_completeness.py` — 133 source files, 133
+fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+current axioms, unchanged; only the allowlisted-confirmed PF finding);
+`check_refutation_independence` (9-tag clean — no tags touched);
+`check_public_reachability` clean (63 repo modules); `check_citations`
+("All axioms have proper citations!"); `check_markdown_links` clean;
+`check_backlog_freshness` clean; scoreboard regenerated (**4411/4/0**)
+with the verification row; map-freshness exit 0 after the 4336 → 4411
+stats sync in both map files and SVG regeneration (49 stations, no
+status change — none owed). Records updated: the proposal (COMPLETE +
+delivery record with six technique findings), `proposals/README.md`
+(new Delivered row), README (4411 + the walks-and-mixing row's
+certificate clause), the radar (QA axis synced, held 4.5),
+`index/map/spectral_graph.md` (the SpectralCertificate section), the
+backlog item-8 twenty-second update, the scoreboard verification row,
+both map data tables + regenerated SVG, this plan, and the activity
+log. One incident, recovered with no loss: the first landing misplaced
+the Oversmoothing consumer inside `Mixing.lean` and its removal cut
+the lazy decay-engine sections — `Mixing.lean` restored verbatim from
+`git show HEAD:` (verified empty-diff against HEAD first) and the
+landing redone with exact anchors; the final diff is a pure insertion
+(+261 lines, zero deletions — verified). Nothing committed; the prior
+runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — pure hard crust, no
+axiom disposition changed, no existing public statement changed.
+Honest scope: the odd-closed-walk interface remains weaker than
+"non-bipartite" (the classical dichotomy unbundled, unchanged from the
+primitivity delivery's record); the computed rate is the two-sided
+max, typically loose where `|λ_max − 1|` and `|1 − λ₂|` differ; the
+depth-form join at the computed rate is a recorded composition, not a
+landed statement.
+
+------
+
+**The lazy family's priced follow-on fences — the standing handoff's
+top-named continuation, the last priced QA items in the mixing
+cascade** (`proposals/adversarial-fences-lazy-family.md`, follow-on
+delivery record; run `20260903T194348Z-run-1`, session
+`ses_f9739ea2fffe2gExHAhzQ4DVCN`). DELIVERED — QA-only, zero axiom
+contact (count stays 4; `#print axioms` via
+`wip/lazyfollowon_axcheck.lean` on all 39 new theorems — 38 exactly
+`propext, Classical.choice, Quot.sound`, `lfFin4` stricter at
+`propext, Quot.sound`; no `-- @refutes` tags — these refute *theorem*
+instantiations, nothing admitted is consumed). QA 4297 → 4336 (+39 by
+the generator metric; the 40 new declarations include the `dK2Adj`
+fixture `def`). Radar QA axis synced to 4336, score held 4.5 per
+protocol (negative witnesses of an already-counted family, not a
+named-gap closure).
+
+The delivery's content, the 2026-09-02 lazy audit's only two priced
+deferrals: **(1) the conjugated-norm contraction twin's two
+certificate fences** — the √D-weighted mirrors of the delivered ℓ²(π)
+pair at the same fixtures: `tri_conj_rate_fence_QA` (`hrate`: triangle,
+`g = (1,−1,0)`, below-mode `r = 1/8` — `P_L *ᵥ g = (1/4) • g` makes
+`LHS = (1/16)·4 = 1/4 > 1/16 = (1/64)·4 = RHS`, the norm `4` pinned
+by `tri_conj_norm_mode_QA` through the generic `conj_norm_smul`
+helper) and `k2_conj_mode_fence_QA` (`hmode`: edge, `g = (1,1)`,
+genuine `r = 0` — `P_L *ᵥ 1 = 1` and `√D = 1`, so `2 > 0`), the
+isolation *packaged* not duplicated (`conj_twin_isolation_QA` closes
+by exact the four delivered companions — the two engines share
+`hmode`/`hrate` statement-identically, so one fence pair now guards
+both contraction engines' certificate interface); **(2) the lazy
+`t_mix` object's `_spec` witness-clause junk corner at `dK2Adj =
+K₂ ⊕ K₂`** on `Fin 4` (the `triIso4` idiom: sixteen `rfl` entry pins,
+structural pins, `π = 1/4` uniform): the engine `dK2_lazy_step` (one
+lazy adjoint step of any `{0,1}`-supported law averages the block —
+proved through the `2⁻¹ • (Pᵀ + 1)` split, dodging the `if j = k`
+diagonal case splits), the full closed form `dK2_lazy_law_succ_QA`
+(`ν₀ = δ₀`, `ν_{t+1} = (1/2,1/2,0,0)` — convergent to the
+*component*-stationary, not `π`), the exact TV pins `3/4`/`1/2`,
+`dK2_lazy_no_mixing_QA`, `dK2_lazy_mix_junk_corner_QA` (`t_mix =
+sInf ∅ = 0` — the plain twin's `k2_mix_junk_corner_QA` mechanism at
+the lazy object, completing the pair), and the fence
+`dK2_lazy_mix_spec_fence_QA` (dropped-`hne` conclusion fails at
+`s = 0`: `3/4 > 1/8`), with `dK2_fence_isolation_QA` recording every
+structural hypothesis genuine and connectivity exactly the failure —
+laziness repairs periodicity, not disconnection. Four technique
+findings in the proposal (the adjoint-step decomposition route;
+post-normalization `|3/4|` needing explicit `abs_of_nonneg` rewrites;
+`Fin 4` vector-literal indices `2`/`3` needing rfl-pins; the `rw
+[lemma × 3]` instantiation-exhaustion trap).
+
+**Verification:** spike first (`wip/lazyfollowon_spike.lean` — the
+full 40-declaration delivery, iterated to zero errors/zero warnings
+before any shelf edit — six first-pass tactic failures, all fixed in
+one round); `lake env lean` on the landed QA module (zero errors,
+zero warnings; the three info-level `ring_nf` hints pre-existing per
+the 2026-09-03 record); explicit `lake build
+Scaffold.QA.SpectralGraph.Mixing_QA` ✔; **the 39-declaration axiom
+audit above**; **full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 133 source files, 133 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+current axioms, unchanged; only the allowlisted-confirmed PF finding);
+`check_refutation_independence` (9-tag clean — no tags touched);
+`check_public_reachability` clean (63 repo modules);
+`check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; `check_backlog_freshness` clean;
+scoreboard regenerated (**4336/4/0**) with the verification row;
+map-freshness exit 0 after the 4297 → 4336 stats sync in both map
+files and SVG regeneration (49 stations, no status change — none
+owed). Records updated: the proposal (status line + follow-on
+delivery record with four technique findings), `proposals/README.md`
+(new Delivered row), README (4336 + the walks-and-mixing row's
+follow-on clause), the radar (QA axis synced 4297 → 4336, held 4.5),
+`index/map/spectral_graph.md` (the LazyFollowOnFences paragraph), the
+backlog item-8 twenty-first update, the scoreboard verification row,
+both map data tables + regenerated SVG, this plan, and the activity
+log. Nothing committed; the prior runs' uncommitted deliveries
+preserved.
+
+**Remaining risk:** none owed by the delivery — QA-only, no axiom
+disposition changed, no public statement changed. Honest scope: the
+lazy family's falsification surface is complete and no priced QA item
+remains anywhere in the mixing cascade; the standing frontiers are
+named in the handoff above (all consumer- or decision-gated).
+
+------
+
+------
+
+**The capstone's two consumer fences — the primitivity-supplier
+audit's priced follow-ons, the self-contained plain-walk sampling
+theorem's falsification surface completed**
+(`proposals/adversarial-fences-primitivity-supplier-family.md`,
+follow-on delivery record; run `20260903T182707Z-run-1`, session
+`ses_f977fcdc0ffe3Up9DMcZ31uwqc`). DELIVERED — QA-only, zero axiom
+contact (count stays 4; `#print axioms` via
+`wip/capstonefences_axcheck.lean` on all six new declarations exactly
+`propext, Classical.choice, Quot.sound`; no `-- @refutes` tags —
+these refute *theorem* instantiations, nothing admitted is consumed).
+QA 4291 → 4297 (+6, `EmpiricalStationary_QA.lean`'s `PrimitivityFences`
+capstone subsection). Radar QA axis synced to 4297, score held 4.5 per
+protocol (negative witnesses of an already-counted family, not a
+named-gap closure).
+
+The delivery's content: the two clauses the 2026-09-03 audit deferred
+as its only priced follow-ons — the consumer capstone's own graph
+clauses, fenced with the mechanism fully worked in the proposal but
+requiring the `iidPMF` measure-of-singleton machinery the cascade had
+not yet exercised at the capstone level. **`.hp` at `K₂`**
+(`k2_capstone_hp_fence_QA`): every other hypothesis genuine *including
+connectivity* (the companion `k2_capstone_hp_isolation_QA`), every
+closed walk even (`k2WalkEven_not_odd`), and past *any* threshold the
+dropped statement's conclusion fails at the even time `s = 2(t₀+1)`
+from `x = 0` — the law is `δ₀` (`k2_law_even_entry`), the sampling
+measure concentrates on the all-zero trajectory, the deviation
+`|1 − 1/2| = 1/2` carries the full mass `1 > 2 exp(−4)`; the odd walk
+excludes exactly the bipartite class where the walk never mixes.
+**`.hconn` at `triIso4`** (`triIso4_capstone_hconn_fence_QA`): a
+genuine odd closed walk (`triIso4Walk3`) and every walk-level clause
+genuine (the companion), but vertex `3` is absorbing — the law from
+`x = 3` is `δ₃` at *every* time (`triIso4_pow_row3`), convergent to
+the wrong vector while the deviation `|1 − 1/7| = 6/7` carries full
+mass at every threshold time (a failure mode distinct from the `hp`
+fence's parity-gated one). The machinery, generalized rather than
+inlined: **`toMeasure_cyl_singleton_one`** (any point-mass factor
+`q v = 1`, any `Fin n`: the all-`v` coordinate cylinder carries the
+full mass — one `toMeasure_cyl_inter` application collapsing to a
+single factor and `1 ^ n`, one step cleaner than the pricing's
+singleton-route sketch) and **`two_mul_exp_neg_four_lt_one`** (the
+shared numeric, `exp 4 ≥ 5` + `inv_anti₀` — exactly the
+`tri_naive_stationary_refuted_QA` route). One honest parameter
+adjustment recorded: the priced `(ε, n) = (1/4, 32)` needs a strict
+`2 < exp 1` the non-strict `Real.add_one_le_exp` engine cannot
+deliver; the delivered `(1/2, 32)` reads `2 exp(−4) ≤ 2/5 < 1` at the
+same honest deviations. One technique finding in the proposal (`rw`
+cannot rewrite with a `≤`-hypothesis — the `−16/9` original's
+`rw [hval, inv_div] at hinv` rewrites with an equation; the `5⁻¹`
+conversion is `LE.le.trans_eq (one_div _).symm`).
+
+**Verification:** spike first (`wip/capstonefences_spike.lean` — the
+full six-declaration delivery, iterated to zero errors/zero warnings
+before any QA edit); `lake env lean` on the landed QA module (zero
+errors, zero warnings); explicit `lake build
+Scaffold.QA.Derived.EmpiricalStationary_QA` ✔; **the six-declaration
+axiom audit above**; **full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 133 source files, 133 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+current axioms, unchanged; only the allowlisted-confirmed PF finding);
+`check_refutation_independence` (9-tag clean — no tags touched);
+`check_public_reachability` clean (63 repo modules);
+`check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; `check_backlog_freshness` clean;
+scoreboard regenerated (**4297/4/0**) with the verification row;
+map-freshness exit 0 after the 4291 → 4297 stats sync in both map
+files and SVG regeneration (49 stations, no status change — none
+owed). Records updated: the proposal (follow-on delivery record with
+the parameter-adjustment note and one technique finding),
+`proposals/README.md` (new Delivered row), README (4297 + the
+walks-and-mixing row's capstone-fence clause), the radar (QA axis
+synced 4291 → 4297, held 4.5), `index/map/spectral_graph.md` (the
+capstone-fence paragraph), the backlog item-8 twentieth update, the
+scoreboard verification row, both map data tables + regenerated SVG,
+this plan, and the activity log. Nothing committed; the prior runs'
+uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — QA-only, no axiom
+disposition changed, no public statement changed. Honest scope: the
+plain-walk sampling program's falsification surface is complete at
+every level (supplier, rate, convergence, capstone); the remaining
+priced QA follow-ons live in the lazy family's proposal.
+
+------
+
+**The adversarial fence audit of the primitivity-supplier family — the
+standing handoff's top-named continuation, the mixing cascade's last
+unaudited family** (`proposals/adversarial-fences-primitivity-supplier-family.md`,
+same-run proposal; run `20260903T154410Z-run-1`, session
+`ses_f980f316fffen4UgB3DPK5FJ0b`). DELIVERED — QA-only, zero axiom
+contact (count stays 4; `#print axioms` via
+`wip/primsupfences_axcheck.lean` on all 212 new declarations — 209
+exactly `propext, Classical.choice, Quot.sound`, the three Fin-case
+helpers strictly smaller; no `-- @refutes` tags added, since these
+refute *theorem* instantiations and consume nothing admitted). QA
+4094 → 4291 (+197 by the generator metric, which counts
+theorems/lemmas only — the 212 declarations include 15 fixture
+`def`s). Radar QA axis synced to 4291, score held 4.5 per protocol
+(negative witnesses of an already-counted family, not a named-gap
+closure).
+
+The delivery's content: the adversarial re-read (hypothesis necessity
+per `governance/ADVERSARIAL_REVIEW.md`, cross-checked against every
+existing fence) of the primitivity-supplier family —
+`PrimitiveConvergence.lean`'s concatenation/bounce/supplier trio,
+`Mixing.lean`'s walk-to-power bridge, walk-level supplier, plain-walk
+Doeblin rate, and convergence corollary — finding **21 load-bearing
+clauses with no negative witness anywhere in the repository** (the
+existing QA was positive-instance only: the triangle's attainment
+pins and the `K₂` periodicity fence covered two clauses), each closed
+with a fence plus isolation companion: **the engine trio's clauses**
+(`hnn` at off-path negative entries `!![−2,1;0,1]`/`!![1,−2;1,1]`
+poisoning the defining sums; the seed clauses `h1`/`h2` and the
+bounce step clauses `hz1`/`hz2` at the swap and the zero-entry
+fixtures); **the supplier's four hypotheses** — `hreach` at the
+identity (an unreachable pair with genuine self-loops and odd loops),
+`htwo` at the directed 3-cycle permutation (`cycle3 ^ 3 = 1` supplies
+`hreach` and `hodd`; no reciprocal positive pair anywhere — the
+periodicity exactly `htwo` excludes), `hodd` at the swap (every odd
+power has zero diagonal, every even power is the identity), and `hnn`
+at the exact-cube rotation `!![1,−3;1,1]` (`rot2_pow_three_mul`:
+`M³ = −8·1`, so every power is a signed multiple of `1`, `M`, or
+`M²`, each with a nonpositive entry no sign flip repairs); **the
+walk-to-power bridge's `hnn`** at `negWalkAdj = !![−3/2,1,1;1,0,1;1,1,0]`
+— the negative diagonal keeps every degree positive and the walk
+`0 → 1 → 2` genuine, while `(P²) 0 2 = −5`; **the walk-level
+supplier's and the corollary's `hnn`** at `negDiagTri =
+!![−4,3,3;3,0,1;3,1,0]` — the negative weight invisible to the
+support graph, the walk matrix's symmetric-subspace eigenvalue
+`−11/4` giving exact closed forms (`negDiagTri_pow_mulVec_w` for the
+action on `(0,1,1)`, `negDiagTri_row1_col0` for the `(1,0)`-entry
+through the row-sum identity): no power entrywise positive, the law
+from `1` divergent; **their `hconn`** at `triIso4 =
+!![0,1,1,0;1,0,1,0;1,1,0,0;0,0,0,1]` — triangle ⊕ a self-weighted
+isolated vertex: `triIso4_walk_stays` (walks cannot leave the
+triangle block), `triIso4_pow_off` (the cross-block power entry zero
+at every `k`), and `triIso4_pow_row3` + `triIso4_pi_three` (the
+absorbed law `δ₃` with `π 3 = 1/7 ≠ 1` — convergent to the wrong
+vector, a failure mode distinct from alternation); **their `hp`** at
+`K₂` with the genuine closed walk `0 → 1 → 0` (`k2WalkEven`,
+`k2P_not_isPrimitive`, and the alternating-law
+`k2_tendsto_hp_fence_QA` at distance `1` forever); **the Doeblin
+rate's `hle`** (`δ = 1` past the diagonal certificate on `K₂`: the
+bound's base `1 − 2·1 = −1` against the truth `TV = 1/2`) and **its
+`hA`** at `asymLoopAdj` with `P = (1/2)·J` (the certificate genuine
+at equality; `π = (3/4,1/4)` not stationary at the asymmetric chain —
+`TV = 1/4 > 0`: symmetry is load-bearing through stationarity, not
+the certificate). Recorded non-fenceables with mechanisms: the
+structural `hA`s (`supportGraph` consumes the symmetry proof in the
+walk/`hconn` statements; the capstone's `hnn`/`hd` are consumed by
+its conclusion's own `iidPMF` certifications); the certificate-screened
+rate `hnn` (falsification needs `δ > 1/|V|` through `hle`, impossible
+at row sums `1` — `D⁻¹A` is stochastic at every nonzero degree, signs
+included); the rate's `hd` and its `m = 0`/`δ = 0` junk corner (junk
+rows are zero rows, mass ≤ 1, the right side collapses to the simplex
+diameter); the capstone's benign-junk `hε`/`hn`; `pow_walk`'s `hd`
+(removable given `hnn` — the plain twin of the lazy/entropy audits'
+finding) and the supplier's `hd` (removable given `hnn` + `hconn` on
+≥ 2 vertices); `[Nonempty V]` (structural). Two priced consumer
+follow-ons with fully worked mechanisms (the capstone's `.hp` and
+`.hconn` fences — deferred to keep the delivery bounded). Nine
+technique findings in the proposal (headline: **the positive-weight
+support graph** — `Adj i j ↔ i ≠ j ∧ 0 < A i j`, so negative edges
+are not edges and both `hnn` fixtures had to hide the negative weight
+on a diagonal; plus the `rw`-variable-capture in exponent
+normalization, the `-11/4`-parses-as-`(-11)/4` numeral trap,
+`pow_succ`'s term-unification refusal, `decide`-over-ℝ being
+classical, `open scoped Classical` poisoning kernel `decide`,
+`Finset.sum_eq_single_of_mem`'s argument order, `Fin.sum_univ_four`,
+and the `Metric.tendsto_atTop` + entry-lower-bound ¬Tendsto idiom).
+
+**Verification:** spike first (`wip/primsupfences_spike.lean` — the
+full 212-declaration delivery, iterated to zero errors/zero
+warnings/zero infos before any shelf edit); `lake env lean` on the
+landed QA module (zero errors, zero warnings); explicit `lake build
+Scaffold.QA.Derived.EmpiricalStationary_QA` ✔; **the 212-declaration
+axiom audit above**; **full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 133 source files, 133 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+current axioms, unchanged; only the allowlisted-confirmed PF
+finding); `check_refutation_independence` (9-tag clean — no tags
+touched); `check_public_reachability` clean (63 repo modules);
+`check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; `check_backlog_freshness` clean;
+scoreboard regenerated (**4291/4/0**) with the verification row;
+map-freshness exit 0 after the 4094 → 4291 stats sync in both map
+files and SVG regeneration (no station — no tier change). Records
+updated: the proposal (COMPLETE + delivery record with nine technique
+findings), `proposals/README.md` (new Delivered row), README (4291 +
+the walks-and-mixing row's primitivity-fence clause), the radar (QA
+axis synced 4094 → 4291, score held 4.5), `index/map/spectral_graph.md`
+(the PrimitivityFences section), the backlog item-8 nineteenth
+update, the scoreboard verification row, both map data tables +
+regenerated SVG, this plan, and the activity log. Nothing committed;
+the prior runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — QA-only, no axiom
+disposition changed, no public statement changed. Honest scope: the
+audit covered the supplier family and thereby completes the cascade;
+the capstone's two graph clauses are priced follow-ons with worked
+mechanisms.
+
+------
+
+**The adversarial fence audit of the Poisson-bridge family — the
+standing handoff's top-named continuation, fourth mixing-cascade
+family audited** (`proposals/adversarial-fences-poisson-bridge-family.md`,
+same-run proposal; run `20260903T033044Z-run-1`, session
+`ses_f9ac02d73ffeN20FdKcAwuyaDr`). DELIVERED — QA-only, zero axiom
+contact (count stays 4; `#print axioms` via
+`wip/poissonfences_axcheck.lean` on all 83 new declarations — 1
+fixture `def`, 17 helper pins, 28 fences, 37 support lemmas and
+companions — every one exactly `propext, Classical.choice, Quot.sound`;
+no `-- @refutes` tags added, since these refute *theorem*
+instantiations and consume nothing admitted). QA 4012 → 4094 (+82 by
+the generator metric, which counts theorems/lemmas only — the 83
+declarations include the `asymFlowAdj` fixture `def`). Radar QA axis
+synced to 4094, score held 4.5 per protocol (negative witnesses of an
+already-counted family, not a named-gap closure).**
+
+The delivery's content: the adversarial re-read (hypothesis necessity
+per `governance/ADVERSARIAL_REVIEW.md`, cross-checked against every
+existing fence) of the Poisson-bridge family — `Mixing.lean`'s
+Poissonization identity, TV convexity toolkit, and
+comparability/transfer pair (the continuous↔discrete hinge every
+continuous-time capstone routes through) plus `Heat.lean`'s two
+generic helpers — whose QA was delivered 2026-09-01 and never
+independently re-read. It found **28 load-bearing clauses with no
+negative witness anywhere in the repository** (`hmix` was already
+fenced by `k2_no_discrete_mixing_QA` — recorded, not duplicated), each
+closed with a fence plus isolation companion: **the simplex-diameter
+lemma's four mass clauses** (TV `3/2 > 1`); **the head–tail split's
+summability clause** (junk `0 = 1` at the constant-one sequence); **the
+convexity bound's `hc`** at the alternating geometric weights
+`(3/2)(−1/2)ᵏ` against a geometric law family (the signed mixture's
+TV `1/4` against the weighted average `3/20` — the triangle
+inequality's slack genuinely lost), **`hc1`** at a mass-`2`
+single-point weight, and **`hν`/`hν1` by the corpus's first
+divergent-tsum junk route** (the summable weights `1/2·2⁻ᵏ` against
+the growing laws `(2ᵏ⁺¹, 1 − 2ᵏ⁺¹)` and `(2ᵏ⁺¹, 2ᵏ⁺¹ − 1)` make every
+series in the statement non-summable — both sides junk to `0` against
+the honest left TV `1/2`; the tsum twin of the junk-integral hazard
+class); **the Poisson weight's negative time** (`−e < 0`); **the
+`hnn` clauses** of the TV ≤ 1 bound (the law `(2, −1)`, TV `3/2`), the
+adjoint-walk contraction and its power twin (the basis pair's TV
+triples `1 → 3`), and discrete TV monotonicity (`3/2 → 9/2`, the
+two-step law `(5, −4)` pinned); **the `hA` clauses of the whole
+Poissonization identity triple** — at the asymmetric swap the
+constant-density mixture honestly sums to `(3, 0)` against the heat
+kernel's genuine drift `(3, 3(1 − e⁻¹))`: the identity *is*
+reversibility — **of the stationary power** (`Pᵀπ = (1, 0) ≠ π`), and
+**of monotonicity at the new fixture `asymFlowAdj = !![1,1;3,0]]`**
+(`P = [[1/2,1/2],[1,0]]`, `π = (2/5, 3/5)`: TV rises `1/10 → 7/20` —
+the existing asymmetric fixtures provably cannot serve, at the swap
+the law is absorbed in one step); **the rate theorems' `hA`** at the
+swap's `t = 2` (`1 − e⁻² > 2/3` from `e² > 4`, the mass-drift law
+`(1, 2(1 − e⁻²))` pinned through the idempotent-Laplacian kernel);
+**the `ht` clauses** at `t = −1` on the edge (the signed weights
+`e·(−1)ᵏ/k!` leave the continuous TV at `e²/2` against the Poisson
+average `1/2`); and **the transfer corollary's `htail`** on the
+triangle at `t = 1/2` (certificate `ε₁ = 1/6` genuine, tail budget
+`1/20` understating the honest head `(3/2)e^{−1/2}`, refuted from the
+new series bound **`e < 3`** — `exp_one_lt_three`, the range-5 partial
+sum `65/24` plus the factorial-vs-geometric tail `1/60` through
+`Nat.factorial_mul_pow_le_factorial`). Sixteen non-fenceables recorded
+with mechanisms: the ten `hd` clauses (with `hnn` retained, the
+junk-collapsed chain is honestly substochastic — `0⁻¹·0 = 0` is the
+true row for a nonnegative isolated vertex — and every identity,
+contraction, and the comparability split survive on truth); the
+convexity bound's `hπ`/`hπ1` (the triangle inequality needs no target
+structure); the `_le_tsum` rate's `hnn`/`hd` (the factorial always
+beats the matrix-power growth of `ν_k`, so the Poisson-weighted series
+stays honest and convexity applies sign-free); and the transfer
+corollary's `hnn` (every symmetric stochastic 2×2 with a negative
+entry has spectral escape `> 1`, so the discrete TVs grow without
+bound and no `hnn`-failing fixture can carry a genuine `hmix` — the
+corollary's own certificate hypothesis screens the broken fixtures
+out). Two removable-hypothesis findings (the `hd` clauses are
+removable given `hnn`; the identity triple's `hd` removable outright).
+Six technique findings in the proposal (headline: **the matrix-literal
+index-type trap** — `![a, b]` elaborates at `Fin (Nat.succ 1)` and
+`omega` cannot case-split a variable of that type, silently killing
+the file's load-bearing `omega`-rcases idiom under `funext`; fix:
+explicit `∀ i : Fin 2` binders — generalizing the recorded Fin-literal
+shape-mismatch findings from entries to whole vectors; plus the
+`rw [h, h]` double-rewrite trap, the numeral-rewrite motive failure on
+`Fin 2` types with the `exact`-by-defeq remediation, the abs-sign
+side-condition ℕ-defaulting, `pow_le_pow_left₀`'s argument order, and
+the `Pi.hasSum` literal-type inheritance).
+
+**Verification:** spike first (`wip/poissonfences_spike.lean` — the
+full 83-declaration delivery, iterated to zero errors/zero warnings/
+zero infos before any shelf edit); `lake env lean` on the touched QA
+module (zero errors, zero warnings — the three positioned info-level
+`ring_nf` hints confirmed pre-existing by elaborating the HEAD
+baseline, which emits the same three); explicit `lake build
+Scaffold.QA.SpectralGraph.Mixing_QA` ✔; **the 83-declaration axiom
+audit above**; **full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 133 source files, 133 fresh artifacts,
+0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4 current axioms,
+unchanged; only the allowlisted-confirmed PF finding);
+`check_refutation_independence` (9-tag clean — no tags touched);
+`check_public_reachability` clean (63 repo modules); `check_citations`
+("All axioms have proper citations!"); `check_markdown_links` clean;
+`check_backlog_freshness` clean; scoreboard regenerated (**4094/4/0**)
+with the verification row; map-freshness exit 0 after the 4012 → 4094
+stats sync in both map files and SVG regeneration (no station — no
+tier change). Records updated: the proposal (COMPLETE + delivery
+record with six technique findings), `proposals/README.md` (new
+Delivered row **plus moving the entropy audit's delivered row out of
+the Active table — a records bug found on entry, repaired in the same
+pass**), README (4094 + the walks-and-mixing row's Poisson-fence
+clause), the radar (QA axis synced 4012 → 4094, score held 4.5),
+`index/map/spectral_graph.md` (the PoissonFences section), the backlog
+item-8 eighteenth update, the scoreboard verification row, both map
+data tables + regenerated SVG, this plan, and the activity log. One
+incident, recovered with no loss: a landing-script typo truncated
+`Mixing_QA.lean` between `open(...,'w')` and the failed write;
+restored verbatim from `git show HEAD:` (the session's start state was
+clean and the file carried no other pending changes) and the landing
+redone — the final module's diff contains only the intended insertion.
+Nothing committed; the prior runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — QA-only, no axiom
+disposition changed, no public statement changed. Honest scope: the
+audit covered exactly one family; the primitivity-supplier family is
+the cascade's last unaudited member; the recorded non-fenceables name
+their mechanisms precisely enough that a future engine could reopen
+them deliberately.
 
 ------
 

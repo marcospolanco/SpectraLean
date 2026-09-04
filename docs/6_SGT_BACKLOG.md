@@ -1,7 +1,7 @@
 # SGT Backlog
 
 **Status:** Canonical backlog for the broad spectral-graph-theory program  
-**Last reviewed:** September 3, 2026
+**Last reviewed:** September 4, 2026
 
 This is the bounded, center-first backlog required by the strategy's
 center-out policy. Items are ranked by concrete reuse: each names the
@@ -1397,6 +1397,162 @@ clauses — the heat kernel `e^{−t}·e^{tP}` is entrywise nonnegative
 for any nonnegative `P`, symmetric or not). No gate named here opened
 or closed; the Poisson-bridge and primitivity-supplier audit families
 stay open with the method now thrice exercised.
+
+*Eighteenth update (2026-09-03):* **the Poisson-bridge family's fence
+discipline is complete** — the audit-shaped pass's fourth family
+(`proposals/adversarial-fences-poisson-bridge-family.md`, QA-only,
+zero axioms; 28 fences, +82 QA declarations): `Mixing_QA.lean`'s new
+`PoissonFences` section supplies negative witnesses for the
+continuous↔discrete hinge's 28 load-bearing clauses the 2026-09-01
+Poisson-bridge delivery left unfenced — the simplex-diameter lemma's
+four mass clauses, the head–tail split's summability clause (junk
+`0 = 1`), the TV convexity bound's `hc`/`hc1` and `hν`/`hν1` (the
+corpus's first **divergent-tsum junk** fences: summable weights
+against growing laws junk both sides to `0`), the Poisson weight's
+negative time, the `hnn` clauses of the TV ≤ 1 bound / the
+adjoint-walk contraction and power twin / discrete TV monotonicity
+(`3/2 → 9/2`), the `hA` clauses of the whole Poissonization identity
+triple (reversibility, at the asymmetric swap), of the stationary
+power, and of monotonicity at a new `asymFlowAdj` fixture
+(`1/10 → 7/20`), the rate theorems' `hA` at `t = 2`
+(`1 − e⁻² > 2/3`), the `ht` clauses at `t = −1` on the edge, and the
+transfer corollary's `htail` on the triangle (refuted from a new
+series bound `e < 3`) — each with isolation companions; sixteen
+non-fenceables recorded with mechanisms (ten `hd` clauses survive on
+truth as substochastic algebra; the convexity bound needs no target
+structure; the factorial beats spectral growth; the transfer's `hnn`
+is screened by spectral escape `> 1`), and two removable-hypothesis
+findings. No gate named here opened or closed; the
+primitivity-supplier audit family stays open as the cascade's last
+unaudited member, with the method now four times exercised.
+
+
+*Nineteenth update (2026-09-03):* **the primitivity-supplier family's
+fence audit closes the adversarial re-read of the entire mixing
+cascade** (`proposals/adversarial-fences-primitivity-supplier-family.md`,
+`EmpiricalStationary_QA.lean`'s `PrimitivityFences` section, +197 by
+the generator metric, QA-only, zero axiom contact): negative witnesses
+for the supplier family's 21 unfenced load-bearing clauses — the
+concatenation/bounce engines' `hnn`/seed/step clauses, the matrix-level
+supplier's four hypotheses (`hreach` at the identity, `htwo` at the
+directed 3-cycle permutation, `hodd` at the swap, `hnn` at the
+exact-cube rotation `!![1,−3;1,1]` with `M³ = −8·1`), the walk-to-power
+bridge's `hnn` (a negative-diagonal chord making `(P²) 0 2 = −5`), the
+walk-level supplier's and convergence corollary's `hnn`/`hconn`/`hp`
+(the negative-diagonal triangle with the `−11/4` eigenvalue closed
+forms; the triangle⊕isolated-vertex fixture with identically-zero
+cross-block powers and the absorbed law `δ₃ ≠ π`; `K₂`'s alternating
+law), and the Doeblin rate's `hle` and `hA` — every fence with an
+isolation companion, the non-fenceables recorded with mechanisms
+(structural `hA`s, the certificate-screened rate `hnn`, the benign-junk
+capstone corners, the plain-twin removable `hd`). The step-0 finding
+that reshaped two fixtures: the support graph's adjacency demands
+*positive* weights, so negative edges are not graph edges — the
+negative weight must sit off the positive odd cycle (a diagonal),
+which is exactly why the delivered negative-diagonal fixtures keep
+every other hypothesis genuine.
+
+*Twentieth update (2026-09-03):* **the same proposal's priced follow-on
+closes the capstone's own falsification surface** — negative witnesses
+for `empiricalWalkDistribution_tail_selfcontained_of_depth`'s two
+deferred graph clauses (`EmpiricalStationary_QA.lean`'s
+`PrimitivityFences` capstone subsection, +6, QA-only, zero axiom
+contact): `hp` at `K₂` (connectivity genuine, every closed walk even —
+past any threshold the even-time law from `0` is `δ₀`, the sampling
+measure concentrates on the all-zero trajectory, deviation `1/2` at
+full mass `1 > 2 exp(−4)`) and `hconn` at `triIso4` started at the
+absorbing vertex `x = 3` (a genuine odd closed walk and every
+walk-level clause genuine, but the law is `δ₃` at every time —
+convergent to the wrong vector while deviation `6/7` carries full
+mass), both through the point-mass cylinder helper
+`toMeasure_cyl_singleton_one` — after this, every hypothesis of the
+self-contained sampling theorem is fenced or recorded non-fenceable.
+
+*Twenty-first update (2026-09-03):* **the lazy family's priced
+follow-ons close the last priced QA items anywhere in the mixing
+cascade** (`proposals/adversarial-fences-lazy-family.md`'s follow-on
+delivery record, `Mixing_QA.lean`'s `LazyFollowOnFences` section,
++39 by the generator metric, QA-only, zero axiom contact): the
+conjugated-norm contraction twin's two certificate clauses (the
+√D-weighted mirrors of the delivered ℓ²(π) pair — `hrate` at the
+triangle's `3/2`-mode direction with the below-mode `r = 1/8`
+(`1/4 > 1/16`), `hmode` at the edge's constant zero mode with the
+genuine `r = 0` (`2 > 0`), the companions reused verbatim through
+`conj_twin_isolation_QA` since the two engines share the clauses
+statement-identically) and the lazy `t_mix` object's `_spec`
+witness-clause junk corner at the disconnected bipartite fixture
+`K₂ ⊕ K₂` on `Fin 4` (the lazy-law closed form: `δ₀` at zero, the
+component-stationary `(1/2,1/2,0,0)` at every positive time —
+`TV = 3/4`/`1/2`, never below `1/8`, so no witness exists,
+`t_mix = sInf ∅ = 0`, and the dropped-`hne` conclusion fails at
+`s = 0`; every structural hypothesis genuine with connectivity
+exactly the failure — laziness repairs periodicity, not
+disconnection). The plain twin's junk corner was already fenced
+(`k2_mix_junk_corner_QA`); the pair is complete.
+The stated `(ε, n) = (1/2, 32)` adjusts the priced `(1/4, 32)`: the
+latter's numeric side needs a strict `2 < exp 1` the non-strict
+`Real.add_one_le_exp` engine cannot deliver, and `(1/2, 32)` closes
+(`2 exp(−4) ≤ 2/5 < 1`) at the same honest deviations.
+
+*Twenty-second update (2026-09-03):* **the spectral-certificate route
+for the plain family — the frontier this item's fourteenth update
+recorded as consumer-gated "exactly as before" — is delivered**
+(`proposals/spectral-certificate-plain-walk.md`, zero new axioms): the
+strict signless engine `eigvalOf_normalizedLaplacian_lt_two_of_odd_walk`
+(connected + an odd closed walk ⟹ every `L_sym` eigenvalue `< 2`,
+through the signless SOS: the `μ = 2` eigenvector unstretches to an
+edge-flipping potential, zeroed by the odd walk and propagated to zero
+by connectivity), the computed certificates `∃ r < 1` / `∃ r ∈ (0,1)` at
+`max (1 − λ₂) (λ_max − 1)`, and the χ²/TV/entrywise max-rate joins —
+the consumer gate discharged by naming the plain family's entrywise
+oversmoothing ceiling (the message-passing depth setting's non-lazy
+walk), the same consumer class the lazy intrinsic rate's delivery named
+on the bipartite side. QA +75 (`Mixing_QA.lean`'s `SpectralCertificate`
+section): the triangle's certificate `1/2` exact with the bound attained
+at `χ²(1) = 1/2`; the honest `r = 0` corner at the looped triangle
+(spectrum `{0,1,1}`, one-step exact mixing); the C₄ unsatisfiability
+fence (alternating-mode `eigvalOf = 2` forbids every `r < 1`); and the
+engine's `hnn`/`hconn` fences. The gated remainder on this item is
+unchanged: the sharp `|λ₂| = α` layer alone.
+
+*Twenty-third update (2026-09-03):* **the spectral-certificate
+delivery's recorded depth-form composition is landed**
+(`proposals/spectral-certificate-plain-walk.md`'s follow-on, zero new
+axioms): `Oversmoothing.lean`'s
+`walkDistribution_sub_stationaryVec_le_of_depth_of_odd_walk` — the
+plain family's first certificate-free depth ceiling, stated at the
+inflated computed rate `(max (max (1 − λ₂) (λ_max − 1)) 0 + 1)/2`
+(the inflation honest: the computed rate is `0` at exactly-mixing
+fixtures and depth thresholds divide by `log (1/r)`). The rate facts
+proved directly from the constituents (connectivity's `0 < λ₂`, the
+strict signless `λ_max < 2`, the below-gap workhorse), so nothing
+depends on rcases witness unfolding. QA +17: the inflated display
+pinned exact at both certificate fixtures, the ceiling instantiated
+with genuinely verified thresholds at both, and the odd-walk clause
+fenced load-bearing at `C₄` by the junk-threshold route — dropped,
+the display saturates at `1` and the threshold hypothesis degenerates
+to junk while the conclusion fails. The gated remainder is unchanged:
+the sharp `|λ₂| = α` layer alone.
+
+*Twenty-fourth update (2026-09-04):* **the depth-form delivery's
+recorded two-start composition is landed too**
+(`proposals/spectral-certificate-plain-walk.md`'s second follow-on,
+zero new axioms): `Oversmoothing.lean`'s
+`walkDistribution_sub_walkDistribution_le_of_depth_of_odd_walk` —
+past *both* starts' own computed-rate thresholds, any two `t`-step
+views are within `2ε` at every target vertex: the "representations
+become indistinguishable" statement, certificate-free, the same
+consumer the caller-certificate twin has served since 2026-08-31. QA
++6 (4428 → 4434): the true two-start values pinned at both
+certificate fixtures (triangle `t = 3`, starts `0`/`1`: `1/8` inside
+the certified `1`, the one-start deviations `1/12`/`1/24` in opposite
+directions summing to it; looped triangle `t = 1`, every pair:
+exactly `0` by one-step mixing) and the odd-walk clause fenced at
+`C₄` with a **genuinely two-start witness** — opposite-parity starts
+(`|0 − 1/2| = 1/2 > 2ε` at `(t, ε) = (2, 1/8)`, both thresholds
+junk-satisfiable), a shape the one-start fence cannot exhibit since
+same-parity starts coincide at even times. The gated remainder is
+unchanged: the sharp `|λ₂| = α` layer alone.
 
 ### 9. Bounded-window ("band") Davis–Kahan (2026-08-21, opened by the Davis–Kahan Step-0/1 survey)
 

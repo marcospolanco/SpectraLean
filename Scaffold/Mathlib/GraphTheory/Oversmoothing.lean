@@ -284,6 +284,180 @@ theorem walkDistribution_sub_stationaryVec_le_of_depth (A : WAdj (V := V))
   exact pow_mul_le_of_log_threshold hr hr1
     (Real.sqrt_nonneg _) hε t hthr
 
+/-- **The entrywise plain ceiling at the computed spectral rate** — the
+named consumer: `walkDistribution_sub_stationaryVec_abs_le` with no
+caller certificate. On the odd-walk class the displayed rate is
+strictly contractive (`exists_lt_one_rate_of_odd_walk`), which is what
+the depth-form oversmoothing ceiling consumes. The computed rate is
+nonnegative: if both max branches were negative, `λ₂ > 1 > λ_max ≥ λ₂`
+— impossible. -/
+theorem walkDistribution_sub_stationaryVec_abs_le_max_rate
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected)
+    (t : ℕ) (x y : V) :
+    |walkDistribution A t x y - stationaryVec A y|
+      ≤ (max (1 - secondEval (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) hcard)
+            (evals (normalizedLaplacian_symmetric A hA)
+              ⟨Fintype.card V - 1, by omega⟩ - 1)) ^ t
+          * Real.sqrt (stationaryVec A y
+              * ((stationaryVec A x)⁻¹ - 1)) := by
+  have hmono : evals (normalizedLaplacian_symmetric A hA) ⟨1, by omega⟩
+      ≤ evals (normalizedLaplacian_symmetric A hA)
+        ⟨Fintype.card V - 1, by omega⟩ :=
+    evals_sorted _ (Fin.mk_le_mk.mpr (by omega))
+  have hsec : secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard
+      = evals (normalizedLaplacian_symmetric A hA) ⟨1, by omega⟩ := rfl
+  have h0r : 0 ≤ max (1 - secondEval (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) hcard)
+      (evals (normalizedLaplacian_symmetric A hA)
+        ⟨Fintype.card V - 1, by omega⟩ - 1) := by
+    by_contra hcon
+    push_neg at hcon
+    simp only [max_lt_iff] at hcon
+    linarith
+  exact walkDistribution_sub_stationaryVec_abs_le A hA hnonneg hd hconn _
+    h0r
+    (fun _ hi =>
+      abs_one_sub_eigvalOf_le_max A hA hnonneg hd hcard hi) t x y
+
+/-- **The depth-form oversmoothing ceiling at the computed plain rate**
+— the spectral-certificate delivery's recorded composition, landed: on
+connected input carrying an odd closed walk in the support graph, the
+entrywise plain ceiling holds past the depth computed from the
+*inflated* spectral rate `(max (max (1 − λ₂) (λ_max − 1)) 0 + 1)/2`
+with no caller-supplied certificate. The inflation is forced: the
+computed rate is `0` at exactly-mixing fixtures (the looped triangle)
+and depth thresholds divide by `log (1/r)`. Unlike the abs twins this
+statement cannot be unconditional — on bipartite input the computed
+rate is `1`, the displayed log denominator degenerates to `log 1 = 0`,
+and the threshold hypothesis degenerates to junk — so the odd-walk
+clause is load-bearing (fenced at C₄ in `Mixing_QA.lean`). -/
+theorem walkDistribution_sub_stationaryVec_le_of_depth_of_odd_walk
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected)
+    {w : V} (p : (supportGraph A hA).Walk w w) (hp : Odd p.length)
+    (ε : ℝ) (hε : 0 < ε) (t : ℕ) (x y : V)
+    (hthr : Real.log (Real.sqrt (stationaryVec A y
+          * ((stationaryVec A x)⁻¹ - 1)) / ε)
+      / Real.log (1 / ((max (max (1 - secondEval (normalizedLaplacian A)
+                (normalizedLaplacian_symmetric A hA) hcard)
+              (evals (normalizedLaplacian_symmetric A hA)
+                ⟨Fintype.card V - 1, by omega⟩ - 1)) 0 + 1) / 2))
+      ≤ (t : ℝ)) :
+    |walkDistribution A t x y - stationaryVec A y| ≤ ε := by
+  have hl2 : 0 < secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard :=
+    secondEval_normalizedLaplacian_pos_of_connected A hA hnonneg hd hcard hconn
+  have hlmax : evals (normalizedLaplacian_symmetric A hA)
+      ⟨Fintype.card V - 1, by omega⟩ < 2 :=
+    evals_normalizedLaplacian_lt_two_of_odd_walk A hA hnonneg hd hconn p hp _
+  have hrmax : max (1 - secondEval (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) hcard)
+      (evals (normalizedLaplacian_symmetric A hA)
+        ⟨Fintype.card V - 1, by omega⟩ - 1) < 1 :=
+    max_lt (by linarith) (by linarith)
+  have hstar0 : (0:ℝ) < max (max (1 - secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard)
+        (evals (normalizedLaplacian_symmetric A hA)
+          ⟨Fintype.card V - 1, by omega⟩ - 1)) 0 + 1 := by
+    have h0 : (0:ℝ) ≤ max (max (1 - secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard)
+        (evals (normalizedLaplacian_symmetric A hA)
+          ⟨Fintype.card V - 1, by omega⟩ - 1)) 0 :=
+      le_max_right _ _
+    linarith
+  have hstar1 : (max (max (1 - secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard)
+        (evals (normalizedLaplacian_symmetric A hA)
+          ⟨Fintype.card V - 1, by omega⟩ - 1)) 0 + 1) / 2 < 1 := by
+    have h1 : max (max (1 - secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard)
+        (evals (normalizedLaplacian_symmetric A hA)
+          ⟨Fintype.card V - 1, by omega⟩ - 1)) 0 < 1 :=
+      max_lt hrmax (by norm_num)
+    linarith
+  have hrate : ∀ i : V, eigvalOf (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) i ≠ 0 →
+      |1 - eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i|
+        ≤ (max (max (1 - secondEval (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) hcard)
+            (evals (normalizedLaplacian_symmetric A hA)
+              ⟨Fintype.card V - 1, by omega⟩ - 1)) 0 + 1) / 2 := by
+    intro i hi
+    refine (abs_one_sub_eigvalOf_le_max A hA hnonneg hd hcard hi).trans ?_
+    have hle : max (1 - secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard)
+        (evals (normalizedLaplacian_symmetric A hA)
+          ⟨Fintype.card V - 1, by omega⟩ - 1)
+        ≤ max (max (1 - secondEval (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) hcard)
+            (evals (normalizedLaplacian_symmetric A hA)
+              ⟨Fintype.card V - 1, by omega⟩ - 1)) 0 :=
+      le_max_left _ _
+    have h1 : max (max (1 - secondEval (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) hcard)
+        (evals (normalizedLaplacian_symmetric A hA)
+          ⟨Fintype.card V - 1, by omega⟩ - 1)) 0 ≤ 1 :=
+      le_of_lt (max_lt hrmax (by norm_num))
+    have h2 : (1:ℝ) ≤ 2 := by norm_num
+    nlinarith
+  exact walkDistribution_sub_stationaryVec_le_of_depth A hA hnonneg hd hconn _
+    ε (div_pos hstar0 (by norm_num)) hstar1 hε hrate t x y hthr
+
+/-- **Two-start indistinguishability at the computed plain rate** — the
+`_of_odd_walk` twin of the caller-certificate corollary below: on
+connected input carrying an odd closed walk in the support graph, past
+*both* starts' own computed-rate depth thresholds, the two `t`-step
+views are within `2ε` of *each other*, at every target vertex — the
+"representations become indistinguishable" statement oversmoothing
+papers state informally, with no caller-supplied certificate. The
+odd-walk clause is load-bearing for the same reason the one-start
+ceiling's is (fenced at C₄ in `Mixing_QA.lean`, with a genuinely
+two-start failure witness: opposite-parity starts). -/
+theorem walkDistribution_sub_walkDistribution_le_of_depth_of_odd_walk
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected)
+    {w : V} (p : (supportGraph A hA).Walk w w) (hp : Odd p.length)
+    (ε : ℝ) (hε : 0 < ε) (t : ℕ) (x₁ x₂ y : V)
+    (hthr₁ : Real.log (Real.sqrt (stationaryVec A y
+          * ((stationaryVec A x₁)⁻¹ - 1)) / ε)
+      / Real.log (1 / ((max (max (1 - secondEval (normalizedLaplacian A)
+                (normalizedLaplacian_symmetric A hA) hcard)
+              (evals (normalizedLaplacian_symmetric A hA)
+                ⟨Fintype.card V - 1, by omega⟩ - 1)) 0 + 1) / 2))
+      ≤ (t : ℝ))
+    (hthr₂ : Real.log (Real.sqrt (stationaryVec A y
+          * ((stationaryVec A x₂)⁻¹ - 1)) / ε)
+      / Real.log (1 / ((max (max (1 - secondEval (normalizedLaplacian A)
+                (normalizedLaplacian_symmetric A hA) hcard)
+              (evals (normalizedLaplacian_symmetric A hA)
+                ⟨Fintype.card V - 1, by omega⟩ - 1)) 0 + 1) / 2))
+      ≤ (t : ℝ)) :
+    |walkDistribution A t x₁ y - walkDistribution A t x₂ y| ≤ 2 * ε := by
+  have h1 := walkDistribution_sub_stationaryVec_le_of_depth_of_odd_walk
+    A hA hnonneg hd hcard hconn p hp ε hε t x₁ y hthr₁
+  have h2 := walkDistribution_sub_stationaryVec_le_of_depth_of_odd_walk
+    A hA hnonneg hd hcard hconn p hp ε hε t x₂ y hthr₂
+  calc |walkDistribution A t x₁ y - walkDistribution A t x₂ y|
+      = |(walkDistribution A t x₁ y - stationaryVec A y)
+        + (stationaryVec A y - walkDistribution A t x₂ y)| := by
+          congr 1
+          ring
+    _ ≤ |walkDistribution A t x₁ y - stationaryVec A y|
+        + |stationaryVec A y - walkDistribution A t x₂ y| :=
+          abs_add _ _
+    _ = |walkDistribution A t x₁ y - stationaryVec A y|
+        + |walkDistribution A t x₂ y - stationaryVec A y| := by
+          rw [abs_sub_comm (stationaryVec A y) (walkDistribution A t x₂ y)]
+    _ ≤ ε + ε := add_le_add h1 h2
+    _ = 2 * ε := by ring
+
 /-- **Two-start indistinguishability** — the corollary oversmoothing
 papers state informally: past the depth at which *both* starts' views
 are within `ε` of stationarity, the two `t`-step views are within

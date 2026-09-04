@@ -3790,6 +3790,267 @@ theorem secondEval_normalizedLaplacian_le_two (A : WAdj (V := V))
         (normalizedLaplacian_symmetric A hA) i := hi
     _ ≤ 2 := eigvalOf_normalizedLaplacian_le_two A hA hnn hd i
 
+/-! ## The spectral certificate: intrinsic rate on non-bipartite input -/
+
+/-- **Walk flip-propagation**: a function that flips sign along every
+edge of a simple graph flips sign along every walk — `u b =
+(−1)^{|p|} · u a`. The engine's parity mechanism, stated at the pure
+graph level; also the mechanism behind every-closed-walk-even
+witnesses at bipartite fixtures (the QA's isolation companions). -/
+theorem walk_eq_neg_one_pow_length_mul_of_forall_adj {V : Type}
+    [DecidableEq V] {G : SimpleGraph V} (u : V → ℝ)
+    (hflip : ∀ i j : V, G.Adj i j → u j = -u i)
+    {a b : V} (p : G.Walk a b) :
+    u b = (-1) ^ p.length * u a := by
+  induction p with
+  | nil => simp
+  | @cons x k y hadj rest ih =>
+    rw [SimpleGraph.Walk.length_cons, ih, hflip x k hadj,
+      show (-1 : ℝ) ^ (rest.length + 1) = -((-1) ^ rest.length) from by
+        rw [pow_succ]; ring]
+    ring
+
+/-- **The strict signless bound**: on a connected support graph
+carrying an odd closed walk, every normalized-Laplacian eigenvalue is
+strictly below `2` — the classical "bipartite ⟺ `λ_max = 2`"
+dichotomy's strict half, at the shelf's honest non-bipartite interface
+(`Odd p.length`, statement-identical to the primitivity supplier's).
+An eigenvalue `μ = 2` makes `uᵀ(D + A)u = 0` at the unstretched
+conjugate `u = D^{-1/2} *ᵥ v` (the delivered congruence), the
+signless SOS then forces `u` to flip along every support edge, the odd
+walk forces `u = 0` at its base, and connectivity propagates `u = 0`
+everywhere — contradicting the unit eigenvector. -/
+theorem eigvalOf_normalizedLaplacian_lt_two_of_odd_walk
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i)
+    (hconn : (supportGraph A hA).Connected)
+    {w : V} (p : (supportGraph A hA).Walk w w) (hp : Odd p.length)
+    (i : V) :
+    eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i < 2 := by
+  have hL : (normalizedLaplacian A).IsSymm :=
+    normalizedLaplacian_symmetric A hA
+  by_contra hcon
+  push_neg at hcon
+  have hμ2 : eigvalOf (normalizedLaplacian A) hL i = 2 :=
+    le_antisymm (eigvalOf_normalizedLaplacian_le_two A hA hnn hd i) hcon
+  set v : V → ℝ :=
+    eigvecOf (normalizedLaplacian A) (normalizedLaplacian_symmetric A hA) i
+    with hv
+  set u : V → ℝ := degreeInvSqrt A *ᵥ v with hu
+  have hvv : v = eigvecOf (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) i := hv
+  have hun : Matrix.dotProduct v v = 1 := by
+    rw [hvv]
+    simpa [Matrix.dotProduct] using
+      eigvecOf_inner (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i i
+  have hqf : quadForm ((2 : ℝ) • 1 - normalizedLaplacian A) v
+      = 2 - eigvalOf (normalizedLaplacian A) hL i := by
+    have hev : normalizedLaplacian A *ᵥ v
+        = eigvalOf (normalizedLaplacian A) hL i • v :=
+      (isHermitian_of_isSymm hL).mulVec_eigenvectorBasis i
+    rw [quadForm, Matrix.sub_mulVec, Matrix.smul_mulVec_assoc,
+      Matrix.one_mulVec, hev, Matrix.dotProduct_sub,
+      Matrix.dotProduct_smul, Matrix.dotProduct_smul, smul_eq_mul,
+      smul_eq_mul, hun, mul_one, mul_one]
+  have hu0 : quadForm (degreeMatrix A + A) u = 0 := by
+    rw [hu, ← quadForm_two_sub_normalizedLaplacian_eq A hd v, hqf, hμ2]
+    norm_num
+  have hsum : ∑ j, ∑ k, A j k * (u j + u k) ^ 2 = 0 := by
+    have h := quadForm_degreeMatrix_add_eq_half_sum A hA u
+    rw [hu0] at h
+    linarith
+  have hterms : ∀ j k : V, A j k * (u j + u k) ^ 2 = 0 := by
+    intro j k
+    have hinner : ∀ j' ∈ (Finset.univ : Finset V),
+        0 ≤ ∑ k', A j' k' * (u j' + u k') ^ 2 :=
+      fun j' _ => Finset.sum_nonneg fun k' _ =>
+        mul_nonneg (hnn j' k') (sq_nonneg _)
+    have h := (Finset.sum_eq_zero_iff_of_nonneg hinner).1 hsum
+    have hj := h j (Finset.mem_univ j)
+    exact (Finset.sum_eq_zero_iff_of_nonneg
+      (fun k _ => mul_nonneg (hnn j k) (sq_nonneg _))).1 hj k
+      (Finset.mem_univ k)
+  have hflip : ∀ j k : V, (supportGraph A hA).Adj j k → u k = -u j := by
+    intro j k hadj
+    have hpos : 0 < A j k := (supportGraph_adj.1 hadj).2
+    have hz := hterms j k
+    have hsq : (u j + u k) ^ 2 = 0 := by
+      rcases mul_eq_zero.mp hz with h | h
+      · exact absurd h (ne_of_gt hpos)
+      · exact h
+    have h0 : u j + u k = 0 := sq_eq_zero_iff.mp hsq
+    linarith
+  have hpar := walk_eq_neg_one_pow_length_mul_of_forall_adj u hflip p
+  rw [hp.neg_one_pow] at hpar
+  have hw0 : u w = 0 := by linarith
+  have hzero : ∀ z : V, u z = 0 := by
+    intro z
+    obtain ⟨q⟩ := hconn.1 z w
+    have hq := walk_eq_neg_one_pow_length_mul_of_forall_adj u hflip q
+    rw [hw0] at hq
+    rcases mul_eq_zero.mp hq.symm with h | h
+    · exact absurd h (pow_ne_zero _ (by norm_num))
+    · exact h
+  have hvne : v ≠ 0 := by
+    intro h0
+    rw [h0] at hun
+    norm_num at hun
+  have hst : degreeSqrt A *ᵥ u = v := by
+    rw [hu, Matrix.mulVec_mulVec, degreeSqrt_mul_degreeInvSqrt A hd,
+      Matrix.one_mulVec]
+  rw [show u = 0 from funext hzero, Matrix.mulVec_zero] at hst
+  exact hvne hst.symm
+
+/-- **The strict signless bound, sorted-spectrum form**: every sorted
+entry of the normalized-Laplacian spectrum is strictly below `2` on
+the odd-walk class (each sorted entry is some basis eigenvalue). -/
+theorem evals_normalizedLaplacian_lt_two_of_odd_walk
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i)
+    (hconn : (supportGraph A hA).Connected)
+    {w : V} (p : (supportGraph A hA).Walk w w) (hp : Odd p.length)
+    (k : Fin (Fintype.card V)) :
+    evals (normalizedLaplacian_symmetric A hA) k < 2 := by
+  obtain ⟨i, hi⟩ := evals_mem_eigvalOf
+    (normalizedLaplacian_symmetric A hA) k
+  rw [hi]
+  exact eigvalOf_normalizedLaplacian_lt_two_of_odd_walk A hA hnn hd hconn
+    p hp i
+
+/-- **The certificate rate dominates every decaying walk factor**:
+`|1 − μ| ≤ max (1 − λ₂) (λ_max − 1)` for every nonzero mode — PSD and
+the below-gap plumbing supply `λ₂ ≤ μ`, the sorted-extremes bridge
+supplies `μ ≤ λ_max`. Stated unconditionally in the graph (on
+bipartite input the max merely reaches `1`); the odd-walk class is
+where the certificate theorem below makes it strictly contractive. -/
+theorem abs_one_sub_eigvalOf_le_max
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) (hcard : 2 ≤ Fintype.card V)
+    {i : V} (hne : eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i ≠ 0) :
+    |1 - eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i|
+      ≤ max (1 - secondEval (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) hcard)
+          (evals (normalizedLaplacian_symmetric A hA)
+            ⟨Fintype.card V - 1, by omega⟩ - 1) := by
+  have hμ0 := eigvalOf_normalizedLaplacian_nonneg A hA hnn hd i
+  have hμlow := secondEval_le_eigvalOf_normalizedLaplacian_of_ne_zero
+    A hA hnn hd hcard hne
+  have hμhigh : eigvalOf (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) i
+      ≤ evals (normalizedLaplacian_symmetric A hA)
+        ⟨Fintype.card V - 1, by omega⟩ :=
+    eigvalOf_le_evals_last _ (by omega) i
+  rw [abs_le]
+  constructor
+  · linarith [hμhigh, le_max_right (1 - secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard)
+      (evals (normalizedLaplacian_symmetric A hA)
+        ⟨Fintype.card V - 1, by omega⟩ - 1)]
+  · linarith [hμlow, le_max_left (1 - secondEval (normalizedLaplacian A)
+      (normalizedLaplacian_symmetric A hA) hcard)
+      (evals (normalizedLaplacian_symmetric A hA)
+        ⟨Fintype.card V - 1, by omega⟩ - 1)]
+
+/-- **The plain family's `r < 1` certificate exists on the odd-walk
+class**: the intrinsic-rate family's non-bipartite member. The rate is
+computed, not caller-supplied — `max (1 − λ₂) (λ_max − 1)` with
+`0 < λ₂` (connectivity) and `λ_max < 2` (the strict signless engine),
+so the max is strictly below one. -/
+theorem exists_lt_one_rate_of_odd_walk
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected)
+    {w : V} (p : (supportGraph A hA).Walk w w) (hp : Odd p.length) :
+    ∃ r : ℝ, r < 1 ∧ ∀ i : V, eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i ≠ 0 →
+      |1 - eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i| ≤ r :=
+  ⟨max (1 - secondEval (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) hcard)
+      (evals (normalizedLaplacian_symmetric A hA)
+        ⟨Fintype.card V - 1, by omega⟩ - 1),
+    max_lt (by
+      linarith [secondEval_normalizedLaplacian_pos_of_connected A hA hnn
+        hd hcard hconn])
+      (by
+        linarith [evals_normalizedLaplacian_lt_two_of_odd_walk A hA hnn hd
+          hconn p hp ⟨Fintype.card V - 1, by omega⟩]),
+    fun i hi =>
+      abs_one_sub_eigvalOf_le_max A hA hnn hd hcard hi⟩
+
+/-- **The display-friendly positive certificate**: an `r ∈ (0, 1)`
+dominating every decaying factor — the computed rate inflated to the
+open interval, needed because `r = 0` is an honest corner (a looped
+triangle mixes exactly in one step) and depth-form log thresholds
+divide by `log (1/r)`. -/
+theorem exists_pos_lt_one_rate_of_odd_walk
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected)
+    {w : V} (p : (supportGraph A hA).Walk w w) (hp : Odd p.length) :
+    ∃ r : ℝ, 0 < r ∧ r < 1 ∧ ∀ i : V, eigvalOf (normalizedLaplacian A)
+        (normalizedLaplacian_symmetric A hA) i ≠ 0 →
+      |1 - eigvalOf (normalizedLaplacian A)
+          (normalizedLaplacian_symmetric A hA) i| ≤ r := by
+  obtain ⟨r, hr1, hrate⟩ :=
+    exists_lt_one_rate_of_odd_walk A hA hnn hd hcard hconn p hp
+  have h1 : r ≤ max r 0 := le_max_left r 0
+  have h2 : 0 ≤ max r 0 := le_max_right r 0
+  have h3 : max r 0 < 1 := max_lt_iff.2 ⟨hr1, by norm_num⟩
+  refine ⟨(max r 0 + 1) / 2, by linarith, by linarith, ?_⟩
+  intro i hi
+  exact (hrate i hi).trans (by linarith)
+
+/-- **The plain χ² mixing bound at the computed spectral rate** — the
+plain family's display twin (the lazy family's
+`lazyChiSquareDistance_le_of_connected` computes `1 − λ₂/2` under
+connectivity alone; the plain walk's factors are two-sided in the
+spectrum, so the computed rate is `max (1 − λ₂) (λ_max − 1)`):
+`χ²(t, x) ≤ max(1 − λ₂, λ_max − 1)^{2t} · ((π x)⁻¹ − 1)` on every
+connected symmetric-nonnegative positive-degree network with
+`2 ≤ card V`. The statement is unconditional in the parity of the
+graph — on the odd-walk (non-bipartite) class
+`exists_lt_one_rate_of_odd_walk` makes the displayed rate strictly
+contractive, which is the certificate's whole content; on bipartite
+input the display saturates at `1` and the bound is the trivial
+`t = 0` normalization. -/
+theorem chiSquareDistance_le_max_rate
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected) (t : ℕ) (x : V) :
+    chiSquareDistance A t x
+      ≤ (max (1 - secondEval (normalizedLaplacian A)
+              (normalizedLaplacian_symmetric A hA) hcard)
+            (evals (normalizedLaplacian_symmetric A hA)
+              ⟨Fintype.card V - 1, by omega⟩ - 1)) ^ (2 * t)
+          * ((stationaryVec A x)⁻¹ - 1) :=
+  chiSquareDistance_le_of_connected A hA hnn hd hconn _ t x
+    (fun _ hi =>
+      abs_one_sub_eigvalOf_le_max A hA hnn hd hcard hi)
+
+/-- **The TV shadow at the computed spectral rate** — the plain twin of
+`lazyWalkDistribution_tvDistance_le_of_connected`. -/
+theorem walkDistribution_tvDistance_le_max_rate
+    (A : WAdj (V := V)) (hA : A.IsSymm) (hnn : ∀ i j, 0 ≤ A i j)
+    (hd : ∀ i, 0 < deg A i) [Nonempty V] (hcard : 2 ≤ Fintype.card V)
+    (hconn : (supportGraph A hA).Connected) (t : ℕ) (x : V) :
+    tvDistance (walkDistribution A t x) (stationaryVec A)
+      ≤ (1/2) * Real.sqrt
+          ((max (1 - secondEval (normalizedLaplacian A)
+                  (normalizedLaplacian_symmetric A hA) hcard)
+              (evals (normalizedLaplacian_symmetric A hA)
+                ⟨Fintype.card V - 1, by omega⟩ - 1)) ^ (2 * t)
+            * ((stationaryVec A x)⁻¹ - 1)) := by
+  refine (walkDistribution_tvDistance_le A hd t x).trans ?_
+  exact mul_le_mul_of_nonneg_left
+    (Real.sqrt_le_sqrt
+      (chiSquareDistance_le_max_rate A hA hnn hd hcard hconn t x))
+    (by norm_num)
+
 /-! ## The lazy decay engine -/
 
 /-- **The lazy commutation**: `√D · P_L = (1 − (1/2)·L_sym) · √D` — the

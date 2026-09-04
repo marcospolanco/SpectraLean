@@ -216,7 +216,7 @@ sequenceDiagram
 #### 6.1 Untrusted Model vs. Trusted Authorizer
 `@fde/media` Chapter 9 & 10 establish that **the model is an untrusted parser and proposer; trusted code alone authorizes and executes**.
 - The LLM can propose any Lean syntax, tactic, or documentation edit.
-- No model output is trusted on self-report. The `verify_for_commit` routine in `scripts/opencode-pursue` runs a **subset** of the `AGENTS.md` ladder (R-09: it omits `check_refutation_independence.py` and `check_public_reachability.py`). Sequence 0 replaces that subset with a versioned fail-closed manifest.
+- No model output is trusted on self-report. The `verify_for_commit` routine in `scripts/opencode-pursue` runs a **subset** of the `AGENTS.md` ladder (R-09: it omits `check_refutation_independence.py`, `check_public_reachability.py`, and `check_backlog_freshness.py` — the third script joined `AGENTS.md`'s canonical ladder 2026-09-01, one day after this finding was first written, and was never folded into the count until this revision). Sequence 0 replaces that subset with a versioned fail-closed manifest.
 - If a single required check fails, the git commit is completely blocked.
 
 #### 6.2 The Read-Only Commit Steward (veto only, never a go-signal)
@@ -499,7 +499,7 @@ None of this implies the agent is malicious. It protects against races, accident
 | :--- | :--- | :--- | :--- | :--- |
 | **1** | It verifies one state and commits another. Checks run against the live worktree; afterward `git add -A` stages whatever exists then. There is no immutable verified snapshot. | A race or a later generator rewrite can commit a tree the ladder never saw. | Temporary index → tree OID *T*; verify a checkout of *T*; `C=$(git commit-tree T -p P)`; `git update-ref <ref> C P`. Generators run before *T*, or regeneration must leave *T* unchanged. | R-07, R-13 |
 | **2** | The verifier is inside the candidate change. The agent can accidentally edit `scripts/lint_axioms.py`, build configuration, or another trust-root file, and the wrapper then uses that edited version for approval. | Approval is not from a trusted verifier. | Run the ladder from a pinned checkout/image of the last trusted verifier. Refuse unattended `--commit` (human review) if the **trust root** changed: `scripts/` (including the verification manifest), `lakefile.lean`, `lake-manifest.json`, `lean-toolchain`, tracked hooks, and other Lake/toolchain pins. | R-06, R-14 |
-| **3** | The unattended ladder is incomplete. It omits `check_refutation_independence.py` and `check_public_reachability.py`. | A “pass” is not the complete `AGENTS.md` ladder. | Versioned fail-closed manifest matching `AGENTS.md`; record every exit. | R-09 |
+| **3** | The unattended ladder is incomplete. It omits `check_refutation_independence.py`, `check_public_reachability.py`, and `check_backlog_freshness.py` (the third added to `AGENTS.md`'s canonical ladder 2026-09-01, after this row was first written). | A “pass” is not the complete `AGENTS.md` ladder. | Versioned fail-closed manifest matching `AGENTS.md`; record every exit. | R-09 |
 | **4** | A run has no enforced internal time budget. The 12-step brake is prompt guidance. A stuck proof attempt can run for hours. | The host cannot bound a runaway generator. | Host wall-clock/CPU limit on the generator process. Prompted 12-step is not a control. | R-05 |
 
 External review (2026-08-30: **Grade B — adopt conditionally, not yet ship for unattended commits**) accepted Lean + deterministic QA as the evidence plane and host-only Git as the right shape. Sequence 0 is those four closures. Additional Sequence 0 rules (steward veto-only, never a go-signal; cooperative flock is not a substitute for `update-ref`) do not replace them.
@@ -697,7 +697,7 @@ KEY TAKEAWAY:
 Lean work and ordinary verification are strong. Live unattended commit is B
 because it still fails four Sequence 0 criteria: (1) verify worktree then
 git add -A another state; (2) verifier lives in the candidate tree;
-(3) ladder omits two AGENTS.md checks; (4) 12-step brake is prompt-only.
+(3) ladder omits three AGENTS.md checks; (4) 12-step brake is prompt-only.
 The guarantee Sequence 0 must add: the exact Git tree that passed the
 complete trusted verification ladder is the exact tree committed. That
 protects against races, accidental edits, stale checks, and runaway runs
@@ -720,3 +720,4 @@ protects against races, accidental edits, stale checks, and runaway runs
 | v6 | 2026-08-30 | Regrade absorbed: live unattended-commit **B**, planning contract **A−**, **A+ not earned**. Sequence 0 now requires `write-tree` / verify / `commit-tree` of the same OID *T* (R-13); expanded trust root (`lean-toolchain`, `lake-manifest.json`, hooks, verification manifest — R-14); steward is veto/escalate only, never the positive authorize condition. §7.0 scoreboard counts are a link only. Planning only. |
 | v7 | 2026-08-30 | Sequence 0 Git mechanics made implementation-explicit: `write-tree` serializes the index, not the worktree; temporary index; `C=$(git commit-tree T -p P)`; `git update-ref <ref> C P`; content generators run before *T* or must leave *T* unchanged. Planning only. |
 | v8 | 2026-08-30 | Sequence 0 acceptance restated as the four live failures a critic must not have to reconstruct: (1) verify one state / commit another; (2) verifier inside the candidate change; (3) incomplete unattended ladder; (4) no host time budget. Transactional guarantee is the one-sentence test. Planning only. |
+| v9 | 2026-09-04 | R-09 corrected from a two-check to a three-check omission: `check_backlog_freshness.py` joined `AGENTS.md`'s canonical ladder 2026-09-01 (one day after this finding was first written) and was never folded into R-09's count until a governance-currency review caught the drift. `verify_for_commit` was independently re-read to confirm it still omits all three. No architectural change; a factual correction only. |

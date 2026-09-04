@@ -27,9 +27,11 @@ fails four criteria. The guarantee that would close them:
    be the copy that blesses the same diff. Close: pinned verifier;
    trust-root diffs fail closed to human review.
 3. **Unattended ladder is incomplete.** `verify_for_commit` omits
-   `check_refutation_independence.py` and
-   `check_public_reachability.py`. Close: the full Step 3 table as a
-   versioned fail-closed manifest.
+   `check_refutation_independence.py`, `check_public_reachability.py`,
+   and `check_backlog_freshness.py` (added to the canonical ladder
+   2026-09-01, after this finding was first written — the omission
+   count grew by one without the finding being updated to match).
+   Close: the full Step 3 table as a versioned fail-closed manifest.
 4. **No enforced internal time budget.** The 12-step brake is prompt
    guidance. Close: host wall-clock/CPU on the generator.
 
@@ -218,8 +220,10 @@ ladder was re-run by the steward before being trusted, not copied from
 the agent's own log.
 
 The live `--commit` wrapper's `verify_for_commit` currently **omits**
-`check_refutation_independence.py` and `check_public_reachability.py`
-(architecture review R-09). Sequence 0 makes this entire table a
+`check_refutation_independence.py`, `check_public_reachability.py`,
+and `check_backlog_freshness.py` (architecture review R-09, undercounted
+at two checks until this revision — the third script postdates R-09's
+original write-up by one day). Sequence 0 makes this entire table a
 versioned fail-closed manifest and runs the Python steps from a
 **pinned** verifier (last trusted commit or image), not from a
 worktree the generator may have edited. Unattended `--commit` fails
@@ -485,3 +489,9 @@ fresh design exercise.
   vs commit mismatch; verifier in the candidate tree; incomplete
   ladder; prompt-only time budget. Transactional guarantee is the
   one-sentence test.
+- 2026-09-04 — R-09's omission count corrected from two checks to
+  three: `check_backlog_freshness.py` joined `AGENTS.md`'s canonical
+  ladder 2026-09-01 and was never folded into this document's count
+  until a governance-currency review caught the drift. Factual
+  correction only, found by independently re-reading
+  `scripts/opencode-pursue`'s `verify_for_commit`.

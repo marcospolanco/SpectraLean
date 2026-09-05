@@ -128,7 +128,7 @@ def parse_scoreboard(root: Path) -> tuple[int, int, int]:
     path = root / SCOREBOARD
     text = path.read_text(encoding="utf-8")
     rows = {
-        "qa": r"\|\s*QA theorem/lemma declarations\s*\|\s*(\d+)\s*\|",
+        "qa": r"\|\s*QA theorem/lemma declarations\b.*?\|\s*(\d+)\s*\|",
         "axioms": r"\|\s*Explicit axioms in `Scaffold/Mathlib`\s*\|\s*(\d+)\s*\|",
         "sorries": r"\|\s*`sorry`/`admit` tokens in QA code\s*\|\s*(\d+)\s*\|",
     }

@@ -67,10 +67,23 @@ def build_metrics() -> str:
 
     public_axioms = 0
     public_placeholders = 0
+    functional_total = 0
     for path in lean_files(ROOT / "Scaffold" / "Mathlib"):
         code = strip_lean_comments(path.read_text(encoding="utf-8"))
         public_axioms += len(AXIOM.findall(code))
         public_placeholders += len(PLACEHOLDER.findall(code))
+        functional_total += len(DECLARATION.findall(code))
+
+    # `Scaffold/Derived` holds axiom-backed derived theorems: real, consumer-
+    # facing content (6 of Scaffold.lean's 62 imports), not QA and not raw
+    # public API either. Counted into the same "functional" figure as
+    # Scaffold/Mathlib because both are reachable from the public umbrella
+    # and neither is testing infrastructure the way Scaffold/QA is.
+    for path in lean_files(ROOT / "Scaffold" / "Derived"):
+        code = strip_lean_comments(path.read_text(encoding="utf-8"))
+        functional_total += len(DECLARATION.findall(code))
+
+    qa_ratio = qa_total / functional_total if functional_total else float("nan")
 
     lines = [
         START,
@@ -78,7 +91,9 @@ def build_metrics() -> str:
         "",
         "| Metric | Count |",
         "| --- | ---: |",
-        f"| QA theorem/lemma declarations | {qa_total} |",
+        f"| Functional theorem/lemma declarations (`Scaffold/Mathlib` + `Scaffold/Derived` — the public, consumer-facing layer; excludes `def`s) | {functional_total} |",
+        f"| QA theorem/lemma declarations (`Scaffold/QA` — fixtures, fences, and negative witnesses; not imported by `Scaffold.lean`, never reachable by a downstream consumer) | {qa_total} |",
+        f"| QA-to-functional ratio | {qa_ratio:.1f}:1 |",
         f"| `sorry`/`admit` tokens in QA code | {qa_placeholders} |",
         f"| Explicit axioms in `Scaffold/Mathlib` | {public_axioms} |",
         f"| `sorry`/`admit` tokens in `Scaffold/Mathlib` code | {public_placeholders} |",

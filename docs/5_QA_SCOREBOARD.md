@@ -5,6 +5,8 @@
 
 This document separates source-derived counts from commands that have actually been run. A QA declaration is counted syntactically; it is considered verified only when its module check passes. QA proves selected consequences relative to Scaffold’s axioms and does not prove those axioms.
 
+**Functional vs. QA declarations are a real distinction, not a labeling choice.** `Scaffold/QA/` is testing infrastructure — fixtures, adversarial fences, negative witnesses — and `Scaffold.lean` (the umbrella a downstream `import Scaffold` actually pulls in) imports zero of its modules; the QA count is invisible to a consumer by construction. The "functional" count below (`Scaffold/Mathlib` + `Scaffold/Derived`, both reachable from that umbrella) is the number that answers "how much library is here." Both are reported below, never only the larger one.
+
 ## Source metrics
 
 Run `python3 scripts/generate_qa_scoreboard.py` after changing Lean source.
@@ -14,7 +16,9 @@ _Generated from Lean source on 2026-09-04._
 
 | Metric | Count |
 | --- | ---: |
-| QA theorem/lemma declarations | 5494 |
+| Functional theorem/lemma declarations (`Scaffold/Mathlib` + `Scaffold/Derived` — the public, consumer-facing layer; excludes `def`s) | 1312 |
+| QA theorem/lemma declarations (`Scaffold/QA` — fixtures, fences, and negative witnesses; not imported by `Scaffold.lean`, never reachable by a downstream consumer) | 5494 |
+| QA-to-functional ratio | 4.2:1 |
 | `sorry`/`admit` tokens in QA code | 0 |
 | Explicit axioms in `Scaffold/Mathlib` | 4 |
 | `sorry`/`admit` tokens in `Scaffold/Mathlib` code | 0 |

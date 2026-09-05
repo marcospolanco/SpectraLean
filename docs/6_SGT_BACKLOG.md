@@ -139,7 +139,47 @@ documentation's own named corner, now proved rather than warned) —
 plus the `IsIrreducible` positive-arcs definitional witness
 (negativity creates no arcs); the repository's `-- @refutes` tag count
 rose 9 → 12, all mechanically independence-checked. The
-**resolvent family's** falsification
+**random-walk family's** falsification surface was completed
+2026-09-05 (`proposals/adversarial-fences-random-walk-family.md`, the
+prior terminal handoff's named top target, confirmed by a fresh
+reverse-import walk at 5 transitive non-QA consumers — the
+walk-mixing chain's root interface via `Stationary` → `Mixing` /
+`Oversmoothing` / `DirectedMixing` / the `EmpiricalStationary`
+capstone; the 76-line QA fully pre-discipline): six hypothesis-form
+fences in `RandomWalk_QA.lean`'s `AdversarialFences` section — both
+`hA` symmetry clauses at the asymmetric `!![0,2;1,0]]` (with the
+`d = 0` junk-rescue corner pinned: the scalar `0⁻¹ = 0` symmetrizes
+every matrix, so the dropped symmetry statements fail exactly when
+`d ≠ 0` ∧ asymmetric), both `hd` regularity clauses at the delivered
+`edgeAdj` at the wrong claimed degree `d = 2` (no junk anywhere), and
+both `hdpos` clauses at the genuinely `0`-regular zero matrix (the
+junk `0⁻¹ = 0` corner) — plus the audit's structural finding recorded
+as two proved strengthening companions: `hdpos` is load-bearing *only
+through the `d = 0` junk corner*, since `d ≠ 0` (negative degrees
+included) suffices by the same `d⁻¹ · d = 1` algebra, so the
+fence+strengthening pair is an exact characterization. The
+**stationary family's** falsification surface was completed 2026-09-05
+(`proposals/adversarial-fences-stationary-family.md`, the prior
+terminal handoff's named top target, confirmed by a fresh
+reverse-import walk at 4 transitive non-QA consumers — the
+stationarity/reversibility root feeding `Mixing`, `Oversmoothing`,
+`DirectedMixing`, and the `EmpiricalStationary` capstone; the
+259-line QA pre-discipline with one free-form negative witness, here
+reconciled into the fence discipline): thirteen hypothesis-form
+fences in `Stationary_QA.lean`'s `AdversarialFences` section — the six
+`hA` clauses at the asymmetric `asymAdj2` (column-sums-vs-row-sums
+kill mechanism), the degree-measure `hd` clauses at the signed
+canceling-zero-degree triangle (junk-√ congruence collapse for the
+kernel; junk-`0⁻¹` column-zeroing for stationarity and balance —
+nonnegative zero-degree rows are inert, signs make them load-bearing),
+the stationary-measure/symmetrized `hd` twins at a volume-nonzero
+variant fixture, and the mass-conservation `hd`/`hdpos` pair at the
+wrong claimed degree and the `d = 0` junk corner — plus five proved
+strengthening companions: the kernel statement's `hA` is P4
+truth-removable (the shelf proof never consumes symmetry; the
+symmetry-free companion makes it machine-checked) and the positivity
+clauses are secretly nonzeroness clauses (`deg ≠ 0`/`d ≠ 0` suffice).
+The **resolvent family's** falsification
 surface was completed 2026-09-05
 (`proposals/adversarial-fences-resolvent-family.md`, the prior
 handoff's named top survey target, confirmed by a fresh reverse-import

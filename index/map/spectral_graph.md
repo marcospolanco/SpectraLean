@@ -702,6 +702,24 @@ Real definitions: `transitionMatrix` (`d⁻¹ • A`), `randomWalkLaplacian`
 | `randomWalkLaplacian_eq_regularNormalizedLaplacian` | interop with the Cheeger bridge |
 | `randomWalkLaplacian_eq_smul_laplacian` | `L_rw = d⁻¹ • L` for `d`-regular graphs |
 
+**Adversarial fence audit (2026-09-05,
+`proposals/adversarial-fences-random-walk-family.md`):** the shelf is
+the walk-mixing chain's root interface (5 transitive non-QA consumers
+via `Stationary`); the `AdversarialFences` section of
+`RandomWalk_QA.lean` carries six hypothesis-form fences covering every
+hypothesis clause of the theorem surface — both `hA` symmetry clauses
+at the asymmetric `!![0,2;1,0]]` (with the `d = 0` junk-rescue corner
+pinned: `0⁻¹ = 0` symmetrizes every matrix), both `hd` regularity
+clauses at the delivered `edgeAdj` at the wrong claimed degree `d = 2`
+(no junk anywhere), and both `hdpos` clauses at the genuinely
+`0`-regular zero matrix (the junk `0⁻¹ = 0` corner where the
+transition matrix collapses to zero). The recorded structural finding:
+`hdpos` is load-bearing *only* through that corner — the proved
+strengthening companions `_of_ne_zero` show `d ≠ 0` (negative degrees
+included) suffices, so fence+strengthening is an exact characterization.
+The hypothesis-free `rfl` bridge is non-fenceable by inspection. QA-only,
+zero axioms.
+
 See the [SGT backlog](../../docs/6_SGT_BACKLOG.md) for the irregular-graph
 adapter plan.
 
@@ -800,6 +818,28 @@ downstream reuse:
 | `transitionMatrix_detailed_balance_uniform` | regular-case uniform-measure balance, composed from `RandomWalk.transitionMatrix_symmetric` |
 | `randomWalkLaplacian_mulVec_one_eq_zero` | conservation of mass, regular case (consumes `RandomWalk.transitionMatrix_row_sum`) |
 | `walkLaplacian_mulVec_one_eq_zero` | conservation of mass, irregular case (consumes `Normalized.walkTransitionMatrix_row_sum`) |
+
+**Adversarial fence audit (2026-09-05,
+`proposals/adversarial-fences-stationary-family.md`):** the shelf is
+the stationarity/reversibility root every walk-mixing consumer starts
+from (4 transitive non-QA consumers); the `AdversarialFences` section
+of `Stationary_QA.lean` carries thirteen hypothesis-form fences
+covering every priceable clause of the theorem surface — the six `hA`
+clauses at the delivered asymmetric `asymAdj2` (kill mechanism:
+`Pᵀ *ᵥ deg` computes column sums against the row-sum degree vector;
+the degree-measure fence consumes the delivered free-form witness,
+reconciling it into the discipline), the degree-measure `hd` clauses
+at the new signed canceling-zero-degree triangle (junk-√ collapse for
+the kernel; junk-`0⁻¹` column-zeroing for stationarity and balance —
+nonnegative zero-degree rows are inert, signs make them load-bearing),
+the stationary-measure/symmetrized `hd` twins at a volume-nonzero
+variant (vol `0` would junk-collapse both sides of the division), and
+the mass-conservation `hd`/`hdpos` pair at the wrong claimed degree
+and the `d = 0` corner. Five proved strengthening companions record
+the structural findings: the kernel statement's `hA` is P4
+truth-removable (the shelf proof never consumes symmetry), and the
+positivity clauses are secretly nonzeroness clauses (`deg ≠ 0`/`d ≠ 0`
+suffice by the shelf proofs' own routes). QA-only, zero axioms.
 
 (The entry form `Normalized.walkTransitionMatrix_apply`
 (`P i j = (deg A i)⁻¹ * A i j`) was added alongside, next to the

@@ -5,13 +5,273 @@ updated at milestone boundaries; [`AGENT_ACTIVITY.md`](AGENT_ACTIVITY.md)
 holds the append-only narrative.
 ## Active milestone
 
+**The stationary family's adversarial fence audit — DELIVERED; see
+the delivered block below**
+(`proposals/adversarial-fences-stationary-family.md`, COMPLETE; run
+`20260905T045658Z-run-1`, session `ses_f90206573ffepoH8ZpAC23ERiP`).
+The queue is empty — check `proposals/README.md`'s Active priority
+table (all-Low as of this delivery) and the handoff below for the next
+safe target.
+
+------
+
+**The stationary family's adversarial fence audit — the prior
+terminal handoff's named top target, confirmed by this run's own fresh
+reverse-import walk: Stationary 4 transitive non-QA consumers
+(`Mixing`, `Oversmoothing`, `DirectedMixing` directly, plus the
+`EmpiricalStationary` derived capstone — the stationarity/reversibility
+root every walk-mixing consumer starts from), its 259-line QA
+delivered 2026-08-22 pre-discipline with one free-form negative
+witness (`asym_detailed_balance_refuted_QA`, never reconciled into the
+fence discipline) — the audit method's twentieth application**
+(same-run proposal `proposals/adversarial-fences-stationary-family.md`;
+run `20260905T045658Z-run-1`, session
+`ses_f90206573ffepoH8ZpAC23ERiP`). DELIVERED at the full priced scope
+— thirteen hypothesis-form fences plus isolation companions, kill
+pins, and five proved strengthening companions, QA-only, zero axiom
+contact (count stays 4; `#print axioms` via `wip/stfences_axcheck.lean`
+on all 75 declarations — every one exactly `propext,
+Classical.choice, Quot.sound`; no `-- @refutes` tags — theorem
+instantiations of an all-proved shelf, nothing admitted consumed; the
+12-tag independence check unchanged and clean). QA 5422 → 5494 (+72
+by the generator metric; 75 declarations = 72 theorems + 3 fixture
+`def`s). Radar QA row synced to 5494, score held 4.5 per protocol
+(negative witnesses of an already-counted family, not a named-gap
+closure).
+
+The delivery's content — the fences, each a first fence-form witness
+for its clause: **the six `hA` clauses** at the delivered asymmetric
+`asymAdj2` (degrees `(2,1)` positive so every kept `hd` is genuine) —
+adjoint-walk stationarity dies because `Pᵀ *ᵥ deg` computes *column*
+sums `(1,2)` against the row-sum degree `(2,1)`; the degree-measure
+balance fence's proof consumes the delivered free-form witness
+`asym_detailed_balance_refuted_QA` (reconciled into the discipline);
+the stationary-measure twin at `(2/3) ≠ (1/3)` through the pinned vol
+`3`; the symmetrized matrix `(D * P) 0 1 = 2 ≠ 1`; the regular
+uniform balance at `d = 1` where the transition matrix is the
+adjacency itself (`1 ≠ 1/2` through `Fintype.card_fin`). **The
+degree-measure `hd` clauses** at the new signed canceling-zero-degree
+triangle `stNegAdj = !![0,1,−1;1,0,0;−1,0,0]]` (symmetric, degrees
+`(0,1,−1)`, vol `0`): the kernel statement dies through the junk-√
+collapse (`degreeInvSqrt` degenerates to `diag(0,1,0)` pinned, the
+congruence is zero, `L_sym = 1`, while the kernel vector's positive
+entry survives — `(L_sym *ᵥ √deg) 1 = 1 ≠ 0`); adjoint stationarity
+dies on the column side (the zero-degree vertex's edge contributes
+`A 0 1 = 1` to `deg 1` but is junk-zeroed through `0⁻¹ = 0` in the
+adjoint product — `(Pᵀ *ᵥ deg) 1 = 0 ≠ 1`); balance dies at pair
+`(0,1)` (`0 ≠ 1`). **Nonnegative zero-degree rows are inert — signs
+are what make them load-bearing** (the audit's headline finding).
+**The stationary-measure and symmetrized `hd` twins** at the
+volume-nonzero variant `stVolAdj` (degrees `(0,3,1)`, vol `4` — the
+first triangle's vol `0` would junk-collapse both sides of the
+division): `0 ≠ 1/4` and `(D * P) 0 1 = 0 ≠ 1`. **The
+mass-conservation trio**: regular `hd` at the delivered `edgeAdj2` at
+the wrong claimed degree `d = 2` (`1/2 ≠ 0`), regular `hdpos` at the
+genuinely `0`-regular zero matrix (the `d = 0` junk corner, `L_rw = 1`
+does not kill constants), irregular `hd` at the zero matrix (the walk
+Laplacian of an edgeless graph is the identity). **Five proved
+strengthenings** record the structural findings: the kernel
+statement's `hA` is P4 truth-removable — the shelf proof never
+consumes symmetry, and the symmetry-free companion upgrades that
+pricing call from proof-reading to machine-checked; stationarity and
+detailed balance hold at `deg ≠ 0` (the shelf proofs' own routes
+re-keyed); both mass conservations at `deg ≠ 0` / `d ≠ 0` (the last
+transferring the random-walk audit's `d = 0`-corner finding to its
+consumer). Non-fenceable: `mulVec_one_eq_deg` carries no hypotheses.
+
+**Verification:** spike first (`wip/stfences_spike.lean` — the full
+75-declaration delivery, iterated to zero errors/zero warnings over
+four fix rounds, all in recorded trap classes: the constant-row
+`vecHead/vecTail` collapse on `stNegAdj`'s zero rows forcing the
+named-entry-pin route, the eta-literal `show`-coercion on Fin 3, the
+`mul_diagonal`-before-`diagonal_mul` ordering, and the vector-level
+route for `*ᵥ` identities; plus one real bug caught by the spike —
+the uniform-balance fence's first statement kept the clause it was
+supposed to drop); `lake env lean` on the landed module (zero errors,
+zero warnings); explicit `lake build
+Scaffold.QA.SpectralGraph.Stationary_QA` ✔ (2192/2192); the
+75-declaration axiom audit above; **full `lake build` ✔ immediately
+followed by `check_build_completeness.py` — 133 source files, 133
+fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0
+(4 current axioms, unchanged); `check_refutation_independence`
+(12-tag clean — no tags touched); `check_public_reachability` clean
+(63 repo modules); `check_citations` ("All axioms have proper
+citations!"); `check_markdown_links` clean; `check_backlog_freshness`
+clean; scoreboard regenerated (**5494/4/0**) with the verification
+row; map-freshness exit 0 after the 5422 → 5494 stats sync in both
+map data tables and SVG regeneration (49 stations, no status change —
+none owed: the audit's proposal is not a map station's cited source).
+The landing verified as a pure insertion (631/0 in numstat). Records
+updated: the proposal (COMPLETE + delivery record with four technique
+findings), `proposals/README.md` (new Delivered row), README (5494),
+the radar (QA row synced, held 4.5), `index/map/spectral_graph.md`
+(the audit paragraph in the Stationary section), the backlog item-2
+falsification-surface note, the scoreboard verification row, both map
+data tables + regenerated SVG, this plan, and the activity log.
+Nothing committed; the prior runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — QA-only, no axiom
+disposition changed, no public statement changed. QA proves
+consequences relative to the substrate; it does not prove the
+substrate (no axiom touched). Honest scope: the stationary shelf's
+falsification surface is complete (thirteen fences covering every
+priceable clause + the P4 record with its machine-checked companion +
+the five strengthenings + the recorded non-fenceable); the
+stationary-measure and symmetrized twins' `deg ≠ 0` strengthenings
+inherit compositionally from the delivered balance strengthening
+(recorded, not re-proved).
+
+**Next handoff:** the Active table stays all-Low and the standing
+frontiers remain decision- or consumer-gated (the QA axis's randomized
+half; the priced undirected `walkTVPair` join; the sharp `|λ₂| = α`
+layer; the reverse TV → χ² calculus; the heat audit's priced
+deferral D1, the walk-twin variance `ht` fence at `K₂ ⊕ K₂` — still
+the smallest priced completion anywhere; the multiway hard direction
+and clean-room items behind human decisions). The audit method's
+natural next targets, by this run's confirmed survey numbers:
+`IrreducibleStationary` (3 transitive non-QA consumers — feeding
+`PageRank`, `DirectedMixing`, and the `EmpiricalStationary` capstone)
+and `Directed` (3 — feeding `FunctionalCalculus`, `Magnetic`,
+`Signed`); `Exhaustive_QA.lean`'s free-form witness layer over the
+Normalized/RandomWalk interfaces remains the standing handoff's other
+named audit remainder. The generic pieces landed here (the
+read-then-confirm P4 upgrade pattern for decorative-looking clauses,
+the signed canceling-zero-degree-row fixture class for statements
+that survive nonnegative zero-degree corners, and the volume-nonzero
+variant-fixture pattern for divided statements) are reusable by any
+future audit touching degree or volume clauses.
+
+------
+
+**The random-walk family's adversarial fence audit — DELIVERED; see
+the delivered block below**
+(`proposals/adversarial-fences-random-walk-family.md`, COMPLETE; run
+`20260905T044531Z-run-1`, session `ses_f90206573ffepoH8ZpAC23ERiP`).
+The queue is empty — check `proposals/README.md`'s Active priority
+table (all-Low as of this delivery) and the handoff below for the next
+safe target.
+
+------
+
+**The random-walk family's adversarial fence audit — the prior
+terminal handoff's named top target, confirmed by this run's own fresh
+reverse-import walk: RandomWalk 5 transitive non-QA consumers (via
+`Stationary` directly, feeding `Mixing`, `Oversmoothing`,
+`DirectedMixing`, and the `EmpiricalStationary` derived capstone — the
+walk-mixing chain's root interface: every consumer's mass-conservation
+and reversibility statement consumes `transitionMatrix_row_sum` or
+`transitionMatrix_symmetric` through `Stationary.lean`), vs
+`Stationary` 4, `IrreducibleStationary` 3, `Directed` 3 as the
+remaining follow-ons. Its QA (`RandomWalk_QA.lean`, 76 lines) was
+fully pre-discipline: one nonnegative fixture, zero negative
+witnesses, zero fence sections — the audit method's nineteenth
+application** (same-run proposal
+`proposals/adversarial-fences-random-walk-family.md`; run
+`20260905T044531Z-run-1`, session `ses_f90206573ffepoH8ZpAC23ERiP`).
+DELIVERED at the full priced scope — six hypothesis-form fences plus
+isolation companions, junk-corner pins, and two proved strengthening
+companions, QA-only, zero axiom contact (count stays 4; `#print
+axioms` via `wip/rwfences_axcheck.lean` on all 29 declarations — every
+one exactly `propext, Classical.choice, Quot.sound`; no `-- @refutes`
+tags — theorem instantiations of an all-proved shelf, nothing admitted
+consumed; the 12-tag independence check unchanged and clean). QA
+5395 → 5422 (+27 by the generator metric; 29 declarations = 27
+theorems + 2 fixture `def`s). Radar QA row synced to 5422, score held
+4.5 per protocol (negative witnesses of an already-counted family, not
+a named-gap closure).
+
+The delivery's content — the fences, each a first negative witness
+for its clause: **both `hA` symmetry clauses** at the asymmetric
+`rwAsymAdj = !![0,2;1,0]]`, killed at `d = 1` where `1⁻¹ • A = A`
+(`2 ≠ 1` for the transition matrix; `-2 ≠ -1` for the walk Laplacian,
+the asymmetry surviving the `1 - ·` subtraction), with the `d = 0`
+junk-rescue corner pinned alongside (`transitionMatrix rwAsymAdj 0 = 0`
+is symmetric — the scalar `0⁻¹ = 0` symmetrizes every matrix, so the
+dropped symmetry statements fail exactly when `d ≠ 0` ∧ asymmetric);
+**both `hd` regularity clauses** at the delivered `edgeAdj` with the
+wrong claimed degree `d = 2` — row sums `1/2 ≠ 1` and a `2×`
+bridge-diagonal separation `1 ≠ 1/2`, pure wrong-constant arithmetic
+with no junk anywhere and the kept `0 < d` genuine; **both `hdpos`
+clauses** at the genuinely `0`-regular zero matrix `rwZeroAdj = 0`
+where the junk `0⁻¹ = 0` collapses the transition matrix to the zero
+matrix (row sums `0 ≠ 1` — the transition matrix of a `0`-regular
+graph is not stochastic — and the scaling bridge's sides separate
+`1 ≠ 0`), with the kept `hd` genuine through `deg 0 i = 0`. The audit's
+structural finding, recorded as the two proved strengthening
+companions `transitionMatrix_row_sum_of_ne_zero` and
+`randomWalkLaplacian_eq_smul_laplacian_of_ne_zero`: **`hdpos` is
+load-bearing only through the `d = 0` junk corner** — at every
+genuinely `d`-regular fixture with `d ≠ 0`, negative degrees included,
+both dropped statements are *true* by the same `d⁻¹ · d = 1` algebra
+(the shelf proofs' own routes close verbatim with `0 < d` weakened to
+`d ≠ 0`), making the fence+strengthening pair an exact characterization.
+Non-fenceable: `randomWalkLaplacian_eq_regularNormalizedLaplacian`
+carries no mathematical hypotheses at all (the `rfl` identity of the
+two normalizations — nothing to drop).
+
+**Verification:** spike first (`wip/rwfences_spike.lean` — the full
+29-declaration delivery, iterated to zero errors/zero warnings over
+three fix rounds, all in recorded trap classes, headline: bare numeric
+inverses in statement position elaborate against `ℕ` and need
+ascription, and `norm_num` does not evaluate raw numeral inverses —
+`inv_eq_one_div` first); `lake env lean` on the landed module (zero
+errors, zero warnings); explicit `lake build
+Scaffold.QA.SpectralGraph.RandomWalk_QA` ✔ (2190/2190); the
+29-declaration axiom audit above; **full `lake build` ✔ immediately
+followed by `check_build_completeness.py` — 133 source files, 133
+fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0
+(4 current axioms, unchanged); `check_refutation_independence`
+(12-tag clean — no tags touched); `check_public_reachability` clean
+(63 repo modules); `check_citations` ("All axioms have proper
+citations!"); `check_markdown_links` clean; `check_backlog_freshness`
+clean; scoreboard regenerated (**5422/4/0**) with the verification
+row; map-freshness exit 0 after the 5395 → 5422 stats sync in both
+map data tables and SVG regeneration (49 stations, no status change —
+none owed: the audit's proposal is not a map station's cited source).
+The landing verified as a pure insertion (273/0 in numstat). Records
+updated: the proposal (COMPLETE + delivery record with three technique
+findings), `proposals/README.md` (new Delivered row), README (5422),
+the radar (QA row synced, held 4.5), `index/map/spectral_graph.md`
+(the audit paragraph in the RandomWalk section), the backlog item-2
+falsification-surface note, the scoreboard verification row, both map
+data tables + regenerated SVG, this plan, and the activity log.
+Nothing committed; the prior runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed by the delivery — QA-only, no axiom
+disposition changed, no public statement changed. QA proves
+consequences relative to the substrate; it does not prove the
+substrate (no axiom touched). Honest scope: the random-walk shelf's
+falsification surface is complete (six fences covering the entire
+hypothesis surface + the strengthening companions + the junk-corner
+pins + the recorded non-fenceable); the shelf is small by construction
+(7 public declarations, one of them hypothesis-free), which is why
+the delivery is proportionately small — the audit closed every
+priceable clause it has.
+
+**Next handoff:** the Active table stays all-Low and the standing
+frontiers remain decision- or consumer-gated (the QA axis's randomized
+half; the priced undirected `walkTVPair` join; the sharp `|λ₂| = α`
+layer; the reverse TV → χ² calculus; the heat audit's priced deferral
+D1, the walk-twin variance `ht` fence at `K₂ ⊕ K₂` — still the
+smallest priced completion anywhere; the multiway hard direction and
+clean-room items behind human decisions). The audit method's natural
+next targets, by this run's confirmed survey numbers: `Stationary`
+(4 transitive non-QA consumers — now the top unaudited shelf by that
+metric, its QA never audited), then `IrreducibleStationary` (3) and
+`Directed` (3); `Exhaustive_QA.lean`'s free-form witness layer over
+the Normalized/RandomWalk interfaces remains the standing handoff's
+other named audit remainder. The generic pieces landed here (the
+junk-rescue corner-pin pattern for scalar-collapsed statements, and
+the fence+strengthening exact-characterization pattern for strictness
+clauses that are secretly nonzeroness clauses) are reusable by any
+future audit touching positivity/strictness clauses.
+
+------
+
 **The heat family's adversarial fence audit — DELIVERED; see the
 delivered block below**
 (`proposals/adversarial-fences-heat-family.md`, COMPLETE; run
 `20260905T024254Z-run-1`, session `ses_f909884d5ffeYcyOG4VIwyJJh3`).
-The queue is empty — check `proposals/README.md`'s Active priority
-table (all-Low as of this delivery) and the handoff below for the next
-safe target.
 
 ------
 

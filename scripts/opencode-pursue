@@ -179,7 +179,8 @@ commit_verified_pursuit() {
 for ((run_number = 1; run_number <= runs; run_number++)); do
   echo "==> Checking quota before pursuit run $run_number/$runs"
   set +e
-  "$script_dir/zquota" --threshold "$quota_threshold"
+  "$script_dir/zquota" --threshold "$quota_threshold" \
+    --log-file "$project_dir/.opencode/quota-history.jsonl"
   quota_status=$?
   set -e
   if ((quota_status == 10)); then

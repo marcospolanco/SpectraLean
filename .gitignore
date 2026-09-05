@@ -37,6 +37,7 @@ htmlcov/
 build_summary.txt
 .opencode/runs/
 .opencode/pursue-session
+.opencode/quota-history.jsonl
 
 # OS
 .DS_Store

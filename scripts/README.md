@@ -90,6 +90,11 @@ network, or response error). Scope a diagnostic to token limits with
 `zquota --scope tokens`; set a different gate with either
 `scripts/opencode-pursue --quota-threshold 70` or `ZQUOTA_THRESHOLD=70`.
 
+`opencode-pursue` also passes `--log-file .opencode/quota-history.jsonl` on
+every check, so each invocation appends one JSON-lines record (independent of
+`--json`/`--quiet`) — a queryable history of quota usage over time, gitignored
+since it's local operational data, not repository content.
+
 ### Hourly macOS wake-up
 
 The checked-in [LaunchAgent template](io.github.marcospolanco.scaffold-pursue.plist)

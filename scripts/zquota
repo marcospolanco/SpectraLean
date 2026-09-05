@@ -11,6 +11,7 @@ env_file="$project_dir/.env"
 threshold=80
 format=human
 scope=all
+log_file=""
 
 usage() {
   cat <<'EOF'
@@ -23,6 +24,8 @@ Options:
   --scope SCOPE         Check `all` limits or only `tokens` limits (default: all).
   --json                Emit one stable JSON result.
   --quiet               Emit no result; use the exit status only.
+  --log-file PATH       Append one JSON-lines record of this check to PATH
+                         (created if missing), independent of --json/--quiet.
   -h, --help            Show this help.
 
 Exit status:
@@ -54,6 +57,11 @@ while (($#)); do
     --quiet)
       format=quiet
       shift
+      ;;
+    --log-file)
+      (($# >= 2)) || { echo "zquota: --log-file requires a path" >&2; exit 1; }
+      log_file=$2
+      shift 2
       ;;
     -h|--help)
       usage
@@ -108,6 +116,9 @@ def as_utc(reset_ms):
 threshold = int(sys.argv[1])
 output_format = sys.argv[2]
 scope = sys.argv[3]
+log_file = sys.argv[4] if len(sys.argv) > 4 and sys.argv[4] else None
+
+queried_at = dt.datetime.now(dt.timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
 try:
     payload = json.load(sys.stdin)
@@ -147,6 +158,7 @@ if not normalized:
 blocked = [limit for limit in normalized if limit["percentage"] >= threshold]
 next_resets = [limit["nextResetTime"] for limit in blocked if isinstance(limit["nextResetTime"], (int, float))]
 result = {
+    "queriedAt": queried_at,
     "ready": not blocked,
     "threshold": threshold,
     "scope": scope,
@@ -155,6 +167,14 @@ result = {
     "nextResetTime": min(next_resets) if next_resets else None,
     "nextResetAt": as_utc(min(next_resets)) if next_resets else None,
 }
+
+if log_file:
+    import os
+    log_dir = os.path.dirname(log_file)
+    if log_dir:
+        os.makedirs(log_dir, exist_ok=True)
+    with open(log_file, "a") as handle:
+        handle.write(json.dumps(result, separators=(",", ":"), sort_keys=True) + "\n")
 
 if output_format == "json":
     print(json.dumps(result, separators=(",", ":"), sort_keys=True))
@@ -168,4 +188,4 @@ elif output_format == "human":
         print(f"resume after: {result['"'"'nextResetAt'"'"'] or '"'"'an unknown reset time'"'"'}")
 
 sys.exit(10 if blocked else 0)
-' "$threshold" "$format" "$scope" <<<"$response"
+' "$threshold" "$format" "$scope" "$log_file" <<<"$response"

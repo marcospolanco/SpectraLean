@@ -71,6 +71,22 @@ column convergence, the row-action walk form).
   V` guard is needed; at `Fin 1` both instantiate with conclusions
   pinned to hand data (`perron_frobenius_S1_QA`,
   `P1_singleton_axiom_QA`).
+- **Every hypothesis clause of `perron_frobenius` is load-bearing**
+  (2026-09-05, the adversarial fence audit
+  `proposals/adversarial-fences-perron-frobenius-family.md`):
+  tagged axiom-independent fences in `PerronFrobenius_QA.lean`'s
+  `AdversarialFences` section refute the axiom-minus-one-clause shape
+  at fixtures where the kept clauses are proven genuine — `hnn` at the
+  negative-diagonal irreducible `!![-1,2;2,-1]]` (the eigen conjuncts
+  stay satisfiable in isolation at `r = 1`, so the kill route is
+  genuinely the domination clause: the pinned complex root `−3` forces
+  `3 ≤ 1`), `hirr` at the reducible nilpotent edge `!![0,1;0,0]]`
+  (the stranded vertex's zero row forces `r x₁ = 0` against `r > 0`,
+  `x₁ > 0`), and `hex` at the one-vertex zero matrix `!![0]]`
+  (nonnegativity and irreducibility genuine, the module's own named
+  corner now proved rather than warned); plus the `IsIrreducible`
+  positive-arcs definitional witness `!![0,-2;-2,0]]` (negativity
+  creates no arcs).
 
 ## Named Consumers
 

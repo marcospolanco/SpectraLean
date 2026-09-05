@@ -147,6 +147,29 @@ parallel construction can drift out of agreement).
 | `finrank_ker_laplacian_eq_card_supportGraph_components` | kernel dimension = number of support-graph components, for *weighted* graphs (Mathlib's component-count result transferred through the bridge; generalizes the connected case) |
 | `laplacian_ker_basis`, `laplacian_ker_basis_apply` | component-indicator basis of the weighted kernel (Mathlib's `lapMatrix_ker_basis` transported); apply lemma: the `c`-th vector is the indicator of `c` |
 
+**Adversarial fences (2026-09-04, proposal
+`adversarial-fences-kernel-bridge-family.md`, `KernelBridge_QA.lean`'s
+`BridgeFences` section):** the bridge family and its weighted center
+characterization chain carry 12 hypothesis-form negative witnesses at
+three fixtures the nonnegative QA fixtures could not serve — the Fin 2
+negative edge (edgeless support) kills the center iff's ← direction
+(reachability constancy junk-trivial while `L *ᵥ ![1,0] ≠ 0`), the
+bridge's first orientation, and the dimension statement (`finrank 1 ≠
+2`); the Fin 3 signed path with *connected* support (the negative edge
+`(0,2)` is not a support edge) kills the iff's → direction at the
+kernel vector `![1,2,3]`, the span and exists-const forms (with the
+connectivity co-hypothesis genuine), the bridge's second orientation,
+the dimension statement's second witness (`2 ≤ finrank ≠ 1`), and the
+pos-weight engine's `hnonneg` at the mechanism level (`0 < A 0 1`
+genuine, kernel equation genuine, `f 0 ≠ f 1`); and the Fin 3
+asymmetric *nonnegative* sink star kills the pos-weight engine's `hA`
+— the family's only `supportGraph`-free statement, whose `hA` is
+proof-internal — with every other hypothesis genuine (`hnonneg`
+entrywise): symmetry is load-bearing at the quadratic-form step. The
+`hA` clauses of every `supportGraph`-carrying statement are recorded
+non-fenceable (statement-entangled); the `hconn` clauses were already
+fenced by `Connectivity_QA`'s disconnected witnesses.
+
 
 Admitted axioms:
 
@@ -407,6 +430,22 @@ consumer's explicit non-overclaim instruction), still zero axioms.
 
 ### `Scaffold.Mathlib.GraphTheory.Band` (two-sided spectral band projectors)
 
+**Adversarial fences** (2026-09-04,
+`proposals/adversarial-fences-band-projector-family.md`,
+`Band_QA.lean`'s `BandFences` section): 22 hypothesis-form negative
+witnesses closing every load-bearing clause the pre-discipline QA left
+unfenced — the negated junk band `B(4,0] = −1` kills idempotence
+(`(−1)² ≠ −1`), both annihilation statements (`−v ≠ 0`), the
+disjointness trio's `hab`/`hcd` plus the flipped twin's `hbc`, both
+inner-orthogonality clauses, the residual-orthogonality engine
+(`−2 ≠ 0`), the Hilbert identification (surjective `v ↦ −v` range:
+projection `x ≠ −x`), and the closest-point bound (`‖2x‖ ≤ ‖x‖`
+collapse); the mode-selection `h₂`, the covering `h`/`ha`/`hb`, the
+monotone-family `ht`/`hkm`, and the vector-completeness `hb`/`hc` close
+the rest. The shared-mode theorem's `hab`/`hcd` are recorded
+non-fenceable: a negated band's fixed space is trivially zero, so the
+dropped-guard statement is provable (the P4 truth-removable class).
+
 The `(a, b]` band projector (proposal `spectral-band-projectors.md`,
 High, the four-step program complete — Steps 1–3 delivered
 2026-08-20, Step 4 delivered 2026-08-21): the orthogonal projector
@@ -456,6 +495,16 @@ the bare `V → ℝ` default norm is the sup norm and is not used).
 | `norm_sub_bandProjector_apply_le` | **the closest-point property:** `‖e x − e (B *ᵥ x)‖ ≤ ‖e x − e y‖` for every fixed point `y` of the band (equivalently every range member) — from `orthogonalProjection_minimal` + `ciInf_le`; the fixed-point hypothesis is load-bearing (the QA guard refutes the hypothesis-free form) |
 
 ### `Scaffold.Mathlib.GraphTheory.ClusterProjector` (the set-valued spectral projector)
+
+**Adversarial fences** (2026-09-04,
+`proposals/adversarial-fences-band-projector-family.md`,
+`ClusterProjector_QA.lean`'s `ClusterFences` section): 7
+hypothesis-form negative witnesses at `clusterA = diag(0,5,11)` —
+mode-selection in both directions at `{0,11}`, the zero/one corners
+via the delivered projector pins, identical-cluster disjointness
+(`P² = P ≠ 0`), capture-iff against a covering `Ioc` selection, and
+the band agreement's own docstring corner (`Ioc 6 (−1) = ∅` gives the
+zero projector against the negated band `−diag(1,1,0) ≠ 0`).
 
 The cluster projector (proposal `cluster-projector.md`, delivered
 2026-08-24 — the recorded follow-on of the band Davis–Kahan
@@ -661,6 +710,24 @@ adapter plan.
 Real definitions: `degreeSqrt`, `degreeInvSqrt` (diagonal `√D`, `1/√D`
 via `Real.sqrt` — no matrix square root needed), `normalizedLaplacian`
 (`1 - (1/√D) A (1/√D)`, the irregular symmetric normalized Laplacian).
+**Adversarial fence audit (2026-09-04,
+`proposals/adversarial-fences-normalized-family.md`):** the shelf is the
+library's most-consumed unaudited surface (20 transitive non-QA
+consumers); the `AdversarialFences` section of `Normalized_QA.lean`
+carries 27 hypothesis-form fences with packaged isolation companions
+covering every load-bearing clause of the theorem surface. The recorded
+headline: at *symmetric zero-degree* fixtures the dropped-`hd`
+statements of the congruence bridge, left-multiplied congruence,
+commutation form, and conjugated-power transfer are *provable* (the
+junk kills both sides identically) — the genuine breaker is the
+negative-degree row, where `(deg)⁻¹` stays genuine while the
+square-root factors vanish; the single Fin 2 fixture `!![-2,1;1,0]]`
+(`L_sym` degenerates to the identity, `P = !![2,−1;1,0]]`, all
+rational) kills fifteen clauses including the transfer trio at genuine
+eigen-hypotheses, the eigenbasis instantiations (orthonormality-witness
+index — no eigenvalue pin), and the transferred-spectrum existential
+(dead by the pinned `P` row equations through `evals_congr` +
+`evals_one`). QA-only, zero axioms.
 All statements proved (2026-08-17), no axioms:
 
 | Declaration | Content |
@@ -1243,6 +1310,25 @@ irregular-Cheeger consumer (proposal
 consumers anywhere): the volume-weighted easy direction and its
 degree-stretched cut-test-vector layer** — see the second table.
 
+**Adversarial fences** (2026-09-04,
+`proposals/adversarial-fences-variational-transfer-family.md`, the
+fresh consumption survey's pick at 13 transitive non-QA consumers):
+`VariationalTransfer_QA.lean`'s `TransferFences` section carries 27
+hypothesis-form fences over the shelf's unfenced clause surface — the
+transfer-engine layer's degree clauses at the negative-degree fixture
+(junk `√(−1) = 0` collapsing the stretch across the Dirichlet transfer,
+the degree-weighted pairings, the Rayleigh transfer, the
+left-multiplied congruence, and the kernel-cone lift), PSD transfer's
+`hA`/`hnn`, the congruence lemma's `hP`, the bottom-eigenvalue pin's
+`hnn`/`hd`, the algebraic-connectivity transfer's `hnn` at the signed
+path with connected support (two stretched kernel vectors force
+`λ₂ ≤ 0`), and the degree sandwich's pointwise engines — headline: the
+quotient bracket's sign-flip on signed input, the docstring's own
+warning, witnessed at the connected negative cut. The Cheeger-statement
+clauses and the mul-form sandwich/window clauses were already fenced by
+`IrregularCheeger_QA`'s `IrregularFences` and `DegreeSandwich_QA` and
+are out of scope.
+
 | Declaration | Content |
 |-------------|---------|
 | `quadForm_congr` | generic congruence lemma: `quadForm (P M P) y = quadForm M (P *ᵥ y)` for symmetric `P` |
@@ -1499,7 +1585,21 @@ and Parseval-exact heat identities, and **`heatKernel_variance_decay`**
 (`Var(e^{-tL}f) ≤ e^{−2tλ₂}Var(f)`, hypothesis-minimal — no
 connectivity, no gap positivity — by the eigenbasis contraction, no
 derivative machinery). Pure hard crust, zero
-axioms; QA at `Scaffold/QA/SpectralGraph/Heat_QA.lean`.
+axioms; QA at `Scaffold/QA/SpectralGraph/Heat_QA.lean`. The shelf's
+falsification surface was completed 2026-09-05
+(`proposals/adversarial-fences-heat-family.md`, the audit method's
+eighteenth application, this run's fresh consumption survey confirming
+Heat as the library's most-consumed unaudited shelf at 8 transitive
+non-QA consumers): 30 hypothesis-form fences in the QA file's
+`HeatFences` section, headline findings the dissipation failure on
+signed input (the negative edge's eigenvalue `-4` makes every "decay"
+factor a growth factor, `e⁴ > 1`), the DC-limit and variance-decay
+`hnn` failures at the same fixture (`2e⁸ > 2` at rate `1`), the
+mean-preservation `hA` kill on asymmetric input (`1 − α ≠ 1` with
+`α = (1−e⁻³)/3`), the six normalized/walk `hd` kills at the
+zero-degree signed fixture (the junk `D⁻¹ᐟ²` congruence-collapse with
+`√D·1` surviving), and the remainder-window kill at `t = -2`
+(`e⁴ − 5 > 16` through the `9/4 ≤ e` pin).
 
 | Declaration | Content |
 |-------------|---------|
@@ -1727,6 +1827,10 @@ nontriviality (`heatKernel K₂ 1 ≠ 1`: diffusion provably moves mass,
 refuting any constant-collapse reading).
 
 ### `Scaffold.Mathlib.GraphTheory.Sparsification` (leverage-score sparsification, Steps 1 Slices 2–3 — the deterministic core)
+
+#### Adversarial fences (`CoreFences`, 2026-09-04)
+
+`Sparsification_QA.lean`'s `CoreFences` section (`proposals/adversarial-fences-sparsification-core-family.md`): hypothesis-form negative witnesses for the deterministic core's 15 unfenced load-bearing clauses — the eigenvalue-nonnegativity engine's `hnn` (whole-family form at the signed fixture: the pinned `quadForm = −2` plus the spectral resolution), the leverage-share identity's `hnn` (the signed fixture's negative pair: junk-`√` zero edge vector against `(−1)·R 2 1/2 = 1`), the ordered-pair budget identity's `hnn` (the rank-1 signed 4-cycle: `L = s⊗s` pinned entrywise, the single genuine eigenvalue `4`, per-pair `1/8`, total `1 ≠ card − 1`), the projector trio and exact-deviation identity's `hnn` (the nonpositive-spectrum fixture: every eigenvalue `≤ 0` zeroes every edge vector), the trace identity's `hconn` (the disconnected fixture through the Foster kernel-count engine), the bilinear Dirichlet identity's `hA` (asymmetric `Fin 2`: `3 ≠ 4`), the sampling layer's `hq` clauses and the second moment's `hpne` at `K₂`, and the strict dot-positivity `hv`. Recorded non-fenceables with mechanisms: the junk-`√` zero edge vector as an automatic sign guard on the sampled Laplacian's PSD theorem; two `hq` bound clauses algebraically true at every corner; the two transport clauses already fenced by the tail QA's `sg` fixture.
 
 The deterministic Spielman–Srivastava algebra
 (`proposals/spectral-sparsification-via-leverage-scores.md`, the

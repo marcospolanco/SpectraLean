@@ -67,6 +67,21 @@
   prove the theorems; it checks their interfaces against independently
   computed values and falsifies nearby wrong statements.
 
+  Adversarial fence audit (2026-09-05,
+  `proposals/adversarial-fences-resolvent-family.md`): the section
+  `AdversarialFences` below reconciles this file's free-form negative
+  witnesses into the hypothesis-necessity discipline and closes the
+  shelf's unfenced clause surface — 12 fences (both upper-bridge `hc`
+  clauses at a `Fin 0` fixture; the general-shift invertibility's `hpsd`
+  at `M = -1` and `ht` at `t = 0`; the `+1` invertibility's `hpsd`; the
+  resolvent identity's `hA`/`hB` at a one-sided singular shift; the
+  general-`t` norm bound's `ht` at `quartOne`/`t = 0` and `hpsd` at
+  `negThreeQuart`/`t = 1`; both Lipschitz `quadForm` clauses at
+  `negThreeQuart` vs `0`, a `4×` separation `3 ≤ 3/4` through two new
+  diagonal norm pins; the injectivity trio's jointly dropped clauses at
+  the delivered `-1` vs `-1 + E` guard), with screened and
+  non-fenceable classes recorded in the section header.
+
   Scoreboard: ../docs/5_QA_SCOREBOARD.md
 -/
 
@@ -1149,5 +1164,484 @@ theorem resolvent_injective_needs_invertibility_QA :
         negOneShift_add_one_inv_eq_zero_QA]))
 
 end Injective
+
+section AdversarialFences
+
+/-!
+## AdversarialFences: the adversarial fence audit
+(proposal `adversarial-fences-resolvent-family.md`, 2026-09-05)
+
+Hypothesis-form negative witnesses for the resolvent family's unfenced
+clause surface, reconciling the QA's 2026-08-19/20 free-form negative
+witnesses into the fence discipline. The shelf (`Resolvent.lean`, 14
+public theorems) is the library's most-consumed unaudited surface at 16
+transitive non-QA consumers (this run's reverse-import walk).
+
+**Fences delivered (12):** both upper-bridge `hc` clauses at a `Fin 0`
+fixture (the only corner where the eigenvalue hypothesis leaves `c`
+unconstrained — vacuous for every `c` while the norm is still `0`); the
+general-shift invertibility's `hpsd` (at `M = -1`: the shift lands on the
+zero matrix) and `ht` (at `t = 0` on the delivered `lap2`: PSD genuine,
+determinant pinned `0`); the `+1` invertibility's `hpsd` (same `-1`
+witness); the resolvent identity's `hA` and `hB` (a singular shift on
+exactly one side collapses that side's resolvent to the junk `0`, and
+the two sides separate: `-1 ≠ 0` resp. `1 ≠ 0`); the general-`t` norm
+bound's `ht` (at `t = 0` on the delivered `quartOne`: the genuine
+inverse has norm `4` against `0⁻¹ = 0`) and `hpsd` (at `t = 1` on the
+delivered `negThreeQuart`: the `+1` shift is `quartOne`, norm `4 > 1`);
+both Lipschitz `quadForm` clauses (at `negThreeQuart` vs `0`: the
+resolvent difference is `fourOne - 1 = 3I`, norm `3`, against
+`‖negThreeQuart‖ = 3/4` — a `4×` separation); and the injectivity
+trio's *jointly* dropped determinant/PSD clauses (the delivered
+`-1` vs `-1 + E` pair, both resolvents the junk `0`).
+
+**Screened by delivered witnesses:** both upper-bridge `h` clauses
+(`mat2_not_opNorm_le_one_QA` refutes `‖mat2‖ ≤ 1`, the bound by one
+eigenvalue instead of all); the `+1` norm bound's `hpsd`
+(`hypothesis_guard_not_le_one_QA` is literally its dropped form); the
+core injectivity's jointly-dropped form
+(`resolvent_injective_needs_invertibility_QA`).
+
+**Non-fenceable, with mechanisms:** the five `hM` clauses
+(signature-entangled — `eigvalOf M hM`/`evals hM` cannot be stated
+without the symmetry proof); `l2OpNorm_eq_max_abs_evals`'s `hcard`
+(proof-term-in-display — the conclusion's `⟨0, by omega⟩` index consumes
+it, so the dropped statement does not elaborate); and the injectivity
+trio's *individually* dropped determinant clauses (P4 truth-removable: a
+common resolvent value that genuinely left-inverts one factor already
+forces the other factor's invertibility in finite dimensions — only the
+joint drop is false, which the joint fence above witnesses).
+-/
+
+/-!
+### The `Fin 0` fixture and the upper-bridge `hc` fences
+
+On the empty index type every eigenvalue clause is vacuous while the
+operator norm is still `0` (the underlying space is trivial) — the only
+corner where dropping `0 ≤ c` turns the upper bridge into a falsehood
+(`0 ≤ -1`): on a nonempty type the eigenvalue hypothesis already forces
+`c ≥ 0` through `|λ| ≥ 0`.
+-/
+
+/-- The `Fin 0` fixture: the empty matrix, where every eigenvalue
+hypothesis is vacuous and the operator norm collapses to zero. -/
+def rfZeroM : Matrix (Fin 0) (Fin 0) ℝ := 0
+
+theorem rfZeroM_isSymm : rfZeroM.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  exact isEmptyElim i
+
+/-- The norm pin, by an independent route (the `cstar_norm_def` transport
+plus `opNorm_le_bound` on the trivial space — no eigenvalue machinery). -/
+theorem rfZeroM_opNorm_eq_zero_QA : ‖rfZeroM‖ = 0 := by
+  have hle : ‖rfZeroM‖ ≤ 0 := by
+    rw [Matrix.cstar_norm_def]
+    refine ContinuousLinearMap.opNorm_le_bound _ (le_refl 0) ?_
+    intro x
+    have hx : x = 0 := Subsingleton.elim x 0
+    rw [hx]
+    simp
+  exact le_antisymm hle (norm_nonneg _)
+
+/-- **Fence (upper bridge, `eigvalOf` form, `hc` clause):** dropping the
+nonnegativity of `c` is refuted at the empty corner — the hypothesis set
+is satisfiable at `c = -1` (vacuously, no indices) while the conclusion
+demands `0 ≤ -1`. The kept `hM` and `h` clauses are genuine at the
+fixture (trivial symmetry; vacuous bound). -/
+theorem rf_bridge_hc_fence_QA :
+    ¬ (∀ (M : Matrix (Fin 0) (Fin 0) ℝ) (_hM : M.IsSymm) (c : ℝ),
+        (∀ i, |eigvalOf M _hM i| ≤ c) → ‖M‖ ≤ c) := by
+  intro h
+  have h0 := h rfZeroM rfZeroM_isSymm (-1 : ℝ) (fun i => isEmptyElim i)
+  rw [rfZeroM_opNorm_eq_zero_QA] at h0
+  linarith
+
+/-- **Fence (upper bridge, sorted-spectrum form, `hc` clause):** the same
+corner through the `evals` API — `Fin (Fintype.card (Fin 0))` is empty,
+so the sorted-spectrum hypothesis is vacuous at `c = -1`. -/
+theorem rf_evals_bridge_hc_fence_QA :
+    ¬ (∀ (M : Matrix (Fin 0) (Fin 0) ℝ) (_hM : M.IsSymm) (c : ℝ),
+        (∀ k : Fin (Fintype.card (Fin 0)), |evals _hM k| ≤ c) → ‖M‖ ≤ c) := by
+  intro h
+  have h0 := h rfZeroM rfZeroM_isSymm (-1 : ℝ)
+    (fun k => by have hk := k.isLt; simp at hk)
+  rw [rfZeroM_opNorm_eq_zero_QA] at h0
+  linarith
+
+/-!
+### The `M = -1` witness and the invertibility fences
+
+`-(1)` has quadratic form `-‖x‖²` (violating `hpsd` genuinely at every
+nonzero vector) and its `+1` shift is the zero matrix, determinant `0` —
+PSD is load-bearing for shifted invertibility, and so is `t > 0` (the
+delivered `lap2` at `t = 0` keeps PSD genuine with determinant pinned
+`0`).
+-/
+
+theorem rf_negOne_add_one_det_eq_zero_QA :
+    ((-(1 : Matrix (Fin 2) (Fin 2) ℝ)) + 1).det = 0 := by
+  rw [neg_add_cancel]
+  exact Matrix.det_zero (n := Fin 2) ⟨⟨0, by decide⟩⟩
+
+/-- The dropped-hypothesis violation: the `+1` shift of `-(1)` is
+singular. -/
+theorem rf_negOne_add_one_det_not_isUnit_QA :
+    ¬ IsUnit ((-(1 : Matrix (Fin 2) (Fin 2) ℝ)) + 1).det := by
+  rw [rf_negOne_add_one_det_eq_zero_QA]
+  exact not_isUnit_zero
+
+/-- The dropped-hypothesis violation for the PSD clauses: the quadratic
+form of `-(1)` is `-‖x‖²`, negative at `![1, 0]`. -/
+theorem rf_negOne_not_psd_QA :
+    ¬ (∀ x : Fin 2 → ℝ, 0 ≤ quadForm (-(1 : Matrix (Fin 2) (Fin 2) ℝ)) x) := by
+  intro h
+  have h0 := h ![1, 0]
+  have hval : quadForm (-(1 : Matrix (Fin 2) (Fin 2) ℝ)) (![1, 0] : Fin 2 → ℝ)
+      = -1 := by
+    have hmv : (-(1 : Matrix (Fin 2) (Fin 2) ℝ)) *ᵥ (![1, 0] : Fin 2 → ℝ)
+        = ![-1, 0] := by
+      funext i
+      fin_cases i <;>
+        simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+    rw [show quadForm (-(1 : Matrix (Fin 2) (Fin 2) ℝ)) (![1, 0] : Fin 2 → ℝ)
+        = Matrix.dotProduct (![1, 0] : Fin 2 → ℝ)
+          ((-(1 : Matrix (Fin 2) (Fin 2) ℝ)) *ᵥ (![1, 0] : Fin 2 → ℝ)) from rfl,
+      hmv]
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+  rw [hval] at h0
+  linarith
+
+/-- **Fence (general-shift invertibility, `hpsd` clause):** with the
+quadratic-form hypothesis dropped and `t = 1` genuine (`0 < 1`), the
+statement demands `IsUnit 0` — the shift is not decorative. -/
+theorem rf_inv_smul_hpsd_fence_QA :
+    ¬ (∀ (M : Matrix (Fin 2) (Fin 2) ℝ) (t : ℝ), 0 < t →
+        IsUnit (M + t • 1).det) := by
+  intro h
+  have h1 := h (-(1 : Matrix (Fin 2) (Fin 2) ℝ)) 1 one_pos
+  rw [one_smul] at h1
+  exact rf_negOne_add_one_det_not_isUnit_QA h1
+
+/-- **Fence (general-shift invertibility, `ht` clause):** with the
+positivity of `t` dropped and PSD genuine (the delivered `lap2_psd`), the
+`t = 0` instance is the unshifted Laplacian — singular, by the delivered
+determinant pin. -/
+theorem rf_inv_smul_ht_fence_QA :
+    ¬ (∀ (M : Matrix (Fin 2) (Fin 2) ℝ) (t : ℝ),
+        (∀ x, 0 ≤ quadForm M x) → IsUnit (M + t • 1).det) := by
+  intro h
+  have h1 := h lap2 0 lap2_psd
+  rw [zero_smul, add_zero] at h1
+  exact lap2_det_not_isUnit_QA h1
+
+/-- **Fence (`+1` invertibility, `hpsd` clause):** the `t = 1` companion
+statement — `IsUnit (M + 1).det` fails at `M = -1`. -/
+theorem rf_inv_one_hpsd_fence_QA :
+    ¬ (∀ M : Matrix (Fin 2) (Fin 2) ℝ, IsUnit (M + 1).det) := by
+  intro h
+  exact rf_negOne_add_one_det_not_isUnit_QA (h _)
+
+/-!
+### The resolvent identity's determinant clauses
+
+With exactly one side's shift singular, that side's resolvent is the junk
+`0` while the other side's is genuine (`1`), and the identity's two sides
+separate: `0 - 1 = -1` against `0 * _ * 1 = 0` (resp. `1 - 0 = 1`
+against `1 * _ * 0 = 0`).
+-/
+
+theorem rf_zero_add_one_inv_eq_one_QA :
+    ((0 : Matrix (Fin 2) (Fin 2) ℝ) + 1)⁻¹ = 1 := by rw [zero_add, inv_one]
+
+theorem rf_negOne_ne_zero_QA :
+    (-(1 : Matrix (Fin 2) (Fin 2) ℝ)) ≠ 0 := by
+  intro h
+  have e0 : (-(1 : Matrix (Fin 2) (Fin 2) ℝ)) 0 0 = -1 := by
+    simp [Matrix.one_apply]
+  rw [h] at e0
+  simp at e0
+
+theorem rf_one_ne_zero_QA : (1 : Matrix (Fin 2) (Fin 2) ℝ) ≠ 0 := by
+  intro h
+  have e0 : (1 : Matrix (Fin 2) (Fin 2) ℝ) 0 0 = 1 := by
+    simp [Matrix.one_apply]
+  rw [h] at e0
+  simp at e0
+
+/-- **Fence (resolvent identity, `hA` clause):** with `hB` genuine at
+`B = 0` (the delivered `zero_add_one_isUnit_det_QA`), the `A = -1`
+instance reads `-1 = 0` — both sides computed from the pinned junk
+inverse. -/
+theorem rf_identity_hA_fence_QA :
+    ¬ (∀ (A B : Matrix (Fin 2) (Fin 2) ℝ), IsUnit (B + 1).det →
+        (A + 1)⁻¹ - (B + 1)⁻¹ = (A + 1)⁻¹ * (B - A) * (B + 1)⁻¹) := by
+  intro h
+  have h1 := h (-(1 : Matrix (Fin 2) (Fin 2) ℝ)) 0 zero_add_one_isUnit_det_QA
+  rw [negOne_add_one_inv_eq_zero_QA, rf_zero_add_one_inv_eq_one_QA] at h1
+  simp only [Matrix.zero_mul, Matrix.mul_one, zero_sub] at h1
+  exact rf_negOne_ne_zero_QA h1
+
+/-- **Fence (resolvent identity, `hB` clause):** the mirror, with `hA`
+genuine at `A = 0` and the singular shift on `B`: the instance reads
+`1 = 0`. -/
+theorem rf_identity_hB_fence_QA :
+    ¬ (∀ (A B : Matrix (Fin 2) (Fin 2) ℝ), IsUnit (A + 1).det →
+        (A + 1)⁻¹ - (B + 1)⁻¹ = (A + 1)⁻¹ * (B - A) * (B + 1)⁻¹) := by
+  intro h
+  have h1 := h 0 (-(1 : Matrix (Fin 2) (Fin 2) ℝ)) zero_add_one_isUnit_det_QA
+  rw [rf_zero_add_one_inv_eq_one_QA, negOne_add_one_inv_eq_zero_QA] at h1
+  simp only [Matrix.mul_zero, Matrix.mul_one, sub_zero] at h1
+  exact rf_one_ne_zero_QA h1
+
+/-!
+### The general-`t` norm bound's two clauses
+
+At `t = 0` on the delivered `quartOne` (PSD genuine) the bound demands
+`‖quartOne⁻¹‖ = 4 ≤ 0⁻¹ = 0`; at `t = 1` on the delivered
+`negThreeQuart` (positivity genuine, PSD violated and exhibited by the
+delivered `negThreeQuart_not_psd_QA`) the `+1` shift is `quartOne` and
+the bound demands `4 ≤ 1`.
+-/
+
+/-- **Fence (norm bound, `ht` clause):** positivity of the shift is not
+decorative — the unshifted PSD inverse is unbounded by `0`. -/
+theorem rf_normbound_ht_fence_QA :
+    ¬ (∀ (M : Matrix (Fin 2) (Fin 2) ℝ) (t : ℝ),
+        (∀ x, 0 ≤ quadForm M x) → ‖(M + t • 1)⁻¹‖ ≤ t⁻¹) := by
+  intro h
+  have h1 := h quartOne 0 quartOne_psd
+  rw [zero_smul, add_zero, quartOne_inv_eq_fourOne_QA,
+    fourOne_opNorm_eq_four_QA, (_root_.inv_zero : (0 : ℝ)⁻¹ = 0)] at h1
+  norm_num at h1
+
+/-- **Fence (norm bound, `hpsd` clause):** the quadratic-form hypothesis
+is load-bearing at every `t` — at `t = 1` the non-PSD `negThreeQuart`
+shifts onto `quartOne`, whose inverse has norm `4 > 1 = 1⁻¹`. -/
+theorem rf_normbound_hpsd_fence_QA :
+    ¬ (∀ (M : Matrix (Fin 2) (Fin 2) ℝ) (t : ℝ), 0 < t →
+        ‖(M + t • 1)⁻¹‖ ≤ t⁻¹) := by
+  intro h
+  have h1 := h negThreeQuart 1 one_pos
+  rw [one_smul, negThreeQuart_add_one, quartOne_inv_eq_fourOne_QA,
+    fourOne_opNorm_eq_four_QA, inv_one] at h1
+  norm_num at h1
+
+/-!
+### The Lipschitz bound's two `quadForm` clauses
+
+At `A = negThreeQuart`, `B = 0` (either clause dropped, the other
+genuine via the delivered `zero_psd_QA`): the left side is
+`‖fourOne - 1‖ = ‖3I‖ = 3` (two new diagonal pins), the right side is
+`‖negThreeQuart‖ = 3/4` — a `4×` separation, so PSD is load-bearing on
+*both* sides of the pairing.
+-/
+
+/-- The Lipschitz left-side fixture: `3I`, the difference of the
+delivered inverse witness `fourOne` and the identity. -/
+def threeOne : Matrix (Fin 2) (Fin 2) ℝ :=
+  !![3, 0; 0, 3]
+
+theorem threeOne_symmetric : threeOne.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [Matrix.transpose_apply, threeOne]
+
+theorem threeOne_apply (i j : Fin 2) : threeOne i j = if i = j then 3 else 0 := by
+  fin_cases i <;> fin_cases j <;> simp [threeOne]
+
+theorem threeOne_trace : threeOne.trace = 6 := by
+  simp [Matrix.trace, threeOne_apply]
+  norm_num
+
+theorem threeOne_det : threeOne.det = 9 := by
+  have h00 : threeOne 0 0 = 3 := by simp [threeOne_apply]
+  have h11 : threeOne 1 1 = 3 := by simp [threeOne_apply]
+  have h01 : threeOne 0 1 = 0 := by simp [threeOne_apply]
+  have h10 : threeOne 1 0 = 0 := by simp [threeOne_apply]
+  rw [Matrix.det_fin_two, h00, h11, h01, h10]
+  norm_num
+
+theorem threeOne_evals_pin :
+    evals threeOne_symmetric ⟨0, by simp⟩ = 3 ∧
+      evals threeOne_symmetric ⟨1, by simp⟩ = 3 := by
+  have hlen : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm threeOne_symmetric).eigenvalues))).length = 2 := by
+    rw [Multiset.length_sort, Multiset.card_map]; simp
+  have hsorted : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm threeOne_symmetric).eigenvalues))).Sorted
+        (fun a b => a ≤ b) :=
+    Multiset.sort_sorted _ _
+  have hsum : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm threeOne_symmetric).eigenvalues))).sum = 3 + 3 := by
+    have htr : ∑ i : Fin 2, eigvalOf threeOne threeOne_symmetric i = 3 + 3 := by
+      rw [eigvalOf_sum_eq_trace, threeOne_trace]
+      norm_num
+    rw [← Multiset.sum_coe, Multiset.sort_eq, ← Finset.sum_eq_multiset_sum]
+    exact htr
+  have hprod : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm threeOne_symmetric).eigenvalues))).prod = 3 * 3 := by
+    have hd0 : ∏ i : Fin 2,
+        ((isHermitian_of_isSymm threeOne_symmetric).eigenvalues i) = 9 := by
+      have h := (isHermitian_of_isSymm threeOne_symmetric).det_eq_prod_eigenvalues
+      rw [threeOne_det] at h
+      simpa using h.symm
+    rw [← Multiset.prod_coe, Multiset.sort_eq, ← Finset.prod_eq_multiset_prod]
+    rw [hd0]
+    norm_num
+  exact two_point_pin_of_sum_prod (lo := 3) (hi := 3) (le_refl _) hlen hsorted hsum hprod
+
+theorem threeOne_opNorm_eq_three_QA : ‖threeOne‖ = 3 := by
+  refine le_antisymm ?_ ?_
+  · refine l2OpNorm_le_of_abs_evals_le threeOne_symmetric (by norm_num) ?_
+    intro k
+    fin_cases k
+    · rw [threeOne_evals_pin.1, abs_of_nonneg (show (0:ℝ) ≤ 3 by norm_num)]
+      try norm_num
+    · rw [threeOne_evals_pin.2, abs_of_nonneg (show (0:ℝ) ≤ 3 by norm_num)]
+      try norm_num
+  · have h := abs_evals_le_l2OpNorm threeOne_symmetric ⟨1, by simp⟩
+    rw [threeOne_evals_pin.2, abs_of_nonneg (show (0:ℝ) ≤ 3 by norm_num)] at h
+    exact h
+
+theorem fourOne_sub_one_eq_threeOne : fourOne - 1 = threeOne := by
+  refine Matrix.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;>
+    simp [fourOne, threeOne, Matrix.one_apply] <;> norm_num
+
+theorem rf_one_sub_fourOne_opNorm_eq_three_QA :
+    ‖(1 : Matrix (Fin 2) (Fin 2) ℝ) - fourOne‖ = 3 := by
+  have h : (1 : Matrix (Fin 2) (Fin 2) ℝ) - fourOne = -threeOne := by
+    refine Matrix.ext fun i j => ?_
+    fin_cases i <;> fin_cases j <;>
+      simp [Matrix.one_apply, fourOne, threeOne] <;> norm_num
+  rw [h, norm_neg, threeOne_opNorm_eq_three_QA]
+
+theorem negThreeQuart_symmetric : negThreeQuart.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [Matrix.transpose_apply, negThreeQuart]
+
+theorem negThreeQuart_apply (i j : Fin 2) :
+    negThreeQuart i j = if i = j then -3/4 else 0 := by
+  fin_cases i <;> fin_cases j <;> simp [negThreeQuart]
+
+theorem negThreeQuart_trace : negThreeQuart.trace = -3/2 := by
+  simp [Matrix.trace, negThreeQuart_apply]
+  norm_num
+
+theorem negThreeQuart_det : negThreeQuart.det = 9/16 := by
+  have h00 : negThreeQuart 0 0 = -3/4 := by simp [negThreeQuart_apply]
+  have h11 : negThreeQuart 1 1 = -3/4 := by simp [negThreeQuart_apply]
+  have h01 : negThreeQuart 0 1 = 0 := by simp [negThreeQuart_apply]
+  have h10 : negThreeQuart 1 0 = 0 := by simp [negThreeQuart_apply]
+  rw [Matrix.det_fin_two, h00, h11, h01, h10]
+  norm_num
+
+theorem negThreeQuart_evals_pin :
+    evals negThreeQuart_symmetric ⟨0, by simp⟩ = -3/4 ∧
+      evals negThreeQuart_symmetric ⟨1, by simp⟩ = -3/4 := by
+  have hlen : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm negThreeQuart_symmetric).eigenvalues))).length = 2 := by
+    rw [Multiset.length_sort, Multiset.card_map]; simp
+  have hsorted : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm negThreeQuart_symmetric).eigenvalues))).Sorted
+        (fun a b => a ≤ b) :=
+    Multiset.sort_sorted _ _
+  have hsum : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm negThreeQuart_symmetric).eigenvalues))).sum
+        = -3/4 + -3/4 := by
+    have htr : ∑ i : Fin 2,
+        eigvalOf negThreeQuart negThreeQuart_symmetric i = -3/4 + -3/4 := by
+      rw [eigvalOf_sum_eq_trace, negThreeQuart_trace]
+      norm_num
+    rw [← Multiset.sum_coe, Multiset.sort_eq, ← Finset.sum_eq_multiset_sum]
+    exact htr
+  have hprod : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm negThreeQuart_symmetric).eigenvalues))).prod
+        = (-3/4) * (-3/4) := by
+    have hd0 : ∏ i : Fin 2,
+        ((isHermitian_of_isSymm negThreeQuart_symmetric).eigenvalues i) = 9/16 := by
+      have h := (isHermitian_of_isSymm negThreeQuart_symmetric).det_eq_prod_eigenvalues
+      rw [negThreeQuart_det] at h
+      simpa using h.symm
+    rw [← Multiset.prod_coe, Multiset.sort_eq, ← Finset.prod_eq_multiset_prod]
+    rw [hd0]
+    norm_num
+  exact two_point_pin_of_sum_prod (lo := -3/4) (hi := -3/4) (le_refl _)
+    hlen hsorted hsum hprod
+
+theorem negThreeQuart_opNorm_eq_three_quarters_QA : ‖negThreeQuart‖ = 3/4 := by
+  refine le_antisymm ?_ ?_
+  · refine l2OpNorm_le_of_abs_evals_le negThreeQuart_symmetric (by norm_num) ?_
+    intro k
+    fin_cases k
+    · rw [negThreeQuart_evals_pin.1,
+        show (-3/4 : ℝ) = -(3/4) from by norm_num, abs_neg,
+        abs_of_nonneg (show (0:ℝ) ≤ 3/4 by norm_num)]
+      try norm_num
+    · rw [negThreeQuart_evals_pin.2,
+        show (-3/4 : ℝ) = -(3/4) from by norm_num, abs_neg,
+        abs_of_nonneg (show (0:ℝ) ≤ 3/4 by norm_num)]
+      try norm_num
+  · have h := abs_evals_le_l2OpNorm negThreeQuart_symmetric ⟨0, by simp⟩
+    rw [negThreeQuart_evals_pin.1,
+      show (-3/4 : ℝ) = -(3/4) from by norm_num, abs_neg,
+      abs_of_nonneg (show (0:ℝ) ≤ 3/4 by norm_num)] at h
+    exact h
+
+/-- **Fence (Lipschitz bound, `hA` clause):** with `hB` genuine at
+`B = 0` (the delivered `zero_psd_QA`) and `hA` genuinely violated (the
+delivered `negThreeQuart_not_psd_QA`), the bound demands `3 ≤ 3/4`. -/
+theorem rf_lipschitz_hA_fence_QA :
+    ¬ (∀ (A B : Matrix (Fin 2) (Fin 2) ℝ), (∀ x, 0 ≤ quadForm B x) →
+        ‖(A + 1)⁻¹ - (B + 1)⁻¹‖ ≤ ‖A - B‖) := by
+  intro h
+  have h1 := h negThreeQuart 0 zero_psd_QA
+  rw [negThreeQuart_add_one, quartOne_inv_eq_fourOne_QA,
+    rf_zero_add_one_inv_eq_one_QA, fourOne_sub_one_eq_threeOne,
+    threeOne_opNorm_eq_three_QA, sub_zero,
+    negThreeQuart_opNorm_eq_three_quarters_QA] at h1
+  norm_num at h1
+
+/-- **Fence (Lipschitz bound, `hB` clause):** the mirror, with `hA`
+genuine at `A = 0`: the same `3` vs `3/4` separation. -/
+theorem rf_lipschitz_hB_fence_QA :
+    ¬ (∀ (A B : Matrix (Fin 2) (Fin 2) ℝ), (∀ x, 0 ≤ quadForm A x) →
+        ‖(A + 1)⁻¹ - (B + 1)⁻¹‖ ≤ ‖A - B‖) := by
+  intro h
+  have h1 := h 0 negThreeQuart zero_psd_QA
+  rw [rf_zero_add_one_inv_eq_one_QA, negThreeQuart_add_one,
+    quartOne_inv_eq_fourOne_QA, rf_one_sub_fourOne_opNorm_eq_three_QA,
+    zero_sub, norm_neg,
+    negThreeQuart_opNorm_eq_three_quarters_QA] at h1
+  norm_num at h1
+
+/-!
+### The injectivity trio's joint drop
+
+The delivered guard pair (`-1` vs `-1 + E`, both `+1` shifts singular,
+both resolvents the junk `0`) refutes the jointly-hypothesis-free
+injectivity statement; the individually dropped determinant clauses are
+P4 truth-removable (see the section header).
+-/
+
+/-- **Fence (injectivity, `hA`+`hB` jointly dropped):** distinct matrices
+with equal (junk) resolvents — the packaged injectivity statement needs
+at least one of the two hypothesis families. -/
+theorem rf_injective_joint_fence_QA :
+    ¬ (∀ (A B : Matrix (Fin 2) (Fin 2) ℝ), A ≠ B → (A + 1)⁻¹ ≠ (B + 1)⁻¹) := by
+  intro h
+  have hx := h (-(1 : Matrix (Fin 2) (Fin 2) ℝ)) negOneShift
+    negOne_ne_negOneShift_QA
+  rw [negOne_add_one_inv_eq_zero_QA, negOneShift_add_one_inv_eq_zero_QA] at hx
+  exact hx rfl
+
+end AdversarialFences
 
 end Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent.QA

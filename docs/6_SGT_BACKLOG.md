@@ -1,7 +1,7 @@
 # SGT Backlog
 
 **Status:** Canonical backlog for the broad spectral-graph-theory program  
-**Last reviewed:** September 4, 2026
+**Last reviewed:** September 5, 2026
 
 This is the bounded, center-first backlog required by the strategy's
 center-out policy. Items are ranked by concrete reuse: each names the
@@ -73,7 +73,111 @@ characteristic-polynomial interface needed, which is why the pinned
 Mathlib's lack of one (still true, re-surveyed 2026-08-22: no
 similar-matrices-share-eigenvalues lemma anywhere under
 `Mathlib/LinearAlgebra/`) stopped being the obstruction it appeared to
-be. The irregular family's falsification surface was completed
+be. Beyond the electrical cluster, the **variational-transfer
+family's** falsification surface was completed 2026-09-04
+(`proposals/adversarial-fences-variational-transfer-family.md`, the
+fresh consumption survey's pick at 13 transitive non-QA consumers —
+the top tier's only fully pre-discipline QA): 27 hypothesis-form
+fences in `VariationalTransfer_QA.lean`'s `TransferFences` section
+over the shelf's unfenced clause surface (the transfer engine, the
+connectivity transfer, the degree sandwich's pointwise engines — the
+Cheeger-statement and mul-form sandwich clauses already fenced
+elsewhere), headline findings the quotient bracket's sign-flip on
+signed input (the docstring's own warning, first witnessed) and the
+connectivity transfer's `hnn` (connected signed support with a
+two-dimensional normalized kernel forcing `λ₂ ≤ 0`). The
+**normalized-Laplacian
+family's** falsification surface was completed 2026-09-04
+(`proposals/adversarial-fences-normalized-family.md`, the fresh
+full-repo Step-0 consumption survey's pick — this shelf carries 20
+transitive non-QA consumers, the library's most-consumed unaudited
+surface, ranked above Resolvent 16 and VariationalTransfer 13 by the
+reverse-import walk): 27 hypothesis-form fences with packaged
+isolation companions in `Normalized_QA.lean`'s `AdversarialFences`
+section, with the audit's headline pricing finding — at *symmetric
+zero-degree* fixtures the dropped-`hd` statements of the congruence
+bridge, left-multiplied congruence, commutation form, and power
+transfer are *provable* (the junk kills both sides identically), the
+genuine breaker being the negative-degree row (where `(deg)⁻¹` stays
+genuine while the square-root factors vanish); the single Fin 2
+fixture `!![-2,1;1,0]]` kills fifteen clauses including the transfer
+trio at genuine eigen-hypotheses and the eigenbasis instantiations
+without eigenvalue pins. The **heat family's** falsification surface was completed 2026-09-05
+(`proposals/adversarial-fences-heat-family.md`, this run's own fresh
+consumption survey confirming Heat as the library's most-consumed
+unaudited shelf at 8 transitive non-QA consumers, ahead of RandomWalk
+5, Stationary 4, IrreducibleStationary 3, Directed 3): 30
+hypothesis-form fences in `Heat_QA.lean`'s `HeatFences` section at
+four new fixtures (the negative edge `!![0,-2;-2,0]]` with Laplacian
+eigenvalue `-4` — dissipation, DC-limit, and both variance-decay `hnn`
+mechanisms; the zero-degree signed `!![-2,2;2,0]]` — six normalized/
+walk `hd` kills where the junk congruence collapses but `√D·1`
+survives; the signed 2-regular `!![3,-1;-1,3]]` — the normalized
+below-gap and walk-variance twins; the asymmetric rank-one
+`!![0,2;1,0]]` — the mean-preservation `hA` kill) plus the engine-level
+`hM`/`hc`/`hμ`/`ht`/`hconn` fences at K₂, the nilpotent, the identity,
+and the delivered disconnected fixture; one priced deferral (the
+walk-twin variance `ht`, needing a four-point normalized secondEval
+pin) and the recorded non-fenceable classes (signature-entangled
+eigenbasis displays, the P4 truth-removable `HasDerivAt` pair, the
+`hcard` display class). The **Perron–Frobenius family's**
+falsification surface was completed 2026-09-05
+(`proposals/adversarial-fences-perron-frobenius-family.md`, the prior
+handoff's named top target, confirmed by a fresh reverse-import walk at
+7 transitive non-QA consumers — the directed axis' axiom shelf, feeding
+`IrreducibleStationary`, `PrimitiveConvergence`, `PageRank`,
+`DirectedMixing`, `Mixing`, `Oversmoothing`, and the
+`EmpiricalStationary` capstone): three tagged axiom-independent
+hypothesis-form fences closing the admitted axiom's full three-clause
+hypothesis surface in `PerronFrobenius_QA.lean`'s `AdversarialFences`
+section — `hnn` at the negative-diagonal irreducible `!![-1,2;2,-1]]`
+(where the eigen conjuncts stay satisfiable in isolation at `r = 1`,
+so the kill route is genuinely the domination clause `3 ≤ 1`),
+`hirr` at the reducible nilpotent edge (killed through the eigen
+clause alone), and `hex` at the one-vertex zero matrix (the module
+documentation's own named corner, now proved rather than warned) —
+plus the `IsIrreducible` positive-arcs definitional witness
+(negativity creates no arcs); the repository's `-- @refutes` tag count
+rose 9 → 12, all mechanically independence-checked. The
+**resolvent family's** falsification
+surface was completed 2026-09-05
+(`proposals/adversarial-fences-resolvent-family.md`, the prior
+handoff's named top survey target, confirmed by a fresh reverse-import
+walk at 16 transitive non-QA consumers — the library's
+most-consumed unaudited shelf, feeding the Weyl/Duhamel/ProjectionGap
+chain, Fiedler, Poincaré, PolyFilter, Sparsification, MasterBound, and
+four Derived capstones): 12 hypothesis-form fences in
+`Resolvent_QA.lean`'s `AdversarialFences` section, reconciling the
+pre-discipline QA's five free-form witnesses into the fence
+discipline, headline findings the `Fin 0` corner as the *only*
+`hc` failure corner of both upper norm bridges, the one-sided
+singular-shift separation of the resolvent identity's determinant
+clauses, and the `4×` Lipschitz PSD separation; the shelf's
+individually dropped injectivity determinant clauses are recorded P4
+truth-removable. The **band-projector family's**
+falsification surface was completed 2026-09-04
+(`proposals/adversarial-fences-band-projector-family.md`, the Step-0
+consumption survey's pick — this neighborhood feeds the set-form
+Davis–Kahan bridge): 29 hypothesis-form fences in `Band_QA.lean`'s
+`BandFences` + `ClusterProjector_QA.lean`'s `ClusterFences`, headline
+at the negated junk band `B(4,0] = −1` and the band agreement's
+docstring corner, with the shared-mode theorem's `hab`/`hcd` recorded
+non-fenceable by the trivial-fixed-space mechanism. The **Davis–Kahan
+core perturbation family's** falsification surface was completed
+2026-09-04 (`proposals/adversarial-fences-davis-kahan-core-family.md`,
+the fresh Step-0 consumption survey's pick — the retirement chain's four
+shelves are the library's four most-consumed unaudited surfaces at
+4/6/6/7 non-QA consumers): 20 hypothesis-form fences across
+`DavisKahan_QA`/`Weyl_QA`/`ProjectionGap_QA` — the sin-Θ bound's
+`hδ`/`hsep`, the gap-stability `hnorm`/`hγ`, the Duhamel bound's
+`hab`/`hcl`, the rank pin's no-tie clause (zero-matrix tie, `rank 2 ≠
+1`), the trivial endpoint's four projector-structure clauses, the
+sorted-step clause, and eight of the ten equal-rank-identity clauses
+(the core's `hP`/`hQ` deferred with the zero-residual analysis
+recorded) — with the Weyl additive pair's `hcard` recorded
+non-fenceable by a distinct proof-term-in-display mechanism. The
+irregular
+family's falsification surface was completed
 2026-09-04 (`proposals/adversarial-fences-irregular-cheeger-family.md`):
 19 previously unfenced load-bearing clauses of the irregular Cheeger
 program closed with hypothesis-form negative witnesses plus isolation
@@ -122,6 +226,19 @@ dropped-`hnonnegA` statement reads `1 ≤ −1`; three P4 removable
 findings recorded (the identity's `hnneg`/`hconn` truth-removable
 given `hA`+`hf`; Thomson's `hconn` implied by the unit-flow
 hypothesis; Rayleigh's `hnonnegB` by entrywise domination); the
+*kernel-bridge* family's falsification surface was completed the
+same day (`proposals/adversarial-fences-kernel-bridge-family.md`):
+twelve previously unfenced load-bearing clauses of the kernel-equality
+bridge and the weighted center characterization chain closed with
+fences plus companions (`KernelBridge_QA.lean`'s `BridgeFences`
+section, QA-only) — the whole family's `hnonneg` surface (both
+directions of the center iff, both orientations of the bridge, both
+witnesses of the dimension statement, the span/exists-const forms at
+a connected-support signed fixture where the connectivity
+co-hypothesis stays genuine, and the pos-weight engine at the
+mechanism level) plus the family's only `supportGraph`-free
+statement's `hA` at an asymmetric nonnegative sink star where only
+symmetry fails (`1 ≠ 2` with every other hypothesis genuine); the
 *Foster* family's falsification surface was completed the same day
 (`proposals/adversarial-fences-foster-family.md`): nine previously
 unfenced load-bearing clauses of the spanning-tree-counting program
@@ -138,7 +255,24 @@ demand unsolvable — the kernel-generator coordinate map injective on
 `Fin 4`) and `4 ≠ 2·3` at the disconnected one, and the leverage
 corollary's `hcard` division-guard junk corner `0/0` at a one-vertex
 fixture; the cluster's two remaining QA families (`KernelBridge`, the
-`ResistanceMetric` consumers) are next in consumption order. The remaining open piece on this axis is the mixing-time program's
+`ResistanceMetric` consumers) are next in consumption order. The
+*sparsification-core* family's falsification surface — the cluster's
+last, the resistance-metric consumer set the whole cluster feeds — was
+completed the same day
+(`proposals/adversarial-fences-sparsification-core-family.md`):
+fifteen previously unfenced load-bearing clauses of the deterministic
+core closed with fences plus companions (`Sparsification_QA.lean`'s
+`CoreFences` section, QA-only) — the ordered-pair budget identity
+failing at the rank-1 signed 4-cycle with each positive pair's
+leverage pinned exactly `1/8` (Foster genuinely needing nonnegative
+weights), the projector trio and the exact deviation identity failing
+at a nonpositive-spectrum fixture through the single mechanism that a
+negative eigenvalue's junk-`√` zeroes every edge vector, and the
+sampling layer's `hq` clauses at `K₂` — with the structural finding
+that the same junk-`√` zero edge vector is an *automatic sign guard*
+on the sampled Laplacian's PSD theorem (the dropped-`hnn` statement is
+provable), completing the electrical cluster's falsification surface
+in full. The remaining open piece on this axis is the mixing-time program's
 Step 3 — the geometric decay bound. **Step 2 (the ℓ²-mixing proxy) was
 delivered 2026-08-22** in the new `GraphTheory.Mixing` (zero new
 axioms): the scoping gate decided and recorded first (ℓ² alone, with

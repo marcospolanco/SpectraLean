@@ -1382,4 +1382,1257 @@ theorem heat_variance_zero_time_QA (f : Fin 2 → ℝ) :
           - (∑ j, f j) / (Fintype.card (Fin 2) : ℝ)) ^ 2 := by
   rw [heatKernel_zero, Matrix.one_mulVec]
 
+/-!
+## Adversarial fences over the heat family (2026-09-05)
+
+`proposals/adversarial-fences-heat-family.md`: the audit method's
+eighteenth application — 30 hypothesis-form fences over the shelf's
+unfenced clause surface (the exponential engines' `hM` clauses, the
+rank-one collapse's `hc`/`hM`, the decay factors' `ht`/`hij`/`hnonneg`,
+the DC limit's `hconn`/`hnonneg`, both variance-decay twins'
+`hnn`/`ht`, the normalized/walk conservation-and-conjugation `hd`
+clauses, and the eigenvalue-plumbing `hnn`/`hμ`), at four new fixtures
+(`hfNegAdj`, `hfZeroAdj`, `hfRegAdj`, `hfAsymAdj`, `hfNz`) plus the
+delivered `edgeAdj`/`disAdj` pins. Every declaration is a fence (the
+dropped-hypothesis statement refuted at a fixture where every kept
+hypothesis is genuine) or its fixture-pin/isolation companion; nothing
+here touches an axiom.
+-/
+
+section HeatFences
+
+/-! ### Numeric helpers -/
+
+/-- The `9/4 ≤ e` pin: two applications of `add_one_le_exp` at `1/2`
+composed through `exp_add`. Every exponential fence constant below
+(`e ≠ 1`, `e ≠ 2`, `e⁴ > 21`) reads from this one bound. -/
+theorem hf_exp_one_ge : (9 / 4 : ℝ) ≤ Real.exp 1 := by
+  have h1 : (1 / 2 : ℝ) + 1 ≤ Real.exp (1 / 2) := Real.add_one_le_exp _
+  have h1' : (3 / 2 : ℝ) ≤ Real.exp (1 / 2) := by
+    have h := Real.add_one_le_exp (1 / 2 : ℝ)
+    norm_num at h
+    exact h
+  have h2 : Real.exp (1 / 2) * Real.exp (1 / 2) = Real.exp 1 := by
+    rw [← Real.exp_add]; ring_nf
+  have h3 : ((3 / 2 : ℝ) * (3 / 2 : ℝ)) ≤ Real.exp (1 / 2) * Real.exp (1 / 2) :=
+    mul_le_mul h1' h1' (by norm_num) (Real.exp_nonneg _)
+  have h4 : (3 / 2 : ℝ) * (3 / 2 : ℝ) = 9 / 4 := by norm_num
+  rw [h4, h2] at h3
+  exact h3
+
+theorem hf_exp_one_ne_two : Real.exp 1 ≠ 2 := by
+  intro h
+  have := hf_exp_one_ge
+  rw [h] at this
+  norm_num at this
+
+theorem hf_exp_one_ne_one : Real.exp 1 ≠ 1 := by
+  intro h
+  have := hf_exp_one_ge
+  rw [h] at this
+  norm_num at this
+
+theorem hf_exp_two_gt_one : (1 : ℝ) < Real.exp 2 :=
+  Real.one_lt_exp_iff.2 (by norm_num)
+
+theorem hf_exp_four_gt_one : (1 : ℝ) < Real.exp 4 :=
+  Real.one_lt_exp_iff.2 (by norm_num)
+
+/-- The `e⁴ > 21` fence constant: `(9/4)⁴ = 6561/256 > 21`. -/
+theorem hf_exp_four_gt_21 : (21 : ℝ) < Real.exp 4 := by
+  have h1 : ((9 / 4 : ℝ)) ^ 4 ≤ (Real.exp 1) ^ 4 :=
+    pow_le_pow_left₀ (by norm_num) hf_exp_one_ge 4
+  have h2 : ((9 / 4 : ℝ)) ^ 4 = 6561 / 256 := by norm_num
+  rw [h2] at h1
+  have h4 : (Real.exp 1) ^ 4 = Real.exp 4 := by
+    have := Real.exp_nat_mul 1 4
+    rw [Nat.cast_ofNat] at this
+    rw [← this]
+    congr 1
+    norm_num
+  rw [h4] at h1
+  have h3 : (21 : ℝ) < 6561 / 256 := by norm_num
+  linarith
+
+theorem hf_exp_neg_one_ne_one : Real.exp (-1 : ℝ) ≠ 1 := by
+  intro h
+  have hlt : Real.exp (-1 : ℝ) < Real.exp (0 : ℝ) := Real.exp_lt_exp.2 (by norm_num)
+  rw [Real.exp_zero, h] at hlt
+  norm_num at hlt
+
+theorem hf_exp_neg_three_ne_one : Real.exp (-3 : ℝ) ≠ 1 := by
+  intro h
+  have hlt : Real.exp (-3 : ℝ) < Real.exp (0 : ℝ) := Real.exp_lt_exp.2 (by norm_num)
+  rw [Real.exp_zero, h] at hlt
+  norm_num at hlt
+
+theorem hf_sqrt_two_ne_zero : Real.sqrt 2 ≠ 0 := by
+  intro h
+  have h2 : Real.sqrt 2 * Real.sqrt 2 = 2 :=
+    Real.mul_self_sqrt (by norm_num : (0 : ℝ) ≤ 2)
+  rw [h, mul_zero] at h2
+  norm_num at h2
+
+/-! ### α — the general exponential engines -/
+
+/-- The scalar-matrix exponential at the identity: `exp 1 = e • 1`
+through the delivered scalar-collapse engine. -/
+theorem hf_exp_one_matrix : NormedSpace.exp ℝ (1 : Matrix (Fin 2) (Fin 2) ℝ)
+    = Real.exp 1 • 1 := by
+  have h := matrix_exp_smul_one (V := Fin 2) (1 : ℝ)
+  rw [one_smul] at h
+  exact h
+
+/-- The scalar-matrix exponential at the negated identity. -/
+theorem hf_exp_neg_one_matrix : NormedSpace.exp ℝ (-(1 : Matrix (Fin 2) (Fin 2) ℝ))
+    = Real.exp (-1 : ℝ) • 1 := by
+  have hneg : -(1 : Matrix (Fin 2) (Fin 2) ℝ) = (-1 : ℝ) • 1 :=
+    (neg_one_smul ℝ (1 : Matrix (Fin 2) (Fin 2) ℝ)).symm
+  rw [hneg]
+  exact matrix_exp_smul_one (V := Fin 2) (-1)
+
+/-- **Fence (`hM` of `exp_eq_one_add_of_mul_self_eq_zero`)**: at the
+identity matrix the dropped statement `exp 1 = 1 + 1` is refuted
+through the scalar-matrix exponential and `9/4 ≤ e`. First negative
+witness for the clause anywhere in the repository. -/
+theorem hf_sqzero_M_fence :
+    ¬ (NormedSpace.exp ℝ (1 : Matrix (Fin 2) (Fin 2) ℝ)
+      = 1 + (1 : Matrix (Fin 2) (Fin 2) ℝ)) := by
+  intro h
+  rw [hf_exp_one_matrix] at h
+  have h00 := congrFun (congrFun h 0) 0
+  simp at h00
+  exact hf_exp_one_ne_two (by linarith)
+
+/-- **Fence (`hM` of `exp_neg_smul_eq_one_add_of_mul_self_eq_zero`)**:
+at the identity matrix and `t = 1` the dropped statement's two sides
+are `e⁻¹ • 1` and `1 − 1 = 0`. -/
+theorem hf_neg_smul_M_fence :
+    ¬ (NormedSpace.exp ℝ (-(1 • (1 : Matrix (Fin 2) (Fin 2) ℝ)))
+      = 1 + -(1 • (1 : Matrix (Fin 2) (Fin 2) ℝ))) := by
+  intro h
+  have h00 := congrFun (congrFun h 0) 0
+  simp only [one_smul] at h00
+  rw [hf_exp_neg_one_matrix] at h00
+  norm_num at h00
+
+/-- **Fence (`hM` of `pow_mulVec_smul`)**: at the zero matrix,
+`v = ![1, 0]`, `μ = 1`, `n = 1`, the dropped statement reads
+`0 = ![1, 0]`. -/
+theorem hf_pow_mulVec_fence :
+    ¬ ((0 : Matrix (Fin 2) (Fin 2) ℝ) ^ 1 *ᵥ (![1, 0] : Fin 2 → ℝ)
+      = (1 : ℝ) ^ 1 • (![1, 0] : Fin 2 → ℝ)) := by
+  intro h
+  have h0 := congrFun h 0
+  simp at h0
+
+/-- **Fence (`hM` of `exp_mulVec_eq_smul_of_mulVec_eq_smul`)**: at the
+zero matrix, `v = ![1, 0]`, `μ = 1`, the eigenmode engine's dropped
+statement reads `v = e • v`. -/
+theorem hf_engine_M_fence :
+    ¬ ((NormedSpace.exp ℝ (0 : Matrix (Fin 2) (Fin 2) ℝ)) *ᵥ (![1, 0] : Fin 2 → ℝ)
+      = Real.exp 1 • (![1, 0] : Fin 2 → ℝ)) := by
+  intro h
+  rw [NormedSpace.exp_zero, Matrix.one_mulVec] at h
+  have h0 := congrFun h 0
+  simp only [Pi.smul_apply, smul_eq_mul, Matrix.cons_val_zero, mul_one] at h0
+  exact hf_exp_one_ne_one h0.symm
+
+/-- **Fence (`hM` of `exp_mulVec_eq_of_mulVec_eq_zero`)**: at the
+identity matrix and `v = ![1, 0]` (a *non*-kernel vector: `1 *ᵥ v =
+v ≠ 0`), the dropped statement reads `e • v = v`. -/
+theorem hf_kernel_M_fence :
+    ¬ ((NormedSpace.exp ℝ (1 : Matrix (Fin 2) (Fin 2) ℝ)) *ᵥ (![1, 0] : Fin 2 → ℝ)
+      = (![1, 0] : Fin 2 → ℝ)) := by
+  intro h
+  rw [hf_exp_one_matrix, Matrix.smul_mulVec_assoc, Matrix.one_mulVec] at h
+  have h0 := congrFun h 0
+  simp only [Pi.smul_apply, smul_eq_mul, Matrix.cons_val_zero, mul_one] at h0
+  exact hf_exp_one_ne_one h0
+
+/-- **Fence (`hμ` of `tendsto_exp_neg_mul_atTop`)**: at `μ = 0` the
+mode factor is the constant `1` and does not tend to `0`. -/
+theorem hf_tendsto_mu_fence :
+    ¬ Filter.Tendsto (fun t : ℝ => Real.exp (-(t * 0))) Filter.atTop (nhds 0) := by
+  have hconst : (fun t : ℝ => Real.exp (-(t * 0))) = fun _ : ℝ => (1 : ℝ) := by
+    funext t; simp
+  rw [hconst]
+  intro h
+  have h1 := tendsto_nhds_unique h tendsto_const_nhds
+  norm_num at h1
+
+/-! ### β — the nilpotent fixture and the rank-one-idempotent collapse -/
+
+/-- The nilpotent fixture: `hfNz² = 0` with `hfNz ≠ 0` — the square-zero
+collapse applies genuinely while the rank-one clause `M * M = 1 • M`
+genuinely fails (`0 ≠ hfNz`). -/
+def hfNz : Matrix (Fin 2) (Fin 2) ℝ := !![0, 1; 0, 0]
+
+theorem hfNz_mul_hfNz : hfNz * hfNz = 0 := by
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [hfNz]
+
+theorem hfNz_ne_zero : hfNz ≠ 0 := by
+  intro h
+  have h01 := congrFun (congrFun h 0) 1
+  simp [hfNz] at h01
+
+theorem hfNz_exp_eq : NormedSpace.exp ℝ hfNz = 1 + hfNz :=
+  exp_eq_one_add_of_mul_self_eq_zero _ hfNz_mul_hfNz
+
+/-- **Fence (`hc` of `exp_eq_one_add_of_mul_self_eq_smul`)**: at `c = 0`
+with the hypothesis `hfNz² = 0 • hfNz` genuinely satisfiable, the
+dropped statement's coefficient `(e⁰ − 1)/0` is *junk zero*, collapsing
+the claim to `exp hfNz = 1` — refuted by the square-zero collapse at
+the nonzero fixture. The junk-division corner class. -/
+theorem hf_collapse_c_fence :
+    ¬ (NormedSpace.exp ℝ hfNz = 1 + ((Real.exp 0 - 1) / 0) • hfNz) := by
+  intro h
+  rw [hfNz_exp_eq, Real.exp_zero, sub_self, div_zero, zero_smul, add_zero] at h
+  have h01 := congrFun (congrFun h 0) 1
+  simp [hfNz] at h01
+
+/-- **Fence (`hM` of `exp_eq_one_add_of_mul_self_eq_smul`)**: at
+`c = 1` (genuine) with `hfNz² = 0 ≠ 1 • hfNz` genuinely failing, the
+dropped statement reads `1 + hfNz = 1 + (e − 1) • hfNz` — i.e. `e = 2`
+entrywise. -/
+theorem hf_collapse_M_fence :
+    ¬ (NormedSpace.exp ℝ hfNz = 1 + ((Real.exp 1 - 1) / 1) • hfNz) := by
+  intro h
+  rw [hfNz_exp_eq, div_one] at h
+  have h01 := congrFun (congrFun h 0) 1
+  simp only [Matrix.add_apply, Matrix.one_apply, hfNz, Pi.smul_apply, smul_eq_mul,
+    Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_zero, zero_add] at h01
+  norm_num at h01
+  exact hf_exp_one_ne_two (by linarith)
+
+/-! ### γ — K₂ decay-factor fences -/
+
+/-- **Fence (`ht` of `heatKernel_decayFactor_antitone`)**: at `t = -1`
+(beyond the semigroup's forward window) the monotonicity claim flips to
+`e² ≤ e⁰ = 1`. -/
+theorem hf_antitone_t_fence :
+    ¬ (Real.exp (-((-1 : ℝ) * evals (laplacian_symmetric edgeAdj edgeAdj_isSymm)
+          ⟨1, by simp⟩))
+      ≤ Real.exp (-((-1 : ℝ) * evals (laplacian_symmetric edgeAdj edgeAdj_isSymm)
+          ⟨0, by simp⟩))) := by
+  rw [(edgeLaplacian_evals_QA).2, (edgeLaplacian_evals_QA).1]
+  rw [show (-1 : ℝ) * 2 = -2 by norm_num, show (-1 : ℝ) * 0 = 0 by norm_num,
+    neg_neg, neg_zero, Real.exp_zero]
+  exact not_le.2 hf_exp_two_gt_one
+
+/-- **Fence (`hij` of `heatKernel_decayFactor_antitone`)**: with the
+index order genuinely violated (`⟨1⟩ ≤ ⟨0⟩` false), the claim reads
+`e⁰ = 1 ≤ e⁻²`. -/
+theorem hf_antitone_ij_fence :
+    ¬ (Real.exp (-((1 : ℝ) * evals (laplacian_symmetric edgeAdj edgeAdj_isSymm)
+          ⟨0, by simp⟩))
+      ≤ Real.exp (-((1 : ℝ) * evals (laplacian_symmetric edgeAdj edgeAdj_isSymm)
+          ⟨1, by simp⟩))) := by
+  rw [(edgeLaplacian_evals_QA).1, (edgeLaplacian_evals_QA).2]
+  rw [show (1 : ℝ) * 0 = 0 by norm_num, show (1 : ℝ) * 2 = 2 by norm_num,
+    neg_zero, Real.exp_zero]
+  have hlt : Real.exp (-(2 : ℝ)) < 1 := by
+    have := Real.exp_lt_exp.2 (by norm_num : (-(2 : ℝ)) < 0)
+    rwa [Real.exp_zero] at this
+  exact not_le.2 hlt
+
+/-- **Fence (`ht` of `heatKernel_decayFactor_le_one`)**: at `t = -1` the
+top mode's factor is `e² > 1` — dissipation genuinely needs forward
+time. -/
+theorem hf_le_one_t_fence :
+    ¬ (Real.exp (-((-1 : ℝ) * evals (laplacian_symmetric edgeAdj edgeAdj_isSymm)
+          ⟨1, by simp⟩)) ≤ 1) := by
+  rw [(edgeLaplacian_evals_QA).2, show (-1 : ℝ) * 2 = -2 by norm_num, neg_neg]
+  exact not_le.2 hf_exp_two_gt_one
+
+/-! ### δ — the negative-edge fixture `hfNegAdj` -/
+
+/-- The negative edge: symmetric, degrees `(-2, -2)`, Laplacian
+`!![-2, 2; 2, -2]]` with spectrum `[-4, 0]` — the signed fixture
+carrying the dissipation-failure witnesses. -/
+def hfNegAdj : Matrix (Fin 2) (Fin 2) ℝ := !![0, -2; -2, 0]
+
+theorem hfNegAdj_isSymm : hfNegAdj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [hfNegAdj]
+
+/-- Isolation: the nonnegativity clause genuinely fails at the
+off-diagonal `-2`. -/
+theorem hfNegAdj_not_nonneg : ¬ ∀ i j, 0 ≤ hfNegAdj i j := by
+  intro h
+  have h01 := h 0 1
+  simp only [hfNegAdj, Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_zero] at h01
+  norm_num at h01
+
+theorem hfNegAdj_deg (i : Fin 2) : deg hfNegAdj i = -2 := by
+  fin_cases i <;> simp [deg, hfNegAdj, Fin.sum_univ_two]
+
+theorem hfNegAdj_laplacian : laplacian hfNegAdj = !![-2, 2; 2, -2] := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [laplacian, degreeMatrix, deg, hfNegAdj, Fin.sum_univ_two]
+
+theorem hfNegAdj_laplacian_trace : (laplacian hfNegAdj).trace = -4 := by
+  simp [Matrix.trace, hfNegAdj_laplacian, Fin.sum_univ_two]; norm_num
+
+theorem hfNegAdj_laplacian_det : (laplacian hfNegAdj).det = 0 := by
+  rw [hfNegAdj_laplacian, Matrix.det_fin_two]; norm_num
+
+theorem hfNegAdj_card : 2 ≤ Fintype.card (Fin 2) := le_refl 2
+
+/-- Length-two list identification (local twin of the delivered
+`list_two_eq`). -/
+private theorem hf_list_two_eq {l : List ℝ} (h : l.length = 2) :
+    l = [l.get ⟨0, by omega⟩, l.get ⟨1, by omega⟩] :=
+  List.ext_get h (by
+    intro n h₁ h₂
+    have hn2 : n < 2 := by omega
+    interval_cases n <;> simp)
+
+/-- Two-point spectrum pinning, negative-sum variant: a sorted
+length-two list with sum `-4` and product `0` is `[-4, 0]`. -/
+private theorem hf_two_point_pin_neg {l : List ℝ} (h2 : l.length = 2)
+    (hs : l.Sorted (fun a b => a ≤ b)) (hsum : l.sum = -4)
+    (hprod : l.prod = 0) :
+    l.get ⟨0, by omega⟩ = -4 ∧ l.get ⟨1, by omega⟩ = 0 := by
+  obtain ⟨g₀, g₁, hg⟩ : ∃ a b : ℝ, l = [a, b] :=
+    ⟨l.get ⟨0, by omega⟩, l.get ⟨1, by omega⟩, hf_list_two_eq h2⟩
+  subst hg
+  have hmono : g₀ ≤ g₁ := hs.rel_get_of_lt (show (0 : Fin 2) < 1 by decide)
+  simp only [List.sum_cons, List.sum_nil, add_zero, List.prod_cons,
+    List.prod_nil, mul_one] at hsum hprod
+  rcases eq_zero_or_eq_zero_of_mul_eq_zero hprod with h0 | h1
+  · exfalso
+    subst h0
+    linarith
+  · subst h1
+    refine ⟨?_, ?_⟩
+    · have h0 : g₀ = -4 := by linarith
+      simpa using h0
+    · simp
+
+/-- **The negative-edge Laplacian spectrum is `[-4, 0]`** — the
+two-point pattern (sortedness + trace `-4` + determinant `0`) at the
+signed fixture. Four fences below read their constants from here. -/
+theorem hfNegAdj_laplacian_evals_QA :
+    evals (laplacian_symmetric hfNegAdj hfNegAdj_isSymm) ⟨0, by simp⟩ = -4 ∧
+      evals (laplacian_symmetric hfNegAdj hfNegAdj_isSymm) ⟨1, by simp⟩ = 0 := by
+  have hlen : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm (laplacian_symmetric hfNegAdj
+          hfNegAdj_isSymm)).eigenvalues))).length = 2 := by
+    rw [Multiset.length_sort, Multiset.card_map]; simp
+  have hsorted : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm (laplacian_symmetric hfNegAdj
+          hfNegAdj_isSymm)).eigenvalues))).Sorted (fun a b => a ≤ b) :=
+    Multiset.sort_sorted _ _
+  have hsum : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm (laplacian_symmetric hfNegAdj
+          hfNegAdj_isSymm)).eigenvalues))).sum = -4 := by
+    have htr : ∑ i : Fin 2, eigvalOf (laplacian hfNegAdj)
+        (laplacian_symmetric hfNegAdj hfNegAdj_isSymm) i = -4 := by
+      rw [eigvalOf_sum_eq_trace, hfNegAdj_laplacian_trace]
+    rw [← Multiset.sum_coe, Multiset.sort_eq, ← Finset.sum_eq_multiset_sum]
+    exact htr
+  have hprod : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm (laplacian_symmetric hfNegAdj
+          hfNegAdj_isSymm)).eigenvalues))).prod = 0 := by
+    have hd : ∏ i : Fin 2, ((isHermitian_of_isSymm
+        (laplacian_symmetric hfNegAdj hfNegAdj_isSymm)).eigenvalues i) = 0 := by
+      have hd0 := (isHermitian_of_isSymm
+        (laplacian_symmetric hfNegAdj hfNegAdj_isSymm)).det_eq_prod_eigenvalues
+      rw [hfNegAdj_laplacian_det] at hd0
+      simpa using hd0.symm
+    rw [← Multiset.prod_coe, Multiset.sort_eq, ← Finset.prod_eq_multiset_prod]
+    exact hd
+  exact hf_two_point_pin_neg hlen hsorted hsum hprod
+
+theorem hfNegAdj_secondEval_eq_zero :
+    secondEval (laplacian hfNegAdj) (laplacian_symmetric hfNegAdj hfNegAdj_isSymm)
+      hfNegAdj_card = 0 :=
+  hfNegAdj_laplacian_evals_QA.2
+
+theorem hfNegAdj_laplacian_mulVec_mode :
+    laplacian hfNegAdj *ᵥ (![1, -1] : Fin 2 → ℝ)
+      = (-4 : ℝ) • (![1, -1] : Fin 2 → ℝ) := by
+  rw [hfNegAdj_laplacian]
+  funext i
+  fin_cases i <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, smul_eq_mul] <;>
+    norm_num
+
+theorem hfNegAdj_heatKernel_mode (t : ℝ) :
+    heatKernel hfNegAdj t *ᵥ (![1, -1] : Fin 2 → ℝ)
+      = Real.exp (4 * t) • (![1, -1] : Fin 2 → ℝ) := by
+  rw [heatKernel]
+  refine exp_mulVec_eq_smul_of_mulVec_eq_smul _ _ _ ?_
+  rw [Matrix.neg_mulVec, Matrix.smul_mulVec_assoc, hfNegAdj_laplacian_mulVec_mode,
+    smul_smul, ← neg_smul]
+  congr 2
+  ring
+
+/-- **Fence (`hnonneg` of `heatKernel_decayFactor_le_one`)**: on the
+signed fixture the bottom mode's "decay" factor is `e⁴ > 1` —
+dissipation fails on signed input. First negative witness for the
+clause. -/
+theorem hf_le_one_nn_fence :
+    ¬ (Real.exp (-((1 : ℝ) * evals (laplacian_symmetric hfNegAdj hfNegAdj_isSymm)
+          ⟨0, by simp⟩)) ≤ 1) := by
+  rw [hfNegAdj_laplacian_evals_QA.1, show (1 : ℝ) * (-4) = -4 by norm_num, neg_neg]
+  exact not_le.2 hf_exp_four_gt_one
+
+/-- **Fence (`hnonneg` of `heatKernel_mulVec_tendsto_atTop`)**: the
+alternating mode's flow is `e^{4t} • ![1, -1]` — coordinate `0` is
+bounded below by `1`, so the flow does not tend to the claimed mean
+`0`. The DC limit genuinely needs nonnegative input: on signed input
+modes grow instead of dissipating. -/
+theorem hf_dc_nn_fence :
+    ¬ Filter.Tendsto (fun t : ℝ => heatKernel hfNegAdj t *ᵥ (![1, -1] : Fin 2 → ℝ))
+      Filter.atTop
+      (nhds (((∑ j, (![1, -1] : Fin 2 → ℝ) j) / (Fintype.card (Fin 2) : ℝ))
+        • (onesVec : Fin 2 → ℝ))) := by
+  have hmean : ((∑ j, (![1, -1] : Fin 2 → ℝ) j) / (Fintype.card (Fin 2) : ℝ))
+      • (onesVec : Fin 2 → ℝ) = 0 := by
+    have hsum : (∑ j, (![1, -1] : Fin 2 → ℝ) j) = 0 := by
+      simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.head_cons]
+      norm_num
+    rw [hsum, zero_div, zero_smul]
+  rw [hmean]
+  intro h
+  have h0 : Filter.Tendsto
+      (fun t : ℝ => (heatKernel hfNegAdj t *ᵥ (![1, -1] : Fin 2 → ℝ)) 0)
+      Filter.atTop (nhds 0) := by
+    have hpi := (tendsto_pi_nhds.1 h) 0
+    simpa using hpi
+  have hmode0 : ∀ t : ℝ, (heatKernel hfNegAdj t *ᵥ (![1, -1] : Fin 2 → ℝ)) 0
+      = Real.exp (4 * t) := by
+    intro t
+    rw [hfNegAdj_heatKernel_mode t]
+    simp
+  rw [funext hmode0] at h0
+  have hmem : (Set.Iio (1 / 2 : ℝ)) ∈ nhds (0 : ℝ) :=
+    isOpen_Iio.mem_nhds (by norm_num)
+  have h1 := h0 hmem
+  obtain ⟨b, hb⟩ := mem_atTop_sets.1 h1
+  have hmax : (0 : ℝ) ≤ max b 0 := le_max_right b 0
+  have hge : (1 : ℝ) ≤ Real.exp (4 * max b 0) := by
+    have h4 : Real.exp (0 : ℝ) ≤ Real.exp (4 * max b 0) :=
+      Real.exp_le_exp.2 (mul_nonneg (by norm_num) hmax)
+    rwa [Real.exp_zero] at h4
+  have hlt : Real.exp (4 * max b 0) < 1 / 2 := hb (max b 0) (le_max_left b 0)
+  linarith
+
+/-- **Fence (`hnn` of `heatKernel_variance_decay`)**: at the signed
+fixture, `t = 1`, the Fiedler input `![1, -1]` (mean `0`) has output
+variance `2e⁸` against the rate-`e⁰ = 1` bound on input variance `2` —
+the variance bound genuinely needs PSD. -/
+theorem hf_var_nn_fence :
+    ¬ (∑ i : Fin 2, ((heatKernel hfNegAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ)) i
+        - (∑ j, (![1, -1] : Fin 2 → ℝ) j) / (Fintype.card (Fin 2) : ℝ)) ^ 2
+      ≤ Real.exp (-(2 * (1 : ℝ) * secondEval (laplacian hfNegAdj)
+          (laplacian_symmetric hfNegAdj hfNegAdj_isSymm) hfNegAdj_card))
+        * ∑ i : Fin 2, ((![1, -1] : Fin 2 → ℝ) i
+          - (∑ j, (![1, -1] : Fin 2 → ℝ) j) / (Fintype.card (Fin 2) : ℝ)) ^ 2) := by
+  have hmean : (∑ j, (![1, -1] : Fin 2 → ℝ) j) / (Fintype.card (Fin 2) : ℝ) = 0 := by
+    have hsum : (∑ j, (![1, -1] : Fin 2 → ℝ) j) = 0 := by
+      simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.head_cons]
+      norm_num
+    rw [hsum, zero_div]
+  have hvar : ∑ i : Fin 2, (![1, -1] : Fin 2 → ℝ) i ^ 2 = 2 := by
+    simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      Fin.sum_univ_two]
+    norm_num
+  rw [hfNegAdj_secondEval_eq_zero, hmean]
+  simp only [sub_zero]
+  rw [hfNegAdj_heatKernel_mode 1]
+  have hout : ∑ i : Fin 2, ((Real.exp (4 * (1 : ℝ)) • (![1, -1] : Fin 2 → ℝ)) i) ^ 2
+      = 2 * (Real.exp 4) ^ 2 := by
+    have e0 : (((Real.exp (4 * (1 : ℝ)) • (![1, -1] : Fin 2 → ℝ)) : Fin 2 → ℝ) 0) ^ 2
+        = (Real.exp 4) ^ 2 := by
+      simp only [Pi.smul_apply, smul_eq_mul, Matrix.cons_val_zero, mul_one]
+    have e1 : (((Real.exp (4 * (1 : ℝ)) • (![1, -1] : Fin 2 → ℝ)) : Fin 2 → ℝ) 1) ^ 2
+        = (Real.exp 4) ^ 2 := by
+      simp only [Pi.smul_apply, smul_eq_mul, Matrix.cons_val_one, Matrix.head_cons]
+      ring_nf
+    rw [Fin.sum_univ_two, e0, e1]
+    ring
+  rw [hout, hvar, show 2 * (1 : ℝ) * 0 = 0 by norm_num, neg_zero, Real.exp_zero, one_mul]
+  intro hle
+  have hgt : (1 : ℝ) < (Real.exp 4) ^ 2 := by
+    nlinarith [hf_exp_four_gt_one, Real.exp_nonneg 4]
+  linarith
+
+/-- **Fence (`hnn` of `secondEval_le_eigvalOf_of_ne_zero`)**: at the
+index carrying the eigenvalue `-4` (from `evals_mem_eigvalOf` at the
+pinned bottom entry), the claim reads `λ₂ = 0 ≤ -4`. Below-gap
+eigenvalues are only kernel eigenvalues on PSD input. -/
+theorem hf_secondEval_nn_fence :
+    ∃ i : Fin 2, eigvalOf (laplacian hfNegAdj)
+        (laplacian_symmetric hfNegAdj hfNegAdj_isSymm) i ≠ 0 ∧
+      ¬ (secondEval (laplacian hfNegAdj)
+          (laplacian_symmetric hfNegAdj hfNegAdj_isSymm) hfNegAdj_card
+        ≤ eigvalOf (laplacian hfNegAdj)
+            (laplacian_symmetric hfNegAdj hfNegAdj_isSymm) i) := by
+  obtain ⟨i, hi⟩ := evals_mem_eigvalOf
+    (laplacian_symmetric hfNegAdj hfNegAdj_isSymm) ⟨0, by simp⟩
+  rw [hfNegAdj_laplacian_evals_QA.1] at hi
+  refine ⟨i, ?_, ?_⟩
+  · rw [← hi]; norm_num
+  · rw [hfNegAdj_secondEval_eq_zero, ← hi]; norm_num
+
+/-- Junk-`√` pin: at the negative degrees both diagonal entries of
+`degreeSqrt` are zero (`√(-2) = 0`), so the whole matrix vanishes. -/
+theorem hfNegAdj_degreeSqrt_eq_zero : degreeSqrt hfNegAdj = 0 := by
+  ext i j
+  simp only [degreeSqrt, Matrix.diagonal_apply, Matrix.zero_apply]
+  by_cases h : i = j
+  · rw [if_pos h, hfNegAdj_deg, Real.sqrt_eq_zero']
+    norm_num
+  · rw [if_neg h]
+
+/-- **Fence (`hd` of `sum_deg_mul_sq_eq`)**: at the negative edge the
+degree-weighted sum is `-2` while the `√D`-conjugate pairing is junk
+(`√(-2) = 0` on both coordinates). -/
+theorem hf_pi_fence :
+    ¬ (∑ i : Fin 2, deg hfNegAdj i * ((![1, 0] : Fin 2 → ℝ) i * (![1, 0] : Fin 2 → ℝ) i)
+      = Matrix.dotProduct (degreeSqrt hfNegAdj *ᵥ (![1, 0] : Fin 2 → ℝ))
+          (degreeSqrt hfNegAdj *ᵥ (![1, 0] : Fin 2 → ℝ))) := by
+  intro h
+  have hL : ∑ i : Fin 2, deg hfNegAdj i * ((![1, 0] : Fin 2 → ℝ) i * (![1, 0] : Fin 2 → ℝ) i)
+      = -2 := by
+    have e0 : deg hfNegAdj 0 * ((![1, 0] : Fin 2 → ℝ) 0 * (![1, 0] : Fin 2 → ℝ) 0) = -2 := by
+      simp only [Matrix.cons_val_zero, Matrix.head_cons]
+      rw [hfNegAdj_deg 0]
+      norm_num
+    have e1 : deg hfNegAdj 1 * ((![1, 0] : Fin 2 → ℝ) 1 * (![1, 0] : Fin 2 → ℝ) 1) = 0 := by
+      simp only [Matrix.cons_val_one, Matrix.head_cons, Matrix.tail_cons, Matrix.vecTail]
+      rw [hfNegAdj_deg 1]
+      norm_num
+    rw [Fin.sum_univ_two, e0, e1]
+    norm_num
+  rw [hL, hfNegAdj_degreeSqrt_eq_zero] at h
+  simp only [Matrix.zero_mulVec, Matrix.dotProduct_zero] at h
+  norm_num at h
+
+/-- **Fence (`hd` of `sum_deg_mul_eq`)**: the cross-term twin at the
+same fixture — `-2 ≠ 0`. -/
+theorem hf_pi_cross_fence :
+    ¬ (∑ i : Fin 2, deg hfNegAdj i * (![1, 0] : Fin 2 → ℝ) i
+      = Matrix.dotProduct (degreeSqrt hfNegAdj *ᵥ (onesVec : Fin 2 → ℝ))
+          (degreeSqrt hfNegAdj *ᵥ (![1, 0] : Fin 2 → ℝ))) := by
+  intro h
+  have hL : ∑ i : Fin 2, deg hfNegAdj i * (![1, 0] : Fin 2 → ℝ) i = -2 := by
+    have e0 : deg hfNegAdj 0 * (![1, 0] : Fin 2 → ℝ) 0 = -2 := by
+      simp only [Matrix.cons_val_zero, Matrix.head_cons]
+      rw [hfNegAdj_deg 0]
+      norm_num
+    have e1 : deg hfNegAdj 1 * (![1, 0] : Fin 2 → ℝ) 1 = 0 := by
+      simp only [Matrix.cons_val_one, Matrix.head_cons, Matrix.tail_cons, Matrix.vecTail]
+      rw [hfNegAdj_deg 1]
+      norm_num
+    rw [Fin.sum_univ_two, e0, e1]
+    norm_num
+  rw [hL, hfNegAdj_degreeSqrt_eq_zero] at h
+  simp only [Matrix.zero_mulVec, Matrix.dotProduct_zero] at h
+  norm_num at h
+
+/-! ### ε — the disconnected fixture (delivered pins reused) -/
+
+/-- The `{0, 1}`-edge's antisymmetric mode is an eigenvector at `2` on
+the delivered disconnected fixture — the eigen-equation the
+backward-time fence consumes. -/
+theorem disAdj_laplacian_mulVec_mode :
+    laplacian disAdj *ᵥ (![1, -1, 0] : Fin 3 → ℝ)
+      = (2 : ℝ) • (![1, -1, 0] : Fin 3 → ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Pi.zero_apply, Fin.sum_univ_three,
+      laplacian, degreeMatrix, deg, disAdj] <;>
+    norm_num
+
+theorem disAdj_heatKernel_minus_one_mode :
+    heatKernel disAdj (-1) *ᵥ (![1, -1, 0] : Fin 3 → ℝ)
+      = Real.exp 2 • (![1, -1, 0] : Fin 3 → ℝ) := by
+  rw [heatKernel]
+  refine exp_mulVec_eq_smul_of_mulVec_eq_smul _ _ _ ?_
+  rw [neg_smul, neg_neg, one_smul, disAdj_laplacian_mulVec_mode]
+
+/-- **Fence (`hconn` of `heatKernel_mulVec_tendsto_atTop`)**: at the
+isolated vertex's indicator the flow is *constant* (the delivered
+`heatKernel_isolated_fixed_QA`), so it converges to the indicator —
+which is not the global mean `(1/3) • onesVec`. The DC limit genuinely
+needs connectivity. -/
+theorem hf_dc_conn_fence :
+    ¬ Filter.Tendsto
+        (fun t : ℝ => heatKernel disAdj t *ᵥ (fun j => if j = 2 then (1 : ℝ) else 0))
+        Filter.atTop
+        (nhds (((∑ j : Fin 3, (if j = 2 then (1 : ℝ) else 0))
+            / (Fintype.card (Fin 3) : ℝ)) • (onesVec : Fin 3 → ℝ))) := by
+  intro h
+  rw [funext (heatKernel_isolated_fixed_QA)] at h
+  have hc := tendsto_nhds_unique h tendsto_const_nhds
+  have e2 := congrFun hc 2
+  have hsum : (∑ j : Fin 3, (if j = 2 then (1 : ℝ) else 0)) = 1 := by
+    have e0 : (if (0 : Fin 3) = 2 then (1 : ℝ) else 0) = 0 := if_neg (by decide)
+    have e1 : (if (1 : Fin 3) = 2 then (1 : ℝ) else 0) = 0 := if_neg (by decide)
+    have e2' : (if (2 : Fin 3) = 2 then (1 : ℝ) else 0) = 1 := if_pos rfl
+    rw [Fin.sum_univ_three, e0, e1, e2']
+    norm_num
+  simp only [hsum, Fintype.card_fin, onesVec, Pi.smul_apply, smul_eq_mul, mul_one,
+    if_pos rfl] at e2
+  norm_num at e2
+
+/-- **Fence (`ht` of `heatKernel_variance_decay`)**: at `t = -1` the
+backward flow grows the eigenvalue-`2` mode — output variance `2e⁴`
+against the rate-`e⁰ = 1` bound on input variance `2`. Negative time
+is the backward (growth) semigroup, and the variance bound genuinely
+excludes it. -/
+theorem hf_var_t_fence :
+    ¬ (∑ i : Fin 3, ((heatKernel disAdj (-1) *ᵥ (![1, -1, 0] : Fin 3 → ℝ)) i
+        - (∑ j, (![1, -1, 0] : Fin 3 → ℝ) j) / (Fintype.card (Fin 3) : ℝ)) ^ 2
+      ≤ Real.exp (-(2 * (-1 : ℝ) * secondEval (laplacian disAdj)
+          (laplacian_symmetric disAdj disAdj_isSymm) disAdj_card))
+        * ∑ i : Fin 3, ((![1, -1, 0] : Fin 3 → ℝ) i
+          - (∑ j, (![1, -1, 0] : Fin 3 → ℝ) j) / (Fintype.card (Fin 3) : ℝ)) ^ 2) := by
+  have hmean : (∑ j, (![1, -1, 0] : Fin 3 → ℝ) j) / (Fintype.card (Fin 3) : ℝ) = 0 := by
+    have hsum : (∑ j, (![1, -1, 0] : Fin 3 → ℝ) j) = 0 := by
+      simp only [Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.cons_val_two, Matrix.head_cons]
+      norm_num
+    rw [hsum, zero_div]
+  have hvar : ∑ i : Fin 3, (![1, -1, 0] : Fin 3 → ℝ) i ^ 2 = 2 := by
+    simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+      Matrix.head_cons, Fin.sum_univ_three]
+    norm_num
+  rw [hmean, disAdj_heatKernel_minus_one_mode]
+  simp only [sub_zero]
+  have hout : ∑ i : Fin 3, ((Real.exp 2 • (![1, -1, 0] : Fin 3 → ℝ)) i) ^ 2
+      = 2 * (Real.exp 2) ^ 2 := by
+    have e0 : (((Real.exp 2 • (![1, -1, 0] : Fin 3 → ℝ)) : Fin 3 → ℝ) 0) ^ 2
+        = (Real.exp 2) ^ 2 := by
+      simp [Pi.smul_apply, smul_eq_mul, Matrix.cons_val_zero]
+    have e1 : (((Real.exp 2 • (![1, -1, 0] : Fin 3 → ℝ)) : Fin 3 → ℝ) 1) ^ 2
+        = (Real.exp 2) ^ 2 := by
+      simp only [Pi.smul_apply, smul_eq_mul, Matrix.cons_val_one, Matrix.head_cons]
+      ring
+    have e2 : (((Real.exp 2 • (![1, -1, 0] : Fin 3 → ℝ)) : Fin 3 → ℝ) 2) ^ 2 = 0 := by
+      simp [Pi.smul_apply, smul_eq_mul, Matrix.cons_val_two, Matrix.head_cons]
+    rw [Fin.sum_univ_three, e0, e1, e2]
+    ring
+  rw [hout, hvar, disAdj_secondEval_eq_zero_QA,
+    show 2 * (-1 : ℝ) * 0 = 0 by norm_num, neg_zero, Real.exp_zero, one_mul]
+  intro hle
+  have hgt : (1 : ℝ) < (Real.exp 2) ^ 2 := by
+    nlinarith [hf_exp_two_gt_one, Real.exp_nonneg 2]
+  linarith
+
+/-! ### ζ — the asymmetric mass fixture `hfAsymAdj` -/
+
+/-- The asymmetric fixture: degrees `(2, 1)`, Laplacian
+`!![2, -2; -1, 1]]` with square `3 • L` — the mass-preservation fence's
+carrier. -/
+def hfAsymAdj : Matrix (Fin 2) (Fin 2) ℝ := !![0, 2; 1, 0]
+
+theorem hfAsymAdj_not_isSymm : ¬ hfAsymAdj.IsSymm := by
+  intro h
+  have h01 := Matrix.IsSymm.apply h 0 1
+  simp only [hfAsymAdj, Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_zero] at h01
+  norm_num at h01
+
+theorem hfAsymAdj_laplacian : laplacian hfAsymAdj = !![2, -2; -1, 1] := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [laplacian, degreeMatrix, deg, hfAsymAdj, Fin.sum_univ_two]
+
+theorem hfAsymAdj_laplacian_sq :
+    laplacian hfAsymAdj * laplacian hfAsymAdj = (3 : ℝ) • laplacian hfAsymAdj := by
+  rw [hfAsymAdj_laplacian]
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [Matrix.mul_apply, smul_eq_mul, Fin.sum_univ_two] <;> ring
+
+theorem hfAsymAdj_laplacian_mulVec_e0 :
+    laplacian hfAsymAdj *ᵥ (![1, 0] : Fin 2 → ℝ) = (![2, -1] : Fin 2 → ℝ) := by
+  rw [hfAsymAdj_laplacian]
+  funext i
+  fin_cases i <;> simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+
+theorem hfAsymAdj_heatKernel_one :
+    heatKernel hfAsymAdj 1 *ᵥ (![1, 0] : Fin 2 → ℝ)
+      = (![1, 0] : Fin 2 → ℝ) - ((1 - Real.exp (-3)) / 3) • (![2, -1] : Fin 2 → ℝ) := by
+  have hM : (-(laplacian hfAsymAdj)) * (-(laplacian hfAsymAdj))
+      = (-3 : ℝ) • (-(laplacian hfAsymAdj)) := by
+    rw [neg_mul_neg, hfAsymAdj_laplacian_sq,
+      ← neg_one_smul ℝ (laplacian hfAsymAdj), smul_smul]
+    congr 1
+    norm_num
+  have hc : (-3 : ℝ) ≠ 0 := by norm_num
+  have hexp := exp_eq_one_add_of_mul_self_eq_smul (-(laplacian hfAsymAdj)) hc hM
+  rw [heatKernel]
+  simp only [one_smul]
+  rw [hexp, Matrix.add_mulVec, Matrix.one_mulVec, Matrix.smul_mulVec_assoc,
+    Matrix.neg_mulVec, hfAsymAdj_laplacian_mulVec_e0]
+  have hcoe : ((Real.exp (-3) - 1) / (-3 : ℝ)) • (-(![2, -1] : Fin 2 → ℝ))
+      = -(((1 - Real.exp (-3)) / 3) • (![2, -1] : Fin 2 → ℝ)) := by
+    have h0 : (Real.exp (-3) - 1) / (-3 : ℝ) = (1 - Real.exp (-3)) / 3 := by
+      ring_nf
+    rw [h0]
+    funext i
+    fin_cases i <;> simp [Pi.smul_apply, smul_eq_mul]
+  rw [hcoe]
+  funext i
+  fin_cases i <;>
+    simp only [Pi.sub_apply, Pi.add_apply, Pi.smul_apply, smul_eq_mul, Pi.neg_apply,
+      Matrix.cons_val_zero, Matrix.head_cons, Matrix.cons_val_one] <;>
+    ring
+
+/-- **Fence (`hA` of `sum_heatKernel_mulVec`)**: on the asymmetric
+fixture the flow of `![1, 0]` at `t = 1` has mass `1 - α` with
+`α = (1 - e⁻³)/3 ≠ 0` — mean preservation genuinely needs symmetry. -/
+theorem hf_sum_hA_fence :
+    ¬ (∑ i : Fin 2, (heatKernel hfAsymAdj 1 *ᵥ (![1, 0] : Fin 2 → ℝ)) i
+      = ∑ j, (![1, 0] : Fin 2 → ℝ) j) := by
+  intro h
+  rw [hfAsymAdj_heatKernel_one] at h
+  have hα : (1 - Real.exp (-3)) / 3 ≠ 0 := by
+    intro h0
+    have h1 : 1 - Real.exp (-3) = 0 := by
+      have h2 : 3 * ((1 - Real.exp (-3)) / 3) = 3 * 0 := by rw [h0]
+      linarith
+    exact hf_exp_neg_three_ne_one (by linarith)
+  have hsum : ∀ α : ℝ,
+      ∑ i : Fin 2, ((![1, 0] : Fin 2 → ℝ) - α • (![2, -1] : Fin 2 → ℝ)) i = 1 - α := by
+    intro α
+    simp [Fin.sum_univ_two]
+    ring
+  have hsumin : (∑ j, (![1, 0] : Fin 2 → ℝ) j) = 1 := by
+    simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.head_cons,
+      Matrix.tail_cons, Matrix.vecTail, Matrix.vecHead]
+    norm_num
+  rw [hsum, hsumin] at h
+  exact hα (by linarith)
+
+/-! ### η — K₂ kernel-mode and remainder-window fences -/
+
+/-- **Fence (`hμ` of `eigvecOf_ker_eq_smul_onesVec_of_secondEval_pos`)**:
+at the index carrying the eigenvalue `2`, the mode-structure pin
+(`eigvecOf i = c • ![1, -1]` with `2c² = 1`) contradicts the
+kernel-mode claim `= d • onesVec` (which would force `c = 0`). The
+clause genuinely excludes nonzero modes, with the gap positivity (and
+every other hypothesis) genuine at K₂. -/
+theorem hf_ker_mode_fence :
+    ∃ i : Fin 2, eigvalOf (laplacian edgeAdj)
+        (laplacian_symmetric edgeAdj edgeAdj_isSymm) i ≠ 0 ∧
+      ¬ (∃ c : ℝ, eigvecOf (laplacian edgeAdj)
+          (laplacian_symmetric edgeAdj edgeAdj_isSymm) i
+        = c • (onesVec : Fin 2 → ℝ)) := by
+  obtain ⟨i, hi⟩ := edge_eigvalOf_exists_two
+  obtain ⟨c, hc, hc2⟩ := edge_eigvecOf_mode_two hi
+  refine ⟨i, by rw [hi]; norm_num, ?_⟩
+  intro ⟨d, hd⟩
+  have hcd : c • (![1, -1] : Fin 2 → ℝ) = d • (onesVec : Fin 2 → ℝ) :=
+    hc.symm.trans hd
+  have e0 : c = d := by
+    have h := congrFun hcd 0
+    simpa [onesVec, Matrix.cons_val_zero] using h
+  have e1 : -c = d := by
+    have h := congrFun hcd 1
+    simpa [onesVec, Matrix.cons_val_one, Matrix.head_cons] using h
+  have hc0 : c = 0 := by linarith
+  rw [hc0] at hc2
+  norm_num at hc2
+
+/-- Isolation: the gap positivity is genuine at K₂ (`λ₂ = 2 > 0`,
+read from the delivered spectrum pin). -/
+theorem hf_edge_gap_pos :
+    0 < secondEval (laplacian edgeAdj)
+      (laplacian_symmetric edgeAdj edgeAdj_isSymm) edgeAdj_card := by
+  have h2 : secondEval (laplacian edgeAdj)
+      (laplacian_symmetric edgeAdj edgeAdj_isSymm) edgeAdj_card = 2 :=
+    (edgeLaplacian_evals_QA).2
+  rw [h2]
+  norm_num
+
+/-- **Fence (`ht` of `heatKernel_firstOrder_remainder_apply_le`)**: at
+`t = -2` (window genuinely failing: `|{-2} · 2| = 4 ≰ 1`), the raw
+remainder is `e⁴ - 5 > 16` against the eigen-sum constant `4 · t² =
+16` — the smallness window is genuinely load-bearing. -/
+theorem hf_remainder_t_fence :
+    ¬ (|(heatKernel edgeAdj (-2) *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
+       - (![1, 3] : Fin 2 → ℝ) 0
+       + (-2) * ((laplacian edgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0)|
+      ≤ (-2 : ℝ) ^ 2 * ∑ i : Fin 2, (eigvalOf (laplacian edgeAdj)
+          (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) ^ 2
+        * |Matrix.dotProduct (eigvecOf (laplacian edgeAdj)
+            (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) (![1, 3] : Fin 2 → ℝ)|
+        * |(eigvecOf (laplacian edgeAdj)
+            (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0|) := by
+  rw [edge_remainder_sum_eq, show (-2 : ℝ) ^ 2 = 4 by norm_num]
+  have hflow : (heatKernel edgeAdj (-2) *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
+      = 2 - Real.exp 4 := by
+    have hc := heatKernel_edge_closed_QA (-2) (by norm_num)
+    rw [hc, Matrix.add_mulVec, Matrix.one_mulVec, Matrix.smul_mulVec_assoc,
+      edgeLaplacian_mulVec_dc]
+    have he : -(2 * (-2 : ℝ)) = 4 := by norm_num
+    rw [he]
+    simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul, Matrix.cons_val_zero,
+      Matrix.head_cons]
+    have hd : ((Real.exp 4 - 1) / 2) * (-2) = -(Real.exp 4 - 1) := by
+      ring_nf
+    rw [hd]
+    ring
+  have hx0 : (![1, 3] : Fin 2 → ℝ) 0 = 1 := by simp
+  have hL0 : (laplacian edgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0 = -2 := by
+    rw [edgeLaplacian_mulVec_dc]; simp
+  rw [hflow, hx0, hL0]
+  have heq : (2 - Real.exp 4) - 1 + (-2 : ℝ) * (-2) = 5 - Real.exp 4 := by ring
+  rw [heq]
+  have hgt := hf_exp_four_gt_21
+  have habs : |(5 : ℝ) - Real.exp 4| = Real.exp 4 - 5 := by
+    rw [abs_sub_comm, abs_of_nonneg (by linarith)]
+  rw [habs]
+  norm_num
+  exact hgt
+
+/-! ### θ — the zero-degree signed fixture `hfZeroAdj` -/
+
+/-- The zero-degree signed fixture: degrees `(0, 2)`, so the
+`degreeInvSqrt` congruence junk-kills to the zero matrix
+(`normalizedLaplacian = 1`) while `walkLaplacian = !![1, 0; -1, 1]]`
+survives with its asymmetric row — both heat kernels evaluate in
+closed form. -/
+def hfZeroAdj : Matrix (Fin 2) (Fin 2) ℝ := !![-2, 2; 2, 0]
+
+theorem hfZeroAdj_isSymm : hfZeroAdj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [hfZeroAdj]
+
+theorem hfZeroAdj_deg_zero : deg hfZeroAdj 0 = 0 := by
+  simp [deg, hfZeroAdj, Fin.sum_univ_two]
+
+theorem hfZeroAdj_deg_one : deg hfZeroAdj 1 = 2 := by
+  simp [deg, hfZeroAdj, Fin.sum_univ_two]
+
+/-- Isolation: the positive-degree clause genuinely fails at vertex
+`0`. -/
+theorem hfZeroAdj_not_hd : ¬ ∀ i, 0 < deg hfZeroAdj i := by
+  intro h
+  have h0 := h 0
+  rw [hfZeroAdj_deg_zero] at h0
+  norm_num at h0
+
+theorem hfZeroAdj_congruence_zero :
+    degreeInvSqrt hfZeroAdj * hfZeroAdj * degreeInvSqrt hfZeroAdj = 0 := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [Matrix.mul_apply, degreeInvSqrt, Matrix.diagonal_apply, deg, hfZeroAdj,
+      Real.sqrt_zero, inv_zero, Fin.sum_univ_two]
+
+theorem hfZeroAdj_normalizedLaplacian : normalizedLaplacian hfZeroAdj = 1 := by
+  rw [normalizedLaplacian, hfZeroAdj_congruence_zero, sub_zero]
+
+theorem hfZeroAdj_walkLaplacian : walkLaplacian hfZeroAdj = !![1, 0; -1, 1] := by
+  rw [walkLaplacian]
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [Matrix.sub_apply, Matrix.one_apply, walkTransitionMatrix_apply, deg,
+      hfZeroAdj, Fin.sum_univ_two, inv_zero]
+
+theorem hfZeroAdj_walkHeatKernel_one :
+    walkHeatKernel hfZeroAdj 1 = Real.exp (-1 : ℝ) • !![1, 0; 1, 1] := by
+  have hNsq : (walkLaplacian hfZeroAdj - 1) * (walkLaplacian hfZeroAdj - 1) = 0 := by
+    rw [hfZeroAdj_walkLaplacian]
+    ext i j
+    fin_cases i <;> fin_cases j <;>
+      simp [Matrix.mul_apply, Matrix.sub_apply, Fin.sum_univ_two]
+  have hsplit : -((1 : ℝ) • walkLaplacian hfZeroAdj)
+      = (-1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ)
+        + (-((1 : ℝ) • (walkLaplacian hfZeroAdj - 1))) := by
+    ext i j
+    simp only [one_smul]
+    by_cases h : i = j
+    · simp [Matrix.neg_apply, Matrix.add_apply, Matrix.one_apply, Matrix.sub_apply,
+        Pi.smul_apply, smul_eq_mul, h]
+      ring
+    · simp [Matrix.neg_apply, Matrix.add_apply, Matrix.one_apply, Matrix.sub_apply,
+        Pi.smul_apply, smul_eq_mul, h]
+  have hcomm : Commute ((-1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))
+      (-((1 : ℝ) • (walkLaplacian hfZeroAdj - 1))) := by
+    show ((-1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))
+        * (-((1 : ℝ) • (walkLaplacian hfZeroAdj - 1)))
+      = (-((1 : ℝ) • (walkLaplacian hfZeroAdj - 1)))
+        * ((-1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))
+    rw [Matrix.smul_mul, Matrix.one_mul, Matrix.mul_smul, Matrix.mul_one]
+  have hNexp : NormedSpace.exp ℝ (-((1 : ℝ) • (walkLaplacian hfZeroAdj - 1)))
+      = 1 + (-((1 : ℝ) • (walkLaplacian hfZeroAdj - 1))) :=
+    exp_neg_smul_eq_one_add_of_mul_self_eq_zero _ hNsq 1
+  rw [walkHeatKernel, hsplit, Matrix.exp_add_of_commute ℝ _ _ hcomm,
+    matrix_exp_smul_one (V := Fin 2), hNexp, Matrix.smul_mul, Matrix.one_mul]
+  congr 1
+  simp only [one_smul, hfZeroAdj_walkLaplacian]
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp only [Matrix.add_apply, Matrix.neg_apply, Matrix.sub_apply, Matrix.one_apply,
+      if_true, ite_true] <;>
+    norm_num
+
+theorem hfZeroAdj_degreeSqrt_onesVec :
+    degreeSqrt hfZeroAdj *ᵥ (onesVec : Fin 2 → ℝ) = ![0, Real.sqrt 2] := by
+  funext i
+  fin_cases i <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, degreeSqrt, Matrix.diagonal_apply,
+      hfZeroAdj_deg_zero, hfZeroAdj_deg_one, onesVec, Fin.sum_univ_two, Real.sqrt_zero]
+
+/-- **Fence (`hd` of `normalizedHeatKernel_mulVec_degreeSqrt_onesVec`)**:
+at the zero-degree signed fixture the normalized flow of `√D · 1` is
+`e⁻¹ (0, √2) ≠ (0, √2)` — the normalized mass-conservation twin
+genuinely needs positive degrees. -/
+theorem hf_norm_heat_hd_fence :
+    ¬ (normalizedHeatKernel hfZeroAdj 1 *ᵥ (degreeSqrt hfZeroAdj *ᵥ (onesVec : Fin 2 → ℝ))
+      = degreeSqrt hfZeroAdj *ᵥ (onesVec : Fin 2 → ℝ)) := by
+  rw [hfZeroAdj_degreeSqrt_onesVec]
+  have hker : normalizedHeatKernel hfZeroAdj 1 = Real.exp (-1 : ℝ) • 1 := by
+    rw [normalizedHeatKernel, hfZeroAdj_normalizedLaplacian, one_smul]
+    exact hf_exp_neg_one_matrix
+  rw [hker, Matrix.smul_mulVec_assoc, Matrix.one_mulVec]
+  intro h
+  have e1 := congrFun h 1
+  simp only [Pi.smul_apply, smul_eq_mul, Matrix.cons_val_one, Matrix.head_cons,
+    Matrix.cons_val_zero] at e1
+  rcases mul_eq_zero.1 (show (Real.exp (-1) - 1) * Real.sqrt 2 = 0 by
+      have h2 : (Real.exp (-1) - 1) * Real.sqrt 2
+          = Real.exp (-1) * Real.sqrt 2 - Real.sqrt 2 := by ring
+      rw [h2, sub_eq_zero_of_eq (by linarith)]) with hm | hs
+  · exact hf_exp_neg_one_ne_one (by linarith)
+  · exact hf_sqrt_two_ne_zero hs
+
+/-- **Fence (`hd` of `walkHeatKernel_mulVec_onesVec`)**: the walk flow of
+`onesVec` is `e⁻¹ (1, 2) ≠ (1, 1)`. -/
+theorem hf_walk_heat_hd_fence :
+    ¬ (walkHeatKernel hfZeroAdj 1 *ᵥ (onesVec : Fin 2 → ℝ)
+      = (onesVec : Fin 2 → ℝ)) := by
+  intro h
+  rw [hfZeroAdj_walkHeatKernel_one, Matrix.smul_mulVec_assoc] at h
+  have hflow : (!![1, 0; 1, 1] : Matrix (Fin 2) (Fin 2) ℝ) *ᵥ (onesVec : Fin 2 → ℝ)
+      = (![1, 2] : Fin 2 → ℝ) := by
+    funext i
+    fin_cases i <;>
+      norm_num [Matrix.mulVec, Matrix.dotProduct, onesVec, Fin.sum_univ_two]
+  rw [hflow] at h
+  have e0 := congrFun h 0
+  simp only [Pi.smul_apply, smul_eq_mul, Matrix.cons_val_zero, Matrix.head_cons,
+    mul_one, Matrix.cons_val_one, one_mul, onesVec] at e0
+  exact hf_exp_neg_one_ne_one (by linarith)
+
+/-- **Fence (`hd` of `degreeSqrt_mul_walkLaplacian`)**: entry `(1, 0)`
+reads `-√2 ≠ 0` — the commutation genuinely needs positive degrees. -/
+theorem hf_comm_hd_fence :
+    ¬ (degreeSqrt hfZeroAdj * walkLaplacian hfZeroAdj
+      = normalizedLaplacian hfZeroAdj * degreeSqrt hfZeroAdj) := by
+  intro h
+  have e := congrFun (congrFun h 1) 0
+  have hL : (degreeSqrt hfZeroAdj * walkLaplacian hfZeroAdj) 1 0
+      = -(Real.sqrt 2) := by
+    rw [hfZeroAdj_walkLaplacian]
+    simp only [Matrix.mul_apply, degreeSqrt, Matrix.diagonal_apply, hfZeroAdj_deg_one,
+      Fin.sum_univ_two, Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_zero,
+      if_true, if_false]
+    norm_num
+  have hR : (normalizedLaplacian hfZeroAdj * degreeSqrt hfZeroAdj) 1 0 = 0 := by
+    rw [hfZeroAdj_normalizedLaplacian]
+    simp only [Matrix.mul_apply, Matrix.one_apply, degreeSqrt, Matrix.diagonal_apply,
+      hfZeroAdj_deg_zero, hfZeroAdj_deg_one, Fin.sum_univ_two, if_true, if_false]
+    norm_num
+  rw [hL, hR] at e
+  exact hf_sqrt_two_ne_zero (by linarith)
+
+/-- **Fence (`hd` of `degreeSqrt_mul_pow_neg_smul_walkLaplacian`)**: the
+per-power conjugation at `n = 1`, `t = 1` — same entry, `√2 ≠ 0`. -/
+theorem hf_pow_comm_hd_fence :
+    ¬ (degreeSqrt hfZeroAdj * (-(1 : ℝ) • walkLaplacian hfZeroAdj) ^ 1
+      = (-(1 : ℝ) • normalizedLaplacian hfZeroAdj) ^ 1 * degreeSqrt hfZeroAdj) := by
+  rw [pow_one, pow_one]
+  intro h
+  have e := congrFun (congrFun h 1) 0
+  have hL : (degreeSqrt hfZeroAdj * (-(1 : ℝ) • walkLaplacian hfZeroAdj)) 1 0
+      = Real.sqrt 2 := by
+    rw [hfZeroAdj_walkLaplacian]
+    simp only [Matrix.mul_apply, Matrix.smul_apply, smul_eq_mul, degreeSqrt,
+      Matrix.diagonal_apply, hfZeroAdj_deg_one, Fin.sum_univ_two, Matrix.cons_val_one,
+      Matrix.head_cons, Matrix.cons_val_zero, if_true, if_false, Matrix.neg_apply]
+    norm_num
+  have hR : ((-(1 : ℝ) • normalizedLaplacian hfZeroAdj) * degreeSqrt hfZeroAdj) 1 0
+      = 0 := by
+    rw [hfZeroAdj_normalizedLaplacian]
+    simp only [Matrix.mul_apply, Matrix.smul_apply, smul_eq_mul, Matrix.one_apply,
+      degreeSqrt, Matrix.diagonal_apply, hfZeroAdj_deg_zero, hfZeroAdj_deg_one,
+      Fin.sum_univ_two, if_true, if_false]
+    norm_num
+  rw [hL, hR] at e
+  exact hf_sqrt_two_ne_zero e
+
+/-- **Fence (`hd` of `degreeSqrt_mulVec_walkHeatKernel`)**: at `t = 1`,
+`f = ![1, 0]`, the left side is `(0, √2 e⁻¹) ≠ 0` — the semigroup
+conjugation genuinely needs positive degrees. -/
+theorem hf_conj_hd_fence :
+    ¬ (degreeSqrt hfZeroAdj *ᵥ (walkHeatKernel hfZeroAdj 1 *ᵥ (![1, 0] : Fin 2 → ℝ))
+      = normalizedHeatKernel hfZeroAdj 1 *ᵥ (degreeSqrt hfZeroAdj *ᵥ (![1, 0] : Fin 2 → ℝ))) := by
+  have hker : normalizedHeatKernel hfZeroAdj 1 = Real.exp (-1 : ℝ) • 1 := by
+    rw [normalizedHeatKernel, hfZeroAdj_normalizedLaplacian, one_smul]
+    exact hf_exp_neg_one_matrix
+  rw [hfZeroAdj_walkHeatKernel_one, hker, Matrix.smul_mulVec_assoc, Matrix.mulVec_smul,
+    Matrix.smul_mulVec_assoc, Matrix.one_mulVec]
+  have hflow : (!![1, 0; 1, 1] : Matrix (Fin 2) (Fin 2) ℝ) *ᵥ (![1, 0] : Fin 2 → ℝ)
+      = (![1, 1] : Fin 2 → ℝ) := by
+    funext i
+    fin_cases i <;> simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+  rw [hflow]
+  have hconj : degreeSqrt hfZeroAdj *ᵥ (![1, 1] : Fin 2 → ℝ)
+      = (![0, Real.sqrt 2] : Fin 2 → ℝ) := by
+    funext i
+    fin_cases i <;>
+      simp [Matrix.mulVec, Matrix.dotProduct, degreeSqrt, Matrix.diagonal_apply,
+        hfZeroAdj_deg_zero, hfZeroAdj_deg_one, Fin.sum_univ_two, Real.sqrt_zero]
+  rw [hconj]
+  have hker2 : degreeSqrt hfZeroAdj *ᵥ (![1, 0] : Fin 2 → ℝ)
+      = (![0, 0] : Fin 2 → ℝ) := by
+    funext i
+    fin_cases i <;>
+      simp [Matrix.mulVec, Matrix.dotProduct, degreeSqrt, Matrix.diagonal_apply,
+        hfZeroAdj_deg_zero, hfZeroAdj_deg_one, Fin.sum_univ_two, Real.sqrt_zero]
+  rw [hker2]
+  intro h
+  have e1 := congrFun h 1
+  simp only [Pi.smul_apply, smul_eq_mul, Matrix.cons_val_one, Matrix.head_cons,
+    Matrix.cons_val_zero, mul_zero] at e1
+  rcases mul_eq_zero.1 e1 with hm | hs
+  · exact (Real.exp_ne_zero (-1 : ℝ)) hm
+  · exact hf_sqrt_two_ne_zero hs
+
+/-! ### ι — the signed 2-regular fixture `hfRegAdj` -/
+
+def hfRegAdj : Matrix (Fin 2) (Fin 2) ℝ := !![3, -1; -1, 3]
+
+theorem hfRegAdj_isSymm : hfRegAdj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [hfRegAdj]
+
+theorem hfRegAdj_not_nonneg : ¬ ∀ i j, 0 ≤ hfRegAdj i j := by
+  intro h
+  have h01 := h 0 1
+  simp only [hfRegAdj, Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_zero] at h01
+  norm_num at h01
+
+theorem hfRegAdj_deg (i : Fin 2) : deg hfRegAdj i = 2 := by
+  fin_cases i <;> simp [deg, hfRegAdj, Fin.sum_univ_two] <;> norm_num
+
+theorem hfRegAdj_hd : ∀ i, 0 < deg hfRegAdj i := by
+  intro i
+  rw [hfRegAdj_deg]
+  norm_num
+
+theorem hfRegAdj_card : 2 ≤ Fintype.card (Fin 2) := le_refl 2
+
+theorem hfRegAdj_degreeInvSqrt :
+    degreeInvSqrt hfRegAdj = (√2)⁻¹ • (1 : Matrix (Fin 2) (Fin 2) ℝ) := by
+  ext i j
+  simp only [degreeInvSqrt, Matrix.diagonal_apply, hfRegAdj_deg, Matrix.smul_apply,
+    Matrix.one_apply, smul_eq_mul]
+  by_cases h : i = j
+  · rw [if_pos h, if_pos h, mul_one]
+  · rw [if_neg h, if_neg h, mul_zero]
+
+theorem hfRegAdj_congruence :
+    degreeInvSqrt hfRegAdj * hfRegAdj * degreeInvSqrt hfRegAdj
+      = (1 / 2 : ℝ) • hfRegAdj := by
+  have h1 : ((√2)⁻¹ • (1 : Matrix (Fin 2) (Fin 2) ℝ)) * hfRegAdj
+      = (√2)⁻¹ • hfRegAdj := by
+    simp only [Matrix.smul_mul, one_mul]
+  have h2 : ((√2)⁻¹ • hfRegAdj) * ((√2)⁻¹ • (1 : Matrix (Fin 2) (Fin 2) ℝ))
+      = ((√2)⁻¹ * (√2)⁻¹) • hfRegAdj := by
+    simp only [Matrix.mul_smul, Matrix.mul_one, smul_smul]
+  rw [hfRegAdj_degreeInvSqrt, h1, h2]
+  have hcoef : ((√2)⁻¹ * (√2)⁻¹ : ℝ) = 1 / 2 := by
+    rw [← mul_inv, Real.mul_self_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
+    norm_num
+  rw [hcoef]
+
+theorem hfRegAdj_normalizedLaplacian :
+    normalizedLaplacian hfRegAdj = !![-1 / 2, 1 / 2; 1 / 2, -1 / 2] := by
+  rw [normalizedLaplacian, hfRegAdj_congruence]
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [hfRegAdj] <;> norm_num
+
+theorem hfRegAdj_norm_trace : (normalizedLaplacian hfRegAdj).trace = -1 := by
+  simp [Matrix.trace, hfRegAdj_normalizedLaplacian, Fin.sum_univ_two]
+
+theorem hfRegAdj_norm_det : (normalizedLaplacian hfRegAdj).det = 0 := by
+  rw [hfRegAdj_normalizedLaplacian, Matrix.det_fin_two]; norm_num
+
+/-- Two-point spectrum pinning, signed variant: a sorted length-two
+list with sum `-1` and product `0` is `[-1, 0]`. -/
+private theorem hf_two_point_pin_reg {l : List ℝ} (h2 : l.length = 2)
+    (hs : l.Sorted (fun a b => a ≤ b)) (hsum : l.sum = -1)
+    (hprod : l.prod = 0) :
+    l.get ⟨0, by omega⟩ = -1 ∧ l.get ⟨1, by omega⟩ = 0 := by
+  obtain ⟨g₀, g₁, hg⟩ : ∃ a b : ℝ, l = [a, b] :=
+    ⟨l.get ⟨0, by omega⟩, l.get ⟨1, by omega⟩, hf_list_two_eq h2⟩
+  subst hg
+  have hmono : g₀ ≤ g₁ := hs.rel_get_of_lt (show (0 : Fin 2) < 1 by decide)
+  simp only [List.sum_cons, List.sum_nil, add_zero, List.prod_cons,
+    List.prod_nil, mul_one] at hsum hprod
+  rcases eq_zero_or_eq_zero_of_mul_eq_zero hprod with h0 | h1
+  · exfalso
+    subst h0
+    linarith
+  · subst h1
+    refine ⟨?_, ?_⟩
+    · have h0 : g₀ = -1 := by linarith
+      simpa using h0
+    · simp
+
+theorem hfRegAdj_evals :
+    evals (normalizedLaplacian_symmetric hfRegAdj hfRegAdj_isSymm) ⟨0, by simp⟩ = -1 ∧
+      evals (normalizedLaplacian_symmetric hfRegAdj hfRegAdj_isSymm) ⟨1, by simp⟩ = 0 := by
+  have hlen : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm (normalizedLaplacian_symmetric hfRegAdj
+          hfRegAdj_isSymm)).eigenvalues))).length = 2 := by
+    rw [Multiset.length_sort, Multiset.card_map]; simp
+  have hsorted : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm (normalizedLaplacian_symmetric hfRegAdj
+          hfRegAdj_isSymm)).eigenvalues))).Sorted (fun a b => a ≤ b) :=
+    Multiset.sort_sorted _ _
+  have hsum : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm (normalizedLaplacian_symmetric hfRegAdj
+          hfRegAdj_isSymm)).eigenvalues))).sum = -1 := by
+    have htr : ∑ i : Fin 2, eigvalOf (normalizedLaplacian hfRegAdj)
+        (normalizedLaplacian_symmetric hfRegAdj hfRegAdj_isSymm) i = -1 := by
+      rw [eigvalOf_sum_eq_trace, hfRegAdj_norm_trace]
+    rw [← Multiset.sum_coe, Multiset.sort_eq, ← Finset.sum_eq_multiset_sum]
+    exact htr
+  have hprod : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm (normalizedLaplacian_symmetric hfRegAdj
+          hfRegAdj_isSymm)).eigenvalues))).prod = 0 := by
+    have hd : ∏ i : Fin 2, ((isHermitian_of_isSymm
+        (normalizedLaplacian_symmetric hfRegAdj
+          hfRegAdj_isSymm)).eigenvalues i) = 0 := by
+      have hd0 := (isHermitian_of_isSymm
+        (normalizedLaplacian_symmetric hfRegAdj hfRegAdj_isSymm)).det_eq_prod_eigenvalues
+      rw [hfRegAdj_norm_det] at hd0
+      exact hd0.symm
+    rw [← Multiset.prod_coe, Multiset.sort_eq, ← Finset.prod_eq_multiset_prod]
+    exact hd
+  exact hf_two_point_pin_reg hlen hsorted hsum hprod
+
+theorem hfRegAdj_norm_secondEval_eq_zero :
+    secondEval (normalizedLaplacian hfRegAdj)
+      (normalizedLaplacian_symmetric hfRegAdj hfRegAdj_isSymm) hfRegAdj_card = 0 :=
+  hfRegAdj_evals.2
+
+theorem hfRegAdj_walkTransition :
+    walkTransitionMatrix hfRegAdj = (1 / 2 : ℝ) • hfRegAdj := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    rw [walkTransitionMatrix_apply, hfRegAdj_deg] <;>
+    simp [Matrix.smul_apply, smul_eq_mul, hfRegAdj]
+
+theorem hfRegAdj_walkLaplacian : walkLaplacian hfRegAdj = normalizedLaplacian hfRegAdj := by
+  rw [walkLaplacian, normalizedLaplacian, hfRegAdj_walkTransition, hfRegAdj_congruence]
+
+theorem hfRegAdj_walkLaplacian_mulVec_mode :
+    walkLaplacian hfRegAdj *ᵥ (![1, -1] : Fin 2 → ℝ)
+      = (-1 : ℝ) • (![1, -1] : Fin 2 → ℝ) := by
+  rw [hfRegAdj_walkLaplacian, hfRegAdj_normalizedLaplacian]
+  funext i
+  fin_cases i <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, smul_eq_mul] <;>
+    norm_num
+
+theorem hfRegAdj_walkHeatKernel_one_mode :
+    walkHeatKernel hfRegAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ)
+      = Real.exp 1 • (![1, -1] : Fin 2 → ℝ) := by
+  rw [walkHeatKernel]
+  refine exp_mulVec_eq_smul_of_mulVec_eq_smul _ _ _ ?_
+  rw [Matrix.neg_mulVec, Matrix.smul_mulVec_assoc, one_smul,
+    hfRegAdj_walkLaplacian_mulVec_mode, ← neg_smul, neg_neg]
+
+/-- **Fence (`hnn` of `secondEval_le_eigvalOf_normalizedLaplacian_of_ne_zero`)**:
+at the index carrying the eigenvalue `-2`, the claim reads
+`λ₂(L_sym) = 1 ≤ -2`. The normalized twin, with `hd` genuine (degrees
+`2 > 0`). -/
+theorem hf_norm_secondEval_nn_fence :
+    ∃ i : Fin 2, eigvalOf (normalizedLaplacian hfRegAdj)
+        (normalizedLaplacian_symmetric hfRegAdj hfRegAdj_isSymm) i ≠ 0 ∧
+      ¬ (secondEval (normalizedLaplacian hfRegAdj)
+          (normalizedLaplacian_symmetric hfRegAdj hfRegAdj_isSymm) hfRegAdj_card
+        ≤ eigvalOf (normalizedLaplacian hfRegAdj)
+            (normalizedLaplacian_symmetric hfRegAdj hfRegAdj_isSymm) i) := by
+  obtain ⟨i, hi⟩ := evals_mem_eigvalOf
+    (normalizedLaplacian_symmetric hfRegAdj hfRegAdj_isSymm) ⟨0, by simp⟩
+  rw [hfRegAdj_evals.1] at hi
+  refine ⟨i, ?_, ?_⟩
+  · rw [← hi]; norm_num
+  · rw [hfRegAdj_norm_secondEval_eq_zero, ← hi]; norm_num
+
+/-- **Fence (`hnn` of `walkHeatKernel_variance_decay`)**: at the signed
+regular fixture, `t = 1`, the Fiedler input's π-variance grows by
+`e²` — output `4e²` against the rate-`e⁰ = 1` bound on input `4`.
+With `hd`, `hA`, `hcard`, `ht` all genuine. -/
+theorem hf_walk_var_nn_fence :
+    ¬ (∑ i : Fin 2, deg hfRegAdj i * ((walkHeatKernel hfRegAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ)) i
+        - (∑ j, deg hfRegAdj j * (![1, -1] : Fin 2 → ℝ) j) / (∑ j, deg hfRegAdj j)) ^ 2
+      ≤ Real.exp (-(2 * (1 : ℝ) * secondEval (normalizedLaplacian hfRegAdj)
+          (normalizedLaplacian_symmetric hfRegAdj hfRegAdj_isSymm) hfRegAdj_card))
+        * ∑ i : Fin 2, deg hfRegAdj i * ((![1, -1] : Fin 2 → ℝ) i
+          - (∑ j, deg hfRegAdj j * (![1, -1] : Fin 2 → ℝ) j) / (∑ j, deg hfRegAdj j)) ^ 2) := by
+  have hdegsum : (∑ j : Fin 2, deg hfRegAdj j) = 4 := by
+    rw [Fin.sum_univ_two, hfRegAdj_deg 0, hfRegAdj_deg 1]; norm_num
+  have hcross : (∑ j : Fin 2, deg hfRegAdj j * (![1, -1] : Fin 2 → ℝ) j) = 0 := by
+    have e0 : deg hfRegAdj 0 * (![1, -1] : Fin 2 → ℝ) 0 = 2 := by
+      simp only [Matrix.cons_val_zero, Matrix.head_cons]; rw [hfRegAdj_deg 0]; norm_num
+    have e1 : deg hfRegAdj 1 * (![1, -1] : Fin 2 → ℝ) 1 = -2 := by
+      simp only [Matrix.cons_val_one, Matrix.head_cons]; rw [hfRegAdj_deg 1]; norm_num
+    rw [Fin.sum_univ_two, e0, e1]; norm_num
+  rw [hcross, zero_div, hfRegAdj_walkHeatKernel_one_mode,
+    hfRegAdj_norm_secondEval_eq_zero]
+  simp only [sub_zero]
+  have hvarin : ∑ i : Fin 2, deg hfRegAdj i * ((![1, -1] : Fin 2 → ℝ) i) ^ 2 = 4 := by
+    have e0 : deg hfRegAdj 0 * ((![1, -1] : Fin 2 → ℝ) 0) ^ 2 = 2 := by
+      simp only [Matrix.cons_val_zero, Matrix.head_cons]; rw [hfRegAdj_deg 0]; norm_num
+    have e1 : deg hfRegAdj 1 * ((![1, -1] : Fin 2 → ℝ) 1) ^ 2 = 2 := by
+      simp only [Matrix.cons_val_one, Matrix.head_cons]; rw [hfRegAdj_deg 1]; norm_num
+    rw [Fin.sum_univ_two, e0, e1]; norm_num
+  have hvarout : ∑ i : Fin 2, deg hfRegAdj i
+        * (((Real.exp 1 • (![1, -1] : Fin 2 → ℝ)) : Fin 2 → ℝ) i) ^ 2
+      = 4 * (Real.exp 1) ^ 2 := by
+    have e0 : deg hfRegAdj 0 * (((Real.exp 1 • (![1, -1] : Fin 2 → ℝ)) : Fin 2 → ℝ) 0) ^ 2
+        = 2 * (Real.exp 1) ^ 2 := by
+      simp only [Pi.smul_apply, smul_eq_mul, Matrix.cons_val_zero, mul_one,
+        hfRegAdj_deg 0]
+    have e1 : deg hfRegAdj 1 * (((Real.exp 1 • (![1, -1] : Fin 2 → ℝ)) : Fin 2 → ℝ) 1) ^ 2
+        = 2 * (Real.exp 1) ^ 2 := by
+      simp only [Pi.smul_apply, smul_eq_mul, Matrix.cons_val_one, Matrix.head_cons,
+        hfRegAdj_deg 1]
+      ring
+    rw [Fin.sum_univ_two, e0, e1]
+    ring
+  rw [hvarout, hvarin, show 2 * (1 : ℝ) * 0 = 0 by norm_num, neg_zero,
+    Real.exp_zero, one_mul]
+  intro hle
+  have hgt : (1 : ℝ) < (Real.exp 1) ^ 2 := by
+    nlinarith [hf_exp_one_ge, Real.exp_nonneg 1]
+  linarith
+
+end HeatFences
+
 end SpectralGraphTheory.QA

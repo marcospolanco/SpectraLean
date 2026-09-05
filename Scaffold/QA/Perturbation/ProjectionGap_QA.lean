@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -/
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.ProjectionGap
+import Scaffold.QA.Perturbation.DavisKahan_QA
 
 /-!
 # QA for the projection-gap (equal-rank projector identity) interface
@@ -582,5 +583,382 @@ theorem max_form_unequal_rank_QA :
         fin_cases i <;> fin_cases j <;> simp)
       (by rw [Matrix.mul_one]),
     zero_left_resid_QA, right_resid_opNorm_QA]
+
+/-!
+## The adversarial fence audit (`proposals/adversarial-fences-davis-kahan-core-family.md`)
+
+Hypothesis-form fences and packaged isolation companions for the two
+equal-rank headline identities' clause surfaces — signature-free `P`/`Q`
+statements, the most fenceable class in the library — at trivial
+fixtures with witness-vector norm bounds. The audit method's thirteenth
+application; every fence refutes a *theorem* instantiation (both
+identities are proved hard crust), so nothing admitted is consumed.
+The `dkfDiag2` fixture and its pins arrive via the Davis–Kahan QA
+family's H4–H7 layer.
+-/
+
+/-!
+## The P section (lands in `ProjectionGap_QA.lean`): the two equal-rank
+headline identities' clause surfaces — signature-free `P`/`Q`
+statements, fenced at trivial fixtures with witness-vector norm bounds.
+-/
+
+/-- The asymmetric idempotent `!![1,1;0,0]]` — the `hP`/`hQ` fixture. -/
+def dkfAsym : Matrix (Fin 2) (Fin 2) ℝ := !![1, 1; 0, 0]
+
+theorem dkfAsym_mul_self : dkfAsym * dkfAsym = dkfAsym := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [Matrix.mul_apply, Matrix.dotProduct, Fin.sum_univ_two, dkfAsym]
+
+theorem dkfAsym_not_isSymm : ¬ dkfAsym.IsSymm := by
+  intro h
+  have h1 := congrFun (congrFun h.eq 1) 0
+  simp [Matrix.transpose_apply, dkfAsym] at h1
+
+private theorem dkfAsym_mulVec_eq_smul (x : Fin 2 → ℝ) :
+    dkfAsym *ᵥ x = (x 0 + x 1) • (![1, 0] : Fin 2 → ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, dkfAsym]
+
+theorem dkfAsym_rank : dkfAsym.rank = 1 := by
+  have hv : (![1, 0] : Fin 2 → ℝ) ≠ 0 := by
+    intro h
+    have h0 := congrFun h 0
+    simp at h0
+  set v : Fin 2 → ℝ := ![1, 0] with hvdef
+  have hvv : Matrix.dotProduct v v = 1 := by
+    simp [Matrix.dotProduct, hvdef]
+  have hmem : ∀ y ∈ LinearMap.range dkfAsym.mulVecLin,
+      y ∈ Submodule.span ℝ ({v} : Set (Fin 2 → ℝ)) := by
+    rintro y ⟨x, rfl⟩
+    simp only [Matrix.mulVecLin_apply]
+    rw [dkfAsym_mulVec_eq_smul x]
+    exact Submodule.smul_mem _ _ (Submodule.subset_span (Set.mem_singleton v))
+  have hvrange : v ∈ LinearMap.range dkfAsym.mulVecLin := by
+    refine LinearMap.mem_range.2 ⟨v, ?_⟩
+    simp only [Matrix.mulVecLin_apply]
+    rw [dkfAsym_mulVec_eq_smul v]
+    simp only [hvdef]
+    norm_num
+  have hspanle : Submodule.span ℝ ({v} : Set (Fin 2 → ℝ))
+      ≤ LinearMap.range dkfAsym.mulVecLin :=
+    Submodule.span_le.2 (fun y hy => by
+      rcases Set.mem_singleton_iff.1 hy with rfl
+      exact hvrange)
+  have hrange : LinearMap.range dkfAsym.mulVecLin
+      = Submodule.span ℝ ({v} : Set (Fin 2 → ℝ)) :=
+    le_antisymm (fun y hy => hmem y hy) hspanle
+  rw [Matrix.rank, hrange, finrank_span_singleton hv]
+
+/-- The symmetric non-idempotent `diag(0, 2)` — the `hQQ` fixture. -/
+def dkfDiag02 : Matrix (Fin 2) (Fin 2) ℝ := Matrix.diagonal ![0, 2]
+
+theorem dkfDiag02_symmetric : dkfDiag02.IsSymm := by
+  show dkfDiag02ᵀ = dkfDiag02
+  exact Matrix.diagonal_transpose _
+
+theorem dkfDiag02_not_mul_self : ¬ (dkfDiag02 * dkfDiag02 = dkfDiag02) := by
+  intro h
+  have e := congrFun (congrFun h 1) 1
+  simp only [Matrix.mul_apply, Matrix.dotProduct, Fin.sum_univ_two,
+    dkfDiag02, Matrix.diagonal_apply] at e
+  norm_num at e
+
+theorem dkfDiag02_rank : dkfDiag02.rank = 1 := by
+  unfold dkfDiag02
+  rw [Matrix.rank_diagonal]
+  have hfe : (Finset.univ.filter fun x => (![0, 2] : Fin 2 → ℝ) x ≠ 0)
+      = ({1} : Finset (Fin 2)) := by
+    ext x
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and,
+      Finset.mem_singleton]
+    fin_cases x <;> simp
+  simp only [Fintype.card_subtype, Finset.sum_ite_eq', Finset.mem_univ]
+  rw [hfe, Finset.card_singleton]
+
+/-- The two shared computations of the P1/P2/P6 fences: the complement
+projector kills the first-axis range of both fixtures, and `qRot` fixes
+its generating line — stated once each. -/
+theorem dkf_comp_mul_asym_eq_zero : (1 - pDiag) * dkfAsym = 0 := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [Matrix.mul_apply, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.one_apply, Matrix.sub_apply, pDiag, Matrix.diagonal_apply,
+      dkfAsym]
+
+theorem dkf_comp_mul_diag2_eq_zero : (1 - pDiag) * dkfDiag2 = 0 := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [Matrix.mul_apply, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.one_apply, Matrix.sub_apply, pDiag, Matrix.diagonal_apply,
+      dkfDiag2]
+
+/-- The qRot fixed line: `qRot *ᵥ (4/5, 3/5) = (4/5, 3/5)`, the shared
+witness of the two `hrank` fences. -/
+theorem dkf_qRot_fixes_line :
+    qRot *ᵥ (![4/5, 3/5] : Fin 2 → ℝ) = ![4/5, 3/5] := by
+  funext i
+  fin_cases i <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, qRot] <;>
+    norm_num
+
+/-- **The P1 fence: `hP : P.IsSymm` of the equal-rank projector identity
+is load-bearing.** The asymmetric idempotent `!![1,1;0,0]]` (rank `1`,
+kept clauses all genuine) against `pDiag`: `(1 - pDiag) * P = 0` while
+`(P - pDiag) *ᵥ e₁ = ![1, 0]` pins `‖P - pDiag‖² ≥ 1`. -/
+theorem dkf_pgsub_hP_fence :
+    ¬ (‖dkfAsym - pDiag‖ = ‖(1 - pDiag) * dkfAsym‖) := by
+  intro hcon
+  have hw := dotProduct_mulVec_norm2_le_l2OpNorm_sq (dkfAsym - pDiag)
+    (![0, 1] : Fin 2 → ℝ)
+  have hmv : (dkfAsym - pDiag) *ᵥ (![0, 1] : Fin 2 → ℝ) = ![1, 0] := by
+    funext i
+    fin_cases i <;>
+      simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, dkfAsym, pDiag,
+        Matrix.diagonal_apply]
+  have hd : (![1, 0] : Fin 2 → ℝ) ⬝ᵥ ![1, 0] = 1 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+  have he : (![0, 1] : Fin 2 → ℝ) ⬝ᵥ ![0, 1] = 1 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+  rw [hmv, hd, he] at hw
+  rw [dkf_comp_mul_asym_eq_zero, norm_zero] at hcon
+  rw [hcon] at hw
+  norm_num at hw
+
+/-- **P1 isolation, packaged:** every kept clause is genuine at the
+fixture, so `hP` is the only failing hypothesis. -/
+theorem dkf_pgsub_hP_isolation :
+    dkfAsym * dkfAsym = dkfAsym ∧ pDiag.IsSymm ∧ pDiag * pDiag = pDiag ∧
+      dkfAsym.rank = pDiag.rank ∧ ¬ dkfAsym.IsSymm :=
+  ⟨dkfAsym_mul_self, pDiag_isSymm, pDiag_mul_self,
+    by rw [dkfAsym_rank, pDiag_rank], dkfAsym_not_isSymm⟩
+
+/-- **The P2 fence: `hPP : P * P = P` of the identity is
+load-bearing.** The symmetric non-idempotent `diag(2, 0)` against
+`pDiag`: `(1 - pDiag) * diag(2,0) = 0` while
+`(diag(2,0) - pDiag) *ᵥ e₀ = ![1, 0]` pins the left side's square at
+`≥ 1`. -/
+theorem dkf_pgsub_hPP_fence :
+    ¬ (‖dkfDiag2 - pDiag‖ = ‖(1 - pDiag) * dkfDiag2‖) := by
+  intro hcon
+  have hw := dotProduct_mulVec_norm2_le_l2OpNorm_sq (dkfDiag2 - pDiag)
+    (![1, 0] : Fin 2 → ℝ)
+  have hmv : (dkfDiag2 - pDiag) *ᵥ (![1, 0] : Fin 2 → ℝ) = ![1, 0] := by
+    funext i
+    fin_cases i <;>
+      simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, pDiag,
+        Matrix.diagonal_apply, dkfDiag2]
+    all_goals norm_num
+  have hd : (![1, 0] : Fin 2 → ℝ) ⬝ᵥ ![1, 0] = 1 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+  rw [hmv, hd] at hw
+  rw [dkf_comp_mul_diag2_eq_zero, norm_zero] at hcon
+  rw [hcon] at hw
+  norm_num at hw
+
+/-- **P2 isolation, packaged.** -/
+theorem dkf_pgsub_hPP_isolation :
+    dkfDiag2.IsSymm ∧ pDiag.IsSymm ∧ pDiag * pDiag = pDiag ∧
+      dkfDiag2.rank = pDiag.rank ∧ ¬ (dkfDiag2 * dkfDiag2 = dkfDiag2) :=
+  ⟨dkfDiag2_symmetric, pDiag_isSymm, pDiag_mul_self,
+    by rw [dkfDiag2_rank, pDiag_rank], dkfDiag2_not_mul_self⟩
+
+/-- **The P3 fence: `hQ` of the identity is load-bearing** — the
+asymmetric idempotent on the other side: `(1 - dkfAsym) * pDiag = 0`
+while `(pDiag - dkfAsym) *ᵥ e₁ = ![-1, 0]`. -/
+theorem dkf_pgsub_hQ_fence :
+    ¬ (‖pDiag - dkfAsym‖ = ‖(1 - dkfAsym) * pDiag‖) := by
+  intro hcon
+  have hR : (1 - dkfAsym) * pDiag = 0 := by
+    ext i j
+    fin_cases i <;> fin_cases j <;>
+      simp [Matrix.mul_apply, Matrix.dotProduct, Fin.sum_univ_two,
+        Matrix.one_apply, Matrix.sub_apply, pDiag, Matrix.diagonal_apply,
+        dkfAsym]
+  have hw := dotProduct_mulVec_norm2_le_l2OpNorm_sq (pDiag - dkfAsym)
+    (![0, 1] : Fin 2 → ℝ)
+  have hmv : (pDiag - dkfAsym) *ᵥ (![0, 1] : Fin 2 → ℝ) = ![-1, 0] := by
+    funext i
+    fin_cases i <;>
+      simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, pDiag,
+        Matrix.diagonal_apply, dkfAsym]
+  have hd : (![-1, 0] : Fin 2 → ℝ) ⬝ᵥ ![-1, 0] = 1 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+  have he : (![0, 1] : Fin 2 → ℝ) ⬝ᵥ ![0, 1] = 1 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+  rw [hmv, hd, he] at hw
+  rw [hR, norm_zero] at hcon
+  rw [hcon] at hw
+  norm_num at hw
+
+/-- **P3 isolation, packaged.** -/
+theorem dkf_pgsub_hQ_isolation :
+    pDiag.IsSymm ∧ pDiag * pDiag = pDiag ∧ dkfAsym * dkfAsym = dkfAsym ∧
+      pDiag.rank = dkfAsym.rank ∧ ¬ dkfAsym.IsSymm :=
+  ⟨pDiag_isSymm, pDiag_mul_self, dkfAsym_mul_self,
+    by rw [pDiag_rank, dkfAsym_rank], dkfAsym_not_isSymm⟩
+
+/-- **The P4 fence: `hQQ` of the identity is load-bearing.** The
+symmetric non-idempotent `diag(0, 2)` (rank `1`, kept clauses genuine)
+against `pDiag`: the right side is `‖pDiag‖` (the complement product
+telescopes to `pDiag` itself), an orthogonal projector's norm sandwiched
+at exactly `1` from both sides, while
+`(pDiag - diag(0,2)) *ᵥ e₁ = ![0, -2]` pins the left side's square at
+`≥ 4`. -/
+theorem dkf_pgsub_hQQ_fence :
+    ¬ (‖pDiag - dkfDiag02‖ = ‖(1 - dkfDiag02) * pDiag‖) := by
+  intro hcon
+  have hR : (1 - dkfDiag02) * pDiag = pDiag := by
+    ext i j
+    fin_cases i <;> fin_cases j <;>
+      simp [Matrix.mul_apply, Matrix.dotProduct, Fin.sum_univ_two,
+        Matrix.one_apply, Matrix.sub_apply, pDiag, Matrix.diagonal_apply,
+        dkfDiag02]
+  rw [hR] at hcon
+  have hle : ‖pDiag‖ ≤ 1 :=
+    l2OpNorm_le_one_of_isSymm_idempotent pDiag_isSymm pDiag_mul_self
+  have hge : (1:ℝ) ≤ ‖pDiag‖ := by
+    have hw2 := dotProduct_mulVec_norm2_le_l2OpNorm_sq pDiag
+      (![1, 0] : Fin 2 → ℝ)
+    have hmv2 : pDiag *ᵥ (![1, 0] : Fin 2 → ℝ) = ![1, 0] := by
+      funext i
+      fin_cases i <;>
+        simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, pDiag,
+          Matrix.diagonal_apply]
+    have hd2 : (![1, 0] : Fin 2 → ℝ) ⬝ᵥ ![1, 0] = 1 := by
+      simp [Matrix.dotProduct, Fin.sum_univ_two]
+    rw [hmv2, hd2] at hw2
+    have hnn : (0:ℝ) ≤ ‖pDiag‖ := norm_nonneg _
+    nlinarith [hnn]
+  have hw := dotProduct_mulVec_norm2_le_l2OpNorm_sq (pDiag - dkfDiag02)
+    (![0, 1] : Fin 2 → ℝ)
+  have hmv : (pDiag - dkfDiag02) *ᵥ (![0, 1] : Fin 2 → ℝ) = ![0, -2] := by
+    funext i
+    fin_cases i <;>
+      simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, pDiag,
+        Matrix.diagonal_apply, dkfDiag02]
+  have hd : (![0, -2] : Fin 2 → ℝ) ⬝ᵥ ![0, -2] = 4 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+    norm_num
+  have he : (![0, 1] : Fin 2 → ℝ) ⬝ᵥ ![0, 1] = 1 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+  rw [hmv, hd, he] at hw
+  have hone : ‖pDiag - dkfDiag02‖ = 1 := by linarith
+  have hsq : ‖pDiag - dkfDiag02‖ * ‖pDiag - dkfDiag02‖ = 1 := by
+    rw [hone]
+    norm_num
+  linarith
+
+/-- **P4 isolation, packaged.** -/
+theorem dkf_pgsub_hQQ_isolation :
+    pDiag.IsSymm ∧ pDiag * pDiag = pDiag ∧ dkfDiag02.IsSymm ∧
+      pDiag.rank = dkfDiag02.rank ∧ ¬ (dkfDiag02 * dkfDiag02 = dkfDiag02) :=
+  ⟨pDiag_isSymm, pDiag_mul_self, dkfDiag02_symmetric,
+    by rw [pDiag_rank, dkfDiag02_rank], dkfDiag02_not_mul_self⟩
+
+/-- **The P5 fence: `hrank` of the identity is load-bearing.** Both
+`P = 0` and `Q = qRot` are genuine orthogonal projectors, but their
+ranks differ (`0 ≠ 1`): the right side is `‖(1 - qRot) * 0‖ = 0` while
+`qRot *ᵥ (4/5, 3/5) = (4/5, 3/5)` pins `‖qRot‖² ≥ 1`. -/
+theorem dkf_pgsub_hrank_fence :
+    ¬ (‖(0 : Matrix (Fin 2) (Fin 2) ℝ) - qRot‖ = ‖(1 - qRot) * 0‖) := by
+  intro hcon
+  rw [zero_sub, norm_neg] at hcon
+  have hR : (1 - qRot) * (0 : Matrix (Fin 2) (Fin 2) ℝ) = 0 := mul_zero _
+  rw [hR, norm_zero] at hcon
+  have hw := dotProduct_mulVec_norm2_le_l2OpNorm_sq qRot
+    (![4/5, 3/5] : Fin 2 → ℝ)
+  have hd : (![4/5, 3/5] : Fin 2 → ℝ) ⬝ᵥ ![4/5, 3/5] = 1 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+    norm_num
+  rw [dkf_qRot_fixes_line, hd] at hw
+  rw [hcon] at hw
+  norm_num at hw
+
+/-- **P5 isolation, packaged.** -/
+theorem dkf_pgsub_hrank_isolation :
+    (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm ∧
+      ((0 : Matrix (Fin 2) (Fin 2) ℝ) * 0 = 0) ∧ qRot.IsSymm ∧
+      qRot * qRot = qRot ∧
+      ¬ ((0 : Matrix (Fin 2) (Fin 2) ℝ).rank = qRot.rank) :=
+  ⟨zero_isSymm_QA, mul_zero _, qRot_isSymm, qRot_mul_self, by
+    rw [Matrix.rank_zero, qRot_rank]
+    norm_num⟩
+
+/-- **The P6 fence: `hPP` of the equal-rank core is load-bearing.**
+`(1 - pDiag) * diag(2,0) = 0` while `(1 - diag(2,0)) * pDiag =
+diag(-1, 0)` has `*ᵥ e₀ = ![-1, 0]`, squaring its norm at `≥ 1`. -/
+theorem dkf_pgcore_hPP_fence :
+    ¬ (‖(1 - pDiag) * dkfDiag2‖ = ‖(1 - dkfDiag2) * pDiag‖) := by
+  intro hcon
+  have hw := dotProduct_mulVec_norm2_le_l2OpNorm_sq ((1 - dkfDiag2) * pDiag)
+    (![1, 0] : Fin 2 → ℝ)
+  have hmv : ((1 - dkfDiag2) * pDiag) *ᵥ (![1, 0] : Fin 2 → ℝ)
+      = ![-1, 0] := by
+    funext i
+    fin_cases i <;>
+      simp [Matrix.mulVec, Matrix.mul_apply, Matrix.dotProduct,
+        Fin.sum_univ_two, Matrix.one_apply, Matrix.sub_apply, pDiag,
+        Matrix.diagonal_apply, dkfDiag2]
+    all_goals norm_num
+  have hd : (![-1, 0] : Fin 2 → ℝ) ⬝ᵥ ![-1, 0] = 1 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+  have he : (![1, 0] : Fin 2 → ℝ) ⬝ᵥ ![1, 0] = 1 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+  rw [hmv, hd, he] at hw
+  rw [dkf_comp_mul_diag2_eq_zero, norm_zero] at hcon
+  rw [← hcon] at hw
+  norm_num at hw
+
+/-- **P6 isolation, packaged** (same kept-clause set as P2's). -/
+theorem dkf_pgcore_hPP_isolation :
+    dkfDiag2.IsSymm ∧ pDiag.IsSymm ∧ pDiag * pDiag = pDiag ∧
+      dkfDiag2.rank = pDiag.rank ∧ ¬ (dkfDiag2 * dkfDiag2 = dkfDiag2) :=
+  dkf_pgsub_hPP_isolation
+
+/-- **The P7 fence: `hQQ` of the core is load-bearing** — the mirror of
+P6 at the same fixture. -/
+theorem dkf_pgcore_hQQ_fence :
+    ¬ (‖(1 - dkfDiag2) * pDiag‖ = ‖(1 - pDiag) * dkfDiag2‖) := by
+  intro hcon
+  exact dkf_pgcore_hPP_fence hcon.symm
+
+/-- **P7 isolation, packaged.** -/
+theorem dkf_pgcore_hQQ_isolation :
+    pDiag.IsSymm ∧ pDiag * pDiag = pDiag ∧ dkfDiag2.IsSymm ∧
+      pDiag.rank = dkfDiag2.rank ∧ ¬ (dkfDiag2 * dkfDiag2 = dkfDiag2) :=
+  ⟨pDiag_isSymm, pDiag_mul_self, dkfDiag2_symmetric,
+    by rw [pDiag_rank, dkfDiag2_rank], dkfDiag2_not_mul_self⟩
+
+/-- **The P8 fence: `hrank` of the core is load-bearing** — `P = 0`
+against `qRot` (both genuine, ranks `0 ≠ 1`): `‖(1 - qRot) * 0‖ = 0`
+against `‖qRot‖² ≥ 1`. -/
+theorem dkf_pgcore_hrank_fence :
+    ¬ (‖(1 - qRot) * (0 : Matrix (Fin 2) (Fin 2) ℝ)‖
+        = ‖(1 - (0 : Matrix (Fin 2) (Fin 2) ℝ)) * qRot‖) := by
+  intro hcon
+  have hL : (1 - qRot) * (0 : Matrix (Fin 2) (Fin 2) ℝ) = 0 := mul_zero _
+  have hR : (1 - (0 : Matrix (Fin 2) (Fin 2) ℝ)) * qRot = qRot := by
+    rw [sub_zero, one_mul]
+  rw [hL, norm_zero, hR] at hcon
+  have hw := dotProduct_mulVec_norm2_le_l2OpNorm_sq qRot
+    (![4/5, 3/5] : Fin 2 → ℝ)
+  have hd : (![4/5, 3/5] : Fin 2 → ℝ) ⬝ᵥ ![4/5, 3/5] = 1 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+    norm_num
+  rw [dkf_qRot_fixes_line, hd] at hw
+  rw [← hcon] at hw
+  norm_num at hw
+
+/-- **P8 isolation, packaged** (same kept-clause set as P5's). -/
+theorem dkf_pgcore_hrank_isolation :
+    (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm ∧
+      ((0 : Matrix (Fin 2) (Fin 2) ℝ) * 0 = 0) ∧ qRot.IsSymm ∧
+      qRot * qRot = qRot ∧
+      ¬ ((0 : Matrix (Fin 2) (Fin 2) ℝ).rank = qRot.rank) :=
+  dkf_pgsub_hrank_isolation
+
 
 end Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.QA

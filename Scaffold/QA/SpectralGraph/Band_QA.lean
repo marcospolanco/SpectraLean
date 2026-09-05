@@ -1186,4 +1186,473 @@ theorem band_diag13_hilb_guard :
     norm_zero] at h0
   norm_num at h0
 
+/-! ## BandFences: the adversarial fence audit (proposal
+`adversarial-fences-band-projector-family.md`, 2026-09-04)
+
+Every load-bearing hypothesis clause of `Band.lean`'s theorem surface
+with no negative witness anywhere in the repository, fenced in
+hypothesis form at the pinned fixture `diag13` (spectrum `{1, 3}`),
+with isolation companions certifying the remaining clauses genuine.
+QA-only, no axiom contact. -/
+
+section BandFences
+
+/-! ### The two new band pins (each two rewrites from delivered
+threshold pins) -/
+
+/-- Pin: the band `(1, 3]` keeps the eigenvalue-`3` mode only — the
+second-axis projector. -/
+theorem band_diag13_one_three :
+    bandProjector diag13 diag13_symm 1 3 = !![0, 0; 0, 1] := by
+  rw [bandProjector,
+    spectralProjector_eq_one diag13 diag13_symm 3
+      (fun i => by
+        rcases diag13_eigvalOf_mem i with h | h
+        · norm_num [h]
+        · norm_num [h]),
+    spectralProjector_diag13_one]
+  ext a b
+  fin_cases a <;> fin_cases b <;> simp [Matrix.one_apply]
+
+/-- Pin: the negated band `B(4, 1] = P_1 − P_4 = diag(1,0) − 1` — the
+negated second-axis projector. -/
+theorem band_diag13_four_one :
+    bandProjector diag13 diag13_symm 4 1 = !![0, 0; 0, -1] := by
+  rw [bandProjector,
+    spectralProjector_eq_one diag13 diag13_symm 4
+      (fun i => by
+        rcases diag13_eigvalOf_mem i with h | h
+        · norm_num [h]
+        · norm_num [h]),
+    spectralProjector_diag13_one]
+  ext a b
+  fin_cases a <;> fin_cases b <;> simp [Matrix.one_apply]
+
+/-! ### The junk-band `hab` fences (`B(4,0] = −1`, the delivered pin) -/
+
+/-- **Isolation (the `hab` fences):** the dropped clause genuinely
+fails at the junk band — `4 ≤ 0` is false. -/
+theorem bfF_hab_isolation : ¬ ((4 : ℝ) ≤ (0 : ℝ)) := by norm_num
+
+/-- **Fence (`bandProjector_idempotent`, `hab`)**: the negated band is
+not idempotent — `(−1)² = 1 ≠ −1` (entry `(0,0)`). -/
+theorem bfF_idempotent_hab_fence :
+    ¬ (bandProjector diag13 diag13_symm 4 0 * bandProjector diag13 diag13_symm 4 0
+        = bandProjector diag13 diag13_symm 4 0) := by
+  rw [band_diag13_four_zero]
+  intro h
+  have h00 := congrFun (congrFun h 0) 0
+  simp at h00
+  all_goals linarith
+
+/-- **Fence (`bandProjector_mulVec_eigvecOf_eq_zero_left`, `hab`)**:
+at the negated band the eigenvalue clause `h : λ i ≤ a` holds for every
+mode (isolation below), but `B(4,0] *ᵥ v = −v ≠ 0`. -/
+theorem bfF_zeroLeft_hab_fence (i : Fin 2) :
+    ¬ (bandProjector diag13 diag13_symm 4 0 *ᵥ eigvecOf diag13 diag13_symm i = 0) := by
+  rw [band_diag13_four_zero, Matrix.neg_mulVec, Matrix.one_mulVec]
+  intro h
+  exact eigvecOf_diag13_ne_zero i (neg_eq_zero.mp h)
+
+/-- **Isolation (`zero_left`'s `hab` fence):** the surviving clause
+`h : λ i ≤ a` is genuine at the fixture for every mode. -/
+theorem bfF_zeroLeft_hab_isolation (i : Fin 2) :
+    eigvalOf diag13 diag13_symm i ≤ 4 := by
+  rcases diag13_eigvalOf_mem i with h | h <;> (rw [h]; norm_num)
+
+/-- **Fence (`bandProjector_mulVec_eigvecOf_eq_zero_right`, `hab`)**:
+at the negated band the strict-above clause `h : b < λ i` holds for
+every mode (isolation below), but `B(4,0] *ᵥ v = −v ≠ 0`. -/
+theorem bfF_zeroRight_hab_fence (i : Fin 2) :
+    ¬ (bandProjector diag13 diag13_symm 4 0 *ᵥ eigvecOf diag13 diag13_symm i = 0) :=
+  bfF_zeroLeft_hab_fence i
+
+/-- **Isolation (`zero_right`'s `hab` fence):** the surviving clause
+`h : b < λ i` is genuine at the fixture for every mode. -/
+theorem bfF_zeroRight_hab_isolation (i : Fin 2) :
+    0 < eigvalOf diag13 diag13_symm i := by
+  rcases diag13_eigvalOf_mem i with h | h <;> (rw [h]; norm_num)
+
+/-! ### The mode-selection `h₂` fence -/
+
+/-- **Fence (`bandProjector_mulVec_eigvecOf_self`, `h₂`)**: at the band
+`(−1, 2]` the strict-below clause `h₁ : −1 < λ j` is genuine for the
+eigenvalue-`3` mode, but the mode is annihilated rather than fixed —
+the upper endpoint `λ ≤ b` is load-bearing on the fixing side. -/
+theorem bfF_selfFix_h2_fence {j : Fin 2}
+    (hj : eigvalOf diag13 diag13_symm j = 3) :
+    ¬ (bandProjector diag13 diag13_symm (-1) 2 *ᵥ eigvecOf diag13 diag13_symm j
+        = eigvecOf diag13 diag13_symm j) := by
+  obtain ⟨hv0, -⟩ := eigvecOf_diag13_three j hj
+  have hkill : bandProjector diag13 diag13_symm (-1) 2
+      *ᵥ eigvecOf diag13 diag13_symm j = 0 := by
+    rw [band_diag13_low]
+    funext k
+    fin_cases k
+    · simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, hv0]
+    · simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+  rw [hkill]
+  intro hcon
+  exact eigvecOf_diag13_ne_zero j hcon.symm
+
+/-! ### The below-spectrum and covering `h`/`ha`/`hb` fences -/
+
+/-- **Fence (`bandProjector_eq_spectralProjector_of_lt`, `h`)**: with
+`a = 1` (an eigenvalue) and `b = 4`, the band is the second-axis
+projector while `P_4 = 1` — entry `(0,0)` separates them (`0 ≠ 1`). -/
+theorem bfF_eqSp_h_fence :
+    ¬ (bandProjector diag13 diag13_symm 1 4
+        = spectralProjector diag13 diag13_symm 4) := by
+  rw [band_diag13_overlap_high,
+    spectralProjector_eq_one diag13 diag13_symm 4
+      (fun i => by
+        rcases diag13_eigvalOf_mem i with h | h
+        · norm_num [h]
+        · norm_num [h])]
+  intro h
+  have h00 := congrFun (congrFun h 0) 0
+  simp at h00
+
+/-- **Fence (`bandProjector_eq_one`, `ha`)**: with `a = 1` an
+eigenvalue, `hb` genuine (`λ ≤ 4`), the band misses the eigenvalue-`1`
+mode: `diag(0,1) ≠ 1`. -/
+theorem bfF_eqOne_ha_fence :
+    ¬ (bandProjector diag13 diag13_symm 1 4 = 1) := by
+  rw [band_diag13_overlap_high]
+  intro h
+  have h00 := congrFun (congrFun h 0) 0
+  simp at h00
+
+/-- **Isolation (`eq_one`'s `ha` fence):** the surviving clause `hb` is
+genuine at the fixture. -/
+theorem bfF_eqOne_ha_isolation (i : Fin 2) :
+    eigvalOf diag13 diag13_symm i ≤ 4 := bfF_zeroLeft_hab_isolation i
+
+/-- **Fence (`bandProjector_eq_one`, `hb`)**: with `b = 2` below the
+top eigenvalue, `ha` genuine (`−1 < λ`), the band misses the
+eigenvalue-`3` mode: `diag(1,0) ≠ 1`. -/
+theorem bfF_eqOne_hb_fence :
+    ¬ (bandProjector diag13 diag13_symm (-1) 2 = 1) := by
+  rw [band_diag13_low]
+  intro h
+  have h11 := congrFun (congrFun h 1) 1
+  simp at h11
+
+/-- **Isolation (`eq_one`'s `hb` fence):** the surviving clause `ha` is
+genuine at the fixture. -/
+theorem bfF_eqOne_hb_isolation (i : Fin 2) :
+    (-1 : ℝ) < eigvalOf diag13 diag13_symm i := by
+  rcases diag13_eigvalOf_mem i with h | h <;> (rw [h]; norm_num)
+
+/-! ### The disjointness trio's `hab`/`hcd`/flipped-`hbc` fences -/
+
+/-- **Isolation (the `hab` fences on the disjoint pair
+`B(4,0] × B(1,3]`):** the surviving clauses `hcd : 1 ≤ 3` and
+`hbc : 0 ≤ 1` are genuine. -/
+theorem bfF_zero_hab_isolation : (1 : ℝ) ≤ 3 ∧ (0 : ℝ) ≤ 1 := by
+  constructor <;> norm_num
+
+/-- **Fence (`bandProjector_mul_bandProjector_eq_zero`, `hab`)**: the
+negated first band composed with the band `(1,3]` gives
+`−diag(0,1) ≠ 0`. -/
+theorem bfF_zero_hab_fence :
+    ¬ (bandProjector diag13 diag13_symm 4 0 * bandProjector diag13 diag13_symm 1 3
+        = 0) := by
+  rw [band_diag13_four_zero, band_diag13_one_three, Matrix.neg_mul,
+    Matrix.one_mul]
+  intro h
+  have h11 := congrFun (congrFun h 1) 1
+  simp at h11
+
+/-- **Isolation (the `hcd` fences on `B(−1,3] × B(4,1]`):** the
+surviving clauses `hab : −1 ≤ 3` and `hbc : 3 ≤ 4` are genuine. -/
+theorem bfF_zero_hcd_isolation : (-1 : ℝ) ≤ 3 ∧ (3 : ℝ) ≤ 4 := by
+  constructor <;> norm_num
+
+/-- **Fence (`bandProjector_mul_bandProjector_eq_zero`, `hcd`)**: the
+negated second band composed with the covering band `(−1,3]` gives
+`diag(0,−1) ≠ 0`. -/
+theorem bfF_zero_hcd_fence :
+    ¬ (bandProjector diag13 diag13_symm (-1) 3 * bandProjector diag13 diag13_symm 4 1
+        = 0) := by
+  rw [band_diag13_overlap_low, band_diag13_four_one, Matrix.one_mul]
+  intro h
+  have h11 := congrFun (congrFun h 1) 1
+  simp at h11
+
+/-- **Fence (`bandProjector_mul_bandProjector_eq_zero'`, `hab`)**:
+flipped order, same separation: `diag(0,1) · (−1) = −diag(0,1) ≠ 0`. -/
+theorem bfF_zero'_hab_fence :
+    ¬ (bandProjector diag13 diag13_symm 1 3 * bandProjector diag13 diag13_symm 4 0
+        = 0) := by
+  rw [band_diag13_one_three, band_diag13_four_zero, Matrix.mul_neg,
+    Matrix.mul_one]
+  intro h
+  have h11 := congrFun (congrFun h 1) 1
+  simp at h11
+
+/-- **Fence (`bandProjector_mul_bandProjector_eq_zero'`, `hcd`)**:
+flipped order: `diag(0,−1) · 1 = diag(0,−1) ≠ 0`. -/
+theorem bfF_zero'_hcd_fence :
+    ¬ (bandProjector diag13 diag13_symm 4 1 * bandProjector diag13 diag13_symm (-1) 3
+        = 0) := by
+  rw [band_diag13_four_one, band_diag13_overlap_low, Matrix.mul_one]
+  intro h
+  have h11 := congrFun (congrFun h 1) 1
+  simp at h11
+
+/-- **Fence (`bandProjector_mul_bandProjector_eq_zero'`, `hbc`)**: the
+forward order's overlap guard (`band_diag13_overlap_mul_ne_zero`) has
+no flipped twin anywhere in the repository — flipped, the overlapping
+bands `(1,4]` and `(−1,3]` compose to `diag(0,1) ≠ 0`. -/
+theorem bfF_zero'_hbc_fence :
+    ¬ (bandProjector diag13 diag13_symm 1 4 * bandProjector diag13 diag13_symm (-1) 3
+        = 0) := by
+  rw [band_diag13_overlap_high, band_diag13_overlap_low, Matrix.mul_one]
+  intro h
+  have h11 := congrFun (congrFun h 1) 1
+  simp at h11
+
+/-! ### The inner-orthogonality `hab`/`hcd` fences -/
+
+/-- **Fence (`bandProjector_inner_eq_zero`, `hab`)**: at `x = y =
+![0,1]` the negated band's image `![0,−1]` against the `(1,3]` band's
+image `![0,1]` dots to `−1 ≠ 0`. -/
+theorem bfF_inner_hab_fence :
+    ¬ ((bandProjector diag13 diag13_symm 4 0 *ᵥ (![0, 1] : Fin 2 → ℝ))
+        ⬝ᵥ (bandProjector diag13 diag13_symm 1 3 *ᵥ (![0, 1] : Fin 2 → ℝ)) = 0) := by
+  rw [band_diag13_four_zero, Matrix.neg_mulVec, Matrix.one_mulVec,
+    band_diag13_one_three]
+  have hdot : ((-![0, 1] : Fin 2 → ℝ) ⬝ᵥ
+      (!![0, 0; 0, 1] *ᵥ (![0, 1] : Fin 2 → ℝ))) = -1 := by
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+  rw [hdot]
+  intro hcon
+  all_goals linarith
+
+/-- **Fence (`bandProjector_inner_eq_zero`, `hcd`)**: the covering band
+`(−1,3]`'s image `![0,1]` against the negated band `(4,1]`'s image
+`![0,−1]` dots to `−1 ≠ 0`. -/
+theorem bfF_inner_hcd_fence :
+    ¬ ((bandProjector diag13 diag13_symm (-1) 3 *ᵥ (![0, 1] : Fin 2 → ℝ))
+        ⬝ᵥ (bandProjector diag13 diag13_symm 4 1 *ᵥ (![0, 1] : Fin 2 → ℝ)) = 0) := by
+  rw [band_diag13_overlap_low, Matrix.one_mulVec, band_diag13_four_one]
+  have hdot : ((![0, 1] : Fin 2 → ℝ) ⬝ᵥ
+      (!![0, 0; 0, -1] *ᵥ (![0, 1] : Fin 2 → ℝ))) = -1 := by
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+  rw [hdot]
+  intro hcon
+  linarith
+
+/-! ### The shared-mode and monotone-family fences -/
+
+/-- **Fence (`eq_zero_of_bandProjector_mulVec_eq_self`, `hbc`)**: the
+overlapping bands `(−1,3]` and `(1,4]` share the eigenvalue-`3` mode —
+`![0,1]` is fixed by both (`1` and `diag(0,1)`) and is nonzero, so the
+hypothesis-free conclusion `w = 0` fails. -/
+theorem bfF_shared_hbc_fence :
+    ¬ (∀ w : Fin 2 → ℝ,
+        bandProjector diag13 diag13_symm (-1) 3 *ᵥ w = w →
+        bandProjector diag13 diag13_symm 1 4 *ᵥ w = w → w = 0) := by
+  intro h
+  have hw := h (![0, 1] : Fin 2 → ℝ)
+    (by rw [band_diag13_overlap_low, Matrix.one_mulVec])
+    (by rw [band_diag13_overlap_high]
+        funext k
+        fin_cases k <;>
+          simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+            Matrix.head_cons, Matrix.cons_val_zero, Matrix.cons_val_one,
+            Matrix.cons_val', Matrix.cons_val_fin_one])
+  simp at hw
+
+/-- **Fence (`bandProjector_mul_bandProjector_eq_zero_of_monotone`,
+`ht`)**: the delivered non-monotone family `4, 0, 4` makes the `k = 0`
+band the negated covering band and the `m = 1` band the covering band:
+`B(4,0] · B(0,4] = −1 ≠ 0` at `k = 0 < 1 = m`. -/
+theorem bfF_mono_ht_fence :
+    ¬ (∀ (t : ℕ → ℝ) (k m : ℕ), k < m →
+        bandProjector diag13 diag13_symm (t k) (t (k + 1))
+          * bandProjector diag13 diag13_symm (t m) (t (m + 1))
+          = 0) := by
+  intro h
+  have hprod := h nonmono 0 1 (by decide)
+  simp only [Nat.reduceAdd, nonmono_zero, nonmono_one, nonmono_two] at hprod
+  rw [band_diag13_four_zero, band_diag13_zero_four, Matrix.neg_mul,
+    Matrix.one_mul] at hprod
+  have e := congrFun (congrFun hprod 0) 0
+  simp at e
+
+/-- **Fence (`bandProjector_mul_bandProjector_eq_zero_of_monotone`,
+`hkm`)**: at `k = m = 0` on the monotone partition family `part2` (so
+`ht` is genuine — the isolation below), the band composes with itself:
+`B(0,2]² = diag(1,0) ≠ 0`. -/
+theorem bfF_mono_hkm_fence :
+    ¬ (∀ (t : ℕ → ℝ) (k m : ℕ),
+        bandProjector diag13 diag13_symm (t k) (t (k + 1))
+          * bandProjector diag13 diag13_symm (t m) (t (m + 1))
+          = 0) := by
+  intro h
+  have hprod := h part2 0 0
+  simp only [Nat.reduceAdd, part2_zero, part2_one] at hprod
+  rw [band_diag13_part2_low, diag13_low_axis_mul_self] at hprod
+  have e := congrFun (congrFun hprod 0) 0
+  simp at e
+
+/-- **Isolation (`hkm` fence):** the surviving clause `ht` is genuine
+at `part2`. -/
+theorem bfF_mono_hkm_isolation : Monotone part2 := part2_monotone
+
+/-! ### The vector-completeness and Step-4 fences -/
+
+/-- **Isolation (`sumVec`'s `hb` fence):** the surviving clause `hc` is
+genuine at `gap_hi`'s truncated family (`λ ≤ 4`). -/
+theorem bfF_sumVec_hb_isolation (i : Fin 2) :
+    eigvalOf diag13 diag13_symm i ≤ gap_hi 1 := by
+  rw [gap_hi_one]
+  exact bfF_zeroLeft_hab_isolation i
+
+/-- **Fence (`sum_range_bandProjector_mulVec_eq_self`, `hb`)**: the
+high-start family `(2, 4]` annihilates `![1,0]` — the vector form of
+the delivered endpoint guard, a distinct statement: sum `= ![0,0] ≠
+![1,0]`. -/
+theorem bfF_sumVec_hb_fence :
+    ¬ (∀ (t : ℕ → ℝ) (n : ℕ) (x : Fin 2 → ℝ),
+        ∑ k in Finset.range n,
+          bandProjector diag13 diag13_symm (t k) (t (k + 1)) *ᵥ x = x) := by
+  intro h
+  have hx := h gap_hi 1 (![1, 0] : Fin 2 → ℝ)
+  simp only [Nat.reduceAdd, Finset.sum_range_one, gap_hi_zero, gap_hi_one] at hx
+  rw [band_diag13_high] at hx
+  have e := congrFun hx 0
+  simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two] at e
+
+/-- **Fence (`sum_range_bandProjector_mulVec_eq_self`, `hc`)**: the
+truncated partition `n = 1` (top threshold `2` below the eigenvalue
+`3`) annihilates `![0,1]` — the vector form of the delivered low-end
+guard: sum `= ![0,0] ≠ ![0,1]`. -/
+theorem bfF_sumVec_hc_fence :
+    ¬ (∀ (t : ℕ → ℝ) (n : ℕ) (x : Fin 2 → ℝ),
+        ∑ k in Finset.range n,
+          bandProjector diag13 diag13_symm (t k) (t (k + 1)) *ᵥ x = x) := by
+  intro h
+  have hx := h part2 1 (![0, 1] : Fin 2 → ℝ)
+  simp only [Nat.reduceAdd, Finset.sum_range_one, part2_zero, part2_one] at hx
+  rw [band_diag13_part2_low] at hx
+  have e := congrFun hx 1
+  simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two] at e
+
+/-- The negated band's action, pinned: `B(4,0] *ᵥ ![1,0] = −![1,0]`
+(the shared numeric pin of the Step-4 `hab` fences). -/
+theorem bfF_four_zero_mulVec :
+    bandProjector diag13 diag13_symm 4 0 *ᵥ (![1, 0] : Fin 2 → ℝ)
+      = -![1, 0] :=
+  by rw [band_diag13_four_zero, Matrix.neg_mulVec, Matrix.one_mulVec]
+
+/-- **Fence (`bandProjector_residual_dotProduct_eq_zero`, `hab`)**: at
+the negated band with `x = z = ![1,0]`, the residual `x − (−x) = ![2,0]`
+against the image `−![1,0]` dots to `−2 ≠ 0` — the negated band's
+residual carries in-band signal. -/
+theorem bfF_residual_hab_fence :
+    ¬ ((![1, 0] - bandProjector diag13 diag13_symm 4 0 *ᵥ (![1, 0] : Fin 2 → ℝ))
+        ⬝ᵥ (bandProjector diag13 diag13_symm 4 0 *ᵥ (![1, 0] : Fin 2 → ℝ))
+        = 0) := by
+  rw [bfF_four_zero_mulVec]
+  have hsub : (![1, 0] - (-![1, 0] : Fin 2 → ℝ)) = (![2, 0] : Fin 2 → ℝ) := by
+    funext k
+    fin_cases k <;> norm_num
+  have hdot : ((![2, 0] : Fin 2 → ℝ) ⬝ᵥ (-![1, 0] : Fin 2 → ℝ)) = -2 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+  rw [hsub, hdot]
+  norm_num
+
+/-! ### The Step-4 `hab` fences (Hilbert-projection specialization) -/
+
+/-- Transport of the band action under the Euclidean packaging (the
+local copy of `Band.lean`'s private lemma, same two rewrites). -/
+private theorem bfF_toEuclideanLin_apply (M : Matrix (Fin 2) (Fin 2) ℝ)
+    (y : Fin 2 → ℝ) :
+    Matrix.toEuclideanLin M ((WithLp.equiv 2 (Fin 2 → ℝ)).symm y)
+      = (WithLp.equiv 2 (Fin 2 → ℝ)).symm (M *ᵥ y) := by
+  rw [Matrix.toEuclideanLin_piLp_equiv_symm, Matrix.toLin'_apply]
+
+/-- **Fence (`bandProjector_toEuclidean_apply_eq_orthogonalProjection`,
+`hab`)**: at the negated band, the transported map `v ↦ −v` is
+surjective, so the range is everything and the orthogonal projection is
+the identity — but the claimed right side is the negated image
+`−![1,0]` (entry `0`: `1 ≠ −1`). -/
+theorem bfF_hilbIdent_hab_fence :
+    ¬ ((orthogonalProjection
+          (LinearMap.range
+            (Matrix.toEuclideanLin (bandProjector diag13 diag13_symm 4 0)))
+          ((WithLp.equiv 2 (Fin 2 → ℝ)).symm (![1, 0] : Fin 2 → ℝ)
+            : EuclideanSpace ℝ (Fin 2))
+        : EuclideanSpace ℝ (Fin 2))
+      = (WithLp.equiv 2 (Fin 2 → ℝ)).symm
+          (bandProjector diag13 diag13_symm 4 0 *ᵥ (![1, 0] : Fin 2 → ℝ))) := by
+  have hneg : bandProjector diag13 diag13_symm 4 0 *ᵥ (-![1, 0] : Fin 2 → ℝ)
+      = ![1, 0] := by
+    rw [band_diag13_four_zero, Matrix.neg_mulVec, Matrix.mulVec_neg,
+      Matrix.one_mulVec, neg_neg]
+  have hmem : (WithLp.equiv 2 (Fin 2 → ℝ)).symm (![1, 0] : Fin 2 → ℝ)
+      ∈ LinearMap.range
+          (Matrix.toEuclideanLin (bandProjector diag13 diag13_symm 4 0)) := by
+    rw [LinearMap.mem_range]
+    refine ⟨(WithLp.equiv 2 (Fin 2 → ℝ)).symm (-![1, 0] : Fin 2 → ℝ), ?_⟩
+    rw [bfF_toEuclideanLin_apply, hneg]
+  have hproj : (orthogonalProjection
+      (LinearMap.range
+        (Matrix.toEuclideanLin (bandProjector diag13 diag13_symm 4 0)))
+      ((WithLp.equiv 2 (Fin 2 → ℝ)).symm (![1, 0] : Fin 2 → ℝ)
+        : EuclideanSpace ℝ (Fin 2))
+      : EuclideanSpace ℝ (Fin 2))
+      = (WithLp.equiv 2 (Fin 2 → ℝ)).symm (![1, 0] : Fin 2 → ℝ) := by
+    refine eq_orthogonalProjection_of_mem_of_inner_eq_zero hmem ?_
+    intro w hw
+    rw [sub_self]
+    exact inner_zero_left _
+  intro hclaim
+  rw [hproj, bfF_four_zero_mulVec] at hclaim
+  have hfun := congrArg (WithLp.equiv 2 (Fin 2 → ℝ)) hclaim
+  have e := congrFun hfun 0
+  simp at e
+  all_goals linarith
+
+/-- **Fence (`norm_sub_bandProjector_apply_le`, `hab`)**: at the
+negated band the fixed-point clause `hy` forces `y = 0` (only `0` is
+fixed by `v ↦ −v`), so the dropped-guard claim reads `‖2x‖ ≤ ‖x‖` —
+false at `![1,0]` (`2 > 1`). -/
+theorem bfF_normLe_hab_fence :
+    ¬ (∀ (x y : Fin 2 → ℝ),
+        bandProjector diag13 diag13_symm 4 0 *ᵥ y = y →
+        ‖(WithLp.equiv 2 (Fin 2 → ℝ)).symm x -
+            (WithLp.equiv 2 (Fin 2 → ℝ)).symm
+              (bandProjector diag13 diag13_symm 4 0 *ᵥ x)‖
+          ≤ ‖(WithLp.equiv 2 (Fin 2 → ℝ)).symm x -
+            (WithLp.equiv 2 (Fin 2 → ℝ)).symm y‖) := by
+  intro h
+  have hinst := h (![1, 0] : Fin 2 → ℝ) 0
+    (by rw [band_diag13_four_zero, Matrix.mulVec_zero])
+  have hsub : (![1, 0] - (-![1, 0] : Fin 2 → ℝ)) = (![2, 0] : Fin 2 → ℝ) := by
+    funext k
+    fin_cases k <;> norm_num
+  have hx0 : (![1, 0] - (0 : Fin 2 → ℝ)) = (![1, 0] : Fin 2 → ℝ) := by
+    funext k
+    fin_cases k <;> simp
+  rw [bfF_four_zero_mulVec, toEuclidean_sub ![1, 0] (-![1, 0]), hsub,
+    toEuclidean_sub ![1, 0] (0 : Fin 2 → ℝ), hx0] at hinst
+  have n2 : ‖((WithLp.equiv 2 (Fin 2 → ℝ)).symm (![2, 0] : Fin 2 → ℝ) :
+      EuclideanSpace ℝ (Fin 2))‖ = 2 :=
+    norm_pin_of_sq (norm_nonneg _) (by norm_num)
+      (by rw [norm_euclidean_sq]
+          norm_num [Matrix.dotProduct, Fin.sum_univ_two])
+  have n1 : ‖((WithLp.equiv 2 (Fin 2 → ℝ)).symm (![1, 0] : Fin 2 → ℝ) :
+      EuclideanSpace ℝ (Fin 2))‖ = 1 :=
+    norm_pin_of_sq (norm_nonneg _) (by norm_num)
+      (by rw [norm_euclidean_sq]
+          norm_num [Matrix.dotProduct, Fin.sum_univ_two])
+  rw [n2, n1] at hinst
+  norm_num at hinst
+
+end BandFences
+
 end SpectralGraphTheory.QA

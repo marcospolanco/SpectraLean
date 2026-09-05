@@ -26,6 +26,17 @@ the additive window from the Courant–Fischer engine composed with the proved
 | `weyl_additive_lower` | proved | `λᵢ(A) + λ₁(E) ≤ λᵢ(A+E)` — the bottom half of the additive window (mirror route; consumes `evals_first_mul_dotProduct_le_quadForm`, the bottom Rayleigh domination added to `GraphTheory.Spectral` with this retirement) | same |
 | `spectral_gap_stability` | proved (fully hard crust since the Weyl retirement) | A gap shrinks by at most `2‖E‖` | corollary; see [Weyl 1912 / Bhatia 1997](../sources/weyl_1912_bhatia.md) |
 
+**Adversarial fence audit (2026-09-04,
+`proposals/adversarial-fences-davis-kahan-core-family.md`):**
+`spectral_gap_stability`'s two load-bearing clauses carry hypothesis-form
+negative witnesses in `Weyl_QA.lean` — `hnorm` at the gap-shrinking
+`diag(0,−1)` perturbation (gap `2 → 1` at norm `1`, the dropped statement
+read at `ε = 1/4` demanding `1 ≥ 3/2`) and `hγ` at the inflated
+`γ = 100`. The additive pair's `hcard` is recorded non-fenceable by a
+distinct mechanism: the conclusion's own `Fin` index proof term
+(`⟨Fintype.card V - 1, by omega⟩`) consumes it, so the dropped statement
+does not elaborate (proof-term-in-display entanglement).
+
 ### Davis–Kahan
 
 **Module**: `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan`
@@ -33,6 +44,16 @@ the additive window from the Courant–Fischer engine composed with the proved
 | Declaration | Kind | Description | Source |
 |-------------|------|-------------|--------|
 | `davis_kahan_sin_theta` | **proved theorem** (retired from axiom 2026-08-21 — the Duhamel/exponential-integral route; `#print axioms` reads only the three standard axioms) | Projector rotation `≤ ‖E‖/δ` under the two-cluster separation `λ_{k+1}(A+E) - λ_k(A) ≥ δ` (single-pair form, the YWS Theorem 1 operator-norm variant at the bottom cluster — locator corrected 2026-08-21, see the source index); proof: three-way tie split consuming the equal-rank identity and the Duhamel bound below, plus Weyl and the `≤ 1` endpoint for the tied cases | [Davis & Kahan 1970](../sources/davis_kahan_1970.md) |
+
+**Adversarial fence audit (2026-09-04,
+`proposals/adversarial-fences-davis-kahan-core-family.md`):** the
+theorem's two free clauses carry hypothesis-form negative witnesses in
+`DavisKahan_QA.lean` — `hδ` at the negative-`δ` corner (the separation
+genuine at `δ = −1/2`, the bound's right side `−3/2` against a
+nonnegative norm) and `hsep` at the inflated `δ = 100` (the pinned exact
+distance `√(1/10) > 3/400`). The `hA`/`hAE`/`hk` clauses are
+signature-entangled (the `initialProjector` displays consume the proofs)
+— recorded non-fenceable.
 
 ### Band Davis–Kahan (bounded windows)
 
@@ -95,6 +116,20 @@ route provably cannot.
 | `rank_spectralProjector_eq_card_filter` / `rank_spectralProjector_evals_of_lt` | proved | The rank of a spectral projector is the threshold filter's card; exactly `k+1` under no tie | closed-form |
 | `l2OpNorm_sub_le_one_of_isSymm_idempotent` | proved | The trivial gap-metric endpoint `‖P − Q‖ ≤ 1`, load-bearing for the retirement's tie cases | closed-form |
 
+**Adversarial fence audit (2026-09-04,
+`proposals/adversarial-fences-davis-kahan-core-family.md`):** the
+Duhamel bound's two free clauses (`hab`, `hcl`), the rank pin's no-tie
+clause, the trivial endpoint's four projector-structure clauses, and the
+sorted-step lemma's eigenvalue clause all carry hypothesis-form negative
+witnesses in `DavisKahan_QA.lean` — `hab` at the negative-denominator
+corner with `hcl` genuine; `hcl` at the inflated window `b = 100`
+through a new threshold-`1` projector pin (the witness square
+`‖(1−Q)P‖² ≥ 1/10` against `(3/400)²`); the zero-matrix tie giving
+`rank 2 ≠ 1` via `spectralProjector_eq_one`; the endpoint's clauses at
+an asymmetric idempotent (`‖P‖² ≥ 5`) and a symmetric non-idempotent
+(`‖P‖² ≥ 4`); and the sorted step at the pinned bottom eigenvalue
+(`2 ≤ 0`).
+
 ### Equal-Rank Projector Identity (Davis–Kahan Step 1, component 1)
 
 **Module**: `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.ProjectionGap`
@@ -110,6 +145,19 @@ operator-norm statement.
 | `l2OpNorm_sub_eq_of_rank_eq` | proved | The headline identity: `‖P−Q‖ = ‖(I−Q)P‖` when `P, Q` additionally have equal rank (principal-angles route via the sandwich `PQP`, eigenspace transfer, and the norm-eigenvalue bridge) | proposal's route, layer (B); no external citation — closed-form finite-dimensional linear algebra |
 | `l2OpNorm_one_sub_mul_sq_eq` | proved | The squared-residual pin `‖(I−Q)P‖² = 1 − τ` (`τ` the sandwich's threshold eigenvalue) underlying the headline identity | same |
 | `evals_pqp_eq_evals_qpq` | proved | Spectral symmetry `evals(PQP) = evals(QPQ)` via the injective eigenspace transfer `v ↦ QPv` — the equal-rank core's key symmetry step | same |
+
+**Adversarial fence audit (2026-09-04,
+`proposals/adversarial-fences-davis-kahan-core-family.md`):** both
+headline identities have signature-free clause surfaces — the most
+fenceable class in the library — and `ProjectionGap_QA.lean` now fences
+eight of the ten: the identity's `hP`/`hPP`/`hQ`/`hQQ`/`hrank` and the
+core's `hPP`/`hQQ`/`hrank`, at trivial fixtures (an asymmetric
+idempotent, symmetric non-idempotents, the zero matrix against the
+delivered rotation projector) with witness-vector norm bounds. The
+core's `hP`/`hQ` are deferred with the zero-residual analysis recorded:
+an idempotent `P` of equal rank whose residual `(1−Q)P` vanishes has
+`range P = range Q`, forcing `(1−P)Q = 0` too — both computed rank-1
+cases came out equal, suggesting truth-removability.
 
 ### Matrix Update Identities (bridge utilities)
 
@@ -143,6 +191,26 @@ All proved, zero axioms (delivered 2026-08-19 for proposal steps 0–2 of
 | `eq_of_inv_add_one_eq_inv_add_one` | proved | Equal resolvents of `+1`-invertible matrices force equal matrices (contrapose the Step-1 identity, cancel both invertible outer factors; the determinant hypotheses are load-bearing) | proposal item 5, core form |
 | `resolvent_map_injective_of_quadForm_nonneg` | proved | `A ≠ B → (A+1)⁻¹ ≠ (B+1)⁻¹` on quadForm-nonneg matrices — the resolvent map is injective on the PSD cone | proposal item 5 |
 | `inv_add_one_eq_inv_add_one_iff_of_quadForm_nonneg` | proved | Resolvent equality ↔ matrix equality on quadForm-nonneg matrices — the certificate form for contrapositive consumers | proposal item 5, packaged |
+
+**Adversarial fences** (2026-09-05,
+`proposals/adversarial-fences-resolvent-family.md`): the shelf's
+hypothesis-necessity surface is complete — 12 hypothesis-form fences in
+`Resolvent_QA.lean`'s `AdversarialFences` section, reconciling the
+pre-discipline QA's five free-form witnesses into the fence discipline.
+Both upper bridges' `0 ≤ c` clauses are load-bearing only through the
+`Fin 0` corner (on nonempty types the eigenvalue hypothesis already
+forces `c ≥ 0`); the invertibility `hpsd` clauses fall at `M = -1` and
+the `ht` clause at `t = 0` on the `K₂` Laplacian with PSD genuine; the
+resolvent identity's determinant clauses separate at a one-sided
+singular shift (`-1 ≠ 0` / `1 ≠ 0` — a both-singular pair collapses
+both sides identically); the norm bound's `ht` needs an *invertible*
+PSD fixture at `t = 0` (the junk inverse of a singular one satisfies
+the dropped statement vacuously); both Lipschitz `quadForm` clauses
+separate `4×` (`3 ≤ 3/4`); the injectivity trio's jointly dropped
+clauses fall to the delivered `-1` vs `-1 + nilpotent` guard, while the
+individually dropped determinant clauses are P4 truth-removable
+(recorded mechanism). The five `hM` clauses are signature-entangled and
+`hcard` proof-term-in-display — recorded non-fenceables.
 
 ## Deferred Work
 

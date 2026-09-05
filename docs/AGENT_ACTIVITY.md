@@ -37,6 +37,580 @@ proposal's status header must also record
 that made this mandatory: the pre-commit hook re-rendered the map on
 every commit while its hand-maintained data tables drifted for days).
 
+## 2026-09-04T23:36:56Z — The variational-transfer family's adversarial fence audit (terminal)
+
+**Run:** `20260904T225018Z-run-1`  
+**Session:** `ses_f91628a09ffet5PEiih6q7y4mG`  
+**Status:** completed  
+**Milestone:** The audit method's fifteenth application — the
+variational-transfer family (`VariationalTransfer.lean`), the prior
+terminal handoff's named top survey target, confirmed by this run's
+own independent reverse-import consumption survey (13 transitive
+non-QA consumers; the top tier's only fully pre-discipline QA at 170
+lines with zero negative witnesses).
+
+**Changes:** QA-only — `VariationalTransfer_QA.lean`'s new
+`TransferFences` section, a pure 1126-line insertion plus three QA
+imports (`Normalized_QA`, `KernelBridge_QA`, `DegreeSandwich_QA`,
+reusing the delivered negative-degree/zero-degree/asymmetric,
+signed-path, and K₂ fixture pins): 27 hypothesis-form fences over the
+shelf's *unfenced* clause surface (the Cheeger-statement clauses and
+the mul-form sandwich/window clauses were already fenced by
+`IrregularFences` and `DegreeSandwich_QA`), with 12 explicit isolation
+companions plus fixture-pin isolation evidence, at three local
+fixtures (`vtSigAdj`, `vtZeroAdj`, `vtNegCutAdj`). Headline findings,
+each a first witness: the quotient bracket's sign-flip on signed input
+(the docstring's own warning — `−2/3 ≤ −1` false at the connected
+negative cut with every other hypothesis genuine), the connectivity
+transfer's `hnn` (connected signed support with a two-dimensional
+normalized kernel forcing `λ₂ ≤ 0`), and the signed normalized
+Laplacian dipping below zero (bottom eigenvalue `≤ −1`). Non-fenceable
+classes recorded with mechanisms (two P4s, display-entanglement,
+choice-entanglement, one screening). Records: the proposal (COMPLETE +
+delivery record with five technique findings), `proposals/README.md`
+(new Delivered row), README (5240 + the audit clause), the radar (QA
+row synced, held 4.5), `index/map/spectral_graph.md`, the backlog
+item-2 note, the scoreboard verification row, both map data tables +
+regenerated SVG, the execution plan. Nothing committed; the prior
+runs' uncommitted deliveries preserved.
+
+**Verification:** `wip/vtfences_spike.lean` iterated to zero
+errors/zero warnings over five fix rounds (all in recorded trap
+classes) before any shelf edit; `lake env lean` on the landed module
+(zero errors, zero warnings); explicit `lake build` on the QA target ✔;
+`#print axioms` via `wip/vtfences_axcheck.lean` — all 127 new
+declarations exactly `propext, Classical.choice, Quot.sound`, zero
+contact with the 4 admitted axioms, no `-- @refutes` tags (theorem
+instantiations, nothing admitted consumed); **full `lake build` ✔
+immediately followed by `check_build_completeness.py` — 133 source
+files, 133 fresh artifacts, 0 stale, 0 missing, exit 0**;
+`lint_axioms` exit 0; `check_refutation_independence` (9-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_backlog_freshness` clean; scoreboard
+regenerated (**5240/4/0**) with the verification row;
+`check_scaffold_map_freshness` exit 0 after the 5116 → 5240 stats
+sync in both map data tables and SVG regeneration (49 stations, no
+status change — none owed).
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. QA proves consequences relative to the
+substrate; it does not prove the substrate (no axiom touched). Honest
+scope: the shelf's falsification surface is complete except the
+recorded non-fenceable classes; the new QA-to-QA import chain verified
+fresh across all four modules in the full build.
+
+**Next handoff:** the Active table remains all-Low and every standing
+frontier stays decision- or consumer-gated exactly as the prior
+handoff recorded. The audit method's natural next targets by this
+run's fresh survey numbers: `Resolvent` (16 consumers — the largest
+remaining unaudited shelf, its 1153-line QA's free-form negative
+witnesses needing reconciliation into the fence discipline) and
+`PerronFrobenius` (7 consumers); `Exhaustive_QA.lean`'s free-form
+witness layer remains the separately-recorded target. The generic
+pieces landed here (the √-entry normalization chain
+`vtf_sqrt_four`/`vtf_inv_sqrt_two`, and the
+`exists_ne_mem_rayleigh_ge_of_finrank_eq` kernel-dimension route for
+λ₂ bounds without PSD) are reusable by future audits touching signed
+spectra or connectivity-transfer clauses.
+
+## 2026-09-04T22:50:18Z — The variational-transfer family's adversarial fence audit (in-progress; terminal entry above)
+
+**Run:** `20260904T225018Z-run-1`  
+**Session:** `ses_f91628a09ffet5PEiih6q7y4mG`  
+**Status:** in-progress  
+**Milestone:** The audit method's fifteenth application — the
+variational-transfer family (`VariationalTransfer.lean`), the prior
+terminal handoff's named top target. This run's independent
+reverse-import consumption survey confirmed the handoff's numbers
+(13 transitive non-QA consumers, behind only Resolvent's 16 whose QA
+already carries free-form negative witnesses; the top tier's only
+fully pre-discipline QA at 170 lines). Center-out leverage: the shelf
+is the SGT-center transfer layer the irregular Cheeger pair, the
+Fiedler capstone, and the degree sandwich all consume.
+
+**Changes (intent):** QA-only — a priced 26-fence adversarial pass over
+the shelf's *unfenced* clause surface (the transfer-engine layer, the
+connectivity-transfer `hnn` clauses, the sandwich's pointwise engines),
+reusing `Normalized_QA`'s delivered negative-degree/iso/asym fixture
+pins and `KernelBridge_QA`'s signed-path pins by import; the
+Cheeger-statement and mul-form sandwich clauses are already fenced by
+`IrregularFences` and `DegreeSandwich_QA` and are out of scope.
+Zero axiom contact intended (count stays 4).
+
+**Verification (planned):** spike in `wip/vtfences_spike.lean` to zero
+errors/zero warnings; `lake env lean` on the landed module; the
+axiom audit via a generated `wip/` check file; full `lake build` +
+`check_build_completeness.py`; the standing lint/citation/link/map
+ladder; scoreboard regeneration and records sync.
+
+**Next handoff:** land the fences, run the ladder, update records
+(proposal COMPLETE row, README, radar, index/map, backlog note,
+scoreboard, map tables + SVG, this plan, terminal log entry).
+
+## 2026-09-04T21:48:57Z — The normalized-Laplacian family's adversarial fence audit (terminal)
+
+**Run:** `20260904T211519Z-run-1`  
+**Session:** `ses_f91be1675ffeQoVWVaTEPa5fHp`  
+**Status:** completed  
+**Milestone:** the opening entry's milestone delivered at the full
+priced scope — the adversarial fence audit of the normalized-Laplacian
+family (`Normalized.lean`'s congruence bridge, degenerate-degree
+corners, walk form, eigenpair transfer, conjugated-power transfer), the
+audit method's fourteenth application, picked by a fresh full-repo
+Step-0 consumption survey (20 transitive non-QA consumers — the
+library's most-consumed unaudited shelf, correcting the prior survey's
+candidate-list artifact; Resolvent 16 and VariationalTransfer 13 also
+outrank every handoff-named candidate). All 27 priced fences closed
+with packaged isolation companions; QA-only, pure hard crust: QA
+5045 → 5116 (+71), zero axiom contact (count stays 4).
+
+**Changes:** one pure insertion — the `AdversarialFences` section of
+`Scaffold/QA/SpectralGraph/Normalized_QA.lean` (+903/0 in numstat,
+plus the Purpose-block sentence); spiked first in
+`wip/nfences_spike.lean` to zero errors/zero warnings (six fix rounds,
+all in recorded trap classes). 75 new declarations: 27 fences +
+companions, the four new fixtures (`nfNegEdge = !![-2,1;1,0]]` — the
+headline; `nfIso` — symmetric `K₂ ⊕ isolated`; `nfNegI = diag(−1,−1)`;
+`nfAsymAdj = !![0,2;1,0]]`), and the pin layer (matrix pins, action
+pins, the orthonormality-witness lemma `nf_basis_second`, the
+`walkEvals` transport). Headline finding, forced by the spike: the
+originally priced Fin 3 fixture was accidentally asymmetric, and
+repairing it exposed a **P4-class truth at scale** — at symmetric
+zero-degree fixtures the dropped-`hd` statements of the congruence
+bridge, left-multiplied congruence, commutation form, and power
+transfer are *provable* (the junk kills both sides identically); the
+genuine breaker is the negative-degree row, where `(deg)⁻¹` stays
+genuine while the square-root factors vanish. The single rational
+Fin 2 fixture `nfNegEdge` (`L_sym` = identity, `P = !![2,−1;1,0]]`)
+kills fifteen clauses including the transfer trio at genuine
+eigen-hypotheses, the eigenbasis instantiations D1/D2 at an
+orthonormality-witness index (no eigenvalue pin), the expansion D3
+(coefficient vector `√D *ᵥ e₀ = 0`), and the existential D4
+(`walkEvals = 0` via `evals_congr`+`evals_one`, dead by the pinned
+`P`'s row equations). Non-fenceables recorded: the
+`eigvecOf`/`walkEvals` display-entangled `hA`/`hM` clauses.
+
+**Verification:** spike first (`wip/nfences_spike.lean`, iterated to
+zero errors/zero warnings over six fix rounds — technique findings
+recorded in the proposal: constant matrix rows defeat `simp`'s entry
+reduction into `vecHead (vecTail (fun i => 0))`, the robust route the
+explicit cons/tail/head chain; `norm_num [Matrix.transpose_apply,
+fixture]` closes literal-matrix symmetry where `simp` does not; a
+deg-pin and the fixture name cannot share one `simp only` set;
+`decide +kernel` does not exist in the pinned Lean; `push_neg` on
+`¬∃` yields a ∀ to be applied, not projected); `lake env lean` on the
+landed module (zero errors, zero warnings); explicit `lake build
+Scaffold.QA.SpectralGraph.Normalized_QA` ✔ (the only warning is the
+shelf `Normalized.lean`'s own pre-existing `congr 1` linter note);
+the 75-declaration axiom audit via `wip/nfences_axcheck.lean` — every
+one exactly `propext, Classical.choice, Quot.sound`; **full `lake
+build` ✔ immediately followed by `check_build_completeness.py` — 133
+source files, 133 fresh artifacts, 0 stale, 0 missing, exit 0**;
+`lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (9-tag clean); `check_public_reachability`
+clean (63 modules); `check_citations`; `check_markdown_links`;
+`check_backlog_freshness`; scoreboard regenerated (**5116/4/0**) with
+the verification row; map-freshness exit 0 after the 5045 → 5116
+stats sync + SVG regeneration (49 stations, no status change — none
+owed). Records updated: the proposal (COMPLETE + delivery record),
+`proposals/README.md` (new Delivered row), README (5116 + the
+walks-and-mixing row's audit clause), the radar (QA row synced, held
+4.5), `index/map/spectral_graph.md` (the audit paragraph), the
+backlog item-2 falsification-surface note, the scoreboard verification
+row, both map data tables + regenerated SVG, the execution plan, and
+this log. Nothing committed; the prior runs' uncommitted deliveries
+preserved.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. QA proves consequences relative to the
+substrate; it does not prove the substrate (no axiom touched). Honest
+scope: `Normalized.lean`'s falsification surface is complete;
+`Exhaustive_QA.lean`'s own partial negative-witness layer over the
+same interfaces was not re-read (a separate audit target).
+
+**Next handoff:** the Active table stays all-Low and the standing
+frontiers remain decision- or consumer-gated. The audit method's
+natural next targets by this run's full-repo survey numbers:
+`VariationalTransfer_QA` (13 consumers, the only fully pre-discipline
+QA of the top three) and `Resolvent_QA` (16 consumers, free-form
+negative witnesses never adversarially re-read) — a fresh survey
+should confirm; `PerronFrobenius_QA` (7) heads the next tier. The
+generic pieces (the index-disjunction rcases-rfl idiom, the
+orthonormality-witness index existence argument) are reusable by any
+future audit touching literal-matrix or eigenbasis clauses.
+
+------
+
+## 2026-09-04T21:15:19Z — The normalized-Laplacian family's adversarial fence audit
+
+**Run:** `20260904T211519Z-run-1`  
+**Session:** `ses_f91be1675ffeQoVWVaTEPa5fHp`  
+**Status:** in-progress  
+**Milestone:** the prior terminal handoff's directed fresh Step-0
+consumption survey over the remaining pre-discipline QA families, run
+in full for the first time (a reverse-import walk over every unaudited
+shelf rather than the handoff's named list) and delivered at its pick:
+the normalized-Laplacian family (`Normalized.lean`'s congruence bridge,
+degenerate-degree corners, walk form, eigenpair transfer, conjugated
+power — 20 transitive non-QA consumers, the library's most-consumed
+unaudited shelf, above Resolvent 16 and VariationalTransfer 13), the
+audit method's fourteenth application. 27 priced clause-fences across
+five fixtures; QA-only, zero axiom contact planned.
+
+------
+
+## 2026-09-04T20:08:50Z — The Davis–Kahan core perturbation family's adversarial fence audit (terminal)
+
+**Run:** `20260904T192751Z-run-1`  
+**Session:** `ses_f9223268cffefyiCvMzysStD3G`  
+**Status:** completed  
+**Milestone:** the opening entry's milestone delivered at 20 of the 22
+priced fences — the adversarial fence audit of the Davis–Kahan core
+perturbation family (the retirement chain `DavisKahan.lean` +
+`Weyl.lean` + `Duhamel.lean`'s four proof-load-bearing theorems +
+`ProjectionGap.lean`'s equal-rank identities), the audit method's
+thirteenth application, picked by the fresh Step-0 consumption survey
+(the four shelves carry 4/6/6/7 transitive non-QA consumers — the four
+most-consumed unaudited surfaces in the library — vs 0 for every other
+candidate). QA-only, pure hard crust: QA 4974 → 5045 (+71), zero axiom
+contact (count stays 4).
+
+**Changes:** three pure insertions — the fence sections of
+`Scaffold/QA/Perturbation/DavisKahan_QA.lean` (481/0; D1–D2, H1–H8),
+`Weyl_QA.lean` (256/0; W1–W2 at a self-contained diagonal fixture), and
+`ProjectionGap_QA.lean` (378/0 + one import line; P1–P8, consuming the
+H-section's `dkfDiag2` fixture by import — same-namespace QA files
+cannot redeclare shared names). 79 declarations (77 public = 71
+theorems + 6 fixture `def`s, plus 2 private helpers audited
+transitively). Headline fences: the Duhamel bound's `hcl` refuted at
+the inflated window `b = 100` through a **new threshold-`1` projector
+pin** (the window `(−∞,1]` captures exactly the `−1/4` eigenspace, so
+`Q` at `1` is the delivered pin's own matrix — no new eigenvector
+analysis), the witness `(1−Q)P *ᵥ e₀ = ![1/10, 3/10]` squaring the
+left side at `≥ 1/10 > (3/400)²`; the sin-Θ bound's `hδ` and the
+Duhamel `hab` at negative-denominator corners (a nonnegative norm below
+a negative bound); the gap-stability `hnorm` at the gap-shrinking
+`diag(0,−1)` (`1 ≥ 3/2` demanded); the zero-matrix tie refuting the
+rank pin's no-tie clause (`rank 2 ≠ 1` through `spectralProjector_eq_one`);
+the trivial endpoint's four clauses at asymmetric-idempotent
+(`‖P‖² ≥ 5`) and symmetric-non-idempotent (`‖P‖² ≥ 4`) fixtures; and
+eight of the ten equal-rank-identity clauses at trivial fixtures through
+witness-vector norm bounds and one exact projector-norm sandwich.
+Recorded non-fenceables/deferrals: the signature-entangled
+`hA`/`hAE`/`hM`/`hk` class; a **distinct proof-term-in-display
+mechanism** first isolated here (the Weyl additive pair's `hcard` is
+consumed by the conclusion's own `by omega` Fin-index proof — the
+dropped statement does not elaborate); and the core identity's
+`hP`/`hQ` deferred with the zero-residual analysis (an idempotent of
+equal rank with vanishing `(1−Q)P` has `range P = range Q`, forcing
+`(1−P)Q = 0` too — both computed rank-1 oblique cases came out equal,
+suggesting truth-removability).
+
+**Verification:** spike first (`wip/dkfences_spike.lean`, iterated to
+zero errors/zero warnings over seven fix rounds, all in recorded trap
+classes — headline: `norm_num at hcon` drifts `Fin`-literal displays,
+the robust route being `le_trans (norm_nonneg _)` + numeric work on
+separate closed goals; also a term-mode type mismatch surfacing as a
+whnf *timeout* anchored at the theorem's statement line, and the
+stale-olean trap: `lake env lean` needs changed QA dependencies
+`lake build`-ed first); `lake env lean` on all three landed modules
+(zero errors, zero warnings); explicit `lake build` on all three QA
+targets; the 77-public-declaration axiom audit via
+`wip/dkfences_axcheck.lean` — every one exactly `propext,
+Classical.choice, Quot.sound`; **full `lake build` ✔ immediately
+followed by `check_build_completeness.py` — 133 source files, 133
+fresh artifacts, 0 stale, 0 missing, exit 0** (the build's only
+warnings are the pinned Mathlib package's own upstream doc-string
+linter notes, present before this delivery); `lint_axioms` exit 0
+(4 axioms unchanged); `check_refutation_independence` (9-tag clean);
+`check_public_reachability` clean (63 modules); `check_citations`;
+`check_markdown_links`; `check_backlog_freshness`; scoreboard
+regenerated (**5045/4/0**) with the verification row; map-freshness
+exit 0 after the 4974 → 5045 stats sync + SVG regeneration (49
+stations, no status change — none owed). Records updated: the proposal
+(COMPLETE + delivery record with seven technique findings),
+`proposals/README.md` (new Delivered row), README (5045 + the
+perturbation row's audit clause), the radar (QA axis synced, held
+4.5), `index/map/perturbation.md` (audit paragraphs in the four
+affected sections), the backlog item-2 falsification-surface note, the
+scoreboard verification row, both map data tables + regenerated SVG,
+the execution plan, and this log. Nothing committed; the prior runs'
+uncommitted deliveries preserved.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. QA proves consequences relative to the
+substrate; it does not prove the substrate (no axiom touched). Honest
+scope: the core chain's falsification surface is complete except the
+two recorded deferrals and the `BandDavisKahan` shelf's own clause
+surface (0 non-QA consumers; its four QA files carry one
+delivery-scoped fence each — a separate future audit).
+
+**Next handoff:** the Active table stays all-Low and the standing
+frontiers remain decision- or consumer-gated. The audit method's
+natural next targets, by this survey's numbers: the `BandDavisKahan`
+QA family's shelf-clause surface, `Poincare_QA` (0 consumers, 663
+lines), and `SpectralCertificates_QA` (0, 498 lines) — a fresh Step-0
+consumption survey should again pick. The generic pieces landed here
+(the window-equality route to new projector pins, the trace-based
+eigenvalue-index existence argument, and the projector-norm-sandwich
+alternative to evals pins) are reusable by any future audit touching
+projector or spectrum clauses.
+
+------
+
+## 2026-09-04T19:27:51Z — The Davis–Kahan core perturbation family's adversarial fence audit
+
+**Run:** `20260904T192751Z-run-1`  
+**Session:** `ses_f9223268cffefyiCvMzysStD3G`  
+**Status:** in-progress  
+**Milestone:** the prior terminal handoff's named fresh Step-0
+consumption survey over the remaining pre-discipline QA families,
+delivered at its pick — the adversarial fence audit of the Davis–Kahan
+core perturbation family (the retirement chain `DavisKahan.lean` +
+`Weyl.lean` + `Duhamel.lean`'s load-bearing theorems +
+`ProjectionGap.lean`'s equal-rank identities), the audit method's
+thirteenth application. Survey: the four shelves carry 4/6/6/7
+transitive non-QA consumers (ProjectionGap the most-consumed unaudited
+shelf in the library) vs 0 for every other candidate; all three QA
+files predate the adversarial-review discipline with zero fences.
+22 priced clause-fences, QA-only, zero axiom contact planned.
+
+------
+
+## 2026-09-04T16:49:30Z — The sparsification core family's adversarial fence audit (terminal)
+
+**Run:** `20260904T160913Z-run-1`  
+**Session:** `ses_f92debbe6ffeU5TO6eNLX6pvSs`  
+**Status:** completed  
+**Milestone:** the opening entry's milestone delivered at the full
+priced scope — the adversarial fence audit of the sparsification core
+family (`Sparsification.lean`'s entire deterministic theorem surface
+plus its pre-discipline QA), the audit method's eleventh application,
+the electrical cluster's fifth and last family (the `ResistanceMetric`
+consumer set the cluster feeds). All 15 priced fences closed with
+hypothesis-form negative witnesses plus isolation companions, and with
+this delivery **the electrical cluster's falsification surface is
+complete in full**. QA-only, pure hard crust: QA 4876 → 4931 (+55),
+zero axiom contact (count stays 4).
+
+**Changes:** one pure insertion — the `CoreFences` section of
+`Scaffold/QA/SpectralGraph/Sparsification_QA.lean` (958/0 in numstat,
+plus one import line and a Purpose-block paragraph); spiked first in
+`wip/spfences_spike.lean` to zero errors/zero warnings (three fix
+rounds, all in recorded trap classes). 61 new declarations: 15 fences +
+isolation companions, the two new fixtures (`cfAsymAdj` — asymmetric
+`Fin 2`; `cfSgAdj` — nonpositive-spectrum `Fin 3`), and the
+engine/pin layer. Headline fences: the ordered-pair budget identity at
+the delivered rank-1 signed 4-cycle (`L = (1,−1,−1,1)(1,−1,−1,1)ᵀ`
+pinned entrywise, the eigenspace-dimension-1 engine giving the single
+genuine eigenvalue `4`, each positive ordered pair's leverage exactly
+`1/8`, total `1 ≠ 3 = card − 1` — Foster genuinely needs nonnegative
+weights); the projector trio and the exact deviation identity at the
+nonpositive fixture through one mechanism (every eigenvalue `≤ 0`
+zeroes every edge vector: zero rank-one sum against the nonzero
+projector, trace `1 ≠ 2`, deviation `0 − Π = 0`); the leverage-share
+identity at the signed fixture's negative pair (junk-`√` zero vector
+against `(−1)(−2)/2 = 1`); the trace identity's `hconn` at the
+disconnected `K₂ ⊕ K₂` through the delivered Foster kernel-count
+engine; the Dirichlet identity's `hA` (`3 ≠ 4`); and the sampling
+layer's seven `hq` clauses plus the second moment's `hpne` at `K₂`.
+Headline non-fenceable recorded with mechanism: **the junk-`√` zero
+edge vector is an automatic sign guard** — a negative-weight pair's
+zero edge vector forces probability `0` and weight `δ/0 = 0`, so the
+sampled Laplacian's PSD theorem survives without nonnegativity. Two
+priced follow-ons recorded with mechanisms (the variance-norm bound
+theorems' `hnn` — witness exists at `q > 4` but needs index-resolved
+`√6`-irrational eigen pins; `quadForm_ssLaplacian_eq`'s `hnn`, `16 ≠ 8`
+on the delivered engine). Records: the proposal (COMPLETE + delivery
+record with five technique findings, headline: `norm_num` destroys
+smul-heavy dot-product hypotheses into DNF — compute through a named
+lemma), `proposals/README.md` (new Delivered row), README (4931 + the
+sparsification row's audit clause), the radar (QA axis synced to 4931,
+held 4.5 per protocol), `index/map/spectral_graph.md` (the
+`Adversarial fences` subsection), the backlog item-2 note (the
+electrical cluster complete), the scoreboard verification row, both map
+data tables + regenerated SVG, the execution plan, and this log.
+Nothing committed.
+
+**Verification:** spike to zero errors/zero warnings before any shelf
+edit; `lake env lean` zero errors/zero warnings on the landed module;
+explicit `lake build Scaffold.QA.SpectralGraph.Sparsification_QA` ✔;
+**`#print axioms` via `wip/spfences_axcheck.lean` on all 57 public
+declarations — every one exactly `propext, Classical.choice,
+Quot.sound`** (the four private helpers audited transitively; no
+`-- @refutes` tags — theorem instantiations, nothing admitted
+consumed); **full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 133 source files, 133 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+current axioms, unchanged; only the allowlisted-confirmed PF finding);
+`check_refutation_independence` (9-tag clean — no tags touched);
+`check_public_reachability` clean (63 repo modules);
+`check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; `check_backlog_freshness` clean;
+scoreboard regenerated (**4931/4/0**) with the verification row;
+map-freshness exit 0 after the 4876 → 4931 stats sync in both map
+files and SVG regeneration (49 stations, no status change — none
+owed). The landing verified a pure insertion (958/0 in numstat).
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. QA proves consequences relative to the
+substrate; it does not prove the substrate (no axiom touched). Honest
+scope: the two priced follow-ons and the axiom-backed tail theorems'
+own clause re-read are recorded in the proposal with mechanisms
+precise enough to reopen deliberately.
+
+**Next handoff:** the Active table stays all-Low and the standing
+frontiers remain decision- or consumer-gated (the QA axis's randomized
+half; the priced undirected `walkTVPair` join; the sharp `|λ₂| = α`
+layer; the reverse TV → χ² calculus; the multiway hard direction and
+clean-room items behind human decisions). The audit method's natural
+next targets are the remaining pre-discipline QA families outside the
+now-complete electrical cluster — the
+`SpectralCertificates`/`Band`/`ClusterProjector` neighborhood and the
+Poincaré family are the plausible candidates; a fresh Step-0
+consumption survey should pick. The generic pieces landed here (the
+rank-one engines `spF_at_most_one_nonzero`/`spF_dot_smul_smul`, the
+`Finset.sum_eq_single` eigen-collapse idiom, and the
+`simp only [ssMeasure]`-before-`measure_univ` instance route) are
+reusable by any future audit touching rank-one spectra or Bernoulli
+design integrals.
+
+## 2026-09-04T16:09:13Z — The sparsification core family's adversarial fence audit (opening)
+
+**Run:** `20260904T160913Z-run-1`  
+**Session:** `ses_f92debbe6ffeU5TO6eNLX6pvSs`  
+**Status:** in-progress  
+**Milestone:** the prior terminal handoff's named next target — the
+adversarial fence audit of the sparsification core family
+(`Sparsification.lean`'s deterministic theorem surface plus its
+pre-discipline QA), the audit method's eleventh application, the
+electrical cluster's fifth and last family (the `ResistanceMetric`
+consumer set the cluster feeds). Step-0 survey prices ~15 further
+load-bearing clauses with no negative witness anywhere in the repository
+(the `hnn` clauses of the eigenvalue/leverage/budget/projector/deviation
+layer, the Dirichlet identity's `hA`, eight `hq` clauses of the
+probability/weight/variance layer, the second moment's `hpne`, the
+strict dot-positivity `hv`), plus recorded non-fenceables — headline
+mechanism: the junk-√ zero edge vector acts as an *automatic sign guard*
+on the sampled Laplacian's PSD theorem. QA-only, zero axiom contact
+planned (count stays 4); spike first in `wip/`, land as pure insertion
+in `Sparsification_QA.lean`.
+
+## 2026-09-04T14:51:37Z — The kernel-bridge family's adversarial fence audit (terminal)
+
+**Run:** `20260904T141530Z-run-1`  
+**Session:** `ses_f9339f4e0ffeTK4EVFefO84ern`  
+**Status:** completed  
+**Milestone:** the opening entry's milestone delivered at the full
+priced scope — the adversarial fence audit of the kernel-bridge family
+(the kernel-equality bridge plus the weighted center characterization
+chain it consumes, the most-consumed kernel API on the shelf), the
+prior terminal handoff's named next target. 12 fences + isolation
+companions at three new fixtures (a Fin 2 negative edge with edgeless
+support; a Fin 3 signed path with *connected* support, keeping the
+`hconn` co-hypothesis genuine; a Fin 3 asymmetric nonnegative sink
+star killing the family's only `supportGraph`-free statement's `hA`).
+QA-only, pure hard crust: QA 4817 → 4876 (+59), zero axiom contact
+(count stays 4).
+
+**Changes:** one pure insertion — the `BridgeFences` section of
+`Scaffold/QA/SpectralGraph/KernelBridge_QA.lean` (558/0 in numstat,
+plus a Purpose-block sentence); spiked first in
+`wip/kbfences_spike.lean` to zero errors/zero warnings (five fix
+rounds, all in recorded trap classes). 65 new declarations (59
+theorems + the three fixture `def`s and three walk `def`s). The
+headline fences: the center iff's `hnonneg` killed in **both
+directions** (the ← direction junk-trivial at the edgeless-support
+negative edge; the → direction by the kernel vector `![1,2,3]`,
+genuinely killed yet nonconstant on *connected* signed support); the
+kernel-equality bridge killed in **both orientations** (`![1,0]` in
+the edgeless `lapMatrix` kernel but not the weighted kernel;
+`![1,2,3]` the other way); the dimension statement killed at **two
+witnesses** (`finrank 1 ≠ 2` with the kernel pinned exactly
+`ℝ ∙ ![1,1]`; `2 ≤ finrank ≠ 1` by the linearly independent kernel
+pair); the span/exists-const forms with `hconn` genuine; the
+pos-weight engine's `hnonneg` at the mechanism level (`0 < A 0 1`
+genuine, `L *ᵥ ![1,2,3] = 0` genuine, `1 ≠ 2` — the termwise-vanishing
+step of the Dirichlet identity is exactly where nonnegativity
+enters); and the pos-weight engine's `hA` — the family's only
+`supportGraph`-free statement, `hA` proof-internal so the dropped
+statement is well-formed — at the asymmetric *nonnegative* sink star
+where every other hypothesis is genuine: **symmetry load-bearing at
+the quadratic-form step, not merely at the `supportGraph` display**.
+Non-fenceables recorded with mechanisms (the statement-entangled
+`hA`s, the basis def's signature-consumed hypotheses, the already-
+fenced `hconn` clauses, degenerate corners screened). Records: the
+proposal (COMPLETE + delivery record with five technique findings,
+headline: `fin_cases` leaves eta-wrapped `Fin` literals defeating
+`rw` of `rfl`-entry lemmas), `proposals/README.md` (new Delivered
+row), README (4876 + the electrical row's kernel-bridge clause), the
+radar (QA axis synced to 4876, held 4.5),
+`index/map/spectral_graph.md` (fences paragraph), the backlog item-2
+note, the scoreboard verification row, both map data tables + SVG,
+the execution plan, and this log. Nothing committed.
+
+**Verification:** spike to zero errors/zero warnings before any shelf
+edit; `lake env lean` zero errors/zero warnings on the landed module;
+explicit `lake build Scaffold.QA.SpectralGraph.KernelBridge_QA` ✔;
+**`#print axioms` via `wip/kbfences_axcheck.lean` on all 65 new
+declarations — every one exactly `propext, Classical.choice,
+Quot.sound`** (no `-- @refutes` tags — theorem instantiations,
+nothing admitted consumed); **full `lake build` ✔ immediately
+followed by `check_build_completeness.py` — 133 source files, 133
+fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0
+(4 current axioms, unchanged; only the allowlisted-confirmed PF
+finding); `check_refutation_independence` (9-tag clean — no tags
+touched); `check_public_reachability` clean (63 repo modules);
+`check_citations` ("All axioms have proper citations!");
+`check_markdown_links` clean; `check_backlog_freshness` clean;
+scoreboard regenerated (**4876/4/0**) with the verification row;
+map-freshness exit 0 after the 4817 → 4876 stats sync in both map
+files and SVG regeneration (49 stations, no status change — none
+owed).
+
+**Remaining risk:** none owed by the delivery — QA-only, no axiom
+disposition changed, no public statement changed. QA proves
+consequences relative to the substrate; it does not prove the
+substrate (no axiom touched).
+
+**Next handoff:** the Active table stays all-Low and the standing
+frontiers remain decision- or consumer-gated (the QA axis's
+randomized half; the priced undirected `walkTVPair` join; the sharp
+`|λ₂| = α` layer; the reverse TV → χ² calculus; the multiway hard
+direction and clean-room items behind human decisions). The audit
+method's natural next target in the electrical cluster's consumption
+order: the **`ResistanceMetric` consumer set** — the cluster's last
+unaudited QA surface, after which the electrical cluster's
+falsification surface is complete and the method's next applications
+move to the remaining pre-discipline QA families elsewhere (a fresh
+Step-0 consumption survey should pick).
+
+## 2026-09-04T14:25:26Z — The kernel-bridge family's adversarial fence audit (opening)
+
+**Run:** `20260904T141530Z-run-1`  
+**Session:** `ses_f9339f4e0ffeTK4EVFefO84ern`  
+**Status:** in-progress  
+**Milestone:** the prior terminal handoff's named next target — the
+adversarial fence audit of the kernel-bridge family
+(`SimpleGraphAdapter.lean`'s kernel-equality bridge plus the weighted
+center characterization chain it consumes), the electrical cluster's
+smallest remaining QA family and the audit method's tenth application.
+Step-0 survey prices 12 fences at three new fixtures (a Fin 2 negative
+edge with edgeless support; a Fin 3 signed path with *connected*
+support; a Fin 3 asymmetric nonnegative sink-star killing the family's
+only `supportGraph`-free statement's `hA`); the family's every
+`hnonneg` clause currently has no negative witness anywhere in the
+repository. QA-only, zero axiom contact planned (count stays 4); spike
+first in `wip/`, land as pure insertion in `KernelBridge_QA.lean`.
+
+**Changes:** none yet — intent recorded; the priced survey is in
+`proposals/adversarial-fences-kernel-bridge-family.md`.
+
+**Verification:** pending (spike → land → full ladder).
+
+**Next handoff:** spike `wip/kbfences_spike.lean` to zero errors/zero
+warnings, then land.
+
 ## 2026-09-04T13:14:31Z — The Foster family's adversarial fence audit (terminal)
 
 **Run:** `20260904T125102Z-run-1`  
@@ -11507,3 +12081,444 @@ calculus). The audit method's natural next targets, if no gate opens,
 are the other pre-discipline QA families outside the mixing cascade —
 priced but not pursued here (this run consumed its budget on the
 highest-consumption cluster).
+
+## 2026-09-04T17:56:35Z — The band-projector family's adversarial fence audit (in progress)
+
+**Run:** `20260904T175635Z-run-1`  
+**Session:** `ses_f9274ad0fffe9WGfaQ7Wf2bO1d`  
+**Status:** in-progress  
+**Milestone:** the audit method's twelfth application — over
+`Band.lean` + `ClusterProjector.lean` and their pre-discipline QA, the
+Step-0 consumption survey's pick among the remaining pre-discipline
+families (3 transitive non-QA consumers feeding the set-form
+Davis–Kahan bridge, vs 0 for the alternatives). Priced at 22 band + 7
+cluster hypothesis-form fences plus companions at the delivered
+fixtures; QA-only, zero axiom contact planned (count stays 4). Next
+action: spike `wip/bpfences_spike.lean` to zero errors/zero warnings,
+then land as pure insertions in `Band_QA.lean` and
+`ClusterProjector_QA.lean`.
+
+## 2026-09-04T18:18:55Z — The band-projector family's adversarial fence audit (terminal)
+
+**Run:** `20260904T175635Z-run-1`  
+**Session:** `ses_f9274ad0fffe9WGfaQ7Wf2bO1d`  
+**Status:** completed  
+**Milestone:** the in-progress entry's milestone delivered in full —
+the audit method's twelfth application, over the band-projector
+neighborhood (`Band.lean` + `ClusterProjector.lean`) selected by the
+directed fresh Step-0 consumption survey (3 transitive non-QA
+consumers feeding the set-form Davis–Kahan bridge vs 0 for the
+alternatives; both QA files predating the adversarial-review
+discipline). All 29 priced fences (22 band + 7 cluster) closed with
+hypothesis-form negative witnesses plus isolation companions.
+QA-only, pure hard crust: QA 4931 → 4974 (+43), zero axiom contact
+(count stays 4).
+
+**Changes:** two pure insertions — the `BandFences` section of
+`Scaffold/QA/SpectralGraph/Band_QA.lean` (35 declarations, 469/0 in
+numstat) and the `ClusterFences` section of
+`Scaffold/QA/Perturbation/ClusterProjector_QA.lean` (9 declarations,
+141/0), each plus one Purpose-block sentence; spiked first in
+`wip/bpfences_spike.lean` to zero errors/zero warnings (five fix
+rounds, all in recorded trap classes). Headline mechanism: one object,
+the negated junk band `B(4,0] = P_0 − P_4 = −1`, kills eleven clauses
+— idempotence (`(−1)² ≠ −1`), both annihilation `hab` clauses,
+the disjointness trio's `hab`/`hcd` and the flipped twin's `hbc`,
+both inner-orthogonality clauses, the residual-orthogonality engine,
+the Hilbert identification (surjective negation range: projection
+`x ≠ −x`), and the closest-point bound (`‖2x‖ ≤ ‖x‖` at the forced
+`y = 0`). The cluster layer: mode selection both directions at
+`{0,11}` on `diag(0,5,11)`, the zero/one corners via delivered pins,
+identical-cluster disjointness, capture-iff against a covering `Ioc`,
+and the band agreement's own docstring corner (`Ioc 6 (−1) = ∅` vs
+`−diag(1,1,0) ≠ 0`). Headline non-fenceable: the shared-mode
+theorem's `hab`/`hcd` — a negated band's fixed space is provably
+trivial, so the dropped-guard statement is *provable* (the P4
+truth-removable class). Five technique findings recorded in the
+proposal (headline: per-branch `norm_num [h]` threshold discharges —
+every `rw [h]; norm_num` variant fails on parse, branch count, or
+rw-closed goals).
+
+**Verification:** `wip/bpfences_spike.lean` iterated to zero
+errors/zero warnings before any shelf edit; `lake env lean` on both
+landed modules (zero errors, zero warnings); explicit `lake build` on
+both QA targets ✔; `#print axioms` via `wip/bpfences_axcheck.lean` —
+all 43 public declarations exactly `propext, Classical.choice,
+Quot.sound` (the private transport helper audited transitively); no
+`-- @refutes` tags (theorem instantiations, nothing admitted
+consumed); **full `lake build` ✔ immediately followed by
+`check_build_completeness.py` — 133 source files, 133 fresh artifacts,
+0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4 axioms
+unchanged); `check_refutation_independence` (9-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_backlog_freshness` clean; scoreboard
+regenerated (**4974/4/0**) with the verification row; map-freshness
+exit 0 after the 4931 → 4974 stats sync in both map data tables and
+SVG regeneration (49 stations, no status change — none owed). Records:
+the proposal (COMPLETE + delivery record), `proposals/README.md` (new
+Delivered row), README (4974 + the cluster-projector row's audit
+clause), the radar (QA axis synced, held 4.5 per protocol — negative
+witnesses of an already-counted family, not a named-gap closure),
+`index/map/spectral_graph.md` (the fences paragraphs in the Band and
+ClusterProjector sections), the backlog item-2 falsification-surface
+note, the scoreboard verification row, both map data tables +
+regenerated SVG, the execution plan, and this log. Nothing committed;
+the prior runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. Honest scope: the band-projector
+neighborhood's falsification surface is complete; the survey's
+remaining pre-discipline families (`Poincare_QA`,
+`SpectralCertificates_QA`, the Davis–Kahan QA files' own shelf
+clauses) are the method's next candidates.
+
+**Next handoff:** the Active table remains all-Low and every standing
+frontier stays decision- or consumer-gated exactly as the prior
+handoff recorded. The audit method's natural next target, per this
+delivery's survey: a fresh Step-0 consumption survey over the
+remaining pre-discipline QA families — `Poincare_QA` (0 non-QA
+consumers, 663 lines), `SpectralCertificates_QA` (0, 498 lines), and
+the Davis–Kahan shelf-clause surfaces (the BandDavisKahan theorems
+the band/cluster families feed are the plausible next-most-consumed
+surface). The Cheeger QA header's stale "hard direction remains
+admitted" sentence remains a one-line records repair for any next run
+touching that file.
+
+## 2026-09-05T00:41:38Z — The resolvent family's adversarial fence audit (intent)
+
+**Run:** `20260905T004138Z-run-1`  
+**Session:** `ses_f90ff2f69ffeA3oqUOZajPQX4v`  
+**Status:** in-progress  
+**Milestone:** The audit method's sixteenth application — the resolvent
+family (`Analysis/OperatorTheory/Resolvent.lean`), the prior terminal
+handoff's named top survey target, confirmed by this run's own fresh
+reverse-import walk (16 transitive non-QA consumers, the largest
+unaudited shelf; QA pre-discipline with five free-form negative
+witnesses).
+
+**Changes:** none yet — recording intent before any edit. Priced scope:
+10 hypothesis-form fences (the bridge `hc` junk corners at Fin 0, the
+invertibility `hpsd` clauses at `M = -1`, both `resolvent_identity`
+determinant clauses, the norm bound's `hpsd`/`ht` clauses at delivered
+fixtures, both Lipschitz `quadForm` clauses with two new diagonal norm
+pins) plus companion/isolation evidence; delivered-witness screenings
+and non-fenceable mechanisms to be recorded per the audit discipline.
+
+**Next handoff:** spike in `wip/`, land pure-insertion in
+`Resolvent_QA.lean`, full verification ladder, records.
+
+## 2026-09-05T00:57:54Z — The resolvent family's adversarial fence audit (terminal)
+
+**Run:** `20260905T004138Z-run-1`  
+**Session:** `ses_f90ff2f69ffeA3oqUOZajPQX4v`  
+**Status:** completed  
+**Milestone:** The audit method's sixteenth application — the resolvent
+family (`Analysis/OperatorTheory/Resolvent.lean`, 14 public theorems),
+the prior terminal handoff's named top survey target, confirmed by this
+run's own fresh reverse-import walk (16 transitive non-QA consumers,
+the library's most-consumed unaudited shelf, feeding the
+Weyl/Duhamel/ProjectionGap chain, Fiedler, Poincaré, PolyFilter,
+Sparsification, MasterBound, and four Derived capstones).
+
+**Changes:** QA-only — `Resolvent_QA.lean`'s new `AdversarialFences`
+section, a pure 535-line insertion (plus a Purpose-block paragraph):
+12 hypothesis-form fences closing the shelf's unfenced clause surface,
+reconciling the pre-discipline QA's five free-form witnesses into the
+fence discipline, with pinned-value companions at two new fixtures
+(`rfZeroM` the `Fin 0` empty matrix, `threeOne = 3I` the Lipschitz
+left-side fixture) and two new diagonal spectrum pins. Headline
+findings, each a first witness: the `Fin 0` corner is the *only*
+`hc` failure corner of both upper norm bridges (vacuous eigenvalue
+clauses against a `‖0‖ = 0` pinned by an independent transport route,
+refuted at `c = -1`); PSD and the shift are separately load-bearing
+for shifted invertibility (`M = -1` / `t = 0` on `lap2`); the resolvent
+identity's determinant clauses separate at a one-sided singular shift
+(`-1 ≠ 0` / `1 ≠ 0` — a both-singular pair collapses both sides
+identically); the norm bound's `t = 0` fence needs an *invertible* PSD
+fixture (the junk inverse of a singular one satisfies the dropped
+statement vacuously — a junk-value-inverts-the-fence instance); both
+Lipschitz `quadForm` clauses separate `4×` (`3 ≤ 3/4`); the injectivity
+trio's jointly dropped clauses fall to the delivered `-1` vs `-1 + E`
+guard. Screened and non-fenceable classes recorded with mechanisms
+(five `hM` signature-entanglements; `hcard` proof-term-in-display;
+individually dropped injectivity determinant clauses P4
+truth-removable). Records: the new proposal (COMPLETE + delivery
+record with five technique findings), `proposals/README.md` (new
+Delivered row), README (5274), the radar (QA row synced, held 4.5),
+`index/map/perturbation.md`, the backlog item-2 note + reviewed-date
+bump, the scoreboard verification row, both map data tables +
+regenerated SVG, the execution plan. Nothing committed; the prior
+runs' uncommitted deliveries preserved.
+
+**Verification:** spike first (`wip/rfences_spike.lean` — the full
+36-declaration delivery, iterated to zero errors/zero warnings over
+three fix rounds, all in recorded trap classes) before any shelf edit;
+`lake env lean` on the landed module (zero errors, zero warnings);
+explicit `lake build Scaffold.QA.OperatorTheory.Resolvent_QA` ✔;
+`#print axioms` via `wip/rfences_axcheck.lean` on all 36 declarations —
+every one exactly `propext, Classical.choice, Quot.sound`, zero contact
+with the 4 admitted axioms; **full `lake build` ✔ immediately followed
+by `check_build_completeness.py` — 133 source files, 133 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0;
+`check_refutation_independence` (9-tag clean — no tags touched);
+`check_public_reachability` clean (63 repo modules); `check_citations`
+clean; `check_markdown_links` clean; `check_backlog_freshness` clean;
+scoreboard regenerated (5274/4/0) with the verification row;
+`check_scaffold_map_freshness` exit 0 (49 stations, stats synced in
+both map data tables, SVG regenerated). The landing verified as a pure
+insertion (535/0 in numstat). QA proves consequences relative to the
+substrate; it does not prove the substrate (no axiom touched).
+
+**Remaining risk:** none owed — QA-only, no axiom disposition or public
+statement changed. The resolvent shelf's falsification surface is now
+complete; the audit's proposal is not a map station's cited source, so
+no station status change was owed (map-freshness confirms).
+
+**Next handoff:** the Active table stays all-Low and the standing
+frontiers remain decision- or consumer-gated. The audit method's
+natural next targets, by the standing survey numbers: `PerronFrobenius`
+(7 transitive non-QA consumers, QA carrying the degenerate-corner
+findings but no fresh hypothesis-necessity pass) and
+`Exhaustive_QA.lean`'s free-form witness layer (a separate audit target
+recorded by the normalized audit). The generic pieces landed here (the
+trivial-space norm-zero pin, the `k.isLt`-simp vacuity idiom for
+`Fin (Fintype.card V)`-quantified hypotheses, the one-sided-junk
+separation pattern) are reusable by future audits touching degenerate
+corners or junk-inverse regimes.
+
+## 2026-09-05T02:01:49Z — The Perron–Frobenius family's adversarial fence audit (intent)
+
+**Run:** `20260905T020149Z-run-1`  
+**Session:** `ses_f90b5fc41ffeyoVZDBjld7GYKp`  
+**Status:** in-progress  
+**Milestone:** The audit method's seventeenth application — the
+Perron–Frobenius family (`LinearAlgebra/PerronFrobenius.lean`: the
+`IsIrreducible` definition and the admitted `perron_frobenius` axiom),
+the prior terminal handoff's named top target, confirmed by this run's
+own fresh reverse-import walk (7 transitive non-QA consumers —
+`IrreducibleStationary`, `PrimitiveConvergence`, `PageRank`,
+`DirectedMixing`, `Mixing`, `Oversmoothing`, `EmpiricalStationary` —
+the highest-ranked unaudited shelf by the standing survey; QA carrying
+the degenerate-corner findings but zero fence sections: no
+hypothesis-necessity pass has ever covered the axiom's three clauses).
+
+**Changes:** none yet — recording intent before any edit. Priced scope:
+hypothesis-form fences for each of the axiom's three hypothesis clauses
+(`hnn` nonnegativity at a negative-diagonal irreducible fixture killed
+through the domination clause; `hirr` irreducibility at a reducible
+nilpotent edge killed through the eigen clause alone; `hex` at the
+`Fin 1` zero matrix killed through positivity-plus-eigen), each with
+`-- @refutes: perron_frobenius` tags (the dropped-clause shapes of a
+currently admitted axiom) and axiom-independent proofs, plus companion
+pins and the `IsIrreducible` definitional interface witness
+(negativity does not create arcs); screening of the delivered
+degenerate-corner and strict-dominance witnesses.
+
+**Next handoff:** price the clause surface in the same-run proposal,
+spike in `wip/pffences_spike.lean`, land a pure insertion in
+`PerronFrobenius_QA.lean`, run the full verification ladder, update
+records.
+
+## 2026-09-05T02:13:27Z — The Perron–Frobenius family's adversarial fence audit (terminal)
+
+**Run:** `20260905T020149Z-run-1`  
+**Session:** `ses_f90b5fc41ffeyoVZDBjld7GYKp`  
+**Status:** completed  
+**Milestone:** The audit method's seventeenth application — the
+Perron–Frobenius family (`LinearAlgebra/PerronFrobenius.lean`: the
+`IsIrreducible` definition and the admitted `perron_frobenius` axiom),
+the prior terminal handoff's named top target, confirmed by this run's
+own fresh reverse-import walk (7 transitive non-QA consumers — the
+directed axis' axiom shelf, feeding `IrreducibleStationary`,
+`PrimitiveConvergence`, `PageRank`, `DirectedMixing`, `Mixing`,
+`Oversmoothing`, `EmpiricalStationary`).
+
+**Changes:** QA-only — `PerronFrobenius_QA.lean`'s new
+`AdversarialFences` section, a pure 367-line insertion (plus the
+Purpose-block paragraph): three tagged hypothesis-form fences closing
+the admitted axiom's *entire* three-clause hypothesis surface, none of
+which had a negative witness anywhere in the repository. Each fence
+refutes the axiom-minus-one-clause shape at a fixture where the kept
+clauses are proven genuine: `hnn` at the negative-diagonal
+irreducible `!![-1,2;2,-1]]` — the audit's pricing headline: the
+fixture's eigen conjuncts stay *satisfiable in isolation* (`r = 1`,
+`x = (1,1)` pinned by the eigen-row sum), so the kill route is
+genuinely the **domination clause** (the pinned complex root `−3` of
+`charpoly = (X−1)(X+3)` forces `3 ≤ 1`); `hirr` at the reducible
+nilpotent edge `!![0,1;0,0]]` (the stranded vertex's zero row, the
+eigen clause alone — the mildest possible kill); `hex` at the
+one-vertex zero matrix `!![0]]` (the module documentation's own named
+corner, now a proved fence rather than a docstring warning). Plus the
+`IsIrreducible` positive-arcs definitional witness `!![0,-2;-2,0]]`
+(negativity creates no arcs) and companion pins (real/complex
+charpoly factorizations, complex roots `{1,−3}`, the `r = 1` eigen
+pin, the `|−3| = 3` modulus pin). Records: the new proposal (COMPLETE
++ delivery record with three technique findings), `proposals/README.md`
+(new Delivered row), README (5307, September 5), the radar (QA row
+synced, held 4.5), `index/map/linear_algebra.md` (the fences bullet),
+the backlog item-2 falsification-surface note, the scoreboard
+verification row, both map data tables + regenerated SVG, the
+execution plan. Nothing committed; the prior runs' uncommitted
+deliveries preserved.
+
+**Verification:** spike first (`wip/pffences_spike.lean` — the full
+38-declaration delivery, iterated to zero errors/zero warnings in one
+fix round, all in recorded trap classes) before any shelf edit; `lake
+env lean` on the landed module (zero errors, zero warnings); explicit
+`lake build Scaffold.QA.LinearAlgebra.PerronFrobenius_QA` ✔; `#print
+axioms` via `wip/pffences_axcheck.lean` on all 38 public declarations
+— every one exactly `propext, Classical.choice, Quot.sound`, zero
+contact with the 4 admitted axioms (the fences refute the axiom's
+dropped-clause shapes without consuming it; the three new
+`-- @refutes: perron_frobenius` tags verified mechanically —
+repository tag count 9 → 12, all clean); **full `lake build` ✔
+immediately followed by `check_build_completeness.py` — 133 source
+files, 133 fresh artifacts, 0 stale, 0 missing, exit 0**;
+`lint_axioms` exit 0 (4 current axioms, unchanged);
+`check_public_reachability` clean (63 repo modules); `check_citations`
+clean; `check_markdown_links` clean; `check_backlog_freshness` clean;
+scoreboard regenerated (5307/4/0) with the verification row;
+`check_scaffold_map_freshness` exit 0 (49 stations, stats synced in
+both map data tables, SVG regenerated, no station status change owed).
+The landing verified as a pure insertion (367/0 in numstat). QA proves
+consequences relative to the substrate; it does not prove the
+substrate (no axiom consumed).
+
+**Remaining risk:** none owed — QA-only, no axiom disposition or
+public statement changed. Honest scope: the Perron–Frobenius shelf's
+falsification surface is complete (three fences covering the entire
+hypothesis surface + the definitional witness + the screened
+corner/strengthening classes); the shelf is small by construction
+(one def + one axiom), and the delivery is proportionately small —
+every priceable clause it has is now closed.
+
+**Next handoff:** the Active table stays all-Low and the standing
+frontiers remain decision- or consumer-gated. The audit method's
+natural next targets: `Exhaustive_QA.lean`'s free-form witness layer
+(the standing handoff's only named audit remainder) and a fresh
+consumption survey over the never-surveyed pre-discipline families —
+this run's own numbers: `Heat` 8 transitive non-QA consumers,
+`RandomWalk` 5, `Stationary` 4, `IrreducibleStationary` 3, `Directed`
+3. The generic pieces landed here (the
+`ReflTransGen.cases_head` one-step route to non-irreducibility
+witnesses, the kill-route-per-fence pricing discipline for axiom
+hypothesis fences, and the `C`-numeral chain extension idiom) are
+reusable by any future audit touching irreducibility or charpoly
+clauses.
+
+## 2026-09-05T02:42:54Z — The heat family's adversarial fence audit (intent)
+
+**Run:** `20260905T024254Z-run-1`  
+**Session:** `ses_f909884d5ffeYcyOG4VIwyJJh3`  
+**Status:** in-progress  
+**Milestone:** The audit method's eighteenth application — the heat
+family (`Heat.lean`'s exponential engines, square-zero and rank-one
+collapses, decay-factor monotonicity, mass/mean conservation, DC limit,
+first-order remainder bound, both variance-decay twins, and the
+normalized/walk-heat conservation-and-conjugation layer), selected by
+this run's own fresh reverse-import consumption survey confirming the
+prior terminal handoff's numbers (Heat 8 transitive non-QA consumers —
+the library's most-consumed unaudited shelf, feeding `FunctionalCalculus`,
+`Krylov`, `Mixing`, `Oversmoothing`, `PolyFilter`, `DirectedMixing`,
+`BandDavisKahan`, and the `EmpiricalStationary` capstone — vs RandomWalk
+5, Stationary 4, IrreducibleStationary 3, Directed 3), its 1385-line QA
+(delivered 2026-08-23/31) predating the adversarial-review discipline
+with four scattered negative witnesses and zero fence sections. QA-only
+planned; zero axiom contact expected (count stays 4; nothing admitted
+consumed — theorem instantiations).
+
+**Changes (planned):** priced at ~30 hypothesis-form fences over the
+shelf's unfenced clause surface at four new fixtures (the negative edge
+`!![0,-2;-2,0]]` whose Laplacian carries the eigenvalue `-4`, the
+zero-degree signed `!![-2,2;2,0]]`, the signed 2-regular `!![3,-1;-1,3]]`,
+the asymmetric rank-one `!![0,2;1,0]]`) plus the delivered K₂/disAdj
+fixtures; spike `wip/heatfences_spike.lean` first, then a pure insertion
+in `Heat_QA.lean`, then the records ladder.
+
+**Verification (planned):** module build, `#print axioms` audit on every
+new declaration, full `lake build` + `check_build_completeness.py`, the
+script ladder, scoreboard regeneration and map-freshness sync.
+
+**Remaining risk:** priced deferrals possible (the walk-twin variance
+`ht` clause needs a four-point normalized secondEval pin at a `Fin 4`
+fixture); any deferral to be recorded with its mechanism per the dk
+audit's precedent.
+
+**Next handoff:** this entry.
+
+## 2026-09-05T03:40:25Z — The heat family's adversarial fence audit (terminal)
+
+**Run:** `20260905T024254Z-run-1`  
+**Session:** `ses_f909884d5ffeYcyOG4VIwyJJh3`  
+**Status:** completed  
+**Milestone:** The audit method's eighteenth application — the heat
+family (`Heat.lean`'s exponential engines, square-zero and rank-one
+collapses, decay factors, mass/mean conservation, DC limit,
+first-order remainder, both variance-decay twins, and the
+normalized/walk conservation-and-conjugation layer), selected by this
+run's own fresh reverse-import consumption survey confirming the prior
+terminal handoff's numbers (Heat 8 transitive non-QA consumers — the
+library's most-consumed unaudited shelf). DELIVERED at the full priced
+scope: 30 hypothesis-form fences, QA-only, zero axiom contact.
+
+**Changes:** `Heat_QA.lean`'s new `HeatFences` section — a pure
+1253-line insertion: 30 fences + 63 fixture-pin/isolation companions
+at four new fixtures (`hfNegAdj` the negative edge with Laplacian
+eigenvalue `-4`, `hfZeroAdj` the zero-degree signed, `hfRegAdj` the
+signed 2-regular, `hfAsymAdj` the asymmetric rank-one, `hfNz` the
+nilpotent) plus the delivered `edgeAdj`/`disAdj` pins reused.
+Headline first witnesses: dissipation failure on signed input
+(`e⁴ > 1`), DC-limit failure on signed input (mode growth `e^{4t}`)
+and the connectivity kill (constant flow at the isolated vertex ≠ the
+global mean), both variance-decay `hnn` kills (`2e⁸ > 2` at rate `1`;
+the walk twin `4e² > 4`), the backward-time `ht` kill (`2e⁴ > 2`),
+the mean-preservation `hA` kill (`1 − α ≠ 1`), the six normalized/
+walk `hd` kills at the zero-degree fixture (junk congruence-collapse
+with `√D·1` surviving), both π-isometry junk-√ kills, the junk-division
+`hc` corner of the rank-one collapse, the eigenvalue-plumbing `hnn`
+pair at pinned spectra, the kernel-mode `hμ` kill at K₂'s pinned gap,
+and the remainder-window `ht` kill (`e⁴ − 5 > 16`). One priced
+deferral with recorded mechanism; the non-fenceable classes recorded
+(signature-entangled displays, the P4 truth-removable `HasDerivAt`
+pair, the `hcard` display class). Records: the proposal (COMPLETE +
+delivery record, seven technique findings), `proposals/README.md`
+(Delivered row), README (5395), the radar (QA row synced to 5395,
+held 4.5), `index/map/spectral_graph.md`, the backlog item-2 note, the
+scoreboard verification row, both map data tables + SVG, the execution
+plan, this log. Nothing committed; prior uncommitted deliveries
+preserved.
+
+**Verification:** spike first (`wip/heatfences_spike.lean`, iterated
+to zero errors/zero own warnings; the spike caught a real
+pricing-stage error — the signed-regular fixture's normalized
+Laplacian was mispriced by a scalar-vs-matrix-`1` confusion, spectrum
+corrected `[-2, 1] → [-1, 0]` before landing); `lake env lean` on the
+landed module clean; explicit `lake build
+Scaffold.QA.SpectralGraph.Heat_QA` ✔; `#print axioms` via
+`wip/heatfences_axcheck.lean` on all 93 public declarations — every
+one exactly `propext, Classical.choice, Quot.sound`; full `lake build`
+✔ + `check_build_completeness.py` (133/133/0/0, exit 0);
+`lint_axioms` exit 0 (4 axioms unchanged); `check_refutation_independence`
+(12-tag clean, none touched); `check_public_reachability` (63
+modules); `check_citations`, `check_markdown_links`,
+`check_backlog_freshness` pass; scoreboard regenerated (**5395/4/0**);
+map-freshness exit 0 after the 5307 → 5395 sync and SVG regeneration
+(49 stations, no status change owed). Landing verified as a pure
+insertion (1253/0 numstat). One operational incident recorded: a
+failed landing script truncated `Heat_QA.lean` to zero bytes; the
+committed blob was recovered read-only via `git show` (no checkout,
+no history rewrite), verified clean, and the landing redone
+atomically.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition or
+public statement changed; QA proves consequences relative to the
+substrate, not the substrate. Honest scope: the heat shelf's
+falsification surface is complete except the recorded deferral D1
+(the walk-twin variance `ht` at `K₂ ⊕ K₂`, mechanism priced).
+
+**Next handoff:** the Active table stays all-Low; the audit method's
+natural next targets by this run's own survey numbers are RandomWalk
+(5 transitive non-QA consumers, never audited), Stationary (4),
+IrreducibleStationary/Directed (3 each), with `Exhaustive_QA.lean`'s
+free-form witness layer the standing handoff's other named audit
+remainder; D1 is the smallest priced completion if a run wants one.

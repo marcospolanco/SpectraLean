@@ -58,6 +58,17 @@
   hand `rootMultiplicity 1 = 1`). Neither degenerate corner breaks the
   axiom; no guard is needed.
 
+  2026-09-05, the adversarial fence audit
+  (`proposals/adversarial-fences-perron-frobenius-family.md`): a
+  hypothesis-necessity pass over the axiom's three hypothesis clauses —
+  `AdversarialFences` below delivers a tagged, axiom-independent
+  negative witness for each (`hnn` at the negative-diagonal irreducible
+  `pfNegDiag`, killed through the domination clause; `hirr` at the
+  reducible nilpotent edge `pfRed`, killed through the eigen clause
+  alone; `hex` at the one-vertex zero matrix `pfZero1`, the module
+  documentation's own named corner), plus the `IsIrreducible`
+  positive-arcs definitional witness `pfNegCycle`.
+
   Scoreboard: ../QA_SCOREBOARD.md
 -/
 
@@ -672,5 +683,361 @@ theorem perron_frobenius_S1_QA :
     funext i
     fin_cases i
     simp [Pi.smul_apply, smul_eq_mul, mul_one]⟩
+
+/-! ### AdversarialFences: the adversarial fence audit
+(`proposals/adversarial-fences-perron-frobenius-family.md`,
+delivered 2026-09-05)
+
+The audit method's seventeenth application: a hypothesis-necessity
+pass over the admitted axiom's three hypothesis clauses, none of which
+had a negative witness anywhere in the repository (the 2026-08-28
+degenerate-cardinality audit checked the `card V ∈ {0, 1}` corners; the
+strict-dominance witness checked the conclusion cannot be
+*strengthened* — neither establishes that each hypothesis clause is
+*needed*). Three hypothesis-form fences, each tagged
+`-- @refutes: perron_frobenius` (they refute the axiom-minus-one-clause
+statement shape of a currently admitted axiom; a refutation cannot
+consume what it refutes, and each proof below is axiom-free):
+
+- **`hnn`** at `pfNegDiag = !![-1, 2; 2, -1]]` — irreducibility and
+  `hex` genuine (both arcs `2 > 0`); the eigen clause is *satisfiable*
+  in isolation (`r = 1`, `x = (1, 1)`, pinned by
+  `pfNegDiag_eigenvalue_pin_QA`), so the kill route is genuinely the
+  domination clause: the pinned complex root `−3` forces `3 ≤ r = 1`.
+- **`hirr`** at `pfRed = !![0, 1; 0, 0]]` — nonnegativity and `hex`
+  genuine; the stranded vertex's zero row forces `r x₁ = 0` against
+  `r > 0`, `x₁ > 0`. The mildest possible kill: the eigen clause
+  alone, no charpoly needed.
+- **`hex`** at `pfZero1 = !![0]]` — nonnegativity and irreducibility
+  genuine (reflexivity on the subsingleton); the module
+  documentation's own named corner ("the vacuously irreducible 1×1
+  zero matrix … would otherwise falsify `0 < r`"), here as a proved
+  fence rather than a docstring warning.
+
+Plus the definitional witness for `IsIrreducible`'s positive-arcs
+convention (`pfNegCycle`: negativity creates no arcs) and the
+companion pins (charpoly `(X − 1)(X + 3)`, complex roots `{1, −3}`,
+the `r = 1` eigen pin, the `|−3| = 3` modulus pin). Non-fenceables:
+none — the hypothesis surface is exactly three clauses, each fenced. -/
+
+section AdversarialFences
+
+/-! #### C-numeral normalization (local chain, self-contained) -/
+
+private theorem pfC_two_real : C ((2:ℝ)) = (2 : ℝ[X]) := by
+  have e : (2:ℝ) = 1 + 1 := by norm_num
+  have e' : (2:ℝ[X]) = 1 + 1 := by norm_num
+  rw [e, Polynomial.C_add, Polynomial.C_1, ← e']
+
+private theorem pfC_three_real : C ((3:ℝ)) = (3 : ℝ[X]) := by
+  have e : (3:ℝ) = 2 + 1 := by norm_num
+  have e' : (3:ℝ[X]) = 2 + 1 := by norm_num
+  rw [e, Polynomial.C_add, pfC_two_real, Polynomial.C_1, ← e']
+
+private theorem pfC_four_real : C ((4:ℝ)) = (4 : ℝ[X]) := by
+  have e : (4:ℝ) = 2 + 2 := by norm_num
+  have e' : (4:ℝ[X]) = 2 + 2 := by norm_num
+  rw [e, Polynomial.C_add, pfC_two_real, ← e']
+
+private theorem pfC_two_complex : C ((2:ℂ)) = (2 : ℂ[X]) := by
+  have e : (2:ℂ) = 1 + 1 := by norm_num
+  have e' : (2:ℂ[X]) = 1 + 1 := by norm_num
+  rw [e, Polynomial.C_add, Polynomial.C_1, ← e']
+
+private theorem pfC_three_complex : C ((3:ℂ)) = (3 : ℂ[X]) := by
+  have e : (3:ℂ) = 2 + 1 := by norm_num
+  have e' : (3:ℂ[X]) = 2 + 1 := by norm_num
+  rw [e, Polynomial.C_add, pfC_two_complex, Polynomial.C_1, ← e']
+
+private theorem pfC_four_complex : C ((4:ℂ)) = (4 : ℂ[X]) := by
+  have e : (4:ℂ) = 2 + 2 := by norm_num
+  have e' : (4:ℂ[X]) = 2 + 2 := by norm_num
+  rw [e, Polynomial.C_add, pfC_two_complex, ← e']
+
+/-! #### Fixture 1: `pfNegDiag = !![-1, 2; 2, -1]]` — the `hnn`
+breaker -/
+
+/-- The `hnn` breaker: symmetric, negative diagonal, both arcs positive
+(`2 > 0` each way) so irreducibility is genuine, `hex` genuine, and
+nonnegativity fails on the diagonal. Complex spectrum `{1, −3}`. -/
+def pfNegDiag : Matrix (Fin 2) (Fin 2) ℝ := !![-1, 2; 2, -1]
+
+theorem pfNegDiag_00 : pfNegDiag 0 0 = -1 := rfl
+theorem pfNegDiag_01 : pfNegDiag 0 1 = 2 := rfl
+theorem pfNegDiag_10 : pfNegDiag 1 0 = 2 := rfl
+theorem pfNegDiag_11 : pfNegDiag 1 1 = -1 := rfl
+
+theorem pfNegDiag_isIrreducible : pfNegDiag.IsIrreducible := by
+  intro i j
+  fin_cases i <;> fin_cases j
+  · exact Relation.ReflTransGen.refl
+  · exact Relation.ReflTransGen.single
+      (by show 0 < pfNegDiag 0 1; rw [pfNegDiag_01]; norm_num)
+  · exact Relation.ReflTransGen.single
+      (by show 0 < pfNegDiag 1 0; rw [pfNegDiag_10]; norm_num)
+  · exact Relation.ReflTransGen.refl
+
+theorem pfNegDiag_hex : ∃ i j, 0 < pfNegDiag i j :=
+  ⟨0, 1, by rw [pfNegDiag_01]; norm_num⟩
+
+/-- Isolation: the dropped clause genuinely fails (the diagonal). -/
+theorem pfNegDiag_not_nonneg : ¬ (∀ i j, 0 ≤ pfNegDiag i j) := by
+  intro h
+  have h00 := h 0 0
+  rw [pfNegDiag_00] at h00
+  linarith
+
+theorem pfNegDiag_mulVec_eq (x : Fin 2 → ℝ) :
+    (pfNegDiag *ᵥ x) 0 = -(x 0) + 2 * x 1 ∧ (pfNegDiag *ᵥ x) 1 = 2 * x 0 - x 1 := by
+  constructor
+  · simp [Matrix.mulVec, Matrix.dotProduct, pfNegDiag, Fin.sum_univ_two]
+  · simp [Matrix.mulVec, Matrix.dotProduct, pfNegDiag, Fin.sum_univ_two, sub_eq_add_neg]
+
+/-- **Eigen pin (no axiom).** Every strictly positive eigenvector of
+`pfNegDiag` has eigenvalue exactly `1`: the two eigen-rows sum to
+`(x₀ + x₁) = r (x₀ + x₁)` with `x₀ + x₁ > 0`. This is the pin the
+`hnn` fence consumes — and note the fixture's eigen conjuncts are
+*satisfiable* in isolation (`r = 1`, `x = (1, 1)`), so the fence's kill
+route is genuinely the domination clause. -/
+theorem pfNegDiag_eigenvalue_pin_QA (r : ℝ) (x : Fin 2 → ℝ)
+    (hx : ∀ i, 0 < x i) (heig : pfNegDiag *ᵥ x = r • x) : r = 1 := by
+  obtain ⟨e0, e1⟩ := pfNegDiag_mulVec_eq x
+  rw [heig] at e0 e1
+  simp only [Pi.smul_apply, smul_eq_mul] at e0 e1
+  have hsum : x 0 + x 1 = r * (x 0 + x 1) := by linear_combination -(e0 + e1)
+  have hpos : 0 < x 0 + x 1 := add_pos (hx 0) (hx 1)
+  have hz : (1 - r) * (x 0 + x 1) = 0 := by linear_combination hsum
+  rcases mul_eq_zero.mp hz with h | h
+  · linarith
+  · exact absurd h (ne_of_gt hpos)
+
+/-- The characteristic polynomial of `pfNegDiag`: `(X − 1)(X + 3)`. -/
+theorem pfNegDiag_charpoly_QA :
+    pfNegDiag.charpoly = (X - C (1:ℝ)) * (X + C (3:ℝ)) := by
+  rw [Matrix.charpoly, Matrix.det_fin_two]
+  have h00 : Matrix.charmatrix pfNegDiag 0 0 = X + C (1:ℝ) := by
+    rw [Matrix.charmatrix_apply_eq, pfNegDiag_00, Polynomial.C_neg, sub_neg_eq_add]
+  have h11 : Matrix.charmatrix pfNegDiag 1 1 = X + C (1:ℝ) := by
+    rw [Matrix.charmatrix_apply_eq, pfNegDiag_11, Polynomial.C_neg, sub_neg_eq_add]
+  have h01 : Matrix.charmatrix pfNegDiag 0 1 = -(C (2:ℝ)) := by
+    rw [Matrix.charmatrix_apply_ne (h := by decide), pfNegDiag_01]
+  have h10 : Matrix.charmatrix pfNegDiag 1 0 = -(C (2:ℝ)) := by
+    rw [Matrix.charmatrix_apply_ne (h := by decide), pfNegDiag_10]
+  have hC : (-(C (2:ℝ))) * (-(C (2:ℝ))) = C (4:ℝ) := by
+    rw [neg_mul_neg, ← Polynomial.C_mul]
+    exact congrArg Polynomial.C (by norm_num : (2:ℝ) * (2:ℝ) = 4)
+  rw [h00, h11, h01, h10, hC, Polynomial.C_1, pfC_three_real, pfC_four_real]
+  ring
+
+theorem pfNegDiag_charpoly_complex_QA :
+    (Matrix.charpoly (pfNegDiag.map (algebraMap ℝ ℂ))) =
+      (X - C (Complex.ofReal 1)) * (X - C (Complex.ofReal (-3))) := by
+  rw [Matrix.charpoly, Matrix.det_fin_two]
+  have h00 : Matrix.charmatrix (pfNegDiag.map (algebraMap ℝ ℂ)) 0 0
+      = X + C (Complex.ofReal 1) := by
+    rw [Matrix.charmatrix_apply_eq, Matrix.map_apply, pfNegDiag_00, Complex.coe_algebraMap,
+      Complex.ofReal_neg, Polynomial.C_neg, sub_neg_eq_add]
+  have h11 : Matrix.charmatrix (pfNegDiag.map (algebraMap ℝ ℂ)) 1 1
+      = X + C (Complex.ofReal 1) := by
+    rw [Matrix.charmatrix_apply_eq, Matrix.map_apply, pfNegDiag_11, Complex.coe_algebraMap,
+      Complex.ofReal_neg, Polynomial.C_neg, sub_neg_eq_add]
+  have h01 : Matrix.charmatrix (pfNegDiag.map (algebraMap ℝ ℂ)) 0 1
+      = -(C (Complex.ofReal 2)) := by
+    rw [Matrix.charmatrix_apply_ne (h := by decide), Matrix.map_apply, pfNegDiag_01,
+      Complex.coe_algebraMap]
+  have h10 : Matrix.charmatrix (pfNegDiag.map (algebraMap ℝ ℂ)) 1 0
+      = -(C (Complex.ofReal 2)) := by
+    rw [Matrix.charmatrix_apply_ne (h := by decide), Matrix.map_apply, pfNegDiag_10,
+      Complex.coe_algebraMap]
+  have hC : (-(C (Complex.ofReal 2))) * (-(C (Complex.ofReal 2)))
+      = C (Complex.ofReal 4) := by
+    rw [neg_mul_neg, ← Polynomial.C_mul, ← Complex.ofReal_mul]
+    exact congrArg Polynomial.C (congrArg Complex.ofReal
+      (by norm_num : (2:ℝ) * (2:ℝ) = 4))
+  rw [h00, h11, h01, h10, hC]
+  simp only [Complex.ofReal_one, Complex.ofReal_ofNat, Complex.ofReal_neg,
+    Polynomial.C_1, Polynomial.C_neg, pfC_two_complex, pfC_three_complex, pfC_four_complex]
+  ring
+
+theorem pfNegDiag_complex_roots_QA :
+    (Matrix.charpoly (pfNegDiag.map (algebraMap ℝ ℂ))).roots
+      = ({Complex.ofReal 1, Complex.ofReal (-3)} : Multiset ℂ) := by
+  rw [pfNegDiag_charpoly_complex_QA]
+  have hne : ((X - C (Complex.ofReal 1)) * (X - C (Complex.ofReal (-3)))) ≠ 0 :=
+    mul_ne_zero (Polynomial.X_sub_C_ne_zero _) (Polynomial.X_sub_C_ne_zero _)
+  rw [Polynomial.roots_mul hne, Polynomial.roots_X_sub_C, Polynomial.roots_X_sub_C]
+  simp
+
+/-- The modulus pin the fence consumes: `|−3| = 3`. -/
+theorem pfNegDiag_abs_neg_three :
+    Complex.abs (Complex.ofReal (-3)) = 3 := by
+  rw [Complex.abs_ofReal, abs_neg, abs_of_pos three_pos]
+
+/-- **Fence (`hnn` clause).** Dropping nonnegativity is refuted at
+`pfNegDiag` with irreducibility and the positive-entry guard genuine:
+the eigen clause forces `r = 1` (the eigen pin) while the domination
+clause at the pinned root `−3` forces `3 ≤ r`. -/
+-- @refutes: perron_frobenius
+theorem perron_frobenius_hnn_fence_QA :
+    ¬ (∀ (A : Matrix (Fin 2) (Fin 2) ℝ), A.IsIrreducible → (∃ i j, 0 < A i j) →
+        ∃ r : ℝ, ∃ x : Fin 2 → ℝ,
+          0 < r ∧
+          (∀ i, 0 < x i) ∧
+          A *ᵥ x = r • x ∧
+          Polynomial.rootMultiplicity r A.charpoly = 1 ∧
+          (∀ μ : ℝ, ∀ y : Fin 2 → ℝ, (∀ i, 0 ≤ y i) → y ≠ 0 → A *ᵥ y = μ • y → μ = r) ∧
+          (∀ μ : ℝ, ∀ y : Fin 2 → ℝ, (∀ i, 0 ≤ y i) → y ≠ 0 → A *ᵥ y = μ • y →
+              ∃ c : ℝ, 0 < c ∧ y = c • x) ∧
+          (∀ z : ℂ, z ∈ (Matrix.charpoly (A.map (algebraMap ℝ ℂ))).roots →
+              Complex.abs z ≤ r)) := by
+  intro h
+  obtain ⟨r, x, hr, hx, hevec, -, -, -, hdom⟩ :=
+    h pfNegDiag pfNegDiag_isIrreducible pfNegDiag_hex
+  have hr1 : r = 1 := pfNegDiag_eigenvalue_pin_QA r x hx hevec
+  have m : Complex.ofReal (-3) ∈ (Matrix.charpoly (pfNegDiag.map (algebraMap ℝ ℂ))).roots := by
+    rw [pfNegDiag_complex_roots_QA]
+    simp
+  have h3 := hdom _ m
+  rw [pfNegDiag_abs_neg_three, hr1] at h3
+  norm_num at h3
+
+/-! #### Fixture 2: `pfRed = !![0, 1; 0, 0]]` — the `hirr` breaker -/
+
+/-- The `hirr` breaker: nonnegative with one positive entry (`hex`
+genuine), but vertex `1` is stranded — no positive step out — so
+irreducibility genuinely fails. -/
+def pfRed : Matrix (Fin 2) (Fin 2) ℝ := !![0, 1; 0, 0]
+
+theorem pfRed_00 : pfRed 0 0 = 0 := rfl
+theorem pfRed_01 : pfRed 0 1 = 1 := rfl
+theorem pfRed_10 : pfRed 1 0 = 0 := rfl
+theorem pfRed_11 : pfRed 1 1 = 0 := rfl
+
+theorem pfRed_nonneg : ∀ i j, 0 ≤ pfRed i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [pfRed_00, pfRed_01, pfRed_10, pfRed_11]
+
+theorem pfRed_hex : ∃ i j, 0 < pfRed i j := ⟨0, 1, by rw [pfRed_01]; norm_num⟩
+
+/-- Isolation: the dropped clause genuinely fails — vertex `1` has no
+positive step out, so it cannot reach `0`. -/
+theorem pfRed_not_isIrreducible : ¬ pfRed.IsIrreducible := by
+  intro h
+  obtain hh | ⟨c, hc, -⟩ := (h 1 0).cases_head
+  · exact absurd hh (by decide)
+  · fin_cases c
+    · exact absurd hc (by show ¬ 0 < pfRed 1 0; rw [pfRed_10]; norm_num)
+    · exact absurd hc (by show ¬ 0 < pfRed 1 1; rw [pfRed_11]; norm_num)
+
+theorem pfRed_mulVec_eq (x : Fin 2 → ℝ) :
+    (pfRed *ᵥ x) 0 = x 1 ∧ (pfRed *ᵥ x) 1 = 0 := by
+  constructor
+  · simp [Matrix.mulVec, Matrix.dotProduct, pfRed, Fin.sum_univ_two]
+  · simp [Matrix.mulVec, Matrix.dotProduct, pfRed, Fin.sum_univ_two]
+
+/-- **Fence (`hirr` clause).** Dropping irreducibility is refuted at
+`pfRed` with nonnegativity and the positive-entry guard genuine: the
+eigen clause forces `r x₁ = 0` against `r > 0` and `x₁ > 0` — the
+stranded vertex's zero row kills every candidate Perron pair. -/
+-- @refutes: perron_frobenius
+theorem perron_frobenius_hirr_fence_QA :
+    ¬ (∀ (A : Matrix (Fin 2) (Fin 2) ℝ), (∀ i j, 0 ≤ A i j) → (∃ i j, 0 < A i j) →
+        ∃ r : ℝ, ∃ x : Fin 2 → ℝ,
+          0 < r ∧
+          (∀ i, 0 < x i) ∧
+          A *ᵥ x = r • x ∧
+          Polynomial.rootMultiplicity r A.charpoly = 1 ∧
+          (∀ μ : ℝ, ∀ y : Fin 2 → ℝ, (∀ i, 0 ≤ y i) → y ≠ 0 → A *ᵥ y = μ • y → μ = r) ∧
+          (∀ μ : ℝ, ∀ y : Fin 2 → ℝ, (∀ i, 0 ≤ y i) → y ≠ 0 → A *ᵥ y = μ • y →
+              ∃ c : ℝ, 0 < c ∧ y = c • x) ∧
+          (∀ z : ℂ, z ∈ (Matrix.charpoly (A.map (algebraMap ℝ ℂ))).roots →
+              Complex.abs z ≤ r)) := by
+  intro h
+  obtain ⟨r, x, hr, hx, hevec, -, -, -, -⟩ :=
+    h pfRed pfRed_nonneg pfRed_hex
+  obtain ⟨e0, e1⟩ := pfRed_mulVec_eq x
+  rw [hevec] at e1
+  simp only [Pi.smul_apply, smul_eq_mul] at e1
+  have hbad : (0:ℝ) < r * x 1 := mul_pos hr (hx 1)
+  rw [e1] at hbad
+  exact lt_irrefl 0 hbad
+
+/-! #### Fixture 3: `pfZero1 = !![0]]` — the `hex` breaker -/
+
+/-- The `hex` breaker: the one-vertex zero matrix — nonnegative,
+irreducible by reflexivity, and the positive-entry guard genuinely
+fails (the single entry is `0`). This is the corner the module
+documentation names ("the vacuously irreducible 1×1 zero matrix …
+would otherwise falsify `0 < r`"), here as a proved fence. -/
+def pfZero1 : Matrix (Fin 1) (Fin 1) ℝ := !![0]
+
+theorem pfZero1_00 : pfZero1 0 0 = 0 := rfl
+
+theorem pfZero1_nonneg : ∀ i j, 0 ≤ pfZero1 i j := by
+  intro i j
+  fin_cases i
+  fin_cases j
+  simp [pfZero1]
+
+theorem pfZero1_isIrreducible : pfZero1.IsIrreducible :=
+  fun i j => by rw [Subsingleton.elim i j]
+
+/-- Isolation: the dropped clause genuinely fails. -/
+theorem pfZero1_not_hex : ¬ ∃ i j, 0 < pfZero1 i j := by
+  rintro ⟨i, j, hij⟩
+  have hz : pfZero1 i j = 0 := by fin_cases i; fin_cases j; rfl
+  rw [hz] at hij
+  exact absurd hij (by norm_num)
+
+/-- **Fence (`hex` clause).** Dropping the positive-entry guard is
+refuted at `pfZero1` with nonnegativity and irreducibility genuine:
+the eigen clause forces `r x₀ = 0` against `r > 0` and `x₀ > 0`. -/
+-- @refutes: perron_frobenius
+theorem perron_frobenius_hex_fence_QA :
+    ¬ (∀ (A : Matrix (Fin 1) (Fin 1) ℝ), (∀ i j, 0 ≤ A i j) → A.IsIrreducible →
+        ∃ r : ℝ, ∃ x : Fin 1 → ℝ,
+          0 < r ∧
+          (∀ i, 0 < x i) ∧
+          A *ᵥ x = r • x ∧
+          Polynomial.rootMultiplicity r A.charpoly = 1 ∧
+          (∀ μ : ℝ, ∀ y : Fin 1 → ℝ, (∀ i, 0 ≤ y i) → y ≠ 0 → A *ᵥ y = μ • y → μ = r) ∧
+          (∀ μ : ℝ, ∀ y : Fin 1 → ℝ, (∀ i, 0 ≤ y i) → y ≠ 0 → A *ᵥ y = μ • y →
+              ∃ c : ℝ, 0 < c ∧ y = c • x) ∧
+          (∀ z : ℂ, z ∈ (Matrix.charpoly (A.map (algebraMap ℝ ℂ))).roots →
+              Complex.abs z ≤ r)) := by
+  intro h
+  obtain ⟨r, x, hr, hx, hevec, -, -, -, -⟩ :=
+    h pfZero1 pfZero1_nonneg pfZero1_isIrreducible
+  have he0 : (0:ℝ) * x 0 = r * x 0 := by
+    have h0 := congrFun hevec 0
+    simp only [Matrix.mulVec, Matrix.dotProduct, Pi.smul_apply, smul_eq_mul,
+      Fin.sum_univ_one] at h0
+    rwa [pfZero1_00] at h0
+  have hzero : r * x 0 = 0 := by linarith
+  exact absurd (mul_pos hr (hx 0)) (by rw [hzero]; exact lt_irrefl 0)
+
+/-! #### Fixture 4: `pfNegCycle = !![0, -2; -2, 0]]` — the
+definitional witness -/
+
+/-- The definitional witness for `IsIrreducible`'s positive-arcs
+convention: every entry nonpositive, so no vertex has a positive step
+out and the matrix is not irreducible — strong connectivity cannot be
+routed through negative weight. -/
+def pfNegCycle : Matrix (Fin 2) (Fin 2) ℝ := !![0, -2; -2, 0]
+
+theorem pfNegCycle_00 : pfNegCycle 0 0 = 0 := rfl
+theorem pfNegCycle_01 : pfNegCycle 0 1 = -2 := rfl
+theorem pfNegCycle_10 : pfNegCycle 1 0 = -2 := rfl
+theorem pfNegCycle_11 : pfNegCycle 1 1 = 0 := rfl
+
+theorem pfNegCycle_not_isIrreducible : ¬ pfNegCycle.IsIrreducible := by
+  intro h
+  obtain hh | ⟨c, hc, -⟩ := (h 1 0).cases_head
+  · exact absurd hh (by decide)
+  · fin_cases c
+    · exact absurd hc (by show ¬ 0 < pfNegCycle 1 0; rw [pfNegCycle_10]; norm_num)
+    · exact absurd hc (by show ¬ 0 < pfNegCycle 1 1; rw [pfNegCycle_11]; norm_num)
+
+end AdversarialFences
 
 end Scaffold.LinearAlgebra.QA

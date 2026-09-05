@@ -359,4 +359,260 @@ theorem weyl_window_endpoint_guard_QA :
 
 end NonzeroFixture
 
+/-!
+## The adversarial fence audit (`proposals/adversarial-fences-davis-kahan-core-family.md`)
+
+Hypothesis-form fences for `spectral_gap_stability`'s two load-bearing
+clauses (`hnorm`, `hγ`) at a self-contained diagonal fixture — the
+audit method's thirteenth application. Every fence refutes a *theorem*
+instantiation; nothing admitted is consumed.
+-/
+
+
+/-!
+## The W section (lands in `Weyl_QA.lean`): `spectral_gap_stability`'s
+two clauses, at a self-contained diagonal fixture.
+-/
+
+/-- The unperturbed W fixture: `diag(0, 2)` (spectral gap `2` at `k = 0`). -/
+def dkfWA : Matrix (Fin 2) (Fin 2) ℝ := Matrix.diagonal ![0, 2]
+
+/-- The gap-shrinking perturbation: `diag(0, -1)`, moving the gap `2`
+to `1` at operator norm `1`. -/
+def dkfWE : Matrix (Fin 2) (Fin 2) ℝ := Matrix.diagonal ![0, -1]
+
+theorem dkfWA_symmetric : dkfWA.IsSymm := by
+  show dkfWAᵀ = dkfWA
+  exact Matrix.diagonal_transpose _
+
+theorem dkfWE_symmetric : dkfWE.IsSymm := by
+  show dkfWEᵀ = dkfWE
+  exact Matrix.diagonal_transpose _
+
+theorem dkfWAE_symmetric : (dkfWA + dkfWE).IsSymm :=
+  dkfWA_symmetric.add dkfWE_symmetric
+
+theorem dkfWA_trace : dkfWA.trace = 2 := by
+  simp [dkfWA, Matrix.trace_diagonal]
+
+theorem dkfWA_det : dkfWA.det = 0 := by
+  simp [dkfWA, Matrix.det_diagonal]
+
+theorem dkfWA_evals_pin :
+    evals dkfWA_symmetric ⟨0, by simp⟩ = 0 ∧
+      evals dkfWA_symmetric ⟨1, by simp⟩ = 2 := by
+  have hlen : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm dkfWA_symmetric).eigenvalues))).length = 2 := by
+    rw [Multiset.length_sort, Multiset.card_map]; simp
+  have hsorted : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm dkfWA_symmetric).eigenvalues))).Sorted
+        (fun a b => a ≤ b) :=
+    Multiset.sort_sorted _ _
+  have hsum : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm dkfWA_symmetric).eigenvalues))).sum = 0 + 2 := by
+    have htr : ∑ i : Fin 2, eigvalOf dkfWA dkfWA_symmetric i = 0 + 2 := by
+      rw [eigvalOf_sum_eq_trace, dkfWA_trace]
+      norm_num
+    rw [← Multiset.sum_coe, Multiset.sort_eq, ← Finset.sum_eq_multiset_sum]
+    exact htr
+  have hprod : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm dkfWA_symmetric).eigenvalues))).prod = 0 * 2 := by
+    have hd0 : ∏ i : Fin 2,
+        ((isHermitian_of_isSymm dkfWA_symmetric).eigenvalues i) = 0 := by
+      have h := (isHermitian_of_isSymm dkfWA_symmetric).det_eq_prod_eigenvalues
+      rw [dkfWA_det] at h
+      simpa using h.symm
+    rw [← Multiset.prod_coe, Multiset.sort_eq, ← Finset.prod_eq_multiset_prod]
+    rw [hd0]
+    norm_num
+  exact two_point_pin_of_sum_prod (lo := 0) (hi := 2) (by norm_num)
+    hlen hsorted hsum hprod
+
+theorem dkfWE_trace : dkfWE.trace = -1 := by
+  simp [dkfWE, Matrix.trace_diagonal]
+
+theorem dkfWE_det : dkfWE.det = 0 := by
+  simp [dkfWE, Matrix.det_diagonal]
+
+theorem dkfWE_evals_pin :
+    evals dkfWE_symmetric ⟨0, by simp⟩ = -1 ∧
+      evals dkfWE_symmetric ⟨1, by simp⟩ = 0 := by
+  have hlen : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm dkfWE_symmetric).eigenvalues))).length = 2 := by
+    rw [Multiset.length_sort, Multiset.card_map]; simp
+  have hsorted : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm dkfWE_symmetric).eigenvalues))).Sorted
+        (fun a b => a ≤ b) :=
+    Multiset.sort_sorted _ _
+  have hsum : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm dkfWE_symmetric).eigenvalues))).sum = -1 + 0 := by
+    have htr : ∑ i : Fin 2, eigvalOf dkfWE dkfWE_symmetric i = -1 + 0 := by
+      rw [eigvalOf_sum_eq_trace, dkfWE_trace]
+      norm_num
+    rw [← Multiset.sum_coe, Multiset.sort_eq, ← Finset.sum_eq_multiset_sum]
+    exact htr
+  have hprod : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm dkfWE_symmetric).eigenvalues))).prod = -1 * 0 := by
+    have hd0 : ∏ i : Fin 2,
+        ((isHermitian_of_isSymm dkfWE_symmetric).eigenvalues i) = 0 := by
+      have h := (isHermitian_of_isSymm dkfWE_symmetric).det_eq_prod_eigenvalues
+      rw [dkfWE_det] at h
+      simpa using h.symm
+    rw [← Multiset.prod_coe, Multiset.sort_eq, ← Finset.prod_eq_multiset_prod]
+    rw [hd0]
+    norm_num
+  exact two_point_pin_of_sum_prod (lo := -1) (hi := 0) (by norm_num)
+    hlen hsorted hsum hprod
+
+theorem dkfWAE_trace : (dkfWA + dkfWE).trace = 1 := by
+  simp [dkfWA, dkfWE, Matrix.trace_diagonal]
+  norm_num
+
+theorem dkfWAE_det : (dkfWA + dkfWE).det = 0 := by
+  have he : dkfWA + dkfWE
+      = Matrix.diagonal (![(0:ℝ), 1] : Fin 2 → ℝ) := by
+    ext i j
+    simp only [Matrix.add_apply, Matrix.diagonal_apply]
+    fin_cases i <;> fin_cases j <;>
+      simp only [dkfWA, dkfWE, Matrix.diagonal_apply]
+    all_goals norm_num
+  rw [he, Matrix.det_diagonal]
+  simp
+
+theorem dkfWAE_evals_pin :
+    evals dkfWAE_symmetric ⟨0, by simp⟩ = 0 ∧
+      evals dkfWAE_symmetric ⟨1, by simp⟩ = 1 := by
+  have hlen : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm dkfWAE_symmetric).eigenvalues))).length = 2 := by
+    rw [Multiset.length_sort, Multiset.card_map]; simp
+  have hsorted : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm dkfWAE_symmetric).eigenvalues))).Sorted
+        (fun a b => a ≤ b) :=
+    Multiset.sort_sorted _ _
+  have hsum : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm dkfWAE_symmetric).eigenvalues))).sum = 0 + 1 := by
+    have htr : ∑ i : Fin 2, eigvalOf (dkfWA + dkfWE) dkfWAE_symmetric i = 0 + 1 := by
+      rw [eigvalOf_sum_eq_trace, dkfWAE_trace]
+      norm_num
+    rw [← Multiset.sum_coe, Multiset.sort_eq, ← Finset.sum_eq_multiset_sum]
+    exact htr
+  have hprod : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm dkfWAE_symmetric).eigenvalues))).prod = 0 * 1 := by
+    have hd0 : ∏ i : Fin 2,
+        ((isHermitian_of_isSymm dkfWAE_symmetric).eigenvalues i) = 0 := by
+      have h := (isHermitian_of_isSymm dkfWAE_symmetric).det_eq_prod_eigenvalues
+      rw [dkfWAE_det] at h
+      simpa using h.symm
+    rw [← Multiset.prod_coe, Multiset.sort_eq, ← Finset.prod_eq_multiset_prod]
+    rw [hd0]
+    norm_num
+  exact two_point_pin_of_sum_prod (lo := 0) (hi := 1) (by norm_num)
+    hlen hsorted hsum hprod
+
+/-- The perturbation norm `‖dkfWE‖ = 1` — the top of its pinned
+spectrum in absolute value, through the proved operator-norm bridge. -/
+theorem dkfWE_norm : ‖dkfWE‖ = 1 := by
+  rw [Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent.l2OpNorm_eq_max_abs_evals
+    dkfWE_symmetric (by norm_num : (1:ℕ) ≤ Fintype.card (Fin 2))]
+  rw [dkfWE_evals_pin.1]
+  have hlast : evals dkfWE_symmetric ⟨Fintype.card (Fin 2) - 1, by simp⟩ = 0 := by
+    show evals dkfWE_symmetric ⟨1, by simp⟩ = 0
+    exact dkfWE_evals_pin.2
+  rw [hlast]
+  norm_num
+
+/-- **The W1 fence: `hnorm : ‖E‖ ≤ ε` is load-bearing.** The
+gap-shrinking perturbation moves the gap from `2` to `1` at norm `1`,
+but the dropped statement would allow `ε = 1/4`: the conclusion reads
+`gap(dkfWA + dkfWE) ≥ 2 - 1/2 = 3/2` while the pinned gap is `1`. -/
+theorem dkf_sgs_hnorm_fence :
+    ¬ (spectralGap (dkfWA + dkfWE) dkfWAE_symmetric ⟨0, by simp⟩
+        (show (0:ℕ) + 1 < Fintype.card (Fin 2) by decide)
+        ≥ (2:ℝ) - 2 * (1/4)) := by
+  intro hcon
+  have hrw : spectralGap (dkfWA + dkfWE) dkfWAE_symmetric ⟨0, by simp⟩
+      (show (0:ℕ) + 1 < Fintype.card (Fin 2) by decide)
+      = evals dkfWAE_symmetric ⟨(0:ℕ) + 1, by simp⟩
+        - evals dkfWAE_symmetric ⟨(0:ℕ), by simp⟩ := rfl
+  have h1 : evals dkfWAE_symmetric ⟨(0:ℕ) + 1, by simp⟩ = 1 := by
+    show evals dkfWAE_symmetric ⟨1, by simp⟩ = 1
+    exact dkfWAE_evals_pin.2
+  have h0 : evals dkfWAE_symmetric ⟨(0:ℕ), by simp⟩ = 0 := dkfWAE_evals_pin.1
+  rw [hrw, h1, h0] at hcon
+  norm_num at hcon
+
+/-- **W1 isolation:** the gap clause `hγ` is genuine at `γ = 2` (the
+unperturbed gap is exactly `2`), so `hnorm` is the only failing
+hypothesis; and the dropped `hnorm` itself reads `‖dkfWE‖ = 1 ≤ 1/4`,
+false by the pinned norm. -/
+theorem dkf_sgs_hnorm_isolation :
+    (2:ℝ) ≤ spectralGap dkfWA dkfWA_symmetric ⟨0, by simp⟩
+      (show (0:ℕ) + 1 < Fintype.card (Fin 2) by decide) ∧
+      ¬ (‖dkfWE‖ ≤ 1/4) := by
+  refine ⟨?_, ?_⟩
+  · have hrw : spectralGap dkfWA dkfWA_symmetric ⟨0, by simp⟩
+        (show (0:ℕ) + 1 < Fintype.card (Fin 2) by decide)
+        = evals dkfWA_symmetric ⟨(0:ℕ) + 1, by simp⟩
+          - evals dkfWA_symmetric ⟨(0:ℕ), by simp⟩ := rfl
+    have h1 : evals dkfWA_symmetric ⟨(0:ℕ) + 1, by simp⟩ = 2 := by
+      show evals dkfWA_symmetric ⟨1, by simp⟩ = 2
+      exact dkfWA_evals_pin.2
+    rw [hrw, h1, dkfWA_evals_pin.1]
+    norm_num
+  · rw [dkfWE_norm]
+    norm_num
+
+/-- **The W2 fence: `hγ : spectralGap A ≥ γ` is load-bearing.** With
+`E = 0` (`hnorm` genuine at any `ε ≥ 0`) and the dropped `γ = 100`, the
+conclusion would read `gap(dkfWA) = 2 ≥ 98`. -/
+theorem dkf_sgs_hgamma_fence :
+    ¬ (spectralGap (dkfWA + 0)
+        (show (dkfWA + 0).IsSymm by rw [add_zero]; exact dkfWA_symmetric)
+        ⟨0, by simp⟩ (show (0:ℕ) + 1 < Fintype.card (Fin 2) by decide)
+        ≥ (100:ℝ) - 2 * 1) := by
+  intro hcon
+  have heq : ∀ i : Fin (Fintype.card (Fin 2)),
+      evals (show (dkfWA + 0).IsSymm by rw [add_zero]; exact dkfWA_symmetric) i
+        = evals dkfWA_symmetric i :=
+    evals_add_zero dkfWA dkfWA_symmetric
+  have hrw : spectralGap (dkfWA + 0)
+      (show (dkfWA + 0).IsSymm by rw [add_zero]; exact dkfWA_symmetric)
+      ⟨0, by simp⟩ (show (0:ℕ) + 1 < Fintype.card (Fin 2) by decide)
+      = evals (show (dkfWA + 0).IsSymm by rw [add_zero]; exact dkfWA_symmetric)
+          ⟨(0:ℕ) + 1, by simp⟩
+        - evals (show (dkfWA + 0).IsSymm by rw [add_zero]; exact dkfWA_symmetric)
+          ⟨(0:ℕ), by simp⟩ := rfl
+  have h1 : evals (show (dkfWA + 0).IsSymm by rw [add_zero]; exact dkfWA_symmetric)
+      ⟨(0:ℕ) + 1, by simp⟩ = 2 := by
+    show evals (show (dkfWA + 0).IsSymm by rw [add_zero]; exact dkfWA_symmetric)
+        ⟨1, by simp⟩ = 2
+    rw [heq ⟨1, by simp⟩]
+    exact dkfWA_evals_pin.2
+  have h0 : evals (show (dkfWA + 0).IsSymm by rw [add_zero]; exact dkfWA_symmetric)
+      ⟨(0:ℕ), by simp⟩ = 0 := by
+    show evals (show (dkfWA + 0).IsSymm by rw [add_zero]; exact dkfWA_symmetric)
+        ⟨0, by simp⟩ = 0
+    rw [heq ⟨0, by simp⟩]
+    exact dkfWA_evals_pin.1
+  rw [hrw, h1, h0] at hcon
+  norm_num at hcon
+
+/-- **W2 isolation:** `hnorm` is genuine at `ε = 1` (`‖0‖ = 0`). -/
+theorem dkf_sgs_hgamma_isolation :
+    ‖(0 : Matrix (Fin 2) (Fin 2) ℝ)‖ ≤ 1 := by
+  rw [norm_zero]
+  norm_num
+
 end Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.QA

@@ -48,6 +48,12 @@
      hypothesis-free conclusion `‖P - Q‖ ≤ 0` is refuted with the norm
      lower-bounded by `1` at `e₀`.
 
+  The adversarial fence audit of the shelf's own clause surface
+  (proposal `adversarial-fences-band-projector-family.md`, 2026-09-04)
+  is the fifth section: seven hypothesis-form fences over
+  `ClusterProjector.lean`'s mode-selection, corner, disjointness,
+  capture, and band-agreement statements at the same fixtures.
+
   All proofs are real Lean proofs (no `sorry`/`admit`).
 
   Scoreboard: ../QA_SCOREBOARD.md
@@ -1188,5 +1194,140 @@ theorem cpsQA_ring_QA :
   fin_cases a <;> fin_cases b <;>
     simp [Matrix.sub_apply, Matrix.one_apply, Matrix.mul_apply,
       Matrix.diagonal_apply, Fin.sum_univ_three]
+
+/-! ## ClusterFences: the adversarial fence audit (proposal
+`adversarial-fences-band-projector-family.md`, 2026-09-04)
+
+Every load-bearing hypothesis clause of `ClusterProjector.lean`'s
+theorem surface with no negative witness anywhere in the repository,
+fenced in hypothesis form at the pinned fixture `clusterA =
+diag(0,5,11)`. QA-only, no axiom contact. -/
+
+section ClusterFences
+
+/-- No eigenvector of the fixture is the zero vector (unit norm) — the
+companion every action fence routes through. -/
+theorem cfF_eigvec_ne_zero (i : Fin 3) :
+    eigvecOf clusterA clusterA_symm i ≠ 0 := by
+  intro hz
+  have hnorm := eigvecOf_inner clusterA clusterA_symm i i
+  rw [if_pos rfl, hz] at hnorm
+  simp at hnorm
+
+/-- **Fence (`clusterProjector_mulVec_eigvecOf_self`, `h : λ i ∈ S`)**:
+at `S = {0, 11}` the eigenvalue-`5` mode is annihilated, not fixed. -/
+theorem cfF_self_h_fence :
+    ¬ (∀ i : Fin 3, clusterProjector clusterA clusterA_symm ({0, 11} : Set ℝ)
+        *ᵥ eigvecOf clusterA clusterA_symm i
+          = eigvecOf clusterA clusterA_symm i) := by
+  intro h
+  obtain ⟨i₅, hi₅⟩ := clusterA_exists_five
+  have hkill : clusterProjector clusterA clusterA_symm ({0, 11} : Set ℝ)
+      *ᵥ eigvecOf clusterA clusterA_symm i₅ = 0 :=
+    clusterProjector_mulVec_eigvecOf_eq_zero clusterA clusterA_symm _ i₅
+      (by intro hin
+          rw [hi₅] at hin
+          simp at hin)
+  have hfix := h i₅
+  rw [hkill] at hfix
+  exact cfF_eigvec_ne_zero i₅ hfix.symm
+
+/-- **Fence (`clusterProjector_mulVec_eigvecOf_eq_zero`,
+`h : λ i ∉ S`)**: at `S = {0, 11}` the eigenvalue-`0` mode is fixed,
+not annihilated. -/
+theorem cfF_zero_h_fence :
+    ¬ (∀ i : Fin 3, clusterProjector clusterA clusterA_symm ({0, 11} : Set ℝ)
+        *ᵥ eigvecOf clusterA clusterA_symm i = 0) := by
+  intro h
+  obtain ⟨i₀, hi₀⟩ := clusterA_exists_zero
+  have hfix : clusterProjector clusterA clusterA_symm ({0, 11} : Set ℝ)
+      *ᵥ eigvecOf clusterA clusterA_symm i₀
+        = eigvecOf clusterA clusterA_symm i₀ :=
+    clusterProjector_mulVec_eigvecOf_self clusterA clusterA_symm _ i₀
+      (by rw [hi₀]; simp)
+  have hkill := h i₀
+  rw [hfix] at hkill
+  exact cfF_eigvec_ne_zero i₀ hkill
+
+/-- **Fence (`clusterProjector_eq_zero_of_forall_not_mem`, `h`)**: a
+set genuinely selecting eigenvalues gives a nonzero projector — the
+pinned `diag(1,0,1)` (entry `(0,0)` is `1 ≠ 0`). -/
+theorem cfF_eqZeroNotMem_h_fence :
+    ¬ (clusterProjector clusterA clusterA_symm ({0, 11} : Set ℝ) = 0) := by
+  rw [cpA_zeroEleven]
+  intro h
+  have e := congrFun (congrFun h 0) 0
+  simp at e
+
+/-- **Fence (`clusterProjector_eq_one_of_forall_mem`, `h`)**: a set
+missing an eigenvalue is not the identity — the pinned `diag(1,1,0)`
+(entry `(2,2)` is `0 ≠ 1`). -/
+theorem cfF_eqOneMem_h_fence :
+    ¬ (clusterProjector clusterA clusterA_symm ({0, 5} : Set ℝ) = 1) := by
+  rw [cpA_zeroFive]
+  intro h
+  have e := congrFun (congrFun h 2) 2
+  simp at e
+
+/-- **Fence (`clusterProjector_mul_clusterProjector_eq_zero_of_disjoint`,
+`hST`)**: identical clusters are as far from disjoint as possible, and
+`P² = P = diag(1,0,1) ≠ 0`. -/
+theorem cfF_disjoint_hST_fence :
+    ¬ (clusterProjector clusterA clusterA_symm ({0, 11} : Set ℝ)
+        * clusterProjector clusterA clusterA_symm ({0, 11} : Set ℝ) = 0) := by
+  rw [clusterProjector_idempotent, cpA_zeroEleven]
+  intro h
+  have e := congrFun (congrFun h 0) 0
+  simp at e
+
+/-- **Fence (`clusterProjector_eq_of_forall_mem_iff`, `hiff`)**: sets
+selecting different eigenvalue classes give different projectors —
+`diag(1,0,1)` (missing the `5` mode) against the covering selection's
+identity (entry `(1,1)`: `0 ≠ 1`). -/
+theorem cfF_iff_hiff_fence :
+    ¬ (clusterProjector clusterA clusterA_symm ({0, 11} : Set ℝ)
+        = clusterProjector clusterA clusterA_symm (Set.Ioc (-1) 12)) := by
+  rw [cpA_zeroEleven,
+    clusterProjector_eq_one_of_forall_mem clusterA_symm _
+      (fun i => by
+        rcases clusterA_mem i with h | h | h <;> rw [h] <;>
+          exact Set.mem_Ioc.mpr ⟨by norm_num, by norm_num⟩)]
+  intro h
+  have e := congrFun (congrFun h 1) 1
+  simp at e
+
+/-- **Isolation (the band-agreement `hab` fence):** the dropped clause
+genuinely fails — `6 ≤ −1` is false. -/
+theorem cfF_bandAgree_hab_isolation : ¬ ((6 : ℝ) ≤ (-1 : ℝ)) := by norm_num
+
+/-- **Fence (`clusterProjector_eq_bandProjector`, `hab : a ≤ b`)**: the
+docstring's own corner, realized — `Set.Ioc 6 (−1)` is empty so the
+cluster side is `0`, while the negated band is
+`P_{−1} − P_6 = −diag(1,1,0) ≠ 0` (both threshold pins delivered). -/
+theorem cfF_bandAgree_hab_fence :
+    ¬ (clusterProjector clusterA clusterA_symm (Set.Ioc 6 (-1))
+        = bandProjector clusterA clusterA_symm 6 (-1)) := by
+  have hempty : ∀ i : Fin 3,
+      eigvalOf clusterA clusterA_symm i ∉ Set.Ioc 6 (-1) := by
+    intro i hmem
+    rw [Set.mem_Ioc] at hmem
+    linarith
+  have hband : bandProjector clusterA clusterA_symm 6 (-1)
+      = -(Matrix.diagonal ![1, 1, 0]) := by
+    rw [bandProjector, spClusterA_eq,
+      spectralProjector_eq_zero clusterA clusterA_symm (-1)
+        (fun i => by
+          rcases clusterA_mem i with h | h | h
+          · norm_num [h]
+          · norm_num [h]
+          · norm_num [h]),
+      zero_sub]
+  rw [clusterProjector_eq_zero_of_forall_not_mem clusterA_symm _ hempty,
+    hband]
+  intro h
+  have e := congrFun (congrFun h 0) 0
+  simp at e
+
+end ClusterFences
 
 end Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.QA

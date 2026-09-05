@@ -708,4 +708,485 @@ theorem davis_kahan_rotation_strict_QA :
 
 end RotationFixture
 
+/-!
+## The adversarial fence audit (`proposals/adversarial-fences-davis-kahan-core-family.md`)
+
+Hypothesis-form fences (negative witnesses) and packaged isolation
+companions for the Davis–Kahan core perturbation family's load-bearing
+clauses: `davis_kahan_sin_theta`'s `hδ`/`hsep`, the Duhamel bound's
+`hab`/`hcl`, the rank pin's no-tie clause, the trivial endpoint's four
+projector-structure clauses, and the sorted-step lemma's eigenvalue
+clause — the audit method's thirteenth application. Every fence refutes
+a *theorem* instantiation (the family is proved hard crust); nothing
+admitted is consumed.
+-/
+
+/-- **The D1 fence: `hδ : 0 < δ` is load-bearing.** At the rotation
+fixture with `δ = -1/2` (every other hypothesis genuine, including the
+separation), the bound's right side is the negative `‖dkE‖ / (-1/2) =
+-3/2` while the left side is a norm — the dropped statement cannot
+hold. -/
+theorem dkf_dk_hdelta_fence :
+    ¬ (‖initialProjector (dkA + dkE) dkAE_symmetric ⟨0, by simp⟩
+          - initialProjector dkA dkA_symmetric ⟨0, by simp⟩‖
+        ≤ ‖dkE‖ / (-(1/2) : ℝ)) := by
+  intro hcon
+  have h0 := le_trans (norm_nonneg _) hcon
+  rw [dkE_norm] at h0
+  norm_num at h0
+
+/-- **D1 isolation:** the separation clause is genuine at `δ = -1/2`
+(the pinned gap `9/4 - 0` dominates it), so `hδ` is the only failing
+hypothesis at this fixture. -/
+theorem dkf_dk_hdelta_isolation :
+    (-(1/2) : ℝ) ≤ evals dkAE_symmetric ⟨1, by simp⟩
+      - evals dkA_symmetric ⟨0, by simp⟩ := by
+  rw [dkAE_evals_pin.2, dkA_evals_pin.1]
+  norm_num
+
+/-- **The D2 fence: `hsep` is load-bearing.** With the separation
+dropped, take `δ = 100` (`hδ` genuine): the bound would read
+`‖Q - P‖ ≤ ‖dkE‖ / 100 = 3/400`, but the exact distance is pinned at
+`√(1/10) > 3/400`. -/
+theorem dkf_dk_hsep_fence :
+    ¬ (‖initialProjector (dkA + dkE) dkAE_symmetric ⟨0, by simp⟩
+          - initialProjector dkA dkA_symmetric ⟨0, by simp⟩‖
+        ≤ ‖dkE‖ / (100 : ℝ)) := by
+  intro hcon
+  rw [dkE_norm] at hcon
+  rw [(davis_kahan_rotation_strict_QA).1] at hcon
+  have hsq : Real.sqrt ((1:ℝ)/10) * Real.sqrt ((1:ℝ)/10) = 1/10 :=
+    Real.mul_self_sqrt (by norm_num)
+  have hnn := Real.sqrt_nonneg ((1:ℝ)/10)
+  have hc0 : (0:ℝ) ≤ 3/400 := by norm_num
+  nlinarith
+
+/-- **D2 isolation:** `hδ` is genuine at `δ = 100`. -/
+theorem dkf_dk_hsep_isolation : (0:ℝ) < 100 := by norm_num
+
+/-!
+
+## The Duhamel bound's two clauses (H1, H2)
+-/
+
+/-- **The H1 fence: `hab : a < b` is load-bearing.** At `a = 1`,
+`b = 0` (with `hcl` genuine: its premise-implication is trivially true
+at `b = 0`, `c' = 0`, since `0 < λ → 0 ≤ λ`), the bound's right side is
+`‖dkE‖ / (0 - 1) = -3/4` — below every norm. -/
+theorem dkf_duhamel_hab_fence :
+    ¬ (‖(1 - spectralProjector (dkA + dkE) dkAE_symmetric 0)
+          * spectralProjector dkA dkA_symmetric 1‖
+        ≤ ‖dkE‖ / (0 - 1)) := by
+  intro hcon
+  have h0 := le_trans (norm_nonneg _) hcon
+  rw [dkE_norm] at h0
+  norm_num at h0
+
+/-- **H1 isolation:** the eigenvalue-window clause `hcl` is genuine at
+the fence's `b = 0`, `c' = 0`. -/
+theorem dkf_duhamel_hab_isolation : ∀ i : Fin 2,
+    (0:ℝ) < eigvalOf (dkA + dkE) dkAE_symmetric i →
+      (0:ℝ) ≤ eigvalOf (dkA + dkE) dkAE_symmetric i := by
+  intro i hi
+  exact le_of_lt hi
+
+
+/-!
+## The H2 layer: the threshold-`1` projector pin (the Duhamel `hcl`
+fence's fixture) — the window `(-∞, 1]` captures exactly the `-1/4`
+eigenspace, so the projector is the delivered pin's own matrix.
+-/
+
+/-- The window filter at threshold `1` coincides with the low filter at
+`-1/4`: the only eigenvalue in `(-∞, 1]` is `-1/4` (`9/4` sits above
+the window, by the delivered eigenvalue-membership pin). -/
+theorem dkAE_filter_one_eq_low :
+    (Finset.univ.filter fun i => eigvalOf (dkA + dkE) dkAE_symmetric i ≤ 1)
+      = (Finset.univ.filter fun i =>
+        eigvalOf (dkA + dkE) dkAE_symmetric i ≤ -1/4) := by
+  apply Finset.ext
+  intro i
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+  constructor
+  · intro h
+    rcases dkAE_eigvalOf_mem i with h' | h'
+    · exact h'.le
+    · exact absurd (h' ▸ h) (by norm_num)
+  · intro h
+    exact le_trans h (by norm_num)
+
+/-- **The perturbed projector pinned at the H2 window**: `Q` at
+threshold `1` is the same rank-one outer product
+`(1/10)·!![9, -3; -3, 1]` as at its bottom eigenvalue. -/
+theorem dkAE_projector_one_pin :
+    spectralProjector (dkA + dkE) dkAE_symmetric 1
+      = !![9/10, -3/10; -3/10, 1/10] := by
+  have hEq : spectralProjector (dkA + dkE) dkAE_symmetric 1
+      = spectralProjector (dkA + dkE) dkAE_symmetric (-1/4) := by
+    conv_lhs => unfold spectralProjector
+    rw [dkAE_filter_one_eq_low]
+    rfl
+  have hpin := dkAE_projector_pin
+  rw [dkAE_evals_pin.1] at hpin
+  rw [hEq]
+  exact hpin
+
+/-- The unperturbed projector at the H2 threshold `0` — the delivered
+pin's own matrix (its threshold is the pinned bottom eigenvalue `0`). -/
+theorem dkA_projector_zero :
+    spectralProjector dkA dkA_symmetric 0 = !![1, 0; 0, 0] := by
+  have h := dkA_projector_pin
+  rw [dkA_evals_pin.1] at h
+  exact h
+
+/-- **The H2 fence: `hcl` (the eigenvalue window above `c'`) is
+load-bearing.** At `a = 0`, `c' = 1` (both projectors pinned), `b = 100`
+(`hab` genuine), the bound would read `‖(1 - Q) * P‖ ≤ ‖dkE‖ / 100 =
+3/400`; but `(1 - Q) * P *ᵥ e₀ = ![1/10, 3/10]` pins the left side's
+square at `≥ 1/10 > (3/400)²`. -/
+theorem dkf_duhamel_hcl_fence :
+    ¬ (‖(1 - spectralProjector (dkA + dkE) dkAE_symmetric 1)
+          * spectralProjector dkA dkA_symmetric 0‖
+        ≤ ‖dkE‖ / (100 - 0)) := by
+  intro hcon
+  have hRval : ‖dkE‖ / (100 - 0) = 3/400 := by
+    rw [dkE_norm]
+    norm_num
+  rw [hRval] at hcon
+  have hM : (1 - spectralProjector (dkA + dkE) dkAE_symmetric 1)
+      * spectralProjector dkA dkA_symmetric 0
+      = !![1/10, 0; 3/10, 0] := by
+    rw [dkAE_projector_one_pin, dkA_projector_zero]
+    ext i j
+    fin_cases i <;> fin_cases j <;>
+      simp [Matrix.mul_apply, Matrix.dotProduct, Fin.sum_univ_two,
+        Matrix.one_apply, Matrix.sub_apply]
+    all_goals norm_num
+  rw [hM] at hcon
+  have hw := dotProduct_mulVec_norm2_le_l2OpNorm_sq
+    (!![1/10, 0; 3/10, 0] : Matrix (Fin 2) (Fin 2) ℝ) (![1, 0] : Fin 2 → ℝ)
+  have hmv : (!![1/10, 0; 3/10, 0] : Matrix (Fin 2) (Fin 2) ℝ) *ᵥ
+      (![1, 0] : Fin 2 → ℝ) = ![1/10, 3/10] := by
+    funext i
+    fin_cases i <;>
+      simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+  have hd : (![1/10, 3/10] : Fin 2 → ℝ) ⬝ᵥ ![1/10, 3/10] = 1/10 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+    norm_num
+  have he : (![1, 0] : Fin 2 → ℝ) ⬝ᵥ ![1, 0] = 1 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+  rw [hmv, hd, he] at hw
+  have hnn : (0:ℝ) ≤ ‖(!![1/10, 0; 3/10, 0] : Matrix (Fin 2) (Fin 2) ℝ)‖ :=
+    norm_nonneg _
+  nlinarith [hcon, hnn]
+
+/-- **H2 isolation:** `hab` is genuine at `b = 100`, and the dropped
+`hcl` fails at exactly the `9/4` eigenvalue index. -/
+theorem dkf_duhamel_hcl_isolation :
+    ((0:ℝ) < 100) ∧ ∃ i : Fin 2,
+      (1:ℝ) < eigvalOf (dkA + dkE) dkAE_symmetric i ∧
+      ¬ ((100:ℝ) ≤ eigvalOf (dkA + dkE) dkAE_symmetric i) := by
+  refine ⟨by norm_num, ?_⟩
+  have hsum : ∑ i : Fin 2, eigvalOf (dkA + dkE) dkAE_symmetric i
+      = (-1/4) + 9/4 := by
+    rw [eigvalOf_sum_eq_trace, dkAE_trace]
+    norm_num
+  by_contra hcon'
+  have hall : ∀ i, eigvalOf (dkA + dkE) dkAE_symmetric i = -1/4 := fun i => by
+    rcases dkAE_eigvalOf_mem i with h | h
+    · exact h
+    · exact (hcon' ⟨i, by rw [h]; norm_num,
+        fun hle => by rw [h] at hle; norm_num at hle⟩).elim
+  simp only [hall] at hsum
+  norm_num at hsum
+
+/-!
+## The H3 layer: the rank pin's no-tie clause, at the zero matrix
+-/
+
+private theorem dkf_zero_eigvalOf (i : Fin 2) :
+    eigvalOf (0 : Matrix (Fin 2) (Fin 2) ℝ) zero_isSymm_QA i = 0 := by
+  have hveq : (0 : Matrix (Fin 2) (Fin 2) ℝ) *ᵥ
+      (eigvecOf (0 : Matrix (Fin 2) (Fin 2) ℝ) zero_isSymm_QA i)
+      = eigvalOf (0 : Matrix (Fin 2) (Fin 2) ℝ) zero_isSymm_QA i
+        • eigvecOf (0 : Matrix (Fin 2) (Fin 2) ℝ) zero_isSymm_QA i :=
+    (isHermitian_of_isSymm zero_isSymm_QA).mulVec_eigenvectorBasis i
+  rw [zero_mulVec] at hveq
+  rcases smul_eq_zero.1 hveq.symm with h | h
+  · exact h
+  · exfalso
+    have hu : ∑ a, (eigvecOf (0 : Matrix (Fin 2) (Fin 2) ℝ) zero_isSymm_QA i a
+        * eigvecOf (0 : Matrix (Fin 2) (Fin 2) ℝ) zero_isSymm_QA i a) = 1 := by
+      have h := eigvecOf_inner (0 : Matrix (Fin 2) (Fin 2) ℝ) zero_isSymm_QA i i
+      simpa using h
+    rw [h] at hu
+    simp at hu
+
+theorem dkf_zero_evals_pin :
+    evals (zero_isSymm_QA : (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm) ⟨0, by simp⟩ = 0 ∧
+      evals (zero_isSymm_QA : (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm) ⟨1, by simp⟩
+        = 0 := by
+  have hlen : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm
+          (zero_isSymm_QA : (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm)).eigenvalues))).length = 2 := by
+    rw [Multiset.length_sort, Multiset.card_map]; simp
+  have hsorted : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm
+          (zero_isSymm_QA : (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm)).eigenvalues))).Sorted
+        (fun a b => a ≤ b) :=
+    Multiset.sort_sorted _ _
+  have hsum : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm
+          (zero_isSymm_QA : (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm)).eigenvalues))).sum
+        = 0 + 0 := by
+    have htr : ∑ i : Fin 2,
+        eigvalOf (0 : Matrix (Fin 2) (Fin 2) ℝ) zero_isSymm_QA i = 0 + 0 := by
+      rw [eigvalOf_sum_eq_trace]
+      simp
+    rw [← Multiset.sum_coe, Multiset.sort_eq, ← Finset.sum_eq_multiset_sum]
+    exact htr
+  have hprod : (Multiset.sort (fun a b => a ≤ b)
+      ((Finset.univ : Finset (Fin 2)).val.map
+        ((isHermitian_of_isSymm
+          (zero_isSymm_QA : (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm)).eigenvalues))).prod
+        = 0 * 0 := by
+    have hd0 : ∏ i : Fin 2,
+        ((isHermitian_of_isSymm
+          (zero_isSymm_QA : (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm)).eigenvalues i) = 0 := by
+      have h := (isHermitian_of_isSymm
+        (zero_isSymm_QA : (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm)).det_eq_prod_eigenvalues
+      have hz : (0 : Matrix (Fin 2) (Fin 2) ℝ).det = 0 := by
+        simp [Matrix.det_fin_two]
+      rw [hz] at h
+      exact h.symm
+    rw [← Multiset.prod_coe, Multiset.sort_eq, ← Finset.prod_eq_multiset_prod]
+    rw [hd0]
+    norm_num
+  exact two_point_pin_of_sum_prod (lo := 0) (hi := 0) (by norm_num)
+    hlen hsorted hsum hprod
+
+/-- **The H3 fence: the no-tie clause of the rank pin is
+load-bearing.** At the zero matrix the sorted spectrum is tied (`0, 0`),
+so the dropped statement would read
+`rank (spectralProjector 0 hM 0) = 1`; but every eigenvalue is `0`, the
+projector is the identity, and its rank is `2`. -/
+theorem dkf_rank_hnn_tie_fence :
+    ¬ ((spectralProjector (0 : Matrix (Fin 2) (Fin 2) ℝ)
+          (zero_isSymm_QA : (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm)
+          (evals (zero_isSymm_QA : (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm)
+            ⟨0, by simp⟩)).rank
+        = (0:ℕ) + 1) := by
+  intro hcon
+  have hproj : spectralProjector (0 : Matrix (Fin 2) (Fin 2) ℝ)
+      (zero_isSymm_QA : (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm)
+      (evals (zero_isSymm_QA : (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm)
+        ⟨0, by simp⟩) = 1 :=
+    spectralProjector_eq_one _ _ _ (fun i => by
+      show eigvalOf (0 : Matrix (Fin 2) (Fin 2) ℝ) zero_isSymm_QA i
+        ≤ evals (zero_isSymm_QA : (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm)
+          ⟨0, by simp⟩
+      rw [dkf_zero_evals_pin.1]
+      exact le_of_eq (dkf_zero_eigvalOf i))
+  rw [hproj, Matrix.rank_one] at hcon
+  simp at hcon
+
+/-- **H3 isolation:** the dropped no-tie hypothesis fails — the zero
+matrix's pinned spectrum is tied at `0`. -/
+theorem dkf_rank_hnn_tie_isolation :
+    ¬ (evals (zero_isSymm_QA : (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm) ⟨0, by simp⟩
+        < evals (zero_isSymm_QA : (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm)
+          ⟨1, by simp⟩) := by
+  rw [dkf_zero_evals_pin.1, dkf_zero_evals_pin.2]
+  norm_num
+
+/-!
+## The H4–H7 layer: the trivial endpoint's four projector-structure
+clauses, at two trivial fixtures
+-/
+
+/-- The asymmetric idempotent `!![1,2;0,0]]` — the H4/H6 fixture. -/
+def dkfAsym2 : Matrix (Fin 2) (Fin 2) ℝ := !![1, 2; 0, 0]
+
+theorem dkfAsym2_mul_self : dkfAsym2 * dkfAsym2 = dkfAsym2 := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [Matrix.mul_apply, Matrix.dotProduct, Fin.sum_univ_two, dkfAsym2]
+
+theorem dkfAsym2_not_isSymm : ¬ dkfAsym2.IsSymm := by
+  intro h
+  have h1 := congrFun (congrFun h.eq 1) 0
+  simp [Matrix.transpose_apply, dkfAsym2] at h1
+
+/-- The symmetric non-idempotent `diag(2, 0)` — the H5/H7 fixture and a
+P-section fixture. -/
+def dkfDiag2 : Matrix (Fin 2) (Fin 2) ℝ := Matrix.diagonal ![2, 0]
+
+theorem dkfDiag2_symmetric : dkfDiag2.IsSymm := by
+  show dkfDiag2ᵀ = dkfDiag2
+  exact Matrix.diagonal_transpose _
+
+theorem dkfDiag2_not_mul_self : ¬ (dkfDiag2 * dkfDiag2 = dkfDiag2) := by
+  intro h
+  have e := congrFun (congrFun h 0) 0
+  simp only [Matrix.mul_apply, Matrix.dotProduct, Fin.sum_univ_two,
+    dkfDiag2, Matrix.diagonal_apply] at e
+  norm_num at e
+
+theorem dkfDiag2_rank : dkfDiag2.rank = 1 := by
+  unfold dkfDiag2
+  rw [Matrix.rank_diagonal]
+  have hfe : (Finset.univ.filter fun x => (![2, 0] : Fin 2 → ℝ) x ≠ 0)
+      = ({0} : Finset (Fin 2)) := by
+    ext x
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and,
+      Finset.mem_singleton]
+    fin_cases x <;> simp
+  simp only [Fintype.card_subtype, Finset.sum_ite_eq', Finset.mem_univ]
+  rw [hfe, Finset.card_singleton]
+
+/-- **The H4 fence: `hP : P.IsSymm` of the trivial endpoint is
+load-bearing.** The asymmetric idempotent `!![1,2;0,0]]` against `Q = 0`
+(every kept clause genuine) has `P *ᵥ ![1,2] = ![5,0]`, so `‖P‖² ≥ 5`
+and `‖P - Q‖ ≤ 1` fails. -/
+theorem dkf_one_hP_fence : ¬ (‖dkfAsym2 - 0‖ ≤ 1) := by
+  intro hcon
+  have hz : dkfAsym2 - 0 = dkfAsym2 := sub_zero _
+  rw [hz] at hcon
+  have hw := dotProduct_mulVec_norm2_le_l2OpNorm_sq dkfAsym2
+    (![1, 2] : Fin 2 → ℝ)
+  have hmv : dkfAsym2 *ᵥ (![1, 2] : Fin 2 → ℝ) = ![5, 0] := by
+    funext i
+    fin_cases i <;>
+      simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, dkfAsym2]
+    all_goals norm_num
+  have hd : (![5, 0] : Fin 2 → ℝ) ⬝ᵥ ![5, 0] = 25 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+    norm_num
+  have he : (![1, 2] : Fin 2 → ℝ) ⬝ᵥ ![1, 2] = 5 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+    norm_num
+  rw [hmv, hd, he] at hw
+  have hnn : (0:ℝ) ≤ ‖dkfAsym2‖ := norm_nonneg _
+  nlinarith [hcon, hnn]
+
+/-- **H4 isolation:** every kept clause is genuine (`Q = 0` is a
+symmetric idempotent; `P` is idempotent), so `hP` is the only failing
+hypothesis. -/
+theorem dkf_one_hP_isolation :
+    dkfAsym2 * dkfAsym2 = dkfAsym2 ∧
+      (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm ∧
+      ((0 : Matrix (Fin 2) (Fin 2) ℝ) * 0 = 0) ∧ ¬ dkfAsym2.IsSymm :=
+  ⟨dkfAsym2_mul_self, zero_isSymm_QA, mul_zero _, dkfAsym2_not_isSymm⟩
+
+/-- **The H5 fence: `hPP : P * P = P` of the trivial endpoint is
+load-bearing.** The symmetric non-idempotent `diag(2, 0)` against
+`Q = 0` has `‖P‖² ≥ 4` (witness `e₀`), so `‖P - Q‖ ≤ 1` fails. -/
+theorem dkf_one_hPP_fence : ¬ (‖dkfDiag2 - 0‖ ≤ 1) := by
+  intro hcon
+  have hz : dkfDiag2 - 0 = dkfDiag2 := sub_zero _
+  rw [hz] at hcon
+  have hw := dotProduct_mulVec_norm2_le_l2OpNorm_sq dkfDiag2
+    (![1, 0] : Fin 2 → ℝ)
+  have hmv : dkfDiag2 *ᵥ (![1, 0] : Fin 2 → ℝ) = ![2, 0] := by
+    funext i
+    fin_cases i <;>
+      simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, dkfDiag2,
+        Matrix.diagonal_apply]
+  have hd : (![2, 0] : Fin 2 → ℝ) ⬝ᵥ ![2, 0] = 4 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+    norm_num
+  have he : (![1, 0] : Fin 2 → ℝ) ⬝ᵥ ![1, 0] = 1 := by
+    simp [Matrix.dotProduct, Fin.sum_univ_two]
+  rw [hmv, hd, he] at hw
+  have hnn : (0:ℝ) ≤ ‖dkfDiag2‖ := norm_nonneg _
+  nlinarith [hcon, hnn]
+
+/-- **H5 isolation.** -/
+theorem dkf_one_hPP_isolation :
+    dkfDiag2.IsSymm ∧ (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm ∧
+      ((0 : Matrix (Fin 2) (Fin 2) ℝ) * 0 = 0) ∧
+      ¬ (dkfDiag2 * dkfDiag2 = dkfDiag2) :=
+  ⟨dkfDiag2_symmetric, zero_isSymm_QA, mul_zero _, dkfDiag2_not_mul_self⟩
+
+/-- **The H6 fence: `hQ` of the trivial endpoint is load-bearing** —
+the mirror of H4 at the same fixture. -/
+theorem dkf_one_hQ_fence : ¬ (‖(0 : Matrix (Fin 2) (Fin 2) ℝ) - dkfAsym2‖ ≤ 1) := by
+  intro hcon
+  rw [zero_sub, norm_neg] at hcon
+  exact dkf_one_hP_fence (by rw [sub_zero]; exact hcon)
+
+/-- **H6 isolation** — mirror of H4's. -/
+theorem dkf_one_hQ_isolation :
+    (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm ∧
+      ((0 : Matrix (Fin 2) (Fin 2) ℝ) * 0 = 0) ∧
+      dkfAsym2 * dkfAsym2 = dkfAsym2 ∧ ¬ dkfAsym2.IsSymm :=
+  ⟨zero_isSymm_QA, mul_zero _, dkfAsym2_mul_self, dkfAsym2_not_isSymm⟩
+
+/-- **The H7 fence: `hQQ` of the trivial endpoint is load-bearing** —
+the mirror of H5 at the same fixture. -/
+theorem dkf_one_hQQ_fence : ¬ (‖(0 : Matrix (Fin 2) (Fin 2) ℝ) - dkfDiag2‖ ≤ 1) := by
+  intro hcon
+  rw [zero_sub, norm_neg] at hcon
+  exact dkf_one_hPP_fence (by rw [sub_zero]; exact hcon)
+
+/-- **H7 isolation** — mirror of H5's. -/
+theorem dkf_one_hQQ_isolation :
+    (0 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm ∧
+      ((0 : Matrix (Fin 2) (Fin 2) ℝ) * 0 = 0) ∧
+      dkfDiag2.IsSymm ∧ ¬ (dkfDiag2 * dkfDiag2 = dkfDiag2) :=
+  ⟨zero_isSymm_QA, mul_zero _, dkfDiag2_symmetric, dkfDiag2_not_mul_self⟩
+
+/-!
+## The H8 layer: the sorted-step lemma's eigenvalue clause
+-/
+
+/-- **The H8 fence: `h : evals k < eigvalOf i` of the sorted-step lemma
+is load-bearing.** At `dkA` with `k = 0`, the pinned spectrum is
+`[0, 2]` and some eigenbasis index carries the bottom eigenvalue `0`
+(the sub-level filter is nonempty and no eigenvalue is below the
+bottom), so the dropped statement reads `2 ≤ 0`. -/
+theorem dkf_sortedstep_fence : ∃ i : Fin 2,
+    ¬ (evals dkA_symmetric ⟨(0:ℕ) + 1, by simp⟩ ≤ eigvalOf dkA dkA_symmetric i) := by
+  have hge := succ_le_card_filter_eigvalOf_le dkA_symmetric ⟨0, by simp⟩
+  rw [dkA_evals_pin.1] at hge
+  have hne : (Finset.univ.filter fun i => eigvalOf dkA dkA_symmetric i ≤ 0).Nonempty :=
+    Finset.card_pos.1 (by omega)
+  obtain ⟨i₀, hi₀⟩ := hne
+  have hle : eigvalOf dkA dkA_symmetric i₀ ≤ 0 := (Finset.mem_filter.1 hi₀).2
+  have hfirst : evals dkA_symmetric ⟨0, by simp⟩ ≤ eigvalOf dkA dkA_symmetric i₀ :=
+    evals_first_le_eigvalOf dkA_symmetric (by norm_num : (1:ℕ) ≤ Fintype.card (Fin 2)) i₀
+  rw [dkA_evals_pin.1] at hfirst
+  have heq : eigvalOf dkA dkA_symmetric i₀ = 0 := le_antisymm hle hfirst
+  refine ⟨i₀, ?_⟩
+  intro hc
+  have h1 : evals dkA_symmetric ⟨(0:ℕ) + 1, by simp⟩ = 2 := by
+    show evals dkA_symmetric ⟨1, by simp⟩ = 2
+    exact dkA_evals_pin.2
+  rw [h1, heq] at hc
+  norm_num at hc
+
+/-- **H8 isolation:** the dropped clause fails at the found index —
+`evals ⟨0⟩ = 0` is not strictly below `eigvalOf i₀ = 0`. -/
+theorem dkf_sortedstep_isolation :
+    ¬ (∀ i : Fin 2, evals dkA_symmetric ⟨0, by simp⟩ < eigvalOf dkA dkA_symmetric i) := by
+  intro h
+  have hge := succ_le_card_filter_eigvalOf_le dkA_symmetric ⟨0, by simp⟩
+  rw [dkA_evals_pin.1] at hge
+  have hne : (Finset.univ.filter fun i => eigvalOf dkA dkA_symmetric i ≤ 0).Nonempty :=
+    Finset.card_pos.1 (by omega)
+  obtain ⟨i₀, hi₀⟩ := hne
+  have hle : eigvalOf dkA dkA_symmetric i₀ ≤ 0 := (Finset.mem_filter.1 hi₀).2
+  have hfirst : evals dkA_symmetric ⟨0, by simp⟩ ≤ eigvalOf dkA dkA_symmetric i₀ :=
+    evals_first_le_eigvalOf dkA_symmetric (by norm_num : (1:ℕ) ≤ Fintype.card (Fin 2)) i₀
+  rw [dkA_evals_pin.1] at hfirst
+  have heq : eigvalOf dkA dkA_symmetric i₀ = 0 := le_antisymm hle hfirst
+  have hlt := h i₀
+  rw [show evals dkA_symmetric ⟨0, by simp⟩ = 0 from dkA_evals_pin.1] at hlt
+  rw [heq] at hlt
+  exact absurd hlt (by norm_num)
+
+
 end Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.QA

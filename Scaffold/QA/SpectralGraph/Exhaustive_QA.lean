@@ -27,10 +27,25 @@
     that a hypothesis is load-bearing (an asymmetric two-vertex weight
     on which cut duality genuinely fails, `2 ≠ 1`).
 
+  - *Witness-layer reconciliation (2026-09-05).* The `WitnessFences`
+    section below brings the file's one free-form load-bearing witness
+    (`asym_boundary_not_dual_QA`, delivered 2026-08-17 before the
+    per-clause fence discipline existed) into that discipline: the
+    `boundary_compl` fence's proof *consumes* the free-form witness as
+    its engine, and the sibling `conductance_compl` clause is fenced at
+    the same fixture, completing the cut-duality pair's coverage at
+    this file's own layer (both clauses are also fenced at `dirB` in
+    `Spectral_QA.lean`'s Step-1 section — independent fixture,
+    independent proof route).
+
   Fixtures are declared under fresh names rather than imported from
-  sibling QA modules: QA modules are built independently and must not
-  import each other (they share the `SpectralGraphTheory.QA`
-  namespace).
+  sibling QA modules, keeping this module independently elaborable.
+  QA-to-QA imports are no longer forbidden repository-wide (the
+  2026-09-05 `edgeAdj` lattice repair made the shared
+  `SpectralGraphTheory.QA` namespace co-import-safe at that name, and
+  residual same-named QA fixtures are tracked by
+  `scripts/check_qa_name_uniqueness.py`, renamed on demand per that
+  repair's recipe) — but this file needs none.
 
   All proofs are real Lean proofs (no `sorry`/`admit`). These are
   theorems, not axioms; QA checks interfaces; it does not prove any
@@ -563,5 +578,137 @@ theorem exh_walk_row_two :
     simp only [walkTransitionMatrix, Matrix.diagonal_mul, exhPathAdj_deg_two]
   simp only [hrow, Fin.sum_univ_three]
   norm_num [exhPathAdj, Matrix.of_apply]
+
+/-!
+## Witness-layer reconciliation (2026-09-05)
+
+  The standing audit remainder (`proposals/qa-name-collision-guard.md`,
+  Part B): this file's one free-form load-bearing witness —
+  `asym_boundary_not_dual_QA`, delivered 2026-08-17, weeks before the
+  per-clause fence discipline existed — is reconciled into that
+  discipline here. The `boundary_compl` fence below consumes the
+  free-form witness as its proof engine (the reconciliation proper);
+  the sibling `conductance_compl` clause is fenced at the same
+  `asymAdj2` fixture through pinned conductance values, completing the
+  cut-duality pair's coverage at this file's own layer. The other
+  negative-flavored checks above are classified, not converted: the
+  three `*_separates_QA` theorems are interface-separation checks
+  (positive computations that distinct inputs evaluate distinctly —
+  they falsify a *collapsed* definition, not a dropped hypothesis), so
+  they have no per-clause fence form.
+
+  Clause-surface context: every other hypothesis-bearing statement this
+  file computes from is fenced at its home QA file — the duality pair
+  also at `dirB` (`Spectral_QA.lean`, Step 1), the walk layer's `hd`
+  clauses at `nfIso`/`nfNegEdge` (`Normalized_QA.lean`, section C),
+  `laplacian_quadForm`'s `hA`/`hnn` at `dirA`/`sfNegEdge`
+  (`Spectral_QA.lean`, Step 1). The fences below are independent
+  second fixtures with independent proof routes; `vol_compl`,
+  `boundary_empty`/`_univ`, `walkTransitionMatrix_apply`, and
+  `laplacian_ones_in_kernel` are hypothesis-free (nothing to fence).
+
+  All proofs are real Lean proofs (no `sorry`/`admit`); `#print axioms`
+  on every declaration below reads exactly `propext,
+  Classical.choice, Quot.sound` (theorem instantiations of an
+  all-proved shelf; no `-- @refutes` tags — nothing admitted consumed).
+-/
+
+/-- Entry pin: the forward arc carries weight `2`. -/
+theorem exhAsym_01 : asymAdj2 0 1 = 2 := rfl
+
+/-- Entry pin: the return arc carries weight `1`. -/
+theorem exhAsym_10 : asymAdj2 1 0 = 1 := rfl
+
+/-- Isolation for the duality fences: `asymAdj2` is genuinely outside
+the dropped symmetric cone (`2 ≠ 1` at the off-diagonal pair), so the
+fences below kill the clause, not an accidental corner inside it. -/
+theorem exhAsym_not_isSymm : ¬ asymAdj2.IsSymm := by
+  intro h
+  have h01 := h.apply 0 1
+  rw [exhAsym_01, exhAsym_10] at h01
+  norm_num at h01
+
+/-- Degree pin: the asymmetric two-network has degrees `(2, 1)`. -/
+theorem exhAsym_deg_zero : deg asymAdj2 0 = 2 := by
+  simp only [deg, asymAdj2, Matrix.of_apply, Fin.sum_univ_two]
+  norm_num
+
+/-- Degree pin. -/
+theorem exhAsym_deg_one : deg asymAdj2 1 = 1 := by
+  simp only [deg, asymAdj2, Matrix.of_apply, Fin.sum_univ_two]
+  norm_num
+
+/-- Volume pin: `vol {0} = 2`. -/
+theorem exhAsym_vol_zero : vol asymAdj2 ({0} : Finset (Fin 2)) = 2 := by
+  simp only [vol, Finset.sum_singleton, exhAsym_deg_zero]
+
+/-- Volume pin: `vol {1} = 1`. -/
+theorem exhAsym_vol_one : vol asymAdj2 ({1} : Finset (Fin 2)) = 1 := by
+  simp only [vol, Finset.sum_singleton, exhAsym_deg_one]
+
+/-- Boundary pin at the `{1}` cut: the free-form witness's complement
+side (`boundary {0}ᶜ = 1`), transferred to the singleton form through
+the decided complement fact. -/
+theorem exhAsym_boundary_one : boundary asymAdj2 ({1} : Finset (Fin 2)) = 1 := by
+  rw [← compl2_0]
+  exact asym_boundary_sides.2
+
+/-- Conductance of the `{0}` cut: `2 / min(2, 1) = 2`. -/
+theorem exhAsym_conductance_zero :
+    conductance asymAdj2 ({0} : Finset (Fin 2)) = 2 := by
+  rw [conductance, asym_boundary_sides.1, exhAsym_vol_zero, compl2_0,
+    exhAsym_vol_one, min_eq_right (by norm_num : (1 : ℝ) ≤ 2)]
+  norm_num
+
+/-- Conductance of the complementary `{1}` cut: `1 / min(1, 2) = 1`. -/
+theorem exhAsym_conductance_one :
+    conductance asymAdj2 ({1} : Finset (Fin 2)) = 1 := by
+  rw [conductance, compl2_1, exhAsym_boundary_one, exhAsym_vol_one,
+    exhAsym_vol_zero, min_eq_left (by norm_num : (1 : ℝ) ≤ 2)]
+  norm_num
+
+/-- Conductance of the complement cut, pinned for the fence below. -/
+theorem exhAsym_conductance_compl :
+    conductance asymAdj2 ({0} : Finset (Fin 2))ᶜ = 1 := by
+  rw [compl2_0]
+  exact exhAsym_conductance_one
+
+/-- **Fence (`hA` clause of `boundary_compl`) — reconciliation.**
+Dropping the symmetric cone is refuted at this file's own asymmetric
+fixture, `S = {0}`: the two directions of the cut carry different
+weight, `2 ≠ 1`. The proof *consumes* the 2026-08-17 free-form
+witness `asym_boundary_not_dual_QA` as its engine — the witness is now
+inside the per-clause discipline. Isolation: `exhAsym_not_isSymm`;
+kept clauses: none (the theorem's only hypothesis is the dropped
+one). -/
+theorem exh_boundary_compl_hA_fence_QA :
+    ¬ ∀ (A : Matrix (Fin 2) (Fin 2) ℝ) (S : Finset (Fin 2)),
+      boundary A S = boundary A Sᶜ := by
+  intro h
+  exact asym_boundary_not_dual_QA (h asymAdj2 {0})
+
+/-- **Fence (`hA` clause of `conductance_compl`).** The sibling duality
+statement fails at the same fixture through the pinned conductance
+values: `conductance {0} = 2 ≠ 1 = conductance {0}ᶜ` — cut
+canonicalization needs symmetry at the conductance level too, not just
+the boundary level. Isolation: `exhAsym_not_isSymm`. -/
+theorem exh_conductance_compl_hA_fence_QA :
+    ¬ ∀ (A : Matrix (Fin 2) (Fin 2) ℝ) (S : Finset (Fin 2)),
+      conductance A S = conductance A Sᶜ := by
+  intro h
+  have h1 := h asymAdj2 {0}
+  rw [exhAsym_conductance_zero, exhAsym_conductance_compl] at h1
+  norm_num at h1
+
+/-- Packaged isolation for the walk row-sum layer: the path sits
+inside the `hd : ∀ i, 0 < deg A i` cone (degrees `(1, 2, 1)`), so the
+three `exh_walk_row_*` computations above are genuine positive
+instances of `walkTransitionMatrix_row_sum` — positive-side
+companions to `Normalized_QA.lean`'s C1 fence, which kills the dropped
+statement at a zero-degree fixture outside the cone. -/
+theorem exhPathAdj_deg_pos : ∀ i, 0 < deg exhPathAdj i := by
+  intro i
+  fin_cases i <;>
+    simp [exhPathAdj_deg_zero, exhPathAdj_deg_one, exhPathAdj_deg_two]
 
 end SpectralGraphTheory.QA

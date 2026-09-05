@@ -233,6 +233,22 @@ D1. `walkHeatKernel_variance_decay`'s `ht : 0 ≤ t` — the natural
     priced; deferred with the combinatorial twin (fence 19) closing the
     same mechanism class (`ht`, backward-time growth) for the family.
 
+    **RESOLVED 2026-09-05** (run `20260905T144054Z-run-1`, session
+    `ses_f8e134871ffeiWXCb84ykj7oaD`; see the D1 delivery record
+    below): `hf_walk_var_t_fence` in `Heat_QA.lean`'s new
+    `HeatFencesD1` section, at the priced witness and the priced
+    route — the four-point pin landed as
+    `hfDis4Adj_norm_secondEval_eq_zero` (upper bound via
+    `secondEval_le_rayleigh` at the centered component indicator
+    `![1,1,-1,-1]`, a genuine `L_sym`-kernel vector; lower bound via
+    `normalizedLaplacian_evals_zero` + `evals_sorted`), the flow pin
+    via `exp_mulVec_eq_smul_of_mulVec_eq_smul` at the eigenvalue-`2`
+    mode. Output π-variance `2e⁴` against the rate-`e⁰ = 1` bound on
+    input `2`, at `t = -1`; packaged isolation proving every kept
+    clause (`hA`/`hnn`/`hd`/`hcard`) genuine and `ht` genuinely
+    failing. The family's falsification surface is now complete with
+    no open deferral.
+
 ### Non-fenceables with mechanisms (the P4/signature classes)
 
 - **The `hA`-in-display class**: every eigenbasis-consuming statement
@@ -323,3 +339,86 @@ Technique findings (recorded for future audits):
    scalar-literal smuls in *statement* position elaborate as `ℕ`-smuls
    unless annotated `(c : ℝ) •`, which silently mismatches
    `matrix_exp_smul_one`'s `ℝ`-smul instance.
+
+## D1 delivery record (2026-09-05)
+
+**Run:** `20260905T144054Z-run-1`, session
+`ses_f8e134871ffeiWXCb84ykj7oaD`. DELIVERED at the full priced scope —
+the walk-twin variance `ht` fence in `Heat_QA.lean`'s new
+`HeatFencesD1` section (a pure insertion after `end HeatFences`):
+twenty theorems plus two fixture `def`s at the priced witness
+`hfDis4Adj` (two disjoint edges on `Fin 4`, the `if`-spelling per the
+family's own technique finding — the `!![…]` cons-tower leaves
+`vecHead/vecTail` residue at Fin 4), QA-only, zero axiom contact
+(`#print axioms` via `wip/d1fence_axcheck.lean` on all twenty public
+declarations — every one exactly `propext, Classical.choice,
+Quot.sound`; the two `def`s audited transitively; no `-- @refutes`
+tags — theorem instantiations of an all-proved shelf, nothing
+admitted consumed; the 12-tag independence check unchanged and
+clean). QA 6041 → 6061 (+20 by the generator metric).
+
+The delivery's content:
+
+- **The fixture's honest-clause design** — the deferral's whole reason
+  for existing: the walk twin's kept clauses include `hnn` and `hd`,
+  so neither pre-delivery fixture could carry an `ht`-only fence (the
+  Fin 3 `disAdj` breaks `hd` at its isolated vertex; the Fin 2
+  `hfRegAdj` breaks `hnn` at its negative weight). Two disjoint edges
+  keep every clause genuine while disconnection holds the rate at
+  `e⁰ = 1` — the packaged isolation `hfDis4Adj_isolation` proves
+  `hA`/`hnn`/`hd`/`hcard` genuine and `(-1 : ℝ) < 0`.
+- **The four-point pin** `hfDis4Adj_norm_secondEval_eq_zero` at the
+  priced route: upper bound via `secondEval_le_rayleigh` at the
+  centered component indicator `hfDis4KerVec = ![1,1,-1,-1]` (a
+  genuine `L_sym`-kernel vector at the unit degrees where
+  `degreeInvSqrt = 1`, so `L_sym = 1 − A` and the Rayleigh quotient is
+  `0`), lower bound via `normalizedLaplacian_evals_zero` +
+  `evals_sorted` — the exact shape of the delivered Fin 3
+  combinatorial pin `disAdj_secondEval_eq_zero_QA`, lifted to the
+  normalized Laplacian.
+- **The flow pin** `hfDis4Adj_walkHeatKernel_minus_one_mode`:
+  `walkHeatKernel hfDis4Adj (-1) *ᵥ ![1,-1,0,0] = e² • ![1,-1,0,0]`
+  through `exp_mulVec_eq_smul_of_mulVec_eq_smul` at the per-block
+  antisymmetric mode, a genuine `L_walk`-eigenvalue-`2` vector (the
+  within-block swap negates it).
+- **The fence** `hf_walk_var_t_fence` in the delivered
+  `hf_walk_var_nn_fence` statement shape (the deg-weighted π-variance,
+  the rate through `secondEval (normalizedLaplacian …)`): at
+  `t = -1`, mean `0` (the deg-weighted cross sum vanishes), input
+  variance `2`, output `2e⁴` — the dropped statement demands
+  `2e⁴ ≤ 2`, killed by `hf_exp_two_gt_one`. Backward time is the
+  backward (growth) semigroup, and the variance bound genuinely
+  excludes it — now witnessed on both twins at independent fixtures.
+
+Technique findings: (1) the `if`-spelling fixture is mandatory at
+Fin 4 — the `!![…]` literal's entry proofs leave irreducible
+`vecHead/vecTail` towers that neither `simp` nor `norm_num` closes
+(the family's own finding 4, re-confirmed); (2) at unit degrees the
+normalized Laplacian collapses through the `degreeInvSqrt = 1` pin
+(`simp only` with `Matrix.diagonal_apply`/`Matrix.one_apply`, then
+`one_mul`/`mul_one`), which is what makes the four-point pin a
+Fin-3-shaped argument rather than a new engine; (3) literal-index
+entry pins of the 4-vector `![1,-1,0,0]` close under plain `norm_num`
+after the degree `rw` — no cons-entry lemma list needed in `have`
+position (only in `funext`-position proofs, where full `simp [def]`
+carries them).
+
+**Verification:** spike first (`wip/d1fence_spike.lean` — the full
+delivery, green after two fix rounds in the recorded trap classes:
+the cons-tower residue forcing the `if`-spelling, and a
+`degreeInvSqrt` `rw` that needed `simp only [degreeInvSqrt, …]`
+rather than `rw [Matrix.diagonal_apply]` at the folded def); `lake
+env lean` on the landed module (zero errors; the file's two
+`Try this: ring_nf` traces pre-exist at HEAD, verified by elaborating
+`git show HEAD`'s copy); explicit `lake build
+Scaffold.QA.SpectralGraph.Heat_QA` ✔; full `lake build` ✔ +
+`check_build_completeness.py` — 134/134/0/0, exit 0; `lint_axioms`
+exit 0 (4 axioms unchanged); `check_refutation_independence`
+(12-tag clean); `check_public_reachability` clean (63 modules);
+`check_citations` ("All axioms have proper citations!");
+`check_qa_name_uniqueness` clean (the new `hfDis4*` names add no
+collision); `check_backlog_freshness` clean; scoreboard regenerated
+(**6061/4/0**) with the verification row; map-freshness exit 0 after
+the 6041 → 6061 stats sync in both map data tables and SVG
+regeneration (49 stations, no status change — none owed: this
+proposal is not a map station's cited source).

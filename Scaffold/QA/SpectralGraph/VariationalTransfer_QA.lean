@@ -1010,20 +1010,20 @@ bound the weighted norm — `5 · ‖e₀‖² = 5 ≤ 1 = deg · e₀²` is fal
 theorem vtf_sum_ge_hdmin_fence_QA :
     ¬ ((5 : ℝ) * Matrix.dotProduct (![1, 0] : Fin 2 → ℝ)
           (![1, 0] : Fin 2 → ℝ)
-        ≤ ∑ i, deg edgeAdj i * (![1, 0] : Fin 2 → ℝ) i
+        ≤ ∑ i, deg cheegerEdgeAdj i * (![1, 0] : Fin 2 → ℝ) i
             * (![1, 0] : Fin 2 → ℝ) i) := by
-  simp only [Matrix.dotProduct, Fin.sum_univ_two, edgeAdj_regular,
+  simp only [Matrix.dotProduct, Fin.sum_univ_two, cheegerEdgeAdj_regular,
     Matrix.cons_val_zero, Matrix.head_cons, Matrix.cons_val_one]
   norm_num
 
 /-- **Fence (denominator ceiling, `hdmax`)**: an understated ceiling
 cannot dominate the weighted norm — `1 ≤ (1/2) · 1` is false. -/
 theorem vtf_sum_le_hdmax_fence_QA :
-    ¬ (∑ i, deg edgeAdj i * (![1, 0] : Fin 2 → ℝ) i
+    ¬ (∑ i, deg cheegerEdgeAdj i * (![1, 0] : Fin 2 → ℝ) i
             * (![1, 0] : Fin 2 → ℝ) i
         ≤ (1 / 2 : ℝ) * Matrix.dotProduct (![1, 0] : Fin 2 → ℝ)
             (![1, 0] : Fin 2 → ℝ)) := by
-  simp only [Matrix.dotProduct, Fin.sum_univ_two, edgeAdj_regular,
+  simp only [Matrix.dotProduct, Fin.sum_univ_two, cheegerEdgeAdj_regular,
     Matrix.cons_val_zero, Matrix.head_cons, Matrix.cons_val_one]
   norm_num
 
@@ -1111,28 +1111,28 @@ theorem vtf_rayleigh_hnn_isolation_QA :
 /-! ### Wrong-constant fences on K₂ -/
 
 /-- The K₂ stretch pin: `√D = 1` on `K₂`. -/
-theorem vtK2_ds (x : Fin 2 → ℝ) : degreeSqrt edgeAdj *ᵥ x = x := by
+theorem vtK2_ds (x : Fin 2 → ℝ) : degreeSqrt cheegerEdgeAdj *ᵥ x = x := by
   funext i
-  rw [degreeSqrt_mulVec_apply, edgeAdj_regular i, Real.sqrt_one, one_mul]
+  rw [degreeSqrt_mulVec_apply, cheegerEdgeAdj_regular i, Real.sqrt_one, one_mul]
 
-theorem vtK2_pos_deg (i : Fin 2) : 0 < deg edgeAdj i := by
-  rw [edgeAdj_regular i]; norm_num
+theorem vtK2_pos_deg (i : Fin 2) : 0 < deg cheegerEdgeAdj i := by
+  rw [cheegerEdgeAdj_regular i]; norm_num
 
 /-- The K₂ alternating mode's combinatorial form: `4`. -/
 theorem vtK2_quadForm :
-    quadForm (laplacian edgeAdj) (![1, -1] : Fin 2 → ℝ) = 4 := by
+    quadForm (laplacian cheegerEdgeAdj) (![1, -1] : Fin 2 → ℝ) = 4 := by
   rw [quadForm]
   simp only [Matrix.mulVec, Matrix.dotProduct, laplacian,
-    Matrix.sub_apply, degreeMatrix, edgeAdj, Matrix.of_apply,
+    Matrix.sub_apply, degreeMatrix, cheegerEdgeAdj, Matrix.of_apply,
     Fin.isValue, deg, Fin.sum_univ_two, Matrix.diagonal_apply,
     Matrix.cons_val_zero, Matrix.head_cons, Matrix.cons_val_one,
     reduceIte, Matrix.one_apply]
   norm_num
 
 theorem vtK2_quadForm_norm :
-    quadForm (normalizedLaplacian edgeAdj) (![1, -1] : Fin 2 → ℝ) = 4 := by
+    quadForm (normalizedLaplacian cheegerEdgeAdj) (![1, -1] : Fin 2 → ℝ) = 4 := by
   rw [← vtK2_ds (![1, -1] : Fin 2 → ℝ),
-    ← quadForm_laplacian_eq_quadForm_normalizedLaplacian edgeAdj
+    ← quadForm_laplacian_eq_quadForm_normalizedLaplacian cheegerEdgeAdj
       vtK2_pos_deg]
   exact vtK2_quadForm
 
@@ -1143,21 +1143,21 @@ theorem vtK2_dot :
   norm_num
 
 theorem vtK2_rayleigh_norm :
-    rayleigh (normalizedLaplacian edgeAdj) (![1, -1] : Fin 2 → ℝ) = 2 := by
+    rayleigh (normalizedLaplacian cheegerEdgeAdj) (![1, -1] : Fin 2 → ℝ) = 2 := by
   rw [rayleigh, if_neg vtf_alt_ne, vtK2_quadForm_norm, vtK2_dot]
   norm_num
 
 theorem vtK2_rayleigh_lap :
-    rayleigh (laplacian edgeAdj) (![1, -1] : Fin 2 → ℝ) = 2 := by
+    rayleigh (laplacian cheegerEdgeAdj) (![1, -1] : Fin 2 → ℝ) = 2 := by
   rw [rayleigh, if_neg vtf_alt_ne, vtK2_quadForm, vtK2_dot]
   norm_num
 
 /-- **Fence (quotient bracket upper, wrong `hdmin`)**: at `dmin = 5` on
 K₂ the dropped statement reads `2 ≤ 2/5`. -/
 theorem vtf_rayleigh_le_div_hdmin_fence_QA :
-    ¬ (rayleigh (normalizedLaplacian edgeAdj)
-          (degreeSqrt edgeAdj *ᵥ (![1, -1] : Fin 2 → ℝ))
-        ≤ rayleigh (laplacian edgeAdj) (![1, -1] : Fin 2 → ℝ)
+    ¬ (rayleigh (normalizedLaplacian cheegerEdgeAdj)
+          (degreeSqrt cheegerEdgeAdj *ᵥ (![1, -1] : Fin 2 → ℝ))
+        ≤ rayleigh (laplacian cheegerEdgeAdj) (![1, -1] : Fin 2 → ℝ)
             / (5 : ℝ)) := by
   intro h
   rw [vtK2_ds, vtK2_rayleigh_norm, vtK2_rayleigh_lap] at h
@@ -1166,9 +1166,9 @@ theorem vtf_rayleigh_le_div_hdmin_fence_QA :
 /-- **Fence (quotient bracket lower, wrong `hdmax`)**: at `dmax = 1/2`
 on K₂ the dropped statement reads `2 ≤ (1/2) · 2 = 1`. -/
 theorem vtf_rayleigh_mul_hdmax_fence_QA :
-    ¬ (rayleigh (laplacian edgeAdj) (![1, -1] : Fin 2 → ℝ)
-        ≤ (1 / 2 : ℝ) * rayleigh (normalizedLaplacian edgeAdj)
-            (degreeSqrt edgeAdj *ᵥ (![1, -1] : Fin 2 → ℝ))) := by
+    ¬ (rayleigh (laplacian cheegerEdgeAdj) (![1, -1] : Fin 2 → ℝ)
+        ≤ (1 / 2 : ℝ) * rayleigh (normalizedLaplacian cheegerEdgeAdj)
+            (degreeSqrt cheegerEdgeAdj *ᵥ (![1, -1] : Fin 2 → ℝ))) := by
   intro h
   rw [vtK2_rayleigh_lap, vtK2_ds, vtK2_rayleigh_norm] at h
   norm_num at h
@@ -1178,9 +1178,9 @@ on K₂ the dropped statement reads `lambda2 / (1/2) = 4 ≤ 2`. (The mul
 form is fenced by `icf_sandwich_hdmax`; this is the div form's own
 statement.) -/
 theorem vtf_div_secondEval_hdmax_fence_QA :
-    ¬ (lambda2 edgeAdj edgeAdj_symmetric (le_refl 2) / (1 / 2 : ℝ)
-        ≤ secondEval (normalizedLaplacian edgeAdj)
-            (normalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric)
+    ¬ (lambda2 cheegerEdgeAdj cheegerEdgeAdj_symmetric (le_refl 2) / (1 / 2 : ℝ)
+        ≤ secondEval (normalizedLaplacian cheegerEdgeAdj)
+            (normalizedLaplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric)
             (le_refl 2)) := by
   intro h
   rw [dsK2_lambda2_eq_two, icEdge_normLap_secondEval] at h

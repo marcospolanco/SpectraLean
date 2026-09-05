@@ -1471,4 +1471,906 @@ theorem bernstein_bounded_variance_rademacher_QA :
   exact hint
 
 
+/-!
+## Adversarial fences
+
+The hypothesis-necessity pass (`governance/ADVERSARIAL_REVIEW.md`;
+proposal `proposals/adversarial-fences-scalar-concentration-family.md`,
+2026-09-05): eleven hypothesis-form fences over the family's unfenced
+priceable surface — the `h_indep` clauses of nine tail/MGF theorems at
+the perfectly-correlated two-coin fixture `scCorrX` (the retirement
+QA instantiated independence genuinely at `scRadX` but never refuted a
+dropped-independence statement), and the `ht : 0 ≤ t` backward-time
+clauses of the Hoeffding and Bernstein head theorems at the delivered
+`scRadX` fixture. Each fence assumes the theorem's conclusion with one
+clause dropped at a fixture keeping every kept clause genuine, and
+derives `False`.
+-/
+
+section AdversarialFences
+
+open Scaffold.Mathlib.Probability.BernoulliProduct
+
+/-! ## The perfectly-correlated fixture -/
+
+private theorem scF_ne_ff_ft : (![false, false] : Fin 2 → Bool) ≠ ![false, true] := fun he =>
+  absurd (congrFun he 1) (by decide)
+
+private theorem scF_ne_ff_tf : (![false, false] : Fin 2 → Bool) ≠ ![true, false] := fun he =>
+  absurd (congrFun he 0) (by decide)
+
+private theorem scF_ne_ff_tt : (![false, false] : Fin 2 → Bool) ≠ ![true, true] := fun he =>
+  absurd (congrFun he 0) (by decide)
+
+private theorem scF_ne_ft_tf : (![false, true] : Fin 2 → Bool) ≠ ![true, false] := fun he =>
+  absurd (congrFun he 0) (by decide)
+
+private theorem scF_ne_ft_tt : (![false, true] : Fin 2 → Bool) ≠ ![true, true] := fun he =>
+  absurd (congrFun he 0) (by decide)
+
+private theorem scF_ne_tf_tt : (![true, false] : Fin 2 → Bool) ≠ ![true, true] := fun he =>
+  absurd (congrFun he 1) (by decide)
+
+set_option linter.unusedVariables false in
+/-- The perfectly-correlated family: both coordinates are the ±1 lift
+of coordinate `0`. Every non-independence clause of every theorem in
+the family is genuine here (measurable, `|X| = 1`, mean `0`,
+variance `1`) — the family is distributionally identical to `scRadX`;
+only the joint law differs. -/
+def scCorrX (i : Fin 2) (ω : (Fin 2) → Bool) : ℝ := if ω 0 then 1 else -1
+
+theorem scCorrX_measurable_QA (i : Fin 2) : Measurable (scCorrX i) :=
+  measurable_scRad_lift.comp (measurable_coord 0)
+
+theorem scCorrX_abs_QA (i : Fin 2) (ω : (Fin 2) → Bool) : |scCorrX i ω| = 1 := by
+  cases h : ω 0 <;> simp [scCorrX, h]
+
+theorem scCorrX_mean_QA (i : Fin 2) :
+    ∫ ω : (Fin 2) → Bool, scCorrX i ω
+      ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure = 0 := by
+  have heq : (fun ω : (Fin 2) → Bool => scCorrX i ω)
+      = fun ω : (Fin 2) → Bool => (if ω 0 then (1 : ℝ) else 0) • 2 - 1 := by
+    funext ω
+    cases h : ω 0 with
+    | true => simp [scCorrX, h]; norm_num
+    | false => simp [scCorrX, h]
+  rw [heq, integral_sub (Integrable.of_finite) (integrable_const _),
+    integral_smul_const,
+    integral_delta scHalf scHalf_nonneg scHalf_le_one 0, integral_const,
+    measure_univ, ENNReal.one_toReal, one_smul, smul_eq_mul]
+  norm_num [scHalf]
+
+/-- The `h_indep` breaker is genuine: the family is NOT mutually
+independent (both coordinates are the same function of the same
+coordinate). -/
+theorem scCorr_not_iIndepFun_QA :
+    ¬ iIndepFun (fun _ : Fin 2 => (inferInstance : MeasurableSpace ℝ)) scCorrX
+      (bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure := by
+  intro hind
+  rw [iIndepFun_iff_measure_inter_preimage_eq_mul] at hind
+  have h' := hind (Finset.univ : Finset (Fin 2)) (sets := fun _ => {1})
+    (fun _ _ => (Set.toFinite {1} : Set.Finite _).measurableSet)
+  have hprei : ∀ (i : Fin 2), scCorrX i ⁻¹' {1}
+      = (fun ω : (Fin 2) → Bool => ω 0) ⁻¹' {true} := by
+    intro i
+    ext ω
+    simp only [Set.mem_preimage, Set.mem_singleton_iff, scCorrX]
+    cases h : ω 0
+    · simp [h]; norm_num
+    · simp [h]
+  have hint : (⋂ k ∈ (Finset.univ : Finset (Fin 2)),
+      (fun ω : (Fin 2) → Bool => ω 0) ⁻¹' {true})
+      = (fun ω : (Fin 2) → Bool => ω 0) ⁻¹' {true} := by
+    ext ω
+    simp only [Set.mem_iInter]
+    exact ⟨fun hh => hh 0 (Finset.mem_univ 0), fun hh k _ => hh⟩
+  simp only [hprei, hint] at h'
+  rw [scRad_cyl_mass 0 true, Finset.prod_const, Finset.card_fin, pow_two,
+    ← ENNReal.ofReal_mul (by norm_num)] at h'
+  apply_fun ENNReal.toReal at h'
+  rw [ENNReal.toReal_ofReal (by norm_num), ENNReal.toReal_ofReal (by norm_num)] at h'
+  norm_num at h'
+
+/-- The MGF pin: the exponential moment of the correlated family at
+parameter `z` is `cosh z` (the four-atom enumeration; the mass of every
+atom is `1/4` and the summand only sees coordinate `0`). -/
+theorem scCorr_integral_exp (z : ℝ) :
+    ∫ ω : (Fin 2) → Bool, Real.exp (z * scCorrX 0 ω)
+      ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure
+      = (Real.exp z + Real.exp (-z)) / 2 := by
+  have hb : ∀ (i : Fin 2) (b : Bool), bern scHalf i b = ENNReal.ofReal ((1 : ℝ) / 2) := by
+    intro i b
+    cases b
+    · simp [bern, scHalf]
+      congr 1; norm_num
+    · simp [bern, scHalf]
+  have hmass : ∀ ω : (Fin 2) → Bool,
+      ((bernPMF scHalf scHalf_nonneg scHalf_le_one) ω).toReal = 1 / 4 := by
+    intro ω
+    have h1 : jointMass scHalf ω
+        = ENNReal.ofReal ((1 : ℝ) / 2) * ENNReal.ofReal ((1 : ℝ) / 2) := by
+      simp only [jointMass, Fin.prod_univ_two, hb]
+    rw [bernPMF_apply, h1, ENNReal.toReal_mul, ENNReal.toReal_ofReal (by norm_num)]
+    norm_num
+  have huniv : (Finset.univ : Finset ((Fin 2) → Bool))
+      = {![false, false], ![false, true], ![true, false], ![true, true]} := by
+    ext ω
+    cases h0 : ω 0 <;> cases h1 : ω 1 <;>
+      simp [Set.mem_singleton_iff, Set.mem_insert_iff, funext_iff, h0, h1]
+    · exact Or.inl fun x => by fin_cases x <;> simp [h0, h1]
+    · exact Or.inr (Or.inl fun x => by fin_cases x <;> simp [h0, h1])
+    · exact Or.inr (Or.inr (Or.inl fun x => by fin_cases x <;> simp [h0, h1]))
+    · exact Or.inr (Or.inr (Or.inr fun x => by fin_cases x <;> simp [h0, h1]))
+  rw [PMF.integral_eq_sum, huniv,
+    Finset.sum_insert (by simp [scF_ne_ff_ft, scF_ne_ff_tf, scF_ne_ff_tt]),
+    Finset.sum_insert (by simp [scF_ne_ft_tf, scF_ne_ft_tt]),
+    Finset.sum_insert (by simp [scF_ne_tf_tt]), Finset.sum_singleton]
+  simp only [hmass, scCorrX, Matrix.cons_val_zero]
+  norm_num
+  ring
+
+/-! ## The empirical-lift fixture and the shared exp pins -/
+
+set_option linter.unusedVariables false in
+/-- The `[0, 1]`-valued lift of the correlated family (for the
+empirical form's `h_indep` breaker). -/
+def scCorr01 (i : Fin 2) (ω : (Fin 2) → Bool) : ℝ := if ω 0 then 1 else 0
+
+theorem scCorr01_measurable_QA (i : Fin 2) : Measurable (scCorr01 i) :=
+  measurable_scInd_lift.comp (measurable_coord 0)
+
+theorem scCorr01_mean_QA (i : Fin 2) :
+    ∫ ω : (Fin 2) → Bool, scCorr01 i ω
+      ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure = 1 / 2 := by
+  simp only [scCorr01]
+  exact integral_delta scHalf scHalf_nonneg scHalf_le_one 0
+
+theorem scF_exp_gt_two_sevenths : (27 : ℝ) / 10 < Real.exp 1 :=
+  lt_trans (show (27 : ℝ) / 10 < 2.7182818283 by norm_num) Real.exp_one_gt_d9
+
+theorem scF_exp_lt_fourteen_fifths : Real.exp 1 < 14 / 5 := by
+  have hsq : Real.exp 1 = (Real.exp ((1 : ℝ) / 2)) ^ 2 := by
+    rw [pow_two, ← Real.exp_add]; norm_num
+  have h := exp_half_lt_five_thirds_QA
+  have h2 : (Real.exp ((1 : ℝ) / 2)) ^ 2 < (5 / 3 : ℝ) ^ 2 := by
+    nlinarith [h, Real.exp_nonneg ((1 : ℝ) / 2)]
+  rw [hsq]
+  exact lt_trans h2 (by norm_num)
+
+theorem scF_two_exp_neg_lt_one : 2 * Real.exp (-(1 : ℝ)) < 1 := by
+  have he : (2 : ℝ) < Real.exp 1 := lt_trans (by norm_num) scF_exp_gt_two_sevenths
+  calc 2 * Real.exp (-(1 : ℝ)) < Real.exp 1 * Real.exp (-(1 : ℝ)) :=
+        mul_lt_mul_of_pos_right he (Real.exp_pos (-1))
+    _ = 1 := by rw [← Real.exp_add, add_neg_cancel, Real.exp_zero]
+
+theorem scF_exp_cube_eq : Real.exp 1 * Real.exp 1 * Real.exp 1 = Real.exp 3 := by
+  rw [← Real.exp_add, ← Real.exp_add]
+  congr 1
+  norm_num
+
+theorem scF_exp_cube_gt_sixteen : (16 : ℝ) < Real.exp 1 * Real.exp 1 * Real.exp 1 := by
+  have h1 : (27 : ℝ) / 10 < Real.exp 1 := scF_exp_gt_two_sevenths
+  have h2 : (27 / 10 : ℝ) * (27 / 10 : ℝ) < Real.exp 1 * Real.exp 1 := by
+    nlinarith [h1, sq_nonneg (Real.exp 1 - 27 / 10)]
+  have h3 : (16 : ℝ) < (27 / 10 : ℝ) * ((27 / 10 : ℝ) * (27 / 10 : ℝ)) := by norm_num
+  nlinarith [h1, h2, h3]
+
+theorem scF_two_exp_neg_three_quarters_lt_one : 2 * Real.exp (-((3 : ℝ) / 4)) < 1 := by
+  have hL : (Real.exp ((3 : ℝ) / 4)) ^ 4 = Real.exp 3 := by
+    have hpow : (Real.exp ((3 : ℝ) / 4)) ^ 4
+        = Real.exp ((3 : ℝ) / 4) * Real.exp ((3 : ℝ) / 4)
+          * Real.exp ((3 : ℝ) / 4) * Real.exp ((3 : ℝ) / 4) := by ring
+    rw [hpow, ← Real.exp_add, ← Real.exp_add, ← Real.exp_add]
+    congr 1
+    norm_num
+  have hgt : (2 : ℝ) < Real.exp ((3 : ℝ) / 4) := by
+    by_contra hcon
+    push_neg at hcon
+    have hle : (Real.exp ((3 : ℝ) / 4)) ^ 4 ≤ (2 : ℝ) ^ 4 :=
+      pow_le_pow_left₀ (Real.exp_nonneg _) hcon 4
+    rw [hL, show ((2 : ℝ)) ^ 4 = 16 from by norm_num] at hle
+    rw [← scF_exp_cube_eq] at hle
+    linarith [scF_exp_cube_gt_sixteen]
+  have hinv : Real.exp (-((3 : ℝ) / 4)) < (2 : ℝ) ⁻¹ := by
+    rw [Real.exp_neg, inv_lt_inv₀ (Real.exp_pos _) (by norm_num)]
+    exact hgt
+  rw [show (1 : ℝ) = 2 * (2 : ℝ) ⁻¹ from by field_simp]
+  exact mul_lt_mul_of_pos_left hinv (by norm_num)
+
+theorem scF_two_exp_neg_three_halves_lt_one : 2 * Real.exp (-((3 : ℝ) / 2)) < 1 := by
+  have hL : (Real.exp ((3 : ℝ) / 2)) ^ 2 = Real.exp 3 := by
+    have hpow : (Real.exp ((3 : ℝ) / 2)) ^ 2
+        = Real.exp ((3 : ℝ) / 2) * Real.exp ((3 : ℝ) / 2) := by ring
+    rw [hpow, ← Real.exp_add]
+    congr 1
+    norm_num
+  have hgt : (2 : ℝ) < Real.exp ((3 : ℝ) / 2) := by
+    by_contra hcon
+    push_neg at hcon
+    have hle : (Real.exp ((3 : ℝ) / 2)) ^ 2 ≤ (2 : ℝ) ^ 2 :=
+      pow_le_pow_left₀ (Real.exp_nonneg _) hcon 2
+    rw [hL, show ((2 : ℝ)) ^ 2 = 4 from by norm_num] at hle
+    rw [← scF_exp_cube_eq] at hle
+    linarith [scF_exp_cube_gt_sixteen]
+  have hinv : Real.exp (-((3 : ℝ) / 2)) < (2 : ℝ) ⁻¹ := by
+    rw [Real.exp_neg, inv_lt_inv₀ (Real.exp_pos _) (by norm_num)]
+    exact hgt
+  rw [show (1 : ℝ) = 2 * (2 : ℝ) ⁻¹ from by field_simp]
+  exact mul_lt_mul_of_pos_left hinv (by norm_num)
+
+
+/-! ## The fences -/
+
+/-- **Fence: `integral_prod_exp_of_iIndepFun`'s `h_indep`.** At the
+perfectly-correlated family with `lam = 1`, `s = univ`: the left side is
+`∫ exp (X₀ + X₁) = cosh 2` while the right side is
+`(∫ exp X₀) · (∫ exp X₁) = cosh² 1` — the product-integral identity is
+Cauchy–Schwarz-strict at perfect correlation (the difference is
+`(e − e⁻¹)²/4 > 0`, pure algebra from `e · e⁻¹ = 1`). -/
+theorem scFence_prod_exp_indep
+    (h : ∫ ω : (Fin 2) → Bool, ∏ i, Real.exp ((1 : ℝ) * scCorrX i ω)
+        ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure
+      = ∏ i, ∫ ω : (Fin 2) → Bool, Real.exp ((1 : ℝ) * scCorrX i ω)
+          ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure) : False := by
+  have hsum : ∀ ω : (Fin 2) → Bool, ∑ i : Fin 2, (1 : ℝ) * scCorrX i ω
+      = 2 * scCorrX 0 ω := by
+    intro ω
+    simp only [Fin.sum_univ_two, scCorrX]
+    ring
+  have hcongr : ∀ ω : (Fin 2) → Bool,
+      ∏ i : Fin 2, Real.exp ((1 : ℝ) * scCorrX i ω) = Real.exp (2 * scCorrX 0 ω) := by
+    intro ω
+    rw [← Real.exp_sum, hsum ω]
+  rw [integral_congr_ae (ae_of_all _ (fun ω => hcongr ω)), scCorr_integral_exp 2] at h
+  have hR : ∏ i : Fin 2, ∫ ω : (Fin 2) → Bool, Real.exp ((1 : ℝ) * scCorrX i ω)
+      ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure
+      = ((Real.exp 1 + Real.exp (-1)) / 2) ^ 2 := by
+    have hf : ∀ i : Fin 2, ∫ ω : (Fin 2) → Bool, Real.exp ((1 : ℝ) * scCorrX i ω)
+        ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure
+        = (Real.exp 1 + Real.exp (-1)) / 2 := fun i => scCorr_integral_exp 1
+    rw [Fin.prod_univ_two, hf 0, hf 1]
+    ring
+  rw [hR] at h
+  have he2 : Real.exp 2 = Real.exp 1 * Real.exp 1 := by rw [← Real.exp_add]; norm_num
+  have hem2 : Real.exp (-2) = Real.exp (-1) * Real.exp (-1) := by
+    rw [← Real.exp_add]; norm_num
+  rw [he2, hem2] at h
+  have hprod : Real.exp 1 * Real.exp (-1) = 1 := by
+    rw [← Real.exp_add, add_neg_cancel, Real.exp_zero]
+  have hd : (Real.exp 1 - Real.exp (-1)) * (Real.exp 1 - Real.exp (-1)) = 0 := by
+    nlinarith [h, hprod]
+  have hz : Real.exp 1 - Real.exp (-1) = 0 := by
+    exact (mul_self_eq_zero).mp hd
+  have hne : Real.exp 1 = Real.exp (-1) := by linarith
+  have h12 : (1 : ℝ) = -1 := Real.exp_strictMono.injective hne
+  norm_num at h12
+
+set_option linter.unusedVariables false in
+/-- **Fence: `mgf_sum_le_of_iIndepFun`'s `h_indep`.** At the same
+fixture with `lam = 1`, `c = -1`, `d = 1`: the MGF is `cosh 2` against
+the bound `exp 1` — `cosh 2 > e` from the pins `27/10 < e < 14/5`. -/
+theorem scFence_mgf_sum_indep
+    (h : ∫ ω : (Fin 2) → Bool, Real.exp ((1 : ℝ) * ∑ i, scCorrX i ω)
+        ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure
+      ≤ Real.exp ((1 : ℝ) ^ 2 * (∑ i : Fin 2, ((1 : ℝ) - (-(1 : ℝ))) ^ 2) / 8)) : False := by
+  have hsum : ∀ ω : (Fin 2) → Bool, (1 : ℝ) * ∑ i, scCorrX i ω = 2 * scCorrX 0 ω := by
+    intro ω
+    simp only [Fin.sum_univ_two, scCorrX]
+    ring
+  have hcongr : ∀ ω : (Fin 2) → Bool, Real.exp ((1 : ℝ) * ∑ i, scCorrX i ω)
+      = Real.exp (2 * scCorrX 0 ω) := by
+    intro ω
+    rw [hsum ω]
+  rw [integral_congr_ae (ae_of_all _ (fun ω => hcongr ω)), scCorr_integral_exp 2] at h
+  have hb : (1 : ℝ) ^ 2 * (∑ i : Fin 2, ((1 : ℝ) - (-(1 : ℝ))) ^ 2) / 8 = 1 := by
+    have hs : ∑ i : Fin 2, ((1 : ℝ) - (-(1 : ℝ))) ^ 2 = 8 := by simp; norm_num
+    rw [hs]
+    norm_num
+  rw [hb] at h
+  have he2 : Real.exp 2 = Real.exp 1 * Real.exp 1 := by rw [← Real.exp_add]; norm_num
+  have hem2 : Real.exp (-2) = Real.exp (-1) * Real.exp (-1) := by
+    rw [← Real.exp_add]; norm_num
+  rw [he2, hem2] at h
+  nlinarith [h, scF_exp_gt_two_sevenths, scF_exp_lt_fourteen_fifths,
+    sq_nonneg (Real.exp 1 - 27 / 10), Real.exp_nonneg (-1 : ℝ)]
+
+/-- The shared `t = 2` tail-event pin at the correlated family: the
+event is all of `Ω` (the sum is `±2` everywhere). -/
+theorem scCorr_event_eq_univ :
+    {ω : (Fin 2) → Bool | |∑ i, scCorrX i ω| ≥ 2} = Set.univ := by
+  apply Set.eq_univ_of_forall
+  intro ω
+  simp only [Set.mem_setOf_eq]
+  have hsum : ∑ i, scCorrX i ω = 2 * scCorrX 0 ω := by
+    simp only [Fin.sum_univ_two, scCorrX]
+    ring
+  rw [hsum]
+  cases hw : ω 0 <;> simp [scCorrX, hw]
+
+set_option linter.unusedVariables false in
+/-- **Fence: `hoeffding_inequality_interval`'s `h_indep`.** At `t = 2`
+the tail event is all of `Ω` (measure `1`) against the bound
+`2e⁻¹ < 1` (from `e > 2`). -/
+theorem scFence_hoeffding_interval_indep
+    (h : (bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure
+        {ω : (Fin 2) → Bool | |∑ i, scCorrX i ω| ≥ 2}
+      ≤ ENNReal.ofReal (2 * Real.exp (-2 * (2 : ℝ) ^ 2
+          / ∑ i : Fin 2, ((1 : ℝ) - (-(1 : ℝ))) ^ 2))) : False := by
+  have hb : ∑ i : Fin 2, ((1 : ℝ) - (-(1 : ℝ))) ^ 2 = 8 := by
+    simp
+    norm_num
+  rw [scCorr_event_eq_univ, measure_univ, hb,
+    show (-2 * (2 : ℝ) ^ 2 / 8) = -(1 : ℝ) from by norm_num,
+    ENNReal.one_le_ofReal] at h
+  exact absurd h (not_le.2 scF_two_exp_neg_lt_one)
+
+set_option linter.unusedVariables false in
+/-- **Fence: `hoeffding_inequality`'s `h_indep`.** The same kill at the
+uniform-radius form (`a := 1`, bound again `2e⁻¹`). -/
+theorem scFence_hoeffding_indep
+    (h : (bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure
+        {ω : (Fin 2) → Bool | |∑ i, scCorrX i ω| ≥ 2}
+      ≤ ENNReal.ofReal (2 * Real.exp (-(2 : ℝ) ^ 2
+          / (2 * ∑ i : Fin 2, (1 : ℝ) ^ 2)))) : False := by
+  have hb : ∑ i : Fin 2, (1 : ℝ) ^ 2 = 2 := by simp
+  rw [scCorr_event_eq_univ, measure_univ, hb,
+    show -(2 : ℝ) ^ 2 / (2 * 2) = -(1 : ℝ) from by norm_num,
+    ENNReal.one_le_ofReal] at h
+  exact absurd h (not_le.2 scF_two_exp_neg_lt_one)
+
+set_option linter.unusedVariables false in
+/-- **Fence: `hoeffding_iid`'s `h_indep`.** The same kill at the
+identically-distributed form (`n = 2`, `a = 1`). -/
+theorem scFence_hoeffding_iid_indep
+    (h : (bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure
+        {ω : (Fin 2) → Bool | |∑ i, scCorrX i ω| ≥ 2}
+      ≤ ENNReal.ofReal (2 * Real.exp (-(2 : ℝ) ^ 2
+          / (2 * ((2 : ℝ) * (1 : ℝ) ^ 2))))) : False := by
+  rw [scCorr_event_eq_univ, measure_univ,
+    show -(2 : ℝ) ^ 2 / (2 * ((2 : ℝ) * (1 : ℝ) ^ 2)) = -(1 : ℝ) from by norm_num,
+    ENNReal.one_le_ofReal] at h
+  exact absurd h (not_le.2 scF_two_exp_neg_lt_one)
+
+/-- **Fence: `hoeffding_empirical`'s `h_indep`.** At the `[0, 1]`-lift
+of the correlated family with `t = 1/2`: the empirical deviation is
+`±1/2` everywhere (measure `1`) against the bound `2e⁻¹`. -/
+theorem scFence_hoeffding_empirical_indep
+    (h : (bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure
+        {ω : (Fin 2) → Bool | |(1 / (2 : ℝ)) * ∑ i, scCorr01 i ω
+            - (1 / (2 : ℝ)) * ∑ i, ∫ ω' : (Fin 2) → Bool, scCorr01 i ω'
+              ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure| ≥ 1 / 2}
+      ≤ ENNReal.ofReal (2 * Real.exp (-2 * (2 : ℝ) * ((1 : ℝ) / 2) ^ 2))) : False := by
+  have hev : {ω : (Fin 2) → Bool | |(1 / (2 : ℝ)) * ∑ i, scCorr01 i ω
+      - (1 / (2 : ℝ)) * ∑ i, ∫ ω' : (Fin 2) → Bool, scCorr01 i ω'
+        ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure| ≥ 1 / 2}
+      = Set.univ := by
+    apply Set.eq_univ_of_forall
+    intro ω
+    simp only [Set.mem_setOf_eq]
+    have hsum : ∑ i, scCorr01 i ω = 2 * (if ω 0 then (1 : ℝ) else 0) := by
+      simp only [Fin.sum_univ_two, scCorr01]
+      ring
+    have hmean : ∑ i, ∫ ω' : (Fin 2) → Bool, scCorr01 i ω'
+        ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure = 1 := by
+      rw [Finset.sum_congr rfl (fun i _ => scCorr01_mean_QA i)]
+      norm_num
+    rw [hsum, hmean]
+    cases hw : ω 0
+    · simp [scCorr01, hw]
+      exact le_abs_self _
+    · simp [scCorr01, hw]
+      rw [show ((1 : ℝ) - 2⁻¹) = 2⁻¹ from by norm_num]
+      exact le_abs_self _
+  rw [hev, measure_univ,
+    show (-2 * (2 : ℝ) * ((1 : ℝ) / 2) ^ 2) = -(1 : ℝ) from by norm_num,
+    ENNReal.one_le_ofReal] at h
+  exact absurd h (not_le.2 scF_two_exp_neg_lt_one)
+
+/-- The shared variance pin at the correlated family: the centered
+second-moment sum is `2` (each coordinate has `|X| = 1`, mean `0`). -/
+theorem scCorr_var_sum :
+    ∑ i, ∫ ω : (Fin 2) → Bool, (scCorrX i ω
+        - ∫ ω' : (Fin 2) → Bool, scCorrX i ω'
+          ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure) ^ 2
+      ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure = 2 := by
+  have hint : ∀ i : Fin 2, ∫ ω : (Fin 2) → Bool, (scCorrX i ω
+      - ∫ ω' : (Fin 2) → Bool, scCorrX i ω'
+        ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure) ^ 2
+    ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure = 1 := by
+    intro i
+    rw [scCorrX_mean_QA i]
+    have hc : (fun ω : (Fin 2) → Bool => (scCorrX i ω - 0) ^ 2) = fun _ => 1 := by
+      funext ω
+      cases hw : ω 0 <;> simp [scCorrX, hw]
+    rw [hc, integral_const, measure_univ, ENNReal.one_toReal, one_smul]
+  rw [Finset.sum_congr rfl (fun i _ => hint i)]
+  norm_num
+
+/-- The shared `t = 2` centered tail-event pin at the correlated family:
+the centering integrals vanish (mean `0`) and the centered sum is
+`±2` everywhere. -/
+theorem scCorr_centered_event_eq_univ :
+    {ω : (Fin 2) → Bool | |∑ i, (scCorrX i ω
+        - ∫ ω' : (Fin 2) → Bool, scCorrX i ω'
+          ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure)| ≥ 2} = Set.univ := by
+  apply Set.eq_univ_of_forall
+  intro ω
+  simp only [Set.mem_setOf_eq, scCorrX_mean_QA]
+  have hsum : ∑ i, (scCorrX i ω - 0) = 2 * scCorrX 0 ω := by
+    simp only [Fin.sum_univ_two, scCorrX, sub_zero]
+    ring
+  rw [hsum]
+  cases hw : ω 0 <;> simp [scCorrX, hw]
+
+/-- **Fence: `bernstein_inequality`'s `h_indep`.** At `t = 2`, `a = 1`:
+the centered tail event is all of `Ω` (measure `1`) against the bound
+`2e^{-3/4} < 1` (from `e³ > (27/10)³ > 16`). -/
+theorem scFence_bernstein_indep
+    (h : (bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure
+        {ω : (Fin 2) → Bool | |∑ i, (scCorrX i ω
+            - ∫ ω' : (Fin 2) → Bool, scCorrX i ω'
+              ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure)| ≥ 2}
+      ≤ ENNReal.ofReal (2 * Real.exp (-((2 : ℝ) ^ 2 /
+          (2 * ∑ i, ∫ ω : (Fin 2) → Bool, (scCorrX i ω
+              - ∫ ω' : (Fin 2) → Bool, scCorrX i ω'
+                ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure) ^ 2
+            ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure
+          + (2 * (1 : ℝ) * 2) / 3))))) : False := by
+  rw [scCorr_var_sum,
+    show (2 * 2 + (2 * (1 : ℝ) * 2) / 3) = (16 : ℝ) / 3 from by norm_num,
+    show (-((2 : ℝ) ^ 2 / ((16 : ℝ) / 3))) = -((3 : ℝ) / 4) from by norm_num,
+    scCorr_centered_event_eq_univ, measure_univ, ENNReal.one_le_ofReal] at h
+  exact absurd h (not_le.2 scF_two_exp_neg_three_quarters_lt_one)
+
+/-- **Fence: `bernstein_bounded_variance`'s `h_indep`.** The same kill
+at the budget form (`v := 2` exactly the variance statistic). -/
+theorem scFence_bernstein_bounded_variance_indep
+    (h : (bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure
+        {ω : (Fin 2) → Bool | |∑ i, (scCorrX i ω
+            - ∫ ω' : (Fin 2) → Bool, scCorrX i ω'
+              ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure)| ≥ 2}
+      ≤ ENNReal.ofReal (2 * Real.exp (-((2 : ℝ) ^ 2
+          / (2 * (2 : ℝ) + (2 * (1 : ℝ) * 2) / 3))))) : False := by
+  rw [scCorr_centered_event_eq_univ, measure_univ,
+    show (2 * (2 : ℝ) + (2 * (1 : ℝ) * 2) / 3) = (16 : ℝ) / 3 from by norm_num,
+    show (-((2 : ℝ) ^ 2 / ((16 : ℝ) / 3))) = -((3 : ℝ) / 4) from by norm_num,
+    ENNReal.one_le_ofReal] at h
+  exact absurd h (not_le.2 scF_two_exp_neg_three_quarters_lt_one)
+
+/-- **Fence: `bernstein_iid`'s `h_indep`.** The same kill at the
+identically-distributed form (`σ² := 1`). -/
+theorem scFence_bernstein_iid_indep
+    (h : (bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure
+        {ω : (Fin 2) → Bool | |∑ i, (scCorrX i ω
+            - ∫ ω' : (Fin 2) → Bool, scCorrX i ω'
+              ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure)| ≥ 2}
+      ≤ ENNReal.ofReal (2 * Real.exp (-((2 : ℝ) ^ 2
+          / (2 * ((2 : ℝ) * (1 : ℝ)) + (2 * (1 : ℝ) * 2) / 3))))) : False := by
+  rw [scCorr_centered_event_eq_univ, measure_univ,
+    show (2 * ((2 : ℝ) * (1 : ℝ)) + (2 * (1 : ℝ) * 2) / 3) = (16 : ℝ) / 3 from by norm_num,
+    show (-((2 : ℝ) ^ 2 / ((16 : ℝ) / 3))) = -((3 : ℝ) / 4) from by norm_num,
+    ENNReal.one_le_ofReal] at h
+  exact absurd h (not_le.2 scF_two_exp_neg_three_quarters_lt_one)
+
+set_option linter.unusedVariables false in
+/-- **Fence: `hoeffding_inequality`'s `ht : 0 ≤ t`.** At the genuine
+scRad fixture with `t = -2`: the tail event `{|Σ| ≥ -2}` is all of `Ω`
+(absolute values are nonnegative), so the measure is `1` against the
+bound `2e⁻¹ < 1`. -/
+theorem scFence_hoeffding_ht
+    (h : (bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure
+        {ω : (Fin 2) → Bool | |∑ i, scRadX i ω| ≥ -2}
+      ≤ ENNReal.ofReal (2 * Real.exp (-((-2 : ℝ) ^ 2
+          / (2 * ∑ i : Fin 2, (1 : ℝ) ^ 2))))) : False := by
+  have hev : {ω : (Fin 2) → Bool | |∑ i, scRadX i ω| ≥ -2} = Set.univ :=
+    Set.eq_univ_of_forall fun ω => le_trans (show (-2 : ℝ) ≤ 0 by norm_num) (abs_nonneg _)
+  have hs : ∑ i : Fin 2, (1 : ℝ) ^ 2 = 2 := by simp
+  rw [hev, measure_univ, hs,
+    show -((-2 : ℝ) ^ 2 / (2 * 2)) = -(1 : ℝ) from by norm_num,
+    ENNReal.one_le_ofReal] at h
+  exact absurd h (not_le.2 scF_two_exp_neg_lt_one)
+
+/-- **Fence: `bernstein_inequality`'s `ht : 0 ≤ t`.** At the genuine
+scRad fixture with `t = -2`: the centered tail event is all of `Ω`
+against the bound `2e^{-3/2} < 1` (from `e³ > 16 > 8`). -/
+theorem scFence_bernstein_ht
+    (h : (bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure
+        {ω : (Fin 2) → Bool | |∑ i, (scRadX i ω
+            - ∫ ω' : (Fin 2) → Bool, scRadX i ω'
+              ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure)| ≥ -2}
+      ≤ ENNReal.ofReal (2 * Real.exp (-(((-2 : ℝ)) ^ 2 /
+          (2 * ∑ i, ∫ ω : (Fin 2) → Bool, (scRadX i ω
+              - ∫ ω' : (Fin 2) → Bool, scRadX i ω'
+                ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure) ^ 2
+            ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure
+          + (2 * (1 : ℝ) * (-2)) / 3))))) : False := by
+  simp only [scRad_mean_QA] at h
+  have hint : ∀ i : Fin 2, ∫ ω : (Fin 2) → Bool, (scRadX i ω - 0) ^ 2
+      ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure = 1 := by
+    intro i
+    have hc : (fun ω : (Fin 2) → Bool => (scRadX i ω - 0) ^ 2) = fun _ => 1 := by
+      funext ω
+      cases hw : ω i <;> simp [scRadX, hw]
+    rw [hc, integral_const, measure_univ, ENNReal.one_toReal, one_smul]
+  have hvar : ∑ i, ∫ ω : (Fin 2) → Bool, (scRadX i ω - 0) ^ 2
+      ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure = 2 := by
+    rw [Finset.sum_congr rfl (fun i _ => hint i)]
+    norm_num
+  have hev : {ω : (Fin 2) → Bool | |∑ i, (scRadX i ω - 0)| ≥ -2} = Set.univ :=
+    Set.eq_univ_of_forall fun ω => le_trans (show (-2 : ℝ) ≤ 0 by norm_num) (abs_nonneg _)
+  rw [hvar, hev, measure_univ,
+    show (2 * 2 + (2 * (1 : ℝ) * (-2)) / 3) = (8 : ℝ) / 3 from by norm_num,
+    show (-(((-2 : ℝ)) ^ 2 / ((8 : ℝ) / 3))) = -((3 : ℝ) / 2) from by norm_num,
+    ENNReal.one_le_ofReal] at h
+  exact absurd h (not_le.2 scF_two_exp_neg_three_halves_lt_one)
+
+end AdversarialFences
+
+section DeferralFences
+
+open Scaffold.Mathlib.Probability.BernoulliProduct
+
+/-!
+## The audit's priced deferrals, closed
+
+The two deferrals recorded by
+`proposals/adversarial-fences-scalar-concentration-family.md`, closed
+2026-09-05: D1 — `mgf_sum_le_bernstein`'s `h_indep` at the
+perfectly-correlated fixture (the audit's own deferred kill, re-priced
+through `3/2 < cosh 1 > exp (3/10)`); D2 — the `h_mean : ∀ i, ∫ X i = 0`
+centering cluster of the four Hoeffding-family theorems at a NEW
+genuinely-independent biased product (the audit had no independent
+non-centered witness: every prior fence broke independence, every
+genuine-independence instance was centered). Each fence keeps every
+kept clause genuine and drops exactly one.
+-/
+
+/-- The biased factor distribution: every coordinate `true` with
+probability `9/10`. -/
+noncomputable def scBias : Fin 2 → ℝ := ![9 / 10, 9 / 10]
+
+theorem scBias_nonneg : ∀ i, 0 ≤ scBias i := by
+  intro i; fin_cases i <;> norm_num [scBias]
+
+theorem scBias_le_one : ∀ i, scBias i ≤ 1 := by
+  intro i; fin_cases i <;> norm_num [scBias]
+
+/-- The biased ±1 coordinate lift: `+1` at `true`, `-1` at `false`,
+each coordinate through its OWN coordinate projection — genuinely
+mutually independent (unlike `scCorrX`), with every clause of the
+Hoeffding family genuine except the centering: `∫ scBiasX i = 4/5`. -/
+def scBiasX (i : Fin 2) (ω : (Fin 2) → Bool) : ℝ := if ω i then 1 else -1
+
+theorem scBiasX_measurable_QA (i : Fin 2) : Measurable (scBiasX i) :=
+  measurable_scRad_lift.comp (measurable_coord i)
+
+theorem scBiasX_abs_QA (i : Fin 2) (ω : (Fin 2) → Bool) : |scBiasX i ω| = 1 := by
+  cases h : ω i <;> simp [scBiasX, h]
+
+/-- The kept `h_indep` clause is genuine: the family is the ±1 lift
+of genuinely independent coordinate projections at the biased
+product. -/
+theorem scBiasX_iIndepFun_QA :
+    iIndepFun (fun _ : Fin 2 => (inferInstance : MeasurableSpace ℝ)) scBiasX
+      (bernPMF scBias scBias_nonneg scBias_le_one).toMeasure :=
+  (iIndepFun_coord scBias scBias_nonneg scBias_le_one).comp
+    (fun _ b => if b then (1 : ℝ) else -1) (fun _ => measurable_scRad_lift)
+
+/-- The dropped `h_mean` clause genuinely fails: the coordinate mean
+is `9/10 - 1/10 = 4/5 ≠ 0`. -/
+theorem scBiasX_mean_QA (i : Fin 2) :
+    ∫ ω : (Fin 2) → Bool, scBiasX i ω
+      ∂(bernPMF scBias scBias_nonneg scBias_le_one).toMeasure = 4 / 5 := by
+  have heq : (fun ω : (Fin 2) → Bool => scBiasX i ω)
+      = fun ω : (Fin 2) → Bool => (if ω i then (1 : ℝ) else 0) • 2 - 1 := by
+    funext ω
+    cases h : ω i with
+    | true => simp [scBiasX, h]; norm_num
+    | false => simp [scBiasX, h]
+  rw [heq, integral_sub (Integrable.of_finite) (integrable_const _),
+    integral_smul_const,
+    integral_delta scBias scBias_nonneg scBias_le_one i, integral_const,
+    measure_univ, ENNReal.one_toReal, one_smul, smul_eq_mul]
+  fin_cases i <;> norm_num [scBias]
+
+private theorem scB_huniv :
+    (Finset.univ : Finset ((Fin 2) → Bool))
+      = {![false, false], ![false, true], ![true, false], ![true, true]} := by
+  ext ω
+  cases h0 : ω 0 <;> cases h1 : ω 1 <;>
+    simp [Set.mem_singleton_iff, Set.mem_insert_iff, funext_iff, h0, h1]
+  · exact Or.inl fun x => by fin_cases x <;> simp [h0, h1]
+  · exact Or.inr (Or.inl fun x => by fin_cases x <;> simp [h0, h1])
+  · exact Or.inr (Or.inr (Or.inl fun x => by fin_cases x <;> simp [h0, h1]))
+  · exact Or.inr (Or.inr (Or.inr fun x => by fin_cases x <;> simp [h0, h1]))
+
+private theorem scB_joint_ff : jointMass scBias ![false, false]
+    = ENNReal.ofReal ((1 : ℝ) / 100) := by
+  have h : jointMass scBias ![false, false]
+      = ENNReal.ofReal (1 - 9 / 10) * ENNReal.ofReal (1 - 9 / 10) := by
+    simp [bern, scBias, jointMass, Fin.prod_univ_two]
+  rw [h, show (1 : ℝ) - 9 / 10 = 1 / 10 from by norm_num,
+    ← ENNReal.ofReal_mul (by norm_num : (0 : ℝ) ≤ 1 / 10)]
+  congr 1
+  norm_num
+
+private theorem scB_joint_ft : jointMass scBias ![false, true]
+    = ENNReal.ofReal ((9 : ℝ) / 100) := by
+  have h : jointMass scBias ![false, true]
+      = ENNReal.ofReal (1 - 9 / 10) * ENNReal.ofReal (9 / 10) := by
+    simp [bern, scBias, jointMass, Fin.prod_univ_two]
+  rw [h, show (1 : ℝ) - 9 / 10 = 1 / 10 from by norm_num,
+    ← ENNReal.ofReal_mul (by norm_num : (0 : ℝ) ≤ 1 / 10)]
+  congr 1
+  norm_num
+
+private theorem scB_joint_tf : jointMass scBias ![true, false]
+    = ENNReal.ofReal ((9 : ℝ) / 100) := by
+  have h : jointMass scBias ![true, false]
+      = ENNReal.ofReal (9 / 10) * ENNReal.ofReal (1 - 9 / 10) := by
+    simp [bern, scBias, jointMass, Fin.prod_univ_two]
+  rw [h, show (1 : ℝ) - 9 / 10 = 1 / 10 from by norm_num,
+    ← ENNReal.ofReal_mul (by norm_num : (0 : ℝ) ≤ 9 / 10)]
+  congr 1
+  norm_num
+
+private theorem scB_joint_tt : jointMass scBias ![true, true]
+    = ENNReal.ofReal ((81 : ℝ) / 100) := by
+  have h : jointMass scBias ![true, true]
+      = ENNReal.ofReal (9 / 10) * ENNReal.ofReal (9 / 10) := by
+    simp [bern, scBias, jointMass, Fin.prod_univ_two]
+  rw [h, ← ENNReal.ofReal_mul (by norm_num : (0 : ℝ) ≤ 9 / 10)]
+  congr 1
+  norm_num
+
+private theorem scB_mass_ff :
+    ((bernPMF scBias scBias_nonneg scBias_le_one) ![false, false]).toReal
+      = 1 / 100 := by
+  rw [bernPMF_apply, scB_joint_ff, ENNReal.toReal_ofReal (by norm_num)]
+
+private theorem scB_mass_ft :
+    ((bernPMF scBias scBias_nonneg scBias_le_one) ![false, true]).toReal
+      = 9 / 100 := by
+  rw [bernPMF_apply, scB_joint_ft, ENNReal.toReal_ofReal (by norm_num)]
+
+private theorem scB_mass_tf :
+    ((bernPMF scBias scBias_nonneg scBias_le_one) ![true, false]).toReal
+      = 9 / 100 := by
+  rw [bernPMF_apply, scB_joint_tf, ENNReal.toReal_ofReal (by norm_num)]
+
+private theorem scB_mass_tt :
+    ((bernPMF scBias scBias_nonneg scBias_le_one) ![true, true]).toReal
+      = 81 / 100 := by
+  rw [bernPMF_apply, scB_joint_tt, ENNReal.toReal_ofReal (by norm_num)]
+
+/-- The `t = 2` tail-event mass at the biased independent family: the
+event is `{ω | ω 0 = ω 1}` (both coordinates equal — the sum is `±2`),
+at measure `81/100 + 1/100 = 41/50`. -/
+theorem scBias_event_mass :
+    (bernPMF scBias scBias_nonneg scBias_le_one).toMeasure
+        {ω : (Fin 2) → Bool | |∑ i, scBiasX i ω| ≥ 2}
+      = ENNReal.ofReal ((41 : ℝ) / 50) := by
+  have hmeas : MeasurableSet {ω : (Fin 2) → Bool | |∑ i, scBiasX i ω| ≥ 2} :=
+    Set.Finite.measurableSet (Set.toFinite _)
+  have meff : (![false, false] : Fin 2 → Bool)
+      ∈ {ω : (Fin 2) → Bool | |∑ i, scBiasX i ω| ≥ 2} := by
+    simp only [Set.mem_setOf_eq, Fin.sum_univ_two, scBiasX]
+    norm_num
+  have mft : ¬(![false, true] : Fin 2 → Bool)
+      ∈ {ω : (Fin 2) → Bool | |∑ i, scBiasX i ω| ≥ 2} := by
+    simp only [Set.mem_setOf_eq, Fin.sum_univ_two, scBiasX, not_false_iff]
+    norm_num
+  have mtf : ¬(![true, false] : Fin 2 → Bool)
+      ∈ {ω : (Fin 2) → Bool | |∑ i, scBiasX i ω| ≥ 2} := by
+    simp only [Set.mem_setOf_eq, Fin.sum_univ_two, scBiasX, not_false_iff]
+    norm_num
+  have mett : (![true, true] : Fin 2 → Bool)
+      ∈ {ω : (Fin 2) → Bool | |∑ i, scBiasX i ω| ≥ 2} := by
+    simp only [Set.mem_setOf_eq, Fin.sum_univ_two, scBiasX]
+    norm_num
+  have hff : (bernPMF scBias scBias_nonneg scBias_le_one) ![false, false]
+      = ENNReal.ofReal ((1 : ℝ) / 100) := by
+    rw [bernPMF_apply, scB_joint_ff]
+  have htt : (bernPMF scBias scBias_nonneg scBias_le_one) ![true, true]
+      = ENNReal.ofReal ((81 : ℝ) / 100) := by
+    rw [bernPMF_apply, scB_joint_tt]
+  rw [PMF.toMeasure_apply _ _ hmeas, tsum_fintype]
+  simp only [Set.indicator_apply]
+  rw [scB_huniv,
+    Finset.sum_insert (by simp [scF_ne_ff_ft, scF_ne_ff_tf, scF_ne_ff_tt]),
+    Finset.sum_insert (by simp [scF_ne_ft_tf, scF_ne_ft_tt]),
+    Finset.sum_insert (by simp [scF_ne_tf_tt]), Finset.sum_singleton,
+    if_pos meff, if_neg mft, if_neg mtf, if_pos mett, hff, htt]
+  simp only [zero_add, add_zero]
+  rw [← ENNReal.ofReal_add (by norm_num : (0 : ℝ) ≤ 1 / 100)
+      (by norm_num : (0 : ℝ) ≤ 81 / 100)]
+  congr 1
+  norm_num
+
+/-- The MGF pin at `lam = 1`: the exponential moment of the biased
+independent family is `(81/100)e² + 18/100 + (1/100)e⁻²` (the
+four-atom enumeration; the `tt` atom alone carries `(81/100)e²`). -/
+theorem scBias_integral_exp_one :
+    ∫ ω : (Fin 2) → Bool, Real.exp ((1 : ℝ) * ∑ i, scBiasX i ω)
+      ∂(bernPMF scBias scBias_nonneg scBias_le_one).toMeasure
+      = (81 / 100) * (Real.exp 1 * Real.exp 1) + 18 / 100
+          + (1 / 100) * (Real.exp (-1) * Real.exp (-1)) := by
+  have vff : (1 : ℝ) * ∑ i, scBiasX i (![false, false] : Fin 2 → Bool) = -2 := by
+    simp only [Fin.sum_univ_two, scBiasX]; norm_num
+  have vft : (1 : ℝ) * ∑ i, scBiasX i (![false, true] : Fin 2 → Bool) = 0 := by
+    simp only [Fin.sum_univ_two, scBiasX]; norm_num
+  have vtf : (1 : ℝ) * ∑ i, scBiasX i (![true, false] : Fin 2 → Bool) = 0 := by
+    simp only [Fin.sum_univ_two, scBiasX]; norm_num
+  have vtt : (1 : ℝ) * ∑ i, scBiasX i (![true, true] : Fin 2 → Bool) = 2 := by
+    simp only [Fin.sum_univ_two, scBiasX]; norm_num
+  rw [PMF.integral_eq_sum, scB_huniv,
+    Finset.sum_insert (by simp [scF_ne_ff_ft, scF_ne_ff_tf, scF_ne_ff_tt]),
+    Finset.sum_insert (by simp [scF_ne_ft_tf, scF_ne_ft_tt]),
+    Finset.sum_insert (by simp [scF_ne_tf_tt]), Finset.sum_singleton,
+    scB_mass_ff, scB_mass_ft, scB_mass_tf, scB_mass_tt, vff, vft, vtf, vtt]
+  have he2 : Real.exp 2 = Real.exp 1 * Real.exp 1 := by rw [← Real.exp_add]; norm_num
+  have hem2 : Real.exp (-2) = Real.exp (-1) * Real.exp (-1) := by
+    rw [← Real.exp_add]; norm_num
+  rw [he2, hem2, Real.exp_zero]
+  norm_num
+  ring
+
+private theorem scF_ofReal_le_ofReal' {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b)
+    (h : ENNReal.ofReal a ≤ ENNReal.ofReal b) : a ≤ b := by
+  have h1 := (ENNReal.toReal_le_toReal ENNReal.ofReal_ne_top
+    ENNReal.ofReal_ne_top).mpr h
+  rwa [ENNReal.toReal_ofReal ha, ENNReal.toReal_ofReal hb] at h1
+
+theorem scF_exp_inv_lt_ten_27s : Real.exp (-1) < 10 / 27 := by
+  have hprod : Real.exp 1 * Real.exp (-1) = 1 := by
+    rw [← Real.exp_add, add_neg_cancel, Real.exp_zero]
+  have hepos : (0 : ℝ) < Real.exp 1 := Real.exp_pos 1
+  by_contra hcon
+  push_neg at hcon
+  nlinarith [hcon, hprod, hepos, scF_exp_gt_two_sevenths]
+
+theorem scF_two_exp_neg_lt_41_50 : 2 * Real.exp (-(1 : ℝ)) < 41 / 50 := by
+  calc 2 * Real.exp (-(1 : ℝ)) < 2 * (10 / 27) :=
+        mul_lt_mul_of_pos_left scF_exp_inv_lt_ten_27s (by norm_num)
+    _ < 41 / 50 := by norm_num
+
+set_option linter.unusedVariables false in
+/-- **Fence: `mgf_sum_le_of_iIndepFun`'s `h_mean`.** At the genuinely
+independent biased family with `lam = 1`, `c = -1`, `d = 1`: the MGF
+is at least the `tt` atom's `(81/100)e²` while the bound is
+`exp 1` — and `(81/100)e > 1` already at `e > 27/10`, so the centering
+clause is load-bearing against non-centered independent input. -/
+theorem scFence_mgf_sum_mean
+    (h : ∫ ω : (Fin 2) → Bool, Real.exp ((1 : ℝ) * ∑ i, scBiasX i ω)
+        ∂(bernPMF scBias scBias_nonneg scBias_le_one).toMeasure
+      ≤ Real.exp ((1 : ℝ) ^ 2 * (∑ i : Fin 2, ((1 : ℝ) - (-(1 : ℝ))) ^ 2) / 8)) : False := by
+  have hb : (1 : ℝ) ^ 2 * (∑ i : Fin 2, ((1 : ℝ) - (-(1 : ℝ))) ^ 2) / 8 = 1 := by
+    have hs : ∑ i : Fin 2, ((1 : ℝ) - (-(1 : ℝ))) ^ 2 = 8 := by simp; norm_num
+    rw [hs]
+    norm_num
+  rw [scBias_integral_exp_one, hb] at h
+  have hepos : (0 : ℝ) < Real.exp 1 := lt_trans (by norm_num) scF_exp_gt_two_sevenths
+  nlinarith [h, scF_exp_gt_two_sevenths, hepos, sq_nonneg (Real.exp 1 - 27 / 10),
+    mul_nonneg (Real.exp_nonneg (-1 : ℝ)) (Real.exp_nonneg (-1 : ℝ))]
+
+set_option linter.unusedVariables false in
+/-- **Fence: `hoeffding_inequality_interval`'s `h_mean`.** At `t = 2`
+the tail event `{ω 0 = ω 1}` carries `41/50` against the bound
+`2e⁻¹ < 41/50` (from `e > 27/10`, i.e. `e⁻¹ < 10/27`). -/
+theorem scFence_hoeffding_interval_mean
+    (h : (bernPMF scBias scBias_nonneg scBias_le_one).toMeasure
+        {ω : (Fin 2) → Bool | |∑ i, scBiasX i ω| ≥ 2}
+      ≤ ENNReal.ofReal (2 * Real.exp (-2 * (2 : ℝ) ^ 2
+          / ∑ i : Fin 2, ((1 : ℝ) - (-(1 : ℝ))) ^ 2))) : False := by
+  have hb : ∑ i : Fin 2, ((1 : ℝ) - (-(1 : ℝ))) ^ 2 = 8 := by
+    simp
+    norm_num
+  rw [scBias_event_mass, hb,
+    show (-2 * (2 : ℝ) ^ 2 / 8) = -(1 : ℝ) from by norm_num] at h
+  exact absurd (scF_ofReal_le_ofReal' (by norm_num : (0 : ℝ) ≤ 41 / 50)
+    (by positivity) h) (not_le.2 scF_two_exp_neg_lt_41_50)
+
+set_option linter.unusedVariables false in
+/-- **Fence: `hoeffding_inequality`'s `h_mean`.** The same kill at the
+uniform-radius form (`a := 1`, bound again `2e⁻¹ < 41/50`). -/
+theorem scFence_hoeffding_mean
+    (h : (bernPMF scBias scBias_nonneg scBias_le_one).toMeasure
+        {ω : (Fin 2) → Bool | |∑ i, scBiasX i ω| ≥ 2}
+      ≤ ENNReal.ofReal (2 * Real.exp (-(2 : ℝ) ^ 2
+          / (2 * ∑ i : Fin 2, (1 : ℝ) ^ 2)))) : False := by
+  have hb : ∑ i : Fin 2, (1 : ℝ) ^ 2 = 2 := by simp
+  rw [scBias_event_mass, hb,
+    show -(2 : ℝ) ^ 2 / (2 * 2) = -(1 : ℝ) from by norm_num] at h
+  exact absurd (scF_ofReal_le_ofReal' (by norm_num : (0 : ℝ) ≤ 41 / 50)
+    (by positivity) h) (not_le.2 scF_two_exp_neg_lt_41_50)
+
+/-- **Fence: `hoeffding_iid`'s `h_mean`.** The same kill at the
+identically-distributed form (`n = 2`, `a = 1`). -/
+theorem scFence_hoeffding_iid_mean
+    (h : (bernPMF scBias scBias_nonneg scBias_le_one).toMeasure
+        {ω : (Fin 2) → Bool | |∑ i, scBiasX i ω| ≥ 2}
+      ≤ ENNReal.ofReal (2 * Real.exp (-(2 : ℝ) ^ 2
+          / (2 * ((2 : ℝ) * (1 : ℝ) ^ 2))))) : False := by
+  rw [scBias_event_mass,
+    show -(2 : ℝ) ^ 2 / (2 * ((2 : ℝ) * (1 : ℝ) ^ 2)) = -(1 : ℝ) from by norm_num] at h
+  exact absurd (scF_ofReal_le_ofReal' (by norm_num : (0 : ℝ) ≤ 41 / 50)
+    (by positivity) h) (not_le.2 scF_two_exp_neg_lt_41_50)
+
+/-- The variance-statistic pin at the correlated family: each
+coordinate squares to the constant `1`, so the sum is `2`. -/
+theorem scCorr_sq_sum :
+    ∑ i, ∫ ω : (Fin 2) → Bool, (scCorrX i ω) ^ 2
+      ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure = 2 := by
+  have hint : ∀ i : Fin 2, ∫ ω : (Fin 2) → Bool, (scCorrX i ω) ^ 2
+      ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure = 1 := by
+    intro i
+    have hc : (fun ω : (Fin 2) → Bool => (scCorrX i ω) ^ 2) = fun _ => 1 := by
+      funext ω
+      cases hw : ω 0 <;> simp [scCorrX, hw]
+    rw [hc, integral_const, measure_univ, ENNReal.one_toReal, one_smul]
+  rw [Finset.sum_congr rfl (fun i _ => hint i)]
+  norm_num
+
+theorem scF_exp_inv_gt_three_tenths : (3 : ℝ) / 10 < Real.exp (-1) := by
+  by_contra hcon
+  push_neg at hcon
+  have h1 : Real.exp 1 * Real.exp (-1) ≤ Real.exp 1 * (3 / 10) :=
+    mul_le_mul_of_nonneg_left hcon (Real.exp_nonneg 1)
+  have h2 : Real.exp 1 * (3 / 10) < (14 / 5) * (3 / 10) :=
+    mul_lt_mul_of_pos_right scF_exp_lt_fourteen_fifths (by norm_num)
+  rw [show Real.exp 1 * Real.exp (-1) = 1 from by
+      rw [← Real.exp_add, add_neg_cancel, Real.exp_zero]] at h1
+  norm_num at h1 h2
+  linarith
+
+theorem scF_cosh_gt_three_halves : (3 : ℝ) / 2 < (Real.exp 1 + Real.exp (-1)) / 2 := by
+  have h1 : 27 / 10 + 3 / 10 < Real.exp 1 + Real.exp (-1) :=
+    add_lt_add scF_exp_gt_two_sevenths scF_exp_inv_gt_three_tenths
+  have h2 : (27 : ℝ) / 10 + 3 / 10 = 3 := by norm_num
+  linarith
+
+theorem scF_exp_three_tenths_lt_three_halves : Real.exp ((3 : ℝ) / 10) < 3 / 2 := by
+  have hL : (Real.exp ((3 : ℝ) / 10)) ^ 3 = Real.exp ((9 : ℝ) / 10) := by
+    have hpow : (Real.exp ((3 : ℝ) / 10)) ^ 3
+        = Real.exp (3 / 10) * Real.exp (3 / 10) * Real.exp (3 / 10) := by ring
+    rw [hpow, ← Real.exp_add, ← Real.exp_add]
+    congr 1
+    norm_num
+  have he9 : Real.exp ((9 : ℝ) / 10) < Real.exp 1 := Real.exp_lt_exp.mpr (by norm_num)
+  by_contra hcon
+  push_neg at hcon
+  have hle : (3 / 2 : ℝ) ^ 3 ≤ (Real.exp ((3 : ℝ) / 10)) ^ 3 :=
+    pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 3 / 2) hcon 3
+  rw [show (3 / 2 : ℝ) ^ 3 = 27 / 8 from by norm_num, hL] at hle
+  linarith [he9, scF_exp_lt_fourteen_fifths]
+
+set_option linter.unusedVariables false in
+/-- **Fence: `mgf_sum_le_bernstein`'s `h_indep`.** At the
+perfectly-correlated family with `a = 1`, `lam = 1/2`: the MGF is
+`cosh 1 = (e + e⁻¹)/2 > 3/2` (from `e > 27/10` and `e⁻¹ > 3/10`, the
+latter via `e < 14/5`) while the bound is `exp (3/10) < 3/2` (the
+cubing route: `exp(3/10)³ = exp(9/10) < e < 14/5 < 27/8`). The
+audit's deferred D1 — the family's priciest single fence, and the
+last never-refuted clause of the Bernstein MGF engine. -/
+theorem scFence_bernstein_mgf_indep
+    (h : ∫ ω : (Fin 2) → Bool, Real.exp ((1 / 2 : ℝ) * ∑ i, scCorrX i ω)
+        ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure
+      ≤ Real.exp ((1 / 2 : ℝ) ^ 2 * (∑ i : Fin 2, ∫ ω : (Fin 2) → Bool, (scCorrX i ω) ^ 2
+            ∂(bernPMF scHalf scHalf_nonneg scHalf_le_one).toMeasure)
+          / (2 * (1 - (1 / 2 : ℝ) * (1 : ℝ) / 3)))) : False := by
+  have hsum : ∀ ω : (Fin 2) → Bool, (1 / 2 : ℝ) * ∑ i, scCorrX i ω
+      = 1 * scCorrX 0 ω := by
+    intro ω
+    simp only [Fin.sum_univ_two, scCorrX]
+    ring
+  have hcongr : ∀ ω : (Fin 2) → Bool, Real.exp ((1 / 2 : ℝ) * ∑ i, scCorrX i ω)
+      = Real.exp (1 * scCorrX 0 ω) := fun ω => by rw [hsum ω]
+  rw [integral_congr_ae (ae_of_all _ fun ω => hcongr ω),
+    scCorr_integral_exp 1, scCorr_sq_sum,
+    show (1 / 2 : ℝ) ^ 2 * 2 / (2 * (1 - (1 / 2 : ℝ) * (1 : ℝ) / 3)) = 3 / 10 from by
+      norm_num] at h
+  linarith [scF_cosh_gt_three_halves, scF_exp_three_tenths_lt_three_halves]
+
+end DeferralFences
+
 end Scaffold.Mathlib.Probability.Concentration.Scalar.QA

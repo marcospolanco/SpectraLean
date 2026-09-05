@@ -94,6 +94,7 @@ lake build
 python3 scripts/check_build_completeness.py
 python3 scripts/check_scaffold_map_freshness.py
 python3 scripts/check_backlog_freshness.py
+python3 scripts/check_qa_name_uniqueness.py
 ```
 
 `check_build_completeness.py` runs after every full `lake build`: a
@@ -139,6 +140,20 @@ item's text in the same delivery (the records-ladder obligation
 `proposals/README.md` already carries) and then bump the reviewed
 date; this check only catches the case where that discipline lapses
 entirely.
+
+`check_qa_name_uniqueness.py` (2026-09-05,
+`proposals/qa-name-collision-guard.md`) fails if any named top-level
+declaration appears in more than one module under `Scaffold/QA/`
+within the same namespace — the latent defect class behind the
+`edgeAdj` lattice repair (QA modules are leaf builds, so a cross-module
+duplicate only fails when some future module imports both, typically a
+cross-family reconciliation wrapper). The 24 residual duplicates the
+2026-09-05 survey found are allowlisted with their exact file sets and
+mechanisms; any new collision, or any drift in a residual's file set
+(a rename landing, a new file joining), fails until the disposition is
+settled deliberately. A new QA fixture or helper should be named
+file-uniquely at introduction time — the same settle-at-admission
+discipline the degenerate-corner guard enforces for axioms.
 
 `lint_axioms.py` includes the degenerate-corner guard check
 (`proposals/lint-axiom-degenerate-corner-guards.md`) and the

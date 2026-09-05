@@ -50,15 +50,15 @@
   Step 4 witnesses (the proposal's QA item 2 plus its orientation
   calibration):
 
-  - **Capacity increase (edge):** the unit edge `edgeAdj` against the
+  - **Capacity increase (edge):** the unit edge `psEdgeAdj` against the
     conductance-`2` edge `edge2Adj` — resistance certified to decrease
     `1 → 1/2`, Rayleigh monotonicity instantiated, the decrease
     certified *strict*, and the **orientation guard**: the reverse
     inequality `1 ≤ 1/2` refuted numerically (weights are conductances;
     a resistance-direction statement would be false here).
-  - **Competitor transfer (edge):** the `edgeAdj`-electrical current is
+  - **Competitor transfer (edge):** the `psEdgeAdj`-electrical current is
     a unit flow on `edge2Adj` (flow-space growth + Kirchhoff), and its
-    `edge2Adj`-energy computes to `1/2 ≤ 1` = its `edgeAdj`-energy —
+    `edge2Adj`-energy computes to `1/2 ≤ 1` = its `psEdgeAdj`-energy —
     the comparison half instantiated at computed values.
   - **Partial increase (triangle):** doubling one edge of `K₃`
     (conductance `2` on `0 — 1`, all else equal) strictly decreases the
@@ -104,39 +104,39 @@ namespace SpectralGraphTheory.QA
 
 /-!
 ## Positive witness 1: the two-vertex edge `0 — 1`
-(fixture `edgeAdj` from `PotentialSolvability_QA`)
+(fixture `psEdgeAdj` from `PotentialSolvability_QA`)
 -/
 
 /-- **Current matrix (edge):** the potential `![1, 0]` induces the
 current `!![0, 1; -1, 0]` — unit current `0 → 1`, its negative back,
 nothing on the diagonals. Computed entrywise from the definitions. -/
 theorem edge_current_matrix_QA :
-    electricalCurrent edgeAdj ![1, 0] = Matrix.of !![0, 1; -1, 0] := by
+    electricalCurrent psEdgeAdj ![1, 0] = Matrix.of !![0, 1; -1, 0] := by
   ext i j
-  fin_cases i <;> fin_cases j <;> simp [electricalCurrent, edgeAdj]
+  fin_cases i <;> fin_cases j <;> simp [electricalCurrent, psEdgeAdj]
 
 /-- **Divergence (edge):** net outflow `+1` at the source, `-1` at the
 sink — computed from the raw definition, independent of the Kirchhoff
 bridge. -/
 theorem edge_current_divergence_QA :
-    flowDivergence (electricalCurrent edgeAdj ![1, 0]) = ![1, -1] := by
+    flowDivergence (electricalCurrent psEdgeAdj ![1, 0]) = ![1, -1] := by
   funext i
   fin_cases i <;>
-    simp [flowDivergence, electricalCurrent, edgeAdj, Fin.sum_univ_two]
+    simp [flowDivergence, electricalCurrent, psEdgeAdj, Fin.sum_univ_two]
 
 /-- **Interface instantiation (edge):** the Kirchhoff bridge computes
 the divergence as the Laplacian action on the potential. -/
 theorem edge_divergence_eq_laplacian_QA :
-    flowDivergence (electricalCurrent edgeAdj ![1, 0])
-      = (laplacian edgeAdj).mulVec ![1, 0] :=
-  flowDivergence_electricalCurrent edgeAdj ![1, 0]
+    flowDivergence (electricalCurrent psEdgeAdj ![1, 0])
+      = (laplacian psEdgeAdj).mulVec ![1, 0] :=
+  flowDivergence_electricalCurrent psEdgeAdj ![1, 0]
 
 /-- **Unit flow (edge):** the potential `![1, 0]` — computed in
 `PotentialSolvability_QA` to solve the unit-demand equation — induces
 a unit flow, via the step-1 headline theorem. -/
 theorem edge_isUnitFlow_QA :
-    IsUnitFlow edgeAdj 0 1 (electricalCurrent edgeAdj ![1, 0]) :=
-  isUnitFlow_electricalCurrent edgeAdj edgeAdj_isSymm edge_potential_value_QA
+    IsUnitFlow psEdgeAdj 0 1 (electricalCurrent psEdgeAdj ![1, 0]) :=
+  isUnitFlow_electricalCurrent psEdgeAdj psEdgeAdj_isSymm edge_potential_value_QA
 
 /-!
 ## Positive witness 2: the three-vertex path `0 — 1 — 2`
@@ -286,15 +286,15 @@ energy `1`, computed from the raw definitions (both ordered pairs of
 the undirected edge contribute `1`, halved) — independent of any
 theorem. -/
 theorem edge_flowEnergy_value_QA :
-    flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0]) = 1 := by
-  simp [flowEnergy, electricalCurrent, edgeAdj, Fin.sum_univ_two]
+    flowEnergy psEdgeAdj (electricalCurrent psEdgeAdj ![1, 0]) = 1 := by
+  simp [flowEnergy, electricalCurrent, psEdgeAdj, Fin.sum_univ_two]
 
 /-- **Agreement (edge):** the theorem route equates the current's
 energy with the Dirichlet energy of its potential. -/
 theorem edge_flowEnergy_agreement_QA :
-    flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0])
-      = quadForm (laplacian edgeAdj) ![1, 0] :=
-  flowEnergy_electricalCurrent edgeAdj edgeAdj_isSymm ![1, 0]
+    flowEnergy psEdgeAdj (electricalCurrent psEdgeAdj ![1, 0])
+      = quadForm (laplacian psEdgeAdj) ![1, 0] :=
+  flowEnergy_electricalCurrent psEdgeAdj psEdgeAdj_isSymm ![1, 0]
 
 /-- **Cross-check (edge):** the theorem-agreed value is `1` on both
 sides — the raw energy computation (`edge_flowEnergy_value_QA`), the
@@ -302,9 +302,9 @@ independently computed Dirichlet energy (`edge_energy_e0_QA`), and the
 pinned resistance (`edge_effectiveResistance_eq_one_QA`) all meet at
 the same number. -/
 theorem edge_flowEnergy_agreed_value_QA :
-    flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0]) = 1
-      ∧ quadForm (laplacian edgeAdj) ![1, 0] = 1
-      ∧ effectiveResistance edgeAdj 0 1 = 1 :=
+    flowEnergy psEdgeAdj (electricalCurrent psEdgeAdj ![1, 0]) = 1
+      ∧ quadForm (laplacian psEdgeAdj) ![1, 0] = 1
+      ∧ effectiveResistance psEdgeAdj 0 1 = 1 :=
   ⟨edge_flowEnergy_value_QA, edge_energy_e0_QA,
     edge_effectiveResistance_eq_one_QA⟩
 
@@ -312,16 +312,16 @@ theorem edge_flowEnergy_agreed_value_QA :
 the energy dissipated by a unit-demand current is the resistance it
 routes. -/
 theorem edge_flowEnergy_eq_resistance_QA :
-    flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0])
-      = effectiveResistance edgeAdj 0 1 :=
-  flowEnergy_electricalCurrent_eq_effectiveResistance edgeAdj
-    edgeAdj_isSymm edgeAdj_nonneg edge_supportGraph_connected
+    flowEnergy psEdgeAdj (electricalCurrent psEdgeAdj ![1, 0])
+      = effectiveResistance psEdgeAdj 0 1 :=
+  flowEnergy_electricalCurrent_eq_effectiveResistance psEdgeAdj
+    psEdgeAdj_isSymm psEdgeAdj_nonneg edge_supportGraph_connected
     edge_potential_value_QA
 
 /-- **Nonnegativity interface instantiation (edge).** -/
 theorem edge_flowEnergy_nonneg_QA :
-    0 ≤ flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0]) :=
-  flowEnergy_nonneg edgeAdj edgeAdj_nonneg _
+    0 ≤ flowEnergy psEdgeAdj (electricalCurrent psEdgeAdj ![1, 0]) :=
+  flowEnergy_nonneg psEdgeAdj psEdgeAdj_nonneg _
 
 /-- **Flow energy (path):** the unit current through the two-edge path
 dissipates energy `2` — both edges carry `1`, both ordered pairs of
@@ -369,10 +369,10 @@ assert `2 = 1` on this fixture. The factor is mandatory, not cosmetic
 sum of the unit current — both entries `(0,1)` and `(1,0)` contribute
 `1`. Computed from the raw definitions. -/
 theorem edge_raw_pair_sum_two_QA :
-    (∑ i, ∑ j, if edgeAdj i j = 0 then (0 : ℝ)
-      else electricalCurrent edgeAdj ![1, 0] i j ^ 2 / edgeAdj i j)
+    (∑ i, ∑ j, if psEdgeAdj i j = 0 then (0 : ℝ)
+      else electricalCurrent psEdgeAdj ![1, 0] i j ^ 2 / psEdgeAdj i j)
       = 2 := by
-  simp [electricalCurrent, edgeAdj, Fin.sum_univ_two]
+  simp [electricalCurrent, psEdgeAdj, Fin.sum_univ_two]
   norm_num
 
 /-- **The double-counting guard:** the raw ordered-pair sum is exactly
@@ -380,10 +380,10 @@ twice the flow energy, and the unhalved value `2` differs from the
 Dirichlet energy `1` — the `1/2` factor is exactly what makes the
 energy agreement true. -/
 theorem edge_double_counting_guard_QA :
-    (∑ i, ∑ j, if edgeAdj i j = 0 then (0 : ℝ)
-      else electricalCurrent edgeAdj ![1, 0] i j ^ 2 / edgeAdj i j)
-      = 2 * flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0])
-      ∧ (2 : ℝ) ≠ quadForm (laplacian edgeAdj) ![1, 0] := by
+    (∑ i, ∑ j, if psEdgeAdj i j = 0 then (0 : ℝ)
+      else electricalCurrent psEdgeAdj ![1, 0] i j ^ 2 / psEdgeAdj i j)
+      = 2 * flowEnergy psEdgeAdj (electricalCurrent psEdgeAdj ![1, 0])
+      ∧ (2 : ℝ) ≠ quadForm (laplacian psEdgeAdj) ![1, 0] := by
   refine ⟨?_, ?_⟩
   · rw [edge_raw_pair_sum_two_QA, edge_flowEnergy_value_QA]
     norm_num
@@ -658,12 +658,12 @@ at the electrical current itself, with both sides pinned to `1` —
 `edge_effectiveResistance_eq_one_QA` and `edge_flowEnergy_value_QA`
 independently. -/
 theorem edge_thomson_attained_QA :
-    effectiveResistance edgeAdj 0 1
-      ≤ flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0])
-      ∧ effectiveResistance edgeAdj 0 1 = 1
-      ∧ flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0]) = 1 :=
-  ⟨effectiveResistance_le_flowEnergy edgeAdj edgeAdj_isSymm
-      edgeAdj_nonneg edge_supportGraph_connected edge_isUnitFlow_QA,
+    effectiveResistance psEdgeAdj 0 1
+      ≤ flowEnergy psEdgeAdj (electricalCurrent psEdgeAdj ![1, 0])
+      ∧ effectiveResistance psEdgeAdj 0 1 = 1
+      ∧ flowEnergy psEdgeAdj (electricalCurrent psEdgeAdj ![1, 0]) = 1 :=
+  ⟨effectiveResistance_le_flowEnergy psEdgeAdj psEdgeAdj_isSymm
+      psEdgeAdj_nonneg edge_supportGraph_connected edge_isUnitFlow_QA,
     edge_effectiveResistance_eq_one_QA, edge_flowEnergy_value_QA⟩
 
 /-- The detour flow on the triangle: routes the whole unit around the
@@ -764,7 +764,7 @@ theorem thomson_split_decomposition_QA :
 -/
 
 /-- The conductance-`2` edge: the capacity-increase fixture of the
-proposal's QA item 2 — `edgeAdj` with its single conductance doubled. -/
+proposal's QA item 2 — `psEdgeAdj` with its single conductance doubled. -/
 def edge2Adj : Matrix (Fin 2) (Fin 2) ℝ :=
   Matrix.of !![0, 2; 2, 0]
 
@@ -776,11 +776,11 @@ theorem edge2Adj_nonneg : ∀ i j, 0 ≤ edge2Adj i j := by
   intro i j
   fin_cases i <;> fin_cases j <;> simp [edge2Adj]
 
-/-- Entrywise `edgeAdj ≤ edge2Adj`: one conductance raised, none
+/-- Entrywise `psEdgeAdj ≤ edge2Adj`: one conductance raised, none
 lowered. -/
-theorem edge_le_edge2Adj : ∀ i j, edgeAdj i j ≤ edge2Adj i j := by
+theorem edge_le_edge2Adj : ∀ i j, psEdgeAdj i j ≤ edge2Adj i j := by
   intro i j
-  fin_cases i <;> fin_cases j <;> simp [edgeAdj, edge2Adj]
+  fin_cases i <;> fin_cases j <;> simp [psEdgeAdj, edge2Adj]
 
 /-- The conductance-`2` edge is connected. -/
 theorem edge2_supportGraph_connected :
@@ -817,15 +817,15 @@ theorem edge2_resistance_value_QA :
 /-- **Rayleigh monotonicity instantiated (QA item 2):** doubling the
 only conductance cannot increase the resistance. -/
 theorem rayleigh_edge_QA :
-    effectiveResistance edge2Adj 0 1 ≤ effectiveResistance edgeAdj 0 1 :=
-  effectiveResistance_le_of_le edgeAdj edge2Adj edgeAdj_isSymm
-    edgeAdj_nonneg edge_supportGraph_connected edge2Adj_isSymm
+    effectiveResistance edge2Adj 0 1 ≤ effectiveResistance psEdgeAdj 0 1 :=
+  effectiveResistance_le_of_le psEdgeAdj edge2Adj psEdgeAdj_isSymm
+    psEdgeAdj_nonneg edge_supportGraph_connected edge2Adj_isSymm
     edge2Adj_nonneg edge2_supportGraph_connected edge_le_edge2Adj 0 1
 
 /-- **The decrease is strict and certified:** `1/2 < 1`, from the two
 independently pinned resistance values. -/
 theorem rayleigh_edge_strict_QA :
-    effectiveResistance edge2Adj 0 1 < effectiveResistance edgeAdj 0 1 := by
+    effectiveResistance edge2Adj 0 1 < effectiveResistance psEdgeAdj 0 1 := by
   rw [edge2_resistance_value_QA, edge_effectiveResistance_eq_one_QA]
   norm_num
 
@@ -835,42 +835,42 @@ Weights are conductances, so `R_B ≤ R_A` is the only direction that can
 hold; a resistance-direction restatement would be a statement bug, and
 this witness would catch it. -/
 theorem rayleigh_orientation_guard_QA :
-    ¬ (effectiveResistance edgeAdj 0 1
+    ¬ (effectiveResistance psEdgeAdj 0 1
       ≤ effectiveResistance edge2Adj 0 1) := by
   rw [edge_effectiveResistance_eq_one_QA, edge2_resistance_value_QA]
   norm_num
 
-/-- **Competitor transfer:** the `edgeAdj`-electrical current (the unit
+/-- **Competitor transfer:** the `psEdgeAdj`-electrical current (the unit
 flow computed in `edge_current_matrix_QA`) is a valid unit flow on the
 doubled network — flow-space growth supplies support, the Kirchhoff
 bridge the divergence. This is the interface the headline proof routes
 through, instantiated on computed objects. -/
 theorem edge_current_isUnitFlow_on_edge2_QA :
-    IsUnitFlow edge2Adj 0 1 (electricalCurrent edgeAdj ![1, 0]) :=
-  ⟨isFlowOn_of_le (isFlowOn_electricalCurrent edgeAdj edgeAdj_isSymm _)
-      edgeAdj_nonneg edge_le_edge2Adj, by
+    IsUnitFlow edge2Adj 0 1 (electricalCurrent psEdgeAdj ![1, 0]) :=
+  ⟨isFlowOn_of_le (isFlowOn_electricalCurrent psEdgeAdj psEdgeAdj_isSymm _)
+      psEdgeAdj_nonneg edge_le_edge2Adj, by
     rw [flowDivergence_electricalCurrent, edge_potential_value_QA]⟩
 
-/-- **Cross-network energy value:** the `edgeAdj`-current dissipates
+/-- **Cross-network energy value:** the `psEdgeAdj`-current dissipates
 `1/2` on the doubled network — computed from the raw `flowEnergy`
 definition (current `1` across conductance `2`, both ordered pairs,
 halved). -/
 theorem edge2_crossEnergy_value_QA :
-    flowEnergy edge2Adj (electricalCurrent edgeAdj ![1, 0]) = 1 / 2 := by
-  simp [flowEnergy, electricalCurrent, edgeAdj, edge2Adj, Fin.sum_univ_two]
+    flowEnergy edge2Adj (electricalCurrent psEdgeAdj ![1, 0]) = 1 / 2 := by
+  simp [flowEnergy, electricalCurrent, psEdgeAdj, edge2Adj, Fin.sum_univ_two]
 
 /-- **The comparison half instantiated:** `1/2 ≤ 1` — the transferred
 competitor's energy on `B` is at most its energy on `A`, with both
 sides independently computed (`edge_flowEnergy_value_QA` pins the
 `A`-side at `1`). -/
 theorem edge_crossEnergy_le_QA :
-    flowEnergy edge2Adj (electricalCurrent edgeAdj ![1, 0])
-      ≤ flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0])
-      ∧ flowEnergy edge2Adj (electricalCurrent edgeAdj ![1, 0]) = 1 / 2
-      ∧ flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0]) = 1 :=
+    flowEnergy edge2Adj (electricalCurrent psEdgeAdj ![1, 0])
+      ≤ flowEnergy psEdgeAdj (electricalCurrent psEdgeAdj ![1, 0])
+      ∧ flowEnergy edge2Adj (electricalCurrent psEdgeAdj ![1, 0]) = 1 / 2
+      ∧ flowEnergy psEdgeAdj (electricalCurrent psEdgeAdj ![1, 0]) = 1 :=
   ⟨flowEnergy_le_of_le
-      (isFlowOn_electricalCurrent edgeAdj edgeAdj_isSymm _)
-      edgeAdj_nonneg edge_le_edge2Adj,
+      (isFlowOn_electricalCurrent psEdgeAdj psEdgeAdj_isSymm _)
+      psEdgeAdj_nonneg edge_le_edge2Adj,
     edge2_crossEnergy_value_QA, edge_flowEnergy_value_QA⟩
 
 /-!
@@ -1280,11 +1280,11 @@ def doubleCurrent : Matrix (Fin 2) (Fin 2) ℝ :=
   Matrix.of !![0, 2; -2, 0]
 
 theorem doubleCurrent_isFlowOn_QA :
-    IsFlowOn edgeAdj doubleCurrent := by
+    IsFlowOn psEdgeAdj doubleCurrent := by
   refine ⟨fun i j => by
       fin_cases i <;> fin_cases j <;> simp [doubleCurrent],
     fun i j h => by
-      fin_cases i <;> fin_cases j <;> simp [edgeAdj] at h <;>
+      fin_cases i <;> fin_cases j <;> simp [psEdgeAdj] at h <;>
         simp [doubleCurrent]⟩
 
 theorem doubleCurrent_divergence_QA :
@@ -1293,14 +1293,14 @@ theorem doubleCurrent_divergence_QA :
   fin_cases i <;> simp [flowDivergence, doubleCurrent, Fin.sum_univ_two]
 
 theorem doubleCurrent_energy_QA :
-    flowEnergy edgeAdj doubleCurrent = 4 := by
-  simp [flowEnergy, edgeAdj, doubleCurrent, Fin.sum_univ_two]
+    flowEnergy psEdgeAdj doubleCurrent = 4 := by
+  simp [flowEnergy, psEdgeAdj, doubleCurrent, Fin.sum_univ_two]
   norm_num
 
 theorem triple_current_energy_QA :
-    flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0] + doubleCurrent)
+    flowEnergy psEdgeAdj (electricalCurrent psEdgeAdj ![1, 0] + doubleCurrent)
       = 9 := by
-  simp [flowEnergy, electricalCurrent, edgeAdj, doubleCurrent,
+  simp [flowEnergy, electricalCurrent, psEdgeAdj, doubleCurrent,
     Matrix.add_apply, Fin.sum_univ_two]
   norm_num
 
@@ -1308,9 +1308,9 @@ theorem triple_current_energy_QA :
 perturbing by a genuine flow with *nonzero* divergence does not split
 the energy either: `9 ≠ 5 = 1 + 4`. -/
 theorem effF_superposition_hdiv_fence_QA :
-    ¬ (flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0] + doubleCurrent)
-      = flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0])
-        + flowEnergy edgeAdj doubleCurrent) := by
+    ¬ (flowEnergy psEdgeAdj (electricalCurrent psEdgeAdj ![1, 0] + doubleCurrent)
+      = flowEnergy psEdgeAdj (electricalCurrent psEdgeAdj ![1, 0])
+        + flowEnergy psEdgeAdj doubleCurrent) := by
   rw [triple_current_energy_QA, edge_flowEnergy_value_QA,
     doubleCurrent_energy_QA]
   norm_num
@@ -1318,7 +1318,7 @@ theorem effF_superposition_hdiv_fence_QA :
 /-- **Isolation:** `doubleCurrent` is a genuine flow on the edge
 (antisymmetric, supported); only the divergence clause fails. -/
 theorem effF_superposition_hdiv_isolation_QA :
-    IsFlowOn edgeAdj doubleCurrent ∧ flowDivergence doubleCurrent ≠ 0 :=
+    IsFlowOn psEdgeAdj doubleCurrent ∧ flowDivergence doubleCurrent ≠ 0 :=
   ⟨doubleCurrent_isFlowOn_QA, by
     rw [doubleCurrent_divergence_QA]
     intro h
@@ -1428,23 +1428,23 @@ theorem effF_flowSpace_hnn_isolation_QA :
 conclusion fails for a genuine flow — the edge current carries `1`
 across the zero network's zero-conductance pair. -/
 theorem effF_flowSpace_hle_fence_QA :
-    ¬ IsFlowOn zeroWAdj (electricalCurrent edgeAdj ![1, 0]) := by
+    ¬ IsFlowOn zeroWAdj (electricalCurrent psEdgeAdj ![1, 0]) := by
   rintro ⟨-, hsupp⟩
   have h01 : zeroWAdj 0 1 = 0 := by simp [zeroWAdj]
-  exact absurd (hsupp 0 1 h01) (by simp [electricalCurrent, edgeAdj])
+  exact absurd (hsupp 0 1 h01) (by simp [electricalCurrent, psEdgeAdj])
 
-/-- **Isolation:** the current is a genuine flow on `edgeAdj`
-(delivered engine), `edgeAdj` is nonnegative, and the domination
-`edgeAdj ≤ zeroWAdj` genuinely fails. -/
+/-- **Isolation:** the current is a genuine flow on `psEdgeAdj`
+(delivered engine), `psEdgeAdj` is nonnegative, and the domination
+`psEdgeAdj ≤ zeroWAdj` genuinely fails. -/
 theorem effF_flowSpace_hle_isolation_QA :
-    IsFlowOn edgeAdj (electricalCurrent edgeAdj ![1, 0])
-      ∧ (∀ i j, 0 ≤ edgeAdj i j)
-      ∧ ¬ (∀ i j, edgeAdj i j ≤ zeroWAdj i j) :=
-  ⟨isFlowOn_electricalCurrent edgeAdj edgeAdj_isSymm _, edgeAdj_nonneg,
+    IsFlowOn psEdgeAdj (electricalCurrent psEdgeAdj ![1, 0])
+      ∧ (∀ i j, 0 ≤ psEdgeAdj i j)
+      ∧ ¬ (∀ i j, psEdgeAdj i j ≤ zeroWAdj i j) :=
+  ⟨isFlowOn_electricalCurrent psEdgeAdj psEdgeAdj_isSymm _, psEdgeAdj_nonneg,
     by
     intro h
     have h01 := h 0 1
-    simp [edgeAdj, zeroWAdj] at h01
+    simp [psEdgeAdj, zeroWAdj] at h01
     norm_num at h01⟩
 
 /-!
@@ -1453,35 +1453,35 @@ theorem effF_flowSpace_hle_isolation_QA :
 -/
 
 theorem phantom_energy_edge_QA :
-    flowEnergy edgeAdj phantomFlow = 1 := by
-  simp [flowEnergy, edgeAdj, phantomFlow, Fin.sum_univ_two]
+    flowEnergy psEdgeAdj phantomFlow = 1 := by
+  simp [flowEnergy, psEdgeAdj, phantomFlow, Fin.sum_univ_two]
 
 theorem phantom_energy_negWAdj_QA :
     flowEnergy negWAdj phantomFlow = -1 := by
   simp [flowEnergy, negWAdj, phantomFlow, Fin.sum_univ_two]
 
-theorem zeroWAdj_le_edgeAdj : ∀ i j, zeroWAdj i j ≤ edgeAdj i j := by
+theorem zeroWAdj_le_psEdgeAdj : ∀ i j, zeroWAdj i j ≤ psEdgeAdj i j := by
   intro i j
-  fin_cases i <;> fin_cases j <;> simp [zeroWAdj, edgeAdj]
+  fin_cases i <;> fin_cases j <;> simp [zeroWAdj, psEdgeAdj]
 
-theorem negWAdj_le_edgeAdj : ∀ i j, negWAdj i j ≤ edgeAdj i j := by
+theorem negWAdj_le_psEdgeAdj : ∀ i j, negWAdj i j ≤ psEdgeAdj i j := by
   intro i j
-  fin_cases i <;> fin_cases j <;> simp [negWAdj, edgeAdj]
+  fin_cases i <;> fin_cases j <;> simp [negWAdj, psEdgeAdj]
 
 /-- **Fence (`flowEnergy_le_of_le`, `hθ`):** an unsupported flow's
 energy comparison inverts — the phantom dissipates `0` on the edgeless
 network (delivered) but `1` on the dominating edge: `1 ≤ 0` is false. -/
 theorem effF_energyComp_hθ_fence_QA :
-    ¬ (flowEnergy edgeAdj phantomFlow ≤ flowEnergy zeroWAdj phantomFlow) := by
+    ¬ (flowEnergy psEdgeAdj phantomFlow ≤ flowEnergy zeroWAdj phantomFlow) := by
   rw [phantom_energy_edge_QA, phantom_flowEnergy_zero_QA]
   norm_num
 
 /-- **Isolation:** domination and nonnegativity genuine; the flow
 hypothesis fails (delivered). -/
 theorem effF_energyComp_hθ_isolation_QA :
-    (∀ i j, zeroWAdj i j ≤ edgeAdj i j) ∧ (∀ i j, 0 ≤ zeroWAdj i j)
+    (∀ i j, zeroWAdj i j ≤ psEdgeAdj i j) ∧ (∀ i j, 0 ≤ zeroWAdj i j)
       ∧ ¬ IsFlowOn zeroWAdj phantomFlow :=
-  ⟨zeroWAdj_le_edgeAdj, by
+  ⟨zeroWAdj_le_psEdgeAdj, by
     intro i j
     fin_cases i <;> fin_cases j <;> simp [zeroWAdj],
     phantomFlow_not_isFlowOn_QA⟩
@@ -1491,7 +1491,7 @@ conductances make the *smaller* network's energy smaller still — the
 phantom dissipates `−1` on the signed network against `1` on the
 dominating edge: `1 ≤ −1` is false. -/
 theorem effF_energyComp_hnn_fence_QA :
-    ¬ (flowEnergy edgeAdj phantomFlow ≤ flowEnergy negWAdj phantomFlow) := by
+    ¬ (flowEnergy psEdgeAdj phantomFlow ≤ flowEnergy negWAdj phantomFlow) := by
   rw [phantom_energy_edge_QA, phantom_energy_negWAdj_QA]
   norm_num
 
@@ -1499,17 +1499,17 @@ theorem effF_energyComp_hnn_fence_QA :
 the domination is genuine, nonnegativity fails. -/
 theorem effF_energyComp_hnn_isolation_QA :
     IsFlowOn negWAdj phantomFlow
-      ∧ (∀ i j, negWAdj i j ≤ edgeAdj i j)
+      ∧ (∀ i j, negWAdj i j ≤ psEdgeAdj i j)
       ∧ ¬ (∀ i j, 0 ≤ negWAdj i j) :=
-  ⟨phantom_isFlowOn_negWAdj_QA, negWAdj_le_edgeAdj, negWAdj_not_nonneg⟩
+  ⟨phantom_isFlowOn_negWAdj_QA, negWAdj_le_psEdgeAdj, negWAdj_not_nonneg⟩
 
 /-- **Fence (`flowEnergy_le_of_le`, `hle`):** without domination the
 comparison inverts — the unit current dissipates `1` on the edge but
 `1/2` on the doubled edge (delivered pin): `1 ≤ 1/2` is false. The
 orientation guard's numbers at the energy level. -/
 theorem effF_energyComp_hle_fence_QA :
-    ¬ (flowEnergy edgeAdj (electricalCurrent edgeAdj ![1, 0])
-      ≤ flowEnergy edge2Adj (electricalCurrent edgeAdj ![1, 0])) := by
+    ¬ (flowEnergy psEdgeAdj (electricalCurrent psEdgeAdj ![1, 0])
+      ≤ flowEnergy edge2Adj (electricalCurrent psEdgeAdj ![1, 0])) := by
   rw [edge_flowEnergy_value_QA, edge2_crossEnergy_value_QA]
   norm_num
 
@@ -1517,13 +1517,13 @@ theorem effF_energyComp_hle_fence_QA :
 (delivered transfer), the doubled network is nonnegative, and the
 reverse domination genuinely fails. -/
 theorem effF_energyComp_hle_isolation_QA :
-    IsFlowOn edge2Adj (electricalCurrent edgeAdj ![1, 0])
+    IsFlowOn edge2Adj (electricalCurrent psEdgeAdj ![1, 0])
       ∧ (∀ i j, 0 ≤ edge2Adj i j)
-      ∧ ¬ (∀ i j, edge2Adj i j ≤ edgeAdj i j) :=
+      ∧ ¬ (∀ i j, edge2Adj i j ≤ psEdgeAdj i j) :=
   ⟨edge_current_isUnitFlow_on_edge2_QA.1, edge2Adj_nonneg, by
     intro h
     have h01 := h 0 1
-    simp [edge2Adj, edgeAdj] at h01⟩
+    simp [edge2Adj, psEdgeAdj] at h01⟩
 
 /-!
 ### Rayleigh monotonicity (`effectiveResistance_le_of_le`): the
@@ -1561,7 +1561,7 @@ theorem negWAdj_resistance_value_QA :
 network's genuine negative resistance `−1` sits below the dominating
 edge's `1`: `1 ≤ −1` is false. -/
 theorem effF_rayleigh_hnnA_fence_QA :
-    ¬ (effectiveResistance edgeAdj 0 1 ≤ effectiveResistance negWAdj 0 1) := by
+    ¬ (effectiveResistance psEdgeAdj 0 1 ≤ effectiveResistance negWAdj 0 1) := by
   rw [edge_effectiveResistance_eq_one_QA, negWAdj_resistance_value_QA]
   norm_num
 
@@ -1569,11 +1569,11 @@ theorem effF_rayleigh_hnnA_fence_QA :
 connectivity of both support graphs, and the domination are all
 genuine; only `A`'s nonnegativity fails. -/
 theorem effF_rayleigh_hnnA_isolation_QA :
-    negWAdj.IsSymm ∧ (∀ i j, negWAdj i j ≤ edgeAdj i j)
-      ∧ edgeAdj.IsSymm ∧ (∀ i j, 0 ≤ edgeAdj i j)
-      ∧ (supportGraph edgeAdj edgeAdj_isSymm).Connected
+    negWAdj.IsSymm ∧ (∀ i j, negWAdj i j ≤ psEdgeAdj i j)
+      ∧ psEdgeAdj.IsSymm ∧ (∀ i j, 0 ≤ psEdgeAdj i j)
+      ∧ (supportGraph psEdgeAdj psEdgeAdj_isSymm).Connected
       ∧ ¬ (∀ i j, 0 ≤ negWAdj i j) :=
-  ⟨negWAdj_isSymm, negWAdj_le_edgeAdj, edgeAdj_isSymm, edgeAdj_nonneg,
+  ⟨negWAdj_isSymm, negWAdj_le_psEdgeAdj, psEdgeAdj_isSymm, psEdgeAdj_nonneg,
     edge_supportGraph_connected, negWAdj_not_nonneg⟩
 
 /-!
@@ -1734,9 +1734,9 @@ theorem effF_supportConn_hle_isolation_QA :
 /-- **Fence (`le_increaseConductance`, `hδ`):** a negative
 reinforcement *lowers* the reinforced entry — `1 ≤ 0` is false. -/
 theorem effF_leInc_hδ_fence_QA :
-    ¬ (edgeAdj 0 1 ≤ increaseConductance edgeAdj 0 1 (-1) 0 1) := by
+    ¬ (psEdgeAdj 0 1 ≤ increaseConductance psEdgeAdj 0 1 (-1) 0 1) := by
   rw [increaseConductance_apply_of_reinforced (Or.inl ⟨rfl, rfl⟩)]
-  simp [edgeAdj]
+  simp [psEdgeAdj]
 
 theorem effF_leInc_hδ_isolation_QA : ¬ (0 ≤ (-1 : ℝ)) := by norm_num
 
@@ -1768,11 +1768,11 @@ theorem effF_incNonneg_hnn_fence_QA :
 /-- **Fence (`increaseConductance_nonneg`, `hδ`):** reinforcing by a
 negative `δ` can push a positive conductance below zero — `1 − 2 < 0`. -/
 theorem effF_incNonneg_hδ_fence_QA :
-    ¬ (∀ k l, 0 ≤ increaseConductance edgeAdj 0 1 (-2) k l) := by
+    ¬ (∀ k l, 0 ≤ increaseConductance psEdgeAdj 0 1 (-2) k l) := by
   intro h
   have h01 := h 0 1
   rw [increaseConductance_apply_of_reinforced (Or.inl ⟨rfl, rfl⟩)] at h01
-  simp [edgeAdj] at h01
+  simp [psEdgeAdj] at h01
 
 theorem effF_incNonneg_isolation_QA :
     ¬ (∀ k l : Fin 2, 0 ≤ negWAdj k l) ∧ ¬ (0 ≤ (-2 : ℝ)) := by
@@ -1822,10 +1822,10 @@ theorem halfEdge_resistance_value_QA :
       by norm_num [Matrix.cons_val']⟩
 
 theorem edge_reinforce_neg_half_eq_halfEdge_QA :
-    increaseConductance edgeAdj 0 1 (-1/2) = halfEdgeAdj := by
+    increaseConductance psEdgeAdj 0 1 (-1/2) = halfEdgeAdj := by
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [increaseConductance, halfEdgeAdj, edgeAdj] <;>
+    simp [increaseConductance, halfEdgeAdj, psEdgeAdj] <;>
     norm_num
 
 /-- **Fence (`effectiveResistance_le_increaseConductance`, `hδ`):** a
@@ -1833,17 +1833,17 @@ negative reinforcement *raises* the resistance — the conductance-`1/2`
 edge's resistance is genuinely `2`, above the original `1`: the
 dropped statement reads `2 ≤ 1`. -/
 theorem effF_reinforce_hδ_fence_QA :
-    ¬ (effectiveResistance (increaseConductance edgeAdj 0 1 (-1/2)) 0 1
-      ≤ effectiveResistance edgeAdj 0 1) := by
+    ¬ (effectiveResistance (increaseConductance psEdgeAdj 0 1 (-1/2)) 0 1
+      ≤ effectiveResistance psEdgeAdj 0 1) := by
   rw [edge_reinforce_neg_half_eq_halfEdge_QA, halfEdge_resistance_value_QA,
     edge_effectiveResistance_eq_one_QA]
   norm_num
 
 theorem effF_reinforce_hδ_isolation_QA :
-    edgeAdj.IsSymm ∧ (∀ i j, 0 ≤ edgeAdj i j)
-      ∧ (supportGraph edgeAdj edgeAdj_isSymm).Connected
+    psEdgeAdj.IsSymm ∧ (∀ i j, 0 ≤ psEdgeAdj i j)
+      ∧ (supportGraph psEdgeAdj psEdgeAdj_isSymm).Connected
       ∧ ¬ (0 ≤ (-1/2 : ℝ)) := by
-  refine ⟨edgeAdj_isSymm, edgeAdj_nonneg, edge_supportGraph_connected, ?_⟩
+  refine ⟨psEdgeAdj_isSymm, psEdgeAdj_nonneg, edge_supportGraph_connected, ?_⟩
   norm_num
 
 theorem cheat_reinforce_eq_path_QA :

@@ -986,15 +986,15 @@ theorem epP3_eval_tail_QA :
 `Cheeger_QA`'s independently proved value at its own (identical) edge
 fixture — the join point of this section to the Cheeger QA stack. -/
 theorem epK2_cheegerConstant : cheegerConstant epK2 = 1 := by
-  have h : epK2 = SpectralGraphTheory.QA.edgeAdj := rfl
+  have h : epK2 = SpectralGraphTheory.QA.cheegerEdgeAdj := rfl
   rw [h]
   exact SpectralGraphTheory.QA.edge_cheegerConstant
 
 /-- `K₂` is `1`-regular, transferred the same way. -/
 theorem epK2_regular : ∀ i, deg epK2 i = 1 := by
-  have h : epK2 = SpectralGraphTheory.QA.edgeAdj := rfl
+  have h : epK2 = SpectralGraphTheory.QA.cheegerEdgeAdj := rfl
   rw [h]
-  exact SpectralGraphTheory.QA.edgeAdj_regular
+  exact SpectralGraphTheory.QA.cheegerEdgeAdj_regular
 
 /-- The base λ₂ on `K₂` at the `lambda2` interface is `2` (the
 kernel-plus-trace pin `epK2_evals_one_eq_two_QA` transported). -/

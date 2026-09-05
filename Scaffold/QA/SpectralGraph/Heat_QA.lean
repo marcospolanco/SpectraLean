@@ -47,12 +47,12 @@ namespace SpectralGraphTheory.QA
 
 /-- Adjacency of the two-vertex complete graph `K₂`: symmetric, unit
 weights, degrees (1, 1). -/
-def edgeAdj : Matrix (Fin 2) (Fin 2) ℝ :=
+def heatEdgeAdj : Matrix (Fin 2) (Fin 2) ℝ :=
   !![0, 1; 1, 0]
 
-theorem edgeAdj_isSymm : edgeAdj.IsSymm := by
+theorem heatEdgeAdj_isSymm : heatEdgeAdj.IsSymm := by
   refine Matrix.IsSymm.ext fun i j => ?_
-  fin_cases i <;> fin_cases j <;> simp [edgeAdj]
+  fin_cases i <;> fin_cases j <;> simp [heatEdgeAdj]
 
 /-- The asymmetric fixture: `A = !![0, 1; -1, 0]]` — degrees `(1, -1)`,
 so its Laplacian is `!![1, -1; 1, -1]]`, a *square-zero* nonzero matrix.
@@ -84,7 +84,7 @@ theorem asymLaplacian_sq : laplacian asymAdj * laplacian asymAdj = 0 := by
 /-- At time zero the semigroup is the identity on the symmetric fixture:
 all four entries computed. -/
 theorem heatKernel_zero_edge_QA :
-    heatKernel edgeAdj 0 = !![1, 0; 0, 1] := by
+    heatKernel heatEdgeAdj 0 = !![1, 0; 0, 1] := by
   rw [heatKernel_zero]
   ext i j
   fin_cases i <;> fin_cases j <;> simp [Matrix.one_apply]
@@ -106,8 +106,8 @@ time, with the hypothesis *derived* from the literal (not assumed):
 had `heatKernel_isSymm` gone through a wrong exponent (say a transpose
 defect), this instantiation would still typecheck but its use in the
 entry-level fixture below would not compose. -/
-theorem heatKernel_isSymm_edge_QA (t : ℝ) : (heatKernel edgeAdj t).IsSymm :=
-  heatKernel_isSymm edgeAdj edgeAdj_isSymm t
+theorem heatKernel_isSymm_edge_QA (t : ℝ) : (heatKernel heatEdgeAdj t).IsSymm :=
+  heatKernel_isSymm heatEdgeAdj heatEdgeAdj_isSymm t
 
 set_option linter.unnecessarySeqFocus false in
 /-- Closed form at `t = 1` on the square-zero-Laplacian fixture:
@@ -209,12 +209,12 @@ theorem heatKernel_asym_group_QA :
 /-- The law instantiates at the identity element on the symmetric K₂
 fixture (where no closed form exists): `t = 0` on the left. -/
 theorem heatKernel_semigroup_zero_left_QA (t : ℝ) :
-    heatKernel edgeAdj 0 * heatKernel edgeAdj t = heatKernel edgeAdj t := by
+    heatKernel heatEdgeAdj 0 * heatKernel heatEdgeAdj t = heatKernel heatEdgeAdj t := by
   rw [heatKernel_mul_heatKernel, zero_add]
 
 /-- …and `t = 0` on the right. -/
 theorem heatKernel_semigroup_zero_right_QA (t : ℝ) :
-    heatKernel edgeAdj t * heatKernel edgeAdj 0 = heatKernel edgeAdj t := by
+    heatKernel heatEdgeAdj t * heatKernel heatEdgeAdj 0 = heatKernel heatEdgeAdj t := by
   rw [heatKernel_mul_heatKernel, add_zero]
 
 /-!
@@ -256,8 +256,8 @@ theorem heatKernel_ones_conserved_raw_QA (t : ℝ) :
 form exists): the theorem route only. The point: conservation does not
 depend on the fixture's square-zero accident. -/
 theorem heatKernel_ones_conserved_edge_QA (t : ℝ) :
-    heatKernel edgeAdj t *ᵥ onesVec = onesVec :=
-  heatKernel_mulVec_onesVec edgeAdj t
+    heatKernel heatEdgeAdj t *ᵥ onesVec = onesVec :=
+  heatKernel_mulVec_onesVec heatEdgeAdj t
 
 /-- The disconnected `Fin 3` fixture: the edge `{0, 1}` plus the
 isolated vertex `2` — the matrix `!![0, 1, 0; 1, 0, 0; 0, 0, 0]`,
@@ -331,17 +331,17 @@ open Filter
 
 /-- The K₂ Laplacian, computed raw from the definition: degrees `(1, 1)`,
 so `L = !![1, -1; -1, 1]`. -/
-theorem edgeLaplacian_eq : laplacian edgeAdj = !![1, -1; -1, 1] := by
+theorem edgeLaplacian_eq : laplacian heatEdgeAdj = !![1, -1; -1, 1] := by
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [laplacian, degreeMatrix, deg, edgeAdj, Fin.sum_univ_two]
+    simp [laplacian, degreeMatrix, deg, heatEdgeAdj, Fin.sum_univ_two]
 
 /-- The K₂ Laplacian squares to twice itself: `!![1, -1; -1, 1]` squared
 is `!![2, -2; -2, 2]`, all entries by literal arithmetic. This is the
 `M * M = c • M` hypothesis of the Step-4 collapse — checked raw,
 independent of any theorem. -/
 theorem edgeLaplacian_mul_smul :
-    laplacian edgeAdj * laplacian edgeAdj = 2 • laplacian edgeAdj := by
+    laplacian heatEdgeAdj * laplacian heatEdgeAdj = 2 • laplacian heatEdgeAdj := by
   rw [edgeLaplacian_eq]
   ext i j
   fin_cases i <;> fin_cases j <;> simp <;> ring
@@ -350,7 +350,7 @@ theorem edgeLaplacian_mul_smul :
 (`L *ᵥ ![1, -1] = ![2, -2] = 2 • ![1, -1]`), raw arithmetic — the
 eigen-equation the mode-decay witnesses consume. -/
 theorem edgeLaplacian_mulVec_mode :
-    laplacian edgeAdj *ᵥ (![1, -1] : Fin 2 → ℝ)
+    laplacian heatEdgeAdj *ᵥ (![1, -1] : Fin 2 → ℝ)
       = (2 : ℝ) • (![1, -1] : Fin 2 → ℝ) := by
   rw [edgeLaplacian_eq]
   funext i
@@ -362,7 +362,7 @@ theorem edgeLaplacian_mulVec_mode :
 `L *ᵥ ![1, 3] = ![-2, 2]`, raw arithmetic — consumed by the raw DC-limit
 route. -/
 theorem edgeLaplacian_mulVec_dc :
-    laplacian edgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ) = (![ -2, 2] : Fin 2 → ℝ) := by
+    laplacian heatEdgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ) = (![ -2, 2] : Fin 2 → ℝ) := by
   rw [edgeLaplacian_eq]
   funext i
   fin_cases i <;>
@@ -374,11 +374,11 @@ the Step-4 rank-one-idempotent collapse (`c := -(2 * t)`; the square
 the symbolic-`t` exact-evaluation handle on the *symmetric* fixture —
 no square-zero accident here. -/
 theorem heatKernel_edge_closed_QA (t : ℝ) (ht : t ≠ 0) :
-    heatKernel edgeAdj t
-      = 1 + ((Real.exp (-(2 * t)) - 1) / 2) • laplacian edgeAdj := by
+    heatKernel heatEdgeAdj t
+      = 1 + ((Real.exp (-(2 * t)) - 1) / 2) • laplacian heatEdgeAdj := by
   rw [heatKernel]
-  have hM : (-(t • laplacian edgeAdj)) * (-(t • laplacian edgeAdj))
-      = (-(2 * t)) • (-(t • laplacian edgeAdj)) := by
+  have hM : (-(t • laplacian heatEdgeAdj)) * (-(t • laplacian heatEdgeAdj))
+      = (-(2 * t)) • (-(t • laplacian heatEdgeAdj)) := by
     rw [edgeLaplacian_eq]
     ext i j
     fin_cases i <;> fin_cases j <;>
@@ -398,7 +398,7 @@ kernel acts on the hand eigenvector `![1, -1]` (eigenvalue `2`) by
 exactly the decay factor `e^{-2t}` — the eigenmode theorem's engine at
 every time `t` (no sign restriction). -/
 theorem heatKernel_edge_mode_engine_QA (t : ℝ) :
-    heatKernel edgeAdj t *ᵥ (![1, -1] : Fin 2 → ℝ)
+    heatKernel heatEdgeAdj t *ᵥ (![1, -1] : Fin 2 → ℝ)
       = Real.exp (-(2 * t)) • (![1, -1] : Fin 2 → ℝ) := by
   rw [heatKernel]
   refine exp_mulVec_eq_smul_of_mulVec_eq_smul _ _ _ ?_
@@ -414,7 +414,7 @@ statement through the closed form and hand arithmetic — `(1 + c • L) *ᵥ v
 one decay identity: a wrong sign, factor, or eigenvalue anywhere in
 either delivered chain contradicts the other. -/
 theorem heatKernel_edge_mode_raw_QA (t : ℝ) (ht : t ≠ 0) :
-    heatKernel edgeAdj t *ᵥ (![1, -1] : Fin 2 → ℝ)
+    heatKernel heatEdgeAdj t *ᵥ (![1, -1] : Fin 2 → ℝ)
       = Real.exp (-(2 * t)) • (![1, -1] : Fin 2 → ℝ) := by
   rw [heatKernel_edge_closed_QA t ht, Matrix.add_mulVec, Matrix.one_mulVec,
     Matrix.smul_mulVec_assoc, edgeLaplacian_mulVec_mode, smul_smul]
@@ -499,10 +499,10 @@ private theorem two_point_pin {l : List ℝ} (h2 : l.length = 2)
   · constructor <;> simp <;> linarith
 
 /-- Trace and determinant of the K₂ Laplacian, entrywise. -/
-theorem edgeLaplacian_trace : (laplacian edgeAdj).trace = 2 := by
+theorem edgeLaplacian_trace : (laplacian heatEdgeAdj).trace = 2 := by
   simp [Matrix.trace, edgeLaplacian_eq, Fin.sum_univ_two]; norm_num
 
-theorem edgeLaplacian_det : (laplacian edgeAdj).det = 0 := by
+theorem edgeLaplacian_det : (laplacian heatEdgeAdj).det = 0 := by
   rw [edgeLaplacian_eq, Matrix.det_fin_two]
   norm_num
 
@@ -512,35 +512,35 @@ no spectral-theorem computation (the Cheeger QA pinning pattern, at the
 combinatorial Laplacian). The two decay-factor QA theorems below read
 their constants from here. -/
 theorem edgeLaplacian_evals_QA :
-    evals (laplacian_symmetric edgeAdj edgeAdj_isSymm) ⟨0, by simp⟩ = 0 ∧
-      evals (laplacian_symmetric edgeAdj edgeAdj_isSymm) ⟨1, by simp⟩ = 2 := by
+    evals (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) ⟨0, by simp⟩ = 0 ∧
+      evals (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) ⟨1, by simp⟩ = 2 := by
   have hlen : (Multiset.sort (fun a b => a ≤ b)
       ((Finset.univ : Finset (Fin 2)).val.map
-        ((isHermitian_of_isSymm (laplacian_symmetric edgeAdj
-          edgeAdj_isSymm)).eigenvalues))).length = 2 := by
+        ((isHermitian_of_isSymm (laplacian_symmetric heatEdgeAdj
+          heatEdgeAdj_isSymm)).eigenvalues))).length = 2 := by
     rw [Multiset.length_sort, Multiset.card_map]; simp
   have hsorted : (Multiset.sort (fun a b => a ≤ b)
       ((Finset.univ : Finset (Fin 2)).val.map
-        ((isHermitian_of_isSymm (laplacian_symmetric edgeAdj
-          edgeAdj_isSymm)).eigenvalues))).Sorted (fun a b => a ≤ b) :=
+        ((isHermitian_of_isSymm (laplacian_symmetric heatEdgeAdj
+          heatEdgeAdj_isSymm)).eigenvalues))).Sorted (fun a b => a ≤ b) :=
     Multiset.sort_sorted _ _
   have hsum : (Multiset.sort (fun a b => a ≤ b)
       ((Finset.univ : Finset (Fin 2)).val.map
-        ((isHermitian_of_isSymm (laplacian_symmetric edgeAdj
-          edgeAdj_isSymm)).eigenvalues))).sum = 2 := by
-    have htr : ∑ i : Fin 2, eigvalOf (laplacian edgeAdj)
-        (laplacian_symmetric edgeAdj edgeAdj_isSymm) i = 2 := by
+        ((isHermitian_of_isSymm (laplacian_symmetric heatEdgeAdj
+          heatEdgeAdj_isSymm)).eigenvalues))).sum = 2 := by
+    have htr : ∑ i : Fin 2, eigvalOf (laplacian heatEdgeAdj)
+        (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i = 2 := by
       rw [eigvalOf_sum_eq_trace, edgeLaplacian_trace]
     rw [← Multiset.sum_coe, Multiset.sort_eq, ← Finset.sum_eq_multiset_sum]
     exact htr
   have hprod : (Multiset.sort (fun a b => a ≤ b)
       ((Finset.univ : Finset (Fin 2)).val.map
-        ((isHermitian_of_isSymm (laplacian_symmetric edgeAdj
-          edgeAdj_isSymm)).eigenvalues))).prod = 0 := by
+        ((isHermitian_of_isSymm (laplacian_symmetric heatEdgeAdj
+          heatEdgeAdj_isSymm)).eigenvalues))).prod = 0 := by
     have hd : ∏ i : Fin 2, ((isHermitian_of_isSymm
-        (laplacian_symmetric edgeAdj edgeAdj_isSymm)).eigenvalues i) = 0 := by
-      have hd0 := (isHermitian_of_isSymm (laplacian_symmetric edgeAdj
-        edgeAdj_isSymm)).det_eq_prod_eigenvalues
+        (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm)).eigenvalues i) = 0 := by
+      have hd0 := (isHermitian_of_isSymm (laplacian_symmetric heatEdgeAdj
+        heatEdgeAdj_isSymm)).det_eq_prod_eigenvalues
       rw [edgeLaplacian_det] at hd0
       simpa using hd0.symm
     rw [← Multiset.prod_coe, Multiset.sort_eq, ← Finset.prod_eq_multiset_prod]
@@ -553,7 +553,7 @@ higher mode's factor `e^{-2}` is at most the lower mode's factor
 the independently pinned `edgeLaplacian_evals_QA`. A defective ordering
 or eigenvalue in the theorem would flip or misplace this numeric. -/
 theorem heatKernel_decay_antitone_edge_QA : Real.exp (-2 : ℝ) ≤ 1 := by
-  have h := heatKernel_decayFactor_antitone edgeAdj edgeAdj_isSymm
+  have h := heatKernel_decayFactor_antitone heatEdgeAdj heatEdgeAdj_isSymm
     (by norm_num : (0 : ℝ) ≤ 1)
     (show ((⟨0, by simp⟩ : Fin (Fintype.card (Fin 2)))
         ≤ (⟨1, by simp⟩ : Fin (Fintype.card (Fin 2)))) by
@@ -567,19 +567,19 @@ theorem heatKernel_decay_antitone_edge_QA : Real.exp (-2 : ℝ) ≤ 1 := by
 ### The DC limit, two routes
 -/
 
-theorem edgeAdj_nonneg : ∀ i j, 0 ≤ edgeAdj i j := by
+theorem heatEdgeAdj_nonneg : ∀ i j, 0 ≤ heatEdgeAdj i j := by
   intro i j
-  fin_cases i <;> fin_cases j <;> simp [edgeAdj]
+  fin_cases i <;> fin_cases j <;> simp [heatEdgeAdj]
 
-theorem edge_adj01 : (supportGraph edgeAdj edgeAdj_isSymm).Adj
+theorem edge_adj01 : (supportGraph heatEdgeAdj heatEdgeAdj_isSymm).Adj
     (0 : Fin 2) 1 := by
   rw [supportGraph_adj]
-  exact ⟨by decide, by simp [edgeAdj]⟩
+  exact ⟨by decide, by simp [heatEdgeAdj]⟩
 
 /-- The support graph of K₂ is connected (the single edge is a walk
 between the two vertices). -/
-theorem edgeAdj_supportGraph_connected :
-    (supportGraph edgeAdj edgeAdj_isSymm).Connected := by
+theorem heatEdgeAdj_supportGraph_connected :
+    (supportGraph heatEdgeAdj heatEdgeAdj_isSymm).Connected := by
   rw [SimpleGraph.connected_iff_exists_forall_reachable]
   refine ⟨0, ?_⟩
   intro v
@@ -592,10 +592,10 @@ converges to the mean `![2, 2]` — the Step-4 payoff theorem instantiated
 on the fixture, the mean vector computed by hand
 (`(∑ ![1,3])/2 • onesVec = 2 • onesVec = ![2,2]`). -/
 theorem heatKernel_edge_dc_theorem_QA :
-    Filter.Tendsto (fun t : ℝ => heatKernel edgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ))
+    Filter.Tendsto (fun t : ℝ => heatKernel heatEdgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ))
       Filter.atTop (nhds (![2, 2] : Fin 2 → ℝ)) := by
-  have h := heatKernel_mulVec_tendsto_atTop edgeAdj edgeAdj_isSymm
-    edgeAdj_nonneg edgeAdj_supportGraph_connected (![1, 3] : Fin 2 → ℝ)
+  have h := heatKernel_mulVec_tendsto_atTop heatEdgeAdj heatEdgeAdj_isSymm
+    heatEdgeAdj_nonneg heatEdgeAdj_supportGraph_connected (![1, 3] : Fin 2 → ℝ)
   have hmean : ((∑ j : Fin 2, (![1, 3] : Fin 2 → ℝ) j)
       / (Fintype.card (Fin 2) : ℝ)) • (onesVec : Fin 2 → ℝ)
       = (![2, 2] : Fin 2 → ℝ) := by
@@ -612,9 +612,9 @@ tending to `2` by the scalar decay-factor lemma `tendsto_exp_neg_mul_atTop`
 — *independent* of the DC theorem, the kernel characterization, PSD,
 and the eigenbasis. Two routes to one limit statement. -/
 theorem heatKernel_edge_dc_raw_QA :
-    Filter.Tendsto (fun t : ℝ => heatKernel edgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ))
+    Filter.Tendsto (fun t : ℝ => heatKernel heatEdgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ))
       Filter.atTop (nhds (![2, 2] : Fin 2 → ℝ)) := by
-  have hev : ∀ t : ℝ, t ≠ 0 → heatKernel edgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ)
+  have hev : ∀ t : ℝ, t ≠ 0 → heatKernel heatEdgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ)
       = (![2 - Real.exp (-(2 * t)), 2 + Real.exp (-(2 * t))] : Fin 2 → ℝ) := by
     intro t ht
     rw [heatKernel_edge_closed_QA t ht, Matrix.add_mulVec, Matrix.one_mulVec,
@@ -640,8 +640,8 @@ theorem heatKernel_edge_dc_raw_QA :
   by_cases ht : t = 0
   · subst ht
     show (![2 - Real.exp (-(2 * 0)), 2 + Real.exp (-(2 * 0))] : Fin 2 → ℝ)
-        = heatKernel edgeAdj 0 *ᵥ (![1, 3] : Fin 2 → ℝ)
-    have h1 : heatKernel edgeAdj 0 *ᵥ (![1, 3] : Fin 2 → ℝ)
+        = heatKernel heatEdgeAdj 0 *ᵥ (![1, 3] : Fin 2 → ℝ)
+    have h1 : heatKernel heatEdgeAdj 0 *ᵥ (![1, 3] : Fin 2 → ℝ)
         = (![1, 3] : Fin 2 → ℝ) := by
       rw [heatKernel_zero, Matrix.one_mulVec]
     rw [h1, show -(2 * 0) = (0 : ℝ) by ring, Real.exp_zero]
@@ -659,9 +659,9 @@ on the symmetric fixture, the Laplacian action `L *ᵥ ![1,3] = ![-2,2]`
 supplied by the raw entrywise computation `edgeLaplacian_mulVec_dc`
 (already verified independent of every Phase C theorem). -/
 theorem heatKernel_edge_deriv_theorem_QA :
-    HasDerivAt (fun t : ℝ => heatKernel edgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ))
+    HasDerivAt (fun t : ℝ => heatKernel heatEdgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ))
       (![2, -2] : Fin 2 → ℝ) 0 := by
-  have h := heatKernel_mulVec_hasDerivAt_zero edgeAdj edgeAdj_isSymm
+  have h := heatKernel_mulVec_hasDerivAt_zero heatEdgeAdj heatEdgeAdj_isSymm
     (![1, 3] : Fin 2 → ℝ)
   rw [edgeLaplacian_mulVec_dc] at h
   have hval : (-(![-2, 2] : Fin 2 → ℝ)) = ![2, -2] := by
@@ -672,7 +672,7 @@ theorem heatKernel_edge_deriv_theorem_QA :
 
 set_option linter.unnecessarySeqFocus false in
 /-- **The derivative value on K₂, raw route**: the same statement through
-the Step-4 closed form `heatKernel edgeAdj t = 1 + ((e^{-2t} - 1)/2) • L`
+the Step-4 closed form `heatKernel heatEdgeAdj t = 1 + ((e^{-2t} - 1)/2) • L`
 and scalar calculus only — `d/dt (e^{-2t} - 1)/2 |₀ = -1`, so the flow
 `x + c(t) • (L *ᵥ x)` differentiates to `0 + (-1) • (L *ᵥ x) = ![2,-2]`.
 Independent of the eigenbasis expansion, the entrywise derivative engine,
@@ -680,9 +680,9 @@ and `hasDerivAt_pi` — a wrong sign, factor, or eigenvalue anywhere in the
 Phase C chain contradicts this computation (the closed form itself is the
 independently QA'd `heatKernel_edge_closed_QA`, collapse-route). -/
 theorem heatKernel_edge_deriv_raw_QA :
-    HasDerivAt (fun t : ℝ => heatKernel edgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ))
+    HasDerivAt (fun t : ℝ => heatKernel heatEdgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ))
       (![2, -2] : Fin 2 → ℝ) 0 := by
-  have hact : ∀ t : ℝ, heatKernel edgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ)
+  have hact : ∀ t : ℝ, heatKernel heatEdgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ)
       = (![1, 3] : Fin 2 → ℝ)
         + ((Real.exp (-(2 * t)) - 1) / 2) • (![ -2, 2] : Fin 2 → ℝ) := by
     intro t
@@ -716,8 +716,8 @@ vector, with the Laplacian kernel equation `laplacian_ones_in_kernel`
 collapsing the derivative. The infinitesimal counterpart of Step 3's
 `heatKernel_mulVec_onesVec`. -/
 theorem heatKernel_edge_deriv_conservation_QA :
-    HasDerivAt (fun t : ℝ => heatKernel edgeAdj t *ᵥ (onesVec : Fin 2 → ℝ)) 0 0 := by
-  have h := heatKernel_mulVec_hasDerivAt_zero edgeAdj edgeAdj_isSymm onesVec
+    HasDerivAt (fun t : ℝ => heatKernel heatEdgeAdj t *ᵥ (onesVec : Fin 2 → ℝ)) 0 0 := by
+  have h := heatKernel_mulVec_hasDerivAt_zero heatEdgeAdj heatEdgeAdj_isSymm onesVec
   rw [laplacian_ones_in_kernel] at h
   simpa using h
 
@@ -727,8 +727,8 @@ derivative is `0` with no eigenbasis, no expansion, and no Phase C input.
 Two routes to one derivative; a Phase C defect at the kernel mode breaks
 the theorem route but not this one. -/
 theorem heatKernel_edge_deriv_conservation_route2_QA :
-    HasDerivAt (fun t : ℝ => heatKernel edgeAdj t *ᵥ (onesVec : Fin 2 → ℝ)) 0 0 := by
-  rw [funext fun t => heatKernel_mulVec_onesVec edgeAdj t]
+    HasDerivAt (fun t : ℝ => heatKernel heatEdgeAdj t *ᵥ (onesVec : Fin 2 → ℝ)) 0 0 := by
+  rw [funext fun t => heatKernel_mulVec_onesVec heatEdgeAdj t]
   exact hasDerivAt_const 0 onesVec
 
 /-!
@@ -740,14 +740,14 @@ theorem heatKernel_edge_deriv_conservation_route2_QA :
 unit eigenvector through `quadForm_eigvecOf_self` — the per-index input
 to the eigenvalue inventory below (independent of any sort machinery). -/
 theorem edge_eigvalOf_nonneg (i : Fin 2) :
-    0 ≤ eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i := by
-  rw [← quadForm_eigvecOf_self (laplacian_symmetric edgeAdj edgeAdj_isSymm) i]
-  exact laplacian_psd edgeAdj edgeAdj_isSymm edgeAdj_nonneg _
+    0 ≤ eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i := by
+  rw [← quadForm_eigvecOf_self (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i]
+  exact laplacian_psd heatEdgeAdj heatEdgeAdj_isSymm heatEdgeAdj_nonneg _
 
 /-- The K₂ eigenvalues sum to the trace `2` (`eigvalOf_sum_eq_trace`
 at the raw entrywise trace `edgeLaplacian_trace`). -/
 theorem edge_eigvalOf_sum :
-    ∑ i : Fin 2, eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i
+    ∑ i : Fin 2, eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i
       = 2 := by
   rw [eigvalOf_sum_eq_trace]
   exact edgeLaplacian_trace
@@ -756,10 +756,10 @@ theorem edge_eigvalOf_sum :
 (`det_eq_prod_eigenvalues` at the raw entrywise determinant
 `edgeLaplacian_det`). -/
 theorem edge_eigvalOf_prod :
-    ∏ i : Fin 2, eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i
+    ∏ i : Fin 2, eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i
       = 0 := by
   have hd0 := (isHermitian_of_isSymm
-    (laplacian_symmetric edgeAdj edgeAdj_isSymm)).det_eq_prod_eigenvalues
+    (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm)).det_eq_prod_eigenvalues
   rw [edgeLaplacian_det] at hd0
   exact hd0.symm
 
@@ -769,25 +769,25 @@ and the vanishing product (some factor is `0`; the other must be `2`)
 — with both orderings covered. The per-index smallness window and the
 eigen-sum constant below read their cases from here. -/
 theorem edge_eigvalOf_cases (i : Fin 2) :
-    eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i = 0
-      ∨ eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i = 2 := by
+    eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i = 0
+      ∨ eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i = 2 := by
   have hsum := edge_eigvalOf_sum
   have hprod := edge_eigvalOf_prod
   obtain ⟨j₀, -, hj₀⟩ := Finset.prod_eq_zero_iff.1 hprod
   rw [Fin.sum_univ_two] at hsum
   fin_cases j₀
-  · have hz0 : eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) 0
+  · have hz0 : eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) 0
         = 0 := hj₀
-    have h1 : eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) 1
+    have h1 : eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) 1
         = 2 := by
       have hn := edge_eigvalOf_nonneg 1
       linarith
     fin_cases i
     · exact Or.inl hz0
     · exact Or.inr h1
-  · have hz1 : eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) 1
+  · have hz1 : eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) 1
         = 0 := hj₀
-    have h0 : eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) 0
+    have h0 : eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) 0
         = 2 := by
       have hn := edge_eigvalOf_nonneg 0
       linarith
@@ -798,12 +798,12 @@ theorem edge_eigvalOf_cases (i : Fin 2) :
 /-- Some K₂ mode has eigenvalue exactly `2` (not both can be `0`: the
 trace is `2`) — the index the window-fence witness below reads. -/
 theorem edge_eigvalOf_exists_two :
-    ∃ i : Fin 2, eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i
+    ∃ i : Fin 2, eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i
       = 2 := by
   by_contra hcon
   push_neg at hcon
   have h0 : ∀ i : Fin 2,
-      eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i = 0 := by
+      eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i = 0 := by
     intro i
     rcases edge_eigvalOf_cases i with h | h
     · exact h
@@ -818,7 +818,7 @@ compute: `|s · 0| = 0`, `|s · 2| = 2s ≤ 1`). The bound is usable on
 exactly `[0, 1/2]` on this fixture — and provably not beyond (the fence
 witness below). -/
 theorem edge_window (s : ℝ) (hs0 : 0 ≤ s) (hs : s ≤ 1/2) (i : Fin 2) :
-    |s * eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i| ≤ 1 := by
+    |s * eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i| ≤ 1 := by
   rcases edge_eigvalOf_cases i with h | h
   · rw [h, mul_zero, abs_zero]
     norm_num
@@ -829,8 +829,8 @@ theorem edge_window (s : ℝ) (hs0 : 0 ≤ s) (hs : s ≤ 1/2) (i : Fin 2) :
 to the mode-structure derivation below (rewritten on a fresh goal, so
 the eigenbasis terms never sit under the literal). -/
 theorem edgeLaplacian_mulVec_coords (v : Fin 2 → ℝ) :
-    (laplacian edgeAdj *ᵥ v) 0 = v 0 - v 1
-      ∧ (laplacian edgeAdj *ᵥ v) 1 = v 1 - v 0 := by
+    (laplacian heatEdgeAdj *ᵥ v) 0 = v 0 - v 1
+      ∧ (laplacian heatEdgeAdj *ᵥ v) 1 = v 1 - v 0 := by
   rw [edgeLaplacian_eq]
   constructor <;>
     simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two] <;> ring
@@ -842,53 +842,53 @@ eigen-equation (`v 1 = -v 0`) plus the unit normalization
 computable: the mode's contribution is `λ² |v ⬝ᵥ x| |v a| =
 4 · 2|c| · |c| = 8c² = 4` regardless of the orientation sign `±`. -/
 theorem edge_eigvecOf_mode_two {i : Fin 2}
-    (hi : eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i = 2) :
-    ∃ c : ℝ, eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i
+    (hi : eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i = 2) :
+    ∃ c : ℝ, eigvecOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i
         = c • (![1, -1] : Fin 2 → ℝ) ∧ 2 * c ^ 2 = 1 := by
-  have hev : laplacian edgeAdj *ᵥ (eigvecOf (laplacian edgeAdj)
-      (laplacian_symmetric edgeAdj edgeAdj_isSymm) i)
-      = (2 : ℝ) • (eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) := by
+  have hev : laplacian heatEdgeAdj *ᵥ (eigvecOf (laplacian heatEdgeAdj)
+      (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i)
+      = (2 : ℝ) • (eigvecOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) := by
     have h := (isHermitian_of_isSymm
-      (laplacian_symmetric edgeAdj edgeAdj_isSymm)).mulVec_eigenvectorBasis i
+      (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm)).mulVec_eigenvectorBasis i
     rw [show (isHermitian_of_isSymm
-        (laplacian_symmetric edgeAdj edgeAdj_isSymm)).eigenvalues i
-        = eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i from rfl,
+        (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm)).eigenvalues i
+        = eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i from rfl,
       hi] at h
     exact h
-  have hc := (edgeLaplacian_mulVec_coords (eigvecOf (laplacian edgeAdj)
-    (laplacian_symmetric edgeAdj edgeAdj_isSymm) i)).1
-  have hc' : (2 : ℝ) * (eigvecOf (laplacian edgeAdj)
-        (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0
-      = (eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0
-        - (eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 1 := by
+  have hc := (edgeLaplacian_mulVec_coords (eigvecOf (laplacian heatEdgeAdj)
+    (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i)).1
+  have hc' : (2 : ℝ) * (eigvecOf (laplacian heatEdgeAdj)
+        (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) 0
+      = (eigvecOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) 0
+        - (eigvecOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) 1 := by
     rw [← hc, hev]
     simp
-  have hne : (eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 1
-      = -((eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0) := by
+  have hne : (eigvecOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) 1
+      = -((eigvecOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) 0) := by
     linarith
-  refine ⟨(eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0, ?_, ?_⟩
+  refine ⟨(eigvecOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) 0, ?_, ?_⟩
   · funext k
     fin_cases k <;> simp [hne]
-  · have hu := eigvecOf_inner (laplacian edgeAdj)
-      (laplacian_symmetric edgeAdj edgeAdj_isSymm) i i
+  · have hu := eigvecOf_inner (laplacian heatEdgeAdj)
+      (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i i
     simp only [if_pos rfl, if_true] at hu
     rw [Fin.sum_univ_two] at hu
-    have hv1 : (eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 1
-          * (eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 1
-        = (eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0
-          * (eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0 := by
+    have hv1 : (eigvecOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) 1
+          * (eigvecOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) 1
+        = (eigvecOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) 0
+          * (eigvecOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) 0 := by
       rw [hne]; ring
     rw [pow_two]
     linarith
 
 /-- The per-mode contribution at the λ = 2 mode: `4` exactly (the
 mode-structure computation — `8c² = 4` at `2c² = 1`). -/
-private theorem edge_remainder_somm (i : Fin 2) (h : eigvalOf (laplacian edgeAdj)
-    (laplacian_symmetric edgeAdj edgeAdj_isSymm) i = 2) :
-    (eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) ^ 2
-      * |Matrix.dotProduct (eigvecOf (laplacian edgeAdj)
-          (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) (![1, 3] : Fin 2 → ℝ)|
-      * |(eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0|
+private theorem edge_remainder_somm (i : Fin 2) (h : eigvalOf (laplacian heatEdgeAdj)
+    (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i = 2) :
+    (eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) ^ 2
+      * |Matrix.dotProduct (eigvecOf (laplacian heatEdgeAdj)
+          (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) (![1, 3] : Fin 2 → ℝ)|
+      * |(eigvecOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) 0|
       = 4 := by
   obtain ⟨c, hc, hc2⟩ := edge_eigvecOf_mode_two h
   rw [h, hc]
@@ -921,19 +921,19 @@ what turns the theorem's RHS into the concrete number `t² · 4` in the
 witnesses below (a wrong eigenvalue or normalization in the shelf's
 eigenbasis machinery would move it). -/
 theorem edge_remainder_sum_eq :
-    ∑ i : Fin 2, (eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) ^ 2
-      * |Matrix.dotProduct (eigvecOf (laplacian edgeAdj)
-          (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) (![1, 3] : Fin 2 → ℝ)|
-      * |(eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0|
+    ∑ i : Fin 2, (eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) ^ 2
+      * |Matrix.dotProduct (eigvecOf (laplacian heatEdgeAdj)
+          (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) (![1, 3] : Fin 2 → ℝ)|
+      * |(eigvecOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) 0|
       = 4 := by
   have hsum := edge_eigvalOf_sum
   rw [Fin.sum_univ_two] at hsum
-  have hz : ∀ j : Fin 2, eigvalOf (laplacian edgeAdj)
-        (laplacian_symmetric edgeAdj edgeAdj_isSymm) j = 0 →
-      (eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) j) ^ 2
-        * |Matrix.dotProduct (eigvecOf (laplacian edgeAdj)
-            (laplacian_symmetric edgeAdj edgeAdj_isSymm) j) (![1, 3] : Fin 2 → ℝ)|
-        * |(eigvecOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) j) 0|
+  have hz : ∀ j : Fin 2, eigvalOf (laplacian heatEdgeAdj)
+        (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) j = 0 →
+      (eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) j) ^ 2
+        * |Matrix.dotProduct (eigvecOf (laplacian heatEdgeAdj)
+            (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) j) (![1, 3] : Fin 2 → ℝ)|
+        * |(eigvecOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) j) 0|
       = 0 := by
     intro j hj
     rw [hj, zero_pow (by norm_num)]
@@ -952,11 +952,11 @@ concrete `(1/2)² · 4 = 1` through `edge_remainder_sum_eq`. A wrong
 constant anywhere in the theorem's `t²` or eigenvalue weights moves
 this number. -/
 theorem heatKernel_edge_remainder_bound_half_QA :
-    |(heatKernel edgeAdj (1/2) *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
+    |(heatKernel heatEdgeAdj (1/2) *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
       - (![1, 3] : Fin 2 → ℝ) 0
-      + (1/2) * ((laplacian edgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0)|
+      + (1/2) * ((laplacian heatEdgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0)|
       ≤ 1 := by
-  have h := heatKernel_firstOrder_remainder_apply_le edgeAdj edgeAdj_isSymm
+  have h := heatKernel_firstOrder_remainder_apply_le heatEdgeAdj heatEdgeAdj_isSymm
     (![1, 3] : Fin 2 → ℝ) 0 (1/2) (edge_window (1/2) (by norm_num) (le_refl _))
   rw [edge_remainder_sum_eq] at h
   norm_num at h
@@ -969,9 +969,9 @@ no `Real.abs_exp_sub_one_sub_id_le` — the coordinate-`0` remainder of
 `![1, 3]` on K₂ is exactly `1 - 2t - e^{-2t}`. The cross-check anchor:
 at `t = 1/2` this is `-e⁻¹`, at `t = 1/4` it is `1/2 - e^{-1/2}`. -/
 theorem heatKernel_edge_remainder_value_raw (t : ℝ) (ht : t ≠ 0) :
-    (heatKernel edgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
+    (heatKernel heatEdgeAdj t *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
       - (![1, 3] : Fin 2 → ℝ) 0
-      + t * ((laplacian edgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0)
+      + t * ((laplacian heatEdgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0)
       = 1 - 2 * t - Real.exp (-(2 * t)) := by
   rw [heatKernel_edge_closed_QA t ht, Matrix.add_mulVec, Matrix.one_mulVec,
     Matrix.smul_mulVec_assoc, edgeLaplacian_mulVec_dc]
@@ -986,9 +986,9 @@ expansion + termwise exponential bound vs. rank-one-idempotent closed
 form) contradicts the other. -/
 theorem heatKernel_edge_remainder_cross_QA : Real.exp (-1 : ℝ) ≤ 1 := by
   have h1 := heatKernel_edge_remainder_bound_half_QA
-  have hval : (heatKernel edgeAdj (1/2) *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
+  have hval : (heatKernel heatEdgeAdj (1/2) *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
       - (![1, 3] : Fin 2 → ℝ) 0
-      + (1/2) * ((laplacian edgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0)
+      + (1/2) * ((laplacian heatEdgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0)
       = -(Real.exp (-1 : ℝ)) := by
     have h := heatKernel_edge_remainder_value_raw (1/2) (by norm_num)
     rw [h]
@@ -1001,11 +1001,11 @@ theorem heatKernel_edge_remainder_cross_QA : Real.exp (-1 : ℝ) ≤ 1 := by
 the remainder bound `(1/4)² · 4 = 1/4` — the hypothesis-transfer step
 (`|t·λ| ≤ |T·λ| ≤ 1` at `0 ≤ t ≤ T`) exercised at concrete numerics. -/
 theorem heatKernel_edge_remainder_interval_QA :
-    |(heatKernel edgeAdj (1/4) *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
+    |(heatKernel heatEdgeAdj (1/4) *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
       - (![1, 3] : Fin 2 → ℝ) 0
-      + (1/4) * ((laplacian edgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0)|
+      + (1/4) * ((laplacian heatEdgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0)|
       ≤ 1/4 := by
-  have h := heatKernel_firstOrder_remainder_interval edgeAdj edgeAdj_isSymm
+  have h := heatKernel_firstOrder_remainder_interval heatEdgeAdj heatEdgeAdj_isSymm
     (![1, 3] : Fin 2 → ℝ) 0 (T := 1/2) (t := 1/4)
     (edge_window (1/2) (by norm_num) (le_refl _)) (by norm_num) (by norm_num)
   rw [edge_remainder_sum_eq] at h
@@ -1041,7 +1041,7 @@ genuinely local to `[0, 1/2]` on this fixture (usable exactly there per
 `edge_window`), so the first-order claim is not accidentally global. -/
 theorem heatKernel_edge_remainder_window_fenced_QA :
     ¬ ∀ i : Fin 2, |(1 : ℝ)
-        * eigvalOf (laplacian edgeAdj) (laplacian_symmetric edgeAdj edgeAdj_isSymm) i| ≤ 1 := by
+        * eigvalOf (laplacian heatEdgeAdj) (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i| ≤ 1 := by
   intro h
   obtain ⟨i, hi⟩ := edge_eigvalOf_exists_two
   have h1 := h i
@@ -1051,14 +1051,14 @@ theorem heatKernel_edge_remainder_window_fenced_QA :
 
 /-! ## Variance decay (QA layer) -/
 
-theorem edgeAdj_card : 2 ≤ Fintype.card (Fin 2) := le_refl 2
+theorem heatEdgeAdj_card : 2 ≤ Fintype.card (Fin 2) := le_refl 2
 
 /-- **The K₂ exact-attainment pin**: at the Fiedler vector `![1, -1]`
 the decayed variance is exactly `e^{-4t} · 2` at *every* `t ≥ 0` —
 both sides of the theorem compute to the same closed form (the QA
 shape a bound theorem can have at an eigenvector input). -/
 theorem heat_variance_edge_attained_QA (t : ℝ) :
-    (∑ i : Fin 2, ((heatKernel edgeAdj t *ᵥ (![1, -1] : Fin 2 → ℝ)) i
+    (∑ i : Fin 2, ((heatKernel heatEdgeAdj t *ᵥ (![1, -1] : Fin 2 → ℝ)) i
         - (∑ j, (![1, -1] : Fin 2 → ℝ) j)
           / (Fintype.card (Fin 2) : ℝ)) ^ 2)
       = Real.exp (-(4 * t)) * 2 := by
@@ -1086,29 +1086,29 @@ with the gap read from the independently pinned K₂ spectrum
 attainment: no smaller constant than `e^{-2tλ₂}` works at the Fiedler
 vector. -/
 theorem heat_variance_edge_instance_QA (t : ℝ) (ht : 0 ≤ t) :
-    (∑ i : Fin 2, ((heatKernel edgeAdj t *ᵥ (![1, -1] : Fin 2 → ℝ)) i
+    (∑ i : Fin 2, ((heatKernel heatEdgeAdj t *ᵥ (![1, -1] : Fin 2 → ℝ)) i
         - (∑ j, (![1, -1] : Fin 2 → ℝ) j)
           / (Fintype.card (Fin 2) : ℝ)) ^ 2)
-      ≤ Real.exp (-(2 * t * secondEval (laplacian edgeAdj)
-          (laplacian_symmetric edgeAdj edgeAdj_isSymm) edgeAdj_card))
+      ≤ Real.exp (-(2 * t * secondEval (laplacian heatEdgeAdj)
+          (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) heatEdgeAdj_card))
         * ∑ i : Fin 2, ((![1, -1] : Fin 2 → ℝ) i
           - (∑ j, (![1, -1] : Fin 2 → ℝ) j)
             / (Fintype.card (Fin 2) : ℝ)) ^ 2 :=
-  heatKernel_variance_decay edgeAdj edgeAdj_isSymm edgeAdj_nonneg
-    edgeAdj_card ht ![1, -1]
+  heatKernel_variance_decay heatEdgeAdj heatEdgeAdj_isSymm heatEdgeAdj_nonneg
+    heatEdgeAdj_card ht ![1, -1]
 
 /-- The K₂ instance's RHS reads `e^{-4t} · 2` too: with the gap pinned
 `2` and the Fiedler variance pinned `2`, the bound is *attained*, not
 merely met. -/
 theorem heat_variance_edge_bound_value_QA (t : ℝ) :
-    Real.exp (-(2 * t * secondEval (laplacian edgeAdj)
-        (laplacian_symmetric edgeAdj edgeAdj_isSymm) edgeAdj_card))
+    Real.exp (-(2 * t * secondEval (laplacian heatEdgeAdj)
+        (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) heatEdgeAdj_card))
       * ∑ i : Fin 2, ((![1, -1] : Fin 2 → ℝ) i
         - (∑ j, (![1, -1] : Fin 2 → ℝ) j)
           / (Fintype.card (Fin 2) : ℝ)) ^ 2
       = Real.exp (-(4 * t)) * 2 := by
-  have h2 : secondEval (laplacian edgeAdj)
-      (laplacian_symmetric edgeAdj edgeAdj_isSymm) edgeAdj_card = 2 :=
+  have h2 : secondEval (laplacian heatEdgeAdj)
+      (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) heatEdgeAdj_card = 2 :=
     (edgeLaplacian_evals_QA).2
   have hvar : ∑ i : Fin 2, ((![1, -1] : Fin 2 → ℝ) i
         - (∑ j, (![1, -1] : Fin 2 → ℝ) j)
@@ -1197,7 +1197,7 @@ the K₂ instance makes the conclusion false at `t = 1` — the decayed
 variance `2 e^{-4}` is *not* at most `2 e^{-6}` (since `e^{-6} <
 e^{-4}`). The attained rate is load-bearing, not slack. -/
 theorem heat_variance_edge_wrong_constant_refuted_QA :
-    ¬ ((∑ i : Fin 2, ((heatKernel edgeAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ)) i
+    ¬ ((∑ i : Fin 2, ((heatKernel heatEdgeAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ)) i
         - (∑ j, (![1, -1] : Fin 2 → ℝ) j)
           / (Fintype.card (Fin 2) : ℝ)) ^ 2)
         ≤ Real.exp (-(2 * (1 : ℝ) * 3))
@@ -1354,18 +1354,18 @@ of `![1, 3]` on `K₂` at `t = 1` is exactly the input mass `4` —
 `sum_heatKernel_mulVec` instantiated on the fixture (a transpose slip in
 the lemma's symmetry transfer would move this number). -/
 theorem heat_variance_mean_preserved_theorem_QA :
-    ∑ i : Fin 2, (heatKernel edgeAdj 1 *ᵥ (![1, 3] : Fin 2 → ℝ)) i = 4 := by
-  rw [sum_heatKernel_mulVec edgeAdj edgeAdj_isSymm 1 (![1, 3] : Fin 2 → ℝ)]
+    ∑ i : Fin 2, (heatKernel heatEdgeAdj 1 *ᵥ (![1, 3] : Fin 2 → ℝ)) i = 4 := by
+  rw [sum_heatKernel_mulVec heatEdgeAdj heatEdgeAdj_isSymm 1 (![1, 3] : Fin 2 → ℝ)]
   norm_num [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
     Matrix.head_cons]
 
 set_option linter.unnecessarySeqFocus false in
 /-- **Mean preservation, raw route**: the same mass `4` from the closed
-form `heatKernel edgeAdj 1 = 1 + ((e^{-2} - 1)/2) • L` and hand
+form `heatKernel heatEdgeAdj 1 = 1 + ((e^{-2} - 1)/2) • L` and hand
 arithmetic (`![1,3] + c • ![-2, 2]` sums to `4 + c · 0`) — independent
 of the symmetry-transfer lemma. Two routes to one mass. -/
 theorem heat_variance_mean_preserved_raw_QA :
-    ∑ i : Fin 2, (heatKernel edgeAdj 1 *ᵥ (![1, 3] : Fin 2 → ℝ)) i = 4 := by
+    ∑ i : Fin 2, (heatKernel heatEdgeAdj 1 *ᵥ (![1, 3] : Fin 2 → ℝ)) i = 4 := by
   rw [heatKernel_edge_closed_QA 1 (by norm_num), Matrix.add_mulVec,
     Matrix.one_mulVec, Matrix.smul_mulVec_assoc, edgeLaplacian_mulVec_dc]
   simp only [Fin.sum_univ_two, Pi.add_apply, Pi.smul_apply, smul_eq_mul,
@@ -1376,7 +1376,7 @@ theorem heat_variance_mean_preserved_raw_QA :
 `Var(f) ≤ 1 · Var(f)` — instantiated at every input on the fixture, with
 the rate factor computing to `exp 0 = 1` by hand. -/
 theorem heat_variance_zero_time_QA (f : Fin 2 → ℝ) :
-    (∑ i : Fin 2, ((heatKernel edgeAdj 0 *ᵥ f) i
+    (∑ i : Fin 2, ((heatKernel heatEdgeAdj 0 *ᵥ f) i
         - (∑ j, f j) / (Fintype.card (Fin 2) : ℝ)) ^ 2)
       = ∑ i : Fin 2, (f i
           - (∑ j, f j) / (Fintype.card (Fin 2) : ℝ)) ^ 2 := by
@@ -1393,7 +1393,7 @@ the DC limit's `hconn`/`hnonneg`, both variance-decay twins'
 `hnn`/`ht`, the normalized/walk conservation-and-conjugation `hd`
 clauses, and the eigenvalue-plumbing `hnn`/`hμ`), at four new fixtures
 (`hfNegAdj`, `hfZeroAdj`, `hfRegAdj`, `hfAsymAdj`, `hfNz`) plus the
-delivered `edgeAdj`/`disAdj` pins. Every declaration is a fence (the
+delivered `heatEdgeAdj`/`disAdj` pins. Every declaration is a fence (the
 dropped-hypothesis statement refuted at a fixture where every kept
 hypothesis is genuine) or its fixture-pin/isolation companion; nothing
 here touches an axiom.
@@ -1612,9 +1612,9 @@ theorem hf_collapse_M_fence :
 (beyond the semigroup's forward window) the monotonicity claim flips to
 `e² ≤ e⁰ = 1`. -/
 theorem hf_antitone_t_fence :
-    ¬ (Real.exp (-((-1 : ℝ) * evals (laplacian_symmetric edgeAdj edgeAdj_isSymm)
+    ¬ (Real.exp (-((-1 : ℝ) * evals (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm)
           ⟨1, by simp⟩))
-      ≤ Real.exp (-((-1 : ℝ) * evals (laplacian_symmetric edgeAdj edgeAdj_isSymm)
+      ≤ Real.exp (-((-1 : ℝ) * evals (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm)
           ⟨0, by simp⟩))) := by
   rw [(edgeLaplacian_evals_QA).2, (edgeLaplacian_evals_QA).1]
   rw [show (-1 : ℝ) * 2 = -2 by norm_num, show (-1 : ℝ) * 0 = 0 by norm_num,
@@ -1625,9 +1625,9 @@ theorem hf_antitone_t_fence :
 index order genuinely violated (`⟨1⟩ ≤ ⟨0⟩` false), the claim reads
 `e⁰ = 1 ≤ e⁻²`. -/
 theorem hf_antitone_ij_fence :
-    ¬ (Real.exp (-((1 : ℝ) * evals (laplacian_symmetric edgeAdj edgeAdj_isSymm)
+    ¬ (Real.exp (-((1 : ℝ) * evals (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm)
           ⟨0, by simp⟩))
-      ≤ Real.exp (-((1 : ℝ) * evals (laplacian_symmetric edgeAdj edgeAdj_isSymm)
+      ≤ Real.exp (-((1 : ℝ) * evals (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm)
           ⟨1, by simp⟩))) := by
   rw [(edgeLaplacian_evals_QA).1, (edgeLaplacian_evals_QA).2]
   rw [show (1 : ℝ) * 0 = 0 by norm_num, show (1 : ℝ) * 2 = 2 by norm_num,
@@ -1641,7 +1641,7 @@ theorem hf_antitone_ij_fence :
 top mode's factor is `e² > 1` — dissipation genuinely needs forward
 time. -/
 theorem hf_le_one_t_fence :
-    ¬ (Real.exp (-((-1 : ℝ) * evals (laplacian_symmetric edgeAdj edgeAdj_isSymm)
+    ¬ (Real.exp (-((-1 : ℝ) * evals (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm)
           ⟨1, by simp⟩)) ≤ 1) := by
   rw [(edgeLaplacian_evals_QA).2, show (-1 : ℝ) * 2 = -2 by norm_num, neg_neg]
   exact not_le.2 hf_exp_two_gt_one
@@ -2127,10 +2127,10 @@ kernel-mode claim `= d • onesVec` (which would force `c = 0`). The
 clause genuinely excludes nonzero modes, with the gap positivity (and
 every other hypothesis) genuine at K₂. -/
 theorem hf_ker_mode_fence :
-    ∃ i : Fin 2, eigvalOf (laplacian edgeAdj)
-        (laplacian_symmetric edgeAdj edgeAdj_isSymm) i ≠ 0 ∧
-      ¬ (∃ c : ℝ, eigvecOf (laplacian edgeAdj)
-          (laplacian_symmetric edgeAdj edgeAdj_isSymm) i
+    ∃ i : Fin 2, eigvalOf (laplacian heatEdgeAdj)
+        (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i ≠ 0 ∧
+      ¬ (∃ c : ℝ, eigvecOf (laplacian heatEdgeAdj)
+          (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i
         = c • (onesVec : Fin 2 → ℝ)) := by
   obtain ⟨i, hi⟩ := edge_eigvalOf_exists_two
   obtain ⟨c, hc, hc2⟩ := edge_eigvecOf_mode_two hi
@@ -2151,10 +2151,10 @@ theorem hf_ker_mode_fence :
 /-- Isolation: the gap positivity is genuine at K₂ (`λ₂ = 2 > 0`,
 read from the delivered spectrum pin). -/
 theorem hf_edge_gap_pos :
-    0 < secondEval (laplacian edgeAdj)
-      (laplacian_symmetric edgeAdj edgeAdj_isSymm) edgeAdj_card := by
-  have h2 : secondEval (laplacian edgeAdj)
-      (laplacian_symmetric edgeAdj edgeAdj_isSymm) edgeAdj_card = 2 :=
+    0 < secondEval (laplacian heatEdgeAdj)
+      (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) heatEdgeAdj_card := by
+  have h2 : secondEval (laplacian heatEdgeAdj)
+      (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) heatEdgeAdj_card = 2 :=
     (edgeLaplacian_evals_QA).2
   rw [h2]
   norm_num
@@ -2164,17 +2164,17 @@ theorem hf_edge_gap_pos :
 remainder is `e⁴ - 5 > 16` against the eigen-sum constant `4 · t² =
 16` — the smallness window is genuinely load-bearing. -/
 theorem hf_remainder_t_fence :
-    ¬ (|(heatKernel edgeAdj (-2) *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
+    ¬ (|(heatKernel heatEdgeAdj (-2) *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
        - (![1, 3] : Fin 2 → ℝ) 0
-       + (-2) * ((laplacian edgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0)|
-      ≤ (-2 : ℝ) ^ 2 * ∑ i : Fin 2, (eigvalOf (laplacian edgeAdj)
-          (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) ^ 2
-        * |Matrix.dotProduct (eigvecOf (laplacian edgeAdj)
-            (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) (![1, 3] : Fin 2 → ℝ)|
-        * |(eigvecOf (laplacian edgeAdj)
-            (laplacian_symmetric edgeAdj edgeAdj_isSymm) i) 0|) := by
+       + (-2) * ((laplacian heatEdgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0)|
+      ≤ (-2 : ℝ) ^ 2 * ∑ i : Fin 2, (eigvalOf (laplacian heatEdgeAdj)
+          (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) ^ 2
+        * |Matrix.dotProduct (eigvecOf (laplacian heatEdgeAdj)
+            (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) (![1, 3] : Fin 2 → ℝ)|
+        * |(eigvecOf (laplacian heatEdgeAdj)
+            (laplacian_symmetric heatEdgeAdj heatEdgeAdj_isSymm) i) 0|) := by
   rw [edge_remainder_sum_eq, show (-2 : ℝ) ^ 2 = 4 by norm_num]
-  have hflow : (heatKernel edgeAdj (-2) *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
+  have hflow : (heatKernel heatEdgeAdj (-2) *ᵥ (![1, 3] : Fin 2 → ℝ)) 0
       = 2 - Real.exp 4 := by
     have hc := heatKernel_edge_closed_QA (-2) (by norm_num)
     rw [hc, Matrix.add_mulVec, Matrix.one_mulVec, Matrix.smul_mulVec_assoc,
@@ -2188,7 +2188,7 @@ theorem hf_remainder_t_fence :
     rw [hd]
     ring
   have hx0 : (![1, 3] : Fin 2 → ℝ) 0 = 1 := by simp
-  have hL0 : (laplacian edgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0 = -2 := by
+  have hL0 : (laplacian heatEdgeAdj *ᵥ (![1, 3] : Fin 2 → ℝ)) 0 = -2 := by
     rw [edgeLaplacian_mulVec_dc]; simp
   rw [hflow, hx0, hL0]
   have heq : (2 - Real.exp 4) - 1 + (-2 : ℝ) * (-2) = 5 - Real.exp 4 := by ring
@@ -2634,5 +2634,276 @@ theorem hf_walk_var_nn_fence :
   linarith
 
 end HeatFences
+
+section HeatFencesD1
+
+/-!
+### D1 — the walk-twin variance `ht` fence at `K₂ ⊕ K₂` (Fin 4)
+
+  The heat audit's only recorded deferral, closed 2026-09-05
+  (`proposals/adversarial-fences-heat-family.md` D1;
+  `proposals/qa-name-collision-guard.md` names this as the standing
+  frontier's smallest priced completion): `walkHeatKernel_variance_
+  decay`'s `ht : 0 ≤ t` clause. The combinatorial twin's `ht` fence
+  (fence 19, `hf_var_t_fence` at the Fin 3 `disAdj`) closed the
+  mechanism class, but the walk twin's own statement needed a new
+  fixture — its kept clauses include `hnn` (nonnegative weights, which
+  the signed `hfRegAdj` of the `hnn` fence breaks) and `hd` (positive
+  degrees, which `disAdj`'s isolated vertex breaks), so the honest
+  `ht`-only failure lives at a genuinely nonnegative, positive-degree,
+  disconnected graph: two disjoint edges on `Fin 4`.
+
+  The heaviest single pin the family needed — the four-point
+  `secondEval (normalizedLaplacian) = 0` — rides the priced route:
+  the upper bound through `secondEval_le_rayleigh` at the centered
+  component indicator `![1,1,-1,-1]` (a genuine `L_sym`-kernel
+  vector, so its Rayleigh quotient is `0`), the lower bound through
+  `normalizedLaplacian_evals_zero` plus `evals_sorted`. The flow pin
+  rides `exp_mulVec_eq_smul_of_mulVec_eq_smul` at the per-block
+  antisymmetric mode, a genuine `L_walk`-eigenvalue-`2` vector.
+
+  All proofs are real Lean proofs (no `sorry`/`admit`); `#print
+  axioms` on every declaration in this section reads exactly
+  `propext, Classical.choice, Quot.sound` (theorem instantiations of
+  an all-proved shelf; no `-- @refutes` tags — nothing admitted
+  consumed). QA proves consequences relative to the substrate, not
+  the substrate.
+-/
+
+/-- The D1 fixture: two disjoint edges, every degree positive (`1`),
+genuinely nonnegative and symmetric — the honest `ht`-only failure
+(disconnection holds `λ₂(L_sym)` at `0` while backward time grows the
+per-block antisymmetric mode). -/
+def hfDis4Adj : Matrix (Fin 4) (Fin 4) ℝ :=
+  Matrix.of fun i j =>
+    if (i = 0 ∧ j = 1) ∨ (i = 1 ∧ j = 0) ∨ (i = 2 ∧ j = 3) ∨ (i = 3 ∧ j = 2)
+      then (1 : ℝ) else 0
+
+theorem hfDis4Adj_isSymm : hfDis4Adj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [hfDis4Adj]
+
+theorem hfDis4Adj_nonneg : ∀ i j, 0 ≤ hfDis4Adj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [hfDis4Adj]
+
+theorem hfDis4Adj_deg (i : Fin 4) : deg hfDis4Adj i = 1 := by
+  fin_cases i <;> simp [deg, hfDis4Adj, Fin.sum_univ_four]
+
+theorem hfDis4Adj_deg_pos : ∀ i, 0 < deg hfDis4Adj i := by
+  intro i
+  rw [hfDis4Adj_deg]
+  norm_num
+
+theorem hfDis4Adj_card : 2 ≤ Fintype.card (Fin 4) := by decide
+
+theorem hfDis4Adj_degreeInvSqrt : degreeInvSqrt hfDis4Adj = 1 := by
+  ext i j
+  simp only [degreeInvSqrt, Matrix.diagonal_apply, Matrix.one_apply,
+    hfDis4Adj_deg, Real.sqrt_one, inv_one]
+
+theorem hfDis4Adj_normLaplacian :
+    normalizedLaplacian hfDis4Adj = 1 - hfDis4Adj := by
+  rw [normalizedLaplacian, hfDis4Adj_degreeInvSqrt, one_mul, mul_one]
+
+theorem hfDis4Adj_walkTransition :
+    walkTransitionMatrix hfDis4Adj = hfDis4Adj := by
+  ext i j
+  rw [walkTransitionMatrix_apply, hfDis4Adj_deg, inv_one, one_mul]
+
+theorem hfDis4Adj_walkLaplacian :
+    walkLaplacian hfDis4Adj = 1 - hfDis4Adj := by
+  rw [walkLaplacian, hfDis4Adj_walkTransition]
+
+theorem hfDis4Adj_mulVec_ones :
+    hfDis4Adj *ᵥ (onesVec : Fin 4 → ℝ) = onesVec := by
+  funext i
+  fin_cases i <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, onesVec, Fin.sum_univ_four,
+      hfDis4Adj]
+
+theorem hfDis4Adj_lsym_mulVec_ones :
+    normalizedLaplacian hfDis4Adj *ᵥ (onesVec : Fin 4 → ℝ) = 0 := by
+  rw [hfDis4Adj_normLaplacian, Matrix.sub_mulVec, Matrix.one_mulVec,
+    hfDis4Adj_mulVec_ones, sub_self]
+
+/-- The centered component indicator: block-constant, nonzero,
+orthogonal to `onesVec`, and a genuine `L_sym`-kernel vector. -/
+def hfDis4KerVec : Fin 4 → ℝ :=
+  ![1, 1, -1, -1]
+
+theorem hfDis4KerVec_mulVec :
+    hfDis4Adj *ᵥ hfDis4KerVec = hfDis4KerVec := by
+  funext i
+  fin_cases i <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_four, hfDis4Adj,
+      hfDis4KerVec]
+
+theorem hfDis4KerVec_ne_zero : hfDis4KerVec ≠ 0 := by
+  intro h
+  have h0 := congrFun h 0
+  simp [hfDis4KerVec] at h0
+
+theorem hfDis4KerVec_orth_ones :
+    Matrix.dotProduct hfDis4KerVec (onesVec : Fin 4 → ℝ) = 0 := by
+  simp [Matrix.dotProduct, onesVec, hfDis4KerVec, Fin.sum_univ_four]
+
+theorem hfDis4Adj_lsym_mulVec_ker :
+    normalizedLaplacian hfDis4Adj *ᵥ hfDis4KerVec = 0 := by
+  rw [hfDis4Adj_normLaplacian, Matrix.sub_mulVec, Matrix.one_mulVec,
+    hfDis4KerVec_mulVec, sub_self]
+
+/-- **The four-point `λ₂(L_sym) = 0` pin** — D1's heaviest single
+item, at the priced route: the upper bound through
+`secondEval_le_rayleigh` at the centered component indicator (a kernel
+vector, so its Rayleigh quotient is `0`), the lower bound through
+`normalizedLaplacian_evals_zero` plus sortedness of the eigenvalue
+list. -/
+theorem hfDis4Adj_norm_secondEval_eq_zero :
+    secondEval (normalizedLaplacian hfDis4Adj)
+      (normalizedLaplacian_symmetric hfDis4Adj hfDis4Adj_isSymm)
+      hfDis4Adj_card = 0 := by
+  have hR := secondEval_le_rayleigh
+    (normalizedLaplacian_symmetric hfDis4Adj hfDis4Adj_isSymm)
+    (normalizedLaplacian_psd hfDis4Adj hfDis4Adj_isSymm hfDis4Adj_nonneg
+      hfDis4Adj_deg_pos)
+    hfDis4Adj_lsym_mulVec_ones hfDis4Adj_card hfDis4KerVec_ne_zero
+    hfDis4KerVec_orth_ones
+  rw [rayleigh, if_neg hfDis4KerVec_ne_zero, quadForm,
+    hfDis4Adj_lsym_mulVec_ker, Matrix.dotProduct_zero, zero_div] at hR
+  have hge : (0 : ℝ) ≤ secondEval (normalizedLaplacian hfDis4Adj)
+      (normalizedLaplacian_symmetric hfDis4Adj hfDis4Adj_isSymm)
+      hfDis4Adj_card := by
+    have h0 : evals (normalizedLaplacian_symmetric hfDis4Adj hfDis4Adj_isSymm)
+        ⟨0, by simp⟩ = 0 :=
+      normalizedLaplacian_evals_zero hfDis4Adj hfDis4Adj_isSymm
+        hfDis4Adj_nonneg hfDis4Adj_deg_pos (by simp)
+    have hmono : evals (normalizedLaplacian_symmetric hfDis4Adj hfDis4Adj_isSymm)
+        ⟨0, by simp⟩
+      ≤ evals (normalizedLaplacian_symmetric hfDis4Adj hfDis4Adj_isSymm)
+          ⟨1, by simp⟩ :=
+      evals_sorted _ (Fin.le_def.2 zero_le_one)
+    rw [show secondEval (normalizedLaplacian hfDis4Adj)
+          (normalizedLaplacian_symmetric hfDis4Adj hfDis4Adj_isSymm)
+          hfDis4Adj_card
+        = evals (normalizedLaplacian_symmetric hfDis4Adj hfDis4Adj_isSymm)
+            ⟨1, by simp⟩ from rfl]
+    exact h0 ▸ hmono
+  linarith
+
+/-- The per-block antisymmetric mode is a genuine `L_walk`-eigenvalue-`2`
+vector: the swap within the first block negates it. -/
+theorem hfDis4Adj_walkLaplacian_mulVec_mode :
+    walkLaplacian hfDis4Adj *ᵥ (![1, -1, 0, 0] : Fin 4 → ℝ)
+      = (2 : ℝ) • (![1, -1, 0, 0] : Fin 4 → ℝ) := by
+  have hA : hfDis4Adj *ᵥ (![1, -1, 0, 0] : Fin 4 → ℝ)
+      = -(![1, -1, 0, 0] : Fin 4 → ℝ) := by
+    funext i
+    fin_cases i <;>
+      simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_four, hfDis4Adj]
+  rw [hfDis4Adj_walkLaplacian, Matrix.sub_mulVec, Matrix.one_mulVec, hA,
+    sub_neg_eq_add]
+  simp [two_smul]
+
+theorem hfDis4Adj_walkHeatKernel_minus_one_mode :
+    walkHeatKernel hfDis4Adj (-1) *ᵥ (![1, -1, 0, 0] : Fin 4 → ℝ)
+      = Real.exp 2 • (![1, -1, 0, 0] : Fin 4 → ℝ) := by
+  rw [walkHeatKernel]
+  refine exp_mulVec_eq_smul_of_mulVec_eq_smul _ _ _ ?_
+  rw [neg_smul, neg_neg, one_smul, hfDis4Adj_walkLaplacian_mulVec_mode]
+
+/-- **Fence (`ht` of `walkHeatKernel_variance_decay`) — D1, the walk
+twin.** Backward time at `t = -1` grows the per-block eigenvalue-`2`
+mode: output π-variance `2e⁴` against the rate-`e⁰ = 1` bound on
+input `2` — disconnection holds the rate at `1` while the flow runs
+backward. Every kept clause is genuine at the fixture (the packaged
+isolation below). -/
+theorem hf_walk_var_t_fence :
+    ¬ (∑ i : Fin 4, deg hfDis4Adj i
+        * ((walkHeatKernel hfDis4Adj (-1) *ᵥ (![1, -1, 0, 0] : Fin 4 → ℝ)) i
+          - (∑ j, deg hfDis4Adj j * (![1, -1, 0, 0] : Fin 4 → ℝ) j)
+            / (∑ j, deg hfDis4Adj j)) ^ 2
+      ≤ Real.exp (-(2 * (-1 : ℝ) * secondEval (normalizedLaplacian hfDis4Adj)
+          (normalizedLaplacian_symmetric hfDis4Adj hfDis4Adj_isSymm)
+          hfDis4Adj_card))
+        * ∑ i : Fin 4, deg hfDis4Adj i
+            * ((![1, -1, 0, 0] : Fin 4 → ℝ) i
+              - (∑ j, deg hfDis4Adj j * (![1, -1, 0, 0] : Fin 4 → ℝ) j)
+                / (∑ j, deg hfDis4Adj j)) ^ 2) := by
+  have hdegsum : (∑ j : Fin 4, deg hfDis4Adj j) = 4 := by
+    rw [Finset.sum_congr rfl (fun j _ => hfDis4Adj_deg j)]
+    norm_num
+  have hcross : (∑ j : Fin 4, deg hfDis4Adj j * (![1, -1, 0, 0] : Fin 4 → ℝ) j)
+      = 0 := by
+    have e0 : deg hfDis4Adj 0 * (![1, -1, 0, 0] : Fin 4 → ℝ) 0 = 1 := by
+      rw [hfDis4Adj_deg]; norm_num
+    have e1 : deg hfDis4Adj 1 * (![1, -1, 0, 0] : Fin 4 → ℝ) 1 = -1 := by
+      rw [hfDis4Adj_deg]; norm_num
+    have e2 : deg hfDis4Adj 2 * (![1, -1, 0, 0] : Fin 4 → ℝ) 2 = 0 := by
+      rw [hfDis4Adj_deg]; norm_num
+    have e3 : deg hfDis4Adj 3 * (![1, -1, 0, 0] : Fin 4 → ℝ) 3 = 0 := by
+      rw [hfDis4Adj_deg]; norm_num
+    rw [Fin.sum_univ_four, e0, e1, e2, e3]
+    norm_num
+  rw [hcross, zero_div, hfDis4Adj_walkHeatKernel_minus_one_mode,
+    hfDis4Adj_norm_secondEval_eq_zero]
+  simp only [sub_zero]
+  have hvarin : ∑ i : Fin 4, deg hfDis4Adj i
+      * ((![1, -1, 0, 0] : Fin 4 → ℝ) i) ^ 2 = 2 := by
+    have e0 : deg hfDis4Adj 0 * ((![1, -1, 0, 0] : Fin 4 → ℝ) 0) ^ 2 = 1 := by
+      rw [hfDis4Adj_deg]; norm_num
+    have e1 : deg hfDis4Adj 1 * ((![1, -1, 0, 0] : Fin 4 → ℝ) 1) ^ 2 = 1 := by
+      rw [hfDis4Adj_deg]; norm_num
+    have e2 : deg hfDis4Adj 2 * ((![1, -1, 0, 0] : Fin 4 → ℝ) 2) ^ 2 = 0 := by
+      rw [hfDis4Adj_deg]; norm_num
+    have e3 : deg hfDis4Adj 3 * ((![1, -1, 0, 0] : Fin 4 → ℝ) 3) ^ 2 = 0 := by
+      rw [hfDis4Adj_deg]; norm_num
+    rw [Fin.sum_univ_four, e0, e1, e2, e3]
+    norm_num
+  have hvarout : ∑ i : Fin 4, deg hfDis4Adj i
+      * (((Real.exp 2 • (![1, -1, 0, 0] : Fin 4 → ℝ)) : Fin 4 → ℝ) i) ^ 2
+      = 2 * (Real.exp 2) ^ 2 := by
+    have e0 : deg hfDis4Adj 0
+        * (((Real.exp 2 • (![1, -1, 0, 0] : Fin 4 → ℝ)) : Fin 4 → ℝ) 0) ^ 2
+        = (Real.exp 2) ^ 2 := by
+      rw [hfDis4Adj_deg]
+      simp [Pi.smul_apply, smul_eq_mul]
+    have e1 : deg hfDis4Adj 1
+        * (((Real.exp 2 • (![1, -1, 0, 0] : Fin 4 → ℝ)) : Fin 4 → ℝ) 1) ^ 2
+        = (Real.exp 2) ^ 2 := by
+      rw [hfDis4Adj_deg]
+      simp [Pi.smul_apply, smul_eq_mul]
+    have e2 : deg hfDis4Adj 2
+        * (((Real.exp 2 • (![1, -1, 0, 0] : Fin 4 → ℝ)) : Fin 4 → ℝ) 2) ^ 2
+        = 0 := by
+      rw [hfDis4Adj_deg]
+      simp [Pi.smul_apply, smul_eq_mul]
+    have e3 : deg hfDis4Adj 3
+        * (((Real.exp 2 • (![1, -1, 0, 0] : Fin 4 → ℝ)) : Fin 4 → ℝ) 3) ^ 2
+        = 0 := by
+      rw [hfDis4Adj_deg]
+      simp [Pi.smul_apply, smul_eq_mul]
+    rw [Fin.sum_univ_four, e0, e1, e2, e3]
+    ring
+  rw [hvarout, hvarin, show 2 * (-1 : ℝ) * 0 = 0 by norm_num, neg_zero,
+    Real.exp_zero, one_mul]
+  intro hle
+  have hgt : (1 : ℝ) < (Real.exp 2) ^ 2 := by
+    nlinarith [hf_exp_two_gt_one, Real.exp_nonneg 2]
+  linarith
+
+/-- Packaged isolation for the D1 fence: every kept clause of
+`walkHeatKernel_variance_decay` is genuine at the fixture, and the
+dropped `ht : 0 ≤ t` genuinely fails at `t = -1`. -/
+theorem hfDis4Adj_isolation :
+    hfDis4Adj.IsSymm
+      ∧ (∀ i j, 0 ≤ hfDis4Adj i j)
+      ∧ (∀ i, 0 < deg hfDis4Adj i)
+      ∧ 2 ≤ Fintype.card (Fin 4)
+      ∧ (-1 : ℝ) < 0 :=
+  ⟨hfDis4Adj_isSymm, hfDis4Adj_nonneg, hfDis4Adj_deg_pos, hfDis4Adj_card,
+    by norm_num⟩
+
+end HeatFencesD1
 
 end SpectralGraphTheory.QA

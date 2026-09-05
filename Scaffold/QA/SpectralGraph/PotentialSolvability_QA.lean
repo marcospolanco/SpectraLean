@@ -41,28 +41,28 @@ namespace SpectralGraphTheory.QA
 -/
 
 /-- Adjacency of the two-vertex edge on `Fin 2`: symmetric unit weight. -/
-def edgeAdj : Matrix (Fin 2) (Fin 2) ℝ :=
+def psEdgeAdj : Matrix (Fin 2) (Fin 2) ℝ :=
   Matrix.of !![0, 1; 1, 0]
 
-theorem edgeAdj_isSymm : edgeAdj.IsSymm := by
+theorem psEdgeAdj_isSymm : psEdgeAdj.IsSymm := by
   refine Matrix.IsSymm.ext fun i j => ?_
-  fin_cases i <;> fin_cases j <;> simp [edgeAdj]
+  fin_cases i <;> fin_cases j <;> simp [psEdgeAdj]
 
-theorem edgeAdj_nonneg : ∀ i j, 0 ≤ edgeAdj i j := by
+theorem psEdgeAdj_nonneg : ∀ i j, 0 ≤ psEdgeAdj i j := by
   intro i j
-  fin_cases i <;> fin_cases j <;> simp [edgeAdj]
+  fin_cases i <;> fin_cases j <;> simp [psEdgeAdj]
 
 /-- The support graph of the edge is connected: every vertex is reachable
 from `0` (`0` trivially, `1` across the single edge). -/
 theorem edge_supportGraph_connected :
-    (supportGraph edgeAdj edgeAdj_isSymm).Connected := by
+    (supportGraph psEdgeAdj psEdgeAdj_isSymm).Connected := by
   have hfrom0 : ∀ v : Fin 2,
-      (supportGraph edgeAdj edgeAdj_isSymm).Reachable 0 v := by
+      (supportGraph psEdgeAdj psEdgeAdj_isSymm).Reachable 0 v := by
     intro v
     fin_cases v
     · exact ⟨SimpleGraph.Walk.nil⟩
     · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 1)
-        ⟨by decide, by simp [edgeAdj]⟩ SimpleGraph.Walk.nil⟩
+        ⟨by decide, by simp [psEdgeAdj]⟩ SimpleGraph.Walk.nil⟩
   rw [SimpleGraph.connected_iff_exists_forall_reachable]
   exact ⟨0, hfrom0⟩
 
@@ -76,20 +76,20 @@ the unit-demand equation, computed entrywise from the definitions. The
 Laplacian of the edge is `[[1, −1], [−1, 1]]`, so `L *ᵥ ![1, 0] =
 ![1, −1] = e 0 − e 1`. -/
 theorem edge_potential_value_QA :
-    (laplacian edgeAdj).mulVec ![1, 0]
+    (laplacian psEdgeAdj).mulVec ![1, 0]
       = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ) := by
   funext i
   fin_cases i <;>
-    simp [laplacian, degreeMatrix, deg, edgeAdj, Matrix.mulVec,
+    simp [laplacian, degreeMatrix, deg, psEdgeAdj, Matrix.mulVec,
       Matrix.dotProduct, Fin.sum_univ_two]
 
 /-- **Interface instantiation (edge):** the unit-demand solvability
 theorem applies to the edge graph. -/
 theorem edge_unit_demand_solvability_QA :
-    ∃ f : Fin 2 → ℝ, (laplacian edgeAdj).mulVec f
+    ∃ f : Fin 2 → ℝ, (laplacian psEdgeAdj).mulVec f
       = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ) :=
-  exists_laplacian_mulVec_eq_single_sub_single edgeAdj edgeAdj_isSymm
-    edgeAdj_nonneg edge_supportGraph_connected 0 1
+  exists_laplacian_mulVec_eq_single_sub_single psEdgeAdj psEdgeAdj_isSymm
+    psEdgeAdj_nonneg edge_supportGraph_connected 0 1
 
 /-!
 ## Negative witness on the edge: a non-zero-sum demand is unsolvable
@@ -104,11 +104,11 @@ certifies that no potential exists.
 /-- **Negative witness (zero-sum hypothesis):** the demand `e 0` — sum
 `1`, not zero — admits no potential on the connected edge graph. -/
 theorem edge_unit_injection_unsolvable_QA :
-    ¬ ∃ f : Fin 2 → ℝ, (laplacian edgeAdj).mulVec f = Pi.single 0 (1 : ℝ) := by
+    ¬ ∃ f : Fin 2 → ℝ, (laplacian psEdgeAdj).mulVec f = Pi.single 0 (1 : ℝ) := by
   rintro ⟨f, hf⟩
-  have h0 : Matrix.dotProduct onesVec ((laplacian edgeAdj).mulVec f) = 0 :=
-    dotProduct_eq_zero_of_laplacian_mulVec_eq_zero edgeAdj edgeAdj_isSymm
-      (laplacian_ones_in_kernel edgeAdj)
+  have h0 : Matrix.dotProduct onesVec ((laplacian psEdgeAdj).mulVec f) = 0 :=
+    dotProduct_eq_zero_of_laplacian_mulVec_eq_zero psEdgeAdj psEdgeAdj_isSymm
+      (laplacian_ones_in_kernel psEdgeAdj)
   rw [hf] at h0
   simp [onesVec, Matrix.dotProduct, Fin.sum_univ_two] at h0
 

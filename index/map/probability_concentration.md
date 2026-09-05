@@ -34,6 +34,20 @@ axiom boundary in the 2026-08-17 concentration repair.
 | `hoeffding_inequality_interval` / `hoeffding_lemma_mgf` / `mgf_sum_le_of_iIndepFun` / `phiComb_le_exp` | proved (2026-08-30 retirement) | The retirement's proved core: the MGF interval engine `E exp(λX) ≤ exp(λ²(b−a)²/8)` (secant bound + the sharp two-point `φ(u) ≤ e^{u²/8}` by the perfect-square identity), the independence factorization, and the interval-form tail | Hoeffding 1963, Lemma 2; Vershynin Prop 2.2.1 |
 | `hoeffding_empirical` | **proved (retired from axiom 2026-08-30)** — the centered `[0,1]` specialization of the interval engine (earlier: pairwise→`iIndepFun` repair 2026-08-29, Errata §6; QA: the closed-form instance with the exact `1/2` deviation-event measure in `Scalar_QA.lean`) | Empirical averages of [0,1] variables | Boucheron-Lugosi-Massart Thm 2.8 |
 
+Adversarial-fence coverage (2026-09-05,
+`proposals/adversarial-fences-scalar-concentration-family.md`): the
+`h_indep` clauses of the Hoeffding tail/MGF theorems and the `ht`
+backward-time clause fenced at the perfectly-correlated two-coin
+fixture `scCorrX` (`Scalar_QA.lean`'s `AdversarialFences` section) —
+the product-integral identity refuted by the algebraic
+`cosh 2 ≠ cosh²1`, the MGF bound by `cosh 2 > e`, the tails by
+event-degeneration (`1 > 2e⁻¹`) — and the `h_mean` centering clauses
+of `mgf_sum_le_of_iIndepFun`, `hoeffding_inequality_interval`,
+`hoeffding_inequality`, `hoeffding_iid` fenced at the
+genuinely-independent biased product (the `DeferralFences` section:
+independence genuine, centering broken at `4/5`; the `t = 2` tail at
+`41/50 > 2e⁻¹`, the `λ = 1` MGF over `e`).
+
 ### Bernstein's Inequality
 
 **Module**: `Scaffold.Mathlib.Probability.Concentration.Scalar.Bernstein`
@@ -48,6 +62,11 @@ axiom boundary in the 2026-08-17 concentration repair.
 | `bernstein_iid` | proved | Common-variance specialization | Vershynin Cor 2.8.3 |
 
 ## Sampling Spaces
+
+Adversarial-fence coverage (2026-09-05): the `h_indep` clauses of the
+Bernstein tail theorems fenced at `scCorrX` (event-degeneration kills,
+`1 > 2e^{-3/4}`) and the `ht` clause at `scRadX` (`t = -2`,
+`1 > 2e^{-3/2}`).
 
 ### Bernoulli Product Space
 
@@ -78,6 +97,20 @@ empirical-stationary-distribution proposal names)
 | `integral_coord_smul` | proved | `∫ (δ_e) • M = p e • M` — the matrix centering building block |
 | `integral_coord_center_smul` | proved | `∫ ((δ_e / p e) − 1) • M = 0` at `p e ≠ 0` — the `h_mean` clause shape |
 
+Adversarial-fence coverage (2026-09-05,
+`proposals/adversarial-fences-bernoulli-product-family.md`): fifteen
+hypothesis-form fences in `BernoulliProduct_QA.lean`'s `AdversarialFences`
+section — the four ∑-theorems' `hp0`/`hp1` bounds clauses (out-of-bounds
+fixtures keeping the other bound genuine; a marginal-identity bounds fence
+needs a breaker coordinate outside the statement's consumed coordinates),
+the `hee` distinctness clauses (Cauchy–Schwarz strictness at the double
+marginal; `μ(A ∩ A) ≠ μ(A)²` for both independence statements, the matrix
+kill at the measurable entry cylinder), the `he` injectivity clauses of the
+mutual-independence transfer trio, and the `hpne` centering clause (the
+file's pre-discipline free-form fences reconciled as the wrappers' proof
+engines). The `bernPMF`-consuming theorems' bounds clauses are
+signature-entangled: the sampling measure does not exist out of bounds.
+
 ### IID Product Space (V-valued)
 
 **Module**: `Scaffold.Mathlib.Probability.IIDProduct`
@@ -95,7 +128,36 @@ empirical-stationary-distribution proposal names)
 | `indepFun_indicator_coord` | proved | The pairwise clause at coordinate indicators (the two-point consequence; refutation records' interface) |
 | `iIndepFun_coord` / `iIndepFun_coord_apply` / `iIndepFun_indicator_coord` | proved | The `iidPMF` mutual-independence engine (2026-08-29) — `iIndepFun_indicator_coord` is the repaired `h_indep` clause shape of `hoeffding_empirical` at this sampling space |
 
+The family's falsification surface is fully fenced (2026-09-05,
+`proposals/adversarial-fences-iid-product-family.md`): every priceable
+named clause has a negative witness in `IIDProduct_QA.lean`'s
+`AdversarialFences` section — the `hq0`/`hq1` bounds clauses of the
+three ∑-theorems at `ofReal`-clamp fixtures keeping the other clause
+genuine, `sum_coord2_mul`'s pair at the three-coordinate breaker
+(on `Fin 2` Fubini makes the dropped identity true),
+the three signature-free `hee` clauses at the all-genuine `q23`
+(`2/3 ≠ 4/9`), and `iIndepFun_coord_apply`'s `he` at the constant
+reindexing; `iIndepFun_coord_apply`'s `hF` is decorative at the
+shelf's own generality (the proved hF-free twin
+`iIndepFun_coord_apply_strict`), and the nine `iidPMF`-consumers'
+mass clauses are signature-entangled (the sampling measure does not
+exist out of bounds — the mass-level fences are that entanglement's
+visible boundary).
+
 ## Matrix Concentration
+
+The matrix axioms' hypothesis surfaces are fully fenced (2026-09-05,
+`proposals/adversarial-fences-matrix-concentration-family.md`):
+beyond the repair-era refutations (the `Fin 0` corner ×3, the
+uncentered family, the caterpillar), twelve hypothesis-form
+`-- @refutes`-tagged fences in `Matrix_QA.lean`'s `AdversarialFences`
+section close every remaining named clause — `matrix_hoeffding`'s
+`h_herm`/`h_indep`/`h_bound`/`ht`, `matrix_bernstein`'s
+`h_mean`/`h_herm`/`h_bound`/`h_meas`/`ht` (with `h_meas` the
+headline: the variance statistic is itself a junk integral — Errata
+§7's mechanism class reaching the sibling axiom through `Σ`), and
+`matrix_azuma_hoeffding`'s `cond_mean_zero`/`norm_bound`/`ht` — the
+repository's mechanically-independence-checked tag count 12 → 24.
 
 All statements are over the spectral norm (`Matrix.L2OpNorm`), the
 semidefinite order (`Matrix.PosSemidef`), and the product σ-algebra on

@@ -102,7 +102,112 @@ genuine breaker being the negative-degree row (where `(deg)⁻¹` stays
 genuine while the square-root factors vanish); the single Fin 2
 fixture `!![-2,1;1,0]]` kills fifteen clauses including the transfer
 trio at genuine eigen-hypotheses and the eigenbasis instantiations
-without eigenvalue pins. The **heat family's** falsification surface was completed 2026-09-05
+without eigenvalue pins. The **irreducible-stationary family's** falsification surface was
+completed 2026-09-05
+(`proposals/adversarial-fences-irreducible-stationary-family.md`, the
+prior terminal handoff's named top target, confirmed by a fresh
+reverse-import walk at 3 transitive non-QA consumers — `PageRank`,
+`DirectedMixing`, the `EmpiricalStationary` capstone — tied with
+`Directed` and selected for the larger unfenced surface): thirty-two
+hypothesis-form fences in `IrreducibleStationary_QA.lean`'s
+`AdversarialFences` section (the Jordan-block orbit-escape kill of the
+Krylov–Bogoliubov `hgnn`; three complementary signed Fin 3 fixtures
+covering every walk-level `hnn` clause; the rank-one power-sign
+fixture; the junk `0⁻¹ = 0` `hdeg` corner; the full σ/τ clause set at
+the edge) plus the `hdeg`/`hex` truth-removability strengthenings —
+256 declarations, all at the standard three axioms.
+ The **directed family's** falsification surface was completed
+2026-09-05 (`proposals/adversarial-fences-directed-family.md`, the
+prior terminal handoff's named last unaudited shelf of the
+`IrreducibleStationary`/`Directed` pair, 3 transitive non-QA
+consumers): four hypothesis-form fences in `Directed_QA.lean`'s
+`AdversarialFences` section (the three `hA` cone clauses at the
+delivered `dirA`, two of them reconciliations of the pre-existing
+free-form witnesses; the square-root-free conjugate's
+`hd : ∀ i, 0 < deg A i` at the zero-out-degree fixture where the junk
+`√0·(√0)⁻¹ = 0` collapse erases the symmetrized arc from the left
+side only) plus the strengthening refutation at the negative-degree
+fixture — the conjugate's `hd` is genuinely a positivity clause, not
+nonzeroness in disguise (the `Real.sqrt` route collapses the whole
+non-positive half-line; contrast the random-walk family's `hdpos`)
+— 34 declarations, all at the standard three axioms.
+ The **spectral-core family's** fence audit opened 2026-09-05
+(`proposals/adversarial-fences-spectral-core-family.md` — this run's
+fresh consumption survey finding the enumeration method's own gap:
+the root shelf `Spectral.lean` carries 46 transitive non-QA consumers,
+by far the library's largest unaudited surface, invisible to every
+prior survey because those keyed on same-name QA files while this
+shelf's QA was scattered): Step 0's census (105 hypothesis-bearing
+theorems, 214 named clauses, priced as a four-step program) plus
+Step 1 — twelve hypothesis-form fences over the Laplacian algebra /
+PSD / cut-duality cluster in the new dedicated `Spectral_QA.lean`
+(the `hA` cone including the asymmetric star's two-dimensional
+harmonic kernel killing the kernel-certificate clause; the signed
+edge killing `laplacian_psd`'s `hnonneg`; both `vol_pos_of_pos_deg`
+clauses; the signed-input kills) — 96 declarations, all at the
+standard three axioms. Step 2 (delivered the same day) — the
+connectivity/kernel cluster, 18 fences + the P4 companion (79
+declarations, all at the standard three axioms) in
+`Spectral_QA.lean`'s `AdversarialFencesStep2` section: the `hconn`
+clauses reconciling `Connectivity_QA`'s and
+`PotentialSolvability_QA`'s delivered disconnected witnesses; the
+`hnonneg` clauses at the new signed path `sfSignedPath` with the kept
+connectivity genuine (the kernel genuinely two-dimensional — the
+nonconstant `![1,-1,0]` survives, and the solvability hinge dies
+through the shelf's own kernel certificate); the census's P4
+candidate `laplacian_mulVec_eq_zero_of_forall_reachable`'s `hnonneg`
+settled by refutation (genuinely load-bearing — the pricing note was
+wrong); the Step-1 cut residuals closed at the negative-min
+division-rescue fixture `sfSignedCut` with the hypothesis-free P4
+companion `conductance_ge_cheegerConstant_hypothesis_free`; and the
+`supportGraph`-entanglement classification recorded (every `hA`
+clause of a `supportGraph`-carrying statement non-fenceable). Step 3
+(delivered third, same day) — the spectral-theorem interface layer's
+priced residue, 17 fences (60 declarations, all at the standard
+three axioms): the symmetry-free-conclusion minority (the raw-matrix
+self-adjointness identity; `smul_isSymm`; all five clauses of the
+projector-uniqueness lemma at a fixed-line idempotent family) and
+the side clauses at the identity/zero matrices (the projector
+threshold quartet by sibling-theorem kills; the kernel-orthogonality
+quintet by a Parseval exclusion engine), with the spectral-object-
+consuming `hM` and index-consuming `hcard` clauses classified
+entangled and three concrete-pin-gated deferrals recorded — two of
+which (the congruence lemmas' `h`) were resolved the same day by
+Step 4. Step 4 (delivered fourth, same day) — the variational /
+Courant–Fischer cluster, 19 fences plus the `rayleigh_padVec`
+hypothesis-free P4 companion (41 public declarations, all at the
+standard three axioms): `secondEval_variational`'s and
+`secondEval_le_rayleigh`'s `hpsd`/`hker`/`hx0`/`hxorth`; the
+congruence pair's `h` clauses (the Step-3 deferral resolved for
+`secondEval_congr` and `evals_congr`); `evals_le_of_linearIndependent`'s
+`hk1`/`hgi`/`hbnd`; `lambda2_variational`'s `hnonneg` reconciled from
+the 2026-08-18 pre-discipline refutation; the `_of_ker` twins' seven
+clauses; `secondEval_smul_of_pos`'s `hpsd`/`hker` classified
+truth-removable-not-fenceable (positive scaling commutes with
+sorting). Also delivered: one public-docstring repair (the shelf's
+`_of_ker` QA note cited a nonexistent `icvQ_psd_fence`; the real fence
+is `icFence_psd_fence`), and a recorded QA-lattice defect — the
+`Cheeger_QA`/`PotentialSolvability_QA` `edgeAdj` name collision makes
+those two modules non-co-importable (the repair, renaming one
+`edgeAdj`, is priced as a follow-up). The spectral-core audit program
+is now COMPLETE (Steps 0–4). The `edgeAdj` lattice defect named there
+was RESOLVED the same day (the repair run's file-unique renames across
+ten referencing files), and the residual collision *class* it exposed
+was closed mechanically 2026-09-05
+(`proposals/qa-name-collision-guard.md`): the survey found 24 further
+cross-module duplicate names in `Scaffold/QA/**` (identical-body
+redeclarations, *different-body* duplicates like `k2Adj`/`path3Adj`/
+`triAdj`, shared helper spellings like `list_two_eq` ×5), and
+`scripts/check_qa_name_uniqueness.py` now fails on any new duplicate
+or any drift in the allowlisted residuals — the class can no longer
+grow silently; pairs stay repairable on demand. The same delivery
+reconciled `Exhaustive_QA.lean`'s 2026-08-17 free-form witness
+(`asym_boundary_not_dual_QA`) into the per-clause fence discipline as
+the proof engine of the `boundary_compl` `hA` fence, fenced the
+sibling `conductance_compl` clause at the same fixture, and classified
+the file's separation checks (no fence form) — the last named
+pre-discipline free-form witness layer in the QA tree.
+ The **heat family's** falsification surface was completed 2026-09-05
 (`proposals/adversarial-fences-heat-family.md`, this run's own fresh
 consumption survey confirming Heat as the library's most-consumed
 unaudited shelf at 8 transitive non-QA consumers, ahead of RandomWalk
@@ -120,7 +225,95 @@ and the delivered disconnected fixture; one priced deferral (the
 walk-twin variance `ht`, needing a four-point normalized secondEval
 pin) and the recorded non-fenceable classes (signature-entangled
 eigenbasis displays, the P4 truth-removable `HasDerivAt` pair, the
-`hcard` display class). The **Perron–Frobenius family's**
+`hcard` display class) — **the deferral was RESOLVED 2026-09-05**
+(the same day, `Heat_QA.lean`'s `HeatFencesD1` section:
+`walkHeatKernel_variance_decay`'s `ht` fenced at `K₂ ⊕ K₂` on `Fin 4`
+— the only fixture where the kept `hnn`/`hd` clauses stay genuine —
+with the four-point `secondEval (normalizedLaplacian) = 0` pin at the
+priced route and the flow pin at the eigenvalue-`2` mode: output
+π-variance `2e⁴` against the rate-`e⁰ = 1` bound on input `2`; the
+family's falsification surface is now complete with no open
+deferral). The **i.i.d.-product family's** falsification surface was
+completed 2026-09-05
+(`proposals/adversarial-fences-iid-product-family.md` — the prior
+terminal handoff's named natural next target at 2 transitive non-QA
+consumers, `GraphTheory.Mixing` and the `Derived/EmpiricalStationary`
+capstone, the sampling engine of the empirical-stationary program):
+twelve hypothesis-form fences in `IIDProduct_QA.lean`'s new
+`AdversarialFences` section — the `hq0`/`hq1` bounds clauses of the
+three ∑-theorems at clamp fixtures keeping the other clause genuine,
+`sum_coord2_mul`'s pair at the three-coordinate breaker (the
+outside-the-consumed-coordinates rule transposed: on `Fin 2` Fubini
+makes the dropped identity true), the three signature-free `hee`
+clauses at the all-genuine `q23` (`2/3 ≠ 4/9`), and
+`iIndepFun_coord_apply`'s `he` at the constant reindexing — plus the
+hF-free strengthening twin (`hF` decorative at the shelf's own
+generality: `measurable_of_finite` discharges it for any `F`) and the
+reconciliation of the file's one free-form witness
+(`junk_normalization_fence_QA`) as `sum_iidMass_eq_one`'s `hq1` fence
+engine; the nine `iidPMF`-consumers classified signature-entangled
+(the sampling measure does not exist out of bounds). The
+**scalar-concentration family's** falsification
+surface gained its independence-necessity layer 2026-09-05 and was
+**closed with no open item the same day**
+(`proposals/adversarial-fences-scalar-concentration-family.md`,
+deferral-closure record): the audit's two recorded deferrals —
+`mgf_sum_le_bernstein`'s `h_indep` at the perfectly-correlated
+fixture (`cosh 1` against `exp(3/10)`, both bracketed at `3/2`), the
+last never-refuted clause of the Bernstein MGF engine, and the
+`h_mean` centering cluster of the four Hoeffding-family theorems at
+the new genuinely-independent biased product (independence genuine,
+centering broken at `4/5` — the family's first independent
+non-centered witness; the `t = 2` tail at `41/50 > 2e⁻¹`, the `λ = 1`
+MGF over `e` through the `tt` atom alone).
+(`proposals/adversarial-fences-scalar-concentration-family.md` —
+the prior terminal handoff's named next surface at 5 transitive non-QA
+consumers): eleven hypothesis-form fences in `Scalar_QA.lean`'s new
+`AdversarialFences` section — the `h_indep` clauses of nine tail/MGF
+theorems at the perfectly-correlated fixture `scCorrX` (tail events
+degenerate at `t = 2`, `1 > 2e⁻¹` / `1 > 2e^{-3/4}`; the product-integral
+identity by the algebraic `cosh 2 ≠ cosh²1`) and the `ht` backward-time
+clauses at the delivered `scRadX` — closing the family's last
+never-refuted hypothesis class (the retirement fences had covered only
+constants, shapes, and guards). The **Bernoulli-product family's** falsification surface was
+completed 2026-09-05
+(`proposals/adversarial-fences-bernoulli-product-family.md` — the prior
+terminal handoff's first named natural next move at 8 transitive non-QA
+consumers, the sampling engine every matrix-concentration design consumes):
+fifteen hypothesis-form fences in `BernoulliProduct_QA.lean`'s new
+`AdversarialFences` section — the four ∑-theorems' `hp0`/`hp1` bounds
+clauses at out-of-bounds fixtures keeping the other bound genuine, the `hee`
+distinctness clauses (Cauchy–Schwarz strictness; `μ(A ∩ A) ≠ μ(A)²`, scalar
+and matrix codomain), the `he` injectivity clauses of the transfer trio at
+the constant reindexing, and the `hpne` centering clause — with the file's
+two pre-discipline free-form fences reconciled as the wrappers' proof
+engines and the `bernPMF`-consumers' bounds clauses classified
+signature-entangled (the sampling measure does not exist out of bounds).
+The **matrix-concentration family's** falsification
+surface was completed 2026-09-05
+(`proposals/adversarial-fences-matrix-concentration-family.md` — the
+fresh reverse-import consumption survey's pick at 14 transitive
+non-QA consumers, the library's most-consumed unaudited surface and
+home to 3 of the 4 remaining admitted axioms): twelve
+hypothesis-form `-- @refutes`-tagged fences in `Matrix_QA.lean`'s new
+`AdversarialFences` section close every remaining named hypothesis
+clause of the three admitted matrix axioms — `matrix_hoeffding`'s
+`h_herm` (the alternating nilpotent, domination genuine through
+`N² = 0`), `h_indep` (six identical sign riders), `h_bound` (the free
+variance proxy), `ht`; `matrix_bernstein`'s `h_mean`, `h_herm`
+(genuinely independent cube riders × the unit nilpotent, the
+nilpotent variance statistic zero), `h_bound` (the rare-value family
+`99/−1` at mass `1/100`, genuinely centered with the exact variance
+statistic `99`), **`h_meas` — the headline: the variance statistic is
+itself a junk integral** (the two-point trivial-σ space at
+`diag(1,0)/diag(0,−1)`, the second moment two-valued with distinct
+squares → `Σ = ∫ X²` junk-zero — Errata §7's mechanism class reaching
+the sibling axiom through `Σ`, not the tail event), `ht`; and
+`matrix_azuma_hoeffding`'s `cond_mean_zero`/`norm_bound`/`ht` — the
+mechanically-independence-checked tag count 12 → 24, and
+`check_refutation_independence`'s namespace tracker repaired
+(named `end`s no longer pop namespaces — a latent defect this
+delivery exposed). The **Perron–Frobenius family's**
 falsification surface was completed 2026-09-05
 (`proposals/adversarial-fences-perron-frobenius-family.md`, the prior
 handoff's named top target, confirmed by a fresh reverse-import walk at

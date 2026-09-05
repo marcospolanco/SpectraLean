@@ -2561,7 +2561,7 @@ QA: exercised on genuinely irregular input by
 `Scaffold/QA/SpectralGraph/IrregularCheeger_QA.lean` (the P₃ eigenpair
 witness pins `secondEval (L_sym) ≤ 1` through this lemma at a vector
 *not* orthogonal to `onesVec`), and fenced by the PSD-drop refutation
-there (`icvQ_psd_fence`: `diag(−1, 0)` with `w = e₁`, `x = e₀` makes the
+there (`icFence_psd_fence`: `diag(−1, 0)` with `w = e₁`, `x = e₀` makes the
 hypothesis-free conclusion `0 ≤ −1` false). -/
 theorem secondEval_le_rayleigh_of_ker {M : Matrix V V ℝ} (hM : M.IsSymm)
     (hpsd : ∀ x : V → ℝ, 0 ≤ quadForm M x) {w : V → ℝ} (hwne : w ≠ 0)

@@ -26,52 +26,52 @@ namespace SpectralGraphTheory.QA
 
 /-- The adjacency matrix of the single edge on `Fin 2` (symmetric,
 1-regular, nonnegative). -/
-def edgeAdj : Matrix (Fin 2) (Fin 2) ℝ :=
+def rwEdgeAdj : Matrix (Fin 2) (Fin 2) ℝ :=
   Matrix.of fun i j => if i = j then 0 else 1
 
-theorem edgeAdj_isSymm : edgeAdj.IsSymm := by
+theorem rwEdgeAdj_isSymm : rwEdgeAdj.IsSymm := by
   refine Matrix.IsSymm.ext fun i j => ?_
-  fin_cases i <;> fin_cases j <;> simp [edgeAdj]
+  fin_cases i <;> fin_cases j <;> simp [rwEdgeAdj]
 
-theorem edgeAdj_deg (i : Fin 2) : deg edgeAdj i = 1 := by
+theorem rwEdgeAdj_deg (i : Fin 2) : deg rwEdgeAdj i = 1 := by
   fin_cases i <;>
-    simp only [deg, edgeAdj, Matrix.of_apply, Fin.sum_univ_two] <;>
+    simp only [deg, rwEdgeAdj, Matrix.of_apply, Fin.sum_univ_two] <;>
     simp
 
 /-- Row-stochasticity computes at the edge: both rows of the transition
   matrix are the distribution placing all mass on the neighbor. -/
 theorem edge_row_sum_QA (i : Fin 2) :
-    ∑ j, transitionMatrix edgeAdj 1 i j = 1 :=
-  transitionMatrix_row_sum edgeAdj 1 edgeAdj_deg one_pos i
+    ∑ j, transitionMatrix rwEdgeAdj 1 i j = 1 :=
+  transitionMatrix_row_sum rwEdgeAdj 1 rwEdgeAdj_deg one_pos i
 
 /-- The transition matrix of the edge computes entrywise: it is the
   anti-diagonal (swapping) matrix. -/
 theorem edge_transitionMatrix_entries_QA :
-    transitionMatrix edgeAdj 1
+    transitionMatrix rwEdgeAdj 1
       = Matrix.of fun (i j : Fin 2) => if i = j then 0 else 1 := by
-  simp only [transitionMatrix, inv_one, one_smul, edgeAdj]
+  simp only [transitionMatrix, inv_one, one_smul, rwEdgeAdj]
 
 /-- The scaling bridge computes at the edge: the walk Laplacian is the
   combinatorial Laplacian itself (degree `d = 1`). -/
 theorem edge_randomWalkLaplacian_eq_laplacian_QA :
-    randomWalkLaplacian edgeAdj 1 = laplacian edgeAdj := by
-  rw [randomWalkLaplacian_eq_smul_laplacian edgeAdj 1 edgeAdj_deg one_pos,
+    randomWalkLaplacian rwEdgeAdj 1 = laplacian rwEdgeAdj := by
+  rw [randomWalkLaplacian_eq_smul_laplacian rwEdgeAdj 1 rwEdgeAdj_deg one_pos,
     inv_one, one_smul]
 
 /-- Interop with the Cheeger bridge computes at the edge: the walk
   Laplacian is the normalized Laplacian used by the Cheeger axioms. -/
 theorem edge_randomWalkLaplacian_eq_normalized_QA :
-    randomWalkLaplacian edgeAdj 1 = regularNormalizedLaplacian edgeAdj 1 :=
-  randomWalkLaplacian_eq_regularNormalizedLaplacian edgeAdj 1
+    randomWalkLaplacian rwEdgeAdj 1 = regularNormalizedLaplacian rwEdgeAdj 1 :=
+  randomWalkLaplacian_eq_regularNormalizedLaplacian rwEdgeAdj 1
 
 /-- The combinatorial Laplacian of the edge computes: it is `1 - A`, the
   standard two-vertex Laplacian with eigenvalues `0` and `2`. -/
 theorem edge_laplacian_entries_QA :
-    laplacian edgeAdj
+    laplacian rwEdgeAdj
       = Matrix.of fun (i j : Fin 2) => if i = j then 1 else -1 := by
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [laplacian, degreeMatrix, edgeAdj, deg]
+    simp [laplacian, degreeMatrix, rwEdgeAdj, deg]
 
 /-! ### AdversarialFences: the adversarial fence audit
 (`proposals/adversarial-fences-random-walk-family.md`, 2026-09-05)
@@ -90,7 +90,7 @@ admitted consumed):
   symmetrizes every matrix, so the dropped statements fail exactly
   when `d ≠ 0` ∧ asymmetric).
 - **`hd`** (row-stochasticity and the scaling bridge) at the delivered
-  `edgeAdj` with the wrong claimed degree `d = 2` — row sum `1/2 ≠ 1`
+  `rwEdgeAdj` with the wrong claimed degree `d = 2` — row sum `1/2 ≠ 1`
   and a `2×` diagonal separation `1 ≠ 1/2`, no junk anywhere.
 - **`hdpos`** (row-stochasticity and the scaling bridge) at
   `rwZeroAdj = 0`, genuinely `0`-regular: the junk `0⁻¹ = 0` corner
@@ -245,66 +245,66 @@ theorem randomWalkLaplacian_eq_smul_laplacian_hdpos_fence_QA :
     inv_zero, zero_mul, Matrix.zero_apply, Pi.one_apply] at e00
   norm_num at e00
 
-/-! #### Fixture 3: the delivered `edgeAdj` at the wrong claimed degree
+/-! #### Fixture 3: the delivered `rwEdgeAdj` at the wrong claimed degree
 `d = 2` — the `hd` breaker -/
 
-/-- Isolation: the dropped clause genuinely fails — `edgeAdj` is
+/-- Isolation: the dropped clause genuinely fails — `rwEdgeAdj` is
 genuinely `1`-regular, so it is not `2`-regular. -/
-theorem edgeAdj_not_two_regular : ¬ (∀ i, deg edgeAdj i = 2) := by
+theorem rwEdgeAdj_not_two_regular : ¬ (∀ i, deg rwEdgeAdj i = 2) := by
   intro h
   have h0 := h 0
-  rw [edgeAdj_deg] at h0
+  rw [rwEdgeAdj_deg] at h0
   norm_num at h0
 
 /-- The kill pin: at the wrong claimed degree `d = 2` every row of the
 transition matrix sums to `1/2`, not `1` — pure wrong-constant
 arithmetic, no junk anywhere. -/
-theorem edgeAdj_transitionMatrix_row_sum_two (i : Fin 2) :
-    ∑ j, transitionMatrix edgeAdj 2 i j = 1 / 2 := by
+theorem rwEdgeAdj_transitionMatrix_row_sum_two (i : Fin 2) :
+    ∑ j, transitionMatrix rwEdgeAdj 2 i j = 1 / 2 := by
   simp only [transitionMatrix, Matrix.smul_apply, smul_eq_mul,
     ← Finset.mul_sum]
-  rw [← deg, edgeAdj_deg i, inv_eq_one_div]
+  rw [← deg, rwEdgeAdj_deg i, inv_eq_one_div]
   norm_num
 
 /-- **Fence (`hd` clause of `transitionMatrix_row_sum`).** Dropping
-regularity is refuted at `edgeAdj` with the claimed degree `d = 2`: the
+regularity is refuted at `rwEdgeAdj` with the claimed degree `d = 2`: the
 kept `0 < d` is genuine while the row sums are `1/2 ≠ 1`. -/
 theorem transitionMatrix_row_sum_hd_fence_QA :
     ¬ (∀ (A : Matrix (Fin 2) (Fin 2) ℝ) (d : ℝ), 0 < d →
         ∀ i, ∑ j, transitionMatrix A d i j = 1) := by
   intro h
-  have h0 := h edgeAdj 2 two_pos 0
-  rw [edgeAdj_transitionMatrix_row_sum_two 0] at h0
+  have h0 := h rwEdgeAdj 2 two_pos 0
+  rw [rwEdgeAdj_transitionMatrix_row_sum_two 0] at h0
   norm_num at h0
 
 /-- The bridge's separation pin at the same fixture: the walk
 Laplacian's diagonal is `1 - 2⁻¹ * 0 = 1` while the scaled
 combinatorial Laplacian's is `2⁻¹ * 1 = 1/2`. -/
-theorem edgeAdj_randomWalkLaplacian_two_00 :
-    randomWalkLaplacian edgeAdj 2 0 0 = 1 := by
+theorem rwEdgeAdj_randomWalkLaplacian_two_00 :
+    randomWalkLaplacian rwEdgeAdj 2 0 0 = 1 := by
   simp only [randomWalkLaplacian, Matrix.sub_apply, transitionMatrix,
-    Matrix.smul_apply, smul_eq_mul, Matrix.one_apply, edgeAdj]
+    Matrix.smul_apply, smul_eq_mul, Matrix.one_apply, rwEdgeAdj]
   norm_num
 
-theorem edgeAdj_smul_laplacian_two_00 :
-    ((2:ℝ)⁻¹ • laplacian edgeAdj) 0 0 = 1 / 2 := by
-  have e : laplacian edgeAdj 0 0 = 1 := by
+theorem rwEdgeAdj_smul_laplacian_two_00 :
+    ((2:ℝ)⁻¹ • laplacian rwEdgeAdj) 0 0 = 1 / 2 := by
+  have e : laplacian rwEdgeAdj 0 0 = 1 := by
     rw [edge_laplacian_entries_QA]; simp
   simp only [Matrix.smul_apply, smul_eq_mul, e]
   rw [inv_eq_one_div]
   norm_num
 
 /-- **Fence (`hd` clause of `randomWalkLaplacian_eq_smul_laplacian`).**
-Dropping regularity is refuted at `edgeAdj` with the claimed degree
+Dropping regularity is refuted at `rwEdgeAdj` with the claimed degree
 `d = 2`: the kept `0 < d` is genuine while the two sides separate `2×`
 at the diagonal (`1 ≠ 1/2`). -/
 theorem randomWalkLaplacian_eq_smul_laplacian_hd_fence_QA :
     ¬ (∀ (A : Matrix (Fin 2) (Fin 2) ℝ) (d : ℝ), 0 < d →
         randomWalkLaplacian A d = d⁻¹ • laplacian A) := by
   intro h
-  have h0 := h edgeAdj 2 two_pos
+  have h0 := h rwEdgeAdj 2 two_pos
   have e00 := congrFun (congrFun h0 0) 0
-  rw [edgeAdj_randomWalkLaplacian_two_00, edgeAdj_smul_laplacian_two_00]
+  rw [rwEdgeAdj_randomWalkLaplacian_two_00, rwEdgeAdj_smul_laplacian_two_00]
     at e00
   norm_num at e00
 

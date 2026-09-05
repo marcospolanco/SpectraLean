@@ -15,6 +15,18 @@
   and the `Fin 2` non-normalized vector carries the mass-hypothesis
   fence.
 
+  Since 2026-09-05 the `AdversarialFences` section carries the shelf's
+  hypothesis-necessity pass
+  (`proposals/adversarial-fences-iid-product-family.md`): a fence for
+  every priceable named clause of the seventeen theorems — the
+  `hq0`/`hq1` bounds clauses of the three ∑-theorems at clamp
+  fixtures, `sum_coord2_mul`'s pair at the three-coordinate breaker,
+  the three signature-free `hee` clauses and `iIndepFun_coord_apply`'s
+  `he` at the all-genuine `q23`, the hF-free strengthening twin, and
+  the reconciliation of this file's free-form
+  `junk_normalization_fence_QA` as `sum_iidMass_eq_one`'s `hq1` fence
+  engine. QA-only, zero axiom contact.
+
   All proofs are real Lean proofs (no `sorry`/`admit`). QA does not
   prove any axiom (this module admits none); it checks that the
   sampling-space interfaces return the classical numbers.
@@ -280,5 +292,326 @@ theorem junk_normalization_fence_QA :
     Finset.sum_insert (by simp [ne_10_11]), Finset.sum_singleton,
     h00, h01, h10, h11]
   norm_num
+
+section AdversarialFences
+
+/-!
+## The hypothesis-necessity pass
+
+Each fence below assumes the theorem's conclusion with exactly one
+named hypothesis dropped, at a fixture keeping every kept clause
+genuine, and derives `False` — the per-clause discipline of
+`governance/ADVERSARIAL_REVIEW.md`
+(`proposals/adversarial-fences-iid-product-family.md`). Everything
+here is a theorem-instantiation audit of an all-proved shelf: no
+axiom is consumed, no `-- @refutes` tag applies.
+-/
+
+/-- The out-of-lower-bound factor fixture `q = ![-1, 2]`: breaks `hq0`
+only — the `ENNReal.ofReal` clamp zeroes the negative coordinate's
+mass — while the kept `hq1` stays genuine at `-1 + 2 = 1`. -/
+noncomputable def iidNeg : Fin 2 → ℝ := ![-1, 2]
+
+/-- The out-of-upper-bound factor fixture `q = ![2, 0]`: breaks `hq1`
+only (the coordinate masses sum to `2 ≠ 1`) while the kept `hq0` stays
+genuine. This is the factor-distribution shape of the file's delivered
+free-form fence. -/
+noncomputable def iidTwo : Fin 2 → ℝ := ![2, 0]
+
+/-- Kept-clause pin: `hq1` is genuine at `iidNeg`. -/
+theorem iidNeg_sum : ∑ v, iidNeg v = 1 := by
+  simp only [Fin.sum_univ_two, iidNeg]
+  norm_num
+
+/-- Kept-clause pin: `hq0` is genuine at `iidTwo`. -/
+theorem iidTwo_nonneg : ∀ v, 0 ≤ iidTwo v := by
+  intro v; fin_cases v <;> norm_num [iidTwo]
+
+theorem iidNeg_ofReal_sum :
+    ∑ v, ENNReal.ofReal (iidNeg v) = ENNReal.ofReal ((2 : ℝ)) := by
+  have h0 : iidNeg 0 = -1 := by norm_num [iidNeg]
+  have h1 : iidNeg 1 = 2 := by norm_num [iidNeg]
+  rw [Fin.sum_univ_two, h0, h1,
+    show ENNReal.ofReal ((-1 : ℝ)) = 0 from ENNReal.ofReal_eq_zero.2 (by norm_num),
+    zero_add]
+
+theorem iidTwo_ofReal_sum :
+    ∑ v, ENNReal.ofReal (iidTwo v) = ENNReal.ofReal ((2 : ℝ)) := by
+  simp only [Fin.sum_univ_two, iidTwo]
+  norm_num
+
+/-- The joint-mass total at `iidTwo`, by the delivered free-form
+fence's computation (the shapes are definitionally equal). -/
+theorem iidTwo_mass_sum : ∑ ω : Fin 2 → Fin 2, iidMass iidTwo ω = 4 :=
+  junk_normalization_fence_QA
+
+theorem iidNeg_mass_sum : ∑ ω : Fin 2 → Fin 2, iidMass iidNeg ω = 4 := by
+  have hclamp : ENNReal.ofReal ((-1 : ℝ)) = 0 := ENNReal.ofReal_eq_zero.2 (by norm_num)
+  have h00 : iidMass iidNeg ![0, 0] = 0 := by
+    have h : iidMass iidNeg ![0, 0]
+        = ENNReal.ofReal ((-1 : ℝ)) * ENNReal.ofReal ((-1 : ℝ)) := by
+      simp [iidMass, Fin.prod_univ_two, iidNeg]
+    rw [h, hclamp, zero_mul]
+  have h01 : iidMass iidNeg ![0, 1] = 0 := by
+    have h : iidMass iidNeg ![0, 1]
+        = ENNReal.ofReal ((-1 : ℝ)) * ENNReal.ofReal ((2 : ℝ)) := by
+      simp [iidMass, Fin.prod_univ_two, iidNeg]
+    rw [h, hclamp, zero_mul]
+  have h10 : iidMass iidNeg ![1, 0] = 0 := by
+    have h : iidMass iidNeg ![1, 0]
+        = ENNReal.ofReal ((2 : ℝ)) * ENNReal.ofReal ((-1 : ℝ)) := by
+      simp [iidMass, Fin.prod_univ_two, iidNeg]
+    rw [h, hclamp, mul_zero]
+  have h11 : iidMass iidNeg ![1, 1] = 4 := by
+    have h : iidMass iidNeg ![1, 1]
+        = ENNReal.ofReal ((2 : ℝ)) * ENNReal.ofReal ((2 : ℝ)) := by
+      simp [iidMass, Fin.prod_univ_two, iidNeg]
+    rw [h, ← ENNReal.ofReal_mul (by norm_num),
+      show ((2 : ℝ) * 2) = 4 from by norm_num]
+    norm_num
+  rw [univ_fin2_fin2,
+    Finset.sum_insert (by simp [ne_00_01, ne_00_10, ne_00_11]),
+    Finset.sum_insert (by simp [ne_01_10, ne_01_11]),
+    Finset.sum_insert (by simp [ne_10_11]), Finset.sum_singleton,
+    h00, h01, h10, h11]
+  norm_num
+
+private theorem iidF_ofReal_ne_ofReal {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) (hne : a ≠ b)
+    (h : ENNReal.ofReal a = ENNReal.ofReal b) : False := by
+  apply_fun ENNReal.toReal at h
+  rw [ENNReal.toReal_ofReal ha, ENNReal.toReal_ofReal hb] at h
+  exact hne h
+
+/-- **Fence: `sum_mass_eq_one`'s `hq0 : ∀ v, 0 ≤ q v`.** At `q = ![-1, 2]`
+(kept `hq1` genuine: `-1 + 2 = 1`) the `ofReal` clamp zeroes the
+negative coordinate's mass, so the coordinate mass sum is
+`0 + 2 = 2 ≠ 1`. -/
+theorem iidFence_sum_mass_nonneg
+    (h : ∑ v, ENNReal.ofReal (iidNeg v) = 1) : False := by
+  rw [iidNeg_ofReal_sum, ← ENNReal.ofReal_one] at h
+  exact iidF_ofReal_ne_ofReal (by norm_num) (by norm_num) (by norm_num) h
+
+/-- **Fence: `sum_mass_eq_one`'s `hq1 : ∑ v, q v = 1`.** At `q = ![2, 0]`
+(kept `hq0` genuine) the coordinate mass sum is `2 + 0 = 2 ≠ 1`. -/
+theorem iidFence_sum_mass_sum
+    (h : ∑ v, ENNReal.ofReal (iidTwo v) = 1) : False := by
+  rw [iidTwo_ofReal_sum, ← ENNReal.ofReal_one] at h
+  exact iidF_ofReal_ne_ofReal (by norm_num) (by norm_num) (by norm_num) h
+
+/-- **Fence: `sum_iidMass_eq_one`'s `hq0`.** At `q = ![-1, 2]` (kept
+`hq1` genuine) the clamped joint masses sum to `4 ≠ 1`: the `(1,1)`
+atom carries `2 · 2 = 4` and every atom touching the negative
+coordinate is zeroed. -/
+theorem iidFence_sum_iidMass_nonneg
+    (h : ∑ ω : Fin 2 → Fin 2, iidMass iidNeg ω = 1) : False := by
+  rw [iidNeg_mass_sum,
+    show (4 : ℝ≥0∞) = ENNReal.ofReal ((4 : ℝ)) from (ENNReal.ofReal_natCast 4).symm,
+    ← ENNReal.ofReal_one] at h
+  exact iidF_ofReal_ne_ofReal (by norm_num) (by norm_num) (by norm_num) h
+
+/-- **Fence: `sum_iidMass_eq_one`'s `hq1`.** At `q = ![2, 0]` (kept
+`hq0` genuine) the joint masses sum to `4 ≠ 1` — the hypothesis-form
+wrapper consuming the file's delivered free-form fence
+`junk_normalization_fence_QA` as its proof engine, reconciling it
+into the per-clause discipline. -/
+theorem iidFence_sum_iidMass_sum
+    (h : ∑ ω : Fin 2 → Fin 2, iidMass (![2, 0] : Fin 2 → ℝ) ω = 1) : False := by
+  rw [junk_normalization_fence_QA,
+    show (4 : ℝ≥0∞) = ENNReal.ofReal ((4 : ℝ)) from (ENNReal.ofReal_natCast 4).symm,
+    ← ENNReal.ofReal_one] at h
+  exact iidF_ofReal_ne_ofReal (by norm_num) (by norm_num) (by norm_num) h
+
+/-- **Fence: `sum_coord_mul`'s `hq0`.** At `q = ![-1, 2]` with `e = 0`
+and `F` the constant `1`, the left side is the total joint mass `4`
+while the right side is the coordinate mass sum `2`: the clamped
+negative coordinate zeroes three atoms on the left but only one
+summand on the right. -/
+theorem iidFence_sum_coord_mul_nonneg
+    (h : ∑ ω : Fin 2 → Fin 2, (1 : ℝ≥0∞) * iidMass iidNeg ω
+      = ∑ v, (1 : ℝ≥0∞) * ENNReal.ofReal (iidNeg v)) : False := by
+  simp only [one_mul] at h
+  rw [iidNeg_mass_sum, iidNeg_ofReal_sum,
+    show (4 : ℝ≥0∞) = ENNReal.ofReal ((4 : ℝ)) from (ENNReal.ofReal_natCast 4).symm] at h
+  exact iidF_ofReal_ne_ofReal (by norm_num) (by norm_num) (by norm_num) h
+
+/-- **Fence: `sum_coord_mul`'s `hq1`.** At `q = ![2, 0]` with `e = 0`
+and `F` the constant `1`, the left side is the joint mass total `4`
+while the right side is the coordinate mass sum `2`. -/
+theorem iidFence_sum_coord_mul_sum
+    (h : ∑ ω : Fin 2 → Fin 2, (1 : ℝ≥0∞) * iidMass iidTwo ω
+      = ∑ v, (1 : ℝ≥0∞) * ENNReal.ofReal (iidTwo v)) : False := by
+  simp only [one_mul] at h
+  rw [iidTwo_mass_sum, iidTwo_ofReal_sum,
+    show (4 : ℝ≥0∞) = ENNReal.ofReal ((4 : ℝ)) from (ENNReal.ofReal_natCast 4).symm] at h
+  exact iidF_ofReal_ne_ofReal (by norm_num) (by norm_num) (by norm_num) h
+
+/-- **Fence: `sum_coord2_mul`'s `hq0`.** At `q = ![-1, 2]` on THREE
+sample coordinates with `e = 0`, `e' = 1` and `F = G` the constant
+`1`, the left side is the full product total `2³ = 8` while the right
+side is `2 · 2 = 4`. The third coordinate is the breaker: on
+`ι = Fin 2` both quantified coordinates are consumed by the statement
+and the dropped identity holds there by Fubini (`(0+2)² = 2·2`). -/
+theorem iidFence_sum_coord2_nonneg
+    (h : ∑ ω : Fin 3 → Fin 2, (1 : ℝ≥0∞) * (1 : ℝ≥0∞) * iidMass iidNeg ω
+      = (∑ v, (1 : ℝ≥0∞) * ENNReal.ofReal (iidNeg v))
+        * (∑ v, (1 : ℝ≥0∞) * ENNReal.ofReal (iidNeg v))) : False := by
+  simp only [one_mul] at h
+  rw [show ∑ ω : Fin 3 → Fin 2, iidMass iidNeg ω
+      = ∑ ω : Fin 3 → Fin 2, ∏ i,
+          (fun (_ : Fin 3) (v : Fin 2) => ENNReal.ofReal (iidNeg v)) i (ω i) from by
+      exact Finset.sum_congr rfl fun ω _ => rfl,
+    show (Finset.univ : Finset (Fin 3 → Fin 2)) = Fintype.piFinset fun _ => Finset.univ from by
+      ext ω; simp [Fintype.mem_piFinset],
+    Finset.sum_prod_piFinset (Finset.univ : Finset (Fin 2))
+      (fun (_ : Fin 3) (v : Fin 2) => ENNReal.ofReal (iidNeg v)),
+    iidNeg_ofReal_sum, Finset.prod_const, Finset.card_univ, Fintype.card_fin] at h
+  have hL : ENNReal.ofReal ((2 : ℝ)) ^ 3 = ENNReal.ofReal ((8 : ℝ)) := by
+    rw [← ENNReal.ofReal_pow (by norm_num : (0 : ℝ) ≤ 2)]
+    congr 1; norm_num
+  have hR : ENNReal.ofReal ((2 : ℝ)) * ENNReal.ofReal ((2 : ℝ)) = ENNReal.ofReal ((4 : ℝ)) := by
+    rw [← ENNReal.ofReal_mul (by norm_num)]
+    congr 1; norm_num
+  rw [hL, hR] at h
+  exact iidF_ofReal_ne_ofReal (by norm_num) (by norm_num) (by norm_num) h
+
+/-- **Fence: `sum_coord2_mul`'s `hq1`.** At `q = ![2, 0]` on three
+sample coordinates with `e = 0`, `e' = 1` and `F = G` the constant
+`1`, the left side is `2³ = 8` against the right side `2 · 2 = 4` —
+the same outside-the-consumed-coordinates breaker as the `hq0` twin,
+with the kept `hq0` genuine this time. -/
+theorem iidFence_sum_coord2_sum
+    (h : ∑ ω : Fin 3 → Fin 2, (1 : ℝ≥0∞) * (1 : ℝ≥0∞) * iidMass iidTwo ω
+      = (∑ v, (1 : ℝ≥0∞) * ENNReal.ofReal (iidTwo v))
+        * (∑ v, (1 : ℝ≥0∞) * ENNReal.ofReal (iidTwo v))) : False := by
+  simp only [one_mul] at h
+  rw [show ∑ ω : Fin 3 → Fin 2, iidMass iidTwo ω
+      = ∑ ω : Fin 3 → Fin 2, ∏ i,
+          (fun (_ : Fin 3) (v : Fin 2) => ENNReal.ofReal (iidTwo v)) i (ω i) from by
+      exact Finset.sum_congr rfl fun ω _ => rfl,
+    show (Finset.univ : Finset (Fin 3 → Fin 2)) = Fintype.piFinset fun _ => Finset.univ from by
+      ext ω; simp [Fintype.mem_piFinset],
+    Finset.sum_prod_piFinset (Finset.univ : Finset (Fin 2))
+      (fun (_ : Fin 3) (v : Fin 2) => ENNReal.ofReal (iidTwo v)),
+    iidTwo_ofReal_sum, Finset.prod_const, Finset.card_univ, Fintype.card_fin] at h
+  have hL : ENNReal.ofReal ((2 : ℝ)) ^ 3 = ENNReal.ofReal ((8 : ℝ)) := by
+    rw [← ENNReal.ofReal_pow (by norm_num : (0 : ℝ) ≤ 2)]
+    congr 1; norm_num
+  have hR : ENNReal.ofReal ((2 : ℝ)) * ENNReal.ofReal ((2 : ℝ)) = ENNReal.ofReal ((4 : ℝ)) := by
+    rw [← ENNReal.ofReal_mul (by norm_num)]
+    congr 1; norm_num
+  rw [hL, hR] at h
+  exact iidF_ofReal_ne_ofReal (by norm_num) (by norm_num) (by norm_num) h
+
+/-- **Fence: `sum_coord2_mul`'s `hee : e ≠ e'`.** At the all-genuine
+fixture `q23` with `e = e' = 0` and `F = G` the coordinate-`0`
+indicator, the left side is the one-coordinate marginal `2/3` while
+the right side is its square `4/9`: Cauchy–Schwarz is strict on a
+two-point value space, so a single coordinate cannot play the role of
+two. -/
+theorem iidFence_sum_coord2_hee
+    (h : ∑ ω : Fin 2 → Fin 2, (if ω 0 = 0 then (1 : ℝ≥0∞) else 0)
+          * (if ω 0 = 0 then (1 : ℝ≥0∞) else 0) * iidMass q23 ω
+      = (∑ v, (if v = 0 then (1 : ℝ≥0∞) else 0) * ENNReal.ofReal (q23 v))
+        * (∑ v, (if v = 0 then (1 : ℝ≥0∞) else 0) * ENNReal.ofReal (q23 v))) : False := by
+  have i00 : (if (![0, 0] : Fin 2 → Fin 2) 0 = 0 then (1 : ℝ≥0∞) else 0) = 1 := by simp
+  have i01 : (if (![0, 1] : Fin 2 → Fin 2) 0 = 0 then (1 : ℝ≥0∞) else 0) = 1 := by simp
+  have i10 : (if (![1, 0] : Fin 2 → Fin 2) 0 = 0 then (1 : ℝ≥0∞) else 0) = 0 := by simp
+  have i11 : (if (![1, 1] : Fin 2 → Fin 2) 0 = 0 then (1 : ℝ≥0∞) else 0) = 0 := by simp
+  have hL : ∑ ω : Fin 2 → Fin 2, (if ω 0 = 0 then (1 : ℝ≥0∞) else 0)
+      * (if ω 0 = 0 then (1 : ℝ≥0∞) else 0) * iidMass q23 ω
+      = ENNReal.ofReal ((2 : ℝ) / 3) := by
+    rw [univ_fin2_fin2,
+      Finset.sum_insert (by simp [ne_00_01, ne_00_10, ne_00_11]),
+      Finset.sum_insert (by simp [ne_01_10, ne_01_11]),
+      Finset.sum_insert (by simp [ne_10_11]), Finset.sum_singleton,
+      i00, i01, i10, i11, mass_00_QA, mass_01_QA]
+    simp only [one_mul, zero_mul, add_zero, zero_add]
+    rw [← ENNReal.ofReal_add (by norm_num) (by norm_num)]
+    congr 1; norm_num
+  have hR : ∑ v, (if v = 0 then (1 : ℝ≥0∞) else 0) * ENNReal.ofReal (q23 v)
+      = ENNReal.ofReal ((2 : ℝ) / 3) := by
+    rw [Finset.sum_eq_single (0 : Fin 2)]
+    · simp [q23_zero]
+    · intro b _ hb; simp [hb]
+    · intro h; exact absurd (Finset.mem_univ 0) h
+  rw [hL, hR, ← ENNReal.ofReal_mul (by norm_num)] at h
+  exact iidF_ofReal_ne_ofReal (by norm_num) (by norm_num) (by norm_num) h
+
+/-- **Fence: `indepFun_coord`'s `hee`.** At the all-genuine fixture
+with `e = e' = 0` the two "independent" coordinates are the same
+function: at `s = t = {0}`, `μ(A ∩ A) = μ(A) = 2/3 ≠ 4/9 = μ(A) ·
+μ(A)` — a coordinate is not independent of itself. -/
+theorem iidFence_indepFun_coord_hee
+    (h : IndepFun (fun ω : Fin 2 → Fin 2 => ω 0) (fun ω : Fin 2 → Fin 2 => ω 0)
+      (iidPMF q23 q23_nonneg q23_sum).toMeasure) : False := by
+  rw [indepFun_iff_measure_inter_preimage_eq_mul] at h
+  have h' := h {0} {0}
+    ((Set.toFinite ({0} : Set (Fin 2))).measurableSet)
+    ((Set.toFinite ({0} : Set (Fin 2))).measurableSet)
+  rw [Set.inter_self, cylinder_QA, ← ENNReal.ofReal_mul (by norm_num)] at h'
+  exact iidF_ofReal_ne_ofReal (by norm_num) (by norm_num) (by norm_num) h'
+
+/-- **Fence: `indepFun_indicator_coord`'s `hee`.** The same clause at
+the indicator codomain: with `e = e' = 0` and `i = j = 0` the two
+"independent" indicators are the same function, killed at the
+measurable set `{1}` (the indicator's support) through the preimage
+identification with the `{ω | ω 0 = 0}` cylinder. -/
+theorem iidFence_indepFun_indicator_hee
+    (h : IndepFun (fun ω : Fin 2 → Fin 2 => (if ω 0 = 0 then (1 : ℝ) else 0))
+        (fun ω : Fin 2 → Fin 2 => (if ω 0 = 0 then (1 : ℝ) else 0))
+        (iidPMF q23 q23_nonneg q23_sum).toMeasure) : False := by
+  rw [indepFun_iff_measure_inter_preimage_eq_mul] at h
+  have hm : MeasurableSet ({1} : Set ℝ) := measurableSet_singleton 1
+  have h' := h {1} {1} hm hm
+  have hpre : (fun ω : Fin 2 → Fin 2 => (if ω 0 = 0 then (1 : ℝ) else 0)) ⁻¹' {1}
+      = (fun ω : Fin 2 → Fin 2 => ω 0) ⁻¹' {0} := by
+    ext ω
+    simp only [Set.mem_preimage, Set.mem_singleton_iff]
+    by_cases hω : ω 0 = 0 <;> simp [hω]
+  rw [hpre, Set.inter_self, cylinder_QA, ← ENNReal.ofReal_mul (by norm_num)] at h'
+  exact iidF_ofReal_ne_ofReal (by norm_num) (by norm_num) (by norm_num) h'
+
+/-- **Fence: `iIndepFun_coord_apply`'s `he : Function.Injective e`.**
+At the constant reindexing `e : Fin 2 → Fin 2 := fun _ => 0` with
+`F k = id` (kept `hF` genuine: the identity is measurable) both
+reindexed coordinates are `ω ↦ ω 0` — perfectly correlated — killed at
+`T = univ`, `sets = {0}, {0}`: mutual independence fails as
+`2/3 ≠ 4/9`. The empirical-stationary designs reindex trajectory
+times into coordinates injectively; this clause is what makes that
+transfer sound. -/
+theorem iidFence_iIndep_apply_he
+    (h : iIndepFun (fun _ : Fin 2 => (inferInstance : MeasurableSpace (Fin 2)))
+      (fun (_ : Fin 2) (ω : Fin 2 → Fin 2) => (fun (v : Fin 2) => v) (ω (0 : Fin 2)))
+      (iidPMF q23 q23_nonneg q23_sum).toMeasure) : False := by
+  rw [iIndepFun_iff_measure_inter_preimage_eq_mul] at h
+  have h' := h (Finset.univ : Finset (Fin 2)) (sets := fun _ => {0})
+    (fun _ _ => (Set.toFinite ({0} : Set (Fin 2))).measurableSet)
+  have hint : (⋂ k ∈ (Finset.univ : Finset (Fin 2)),
+      (fun ω : Fin 2 → Fin 2 => (fun (v : Fin 2) => v) (ω (0 : Fin 2))) ⁻¹' {0})
+      = (fun ω : Fin 2 → Fin 2 => ω (0 : Fin 2)) ⁻¹' {0} := by
+    ext ω
+    simp only [Set.mem_iInter]
+    exact ⟨fun hh => hh 0 (Finset.mem_univ 0), fun hh k _ => hh⟩
+  simp only [hint, cylinder_QA] at h'
+  rw [Finset.prod_const, Finset.card_fin, pow_two,
+    ← ENNReal.ofReal_mul (by norm_num)] at h'
+  exact iidF_ofReal_ne_ofReal (by norm_num) (by norm_num) (by norm_num) h'
+
+/-- The strengthening companion: `iIndepFun_coord_apply`'s
+`hF : ∀ k, Measurable (F k)` clause is decorative at the shelf's own
+generality — `V` is a `Fintype` with `MeasurableSingletonClass`, so
+every subset of `V` is measurable and `measurable_of_finite`
+discharges the clause for any `F`. The hF-free twin holds verbatim. -/
+theorem iIndepFun_coord_apply_strict {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {V : Type*} [Fintype V] [DecidableEq V] [MeasurableSpace V] [MeasurableSingletonClass V]
+    (q : V → ℝ) (hq0 : ∀ v, 0 ≤ q v) (hq1 : ∑ v, q v = 1)
+    {γ : Type*} {mγ : MeasurableSpace γ}
+    {ι' : Type*} [Fintype ι'] (e : ι' → ι) (he : Function.Injective e)
+    (F : ι' → V → γ) :
+    iIndepFun (fun _ : ι' => mγ)
+      (fun (k : ι') (ω : ι → V) => F k (ω (e k))) (iidPMF q hq0 hq1).toMeasure :=
+  iIndepFun_coord_apply q hq0 hq1 e he F (fun _ => measurable_of_finite _)
+
+end AdversarialFences
 
 end Scaffold.Mathlib.Probability.IIDProduct.QA

@@ -80,41 +80,41 @@ The unit edge has resistance exactly `1`: the witness potential
 
 /-- The resistance value on the edge, as a relation instance: `1`
 witnessed by the potential `![1, 0]`. -/
-theorem edge_resistance_one_QA : IsEffectiveResistance edgeAdj 0 1 (1 : ℝ) :=
+theorem edge_resistance_one_QA : IsEffectiveResistance psEdgeAdj 0 1 (1 : ℝ) :=
   ⟨![1, 0], edge_potential_value_QA, by norm_num [Matrix.cons_val']⟩
 
 /-- **Value of the total function on the edge:** `R 0 1 = 1` for the
 unit-resistance edge, pinned through the agreement theorem. -/
 theorem edge_effectiveResistance_eq_one_QA :
-    effectiveResistance edgeAdj 0 1 = 1 :=
-  effectiveResistance_eq edgeAdj edgeAdj_isSymm edgeAdj_nonneg
+    effectiveResistance psEdgeAdj 0 1 = 1 :=
+  effectiveResistance_eq psEdgeAdj psEdgeAdj_isSymm psEdgeAdj_nonneg
     edge_supportGraph_connected edge_resistance_one_QA
 
 /-- **Orientation-independence of the value:** `R 1 0 = 1` on the edge,
 through the symmetry theorem (not by a second witness). -/
 theorem edge_effectiveResistance_symm_value_QA :
-    effectiveResistance edgeAdj 1 0 = 1 := by
-  rw [effectiveResistance_symm edgeAdj edgeAdj_isSymm edgeAdj_nonneg
+    effectiveResistance psEdgeAdj 1 0 = 1 := by
+  rw [effectiveResistance_symm psEdgeAdj psEdgeAdj_isSymm psEdgeAdj_nonneg
     edge_supportGraph_connected 1 0, edge_effectiveResistance_eq_one_QA]
 
 /-- **Diagonal:** `R 0 0 = 0` unconditionally. -/
 theorem edge_effectiveResistance_self_QA :
-    effectiveResistance edgeAdj 0 0 = 0 :=
-  effectiveResistance_self edgeAdj 0
+    effectiveResistance psEdgeAdj 0 0 = 0 :=
+  effectiveResistance_self psEdgeAdj 0
 
 /-- **Nonnegativity interface instantiation** on the edge. -/
 theorem edge_effectiveResistance_nonneg_QA :
-    0 ≤ effectiveResistance edgeAdj 0 1 :=
-  effectiveResistance_nonneg edgeAdj edgeAdj_isSymm edgeAdj_nonneg
+    0 ≤ effectiveResistance psEdgeAdj 0 1 :=
+  effectiveResistance_nonneg psEdgeAdj psEdgeAdj_isSymm psEdgeAdj_nonneg
     edge_supportGraph_connected 0 1
 
 /-- **Energy-identity interface instantiation** on the edge: some
 potential solves the demand, and `R` equals its energy. -/
 theorem edge_energy_identity_QA :
-    ∃ f : Fin 2 → ℝ, (laplacian edgeAdj).mulVec f
+    ∃ f : Fin 2 → ℝ, (laplacian psEdgeAdj).mulVec f
       = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ)
-      ∧ effectiveResistance edgeAdj 0 1 = quadForm (laplacian edgeAdj) f :=
-  effectiveResistance_eq_quadForm edgeAdj edgeAdj_isSymm edgeAdj_nonneg
+      ∧ effectiveResistance psEdgeAdj 0 1 = quadForm (laplacian psEdgeAdj) f :=
+  effectiveResistance_eq_quadForm psEdgeAdj psEdgeAdj_isSymm psEdgeAdj_nonneg
     edge_supportGraph_connected 0 1
 
 /-!
@@ -270,9 +270,9 @@ witness for the `0 <` energy hypothesis.
 /-- **Independent energy computation (edge):** the energy of `![1, 0]`
 — computed from the raw definitions, not through any theorem — is `1`
 (the voltage difference it realizes). -/
-theorem edge_energy_e0_QA : quadForm (laplacian edgeAdj) ![1, 0] = 1 := by
+theorem edge_energy_e0_QA : quadForm (laplacian psEdgeAdj) ![1, 0] = 1 := by
   simp [quadForm, Matrix.mulVec, Matrix.dotProduct, laplacian,
-    degreeMatrix, deg, edgeAdj, Fin.sum_univ_two]
+    degreeMatrix, deg, psEdgeAdj, Fin.sum_univ_two]
 
 /-- **Independent energy computation (path):** the energy of the
 non-harmonic test potential `![1, 0, 0]`, computed from the raw
@@ -288,8 +288,8 @@ gives `1 ^ 2 / 1 = 1 = R 0 1`, computed from the independent energy
 (`edge_energy_e0_QA`) and the pinned resistance value. Equality, not
 just the inequality. -/
 theorem edge_bound_attained_QA :
-    (![1, 0] 0 - ![1, 0] 1) ^ 2 / quadForm (laplacian edgeAdj) ![1, 0]
-      = effectiveResistance edgeAdj 0 1 := by
+    (![1, 0] 0 - ![1, 0] 1) ^ 2 / quadForm (laplacian psEdgeAdj) ![1, 0]
+      = effectiveResistance psEdgeAdj 0 1 := by
   rw [edge_energy_e0_QA, edge_effectiveResistance_eq_one_QA]
   norm_num [Matrix.cons_val']
 
@@ -297,10 +297,10 @@ theorem edge_bound_attained_QA :
 `f = ![1, 0]` with the positivity hypothesis discharged by the
 independent energy computation. -/
 theorem edge_bound_QA :
-    (![1, 0] 0 - ![1, 0] 1) ^ 2 / quadForm (laplacian edgeAdj) ![1, 0]
-      ≤ effectiveResistance edgeAdj 0 1 :=
-  effectiveResistance_ge_sq_div_quadForm edgeAdj edgeAdj_isSymm
-    edgeAdj_nonneg edge_supportGraph_connected 0 1 ![1, 0]
+    (![1, 0] 0 - ![1, 0] 1) ^ 2 / quadForm (laplacian psEdgeAdj) ![1, 0]
+      ≤ effectiveResistance psEdgeAdj 0 1 :=
+  effectiveResistance_ge_sq_div_quadForm psEdgeAdj psEdgeAdj_isSymm
+    psEdgeAdj_nonneg edge_supportGraph_connected 0 1 ![1, 0]
     (by rw [edge_energy_e0_QA]; norm_num)
 
 /-- **The bound is attained at the harmonic potential (path):** the

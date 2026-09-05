@@ -129,7 +129,7 @@ theorem cheeger_bounds_coherent_QA (A : WAdj (V := V))
 /-!
 ## Fixture: the two-vertex edge
 
-`edgeAdj` is the adjacency matrix of `K₂`, a `1`-regular graph. The
+`cheegerEdgeAdj` is the adjacency matrix of `K₂`, a `1`-regular graph. The
 fixture serves two purposes:
 
 - a **refutation of the pre-repair statement shape**: composing the old
@@ -144,43 +144,43 @@ fixture serves two purposes:
 
 /-- Adjacency matrix of the two-vertex edge: a `1`-regular weighted
 graph on `Fin 2`. -/
-def edgeAdj : Matrix (Fin 2) (Fin 2) ℝ :=
+def cheegerEdgeAdj : Matrix (Fin 2) (Fin 2) ℝ :=
   Matrix.of fun i j => if i = j then 0 else 1
 
-theorem edgeAdj_symmetric : edgeAdj.IsSymm := by
+theorem cheegerEdgeAdj_symmetric : cheegerEdgeAdj.IsSymm := by
   refine Matrix.IsSymm.ext fun i j => ?_
-  fin_cases i <;> fin_cases j <;> simp [edgeAdj]
+  fin_cases i <;> fin_cases j <;> simp [cheegerEdgeAdj]
 
-theorem edgeAdj_nonneg : ∀ i j, 0 ≤ edgeAdj i j := by
+theorem cheegerEdgeAdj_nonneg : ∀ i j, 0 ≤ cheegerEdgeAdj i j := by
   intro i j
-  fin_cases i <;> fin_cases j <;> simp [edgeAdj]
+  fin_cases i <;> fin_cases j <;> simp [cheegerEdgeAdj]
 
 /-- `K₂` is `1`-regular. -/
-theorem edgeAdj_regular : ∀ i, deg edgeAdj i = 1 := by
+theorem cheegerEdgeAdj_regular : ∀ i, deg cheegerEdgeAdj i = 1 := by
   intro i
-  fin_cases i <;> simp [deg, edgeAdj, Fin.sum_univ_two]
+  fin_cases i <;> simp [deg, cheegerEdgeAdj, Fin.sum_univ_two]
 
-theorem edgeAdj_card : 2 ≤ Fintype.card (Fin 2) := le_refl 2
+theorem cheegerEdgeAdj_card : 2 ≤ Fintype.card (Fin 2) := le_refl 2
 
 section EdgeCuts
 
 /-- The edge cut of either singleton has boundary weight `1`. -/
-theorem edge_boundary_singleton (i : Fin 2) : boundary edgeAdj {i} = 1 := by
+theorem edge_boundary_singleton (i : Fin 2) : boundary cheegerEdgeAdj {i} = 1 := by
   fin_cases i
-  · simp [boundary, edgeAdj,
+  · simp [boundary, cheegerEdgeAdj,
       show ({0} : Finset (Fin 2))ᶜ = {1} by decide, Finset.sum_singleton]
-  · simp [boundary, edgeAdj,
+  · simp [boundary, cheegerEdgeAdj,
       show ({1} : Finset (Fin 2))ᶜ = {0} by decide, Finset.sum_singleton]
 
 /-- Both sides of the edge cut have volume `1`. -/
 theorem edge_vol_singleton (i : Fin 2) :
-    vol edgeAdj {i} = 1 ∧ vol edgeAdj {i}ᶜ = 1 := by
-  have h1 : ∀ j : Fin 2, vol edgeAdj {j} = 1 := by
+    vol cheegerEdgeAdj {i} = 1 ∧ vol cheegerEdgeAdj {i}ᶜ = 1 := by
+  have h1 : ∀ j : Fin 2, vol cheegerEdgeAdj {j} = 1 := by
     intro j
-    rw [vol, Finset.sum_singleton, edgeAdj_regular]
-  have h2 : ∀ j : Fin 2, vol edgeAdj {j}ᶜ = 1 := by
+    rw [vol, Finset.sum_singleton, cheegerEdgeAdj_regular]
+  have h2 : ∀ j : Fin 2, vol cheegerEdgeAdj {j}ᶜ = 1 := by
     intro j
-    rw [vol, Finset.sum_congr rfl (fun i _ => edgeAdj_regular i),
+    rw [vol, Finset.sum_congr rfl (fun i _ => cheegerEdgeAdj_regular i),
       Finset.sum_const, Finset.card_compl, Finset.card_singleton,
       Fintype.card_fin]
     norm_num
@@ -188,14 +188,14 @@ theorem edge_vol_singleton (i : Fin 2) :
 
 /-- The conductance of the edge cut is `1`, so the Cheeger constant of
 `K₂` — the infimum over its two cuts — is `1`. -/
-theorem edge_cheegerConstant : cheegerConstant edgeAdj = 1 := by
-  have hcond : ∀ i : Fin 2, conductance edgeAdj {i} = 1 := by
+theorem edge_cheegerConstant : cheegerConstant cheegerEdgeAdj = 1 := by
+  have hcond : ∀ i : Fin 2, conductance cheegerEdgeAdj {i} = 1 := by
     intro i
     obtain ⟨hv1, hv2⟩ := edge_vol_singleton i
     rw [conductance, edge_boundary_singleton i, hv1, hv2]
     norm_num
   have hset : {c : ℝ | ∃ S : Finset (Fin 2), S.Nonempty ∧ Sᶜ.Nonempty ∧
-      conductance edgeAdj S = c} = {1} := by
+      conductance cheegerEdgeAdj S = c} = {1} := by
     ext c
     constructor
     · rintro ⟨S, hne, hcn, rfl⟩
@@ -220,36 +220,36 @@ section OldShape
 /-- Entries of the normalized Laplacian of `K₂`: `1` on the diagonal,
 `-1` off it. -/
 theorem edge_normLap_diag (i : Fin 2) :
-    regularNormalizedLaplacian edgeAdj 1 i i = 1 := by
-  fin_cases i <;> simp [regularNormalizedLaplacian, edgeAdj]
+    regularNormalizedLaplacian cheegerEdgeAdj 1 i i = 1 := by
+  fin_cases i <;> simp [regularNormalizedLaplacian, cheegerEdgeAdj]
 
 theorem edge_normLap_off {i j : Fin 2} (h : i ≠ j) :
-    regularNormalizedLaplacian edgeAdj 1 i j = -1 := by
-  simp [regularNormalizedLaplacian, edgeAdj, h]
+    regularNormalizedLaplacian cheegerEdgeAdj 1 i j = -1 := by
+  simp [regularNormalizedLaplacian, cheegerEdgeAdj, h]
 
 /-- Rows of the normalized Laplacian of a regular graph sum to zero, so
 its degree matrix vanishes. -/
 theorem edge_normLap_degreeMatrix :
-    degreeMatrix (regularNormalizedLaplacian edgeAdj 1) = 0 := by
+    degreeMatrix (regularNormalizedLaplacian cheegerEdgeAdj 1) = 0 := by
   ext a b
   by_cases hab : a = b
   · subst hab
-    have hdeg : deg (regularNormalizedLaplacian edgeAdj 1) a = 0 := by
+    have hdeg : deg (regularNormalizedLaplacian cheegerEdgeAdj 1) a = 0 := by
       fin_cases a <;>
-        simp [deg, regularNormalizedLaplacian, edgeAdj, Fin.sum_univ_two]
+        simp [deg, regularNormalizedLaplacian, cheegerEdgeAdj, Fin.sum_univ_two]
     simp [degreeMatrix, hdeg]
   · simp [degreeMatrix, hab]
 
 /-- The combinatorial Laplacian *of* the normalized Laplacian of `K₂`
 is its negation, entrywise `L(L_sym) = -L_sym`. -/
 theorem edge_lapOfNormLap_entry (i j : Fin 2) :
-    laplacian (regularNormalizedLaplacian edgeAdj 1) i j
+    laplacian (regularNormalizedLaplacian cheegerEdgeAdj 1) i j
       = if i = j then -1 else 1 := by
   by_cases h : i = j
   · subst h
-    have hdeg : deg (regularNormalizedLaplacian edgeAdj 1) i = 0 := by
+    have hdeg : deg (regularNormalizedLaplacian cheegerEdgeAdj 1) i = 0 := by
       fin_cases i <;>
-        simp [deg, regularNormalizedLaplacian, edgeAdj, Fin.sum_univ_two]
+        simp [deg, regularNormalizedLaplacian, cheegerEdgeAdj, Fin.sum_univ_two]
     rw [laplacian, Matrix.sub_apply, degreeMatrix_diagonal, hdeg,
       edge_normLap_diag]
     norm_num
@@ -261,7 +261,7 @@ theorem edge_lapOfNormLap_entry (i j : Fin 2) :
 negated squared difference `-(x 0 - x 1)²`. -/
 theorem edge_old_quadForm (x : Fin 2 → ℝ) :
     Matrix.dotProduct x
-        ((laplacian (regularNormalizedLaplacian edgeAdj 1)).mulVec x)
+        ((laplacian (regularNormalizedLaplacian cheegerEdgeAdj 1)).mulVec x)
       = -(x 0 - x 1) ^ 2 := by
   simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
     edge_lapOfNormLap_entry]
@@ -271,13 +271,13 @@ theorem edge_old_quadForm (x : Fin 2 → ℝ) :
 /-- Every eigenvalue of `L(L_sym) = -L_sym` is nonpositive, by the
 center's one-sided Rayleigh bound at the orthonormal eigenbasis. -/
 theorem edge_old_eigvalOf_le_zero (i : Fin 2) :
-    eigvalOf (laplacian (regularNormalizedLaplacian edgeAdj 1))
+    eigvalOf (laplacian (regularNormalizedLaplacian cheegerEdgeAdj 1))
         (laplacian_symmetric _ (regularNormalizedLaplacian_symmetric
-          edgeAdj edgeAdj_symmetric 1)) i ≤ 0 :=
+          cheegerEdgeAdj cheegerEdgeAdj_symmetric 1)) i ≤ 0 :=
   eigvalOf_le_of_quadForm_nonpos
-    (laplacian (regularNormalizedLaplacian edgeAdj 1))
-    (laplacian_symmetric (regularNormalizedLaplacian edgeAdj 1)
-      (regularNormalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric 1))
+    (laplacian (regularNormalizedLaplacian cheegerEdgeAdj 1))
+    (laplacian_symmetric (regularNormalizedLaplacian cheegerEdgeAdj 1)
+      (regularNormalizedLaplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric 1))
     (by
       intro x
       rw [edge_old_quadForm x]
@@ -286,12 +286,12 @@ theorem edge_old_eigvalOf_le_zero (i : Fin 2) :
 
 /-- The sorted spectrum of `L(L_sym) = -L_sym` is entrywise nonpositive. -/
 theorem edge_old_evals_le_zero :
-    evals (laplacian_symmetric (regularNormalizedLaplacian edgeAdj 1)
-      (regularNormalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric 1))
+    evals (laplacian_symmetric (regularNormalizedLaplacian cheegerEdgeAdj 1)
+      (regularNormalizedLaplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric 1))
         (1 : Fin 2) ≤ 0 := by
   obtain ⟨i, hi⟩ := evals_mem_eigvalOf
-    (laplacian_symmetric (regularNormalizedLaplacian edgeAdj 1)
-      (regularNormalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric 1))
+    (laplacian_symmetric (regularNormalizedLaplacian cheegerEdgeAdj 1)
+      (regularNormalizedLaplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric 1))
     (1 : Fin 2)
   rw [hi]
   exact edge_old_eigvalOf_le_zero i
@@ -306,9 +306,9 @@ why the axiom had to be restated at the corrected shape
 are exactly the instance data of `K₂` (symmetric, nonnegative,
 `1`-regular, positive degree, two vertices). -/
 theorem old_cheeger_lower_bound_refuted_QA
-    (h : (cheegerConstant edgeAdj) ^ 2 / 2 ≤
-      lambda2 (regularNormalizedLaplacian edgeAdj 1)
-        (regularNormalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric 1)
+    (h : (cheegerConstant cheegerEdgeAdj) ^ 2 / 2 ≤
+      lambda2 (regularNormalizedLaplacian cheegerEdgeAdj 1)
+        (regularNormalizedLaplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric 1)
         (le_refl 2)) : False := by
   rw [edge_cheegerConstant] at h
   simp only [lambda2] at h
@@ -352,11 +352,11 @@ private theorem two_point_pin {l : List ℝ} (h2 : l.length = 2)
 
 /-- Trace and determinant of the normalized Laplacian of `K₂`. -/
 theorem edge_normLap_trace :
-    (regularNormalizedLaplacian edgeAdj 1).trace = 2 := by
+    (regularNormalizedLaplacian cheegerEdgeAdj 1).trace = 2 := by
   simp [Matrix.trace, edge_normLap_diag]
 
 theorem edge_normLap_det :
-    (regularNormalizedLaplacian edgeAdj 1).det = 0 := by
+    (regularNormalizedLaplacian cheegerEdgeAdj 1).det = 0 := by
   rw [Matrix.det_fin_two]
   have e01 : (0 : Fin 2) ≠ 1 := by decide
   have e10 : (1 : Fin 2) ≠ 0 := by decide
@@ -370,26 +370,26 @@ computation: trace and determinant come from entrywise arithmetic, the
 sum/product bridges from `Multiset.sort_eq`, and the pin from
 `two_point_pin`. -/
 theorem edge_normLap_secondEval_eq_two_QA :
-    secondEval (regularNormalizedLaplacian edgeAdj 1)
-      (regularNormalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric 1)
+    secondEval (regularNormalizedLaplacian cheegerEdgeAdj 1)
+      (regularNormalizedLaplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric 1)
       (le_refl 2) = 2 := by
   have hlen : (Multiset.sort (fun a b => a ≤ b)
       ((Finset.univ : Finset (Fin 2)).val.map
         ((isHermitian_of_isSymm (regularNormalizedLaplacian_symmetric
-          edgeAdj edgeAdj_symmetric 1)).eigenvalues))).length = 2 := by
+          cheegerEdgeAdj cheegerEdgeAdj_symmetric 1)).eigenvalues))).length = 2 := by
     rw [Multiset.length_sort, Multiset.card_map]; simp
   have hsorted : (Multiset.sort (fun a b => a ≤ b)
       ((Finset.univ : Finset (Fin 2)).val.map
         ((isHermitian_of_isSymm (regularNormalizedLaplacian_symmetric
-          edgeAdj edgeAdj_symmetric 1)).eigenvalues))).Sorted
+          cheegerEdgeAdj cheegerEdgeAdj_symmetric 1)).eigenvalues))).Sorted
         (fun a b => a ≤ b) :=
     Multiset.sort_sorted _ _
   have hsum : (Multiset.sort (fun a b => a ≤ b)
       ((Finset.univ : Finset (Fin 2)).val.map
         ((isHermitian_of_isSymm (regularNormalizedLaplacian_symmetric
-          edgeAdj edgeAdj_symmetric 1)).eigenvalues))).sum = 2 := by
-    have htr : ∑ i : Fin 2, eigvalOf (regularNormalizedLaplacian edgeAdj 1)
-        (regularNormalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric 1) i
+          cheegerEdgeAdj cheegerEdgeAdj_symmetric 1)).eigenvalues))).sum = 2 := by
+    have htr : ∑ i : Fin 2, eigvalOf (regularNormalizedLaplacian cheegerEdgeAdj 1)
+        (regularNormalizedLaplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric 1) i
           = 2 := by
       rw [eigvalOf_sum_eq_trace, edge_normLap_trace]
     rw [← Multiset.sum_coe, Multiset.sort_eq, ← Finset.sum_eq_multiset_sum]
@@ -397,12 +397,12 @@ theorem edge_normLap_secondEval_eq_two_QA :
   have hprod : (Multiset.sort (fun a b => a ≤ b)
       ((Finset.univ : Finset (Fin 2)).val.map
         ((isHermitian_of_isSymm (regularNormalizedLaplacian_symmetric
-          edgeAdj edgeAdj_symmetric 1)).eigenvalues))).prod = 0 := by
+          cheegerEdgeAdj cheegerEdgeAdj_symmetric 1)).eigenvalues))).prod = 0 := by
     have hd : ∏ i : Fin 2, ((isHermitian_of_isSymm
-        (regularNormalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric
+        (regularNormalizedLaplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric
           1)).eigenvalues i) = 0 := by
       have hd0 := (isHermitian_of_isSymm (regularNormalizedLaplacian_symmetric
-        edgeAdj edgeAdj_symmetric 1)).det_eq_prod_eigenvalues
+        cheegerEdgeAdj cheegerEdgeAdj_symmetric 1)).det_eq_prod_eigenvalues
       rw [edge_normLap_det] at hd0
       simpa using hd0.symm
     rw [← Multiset.prod_coe, Multiset.sort_eq, ← Finset.prod_eq_multiset_prod]
@@ -415,18 +415,18 @@ and the spectral value `λ₂(L_sym) = 2` are computed independently of
 the axioms, so a defective spectral side (as in the pre-repair shape,
 which evaluates to `0` and violates this check) cannot pass. -/
 theorem cheeger_bounds_edge_QA :
-    (cheegerConstant edgeAdj) ^ 2 / 2 ≤
-        secondEval (regularNormalizedLaplacian edgeAdj 1)
-          (regularNormalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric 1)
+    (cheegerConstant cheegerEdgeAdj) ^ 2 / 2 ≤
+        secondEval (regularNormalizedLaplacian cheegerEdgeAdj 1)
+          (regularNormalizedLaplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric 1)
           (le_refl 2) ∧
-      secondEval (regularNormalizedLaplacian edgeAdj 1)
-        (regularNormalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric 1)
-        (le_refl 2) ≤ 2 * cheegerConstant edgeAdj := by
+      secondEval (regularNormalizedLaplacian cheegerEdgeAdj 1)
+        (regularNormalizedLaplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric 1)
+        (le_refl 2) ≤ 2 * cheegerConstant cheegerEdgeAdj := by
   constructor <;> [
-    exact cheeger_lower_bound edgeAdj edgeAdj_symmetric edgeAdj_nonneg 1
-      edgeAdj_regular (by norm_num) edgeAdj_card;
-    exact cheeger_upper_bound edgeAdj edgeAdj_symmetric edgeAdj_nonneg 1
-      edgeAdj_regular (by norm_num) edgeAdj_card]
+    exact cheeger_lower_bound cheegerEdgeAdj cheegerEdgeAdj_symmetric cheegerEdgeAdj_nonneg 1
+      cheegerEdgeAdj_regular (by norm_num) cheegerEdgeAdj_card;
+    exact cheeger_upper_bound cheegerEdgeAdj cheegerEdgeAdj_symmetric cheegerEdgeAdj_nonneg 1
+      cheegerEdgeAdj_regular (by norm_num) cheegerEdgeAdj_card]
 
 end NewShape
 
@@ -448,7 +448,7 @@ section ProvedEasyDirection
 `![1, -1]` — the values `vol Sᶜ = 1` on `S` and `- vol S = -1` off it,
 from the definitions. -/
 theorem cutTestVector_edge_QA :
-    cutTestVector edgeAdj ({0} : Finset (Fin 2)) = ![1, -1] := by
+    cutTestVector cheegerEdgeAdj ({0} : Finset (Fin 2)) = ![1, -1] := by
   obtain ⟨hv1, hv2⟩ := edge_vol_singleton 0
   funext i
   fin_cases i
@@ -463,14 +463,14 @@ exactly the independently pinned value `λ₂(L_sym) = 2`
 *attained* on `K₂`, at the vector whose values are pinned by
 `cutTestVector_edge_QA`. -/
 theorem cutTestVector_edge_rayleigh_QA :
-    rayleigh (regularNormalizedLaplacian edgeAdj 1)
-        (cutTestVector edgeAdj ({0} : Finset (Fin 2))) = 2 := by
+    rayleigh (regularNormalizedLaplacian cheegerEdgeAdj 1)
+        (cutTestVector cheegerEdgeAdj ({0} : Finset (Fin 2))) = 2 := by
   obtain ⟨hv1, hv2⟩ := edge_vol_singleton 0
-  have hvV : vol edgeAdj (Finset.univ : Finset (Fin 2)) = 2 := by
-    rw [← vol_compl edgeAdj ({0} : Finset (Fin 2)), hv1, hv2]
+  have hvV : vol cheegerEdgeAdj (Finset.univ : Finset (Fin 2)) = 2 := by
+    rw [← vol_compl cheegerEdgeAdj ({0} : Finset (Fin 2)), hv1, hv2]
     norm_num
-  rw [rayleigh_regularNormalizedLaplacian_cutTestVector edgeAdj
-    edgeAdj_symmetric 1 edgeAdj_regular (by norm_num) (by decide)
+  rw [rayleigh_regularNormalizedLaplacian_cutTestVector cheegerEdgeAdj
+    cheegerEdgeAdj_symmetric 1 cheegerEdgeAdj_regular (by norm_num) (by decide)
     (by decide), edge_boundary_singleton 0, hv1, hv2, hvV]
   norm_num
 
@@ -480,9 +480,9 @@ conductance (`edge_cheegerConstant`) are computed independently of the
 theorem, so the equality is a genuine cross-check of the proved bound
 rather than an axiom instantiation. -/
 theorem cheeger_upper_bound_edge_eq_QA :
-    secondEval (regularNormalizedLaplacian edgeAdj 1)
-        (regularNormalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric 1)
-        (le_refl 2) = 2 * cheegerConstant edgeAdj := by
+    secondEval (regularNormalizedLaplacian cheegerEdgeAdj 1)
+        (regularNormalizedLaplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric 1)
+        (le_refl 2) = 2 * cheegerConstant cheegerEdgeAdj := by
   rw [edge_normLap_secondEval_eq_two_QA, edge_cheegerConstant]
   norm_num
 
@@ -566,22 +566,22 @@ theorem edgeF_one : edgeF 1 = 0 := by simp [edgeF]
 /-- Component A's left-hand total-variation sum on `K₂` at `edgeF`,
 computed from the definitions: `|1² - 0²|` across both ordered pairs. -/
 theorem edge_core_tv :
-    ∑ i, ∑ j, edgeAdj i j * |edgeF i ^ 2 - edgeF j ^ 2| = 2 := by
-  simp only [Fin.sum_univ_two, edgeAdj, edgeF_zero, edgeF_one]
+    ∑ i, ∑ j, cheegerEdgeAdj i j * |edgeF i ^ 2 - edgeF j ^ 2| = 2 := by
+  simp only [Fin.sum_univ_two, cheegerEdgeAdj, edgeF_zero, edgeF_one]
   norm_num
 
 /-- Component A's energy factor on `K₂` at `edgeF`, computed raw. -/
 theorem edge_core_E' :
-    ∑ i, ∑ j, edgeAdj i j * (edgeF i - edgeF j) ^ 2 = 2 := by
-  simp only [Fin.sum_univ_two, edgeAdj, edgeF_zero, edgeF_one]
+    ∑ i, ∑ j, cheegerEdgeAdj i j * (edgeF i - edgeF j) ^ 2 = 2 := by
+  simp only [Fin.sum_univ_two, cheegerEdgeAdj, edgeF_zero, edgeF_one]
   norm_num
 
 /-- Component A's degree-weighted factor on `K₂` at `edgeF`, through
 the new regularity bridge `sum_deg_mul_eq_of_regular` (so the bridge is
 load-bearing here, not decorative). -/
 theorem edge_core_degsum :
-    ∑ i, deg edgeAdj i * edgeF i ^ 2 = 1 := by
-  rw [sum_deg_mul_eq_of_regular edgeAdj 1 edgeAdj_regular edgeF]
+    ∑ i, deg cheegerEdgeAdj i * edgeF i ^ 2 = 1 := by
+  rw [sum_deg_mul_eq_of_regular cheegerEdgeAdj 1 cheegerEdgeAdj_regular edgeF]
   simp only [Fin.sum_univ_two, edgeF_zero, edgeF_one]
   norm_num
 
@@ -589,19 +589,19 @@ theorem edge_core_degsum :
 instance reads `4 ≤ 8`, with all three quantities pinned independently
 above. -/
 theorem core_edge_QA :
-    (∑ i, ∑ j, edgeAdj i j * |edgeF i ^ 2 - edgeF j ^ 2|) ^ 2
-      ≤ (∑ i, ∑ j, edgeAdj i j * (edgeF i - edgeF j) ^ 2)
-        * (4 * ∑ i, deg edgeAdj i * edgeF i ^ 2) :=
-  core_sum_abs_sq_sub_sq edgeAdj edgeAdj_symmetric edgeAdj_nonneg edgeF
+    (∑ i, ∑ j, cheegerEdgeAdj i j * |edgeF i ^ 2 - edgeF j ^ 2|) ^ 2
+      ≤ (∑ i, ∑ j, cheegerEdgeAdj i j * (edgeF i - edgeF j) ^ 2)
+        * (4 * ∑ i, deg cheegerEdgeAdj i * edgeF i ^ 2) :=
+  core_sum_abs_sq_sub_sq cheegerEdgeAdj cheegerEdgeAdj_symmetric cheegerEdgeAdj_nonneg edgeF
 
 /-- **The strict case:** on `K₂` at `edgeF` the Component A bound is
 strict with a visible gap, `4 < 8` — the bound is not vacuously tight
 here. (The slack is exactly the AM-GM loss on the crossing pair:
 `(1 + 0)² = 1 < 2·1² + 2·0² = 2`.) -/
 theorem core_edge_strict_QA :
-    (∑ i, ∑ j, edgeAdj i j * |edgeF i ^ 2 - edgeF j ^ 2|) ^ 2
-      < (∑ i, ∑ j, edgeAdj i j * (edgeF i - edgeF j) ^ 2)
-        * (4 * ∑ i, deg edgeAdj i * edgeF i ^ 2) := by
+    (∑ i, ∑ j, cheegerEdgeAdj i j * |edgeF i ^ 2 - edgeF j ^ 2|) ^ 2
+      < (∑ i, ∑ j, cheegerEdgeAdj i j * (edgeF i - edgeF j) ^ 2)
+        * (4 * ∑ i, deg cheegerEdgeAdj i * edgeF i ^ 2) := by
   rw [edge_core_tv, edge_core_E', edge_core_degsum]
   norm_num
 
@@ -689,14 +689,14 @@ Dirichlet double sum: `E' = 8`, `‖x‖² = 2`, `d = 1`, giving `8 / 4 = 2`
 Rayleigh value (`cutTestVector_edge_rayleigh_QA`, at the same vector
 `![1, -1]` by `cutTestVector_edge_QA`). -/
 theorem rayleigh_regularNormalizedLaplacian_edge_eq_QA :
-    rayleigh (regularNormalizedLaplacian edgeAdj 1) ![1, -1] = 2 := by
-  rw [rayleigh_regularNormalizedLaplacian_eq edgeAdj edgeAdj_symmetric 1
-    edgeAdj_regular (by norm_num) (by
+    rayleigh (regularNormalizedLaplacian cheegerEdgeAdj 1) ![1, -1] = 2 := by
+  rw [rayleigh_regularNormalizedLaplacian_eq cheegerEdgeAdj cheegerEdgeAdj_symmetric 1
+    cheegerEdgeAdj_regular (by norm_num) (by
       intro h
       have h0 : (![1, -1] : Fin 2 → ℝ) 0 = 0 := congrFun h 0
       norm_num at h0)]
-  have hE : ∑ i, ∑ j, edgeAdj i j * (![1, -1] i - ![1, -1] j) ^ 2 = 8 := by
-    simp only [Fin.sum_univ_two, edgeAdj]
+  have hE : ∑ i, ∑ j, cheegerEdgeAdj i j * (![1, -1] i - ![1, -1] j) ^ 2 = 8 := by
+    simp only [Fin.sum_univ_two, cheegerEdgeAdj]
     norm_num
   have hd : Matrix.dotProduct (![1, -1] : Fin 2 → ℝ) ![1, -1] = 2 := by
     simp [Matrix.dotProduct, Fin.sum_univ_two]
@@ -710,9 +710,9 @@ equals the independently computed `λ₂(L_sym) = 2` — the constant-`2`
 denominator of the normalization is exactly right; a defective `/ 1`
 or `/ 4` shape would fail this check. -/
 theorem rayleigh_edge_attains_secondEval_QA :
-    rayleigh (regularNormalizedLaplacian edgeAdj 1) ![1, -1]
-      = secondEval (regularNormalizedLaplacian edgeAdj 1)
-          (regularNormalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric 1)
+    rayleigh (regularNormalizedLaplacian cheegerEdgeAdj 1) ![1, -1]
+      = secondEval (regularNormalizedLaplacian cheegerEdgeAdj 1)
+          (regularNormalizedLaplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric 1)
           (le_refl 2) := by
   rw [rayleigh_regularNormalizedLaplacian_edge_eq_QA,
     edge_normLap_secondEval_eq_two_QA]
@@ -848,8 +848,8 @@ theorem edgeY_minority : ∀ t : ℝ, 0 < t →
 /-- The right-hand total-variation sum at `edgeY`, computed raw:
 `|1² - 0²|` across both ordered pairs of the edge. -/
 theorem edge_pairsum :
-    ∑ i, ∑ j, edgeAdj i j * |edgeY i ^ 2 - edgeY j ^ 2| = 2 := by
-  simp only [Fin.sum_univ_two, edgeAdj, edgeY_zero, edgeY_one]
+    ∑ i, ∑ j, cheegerEdgeAdj i j * |edgeY i ^ 2 - edgeY j ^ 2| = 2 := by
+  simp only [Fin.sum_univ_two, cheegerEdgeAdj, edgeY_zero, edgeY_one]
   norm_num
 
 theorem edge_sumYsq : ∑ i, edgeY i ^ 2 = 1 := by
@@ -860,9 +860,9 @@ theorem edge_sumYsq : ∑ i, edgeY i ^ 2 = 1 := by
 theorem (the minority hypothesis supplied by `edgeY_minority`,
 load-bearing). -/
 theorem coarea_edge_instance_QA :
-    2 * (cheegerConstant edgeAdj * (1:ℝ) * ∑ i, edgeY i ^ 2)
-      ≤ ∑ i, ∑ j, edgeAdj i j * |edgeY i ^ 2 - edgeY j ^ 2| :=
-  coarea_core edgeAdj edgeAdj_symmetric edgeAdj_nonneg 1 edgeAdj_regular
+    2 * (cheegerConstant cheegerEdgeAdj * (1:ℝ) * ∑ i, edgeY i ^ 2)
+      ≤ ∑ i, ∑ j, cheegerEdgeAdj i j * |edgeY i ^ 2 - edgeY j ^ 2| :=
+  coarea_core cheegerEdgeAdj cheegerEdgeAdj_symmetric cheegerEdgeAdj_nonneg 1 cheegerEdgeAdj_regular
     (by norm_num) edgeY edgeY_minority
 
 /-- **The co-area bound is attained with equality on `K₂`:** both sides
@@ -870,8 +870,8 @@ evaluate to `2` — `φ = 1` (`edge_cheegerConstant`), `d = 1`, `∑ y² = 1`
 against the raw total variation above. A defective constant anywhere in
 the layer-cake chain would break this equality. -/
 theorem coarea_edge_eq_QA :
-    2 * (cheegerConstant edgeAdj * (1:ℝ) * ∑ i, edgeY i ^ 2)
-      = ∑ i, ∑ j, edgeAdj i j * |edgeY i ^ 2 - edgeY j ^ 2| := by
+    2 * (cheegerConstant cheegerEdgeAdj * (1:ℝ) * ∑ i, edgeY i ^ 2)
+      = ∑ i, ∑ j, cheegerEdgeAdj i j * |edgeY i ^ 2 - edgeY j ^ 2| := by
   rw [edge_cheegerConstant, edge_sumYsq, edge_pairsum]
   norm_num
 
@@ -995,11 +995,11 @@ statement reads `4 ≤ 0` (left side `2 * 1 * 1 * 2` against vanishing
 total variation) — false, with the failure isolated at the minority
 hypothesis by `edgeOnes_minority_fails`. -/
 theorem coarea_minority_refuted_QA :
-    ¬ (2 * (cheegerConstant edgeAdj * (1:ℝ) * ∑ i, edgeOnes i ^ 2)
-      ≤ ∑ i, ∑ j, edgeAdj i j * |edgeOnes i ^ 2 - edgeOnes j ^ 2|) := by
+    ¬ (2 * (cheegerConstant cheegerEdgeAdj * (1:ℝ) * ∑ i, edgeOnes i ^ 2)
+      ≤ ∑ i, ∑ j, cheegerEdgeAdj i j * |edgeOnes i ^ 2 - edgeOnes j ^ 2|) := by
   intro h
   rw [edge_cheegerConstant] at h
-  simp only [Fin.sum_univ_two, edgeAdj, edgeOnes] at h
+  simp only [Fin.sum_univ_two, cheegerEdgeAdj, edgeOnes] at h
   norm_num at h
 
 end HardDirectionStep1b
@@ -1062,18 +1062,18 @@ theorem median_fin4_QA :
 /-- The Dirichlet double sum at `edgeY`, computed raw: `(1 - 0)²` across
 both ordered pairs of the edge. -/
 theorem edge_energy_Y :
-    ∑ i, ∑ j, edgeAdj i j * (edgeY i - edgeY j) ^ 2 = 2 := by
-  simp only [Fin.sum_univ_two, edgeAdj, edgeY_zero, edgeY_one]
+    ∑ i, ∑ j, cheegerEdgeAdj i j * (edgeY i - edgeY j) ^ 2 = 2 := by
+  simp only [Fin.sum_univ_two, cheegerEdgeAdj, edgeY_zero, edgeY_one]
   norm_num
 
 /-- **The per-part bound instantiated on `K₂`** at the Step-1b equality
 fixture `edgeY` (the minority hypothesis supplied by `edgeY_minority`,
 load-bearing). -/
 theorem perPart_edge_QA :
-    cheegerConstant edgeAdj ^ 2 * (1:ℝ) * ∑ i, edgeY i ^ 2
-      ≤ ∑ i, ∑ j, edgeAdj i j * (edgeY i - edgeY j) ^ 2 :=
-  hardDirection_perPart edgeAdj edgeAdj_symmetric edgeAdj_nonneg 1
-    edgeAdj_regular (by norm_num) edgeY edgeY_minority
+    cheegerConstant cheegerEdgeAdj ^ 2 * (1:ℝ) * ∑ i, edgeY i ^ 2
+      ≤ ∑ i, ∑ j, cheegerEdgeAdj i j * (edgeY i - edgeY j) ^ 2 :=
+  hardDirection_perPart cheegerEdgeAdj cheegerEdgeAdj_symmetric cheegerEdgeAdj_nonneg 1
+    cheegerEdgeAdj_regular (by norm_num) edgeY edgeY_minority
 
 /-- **The per-part bound pinned numerically:** the left side is exactly
 `φ² · d · ∑ y² = 1` against the raw energy `2` — the composition of the
@@ -1081,8 +1081,8 @@ Step-1b co-area core (itself at equality, `2 ≤ 2`) with the Step-1a
 Cauchy–Schwarz core (strict, `4 ≤ 8`), so the composed bound inherits
 coarea's tight left factor. -/
 theorem perPart_edge_eq_QA :
-    cheegerConstant edgeAdj ^ 2 * (1:ℝ) * ∑ i, edgeY i ^ 2 = 1
-      ∧ ∑ i, ∑ j, edgeAdj i j * (edgeY i - edgeY j) ^ 2 = 2 := by
+    cheegerConstant cheegerEdgeAdj ^ 2 * (1:ℝ) * ∑ i, edgeY i ^ 2 = 1
+      ∧ ∑ i, ∑ j, cheegerEdgeAdj i j * (edgeY i - edgeY j) ^ 2 = 2 := by
   rw [edge_cheegerConstant, edge_sumYsq, edge_energy_Y]
   norm_num
 
@@ -1187,9 +1187,9 @@ same value as the pinned `λ₂`. A defective constant anywhere in the 1c
 chain would fail this instance. -/
 theorem sweep_edge_QA :
     (1:ℝ) / 2
-      ≤ rayleigh (regularNormalizedLaplacian edgeAdj 1) ![1, -1] := by
-  have h := cheeger_sweep edgeAdj edgeAdj_symmetric edgeAdj_nonneg 1
-    edgeAdj_regular (by norm_num) (by
+      ≤ rayleigh (regularNormalizedLaplacian cheegerEdgeAdj 1) ![1, -1] := by
+  have h := cheeger_sweep cheegerEdgeAdj cheegerEdgeAdj_symmetric cheegerEdgeAdj_nonneg 1
+    cheegerEdgeAdj_regular (by norm_num) (by
       intro h
       have h0 : (![1, -1] : Fin 2 → ℝ) 0 = 0 := congrFun h 0
       norm_num at h0) (by
@@ -1228,12 +1228,12 @@ endpoints independently pinned (`edge_cheegerConstant`,
 consumed the admitted axiom; it is now hard crust. -/
 theorem cheeger_lower_bound_edge_QA :
     (1:ℝ) / 2
-      ≤ secondEval (regularNormalizedLaplacian edgeAdj 1)
-          (regularNormalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric 1)
+      ≤ secondEval (regularNormalizedLaplacian cheegerEdgeAdj 1)
+          (regularNormalizedLaplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric 1)
           (le_refl 2) := by
   rw [edge_normLap_secondEval_eq_two_QA]
-  have h := cheeger_lower_bound edgeAdj edgeAdj_symmetric edgeAdj_nonneg 1
-    edgeAdj_regular (by norm_num) (le_refl 2)
+  have h := cheeger_lower_bound cheegerEdgeAdj cheegerEdgeAdj_symmetric cheegerEdgeAdj_nonneg 1
+    cheegerEdgeAdj_regular (by norm_num) (le_refl 2)
   rw [edge_cheegerConstant, edge_normLap_secondEval_eq_two_QA] at h
   simpa using h
 
@@ -2077,10 +2077,10 @@ theorem rcAsym_regNL :
   all_goals norm_num
 
 theorem rcE_regNL :
-    regularNormalizedLaplacian edgeAdj 1 = !![1, -1; -1, 1] := by
+    regularNormalizedLaplacian cheegerEdgeAdj 1 = !![1, -1; -1, 1] := by
   ext i j
   fin_cases i <;> fin_cases j
-  all_goals simp [regularNormalizedLaplacian, edgeAdj]
+  all_goals simp [regularNormalizedLaplacian, cheegerEdgeAdj]
 
 theorem rcS_regNL_quadForm (x : Fin 2 → ℝ) :
     quadForm (regularNormalizedLaplacian rcSAdj 2) x
@@ -2298,16 +2298,16 @@ theorem rcPosD1_regNL_rayleigh_mode :
 
 /-- Rayleigh of the junk argument `0` is the definitional branch `0`. -/
 theorem rcE_regNL_rayleigh_zero :
-    rayleigh (regularNormalizedLaplacian edgeAdj 1) (0 : Fin 2 → ℝ) = 0 := by
+    rayleigh (regularNormalizedLaplacian cheegerEdgeAdj 1) (0 : Fin 2 → ℝ) = 0 := by
   rw [rayleigh, if_pos rfl]
 
 /-- Rayleigh of the constant vector on the edge: the regular normalized
 Laplacian kills `onesVec`, so the quotient is `0`. -/
 theorem rcE_regNL_rayleigh_ones :
-    rayleigh (regularNormalizedLaplacian edgeAdj 1) (onesVec : Fin 2 → ℝ) = 0 := by
+    rayleigh (regularNormalizedLaplacian cheegerEdgeAdj 1) (onesVec : Fin 2 → ℝ) = 0 := by
   have hne : (onesVec : Fin 2 → ℝ) ≠ 0 := rc_vec_ne_zero (by simp [onesVec])
-  have hq : quadForm (regularNormalizedLaplacian edgeAdj 1) (onesVec : Fin 2 → ℝ) = 0 := by
-    have hmv : (regularNormalizedLaplacian edgeAdj 1) *ᵥ (onesVec : Fin 2 → ℝ) = 0 := by
+  have hq : quadForm (regularNormalizedLaplacian cheegerEdgeAdj 1) (onesVec : Fin 2 → ℝ) = 0 := by
+    have hmv : (regularNormalizedLaplacian cheegerEdgeAdj 1) *ᵥ (onesVec : Fin 2 → ℝ) = 0 := by
       funext i
       fin_cases i <;>
         simp [Matrix.mulVec, Matrix.dotProduct, onesVec, Fin.sum_univ_two,
@@ -2428,34 +2428,34 @@ Hypothesis order: `(hA) (hnn) (d) (hd) (hdpos) (hx0) (horth)`.
 `rayleigh` is definitionally `0` at the zero vector, while `φ²/2 = 1/2`
 on the edge. -/
 theorem rcF_sweep_hx0_fence_QA :
-    ¬ (cheegerConstant edgeAdj ^ 2 / 2
-        ≤ rayleigh (regularNormalizedLaplacian edgeAdj 1) (0 : Fin 2 → ℝ)) := by
+    ¬ (cheegerConstant cheegerEdgeAdj ^ 2 / 2
+        ≤ rayleigh (regularNormalizedLaplacian cheegerEdgeAdj 1) (0 : Fin 2 → ℝ)) := by
   rw [edge_cheegerConstant, rcE_regNL_rayleigh_zero]
   norm_num
 
 theorem rcF_sweep_hx0_isolation_QA :
-    edgeAdj.IsSymm ∧ (∀ i j, 0 ≤ edgeAdj i j) ∧ (∀ i, deg edgeAdj i = 1)
+    cheegerEdgeAdj.IsSymm ∧ (∀ i j, 0 ≤ cheegerEdgeAdj i j) ∧ (∀ i, deg cheegerEdgeAdj i = 1)
       ∧ (0 < (1:ℝ)) ∧ 2 ≤ Fintype.card (Fin 2)
       ∧ (Matrix.dotProduct (0 : Fin 2 → ℝ) onesVec = 0) ∧ ¬ ((0 : Fin 2 → ℝ) ≠ 0) :=
-  ⟨edgeAdj_symmetric, edgeAdj_nonneg, edgeAdj_regular, by norm_num,
+  ⟨cheegerEdgeAdj_symmetric, cheegerEdgeAdj_nonneg, cheegerEdgeAdj_regular, by norm_num,
     le_refl 2, by simp [Matrix.dotProduct], by simp⟩
 
 /-- **Fence (`cheeger_sweep`, `horth`)**: the constant vector is in the
 operator's kernel (`R = 0`) but not orthogonal to itself — the dropped
 conclusion reads `1/2 ≤ 0`. -/
 theorem rcF_sweep_horth_fence_QA :
-    ¬ (cheegerConstant edgeAdj ^ 2 / 2
-        ≤ rayleigh (regularNormalizedLaplacian edgeAdj 1)
+    ¬ (cheegerConstant cheegerEdgeAdj ^ 2 / 2
+        ≤ rayleigh (regularNormalizedLaplacian cheegerEdgeAdj 1)
             (onesVec : Fin 2 → ℝ)) := by
   rw [edge_cheegerConstant, rcE_regNL_rayleigh_ones]
   norm_num
 
 theorem rcF_sweep_horth_isolation_QA :
-    edgeAdj.IsSymm ∧ (∀ i j, 0 ≤ edgeAdj i j) ∧ (∀ i, deg edgeAdj i = 1)
+    cheegerEdgeAdj.IsSymm ∧ (∀ i j, 0 ≤ cheegerEdgeAdj i j) ∧ (∀ i, deg cheegerEdgeAdj i = 1)
       ∧ (0 < (1:ℝ)) ∧ 2 ≤ Fintype.card (Fin 2)
       ∧ ((onesVec : Fin 2 → ℝ) ≠ 0)
       ∧ ¬ (Matrix.dotProduct (onesVec : Fin 2 → ℝ) onesVec = 0) :=
-  ⟨edgeAdj_symmetric, edgeAdj_nonneg, edgeAdj_regular, by norm_num,
+  ⟨cheegerEdgeAdj_symmetric, cheegerEdgeAdj_nonneg, cheegerEdgeAdj_regular, by norm_num,
     le_refl 2, rc_vec_ne_zero (by simp [onesVec]),
     by norm_num [onesVec, Matrix.dotProduct, Fin.sum_univ_two]⟩
 
@@ -2677,31 +2677,31 @@ theorem rcF_ctv_hdpos_isolation_QA :
 /-- **Fence (`cutTestVector_ne_zero`, `hS`)**: the empty cut — the
 vector is constantly `-vol ∅ = 0`. -/
 theorem rcF_ctv_hS_fence_QA :
-    ¬ (cutTestVector edgeAdj (∅ : Finset (Fin 2)) ≠ 0) := by
+    ¬ (cutTestVector cheegerEdgeAdj (∅ : Finset (Fin 2)) ≠ 0) := by
   intro h
   apply h
   funext i
   simp [cutTestVector, cutTestVector_apply, vol]
 
 theorem rcF_ctv_hS_isolation_QA :
-    (∀ i, deg edgeAdj i = 1) ∧ (0 < (1:ℝ))
+    (∀ i, deg cheegerEdgeAdj i = 1) ∧ (0 < (1:ℝ))
       ∧ ((∅ : Finset (Fin 2))ᶜ.Nonempty) ∧ ¬ ((∅ : Finset (Fin 2)).Nonempty) :=
-  ⟨edgeAdj_regular, by norm_num, by decide, by simp⟩
+  ⟨cheegerEdgeAdj_regular, by norm_num, by decide, by simp⟩
 
 /-- **Fence (`cutTestVector_ne_zero`, `hSc`)**: the full cut — the
 vector is constantly `vol univᶜ = vol ∅ = 0`. -/
 theorem rcF_ctv_hSc_fence_QA :
-    ¬ (cutTestVector edgeAdj (Finset.univ : Finset (Fin 2)) ≠ 0) := by
+    ¬ (cutTestVector cheegerEdgeAdj (Finset.univ : Finset (Fin 2)) ≠ 0) := by
   intro h
   apply h
   funext i
   simp [cutTestVector, cutTestVector_apply, vol, Finset.compl_univ]
 
 theorem rcF_ctv_hSc_isolation_QA :
-    (∀ i, deg edgeAdj i = 1) ∧ (0 < (1:ℝ))
+    (∀ i, deg cheegerEdgeAdj i = 1) ∧ (0 < (1:ℝ))
       ∧ (Finset.univ : Finset (Fin 2)).Nonempty
       ∧ ¬ ((Finset.univ : Finset (Fin 2))ᶜ.Nonempty) :=
-  ⟨edgeAdj_regular, by norm_num, by simp, by simp⟩
+  ⟨cheegerEdgeAdj_regular, by norm_num, by simp, by simp⟩
 
 end RegularFences
 

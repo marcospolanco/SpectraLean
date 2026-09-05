@@ -49,7 +49,7 @@ The QA obligations of the degree sandwich family delivered in
 
 Fixtures are declared under fresh names rather than imported from the
 QA files that inspired them (the repository convention; `path3Adj` and
-`edgeAdj` are reused through module imports where their pins live).
+`cheegerEdgeAdj` are reused through module imports where their pins live).
 Everything here is proved; no `sorry`, no `admit`, no axiom contact
 beyond the standard three.
 -/
@@ -337,73 +337,73 @@ theorem dsP3_engine_k2_values_QA :
 
 /-! ## The `K₂` regular squeeze -/
 
-theorem dsK2_degMin (i : Fin 2) : (1 : ℝ) ≤ deg edgeAdj i := by
-  rw [edgeAdj_regular i]
+theorem dsK2_degMin (i : Fin 2) : (1 : ℝ) ≤ deg cheegerEdgeAdj i := by
+  rw [cheegerEdgeAdj_regular i]
 
-theorem dsK2_degMax (i : Fin 2) : deg edgeAdj i ≤ (1 : ℝ) := by
-  rw [edgeAdj_regular i]
+theorem dsK2_degMax (i : Fin 2) : deg cheegerEdgeAdj i ≤ (1 : ℝ) := by
+  rw [cheegerEdgeAdj_regular i]
 
 /-- The combinatorial `λ₂ (K₂) = 2`, kernel-plus-trace route (both
 degrees `1`). -/
 theorem dsK2_lambda2_eq_two :
-    lambda2 edgeAdj edgeAdj_symmetric (le_refl 2) = 2 := by
-  have h0 : evals (laplacian_symmetric edgeAdj edgeAdj_symmetric) (0 : Fin 2)
+    lambda2 cheegerEdgeAdj cheegerEdgeAdj_symmetric (le_refl 2) = 2 := by
+  have h0 : evals (laplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric) (0 : Fin 2)
       = 0 :=
-    laplacian_evals_zero edgeAdj edgeAdj_symmetric edgeAdj_nonneg
+    laplacian_evals_zero cheegerEdgeAdj cheegerEdgeAdj_symmetric cheegerEdgeAdj_nonneg
       (by norm_num)
   have hsum := evals_sum_eq_trace
-    (laplacian_symmetric edgeAdj edgeAdj_symmetric)
-  have htrace : (laplacian edgeAdj).trace = 2 := by
-    have hdiag : ∀ i : Fin 2, (laplacian edgeAdj) i i = 1 := by
+    (laplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric)
+  have htrace : (laplacian cheegerEdgeAdj).trace = 2 := by
+    have hdiag : ∀ i : Fin 2, (laplacian cheegerEdgeAdj) i i = 1 := by
       intro i
       rw [laplacian, Matrix.sub_apply, degreeMatrix_diagonal,
-        edgeAdj_regular i]
-      simp [edgeAdj]
-    rw [show (laplacian edgeAdj).trace = ∑ i, (laplacian edgeAdj) i i from rfl,
+        cheegerEdgeAdj_regular i]
+      simp [cheegerEdgeAdj]
+    rw [show (laplacian cheegerEdgeAdj).trace = ∑ i, (laplacian cheegerEdgeAdj) i i from rfl,
       Finset.sum_congr rfl fun i _ => hdiag i]
     simp [Fin.sum_univ_two]
   rw [htrace] at hsum
   have h2 : ∑ i : Fin 2,
-      evals (laplacian_symmetric edgeAdj edgeAdj_symmetric) i = 2 := hsum
+      evals (laplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric) i = 2 := hsum
   simp only [Fin.sum_univ_two] at h2
-  have h1 : lambda2 edgeAdj edgeAdj_symmetric (le_refl 2)
-      = evals (laplacian_symmetric edgeAdj edgeAdj_symmetric) (1 : Fin 2) := rfl
+  have h1 : lambda2 cheegerEdgeAdj cheegerEdgeAdj_symmetric (le_refl 2)
+      = evals (laplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric) (1 : Fin 2) := rfl
   linarith
 
 /-- **The regular squeeze, lower side:** on the `1`-regular `K₂` the
 bracket collapses to `2 ≤ 2` — attained. -/
 theorem dsK2_squeeze_lower_QA :
-    lambda2 edgeAdj edgeAdj_symmetric (le_refl 2) / (1 : ℝ)
-      ≤ secondEval (normalizedLaplacian edgeAdj)
-          (normalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric)
+    lambda2 cheegerEdgeAdj cheegerEdgeAdj_symmetric (le_refl 2) / (1 : ℝ)
+      ≤ secondEval (normalizedLaplacian cheegerEdgeAdj)
+          (normalizedLaplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric)
           (le_refl 2) :=
-  div_le_secondEval_normalizedLaplacian edgeAdj edgeAdj_symmetric
-    edgeAdj_nonneg (fun i => by rw [edgeAdj_regular i]; norm_num) 1 dsK2_degMax
+  div_le_secondEval_normalizedLaplacian cheegerEdgeAdj cheegerEdgeAdj_symmetric
+    cheegerEdgeAdj_nonneg (fun i => by rw [cheegerEdgeAdj_regular i]; norm_num) 1 dsK2_degMax
     (le_refl 2)
 
 theorem dsK2_squeeze_lower_tight_QA :
-    lambda2 edgeAdj edgeAdj_symmetric (le_refl 2) / (1 : ℝ)
-      = secondEval (normalizedLaplacian edgeAdj)
-          (normalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric)
+    lambda2 cheegerEdgeAdj cheegerEdgeAdj_symmetric (le_refl 2) / (1 : ℝ)
+      = secondEval (normalizedLaplacian cheegerEdgeAdj)
+          (normalizedLaplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric)
           (le_refl 2) := by
   rw [dsK2_lambda2_eq_two, icEdge_normLap_secondEval]
   norm_num
 
 /-- **The regular squeeze, upper side:** `2 ≤ 2` — attained. -/
 theorem dsK2_squeeze_upper_QA :
-    secondEval (normalizedLaplacian edgeAdj)
-        (normalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric)
+    secondEval (normalizedLaplacian cheegerEdgeAdj)
+        (normalizedLaplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric)
         (le_refl 2)
-      ≤ lambda2 edgeAdj edgeAdj_symmetric (le_refl 2) / (1 : ℝ) :=
-  secondEval_normalizedLaplacian_le_div edgeAdj edgeAdj_symmetric
-    edgeAdj_nonneg (fun i => by rw [edgeAdj_regular i]; norm_num) 1 dsK2_degMin
+      ≤ lambda2 cheegerEdgeAdj cheegerEdgeAdj_symmetric (le_refl 2) / (1 : ℝ) :=
+  secondEval_normalizedLaplacian_le_div cheegerEdgeAdj cheegerEdgeAdj_symmetric
+    cheegerEdgeAdj_nonneg (fun i => by rw [cheegerEdgeAdj_regular i]; norm_num) 1 dsK2_degMin
     one_pos (le_refl 2)
 
 theorem dsK2_squeeze_upper_tight_QA :
-    secondEval (normalizedLaplacian edgeAdj)
-        (normalizedLaplacian_symmetric edgeAdj edgeAdj_symmetric)
+    secondEval (normalizedLaplacian cheegerEdgeAdj)
+        (normalizedLaplacian_symmetric cheegerEdgeAdj cheegerEdgeAdj_symmetric)
         (le_refl 2)
-      = lambda2 edgeAdj edgeAdj_symmetric (le_refl 2) / (1 : ℝ) := by
+      = lambda2 cheegerEdgeAdj cheegerEdgeAdj_symmetric (le_refl 2) / (1 : ℝ) := by
   rw [dsK2_lambda2_eq_two, icEdge_normLap_secondEval]
   norm_num
 

@@ -24,6 +24,21 @@
   `Real.sqrt_eq_iff_eq_sq` on this pin (`norm_num` alone does not
   evaluate it); `Real.sqrt_one` for `1`.
 
+  Adversarial fence audit (2026-09-05,
+  `proposals/adversarial-fences-directed-family.md`): the
+  `AdversarialFences` section below closes the shelf's entire clause
+  surface (four one-clause theorems) with per-clause hypothesis-form
+  fences — the three `hA : A.IsSymm` cone clauses at `dirA` (the first
+  two reconciling the pre-existing free-form witnesses into fence
+  form) and the conjugate's `hd : ∀ i, 0 < deg A i` at the new
+  zero-out-degree fixture `dzA`, where the junk `√0 * (√0)⁻¹ = 0`
+  collapse separates the conjugate's sides by the full symmetrized arc
+  weight. The audit's headline finding: `hd` is **not** secretly a
+  nonzeroness clause (unlike the random-walk family's `hdpos`) — the
+  `Real.sqrt` route collapses the whole non-positive half-line, so the
+  nonzeroness-*strengthened* statement is itself refuted at the new
+  negative-degree fixture `dzNeg`.
+
   Witnesses, per the proposal's QA plan:
 
   - positive: `outDeg = (4, 1, 1)` and `inDeg = (2, 3, 1)` on `dirA`,
@@ -609,5 +624,291 @@ theorem dirB_not_quadForm_nonneg :
         (fun _ => (1 : ℝ))) := by
   rw [dirB_quadForm]
   norm_num
+
+/-! ### AdversarialFences: the adversarial fence audit
+(`proposals/adversarial-fences-directed-family.md`, 2026-09-05)
+
+The audit method's twenty-second application: a hypothesis-necessity
+pass over the directed family (3 transitive non-QA consumers —
+`Magnetic` and `FunctionalCalculus` direct, `Signed` via `Magnetic`;
+the prior terminal handoff's named target). The shelf's clause surface
+is four one-clause theorems; each fence below states the theorem's
+conclusion with the clause dropped and refutes it at a fixture where
+the dropped clause genuinely fails (isolation) and every kept clause
+is genuine. The shelf is all-proved, so these are
+theorem-instantiation fences (no `-- @refutes` tags, nothing admitted
+consumed; `#print axioms` on every declaration below reads exactly
+`propext, Classical.choice, Quot.sound`).
+
+The two pre-existing free-form negative witnesses are reconciled here:
+`dirA_outDeg_ne_inDeg` (2026-08-22) is the `ne_comm` twin of the
+`inDeg_eq_outDeg_of_isSymm` fence's kill, and
+`dirA_Ldir_ne_normalizedLaplacian` *is* the Step-3 agreement fence's
+refutation — the wrapper below cites it directly.
+
+Headline finding (the strengthening question the pricing must settle):
+the conjugate's `hd : ∀ i, 0 < deg A i` is **not** secretly a
+nonzeroness clause, unlike the random-walk audit's `hdpos` (there the
+`d⁻¹ * d = 1` route holds for every `d ≠ 0`). Here the route runs
+through `Real.sqrt`, whose junk value collapses the whole non-positive
+half-line: `√d * (√d)⁻¹ = 1` exactly on `0 < d`, and at `d ≤ 0` the
+conjugate's left side loses the symmetrized arcs the right side keeps.
+Refuted at both corners — the zero out-degree (`dzA`) and the strictly
+negative out-degree (`dzNeg`, where the nonzeroness-strengthened
+statement itself fails).
+-/
+
+section AdversarialFences
+
+/-! #### The three `hA` cone clauses at the delivered `dirA` -/
+
+/-- **Fence (`hA` clause of `inDeg_eq_outDeg_of_isSymm`).** Dropping
+the symmetric cone is refuted at the delivered asymmetric fixture:
+`inDeg dirA 0 = 2 ≠ 4 = outDeg dirA 0`. Reconciliation — the
+pre-existing free-form witness `dirA_outDeg_ne_inDeg` (2026-08-22) is
+this kill's `ne_comm` twin, never before stated in fence form.
+Isolation: `dirA_not_isSymm` (the dropped clause genuinely fails). -/
+theorem inDeg_eq_outDeg_of_isSymm_hA_fence_QA :
+    ¬ ∀ (A : Matrix (Fin 3) (Fin 3) ℝ) (i : Fin 3),
+      inDeg A i = outDeg A i := by
+  intro h
+  have h1 := h dirA 0
+  rw [dirA_inDeg_zero, dirA_outDeg_zero] at h1
+  norm_num at h1
+
+/-- **Fence (`hA` clause of `inDeg_eq_deg_of_isSymm`).** Same fixture
+and vertex, different conclusion: `inDeg dirA 0 = 2 ≠ 4 = deg dirA 0` —
+the shelf-degree reading of the same column/row separation. No
+negative witness existed anywhere for this clause. -/
+theorem inDeg_eq_deg_of_isSymm_hA_fence_QA :
+    ¬ ∀ (A : Matrix (Fin 3) (Fin 3) ℝ) (i : Fin 3),
+      inDeg A i = deg A i := by
+  intro h
+  have h1 := h dirA 0
+  rw [dirA_inDeg_zero, dirA_deg_zero] at h1
+  norm_num at h1
+
+/-- **Fence (`hA` clause of the Step-3 acceptance bar,
+`directedNormalizedLaplacian_eq_normalizedLaplacian`).** Dropping the
+symmetric cone is refuted at `dirA`: the directed operator's `(0,1)`
+entry is `-1` against the undirected operator's `-3/2` (the
+unsymmetrized `(1/2) * 3 * 1`). Reconciliation — the delivered
+free-form witness `dirA_Ldir_ne_normalizedLaplacian` (2026-08-22) is
+exactly this dropped statement's refutation; the wrapper cites it. -/
+theorem directedNormalizedLaplacian_eq_normalizedLaplacian_hA_fence_QA :
+    ¬ ∀ A : Matrix (Fin 3) (Fin 3) ℝ,
+      directedNormalizedLaplacian A = normalizedLaplacian A := by
+  intro h
+  exact dirA_Ldir_ne_normalizedLaplacian (h dirA)
+
+/-! #### `dzA = !![0, 1; 0, 0]]` — the conjugate's `hd` breaker
+(the zero out-degree corner) -/
+
+/-- The `hd` breaker: a single arc `0→1` with vertex 1 a pure sink —
+out-degrees `(1, 0)`, nonnegative, asymmetric. At the sink the junk
+`√0 * (√0)⁻¹ = 0 * 0⁻¹ = 0` collapses the normalizer to `diag(1, 0)`,
+erasing vertex 1's row and column from both symmetrized halves. -/
+def dzA : Matrix (Fin 2) (Fin 2) ℝ := !![0, 1; 0, 0]
+
+theorem dzA_00 : dzA 0 0 = 0 := rfl
+theorem dzA_01 : dzA 0 1 = 1 := rfl
+theorem dzA_10 : dzA 1 0 = 0 := rfl
+theorem dzA_11 : dzA 1 1 = 0 := rfl
+
+/-- Out-degrees `(1, 0)`: the source carries the arc, the sink
+nothing. -/
+theorem dzA_deg_zero : deg dzA 0 = 1 := by
+  simp only [deg, Fin.sum_univ_two]
+  rw [dzA_00, dzA_01]; norm_num
+
+theorem dzA_deg_one : deg dzA 1 = 0 := by
+  simp only [deg, Fin.sum_univ_two]
+  rw [dzA_10, dzA_11]; norm_num
+
+/-- Isolation: the dropped clause genuinely fails — vertex 1 is a
+pure sink, so `0 < deg dzA 1` is false. -/
+theorem dzA_not_hd : ¬ ∀ i : Fin 2, 0 < deg dzA i := by
+  intro h
+  have h1 := h 1
+  rw [dzA_deg_one] at h1
+  exact absurd h1 (by norm_num)
+
+theorem dzA_sqrt_deg_zero : Real.sqrt (deg dzA 0) = 1 := by
+  rw [dzA_deg_zero]; exact Real.sqrt_one
+
+/-- The definitional junk pin: `√0 = 0`, so the sink's square root is
+zero — the entry that erases its row and column. -/
+theorem dzA_sqrt_deg_one : Real.sqrt (deg dzA 1) = 0 := by
+  rw [dzA_deg_one]; exact Real.sqrt_zero
+
+/-- Both symmetrized halves vanish: the junk normalizer
+`degreeInvSqrt dzA = diag(1, 0)` erases the sink's row and column, and
+the source's diagonal is zero, so `S A S = S Aᵀ S = 0` entrywise. -/
+theorem dzA_smul_halves_eq_zero :
+    degreeInvSqrt dzA * dzA * degreeInvSqrt dzA
+      + degreeInvSqrt dzA * dzAᵀ * degreeInvSqrt dzA = 0 := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [Matrix.mul_apply, Fin.sum_univ_two, degreeInvSqrt,
+      Matrix.diagonal_apply, dzA_sqrt_deg_zero, dzA_sqrt_deg_one,
+      inv_one, inv_zero, Matrix.transpose_apply,
+      dzA_00, dzA_01, dzA_10, dzA_11]
+
+/-- **The collapse:** with both halves zero, `L_dir dzA = 1` — the
+fixture's directed structure is entirely erased from the operator. -/
+theorem dzA_Ldir_eq_one : directedNormalizedLaplacian dzA = 1 := by
+  rw [directedNormalizedLaplacian, dzA_smul_halves_eq_zero, smul_zero,
+    sub_zero]
+
+/-- The conjugate's left side at `(0,1)`: `√D * 1 * √D` with
+`√D = diag(1, 0)`, off-diagonal entry `0` — the arc is gone. -/
+theorem dzA_conjLHS_zero_one :
+    (degreeSqrt dzA * directedNormalizedLaplacian dzA * degreeSqrt dzA)
+      0 1 = 0 := by
+  rw [dzA_Ldir_eq_one, Matrix.mul_one]
+  simp only [Matrix.mul_apply, Fin.sum_univ_two, degreeSqrt,
+    Matrix.diagonal_apply]
+  simp [dzA_sqrt_deg_zero, dzA_sqrt_deg_one]
+
+/-- The conjugate's right side at `(0,1)`: `0 - (1/2) * (1 + 0)
+= -(1/2)` — the symmetrized adjacency keeps the arc. -/
+theorem dzA_conjRHS_zero_one :
+    (degreeMatrix dzA - (1 / 2 : ℝ) • (dzA + dzAᵀ)) 0 1 = -(1 / 2) := by
+  have hD : degreeMatrix dzA 0 1 = 0 := by simp [degreeMatrix]
+  simp only [Matrix.sub_apply, Matrix.smul_apply, smul_eq_mul,
+    Matrix.add_apply, Matrix.transpose_apply, hD, dzA_01, dzA_10]
+  ring
+
+/-- **Fence (`hd` clause of
+`degreeSqrt_mul_directedNormalizedLaplacian_mul_degreeSqrt`).**
+Dropping positive out-degrees is refuted at `dzA`: the two sides
+separate at `(0,1)` by the full symmetrized arc weight — `0 ≠ -(1/2)`.
+The junk `√0 * (√0)⁻¹ = 0` collapse erases the arc from the left side
+while the right side's `D - (1/2)(A + Aᵀ)` keeps it. -/
+theorem degreeSqrt_mul_directedNormalizedLaplacian_mul_degreeSqrt_hd_fence_QA :
+    ¬ ∀ A : Matrix (Fin 2) (Fin 2) ℝ,
+      degreeSqrt A * directedNormalizedLaplacian A * degreeSqrt A
+        = degreeMatrix A - (1 / 2 : ℝ) • (A + Aᵀ) := by
+  intro h
+  have h1 := h dzA
+  have h01 : (degreeSqrt dzA * directedNormalizedLaplacian dzA
+      * degreeSqrt dzA) 0 1
+      = (degreeMatrix dzA - (1 / 2 : ℝ) • (dzA + dzAᵀ)) 0 1 := by
+    rw [h1]
+  rw [dzA_conjLHS_zero_one, dzA_conjRHS_zero_one] at h01
+  norm_num at h01
+
+/-! #### `dzNeg = !![-1, 0; 1, 0]]` — the strengthening breaker
+(the negative out-degree half-line) -/
+
+/-- The strengthening breaker: signed diagonal, out-degrees `(-1, 1)`
+— genuinely `≠ 0` at *every* vertex (the nonzeroness-strengthened
+hypothesis set is genuinely satisfied) and genuinely failing
+`0 < deg` at vertex 0. At the negative degree the junk
+`√(-1) = 0` collapses the normalizer to `diag(0, 1)`. -/
+def dzNeg : Matrix (Fin 2) (Fin 2) ℝ := !![-1, 0; 1, 0]
+
+theorem dzNeg_00 : dzNeg 0 0 = -1 := rfl
+theorem dzNeg_01 : dzNeg 0 1 = 0 := rfl
+theorem dzNeg_10 : dzNeg 1 0 = 1 := rfl
+theorem dzNeg_11 : dzNeg 1 1 = 0 := rfl
+
+theorem dzNeg_deg_zero : deg dzNeg 0 = -1 := by
+  simp only [deg, Fin.sum_univ_two]
+  rw [dzNeg_00, dzNeg_01]; norm_num
+
+theorem dzNeg_deg_one : deg dzNeg 1 = 1 := by
+  simp only [deg, Fin.sum_univ_two]
+  rw [dzNeg_10, dzNeg_11]; norm_num
+
+/-- The strengthened clause is genuine: every out-degree is nonzero
+(the whole point of this fixture — it satisfies exactly the
+nonzeroness weakening and not the original). -/
+theorem dzNeg_deg_ne_zero : ∀ i : Fin 2, deg dzNeg i ≠ 0 := by
+  intro i
+  fin_cases i
+  · show deg dzNeg 0 ≠ 0
+    rw [dzNeg_deg_zero]; norm_num
+  · show deg dzNeg 1 ≠ 0
+    rw [dzNeg_deg_one]; norm_num
+
+/-- Isolation: the *original* clause genuinely fails at vertex 0
+(`0 < -1` is false) — the fixture sits on the non-positive half-line
+the original hypothesis excludes. -/
+theorem dzNeg_not_hd : ¬ ∀ i : Fin 2, 0 < deg dzNeg i := by
+  intro h
+  have h1 := h 0
+  rw [dzNeg_deg_zero] at h1
+  exact absurd h1 (by norm_num)
+
+/-- The junk pin on the half-line: `√(-1) = 0` — `Real.sqrt` of a
+negative is zero on this development, which is exactly why no
+nonzeroness weakening can rescue the conjugate. -/
+theorem dzNeg_sqrt_deg_zero : Real.sqrt (deg dzNeg 0) = 0 := by
+  rw [dzNeg_deg_zero]
+  exact Real.sqrt_eq_zero_of_nonpos (by norm_num)
+
+theorem dzNeg_sqrt_deg_one : Real.sqrt (deg dzNeg 1) = 1 := by
+  rw [dzNeg_deg_one]; exact Real.sqrt_one
+
+/-- Both symmetrized halves vanish here too: the junk `√(-1) = 0`
+erases vertex 0's row and column (`degreeInvSqrt dzNeg = diag(0, 1)`),
+and the surviving block is diagonal zero. -/
+theorem dzNeg_smul_halves_eq_zero :
+    degreeInvSqrt dzNeg * dzNeg * degreeInvSqrt dzNeg
+      + degreeInvSqrt dzNeg * dzNegᵀ * degreeInvSqrt dzNeg = 0 := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [Matrix.mul_apply, Fin.sum_univ_two, degreeInvSqrt,
+      Matrix.diagonal_apply, dzNeg_sqrt_deg_zero, dzNeg_sqrt_deg_one,
+      inv_one, inv_zero, Matrix.transpose_apply,
+      dzNeg_00, dzNeg_01, dzNeg_10, dzNeg_11]
+
+theorem dzNeg_Ldir_eq_one : directedNormalizedLaplacian dzNeg = 1 := by
+  rw [directedNormalizedLaplacian, dzNeg_smul_halves_eq_zero, smul_zero,
+    sub_zero]
+
+theorem dzNeg_conjLHS_zero_one :
+    (degreeSqrt dzNeg * directedNormalizedLaplacian dzNeg
+      * degreeSqrt dzNeg) 0 1 = 0 := by
+  rw [dzNeg_Ldir_eq_one, Matrix.mul_one]
+  simp only [Matrix.mul_apply, Fin.sum_univ_two, degreeSqrt,
+    Matrix.diagonal_apply]
+  simp [dzNeg_sqrt_deg_zero, dzNeg_sqrt_deg_one]
+
+theorem dzNeg_conjRHS_zero_one :
+    (degreeMatrix dzNeg - (1 / 2 : ℝ) • (dzNeg + dzNegᵀ)) 0 1
+      = -(1 / 2) := by
+  have hD : degreeMatrix dzNeg 0 1 = 0 := by simp [degreeMatrix]
+  simp only [Matrix.sub_apply, Matrix.smul_apply, smul_eq_mul,
+    Matrix.add_apply, Matrix.transpose_apply, hD, dzNeg_01, dzNeg_10]
+  ring
+
+/-- **The strengthening refutation: `hd` is not a nonzeroness clause.**
+The random-walk audit's `hdpos` clauses were secretly nonzeroness
+clauses (its `_of_ne_zero` strengthening companions hold there); the
+conjugate's `hd` is not — the route runs through `Real.sqrt`, whose
+junk value collapses the whole non-positive half-line, so the
+nonzeroness-**strengthened** statement is itself false: at `dzNeg`
+every out-degree is nonzero (genuine), the original `0 < deg` fails
+at vertex 0 (the fixture is on the excluded half-line), and the two
+sides separate at `(0,1)` exactly as at `dzA` (`0 ≠ -(1/2)`). No
+`_of_ne_zero` companion exists; the fence + this refutation form an
+exact characterization — the clause is load-bearing on `d ≤ 0`, not
+on `d = 0`. -/
+theorem degreeSqrt_mul_directedNormalizedLaplacian_mul_degreeSqrt_ne_zero_refuted_QA :
+    ¬ ∀ A : Matrix (Fin 2) (Fin 2) ℝ, (∀ i, deg A i ≠ 0) →
+      degreeSqrt A * directedNormalizedLaplacian A * degreeSqrt A
+        = degreeMatrix A - (1 / 2 : ℝ) • (A + Aᵀ) := by
+  intro h
+  have h1 := h dzNeg dzNeg_deg_ne_zero
+  have h01 : (degreeSqrt dzNeg * directedNormalizedLaplacian dzNeg
+      * degreeSqrt dzNeg) 0 1
+      = (degreeMatrix dzNeg - (1 / 2 : ℝ) • (dzNeg + dzNegᵀ)) 0 1 := by
+    rw [h1]
+  rw [dzNeg_conjLHS_zero_one, dzNeg_conjRHS_zero_one] at h01
+  norm_num at h01
+
+end AdversarialFences
 
 end SpectralGraphTheory.QA

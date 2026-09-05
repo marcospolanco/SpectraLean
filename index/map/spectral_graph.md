@@ -26,6 +26,89 @@ embedding `↥S → ℝ → V → ℝ` preserving dot products, quadratic forms,
 and Rayleigh quotients — the bridge through which principal-submatrix
 test subspaces share the Courant–Fischer engine).
 
+**Adversarial fence audit, Step 1 delivered (2026-09-05,
+`proposals/adversarial-fences-spectral-core-family.md`):** the root
+shelf — 46 transitive non-QA consumers, the library's most-consumed
+surface, invisible to every prior survey because its QA was scattered
+across ~10 per-topic files — now has its own QA home
+(`Spectral_QA.lean`) and a fenced first cluster. The census (105
+hypothesis-bearing theorems, 214 named clauses; multi-run program)
+and the Step-1 fences: the `hA : A.IsSymm` cone on
+`laplacian_symmetric`, `laplacian_quadForm`, `laplacian_psd`,
+`laplacian_dotProduct_mulVec`,
+`dotProduct_eq_zero_of_laplacian_mulVec_eq_zero` (killed at the new
+asymmetric star whose two-dimensional harmonic kernel makes the
+hypothesis `L *ᵥ w = 0` genuine while the conclusion fails),
+`boundary_compl`, and `conductance_compl`; the `hnonneg` clause of
+`laplacian_psd` at the new signed edge; both clauses of
+`vol_pos_of_pos_deg`; and the signed-input kills of
+`degreeMatrix_diagonal_nonneg` and `boundary_nonneg`. Steps 2-4
+(connectivity/kernel, spectral-theorem interface, variational) are
+priced in the proposal's census table.
+
+**Adversarial fence audit, Step 2 delivered (2026-09-05, the same
+proposal):** the connectivity/kernel cluster — the root shelf's most
+load-bearing API — fenced in `Spectral_QA.lean`'s
+`AdversarialFencesStep2` section (18 fences + the P4 companion, 79
+declarations, all at the standard three axioms, zero axiom contact).
+The `hconn` clauses reconcile `Connectivity_QA`'s and
+`PotentialSolvability_QA`'s delivered disconnected witnesses into the
+per-clause discipline; the `hnonneg` clauses are killed at the new
+signed path `sfSignedPath` with connectivity kept genuine — the
+kernel is genuinely two-dimensional there, and the solvability hinge
+dies through the shelf's own kernel certificate (the zero-sum unit
+demand pairs `2 ≠ 0` against the kernel vector). The census's P4
+candidate `laplacian_mulVec_eq_zero_of_forall_reachable`'s `hnonneg`
+is settled **by refutation** (genuinely load-bearing; the earlier
+"row-sum closes without signs" pricing was wrong); the Step-1 cut
+residuals close at the negative-min division-rescue fixture
+`sfSignedCut` with a hypothesis-free P4 companion for
+`conductance_ge_cheegerConstant`; and the `supportGraph`-entanglement
+classification is recorded (every `hA` clause of a
+`supportGraph`-carrying statement is non-fenceable — the dropped
+statement cannot even be formed at an asymmetric fixture).
+
+**Adversarial fence audit, Step 4 delivered (2026-09-05, the same
+proposal):** the variational / Courant-Fischer cluster — nineteen
+hypothesis-form fences plus the `rayleigh_padVec` hypothesis-free P4
+companion in `Spectral_QA.lean`'s `AdversarialFencesStep4` section
+(41 public declarations, all at the standard three axioms, zero axiom
+contact). `secondEval_variational`'s and `secondEval_le_rayleigh`'s
+`hpsd`/`hker`/`hx0`/`hxorth` (the negative Laplacian's `λ₂ = 0` against
+every admissible quotient `-2`; `sfProjE0`'s `λ₂ = 1` against the
+alternating quotient `1/2`; the junk-zero quotient kills at `x = 0`);
+the congruence pair's `h` clauses, resolving Step 3's recorded deferral
+for both members (`2 ≠ 0` through two `lambda2_eq_secondEval`-derived
+pins; the identity's uniform spectrum against `sfProjE0`'s bottom
+entry `0`); `evals_le_of_linearIndependent`'s `hk1`/`hgi`/`hbnd`;
+`lambda2_variational`'s `hnonneg` reconciled from the 2026-08-18
+pre-discipline refutation; the `_of_ker` twins' seven clauses.
+Classifications: `secondEval_smul_of_pos`'s `hpsd`/`hker`
+truth-removable-not-fenceable (positive scaling commutes with
+sorting). Adjacent coverage cited; one public-docstring repair
+(`icFence_psd_fence`); and a QA-lattice defect recorded — the
+`Cheeger_QA`/`PotentialSolvability_QA` `edgeAdj` collision blocks
+co-import.
+
+**Adversarial fence audit, Step 3 delivered (2026-09-05, the same
+proposal):** the spectral-theorem interface layer's priced residue —
+seventeen hypothesis-form fences in `Spectral_QA.lean`'s
+`AdversarialFencesStep3` section (60 declarations, all at the
+standard three axioms, zero axiom contact). The
+symmetry-free-conclusion minority: the raw-matrix self-adjointness
+identity (`4 ≠ 1` at `dirB`), `smul_isSymm`, and all five clauses of
+the projector-uniqueness lemma at an idempotent family sharing the
+fixed line `{x | x 1 = 0}`. The side clauses at the identity/zero
+matrices through the shelf's own pins: `eigvalOf_le_of_quadForm_nonpos`'s
+`hq`, the projector-threshold quartet (killed by the sibling
+theorems' satisfiable hypotheses), and the kernel-orthogonality
+quintet (the onesVec trio through a Parseval exclusion engine
+load-bearing on `dotProduct_eigvecOf`). The entangled majority
+(spectral-object-consuming `hM` clauses, index-consuming `hcard`
+clauses) classified; three concrete-pin-gated deferrals recorded.
+Step 4 (the variational cluster) remains priced in the proposal's
+census table.
+
 Proved theorems (no admission): `degreeMatrix_*`, `laplacian_symmetric`,
 `laplacian_ones_in_kernel`, `evals_sorted`, `laplacian_quadForm`
 (Dirichlet form), `laplacian_psd`, `eventUpdate_preserves_symmetry`,
@@ -1014,6 +1097,25 @@ Laplacian at the out-degree-symmetrized convention, while QA
 certifies the pre-existing walk operators on asymmetric input and
 refutes PSD-ness of the new operator (the calibration boundary).
 
+**Adversarial fence audit complete (2026-09-05,
+`proposals/adversarial-fences-directed-family.md`):** the shelf's
+entire clause surface — four one-clause theorems — carries per-clause
+hypothesis-form fences in `Directed_QA.lean`'s `AdversarialFences`
+section. The three `hA : A.IsSymm` cone clauses fall at the delivered
+`dirA` (the first two reconciling the pre-existing free-form
+witnesses into fence form); the conjugate's
+`hd : ∀ i, 0 < deg A i` falls at the new zero-out-degree fixture
+`dzA = !![0, 1; 0, 0]]`, where the junk `√0 * (√0)⁻¹ = 0` collapse
+erases the symmetrized arc from the conjugate's left side while the
+right side's `D − ½(A + Aᵀ)` keeps it (`0 ≠ −(1/2)`). The audit's
+headline finding: **`hd` is genuinely a positivity clause, not
+nonzeroness in disguise** — unlike the random-walk family's `hdpos`
+(where `d⁻¹ * d = 1` holds for every `d ≠ 0`), the `Real.sqrt` route
+collapses the whole non-positive half-line, so the
+nonzeroness-*strengthened* statement is itself refuted at the new
+negative-degree fixture `dzNeg = !![-1, 0; 1, 0]]` (out-degrees
+`(−1, 1)`, every kept clause of the strengthening genuine).
+
 | Declaration | Content |
 |-------------|---------|
 | `outDeg` | the out-degree `∑ j, A i j` — definitionally the shelf's `deg` (definition) |
@@ -1043,15 +1145,33 @@ the telescoping action-defect `t⁻¹(1 − 1 ᵥ* P^t)` vanishing
 entrywise), strict positivity, and min-ratio uniqueness-up-to-scale —
 `#print axioms` exactly the standard three across the whole layer.
 The two transfer lemmas were always unconditional. QA at
-`Scaffold/QA/SpectralGraph/IrreducibleStationary_QA.lean` (116
-declarations: the asymmetric directed star with the hand value
-identified through the `∃!`, the symmetric-cone `K₂` agreement with
-`stationaryVec` through the shelf's detailed-balance chain, the
-reducibility fence refuting the hypothesis-free `∃!` and
+`Scaffold/QA/SpectralGraph/IrreducibleStationary_QA.lean` (the
+asymmetric directed star with the hand value identified through the
+`∃!`, the symmetric-cone `K₂` agreement with `stationaryVec` through
+the shelf's detailed-balance chain, the reducibility fence refuting
+the hypothesis-free `∃!` and
 scale-uniqueness conclusions, and the Section E engine-mechanism pins —
 orbit/oscillation values, the one-period Cesàro mean exactly
 stationary, power-positivity instances, the engine output identified,
-the min-ratio scalar, reducible-input existence).
+the min-ratio scalar, reducible-input existence). The shelf's
+**adversarial fence audit** (2026-09-05,
+`proposals/adversarial-fences-irreducible-stationary-family.md`, the
+audit method's twenty-first application — its 706-line QA had carried
+only the two hypothesis-free refutations above, never reconciled into
+the per-clause discipline): thirty-two hypothesis-form fences plus
+three strengthening declarations in the QA file's `AdversarialFences`
+section, all 256 declarations at the standard three axioms — headline
+mechanisms: the Krylov–Bogoliubov `hgnn` killed by the Jordan-block
+orbit-escape fixture `!![0,1;-1,2]]` (the mass-constant orbit
+`![2-s, s-1]` escapes exactly where the telescoping defect bound
+needed nonnegativity), the `hnn` clauses by three complementary signed
+Fin 3 fixtures (mixed-sign fixed space / two-dimensional wedge /
+signed-cancellation vanishing support), `exists_pow_pos`'s `hnn` by
+the rank-one `M² = 8•M` power-sign fixture, and the `hdeg`/`hex`
+clauses proved truth-removable (`deg_pos_of_nonneg_irreducible`:
+`hnn + hirr + hex ⟹ hdeg`; `exists_pos_entry_of_deg_pos`: one
+positive row sum suffices) with `exists_walkPerronVector_of_hex`
+restating existence at the strictly weaker hypothesis set.
 
 | Declaration | Content |
 |-------------|---------|

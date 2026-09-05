@@ -120,6 +120,19 @@ def scan_tags():
             if m:
                 namespace.append(m.group(1))
                 continue
+            m_end = re.match(r'^end\s+([A-Za-z_][\w.]*)', line)
+            if m_end:
+                # A NAMED `end` closes a named block; it pops the
+                # namespace stack only when it names the innermost open
+                # namespace (named `section`s must not pop). Found when
+                # the matrix-concentration fence audit landed inside a
+                # named section after `section MasterBoundQA`: every
+                # named `end` popped the file's namespace, so the
+                # generated `#print axioms` file used bare names.
+                if namespace and namespace[-1].split('.')[-1] == \
+                        m_end.group(1).split('.')[-1]:
+                    namespace.pop()
+                continue
             if re.match(r'^end\b', line):
                 if namespace:
                     namespace.pop()

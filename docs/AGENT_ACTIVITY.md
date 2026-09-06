@@ -13636,3 +13636,1523 @@ quadratic-form witnesses, the per-entry-`have` assembly cure for the
 `vecHead`/`vecTail` residue, and the asymmetric-star harmonic-kernel
 fixture class) are reusable by the remaining steps and any future
 audit touching Laplacian clause surfaces.
+
+## 2026-09-05T22:21:40Z — The scalar family's measurability/integrability-guard follow-up (in progress)
+
+**Run:** `20260905T222140Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** in-progress  
+**Milestone:** The scalar-concentration family's last recorded follow-up
+(the prior terminal handoff's priced item): the `h_meas` measurability
+clauses of the MGF engines and the same-class integrability guards,
+fenceable only at non-measurable `⊥`-σ-algebra fixtures — the hypothesis
+class whose absence made `matrix_azuma_hoeffding` materially false
+(Errata §7), never refuted in dropped form anywhere in the scalar tail
+engine behind the derived degree-concentration chain.
+
+**Changes:** none yet — recording intent before editing. Scope: the three
+priced engine clauses plus the fenceable head/tail clauses and the
+truth-removable-through-junk classifications, spiked in `wip/` first.
+
+**Next handoff:** spike → land in `Scalar_QA.lean` → full verification
+ladder → records update.
+
+## 2026-09-05T22:45:06Z — The scalar family's measurability/integrability-guard follow-up (terminal)
+
+**Run:** `20260905T222140Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** completed  
+**Milestone:** The scalar-concentration family's last recorded
+follow-up, delivered at beyond-priced scope: the audit's three
+MGF-engine measurability clauses plus the same-class integrability
+guards and every head-theorem `h_meas` clause falsifiable at a
+non-measurable `⊥`-σ-algebra fixture — the hypothesis class whose
+absence made `matrix_azuma_hoeffding` materially false (Errata §7).
+
+**Changes:** QA-only — `Scalar_QA.lean`'s new `MeasurabilityFences`
+section (11 fences + fixture/mass/non-measurability/pin companions;
+40 declarations, +36 by the generator metric, 6205 → 6241). The
+biased two-point `⊥`-space (`9/10 : 1/10`, the `mcTwoBot` pattern at
+the bias the kills need) with breakers `scM2X` (values 2/0) and
+`scM2Emp` (values 1/0). Fences: `measurable_finset_prod'`/`sum'`'s
+`hf` (the one-element product/sum IS the breaker),
+`integrable_of_bounded_measurable`'s and `integrable_sq_sub_mean`'s
+`h_meas` (`h_bound` kept genuine), `markov_tail_of_mgf`'s `hint`
+(`B = 0`, `t = 0`, event `univ` against `ofReal 0` — the Markov
+engine's junk-integral guard), `subgaussian_tail_bound`'s `h_int`
+(`K = 1`, `t = 2`), `hoeffding_inequality_interval`'s and
+`hoeffding_empirical`'s `h_meas` (`9/10 > 2e⁻²`), and the Bernstein
+trio's `h_meas` (the variance statistic `∑∫(X − ∫X)²` itself junk-zero
+— the matrix audit's headline mechanism at the scalar sibling — the
+denominator collapsing to `2at/3`, `9/10 > 2e^{-3/2}`). Kept-clause
+honesty recorded on the companions: `h_indep` genuine by `Fin 1`
+triviality, `h_mean`/`h_var` held through the junk zero. Classified
+truth-removable-through-junk: the five MGF-conclusion `h_meas`
+clauses. Deferred with priced mechanism:
+`hoeffding_inequality`/`hoeffding_iid`'s `h_meas` — the delivery's
+headline finding, **trim saturation** (`OuterMeasure.trim`, the
+definitional total function of `ofMeasurable`-built measures, takes
+every nonempty set on a trivial σ-algebra to full measure), which
+blocks exact-mass independence computation; two routes priced (the
+deep `δ_a s = 1` unfold; a richer σ-algebra — shown impossible at
+four points). Records: the proposal's follow-up record (with four
+technique findings), `proposals/README.md` Delivered row, README
+(6241), radar QA row (held 4.5), backlog item-2 ledger, scoreboard
+row, both map tables + SVG, `index/map/probability_concentration.md`,
+the QA file header, `EXECUTION_PLAN.md`, this log. Nothing committed;
+prior runs' uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/scmfences_spike.lean`, green after
+four fix rounds, all errors in recorded trap classes); `lake env lean`
+on the landed module (zero errors; 10 warnings all pre-existing, none
+from the new section); explicit `lake build
+Scaffold.QA.Concentration.Scalar_QA` ✔; full `lake build` +
+`check_build_completeness.py` — 134/134 fresh, 0 stale, 0 missing,
+exit 0 (re-confirmed after the records sweep); `#print axioms` via
+`wip/scmfences_axcheck.lean` on all 40 new declarations — every one
+exactly `propext, Classical.choice, Quot.sound`; `lint_axioms` exit 0
+(4 axioms unchanged); `check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (new `scM2*`/
+`scMfence_*` names collision-free); `check_backlog_freshness`;
+`check_scaffold_map_freshness` exit 0 after the stats sync.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. QA proves consequences relative to the
+substrate, not the substrate (no axiom touched — the fences refute
+dropped-hypothesis statement shapes of proved theorems). Honest scope:
+the family's non-measurable-fixture surface is closed except the two
+trim-saturation-gated deferrals and five junk-satisfiable MGF
+classifications, each with its mechanism in the proposal.
+
+**Next handoff:** the Active table stays all-Low (decision-gated). No
+priced single-run completion remains in any audit's deferral list —
+natural next moves: a fresh consumption survey for a new audit target
+(no pre-discipline QA family remains), a residual-pair rename on
+demand, or opening a larger frontier as its own multi-run proposal
+(the `walkTVPair` join the most concretely priced). The
+trim-saturation finding prices a new option: either deferral route,
+if taken, unlocks genuinely-independent non-measurable fixtures for
+any family's two-coordinate `h_meas` clauses.
+
+## 2026-09-05T22:47:24Z — The scalar family's trim-saturation deferral closure (in progress)
+
+**Run:** `20260905T224724Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** in-progress  
+**Milestone:** The prior terminal handoff's own priced option — the
+trim-saturation deferral route: prove the saturation lemma (`μ S = 1`
+for nonempty `S` under a Dirac on a trivial σ-algebra, via
+`OuterMeasure.ofFunction (extend …)` exposed by `ofFunction_eq_iInf_mem`),
+build the four-cell-partition genuinely-independent non-measurable
+family it unlocks on `(Fin 4, ⊥)`, and close `hoeffding_inequality`'s
+and `hoeffding_iid`'s `h_meas` — the scalar family's last two open
+deferrals.
+
+**Changes:** none yet — recording intent before editing. The route was
+verified against the pinned Mathlib before commitment (the
+`ofFunction`/`extend` definitions read directly, not assumed).
+
+**Next handoff:** saturation-lemma spike → full spike → land in
+`Scalar_QA.lean` → verification ladder → records update.
+
+## 2026-09-05T23:09:11Z — The scalar family's trim-saturation deferral closure (terminal)
+
+**Run:** `20260905T224724Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** completed  
+**Milestone:** The prior terminal handoff's own priced option,
+delivered: close `hoeffding_inequality`'s and `hoeffding_iid`'s
+`h_meas` — the scalar family's last two open deferrals — by taking the
+trim-saturation route, landing the saturated-measure independence
+machinery as reusable evidence for any future non-measurable-fixture
+obligation.
+
+**Changes:** QA-only — `Scalar_QA.lean`'s new `SaturationFences`
+section (+29 by the generator metric, 6241 → 6270; 33 declarations).
+The load-bearing piece is the **saturation lemma
+`scM_dirac_bot_eq_one`**: on a trivial σ-algebra a Dirac measure sends
+every nonempty set to exactly `1` (the packaged `measure_eq_iInf` —
+the value is the infimum over measurable supersets, and the only
+`⊥`-measurable superset of a nonempty set is `univ`). The follow-up's
+recorded obstruction thereby becomes the route: with every mass exact,
+the proved saturated-independence lemma
+(`scM_indepFun_of_saturated`: every pair of nonempty preimages
+intersects ⟹ both sides of every independence equality are `1` or
+`0`) applies at the four-cell family `X₀ = 2·1_A`, `X₁ = 2·1_B`
+(`A = {0,1}`, `B = {0,2}`) on `(Fin 4, ⊥, δ₀)` — the repository's
+first genuinely-independent non-measurable family. The fences: both
+theorems' `h_meas` dropped statements killed by the saturated tail
+event `A ∩ B = {0}` at measure `1` against `2exp(−16/16) = 2e⁻¹ < 1`
+(on-file pin) at `a = 2`, `t = 4`; kept clauses genuine (`h_indep`,
+`h_bound`) or junk-recorded (`h_mean`); the dropped clause genuinely
+failing at the nonconstant coordinates. The scalar family's
+falsification surface is now complete with no open item. Records: the
+proposal's deferral-closure record (with four technique findings),
+`proposals/README.md` Delivered row, README (6270), radar QA row (held
+4.5), backlog item-2 ledger, scoreboard row, both map tables + SVG,
+`index/map/probability_concentration.md`, the QA file header,
+`EXECUTION_PLAN.md`, this log. Nothing committed; prior runs'
+uncommitted deliveries preserved.
+
+**Verification:** saturation lemma probed standalone first
+(`wip/scsat_probe.lean`, green after three fix rounds); full spike
+(`wip/scsat_spike.lean`, green after seven, all errors in recorded
+trap classes); `lake env lean` on the landed module (zero errors; 10
+warnings all pre-existing); explicit module build ✔; full `lake
+build` + `check_build_completeness.py` — 134/134 fresh, 0 stale, 0
+missing, exit 0 (re-confirmed after the records sweep); `#print
+axioms` via `wip/scsat_axcheck.lean` on all 29 nameable declarations —
+every one a subset of `propext, Classical.choice, Quot.sound`;
+`lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness`;
+`check_backlog_freshness`; `check_scaffold_map_freshness` exit 0
+after the stats sync.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. QA proves consequences relative to the
+substrate, not the substrate (no axiom touched — the fences refute
+dropped-hypothesis statement shapes of proved theorems). Honest scope:
+the family's closure is complete; the five MGF-conclusion
+classifications are properties of junk-satisfiable conclusion shapes.
+
+**Next handoff:** the Active table stays all-Low (decision-gated). No
+priced single-run completion remains in any audit's deferral list —
+natural next moves: a fresh consumption survey for a new audit target
+(no pre-discipline QA family remains; a survey would need to key on
+shelves without same-name QA — the spectral-core audit's blind-spot
+lesson), a residual-pair rename on demand, or opening a larger
+frontier as its own multi-run proposal (the `walkTVPair` join the most
+concretely priced). The saturated-independence machinery is now
+available for any future family's non-measurable-fixture clauses.
+
+## 2026-09-05T23:13:33Z — The primitive-convergence family's fence audit (in progress)
+
+**Run:** `20260905T231333Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** in-progress  
+**Milestone:** This run's fresh consumption survey — keyed, per the
+prior handoff's lesson, on shelves with NO direct QA import — finds
+`LinearAlgebra.PrimitiveConvergence.lean` (802 lines, ~24 theorems, 4
+transitive non-QA consumers: `Mixing`, `Oversmoothing`,
+`DirectedMixing`, the `EmpiricalStationary` capstone) as the
+library's genuinely-unaudited clause surface with the highest
+consumer count: the primitive-mixing convergence engine of the
+directed axis, never per-clause fenced. Audit it.
+
+**Changes:** none yet — recording intent before editing. Survey
+facts: 58 shelf modules, 51 directly QA-covered; of the 7 uncovered,
+`Matrix/Basic` is a single instance (no clause surface), and
+`ClusterProjector`/`EdgePerturbation` carry delivered audits (their
+fences ride transitive QA imports) — `PrimitiveConvergence` is the
+real gap.
+
+**Next handoff:** Step-0 census proposal → spike (the non-convergence
+trio at the docstring's own directed 2-cycle is the priciest piece) →
+land in `Scaffold/QA/LinearAlgebra/PrimitiveConvergence_QA.lean` →
+verification ladder → records.
+
+## 2026-09-05T23:23:23Z — The primitive-convergence family's fence audit (terminal)
+
+**Run:** `20260905T231333Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** completed  
+**Milestone:** The direct-import-coverage consumption survey's pick,
+audited: `LinearAlgebra.PrimitiveConvergence` — the library's genuine
+unaudited clause surface at 4 transitive non-QA consumers (`Mixing`,
+`Oversmoothing`, `DirectedMixing`, the `EmpiricalStationary`
+capstone), 802 lines and ~24 theorems of the directed axis's
+primitive-mixing convergence engine, zero prior fence coverage.
+
+**Changes:** QA-only — the NEW
+`Scaffold/QA/LinearAlgebra/PrimitiveConvergence_QA.lean` (54
+declarations = 50 theorems + 4 defs; +50, 6270 → 6320). Nineteen
+hypothesis-form fences at three `Fin 2` fixtures (the docstring's own
+directed 2-cycle — nonnegative, row-stochastic, irreducible, NOT
+primitive; the signed row-stochastic `hnn` breaker; the
+non-stochastic nonneg `hrow` breaker): the bookkeeping layer, the
+whole Doeblin entrywise-range engine at both breakers per theorem
+(the dotProduct pair at signed/mass-wrong weights; the contraction's
+`hrow` at δ=0 doubling the range and `hle` at inflated δ=1), **the
+convergence headline with all three `hprim` clauses killed by the
+cycle's oscillation** (`primitive_power_tendsto`,
+`primitive_entrywise_tendsto`, `primitive_vecMul_tendsto`: the
+`(0,0)` entry alternates `1,0,1,0…`, the even/odd subsequence engine
+via `tendsto_nhds_unique`, the vector and vecMul forms composed
+through `continuous_apply`, the genuine stationary `(1/2,1/2)`
+keeping every kept clause honest), and the primitivity suppliers
+(`isIrreducible_of_isPrimitive`' `hprim` at the diagonal by the
+ReflTransGen-tail reachability induction; the odd-loop supplier's
+`hodd` at the bipartite cycle with `hreach`/`htwo` companions
+genuine). Records: the proposal (COMPLETE + delivery record with four
+technique findings and two priced deferral classes — the convergence
+trio's `hnn`/`hrow`/`hπ*` clauses and the signed-cancellation walk
+quartet), `proposals/README.md` Delivered row, README (6320), radar
+QA row (held 4.5, module count 69 → 70), backlog item-2 ledger,
+`index/map/linear_algebra.md`, the scoreboard row, both map tables +
+SVG, `EXECUTION_PLAN.md`, this log. Nothing committed; prior runs'
+uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/pcvfences_spike.lean`, green
+after five fix rounds, all errors in recorded trap classes); `lake
+env lean` on the landed module (zero errors, ZERO warnings); explicit
+module build ✔; full `lake build` + `check_build_completeness.py` —
+135/135 fresh, 0 stale, 0 missing, exit 0 (the new QA module in the
+tree); `#print axioms` via `wip/pcvfences_axcheck.lean` on all 54
+declarations — every one a subset of `propext, Classical.choice,
+Quot.sound`; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new `pcv*`
+names collision-free — the first new QA module since the guard
+landed, clean on introduction); `check_backlog_freshness`;
+`check_scaffold_map_freshness` exit 0 after the stats sync.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition
+changed, no public statement changed. QA proves consequences relative
+to the substrate, not the substrate (no axiom touched — the fences
+refute dropped-hypothesis statement shapes of proved theorems).
+Honest scope: the family's first fence layer is complete; the two
+priced deferral classes carry their mechanisms in the proposal.
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The survey's residual never-audited surfaces are the small Core files
+(`Core.RandomVariable` at 3 consumers, `Core.Norms` at 2,
+`Scaffold.Mathlib.Core` at 0) — a cheap follow-up survey-and-fence
+run; otherwise the standing options (a larger frontier as its own
+multi-run proposal, the `walkTVPair` join the most concretely priced;
+the residual-pair rename watch) remain, and the audit method's
+direct-import key has now been applied once end-to-end.
+
+## 2026-09-05T23:31:31Z — The π-clause deferral cull + survey residual (in progress)
+
+**Run:** `20260905T233131Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** in-progress  
+**Milestone:** The primitive-convergence audit's priced π-clause
+cluster of the convergence trio (the prior run's own deferral record:
+"feasable at π NOT stationary — the conclusion's limit is then wrong
+even where powers converge"), fenced at a strictly-positive `2×2`
+fixture through the two-idempotent spectral decomposition; plus the
+direct-import survey's residual Core files, classified (definition-only
+— closing the survey program: every shelf module then either directly
+QA-covered or definition-only).
+
+**Changes:** none yet — recording intent before editing. The decay
+engine (`(1/2)^t → 0` via `tendsto_pow_atTop_atTop_of_one_lt` +
+`tendsto_inv_atTop_zero`) probed green in `wip/pcvprobe.lean`.
+
+**Next handoff:** spike → land → ladder → records.
+
+## 2026-09-05T23:50:02Z — The π-clause deferral cull + survey residual (terminal)
+
+**Run:** `20260905T233131Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** completed  
+**Milestone:** The primitive-convergence audit's priced π-clause
+cluster, closed; and the direct-import survey's residual, classified
+— closing the survey program itself.
+
+**Changes:** QA-only — `PrimitiveConvergence_QA.lean`'s new
+`PiClauseFences` section (23 declarations; +22, 6320 → 6342). The
+engine: the strictly-positive fixture `pcvPos` with the
+two-idempotent spectral decomposition evaluated ENTRYWISE (`P^t =
+(1/2 + r_t/2, 1/2 − r_t/2; …)`, `r_t = (1/2)^t` — the smul-spelled
+algebraic form abandoned after the `smul_eq_mul` instance-diamond made
+entrywise evaluation erratic), so the actual limit of `P^t *ᵥ x` is
+the averaging vector (decay engine probed standalone first). Five
+fences, each killed by `tendsto_nhds_unique` against the proved
+actual limit: `primitive_power_tendsto`'s `hπstat` at the
+non-stationary mass-one `e₀` (powers converge; the claimed limit
+doesn't match: `1 = 1/2`) and `hπsum` at the stationary mass-two
+`(1,1)`; the entrywise `hπstat` twin; `primitive_vecMul_tendsto`'s
+`hπstat` (via the power-symmetry) and `hνsum` at mass-two `ν`. The
+`hπnn` clause classified ENTANGLED through the proved stationary-space
+pin (`pcvPos_stationary_eq`: mass-one stationary ⟹ uniform) plus the
+general Perron argument. The survey's residual classified
+definition-only (`Matrix/Basic`, `Core`, `Core/RandomVariable`,
+`Core/Norms`) — **the direct-import survey program is closed: every
+shelf module now either directly QA-covered or definition-only**.
+Records: the proposal's deferral-closure record (with three technique
+findings), `proposals/README.md` Delivered row, README (6342), radar
+QA row (held 4.5), backlog item-2 ledger, `index/map/linear_algebra.md`,
+the scoreboard row, both map tables + SVG, the QA file's header,
+`EXECUTION_PLAN.md`, this log. Nothing committed; prior runs'
+uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/pcvfences2_spike.lean`, green
+after eight fix rounds, all errors in recorded trap classes); the
+landed module elaborates with zero errors and zero warnings (after an
+import fix the spike's broader list had masked — the completeness
+discipline catching it); explicit module build ✔; full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0; `#print axioms` via `wip/pcvfences2_axcheck.lean` on all 23
+declarations — every one a subset of `propext, Classical.choice,
+Quot.sound`; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness`;
+`check_backlog_freshness`; `check_scaffold_map_freshness` exit 0
+after the stats sync.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition
+changed, no public statement changed. QA proves consequences relative
+to the substrate, not the substrate (no axiom touched). Honest scope:
+the family's remaining priced deferrals are the convergence trio's
+`hnn`/`hrow` clauses (the `hrow` case carrying a nonexistence sketch)
+and the signed-cancellation walk quartet; the survey program has no
+remaining uncovered clause surface.
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+No survey target and no cheap priced deferral remains; the natural
+next moves are the standing options — opening a larger frontier as
+its own multi-run proposal (the `walkTVPair` join the most
+concretely priced), the residual-pair rename on demand, or the
+primitive-convergence remainder (the signed-primitive `3×3` fixture;
+the walk quartet) as a priced single-run completion.
+
+## 2026-09-06T00:16:11Z — The primitive-convergence remainder (in progress)
+
+**Run:** `20260906T001611Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** in-progress  
+**Milestone:** The prior handoff's named priced single-run completion:
+the signed-cancellation walk quartet (the audit's remaining priced
+deferral — four `hnn` fences at cancellation fixtures designed and
+hand-verified numerically), the six cheap positive-clause fences the
+original audit never reached (`h1`/`h2`/`hz1`/`hz2`/`h1`/`hreach`),
+and the two recorded classifications of the convergence trio's `hnn`
+(truth-removable, by the Perron peripheral-spectrum argument) and
+`hrow` (no admissible fixture, by the strict-contraction
+propagation sketch).
+
+**Changes:** none yet — recording intent before editing.
+
+**Next handoff:** spike → land → ladder → records.
+
+## 2026-09-06T00:23:06Z — The primitive-convergence remainder (terminal)
+
+**Run:** `20260906T001611Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** completed  
+**Milestone:** The prior handoff's named priced single-run
+completion: the audit's remaining priced deferral closed — the
+signed-cancellation walk quartet, the positive-clause tail, and the
+two trio classifications. The primitive-convergence family's
+priceable clause surface is now CLOSED IN FULL.
+
+**Changes:** QA-only — `PrimitiveConvergence_QA.lean`'s new
+`CancellationFences` section (52 declarations; +42, 6342 → 6384). The
+quartet (fixtures designed and hand-verified numerically before any
+Lean): `reachable_of_pow_pos`'s `hnn` at `!![1,-2;0,-2]]` (the
+`(P²) 0 1 = 2 > 0` positivity is pure negative-product cancellation,
+no positive single-edge leaving vertex 0); `isIrreducible_of_isPrimitive`'s
+`hnn` at `!![0,-1;-1,-1]]` (no positive single-edges at all yet `P²`
+strictly positive — primitivity genuine, irreducibility failing);
+`pow_entry_pos_of_pos`'s and the bounce's `hnn` at quench fixtures
+(`(M²) 0 1 = -1`, `(M³) 0 1 = -1`) with every kept clause genuine.
+The positive-clause tail: the `h1`/`h2`/`hz1`/`hz2`/`h1` family at
+split/degenerate fixtures, and the odd-loop supplier's `hreach` at
+`!![0,1,0;1,1,0;0,1,1]]` with every kept clause genuine (including
+`hodd` pinned) yet `(0,2)` unreachable by the column-2 induction.
+The classifications: the convergence trio's `hnn` truth-removable
+(primitive stochastic ⟹ Perron peripheral spectrum `{1}` ⟹
+convergence — the shelf's `hnn` use at the non-expansiveness
+remainder step is a proof artifact) and `hrow` without an admissible
+fixture (strict-contraction propagation sketch). Records: the
+proposal's remainder-closure record, `proposals/README.md` Delivered
+row, README (6384), radar QA row (held 4.5), backlog item-2 ledger
+(family closed in full), `index/map/linear_algebra.md`, the
+scoreboard row, both map tables + SVG, the QA file's header,
+`EXECUTION_PLAN.md`, this log. Nothing committed; prior runs'
+uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/pcvfences3_spike.lean`, green
+after four fix rounds); the landed module elaborates with zero errors
+and zero warnings; explicit module build ✔; full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0; `#print axioms` via `wip/pcvfences3_axcheck.lean` on all 52
+declarations — every one a subset of `propext, Classical.choice,
+Quot.sound`; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness`;
+`check_backlog_freshness`; `check_scaffold_map_freshness` exit 0
+after the stats sync.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition
+changed, no public statement changed. QA proves consequences relative
+to the substrate, not the substrate (no axiom touched). Honest
+scope: the family's clause surface is closed in full; the two
+classifications' formal proofs are priced as optional strengthening.
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The audit method has no remaining target, deferral, or survey gap.
+The standing options are the larger frontiers as their own multi-run
+proposals (the `walkTVPair` join the most concretely priced) plus the
+residual-pair rename on demand.
+
+## 2026-09-06T00:26:23Z — The walkTVPair–Dobrushin engine join (in progress)
+
+**Run:** `20260906T002623Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** in-progress  
+**Milestone:** The standing frontier's most concretely priced item:
+join the undirected `walkTVPair` family onto the matrix-level Dobrushin
+engine — the identity
+`walkTVPair A t = tvDobrushinCoeff ((walkTransitionMatrix A) ^ t)`
+(no symmetry needed, via the transpose-power bridge), plus the two
+proof re-routes (`walkTVPair_submul`, the sharp walk contraction) at
+unchanged public statements, with QA identity pins at the delivered
+`triAdj` fixture.
+
+**Changes:** none yet — recording intent before editing. The route was
+verified against the shelf before commitment (the identity's
+summand-level bridge and both engines' signatures read directly).
+
+**Next handoff:** proposal → spike → land → ladder → records.
+
+## 2026-09-06T03:10:52Z — The walkTVPair–Dobrushin engine join (terminal)
+
+**Run:** `20260906T002623Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** completed  
+**Milestone:** The standing frontier's most concretely priced item,
+delivered: join the undirected `walkTVPair` family onto the
+matrix-level Dobrushin engine, at unchanged public statements.
+
+**Changes:** Shelf (`Oversmoothing.lean`): the identity
+`walkTVPair_eq_tvDobrushinCoeff` — `walkTVPair A t =
+tvDobrushinCoeff ((walkTransitionMatrix A) ^ t)`, no symmetry and no
+stochasticity (the transpose-power bridge makes the `sup'`-defining
+summands of the two sides the same function of `p`; closed by
+`Finset.sup'_congr`) — the one new public theorem (functional
+1312 → 1313); the `walkTVPair_submul` re-route (the ~30-line bespoke
+chain → three identity rewrites + `tvDobrushinCoeff_pow_add_le`);
+the sharp-walk-contraction re-route (the ~50-line bespoke
+sign-statistic proof → the vecMul↔mulVec transpose bridge +
+`tvDistance_vecMul_le_tvDobrushinCoeff`); the retired private pairing
+core deleted with a tombstone. QA (`Mixing_QA.lean`'s new `EngineJoin`
+section, +3): the engine-side identity pins at the delivered `triAdj`
+fixture (`δ(P) = 1/2`, `δ(P²) = 1/4` matching the pinned `walkTVPair`
+values) and the attained submultiplicativity instance re-derived
+through the join. Finding recorded: the join is strictly more general
+than the undirected family it was priced on. Records: the proposal
+(COMPLETE + delivery record with three technique findings),
+`proposals/README.md` Delivered row, README (6387), radar QA row
+(held 4.5), backlog note, `index/map/spectral_graph.md`, the
+scoreboard row, both map tables + SVG, the QA file's header,
+`EXECUTION_PLAN.md`, this log. Nothing committed; prior runs'
+uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/walkjoin_spike.lean`, green after
+four fix rounds); the shelf module and its QA consumer elaborate with
+zero errors/warnings; explicit module builds ✔; full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0 (the downstream closure, including the `EmpiricalStationary`
+capstone, covered); `#print axioms` via `wip/walkjoin_axcheck.lean`
+on the identity, both re-routed theorems (at their unchanged
+statements), and the three QA pins — every one exactly `propext,
+Classical.choice, Quot.sound`; `lint_axioms` exit 0 (4 axioms
+unchanged); `check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness`;
+`check_backlog_freshness`; `check_scaffold_map_freshness` exit 0
+after the stats sync.
+
+**Remaining risk:** none owed — a proof-architecture join plus one
+new identity theorem; no axiom disposition changed, no existing
+public statement changed. The private-core deletion is private-surface
+only.
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The remaining standing frontiers are all multi-run — the QA axis's
+randomized half, the sharp `|λ₂| = α` layer (now the directed-rate
+program's only remaining item, and the join makes its objects
+engine-native), and the reverse TV → χ² calculus — each wants its own
+proposal; the residual-pair rename stays on demand.
+
+## 2026-09-06T03:13:41Z — The sharp |λ₂| = α layer, Slice 1 (in progress)
+
+**Run:** `20260906T031341Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** in-progress  
+**Milestone:** Open the gated sharp layer (the prior handoff's top
+frontier, "now the directed-rate program's only remaining item") as
+its own multi-run proposal, delivering the elementary first slice:
+the spectral ceiling `|λ| ≤ α` for every left-eigenvalue `λ ≠ 1` of
+the Google matrix — the Haveliwala–Kamvar inequality half, at the
+vecMul level (mass lemma + shadow lemma + ℓ¹ peripheral bound +
+ceiling + attainment twin), with the eigenvector equation pinned in
+QA at a 2-cycle fixture.
+
+**Changes:** none yet — recording intent before editing.
+
+**Next handoff:** proposal → spike → land → QA → ladder → records.
+
+## 2026-09-06T03:26:02Z — The sharp |λ₂| = α layer, Slice 1 (terminal)
+
+**Run:** `20260906T031341Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** completed  
+**Milestone:** Open the gated sharp layer (the prior handoff's top
+frontier, "the directed-rate program's only remaining item") as its
+own multi-run proposal, delivering Slice 1: the Google matrix's
+spectral ceiling — Haveliwala–Kamvar's inequality half at full
+generality.
+
+**Changes:** Shelf — `PageRank.lean`'s new `SpectralCeiling` section
+(five public theorems, functional 1313 → 1318): the mass lemma (left
+eigenvectors of `googleMatrix A α` at `c ≠ 1` have zero total mass —
+row-stochastic mass bookkeeping); the shadow lemma (with zero mass
+the teleportation term vanishes and `μ ᵥ* G = c • μ` collapses to
+`μ ᵥ* P = (c/α) • μ` — G's off-one left-eigenvectors ARE P's
+mass-zero left-eigenvectors); the ℓ¹ peripheral bound
+(`abs_vecMulEigen_le_one`, stated for any nonnegative row-stochastic
+matrix); the ceiling `googleMatrix_abs_eigen_le` (`|c| ≤ α`); and
+the attainment twin (a mass-zero walk left-eigenpair maps to a Google
+left-eigenpair at `α·c'`). QA — `PageRank_QA.lean`'s new
+`SpectralCeilingQA` section (+8, 6387 → 6395): the raw eigen-equation
+at the fresh two-cycle fixture (the `-1` shadow pair, the twin's
+`-α`-image, instantiated raw at `α = 4/5`, and the ceiling instance —
+load-bearing on the real `googleMatrix` definition) plus the end-mix
+`0`-pair at `K₂` (the strict side). All at the vecMul level — no
+eigen-API. The shelf's FIRST spectral statements about the Google
+matrix. Records: the proposal (Slice 1 delivery record with three
+technique findings), `proposals/README.md` (a Medium Active row — the
+first non-Low row since the audit program closed), README (6395),
+radar QA row (held 4.5), backlog note,
+`index/map/spectral_graph.md`, the scoreboard row, both map tables +
+SVG, `EXECUTION_PLAN.md`, this log. Nothing committed; prior runs'
+uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/sharp_spike.lean`, green after
+nine fix rounds); the shelf module and its QA consumer elaborate with
+zero errors/warnings; explicit module builds ✔; full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0; `#print axioms` via `wip/sharp_axcheck.lean` on all 13
+declarations — every one exactly `propext, Classical.choice,
+Quot.sound`; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness`;
+`check_backlog_freshness`; `check_scaffold_map_freshness` exit 0
+after the stats sync.
+
+**Remaining risk:** none owed — hard crust only, no axiom
+disposition changed, no existing public statement changed. Honest
+scope: the ceiling is the inequality half at the eigenvector level;
+the eigenvalue-level forms, the strictness layer, and the rate
+connection are the proposal's later slices.
+
+**Next handoff:** the proposal stays open (Active: Medium) — Slice 2
+candidates in leverage order: (a) the rate connection (the ceiling
+composed with the power-method convergence — the empirical PageRank
+capstone's consumer surface); (b) the eigenvalue-level forms through
+Mathlib's `Module.End` eigen-API; (c) the strictness layer on
+aperiodic chains. The other standing frontiers (the QA axis's
+randomized half; the reverse TV → χ² calculus) remain available as
+their own proposals.
+
+## 2026-09-06T03:28:52Z — The sharp layer's Slice 2 (a): the rate connection (in progress)
+
+**Run:** `20260906T032852Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** in-progress  
+**Milestone:** The open sharp-layer proposal's top-ranked Slice 2
+candidate: the rate connection — the Dobrushin shadow
+`δ(G) = α·δ(P)` (exact, the teleportation's uniform shift cancels in
+every row-pair difference), the `t = 1` identity
+`pageRankTVPair A α 1 = α·walkTVPair A 1`, the walk Dobrushin ceiling
+`δ(P) ≤ 1`, and the pair rate
+`pageRankTVPair A α t ≤ (α·walkTVPair A 1)^t ≤ α^t` — the existing
+Doeblin-floor rate recovered through the engine at the sharper
+constant.
+
+**Changes:** none yet — recording intent before editing.
+
+**Next handoff:** spike → land → QA → ladder → records.
+
+## 2026-09-06T04:00:22Z — The sharp layer's Slice 2 (a): the rate connection (terminal)
+
+**Run:** `20260906T032852Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** completed  
+**Milestone:** The open sharp-layer proposal's top-ranked Slice 2
+candidate: the rate connection — the Dobrushin shadow, the empirical
+PageRank capstone's consumer surface.
+
+**Changes:** Shelf — `DirectedMixing.lean`'s new `DobrushinShadow`
+section (six public theorems, functional 1318 → 1324): the EXACT
+pointwise Dobrushin shadow (`TV(G_x, G_y) = α·TV(P_x, P_y)`, the
+teleportation's uniform shift cancelling entrywise); the shadow
+ceiling `δ(G) ≤ α·δ(P)`; the walk Dobrushin ceiling `δ(P) ≤ 1`; the
+`t = 1` rate bound; **the pair rate `pageRankTVPair A α t ≤
+(α·δ(P))^t`** — the existing Doeblin-floor `α^t` rate recovered
+through the engine at the SHARPER constant — and the `α^t` corollary.
+QA — `DirectedMixing_QA.lean`'s new `DobrushinShadowQA` section (+5,
+6395 → 6400): `δ(P) = 1` pinned at the two-cycle (the walk ceiling
+attained), the rate instantiated at `α = 4/5` through the pinned
+coefficient, the `α^t` corollary at `t = 2`. Scope adjustment
+recorded: the exact shadow equality was designed first but its
+sup'-scaling step needs sup'-attainment (a LinearOrder on the index);
+the ≤-form carries every consumer, the equality priced as a
+follow-up. Records: the proposal (Slice 2 (a) delivery record with
+three technique findings), `proposals/README.md` (the Active row:
+Slices 1 and 2 (a) delivered), README (6400), radar QA row (held
+4.5), backlog note, `index/map/spectral_graph.md`, the scoreboard
+row, both map tables + SVG, `EXECUTION_PLAN.md`, this log. Nothing
+committed; prior runs' uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/dobrushin_spike.lean`, green
+after ~14 fix rounds); the shelf module and its QA consumer elaborate
+with zero errors/warnings; explicit module builds ✔; full `lake
+build` + `check_build_completeness.py` — 135/135 fresh, 0 stale, 0
+missing, exit 0; `#print axioms` via `wip/dobrushin_axcheck.lean` on
+all 11 declarations — every one exactly `propext, Classical.choice,
+Quot.sound`; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness`;
+`check_backlog_freshness`; `check_scaffold_map_freshness` exit 0
+after the stats sync.
+
+**Remaining risk:** none owed — hard crust only, no axiom disposition
+changed, no existing public statement changed. Honest scope: the
+exact shadow equality is priced (sup'-attainment); the
+eigenvalue-level forms and the strictness layer remain the proposal's
+later slices.
+
+**Next handoff:** the proposal stays open (Active: Medium) — Slice 3
+candidates in leverage order: (a) the exact shadow equality (the
+attainment route); (b) the eigenvalue-level forms through Mathlib's
+`Module.End` eigen-API; (c) the strictness layer on aperiodic chains.
+The other standing frontiers (the QA axis's randomized half; the
+reverse TV → χ² calculus) remain available.
+
+## 2026-09-06T04:02:38Z — The sharp layer's Slice 3 (a): the exact shadow equality (in progress)
+
+**Run:** `20260906T040022Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** in-progress  
+**Milestone:** The prior handoff's top Slice 3 candidate, closing
+Slice 2 (a)'s priced follow-up: the exact shadow equality
+`δ(G) = α·δ(P)` through the sup'-attainment route
+(`Finset.sup'_induction` — the ⊔-closed induction property
+`α·z ≤ sup'(α·f)`, no LinearOrder on the index), plus the exact `t = 1`
+identity and QA pins at the two-cycle.
+
+**Changes:** none yet — recording intent before editing.
+
+**Next handoff:** spike → land → ladder → records.
+
+## 2026-09-06T08:59:27Z — The sharp layer's Slice 3 (a): the exact shadow equality (terminal)
+
+**Run:** `20260906T040022Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** completed  
+**Milestone:** The prior handoff's top Slice 3 candidate, closing
+Slice 2 (a)'s priced follow-up: the exact shadow equality
+`δ(G) = α·δ(P)`.
+
+**Changes:** Shelf — three public theorems in `DirectedMixing.lean`'s
+`DobrushinShadow` section (functional 1324 → 1327):
+`scaleSupUnivEq` (the reusable sup'-scaling step — the attainment
+route via `Finset.sup'_induction` with the `⊔`-closed induction
+property `α·z ≤ sup'(α·f)`; closure by `max`-case mul-monotonicity
+since ℝ is not unconditionally MulLeftMono; **no LinearOrder on the
+index type** — the recorded gap was an artifact of reaching for
+`le_sup'_iff`); `tvDobrushinCoeff_googleMatrix` (the EXACT Dobrushin
+shadow — the pointwise shadow was exact all along); and
+`pageRankTVPair_one_eq` (the exact `t = 1` identity). QA — one pin in
+`DirectedMixing_QA.lean` (+1, 6400 → 6401): the identity at the
+two-cycle through the delivered `δ(P) = 1` pin —
+`pageRankTVPair dmxCyc (4/5) 1 = 4/5`, the exact shadow attained.
+Records: the proposal (Slice 3 (a) delivery record with three
+technique findings), `proposals/README.md` (the Active row: Slices 1,
+2 (a), 3 (a) delivered), README (6401), radar QA row (held 4.5),
+backlog note, `index/map/spectral_graph.md`, the scoreboard row, both
+map tables + SVG, `EXECUTION_PLAN.md` (a mid-edit splice accident on
+the plan file was caught by the post-edit structure assertion and
+fully restored before proceeding — no historical content lost,
+verified by diff-stat and content probes), this log. Nothing
+committed; prior runs' uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/exactshadow_spike.lean`, green
+after ~12 fix rounds — the headline trap: a `sup'_le _` with a
+metavariable Nonempty witness poisons the entire statement's
+elaboration, with the stuck-instance error reported at the statement
+rather than the tactic); the shelf and QA modules elaborate with
+zero errors/warnings; explicit module builds ✔; full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0; `#print axioms` via `wip/exactshadow_axcheck.lean` on all 4
+new declarations — every one exactly `propext, Classical.choice,
+Quot.sound`; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness`;
+`check_backlog_freshness`; `check_scaffold_map_freshness` exit 0
+after the stats sync.
+
+**Remaining risk:** none owed — hard crust only, no axiom
+disposition changed, no existing public statement changed. Honest
+scope: the Dobrushin-side shadow is now exact; the eigenvalue-level
+forms and the strictness layer remain the proposal's later slices.
+
+**Next handoff:** the proposal stays open (Active: Medium) — the
+remaining Slice candidates: (a) the eigenvalue-level forms through
+Mathlib's `Module.End` eigen-API; (b) the strictness layer on
+aperiodic chains. The other standing frontiers (the QA axis's
+randomized half; the reverse TV → χ² calculus) remain available.
+
+## 2026-09-06T09:05:12Z — The sharp layer's Slice 4: eigenvalue-level forms (in progress)
+
+**Run:** `20260906T090512Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** in-progress  
+**Milestone:** The prior handoff's top remaining Slice candidate:
+lift the sharp layer's ceiling into Mathlib's eigen-API through the
+definitional `Matrix.vecMulLinear` bridge — the eigenvector and
+eigenvalue ceilings, the eigen-level shadow and attainment twin —
+with QA pins at the two-cycle.
+
+**Changes:** none yet — recording intent before editing.
+
+**Next handoff:** spike → land → ladder → records.
+
+## 2026-09-06T09:14:50Z — The sharp layer's Slice 4: eigenvalue-level forms (terminal)
+
+**Run:** `20260906T090512Z-run-1`  
+**Session:** `ses_f8c5e42b3ffe41RPhC77iBiw0k`  
+**Status:** completed  
+**Milestone:** The prior handoff's top remaining Slice candidate:
+Slice 1's ceiling lifted into Mathlib's eigen-API — the
+eigenvalue-level forms of the sharp layer.
+
+**Changes:** Shelf — four public theorems in `PageRank.lean`'s
+`SpectralCeiling` section (functional 1327 → 1331), through the
+definitional `Matrix.vecMulLinear` bridge (`M.vecMulLinear x =
+x ᵥ* M := rfl` — no new mathematics; the spike green in two rounds):
+`googleMatrix_hasEigenvector_abs_le` (the eigenvector ceiling — the
+nonzero hypothesis Slice 1 carried is now supplied by `HasEigenvector`
+itself); `googleMatrix_hasEigenvalue_abs_le` (the eigenvalue ceiling
+via `exists_hasEigenvector` — Haveliwala–Kamvar's inequality half
+directly consumable by spectral machinery);
+`googleMatrix_hasEigenvector_shadow` (a G-eigenvector at `c ≠ 1` IS a
+P-eigenvector at `c/α`); `googleMatrix_hasEigenvector_of_shadow` (the
+attainment twin). QA — four pins in `PageRank_QA.lean`'s
+`SpectralCeilingQA` section (+4, 6401 → 6405): the `-α` pair at the
+two-cycle lifted to genuine `HasEigenvector`/`HasEigenvalue` through
+the bridge, the ceiling instantiated (`|-4/5| ≤ 4/5`), and the
+eigen-level shadow pinned (the `-4/5`-eigenvector of G is the
+`-1`-eigenvector of P). Scope note recorded: the forms are at the
+left-eigenvector (`vecMulLinear`) convention — the shelf's own;
+right-eigenvector forms need the doubly-stochastic case or the
+charpoly-invariance route, priced as a follow-up. Records: the
+proposal (Slice 4 delivery record with the dot-notation technique
+finding), `proposals/README.md` (the Active row: Slices 1, 2 (a),
+3 (a), 4 delivered), README (6405), radar QA row (held 4.5), backlog
+note, `index/map/spectral_graph.md`, the scoreboard row, both map
+tables + SVG, `EXECUTION_PLAN.md`, this log. Nothing committed;
+prior runs' uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/eigen_spike.lean`, green in two
+rounds); the shelf and QA modules elaborate with zero
+errors/warnings; explicit module builds ✔; full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0; `#print axioms` via `wip/eigen_axcheck.lean` on all 8
+declarations — every one exactly `propext, Classical.choice,
+Quot.sound`; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness`;
+`check_backlog_freshness`; `check_scaffold_map_freshness` exit 0
+after the stats sync.
+
+**Remaining risk:** none owed — hard crust only, no axiom
+disposition changed, no existing public statement changed. Honest
+scope: left-eigenvector convention; right-eigenvector forms and the
+strictness layer are priced.
+
+**Next handoff:** the proposal stays open (Active: Medium) — its last
+slice: the strictness layer on aperiodic chains. The other standing
+frontiers (the QA axis's randomized half; the reverse TV → χ²
+calculus) remain available.
+
+## 2026-09-06T10:19:24Z — The sharp layer's Slice 5: the strictness layer (in progress)
+
+**Run:** `20260906T101924Z-run-1`  
+**Session:** `ses_f89c8b23effeTZ0dTR5mzKQYrT`  
+**Status:** in-progress  
+**Milestone:** The open Medium proposal's last slice
+(`proposals/sharp-second-eigenvalue-layer.md`): on a primitive walk
+(aperiodic chain), every off-one Google left-eigenvalue is STRICTLY
+inside the α-disk — `|c| < α` — via the peripheral argument: the
+equality-in-ℓ¹-contraction sign-rigidity engine (a peripheral
+mass-zero left-eigenvector of a matrix with a strictly positive power
+has all entries weakly of one sign, so zero mass forces the zero
+vector). Zero axiom contact by design — Perron–Frobenius is NOT
+consumed; the route is elementary over ℝ.
+
+**Changes:** none yet — recording intent before editing.
+
+**Next handoff:** spike (`wip/strict_spike.lean`) → land the
+`Strictness` section in `PageRank.lean` (importing
+`LinearAlgebra.PrimitiveConvergence` for `Matrix.IsPrimitive`) → QA at
+a fresh primitive two-vertex fixture in `PageRank_QA.lean` → ladder →
+records.
+
+## 2026-09-06T10:44:11Z — The sharp layer's Slice 5: the strictness layer (terminal)
+
+**Run:** `20260906T101924Z-run-1`  
+**Session:** `ses_f89c8b23effeTZ0dTR5mzKQYrT`  
+**Status:** completed  
+**Milestone:** The open Medium proposal's last slice
+(`proposals/sharp-second-eigenvalue-layer.md`), closing the proposal
+COMPLETE: on a primitive (aperiodic) walk, every off-one Google
+left-eigenvalue is STRICTLY inside the α-disk — Haveliwala–Kamvar's
+strict half, via the peripheral argument.
+
+**Changes:** Shelf — five public theorems in `PageRank.lean`'s new
+`Strictness` section (functional 1331 → 1336), through the new
+cycle-free import edge `PageRank → LinearAlgebra.PrimitiveConvergence`
+(for `Matrix.IsPrimitive`): `vecMul_pow_smul_eq` (the power-eigenpair
+engine), `vecMul_sign_coherent_of_abs_eq_pow_pos` (the peripheral
+sign-rigidity engine: equality in the ℓ¹ contraction at a strictly
+positive power forces all entries of the peripheral left-eigenvector
+weakly of one sign — the two-case column extraction),
+`googleMatrix_abs_eigen_lt_of_primitive` (the strictness theorem
+`|c| < α`: sign coherence + Slice 1's zero-mass lemma forces the zero
+vector), its raw `_of_pow_pos` form, and
+`googleMatrix_hasEigenvalue_abs_lt_of_primitive` (the eigen-level
+twin through Slice 4's bridge). QA — 15 theorems + the `prPrim`
+fixture in `PageRank_QA.lean`'s new `StrictnessQA` section (QA
+6405 → 6420): `P = [[1/2,1/2],[1,0]]` pinned entrywise, `P²`
+strictly positive pinned entrywise, the alternating vector's `-1/2`
+walk eigenpair, the Google eigenpair at `-α/2` through Slice 1's
+attainment twin, strictness instantiated at both the vecMul and eigen
+levels (`|−2/5| < 4/5`), and the necessity fence
+`prCyc_not_primitive` — the periodic two-cycle, where Slice 1 pinned
+the ceiling attained at `|−α| = α`, provably fails primitivity
+(powers alternate identity/swap by the even/odd characterization).
+Records: the proposal (Slice 5 record with four technique findings +
+status COMPLETE), `proposals/README.md` (the Medium row retired to
+Delivered), README (1336/6420 + the PageRank module row's
+sharp-layer clause), radar QA row (held 4.5), backlog note,
+`index/map/spectral_graph.md`, the scoreboard verification row, both
+map tables + SVG, `EXECUTION_PLAN.md`, this log. Nothing committed;
+prior runs' uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/strict_spike.lean` — green after
+seven fix rounds); the shelf and QA modules elaborate with zero
+errors/warnings; explicit module builds ✔; full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0; `#print axioms` via `wip/strict_axcheck.lean` on all 20 new
+declarations — every one exactly `propext, Classical.choice,
+Quot.sound` (zero axiom contact — Perron–Frobenius NOT consumed, the
+route elementary over ℝ); `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness`;
+`check_backlog_freshness` clean; scoreboard regenerated (1336/6420/
+4/0) with the verification row; map-freshness exit 0 after the stats
+sync + SVG regeneration (49 stations, no status change owed).
+
+**Remaining risk:** none owed — hard crust only, no axiom disposition
+changed, no existing public statement changed. Honest scope: the
+strictness is at the left-eigenvector convention; the `|λ₂| = α` iff
+characterization has both halves delivered but not composed into one
+theorem; right-eigenvector forms stay priced.
+
+**Next handoff:** the Active priority table is back to all-Low
+(decision-gated) — no open multi-run proposal remains. Standing
+frontiers, each wanting its own proposal: the QA axis's randomized
+half, the reverse TV → χ² calculus, the sharp layer's
+right-eigenvector forms, and the residual-pair rename on demand.
+
+## 2026-09-06T10:50:19Z — The sharp layer's right-eigenvector forms (in progress)
+
+**Run:** `20260906T105019Z-run-1`  
+**Session:** `ses_f89c8b23effeTZ0dTR5mzKQYrT`  
+**Status:** in-progress  
+**Milestone:** The prior handoff's only non-decision-gated frontier,
+opened as its own single-run proposal
+(`proposals/right-eigenvector-sharp-layer.md`): the ceiling and
+strictness at the RIGHT-eigenvector (`mulVecLin`) convention — the
+parent proposal's Slice 4 priced follow-up — through a general
+reusable bridge `HasEigenvalue M.mulVecLin c ↔ HasEigenvalue
+M.vecMulLinear c` (any square matrix over a field, by the
+`det_transpose` + `exists_mulVec_eq_zero_iff` chain; no charpoly —
+the priced route was heavier than needed). Consumer gate: the
+parent's own priced follow-up plus the convention mismatch
+(stationarity left, power iteration right).
+
+**Changes:** none yet — recording intent before editing (the
+proposal file is written; the Mathlib lemma surface probed and
+confirmed: `exists_mulVec_eq_zero_iff`, `exists_vecMul_eq_zero_iff`,
+`mulVec_transpose`, `det_transpose`).
+
+**Next handoff:** spike → land the bridge + 4 right-forms in
+`PageRank.lean` → QA with the two boundary witnesses → ladder →
+records.
+
+## 2026-09-06T11:03:15Z — The sharp layer's right-eigenvector forms (terminal)
+
+**Run:** `20260906T105019Z-run-1`  
+**Session:** `ses_f89c8b23effeTZ0dTR5mzKQYrT`  
+**Status:** completed  
+**Milestone:** The prior handoff's only non-decision-gated frontier,
+delivered as its own same-run proposal (COMPLETE in the opening run):
+the ceiling and strictness at the RIGHT-eigenvector (`mulVecLin`)
+convention through a general reusable left/right spectrum bridge.
+
+**Changes:** Shelf — seven public theorems in `PageRank.lean`'s new
+`RightEigenvalue` section (functional 1336 → 1343), with the new
+import `Mathlib.LinearAlgebra.Matrix.ToLinearEquiv`: the two
+raw-pair↔determinant factoring lemmas
+(`exists_mulVec_eq_smul_iff_det`/`exists_vecMul_eq_smul_iff_det`); the
+**general bridge** `hasEigenvalue_mulVecLin_iff_vecMulLinear` (a
+square matrix's left and right eigenvalue sets coincide, any field —
+kernel-level `det Mᵀ = det M` via `exists_mulVec_eq_zero_iff` +
+`mulVec_transpose`; NO charpoly, the priced route was heavier than
+needed; reusable beyond the Google family); the right-convention
+ceiling `googleMatrix_hasEigenvalue_mulVecLin_abs_le` + raw
+`googleMatrix_abs_mulVec_eigen_le`; and the right-convention
+strictness `googleMatrix_hasEigenvalue_mulVecLin_abs_lt_of_primitive`
++ raw. QA — eleven theorems + the `prPrimRV` fixture in
+`PageRank_QA.lean`'s new `RightEigenQA` section (QA 6420 → 6431): the
+two boundary witnesses (the right eigenvector's NONZERO mass `−4` —
+the left mass lemma cannot transfer; the no-right-shadow witness —
+the left shadow lemma is genuinely FALSE at the right convention),
+the two-cycle's right `-α` pair attained (`G(4/5)` pinned
+closed-form, ceiling instantiated), the primitive fixture's right
+`-α/2` pair with strictness `|−2/5| < 4/5` through the raw right
+theorem, and the bridge pinned at the walk matrix (raw right pair
+`(1,−2)` ⟹ left `HasEigenvalue` at `−1/2`). Records: the proposal
+(COMPLETE + delivery record with four technique findings),
+`proposals/README.md` (new Delivered row), README (1343/6431 + the
+PageRank row's right-forms clause), radar QA row (held 4.5), backlog
+note, `index/map/spectral_graph.md`, the scoreboard verification row,
+both map tables + SVG, `EXECUTION_PLAN.md`, this log. Nothing
+committed; prior runs' uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/righteigen_spike.lean` — green
+after six fix rounds); the shelf and QA modules elaborate with zero
+errors/warnings; explicit module builds ✔; full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0; `#print axioms` via `wip/righteigen_axcheck.lean` on all 18
+new declarations — every one exactly `propext, Classical.choice,
+Quot.sound`; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness`;
+`check_backlog_freshness` clean; scoreboard regenerated (1343/6431/
+4/0) with the verification row; map-freshness exit 0 after the stats
+sync + SVG regeneration (49 stations, no status change owed).
+
+**Remaining risk:** none owed — hard crust only, no axiom disposition
+changed, no existing public statement changed. Honest scope: the
+right-eigenvector shadow is FALSE in general (witnessed in QA); the
+doubly-stochastic right-shadow is priced with its route in the
+proposal; the `|λ₂| = α` iff remains two delivered halves, now
+available at both conventions.
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The standing frontiers are unchanged — the QA axis's randomized half
+(design-gated), the reverse TV → χ² calculus (consumer-gated), the
+residual-pair rename on demand — each wanting its own proposal; the
+doubly-stochastic right-shadow is the newly priced small item (route
+sketched in the proposal).
+
+## 2026-09-06T11:05:32Z — The doubly-stochastic right-shadow (in progress)
+
+**Run:** `20260906T110500Z-run-1`  
+**Session:** `ses_f89c8b23effeTZ0dTR5mzKQYrT`  
+**Status:** in-progress  
+**Milestone:** The right-eigenvector proposal's own priced follow-up
+(`proposals/right-eigenvector-sharp-layer.md`'s "Out of scope,
+priced" — the only unblocked item in the prior handoff): on a
+column-stochastic walk (every Eulerian/regular chain), the two
+engines that genuinely fail at the right convention in general DO
+hold — the right mass lemma and the right shadow, plus the right
+attainment twin — by transporting the left theorems at `A := Pᵀ`
+through `googleMatrix Pᵀ α = (googleMatrix A α)ᵀ`.
+
+**Changes:** none yet — recording intent before editing.
+
+**Next handoff:** spike → land → QA (the two-cycle `-1` shadow
+round-trip; the end-mix `0`-pair; the non-symmetric doubly-stochastic
+`Fin 3` fixture) → ladder → records.
+
+## 2026-09-06T11:16:54Z — The doubly-stochastic right-shadow (terminal)
+
+**Run:** `20260906T110500Z-run-1`  
+**Session:** `ses_f89c8b23effeTZ0dTR5mzKQYrT`  
+**Status:** completed  
+**Milestone:** The right-eigenvector proposal's own priced follow-on
+(the prior handoff's only unblocked item): on a column-stochastic
+walk, the two engines that genuinely fail at the right convention in
+general DO hold on the right.
+
+**Changes:** Shelf — five public theorems in `PageRank.lean`'s
+`RightEigenvalue` section (functional 1343 → 1348):
+`walkTransitionMatrix_transpose_eq_of_col_sum_one` and
+`googleMatrix_transpose_eq_of_col_sum_one` (the two setup identities
+making `A := Pᵀ` a live transport), `googleMatrix_mulVec_mass_zero`
+(the right mass lemma), `googleMatrix_mulVec_shadow` (the right
+shadow `P *ᵥ v = (c/α) • v`), and `googleMatrix_mulVec_of_shadow`
+(the right attainment twin) — all the left theorems transported
+through the transpose bridge, no new mathematics beyond the priced
+route; the section docstring updated with the doubly-stochastic
+repair clause. QA — ten theorems + two fixtures in
+`PageRank_QA.lean`'s new `DoublyStochasticQA` section (QA
+6431 → 6441): the two-cycle's `-1` right shadow DELIVERED by the
+theorem from the pinned right `-α` pair and round-tripped through
+the twin to the pinned Google pair; the end-mix `0`-pair shadow at
+the complete graph; and the NON-SYMMETRIC doubly-stochastic `Fin 3`
+fixture `prDbl3` (the cyclic chain — `¬ IsSymm` pinned, doubly
+stochastic at the walk level pinned), the smallest witness that the
+hypothesis class is genuinely larger than the symmetric cone (on
+`Fin 2` doubly stochastic forces symmetry). Records: the proposal
+(follow-on delivery record with three technique findings, status
+header updated), `proposals/README.md` (the Delivered row extended),
+README (1348/6441 + the PageRank row's follow-on clause), radar QA
+row (held 4.5), backlog note, `index/map/spectral_graph.md`, the
+scoreboard verification row, both map tables + SVG,
+`EXECUTION_PLAN.md`, this log. Nothing committed; prior runs'
+uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/dblstoch_spike.lean` — green
+after four fix rounds; the spike caught one hand-arithmetic error in
+fixture design before any landing — the fixture's rows already sum
+to one, so the walk IS the matrix); the shelf and QA modules
+elaborate with zero errors/warnings; explicit builds ✔; full
+`lake build` + `check_build_completeness.py` — 135/135 fresh, 0
+stale, 0 missing, exit 0; `#print axioms` via
+`wip/dblstoch_axcheck.lean` on all 15 new declarations — every one
+exactly `propext, Classical.choice, Quot.sound`; `lint_axioms`
+exit 0 (4 axioms unchanged); `check_refutation_independence`
+(24-tag clean); `check_public_reachability` (63 modules);
+`check_citations`; `check_markdown_links`;
+`check_qa_name_uniqueness`; `check_backlog_freshness` clean;
+scoreboard regenerated (1348/6441/4/0) with the verification row;
+map-freshness exit 0 after the stats sync + SVG regeneration (49
+stations, no status change owed).
+
+**Remaining risk:** none owed — hard crust only, no axiom
+disposition changed, no existing public statement changed. Honest
+scope: the doubly-stochastic forms need the column-stochasticity
+hypothesis (the general right case's boundary witnesses stand); the
+mass/shadow/twin trio now exists at both conventions.
+
+**Next handoff:** the Active table stays all-Low (decision-gated);
+no priced unblocked item remains in the sharp-layer family. The
+standing frontiers are the QA axis's randomized half (design-gated),
+the reverse TV → χ² calculus (consumer-gated), and the
+residual-pair rename on demand — each wanting its own proposal. The
+natural next moves: a fresh consumption survey for a new audit or
+bridge target (the audit method's standing pattern), or one of the
+larger frontiers opened deliberately.
+
+## 2026-09-06T11:19:51Z — The |λ₂| = α characterization iff (in progress)
+
+**Run:** `20260906T111951Z-run-1`  
+**Session:** `ses_f89c8b23effeTZ0dTR5mzKQYrT`  
+**Status:** in-progress  
+**Milestone:** The one recorded, unblocked, priced item: composing
+the sharp layer's twice-delivered halves into the characterization
+theorem — the off-one Google eigenvalue sits AT modulus `α` iff the
+walk has a mass-zero peripheral eigenpair (item 3 of the layer's
+"What the layer is" list; the honest-scope note in the Slice 5 and
+right-eigenvector records). Both conventions (the doubly-stochastic
+right twin), QA both directions at the two-cycle plus the negative
+witness at the primitive fixture.
+
+**Changes:** none yet — recording intent before editing. (Evidence
+checked this run: the master-bound Step 2 and the `perron_frobenius`
+deprecation are both explicitly operator-gated — the Cesàro record
+reserves the latter decision for the operator; the backlog's items
+5/6 remain operator-gated.)
+
+**Next handoff:** spike → land the two iff theorems → QA → ladder →
+records (follow-on record into
+`proposals/sharp-second-eigenvalue-layer.md`).
+
+## 2026-09-06T11:25:57Z — The |λ₂| = α characterization iff (terminal)
+
+**Run:** `20260906T111951Z-run-1`  
+**Session:** `ses_f89c8b23effeTZ0dTR5mzKQYrT`  
+**Status:** completed  
+**Milestone:** The one recorded, unblocked, priced item — the sharp
+layer's item 3 composed from its twice-delivered halves, closing the
+family's recorded honest-scope note.
+
+**Changes:** Shelf — two public theorems (functional 1348 → 1350):
+`googleMatrix_abs_eigen_eq_alpha_iff` (`PageRank.lean`'s
+`Strictness` section; an off-one Google left-eigenvalue AT modulus
+`α` ⟺ a mass-zero peripheral walk eigenpair at the shadow eigenvalue
+`c/α` — the ⇒ composes the mass lemma + shadow, the ⇐ the attainment
+twin; equality is exactly the periodic-chain phenomenon) and
+`googleMatrix_mulVec_abs_eigen_eq_alpha_iff` (the doubly-stochastic
+right twin, composing the three transports). QA — four pins
+(6441 → 6445): both iff directions instantiated at the two-cycle,
+the right twin instantiated, and `prPrim_no_peripheral_QA` — the
+negative witness at the primitive fixture (no mass-zero peripheral
+walk pair: the mass-zero line is spanned by the alternating vector,
+the walk acting at `-1/2`), strictness's contrapositive content at
+the eigenpair level. Records: the proposal (follow-on record with
+two technique findings + status header — the layer's "What the layer
+is" list now fully stated), `proposals/README.md` (the Delivered
+row's closing note), README (1350/6445 + the characterization
+clause), radar QA row (held 4.5), backlog note,
+`index/map/spectral_graph.md`, the scoreboard verification row, both
+map tables + SVG, `EXECUTION_PLAN.md`, this log. Nothing committed;
+prior runs' uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/iff_spike.lean` — green after
+four fix rounds); the shelf and QA modules elaborate with zero
+errors/warnings; explicit builds ✔; full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0; `#print axioms` via `wip/iff_axcheck.lean` on all 6 new
+declarations — every one exactly `propext, Classical.choice,
+Quot.sound`; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness`;
+`check_backlog_freshness` clean; scoreboard regenerated (1350/6445/
+4/0) with the verification row; map-freshness exit 0 after the stats
+sync + SVG regeneration (49 stations, no status change owed).
+
+**Remaining risk:** none owed — hard crust only, no axiom
+disposition changed, no existing public statement changed. The
+sharp-layer family is closed with no recorded open note.
+
+**Next handoff:** the Active table stays all-Low (decision-gated);
+every remaining item of substance checked this run is operator-gated
+(the master-bound Step 2 admission choice; the `perron_frobenius`
+deprecation — explicitly reserved to the operator by the Cesàro
+record; backlog items 5/6; log-Sobolev adoption; the reverse TV → χ²
+consumer). Natural next moves: a fresh consumption survey under a
+NEW key (the module-level keys are exhausted — theorem-level
+QA-mention coverage, or the cross-family reconciliation wrappers the
+name-uniqueness guard anticipated), or an operator decision on one
+of the gated items.
+
+## 2026-09-06T11:31:39Z — The sharp-layer family's adversarial fence audit (in progress)
+
+**Run:** `20260906T113139Z-run-1`  
+**Session:** `ses_f89c8b23effeTZ0dTR5mzKQYrT`  
+**Status:** in-progress  
+**Milestone:** The audit method applied to today's sharp-layer
+family (sixteen public theorems, pins only, no fence pass — found by
+this run's theorem-level QA-mention survey, a new survey key after
+the module-level keys were exhausted): the hand-checked census lists
+~10 unfenced load-bearing clauses across the mass lemma, shadow,
+ceiling, twin, iff, sign-rigidity engine, and the doubly-stochastic
+trio.
+
+**Changes:** none yet — recording intent before editing. Survey
+honesty note: the transitive-closure half of the survey produced
+false inert-declarations (caught by hand-check against known
+consumption — e.g. `abs_vecMulEigen_le_one` is exercised through the
+ceiling); only the direct-mention half is exact, and the delivery is
+driven by the hand-checked census, not the noisy closure.
+
+**Next handoff:** spike (fixtures hand-verified numerically first) →
+land `SharpFences` → ladder → records.
+
+## 2026-09-06T11:39:40Z — The sharp-layer family's adversarial fence audit (terminal)
+
+**Run:** `20260906T113139Z-run-1`  
+**Session:** `ses_f89c8b23effeTZ0dTR5mzKQYrT`  
+**Status:** completed  
+**Milestone:** The standing audit pattern applied to the day's own
+capstone family — found by the theorem-level QA-mention survey (the
+new survey key after the module-level keys were exhausted): sixteen
+public theorems with pins but no fence pass.
+
+**Changes:** QA — 22 hypothesis-form fences + 3 fixtures in
+`PageRank_QA.lean`'s new `SharpFences` section (6445 → 6467), every
+unfenced load-bearing clause of the sharp family closed: the mass
+lemma's / shadow's / ceiling's `hc` (the constant vector's genuine
+`1`-pair, mass `2 ≠ 0`); the shadow's `hα` (the junk `0/0` shadow at
+the genuine `0`-pair); the ceiling's `hα` at negative `α` at the
+primitive fixture (eigenvalue `1/2` against `−1`) — **the census
+finding caught by the spike: at the two-cycle `G(−1) = I`, its
+off-one spectrum EMPTY** — the ceiling's `hnn` (the signed adjacency,
+eigenvalue `−12/5` against `4/5`); the `hμ0` junk corner; the twin's
+`hmass`; the iff's `hc1` (at `c = α = 1` the left side holds at the
+stationary pair while no mass-zero `1`-pair of the swap exists); the
+sign-rigidity engine's `hrow` (the non-stochastic `!![0,2;1/2,0]]`
+with `M² = 1 > 0` and a mixed-sign peripheral pair) and `hk` (the
+swap, consuming `prCyc_not_primitive`); the doubly-stochastic
+trio's `hcol` (the delivered `prPrim` boundary witness in fence
+form). Screened: strictness's `hprim`. Records: the proposal
+(COMPLETE + delivery record with three technique findings and the
+survey honesty note — the transitive-closure half produced false
+inert-declarations and drove nothing), `proposals/README.md` (new
+Delivered row), README (6467), radar QA row (held 4.5), backlog
+note, `index/map/spectral_graph.md`, the scoreboard verification
+row, both map tables + SVG, `EXECUTION_PLAN.md`, this log. Nothing
+committed; prior runs' uncommitted deliveries preserved.
+
+**Verification:** spike-first with fixtures hand-verified numerically
+before any Lean; the landed module elaborates with zero
+errors/warnings; explicit module build ✔; full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0; `#print axioms` on all 21 nameable audited declarations —
+every one exactly `propext, Classical.choice, Quot.sound`;
+`lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the `sfa*` names
+collision-free); `check_backlog_freshness` clean; scoreboard
+regenerated (1350/6467/4/0) with the verification row;
+map-freshness exit 0 after the stats sync + SVG regeneration (49
+stations, no status change owed).
+
+**Remaining risk:** none owed — QA-only, no axiom disposition
+changed, no public statement changed. QA proves consequences
+relative to the substrate; it does not prove the substrate (no axiom
+touched). The sharp-layer family's falsification surface is now
+complete.
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The theorem-level survey's honest residue: a Lean-level consumption
+survey (compiler-derived, not string heuristics) would be a tooling
+proposition of its own. The remaining items of substance are all
+operator-gated as before (the master-bound Step 2 admission; the
+`perron_frobenius` deprecation; backlog items 5/6; log-Sobolev; the
+reverse TV → χ² consumer).
+
+## 2026-09-06T11:45:13Z — The literal λ₂: sorted-spectrum ceiling forms (in progress)
+
+**Run:** `20260906T114513Z-run-1`  
+**Session:** `ses_f89c8b23effeTZ0dTR5mzKQYrT`  
+**Status:** in-progress  
+**Milestone:** Closing the sharp layer's name-gap: the
+eigenpair-level statements joined to the sorted-spectrum objects on
+regular input (G symmetric), with the new 1-eigenspace simplicity
+argument (strict teleportation positivity + the sign-rigidity
+engine + min-ratio) powering `top eval = 1`, `evals ⟨n−2⟩ ≤ α`, and
+`−α ≤ evals ⟨0⟩`.
+
+**Changes:** none yet — recording intent before editing (the shelf's
+engines surveyed: `exists_eigvalOf_eq_of_mulVec_eq_smul`,
+`evals_le_of_card_eigvalOf_le`, `eigvecOf_inner`,
+`evals_sum_eq_trace`, `googleMatrix_row_sum` — all present and
+reachable).
+
+**Next handoff:** spike → land `SortedSpectrum` → QA at the
+two-cycle (top pinned, bottom `−α` attained through the trace
+engine) → ladder → records.
+
+## 2026-09-06T12:10:40Z — The literal λ₂: sorted-spectrum ceiling forms (terminal)
+
+**Run:** `20260906T114513Z-run-1`  
+**Session:** `ses_f89c8b23effeTZ0dTR5mzKQYrT`  
+**Status:** completed  
+**Milestone:** Closing the sharp layer's name-gap — the
+eigenpair-level statements joined to the sorted-spectrum objects
+where they exist (regular input, `G` symmetric), with the new
+`1`-eigenspace simplicity argument.
+
+**Changes:** Shelf — nine public theorems in `PageRank.lean`'s new
+`SortedSpectrum` section (functional 1350 → 1359):
+`googleMatrix_isSymm_of_regular`, `googleMatrix_entry_pos` (the
+teleportation floor), `googleMatrix_mulVec_ones`,
+`pos_of_mulVec_eq_smul_of_nonneg`, **the `1`-eigenspace simplicity**
+`one_eigenspace_eq_smul_of_pos_isSymm` (sign-rigidity → weak sign →
+strict positivity for the nonneg branch → min-ratio
+proportionality — no Perron–Frobenius), `googleMatrix_eigvalOf_cases`
+(the right-ceiling at the eigenbasis), `googleMatrix_evals_top_eq_one`
+(the top exactly `1`), `googleMatrix_evals_second_le`
+(`evals ⟨n−2⟩ ≤ α` — simplicity plus eigenbasis orthogonality, the
+sdiff-partition count), and `googleMatrix_evals_bot_ge`
+(`-α ≤ evals ⟨0⟩`). QA — seven theorems in `PageRank_QA.lean`'s new
+`SortedSpectrumQA` section (QA 6467 → 6474): the two-cycle's `G(4/5)`
+symmetry pinned, `evals ⟨1⟩ = 1` pinned, the bottom
+`evals ⟨0⟩ = -4/5 = -α` ATTAINED through `evals_sum_eq_trace` and
+the pinned top, the second-from-top instance, and the trace pin.
+Records: the proposal (third follow-on record with four technique
+findings + status header), `proposals/README.md` (the Delivered
+row extended), README (1359/6474 + the sorted-spectrum clause),
+radar QA row (held 4.5), backlog note, `index/map/spectral_graph.md`,
+the scoreboard verification row, both map tables + SVG,
+`EXECUTION_PLAN.md`, this log. Nothing committed; prior runs'
+uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/sorted_spike.lean` — green after
+~18 fix rounds; the traps recorded: statement-level `by omega` index
+proofs, the dependent-domain rewrite block, linarith's
+proof-term-sensitive atoms, `Matrix.IsSymm`'s interface directions);
+both modules elaborate with zero errors (own warnings: none — the
+one `hd0` unused-hypothesis removed at design); explicit builds ✔;
+full `lake build` + `check_build_completeness.py` — 135/135 fresh,
+0 stale, 0 missing, exit 0; `#print axioms` on all 16 new
+declarations — every one exactly `propext, Classical.choice,
+Quot.sound`; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new
+`prCycG_*`/`prCyc_deg_one`/`prCyc_isSymm` names collision-free);
+`check_backlog_freshness` clean; scoreboard regenerated (1359/6474/
+4/0) with the verification row; map-freshness exit 0 after the
+stats sync + SVG regeneration (49 stations, no status change owed).
+
+**Remaining risk:** none owed — hard crust only, no axiom
+disposition changed, no existing public statement changed. Honest
+scope: the sorted-spectrum forms need regular input; the `n = 2`
+fixture's second-from-top coincides with the bottom — a `≥ 3`-vertex
+regular fixture priced in the proposal.
+
+**Next handoff:** the Active table stays all-Low (decision-gated);
+the remaining items of substance are all operator-gated as before
+(the master-bound Step 2 admission; the `perron_frobenius`
+deprecation; backlog items 5/6; log-Sobolev; the reverse TV → χ²
+consumer). The sharp-layer family now carries: five slices, three
+follow-ons, a complete fence audit, and the sorted-spectrum forms —
+its records name no further open item.
+
+## 2026-09-06T14:18:50Z — The separating regular fixture: 4-cycle sorted-spectrum pins (in progress)
+
+**Run:** `20260906T141850Z-run-1`  
+**Session:** `ses_f88f0e835ffe8QUbO4DxhGFxdB`  
+**Status:** in-progress  
+**Milestone:** The sorted-spectrum delivery's own priced follow-up —
+a `≥ 3`-vertex regular fixture (the 4-cycle separates the
+second-from-top from the bottom) pinning the two delivered bounds at
+distinct sorted indices, exercising the subspace Rayleigh–Ritz engine
+on the PageRank family for the first time.
+
+**Changes:** none yet — recording intent before editing (hand-verified
+numerics: `C₄` is 2-regular symmetric, `G(4/5) = (2/5)·A + (1/20)·J`,
+spectrum ascending `{-4/5, 0, 0, 1}`, trace `1/5`; routes surveyed:
+`evals_le_of_linearIndependent` at `k = 2` (span `{e₀−e₂, e₁−e₃}`
+where `G` acts as `0`) and `k = 3` (adding the alternating vector at
+`−4/5`), `exists_eigvalOf_eq_of_mulVec_eq_smul` +
+`evals_first_le_eigvalOf` for the bottom, `evals_sum_eq_trace` for the
+middle lower bounds, the delivered
+`googleMatrix_evals_top_eq_one`/`_bot_ge` for the extremes).
+
+**Next handoff:** spike → land → ladder → records.
+
+## 2026-09-06T14:57:07Z — The separating regular fixture: 4-cycle sorted-spectrum pins (terminal)
+
+**Run:** `20260906T141850Z-run-1`  
+**Session:** `ses_f88f0e835ffe8QUbO4DxhGFxdB`  
+**Status:** completed  
+**Milestone:** The sorted-spectrum delivery's own priced follow-up —
+a `≥ 3`-vertex regular fixture (the 4-cycle separates the
+second-from-top from the bottom) pinning the two delivered bounds at
+distinct sorted indices, exercising the subspace Rayleigh–Ritz engine
+on the PageRank family for the first time.
+
+**Changes:** QA-only — 39 QA theorems + 6 fixture `def`s in
+`PageRank_QA.lean`'s `SortedSpectrumQA` section (6474 → 6513),
+extending it past the two-cycle pins: the `prC4` 4-cycle (2-regular
+symmetric; `G(4/5) = (2/5)·A + (1/20)·J` pinned as the concrete
+matrix `!![1/20, 9/20, …]`, trace `1/5`, spectrum ascending
+`{-4/5, 0, 0, 1}`); the three eigenvector pairs (alternating at
+`-4/5`; the two even-odd modes at `0`); the numeric Gram-matrix dot
+pins (`diag(2,2,4)`, off-diagonal `0`); **the two Rayleigh–Ritz
+family bounds** — `evals ⟨1⟩ ≤ 0` via `evals_le_of_linearIndependent`
+at `k = 2` (`G` acts as the ZERO map on the two-mode span) and
+`evals ⟨2⟩ ≤ 0` at `k = 3` (`quadForm G x = -(16/5)·c₂²` through the
+exhibited eigenvector linearity), both independence proofs by
+dot-both-sides at the numeric pins; **the exact pins** — top `1` (the
+delivered theorem), bottom `-α` ATTAINED (the delivered bottom
+theorem from below; the exhibited `-α` eigenpair +
+`evals_first_le_eigvalOf` from above — load-bearing on both the
+theorems and the fixture), both middles `0` (the trace engine + both
+family bounds); and the separation stated explicitly
+(`prC4G_second_ne_bot_QA`: `0 ≠ -4/5`; `prC4G_second_strict_QA`:
+`|λ₂| = 0 < 4/5` strictly inside while the bottom attains
+`|−α| = α`). Records: the proposal (fourth follow-on record with four
+technique findings + the correction that its "the triangle's Google
+matrix is α-independent (J/3)" pricing note was wrong — trace `1−α`;
+moot for the pricing), `proposals/README.md` (the Delivered row's
+follow-on chain extended), README (6513), the radar (QA row synced,
+held 4.5), the backlog note, the shelf section's QA docstring pointer
+(comment-only), `index/map/spectral_graph.md`, the scoreboard
+verification row, both map tables + SVG, `EXECUTION_PLAN.md`, this
+log. Nothing committed; prior runs' uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/c4_spike.lean` — the fixture
+numerics hand-verified by script before any Lean; green after four
+fix rounds; the recorded traps headed by `rw`'s
+single-metavariable-instance discipline — a lemma with term
+metavariables in its LHS fires once per DISTINCT parameter
+assignment, so it must be repeated per instance — and `fin_cases`'
+eta-expanded binder, cured by taking literal-index congruences before
+the split); the landed module elaborates with zero errors/warnings;
+explicit builds ✔; full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0; `#print axioms` via `wip/c4_axcheck.lean` on all 39 new
+theorems — every one exactly `propext, Classical.choice, Quot.sound`;
+`lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new `prC4*`
+names collision-free); `check_backlog_freshness` clean; scoreboard
+regenerated (1359/6513/4/0) with the verification row;
+map-freshness exit 0 after the stats sync + SVG regeneration (49
+stations, no status change owed).
+
+**Remaining risk:** none owed — QA-only, no axiom disposition
+changed, no public statement changed. QA proves consequences relative
+to the substrate; it does not prove the substrate (no axiom touched).
+Honest scope: the pins are at one teleportation constant (`α = 4/5`,
+the family's standing fixture value) and one regular graph.
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The sharp-layer family's records now name no open item at all (five
+slices, four follow-ons, a complete fence audit, the sorted-spectrum
+forms, and their separating fixture). The remaining items of
+substance are all operator-gated as before (the master-bound Step 2
+admission; the `perron_frobenius` deprecation; backlog items 5/6;
+log-Sobolev; the reverse TV → χ² consumer), plus the theorem-level
+survey's honest residue: a compiler-derived Lean-level consumption
+survey would be a tooling proposition of its own.
+
+## 2026-09-06T15:01:30Z — The compiler-derived consumption survey (in progress)
+
+**Run:** `20260906T150130Z-run-1`  
+**Session:** `ses_f88f0e835ffe8QUbO4DxhGFxdB`  
+**Status:** in-progress  
+**Milestone:** The theorem-level survey's named honest residue (three
+consecutive terminal handoffs): exact QA→shelf dependence tooling —
+a Lean metaprogram computing the transitive constant-closure of every
+QA declaration, value-vs-type separated, replacing the string-heuristic
+survey keys that produced false inert-declarations. First application:
+the exact never-QA-consumed functional-declaration census.
+
+**Changes:** none yet — recording intent before editing (design:
+probe imports every QA module, memoized closure restricted to
+`Scaffold.Mathlib`/`Scaffold.Derived` names; wrapper script
+report-only; Step-0 validation against known-true dependencies from
+the last two deliveries).
+
+**Next handoff:** probe → tool → census → proposal → ladder →
+records.
+
+## 2026-09-06T15:24:01Z — The compiler-derived consumption survey, continued (in progress)
+
+**Run:** `20260906T152401Z-run-1`  
+**Session:** `ses_f88af72b3ffeyngW2jyIJuJLtE`  
+**Status:** in-progress  
+**Milestone:** Continuing the prior run's recorded intent (15:01:30Z, no
+terminal entry — interrupted after writing the wrapper script): validate
+the Lean metaprogram probe behind `scripts/consumption_survey.py`, run
+the exact QA→shelf census with its Step-0 validation, and deliver the
+same-run proposal with delivery record. Leverage: this is the exactness
+fix for the audit program's survey keys (three consecutive handoffs name
+it) — targeting every future audit/bridge run through the elaborator's
+own dependence answer instead of string heuristics that produced false
+inert-declarations.
+
+**Changes:** none yet — smoke-testing the probe first.
+
+**Next handoff:** smoke test → full census → proposal → ladder → records.

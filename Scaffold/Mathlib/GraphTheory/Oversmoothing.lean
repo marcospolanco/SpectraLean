@@ -1335,6 +1335,42 @@ theorem walkTVPair_nonneg (A : WAdj (V := V)) [Nonempty V] (t : ℕ) :
       tvDistance (walkDistribution A t p.1) (walkDistribution A t p.2))
       (Finset.mem_univ (‹Nonempty V›.some, ‹Nonempty V›.some)))
 
+/-- **The engine join**: the two-start walk distance IS the Dobrushin
+coefficient of the transition power — `d(t) = δ(Pᵗ)`. No symmetry, no
+stochasticity: `walkDistribution A t x` is the `x`-column of `(Pᵀ)ᵗ`
+by definition, which is the `x`-row of `Pᵗ`, so the `sup'`-defining
+summands of the two sides are the same function of `p : V × V`. This
+is the join the uniform-mixing delivery priced
+(`proposals/directed-uniform-mixing-time.md`): the walk-level mixing
+layer's whole submultiplicativity class below becomes an instance of
+the matrix-level engine (`Mixing.lean`'s `tvDobrushinCoeff` family)
+that every chain on the shelf can consume.
+
+QA: the identity pins at the delivered `triAdj` fixture
+(`Mixing_QA.lean`, both sides at `t = 1, 2`). -/
+theorem walkTVPair_eq_tvDobrushinCoeff (A : WAdj (V := V)) [Nonempty V]
+    (t : ℕ) :
+    walkTVPair A t = tvDobrushinCoeff ((walkTransitionMatrix A) ^ t) := by
+  have hrow : ∀ x : V, walkDistribution A t x
+      = ((walkTransitionMatrix A) ^ t) x := by
+    intro x
+    rw [walkDistribution]
+    funext j
+    have hcol : ((walkTransitionMatrix A)ᵀ ^ t *ᵥ (Pi.single x (1 : ℝ))) j
+        = ((walkTransitionMatrix A)ᵀ ^ t) j x := by
+      simp only [Matrix.mulVec, Matrix.dotProduct, Pi.single_apply,
+        mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ,
+        if_true]
+    rw [hcol, ← Matrix.transpose_pow, Matrix.transpose_apply]
+  have hterm : ∀ p : V × V,
+      tvDistance (walkDistribution A t p.1) (walkDistribution A t p.2)
+      = tvDistance (((walkTransitionMatrix A) ^ t) p.1)
+          (((walkTransitionMatrix A) ^ t) p.2) := by
+    intro p
+    rw [hrow p.1, hrow p.2]
+  unfold walkTVPair tvDobrushinCoeff
+  exact Finset.sup'_congr _ rfl (fun p _ => hterm p)
+
 theorem walkTVUniform_nonneg (A : WAdj (V := V)) [Nonempty V] (t : ℕ) :
     0 ≤ walkTVUniform A t :=
   le_trans (tvDistance_nonneg (walkDistribution A t ‹Nonempty V›.some)
@@ -1344,128 +1380,44 @@ theorem walkTVUniform_nonneg (A : WAdj (V := V)) [Nonempty V] (t : ℕ) :
       (Finset.mem_univ ‹Nonempty V›.some))
 
 omit [DecidableEq V] in
-/-- **The Dobrushin core at a sign statistic** — evolved TV through
-the pairing, at the statistic the caller supplies: `2 · TV(Mμ, Mν)`
-is the ℓ¹ norm of the evolved difference, evaluated through the sign
-statistic `s` as a pairing `∑ (μ − ν) g` against the evolved
-statistic `g`, then paired (the private pairing lemma above) against
-`g`'s oscillation bound `D`. -/
-private theorem tvDistance_mulVec_le_pair [Nonempty V]
-    {M : Matrix V V ℝ} {μ ν : V → ℝ} (s : V → ℝ)
-    (hsval : ∀ w, s w * ((M *ᵥ (μ - ν)) w) = |((M *ᵥ (μ - ν)) w)|)
-    (D : ℝ) (hosc : ∀ z z' : V,
-      |∑ w, M w z * s w - ∑ w, M w z' * s w| ≤ D)
-    (hmass : ∑ i, μ i = ∑ i, ν i) :
-    tvDistance (M *ᵥ μ) (M *ᵥ ν) ≤ tvDistance μ ν * (D / 2) := by
-  have hmass0 : ∑ z, (μ - ν) z = 0 := by
-    simp only [Pi.sub_apply]
-    rw [Finset.sum_sub_distrib, hmass, sub_self]
-  have hpairing : ∑ w, |((M *ᵥ (μ - ν)) w)|
-      = ∑ z, (μ - ν) z * (∑ w, M w z * s w) := by
-    calc ∑ w, |((M *ᵥ (μ - ν)) w)|
-        = ∑ w, s w * ((M *ᵥ (μ - ν)) w) :=
-          Finset.sum_congr rfl fun w _ => (hsval w).symm
-      _ = ∑ w, ∑ z, s w * (M w z * (μ - ν) z) := by
-          refine Finset.sum_congr rfl fun w _ => ?_
-          simp only [Matrix.mulVec, Matrix.dotProduct]
-          rw [Finset.mul_sum]
-      _ = ∑ z, ∑ w, s w * (M w z * (μ - ν) z) := Finset.sum_comm
-      _ = ∑ z, (μ - ν) z * (∑ w, M w z * s w) := by
-          refine Finset.sum_congr rfl fun z _ => ?_
-          rw [Finset.mul_sum]
-          exact Finset.sum_congr rfl fun w _ => by ring
-  have hp := abs_sum_mul_le_of_pairwise (c := μ - ν)
-    (g := fun z => ∑ w, M w z * s w) hosc hmass0
-  have hL1 : ∑ z, |(μ - ν) z| = 2 * tvDistance μ ν := by
-    simp only [Pi.sub_apply, tvDistance]
-    ring
-  have hsplit : ∀ w : V, (M *ᵥ μ) w - (M *ᵥ ν) w = ((M *ᵥ (μ - ν)) w) := by
-    intro w
-    rw [← Pi.sub_apply, Matrix.mulVec_sub]
-  calc tvDistance (M *ᵥ μ) (M *ᵥ ν)
-      = (1 / 2) * ∑ w, |((M *ᵥ (μ - ν)) w)| := by
-          rw [tvDistance]
-          congr 1
-          exact Finset.sum_congr rfl fun w _ => by rw [hsplit w]
-    _ = (1 / 2) * ∑ z, (μ - ν) z * (∑ w, M w z * s w) := by
-          rw [hpairing]
-    _ ≤ (1 / 2) * |∑ z, (μ - ν) z * (∑ w, M w z * s w)| := by
-          exact mul_le_mul_of_nonneg_left (le_abs_self _) (by norm_num)
-    _ ≤ (1 / 2) * (((∑ z, |(μ - ν) z|) / 2) * D) := by
-          exact mul_le_mul_of_nonneg_left hp (by norm_num)
-    _ = tvDistance μ ν * (D / 2) := by
-          rw [hL1]
-          ring
-
+/-! The private sign-statistic pairing core of the original delivery
+(`tvDistance_mulVec_le_pair`) was retired with the engine join
+(2026-09-06, `proposals/walktvpair-dobrushin-join.md`): the sharp
+walk contraction now routes through the matrix-level engine in
+`Mixing.lean`, whose own private pairing core carries the mechanism.
+-/
 /-- **The sharp Dobrushin contraction** — the engine of the whole
 submultiplicativity class: applying the `t`-step walk evolution to two
 equal-mass vectors contracts their TV distance by the two-start
 distance `d(t)` itself, `TV(μ(Pᵀ)ᵗ, ν(Pᵀ)ᵗ) ≤ TV(μ, ν) · d(t)`.
 Hypothesis-minimal — no stochasticity, no signs, only equal masses
-(the recentering mass-zero condition). Proof: the sign statistic of
-the evolved difference, transported to a pairing against the evolved
-statistic whose oscillation is bounded by `2 d(t)` through the
-delivered distinguishing-function bound (`|s| ≤ 1`), closed by the
-private pairing core. -/
+(the recentering mass-zero condition). Proof (since 2026-09-06, the
+engine join `proposals/walktvpair-dobrushin-join.md`): the
+vecMul↔mulVec transpose bridge `(Pᵀ)ᵗ *ᵥ ω = ω ᵥ* Pᵗ` plus the
+matrix-level engine `tvDistance_vecMul_le_tvDobrushinCoeff` and the
+identity `walkTVPair_eq_tvDobrushinCoeff` — the bespoke sign-statistic
+route of the original delivery is retired, its statement and
+hypotheses unchanged. -/
 theorem tvDistance_pow_walkTransitionMatrixTranspose_mulVec_le
     (A : WAdj (V := V)) [Nonempty V] (t : ℕ) (μ ν : V → ℝ)
     (hmass : ∑ i, μ i = ∑ i, ν i) :
     tvDistance ((walkTransitionMatrix A)ᵀ ^ t *ᵥ μ)
         ((walkTransitionMatrix A)ᵀ ^ t *ᵥ ν)
       ≤ tvDistance μ ν * walkTVPair A t := by
-  have hrow : ∀ (z w : V), walkDistribution A t z w
-      = ((walkTransitionMatrix A)ᵀ ^ t) w z := by
-    intro z w
-    rw [walkDistribution]
-    simp [Matrix.mulVec, Matrix.dotProduct, Pi.single_apply]
-  set s : V → ℝ :=
-    fun w => if 0 ≤ (((walkTransitionMatrix A)ᵀ ^ t) *ᵥ (μ - ν)) w then 1 else -1 with hsdef
-  have hsabs : ∀ w, |s w| ≤ 1 := by
-    intro w
-    by_cases h : 0 ≤ (((walkTransitionMatrix A)ᵀ ^ t) *ᵥ (μ - ν)) w
-    · simp only [hsdef, if_pos h]
-      norm_num
-    · simp only [hsdef, if_neg h]
-      norm_num
-  have hsval : ∀ w, s w * (((walkTransitionMatrix A)ᵀ ^ t) *ᵥ (μ - ν)) w
-      = |(((walkTransitionMatrix A)ᵀ ^ t) *ᵥ (μ - ν)) w| := by
-    intro w
-    by_cases h : 0 ≤ (((walkTransitionMatrix A)ᵀ ^ t) *ᵥ (μ - ν)) w
-    · simp only [hsdef, if_pos h, abs_of_nonneg h]
-      ring
-    · simp only [hsdef, if_neg h, abs_of_neg (lt_of_not_ge h)]
-      ring
-  have hosc : ∀ z z' : V,
-      |(∑ w, ((walkTransitionMatrix A)ᵀ ^ t) w z * s w)
-        - ∑ w, ((walkTransitionMatrix A)ᵀ ^ t) w z' * s w|
-        ≤ 2 * walkTVPair A t := by
-    intro z z'
-    have hgg : (∑ w, ((walkTransitionMatrix A)ᵀ ^ t) w z * s w)
-        - ∑ w, ((walkTransitionMatrix A)ᵀ ^ t) w z' * s w
-        = ∑ w, (walkDistribution A t z w - walkDistribution A t z' w) * s w := by
-      rw [← Finset.sum_sub_distrib]
-      refine Finset.sum_congr rfl fun w _ => ?_
-      rw [hrow z w, hrow z' w]
-      ring
-    have hd := tvDistance_ge_half_abs_sum
-      (μ := walkDistribution A t z) (ν := walkDistribution A t z') s hsabs
-    rw [hgg]
-    have hsup : tvDistance (walkDistribution A t z)
-        (walkDistribution A t z') ≤ walkTVPair A t :=
-      Finset.le_sup'
-        (f := fun p : V × V =>
-          tvDistance (walkDistribution A t p.1) (walkDistribution A t p.2))
-        (Finset.mem_univ (z, z'))
-    calc |∑ w, (walkDistribution A t z w - walkDistribution A t z' w) * s w|
-        ≤ 2 * tvDistance (walkDistribution A t z)
-            (walkDistribution A t z') := by linarith
-      _ ≤ 2 * walkTVPair A t := mul_le_mul_of_nonneg_left hsup (by norm_num)
-  have hcore := tvDistance_mulVec_le_pair
-    (M := (walkTransitionMatrix A)ᵀ ^ t) s hsval (2 * walkTVPair A t) hosc hmass
-  calc tvDistance ((walkTransitionMatrix A)ᵀ ^ t *ᵥ μ)
-        ((walkTransitionMatrix A)ᵀ ^ t *ᵥ ν)
-      ≤ tvDistance μ ν * (2 * walkTVPair A t / 2) := hcore
-    _ = tvDistance μ ν * walkTVPair A t := by ring
+  have hvec : ∀ ω : V → ℝ,
+      (walkTransitionMatrix A)ᵀ ^ t *ᵥ ω
+        = ω ᵥ* ((walkTransitionMatrix A) ^ t) := by
+    intro ω
+    funext j
+    simp only [Matrix.mulVec, Matrix.dotProduct, Matrix.vecMul,
+      Matrix.transpose_apply, mul_comm, ← Matrix.transpose_pow]
+  rw [hvec μ, hvec ν]
+  calc tvDistance (μ ᵥ* ((walkTransitionMatrix A) ^ t))
+        (ν ᵥ* ((walkTransitionMatrix A) ^ t))
+      ≤ tvDistance μ ν * tvDobrushinCoeff ((walkTransitionMatrix A) ^ t) :=
+        tvDistance_vecMul_le_tvDobrushinCoeff μ ν hmass
+    _ = tvDistance μ ν * walkTVPair A t := by
+        rw [← walkTVPair_eq_tvDobrushinCoeff]
 
 
 /-- **Submultiplicativity of the two-start distance** — LPW's
@@ -1476,37 +1428,10 @@ connectivity, no rates — pure Markovity. -/
 theorem walkTVPair_submul (A : WAdj (V := V)) (hd : ∀ i, 0 < deg A i)
     [Nonempty V] (s t : ℕ) :
     walkTVPair A (s + t) ≤ walkTVPair A s * walkTVPair A t := by
-  refine Finset.sup'_le
-    (⟨(‹Nonempty V›.some, ‹Nonempty V›.some), Finset.mem_univ _⟩ :
-      (Finset.univ : Finset (V × V)).Nonempty)
-    (f := fun p : V × V =>
-      tvDistance (walkDistribution A (s + t) p.1)
-        (walkDistribution A (s + t) p.2))
-    ?_
-  intro p _
-  have hev1 : walkDistribution A (s + t) p.1
-      = (walkTransitionMatrix A)ᵀ ^ t *ᵥ walkDistribution A s p.1 :=
-    walkDistribution_add A s t p.1
-  have hev2 : walkDistribution A (s + t) p.2
-      = (walkTransitionMatrix A)ᵀ ^ t *ᵥ walkDistribution A s p.2 :=
-    walkDistribution_add A s t p.2
-  have hmass : ∑ i, walkDistribution A s p.1 i
-      = ∑ i, walkDistribution A s p.2 i := by
-    rw [sum_walkDistribution A hd s p.1, sum_walkDistribution A hd s p.2]
-  calc tvDistance (walkDistribution A (s + t) p.1)
-          (walkDistribution A (s + t) p.2)
-        = tvDistance ((walkTransitionMatrix A)ᵀ ^ t *ᵥ walkDistribution A s p.1)
-            ((walkTransitionMatrix A)ᵀ ^ t *ᵥ walkDistribution A s p.2) := by
-          rw [hev1, hev2]
-      _ ≤ tvDistance (walkDistribution A s p.1) (walkDistribution A s p.2)
-            * walkTVPair A t :=
-          tvDistance_pow_walkTransitionMatrixTranspose_mulVec_le A t _ _ hmass
-      _ ≤ walkTVPair A s * walkTVPair A t := by
-          refine mul_le_mul_of_nonneg_right ?_ (walkTVPair_nonneg A t)
-          exact Finset.le_sup'
-            (f := fun p : V × V =>
-              tvDistance (walkDistribution A s p.1) (walkDistribution A s p.2))
-            (Finset.mem_univ p)
+  rw [walkTVPair_eq_tvDobrushinCoeff A (s + t),
+    walkTVPair_eq_tvDobrushinCoeff A s,
+    walkTVPair_eq_tvDobrushinCoeff A t]
+  exact tvDobrushinCoeff_pow_add_le _ (walkTransitionMatrix_row_sum A hd) s t
 
 /-- **The stationary mixture identity** — stationarity read as: `π` is
 the `π`-weighted mixture of the `t`-step laws (its own defining

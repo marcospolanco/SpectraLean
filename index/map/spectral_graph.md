@@ -1227,6 +1227,65 @@ row stochasticity pinned intact at both).
 | `exists_pageRankVec` | **existence** (hard crust since 2026-09-02): a strictly positive, mass-one `π ᵥ* G = π` for every nonnegative positive-degree network — reducible or not |
 | `existsUnique_pageRankVec` | **the `∃!`** (hard crust since 2026-09-02): exactly one nonnegative stationary distribution of the Google walk, **no irreducibility hypothesis on the input** — the statement the raw walk cannot support on reducible input |
 | `pageRankVec_pos` | **full support** (hard crust since 2026-09-02): every nonzero nonnegative vector fixed by `G` is strictly positive — even a vertex with no inbound walk arcs receives teleportation mass |
+**The spectral ceiling (2026-09-06, `proposals/sharp-second-eigenvalue-layer.md`,
+Slice 1):** `PageRank.lean`'s `SpectralCeiling` section — the mass
+lemma, the shadow lemma (G's off-one left-eigenvectors ARE P's
+mass-zero left-eigenvectors), the ℓ¹ peripheral bound,
+Haveliwala–Kamvar's inequality half `|c| ≤ α`, and the attainment
+twin; QA pins the `-α`-eigenpair attained at the two-cycle fixture
+and the end-mix `0`-pair. Slice 2 (a) (same day): the Dobrushin
+shadow in `DirectedMixing.lean`'s `DobrushinShadow` section — the
+exact pointwise TV scaling, the shadow and walk Dobrushin ceilings,
+and the pair rate at the sharper constant `(α·δ(P))^t`. Slice 3 (a): the exact shadow
+equality `δ(G) = α·δ(P)` and the exact `t = 1` identity, via the
+sup'-induction attainment route. Slice 4: the eigenvalue-level forms —
+the ceilings, shadow, and twin in `Module.End.HasEigenvector`/
+`HasEigenvalue` through the definitional `vecMulLinear` bridge.
+Slice 5 (same day, the proposal COMPLETE): the strictness layer in
+`PageRank.lean`'s `Strictness` section — `vecMul_pow_smul_eq` (the
+power-eigenpair engine), `vecMul_sign_coherent_of_abs_eq_pow_pos`
+(the peripheral sign-rigidity engine: equality in the ℓ¹ contraction
+at a strictly positive power forces a common sign — no
+Perron–Frobenius), `googleMatrix_abs_eigen_lt_of_primitive` (on an
+aperiodic chain every off-one Google left-eigenvalue is STRICTLY
+inside the α-disk, `|c| < α`), its `_of_pow_pos` form, and the
+eigen-level twin `googleMatrix_hasEigenvalue_abs_lt_of_primitive`;
+QA pins strictness at the primitive two-vertex fixture (self-loop +
+arc, `P² > 0`, the `-α/2` eigenpair) and fences the necessity — the
+periodic two-cycle where the ceiling is attained provably fails
+primitivity. The follow-on right-eigenvector forms (same day,
+`proposals/right-eigenvector-sharp-layer.md`): the general
+left/right spectrum bridge
+`hasEigenvalue_mulVecLin_iff_vecMulLinear` (a square matrix's left
+and right eigenvalue sets coincide, any field — kernel-level
+`det Mᵀ = det M`, no charpoly) with its two raw-pair↔determinant
+factoring lemmas, and on it the ceiling and strictness at the
+right (`mulVecLin`) convention, eigen-level and raw — QA's two
+boundary witnesses recording why (the right eigenvector's nonzero
+mass; the no-right-shadow witness). The doubly-stochastic follow-on
+(same day, same proposal): on column-stochastic walks the right mass
+lemma, right shadow, and right twin all hold — transported at
+`A := Pᵀ` through `googleMatrix Pᵀ α = Gᵀ` — with QA at the
+non-symmetric doubly-stochastic `Fin 3` cyclic chain. The
+characterization iff (the layer's item 3) closes the family's open
+statement: `googleMatrix_abs_eigen_eq_alpha_iff` — the ceiling
+attained ⟺ a mass-zero peripheral walk eigenpair — plus its
+doubly-stochastic right twin. The family's adversarial fence audit
+(same day, `proposals/adversarial-fences-sharp-layer-family.md`):
+22 hypothesis-form fences — every unfenced load-bearing clause
+closed, with the two-cycle `G(−1) = I` vacuity finding. The
+literal-`λ₂` sorted-spectrum forms (same day, another follow-on in
+`proposals/sharp-second-eigenvalue-layer.md`): on regular input the
+top eval exactly `1` (the `1`-eigenspace simplicity — teleportation
+strict positivity + sign-rigidity + min-ratio), `evals ⟨n−2⟩ ≤ α`,
+`-α ≤ evals ⟨0⟩`; QA the two-cycle's bottom `−α` attained. Its own
+priced follow-up (the fourth) pinned the separating 4-cycle fixture:
+`G(4/5)` spectrum ascending `{−4/5, 0, 0, 1}`, the exact middle pins
+`evals ⟨1⟩ = evals ⟨2⟩ = 0` through the subspace Rayleigh–Ritz
+engine at `k = 2, 3` (its first exercise on the PageRank family),
+and the separation stated (`|λ₂| = 0 < α` strictly inside, the
+bottom `−α` attained).
+
 
 ### `Scaffold.Mathlib.GraphTheory.DirectedMixing` (the PageRank power iteration — the first primitive-power-convergence consumer)
 
@@ -1308,7 +1367,11 @@ what fails at the fixture. The TV-contraction shelf lives in
 the matrix-level Dobrushin-coefficient engine
 (`tvDobrushinCoeff`, `tvDistance_vecMul_le_tvDobrushinCoeff`,
 `tvDobrushinCoeff_pow_add_le`, and the promoted public pairing core
-`abs_sum_mul_le_of_pairwise`) — the `Mixing` rows above.
+`abs_sum_mul_le_of_pairwise`) — the `Mixing` rows above. The undirected walk layer joined this engine 2026-09-06
+(`proposals/walktvpair-dobrushin-join.md`): the identity
+`walkTVPair A t = tvDobrushinCoeff ((walkTransitionMatrix A) ^ t)`
+(no symmetry needed) re-routes `Oversmoothing.lean`'s submul and
+sharp-contraction proofs onto it at unchanged statements.
 
 ### Mixing — the primitivity supplier and the plain walk's Doeblin rate (`GraphTheory.Mixing` + `LinearAlgebra.PrimitiveConvergence`, 2026-09-02, `proposals/primitivity-supplier-plain-walk.md`)
 

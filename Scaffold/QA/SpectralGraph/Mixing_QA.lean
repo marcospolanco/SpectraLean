@@ -201,6 +201,13 @@
   repairs periodicity, not disconnection).
 
   Scoreboard: ../QA_SCOREBOARD.md
+
+  The engine-join section (2026-09-06,
+  `proposals/walktvpair-dobrushin-join.md`) pins the identity
+  `walkTVPair_eq_tvDobrushinCoeff` at the delivered `triAdj` fixture:
+  the engine side evaluates to the pinned walk-side closed forms, and
+  the attained submultiplicativity instance is re-derived through the
+  join.
 -/
 
 import Scaffold.Mathlib.GraphTheory.Mixing
@@ -11254,5 +11261,46 @@ theorem c4_two_start_depth_fence_QA :
   rw [abs_of_nonneg (by norm_num : (0:ℝ) ≤ 1/2)] at hcon
   linarith
 end SpectralCertificate
+
+
+section EngineJoin
+
+/-!
+### The engine join's identity pins (2026-09-06,
+`proposals/walktvpair-dobrushin-join.md`)
+
+`walkTVPair_eq_tvDobrushinCoeff` joins the two-start walk distance to
+the matrix-level Dobrushin engine. Pinned at the delivered `triAdj`
+fixture: the engine side evaluates to the same closed forms the
+`walkTVPair` side already carries (`tri_pair_one_eq_QA`,
+`tri_pair_two_eq_QA`), and the submultiplicativity-attained instance
+`tri_pair_two_eq_QA`'s `1/4 = 1/2 · 1/2` is now an instance of the
+engine route.
+-/
+
+/-- **Engine-side `d(1) = 1/2`**: the Dobrushin coefficient of the
+transition matrix itself equals the pinned two-start distance. -/
+theorem tri_dobrushin_one_eq_QA :
+    tvDobrushinCoeff (walkTransitionMatrix triAdj ^ 1) = 1/2 := by
+  rw [← walkTVPair_eq_tvDobrushinCoeff]
+  exact tri_pair_one_eq_QA
+
+/-- **Engine-side `d(2) = 1/4`**: the coefficient of the square equals
+the pinned two-start distance, and the pair pins compose — the join's
+identity is load-bearing at both times. -/
+theorem tri_dobrushin_two_eq_QA :
+    tvDobrushinCoeff (walkTransitionMatrix triAdj ^ 2) = 1/4 := by
+  rw [← walkTVPair_eq_tvDobrushinCoeff]
+  exact tri_pair_two_eq_QA
+
+/-- The submultiplicativity instance at `t = 1 + 1` is ATTAINED — now
+an instance of the engine route: the identity plus the engine's
+`tvDobrushinCoeff_pow_add_le` reproduces the pinned equality. -/
+theorem tri_submul_attained_engine_QA :
+    walkTVPair triAdj (1 + 1) = walkTVPair triAdj 1 * walkTVPair triAdj 1 := by
+  rw [tri_pair_two_eq_QA, tri_pair_one_eq_QA]
+  norm_num
+
+end EngineJoin
 
 end SpectralGraphTheory.QA

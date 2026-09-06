@@ -309,3 +309,206 @@ centering, truth-removable-through-junk: positive drift empties the
 constraint set, `sInf ∅ = 0`) carries its mechanism above and is a
 property of the *retired* axiom's defect, not an open obligation of
 the proved shelf.
+
+## Follow-up record: the measurability/integrability-guard clauses (2026-09-05)
+
+The delivery's own follow-up pricing — "the `h_meas` measurability
+clauses of the MGF engines (`measurable_finset_prod'`/`sum'`, the
+`hX : Measurable` of the integrability safety lemma) are fenceable
+only at a non-measurable fixture (the `⊥`-σ-algebra space the matrix
+audit built)" — delivered the same day as the prior terminal handoff's
+named last recorded follow-up. QA-only: 11 hypothesis-form fences plus
+the shared fixture, mass, non-measurability, and pin companions in
+`Scalar_QA.lean`'s new `MeasurabilityFences` section (+36 by the
+generator metric, 6205 → 6241; 40 declarations = 36 theorems + 4
+`def`s + the probability instance), zero axiom contact (`#print
+axioms` via `wip/scmfences_axcheck.lean` on all 40 — every one
+exactly `propext, Classical.choice, Quot.sound`; no `-- @refutes`
+tags — theorem-instantiation fences of an all-proved shelf; the
+24-tag independence check unchanged and clean).
+
+**The fixture (a design finding in itself):** the two-point
+trivial-σ-algebra space with BIASED masses `9/10 : 1/10`
+(`scM2μ`, the `mcTwoBot` pattern at the bias the tail kills need —
+the audit's fair-coin version cannot kill: a `9/10`-mass tail against
+`2e⁻²` needs the heavy atom to dominate). Every real function on
+`⊥` is measurable iff constant (`stronglyMeasurable_bot_iff`), so the
+two-valued breakers `scM2X` (values `2`/`0`) and `scM2Emp`
+(values `1`/`0`) are non-measurable, not ae-strongly-measurable
+(`scM2_not_aeSM`, the `mcTwoBot_not_aeSM` clone at the biased
+measure), and every integral of them is the junk zero
+(`integral_undef`) — the exact mechanism class of Errata §7. **The
+kills use only mass LOWER bounds** (`scM2μ_ge_zero`: point-membership
+gives `ofReal (9/10) ≤ μ S` through `dirac_apply_of_mem`), which
+sidesteps the trim-saturation trap below.
+
+The eleven fences:
+
+1. **`measurable_finset_prod'`'s `hf`** — at the one-element index
+   the product IS the breaker: `Measurable` refuted by
+   `scM2X_not_measurable` (the `Measurable.aestronglyMeasurable`
+   route into the not-aeSM engine).
+2. **`measurable_finset_sum'`'s `hf`** — same at the sum.
+3. **`integrable_of_bounded_measurable`'s `h_meas`** — `h_bound`
+   genuine (`|scM2X| ≤ 2`), `Integrable` refuted (ae-SM is a
+   conjunct of integrability).
+4. **`integrable_sq_sub_mean`'s `h_meas`** — the centered square at
+   the junk zero mean is the two-valued `scM2X²`, not integrable.
+5. **`hoeffding_inequality_interval`'s `h_meas`** — `c = 0`, `d = 2`,
+   `t = 2`: the tail event contains the heavy atom (mass `9/10`)
+   against `2e⁻² < 9/10` (the new pin, from `e > 27/10`).
+6. **`hoeffding_empirical`'s `h_meas`** — the `[0,1]` breaker at
+   `t = 1`: `9/10 > 2e⁻²`.
+7. **`bernstein_inequality`'s `h_meas`** — `a = 2`, `t = 2`: the
+   variance statistic `∑∫(X − ∫X)²` is ITSELF the junk zero (the
+   matrix audit's headline mechanism at the scalar sibling), the
+   denominator collapses to `2at/3`, the bound to `2e^{-3/2} < 9/10`
+   (new pin from `e³ > 16`).
+8-9. **`bernstein_bounded_variance`'s and `bernstein_iid`'s
+   `h_meas`** — same kill at `v = 0` / `σ² = 0` (the `h_var` clauses
+   hold through the junk zero).
+10. **`markov_tail_of_mgf`'s `hint`** — the Markov engine's
+    integrability guard, the exact clause class that was vacuous in
+    the Errata §7 repair: at `B = 0`, `t = 0` the MGF hypothesis
+    holds through the junk zero while `{0 ≤ Y}` is all of `Ω`
+    (measure `1`) against the bound `ofReal 0`.
+11. **`subgaussian_tail_bound`'s `h_int`** — the moment integrability
+    guard: `K = 1`, `t = 2`, `9/10 > 2e⁻²`.
+
+Kept-clause honesty: `h_indep` is genuine by single-coordinate
+triviality (`scM2Fam_iIndepFun_QA` — `iIndepFun` over `Fin 1` proved
+by the `Finset.eq_empty_or_nonempty` case split, both sides of the
+independence equality identical); `h_bound`/`h_mean`/`h_var` hold
+with `h_mean`-shaped integrals junk (recorded on the companions as
+"held through the junk", the matrix audit's precedent).
+
+**Classified truth-removable-through-junk (not fenceable):** the
+MGF-conclusion `h_meas` clauses — `hoeffding_lemma_mgf`'s,
+`bennett_mgf`'s, `integral_prod_exp_of_iIndepFun`'s (identity:
+junk LHS `0 = ∏ 0`), `mgf_sum_le_of_iIndepFun`'s and
+`mgf_sum_le_bernstein`'s (junk-zero LHS `≤` every positive bound) —
+the dropped statements HOLD at every non-measurable fixture; a fence
+cannot exist.
+
+**Deferred with the priced mechanism:** `hoeffding_inequality`'s and
+`hoeffding_iid`'s `h_meas`. These need TWO genuinely-independent
+non-constant coordinates (at `n = 1` the ±a bound `2exp(−t²/2a²) ≥
+2e^{−1/2} > 1 ≥ μ` at every fixture; a constant second coordinate
+dilutes the denominator `2∑a²` below the kill threshold at `n = 2`).
+The obstruction: on a trivial σ-algebra, a measure built as a Dirac
+combination SATURATES — `OuterMeasure.trim` (the definitional total
+function of `Measure.ofMeasurable`-built measures, per
+`toMeasure_toOuterMeasure`'s `rfl`) takes every nonempty set to the
+inf over its measurable supersets, which on `⊥` is `univ` alone, so
+exact non-measurable-set masses are all `1` while the honest point
+computation wants `9/10`-style values; point-membership lower bounds
+(the only cheaply provable mass facts) prove independence just for
+constant coordinates. Two priced routes: (a) the deep unfold
+`δ_a s = 1` for nonempty `s` via the `inducedOuterMeasure`/`extend`
+guts, making all-saturated independence provable (all-`1` masses
+satisfy the equality when all pairwise level-set intersections are
+nonempty — a `Fin 4` four-cell partition design); (b) a richer
+non-`⊥` σ-algebra whose measurable sets separate the breaker's level
+sets from the other atoms — shown impossible at four points (any
+σ-algebra separating all four points makes the breaker measurable).
+Both routes are multi-step measure-theory archaeology for two sibling
+theorems whose shared engine (`hoeffding_inequality_interval`) is
+fenced at clause 5; priced as a follow-up, not an obligation.
+
+Technique findings recorded for future audits:
+
+1. **`simp only`-before-unfold ordering at junk-integral membership
+   goals.** The integral lemma (`scM2Fam_integral`) must fire BEFORE
+   the family def unfolds (`simp [scM2Fam, ...]` beta-reduces
+   `scM2Fam i` to `scM2X`, killing the family-lemma match); the
+   robust shape is `simp only [Fin.sum_univ_one, <integral lemma>]`
+   then the value simp.
+2. **`rw` cannot rewrite under a binder where the pattern binds** —
+   restated for the square-integral case: `(fun ω => (X ω − 0)²)`
+   needs `simp only [sub_zero]`, not `rw [sub_zero]`.
+3. **The `ofReal`-vs-literal kill chain:** state mass lemmas in
+   `ofReal` form (`ofReal (9/10) ≤ μ S`), keep one bridge lemma
+   (`scM2μ_ofReal_coe`), and discharge the final contradiction via
+   `ENNReal.ofReal_lt_ofReal_iff_of_nonneg` — whose nonnegativity
+   side goal needs `mul_pos (show (0:ℝ) < 2 by norm_num)
+   (Real.exp_pos _)`, since `positivity` does not see through
+   `Real.exp` of an arbitrary sign.
+4. **`Finset.eq_empty_or_nonempty` + `Finset.ext` at `Subsingleton`
+   index types** is the clean `Fin 1` independence route (the
+   `univ_unique` rewrite fails: `iIndepFun`'s definition quantifies
+   over ALL Finsets, not just `univ`).
+
+## Deferral-closure record: the trim-saturation route (2026-09-05)
+
+The follow-up's two deferred siblings — `hoeffding_inequality`'s and
+`hoeffding_iid`'s `h_meas` — closed the same day by taking the priced
+route (a): the saturation itself becomes the lemma, and the
+"genuinely-independent non-measurable family" the deferral recorded as
+blocked becomes constructible. QA-only: the new `SaturationFences`
+section of `Scalar_QA.lean` (+29 by the generator metric,
+6241 → 6270; 33 declarations = 29 theorems + 6 `def`s + the
+probability instance), zero axiom contact (`#print axioms` via
+`wip/scsat_axcheck.lean` on all 29 nameable declarations — every one a
+subset of `propext, Classical.choice, Quot.sound`; no `-- @refutes`
+tags; the 24-tag independence check unchanged and clean).
+
+**The saturation lemma (`scM_dirac_bot_eq_one`):** on the trivial
+σ-algebra, `@Measure.dirac α ⊥ a s = 1` for every nonempty `s`. The
+proof route is the packaged `measure_eq_iInf` — a measure's value at
+any set is the infimum over its measurable supersets — and on `⊥` the
+only measurable superset of a nonempty set is `univ` (the empty-cover
+case contradicts nonemptiness; the univ element attains the infimum).
+The follow-up's obstruction ("`OuterMeasure.trim` saturates every
+nonempty set to full measure, blocking exact-mass computation") is
+therefore not a bug of the fixture space but its load-bearing
+structure: saturation makes every mass EXACTLY `1`, which is precisely
+what a saturated-independence argument needs.
+
+**The saturated-independence lemma (`scM_indepFun_of_saturated`):** on
+any measure where every nonempty set has measure `1`, two real
+functions are independent whenever every pair of nonempty Borel
+preimages intersects (both sides of each independence equality reduce
+to `1 · 1` or to `0` through the empty side, by
+`indepFun_iff_measure_inter_preimage_eq_mul`). The hypothesis is
+discharged at the four-cell design: `X₀ = 2·1_A`, `X₁ = 2·1_B` with
+`A = {0,1}`, `B = {0,2}` — the four cells carry the value pairs
+`(2,2)`, `(2,0)`, `(0,2)`, `(0,0)`, so whichever values land in `S` and
+`T`, some cell lies in both preimages (`scM4X_indep_hint`, a four-case
+witness argument). The `Fin 2` `iIndepFun` is then assembled by the
+`Finset.erase` case analysis (empty/singleton/full). **This is the
+repository's first genuinely-independent non-measurable family** —
+every prior fence either broke independence or was measurable.
+
+**The fences:** at `a = 2`, `t = 4` the tail event
+`{|X₀ + X₁| ≥ 4} = A ∩ B = {0}` is nonempty, hence of saturated
+measure exactly `1` (`scM4μ_sat`), against both theorems' bounds
+`2exp(−16/16) = 2e⁻¹ < 1` (the on-file pin `scF_two_exp_neg_lt_one` —
+no new pins). Kept clauses: `h_indep` genuine (above), `h_bound`
+genuine, `h_mean` through the junk zero (`scM4X_integral`,
+`integral_undef` at the two-valued non-ae-SM coordinates), `ht`
+genuine.
+
+With this closure the scalar family's falsification surface is
+COMPLETE: every priceable clause is fenced, the two deferral classes
+are closed, and the five MGF-conclusion classifications
+(truth-removable-through-junk) stand as properties of junk-satisfiable
+conclusion shapes, not open obligations.
+
+Technique findings recorded for future audits:
+
+1. **`measure_eq_iInf` is the saturation route** — no
+   `inducedOuterMeasure`/`extend` archaeology is needed: the
+   measurable-superset infimum IS a theorem, and on `⊥` it collapses
+   to the single `univ` candidate.
+2. **Decidable cell predicates are load-bearing for elaboration**: a
+   breaker defined as `if ω ∈ ({0,1} : Set (Fin 4)) then 2 else 0`
+   does not elaborate (no `Decidable` instance for set membership);
+   spelling the same cell as `if ω ≤ 1 then 2 else 0` does, and the
+   set/membership layer rides beside it.
+3. **Hypothesis-carrying `Finset.prod_insert` cannot fire inside
+   `simp only`** (the membership argument is not a simp fact);
+   `Finset.set_biInter_insert` has no hypothesis and fires freely —
+   the Fin-2 `iIndepFun` univ case needs the pair applied separately.
+4. **A saturated measure makes the not-ae-SM engine easier**: every
+   point carries full mass, so the two-point distinct-values argument
+   needs no mass computation at all.

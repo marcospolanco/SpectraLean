@@ -1,7 +1,7 @@
 # SGT Backlog
 
 **Status:** Canonical backlog for the broad spectral-graph-theory program  
-**Last reviewed:** September 5, 2026
+**Last reviewed:** September 6, 2026
 
 This is the bounded, center-first backlog required by the strategy's
 center-out policy. Items are ranked by concrete reuse: each names the
@@ -265,7 +265,115 @@ last never-refuted clause of the Bernstein MGF engine, and the
 the new genuinely-independent biased product (independence genuine,
 centering broken at `4/5` — the family's first independent
 non-centered witness; the `t = 2` tail at `41/50 > 2e⁻¹`, the `λ = 1`
-MGF over `e` through the `tt` atom alone).
+MGF over `e` through the `tt` atom alone). The scalar family's
+**measurability/integrability-guard layer** — the audit's priced
+follow-up ("fenceable only at a non-measurable `⊥`-σ-algebra fixture")
+— was delivered the same day (the proposal's follow-up record): eleven
+hypothesis-form fences in `Scalar_QA.lean`'s new `MeasurabilityFences`
+section at the biased two-point `⊥`-space (the three engine clauses,
+the `markov`/`subgaussian` integrability guards — the exact Errata §7
+clause class — and the six head-theorem `h_meas` clauses with
+falsifiable tail conclusions, the Bernstein variance statistic itself
+junk-zero); the MGF-conclusion clauses classified
+truth-removable-through-junk, and `hoeffding_inequality`/`iid`'s
+`h_meas` carry the priced trim-saturation deferral (`OuterMeasure.trim`
+saturates nonempty sets on `⊥`, blocking exact-mass independence
+computation — the two candidate routes are recorded in the proposal). **Resolved the
+same day** (the proposal's deferral-closure record): the saturation
+route taken — `scM_dirac_bot_eq_one` (a Dirac on `⊥` sends every
+nonempty set to exactly `1`, via `measure_eq_iInf`) plus the proved
+saturated-independence lemma give the repository's first
+genuinely-independent non-measurable family at the four-cell partition
+on `(Fin 4, ⊥, δ₀)`, fencing both siblings at `2e⁻¹ < 1` — the
+scalar family's falsification surface is now complete with no open
+item. The **primitive-convergence family's**
+falsification surface gained its first layer the same day
+(`proposals/adversarial-fences-primitive-convergence-family.md`, the
+direct-import-coverage survey's pick): nineteen hypothesis-form
+fences in the new `Scaffold/QA/LinearAlgebra/PrimitiveConvergence_QA.lean`
+at the docstring's own directed 2-cycle and two `Fin 2` breakers —
+the bookkeeping layer, the Doeblin entrywise-range engine, all three
+convergence `hprim` clauses (the cycle's oscillation kills them), and
+the primitivity suppliers — with the convergence trio's
+stochasticity/π clauses and the signed-cancellation walk classes
+deferred with priced mechanisms. The audit's π-clause cluster was closed the same day (the
+proposal's deferral-closure record): the convergence trio's
+stationarity and mass clauses fenced at the strictly-positive fixture
+through the entrywise spectral decomposition, the `hπnn` clause
+classified entangled through the proved stationary-space pin, and
+the survey's residual Core files classified definition-only — the
+direct-import survey program is closed (every shelf module now
+either directly QA-covered or definition-only). The family's priceable clause surface was closed IN FULL the next
+day (the proposal's remainder-closure record): the signed-cancellation
+walk quartet and the positive-clause tail fenced, the trio's
+`hnn`/`hrow` clauses classified (truth-removable through Perron; no
+admissible fixture). Separately, the standing frontier's top item — the
+`walkTVPair`–Dobrushin engine join — was delivered 2026-09-06
+(`proposals/walktvpair-dobrushin-join.md`): the walk-level mixing
+layer's whole submultiplicativity class is now an instance of the one
+matrix-level engine, at unchanged public statements. The gated sharp layer was opened the same
+day as its own multi-run proposal (`proposals/sharp-second-eigenvalue-layer.md`,
+Slice 1 delivered): the Google matrix's spectral ceiling — the mass
+and shadow lemmas, the ℓ¹ peripheral bound, Haveliwala–Kamvar's
+inequality half `|c| ≤ α`, and the attainment twin, all at the vecMul
+level. Slice 2 (a) — the rate connection —
+delivered the same day: the Dobrushin shadow (the exact pointwise TV
+scaling, the shadow and walk Dobrushin ceilings, and the pair rate
+`pageRankTVPair A α t ≤ (α·δ(P))^t ≤ α^t` at the sharper constant),
+with the exact shadow equality priced (sup'-attainment). Slice 3 (a) delivered the
+attainment route the same day: the exact shadow equality
+`δ(G) = α·δ(P)` and the exact `t = 1` identity, through
+`Finset.sup'_induction` (no order on the index). Slice 4 delivered the eigenvalue-level forms
+through the definitional `vecMulLinear` bridge into Mathlib's
+eigen-API (the eigenvector/eigenvalue ceilings, the eigen-level
+shadow and twin; the `-α` pair as a genuine `HasEigenvalue` at the
+two-cycle). Slice 5 delivered 2026-09-06, closing the proposal
+COMPLETE: the strictness layer — on a primitive (aperiodic) walk
+every off-one Google left-eigenvalue is STRICTLY inside the α-disk,
+by the peripheral sign-rigidity argument (equality in the ℓ¹
+contraction at a strictly positive power forces a common sign; zero
+mass forces the zero vector — no Perron–Frobenius consumed), with
+the eigen-level twin and the necessity fence at the periodic
+two-cycle. The priced right-eigenvector follow-up was delivered the
+same day as its own proposal
+(`proposals/right-eigenvector-sharp-layer.md`): the general
+left/right spectrum bridge (a square matrix's left and right
+eigenvalue sets coincide — kernel-level `det Mᵀ = det M`, no
+charpoly), and on it the ceiling and strictness at the right
+(`mulVecLin`) convention, with QA's two boundary witnesses (the
+right eigenvector's nonzero mass; the no-right-shadow witness)
+recording why the left machinery's engines cannot transfer. The
+same proposal's doubly-stochastic follow-on was delivered the same
+day: on column-stochastic walks (every Eulerian/regular chain) the
+right mass lemma, right shadow, and right attainment twin all hold —
+the left theorems transported at `A := Pᵀ` — with the non-symmetric
+doubly-stochastic `Fin 3` fixture proving the hypothesis class
+genuinely larger than the symmetric cone. The characterization iff
+itself — the layer's item 3, previously recorded as two delivered
+halves — was composed the same day (a follow-on record in
+`proposals/sharp-second-eigenvalue-layer.md`): `|λ₂| = α` attained
+⟺ a mass-zero peripheral walk eigenpair, at the left convention and
+the doubly-stochastic right twin, with the primitive fixture's
+negative witness. The family's adversarial fence audit landed the
+same day (`proposals/adversarial-fences-sharp-layer-family.md`):
+22 hypothesis-form fences closing every unfenced load-bearing clause
+of the family's sixteen public theorems (found by the run's
+theorem-level QA-mention survey — the new survey key after the
+module-level keys were exhausted). The literal-`λ₂` sorted-spectrum
+forms were delivered the same day (another follow-on record in
+`proposals/sharp-second-eigenvalue-layer.md`): on regular input —
+`G` symmetric — the top eval exactly `1` (through the new
+`1`-eigenspace simplicity argument), `evals ⟨n−2⟩ ≤ α`, and
+`-α ≤ evals ⟨0⟩`, with the two-cycle's bottom `−α` attained through
+the trace engine. That delivery's priced follow-up — a `≥ 3`-vertex
+regular fixture separating the second-from-top index from the bottom
+— was delivered the same day (the fourth follow-on record): at the
+4-cycle (`G(4/5)` spectrum ascending `{−4/5, 0, 0, 1}`) the exact
+middle pins `evals ⟨1⟩ = evals ⟨2⟩ = 0` land through the subspace
+Rayleigh–Ritz engine (`evals_le_of_linearIndependent` at `k = 2, 3`
+— its first exercise on the PageRank family) plus the trace engine,
+the bottom `−α` attained, and the separation stated explicitly
+(`|λ₂| = 0 < α` strictly inside while the bottom attains).
 (`proposals/adversarial-fences-scalar-concentration-family.md` —
 the prior terminal handoff's named next surface at 5 transitive non-QA
 consumers): eleven hypothesis-form fences in `Scalar_QA.lean`'s new

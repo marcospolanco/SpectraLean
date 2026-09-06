@@ -38,6 +38,25 @@ column convergence, the row-action walk form).
 | `primitive_entrywise_tendsto` | theorem | hard crust since the retirement: every column of `Pᵗ` converges to `π` (at the basis vector, through `Matrix.mulVec_single`) | — |
 | `primitive_vecMul_tendsto` | theorem | hard crust since the retirement: `ν ᵥ* Pᵗ → π` for every start summing to one (finite-sum interchange; the pin has no tendsto-sum lemma) | — |
 | `entrySup` / `entryInf` / `entryRange` | def | the entrywise supremum/infimum/range of a vector on a nonempty finite type — the quantity Doeblin's coefficient controls (2026-09-02) | — |
+**Adversarial-fence coverage (2026-09-05,
+`proposals/adversarial-fences-primitive-convergence-family.md`):**
+nineteen hypothesis-form fences in the new
+`Scaffold/QA/LinearAlgebra/PrimitiveConvergence_QA.lean` cover the
+family's bookkeeping layer, the entrywise-range engine (both breakers
+per theorem), all three convergence theorems' `hprim` clauses (killed
+by the docstring's own directed 2-cycle's oscillation), and the
+primitivity suppliers; the convergence trio's stochasticity/π clauses
+and the signed-cancellation walk classes carry priced deferrals. The π-clause cluster was closed the same
+day (the deferral-closure record): the stationarity and mass
+clauses fenced at the strictly-positive spectral-decomposition
+fixture, `hπnn` classified entangled through the stationary-space
+pin; the trio's `hnn`/`hrow` clauses and the walk quartet remain
+priced. The remainder was closed 2026-09-06 (the
+remainder-closure record): the signed-cancellation walk quartet and
+the positive-clause tail fenced, the trio's `hnn`/`hrow` clauses
+classified (truth-removable through Perron; no admissible fixture) —
+the family's priceable clause surface closed in full.
+
 | `entryRange_mulVec_le_of_pos_entries` | theorem | **the Doeblin/Dobrushin contraction**: if every entry of the row-stochastic `Q` is `≥ δ`, then `range (Q *ᵥ y) ≤ (1 - |V|δ) · range y` — the row split `δ` + remainder-of-mass `1-|V|δ` route; the retirement's engine, reusable for any stochastic action | — |
 | `entryRange_pow_mul_le` | theorem | the iterated block contraction: `range (P^(m·q) *ᵥ y) ≤ (1-|V|δ)^q · range y` when `P^m` is entrywise `≥ δ` | — |
 

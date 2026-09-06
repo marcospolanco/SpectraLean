@@ -33,6 +33,18 @@
   All proofs are real Lean proofs (no `sorry`/`admit`). QA does not prove
   the remaining axioms; it checks their interfaces and degenerate cases.
 
+  The measurability/integrability-guard follow-up (2026-09-05, the
+  audit proposal's own follow-up record) added the `MeasurabilityFences`
+  section: eleven hypothesis-form fences at the biased two-point
+  trivial-σ-algebra space, closing the family's non-measurable-fixture
+  clause surface (with the trim-saturation deferral and the
+  truth-removable-through-junk MGF classifications recorded in the
+  proposal). The same day's deferral closure (the proposal's
+  deferral-closure record) added the `SaturationFences` section: the
+  saturation lemma and the saturated-independence machinery fence the
+  two deferred siblings at the four-cell family, completing the
+  family's falsification surface.
+
   Scoreboard: ../QA_SCOREBOARD.md
 -/
 
@@ -2372,5 +2384,701 @@ theorem scFence_bernstein_mgf_indep
   linarith [scF_cosh_gt_three_halves, scF_exp_three_tenths_lt_three_halves]
 
 end DeferralFences
+
+section MeasurabilityFences
+
+/-!
+## The measurability and integrability-guard follow-up
+
+The scalar-concentration audit's last recorded follow-up (its delivery
+record, 2026-09-05): the `h_meas` measurability clauses of the MGF
+engines and the same-class integrability guards, fenceable only at a
+non-measurable fixture. The fixture is the two-point trivial-σ-algebra
+space with biased masses `9/10 : 1/10` (the matrix audit's `mcTwoBot`
+pattern at the bias the tail kills need): every `⊥`-measurable real
+function is constant, so the two-valued breakers below are
+non-measurable and not almost-everywhere strongly measurable (both
+atoms carry positive mass), and every integral of them evaluates to
+the junk zero of `MeasureTheory.integral_undef` — the exact hypothesis
+class whose absence made `matrix_azuma_hoeffding` materially false
+(Errata §7). Mass lower bounds are all the kills need, so the fixture
+avoids the trim-saturation trap entirely (see the follow-up record for
+the two deferred siblings that do not).
+-/
+
+/-- The two-point trivial-σ-algebra space with biased masses
+`9/10 : 1/10`. -/
+noncomputable def scM2μ : @MeasureTheory.Measure (Fin 2) (⊥ : MeasurableSpace (Fin 2)) :=
+  (9 / 10 : ℝ≥0∞) • @MeasureTheory.Measure.dirac (Fin 2) (⊥ : MeasurableSpace (Fin 2)) 0
+    + (1 / 10 : ℝ≥0∞) • @MeasureTheory.Measure.dirac (Fin 2) (⊥ : MeasurableSpace (Fin 2)) 1
+
+instance : @IsProbabilityMeasure (Fin 2) (⊥ : MeasurableSpace (Fin 2)) scM2μ := by
+  constructor
+  have h0 : ((9 / 10 : ℝ≥0∞) •
+      @MeasureTheory.Measure.dirac (Fin 2) (⊥ : MeasurableSpace (Fin 2)) 0) Set.univ
+      = 9 / 10 := by
+    rw [Measure.smul_apply,
+      @Measure.dirac_apply_of_mem (Fin 2) (⊥ : MeasurableSpace (Fin 2)) (s := Set.univ)
+        (a := 0) (Set.mem_univ 0)]
+    simp
+  have h1 : ((1 / 10 : ℝ≥0∞) •
+      @MeasureTheory.Measure.dirac (Fin 2) (⊥ : MeasurableSpace (Fin 2)) 1) Set.univ
+      = 1 / 10 := by
+    rw [Measure.smul_apply,
+      @Measure.dirac_apply_of_mem (Fin 2) (⊥ : MeasurableSpace (Fin 2)) (s := Set.univ)
+        (a := 1) (Set.mem_univ 1)]
+    simp
+  show scM2μ Set.univ = 1
+  rw [scM2μ, Measure.add_apply, h0, h1]
+  rw [ENNReal.div_add_div_same, show ((9 : ℝ≥0∞) + 1) = 10 from by norm_num,
+    ENNReal.div_self (by norm_num) (by norm_num)]
+
+theorem scM2μ_ofReal_coe : ENNReal.ofReal (9 / 10 : ℝ) = (9 / 10 : ℝ≥0∞) := by
+  rw [ENNReal.ofReal_div_of_pos (by norm_num : (0 : ℝ) < 10)]
+  simp
+
+theorem scM2μ_ge_zero (S : Set (Fin 2)) (h0 : (0 : Fin 2) ∈ S) :
+    ENNReal.ofReal (9 / 10 : ℝ) ≤ scM2μ S := by
+  rw [scM2μ, Measure.add_apply]
+  refine le_trans ?_ (le_add_of_nonneg_right (zero_le _))
+  rw [Measure.smul_apply,
+    @Measure.dirac_apply_of_mem (Fin 2) (⊥ : MeasurableSpace (Fin 2)) (s := S)
+      (a := 0) h0, ← scM2μ_ofReal_coe]
+  simp
+
+theorem scM2μ_ge_one (S : Set (Fin 2)) (h1 : (1 : Fin 2) ∈ S) :
+    (1 / 10 : ℝ≥0∞) ≤ scM2μ S := by
+  rw [scM2μ, Measure.add_apply]
+  refine le_trans ?_ (le_add_of_nonneg_left (zero_le _))
+  rw [Measure.smul_apply,
+    @Measure.dirac_apply_of_mem (Fin 2) (⊥ : MeasurableSpace (Fin 2)) (s := S)
+      (a := 1) h1]
+  simp
+
+theorem scM2μ_pos (j : Fin 2) (S : Set (Fin 2)) (hj : j ∈ S) : 0 < scM2μ S := by
+  fin_cases j
+  · refine lt_of_lt_of_le ?_ (scM2μ_ge_zero S (by simpa using hj))
+    rw [scM2μ_ofReal_coe]
+    exact ENNReal.div_pos (by norm_num) (by norm_num)
+  · exact lt_of_lt_of_le (ENNReal.div_pos (by norm_num) (by norm_num))
+      (scM2μ_ge_one S (by simpa using hj))
+
+/-- On the two-point trivial-σ-algebra space, a two-valued function with
+distinct values is not almost-everywhere strongly measurable (both atoms
+carry positive mass, so a.e.-equality with a constant — what
+`stronglyMeasurable_bot_iff` forces — would make the values agree). The
+`mcTwoBot_not_aeSM` pattern, packaged at the biased measure. -/
+theorem scM2_not_aeSM {W : Type*} [NormedAddCommGroup W] [NormedSpace ℝ W]
+    (F : Fin 2 → W) (hF : F 0 ≠ F 1) : ¬ AEStronglyMeasurable F scM2μ := by
+  intro haes
+  obtain ⟨c, hc⟩ := stronglyMeasurable_bot_iff.1
+    (AEStronglyMeasurable.stronglyMeasurable_mk haes)
+  have heq : F =ᵐ[scM2μ] (fun _ => c) := haes.ae_eq_mk.trans (by rw [hc])
+  have hnull := ae_iff.1 (Filter.EventuallyEq.eventually heq)
+  by_cases hc0 : c = F 0
+  · have hsub : ({(1 : Fin 2)} : Set (Fin 2))
+        ⊆ {ω | ¬ (F ω = c)} := by
+      intro ω hω
+      simp only [Set.mem_singleton_iff] at hω
+      subst ω
+      simp only [Set.mem_setOf_eq]
+      intro hcon
+      exact hF (hcon.trans hc0).symm
+    have hmono := measure_mono_null hsub hnull
+    have hpos := scM2μ_pos 1 {1} (Set.mem_singleton 1)
+    rw [hmono] at hpos
+    exact absurd hpos (lt_irrefl (0 : ℝ≥0∞))
+  · have hsub : ({(0 : Fin 2)} : Set (Fin 2))
+        ⊆ {ω | ¬ (F ω = c)} := by
+      intro ω hω
+      simp only [Set.mem_singleton_iff] at hω
+      subst ω
+      simp only [Set.mem_setOf_eq]
+      exact fun hcon => hc0 hcon.symm
+    have hmono := measure_mono_null hsub hnull
+    have hpos := scM2μ_pos 0 {0} (Set.mem_singleton 0)
+    rw [hmono] at hpos
+    exact absurd hpos (lt_irrefl (0 : ℝ≥0∞))
+
+/-- The two-valued breaker: value `2` on the heavy atom, `0` on the
+light one. Non-`⊥`-measurable (nonconstant), not ae-strongly-measurable,
+and of junk zero integral. -/
+def scM2X (ω : Fin 2) : ℝ := if ω = 0 then 2 else 0
+
+theorem scM2X_vals (j : Fin 2) : scM2X j = if j = 0 then 2 else 0 := rfl
+
+theorem scM2X_zero : scM2X 0 = 2 := by simp [scM2X]
+
+theorem scM2X_one : scM2X 1 = 0 := by simp [scM2X]
+
+theorem scM2X_ne : scM2X 0 ≠ scM2X 1 := by
+  rw [scM2X_zero, scM2X_one]
+  norm_num
+
+theorem scM2X_not_aeSM : ¬ AEStronglyMeasurable scM2X scM2μ :=
+  scM2_not_aeSM _ scM2X_ne
+
+theorem scM2X_not_measurable : ¬ Measurable[(⊥ : MeasurableSpace (Fin 2))] scM2X :=
+  fun hm => scM2X_not_aeSM hm.aestronglyMeasurable
+
+theorem scM2X_not_integrable : ¬ Integrable scM2X scM2μ :=
+  fun hi => scM2X_not_aeSM hi.aestronglyMeasurable
+
+/-- The single-coordinate breaker family: the dropped `h_meas` clause
+genuinely fails. -/
+def scM2Fam : Fin 1 → Fin 2 → ℝ := fun _ => scM2X
+
+theorem scM2Fam_not_meas : ¬ ∀ i, Measurable[(⊥ : MeasurableSpace (Fin 2))] (scM2Fam i) :=
+  fun hall => scM2X_not_measurable (hall 0)
+
+theorem scM2X_integral : ∫ ω : Fin 2, scM2X ω ∂scM2μ = 0 :=
+  integral_undef fun hi => scM2X_not_aeSM hi.aestronglyMeasurable
+
+theorem scM2X_sq_not_aeSM : ¬ AEStronglyMeasurable (fun ω => (scM2X ω) ^ 2) scM2μ := by
+  refine scM2_not_aeSM _ ?_
+  rw [scM2X_zero, scM2X_one]
+  norm_num
+
+theorem scM2X_sq_integral :
+    ∫ ω : Fin 2, (scM2X ω - ∫ ω' : Fin 2, scM2X ω' ∂scM2μ) ^ 2 ∂scM2μ = 0 := by
+  have hint : ¬ Integrable (fun ω : Fin 2 => (scM2X ω) ^ 2) scM2μ :=
+    fun hi => scM2X_sq_not_aeSM hi.aestronglyMeasurable
+  rw [scM2X_integral]
+  simp only [sub_zero]
+  exact integral_undef hint
+
+/-- The `h_mean`-shaped integrals of the breaker family are the junk
+zero (`integral_undef` at a non-ae-strongly-measurable integrand) — the
+fences' kept centering clauses hold through the junk, recorded as such. -/
+theorem scM2Fam_integral (i : Fin 1) :
+    ∫ ω : Fin 2, scM2Fam i ω ∂scM2μ = 0 := scM2X_integral
+
+theorem scM2Fam_sq_integral (i : Fin 1) :
+    ∫ ω : Fin 2, (scM2Fam i ω - ∫ ω' : Fin 2, scM2Fam i ω' ∂scM2μ) ^ 2 ∂scM2μ = 0 :=
+  scM2X_sq_integral
+
+/-- The kept `h_indep` clause is genuine at a single coordinate:
+independence over `Fin 1` holds for any family. -/
+theorem scM2Fam_iIndepFun_QA :
+    iIndepFun (fun _ : Fin 1 => (inferInstance : MeasurableSpace ℝ)) scM2Fam scM2μ := by
+  rw [iIndepFun_iff_measure_inter_preimage_eq_mul]
+  intro S sets hS
+  rcases Finset.eq_empty_or_nonempty S with rfl | ⟨a, ha⟩
+  · simp
+  · have hS : S = {a} := Finset.ext fun x => by
+      constructor
+      · intro hx
+        exact Finset.mem_singleton.2 (Subsingleton.elim x a)
+      · intro hx
+        rw [Finset.mem_singleton] at hx
+        rw [hx]
+        exact ha
+    rw [hS, Finset.set_biInter_singleton, Finset.prod_singleton]
+
+/-- The empirical breaker: `[0, 1]`-valued lift of the same atom split. -/
+def scM2Emp : Fin 1 → Fin 2 → ℝ := fun _ ω => if ω = 0 then 1 else 0
+
+theorem scM2Emp_not_meas : ¬ ∀ i, Measurable[(⊥ : MeasurableSpace (Fin 2))] (scM2Emp i) := by
+  intro hall
+  have hm : Measurable[(⊥ : MeasurableSpace (Fin 2))] (scM2Emp 0) := hall 0
+  refine scM2_not_aeSM (fun ω => scM2Emp 0 ω) ?_ hm.aestronglyMeasurable
+  simp [scM2Emp]
+
+theorem scM2Emp_integral (i : Fin 1) :
+    ∫ ω : Fin 2, scM2Emp i ω ∂scM2μ = 0 := by
+  refine integral_undef fun hi => ?_
+  have htwo : (fun ω => scM2Emp i ω) = scM2Emp i := rfl
+  refine scM2_not_aeSM (scM2Emp i) ?_ ?_
+  · simp [scM2Emp]
+  · rw [← htwo]
+    exact hi.aestronglyMeasurable
+
+theorem scM2Emp_bound (i : Fin 1) (ω : Fin 2) :
+    0 ≤ scM2Emp i ω ∧ scM2Emp i ω ≤ 1 := by
+  simp only [scM2Emp]
+  by_cases hω : ω = 0 <;> simp [hω]
+
+theorem scM2Fam_abs_le (i : Fin 1) (ω : Fin 2) : |scM2Fam i ω| ≤ 2 := by
+  simp only [scM2Fam]
+  by_cases hω : ω = 0 <;> simp [scM2X, hω]
+
+/-- Pin: `2e⁻² < 9/10` (from `e > 27/10`). -/
+theorem scM_two_exp_neg_two_lt_nine_tenths : 2 * Real.exp (-(2 : ℝ)) < 9 / 10 := by
+  have he : (27 : ℝ) / 10 < Real.exp 1 := scF_exp_gt_two_sevenths
+  have hpos : (0 : ℝ) < Real.exp 1 := lt_trans (by norm_num) he
+  have he2 : Real.exp 1 * Real.exp 1 = Real.exp 2 := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  have hprod : Real.exp (-(2 : ℝ)) * Real.exp 2 = 1 := by
+    rw [← Real.exp_add, show (-(2 : ℝ)) + 2 = 0 from by ring, Real.exp_zero]
+  nlinarith [he, he2, hprod, hpos]
+
+/-- Pin: `2e^{-3/2} < 9/10` (from `e³ > 16`). -/
+theorem scM_two_exp_neg_three_halves_lt_nine_tenths :
+    2 * Real.exp (-((3 : ℝ) / 2)) < 9 / 10 := by
+  have hcube : (16 : ℝ) < Real.exp 1 * Real.exp 1 * Real.exp 1 := scF_exp_cube_gt_sixteen
+  have hpos : (0 : ℝ) < Real.exp ((3 : ℝ) / 2) := Real.exp_pos _
+  have hprod : Real.exp (-((3 : ℝ) / 2)) * Real.exp ((3 : ℝ) / 2) = 1 := by
+    rw [← Real.exp_add, show -((3 : ℝ) / 2) + 3 / 2 = 0 from by ring, Real.exp_zero]
+  have heee : Real.exp 1 * Real.exp 1 * Real.exp 1 = Real.exp 3 := by
+    rw [← Real.exp_add, ← Real.exp_add]
+    congr 1
+    ring
+  have hsq : Real.exp ((3 : ℝ) / 2) * Real.exp ((3 : ℝ) / 2) = Real.exp 3 := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  nlinarith [hcube, hprod, hsq, hpos, heee]
+
+/-- **Fence: `measurable_finset_prod'`'s `hf`.** The dropped statement
+fails at the breaker family on the one-element index: the product is
+the non-measurable breaker itself. -/
+theorem scMfence_finset_prod_meas
+    (h : Measurable[(⊥ : MeasurableSpace (Fin 2))]
+      (∏ i ∈ (Finset.univ : Finset (Fin 1)), scM2Fam i)) : False := by
+  rw [Finset.univ_unique, Finset.prod_singleton] at h
+  exact scM2X_not_measurable h
+
+/-- **Fence: `measurable_finset_sum'`'s `hf`.** Same kill at the sum. -/
+theorem scMfence_finset_sum_meas
+    (h : Measurable[(⊥ : MeasurableSpace (Fin 2))]
+      (∑ i ∈ (Finset.univ : Finset (Fin 1)), scM2Fam i)) : False := by
+  rw [Finset.univ_unique, Finset.sum_singleton] at h
+  exact scM2X_not_measurable h
+
+/-- **Fence: `integrable_of_bounded_measurable`'s `h_meas`.** The kept
+`h_bound` clause is genuine (`|scM2X| ≤ 2`), the dropped measurability
+clause genuinely fails, and the conclusion `Integrable` fails with it. -/
+theorem scMfence_integrable_bounded_meas
+    (h : Integrable scM2X scM2μ) : False :=
+  scM2X_not_integrable h
+
+/-- **Fence: `integrable_sq_sub_mean`'s `h_meas`.** The kept `h_bound`
+clause is genuine; the centered square (at the junk zero mean) is the
+two-valued `scM2X ^ 2`, not integrable. -/
+theorem scMfence_integrable_sq_sub_mean_meas
+    (h : Integrable (fun ω => (scM2X ω - ∫ ω' : Fin 2, scM2X ω' ∂scM2μ) ^ 2) scM2μ) : False := by
+  simp only [scM2X_integral, sub_zero] at h
+  exact scM2X_sq_not_aeSM h.aestronglyMeasurable
+
+set_option linter.unusedVariables false in
+/-- **Fence: `hoeffding_inequality_interval`'s `h_meas`.** At the breaker
+family with `c = 0`, `d = 2`, `t = 2`: the tail event contains the heavy
+atom (mass `9/10`) while the bound is `2e⁻² < 9/10`. The kept clauses:
+`h_indep` genuine (single coordinate), `h_bound` genuine, `h_mean` through
+the junk zero. -/
+theorem scMfence_interval_meas
+    (h : scM2μ {ω : Fin 2 | |∑ i : Fin 1, scM2Fam i ω| ≥ (2 : ℝ)}
+      ≤ ENNReal.ofReal (2 * Real.exp (-2 * (2 : ℝ) ^ 2 / ∑ i : Fin 1, ((2 : ℝ) - 0) ^ 2))) :
+    False := by
+  have hmem : (0 : Fin 2) ∈ {ω : Fin 2 | |∑ i : Fin 1, scM2Fam i ω| ≥ (2 : ℝ)} := by
+    simp [Fin.sum_univ_one, scM2Fam, scM2X_zero]
+  have hmass := scM2μ_ge_zero _ hmem
+  refine absurd (le_trans hmass h) (not_le.2 ?_)
+  have hsum : ∑ i : Fin 1, ((2 : ℝ) - 0) ^ 2 = 4 := by
+    simp
+    norm_num
+  rw [hsum]
+  refine (ENNReal.ofReal_lt_ofReal_iff_of_nonneg (mul_pos (show (0:ℝ) < 2 by norm_num) (Real.exp_pos _)).le).2 ?_
+  have hv : (-2 * (2 : ℝ) ^ 2 / 4) = -(2 : ℝ) := by norm_num
+  rw [hv]
+  exact scM_two_exp_neg_two_lt_nine_tenths
+
+/-- **Fence: `hoeffding_empirical`'s `h_meas`.** At the `[0,1]`-valued
+breaker with `t = 1`: the tail event contains the heavy atom against
+the bound `2e⁻² < 9/10`. The kept clauses: `h_indep` genuine, `h_bound`
+genuine, no centering clause to hold. -/
+theorem scMfence_empirical_meas
+    (h : scM2μ {ω : Fin 2 | |(1 / (1 : ℝ)) * ∑ i : Fin 1, scM2Emp i ω
+          - (1 / (1 : ℝ)) * ∑ i : Fin 1, ∫ ω' : Fin 2, scM2Emp i ω' ∂scM2μ| ≥ (1 : ℝ)}
+      ≤ ENNReal.ofReal (2 * Real.exp (-2 * (1 : ℝ) * (1 : ℝ) ^ 2))) : False := by
+  have hmem : (0 : Fin 2) ∈ {ω : Fin 2 | |(1 / (1 : ℝ)) * ∑ i : Fin 1, scM2Emp i ω
+      - (1 / (1 : ℝ)) * ∑ i : Fin 1, ∫ ω' : Fin 2, scM2Emp i ω' ∂scM2μ| ≥ (1 : ℝ)} := by
+    simp only [Fin.sum_univ_one, scM2Emp_integral]
+    simp [scM2Emp]
+  have hmass := scM2μ_ge_zero _ hmem
+  refine absurd (le_trans hmass h) (not_le.2 ?_)
+  refine (ENNReal.ofReal_lt_ofReal_iff_of_nonneg (mul_pos (show (0:ℝ) < 2 by norm_num) (Real.exp_pos _)).le).2 ?_
+  have hv : (-2 * (1 : ℝ) * (1 : ℝ) ^ 2) = -(2 : ℝ) := by norm_num
+  rw [hv]
+  exact scM_two_exp_neg_two_lt_nine_tenths
+
+/-- **Fence: `bernstein_inequality`'s `h_meas`.** At the breaker family
+with `a = 2`, `t = 2`: the variance statistic is ITSELF the junk zero
+(the Errata §7 mechanism at the scalar sibling), so the denominator
+collapses to `2at/3` and the bound to `2e^{-3/2} < 9/10` against the
+heavy-atom tail. -/
+theorem scMfence_bernstein_meas
+    (h : scM2μ {ω : Fin 2 | |∑ i : Fin 1, (scM2Fam i ω
+            - ∫ ω' : Fin 2, scM2Fam i ω' ∂scM2μ)| ≥ (2 : ℝ)}
+      ≤ ENNReal.ofReal (2 * Real.exp (-((2 : ℝ) ^ 2) /
+          (2 * ∑ i : Fin 1, ∫ ω : Fin 2, (scM2Fam i ω
+              - ∫ ω' : Fin 2, scM2Fam i ω' ∂scM2μ) ^ 2 ∂scM2μ
+            + (2 * 2 * 2) / 3)))) : False := by
+  have hV : ∑ i : Fin 1, ∫ ω : Fin 2, (scM2Fam i ω
+      - ∫ ω' : Fin 2, scM2Fam i ω' ∂scM2μ) ^ 2 ∂scM2μ = 0 := by
+    simp [scM2Fam_sq_integral]
+  rw [hV] at h
+  have hmem : (0 : Fin 2) ∈ {ω : Fin 2 | |∑ i : Fin 1, (scM2Fam i ω
+      - ∫ ω' : Fin 2, scM2Fam i ω' ∂scM2μ)| ≥ (2 : ℝ)} := by
+    simp only [Fin.sum_univ_one]
+    rw [scM2Fam_integral]
+    simp [scM2Fam, scM2X_zero]
+  have hmass := scM2μ_ge_zero _ hmem
+  refine absurd (le_trans hmass h) (not_le.2 ?_)
+  refine (ENNReal.ofReal_lt_ofReal_iff_of_nonneg (mul_pos (show (0:ℝ) < 2 by norm_num) (Real.exp_pos _)).le).2 ?_
+  have hv : (-((2 : ℝ) ^ 2) / (2 * 0 + (2 * 2 * 2) / 3)) = -((3 : ℝ) / 2) := by norm_num
+  rw [hv]
+  exact scM_two_exp_neg_three_halves_lt_nine_tenths
+
+/-- **Fence: `bernstein_bounded_variance`'s `h_meas`.** Same kill at
+`v = 0` (the `h_var` clause holds through the junk zero). -/
+theorem scMfence_bounded_variance_meas
+    (h : scM2μ {ω : Fin 2 | |∑ i : Fin 1, (scM2Fam i ω
+            - ∫ ω' : Fin 2, scM2Fam i ω' ∂scM2μ)| ≥ (2 : ℝ)}
+      ≤ ENNReal.ofReal (2 * Real.exp (-((2 : ℝ) ^ 2) / (2 * 0 + (2 * 2 * 2) / 3)))) :
+    False := by
+  have hmem : (0 : Fin 2) ∈ {ω : Fin 2 | |∑ i : Fin 1, (scM2Fam i ω
+      - ∫ ω' : Fin 2, scM2Fam i ω' ∂scM2μ)| ≥ (2 : ℝ)} := by
+    simp only [Fin.sum_univ_one]
+    rw [scM2Fam_integral]
+    simp [scM2Fam, scM2X_zero]
+  have hmass := scM2μ_ge_zero _ hmem
+  refine absurd (le_trans hmass h) (not_le.2 ?_)
+  refine (ENNReal.ofReal_lt_ofReal_iff_of_nonneg (mul_pos (show (0:ℝ) < 2 by norm_num) (Real.exp_pos _)).le).2 ?_
+  have hv : (-((2 : ℝ) ^ 2) / (2 * 0 + (2 * 2 * 2) / 3)) = -((3 : ℝ) / 2) := by norm_num
+  rw [hv]
+  exact scM_two_exp_neg_three_halves_lt_nine_tenths
+
+/-- **Fence: `bernstein_iid`'s `h_meas`.** Same kill at `σ² = 0` (the
+`h_var` clause holds through the junk zero). -/
+theorem scMfence_bernstein_iid_meas
+    (h : scM2μ {ω : Fin 2 | |∑ i : Fin 1, (scM2Fam i ω
+            - ∫ ω' : Fin 2, scM2Fam i ω' ∂scM2μ)| ≥ (2 : ℝ)}
+      ≤ ENNReal.ofReal (2 * Real.exp (-((2 : ℝ) ^ 2) /
+          (2 * ((1 : ℝ) * 0) + (2 * 2 * 2) / 3)))) : False := by
+  have hmem : (0 : Fin 2) ∈ {ω : Fin 2 | |∑ i : Fin 1, (scM2Fam i ω
+      - ∫ ω' : Fin 2, scM2Fam i ω' ∂scM2μ)| ≥ (2 : ℝ)} := by
+    simp only [Fin.sum_univ_one]
+    rw [scM2Fam_integral]
+    simp [scM2Fam, scM2X_zero]
+  have hmass := scM2μ_ge_zero _ hmem
+  refine absurd (le_trans hmass h) (not_le.2 ?_)
+  refine (ENNReal.ofReal_lt_ofReal_iff_of_nonneg (mul_pos (show (0:ℝ) < 2 by norm_num) (Real.exp_pos _)).le).2 ?_
+  have hv : (-((2 : ℝ) ^ 2) / (2 * ((1 : ℝ) * 0) + (2 * 2 * 2) / 3))
+      = -((3 : ℝ) / 2) := by norm_num
+  rw [hv]
+  exact scM_two_exp_neg_three_halves_lt_nine_tenths
+
+/-- **Fence: `markov_tail_of_mgf`'s `hint`.** The integrability guard of
+the Markov engine — the exact clause class that was vacuous in the
+Errata §7 repair. At the breaker with `B = 0`, `t = 0`: the MGF
+hypothesis holds through the junk zero while the event `{0 ≤ Y}` is all
+of `Ω` (measure `1`) against the bound `ofReal 0`. -/
+theorem scMfence_markov_integrability
+    (h : scM2μ {ω : Fin 2 | (0 : ℝ) ≤ scM2X ω}
+      ≤ ENNReal.ofReal (Real.exp (-((1 : ℝ) * 0)) * 0)) : False := by
+  have hev : {ω : Fin 2 | (0 : ℝ) ≤ scM2X ω} = Set.univ :=
+    Set.eq_univ_of_forall fun ω => by
+      by_cases hω : ω = 0 <;> simp [scM2X, hω]
+  have hval : Real.exp (-((1 : ℝ) * 0)) * 0 = 0 := by ring
+  rw [hev, measure_univ, hval, ENNReal.ofReal_zero] at h
+  exact absurd h (by norm_num : ¬((1 : ℝ≥0∞) ≤ 0))
+
+/-- **Fence: `subgaussian_tail_bound`'s `h_int`.** The moment
+integrability guard of the subgaussian engine: at the breaker with
+`K = 1`, `t = 2` the moment hypothesis holds through the junk zero
+while the tail event contains the heavy atom against `2e⁻² < 9/10`. -/
+theorem scMfence_subgaussian_int
+    (h : scM2μ {ω : Fin 2 | |scM2X ω| ≥ (2 : ℝ)}
+      ≤ ENNReal.ofReal (2 * Real.exp (-((2 : ℝ) ^ 2) / (2 * (1 : ℝ) ^ 2)))) : False := by
+  have hmem : (0 : Fin 2) ∈ {ω : Fin 2 | |scM2X ω| ≥ (2 : ℝ)} := by
+    simp [scM2X_zero]
+  have hmass := scM2μ_ge_zero _ hmem
+  refine absurd (le_trans hmass h) (not_le.2 ?_)
+  refine (ENNReal.ofReal_lt_ofReal_iff_of_nonneg (mul_pos (show (0:ℝ) < 2 by norm_num) (Real.exp_pos _)).le).2 ?_
+  have hv : (-((2 : ℝ) ^ 2) / (2 * (1 : ℝ) ^ 2)) = -(2 : ℝ) := by norm_num
+  rw [hv]
+  exact scM_two_exp_neg_two_lt_nine_tenths
+
+end MeasurabilityFences
+
+section SaturationFences
+
+/-!
+## The trim-saturation deferral closure
+
+The `MeasurabilityFences` follow-up deferred `hoeffding_inequality`'s
+and `hoeffding_iid`'s `h_meas` on the priced trim-saturation mechanism:
+on a trivial σ-algebra, exact masses of non-measurable sets are
+saturated upward, which blocked the independence equality. This
+section takes the priced route: the saturation itself becomes the
+lemma (`scM_dirac_bot_eq_one`, via `measure_eq_iInf` — the value of a
+Dirac measure at any set is the infimum over its measurable supersets,
+and on `⊥` the only measurable superset of a nonempty set is `univ`).
+On the saturated space every nonempty set has measure exactly `1`, so
+the four-cell-partition family below is genuinely independent (every
+pair of nonempty preimages intersects, hence both sides of every
+independence equality are `1` or `0`), and the two deferred fences
+land with the on-file pin `2e⁻¹ < 1`.
+-/
+
+/-- **Saturation lemma.** On the trivial σ-algebra, a Dirac measure's
+total function sends every nonempty set to `1`: by `measure_eq_iInf`
+the value is the infimum over measurable supersets, and the only
+`⊥`-measurable superset of a nonempty set is `univ`. -/
+theorem scM_dirac_bot_eq_one {α : Type*} (a : α) {s : Set α} (hs : s.Nonempty) :
+    @Measure.dirac α (⊥ : MeasurableSpace α) a s = 1 := by
+  have hUniv : @Measure.dirac α (⊥ : MeasurableSpace α) a Set.univ = 1 :=
+    @Measure.dirac_apply_of_mem α (⊥ : MeasurableSpace α) Set.univ a (Set.mem_univ a)
+  rw [@measure_eq_iInf α (⊥ : MeasurableSpace α)
+    (@Measure.dirac α (⊥ : MeasurableSpace α) a) s]
+  refine le_antisymm ?_ ?_
+  · exact iInf_le_of_le Set.univ (iInf_le_of_le s.subset_univ
+      (iInf_le_of_le (@MeasurableSet.univ α (⊥ : MeasurableSpace α))
+        (le_of_eq hUniv)))
+  · refine le_iInf fun t => le_iInf fun hsub => le_iInf fun hmeas => ?_
+    rcases MeasurableSpace.measurableSet_bot_iff.1 hmeas with rfl | rfl
+    · exact (hs.not_subset_empty hsub).elim
+    · exact hUniv.ge
+
+/-- The four-point trivial-σ-algebra saturated space. -/
+noncomputable def scM4μ : @MeasureTheory.Measure (Fin 4) (⊥ : MeasurableSpace (Fin 4)) :=
+  @Measure.dirac (Fin 4) (⊥ : MeasurableSpace (Fin 4)) 0
+
+instance : @IsProbabilityMeasure (Fin 4) (⊥ : MeasurableSpace (Fin 4)) scM4μ :=
+  ⟨@Measure.dirac_apply_of_mem (Fin 4) (⊥ : MeasurableSpace (Fin 4)) Set.univ 0
+    (Set.mem_univ 0)⟩
+
+theorem scM4μ_sat (S : Set (Fin 4)) (hS : S.Nonempty) : scM4μ S = 1 :=
+  scM_dirac_bot_eq_one 0 hS
+
+/-- On the saturated space, a function taking distinct values at two
+points is not almost-everywhere strongly measurable (each point carries
+full saturated mass, so a.e.-equality with a constant — what
+`stronglyMeasurable_bot_iff` forces — would make the values agree). -/
+theorem scM4_not_aeSM {W : Type*} [NormedAddCommGroup W] [NormedSpace ℝ W]
+    (F : Fin 4 → W) (p q : Fin 4) (hF : F p ≠ F q) :
+    ¬ AEStronglyMeasurable F scM4μ := by
+  intro haes
+  obtain ⟨c, hc⟩ := stronglyMeasurable_bot_iff.1
+    (AEStronglyMeasurable.stronglyMeasurable_mk haes)
+  have heq : F =ᵐ[scM4μ] (fun _ => c) := haes.ae_eq_mk.trans (by rw [hc])
+  have hnull := ae_iff.1 (Filter.EventuallyEq.eventually heq)
+  by_cases hcp : c = F p
+  · have hsub : ({q} : Set (Fin 4)) ⊆ {ω | ¬ (F ω = c)} := by
+      intro ω hω
+      simp only [Set.mem_singleton_iff] at hω
+      subst ω
+      simp only [Set.mem_setOf_eq]
+      intro hcon
+      exact hF (hcon.trans hcp).symm
+    have hzero := measure_mono_null hsub hnull
+    have hfull : scM4μ ({q} : Set (Fin 4)) = 1 := scM4μ_sat _ ⟨q, rfl⟩
+    rw [hzero] at hfull
+    exact one_ne_zero hfull.symm
+  · have hsub : ({p} : Set (Fin 4)) ⊆ {ω | ¬ (F ω = c)} := by
+      intro ω hω
+      simp only [Set.mem_singleton_iff] at hω
+      subst ω
+      simp only [Set.mem_setOf_eq]
+      exact fun hcon => hcp hcon.symm
+    have hzero := measure_mono_null hsub hnull
+    have hfull : scM4μ ({p} : Set (Fin 4)) = 1 := scM4μ_sat _ ⟨p, rfl⟩
+    rw [hzero] at hfull
+    exact one_ne_zero hfull.symm
+
+/-- The two cells of the four-cell partition design: `A = {0, 1}` and
+`B = {0, 2}`, so all four intersections `A ∩ B = {0}`, `A ∩ Bᶜ = {1}`,
+`Aᶜ ∩ B = {2}`, `Aᶜ ∩ Bᶜ = {3}` are nonempty. -/
+def scM4A : Set (Fin 4) := {ω | ω ≤ 1}
+def scM4B : Set (Fin 4) := {ω | ω = 0 ∨ ω = 2}
+
+theorem scM4A_zero : (0 : Fin 4) ∈ scM4A := by simp [scM4A]
+theorem scM4A_one : (1 : Fin 4) ∈ scM4A := by simp [scM4A]
+theorem scM4A_not_two : (2 : Fin 4) ∉ scM4A := by simp [scM4A]
+theorem scM4A_not_three : (3 : Fin 4) ∉ scM4A := by simp [scM4A]
+theorem scM4B_zero : (0 : Fin 4) ∈ scM4B := by simp [scM4B]
+theorem scM4B_two : (2 : Fin 4) ∈ scM4B := by simp [scM4B]
+theorem scM4B_not_one : (1 : Fin 4) ∉ scM4B := by simp [scM4B]
+theorem scM4B_not_three : (3 : Fin 4) ∉ scM4B := by simp [scM4B]
+
+/-- The breaker coordinates: `X₀ = 2·1_A`, `X₁ = 2·1_B` (the cell
+predicates spelled decibaly so the value definitions elaborate). -/
+def scM4X0 (ω : Fin 4) : ℝ := if ω ≤ 1 then 2 else 0
+def scM4X1 (ω : Fin 4) : ℝ := if ω = 0 ∨ ω = 2 then 2 else 0
+def scM4X : Fin 2 → Fin 4 → ℝ := ![scM4X0, scM4X1]
+
+theorem scM4X_zero : scM4X 0 = scM4X0 := rfl
+theorem scM4X_one : scM4X 1 = scM4X1 := rfl
+
+theorem scM4X0_point : scM4X0 0 = 2 := by simp [scM4X0]
+theorem scM4X0_point' : scM4X0 2 = 0 := by simp [scM4X0]
+theorem scM4X1_point : scM4X1 0 = 2 := by simp [scM4X1]
+theorem scM4X1_point' : scM4X1 1 = 0 := by simp [scM4X1]
+
+theorem scM4X0_ne : scM4X0 0 ≠ scM4X0 2 := by
+  rw [scM4X0_point, scM4X0_point']
+  norm_num
+
+theorem scM4X1_ne : scM4X1 0 ≠ scM4X1 1 := by
+  rw [scM4X1_point, scM4X1_point']
+  norm_num
+
+theorem scM4X0_not_aeSM : ¬ AEStronglyMeasurable scM4X0 scM4μ :=
+  scM4_not_aeSM _ 0 2 scM4X0_ne
+
+theorem scM4X1_not_aeSM : ¬ AEStronglyMeasurable scM4X1 scM4μ :=
+  scM4_not_aeSM _ 0 1 scM4X1_ne
+
+/-- The dropped `h_meas` clause genuinely fails: neither coordinate is
+`⊥`-measurable (both are nonconstant). -/
+theorem scM4X_not_meas : ¬ ∀ i, Measurable[(⊥ : MeasurableSpace (Fin 4))] (scM4X i) :=
+  fun hall => scM4X0_not_aeSM (hall 0).aestronglyMeasurable
+
+/-- The `h_mean`-shaped integrals are the junk zero (recorded as such —
+the fences' kept centering clauses hold through the junk). -/
+theorem scM4X_integral (i : Fin 2) :
+    ∫ ω : Fin 4, scM4X i ω ∂scM4μ = 0 := by
+  fin_cases i
+  · exact integral_undef fun hi => scM4X0_not_aeSM hi.aestronglyMeasurable
+  · exact integral_undef fun hi => scM4X1_not_aeSM hi.aestronglyMeasurable
+
+theorem scM4X_abs_le (i : Fin 2) (ω : Fin 4) : |scM4X i ω| ≤ 2 := by
+  fin_cases i
+  · by_cases h : ω ≤ 1
+    · simp [scM4X_zero, scM4X0, h]
+    · simp [scM4X_zero, scM4X0, h]
+  · by_cases h : ω = 0 ∨ ω = 2
+    · simp [scM4X_one, scM4X1, h]
+    · simp [scM4X_one, scM4X1, h]
+
+/-- Every nonempty preimage pair of the two coordinates intersects:
+on the four cells the value pairs are `(2,2)`, `(2,0)`, `(0,2)`,
+`(0,0)`, so whichever values land in `S` and `T`, some cell is inside
+both preimages. -/
+theorem scM4X_indep_hint (S T : Set ℝ)
+    (h1 : (scM4X0 ⁻¹' S).Nonempty) (h2 : (scM4X1 ⁻¹' T).Nonempty) :
+    (scM4X0 ⁻¹' S ∩ scM4X1 ⁻¹' T).Nonempty := by
+  have hf : (2 : ℝ) ∈ S ∨ (0 : ℝ) ∈ S := by
+    obtain ⟨ω, hω⟩ := h1
+    simp only [Set.mem_preimage, scM4X0] at hω
+    by_cases h : ω ≤ 1
+    · exact Or.inl (by rw [if_pos h] at hω; exact hω)
+    · exact Or.inr (by rw [if_neg h] at hω; exact hω)
+  have hg : (2 : ℝ) ∈ T ∨ (0 : ℝ) ∈ T := by
+    obtain ⟨ω, hω⟩ := h2
+    simp only [Set.mem_preimage, scM4X1] at hω
+    by_cases h : ω = 0 ∨ ω = 2
+    · exact Or.inl (by rw [if_pos h] at hω; exact hω)
+    · exact Or.inr (by rw [if_neg h] at hω; exact hω)
+  rcases hf with h2S | h0S <;> rcases hg with h2T | h0T
+  · exact ⟨0, by simp [Set.mem_inter_iff, Set.mem_preimage, scM4X0, scM4X1, h2S, h2T]⟩
+  · exact ⟨1, by simp [Set.mem_inter_iff, Set.mem_preimage, scM4X0, scM4X1, h2S, h0T]⟩
+  · exact ⟨2, by simp [Set.mem_inter_iff, Set.mem_preimage, scM4X0, scM4X1, h0S, h2T]⟩
+  · exact ⟨3, by simp [Set.mem_inter_iff, Set.mem_preimage, scM4X0, scM4X1, h0S, h0T]⟩
+
+/-- Independence on a saturated measure: every pair of nonempty
+preimages intersects, so both sides of every independence equality are
+`1` (or `0` through the empty side). -/
+theorem scM_indepFun_of_saturated {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
+    (hsat : ∀ S : Set Ω, S.Nonempty → μ S = 1) (f g : Ω → ℝ)
+    (hint : ∀ S T : Set ℝ, (f ⁻¹' S).Nonempty → (g ⁻¹' T).Nonempty →
+      (f ⁻¹' S ∩ g ⁻¹' T).Nonempty) :
+    IndepFun f g μ := by
+  rw [indepFun_iff_measure_inter_preimage_eq_mul]
+  intro s t hs ht
+  rcases Set.eq_empty_or_nonempty (f ⁻¹' s) with h1 | h1
+  · rw [h1, Set.empty_inter, measure_empty]
+    simp
+  rcases Set.eq_empty_or_nonempty (g ⁻¹' t) with h2 | h2
+  · rw [h2, Set.inter_empty, measure_empty]
+    simp
+  rw [hsat _ (hint s t h1 h2), hsat _ h1, hsat _ h2]
+  ring
+
+/-- The kept `h_indep` clause is genuine: the four-cell family is
+mutually independent on the saturated space. -/
+theorem scM4X_iIndepFun_QA :
+    iIndepFun (fun _ : Fin 2 => (inferInstance : MeasurableSpace ℝ)) scM4X scM4μ := by
+  rw [iIndepFun_iff_measure_inter_preimage_eq_mul]
+  intro S sets hS
+  rcases S.eq_empty_or_nonempty with rfl | ⟨a, ha⟩
+  · simp
+  rcases (S.erase a).eq_empty_or_nonempty with h | ⟨b, hb⟩
+  · rw [← Finset.insert_erase ha, h,
+      Finset.set_biInter_insert a ∅ (fun i => scM4X i ⁻¹' sets i),
+      Finset.prod_insert (by simp : a ∉ (∅ : Finset (Fin 2)))]
+    simp
+  · have hba : b ≠ a := (Finset.mem_erase.1 hb).1
+    have hsub : (Finset.univ : Finset (Fin 2)) ⊆ S := by
+      intro x _
+      fin_cases x <;> fin_cases a <;> fin_cases b <;> simp_all [ha, hb, hba]
+    have hfull : S = Finset.univ := Finset.univ_subset_iff.mp hsub
+    have hind : IndepFun scM4X0 scM4X1 scM4μ :=
+      scM_indepFun_of_saturated scM4μ_sat scM4X0 scM4X1 scM4X_indep_hint
+    have huniv : (Finset.univ : Finset (Fin 2)) = insert 0 {1} := by decide
+    rw [hfull, huniv]
+    have hm0 : MeasurableSet (sets 0) := hS 0 (by rw [hfull]; exact Finset.mem_univ _)
+    have hm1 : MeasurableSet (sets 1) := hS 1 (by rw [hfull]; exact Finset.mem_univ _)
+    have hfinal := hind.measure_inter_preimage_eq_mul (sets 0) (sets 1) hm0 hm1
+    simp only [Finset.set_biInter_insert, Finset.set_biInter_singleton,
+      Set.inter_univ]
+    rw [Finset.prod_insert (by decide : (0 : Fin 2) ∉ ({1} : Finset (Fin 2))),
+      Finset.prod_singleton]
+    exact hfinal
+
+set_option linter.unusedVariables false in
+/-- **Fence: `hoeffding_inequality`'s `h_meas`** — the follow-up's
+deferred sibling, closed by the saturation route. At the four-cell
+family with `a = 2`, `t = 4`: the tail event `A ∩ B = {0}` is
+nonempty, hence of saturated measure `1`, against the bound
+`2exp(−16/16) = 2e⁻¹ < 1` (on-file pin). The kept clauses:
+`h_indep` genuine (the saturated-independence lemma at the four-cell
+partition), `h_bound` genuine (`|X i ω| ≤ 2`), `h_mean` through the
+junk zero, `ht` genuine. -/
+theorem scMfence_hoeffding_meas
+    (h : scM4μ {ω : Fin 4 | |∑ i : Fin 2, scM4X i ω| ≥ (4 : ℝ)}
+      ≤ ENNReal.ofReal (2 * Real.exp (-((4 : ℝ) ^ 2)
+          / (2 * ∑ i : Fin 2, (2 : ℝ) ^ 2)))) : False := by
+  have hmem : (0 : Fin 4) ∈ {ω : Fin 4 | |∑ i : Fin 2, scM4X i ω| ≥ (4 : ℝ)} := by
+    have hvals : ∑ i : Fin 2, scM4X i (0 : Fin 4) = 4 := by
+      simp only [Fin.sum_univ_two]
+      rw [scM4X_zero, scM4X_one, scM4X0_point, scM4X1_point]
+      norm_num
+    simp only [Set.mem_setOf_eq]
+    rw [hvals]
+    norm_num
+  rw [scM4μ_sat _ ⟨0, hmem⟩] at h
+  have hsum : ∑ i : Fin 2, (2 : ℝ) ^ 2 = 8 := by
+    rw [Fin.sum_univ_two]
+    norm_num
+  rw [hsum, show (-((4 : ℝ) ^ 2) / (2 * 8)) = -(1 : ℝ) from by norm_num,
+    ENNReal.one_le_ofReal] at h
+  exact absurd h (not_le.2 scF_two_exp_neg_lt_one)
+
+set_option linter.unusedVariables false in
+/-- **Fence: `hoeffding_iid`'s `h_meas`** — the second deferred sibling,
+same fixture and kill (the iid denominator `2·(n·a²)` also evaluates to
+`16`). -/
+theorem scMfence_hoeffding_iid_meas
+    (h : scM4μ {ω : Fin 4 | |∑ i : Fin 2, scM4X i ω| ≥ (4 : ℝ)}
+      ≤ ENNReal.ofReal (2 * Real.exp (-((4 : ℝ) ^ 2)
+          / (2 * ((2 : ℝ) * (2 : ℝ) ^ 2))))) : False := by
+  have hmem : (0 : Fin 4) ∈ {ω : Fin 4 | |∑ i : Fin 2, scM4X i ω| ≥ (4 : ℝ)} := by
+    have hvals : ∑ i : Fin 2, scM4X i (0 : Fin 4) = 4 := by
+      simp only [Fin.sum_univ_two]
+      rw [scM4X_zero, scM4X_one, scM4X0_point, scM4X1_point]
+      norm_num
+    simp only [Set.mem_setOf_eq]
+    rw [hvals]
+    norm_num
+  rw [scM4μ_sat _ ⟨0, hmem⟩] at h
+  rw [show (-((4 : ℝ) ^ 2) / (2 * ((2 : ℝ) * (2 : ℝ) ^ 2))) = -(1 : ℝ) from by norm_num,
+    ENNReal.one_le_ofReal] at h
+  exact absurd h (not_le.2 scF_two_exp_neg_lt_one)
+
+end SaturationFences
 
 end Scaffold.Mathlib.Probability.Concentration.Scalar.QA

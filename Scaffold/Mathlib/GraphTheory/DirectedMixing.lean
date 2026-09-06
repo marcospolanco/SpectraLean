@@ -935,4 +935,252 @@ theorem pageRankMixingTime_le_of_escalation (A : WAdj (V := V))
     t₀ (Nat.ceil (Real.log (ε₀ / ε) / Real.log (1 / ρ))) hunif hpair
     (by rw [mul_comm]; exact hkey)
 
+
+/-!
+### The Dobrushin shadow — the sharp layer's Slice 2 (a), the rate
+connection (2026-09-06, `proposals/sharp-second-eigenvalue-layer.md`)
+
+The Google matrix's Dobrushin coefficient is at most `α` times the
+walk's: teleportation mixes every row pair with the same uniform
+vector, so each pairwise TV distance scales by exactly `α` — the
+Doeblin-side ceiling joining Slice 1's spectral ceiling (both at
+`α`). Through the engine this yields the pair rate
+`pageRankTVPair A α t ≤ (α · δ(P))^t ≤ α^t` — the existing
+Doeblin-floor rate recovered through the engine at the sharper
+constant. The exact shadow equality was delivered 2026-09-06 as
+Slice 3 (a) — the attainment route through `Finset.sup'_induction`
+(the `⊔`-closed induction property `α·z ≤ sup'(α·f)`), which needs
+no order on the index type.
+-/
+
+section DobrushinShadow
+
+variable {V : Type} [Fintype V] [DecidableEq V]
+
+/-- **The pointwise Dobrushin shadow**: teleportation mixes every row
+pair with the same uniform vector, so each pairwise TV distance
+scales by exactly `α`. -/
+theorem tvDistance_googleMatrix_row_eq (A : WAdj (V := V)) {α : ℝ}
+    (hα : 0 ≤ α) (x y : V) :
+    tvDistance (googleMatrix A α x) (googleMatrix A α y)
+      = α * tvDistance (walkTransitionMatrix A x) (walkTransitionMatrix A y) := by
+  have hentry : ∀ j, |googleMatrix A α x j - googleMatrix A α y j|
+      = α * |walkTransitionMatrix A x j - walkTransitionMatrix A y j| := by
+    intro j
+    have hd : α * walkTransitionMatrix A x j + (1 - α) * (Fintype.card V : ℝ)⁻¹
+          - (α * walkTransitionMatrix A y j + (1 - α) * (Fintype.card V : ℝ)⁻¹)
+        = α * (walkTransitionMatrix A x j - walkTransitionMatrix A y j) := by ring
+    rw [googleMatrix_apply, googleMatrix_apply, hd, abs_mul, abs_of_nonneg hα]
+  have hR : α * tvDistance (walkTransitionMatrix A x) (walkTransitionMatrix A y)
+      = (1 / 2 : ℝ) * ∑ i, α * |walkTransitionMatrix A x i
+          - walkTransitionMatrix A y i| := by
+    rw [tvDistance]
+    rw [show α * ((1 / 2 : ℝ) * ∑ i, |walkTransitionMatrix A x i
+            - walkTransitionMatrix A y i|)
+        = (1 / 2 : ℝ) * (α * ∑ i, |walkTransitionMatrix A x i
+            - walkTransitionMatrix A y i|) from by ring,
+      ← Finset.mul_sum]
+  calc tvDistance (googleMatrix A α x) (googleMatrix A α y)
+      = (1 / 2 : ℝ) * ∑ i, |googleMatrix A α x i - googleMatrix A α y i| := by
+        rw [tvDistance]
+    _ = (1 / 2 : ℝ) * ∑ i, α * |walkTransitionMatrix A x i
+          - walkTransitionMatrix A y i| := by
+        refine congrArg ((1 / 2 : ℝ) * ·) ?_
+        exact Finset.sum_congr rfl fun j _ => hentry j
+    _ = α * tvDistance (walkTransitionMatrix A x) (walkTransitionMatrix A y) :=
+        hR.symm
+
+/-- **The Dobrushin shadow**: the Google matrix's Dobrushin coefficient
+is exactly `α` times the walk's. -/
+theorem tvDobrushinCoeff_googleMatrix_le (A : WAdj (V := V)) {α : ℝ}
+    (hα : 0 ≤ α) [Nonempty V] :
+    tvDobrushinCoeff (googleMatrix A α)
+      ≤ α * tvDobrushinCoeff (walkTransitionMatrix A) := by
+  have hrow : tvDobrushinCoeff (googleMatrix A α) = pageRankTVPair A α 1 := by
+    rw [pageRankTVPair_eq_tvDobrushinCoeff A α 1, pow_one]
+  rw [hrow]
+  refine Finset.sup'_le
+    (⟨(‹Nonempty V›.some, ‹Nonempty V›.some), Finset.mem_univ _⟩ :
+      (Finset.univ : Finset (V × V)).Nonempty)
+    (f := fun p : V × V =>
+      tvDistance (pageRankDistribution A α 1 p.1) (pageRankDistribution A α 1 p.2))
+    fun p _ => ?_
+  show tvDistance (pageRankDistribution A α 1 p.1)
+      (pageRankDistribution A α 1 p.2)
+      ≤ α * tvDobrushinCoeff (walkTransitionMatrix A)
+  rw [pageRankDistribution_eq_row A α 1 p.1, pageRankDistribution_eq_row A α 1 p.2,
+    show googleMatrix A α ^ 1 = googleMatrix A α from pow_one _, 
+    tvDistance_googleMatrix_row_eq A hα p.1 p.2]
+  exact mul_le_mul_of_nonneg_left
+    (Finset.le_sup'
+      (f := fun q : V × V => tvDistance (walkTransitionMatrix A q.1)
+        (walkTransitionMatrix A q.2))
+      (Finset.mem_univ p)) hα
+
+/-- **The walk Dobrushin ceiling**: the walk matrix's rows are
+probability vectors, so pairwise TV distances are at most one. -/
+theorem tvDobrushinCoeff_walkTransitionMatrix_le_one (A : WAdj (V := V))
+    (hnn : ∀ i j, 0 ≤ A i j) (hdeg : ∀ i, 0 < deg A i) [Nonempty V] :
+    tvDobrushinCoeff (walkTransitionMatrix A) ≤ 1 := by
+  refine Finset.sup'_le
+    (⟨(‹Nonempty V›.some, ‹Nonempty V›.some), Finset.mem_univ _⟩ :
+      (Finset.univ : Finset (V × V)).Nonempty)
+    (f := fun p : V × V =>
+      tvDistance (walkTransitionMatrix A p.1) (walkTransitionMatrix A p.2))
+    fun p _ => ?_
+  exact tvDistance_le_one_of_nonneg_of_sum_eq_one
+    (walkTransitionMatrix_nonneg A hnn hdeg p.1)
+    (walkTransitionMatrix_row_sum A hdeg p.1)
+    (walkTransitionMatrix_nonneg A hnn hdeg p.2)
+    (walkTransitionMatrix_row_sum A hdeg p.2)
+
+/-- **The `t = 1` rate bound**: the PageRank two-start distance at
+one step is at most `α` times the walk's Dobrushin coefficient (which
+the engine join identifies with the walk's own two-start distance). -/
+theorem pageRankTVPair_one_le (A : WAdj (V := V)) {α : ℝ} (hα : 0 ≤ α)
+    [Nonempty V] :
+    pageRankTVPair A α 1 ≤ α * tvDobrushinCoeff (walkTransitionMatrix A) := by
+  rw [pageRankTVPair_eq_tvDobrushinCoeff A α 1, pow_one]
+  exact tvDobrushinCoeff_googleMatrix_le A hα
+
+/-- **The pair rate through the engine** — the sharper constant:
+`pageRankTVPair A α t ≤ (α · δ(P))^t`. -/
+theorem pageRankTVPair_le_pow (A : WAdj (V := V))
+    (hdeg : ∀ i, 0 < deg A i)
+    {α : ℝ} (hα : 0 ≤ α) [Nonempty V]
+    (t : ℕ) :
+    pageRankTVPair A α t
+      ≤ (α * tvDobrushinCoeff (walkTransitionMatrix A)) ^ t := by
+  induction t with
+  | zero =>
+    rw [pow_zero]
+    refine Finset.sup'_le
+      (⟨(‹Nonempty V›.some, ‹Nonempty V›.some), Finset.mem_univ _⟩ :
+        (Finset.univ : Finset (V × V)).Nonempty)
+      (f := fun p => tvDistance (pageRankDistribution A α 0 p.1)
+        (pageRankDistribution A α 0 p.2))
+      fun p _ => ?_
+    show tvDistance (pageRankDistribution A α 0 p.1)
+        (pageRankDistribution A α 0 p.2) ≤ 1
+    rw [pageRankDistribution_zero A α p.1, pageRankDistribution_zero A α p.2]
+    exact tvDistance_le_one_of_nonneg_of_sum_eq_one
+      (piSingle_nonneg p.1) (sum_piSingle p.1)
+      (piSingle_nonneg p.2) (sum_piSingle p.2)
+  | succ t ih =>
+    have hpair := pageRankTVPair_submul A hdeg α t 1
+    have hone : pageRankTVPair A α 1
+        ≤ α * tvDobrushinCoeff (walkTransitionMatrix A) :=
+      pageRankTVPair_one_le A hα
+    have hnn : 0 ≤ α * tvDobrushinCoeff (walkTransitionMatrix A) :=
+      mul_nonneg hα (tvDobrushinCoeff_nonneg _)
+    have hcomb : pageRankTVPair A α t * pageRankTVPair A α 1
+        ≤ (α * tvDobrushinCoeff (walkTransitionMatrix A)) ^ t
+            * (α * tvDobrushinCoeff (walkTransitionMatrix A)) :=
+      mul_le_mul ih hone (pageRankTVPair_nonneg A α 1) (pow_nonneg hnn t)
+    calc pageRankTVPair A α (t + 1)
+        ≤ pageRankTVPair A α t * pageRankTVPair A α 1 := hpair
+      _ ≤ (α * tvDobrushinCoeff (walkTransitionMatrix A)) ^ t
+            * (α * tvDobrushinCoeff (walkTransitionMatrix A)) := hcomb
+      _ = (α * tvDobrushinCoeff (walkTransitionMatrix A)) ^ (t + 1) :=
+          (pow_succ _ _).symm
+
+/-- **The `α^t` rate** — the existing Doeblin-floor rate recovered
+through the engine (with the sharper constant visible above). -/
+theorem pageRankTVPair_le_pow_alpha (A : WAdj (V := V))
+    (hnn : ∀ i j, 0 ≤ A i j) (hdeg : ∀ i, 0 < deg A i)
+    {α : ℝ} (hα : 0 ≤ α) [Nonempty V] (t : ℕ) :
+    pageRankTVPair A α t ≤ α ^ t := by
+  refine le_trans (pageRankTVPair_le_pow A hdeg hα t) ?_
+  have hle : α * tvDobrushinCoeff (walkTransitionMatrix A) ≤ α * 1 :=
+    mul_le_mul_of_nonneg_left
+      (tvDobrushinCoeff_walkTransitionMatrix_le_one A hnn hdeg) hα
+  calc (α * tvDobrushinCoeff (walkTransitionMatrix A)) ^ t ≤ (α * 1) ^ t :=
+        pow_le_pow_left₀
+          (mul_nonneg hα (tvDobrushinCoeff_nonneg _)) hle t
+    _ = α ^ t := by rw [mul_one]
+
+
+
+
+
+/-- **The sup'-scaling step** (the attainment route): scaling a
+`Finset.univ`-indexed sup' by a nonnegative constant commutes — the
+induction property `α·z ≤ sup'(α·f)` is `⊔`-closed through the
+`max`-case analysis (`Finset.sup'_induction`), giving attainment
+without any order on the index type. -/
+theorem scaleSupUnivEq {ι : Type} [Fintype ι] [Nonempty ι]
+    {α : ℝ} (hα : 0 ≤ α) (f : ι → ℝ) :
+    (Finset.univ : Finset ι).sup'
+      (⟨‹Nonempty ι›.some, Finset.mem_univ _⟩ : (Finset.univ : Finset ι).Nonempty)
+      (fun p => α * f p)
+    = α * (Finset.univ : Finset ι).sup'
+      (⟨‹Nonempty ι›.some, Finset.mem_univ _⟩ : (Finset.univ : Finset ι).Nonempty)
+      f := by
+  refine le_antisymm ?_ ?_
+  · refine Finset.sup'_le
+      (⟨‹Nonempty ι›.some, Finset.mem_univ _⟩ :
+        (Finset.univ : Finset ι).Nonempty)
+      (fun p => α * f p)
+      fun p _ => ?_
+    exact mul_le_mul_of_nonneg_left
+      (Finset.le_sup' f (Finset.mem_univ p)) hα
+  · refine @Finset.sup'_induction ℝ ι Real.instSemilatticeSup
+      (Finset.univ : Finset ι)
+      (⟨‹Nonempty ι›.some, Finset.mem_univ _⟩ : (Finset.univ : Finset ι).Nonempty)
+      f
+      (fun z => α * z ≤ (Finset.univ : Finset ι).sup'
+        (⟨‹Nonempty ι›.some, Finset.mem_univ _⟩ :
+          (Finset.univ : Finset ι).Nonempty)
+        (fun q => α * f q))
+      ?_ ?_
+    · intro a₁ ha₁ a₂ ha₂
+      have hmul : α * (a₁ ⊔ a₂) = α * a₁ ⊔ α * a₂ := by
+        have hstep : ∀ x y : ℝ, x ≤ y → α * (x ⊔ y) = α * x ⊔ α * y := by
+          intro x y hxy
+          have hx : x ⊔ y = y := by
+            exact le_antisymm (sup_le hxy (le_refl y)) (le_sup_right)
+          have hx' : α * x ⊔ α * y = α * y := by
+            refine le_antisymm (sup_le (mul_le_mul_of_nonneg_left hxy hα)
+              (le_refl _)) (le_sup_right)
+          rw [hx, hx']
+        rcases le_total a₁ a₂ with h | h
+        · exact hstep a₁ a₂ h
+        · rw [sup_comm, hstep a₂ a₁ h, sup_comm]
+      rw [hmul]
+      exact sup_le ha₁ ha₂
+    · intro b _
+      exact Finset.le_sup' (fun q => α * f q) (Finset.mem_univ b)
+
+/-- **The exact Dobrushin shadow**: the Google matrix's Dobrushin
+coefficient is exactly `α` times the walk's. -/
+theorem tvDobrushinCoeff_googleMatrix (A : WAdj (V := V)) {α : ℝ}
+    (hα : 0 ≤ α) [Nonempty V] :
+    tvDobrushinCoeff (googleMatrix A α)
+      = α * tvDobrushinCoeff (walkTransitionMatrix A) := by
+  have hterm : ∀ p : V × V,
+      tvDistance (googleMatrix A α p.1) (googleMatrix A α p.2)
+      = α * tvDistance (walkTransitionMatrix A p.1) (walkTransitionMatrix A p.2) :=
+    fun p => tvDistance_googleMatrix_row_eq A hα p.1 p.2
+  have hcongr : tvDobrushinCoeff (googleMatrix A α)
+      = (Finset.univ : Finset (V × V)).sup'
+        (⟨(‹Nonempty V›.some, ‹Nonempty V›.some), Finset.mem_univ _⟩ :
+          (Finset.univ : Finset (V × V)).Nonempty)
+        (fun p => α * tvDistance (walkTransitionMatrix A p.1)
+          (walkTransitionMatrix A p.2)) := by
+    unfold tvDobrushinCoeff
+    exact Finset.sup'_congr _ rfl (fun p _ => hterm p)
+  rw [hcongr, scaleSupUnivEq hα]
+  rfl
+
+/-- **The exact `t = 1` identity**: the PageRank two-start distance at
+one step IS `α` times the walk's Dobrushin coefficient. -/
+theorem pageRankTVPair_one_eq (A : WAdj (V := V)) {α : ℝ} (hα : 0 ≤ α)
+    [Nonempty V] :
+    pageRankTVPair A α 1 = α * tvDobrushinCoeff (walkTransitionMatrix A) := by
+  rw [pageRankTVPair_eq_tvDobrushinCoeff A α 1, pow_one,
+    tvDobrushinCoeff_googleMatrix A hα]
+
+
+end DobrushinShadow
+
 end SpectralGraphTheory

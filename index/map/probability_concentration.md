@@ -46,7 +46,20 @@ of `mgf_sum_le_of_iIndepFun`, `hoeffding_inequality_interval`,
 `hoeffding_inequality`, `hoeffding_iid` fenced at the
 genuinely-independent biased product (the `DeferralFences` section:
 independence genuine, centering broken at `4/5`; the `t = 2` tail at
-`41/50 > 2e⁻¹`, the `λ = 1` MGF over `e`).
+`41/50 > 2e⁻¹`, the `λ = 1` MGF over `e`). The measurability layer
+(the proposal's follow-up record, same day): the `h_meas` clauses of
+`hoeffding_inequality_interval` and `hoeffding_empirical` and the
+`hf` clauses of the `measurable_finset_prod'`/`sum'` engines fenced at
+the biased two-point `⊥`-σ-algebra space (`Scalar_QA.lean`'s
+`MeasurabilityFences` section — non-measurable breakers, junk-zero
+means, heavy-atom mass `9/10 > 2e⁻²`); `hoeffding_inequality`'s and
+`hoeffding_iid`'s own `h_meas` carry the priced trim-saturation
+deferral. Both deferrals were closed the same day (the
+proposal's deferral-closure record): the saturation lemma
+(`scM_dirac_bot_eq_one`) and the saturated-independence lemma in
+`Scalar_QA.lean`'s `SaturationFences` section fence both theorems'
+`h_meas` at the four-cell family on `(Fin 4, ⊥, δ₀)` — the
+repository's first genuinely-independent non-measurable family.
 
 ### Bernstein's Inequality
 

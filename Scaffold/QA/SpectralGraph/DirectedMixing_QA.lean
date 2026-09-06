@@ -1882,4 +1882,96 @@ theorem fence_pairing_mass_isolation_QA :
   rw [sum_e0]
   norm_num
 
+
+section DobrushinShadowQA
+
+/-!
+### The Dobrushin shadow's pins (2026-09-06,
+`proposals/sharp-second-eigenvalue-layer.md`, Slice 2 (a))
+
+The shadow ceiling's QA obligation, at the two-cycle fixture: the
+`t = 1` rate bound pinned with its constant attained (the walk's
+Dobrushin coefficient is `1` there, so the bound IS `α`), and the
+`α^t` corollary instantiated.
+-/
+
+/-- The two-cycle fixture (same graph as `PageRank_QA`'s spectral
+pins). -/
+def dmxCyc : Matrix (Fin 2) (Fin 2) ℝ := !![0, 1; 1, 0]
+
+theorem dmxCyc_nonneg : ∀ i j, 0 ≤ dmxCyc i j := by
+  intro i j; fin_cases i <;> fin_cases j <;> norm_num [dmxCyc]
+
+theorem dmxCyc_deg_pos : ∀ i, 0 < deg dmxCyc i := by
+  intro i
+  fin_cases i <;> norm_num [deg, dmxCyc, Fin.sum_univ_two]
+
+/-- **The walk's Dobrushin coefficient is `1` on the two-cycle**: the
+swapped rows are point masses at distinct vertices. -/
+theorem dmxCyc_dobrushin_one :
+    tvDobrushinCoeff (walkTransitionMatrix dmxCyc) = 1 := by
+  refine le_antisymm ?_ ?_
+  · refine Finset.sup'_le
+      (⟨(0, 1), Finset.mem_univ _⟩ :
+        (Finset.univ : Finset (Fin 2 × Fin 2)).Nonempty)
+      (f := fun p => tvDistance (walkTransitionMatrix dmxCyc p.1)
+        (walkTransitionMatrix dmxCyc p.2))
+      fun p _ => ?_
+    exact tvDistance_le_one_of_nonneg_of_sum_eq_one
+      (walkTransitionMatrix_nonneg dmxCyc dmxCyc_nonneg dmxCyc_deg_pos p.1)
+      (walkTransitionMatrix_row_sum dmxCyc dmxCyc_deg_pos p.1)
+      (walkTransitionMatrix_nonneg dmxCyc dmxCyc_nonneg dmxCyc_deg_pos p.2)
+      (walkTransitionMatrix_row_sum dmxCyc dmxCyc_deg_pos p.2)
+  · have hrow0 : walkTransitionMatrix dmxCyc 0 = ![0, 1] := by
+      funext j
+      fin_cases j <;>
+        norm_num [walkTransitionMatrix, deg, degreeMatrix, dmxCyc,
+          Fin.sum_univ_two, Matrix.diagonal_mul, Matrix.diagonal_apply,
+          inv_mul_cancel₀]
+    have hrow1 : walkTransitionMatrix dmxCyc 1 = ![1, 0] := by
+      funext j
+      fin_cases j <;>
+        norm_num [walkTransitionMatrix, deg, degreeMatrix, dmxCyc,
+          Fin.sum_univ_two, Matrix.diagonal_mul, Matrix.diagonal_apply,
+          inv_mul_cancel₀]
+    have h0 : (1 : ℝ) = tvDistance (walkTransitionMatrix dmxCyc 0)
+        (walkTransitionMatrix dmxCyc 1) := by
+      rw [hrow0, hrow1, tvDistance]
+      have hsum : ∑ i, |(![0, 1] : Fin 2 → ℝ) i - (![1, 0] : Fin 2 → ℝ) i| = 2 := by
+        rw [Fin.sum_univ_two]
+        norm_num [Matrix.cons_val_zero, Matrix.head_cons, Matrix.cons_val_one]
+      rw [hsum]
+      norm_num
+    rw [h0]
+    refine Finset.le_sup'
+      (f := fun p : Fin 2 × Fin 2 =>
+        tvDistance (walkTransitionMatrix dmxCyc p.1)
+          (walkTransitionMatrix dmxCyc p.2))
+      (Finset.mem_univ (0, 1))
+
+/-- **The rate bound attained at the ceiling**: with `δ(P) = 1` the
+`t = 1` bound IS `α` — instantiated at `α = 4/5` through the pinned
+coefficient. -/
+theorem dmxCyc_rate_attained_QA :
+    pageRankTVPair dmxCyc (4 / 5 : ℝ) 1 ≤ 4 / 5 := by
+  have h := pageRankTVPair_one_le dmxCyc (by norm_num : (0 : ℝ) ≤ 4 / 5)
+  rw [dmxCyc_dobrushin_one, mul_one] at h
+  exact h
+
+/-- The `α^t` corollary instantiated at `t = 2`. -/
+theorem dmxCyc_alpha_pow_QA :
+    pageRankTVPair dmxCyc (4 / 5 : ℝ) 2 ≤ (4 / 5 : ℝ) ^ 2 :=
+  pageRankTVPair_le_pow_alpha dmxCyc dmxCyc_nonneg dmxCyc_deg_pos
+    (by norm_num) 2
+
+/-- **The exact `t = 1` identity at the fixture**: with the pinned
+`δ(P) = 1`, the two-start distance IS `α` — the exact shadow
+attained. -/
+theorem dmxCyc_one_eq_QA :
+    pageRankTVPair dmxCyc (4 / 5 : ℝ) 1 = 4 / 5 := by
+  rw [pageRankTVPair_one_eq dmxCyc (by norm_num : (0 : ℝ) ≤ 4 / 5),
+    dmxCyc_dobrushin_one, mul_one]
+
+end DobrushinShadowQA
+
 end Scaffold.QA.SpectralGraph

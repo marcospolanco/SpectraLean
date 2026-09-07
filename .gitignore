@@ -39,6 +39,9 @@ build_summary.txt
 .opencode/pursue-session
 .opencode/quota-history.jsonl
 
+# Inbound request drafts (not scaffold's own content; never tracked)
+scaffold-requests.md
+
 # OS
 .DS_Store
 Thumbs.db

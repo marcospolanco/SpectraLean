@@ -56,6 +56,7 @@
   junk fence at `k = 3` on `K₂`).
 -/
 import Scaffold.Mathlib.GraphTheory.VariationalTransfer
+import Scaffold.Mathlib.GraphTheory.Heat
 
 open scoped BigOperators Matrix
 namespace SpectralGraphTheory
@@ -130,6 +131,126 @@ theorem quadForm_laplacian_partIndicator (A : WAdj (V := V)) (hA : A.IsSymm)
     Finset.sum_congr rfl (fun u hu => hrowSc u hu), hbd1, hbd2,
     boundary_compl A hA S]
   ring
+
+/-!
+## The boundary outflow lemma (Step 1)
+
+`proposals/boundary-outflow-lemma.md` (2026-09-07, the Active table's
+Medium row): the vector-level statement underneath the part-indicator
+energy identity above — `L · 1_S` is the *outflow vector*: on a region
+member, the crossing outflow `∑_{j ∈ Sᶜ} A i j`; off the region, the
+negative inflow `-(∑_{j ∈ S} A i j)`. Hypothesis-free (any weights,
+asymmetric included): the whole content is
+`laplacian_mulVec_apply` at the indicator plus the same
+`Finset.sum_add_sum_compl` split the energy identity's own proof
+performs one level up.
+-/
+
+/-- **The boundary outflow lemma, membership case** (hypothesis-free):
+on a region member, the Laplacian's action on the indicator is the
+outflow into the complement — every crossing edge contributes its
+weight once. -/
+theorem laplacian_mulVec_partIndicator_of_mem (A : WAdj (V := V))
+    {S : Finset V} {i : V} (hi : i ∈ S) :
+    (laplacian A).mulVec (partIndicator S) i = ∑ j in Sᶜ, A i j := by
+  rw [laplacian_mulVec_apply A (partIndicator S) i,
+    ← Finset.sum_add_sum_compl S
+      (fun j => A i j * (partIndicator S i - partIndicator S j))]
+  have h1 : ∑ j in S, A i j * (partIndicator S i - partIndicator S j) = 0 := by
+    refine Finset.sum_eq_zero fun j hj => ?_
+    rw [partIndicator_of_mem hi, partIndicator_of_mem hj, sub_self, mul_zero]
+  rw [h1, zero_add]
+  refine Finset.sum_congr rfl fun j hj => ?_
+  rw [partIndicator_of_mem hi, partIndicator_of_not_mem (Finset.mem_compl.1 hj)]
+  simp
+
+/-- **The boundary outflow lemma, complement case** (hypothesis-free):
+off the region, the action is the negative inflow from the region. -/
+theorem laplacian_mulVec_partIndicator_of_not_mem (A : WAdj (V := V))
+    {S : Finset V} {i : V} (hi : i ∉ S) :
+    (laplacian A).mulVec (partIndicator S) i = -(∑ j in S, A i j) := by
+  rw [laplacian_mulVec_apply A (partIndicator S) i,
+    ← Finset.sum_add_sum_compl S
+      (fun j => A i j * (partIndicator S i - partIndicator S j))]
+  have h1 : ∑ j in Sᶜ, A i j * (partIndicator S i - partIndicator S j) = 0 := by
+    refine Finset.sum_eq_zero fun j hj => ?_
+    rw [partIndicator_of_not_mem hi,
+      partIndicator_of_not_mem (Finset.mem_compl.1 hj), sub_self, mul_zero]
+  rw [h1, add_zero]
+  have hcongr : ∑ j in S, A i j * (partIndicator S i - partIndicator S j)
+      = ∑ j in S, (-(A i j)) := Finset.sum_congr rfl fun j hj => by
+    show A i j * (partIndicator S i - partIndicator S j) = -(A i j)
+    rw [show partIndicator S i = 0 from partIndicator_of_not_mem hi,
+      show partIndicator S j = 1 from partIndicator_of_mem hj]
+    ring
+  rw [hcongr, Finset.sum_neg_distrib]
+
+/-- **The boundary outflow lemma, case-split form**: `L · 1_S` is the
+outflow vector — on `S` the crossing outflow `∑_{j ∈ Sᶜ} A i j`, off
+`S` its negative inflow `-(∑_{j ∈ S} A i j)`. -/
+theorem laplacian_mulVec_partIndicator_apply (A : WAdj (V := V))
+    (S : Finset V) (i : V) :
+    (laplacian A).mulVec (partIndicator S) i
+      = if i ∈ S then ∑ j in Sᶜ, A i j else -(∑ j in S, A i j) := by
+  by_cases hi : i ∈ S
+  · rw [if_pos hi]
+    exact laplacian_mulVec_partIndicator_of_mem A hi
+  · rw [if_neg hi]
+    exact laplacian_mulVec_partIndicator_of_not_mem A hi
+
+/-- **The region row-sum total is the boundary** (hypothesis-free):
+summing the membership case over the region gives `boundary A S`
+definitionally. -/
+theorem sum_laplacian_mulVec_partIndicator (A : WAdj (V := V))
+    (S : Finset V) :
+    ∑ i in S, (laplacian A).mulVec (partIndicator S) i = boundary A S := by
+  refine Finset.sum_congr rfl fun i hi => ?_
+  exact laplacian_mulVec_partIndicator_of_mem A hi
+
+/-- **The indicator's Dirichlet energy is the boundary — WITHOUT
+symmetry.** The delivered `quadForm_laplacian_partIndicator` carries
+`hA : A.IsSymm` because its route runs through the squared-difference
+quadratic form and `boundary_compl`; the vector-level outflow route
+never flips the region, so the same identity holds for ANY weights
+(asymmetric included). The hypothesis is thereby removable. -/
+theorem quadForm_laplacian_partIndicator_unsymm (A : WAdj (V := V))
+    (S : Finset V) :
+    quadForm (laplacian A) (partIndicator S) = boundary A S := by
+  have hsplit :
+      ∑ i, partIndicator S i * (laplacian A).mulVec (partIndicator S) i
+        = ∑ i in S, (laplacian A).mulVec (partIndicator S) i := by
+    rw [← Finset.sum_add_sum_compl S
+        (fun i => partIndicator S i * (laplacian A).mulVec (partIndicator S) i)]
+    have h1 : ∑ i in Sᶜ, partIndicator S i
+        * (laplacian A).mulVec (partIndicator S) i = 0 := by
+      refine Finset.sum_eq_zero fun i hi => ?_
+      rw [partIndicator_of_not_mem (Finset.mem_compl.1 hi), zero_mul]
+    rw [h1, add_zero]
+    refine Finset.sum_congr rfl fun i hi => ?_
+    rw [partIndicator_of_mem hi, one_mul]
+  show Matrix.dotProduct (partIndicator S)
+      ((laplacian A).mulVec (partIndicator S)) = _
+  rw [Matrix.dotProduct, hsplit, sum_laplacian_mulVec_partIndicator]
+
+open Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation in
+/-- **The regional dissipation bound at the region indicator** (the
+Boundary Outflow Lemma's Part 2, the Medium row's own ask, verbatim):
+the heat flow's displacement of any input `x₀`, measured by region
+membership `1_S`, is bounded by `t` times the norm of the Laplacian's
+OUTFLOW VECTOR `L · 1_S` (Step 1's own object — the membership case
+`laplacian_mulVec_partIndicator_of_mem` is its per-entry content) times
+the input's norm. The cut↔heat bridge: combinatorial region structure
+on the left, heat semigroup on the right, connected through the
+outflow vector. -/
+theorem abs_partIndicator_dotProduct_heatFlow_le (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j) {t : ℝ} (ht : 0 ≤ t)
+    (S : Finset V) (x₀ : V → ℝ) :
+    |Matrix.dotProduct (partIndicator S) (x₀ - heatKernel A t *ᵥ x₀)|
+      ≤ t * ‖(WithLp.equiv 2 (V → ℝ)).symm
+          (laplacian A *ᵥ partIndicator S)‖
+        * ‖(WithLp.equiv 2 (V → ℝ)).symm x₀‖ := by
+  have h := abs_dotProduct_heatFlow_le A hA hnonneg ht (partIndicator S) x₀
+  rwa [norm_euclidean_eq_sqrt, norm_euclidean_eq_sqrt]
 
 /-- The part-indicator combination `∑ᵢ cᵢ · 1_{Sᵢ}`: the multiway test
 family's general member (classical decidability; noncomputable by

@@ -1696,4 +1696,241 @@ theorem mw_supplier_instance_QA :
     ∃ S : Fin 3 → Finset (Fin 4), IsMultiwayPartition S :=
   exists_isMultiwayPartition_of_le_card (by norm_num) (by decide)
 
+/-!
+## The boundary outflow lemma (Step 1)
+
+`proposals/boundary-outflow-lemma.md`: the algebraic cut
+characterization pinned at the delivered fixtures — the K₂ membership
+and complement cases plus the whole action vector computed RAW
+(independent of the new theorems), the path fixture's three entries
+(including the crossing-free branch), the asymmetric-cut disagreement
+fence and the directed-input instantiation (the no-hidden-symmetry
+fence: the theorems apply on asymmetric `A` at all), the boundary
+row-sum tie, and the Dirichlet-energy two-route join (the new
+hypothesis-free identity vs the delivered symmetric-`hA` identity).
+-/
+
+/-- The K₂ region: the singleton `{0}`. -/
+def bolEdgeS : Finset (Fin 2) := {0}
+
+/-- The directed-weight fence fixture: arc `0→1` of weight `3`, arc
+`1→0` of weight `1` — genuinely asymmetric cut weights. -/
+def bolDirAdj : Matrix (Fin 2) (Fin 2) ℝ := !![0, 3; 1, 0]
+
+/-- The path region: the singleton `{0}`. -/
+def bolPathS : Finset (Fin 3) := {0}
+
+/-- **K₂ membership case pinned**: the outflow into the complement is
+the single crossing edge's weight `1`, through the theorem. -/
+theorem bol_K2_mem :
+    (laplacian mwEdgeAdj).mulVec (partIndicator bolEdgeS) (0 : Fin 2) = 1 := by
+  rw [laplacian_mulVec_partIndicator_of_mem mwEdgeAdj
+    (by simp [bolEdgeS] : (0 : Fin 2) ∈ bolEdgeS)]
+  have hcompl : (bolEdgeSᶜ : Finset (Fin 2)) = {1} := by
+    ext j
+    fin_cases j <;> simp [bolEdgeS]
+  rw [hcompl]
+  norm_num [mwEdgeAdj, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons, Matrix.of_apply, Finset.sum_singleton]
+
+/-- **K₂ complement case pinned**: the negative inflow is `-1`, through
+the theorem. -/
+theorem bol_K2_notmem :
+    (laplacian mwEdgeAdj).mulVec (partIndicator bolEdgeS) (1 : Fin 2) = -1 := by
+  rw [laplacian_mulVec_partIndicator_of_not_mem mwEdgeAdj
+    (by simp [bolEdgeS] : (1 : Fin 2) ∉ bolEdgeS)]
+  simp only [bolEdgeS]
+  norm_num [mwEdgeAdj, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons, Matrix.of_apply, Finset.sum_singleton]
+
+/-- **The combined case-split form consumed**: the K₂ membership value
+through `laplacian_mulVec_partIndicator_apply` + `if_pos` — the
+packaging theorem's first consumer. -/
+theorem bol_K2_mem_via_casesplit :
+    (laplacian mwEdgeAdj).mulVec (partIndicator bolEdgeS) (0 : Fin 2) = 1 := by
+  rw [laplacian_mulVec_partIndicator_apply mwEdgeAdj bolEdgeS (0 : Fin 2),
+    if_pos (by simp [bolEdgeS] : (0 : Fin 2) ∈ bolEdgeS)]
+  have hcompl : (bolEdgeSᶜ : Finset (Fin 2)) = {1} := by
+    ext j
+    fin_cases j <;> simp [bolEdgeS]
+  rw [hcompl, Finset.sum_singleton]
+  norm_num [mwEdgeAdj, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons, Matrix.of_apply]
+
+/-- **The whole action vector, computed RAW** (matrix arithmetic
+through the Laplacian definition, not through the new theorems):
+`L · 1_{{0}} = ![1, -1]` — the two theorem-route pins above are
+checked against an independent computation. -/
+theorem bol_K2_raw :
+    (laplacian mwEdgeAdj).mulVec (partIndicator bolEdgeS) = ![1, -1] := by
+  have hL : ∀ i j : Fin 2, (laplacian mwEdgeAdj) i j
+      = if i = j then 1 else -1 := by
+    intro i j
+    show degreeMatrix mwEdgeAdj i j - mwEdgeAdj i j = _
+    by_cases h : i = j
+    · subst h
+      rw [degreeMatrix_diagonal, mwEdgeAdj_deg i, if_pos rfl]
+      fin_cases i <;>
+        norm_num [mwEdgeAdj, Matrix.cons_val_zero, Matrix.cons_val_one,
+          Matrix.head_cons, Matrix.of_apply]
+    · rw [degreeMatrix_off_diagonal mwEdgeAdj h, if_neg h]
+      fin_cases i <;> fin_cases j <;>
+        first
+        | exact absurd rfl h
+        | norm_num [mwEdgeAdj, Matrix.cons_val_zero, Matrix.cons_val_one,
+          Matrix.head_cons, Matrix.of_apply]
+  funext i
+  rw [Matrix.mulVec, Matrix.dotProduct]
+  have hind : ∀ j : Fin 2, partIndicator bolEdgeS j
+      = if j = (0 : Fin 2) then 1 else 0 := by
+    intro j
+    by_cases h : j = (0 : Fin 2)
+    · subst h
+      rw [partIndicator_of_mem (by simp [bolEdgeS]), if_pos rfl]
+    · rw [partIndicator_of_not_mem (by simpa [bolEdgeS] using h), if_neg h]
+  fin_cases i <;>
+    simp only [Fin.sum_univ_two, hind, hL, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.head_cons, Matrix.of_apply] <;>
+    norm_num
+
+/-- **The path fixture, all three entries through the theorems**:
+`L · 1_{{0}} = ![1, -1, 0]` — the membership case at `0`, the
+crossing complement case at `1`, and the crossing-free complement
+case at `2` (the isolated-side branch: no region edges, value `0`). -/
+theorem bol_path_pin :
+    (laplacian mwPathAdj).mulVec (partIndicator bolPathS)
+      = ![1, -1, 0] := by
+  have hcompl : (bolPathSᶜ : Finset (Fin 3)) = {1, 2} := by
+    ext j
+    fin_cases j <;> simp [bolPathS]
+  have h0 : (laplacian mwPathAdj).mulVec (partIndicator bolPathS) (0 : Fin 3)
+      = 1 := by
+    rw [laplacian_mulVec_partIndicator_of_mem mwPathAdj
+      (by simp [bolPathS] : (0 : Fin 3) ∈ bolPathS), hcompl,
+      Finset.sum_insert (by decide : (1 : Fin 3) ∉ ({2} : Finset (Fin 3))),
+      Finset.sum_singleton]
+    norm_num [mwPathAdj, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, Matrix.tail_cons, Matrix.of_apply]
+  have h1 : (laplacian mwPathAdj).mulVec (partIndicator bolPathS) (1 : Fin 3)
+      = -1 := by
+    rw [laplacian_mulVec_partIndicator_of_not_mem mwPathAdj
+      (by simp [bolPathS] : (1 : Fin 3) ∉ bolPathS)]
+    simp only [bolPathS, Finset.sum_singleton]
+    norm_num [mwPathAdj, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, Matrix.tail_cons, Matrix.of_apply]
+  have h2 : (laplacian mwPathAdj).mulVec (partIndicator bolPathS) (2 : Fin 3)
+      = 0 := by
+    rw [laplacian_mulVec_partIndicator_of_not_mem mwPathAdj
+      (by simp [bolPathS] : (2 : Fin 3) ∉ bolPathS)]
+    simp only [bolPathS, Finset.sum_singleton]
+    norm_num [mwPathAdj, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, Matrix.tail_cons, Matrix.of_apply]
+  funext i
+  fin_cases i
+  · exact h0
+  · exact h1
+  · exact h2
+
+/-- **The asymmetric-cut disagreement fence**: on the directed fixture
+(arc `0→1` weight `3`, arc `1→0` weight `1`), the two case values are
+`3` and `-1` — genuinely different quantities, not one value restated
+with a sign. The theorems instantiate on asymmetric `A` at all
+(hypothesis-free), which is itself the no-hidden-symmetry fence. -/
+theorem bol_dir_fence :
+    ∑ j in bolEdgeSᶜ, bolDirAdj (0 : Fin 2) j = 3
+      ∧ -(∑ j in bolEdgeS, bolDirAdj (1 : Fin 2) j) = -1
+      ∧ ∑ j in bolEdgeSᶜ, bolDirAdj (0 : Fin 2) j
+          ≠ -(∑ j in bolEdgeS, bolDirAdj (1 : Fin 2) j) := by
+  have hcompl : (bolEdgeSᶜ : Finset (Fin 2)) = {1} := by
+    ext j
+    fin_cases j <;> simp [bolEdgeS]
+  refine ⟨?_, ?_, ?_⟩
+  · rw [hcompl]
+    norm_num [bolDirAdj, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, Matrix.of_apply, Finset.sum_singleton]
+  · simp only [bolEdgeS]
+    norm_num [bolDirAdj, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, Matrix.of_apply, Finset.sum_singleton]
+  · rw [hcompl]
+    simp only [bolEdgeS]
+    norm_num [bolDirAdj, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, Matrix.of_apply, Finset.sum_singleton]
+
+/-- **The action vector on the directed fixture, through the
+theorems**: `L · 1_{{0}} = ![3, -1]` — the asymmetric weights flow
+through the formula exactly. -/
+theorem bol_dir_action :
+    (laplacian bolDirAdj).mulVec (partIndicator bolEdgeS) = ![3, -1] := by
+  have hcompl : (bolEdgeSᶜ : Finset (Fin 2)) = {1} := by
+    ext j
+    fin_cases j <;> simp [bolEdgeS]
+  have h0 : (laplacian bolDirAdj).mulVec (partIndicator bolEdgeS) (0 : Fin 2)
+      = 3 := by
+    rw [laplacian_mulVec_partIndicator_of_mem bolDirAdj
+      (by simp [bolEdgeS] : (0 : Fin 2) ∈ bolEdgeS), hcompl,
+      Finset.sum_singleton]
+    norm_num [bolDirAdj, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, Matrix.of_apply]
+  have h1 : (laplacian bolDirAdj).mulVec (partIndicator bolEdgeS) (1 : Fin 2)
+      = -1 := by
+    rw [laplacian_mulVec_partIndicator_of_not_mem bolDirAdj
+      (by simp [bolEdgeS] : (1 : Fin 2) ∉ bolEdgeS)]
+    simp only [bolEdgeS, Finset.sum_singleton]
+    norm_num [bolDirAdj, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, Matrix.of_apply]
+  funext i
+  fin_cases i
+  · exact h0
+  · exact h1
+
+/-- **The boundary tie at the K₂ fixture, two routes**: the region
+row-sum total is `boundary`, through the new corollary AND through the
+delivered `mwEdgeAdj_boundary_single` pin (value `1`). -/
+theorem bol_sum_boundary :
+    ∑ i in bolEdgeS, (laplacian mwEdgeAdj).mulVec (partIndicator bolEdgeS) i
+      = 1 := by
+  rw [sum_laplacian_mulVec_partIndicator mwEdgeAdj bolEdgeS]
+  exact mwEdgeAdj_boundary_single 0
+
+/-- **The Dirichlet-energy join, two routes**: the indicator's
+quadratic form at the K₂ Laplacian is `1` — through the new
+hypothesis-free theorem and through the delivered symmetric-`hA`
+identity, both composed with the delivered boundary pin. Two theorem
+routes, one value; they agree only if both proofs are right. -/
+theorem bol_quadForm_unsymm_route :
+    quadForm (laplacian mwEdgeAdj) (partIndicator bolEdgeS) = 1 := by
+  rw [quadForm_laplacian_partIndicator_unsymm mwEdgeAdj bolEdgeS]
+  exact mwEdgeAdj_boundary_single 0
+
+theorem bol_quadForm_symm_route :
+    quadForm (laplacian mwEdgeAdj) (partIndicator bolEdgeS) = 1 := by
+  rw [quadForm_laplacian_partIndicator mwEdgeAdj mwEdgeAdj_symmetric bolEdgeS]
+  exact mwEdgeAdj_boundary_single 0
+
+
+/-! ### The QA pieces (destined for MultiwayCheeger_QA.lean) -/
+
+
+/-- **The regional dissipation bound pinned at the bol K₂ fixture**
+(`S = {0}`, `t = 1`, the mode input): through the Part-2 theorem. The
+norm factor is `‖L · 1_S‖` with `L · 1_S = ![1,−1]` — Step 1's own
+action-vector pin `bol_K2_raw` — so the bound reads
+`|1 − e^{−2}| ≤ 1 · √2 · √2`. The cut↔heat bridge instantiated
+end-to-end: region indicator in, outflow vector norm out. -/
+theorem bol_dissipation_K2 :
+    |Matrix.dotProduct (partIndicator bolEdgeS)
+        ((![1, -1] : Fin 2 → ℝ)
+          - heatKernel mwEdgeAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ))|
+      ≤ 1 * ‖(WithLp.equiv 2 (Fin 2 → ℝ)).symm
+          ((laplacian mwEdgeAdj).mulVec (partIndicator bolEdgeS))‖
+        * ‖(WithLp.equiv 2 (Fin 2 → ℝ)).symm (![1, -1] : Fin 2 → ℝ)‖ := by
+  have h := abs_partIndicator_dotProduct_heatFlow_le mwEdgeAdj
+    mwEdgeAdj_symmetric mwEdgeAdj_nonneg zero_le_one bolEdgeS (![1, -1])
+  -- the norm factor is the outflow vector's norm, via Step 1's own pin
+  have hout : (laplacian mwEdgeAdj).mulVec (partIndicator bolEdgeS)
+      = (![1, -1] : Fin 2 → ℝ) := bol_K2_raw
+  rw [hout] at h
+  rw [hout]
+  exact h
+
 end SpectralGraphTheory.MultiwayQA

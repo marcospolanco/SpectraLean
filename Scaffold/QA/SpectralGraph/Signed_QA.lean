@@ -528,4 +528,142 @@ theorem sgPath_switched_vec_QA :
   have h0' : (![1, 0, 1] : Fin 3 → ℝ) 0 = 0 := congrFun h 0
   norm_num at h0'
 
+/-! ### The structural pins (destined for Signed_QA.lean) -/
+
+/-- The diagonal action at a literal, Fin-if-free: `(diag(g) · v) i =
+`g i * v i`, by `Finset.sum_eq_single` + the diagonal's eq/ne entry
+lemmas — dodging the Fin-literal `if`s `Matrix.diagonal_apply` leaves
+behind. -/
+private theorem sgp_diagonal_mulVec_apply (g v : Fin 3 → ℝ) (i : Fin 3) :
+    (Matrix.diagonal g *ᵥ v) i = g i * v i := by
+  rw [Matrix.mulVec, Matrix.dotProduct, Finset.sum_eq_single i]
+  · rw [Matrix.diagonal_apply_eq]
+  · intro j _ hj
+    have hd : Matrix.diagonal g i j = 0 := by
+      simp [Matrix.diagonal_apply, hj.symm]
+    rw [hd, zero_mul]
+  · intro hi
+    exact absurd (Finset.mem_univ i) hi
+
+
+/-- **The signed adjacency's symmetry, path fixture** — through the
+theorem, with both hypotheses genuine (`sgPaths_isSymm`,
+`sgPathA_isSymm`). -/
+theorem sgp_adjSymm_path :
+    (signedAdj sgPathA sgPaths).IsSymm :=
+  signedAdj_symmetric sgPathA sgPaths_isSymm sgPathA_isSymm
+
+/-- **The symmetry read at the entry level**: the `(1, 0)` entry of
+the signed adjacency DERIVED through the theorem's symmetry instance
+from the `(0, 1)` entry (which is raw `1 * (-1) = -1`), with the raw
+companion pinned beside it — the entry equality is exactly what a
+transposed convention would break. -/
+theorem sgp_adjSymm_entry_pin :
+    signedAdj sgPathA sgPaths 1 0 = -1
+      ∧ signedAdj sgPathA sgPaths 0 1 = -1 := by
+  have hsym : signedAdj sgPathA sgPaths 0 1 = signedAdj sgPathA sgPaths 1 0 :=
+    (signedAdj_symmetric sgPathA sgPaths_isSymm sgPathA_isSymm).apply 1 0
+  have hraw : signedAdj sgPathA sgPaths 0 1 = -1 := by
+    show sgPathA 0 1 * sgPaths 0 1 = -1
+    norm_num [sgPathA, sgPaths]
+  exact ⟨hsym.symm.trans hraw, hraw⟩
+
+/-- **The signed Laplacian's symmetry, path fixture** — through the
+theorem. -/
+theorem sgp_lapSymm_path :
+    (signedLaplacian sgPathA sgPaths).IsSymm :=
+  signedLaplacian_symmetric sgPathA sgPaths_isSymm sgPathA_isSymm
+
+/-- **The symmetry scope witness — the frustrated triangle**: the
+triangle's single-negative-edge signing is symmetric but NOT balanced
+(`sgTri_not_isBalanced_QA`), and the signed Laplacian is symmetric
+anyway — the theorem's hypothesis set is symmetry, not balance. -/
+theorem sgp_lapSymm_tri :
+    (signedLaplacian sgTriA sgTris).IsSymm :=
+  signedLaplacian_symmetric sgTriA sgTris_isSymm sgTriA_isSymm
+
+/-- **The sign-flipped edge read through the symmetry**: the signed
+Laplacian's `(0, 1)` entry is `+1` (the degree diagonal minus the
+negatively-signed edge `−(−1)`), the `(1, 0)` entry DERIVED through
+the theorem. -/
+theorem sgp_lapSymm_entry_pin :
+    signedLaplacian sgPathA sgPaths 1 0 = 1
+      ∧ signedLaplacian sgPathA sgPaths 0 1 = 1 := by
+  have hsym : signedLaplacian sgPathA sgPaths 0 1
+      = signedLaplacian sgPathA sgPaths 1 0 :=
+    (signedLaplacian_symmetric sgPathA sgPaths_isSymm sgPathA_isSymm).apply
+      1 0
+  have hraw : signedLaplacian sgPathA sgPaths 0 1 = 1 := by
+    show degreeMatrix sgPathA 0 1 - sgPathA 0 1 * sgPaths 0 1 = 1
+    rw [degreeMatrix_off_diagonal sgPathA (by decide)]
+    norm_num [sgPathA, sgPaths]
+  exact ⟨hsym.symm.trans hraw, hraw⟩
+
+/-- **The switched vector, value pinned raw**: `diag(g) · (2, 3, 5) =
+(2, −3, −5)` — three genuinely nonzero entries, so the nonvanishing
+below is not carried by a single coordinate. -/
+theorem sgp_switchVec_val :
+    Matrix.diagonal sgPathG *ᵥ (![2, 3, 5] : Fin 3 → ℝ)
+      = (![2, -3, -5] : Fin 3 → ℝ) := by
+  funext i
+  rw [sgp_diagonal_mulVec_apply]
+  fin_cases i <;>
+    simp only [sgPathG, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons] <;>
+    norm_num
+
+/-- **The switching preserves nonvanishing** — through the theorem, at
+the value-carrying vector. -/
+theorem sgp_switchVec_ne_zero_pin :
+    Matrix.diagonal sgPathG *ᵥ (![2, 3, 5] : Fin 3 → ℝ) ≠ 0 :=
+  switchVec_ne_zero sgPathG_pm
+    (by intro h
+        have h0 := congrFun h 0
+        simp at h0)
+
+/-- **The raw unsigned eigenpair** (route A): `L · (1, 0, −1) =
+1 · (1, 0, −1)` on the path — direct entrywise computation. -/
+theorem sgp_unsigned_eigenpair_raw :
+    laplacian sgPathA *ᵥ (![1, 0, -1] : Fin 3 → ℝ)
+      = (1 : ℝ) • (![1, 0, -1] : Fin 3 → ℝ) := by
+  funext i
+  rw [laplacian_mulVec_apply]
+  fin_cases i <;>
+    simp only [Fin.sum_univ_three, Pi.smul_apply, smul_eq_mul] <;>
+    norm_num [sgPathA]
+
+/-- **The raw signed eigenpair**: `L_σ · (1, 0, 1) = 1 · (1, 0, 1)` —
+the switching of the unsigned mode, computed entrywise through the
+signed action's diffusion form. -/
+theorem sgp_signed_eigenpair_raw :
+    signedLaplacian sgPathA sgPaths *ᵥ (![1, 0, 1] : Fin 3 → ℝ)
+      = (1 : ℝ) • (![1, 0, 1] : Fin 3 → ℝ) := by
+  funext i
+  fin_cases i <;>
+    simp only [signedLaplacian_mulVec_apply, Fin.sum_univ_three] <;>
+    norm_num [sgPathA, sgPaths]
+
+/-- **The backward eigenpair transfer consumed** (route B): from the
+raw SIGNED eigenpair, `laplacian_mulVec_switchVec` produces the
+unsigned eigenpair equation at the switched vector — and the switching
+involutivity identifies that vector as exactly `![1, 0, −1]` — the
+same equation as route A, derived through the spectral bridge of
+Harary balance. Two routes, one value; they agree only if the raw
+computations AND the bridge are right. -/
+theorem sgp_backward_transfer_pin :
+    laplacian sgPathA *ᵥ (![1, 0, -1] : Fin 3 → ℝ)
+      = (1 : ℝ) • (![1, 0, -1] : Fin 3 → ℝ) := by
+  have hsign := sgp_signed_eigenpair_raw
+  have hback := laplacian_mulVec_switchVec sgPathG_pm sgPaths_eq_g_mul_g
+    hsign
+  have hsw : Matrix.diagonal sgPathG *ᵥ (![1, 0, 1] : Fin 3 → ℝ)
+      = (![1, 0, -1] : Fin 3 → ℝ) := by
+    funext i
+    rw [sgp_diagonal_mulVec_apply]
+    fin_cases i <;>
+      simp only [sgPathG, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.head_cons] <;>
+      norm_num
+  rwa [hsw] at hback
+
 end SpectralGraphTheory.QA

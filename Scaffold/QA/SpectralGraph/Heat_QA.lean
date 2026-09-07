@@ -2904,6 +2904,268 @@ theorem hfDis4Adj_isolation :
   ⟨hfDis4Adj_isSymm, hfDis4Adj_nonneg, hfDis4Adj_deg_pos, hfDis4Adj_card,
     by norm_num⟩
 
+
+/-! ### The QA pieces (destined for Heat_QA.lean) -/
+
+/-- **The scalar engine pinned at `y = 2`** through the theorem: the
+displacement factor of the eigenvalue-`2` mode at `t = 1`. -/
+theorem gsc_scalar_two_QA :
+    (1 - Real.exp (-(2:ℝ))) ^ 2 ≤ (2:ℝ) ^ 2 :=
+  sq_one_sub_exp_neg_le (by norm_num : (0:ℝ) ≤ 2)
+
+/-- **The global bound instantiated where the windowed bound's
+hypothesis fails** — the delivery's payoff pin. At `t = 1` on K₂ the
+mode displacement is `(1 − e^{−2}) • ![1,−1]`, while `t·λ = 2`
+violates the windowed bound's `|t·λᵢ| ≤ 1` (the fence
+`heatKernel_edge_remainder_window_fenced_QA`); the global bound
+applies THROUGH the theorem at exactly the point the windowed one
+cannot. -/
+theorem gsc_K2_t1_QA :
+    Matrix.dotProduct
+        ((![1, -1] : Fin 2 → ℝ) - heatKernel heatEdgeAdj 1 *ᵥ (![1, -1]))
+        ((![1, -1] : Fin 2 → ℝ) - heatKernel heatEdgeAdj 1 *ᵥ (![1, -1]))
+      ≤ 1 ^ 2 * Matrix.dotProduct (laplacian heatEdgeAdj *ᵥ (![1, -1]))
+          (laplacian heatEdgeAdj *ᵥ (![1, -1])) :=
+  heatKernel_globalContraction_dotProduct_le heatEdgeAdj
+    heatEdgeAdj_isSymm heatEdgeAdj_nonneg zero_le_one (![1, -1])
+
+/-- **Both sides of the payoff pin evaluated**: the RHS is exactly `8`
+(the mode is a `2`-eigenvector: `(2•m) ⬝ᵥ (2•m) = 4·2`), the LHS at
+most `2` (the displacement factor lies in `[0, 1]`, the mode's
+self-pairing is `2`) — the instantiation is non-vacuous, with genuine
+slack, at the windowed bound's failure point. -/
+theorem gsc_K2_t1_values_QA :
+    Matrix.dotProduct
+        ((![1, -1] : Fin 2 → ℝ) - heatKernel heatEdgeAdj 1 *ᵥ (![1, -1]))
+        ((![1, -1] : Fin 2 → ℝ) - heatKernel heatEdgeAdj 1 *ᵥ (![1, -1]))
+      ≤ 2
+      ∧ 8 = 1 ^ 2 * Matrix.dotProduct
+          (laplacian heatEdgeAdj *ᵥ (![1, -1]))
+          (laplacian heatEdgeAdj *ᵥ (![1, -1])) := by
+  have he : Real.exp (-(2:ℝ)) ≤ 1 := by
+    rw [← Real.exp_zero]
+    exact Real.exp_le_exp.2 (neg_nonpos.2 (by norm_num : (0:ℝ) ≤ 2))
+  have he0 := Real.exp_nonneg (-(2:ℝ))
+  have hval := sq_le_sq'
+    (by linarith : -(1:ℝ) ≤ 1 - Real.exp (-(2:ℝ)))
+    (by linarith : 1 - Real.exp (-(2:ℝ)) ≤ 1)
+  have hK' : heatKernel heatEdgeAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ)
+      = Real.exp (-(2 * 1 : ℝ)) • (![1, -1] : Fin 2 → ℝ) :=
+    heatKernel_edge_mode_raw_QA 1 one_ne_zero
+  have hK : heatKernel heatEdgeAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ)
+      = Real.exp (-(2:ℝ)) • (![1, -1] : Fin 2 → ℝ) := by
+    rw [show (2:ℝ) * 1 = 2 from by norm_num] at hK'
+    exact hK'
+  refine ⟨?_, ?_⟩
+  · rw [hK]
+    have hdd : Matrix.dotProduct
+        ((![1, -1] : Fin 2 → ℝ) - Real.exp (-(2:ℝ)) • (![1, -1]))
+        ((![1, -1] : Fin 2 → ℝ) - Real.exp (-(2:ℝ)) • (![1, -1]))
+        = (1 - Real.exp (-(2:ℝ))) ^ 2 * 2 := by
+      simp only [Matrix.dotProduct, Fin.sum_univ_two, Matrix.cons_val_zero,
+        Matrix.cons_val_one, Matrix.head_cons, Pi.sub_apply, Pi.smul_apply,
+        smul_eq_mul]
+      ring
+    rw [hdd]
+    nlinarith [hval]
+  · rw [edgeLaplacian_mulVec_mode]
+    have hdot : Matrix.dotProduct ((2:ℝ) • (![1, -1] : Fin 2 → ℝ))
+        ((2:ℝ) • (![1, -1] : Fin 2 → ℝ)) = 8 := by
+      simp only [Matrix.dotProduct, Fin.sum_univ_two, Matrix.cons_val_zero,
+        Matrix.cons_val_one, Matrix.head_cons, Pi.smul_apply, smul_eq_mul]
+      norm_num
+    rw [hdot]
+    norm_num
+
+/-- **The Euclidean form pinned at the same point**: the request's
+first formula, verbatim, at `t = 1` on K₂ through the Step-2
+corollary. -/
+theorem gsc_K2_norm_t1_QA :
+    ‖(WithLp.equiv 2 (Fin 2 → ℝ)).symm
+        ((![1, -1] : Fin 2 → ℝ)
+          - heatKernel heatEdgeAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ))‖
+      ≤ 1 * ‖(WithLp.equiv 2 (Fin 2 → ℝ)).symm
+          (laplacian heatEdgeAdj *ᵥ (![1, -1] : Fin 2 → ℝ))‖ :=
+  heatKernel_globalContraction_le heatEdgeAdj heatEdgeAdj_isSymm
+    heatEdgeAdj_nonneg zero_le_one (![1, -1])
+
+/-- **The general-probe dissipation bound pinned at K₂, `t = 1`**: the
+probe `e₀ = ![1,0]` (the K₂ region indicator `{0}`) read against the
+mode input `![1,−1]` — the left side evaluates to `1 − e^{−2}` (the
+indicator pairs with the mode's first entry), the right side to
+`1 · √(L e₀ ⬝ᵥ L e₀) · √(m ⬝ᵥ m) = √2 · √2 = 2` (the probe's Laplacian
+action is the OUTFLOW vector `![1,−1]` — the Boundary Outflow Lemma's
+own object). -/
+theorem gsc_dissipation_K2_QA :
+    |Matrix.dotProduct (![1, 0] : Fin 2 → ℝ)
+        ((![1, -1] : Fin 2 → ℝ)
+          - heatKernel heatEdgeAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ))|
+      ≤ 1 * Real.sqrt (Matrix.dotProduct
+          (laplacian heatEdgeAdj *ᵥ (![1, 0] : Fin 2 → ℝ))
+          (laplacian heatEdgeAdj *ᵥ (![1, 0] : Fin 2 → ℝ)))
+        * Real.sqrt (Matrix.dotProduct (![1, -1] : Fin 2 → ℝ)
+          (![1, -1] : Fin 2 → ℝ)) := by
+  have h := abs_dotProduct_heatFlow_le heatEdgeAdj heatEdgeAdj_isSymm
+    heatEdgeAdj_nonneg zero_le_one (![1, 0] : Fin 2 → ℝ)
+    (![1, -1] : Fin 2 → ℝ)
+  have hL0 : laplacian heatEdgeAdj *ᵥ (![1, 0] : Fin 2 → ℝ)
+      = (![1, -1] : Fin 2 → ℝ) := by
+    rw [edgeLaplacian_eq]
+    funext i
+    fin_cases i <;>
+      simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+        Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+        Matrix.of_apply] <;>
+      norm_num
+  rw [hL0] at h
+  have he : Real.exp (-(2:ℝ)) ≤ 1 := by
+    rw [← Real.exp_zero]
+    exact Real.exp_le_exp.2 (neg_nonpos.2 (by norm_num : (0:ℝ) ≤ 2))
+  have he0 := Real.exp_nonneg (-(2:ℝ))
+  have hK' : heatKernel heatEdgeAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ)
+      = Real.exp (-(2 * 1 : ℝ)) • (![1, -1] : Fin 2 → ℝ) :=
+    heatKernel_edge_mode_raw_QA 1 one_ne_zero
+  have hK : heatKernel heatEdgeAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ)
+      = Real.exp (-(2:ℝ)) • (![1, -1] : Fin 2 → ℝ) := by
+    rw [show (2:ℝ) * 1 = 2 from by norm_num] at hK'
+    exact hK'
+  -- LHS value: e₀ ⬝ᵥ ((1 − e⁻²) • m) = 1 − e⁻² ≥ 0
+  have hval : Matrix.dotProduct (![1, 0] : Fin 2 → ℝ)
+      ((![1, -1] : Fin 2 → ℝ) - Real.exp (-(2:ℝ)) • (![1, -1]))
+      = 1 - Real.exp (-(2:ℝ)) := by
+    simp only [Matrix.dotProduct, Fin.sum_univ_two, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.head_cons, Pi.sub_apply, Pi.smul_apply,
+      smul_eq_mul]
+    ring
+  have h2 : Matrix.dotProduct (![1, -1] : Fin 2 → ℝ)
+      (![1, -1] : Fin 2 → ℝ) = 2 := by
+    simp only [Matrix.dotProduct, Fin.sum_univ_two, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.head_cons]
+    norm_num
+  rw [hK, hval,
+    abs_of_nonneg (by linarith : (0:ℝ) ≤ 1 - Real.exp (-(2:ℝ))),
+    h2, one_mul, ← pow_two (Real.sqrt 2),
+    Real.sq_sqrt (by norm_num : (0:ℝ) ≤ 2)] at h
+  rw [hK, hval,
+    abs_of_nonneg (by linarith : (0:ℝ) ≤ 1 - Real.exp (-(2:ℝ))),
+    hL0, h2, one_mul, ← pow_two (Real.sqrt 2),
+    Real.sq_sqrt (by norm_num : (0:ℝ) ≤ 2)]
+  exact h
+
+/-! ### The `hnonneg` fence (destined for Heat_QA.lean) -/
+
+/-- The signed K₂ fence fixture: arc weight `−1` — symmetric, with the
+Laplacian's mode eigenvalue NEGATIVE (`−2`), so `e^{−tL}` genuinely
+grows on the mode. `hnonneg` fails (entry `−1`), `hA` holds. -/
+def gscSignedAdj : Matrix (Fin 2) (Fin 2) ℝ :=
+  !![0, -1; -1, 0]
+
+theorem gscSigned_isSymm : gscSignedAdj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [gscSignedAdj]
+
+/-- The signed Laplacian is `!![−1, 1; 1, −1]]` — degrees `−1`, so the
+mode `![1,−1]` is an eigenvector at eigenvalue `−2`. -/
+theorem gscSigned_laplacian :
+    laplacian gscSignedAdj = !![-1, 1; 1, -1] := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp only [laplacian, Matrix.sub_apply, degreeMatrix,
+      Matrix.diagonal_apply, deg, gscSignedAdj, Fin.sum_univ_two,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      Matrix.of_apply] <;>
+    norm_num
+
+theorem gscSigned_lap_mulVec_mode :
+    laplacian gscSignedAdj *ᵥ (![1, -1] : Fin 2 → ℝ)
+      = (-(2 : ℝ)) • (![1, -1] : Fin 2 → ℝ) := by
+  rw [gscSigned_laplacian]
+  funext i
+  fin_cases i <;>
+    simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      Matrix.of_apply, Pi.smul_apply, smul_eq_mul] <;>
+    norm_num
+
+/-- **The `hnonneg` fence**: on the signed fixture the global order-0
+bound's conclusion GENUINELY FAILS at `t = 1` — the mode's displacement
+factor is `1 − e^{2}` (growth, `3 < e²` by `Real.add_one_lt_exp`), so
+the LHS is `2(e² − 1)² > 2·4 = 8` while the RHS is
+`1² · ((−2•m) ⬝ᵥ (−2•m)) = 8`. Every other hypothesis holds
+(`hA` genuine at the symmetric signed fixture; `t = 1 ≥ 0`) — the
+nonnegativity hypothesis is load-bearing, not decorative. -/
+theorem gsc_hnonneg_fence_QA :
+    ¬ (∀ i j, 0 ≤ gscSignedAdj i j) ∧
+    ¬ (Matrix.dotProduct
+        ((![1, -1] : Fin 2 → ℝ)
+          - heatKernel gscSignedAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ))
+        ((![1, -1] : Fin 2 → ℝ)
+          - heatKernel gscSignedAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ))
+      ≤ 1 ^ 2 * Matrix.dotProduct
+          (laplacian gscSignedAdj *ᵥ (![1, -1] : Fin 2 → ℝ))
+          (laplacian gscSignedAdj *ᵥ (![1, -1] : Fin 2 → ℝ))) := by
+  have he2 : (3 : ℝ) < Real.exp 2 := by
+    have h := Real.add_one_lt_exp two_ne_zero
+    linarith
+  -- the heat kernel GROWS on the mode: K₁ m = e² • m
+  have hM : (-(((1 : ℝ) • laplacian gscSignedAdj))) *ᵥ (![1, -1] : Fin 2 → ℝ)
+      = (2 : ℝ) • (![1, -1] : Fin 2 → ℝ) := by
+    rw [Matrix.neg_mulVec, Matrix.smul_mulVec_assoc,
+      gscSigned_lap_mulVec_mode]
+    simp
+  have hK : heatKernel gscSignedAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ)
+      = Real.exp 2 • (![1, -1] : Fin 2 → ℝ) := by
+    rw [heatKernel]
+    exact exp_mulVec_eq_smul_of_mulVec_eq_smul _ _ _ hM
+  refine ⟨fun h => by
+      have h01 := h 0 1
+      simp only [gscSignedAdj, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.head_cons, Matrix.of_apply] at h01
+      norm_num at h01, ?_⟩
+  have hdisp : (![1, -1] : Fin 2 → ℝ)
+        - Real.exp 2 • (![1, -1] : Fin 2 → ℝ)
+      = (1 - Real.exp 2) • (![1, -1] : Fin 2 → ℝ) := by
+    funext i
+    fin_cases i <;>
+      simp only [Pi.sub_apply, Pi.smul_apply, smul_eq_mul,
+        Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons] <;>
+      ring
+  have hLHS : Matrix.dotProduct
+      ((![1, -1] : Fin 2 → ℝ)
+        - heatKernel gscSignedAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ))
+      ((![1, -1] : Fin 2 → ℝ)
+        - heatKernel gscSignedAdj 1 *ᵥ (![1, -1] : Fin 2 → ℝ))
+      = 2 * (Real.exp 2 - 1) ^ 2 := by
+    have hdd : Matrix.dotProduct
+        ((1 - Real.exp 2) • (![1, -1] : Fin 2 → ℝ))
+        ((1 - Real.exp 2) • (![1, -1] : Fin 2 → ℝ))
+        = (1 - Real.exp 2) ^ 2 * 2 := by
+      simp only [Matrix.dotProduct, Fin.sum_univ_two,
+        Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+        Pi.smul_apply, smul_eq_mul]
+      ring
+    rw [hK, hdisp, hdd]
+    ring
+  have hRHS : 1 ^ 2 * Matrix.dotProduct
+      (laplacian gscSignedAdj *ᵥ (![1, -1] : Fin 2 → ℝ))
+      (laplacian gscSignedAdj *ᵥ (![1, -1] : Fin 2 → ℝ)) = 8 := by
+    have hdd : Matrix.dotProduct ((-(2 : ℝ)) • (![1, -1] : Fin 2 → ℝ))
+        ((-(2 : ℝ)) • (![1, -1] : Fin 2 → ℝ)) = 8 := by
+      simp only [Matrix.dotProduct, Fin.sum_univ_two,
+        Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+        Pi.smul_apply, smul_eq_mul]
+      norm_num
+    rw [gscSigned_lap_mulVec_mode, hdd]
+    norm_num
+  rw [hLHS, hRHS]
+  have hpos : (0 : ℝ) < Real.exp 2 - 1 := by linarith
+  have hgt : (4 : ℝ) < (Real.exp 2 - 1) ^ 2 := by
+    nlinarith [mul_pos (by linarith : (0:ℝ) < Real.exp 2 - 3)
+      (by linarith : (0:ℝ) < Real.exp 2 + 1),
+      mul_pos (by linarith : (0:ℝ) < Real.exp 2 - 3)
+        (by linarith : (0:ℝ) < Real.exp 2 - 1)]
+  linarith
+
 end HeatFencesD1
 
 end SpectralGraphTheory.QA

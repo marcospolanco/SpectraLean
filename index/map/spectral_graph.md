@@ -1661,6 +1661,10 @@ new k-general engine pieces in `Spectral.lean` above):
 | --- | --- |
 | `partIndicator`, `partIndicator_of_mem`, `partIndicator_of_not_mem` | the plain `{0,1}`-valued indicator of a vertex set and its entry lemmas — the *uncentered* part indicators are the multiway test family (the Step-0 verdict: no centering anywhere; the k = 2 family's constraint is replaced by the subspace engine's dimension count) |
 | `quadForm_laplacian_partIndicator` | **the per-part energy identity**: `quadForm (laplacian A) (partIndicator S) = boundary A S` — the k = 2 family's `cutTestVector` energy identity at the indicator level, for arbitrary part counts; load-bearing on `laplacian_quadForm` |
+| `laplacian_mulVec_partIndicator_of_mem`, `laplacian_mulVec_partIndicator_of_not_mem`, `laplacian_mulVec_partIndicator_apply` | **the boundary outflow lemma** (2026-09-07, `proposals/boundary-outflow-lemma.md` Step 1, hypothesis-free): `L · 1_S` is the outflow vector — on `S` the crossing outflow `∑_{j ∈ Sᶜ} A i j`, off it the negative inflow `-(∑_{j ∈ S} A i j)` — `laplacian_mulVec_apply` at the indicator plus the energy identity's own `sum_add_sum_compl` split one level down; the combined `if i ∈ S` packaging |
+| `sum_laplacian_mulVec_partIndicator` | the region row-sum total is `boundary A S` definitionally (hypothesis-free) |
+| `quadForm_laplacian_partIndicator_unsymm` | **the energy identity without symmetry**: the same `quadForm (laplacian A) (partIndicator S) = boundary A S` for ANY weights (asymmetric included) — the vector-level outflow route never flips the region, so `boundary_compl` never enters and the delivered symmetric version's `hA` is removable |
+| `abs_partIndicator_dotProduct_heatFlow_le` | **the regional dissipation bound** (2026-09-07, `proposals/boundary-outflow-lemma.md` Part 2 / the Medium row's ask): `|1_S ⬝ᵥ (x₀ − e^{−tL}x₀)| ≤ t · ‖L·1_S‖ · ‖x₀‖` — the cut↔heat bridge, the norm factor being the outflow vector's own norm; general-probe engine `abs_dotProduct_heatFlow_le` in `Heat.lean` (symmetric swap + Cauchy–Schwarz + the global order-0 contraction at the probe) |
 | `multiwayCombination`, `multiwayCombination_of_mem`, `multiwayCombination_eq_zero` | the part combination `∑ᵢ cᵢ · 1_{Sᵢ}` — the multiway test family's general member — with the disjoint-family reading lemmas (a member of part `i₀` reads exactly `c i₀`; off all parts, `0`) |
 | `dotProduct_degreeSqrt_mulVec_multiwayCombination` | the weighted-norm identity `‖√D · ∑ cᵢ1_{Sᵢ}‖² = ∑ cᵢ² · vol(Sᵢ)` — disjointness makes the weighted sum read each part's volume exactly once |
 | `laplacian_quadForm_multiwayCombination_le` | **the cross-part absorption lemma (the theorem's engine)**: `xᵀLx ≤ 2 · ∑ cᵢ² · boundary(Sᵢ)` for every combination — a linear combination's re-introduced cross-part energy is *absorbed*, not eliminated, each crossing pair bounded pointwise by `(a−b)² ≤ 2a² + 2b²`; the headline's constant 2 is exactly this absorption constant; QA pins it at *equality* on the K₂ and C₄ fixtures |
@@ -1818,8 +1822,27 @@ positive-gap kernel lemma, mean preservation, the coordinate-damping
 and Parseval-exact heat identities, and **`heatKernel_variance_decay`**
 (`Var(e^{-tL}f) ≤ e^{−2tλ₂}Var(f)`, hypothesis-minimal — no
 connectivity, no gap positivity — by the eigenbasis contraction, no
-derivative machinery). Pure hard crust, zero
-axioms; QA at `Scaffold/QA/SpectralGraph/Heat_QA.lean`. The shelf's
+derivative machinery). **The global (window-free) contraction section
+added 2026-09-07** (`proposals/global-semigroup-contraction.md`
+Steps 0(m=0)/1/2 under its named-consumer scope — the operator-added
+Medium row `proposals/boundary-outflow-lemma.md`, whose Part 2 is the
+consumer): the scalar engine `sq_one_sub_exp_neg_le`
+(`(1 − e^{−y})² ≤ y²` on the half-line, from `Real.add_one_le_exp` +
+`Real.exp_le_exp` — the window-free stand-in for the pin's windowed
+`Real.abs_exp_sub_one_sub_id_le`),
+`heatKernel_globalContraction_dotProduct_le` /
+`heatKernel_globalContraction_le` (`‖x − e^{−tL}x‖ ≤ t·‖Lx‖` at every
+`t ≥ 0` on nonnegative-weight networks, no eigenvalue window —
+Parseval + PSD + the scalar engine), and the general-probe dissipation
+engine `abs_dotProduct_heatFlow_le` (`|v ⬝ᵥ (x₀ − e^{−tL}x₀)| ≤ t ·
+√(Lv ⬝ᵥ Lv) · √(x₀ ⬝ᵥ x₀)`, symmetric swap + Cauchy–Schwarz + the
+contraction at the probe; the `partIndicator` specialization lives in
+`Multiway.lean` as the Part-2 theorem). Pure hard crust, zero axioms;
+QA at `Scaffold/QA/SpectralGraph/Heat_QA.lean` — including the payoff
+pin (the global bound holds at `t = 1` on K₂ where the windowed
+bound's hypothesis provably fails) and the `hnonneg` fence (the
+conclusion provably fails on the signed negative-eigenvalue fixture,
+`e² > 3` by `Real.add_one_lt_exp`). The shelf's
 falsification surface was completed 2026-09-05
 (`proposals/adversarial-fences-heat-family.md`, the audit method's
 eighteenth application, this run's fresh consumption survey confirming

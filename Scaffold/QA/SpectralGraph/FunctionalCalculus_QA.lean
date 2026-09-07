@@ -68,6 +68,22 @@
       (both modes), and the **nontriviality fence**: the kernel at
       `t = 1` is provably not the identity — diffusion moves mass.
 
+  7. **The structural pins** (Section G, 2026-09-07,
+      `proposals/functionalcalculus-structural-pins.md`): first
+      genuine consumption of the five structural theorems the
+      compiler-derived consumption census found inert — the
+      identity-function two-route join at the `K₂` Laplacian
+      (`spectralCalc_id`), the coefficient bridge at the squared
+      spectrum (`dotProduct_eigvecOf_spectralCalc_mulVec`), the
+      two-technology resolvent join (the calculus-route twin
+      `spectralCalc_tikhonovShrinkage_eq_smul_inv'` deriving the
+      shifted inverse's concrete value from the eigenbasis-pinned
+      filter, with the raw `inv_def` companion), and the magnetic
+      propagator's structural pins (`magneticHeat_apply`: Hermitian
+      and diagonal-real through the entry form's exact conjugate
+      placement; `magneticHeat_mulVec_eigenvectorBasis`: the exhibited
+      eigenpair and the basis semigroup).
+
   QA never proves, validates, or certifies any axiom: this file
   contains no `sorry`/`admit`, and the bridge it exercises consumes
   none (Mathlib's calculus is proved upstream).
@@ -1282,5 +1298,184 @@ theorem fc_res_K2_fence_not_inv :
   norm_num at h00
 
 end ResolventIdentity
+
+/-!
+## Section G: the structural pins
+
+The five structural theorems the compiler-derived consumption census
+found inert (never referenced by any QA proof term — the sections
+above pin the bridge's entry form and reconciliations *beside* them),
+consumed for the first time: `spectralCalc_id`,
+`dotProduct_eigvecOf_spectralCalc_mulVec`,
+`spectralCalc_tikhonovShrinkage_eq_smul_inv'`, `magneticHeat_apply`,
+`magneticHeat_mulVec_eigenvectorBasis` — the pins method's fifth
+application.
+-/
+
+section StructuralPins
+
+open scoped ComplexConjugate
+open Scaffold.Mathlib.GraphTheory.Tikhonov.QA
+
+/-- **Pin: the identity-function fix, two routes joined.** The theorem
+route (`spectralCalc_id`) says `f(L) = L` at `f = id`; the eigenbasis
+route (`fc_lapK2_calc`) computes `f(L)` at `id` as the pinned matrix.
+Composing: the `K₂` Laplacian IS the pinned matrix — each route fails
+independently if its own layer is wrong. -/
+theorem fcp_id_pin :
+    spectralCalc (laplacian adjK2) lapK2_symmetric (fun x => x) = !![1, -1; -1, 1]
+      ∧ laplacian adjK2 = !![1, -1; -1, 1] := by
+  refine ⟨?_, ?_⟩
+  · rw [spectralCalc_id]
+    ext a b
+    fin_cases a <;> fin_cases b <;>
+      simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+        Matrix.tail_cons, Matrix.of_apply, lapK2_apply]
+      <;> norm_num [Fin.isValue]
+  · rw [← spectralCalc_id (laplacian adjK2) lapK2_symmetric,
+      fc_lapK2_calc (fun x => x)]
+    norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      Matrix.tail_cons, Matrix.of_apply]
+
+/-- The squared-spectrum propagator on the `K₂` Laplacian routes
+`![1, 0]` to the pinned `![2, -2]` (the eigenbasis route; the filter
+`f = x²` maps the spectrum `{0, 2}` to `{0, 4}`). -/
+theorem fcp_sq_mulVec :
+    spectralCalc (laplacian adjK2) lapK2_symmetric (fun x => x * x) *ᵥ ![1, 0]
+      = ![2, -2] := by
+  rw [fc_lapK2_calc (fun x => x * x)]
+  funext a
+  fin_cases a <;>
+    simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      Matrix.tail_cons, Matrix.of_apply] <;>
+    norm_num
+
+/-- **Pin: the coefficient bridge at the squared spectrum.** The
+eigenbasis coefficient of the calculus output is the filtered
+coefficient — instantiated at `f = x²` with the propagated vector
+pinned (`fcp_sq_mulVec`), so the theorem's two sides carry the SAME
+eigenvector and the equality is not vacuous: the `λ = 0` mode is
+killed by `f(λ) = 0` on the right, the `λ = 2` mode by
+`f(L) *ᵥ y` on the left. -/
+theorem fcp_coeffBridge_pin (k : Fin 2) :
+    Matrix.dotProduct (eigvecOf (laplacian adjK2) lapK2_symmetric k) ![2, -2]
+      = eigvalOf (laplacian adjK2) lapK2_symmetric k
+          * eigvalOf (laplacian adjK2) lapK2_symmetric k
+        * Matrix.dotProduct (eigvecOf (laplacian adjK2) lapK2_symmetric k) ![1, 0] := by
+  rw [← fcp_sq_mulVec]
+  exact dotProduct_eigvecOf_spectralCalc_mulVec _ _ _ _ k
+
+/-- **Pin: the two-technology resolvent join, calculus route.** The
+primed theorem's calculus route (`cfc_inv`, no matrix inverse,
+determinant, or cancellation anywhere) composed with the
+eigenbasis-pinned filter matrix DERIVES the shifted Laplacian's
+inverse as the concrete `!![2/3, 1/3; 1/3, 2/3]` — the value normally
+computed by adjugate arithmetic. A wrong scalar multiple or shift in
+the resolvent identity breaks this loudly. -/
+theorem fcp_resolvent_calculus_pin :
+    (laplacian adjK2 + (1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))⁻¹
+      = !![2 / 3, 1 / 3; 1 / 3, 2 / 3] := by
+  have h := spectralCalc_tikhonovShrinkage_eq_smul_inv' adjK2 adjK2_symmetric
+    adjK2_nonneg (by norm_num : (0 : ℝ) < 1)
+  rw [fc_lapK2_tikhonov_calc, one_smul] at h
+  exact h.symm
+
+/-- **The raw cross-route**: the same pinned inverse by plain adjugate
+arithmetic (`inv_def` + `det_fin_two` + `adjugate_fin_two`), touching
+no calculus anywhere — two independent engines, one pinned fact. -/
+theorem fcp_resolvent_raw :
+    (laplacian adjK2 + (1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))⁻¹
+      = !![2 / 3, 1 / 3; 1 / 3, 2 / 3] := by
+  have hent : ∀ i j : Fin 2,
+      (laplacian adjK2 + (1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ)) i j
+        = if i = j then 2 else -1 := by
+    intro i j
+    by_cases h : i = j
+    · subst h
+      simp only [Matrix.add_apply, Matrix.smul_apply, Matrix.one_apply,
+        smul_eq_mul, lapK2_apply, if_pos rfl]
+      norm_num
+    · simp only [Matrix.add_apply, Matrix.smul_apply, Matrix.one_apply,
+        smul_eq_mul, lapK2_apply]
+      rw [if_neg h, if_neg h, if_neg h, mul_zero, add_zero]
+  rw [Matrix.inv_def, Matrix.adjugate_fin_two, Matrix.det_fin_two,
+    hent 0 0, hent 1 1, hent 0 1, hent 1 0,
+    if_pos (rfl : (0 : Fin 2) = 0), if_pos (rfl : (1 : Fin 2) = 1),
+    if_neg (by decide : ¬(0 : Fin 2) = 1), if_neg (by decide : ¬(1 : Fin 2) = 0)]
+  norm_num [Ring.inverse_eq_inv, Matrix.smul_apply, smul_eq_mul,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+    Matrix.tail_cons, Matrix.of_apply]
+
+/-- **Pin: the magnetic heat propagator is Hermitian, through the
+entry form.** The entry form's exact `U a i * conj (U b i)` placement
+(against the transposed-conjugate at `(b, a)`) is what makes the
+conjugate-transpose collapse termwise — a swapped convention would
+derive the transpose instead. Basis-free: no eigenvalue identification
+needed. -/
+theorem fcp_magHeat_hermitian {V : Type} [Fintype V] [DecidableEq V]
+    (A : Matrix V V ℝ) (Θ : Matrix V V ℝ) (t : ℝ) :
+    (magneticHeat A Θ t)ᴴ = magneticHeat A Θ t := by
+  ext a b
+  rw [Matrix.conjTranspose_apply, magneticHeat_apply A Θ t b a,
+    magneticHeat_apply A Θ t a b]
+  simp only [Complex.star_def, map_sum, map_mul,
+    Complex.conj_conj, Complex.conj_ofReal]
+  exact Finset.sum_congr rfl fun i _ => by ring
+
+/-- **Pin: the propagator's diagonal is real, through the entry
+form.** Each diagonal entry is the sum of real decay factors times
+`|U a i|²` — reality of the whole diagonal from the entry form plus
+`z * conj z = ↑(normSq z)`. -/
+theorem fcp_magHeat_diag_real {V : Type} [Fintype V] [DecidableEq V]
+    (A : Matrix V V ℝ) (Θ : Matrix V V ℝ) (t : ℝ)
+    (a : V) : (magneticHeat A Θ t a a).im = 0 := by
+  rw [magneticHeat_apply]
+  simp only [mul_assoc, Complex.mul_conj, ← Complex.ofReal_mul,
+    ← Complex.ofReal_sum]
+  rw [Complex.ofReal_im]
+
+/-- **Pin: the eigenbasis action exhibits a genuine eigenpair of the
+propagator** — the spectral-mapping content of the basis-action
+theorem: for every basis index, `e^{-t·λⱼ}` is realized as an
+eigenvalue of the propagator (a nonzero eigenvector exhibited through
+the orthonormality of the eigenbasis). A wrong decay factor or wrong
+eigenvalue index breaks the exhibited equation. -/
+theorem fcp_magHeat_eigenpair {V : Type} [Fintype V] [DecidableEq V]
+    (A : Matrix V V ℝ) (Θ : Matrix V V ℝ) (t : ℝ) (j : V) :
+    ∃ x : V → ℂ, x ≠ 0 ∧ magneticHeat A Θ t *ᵥ x
+      = ((Real.exp (-(t * (magneticLaplacian_isHermitian A Θ).eigenvalues j)) : ℝ) : ℂ)
+          • x := by
+  refine ⟨⇑((magneticLaplacian_isHermitian A Θ).eigenvectorBasis j), ?_,
+    magneticHeat_mulVec_eigenvectorBasis A Θ t j⟩
+  intro h0
+  exact Basis.ne_zero (R := ℂ) (M := EuclideanSpace ℂ V)
+    ((magneticLaplacian_isHermitian A Θ).eigenvectorBasis.toBasis) j h0
+
+/-- **Pin: the semigroup on the eigenbasis.** Flowing for `s` after
+`t` equals flowing for `s + t`, ON THE BASIS VECTORS — through the
+basis-action theorem three times (the matrix-level semigroup is a
+different, already-consumed statement). -/
+theorem fcp_magHeat_basis_semigroup {V : Type} [Fintype V] [DecidableEq V]
+    (A : Matrix V V ℝ) (Θ : Matrix V V ℝ) (s t : ℝ) (j : V) :
+    magneticHeat A Θ s *ᵥ (magneticHeat A Θ t *ᵥ
+        ⇑((magneticLaplacian_isHermitian A Θ).eigenvectorBasis j))
+      = ((Real.exp (-((s + t)
+            * (magneticLaplacian_isHermitian A Θ).eigenvalues j)) : ℝ) : ℂ)
+          • ⇑((magneticLaplacian_isHermitian A Θ).eigenvectorBasis j) := by
+  rw [magneticHeat_mulVec_eigenvectorBasis A Θ t j, Matrix.mulVec_smul,
+    magneticHeat_mulVec_eigenvectorBasis A Θ s j, smul_smul]
+  have hscalar :
+      (((Real.exp (-(t * (magneticLaplacian_isHermitian A Θ).eigenvalues j)) : ℝ) : ℂ))
+        * ((Real.exp (-(s * (magneticLaplacian_isHermitian A Θ).eigenvalues j)) : ℝ) : ℂ)
+      = ((Real.exp (-((s + t)
+            * (magneticLaplacian_isHermitian A Θ).eigenvalues j)) : ℝ) : ℂ) := by
+    rw [← Complex.ofReal_mul, ← Real.exp_add]
+    apply congrArg Complex.ofReal
+    apply congrArg Real.exp
+    ring
+  rw [hscalar]
+
+end StructuralPins
 
 end SpectralGraphTheory.QA

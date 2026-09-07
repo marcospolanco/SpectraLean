@@ -37,6 +37,698 @@ proposal's status header must also record
 that made this mandatory: the pre-commit hook re-rendered the map on
 every commit while its hand-maintained data tables drifted for days).
 
+## 2026-09-07T06:22:15Z — The Signed switching layer's positive pins (terminal)
+
+**Run:** `20260907T060831Z-run-3`  
+**Session:** `ses_f85b4c94affebxh9q9Bec73k5W`  
+**Status:** completed  
+**Milestone:** First genuine QA consumption of the census's largest
+remaining inert cluster — the Signed module's four never-consumed
+theorems (the balance theory's engine, including the never-consumed
+BACKWARD eigenpair transfer, the spectral bridge of Harary balance);
+the pins method's sixth application and its first signed-graph
+target.
+
+**Changes:** QA-only — `Signed_QA.lean`'s new `StructuralPins`
+section (10 theorems + 1 private helper; QA 6635 → 6645), all at the
+delivered path/triangle fixtures: the symmetry two with entry-level
+reads through `IsSymm.apply` (`sgp_adjSymm_entry_pin` /
+`sgp_lapSymm_entry_pin` — the `(1,0)` entries derived from the raw
+`(0,1)` entries: `−1` adjacency, `+1` sign-flipped Laplacian edge);
+the frustrated-triangle scope witness (`sgp_lapSymm_tri` — symmetric
+but NOT balanced, pinning the theorem's hypothesis set as symmetry,
+not balance); the switching nonvanishing with the value pinned raw
+(`sgp_switchVec_val`: `diag(g)·(2,3,5) = (2,−3,−5)`, nonzeroness
+through the theorem in `sgp_switchVec_ne_zero_pin`); and the
+round-trip headline — `sgp_unsigned_eigenpair_raw` (route A, raw
+diffusion-form computation), `sgp_signed_eigenpair_raw` (the
+switched mode's signed eigenpair, raw), and
+`sgp_backward_transfer_pin` (route B: the SAME unsigned eigenpair
+equation re-derived through `laplacian_mulVec_switchVec` + the
+switching involutivity). Records updated: the same-run proposal
+(`proposals/signed-switching-pins.md`, COMPLETE + delivery record),
+`proposals/README.md` (new Delivered row), README + radar (6645), the
+scoreboard verification row, both map data tables + regenerated SVG,
+the execution plan, and this log. Nothing committed; prior runs'
+uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/sgpins_spike.lean` — green after
+three fix rounds; the recorded traps: `Matrix.IsSymm.apply` being the
+REVERSED direction (`A j i = A i j`); Fin-literal `if`s from
+`Matrix.diagonal_apply` stuck under `norm_num` — the
+`Finset.sum_eq_single` + `diagonal_apply_eq` private helper, with the
+off-diagonal bullet closed by `simp [diagonal_apply, hj.symm]` after
+`diagonal_apply_ne`'s argument order made the direct `rw` call
+mis-elaborate; and `Fin 3` entry lemmas (`sgPathL00`-style) not
+matching post-`fin_cases` surface syntax (`⟨2, ⋯⟩` vs `2`) — the raw
+eigenpair routed through the diffusion form `laplacian_mulVec_apply`
+instead, mirroring `sgPath_kernel_QA`'s working idiom); the landed
+module elaborates with zero errors/warnings; explicit build ✔; the
+10-declaration axiom audit (`wip/sgpins_axcheck.lean`) — every one
+exactly `propext, Classical.choice, Quot.sound` (zero axiom contact;
+the 24-tag independence check unchanged and clean); **full
+`lake build` + `check_build_completeness.py` — 135 source files, 135
+fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0
+(4 axioms unchanged); `check_public_reachability` (63 modules);
+`check_citations`; `check_markdown_links`;
+`check_qa_name_uniqueness` (the new `sgp_*` names collision-free);
+`check_backlog_freshness` clean; scoreboard regenerated (**1369
+functional / 6645 QA / 4 axioms / 0 sorries**) with the verification
+row; map freshness exit 0 after the 6635 → 6645 sync in both map
+data tables + SVG regeneration (49 stations, no status change owed);
+**consumption closure verified by the tool** — the census re-run
+(`wip/census_20260907_post7.txt`) shows exactly the 4 targeted
+theorems leaving the inert set: 1328 → 1332 value-consumed, 39 → 35
+never-touched, no bonus, no collateral.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition
+changed, no public statement changed. QA proves consequences relative
+to the substrate; it does not prove the substrate (no axiom touched).
+Honest scope: positive pins only (an `hsymm` necessity fence is
+priced but not owed under the pins pattern); the fixtures are the
+module's own path and triangle; the round-trip is at the eigenvalue
+`1` only.
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The census's remaining inert set (35): EdgePerturbation (4) next by
+size (the design-independence + PSD layer under `matrix_hoeffding`'s
+consumer), then Mixing (3), AlonBoppana (3), Expander (3), the
+Poincaré pair (small count, high name weight — the family's two
+headline theorems), the Band/Heat/Normalized pairs, the singles.
+Operator-gated items unchanged (the companion's Steps 3–5 adoption;
+master-bound Step 2; the `perron_frobenius` deprecation; backlog
+items 5/6; log-Sobolev; the reverse TV → χ² consumer).
+
+## 2026-09-07T06:10:37Z — The Signed switching layer's positive pins (in progress)
+
+**Run:** `20260907T060831Z-run-3`  
+**Session:** `ses_f85b4c94affebxh9q9Bec73k5W`  
+**Status:** in-progress  
+**Milestone:** The census's largest remaining inert cluster (per
+`wip/census_20260907_post6.txt`): the Signed module's four
+never-consumed theorems — `signedAdj_symmetric`,
+`signedLaplacian_symmetric`, `switchVec_ne_zero`, and
+`laplacian_mulVec_switchVec` (the backward eigenpair transfer, the
+spectral bridge of Harary balance) — the balance theory's engine.
+Signed and EdgePerturbation tie at four; Signed wins on content
+centrality (the pins method's sixth application, first signed-graph
+target).
+
+**Changes:** none yet — recording intent before editing. Planned: a
+`StructuralPins` section in `Signed_QA.lean` at the delivered fixtures
+(path + triangle, `sgPathG`): the two symmetry theorems consumed with
+entry-level reads (the triangle as the symmetric-but-unbalanced scope
+witness), the switching nonvanishing with the switched value pinned
+raw, and the backward-transfer round-trip (raw signed eigenpair → the
+theorem → the unsigned eigenpair equation re-derived, cross-checked
+against the pinned `sgPathL**` entries); then the standing ladder, the
+census closure re-run (exactly 4 leaving), and records in a same-run
+proposal.
+
+**Verification:** pending — spike first.
+
+## 2026-09-07T06:07:46Z — The regional dissipation bound via the companion's consumer scope (terminal)
+
+**Run:** `20260907T053227Z-run-2`  
+**Session:** `ses_f85b4c94affebxh9q9Bec73k5W`  
+**Status:** completed  
+**Milestone:** The Medium row's remaining half — the Boundary Outflow
+Lemma's Step 2 — delivered by consuming the companion
+`global-semigroup-contraction.md`'s Steps 0(m=0)/1/2 under its
+named-consumer scope, completing the operator-requested cut↔heat
+bridge end-to-end (both proposals now COMPLETE/scoped-delivered).
+
+**Changes:** Hard crust — 5 public theorems (functional 1364 → 1369)
++ 10 QA theorems (QA 6625 → 6635), zero axiom contact. In
+`Heat.lean`'s new "global (window-free) contraction" section: the
+scalar engine `sq_one_sub_exp_neg_le` (`(1−e^{−y})² ≤ y²` on the
+half-line — simpler than the priced induction, `Real.add_one_le_exp` +
+`Real.exp_le_exp` feeding `sq_le_sq'` directly); the global
+window-free contraction `heatKernel_globalContraction_dotProduct_le`
+(Parseval over the proved eigenbasis, the per-mode coordinate
+`(1−e^{−tλᵢ})cᵢ`, the PSD extraction, the Laplacian's own Parseval)
+and its Euclidean corollary `heatKernel_globalContraction_le`
+(`‖x − e^{−tL}x‖ ≤ t·‖Lx‖` verbatim); and the general-probe
+dissipation engine `abs_dotProduct_heatFlow_le` (symmetric swap +
+Cauchy–Schwarz + the contraction at the probe). In `Multiway.lean`
+(now importing Heat, no cycle): the Medium row's own ask
+`abs_partIndicator_dotProduct_heatFlow_le` — the norm factor being
+Step 1's outflow vector `L·1_S`'s own norm. QA per both proposals'
+plans with the fences in the same delivery: the K₂ `t = 1` payoff pin
+(the global bound THROUGH the theorem exactly where the windowed
+bound's hypothesis provably fails; both sides evaluated — LHS ≤ 2,
+RHS exactly 8), the values/Euclidean/probe pins, the Part-2 pin
+through `bol_K2_raw`, and the `hnonneg` fence (the signed K₂ fixture:
+the conclusion genuinely fails at `t = 1`, mode growth `3 < e²` by
+`Real.add_one_lt_exp`, `hA` kept genuine). Records updated: both
+proposals (status headers + Part-2/delivery records carrying the gate
+note), `proposals/README.md` (the Medium row completed to Delivered;
+the companion row re-scoped to Steps 3–5), README (counts, date, the
+highlights bullet), the radar, both map tables + SVG, the backlog's
+heat item note, `index/map/spectral_graph.md` (two entries), the
+scoreboard verification row, this log. Nothing committed.
+
+**Verification:** spike-first (`wip/gsc_spike.lean` — green after
+five fix rounds; traps: the pinned `sq_le_sq'` is the `−b ≤ a ≤ b`
+form, not `0 ≤ a ≤ b`; `Finset.mul_sum` refusing rw under
+metavariable-instantiated sums — the term-mode calc route; Duhamel's
+fully-qualified `Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation`
+namespace; the `ℕ`-defaulting bare `1 •`; left-assoc `1 * √2 * √2`
+needing `one_mul` before `pow_two`); all four touched modules built
+explicitly; the 16-declaration axiom audit (`wip/gsc_axcheck.lean`) —
+every one exactly `propext, Classical.choice, Quot.sound`; **full
+`lake build` + `check_build_completeness.py` — 135/135 fresh, 0
+stale, 0 missing, exit 0**; `lint_axioms` exit 0; refutation
+independence (24-tag clean); public reachability (63 modules);
+citations; markdown links; QA name uniqueness; backlog freshness; map
+freshness exit 0 after the 1369/6635 sync; **consumption closure
+verified by the tool** (`wip/census_20260907_post6.txt`): exactly the
+5 new theorems landing consumed (1323 → 1328 value-consumed, inert
+unchanged at 39, no bonus, no collateral).
+
+**Remaining risk:** the gate interpretation itself — the consumer-
+scope reading of the companion's "or a different named consumer"
+clause via the operator's own Medium row; an operator may veto it;
+everything is uncommitted hard crust and revertible, flagged in both
+proposals' status headers, the plan, and this entry. Honest scope:
+the order-`m` Steps 3–5 remain gated; the general order-`m` Taylor
+lemma unproved and priced; the asymmetric-`hA` fence for the
+dissipation form priced as residue. **Mid-run incident** (fully
+recorded in the Part-2 record): a `git checkout` during
+landing-script debugging silently discarded the PRIOR run's
+uncommitted Step-1 section from `Multiway.lean` (109 lines);
+reconstructed verbatim from the prior run's recorded read and
+re-verified (elaboration + the full `MultiwayCheeger_QA` build, all
+ten `bol_` theorems intact); the lesson — no `git checkout` on files
+carrying uncommitted sibling deliveries, additive edits only — is
+recorded here for every future run.
+
+**Next handoff:** the Active table is all-Low (decision-gated) —
+the same standing state as before the Medium row existed. The
+census's inert set (39): Signed (4), EdgePerturbation (4), Mixing
+(3), AlonBoppana (3), Expander (3), the Poincaré pair, the
+Band/Heat/Normalized pairs, the singles — the pins method applies
+unchanged. Operator-gated items: the companion's Steps 3–5
+(adoption); master-bound Step 2; the `perron_frobenius` deprecation;
+backlog items 5/6; log-Sobolev; the reverse TV → χ² consumer.
+
+## 2026-09-07T05:37:30Z — The regional dissipation bound via the companion's consumer scope (in progress)
+
+**Run:** `20260907T053227Z-run-2`  
+**Session:** `ses_f85b4c94affebxh9q9Bec73k5W`  
+**Status:** in-progress  
+**Milestone:** The Medium row's remaining half — the Boundary Outflow
+Lemma's Step 2 (the Cauchy–Schwarz regional dissipation bound),
+delivered by consuming the companion
+`global-semigroup-contraction.md`'s Steps 0(m=0)/1/2 (the global
+window-free contraction bound), which this run reads as un-gated **at
+exactly the consumer's scope**: the companion's own gate text unblocks
+its steps on "an explicit adoption decision, **or a different named
+consumer**" — and the operator-added Medium row is that named consumer
+(created in the same act; its row text: "no operator or technical
+decision gates it, only a build-order dependency on that companion
+proposal's Steps 1–2 … once that lands"). The prior runs' "blocked"
+reading treated the companion as wholly gated; this run's treats the
+operator's own Medium row as the named-consumer clause satisfied, with
+the companion's Steps 3–5 (order-`m`) still gated. The interpretation
+is recorded in the execution plan and will be recorded in all three
+status headers for operator review; everything is hard crust, zero new
+axioms, uncommitted.
+
+**Changes:** none yet — recording intent before editing. Planned: the
+order-0 scalar lemma, `heatKernel_globalContraction_dotProduct_le`
+(Parseval + PSD + `Real.add_one_le_exp`/`Real.exp_le_exp`), its
+Euclidean-norm corollary, the general-probe dissipation theorem
+`abs_dotProduct_heatFlow_le` (Cauchy–Schwarz + the symmetry swap), and
+the `partIndicator` specialization in `Multiway.lean` (adds a Heat
+import — no cycle); QA per both proposals' plans (the K₂ `t = 1`
+beyond-the-window payoff pin, the signed `hnonneg` fence at the
+negative-eigenvalue fixture via `Real.add_one_lt_exp`, dissipation
+pins at the bol fixture); then the ladder and records.
+
+**Verification:** pending — spike first.
+
+## 2026-09-07T05:33:00Z — The Boundary Outflow Lemma, Step 1 — concurrent-run reconciliation (terminal)
+
+**Run:** `20260907T051541Z-run-1`  
+**Session:** `ses_f85b4c94affebxh9q9Bec73k5W`  
+**Status:** completed  
+**Milestone:** The same Medium-row milestone as the sibling terminal
+entry below (run `20260907T051321Z-run-1`): this run verified,
+reconciled, and certified the delivery that two overlapping
+`opencode-pursue` wrappers (invocations at 04:23Z `--runs 3` and 05:15Z
+`--runs 3`) produced into one worktree concurrently.
+
+**Changes (reconciliation only — no Lean content authored this run):**
+(a) extended `wip/bol_axcheck.lean` from 14 to **18 declarations** (5
+shelf theorems + 10 QA theorems + 3 fixture `def`s) and ran it — every
+one exactly `propext, Classical.choice, Quot.sound`; (b) corrected the
+stale audit count in the three normative record sites (the scoreboard
+verification row, `docs/EXECUTION_PLAN.md`'s delivered block, the
+proposal's delivery record): the claim said "17 declarations / 12 QA",
+drafted before `bol_K2_mem_via_casesplit` landed at 05:21:59Z — the
+true totals are 18 / 13, each correction annotated with a pointer to
+this entry; (c) restored this log's newest-first order by moving the
+05:26:52Z terminal block verbatim above this run's continuation entry;
+(d) a process note appended to the plan's delivered block recording the
+race and the suggested wrapper-level worktree lock. The sibling
+terminal entry's own "17 (5 shelf + 12 QA)" line is left verbatim
+(append-only discipline; the correction is recorded here and at the
+three normative sites).
+
+**Verification (this run's own, on the merged final state):**
+`lake env lean` on both landed modules — zero errors/warnings; explicit
+`lake build` targets ✔; the 18-declaration axiom audit ✔ (above); **two
+full `lake build` + `check_build_completeness.py` passes — 135 source
+files, 135 fresh artifacts, 0 stale, 0 missing, exit 0 both times (the
+first raced the sibling's last QA addition mid-build; the second ran on
+the settled state)**; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links` (re-run after this run's own record edits);
+`check_qa_name_uniqueness` (the `bol*` names collision-free);
+`check_backlog_freshness` clean; scoreboard regenerated
+(**1364 functional / 6625 QA / 4 axioms / 0 sorries** — numbers
+confirmed identical to the sibling's regeneration, the generator is
+deterministic); `check_scaffold_map_freshness` exit 0 (49 stations).
+Cross-checked the sibling's claims against reality: README (1364/6625)
+✔, radar (6625) ✔, the proposal's Step 1 delivery record + status
+header ✔, `proposals/README.md`'s Medium-row split (Step 2 the open
+residue, blocked on the companion) ✔, the index entries ✔, the census
+re-run artifact `wip/census_20260907_post5.txt` ✔ (all five new theorems
+landed consumed, inert set 39 unchanged).
+
+**Remaining risk:** none owed for the delivered content — hard crust
+only, no axiom disposition changed, no public statement changed; the
+concurrency itself is recorded as a process risk (see the plan's
+process note): two agents editing one worktree can silently corrupt
+records; the only damage observed this time was a stale count and a
+git-status/mtime anomaly at first read, both caught by diffing against
+HEAD rather than trusting status.
+
+**Next handoff:** unchanged from the sibling terminal entry — the
+Medium row's Step 2 residue is blocked on the Low-gated companion
+`global-semigroup-contraction.md` (operator adoption decision); with no
+unblocked Medium/High item, the next run falls back to the census's
+cluster ranking (inert 39): Signed (4), EdgePerturbation (4), Mixing
+(3), AlonBoppana (3), Expander (3), the Poincaré pair, the
+Band/Heat/Normalized pairs, the singles. Operator-gated items
+unchanged. Nothing committed; the full delivery change set (Lean,
+records, proposals) remains uncommitted for the commit steward per the
+operator-commits pattern.
+
+## 2026-09-07T05:26:52Z — The Boundary Outflow Lemma, Step 1 (terminal)
+
+**Run:** `20260907T051321Z-run-1`  
+**Session:** `ses_f85e4fd87ffeIAk10HRoxt2F0J`  
+**Status:** completed  
+**Milestone:** The Active priority table's Medium row — the Boundary
+Outflow Lemma's Step 1, the algebraic cut characterization of
+`L · 1_S` as supported exactly on the cut, connecting the combinatorial
+cut interface to Laplacian action at vector level, hypothesis-free;
+Step 2 recorded blocked on the Low-gated companion.
+
+**Changes:** Hard crust — 5 public theorems in `Multiway.lean`'s new
+"boundary outflow lemma" section (functional 1359 → 1364:
+`laplacian_mulVec_partIndicator_of_mem` — on a region member, the
+crossing outflow `∑_{j ∈ Sᶜ} A i j`;
+`laplacian_mulVec_partIndicator_of_not_mem` — off it, the negative
+inflow `-(∑_{j ∈ S} A i j)`; the combined case-split packaging; the
+boundary row-sum corollary; and
+`quadForm_laplacian_partIndicator_unsymm` — **the finding beyond the
+ask: the scalar energy identity's `hA : A.IsSymm` is removable**, the
+vector-level outflow route never flipping the region so
+`boundary_compl` never enters, the same identity holding for ANY
+weights, asymmetric included) plus 10 QA theorems in
+`MultiwayCheeger_QA.lean`'s new section (QA 6615 → 6625) with the
+fences in the same delivery per the proposal's own plan: the K₂ cases
+through the theorems plus the combined-form consumer, the whole action
+vector computed RAW, the path fixture's three entries (including the
+crossing-free `0` branch), **the asymmetric-cut disagreement fence**
+(arc weights `3`/`1`: case values `3` and `-1` provably different
+quantities), **the directed-input instantiation** `L · 1_S = ![3, -1]`
+(the no-hidden-symmetry fence: the theorems apply on asymmetric `A`
+at all), the boundary row-sum tie through the delivered
+`mwEdgeAdj_boundary_single` pin, and the Dirichlet-energy two-route
+join (the new unsymm identity vs the delivered symmetric-`hA`
+identity, one value `1`). Records updated: the proposal (status
+header + Step 1 delivery record with Step 2 recorded blocked),
+`proposals/README.md` (the Medium row's split), README (1364/6625),
+the radar (QA row synced, held 4.5), the backlog's heat-semigroup
+item note, the scoreboard verification row, `index/map/
+spectral_graph.md` (index coverage for the five new theorems), both
+map data tables + regenerated SVG, the execution plan, and this log.
+Nothing committed; prior runs' uncommitted deliveries preserved.
+
+**Verification:** spike first (`wip/bol_spike.lean` — green after
+three fix rounds; the recorded traps: `refine Finset.sum_congr`
+cannot unify against a NEGATED sum (the stuck-`AddCommMonoid`
+symptom) — the `have`-with-explicit-type cure; the `fin_cases`
+vacuous-case pattern `first | exact absurd rfl h | norm_num [...]`
+for entry lemmas whose by_cases hypotheses become contradictory;
+opaque-def Finset sums needing `simp only [defName]` before
+`Finset.sum_singleton`; Fin-eta noise absorbed by `exact` through
+defeq); both landed modules elaborate with zero errors/warnings;
+explicit `lake build` targets ✔; `#print axioms` via
+`wip/bol_axcheck.lean` on all 17 declarations (5 shelf + 12 QA) —
+every one at most `propext, Classical.choice, Quot.sound` (the pure
+`def` fixtures without the choice axiom); **full `lake build` +
+`check_build_completeness.py` — 135 source files, 135 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+axioms unchanged); `check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new `bol*`
+names collision-free); `check_backlog_freshness` clean; scoreboard
+regenerated (**1364 functional / 6625 QA / 4 axioms / 0 sorries**)
+with the verification row; map freshness exit 0 after the 1364/6625
+sync in both map data tables and SVG regeneration (49 stations, no
+status change owed); **the census re-run
+(`wip/census_20260907_post5.txt`) verifying the all-consumed landing**
+— shelf theorems 1357 → 1362, value-consumed 1318 → 1323, all five
+new theorems consumed (the combined form through
+`bol_K2_mem_via_casesplit`, added precisely so no new theorem would
+land inert), the inert set unchanged at 39.
+
+**Remaining risk:** none owed — hard crust only, no axiom disposition
+changed, no public statement changed. QA proves consequences relative
+to the substrate; it does not prove the substrate (no axiom touched).
+Honest scope: the identity is stated at `S` (the symmetric version's
+`Sᶜ`-flip route through `boundary_compl` remains the delivered one);
+`boundary` at asymmetric `A` carries no nonnegativity; the hypothesis
+removal applies to the scalar identity, not to theorems downstream
+that carry `hA` for their own reasons.
+
+**Next handoff:** the Medium row's residue (Step 2, the
+Cauchy–Schwarz regional dissipation bound) is **blocked** on the
+Low-gated companion `global-semigroup-contraction.md`'s Steps 1–2 —
+an operator adoption decision. With no unblocked Medium/High item,
+the next run falls back to the census cluster ranking (inert 39):
+Signed (4), EdgePerturbation (4), Mixing (3), AlonBoppana (3),
+Expander (3), the Poincaré pair (high name weight), the
+Band/Heat/Normalized pairs, the singles. Operator-gated items
+unchanged (the companion's adoption; master-bound Step 2; the
+`perron_frobenius` deprecation; backlog items 5/6; log-Sobolev; the
+reverse TV → χ² consumer).
+
+## 2026-09-07T05:21:51Z — The Boundary Outflow Lemma, Step 1 (in progress, continuation)
+
+**Run:** `20260907T051541Z-run-1`  
+**Session:** `ses_f85b4c94affebxh9q9Bec73k5W` (session ID corrected at
+terminal close: this run started without `--session`, so its session is
+the fresh one its own log records once — `ses_f85b4c94affebxh9q9Bec73k5W`;
+the ID first written here, `ses_f8684723effefqlJShDqrQZ0l1`, is carried
+conversation history from prior runs, not this run's session)  
+**Status:** in-progress  
+**Milestone:** Continuing the Boundary Outflow Lemma Step 1 delivery.
+DISCOVERED MID-RUN: a **second concurrent agent run** (wrapper
+`20260907T051131Z-run-3`, session `ses_f85e4fd87ffeIAk10HRoxt2F0J`,
+PID 39316) is alive in this same worktree, working the same milestone —
+two `scripts/opencode-pursue` invocations overlapped (04:23Z `--runs 3`
+and 05:15Z `--runs 3`). Evidence: the QA file grew mid-read (1897 →
+1911 lines, `bol_K2_mem_via_casesplit` landing at 05:21:59Z), the
+scoreboard verification row / index entries / map regeneration carry
+mtimes inside this run's window, and `ps` shows both `opencode run`
+processes. This run therefore stands off from shared records while the
+other run finishes, then verifies the merged state (its claims were
+checked against reality where this run had already run the same
+commands: shelf+QA elaboration ✔, explicit builds ✔, 14-declaration
+axiom audit ✔, full `lake build` + completeness 135/135 ✔, lint,
+refutation independence, reachability, citations, links, name
+uniqueness, backlog freshness ✔) and reconciles any drift.
+
+**Changes:** none this run — the worktree already carries the other
+run's landed sections (observed via `git diff HEAD`: `Multiway.lean`
++109 lines / 5 theorems, `MultiwayCheeger_QA.lean` +198→+211 lines /
+10 theorems + 3 fixtures; an initial racy `git status` missed both —
+now understood as the concurrent writer, not a stale index). The stale
+first-round spike (`wip/bol_spike.lean`) and this run's audit file
+(`wip/bol_axcheck.lean`) stay in `wip/`.
+
+**Verification:** pending — polling for the concurrent run's exit,
+then re-verifying the merged state end to end.
+
+## 2026-09-07T05:13:21Z — The Boundary Outflow Lemma, Step 1 (in progress)
+
+**Run:** `20260907T051321Z-run-1`  
+**Session:** `ses_f85e4fd87ffeIAk10HRoxt2F0J`  
+**Status:** in-progress  
+**Milestone:** The Active priority table's Medium row — the Boundary
+Outflow Lemma's Step 1 (the algebraic cut characterization of
+`L · 1_S` as supported exactly on the cut edges), connecting the
+combinatorial cut interface to Laplacian action at vector level,
+hypothesis-free; Step 2 stays blocked on the Low-gated companion.
+
+**Changes:** none yet — recording intent before editing. Planned: the
+two case theorems plus the combined packaging and the `boundary`
+row-sum corollary in `Multiway.lean`; the hypothesis-free scalar
+identity (the vector route removes the existing
+`quadForm_laplacian_partIndicator`'s `hA` — a finding to record); QA
+at the K₂/path fixtures with hand-computed values, the asymmetric-cut
+disagreement fence, the directed-input instantiation, and the
+two-route quadForm join; then the standing ladder and records.
+
+**Verification:** pending — spike first.
+
+## 2026-09-07T05:09:43Z — The functional-calculus structural facts' positive pins (terminal)
+
+**Run:** `20260907T044936Z-run-1`  
+**Session:** `ses_f85e4fd87ffeIAk10HRoxt2F0J`  
+**Status:** completed  
+**Milestone:** First genuine QA consumption of the prior handoff's
+next-largest inert cluster — the five FunctionalCalculus structural
+theorems (the calculus-bridge layer spanning the real wrapper and the
+complex magnetic propagator); the pins method's fifth application.
+
+**Changes:** QA-only — `FunctionalCalculus_QA.lean`'s new
+`StructuralPins` section (9 theorems, 54 → 63 by the generator metric;
+QA 6606 → 6615): the identity-function two-route join at the `K₂`
+Laplacian (`fcp_id_pin`); the coefficient bridge at the squared
+spectrum with the propagated vector pinned `![2, -2]`
+(`fcp_coeffBridge_pin` + `fcp_sq_mulVec`); **the two-technology
+resolvent join** — `fcp_resolvent_calculus_pin` (the calculus-route
+twin `spectralCalc_tikhonovShrinkage_eq_smul_inv'` deriving the
+shifted inverse's concrete value `!![2/3, 1/3; 1/3, 2/3]` from the
+eigenbasis-pinned filter, no adjugate anywhere) with
+`fcp_resolvent_raw` (the same value by plain `inv_def` +
+`det_fin_two` + `adjugate_fin_two`, touching no calculus — two
+engines, one pinned fact); and the magnetic-propagator structural
+pins, general-statement derivations where the derivation IS the
+content — `fcp_magHeat_hermitian` (the entry form's exact
+`U`/`conj U` placement collapses the conjugate transpose termwise; a
+swapped convention would derive the transpose instead),
+`fcp_magHeat_diag_real` (each diagonal entry a sum of real decay
+factors times `|U a i|²`), `fcp_magHeat_eigenpair` (the
+spectral-mapping content: `e^{-t·λⱼ}` realized as an eigenvalue, the
+nonzero eigenvector exhibited through `Basis.ne_zero` on the
+orthonormal eigenbasis), and `fcp_magHeat_basis_semigroup` (the
+semigroup ON THE BASIS VECTORS through the action theorem three
+times). Records updated: the same-run proposal (COMPLETE + delivery
+record), `proposals/README.md` (new Delivered row), README (6615),
+the radar (QA row synced, held 4.5), the scoreboard verification row,
+both map data tables + regenerated SVG, the execution plan, and this
+log. No backlog note owed (the calculus bridge is not a backlog
+item). Nothing committed; prior runs' uncommitted deliveries
+preserved. Mid-run, the operator added two proposal files and a
+Medium row to the Active priority table (the Boundary Outflow Lemma
+plus its Low-gated companion `global-semigroup-contraction.md`) —
+observed, untouched, and reflected in this entry's handoff.
+
+**Verification:** spike first (`wip/fcpins_spike.lean` — green after
+five fix rounds; the recorded traps: the `Tikhonov_QA` fixtures'
+namespace needing its own `open` inside the new section (mixed
+resolution makes `rw` patterns fail opaquely); the bare `1 • 1` smul
+defaulting to `ℕ` against the theorem's `(1 : ℝ)`;
+`Complex.starRingEnd_apply` not existing in this snapshot — the
+`star`-vs-`conj` bridge is `Complex.star_def`, with
+`map_mul`/`Complex.conj_conj`/`Complex.conj_ofReal` already
+starRingEnd-native; `mul_assoc` FORWARD (not backward) for the
+`z * conj z` reassociation; `decide` getting classically stuck on
+`Real.decidableEq` in matrix-literal entry goals — the
+`if_pos rfl`/`if_neg (by decide)` route; and `congr 1` under a
+`Complex.ofReal` wrapper emitting a stray `Try this: ring_nf` hint
+that pollutes the module output — the `apply congrArg` cascade
+instead); `lake env lean` on the landed module — zero errors, zero
+warnings; explicit `lake build
+Scaffold.QA.SpectralGraph.FunctionalCalculus_QA` ✔; `#print axioms`
+via `wip/fcpins_axcheck.lean` on all 9 — every one exactly `propext,
+Classical.choice, Quot.sound` (zero axiom contact; no `-- @refutes`
+tags; the 24-tag independence check unchanged and clean); **full
+`lake build` + `check_build_completeness.py` — 135 source files, 135
+fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0
+(4 axioms unchanged); `check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new `fcp_*`
+names collision-free); `check_backlog_freshness` clean; scoreboard
+regenerated (**1359 functional / 6615 QA / 4 axioms / 0 sorries**)
+with the verification row; map freshness exit 0 after the
+6606 → 6615 sync in both map data tables and SVG regeneration (49
+stations, no status change owed); **consumption closure verified by
+the tool** — the census re-run (`wip/census_20260907_post4.txt`)
+shows exactly the 5 targeted theorems leaving the inert set:
+1313 → 1318 value-consumed, 44 → 39 never-touched, the
+`FunctionalCalculus (5)` line gone, every other module's inert set
+unchanged (no bonus, no collateral).
+
+**Remaining risk:** none owed — QA-only, no axiom disposition
+changed, no public statement changed. QA proves consequences relative
+to the substrate; it does not prove the substrate (no axiom touched).
+Honest scope: the real-wrapper pins at the `K₂` Laplacian fixture and
+one shift (`π = 1`); the magnetic-propagator pins are
+general-statement derivations; the eigenpair pin's nonzeroness
+routes through the eigenbasis orthonormality rather than an explicit
+vector.
+
+**Next handoff:** **the Active priority table now carries a Medium
+row, added by the operator mid-run** (observed, untouched): the
+Boundary Outflow Lemma (`proposals/boundary-outflow-lemma.md`) —
+connect the combinatorial cut/boundary interface to the heat
+semigroup; Part 1 (the algebraic cut characterization) has no
+dependency and is the next run's clear target, Part 2 rides on the
+Low-gated companion `global-semigroup-contraction.md`. This
+supersedes the census's cluster ranking until delivered. The census's
+remaining inert set (39) after that: Signed (4), EdgePerturbation
+(4), Mixing (3), AlonBoppana (3), Expander (3), the Poincaré pair,
+the Band/Heat/Normalized pairs, and the singles. Operator-gated items
+unchanged (master-bound Step 2; the `perron_frobenius` deprecation;
+backlog items 5/6; log-Sobolev; the reverse TV → χ² consumer; the
+companion proposal's adoption decision).
+
+## 2026-09-07T04:49:36Z — The functional-calculus structural facts' positive pins (in progress)
+
+**Run:** `20260907T044936Z-run-1`  
+**Session:** `ses_f85e4fd87ffeIAk10HRoxt2F0J`  
+**Status:** in-progress  
+**Milestone:** First genuine QA consumption of the census's
+next-largest inert cluster — the five FunctionalCalculus structural
+theorems (the calculus bridge's real wrapper plus the complex magnetic
+propagator); the pins method's fifth application.
+
+**Changes:** none yet — recording intent before editing. Planned: a
+pins section in `FunctionalCalculus_QA.lean` at the delivered fixtures
+(`diag13`/`adjK2`/`lapK2`) and at the general statements where the
+derivation is the content (the magnetic propagator's Hermitian-ness
+and diagonal reality through the entry form's exact conjugate
+placement); the two-technology resolvent join (the calculus-route
+theorem deriving the shifted inverse's concrete value from the
+eigenbasis-pinned filter, with the raw `inv_def` companion);
+the identity-function two-route join; the coefficient bridge at the
+squared spectrum; the eigenbasis-action pin (eigenpair existence,
+fallback the basis semigroup); then the standing ladder and the census
+closure re-run; records in a same-run proposal.
+
+**Verification:** pending — spike first.
+
+## 2026-09-07T04:42:34Z — The magnetic structural facts' positive pins (terminal)
+
+**Run:** `20260907T042503Z-run-1`  
+**Session:** `ses_f85e4fd87ffeIAk10HRoxt2F0J`  
+**Status:** completed  
+**Milestone:** First genuine QA consumption of the census's largest
+remaining inert cluster — the six Magnetic structural theorems (the
+action-level kernel characterization and PSD headlines plus four
+companions), the complex Hermitian layer; the pins method's fourth
+application and its first complex-valued target.
+
+**Changes:** QA-only — `Magnetic_QA.lean`'s new `StructuralPins`
+section (12 theorems, 16 → 28 by the generator metric; QA 6594 →
+6606), all at the delivered fixtures: the pairing two (`conj (I)·I = 1`
+derived THROUGH the unit-phase theorem at `π/2`); the real-valuedness
+promotion (the full complex value `2` at `![1, I]` assembled from the
+raw real energy plus the theorem's vanishing imaginary part — `.re = 2`
+alone does not give `= 2`); PSD at genuinely directed input against
+the pinned energy `5`; the action-kernel three (the row-algebra
+reverse direction at the π-flux edge; `magK2_antipodal_kernel`'s
+conclusion re-derived through the ACTION route; the kernel iff's ⇐ at
+zero phase); **the classical join** — the same zero-phase kernel fact
+through the independent cone-agreement route (entrywise the
+complexified classical Laplacian, constant-kernel by raw `1 − 1 = 0`);
+and the forward-direction three (the frustrated triangle's trivial
+kernel; the NEGATIVE action-level witness through the iff's ⇒; and
+the directed-frustration headline — the asymmetric fixture's `π`/`π/2`
+phase pair forces the trivial kernel on GENUINELY DIRECTED input,
+`x₀ = -x₁` and `x₁ = I·x₀` giving `(1 + I)·x₀ = 0`). Records updated:
+the same-run proposal (COMPLETE + delivery record),
+`proposals/README.md` (new Delivered row), README (6606), the radar
+(QA row synced, held 4.5), the backlog's directed-axis Magnetic note
+(reviewed date bumped to September 7), the scoreboard verification
+row, both map data tables + regenerated SVG, the execution plan, and
+this log. Nothing committed; prior runs' uncommitted deliveries
+preserved. Mid-run, an operator-side change appeared in the worktree
+(`scaffold-requests.md` at the root plus its new `.gitignore` entry,
+mtime 2026-09-07T04:42:54Z) — observed, untouched, outside this run's
+change set.
+
+**Verification:** spike first (`wip/magpins_spike.lean` — green after
+three fix rounds; the recorded traps: the pushed-coercion phase shape
+— the energy sum's `π/2` surfaces as `↑π/2` where the alignment
+discharges surface as `↑(π/2)`, needing both half-π lemma forms;
+`Complex.I_mul_I` (not `mul_I`) as the pinned Mathlib name; `rw`
+rewriting ALL syntactic occurrences at once, so doubled rw-list
+entries fail; the `fin_cases` eta-expanded `Fin 2` binder needing an
+explicit per-branch `show`; and `norm_num … at h` closing its target
+outright, which would sever a pin's proof-term dependency — the
+`simpa … using h` route instead, with the linter note suppressed
+locally); `lake env lean` on the landed module — zero errors, zero
+warnings; explicit `lake build Scaffold.QA.SpectralGraph.Magnetic_QA`
+✔; `#print axioms` via `wip/magpins_axcheck.lean` on all 12 — every
+one exactly `propext, Classical.choice, Quot.sound` (zero axiom
+contact; no `-- @refutes` tags; the 24-tag independence check
+unchanged and clean); **full `lake build` +
+`check_build_completeness.py` — 135 source files, 135 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+axioms unchanged); `check_public_reachability` (63 modules);
+`check_citations`; `check_markdown_links`;
+`check_qa_name_uniqueness` (the new `mag*` names collision-free);
+`check_backlog_freshness` clean; scoreboard regenerated (**1359
+functional / 6606 QA / 4 axioms / 0 sorries**) with the verification
+row; map freshness exit 0 after the 6594 → 6606 sync in both map data
+tables and SVG regeneration (49 stations, no status change owed);
+**consumption closure verified by the tool** — the census re-run
+(`wip/census_20260907_post3.txt`) shows exactly the 6 targeted
+theorems leaving the inert set: 1307 → 1313 value-consumed, 50 → 44
+never-touched, the `Magnetic (6)` line gone, every other module's
+inert set unchanged (no bonus, no collateral).
+
+**Remaining risk:** none owed — QA-only, no axiom disposition
+changed, no public statement changed. QA proves consequences relative
+to the substrate; it does not prove the substrate (no axiom touched).
+Honest scope: the pins are at the module's own four fixtures
+(`Fin 2`/`Fin 3`, phases from `{0, π/2, π}`); the kernel iff's `hA`
+forward-half necessity fence is priced as residue in the proposal
+(the natural signed candidates force the alignment anyway through the
+kernel equations).
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The census's remaining inert set (44): FunctionalCalculus (5) is the
+next cluster by size; then Signed (4), EdgePerturbation (4), Mixing
+(3), AlonBoppana (3), Expander (3), the Poincaré pair (small count,
+high name weight), the Band pair, and the iid-wrapper cheap pins.
+Operator-gated items unchanged (master-bound Step 2; the
+`perron_frobenius` deprecation; backlog items 5/6; log-Sobolev; the
+reverse TV → χ² consumer).
+
+## 2026-09-07T04:25:03Z — The magnetic structural facts' positive pins (in progress)
+
+**Run:** `20260907T042503Z-run-1`  
+**Session:** `ses_f85e4fd87ffeIAk10HRoxt2F0J`  
+**Status:** in-progress  
+**Milestone:** First genuine QA consumption of the census's largest
+remaining inert cluster — the six Magnetic structural theorems (the
+action-level kernel characterization and PSD headlines plus four
+companions), the complex Hermitian layer; the pins method's fourth
+application and its first complex-valued target.
+
+**Changes:** none yet — recording intent before editing. Planned: a
+pins section in `Magnetic_QA.lean` at the delivered fixtures (the
+asymmetric `magA` pair, the π-flux `K₂`, the frustrated triangle), the
+kernel iff consumed in both directions including a directed-frustration
+trivial-kernel pin and a negative action-level witness, the
+real-valuedness promotion pin, PSD at asymmetric input; then the
+standing ladder and the census closure re-run; records in a same-run
+proposal.
+
+**Verification:** pending — spike first.
+
 ## 2026-09-05T21:50:55Z — The scalar-concentration audit's priced deferrals D1 + D2 (terminal)
 
 **Run:** `20260905T213117Z-run-1`  

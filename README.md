@@ -19,19 +19,34 @@ revision](docs/5_QA_SCOREBOARD.md) rather than tracking `main`.
 
 ## Status
 
-As of September 6, 2026:
+As of September 7, 2026:
 
 | Check | Result |
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 4 |
-| Functional theorems/lemmas (`Scaffold/Mathlib` + `Scaffold/Derived`) | 1359 — the public, consumer-facing layer `Scaffold.lean` actually imports |
-| QA theorems/lemmas (`Scaffold/QA`) | 6594, with no `sorry` or `admit` under `Scaffold/` — testing infrastructure, not imported by `Scaffold.lean` |
+| Functional theorems/lemmas (`Scaffold/Mathlib` + `Scaffold/Derived`) | 1369 — the public, consumer-facing layer `Scaffold.lean` actually imports |
+| QA theorems/lemmas (`Scaffold/QA`) | 6645, with no `sorry` or `admit` under `Scaffold/` — testing infrastructure, not imported by `Scaffold.lean` |
 
 Recent highlights (full per-run history in
 [`docs/AGENT_ACTIVITY.md`](docs/AGENT_ACTIVITY.md); per-result detail in each
 linked proposal):
 
+- **The global (window-free) semigroup contraction + the regional
+  dissipation bound** — the operator-requested cut↔heat bridge complete
+  end-to-end: on nonnegative-weight networks the eigenvalue window of
+  the existing first-order remainder bound drops out entirely
+  (`‖x − e^{−tL}x‖ ≤ t·‖Lx‖` for every `t ≥ 0`, by Parseval + PSD +
+  `Real.add_one_le_exp`; QA-pinned to hold at `t = 1` on K₂ where the
+  windowed bound's hypothesis provably fails, and fenced at a signed
+  negative-eigenvalue fixture where the conclusion provably fails
+  without nonnegativity), and composing it with the outflow vector
+  gives `|1_S ⬝ᵥ (x₀ − e^{−tL}x₀)| ≤ t·‖L·1_S‖·‖x₀‖` — the Boundary
+  Outflow Lemma's Part 2, the Medium row's own ask
+  ([proposal](proposals/boundary-outflow-lemma.md),
+  [companion](proposals/global-semigroup-contraction.md) Steps 0(m=0)/1/2
+  delivered under its named-consumer scope; the order-`m` Steps 3–5
+  remain operator-gated).
 - **Alon–Boppana bound** delivered complete end-to-end (Nilli's variational
   route), with the **Ramanujan Expansion Ceiling** as its first theorem
   consumer ([proposal](proposals/alon-boppana-bound.md)), and — named on

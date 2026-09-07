@@ -1,7 +1,7 @@
 # SGT Backlog
 
 **Status:** Canonical backlog for the broad spectral-graph-theory program  
-**Last reviewed:** September 6, 2026
+**Last reviewed:** September 7, 2026
 
 This is the bounded, center-first backlog required by the strategy's
 center-out policy. Items are ranked by concrete reuse: each names the
@@ -1237,20 +1237,31 @@ closed form `e^{-L} = !![0,1;-1,2]` on the square-zero-Laplacian
 fixture, the symmetry hypothesis refuted-on-omission, and the sign
 witness.
 
-*COMPLETE 2026-08-23:* the heat-semigroup program finished in four
-zero-axiom runs — Step 2 (the hypothesis-free semigroup law through
-`Matrix.exp_add_of_commute`), Step 3 (mass conservation through the
-entrywise-built exponential-series convergence `expSeries_hasSum_exp`
-and the kernel-vector engine, with the per-component no-leakage
-witness), and Step 4 (the payoff: the eigenmode engine
-`exp_mulVec_eq_smul_of_mulVec_eq_smul` consuming Step 3's convergence
-at an eigenvector, mode decay `heatKernel A t *ᵥ vᵢ = e^{−t·λᵢ} • vᵢ`,
-the sorted-spectrum monotonicity, the eigenbasis expansion, and the
-connected-graph **DC limit** `heatKernel_mulVec_tendsto_atTop` — free
-diffusion leaves only the mean `((∑ x)/|V|) • onesVec`). The external
-consumer's (`sgt-gaps.md`) four-item interface is fully discharged as
-hard crust; QA 1503 declarations total. Consensus maps,
-synchronization, and general graph semigroups remain gated as before.
+ *COMPLETE 2026-08-23:* the heat-semigroup program finished in four
+ zero-axiom runs — Step 2 (the hypothesis-free semigroup law through
+ `Matrix.exp_add_of_commute`), Step 3 (mass conservation through the
+ entrywise-built exponential-series convergence `expSeries_hasSum_exp`
+ and the kernel-vector engine, with the per-component no-leakage
+ witness), and Step 4 (the payoff: the eigenmode engine
+ `exp_mulVec_eq_smul_of_mulVec_eq_smul` consuming Step 3's convergence
+ at an eigenvector, mode decay `heatKernel A t *ᵥ vᵢ = e^{−t·λᵢ} • vᵢ`,
+ the sorted-spectrum monotonicity, the eigenbasis expansion, and the
+ connected-graph **DC limit** `heatKernel_mulVec_tendsto_atTop` — free
+ diffusion leaves only the mean `((∑ x)/|V|) • onesVec`). The external
+ consumer's (`sgt-gaps.md`) four-item interface is fully discharged as
+ hard crust; QA 1503 declarations total. Consensus maps,
+ synchronization, and general graph semigroups remain gated as before.
+ *(Update 2026-09-07: an external request relayed by the operator —
+ restated as the Medium Active proposal
+ `proposals/boundary-outflow-lemma.md` and its Low-gated companion
+ `proposals/global-semigroup-contraction.md` — asks for the cut↔heat
+ connection this program never built: **its Step 1 (the boundary
+ outflow lemma, `L · 1_S` as the cut-supported outflow vector) was
+ delivered 2026-09-07 as hard crust** — hypothesis-free, with the
+ finding that the scalar energy identity `quadForm_laplacian_
+ partIndicator` needs no symmetry; the companion's global window-free
+ contraction bound remains a gated NEW-machinery proposal, not a
+ reopening of this item.)*
 
 *Gate narrowly opened 2026-08-23/24 for discrete affine control
 specifically:* a second `sgt-gaps.md` request (item 2) names a
@@ -1751,7 +1762,17 @@ asymmetric-flux conjugate-pair entries and energy pin, the
 frustrated-vs-consistent kernel pair (the triangle vs `K₂` at the
 same `π` flux — the characterization exhibited discriminating), the
 classical bridge, and the nonnegativity fence (symmetric signed input
-refutes PSD, exactly `hA` isolated). The named external consumer
+refutes PSD, exactly `hA` isolated). (The action-level structural six
+— the kernel characterization `magneticLaplacian_mulVec_eq_zero_iff`,
+PSD, real-valuedness, the row-algebra reverse direction, the
+kernel-to-form helper, and the unit-phase pairing — received their
+first genuine QA consumption 2026-09-07 in `Magnetic_QA`'s new
+`StructuralPins` section (+12, 6594 → 6606,
+`proposals/magnetic-structural-pins.md`): both kernel-iff directions
+pinned, including the directed-frustration headline (the asymmetric
+fixture's `π`/`π/2` phase pair forces the trivial kernel on genuinely
+directed input) and the classical join — the same zero-phase kernel
+fact through the independent cone-agreement route.) The named external consumer
 ("directed community detection via the magnetic Laplacian") now has
 its mathematical core on the shelf; the complex spectral layer
 (eigenvalues of `M`, magnetic Cheeger, synchronization functionals)
@@ -2217,3 +2238,17 @@ follow-ons, not gaps in what is claimed.
 Backlog ranking follows [Strategy](1_STRATEGY.md) (center-out, leverage
 test) and the operator's 2026-08-17 broad-SGT reorientation recorded in
 [AGENT_ACTIVITY.md](AGENT_ACTIVITY.md).
+
+*Update (2026-09-07):* the heat-semigroup instance gained its
+**global (window-free) contraction layer** — not a reopening of the
+2026-08-19 gate (which remains closed for consensus/synchronization/
+general semigroups), but the consumer-scope delivery of
+`proposals/global-semigroup-contraction.md` Steps 0(m=0)/1/2: the
+operator-added Medium row (`proposals/boundary-outflow-lemma.md`,
+Part 2) is the "different named consumer" that document's own gate
+names, so exactly its three named steps landed — `‖x − e^{−tL}x‖ ≤
+t·‖Lx‖` at every `t ≥ 0` on nonnegative-weight networks (no
+eigenvalue window; Parseval + PSD + `Real.add_one_le_exp`), plus the
+regional dissipation bound tying it to the cut interface through the
+outflow vector. Hard crust, zero axioms; the companion's order-`m`
+Steps 3–5 remain operator-gated.

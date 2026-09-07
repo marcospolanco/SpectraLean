@@ -16,6 +16,7 @@ limitations under the License.
 import Scaffold.Mathlib.GraphTheory.Spectral
 import Scaffold.Mathlib.GraphTheory.Normalized
 import Scaffold.Mathlib.GraphTheory.VariationalTransfer
+import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.Duhamel
 import Mathlib.Analysis.Normed.Algebra.MatrixExponential
 import Mathlib.Analysis.SpecificLimits.Normed
 import Mathlib.Analysis.Normed.Group.InfiniteSum
@@ -2088,5 +2089,171 @@ theorem walkHeatKernel_variance_decay (A : WAdj (V := V))
       _ = Real.exp (-(2 * t * secondEval (normalizedLaplacian A) hL hcard))
           * Matrix.dotProduct (degreeSqrt A *ᵥ x) (degreeSqrt A *ᵥ x) := by
             rw [hparse]
+
+/-!
+## The global (window-free) contraction (consumer-scope delivery)
+
+`proposals/global-semigroup-contraction.md` Steps 0(m=0)/1/2, delivered
+under the named-consumer scope (the operator-added Medium row
+`proposals/boundary-outflow-lemma.md`, whose Part 2 rides on these): on
+symmetric NONNEGATIVE-weight networks — the PSD case every other
+heat-semigroup consumer already assumes — the eigenvalue window of the
+delivered first-order remainder bound drops out entirely. The general
+order-`m` Taylor form (the companion's Steps 3–5) remains gated.
+-/
+
+open Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation in
+/-- **The global order-0 scalar engine**: for every `y ≥ 0`,
+`(1 − e^{−y})² ≤ y²` — hypothesis-free on the half-line, from
+`Real.add_one_le_exp` (the `1 − y ≤ e^{−y}` side) and
+`Real.exp_le_exp` (the `e^{−y} ≤ 1` side). This is the window-free
+stand-in for the windowed `Real.abs_exp_sub_one_sub_id_le` the
+delivered first-order remainder bound consumes; the general order-`m`
+Taylor form is priced in
+`proposals/global-semigroup-contraction.md` Step 0 and stays gated. -/
+theorem sq_one_sub_exp_neg_le {y : ℝ} (hy : 0 ≤ y) :
+    (1 - Real.exp (-y)) ^ 2 ≤ y ^ 2 := by
+  have h1 : 1 - y ≤ Real.exp (-y) := by
+    have h := Real.add_one_le_exp (-y)
+    linarith
+  have h2 : Real.exp (-y) ≤ 1 := by
+    have h := Real.exp_le_exp.2 (neg_nonpos.2 hy)
+    rwa [Real.exp_zero] at h
+  exact sq_le_sq' (by linarith) (by linarith)
+
+open Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation in
+/-- **The global (window-free) order-0 contraction, dotProduct form**
+(`global-semigroup-contraction.md` Step 1): on a symmetric
+nonnegative-weight network, at every `t ≥ 0` — no eigenvalue window —
+the heat semigroup moves any vector by at most `t` Laplacian units:
+`(x − e^{−tL}x) ⬝ᵥ (x − e^{−tL}x) ≤ t² · (Lx ⬝ᵥ Lx)`.
+
+Route: Parseval over the proved orthonormal eigenbasis
+(`dotProduct_eigvecOf`), each mode's displacement coordinate read
+through `eigvecOf_dotProduct_heatKernel_mulVec` (the per-mode
+coordinate is `(1 − e^{−tλᵢ})` times the input coordinate), bounded by
+the scalar engine at `y := t·λᵢ ≥ 0` (PSD eigenvalue extraction, the
+`heatKernel_decayFactor_le_one` pattern), and reassembled into
+`t² · (Lx ⬝ᵥ Lx)` by the Laplacian's own Parseval
+(`dotProduct_eigvecOf_mulVec`). -/
+theorem heatKernel_globalContraction_dotProduct_le (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j) {t : ℝ} (ht : 0 ≤ t)
+    (x : V → ℝ) :
+    Matrix.dotProduct (x - heatKernel A t *ᵥ x) (x - heatKernel A t *ᵥ x)
+      ≤ t ^ 2 * Matrix.dotProduct (laplacian A *ᵥ x) (laplacian A *ᵥ x) := by
+  have hL := laplacian_symmetric A hA
+  have hμnn : ∀ i, 0 ≤ eigvalOf (laplacian A) hL i := fun i => by
+    rw [← quadForm_eigvecOf_self hL i]
+    exact laplacian_psd A hA hnonneg _
+  have hcoord : ∀ i : V,
+      Matrix.dotProduct (eigvecOf (laplacian A) hL i)
+          (x - heatKernel A t *ᵥ x)
+        = (1 - Real.exp (-(t * eigvalOf (laplacian A) hL i)))
+          * Matrix.dotProduct (eigvecOf (laplacian A) hL i) x := by
+    intro i
+    rw [Matrix.dotProduct_sub,
+      eigvecOf_dotProduct_heatKernel_mulVec A hA t x i]
+    ring
+  have hterm : ∀ i : V, (t * eigvalOf (laplacian A) hL i) ^ 2
+        * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2
+      = t ^ 2 * (Matrix.dotProduct (eigvecOf (laplacian A) hL i)
+            (laplacian A *ᵥ x)
+          * Matrix.dotProduct (eigvecOf (laplacian A) hL i)
+            (laplacian A *ᵥ x)) := by
+    intro i
+    rw [dotProduct_eigvecOf_mulVec hL i x, mul_pow]
+    ring
+  calc Matrix.dotProduct (x - heatKernel A t *ᵥ x) (x - heatKernel A t *ᵥ x)
+      = ∑ i, ((1 - Real.exp (-(t * eigvalOf (laplacian A) hL i)))
+          * Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2 := by
+        rw [dotProduct_eigvecOf hL (x - heatKernel A t *ᵥ x)
+          (x - heatKernel A t *ᵥ x)]
+        exact Finset.sum_congr rfl fun i _ => by
+          rw [hcoord i, pow_two]
+    _ ≤ ∑ i, (t * eigvalOf (laplacian A) hL i) ^ 2
+          * (Matrix.dotProduct (eigvecOf (laplacian A) hL i) x) ^ 2 := by
+        refine Finset.sum_le_sum fun i _ => ?_
+        rw [mul_pow]
+        exact mul_le_mul_of_nonneg_right
+          (sq_one_sub_exp_neg_le (mul_nonneg ht (hμnn i))) (sq_nonneg _)
+    _ = ∑ i, t ^ 2 * (Matrix.dotProduct (eigvecOf (laplacian A) hL i)
+            (laplacian A *ᵥ x)
+          * Matrix.dotProduct (eigvecOf (laplacian A) hL i)
+            (laplacian A *ᵥ x)) :=
+          Finset.sum_congr rfl fun i _ => hterm i
+    _ = t ^ 2 * ∑ i, Matrix.dotProduct (eigvecOf (laplacian A) hL i)
+            (laplacian A *ᵥ x)
+          * Matrix.dotProduct (eigvecOf (laplacian A) hL i)
+            (laplacian A *ᵥ x) :=
+          (Finset.mul_sum _ _ _).symm
+    _ = t ^ 2 * Matrix.dotProduct (laplacian A *ᵥ x) (laplacian A *ᵥ x) :=
+          congrArg _ (dotProduct_eigvecOf hL (laplacian A *ᵥ x)
+            (laplacian A *ᵥ x)).symm
+
+open Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation in
+/-- **The global order-0 contraction, Euclidean form** (the companion's
+Step 2 — the request's first formula verbatim): `‖x − e^{−tL}x‖ ≤
+t · ‖Lx‖` on the EuclideanSpace side of the `WithLp` equivalence, from
+the dotProduct form by `norm_euclidean_eq_sqrt` + `Real.sqrt`
+monotonicity. -/
+theorem heatKernel_globalContraction_le (A : WAdj (V := V))
+    (hA : A.IsSymm) (hnonneg : ∀ i j, 0 ≤ A i j) {t : ℝ} (ht : 0 ≤ t)
+    (x : V → ℝ) :
+    ‖(WithLp.equiv 2 (V → ℝ)).symm (x - heatKernel A t *ᵥ x)‖
+      ≤ t * ‖(WithLp.equiv 2 (V → ℝ)).symm (laplacian A *ᵥ x)‖ := by
+  have h1 := heatKernel_globalContraction_dotProduct_le A hA hnonneg ht x
+  have h2 : Real.sqrt (Matrix.dotProduct (x - heatKernel A t *ᵥ x)
+        (x - heatKernel A t *ᵥ x))
+      ≤ Real.sqrt (t ^ 2 * Matrix.dotProduct (laplacian A *ᵥ x)
+          (laplacian A *ᵥ x)) := Real.sqrt_le_sqrt h1
+  rw [Real.sqrt_mul (sq_nonneg t), Real.sqrt_sq ht] at h2
+  rwa [norm_euclidean_eq_sqrt, norm_euclidean_eq_sqrt]
+
+open Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation in
+/-- **The regional dissipation bound, general probe form** (the Boundary
+Outflow Lemma's Step 2 at the general probe vector): at every `t ≥ 0`
+on a symmetric nonnegative-weight network, the heat flow's displacement
+of any input `x`, read through any probe `v`, is bounded by `t` times
+the Laplacian's action on the PROBE times the input's norm —
+`|v ⬝ᵥ (x − e^{−tL}x)| ≤ t · √(Lv ⬝ᵥ Lv) · √(x ⬝ᵥ x)`.
+
+Route: the symmetric swap (`Matrix.dotProduct_mulVec` +
+`heatKernel_isSymm`) moves the semigroup from the input to the probe —
+`v ⬝ᵥ (x − K_t x) = (v − K_t v) ⬝ᵥ x` — then Cauchy–Schwarz
+(`abs_dotProduct_le`) splits the pairing, and the global order-0
+contraction at the PROBE bounds the first factor. The Medium row's
+Part-2 statement is this at `v := partIndicator S`. -/
+theorem abs_dotProduct_heatFlow_le (A : WAdj (V := V)) (hA : A.IsSymm)
+    (hnonneg : ∀ i j, 0 ≤ A i j) {t : ℝ} (ht : 0 ≤ t) (v x : V → ℝ) :
+    |Matrix.dotProduct v (x - heatKernel A t *ᵥ x)|
+      ≤ t * Real.sqrt (Matrix.dotProduct (laplacian A *ᵥ v)
+          (laplacian A *ᵥ v))
+        * Real.sqrt (Matrix.dotProduct x x) := by
+  have hswap : Matrix.dotProduct v (x - heatKernel A t *ᵥ x)
+      = Matrix.dotProduct (v - heatKernel A t *ᵥ v) x := by
+    rw [Matrix.dotProduct_sub, Matrix.sub_dotProduct]
+    congr 1
+    rw [Matrix.dotProduct_mulVec, ← Matrix.mulVec_transpose,
+      (heatKernel_isSymm A hA t).eq]
+  rw [hswap]
+  have h1 := heatKernel_globalContraction_dotProduct_le A hA hnonneg ht v
+  have hs : Real.sqrt (Matrix.dotProduct (v - heatKernel A t *ᵥ v)
+        (v - heatKernel A t *ᵥ v))
+      ≤ t * Real.sqrt (Matrix.dotProduct (laplacian A *ᵥ v)
+          (laplacian A *ᵥ v)) := by
+    have h2 : Real.sqrt (Matrix.dotProduct (v - heatKernel A t *ᵥ v)
+          (v - heatKernel A t *ᵥ v))
+        ≤ Real.sqrt (t ^ 2 * Matrix.dotProduct (laplacian A *ᵥ v)
+            (laplacian A *ᵥ v)) := Real.sqrt_le_sqrt h1
+    rw [Real.sqrt_mul (sq_nonneg t), Real.sqrt_sq ht] at h2
+    exact h2
+  calc |Matrix.dotProduct (v - heatKernel A t *ᵥ v) x|
+      ≤ Real.sqrt (Matrix.dotProduct (v - heatKernel A t *ᵥ v)
+          (v - heatKernel A t *ᵥ v))
+        * Real.sqrt (Matrix.dotProduct x x) := abs_dotProduct_le _ _
+    _ ≤ (t * Real.sqrt (Matrix.dotProduct (laplacian A *ᵥ v)
+          (laplacian A *ᵥ v)))
+        * Real.sqrt (Matrix.dotProduct x x) :=
+          mul_le_mul_of_nonneg_right hs (Real.sqrt_nonneg _)
 
 end SpectralGraphTheory

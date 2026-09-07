@@ -37,6 +37,17 @@
     false, so `hA : 0 ≤ A` is exercised, not decorated. This is the
     signed-graph surface the fence marks.
 
+  - **E (the structural pins):** first genuine consumption of the six
+    structural theorems the compiler-derived consumption census found
+    inert (never referenced by any QA proof term — the sections above
+    pin the form-level facts *beside* them). Both directions of the
+    action-level kernel characterization, the PSD, the real-valuedness
+    promotion, the row-algebra reverse direction, the kernel-to-form
+    helper, and the unit-phase pairing — including the directed
+    frustration witness (`π` vs `π/2` on the asymmetric fixture forces
+    the trivial kernel) and the classical-join cross-route
+    (`proposals/magnetic-structural-pins.md`).
+
   Fixtures are `Fin 2`/`Fin 3` with phases from `{0, π/2, π}` so
   `e^{iθ} ∈ {1, I, -1}` exactly. Matrix entries evaluate by `rfl`
   (the `Directed_QA` entry-table pattern); all proofs are raw
@@ -427,5 +438,272 @@ theorem magSigned_PSD_refuted :
       Matrix.head_cons]
   · norm_num [h01, h10, magThetaZero, Matrix.cons_val_zero, Matrix.cons_val_one,
       Matrix.head_cons]
+
+/-! ### Section E: the structural pins
+
+The six structural theorems the consumption census found inert
+(`conj_exp_I_mul_exp_I`, `hermQuadForm_eq_zero_of_mulVec_eq_zero`,
+`magneticLaplacian_mulVec_eq_zero_iff`,
+`magneticLaplacian_mulVec_eq_zero_of_forall_exp_mul_eq`,
+`magneticQuadForm_im_eq_zero`, `magneticQuadForm_re_nonneg`),
+consumed for the first time at the delivered fixtures — the pins
+method's fourth application and its first complex-valued target.
+-/
+
+/-- Weight nonnegativity of the asymmetric fixture (the PSD/kernel-iff
+hypothesis, dischargeable on genuinely directed input). -/
+theorem magA_nonneg : ∀ u v, 0 ≤ magA u v := by
+  intro u v
+  fin_cases u <;> fin_cases v <;>
+    norm_num [magA, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+/-- **Pin: the unit-phase pairing at `π`** — `conj (e^{iπ}) · e^{iπ} = 1`
+by the theorem, the pairing the K₂ alignment discharges lean on. -/
+theorem magPairing_pi_pin :
+    conj (Complex.exp (Complex.I * ((Real.pi : ℝ) : ℂ)))
+      * Complex.exp (Complex.I * ((Real.pi : ℝ) : ℂ)) = 1 :=
+  conj_exp_I_mul_exp_I Real.pi
+
+set_option linter.unnecessarySimpa false in
+/-- **Pin: the unit-phase pairing at a genuinely complex phase** — the
+numeric identity `conj (I) · I = 1` derived THROUGH the theorem at
+`π/2` (not by direct `I·I` arithmetic). -/
+theorem magPairing_I_pin : conj (Complex.I) * Complex.I = 1 := by
+  have h := conj_exp_I_mul_exp_I (Real.pi / 2)
+  rw [magExp_half_pi_raw, Complex.conj_I] at h
+  simpa [Complex.I_mul_I] using h
+
+/-- **Pin: real-valuedness promoted** — at the genuinely complex test
+vector `![1, I]` the form's imaginary part vanishes by the theorem, and
+the full complex value `2` is ASSEMBLED from the raw real energy plus
+that vanishing imaginary part (the promotion is load-bearing: `.re = 2`
+alone does not give `= 2`). -/
+theorem magIm_pin :
+    (hermQuadForm (magneticLaplacian magA magTheta) ![1, Complex.I]).im = 0
+      ∧ hermQuadForm (magneticLaplacian magA magTheta) ![1, Complex.I] = 2 := by
+  have him : (hermQuadForm (magneticLaplacian magA magTheta) ![1, Complex.I]).im = 0 :=
+    magneticQuadForm_im_eq_zero magA magTheta _
+  have hre : (hermQuadForm (magneticLaplacian magA magTheta) ![1, Complex.I]).re = 2 := by
+    rw [magnetic_energy_real, Complex.ofReal_re]
+    norm_num [magA, magTheta, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, magExp_pi, magExp_half_pi, Complex.normSq_apply]
+  refine ⟨him, ?_⟩
+  exact Complex.ext_iff.2 ⟨hre, by rw [him]; norm_num⟩
+
+/-- **Pin: PSD at asymmetric input** — the theorem applies with the
+weights hypothesis discharged on genuinely directed input (`0/2/1/0`),
+and the bound is nonvacuous: the pinned energy at this fixture and
+vector is `5` (`magEnergy_pin`). -/
+theorem magPSD_pin :
+    0 ≤ (hermQuadForm (magneticLaplacian magA magTheta) ![1, 1]).re
+      ∧ (hermQuadForm (magneticLaplacian magA magTheta) ![1, 1]).re = 5 := by
+  refine ⟨magneticQuadForm_re_nonneg magA magTheta _ magA_nonneg, ?_⟩
+  rw [magnetic_energy_real, Complex.ofReal_re]
+  norm_num [magA, magTheta, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons, magExp_pi, magExp_half_pi, Complex.normSq_apply]
+
+/-- **Pin: the row-algebra reverse direction at the `π`-flux edge** —
+the antipodal potential is KILLED by the magnetic Laplacian, through
+the hypothesis-free-on-weights row algebra. -/
+theorem magK2_mulVec_zero :
+    magneticLaplacian magSym magThetaPi *ᵥ ![1, -1] = 0 := by
+  refine magneticLaplacian_mulVec_eq_zero_of_forall_exp_mul_eq magSym magThetaPi ![1, -1] ?_
+  intro u v huv
+  match u, v with
+  | ⟨0, _⟩, ⟨1, _⟩ =>
+    show ![1, -1] 0 = Complex.exp (Complex.I * ↑(magThetaPi 0 1)) * ![1, -1] 1
+    rw [show ((magThetaPi 0 1 : ℝ) : ℂ) = ((Real.pi : ℝ) : ℂ) from rfl, magExp_pi]
+    norm_num [Matrix.cons_val_zero, Matrix.head_cons]
+  | ⟨1, _⟩, ⟨0, _⟩ =>
+    show ![1, -1] 1 = Complex.exp (Complex.I * ↑(magThetaPi 1 0)) * ![1, -1] 0
+    rw [show ((magThetaPi 1 0 : ℝ) : ℂ) = ((-Real.pi : ℝ) : ℂ) from rfl, magExp_neg_pi]
+    norm_num [Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons]
+  | ⟨0, _⟩, ⟨0, _⟩ => exact absurd rfl huv
+  | ⟨1, _⟩, ⟨1, _⟩ => exact absurd rfl huv
+
+/-- **Pin: form-level kernel membership through the ACTION route** —
+`magK2_antipodal_kernel`'s pinned conclusion, re-derived via
+`M *ᵥ x = 0` (the row algebra) plus the kernel-to-form helper. -/
+theorem magK2_action_form_zero :
+    hermQuadForm (magneticLaplacian magSym magThetaPi) ![1, -1] = 0 :=
+  hermQuadForm_eq_zero_of_mulVec_eq_zero _ _ magK2_mulVec_zero
+
+/-- **Pin: the kernel iff's reverse direction at zero phase** — the
+constant potential is killed, through the iff applied backwards (the
+alignment at `e^{i·0} = 1`). -/
+theorem magZero_mulVec_kernel :
+    magneticLaplacian magSym magThetaZero *ᵥ (fun _ => (1 : ℂ)) = 0 := by
+  refine (magneticLaplacian_mulVec_eq_zero_iff magSym magThetaZero
+    (by intro u v
+        fin_cases u <;> fin_cases v <;>
+          norm_num [magSym, Matrix.cons_val_zero, Matrix.cons_val_one,
+            Matrix.head_cons]) _).2 ?_
+  intro u v huv
+  match u, v with
+  | ⟨0, _⟩, ⟨1, _⟩ =>
+    show (1 : ℂ) = Complex.exp (Complex.I * ↑(magThetaZero 0 1)) * 1
+    norm_num [magThetaZero, Complex.exp_zero]
+  | ⟨1, _⟩, ⟨0, _⟩ =>
+    show (1 : ℂ) = Complex.exp (Complex.I * ↑(magThetaZero 1 0)) * 1
+    norm_num [magThetaZero, Complex.exp_zero]
+  | ⟨0, _⟩, ⟨0, _⟩ => exact absurd rfl huv
+  | ⟨1, _⟩, ⟨1, _⟩ => exact absurd rfl huv
+
+/-- **Pin: the classical join, independently** — the same zero-phase
+action-kernel fact through the CONE AGREEMENT route: entrywise the
+magnetic operator is the complexified classical Laplacian, whose
+constant-kernel property is raw arithmetic (`1 - 1 = 0` per row). Two
+independent engines for one pinned fact; each fails if its own layer is
+wrong. -/
+theorem magZero_mulVec_kernel_classical :
+    magneticLaplacian magSym magThetaZero *ᵥ (fun _ => (1 : ℂ)) = 0 := by
+  have hΘ0 : magThetaZero = 0 := by
+    ext u v
+    fin_cases u <;> fin_cases v <;>
+      norm_num [magThetaZero, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.head_cons]
+  have hdeg : ∀ i : Fin 2, deg magSym i = 1 := by
+    intro i
+    fin_cases i <;>
+      norm_num [deg, magSym, Fin.sum_univ_two, Matrix.cons_val_zero,
+        Matrix.cons_val_one, Matrix.head_cons]
+  have hLdiag : ∀ i : Fin 2, (laplacian magSym) i i = 1 := by
+    intro i
+    show degreeMatrix magSym i i - magSym i i = 1
+    rw [degreeMatrix_diagonal, hdeg i]
+    fin_cases i <;>
+      norm_num [magSym, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+  have hLoff : ∀ i j : Fin 2, i ≠ j → (laplacian magSym) i j = -1 := by
+    intro i j hij
+    show degreeMatrix magSym i j - magSym i j = -1
+    rw [degreeMatrix_off_diagonal magSym hij]
+    fin_cases i <;> fin_cases j <;>
+      first
+      | exact absurd rfl hij
+      | norm_num [magSym, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+  funext i
+  rw [Matrix.mulVec, Matrix.dotProduct, hΘ0, Fin.sum_univ_two, Pi.zero_apply]
+  have h0 : magneticLaplacian magSym (0 : Matrix (Fin 2) (Fin 2) ℝ) i 0
+      = ((laplacian magSym) i 0 : ℂ) :=
+    magneticLaplacian_zero_phase_apply_of_isSymm magSym_isSymm i 0
+  have h1 : magneticLaplacian magSym (0 : Matrix (Fin 2) (Fin 2) ℝ) i 1
+      = ((laplacian magSym) i 1 : ℂ) :=
+    magneticLaplacian_zero_phase_apply_of_isSymm magSym_isSymm i 1
+  rw [h0, h1]
+  fin_cases i
+  · show ((laplacian magSym) 0 0 : ℂ) * 1 + ((laplacian magSym) 0 1 : ℂ) * 1 = 0
+    rw [hLdiag 0, hLoff 0 1 (by decide)]
+    norm_num
+  · show ((laplacian magSym) 1 0 : ℂ) * 1 + ((laplacian magSym) 1 1 : ℂ) * 1 = 0
+    rw [hLdiag 1, hLoff 1 0 (by decide)]
+    norm_num
+
+/-- **Pin: the kernel iff's forward direction at the frustrated
+triangle** — action-level kernel membership forces the potential to
+vanish (the alignment the iff supplies, replayed). -/
+theorem magTri_kernel_frustrated (x : Fin 3 → ℂ)
+    (h : magneticLaplacian magTri magThetaTri *ᵥ x = 0) : x = 0 := by
+  have hg := (magneticLaplacian_mulVec_eq_zero_iff magTri magThetaTri magTri_nonneg x).1 h
+  have htri01 : magTri 0 1 ≠ 0 := by
+    norm_num [magTri, Matrix.cons_val_zero, Matrix.cons_val_succ,
+      Matrix.cons_val_one, Matrix.head_cons]
+  have htri12 : magTri 1 2 ≠ 0 := by
+    norm_num [magTri, Matrix.cons_val_zero, Matrix.cons_val_succ,
+      Matrix.cons_val_one, Matrix.head_cons]
+  have htri02 : magTri 0 2 ≠ 0 := by
+    norm_num [magTri, Matrix.cons_val_zero, Matrix.cons_val_succ,
+      Matrix.cons_val_one, Matrix.head_cons]
+  have ht01 : (magThetaTri 0 1 : ℝ) = Real.pi := rfl
+  have ht12 : (magThetaTri 1 2 : ℝ) = 0 := rfl
+  have ht02 : (magThetaTri 0 2 : ℝ) = 0 := rfl
+  have h01 : x 0 = -(x 1) := by
+    have hp := hg 0 1 htri01
+    simp only [ht01] at hp
+    rw [magExp_pi] at hp
+    simpa using hp
+  have h12 : x 1 = x 2 := by
+    have hp := hg 1 2 htri12
+    simp only [ht12] at hp
+    simpa using hp
+  have h02 : x 0 = x 2 := by
+    have hp := hg 0 2 htri02
+    simp only [ht02] at hp
+    simpa using hp
+  have e1 : -(x 1) = -(x 2) := by rw [h12]
+  have ex : x 0 = -(x 0) := by
+    have hx02 : x 2 = x 0 := h02.symm
+    calc x 0 = -(x 1) := h01
+      _ = -(x 2) := e1
+      _ = -(x 0) := by rw [← hx02]
+  have h2 : x 0 + x 0 = 0 := by
+    nth_rewrite 1 [ex]
+    ring
+  have hx0 : x 0 = 0 := by
+    rcases mul_eq_zero.1 (show 2 * x 0 = 0 by rw [two_mul]; exact h2) with hz | hxz
+    · exact absurd hz (by norm_num)
+    · exact hxz
+  funext i
+  fin_cases i
+  · exact hx0
+  · show x 1 = 0
+    rw [show x 1 = x 0 from h12.trans h02.symm]; exact hx0
+  · show x 2 = 0
+    rw [show x 2 = x 0 from h02.symm]; exact hx0
+
+/-- **Pin: the negative action-level witness at the frustrated
+triangle** — the constant potential is NOT killed, THROUGH the iff's
+forward direction (were the kernel larger than the aligned potentials,
+this would fail). -/
+theorem magTri_const_action_ne_zero :
+    ¬ (magneticLaplacian magTri magThetaTri *ᵥ ![1, 1, 1] = 0) := by
+  intro h
+  have hg := (magneticLaplacian_mulVec_eq_zero_iff magTri magThetaTri magTri_nonneg _).1 h
+  have htri01 : magTri 0 1 ≠ 0 := by
+    norm_num [magTri, Matrix.cons_val_zero, Matrix.cons_val_succ,
+      Matrix.cons_val_one, Matrix.head_cons]
+  have hp := hg 0 1 htri01
+  simp only [show (magThetaTri 0 1 : ℝ) = Real.pi from rfl] at hp
+  rw [magExp_pi] at hp
+  norm_num [Matrix.cons_val_zero, Matrix.head_cons] at hp
+
+/-- **Pin: directed frustration** — the asymmetric fixture's phase pair
+(`π` on `0→1`, `π/2` on `1→0`) is frustrated: the kernel
+characterization forces every killed potential to vanish, on GENUINELY
+DIRECTED input with genuinely complex phases (`x₀ = -x₁` and
+`x₁ = I·x₀` give `(1 + I)·x₀ = 0`). -/
+theorem magAsym_kernel_trivial (x : Fin 2 → ℂ)
+    (h : magneticLaplacian magA magTheta *ᵥ x = 0) : x = 0 := by
+  have hg := (magneticLaplacian_mulVec_eq_zero_iff magA magTheta magA_nonneg x).1 h
+  have hA01 : magA 0 1 ≠ 0 := by
+    norm_num [magA, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+  have hA10 : magA 1 0 ≠ 0 := by
+    norm_num [magA, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+  have hp01 := hg 0 1 hA01
+  have hp10 := hg 1 0 hA10
+  rw [show (magTheta 0 1 : ℝ) = Real.pi from rfl, magExp_pi] at hp01
+  rw [show (magTheta 1 0 : ℝ) = Real.pi / 2 from rfl, magExp_half_pi_raw] at hp10
+  have h01 : x 0 = -(x 1) := by simpa using hp01
+  have h10 : x 1 = Complex.I * x 0 := by simpa using hp10
+  have key : x 0 + Complex.I * x 0 = 0 := by
+    calc x 0 + Complex.I * x 0 = -(x 1) + Complex.I * x 0 := by rw [h01]
+      _ = -(Complex.I * x 0) + Complex.I * x 0 := by rw [← h10]
+      _ = 0 := by ring
+  have hne : (1 : ℂ) + Complex.I ≠ 0 := by
+    intro hz
+    have hre := (Complex.ext_iff.1 hz).1
+    norm_num at hre
+  have hx0 : x 0 = 0 := by
+    have hmul : ((1 : ℂ) + Complex.I) * x 0 = 0 := by
+      rw [add_mul, one_mul]
+      exact key
+    rcases mul_eq_zero.1 hmul with h1 | h2
+    · exact absurd h1 hne
+    · exact h2
+  funext i
+  fin_cases i
+  · exact hx0
+  · show x 1 = 0
+    rw [h10, hx0]
+    ring
 
 end SpectralGraphTheory.QA

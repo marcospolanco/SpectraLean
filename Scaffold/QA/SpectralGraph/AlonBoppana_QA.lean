@@ -3119,4 +3119,194 @@ theorem cycfam_asymptotic_witness_QA {ε : ℝ} (hε : 0 < ε) :
 
 end Step8
 
+/-!
+## The inert-trio pins (`proposals/alonboppana-inert-trio-pins.md`)
+
+The first genuine consumption of the level-class machinery's three
+never-consumed theorems (2026-09-07, the census's inert tail):
+`cycleAdj_nonneg` (the cycle-adapter nonnegativity interface),
+`levClass_pairwise_disjoint` (the level-class partition law), and
+`radialVec_apply` (the radial test vector's entry form — the
+falsifiability anchor the earlier energy pins bypass by def-unfolding).
+All three at the delivered `abC4` fixture, whose level geometry is
+pinned above (`abC4_levE_le_one`, `abC4_levClass_two_empty`,
+`abC4_supportGraph_connected`). The `cycleAdj 4 = abC4` bridge is
+load-bearing: a wrong `cycleGraph` adjacency convention (a path, say)
+would break the entrywise equality.
+-/
+
+/-- The cycle adapter at scale `4` is exactly the delivered `C₄`
+fixture — entrywise, the `cycleGraph 4` adjacency decided at all
+sixteen index pairs against the literal matrix. -/
+theorem ab_cycle4_eq : cycleAdj 4 = abC4 := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    first
+      | (rw [cycleAdj_apply, if_pos (by decide)]; simp [abC4])
+      | (rw [cycleAdj_apply, if_neg (by decide)]; simp [abC4])
+
+/-- The generic cycle nonnegativity interface delivers the fixture's
+nonnegativity through the bridge — `cycleAdj_nonneg`'s first genuine
+consumption. -/
+theorem ab_cycle4_nonneg_via_cycleAdj (i j : Fin 4) :
+    0 ≤ abC4 i j := by
+  have h := cycleAdj_nonneg 4 i j
+  rw [ab_cycle4_eq] at h
+  exact h
+
+/-- The wrap edge `(3, 0)` carries the value `1` (raw) — the entry
+that distinguishes the cycle from a path, the join target of the
+nonnegativity pin above. -/
+theorem abC4_wrap_entry : abC4 3 0 = 1 := rfl
+
+/-- The C₄ edge `(0, 1)` level-`0` characterization, through the
+connected form of the junk-zero-honest iff (unreachable vertices
+would also collect at level `0` — connectivity excludes them). -/
+theorem abC4_levE_zero_iff (z : Fin 4) :
+    levE abC4 abC4_isSymm 0 1 z = 0 ↔ z = 0 ∨ z = 1 :=
+  levE_eq_zero_iff_of_connected abC4_supportGraph_connected (by decide) z
+
+/-- The endpoint sits at level `0` (its own distance is `0`). -/
+theorem abC4_levE_zero : levE abC4 abC4_isSymm 0 1 0 = 0 := by
+  have h0 : (supportGraph abC4 abC4_isSymm).dist (0 : Fin 4) 0 = 0 := by
+    simp
+  simp only [levE]
+  rw [h0]
+  omega
+
+/-- Vertex `2` sits at level `1`: adjacent to vertex `1` and distinct
+from vertex `0` (the min is taken at the `1`-side). -/
+theorem abC4_levE_two : levE abC4 abC4_isSymm 0 1 2 = 1 := by
+  have h21 : (supportGraph abC4 abC4_isSymm).dist (2 : Fin 4) 1 = 1 :=
+    SimpleGraph.dist_eq_one_iff_adj.2
+      (supportGraph_adj.2 ⟨by decide, by simp [abC4]⟩)
+  have hn : (supportGraph abC4 abC4_isSymm).dist (2 : Fin 4) 0 ≠ 0 :=
+    SimpleGraph.dist_ne_zero_iff_ne_and_reachable.2
+      ⟨by decide, abC4_supportGraph_connected 2 0⟩
+  simp only [levE]
+  omega
+
+/-- Vertex `3` sits at level `1`: adjacent to vertex `0` and distinct
+from vertex `1` (the wrap side). -/
+theorem abC4_levE_three : levE abC4 abC4_isSymm 0 1 3 = 1 := by
+  have h30 : (supportGraph abC4 abC4_isSymm).dist (3 : Fin 4) 0 = 1 :=
+    SimpleGraph.dist_eq_one_iff_adj.2
+      (supportGraph_adj.2 ⟨by decide, by simp [abC4]⟩)
+  have hn : (supportGraph abC4 abC4_isSymm).dist (3 : Fin 4) 1 ≠ 0 :=
+    SimpleGraph.dist_ne_zero_iff_ne_and_reachable.2
+      ⟨by decide, abC4_supportGraph_connected 3 1⟩
+  simp only [levE]
+  omega
+
+/-- **Level `0` of the C₄ edge `(0, 1)` is exactly the edge itself**
+— `{0, 1}`, through the connected iff. -/
+theorem abC4_levClass_zero_eq :
+    levClass abC4 abC4_isSymm 0 1 0 = {0, 1} := by
+  ext z
+  simp only [levClass, Finset.mem_filter, Finset.mem_univ, true_and,
+    Finset.mem_insert, Finset.not_mem_empty, or_false]
+  rw [abC4_levE_zero_iff z]
+  simp
+
+/-- **Level `1` is exactly the far side** — `{2, 3}`, per-vertex: the
+endpoints sit at level `0`, vertices `2` and `3` at level `1`. -/
+theorem abC4_levClass_one_eq :
+    levClass abC4 abC4_isSymm 0 1 1 = {2, 3} := by
+  ext z
+  simp only [levClass, Finset.mem_filter, Finset.mem_univ, true_and,
+    Finset.mem_insert, Finset.not_mem_empty, or_false]
+  rcases (show z = 0 ∨ z = 1 ∨ z = 2 ∨ z = 3 by
+      fin_cases z
+      all_goals simp_all) with h | h | h | h
+  · rw [h, (abC4_levE_zero_iff 0).2 (Or.inl rfl)]
+    decide
+  · rw [h, (abC4_levE_zero_iff 1).2 (Or.inr rfl)]
+    decide
+  · rw [h, abC4_levE_two]
+    decide
+  · rw [h, abC4_levE_three]
+    decide
+
+/-- **The disjointness law consumed** (theorem route): levels `0` and
+`1` of the C₄ edge are disjoint through
+`levClass_pairwise_disjoint` — the partition half the tree-ball
+machinery assumes, never before instantiated. -/
+theorem abC4_levClass_disjoint :
+    Disjoint (levClass abC4 abC4_isSymm 0 1 0)
+      (levClass abC4 abC4_isSymm 0 1 1) := by
+  have hpair : ∀ a b, a ≠ b →
+      Disjoint (levClass abC4 abC4_isSymm 0 1 a)
+        (levClass abC4 abC4_isSymm 0 1 b) :=
+    levClass_pairwise_disjoint (A := abC4) 0 1
+  exact hpair 0 1 (by decide)
+
+/-- Raw route: the two pinned explicit classes `{0, 1}` and `{2, 3}`
+are disjoint by literal Finset arithmetic — two routes, one fact. -/
+theorem abC4_levClass_disjoint_raw :
+    Disjoint (levClass abC4 abC4_isSymm 0 1 0)
+      (levClass abC4 abC4_isSymm 0 1 1) := by
+  rw [abC4_levClass_zero_eq, abC4_levClass_one_eq]
+  decide
+
+/-- The nonempty-vs-empty instance: levels `1` and `2` are disjoint
+because level `2` is empty (the law through the theorem, joined to
+the emptiness pin). -/
+theorem abC4_levClass_disjoint_empty :
+    Disjoint (levClass abC4 abC4_isSymm 0 1 1)
+      (levClass abC4 abC4_isSymm 0 1 2) := by
+  have hpair : ∀ a b, a ≠ b →
+      Disjoint (levClass abC4 abC4_isSymm 0 1 a)
+        (levClass abC4 abC4_isSymm 0 1 b) :=
+    levClass_pairwise_disjoint (A := abC4) 0 1
+  have h := hpair 1 2 (by decide)
+  rw [abC4_levClass_two_empty] at h
+  rw [abC4_levClass_two_empty]
+  exact h
+
+/-- **The entry form consumed, kept branch**: at the endpoint
+(`levE = 0 ≤ 1`), the radial test vector is `ρ⁰ = 1` — through
+`radialVec_apply`. -/
+theorem abC4_radialVec_endpoint (ρ : ℝ) :
+    radialVec abC4 abC4_isSymm 0 1 ρ 1 0 = 1 := by
+  rw [radialVec_apply,
+    if_pos (show levE abC4 abC4_isSymm 0 1 0 ≤ 1 by
+      rw [abC4_levE_zero]; omega),
+    abC4_levE_zero]
+  norm_num
+
+/-- **The entry form consumed, value branch**: at vertex `2`
+(`levE = 1 ≤ 1`), the radial test vector is `ρ¹ = ρ` — the level
+power the energy pins integrate against. -/
+theorem abC4_radialVec_level1 (ρ : ℝ) :
+    radialVec abC4 abC4_isSymm 0 1 ρ 1 2 = ρ := by
+  rw [radialVec_apply,
+    if_pos (show levE abC4 abC4_isSymm 0 1 2 ≤ 1 by
+      rw [abC4_levE_two]),
+    abC4_levE_two]
+  norm_num
+
+/-- **The entry form consumed, dropped branch**: at truncation `k = 0`
+vertex `2` sits beyond the ball (`levE = 1 ≰ 0`), so the radial test
+vector vanishes — the `if`'s load-bearing half. -/
+theorem abC4_radialVec_truncated (ρ : ℝ) :
+    radialVec abC4 abC4_isSymm 0 1 ρ 0 2 = 0 := by
+  rw [radialVec_apply,
+    if_neg (show ¬ levE abC4 abC4_isSymm 0 1 2 ≤ 0 by
+      rw [abC4_levE_two]; omega)]
+
+/-- Raw companions: the same three values by direct def-unfolding
+(the file's established idiom), no entry-form theorem involved — two
+routes, one value, per entry. -/
+theorem abC4_radialVec_raw (ρ : ℝ) :
+    radialVec abC4 abC4_isSymm 0 1 ρ 1 0 = 1 ∧
+      radialVec abC4 abC4_isSymm 0 1 ρ 1 2 = ρ ∧
+      radialVec abC4 abC4_isSymm 0 1 ρ 0 2 = 0 := by
+  refine ⟨?_, ?_, ?_⟩
+  · simp only [radialVec, abC4_levE_zero]
+    simp
+  · simp only [radialVec, abC4_levE_two]
+    simp
+  · simp only [radialVec, abC4_levE_two]
+    simp
+
 end SpectralGraphTheory.QA

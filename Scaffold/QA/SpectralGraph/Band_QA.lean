@@ -41,7 +41,15 @@
   the residual-orthogonality engine witnessed on both routes, and the
   fixed-space guard: a non-range competitor (the unfiltered signal
   itself) is strictly closer than the projection, refuting the
-  hypothesis-free form of the minimality statement.
+  hypothesis-free form of the minimality statement. Since 2026-09-07
+  (`proposals/band-normalized-pairs-pins.md`) the mode-selection layer
+  carries its right half: the above-band mode annihilated through
+  `bandProjector_mulVec_eigvecOf_eq_zero_right` (with the raw numeric
+  cross-check), and the shared-mode vanishing statement
+  `eq_zero_of_bandProjector_mulVec_eq_self` consumed as the engine of
+  the partition-shares-no-mode nonexistence refutation (two routes),
+  with the audit's missing `h₁`/`h₂` fences beside the delivered `hbc`
+  fence.
 
   Fixture: the diagonal matrix `!![1, 0; 0, 3]` on `Fin 2` — chosen
   over the dense `!![2, 1; 1, 2]` used elsewhere because its
@@ -303,6 +311,30 @@ theorem band_diag13_gap :
   ext a b
   fin_cases a <;> fin_cases b <;> simp
 
+/-- A band strictly below the whole spectrum is zero: both threshold
+projectors vanish (`(−3, −1]`), the closed-form extreme-threshold
+companion the shared-mode fences instantiate. -/
+theorem band_diag13_below_spectrum :
+    bandProjector diag13 diag13_symm (-3) (-1) = 0 := by
+  rw [bandProjector,
+    spectralProjector_eq_zero diag13 diag13_symm (-1) (fun i => by
+      rcases diag13_eigvalOf_mem i with h | h <;> rw [h] <;> norm_num),
+    spectralProjector_eq_zero diag13 diag13_symm (-3) (fun i => by
+      rcases diag13_eigvalOf_mem i with h | h <;> rw [h] <;> norm_num),
+    sub_zero]
+
+/-- A band strictly above the whole spectrum is zero: both threshold
+projectors are the identity (`(4, 6]`), the closed-form extreme-threshold
+companion the shared-mode fences instantiate. -/
+theorem band_diag13_above_spectrum :
+    bandProjector diag13 diag13_symm 4 6 = 0 := by
+  rw [bandProjector,
+    spectralProjector_eq_one diag13 diag13_symm 6 (fun i => by
+      rcases diag13_eigvalOf_mem i with h | h <;> rw [h] <;> norm_num),
+    spectralProjector_eq_one diag13 diag13_symm 4 (fun i => by
+      rcases diag13_eigvalOf_mem i with h | h <;> rw [h] <;> norm_num),
+    sub_self]
+
 /-!
 ## Idempotence and the nestedness cross-law, instantiated numerically
 -/
@@ -402,6 +434,99 @@ theorem band_diag13_low_mulVec_numeric (i : Fin 2)
   funext k
   fin_cases k <;>
     simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, hv1]
+
+/-!
+## Mode selection, right half: above-band annihilation, and the
+shared-mode vanishing statement
+
+The mirror of the delivered left-half pins
+(`band_diag13_high_excludes_low_mode` at the eigenvalue-`1` mode), plus
+the vanishing theorem `eq_zero_of_bandProjector_mulVec_eq_self`
+consumed as the engine of a concrete refutation: its positive instance
+at genuinely disjoint bands is degenerate (only `w = 0` satisfies both
+fixed-point hypotheses), so the honest positive consumption is the
+*nonexistence* form — no nonzero signal is simultaneously a low-band
+and a high-band signal of the delivered two-band partition. The
+`diag13_exists_three` witness above supplies the above-band index.
+
+(`proposals/band-normalized-pairs-pins.md`, 2026-09-07.)
+-/
+
+/-- The excluded above-band mode is annihilated: the eigenvalue-`3`
+eigenvector lies strictly above the low band's upper endpoint `2`
+(the theorem route through
+`bandProjector_mulVec_eigvecOf_eq_zero_right`). -/
+theorem band_diag13_low_excludes_high_mode (i : Fin 2)
+    (hi : eigvalOf diag13 diag13_symm i = 3) :
+    bandProjector diag13 diag13_symm (-1) 2 *ᵥ eigvecOf diag13 diag13_symm i
+      = 0 :=
+  bandProjector_mulVec_eigvecOf_eq_zero_right diag13 diag13_symm (-1) 2
+    (by norm_num) i (by rw [hi]; norm_num)
+
+/-- The excluded above-band mode is not fixed: annihilation meets a
+nonzero vector — a definition that silently kept out-of-band modes
+would fail here. -/
+theorem band_diag13_low_not_fix_high_mode (i : Fin 2)
+    (hi : eigvalOf diag13 diag13_symm i = 3) :
+    bandProjector diag13 diag13_symm (-1) 2 *ᵥ eigvecOf diag13 diag13_symm i
+      ≠ eigvecOf diag13 diag13_symm i := by
+  rw [band_diag13_low_excludes_high_mode i hi]
+  exact Ne.symm (eigvecOf_diag13_ne_zero i)
+
+/-- The numeric cross-check: the low band is the first-axis projector
+and the above-band eigenvector's first entry vanishes, so the raw
+literal arithmetic kills it too — two routes, one value, independent of
+the annihilation theorem. -/
+theorem band_diag13_low_kill_high_mode_numeric (i : Fin 2)
+    (hi : eigvalOf diag13 diag13_symm i = 3) :
+    bandProjector diag13 diag13_symm (-1) 2 *ᵥ eigvecOf diag13 diag13_symm i
+      = 0 := by
+  obtain ⟨hv0, -⟩ := eigvecOf_diag13_three i hi
+  rw [band_diag13_low]
+  funext k
+  fin_cases k
+  · simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two, hv0]
+  · simp [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two]
+
+/-- **The shared-mode vanishing statement consumed.** No nonzero signal
+is fixed by both bands of the delivered partition
+`(−1, 2]` ⊔ `(2, 4]`: the theorem
+`eq_zero_of_bandProjector_mulVec_eq_self` is the engine that turns the
+two fixed-point hypotheses into `w = 0`, refuting the existential. This
+is the subspace-level reading of the Step-2 composition law: disjoint
+bands share no mode. -/
+theorem band_diag13_partition_share_no_mode :
+    ¬ ∃ w : Fin 2 → ℝ, w ≠ 0 ∧
+      bandProjector diag13 diag13_symm (-1) 2 *ᵥ w = w ∧
+      bandProjector diag13 diag13_symm 2 4 *ᵥ w = w := by
+  rintro ⟨w, hw0, h₁, h₂⟩
+  exact hw0 (eq_zero_of_bandProjector_mulVec_eq_self diag13 diag13_symm
+    (-1) 2 2 4 (by norm_num) (by norm_num) (by norm_num) w h₁ h₂)
+
+/-- The raw cross-check: the two band images are the coordinate axes
+(`diag(1, 0)` and `diag(0, 1)`), so a common fixed vector has both
+entries forced to zero by the pinned band values alone — two routes,
+one fact, independent of the vanishing theorem. -/
+theorem band_diag13_partition_share_no_mode_raw :
+    ¬ ∃ w : Fin 2 → ℝ, w ≠ 0 ∧
+      bandProjector diag13 diag13_symm (-1) 2 *ᵥ w = w ∧
+      bandProjector diag13 diag13_symm 2 4 *ᵥ w = w := by
+  rintro ⟨w, hw0, h₁, h₂⟩
+  rw [band_diag13_low] at h₁
+  rw [band_diag13_high] at h₂
+  have e1 := congrFun h₁ 1
+  have e0 := congrFun h₂ 0
+  simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_two,
+    Matrix.of_apply, Fin.isValue, Matrix.cons_val_zero, Matrix.head_cons,
+    Matrix.cons_val_one, mul_zero, add_zero, zero_add, Pi.zero_apply] at e1 e0
+  norm_num at e1 e0
+  have hcase0 : w 0 = 0 := e0.symm
+  have hcase1 : w 1 = 0 := e1.symm
+  apply hw0
+  funext k
+  fin_cases k
+  · exact hcase0
+  · exact hcase1
 
 /-!
 ## Step 2: orthogonality of disjoint bands
@@ -1464,6 +1589,59 @@ theorem bfF_shared_hbc_fence :
             Matrix.head_cons, Matrix.cons_val_zero, Matrix.cons_val_one,
             Matrix.cons_val', Matrix.cons_val_fin_one])
   simp at hw
+
+/-- **Fence (`eq_zero_of_bandProjector_mulVec_eq_self`, `h₁`)**: with
+the low band strictly below the spectrum — the empty band `(−3, −1]`,
+both threshold projectors zero, `hab : −3 ≤ −1` and `hbc : −1 ≤ −1`
+genuine — the kept `h₂` at the covering band `(−1, 4] = 1` fixes every
+vector, so `![1, 0]` survives the dropped-hypothesis conclusion. -/
+theorem bfF_shared_h1_fence :
+    ¬ (∀ w : Fin 2 → ℝ,
+        bandProjector diag13 diag13_symm (-1) 4 *ᵥ w = w → w = 0) := by
+  intro h
+  have hw := h (![1, 0] : Fin 2 → ℝ)
+    (by rw [band_diag13_full, Matrix.one_mulVec])
+  simp at hw
+
+/-- **Isolation (`h₁` fence):** the dropped hypothesis genuinely fails
+at the witness — the empty below-spectrum band annihilates `![1, 0]`
+rather than fixing it. -/
+theorem bfF_shared_h1_isolation :
+    ¬ (bandProjector diag13 diag13_symm (-3) (-1) *ᵥ (![1, 0] : Fin 2 → ℝ)
+        = (![1, 0] : Fin 2 → ℝ)) := by
+  rw [band_diag13_below_spectrum, Matrix.zero_mulVec]
+  intro h
+  have e := congrFun h 0
+  simp at e
+
+/-- **Fence (`eq_zero_of_bandProjector_mulVec_eq_self`, `h₂`)**: with
+the high band strictly above the spectrum — the empty band `(4, 6]`,
+both threshold projectors the identity, `hcd : 4 ≤ 6` and
+`hbc : 3 ≤ 4` genuine — the kept `h₁` at the covering band
+`(−1, 3] = 1` fixes every vector, so `![1, 0]` survives the
+dropped-hypothesis conclusion. The `hab`/`hcd` clauses admit no fence:
+a negated band is minus an honest projector
+(`band_diag13_four_zero`), which fixes only `0` — the classification
+mirrors the primitive-convergence audit's no-admissible-fixture
+pattern. -/
+theorem bfF_shared_h2_fence :
+    ¬ (∀ w : Fin 2 → ℝ,
+        bandProjector diag13 diag13_symm (-1) 3 *ᵥ w = w → w = 0) := by
+  intro h
+  have hw := h (![1, 0] : Fin 2 → ℝ)
+    (by rw [band_diag13_overlap_low, Matrix.one_mulVec])
+  simp at hw
+
+/-- **Isolation (`h₂` fence):** the dropped hypothesis genuinely fails
+at the witness — the empty above-spectrum band annihilates `![1, 0]`
+rather than fixing it. -/
+theorem bfF_shared_h2_isolation :
+    ¬ (bandProjector diag13 diag13_symm 4 6 *ᵥ (![1, 0] : Fin 2 → ℝ)
+        = (![1, 0] : Fin 2 → ℝ)) := by
+  rw [band_diag13_above_spectrum, Matrix.zero_mulVec]
+  intro h
+  have e := congrFun h 0
+  simp at e
 
 /-- **Fence (`bandProjector_mul_bandProjector_eq_zero_of_monotone`,
 `ht`)**: the delivered non-monotone family `4, 0, 4` makes the `k = 0`

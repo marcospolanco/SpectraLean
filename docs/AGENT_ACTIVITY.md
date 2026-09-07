@@ -17006,3 +17006,354 @@ adoption; master-bound Step 2; the `perron_frobenius` deprecation;
 backlog items 5/6; log-Sobolev; the reverse TV → χ² consumer; plus
 the newer `weighted-matrix-tree`, `mutual-information`, and
 `erdos-renyi` Low rows).
+
+## 2026-09-07T15:37:52Z — The Band + Normalized inert quartet's pins (in progress)
+
+**Run:** `20260907T153752Z-run-1`  
+**Session:** `ses_f83866b92ffeZMaPKRE7jkT5Jb`  
+**Status:** in-progress  
+**Milestone:** The prior handoff's named next batch — four of the
+census's eleven never-touched theorems: the Band pair
+(`bandProjector_mulVec_eigvecOf_eq_zero_right`,
+`eq_zero_of_bandProjector_mulVec_eq_self` — the scope decision's
+fence-audit item) and the Normalized pair
+(`walkLaplacian_mulVec_eigvecOf`, `walk_eigvec_expansion` — the scope
+decision's `eigvecOf`-sign-resolution item). Band at the delivered
+`diag13` fixture (positive right-annihilation pin + shared-mode
+nonexistence pin + the missing h₁/h₂ fences); Normalized at the
+delivered P₃ fixture through a QA-local eigenvalue-witness bridge
+(hand eigenpair → `eigvalOf` index) and sign-robust aggregate-quadratic
+forms.
+
+**Changes:** none yet — recording intent before editing.
+
+**Next handoff:** spike (`wip/bnpins_spike.lean`) → land in
+`Band_QA.lean` + `Normalized_QA.lean` → axcheck → full ladder → census
+re-run → records.
+
+## 2026-09-07T16:07:47Z — The Band + Normalized inert quartet's pins (terminal)
+
+**Run:** `20260907T153752Z-run-1`  
+**Session:** `ses_f83866b92ffeZMaPKRE7jkT5Jb`  
+**Status:** completed  
+**Milestone:** The prior handoff's named next batch — four of the
+census's eleven never-touched theorems (the Band pair
+`bandProjector_mulVec_eigvecOf_eq_zero_right` +
+`eq_zero_of_bandProjector_mulVec_eq_self`, the Normalized pair
+`walkLaplacian_mulVec_eigvecOf` + `walk_eigvec_expansion`), both
+recorded scope-decision obstacles dissolved. The pins method's
+thirteenth application.
+
+**Changes:** 24 QA declarations (QA 6742 → 6766), zero axiom contact.
+Band_QA (+12): the right-annihilation half of the mode-selection
+interface first-consumed at `diag13` (the eigenvalue-`3` mode killed
+by the low band through the theorem, raw numeric cross-check and
+not-fixed companion beside it); the vanishing statement consumed AS
+THE ENGINE of the partition-shares-no-mode nonexistence refutation
+(the honest resolution of the "positive instance is `0 = 0`" scope
+concern), with the raw two-route companion; the closed-form
+below/above-spectrum empty-band values; and the audit's missing
+h₁/h₂ fences with kept-genuine isolations beside the delivered `hbc`
+fence (`hab`/`hcd` classified unfenceable — a negated band is minus
+an honest projector, fixing only `0`). Normalized_QA (+12): the
+generic eigenvalue-witness bridge `eigvalOf_of_eigenpair` (hand
+eigenpair → `eigvalOf` index — `dotProduct_eigvecOf_mulVec` moves the
+operator across the dot product, the mismatch factor kills every
+coefficient, `eigvecOf_expansion_apply` collapses the vector; Mathlib
+source confirmed the basis carries no sorting guarantee, an upstream
+TODO); the mode-`1` eigenspace shape at the opaque basis
+(one-dimensional along `(1,0,−1)`); the transfer pin and its
+sign-robust entry-shape companion plus the raw hand-eigenpair route;
+and the expansion's aggregate-quadratic join — the transferred
+expansion of P₃'s center vertex dotted with its conjugate evaluates
+to `(√2)⁻¹ = 1/√(deg 1)`, the graph's genuine irregularity, through
+two independent engines (the theorem vs column-completeness + `√2`
+diagonal arithmetic). Records: the same-run proposal
+`proposals/band-normalized-pairs-pins.md` (COMPLETE + delivery
+record), `proposals/README.md` (new Delivered row), README (6766),
+the radar's QA row (6766, held 4.5), the scoreboard verification row,
+both map data tables + regenerated SVG, the execution plan, and this
+log. No backlog note owed (the backlog names these theorems only
+inside completion notes that remain accurate).
+
+**Verification:** spike-first (`wip/bnpins_spike.lean` — green after
+four fix rounds; traps recorded in the proposal: the
+`Finset.sum_congr` higher-order `rw` failure cured by the explicit
+calc route; `congrArg`'s un-beta-reduced application cured by
+`simp only [hsplit]`; the `fin_cases` eta-expansion trap cured by the
+files' established defeq-tolerant `have`s; the implicit-`{i}`
+argument passed explicitly); both landed modules elaborate with zero
+errors/warnings; explicit builds ✔; **full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0** (one documented artifact-removal remediation for Band_QA
+after a `lake env lean` elaboration left its olean mtime-stale);
+**24-declaration axiom audit via `wip/bnpins_axcheck.lean` — every
+one exactly `propext, Classical.choice, Quot.sound`**, zero axiom
+contact (all four targets are proved theorems), no `-- @refutes`
+tags; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new names
+collision-free — one duplicate `diag13_exists_three` caught at build
+time and removed, the 2026-09-05 guard's exact defect class, caught
+by the elaborator first); `check_backlog_freshness` clean; scoreboard
+regenerated (**1376 / 6766 / 4 / 0**) with the verification row; map
+freshness exit 0 after the 6766 sync in both map data tables + SVG
+regeneration (49 stations, no status change — none owed);
+**consumption closure verified by the tool: the census re-run
+(`wip/census_20260907_post15.txt`, diffed against `post14`) shows
+exactly the 4 targeted theorems leaving the inert set — 1363 → 1367
+value-consumed, 11 → 7 never-touched, no bonus, no collateral**.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition
+changed, no public statement changed. QA proves consequences relative
+to the substrate; it does not prove the substrate (no axiom touched).
+Honest scope: the right-annihilation pin and its fences at the one
+`diag13` fixture; the shared-mode nonexistence at the one two-band
+partition; the transfer pins at the one mode-`1` eigenspace of P₃;
+the expansion join at the one center-vertex quadratic aggregate. The
+Normalized pair's full three-mode value pins are priced in the
+proposal, not owed. One observation recorded, not acted on: a
+pre-existing unused-binder lint warning in
+`Scaffold/Derived/ProjectorDrift.lean` (`hγ`, a public theorem
+binder, untouched by this delivery) — an API decision, not this run's
+to make. Two untracked proposal drafts
+(`proposals/nonautonomous-propagator-gronwall-bound.md`,
+`proposals/quantized-cheeger-bound.md`) appeared in the worktree
+during the run, not created by it — preserved untouched.
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The census's remaining inert set (7): AlonBoppana (3, level-class
+machinery — `cycleAdj_nonneg`/`radialVec_apply` entry-level,
+`levClass_pairwise_disjoint` combinatorial), Azuma (3, `MatrixMDS`
+structure fields — helper-shaped, the 2026-08-29 audit's
+caterpillar fixture the natural instance source), and
+`l_infty_norm_nonneg` (its own Core-targeting QA module — priced, and
+would also first-consume the never-touched def `l_infty_norm`).
+Operator-gated items unchanged (the companion's Steps 3–5 adoption;
+master-bound Step 2; the `perron_frobenius` deprecation; backlog
+items 5/6; log-Sobolev; the reverse TV → χ² consumer; plus the newer
+`weighted-matrix-tree`, `mutual-information`, and `erdos-renyi` Low
+rows).
+
+## 2026-09-07T16:12:28Z — The AlonBoppana inert trio's pins (in progress)
+
+**Run:** `20260907T161228Z-run-1`  
+**Session:** `ses_f83866b92ffeZMaPKRE7jkT5Jb`  
+**Status:** in-progress  
+**Milestone:** The prior handoff's named first cluster of the census's
+remaining inert set (7): the AlonBoppana level-class trio
+(`cycleAdj_nonneg`, `levClass_pairwise_disjoint`, `radialVec_apply`),
+first genuine QA consumption, all at the delivered `abC4` fixture
+whose levE geometry is already pinned — a `cycleAdj 4 = abC4`
+entrywise bridge for the cycle-adapter nonneg interface, the explicit
+level classes `{0,1}`/`{2,3}` with the disjointness law consumed
+through the theorem and verified raw, and the radial test vector's
+entry form at both `if` branches.
+
+**Changes:** none yet — recording intent before editing.
+
+**Next handoff:** spike (`wip/abpins_spike.lean`) → land in
+`AlonBoppana_QA.lean` → axcheck → full ladder → census re-run →
+records.
+
+## 2026-09-07T16:28:59Z — The AlonBoppana inert trio's pins (terminal)
+
+**Run:** `20260907T161228Z-run-1`  
+**Session:** `ses_f83866b92ffeZMaPKRE7jkT5Jb`  
+**Status:** completed  
+**Milestone:** The prior handoff's named first cluster of the census's
+inert tail (7 → 4): the level-class machinery's three never-consumed
+theorems (`cycleAdj_nonneg`, `levClass_pairwise_disjoint`,
+`radialVec_apply`), first genuine QA consumption at the delivered
+`abC4` fixture. The pins method's fourteenth application.
+
+**Changes:** 16 QA declarations (QA 6766 → 6782), zero axiom contact,
+in `AlonBoppana_QA.lean`'s new inert-trio pins section: the
+cycle-adapter bridge `cycleAdj 4 = abC4` proved entrywise (the
+`cycleGraph 4` adjacency decided at all sixteen index pairs —
+load-bearing against a wrong adjacency convention), through which the
+generic nonnegativity interface delivers the fixture's nonneg at the
+wrap edge `(3,0) = 1` beside the raw value; the level geometry
+completed (the connected junk-zero-honest iff, the `0/1/1` level
+values, the explicit classes — level `0` exactly the edge `{0,1}`,
+level `1` exactly the far side `{2,3}`); the disjointness law
+consumed TWO ROUTES (through `levClass_pairwise_disjoint` via an
+explicit-∀ re-packaging, and by literal Finset arithmetic on the
+pinned classes), plus the nonempty-vs-empty instance joined to the
+delivered level-`2` emptiness pin; and the radial test vector's entry
+form consumed at all three `if` branches (`ρ⁰ = 1` kept, `ρ¹ = ρ`
+value, `0` at truncation `k = 0` — the dropped branch), each with a
+def-unfolding raw companion. Records: the same-run proposal
+`proposals/alonboppana-inert-trio-pins.md` (COMPLETE + delivery
+record), `proposals/README.md` (new Delivered row), README (6782),
+the radar's QA row (6782, held 4.5), the scoreboard verification row,
+both map data tables + regenerated SVG, the execution plan, and this
+log. No backlog note owed.
+
+**Verification:** spike-first (`wip/abpins_spike.lean` — green after
+three fix rounds; traps recorded in the proposal: the strict-implicit
+`Pairwise` application trap — positional numerals land in the `a ≠ b`
+slot — cured by the explicit-∀ re-packaging; the `rw`-inside-`show`
+rfl-auto-close inconsistency across branches; the `{1}`-Finset
+membership residue defeating `tauto`); the landed module elaborates
+with zero errors/warnings; explicit build ✔; **full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0** (one documented artifact-removal remediation after a
+`lake env lean` elaboration left the olean mtime-stale — the axcheck
+re-run after it, its imports resolving against the built artifact);
+**16-declaration axiom audit via `wip/abpins_axcheck.lean` — every
+one exactly `propext, Classical.choice, Quot.sound`**, zero axiom
+contact (all three targets are proved theorems), no `-- @refutes`
+tags; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new
+`ab_cycle4_*`/`abC4_levE_*`/`abC4_levClass_*`/`abC4_radialVec_*`
+names collision-free); `check_backlog_freshness` clean; scoreboard
+regenerated (**1376 / 6782 / 4 / 0**) with the verification row; map
+freshness exit 0 after the 6782 sync in both map data tables + SVG
+regeneration (49 stations, no status change — none owed);
+**consumption closure verified by the tool: the census re-run
+(`wip/census_20260907_post16.txt`, diffed against `post15`) shows
+exactly the 3 targeted theorems leaving the inert set — 1367 → 1370
+value-consumed, 7 → 4 never-touched, no bonus, no collateral**.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition
+changed, no public statement changed. QA proves consequences relative
+to the substrate; it does not prove the substrate (no axiom touched).
+Honest scope: the bridge at the one scale `n = 4`; the disjointness
+pins at the one `C₄` edge; the entry-form pins at the three branch
+shapes of one edge (a parametric cycle-family instance priced in the
+proposal, not owed).
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The census's remaining inert set (4) — the last clusters: the Azuma
+`MatrixMDS` structure fields (3, `cond_mean_zero`/`measurable`/
+`norm_bound` — helper-shaped; the 2026-08-29 audit's caterpillar
+fixture and the EdgePerturbation window family's proved instances are
+the natural instance sources) and `l_infty_norm_nonneg` (its own
+Core-targeting QA module, which would also first-consume the
+never-touched def `l_infty_norm`; together they close the inert
+census to zero). Operator-gated items unchanged (the companion's
+Steps 3–5 adoption; master-bound Step 2; the `perron_frobenius`
+deprecation; backlog items 5/6; log-Sobolev; the reverse TV → χ²
+consumer; plus the newer `weighted-matrix-tree`, `mutual-information`,
+and `erdos-renyi` Low rows).
+
+## 2026-09-07T16:37:21Z — Closing the inert census to zero (in progress)
+
+**Run:** `20260907T163721Z-run-1`  
+**Session:** `ses_f83866b92ffeZMaPKRE7jkT5Jb`  
+**Status:** in-progress  
+**Milestone:** The census's last four never-touched theorems: the
+Azuma `MatrixMDS` structure fields (`cond_mean_zero`, `measurable`,
+`norm_bound`) and `Core.l_infty_norm_nonneg`. The Azuma half builds
+the first genuine NONDEGENERATE `MatrixMDS` instance in QA — a
+Rademacher ±identity sequence on the delivered Bernoulli-product coin
+at `V = Fin 1`, with the mean-zero integral computed through
+`PMF.integral_eq_sum` over the pinned atom masses, the trivial-past
+comap characterized via the `Fin 0` subsingleton, and the norm bound
+attained with equality through `l2OpNorm_one_fin1_QA`; each field
+then consumed as a projection at concrete witnesses. The Core half is
+a new `Scaffold/QA/Core/Norms_QA.lean`: `l_infty_norm` value pins at
+a bounded fixture (both `sInf` directions) with
+`l_infty_norm_nonneg` as the theorem route, plus the documented
+unbounded junk corner. Delivering both takes the census's
+never-touched set from 4 to zero.
+
+**Changes:** none yet — recording intent before editing.
+
+**Next handoff:** spike (`wip/zeroinert_spike.lean`) → land in
+`Matrix_QA.lean` + `Scaffold/QA/Core/Norms_QA.lean` → axcheck → full
+ladder → census re-run → records.
+
+## 2026-09-07T17:10:17Z — Closing the inert census to zero (terminal)
+
+**Run:** `20260907T163721Z-run-1`  
+**Session:** `ses_f83866b92ffeZMaPKRE7jkT5Jb`  
+**Status:** completed  
+**Milestone:** The census's last four never-touched theorems — the
+Azuma `MatrixMDS` structure fields (`cond_mean_zero`, `measurable`,
+`norm_bound`) and `Core.l_infty_norm_nonneg` — first-consumed, taking
+the compiler-derived consumption census's never-touched set from 4 to
+**ZERO**: every one of the shelf's 1,374 theorem/lemma declarations is
+now value-consumed by some QA proof. The pins method's fifteenth
+application, and the program milestone it completes.
+
+**Changes:** 21 QA theorems + 4 defs (QA 6782 → 6803), zero axiom
+contact. `Matrix_QA.lean`'s genuine-Rademacher section: the first
+GENUINE (nondegenerate) `MatrixMDS` instance in QA — a one-shot
+Rademacher ±identity sequence on the delivered coin measure at
+`V = Fin 1` — with the mean-zero integral GENUINELY COMPUTED by raw
+atom enumeration (`PMF.integral_eq_sum`, masses `1/2` each), the
+trivial past characterized through the comap existential at the
+subsingleton `Fin 0 → Matrix`, and the norm bound attained with
+equality at both outcomes through the pinned `l2OpNorm_one_fin1_QA`;
+each field then consumed as a projection at concrete witnesses (the
+strong measurability promoted to `AEStronglyMeasurable` — Errata §7's
+exact pre-repair mechanism named; the conditional-mean field at the
+trivial past's `univ` AND at a NONEMPTY past event `k = 1`, the true
+cylinder's past-measurability witnessed at the entry fiber; the norm
+bound two-sided at both outcomes). The new
+`Scaffold/QA/Core/Norms_QA.lean` (the Core subtree's second QA
+module): the `l_infty_norm` value pin (both `sInf` directions raw),
+`l_infty_norm_nonneg` consumed with the raw companion, and the
+documented unbounded junk corner (`sInf ∅ = 0`) pinned. Records: the
+same-run proposal `proposals/zero-inert-census.md` (COMPLETE +
+delivery record), `proposals/README.md` (new Delivered row), README
+(6803), the radar's QA row (6803 across 71 modules, held 4.5), the
+scoreboard verification row, both map data tables + regenerated SVG,
+the execution plan, and this log. No backlog note owed.
+
+**Verification:** spike-first (`wip/zeroinert_spike.lean` — green
+after seven fix rounds; traps recorded in the proposal: the
+`RV`-synonym numeral elaboration break; the `Measurable` app-form and
+`Function.comp` unification gaps cured by explicit-`MeasurableSet`
+haves and the preimage-preimage route; `measurableSet_singleton`'s
+element argument; `rw` not under binders and single-instantiation per
+call; `csInf_le`/`le_csInf` argument order; the partial-application
+parenthesization in `AEStronglyMeasurable (X 0) μ`); both landed
+modules elaborate with zero NEW diagnostics (`Matrix_QA`'s 17
+pre-existing section-variable lint warnings verified at HEAD content
+by elaborating `git show HEAD:`'s copy — untouched by this delivery);
+explicit builds ✔; **full `lake build` +
+`check_build_completeness.py` — 136/136 fresh, 0 stale, 0 missing,
+exit 0** (the new QA module included in the default target);
+**21-declaration axiom audit via `wip/zeroinert_axcheck.lean` — every
+one exactly `propext, Classical.choice, Quot.sound`**, zero axiom
+contact (all four targets are proved theorems/structure fields), no
+`-- @refutes` tags; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules — QA never reachable);
+`check_citations`; `check_markdown_links`; `check_qa_name_uniqueness`
+(the new `mMds*`/`mdsRad*`/`mcCoin_false`/`omega_*`/`univ_fin1_bool`/
+`lnX*`/`lnJunk` names collision-free); `check_backlog_freshness`
+clean; scoreboard regenerated (**1376 / 6803 / 4 / 0**) with the
+verification row; map freshness exit 0 after the 6803 sync in both map
+data tables + SVG regeneration (49 stations, no status change — none
+owed); **consumption closure verified by the tool: the census re-run
+(`wip/census_20260907_post17.txt`, diffed against `post16`) shows
+exactly the 4 targeted theorems leaving the inert set — 1370 → 1374
+value-consumed, 4 → 0 never-touched, no bonus, no collateral
+(never-touched defs 3 → 1; `MRV` type-only by construction)**.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition
+changed, no public statement changed. QA proves consequences relative
+to the substrate; it does not prove the substrate (no axiom touched).
+Honest scope: the instance is one-shot (`X k = 0` for `k ≥ 1`; a
+many-step genuinely-random-tail sequence priced in the proposal, not
+owed); the mean-zero integral at the two-atom coin; the `l_infty_norm`
+pins at one bounded fixture and one junk fixture; the past-event
+consumption at one nonempty past event.
+
+**Next handoff:** the inert-census program is closed — the census
+remains the standing targeting instrument for newly delivered shelf
+theorems (every new public theorem should land consumed). The Active
+table stays all-Low (decision-gated). The remaining agenda is the
+operator-gated items (the companion's Steps 3–5 adoption; master-bound
+Step 2; the `perron_frobenius` deprecation; backlog items 5/6;
+log-Sobolev; the reverse TV → χ² consumer; plus the newer
+`weighted-matrix-tree`, `mutual-information`, and `erdos-renyi` Low
+rows) and the delivered-but-unfenced surfaces; the two untracked
+proposal drafts noted by the 15:37 run remain for operator triage.

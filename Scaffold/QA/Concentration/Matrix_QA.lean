@@ -2381,4 +2381,268 @@ theorem mcBn_herm_fence_QA
 
 end AdversarialFences
 
+
+/-!
+## The genuine-Rademacher instance and the structure-field pins
+(`proposals/zero-inert-census.md`)
+
+The census's never-touched `MatrixMDS` structure fields
+(`cond_mean_zero`, `measurable`, `norm_bound`) had never been consumed
+as projections: the delivered constant-zero instance discharges them
+tautologically. This section builds the first *nondegenerate* instance
+in QA — a one-shot Rademacher ±identity sequence on the delivered coin
+measure (`mcCoin`, the fair Bernoulli product on `Fin 1 → Bool`) at
+`V = Fin 1` — and consumes each field at concrete witnesses:
+
+- `measurable`: the random first difference is strongly measurable
+  through the shelf's `stronglyMeasurable_coord_matrix` (the honest
+  field the 2026-08-29 repair put in place of the content-free
+  `adapted` one), promoted to the almost-everywhere property whose
+  absence made the pre-repair set-integrals junk zeros.
+- `cond_mean_zero`: the mean-zero integral computed by raw atom
+  enumeration (`PMF.integral_eq_sum`, masses `1/2` each through the
+  pmf application), consumed at the trivial past's `univ` and at the
+  *nonempty* past event `k = 1` (the true cylinder, its
+  past-measurability witnessed through the comap characterization at
+  the entry fiber).
+- `norm_bound`: the bound `R = 1` attained with equality at both
+  outcomes, the `≤` side through the field, the `≥` side through the
+  pinned identity norm (`l2OpNorm_one_fin1_QA`).
+
+The trivial-past lemma (`mdsFiltration_zero_trivial`) is the comap
+characterization at `k = 0`: the tuple map into the subsingleton
+`Fin 0 → Matrix` pulls back only `∅` and `univ`.
+-/
+
+/-- The fair coin's false-cylinder mass (the twin of the delivered
+`mcCoin_true`). -/
+theorem mcCoin_false :
+    mcCoin {ω : (Fin 1) → Bool | ω (0 : Fin 1) = false}
+      = ENNReal.ofReal ((1 : ℝ) / 2) := by
+  have hc := toMeasure_cyl (fun _ => (1 / 2 : ℝ)) (by intro i; norm_num)
+    (by intro i; norm_num) (0 : Fin 1) ({false} : Set Bool)
+  have hpre : {ω : (Fin 1) → Bool | ω (0 : Fin 1) = false}
+      = (fun ω : (Fin 1) → Bool => ω (0 : Fin 1)) ⁻¹' {false} := by
+    ext ω; simp
+  rw [mcCoin, hpre, hc]
+  have hb : (Finset.univ : Finset Bool) = ({false, true} : Finset Bool) := by
+    ext b; cases b <;> simp
+  rw [hb, Finset.sum_insert (by simp), Finset.sum_singleton]
+  simp [bern]
+  norm_num
+
+/-- The Rademacher matrix family: the 1×1 identity on `true`, its
+negation on `false`. -/
+def mMds (b : Bool) : Matrix (Fin 1) (Fin 1) ℝ :=
+  if b then 1 else -1
+
+/-- The one-shot Rademacher difference sequence: a genuinely nonzero
+first difference, zero afterwards. -/
+def mdsRad (k : ℕ) (ω : (Fin 1) → Bool) :
+    Matrix (Fin 1) (Fin 1) ℝ :=
+  if k = 0 then mMds (ω 0) else 0
+
+theorem mMds_true : mMds true = (1 : Matrix (Fin 1) (Fin 1) ℝ) := rfl
+
+theorem mMds_false : mMds false = (-(1 : Matrix (Fin 1) (Fin 1) ℝ)) := rfl
+
+/-- Both outcomes carry the identity norm. -/
+theorem mMds_norm (b : Bool) : ‖mMds b‖ = 1 := by
+  cases b
+  · rw [mMds_false, norm_neg, l2OpNorm_one_fin1_QA]
+  · rw [mMds_true, l2OpNorm_one_fin1_QA]
+
+theorem omega_true : (![true] : Fin 1 → Bool) (0 : Fin 1) = true := rfl
+
+theorem omega_false : (![false] : Fin 1 → Bool) (0 : Fin 1) = false := rfl
+
+theorem mdsRad_zero (ω : (Fin 1) → Bool) :
+    mdsRad 0 ω = mMds (ω 0) := if_pos rfl
+
+theorem mdsRad_succ (k : ℕ) (ω : (Fin 1) → Bool) :
+    mdsRad (k + 1) ω = 0 := if_neg (by omega)
+
+/-- The two-atom enumeration of the coin space. -/
+theorem univ_fin1_bool :
+    (Finset.univ : Finset ((Fin 1) → Bool)) = {![false], ![true]} := by
+  ext ω
+  cases h : ω 0 <;>
+    simp [Set.mem_singleton_iff, Set.mem_insert_iff, funext_iff, h]
+  · exact Or.inl fun x => by fin_cases x <;> simp [h]
+  · exact Or.inr fun x => by fin_cases x <;> simp [h]
+
+/-- The mean-zero integral, by raw atom enumeration through
+`PMF.integral_eq_sum`: the two outcomes carry mass `1/2` each, values
+`+1` and `−1`, summing to zero. -/
+theorem mdsRad_integral_zero :
+    ∫ ω : (Fin 1) → Bool, mdsRad 0 ω ∂mcCoin = 0 := by
+  have hf : (bernPMF (fun _ => (1 / 2 : ℝ))
+      (by intro i; norm_num) (by intro i; norm_num)
+      (![false] : Fin 1 → Bool)).toReal = 1 / 2 := by
+    rw [bernPMF_apply]
+    simp only [jointMass, Fin.prod_univ_one, bern, Matrix.cons_val_zero,
+      if_false]
+    rw [ENNReal.toReal_ofReal (by norm_num)]
+    norm_num
+  have ht : (bernPMF (fun _ => (1 / 2 : ℝ))
+      (by intro i; norm_num) (by intro i; norm_num)
+      (![true] : Fin 1 → Bool)).toReal = 1 / 2 := by
+    rw [bernPMF_apply]
+    simp only [jointMass, Fin.prod_univ_one, bern, Matrix.cons_val_zero,
+      if_true]
+    rw [ENNReal.toReal_ofReal (by norm_num)]
+  rw [mcCoin, PMF.integral_eq_sum, univ_fin1_bool,
+    Finset.sum_insert (by
+      intro hcon
+      exact absurd hcon (by decide)),
+    Finset.sum_singleton, hf, ht]
+  simp only [mdsRad_zero, omega_false, omega_true,
+    mMds_false, mMds_true]
+  norm_num
+
+/-- The past at `k = 0` is trivial: every `mdsFiltration X 0`-measurable
+set is `∅` or `univ` (the tuple map into the subsingleton
+`Fin 0 → Matrix` pulls back only the two extreme sets). -/
+theorem mdsFiltration_zero_trivial
+    (X : ℕ → ((Fin 1) → Bool) → Matrix (Fin 1) (Fin 1) ℝ)
+    (S : Set ((Fin 1) → Bool))
+    (hS : MeasurableSet[mdsFiltration X 0] S) :
+    S = ∅ ∨ S = Set.univ := by
+  have hsub : Subsingleton (Fin 0 → Matrix (Fin 1) (Fin 1) ℝ) :=
+    inferInstance
+  rw [mdsFiltration, MeasurableSpace.measurableSet_comap] at hS
+  obtain ⟨t, -, ht⟩ := hS
+  rcases Classical.em (∃ a, a ∈ t) with ⟨a, ha⟩ | hempty
+  · right
+    refine Set.eq_univ_of_forall fun ω => ?_
+    have heq : (fun (j : Fin 0) => X ↑j ω) = a := hsub.allEq _ a
+    have hmem : (fun (j : Fin 0) => X ↑j ω) ∈ t := heq ▸ ha
+    have h' : ω ∈ (fun (ω : (Fin 1) → Bool) (j : Fin 0) => X ↑j ω) ⁻¹' t :=
+      hmem
+    rw [← ht]
+    exact h'
+  · left
+    apply Set.eq_empty_iff_forall_not_mem.2
+    intro ω hω
+    have h' : ω ∈ (fun (ω : (Fin 1) → Bool) (j : Fin 0) => X ↑j ω) ⁻¹' t := by
+      rw [ht]
+      exact hω
+    exact hempty ⟨_, h'⟩
+
+/-- The genuine Rademacher instance on the coin: the identity matrix's
+sign is the coin flip, the tail is zero, the bound is attained. -/
+noncomputable def mdsRadMDS :
+    MatrixMDS (V := Fin 1) mcCoin where
+  R := 1
+  X := mdsRad
+  measurable := by
+    intro k
+    by_cases hk : k = 0
+    · subst hk
+      show StronglyMeasurable (fun ω => mdsRad 0 ω)
+      simp only [mdsRad_zero]
+      exact stronglyMeasurable_coord_matrix mMds 0
+    · obtain ⟨k', rfl⟩ : ∃ k', k = k' + 1 := ⟨k - 1, by omega⟩
+      show StronglyMeasurable (fun ω => mdsRad (k' + 1) ω)
+      simp only [mdsRad_succ]
+      exact stronglyMeasurable_const
+  cond_mean_zero := by
+    intro k S hS
+    by_cases hk : k = 0
+    · subst hk
+      simp only [mdsRad_zero]
+      rcases mdsFiltration_zero_trivial mdsRad S hS with h | h
+      · rw [h, setIntegral_empty]
+      · rw [h, setIntegral_univ]
+        exact mdsRad_integral_zero
+    · obtain ⟨k', rfl⟩ : ∃ k', k = k' + 1 := ⟨k - 1, by omega⟩
+      simp only [mdsRad_succ]
+      simp
+  norm_bound := by
+    intro k ω
+    by_cases hk : k = 0
+    · subst hk
+      rw [mdsRad_zero, mMds_norm]
+    · obtain ⟨k', rfl⟩ : ∃ k', k = k' + 1 := ⟨k - 1, by omega⟩
+      rw [mdsRad_succ, norm_zero]
+      norm_num
+
+/-- The true cylinder is past-measurable at `k = 1` (it is the
+preimage of the entry fiber `t 0 0 0 = 1` under the one-step tuple
+map — the fiber that distinguishes `+1` from `−1`). -/
+theorem mdsRad_trueCyl_past :
+    MeasurableSet[mdsFiltration mdsRadMDS.X 1]
+      {ω : (Fin 1) → Bool | ω (0 : Fin 1) = true} := by
+  rw [mdsFiltration, MeasurableSpace.measurableSet_comap]
+  refine ⟨(fun t : Fin 1 → Matrix (Fin 1) (Fin 1) ℝ => t 0 0 0) ⁻¹'
+      ({1} : Set ℝ), ?_, ?_⟩
+  · have hentry : MeasurableSet
+        ((fun M : Matrix (Fin 1) (Fin 1) ℝ => M 0 0) ⁻¹' ({1} : Set ℝ)) :=
+      ((measurable_pi_apply (0 : Fin 1)).comp
+        (measurable_pi_apply (0 : Fin 1)))
+        (measurableSet_singleton (1 : ℝ))
+    exact (measurable_pi_apply (0 : Fin 1) :
+      Measurable fun t : Fin 1 → Matrix (Fin 1) (Fin 1) ℝ => t 0) hentry
+  · ext ω
+    simp only [Set.mem_preimage, Set.mem_singleton_iff, Set.mem_setOf_eq,
+      Fin.val_zero]
+    have hx : mdsRadMDS.X 0 ω = mdsRad 0 ω := rfl
+    rw [hx, mdsRad_zero]
+    constructor
+    · intro hval
+      rcases (Classical.em (ω 0 = true)) with h | h
+      · exact h
+      · rw [Bool.not_eq_true] at h
+        rw [h, mMds_false] at hval
+        simp only [Matrix.neg_apply, Matrix.one_apply, Matrix.cons_val_zero,
+          Matrix.head_cons, if_pos rfl] at hval
+        norm_num at hval
+    · intro h
+      rw [h, mMds_true]
+      simp
+
+/-- **PIN (`norm_bound`)**: the uniform bound is attained with equality
+at both outcomes — the `≤` side through the field projection, the `≥`
+side through the pinned identity norm. -/
+theorem mdsRadMDS_norm_pin :
+    ‖mdsRadMDS.X 0 ![true]‖ = mdsRadMDS.R ∧
+      ‖mdsRadMDS.X 0 ![false]‖ = mdsRadMDS.R := by
+  have hT : mdsRadMDS.X 0 ![true] = (1 : Matrix (Fin 1) (Fin 1) ℝ) := by
+    show mdsRad 0 ![true] = 1
+    rw [mdsRad_zero, omega_true, mMds_true]
+  have hF : mdsRadMDS.X 0 ![false]
+      = (-(1 : Matrix (Fin 1) (Fin 1) ℝ)) := by
+    show mdsRad 0 ![false] = -1
+    rw [mdsRad_zero, omega_false, mMds_false]
+  refine ⟨le_antisymm (mdsRadMDS.norm_bound 0 ![true]) ?_,
+    le_antisymm (mdsRadMDS.norm_bound 0 ![false]) ?_⟩
+  · show (1 : ℝ) ≤ ‖mdsRadMDS.X 0 ![true]‖
+    rw [hT, l2OpNorm_one_fin1_QA]
+  · show (1 : ℝ) ≤ ‖mdsRadMDS.X 0 ![false]‖
+    rw [hF, norm_neg, l2OpNorm_one_fin1_QA]
+
+/-- **PIN (`cond_mean_zero`)**: the field consumed twice — at the
+trivial past's `univ` (the genuinely computed mean zero, joined to the
+raw atom enumeration) and at the nonempty past event `k = 1` (the true
+cylinder, whose past-measurability is witnessed above). -/
+theorem mdsRadMDS_cond_mean_pin :
+    (∫ ω : (Fin 1) → Bool, mdsRadMDS.X 0 ω ∂mcCoin = 0) ∧
+      (∫ ω in {ω : (Fin 1) → Bool | ω (0 : Fin 1) = true},
+          mdsRadMDS.X 1 ω ∂mcCoin = 0) := by
+  refine ⟨?_, ?_⟩
+  · have h := mdsRadMDS.cond_mean_zero 0 Set.univ
+      MeasurableSet.univ
+    rwa [setIntegral_univ] at h
+  · exact mdsRadMDS.cond_mean_zero 1 _
+      mdsRad_trueCyl_past
+
+/-- **PIN (`measurable`)**: the ambient strong measurability of the
+random first difference — the honest field the 2026-08-29 repair put
+in place of the content-free `adapted` one — promoted to
+almost-everywhere strong measurability, the property whose absence
+made the pre-repair set-integrals junk zeros. -/
+theorem mdsRadMDS_meas_pin :
+    AEStronglyMeasurable (mdsRadMDS.X 0) mcCoin :=
+  StronglyMeasurable.aestronglyMeasurable (mdsRadMDS.measurable 0)
+
 end Scaffold.Mathlib.Probability.Concentration.Matrix.QA

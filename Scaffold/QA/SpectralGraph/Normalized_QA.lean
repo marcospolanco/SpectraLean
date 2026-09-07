@@ -1291,4 +1291,446 @@ theorem nf_power_transfer_hd_fence :
     Matrix.cons_val_zero, Pi.zero_apply] at e1
   norm_num at e1
 
+/-!
+## The eigenbasis-transfer pins (`proposals/band-normalized-pairs-pins.md`)
+
+The first genuine consumption of the two opaque-`eigvecOf` transfer
+theorems (`walkLaplacian_mulVec_eigvecOf`, `walk_eigvec_expansion`).
+Mathlib's `eigenvalues`/`eigenvectorBasis` are built from the direct sum
+of eigenspaces with no sorting guarantee (an explicit upstream TODO), so
+neither the eigenvalue at an index nor the eigenvector's sign is
+syntactically resolvable. Two instruments resolve this without unfolding:
+
+- the **eigenvalue-witness bridge** (`eigvalOf_of_eigenpair`): a hand
+  eigenpair locates an *index* carrying its eigenvalue —
+  `dotProduct_eigvecOf_mulVec` moves the symmetric operator across the
+  dot product, the eigenvalue-mismatch factor kills every expansion
+  coefficient, and `eigvecOf_expansion_apply` collapses the vector;
+- **sign-robust forms**: facts homogeneous in the eigenvector (the
+  eigen-equation itself, entry antisymmetry) or quadratic per mode (the
+  expansion's aggregate join), for which the unresolved sign cancels.
+
+The mode-`1` eigenspace at the path is one-dimensional along
+`(1, 0, -1)` (two row equations), so the transferred walk eigenvector
+is `c • (1, 0, -1)` at an unknown nonzero `c` — its antisymmetry and
+eigen-equation are `c`-robust. The expansion pin evaluates the
+transferred expansion's quadratic aggregate at the degree-`2` center,
+where the value `(√2)⁻¹ = 1/√(deg 1)` carries the graph's genuine
+irregularity, through two independent engines.
+-/
+
+/-- **The eigenvalue-witness bridge.** Every eigenvector of a symmetric
+matrix (with any eigenvalue, hand-supplied) matches some spectral-theorem
+basis index's eigenvalue: if no `eigvalOf` equaled `μ`, then every
+expansion coefficient `vᵢ ⬝ᵥ x` would vanish
+(`dotProduct_eigvecOf_mulVec` moves `M` across the dot product and the
+mismatch factor kills the coefficient), forcing `x = 0` by
+`eigvecOf_expansion_apply`. This is the sign-free instrument that
+instantiates the opaque-basis transfer theorems at hand eigenpairs. -/
+theorem eigvalOf_of_eigenpair {V : Type} [Fintype V] [DecidableEq V]
+    {M : Matrix V V ℝ} (hM : M.IsSymm) {x : V → ℝ} (hx : x ≠ 0)
+    {μ : ℝ} (h : M *ᵥ x = μ • x) :
+    ∃ i : V, eigvalOf M hM i = μ := by
+  by_contra hcon
+  push_neg at hcon
+  apply hx
+  funext a
+  have hzero : ∀ i, Matrix.dotProduct (eigvecOf M hM i) x = 0 := by
+    intro i
+    have h1 : Matrix.dotProduct (eigvecOf M hM i) (M *ᵥ x)
+        = μ * Matrix.dotProduct (eigvecOf M hM i) x := by
+      rw [h, Matrix.dotProduct_smul, smul_eq_mul]
+    rw [dotProduct_eigvecOf_mulVec hM i x] at h1
+    have h2 : (eigvalOf M hM i - μ)
+        * Matrix.dotProduct (eigvecOf M hM i) x = 0 := by
+      rw [sub_mul, h1, sub_self]
+    rcases mul_eq_zero.1 h2 with h' | h'
+    · exact absurd (eq_of_sub_eq_zero h') (hcon i)
+    · exact h'
+  have hexp := eigvecOf_expansion_apply hM x a
+  simp only [hzero, zero_mul, Finset.sum_const_zero, Pi.zero_apply] at hexp
+  exact hexp.symm
+
+/-- The hand mode-`1` eigenvector is nonzero (entry read). -/
+theorem path_eigvec_one_hand_ne_zero : (![1, 0, -1] : Fin 3 → ℝ) ≠ 0 := by
+  intro h
+  have e := congrFun h 0
+  simp at e
+
+/-- Normalized-Laplacian corner diagonal entry: `(L_sym) 0 0 = 1` (no
+self-loops, degree-`1` vertex) — completing the entry pins the
+eigenspace row-solve needs. -/
+theorem path_normalizedLaplacian_00_QA :
+    normalizedLaplacian pathAdj 0 0 = 1 := by
+  have hp00 : pathAdj 0 0 = 0 := by norm_num [pathAdj]
+  simp only [normalizedLaplacian, Matrix.sub_apply, Matrix.one_apply,
+    Matrix.diagonal_apply, Matrix.diagonal_mul, Matrix.mul_diagonal,
+    degreeInvSqrt, Real.sqrt_one, inv_one, one_mul, zero_sub,
+    pathAdj_deg_zero]
+  rw [hp00]
+  norm_num
+
+/-- Normalized-Laplacian second off-diagonal: `(L_sym) 1 2 = -1/√2` —
+the degree-`(2, 1)` edge scaled by `1/√(2·1)`. -/
+theorem path_normalizedLaplacian_12_QA :
+    normalizedLaplacian pathAdj 1 2 = -(Real.sqrt 2)⁻¹ := by
+  have hp12 : pathAdj 1 2 = 1 := by norm_num [pathAdj]
+  simp only [normalizedLaplacian, Matrix.sub_apply, Matrix.one_apply,
+    Matrix.diagonal_apply, Matrix.diagonal_mul, Matrix.mul_diagonal,
+    degreeInvSqrt, Real.sqrt_one, inv_one, one_mul, zero_sub,
+    pathAdj_deg_one, pathAdj_deg_two]
+  rw [hp12]
+  have hne : ¬(1 : ℕ) = 2 := by decide
+  simp [hne]
+
+/-- **The mode-`1` eigenspace shape at the opaque basis**: an
+eigenvalue-`1` basis vector has middle entry `0` and antisymmetric
+ends (`v 2 = -v 0`), by the two row equations of
+`L_sym - 1` — the sign (and scale) of the basis vector stays
+unresolved, exactly the degree of freedom the transfer pins below never
+consume. -/
+theorem path_eigvecOf_one_shape {i : Fin 3}
+    (hi : eigvalOf (normalizedLaplacian pathAdj)
+        (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i = 1) :
+    eigvecOf (normalizedLaplacian pathAdj)
+        (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1 = 0 ∧
+      eigvecOf (normalizedLaplacian pathAdj)
+          (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 2
+        = -eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 0 := by
+  have hev : normalizedLaplacian pathAdj *ᵥ
+      eigvecOf (normalizedLaplacian pathAdj)
+        (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i
+      = eigvalOf (normalizedLaplacian pathAdj)
+          (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i •
+          eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i :=
+    (isHermitian_of_isSymm
+      (normalizedLaplacian_symmetric pathAdj
+        pathAdj_isSymm)).mulVec_eigenvectorBasis i
+  rw [hi] at hev
+  have e0 := congrFun hev 0
+  have e1 := congrFun hev 1
+  have h10 : normalizedLaplacian pathAdj 1 0 = -(Real.sqrt 2)⁻¹ := by
+    rw [show normalizedLaplacian pathAdj 1 0
+        = normalizedLaplacian pathAdj 0 1 from
+        (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm).apply 0 1,
+      path_normalizedLaplacian_offdiag_QA]
+  simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three,
+    Pi.smul_apply, smul_eq_mul, mul_one,
+    path_normalizedLaplacian_00_QA,
+    path_normalizedLaplacian_offdiag_QA,
+    path_normalizedLaplacian_far_QA] at e0
+  simp only [Matrix.mulVec, Matrix.dotProduct, Fin.sum_univ_three,
+    Pi.smul_apply, smul_eq_mul, mul_one,
+    path_normalizedLaplacian_diag_QA, h10,
+    path_normalizedLaplacian_12_QA] at e1
+  have hin : ((Real.sqrt 2 : ℝ)⁻¹)
+      * eigvecOf (normalizedLaplacian pathAdj)
+          (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1 = 0 := by
+    have hpos : (0 : ℝ) ≤ Real.sqrt 2 := Real.sqrt_nonneg _
+    nlinarith [e0]
+  have hv1 : eigvecOf (normalizedLaplacian pathAdj)
+      (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1 = 0 := by
+    rcases mul_eq_zero.1 hin with h' | h'
+    · exact absurd h' (inv_ne_zero
+        (Real.sqrt_ne_zero'.mpr (by norm_num)))
+    · exact h'
+  refine ⟨hv1, ?_⟩
+  have hsum : ((Real.sqrt 2 : ℝ)⁻¹)
+      * (eigvecOf (normalizedLaplacian pathAdj)
+          (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 0
+        + eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 2) = 0 := by
+    nlinarith [e1, hv1]
+  have hkey : eigvecOf (normalizedLaplacian pathAdj)
+      (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 0
+      + eigvecOf (normalizedLaplacian pathAdj)
+          (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 2 = 0 := by
+    rcases mul_eq_zero.1 hsum with h' | h'
+    · exact absurd h' (inv_ne_zero
+        (Real.sqrt_ne_zero'.mpr (by norm_num)))
+    · exact h'
+  linarith
+
+/-- **The eigenbasis transfer consumed, eigen-equation form**: the
+bridge locates the eigenvalue-`1` index from the hand eigenpair
+`path_Lsym_eigen_one_QA`, and `walkLaplacian_mulVec_eigvecOf` transfers
+that basis vector to a fixed point of the walk Laplacian — the
+opaque-index instantiation of the forward transfer at eigenvalue `1`. -/
+theorem path_walkLaplacian_eigvecOf_transfer_pin :
+    ∃ i : Fin 3,
+      eigvalOf (normalizedLaplacian pathAdj)
+          (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i = 1 ∧
+      walkLaplacian pathAdj *ᵥ (degreeInvSqrt pathAdj *ᵥ
+          eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i)
+        = degreeInvSqrt pathAdj *ᵥ
+            eigvecOf (normalizedLaplacian pathAdj)
+              (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i := by
+  obtain ⟨i, hi⟩ := eigvalOf_of_eigenpair
+    (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm)
+    path_eigvec_one_hand_ne_zero path_Lsym_eigen_one_QA
+  refine ⟨i, hi, ?_⟩
+  have h := walkLaplacian_mulVec_eigvecOf pathAdj pathAdj_isSymm
+    pathAdj_deg_pos i
+  rwa [hi, one_smul] at h
+
+/-- **The same transfer in sign-robust entry form**: the transferred
+walk eigenvector has middle entry `0`, antisymmetric ends, and is
+nonzero — properties invariant under the unresolved sign/scale of the
+basis vector (the eigenspace shape composed with the degree
+conjugation; the endpoints have degree `1`, so only the middle entry
+scales). A wrong conjugation or a wrong eigenvalue would break the
+antisymmetry or the nonvanishing. -/
+theorem path_walkLaplacian_eigvecOf_transfer_shape :
+    ∃ i : Fin 3,
+      eigvalOf (normalizedLaplacian pathAdj)
+          (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i = 1 ∧
+      (degreeInvSqrt pathAdj *ᵥ
+          eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i) 1 = 0 ∧
+      (degreeInvSqrt pathAdj *ᵥ
+          eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i) 0
+        = -((degreeInvSqrt pathAdj *ᵥ
+              eigvecOf (normalizedLaplacian pathAdj)
+                (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i) 2) ∧
+      (degreeInvSqrt pathAdj *ᵥ
+          eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i) ≠ 0 := by
+  obtain ⟨i, hi⟩ := eigvalOf_of_eigenpair
+    (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm)
+    path_eigvec_one_hand_ne_zero path_Lsym_eigen_one_QA
+  obtain ⟨hv1, hv2⟩ := path_eigvecOf_one_shape hi
+  have w0 : (degreeInvSqrt pathAdj *ᵥ
+      eigvecOf (normalizedLaplacian pathAdj)
+        (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i) 0
+      = eigvecOf (normalizedLaplacian pathAdj)
+          (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 0 := by
+    rw [degreeInvSqrt_mulVec_apply, pathAdj_deg_zero, Real.sqrt_one,
+      inv_one, one_mul]
+  have w1 : (degreeInvSqrt pathAdj *ᵥ
+      eigvecOf (normalizedLaplacian pathAdj)
+        (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i) 1 = 0 := by
+    rw [degreeInvSqrt_mulVec_apply, pathAdj_deg_one, hv1]
+    simp
+  have w2 : (degreeInvSqrt pathAdj *ᵥ
+      eigvecOf (normalizedLaplacian pathAdj)
+        (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i) 2
+      = eigvecOf (normalizedLaplacian pathAdj)
+          (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 2 := by
+    rw [degreeInvSqrt_mulVec_apply, pathAdj_deg_two, Real.sqrt_one,
+      inv_one, one_mul]
+  exact ⟨i, hi, w1, by rw [w0, w2, hv2, neg_neg],
+    degreeInvSqrt_mulVec_ne_zero pathAdj pathAdj_deg_pos
+      (eigvecOf_ne_zero _ _ i)⟩
+
+/-- Raw route: the hand eigenpair `(1, 0, -1)` is a walk-Laplacian fixed
+point by direct row arithmetic on `P = D⁻¹A` (the delivered
+`path_walkTransition_middle_raw_QA` annihilates it under `P`, and
+`L_walk = 1 - P`) — the numeric companion of the transfer pin, no
+eigenbasis involved. -/
+theorem path_walkLaplacian_one_mode_raw :
+    walkLaplacian pathAdj *ᵥ (![1, 0, -1] : Fin 3 → ℝ)
+      = (![1, 0, -1] : Fin 3 → ℝ) := by
+  rw [walkLaplacian, Matrix.sub_mulVec, Matrix.one_mulVec,
+    path_walkTransition_middle_raw_QA, sub_zero]
+
+/-- The degree-square-root action at the center vertex:
+`√D *ᵥ e₁ = √2 • e₁` (the degree-`2` center). -/
+theorem path_degreeSqrt_mulVec_center :
+    degreeSqrt pathAdj *ᵥ (![0, 1, 0] : Fin 3 → ℝ)
+      = ![0, Real.sqrt 2, 0] := by
+  funext i
+  rcases nfFin3_cases i with rfl | rfl | rfl
+  · rw [degreeSqrt_mulVec_apply, pathAdj_deg_zero, Real.sqrt_one]
+    simp
+  · rw [degreeSqrt_mulVec_apply, pathAdj_deg_one]
+    simp
+  · rw [degreeSqrt_mulVec_apply, pathAdj_deg_two, Real.sqrt_one]
+    simp
+
+/-- The reciprocal action at the center vertex:
+`(1/√D) *ᵥ e₁ = (1/√2) • e₁`. -/
+theorem path_degreeInvSqrt_mulVec_center :
+    degreeInvSqrt pathAdj *ᵥ (![0, 1, 0] : Fin 3 → ℝ)
+      = ![0, (Real.sqrt 2)⁻¹, 0] := by
+  funext i
+  rcases nfFin3_cases i with rfl | rfl | rfl
+  · rw [degreeInvSqrt_mulVec_apply, pathAdj_deg_zero, Real.sqrt_one]
+    simp
+  · rw [degreeInvSqrt_mulVec_apply, pathAdj_deg_one]
+    simp
+  · rw [degreeInvSqrt_mulVec_apply, pathAdj_deg_two, Real.sqrt_one]
+    simp
+
+/-- **Column completeness at the center**: the basis vectors' center
+entries square-sum to one — `eigvecOf_expansion_apply` at `e₁` read at
+entry `1` (the unconjugated expansion engine, consumed here as the
+independent route of the transferred-expansion join). -/
+theorem path_eigvecOf_column_norm :
+    ∑ i, eigvecOf (normalizedLaplacian pathAdj)
+          (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1
+        * eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1
+      = 1 := by
+  have hexp := eigvecOf_expansion_apply
+    (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm)
+    (![0, 1, 0] : Fin 3 → ℝ) 1
+  simpa [Matrix.dotProduct, Fin.sum_univ_three] using hexp
+
+/-- **The transferred expansion consumed, aggregate-quadratic form.**
+Dotting the transferred expansion of `e₁`
+(`walk_eigvec_expansion`) with the conjugated test vector
+`(1/√D) *ᵥ e₁ = ![0, 1/√2, 0]` evaluates the whole quadratic sum
+through the theorem: the value is `1/√2 = 1/√(deg 1)`, carrying the
+graph's genuine irregularity (on a regular graph it would be `1`). Each
+summand is quadratic in its basis vector, so the unresolved signs
+cancel — no identification of the basis is needed. -/
+theorem path_walk_eigvec_expansion_center_join :
+    (∑ i, Matrix.dotProduct
+          (eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i)
+          (degreeSqrt pathAdj *ᵥ (![0, 1, 0] : Fin 3 → ℝ))
+        * Matrix.dotProduct
+            (degreeInvSqrt pathAdj *ᵥ
+              eigvecOf (normalizedLaplacian pathAdj)
+                (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i)
+            (![0, (Real.sqrt 2)⁻¹, 0] : Fin 3 → ℝ))
+      = (Real.sqrt 2)⁻¹ := by
+  have hexp := walk_eigvec_expansion pathAdj pathAdj_isSymm
+    pathAdj_deg_pos (![0, 1, 0] : Fin 3 → ℝ)
+  have hsplit : ∀ (c : Fin 3 → ℝ) (y : Fin 3 → (Fin 3 → ℝ))
+      (u : Fin 3 → ℝ),
+      (∑ i, c i • y i) ⬝ᵥ u = ∑ i, c i * (y i ⬝ᵥ u) := by
+    intro c y u
+    simp only [Matrix.dotProduct, Finset.sum_apply, Pi.smul_apply,
+      smul_eq_mul]
+    calc ∑ a, (∑ i, c i * y i a) * u a
+        = ∑ a, ∑ i, (c i * y i a) * u a := by
+          exact Finset.sum_congr rfl fun a _ => Finset.sum_mul _ _ _
+      _ = ∑ i, ∑ a, (c i * y i a) * u a := Finset.sum_comm
+      _ = ∑ i, c i * ∑ a, y i a * u a := by
+          refine Finset.sum_congr rfl fun i _ => ?_
+          rw [Finset.mul_sum]
+          exact Finset.sum_congr rfl fun a _ => by ring
+  have hdot := congrArg
+    (fun s => Matrix.dotProduct s (![0, (Real.sqrt 2)⁻¹, 0] : Fin 3 → ℝ)) hexp
+  simp only [hsplit] at hdot
+  have hval : Matrix.dotProduct (![0, 1, 0] : Fin 3 → ℝ)
+      (![0, (Real.sqrt 2)⁻¹, 0] : Fin 3 → ℝ) = (Real.sqrt 2)⁻¹ := by
+    simp [Matrix.dotProduct, Fin.sum_univ_three]
+  rw [hval] at hdot
+  exact hdot
+
+/-- The same value through the independent engine: each summand
+rewrites by the pinned diagonal actions (`√2` and `1/√2` at the
+center) to `(1/√2) · (vᵢ 1)²`, and the column-completeness pin sums the
+squares to one — no transferred-expansion theorem involved. Two routes,
+one value. -/
+theorem path_walk_eigvec_expansion_center_join_raw :
+    (∑ i, Matrix.dotProduct
+          (eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i)
+          (degreeSqrt pathAdj *ᵥ (![0, 1, 0] : Fin 3 → ℝ))
+        * Matrix.dotProduct
+            (degreeInvSqrt pathAdj *ᵥ
+              eigvecOf (normalizedLaplacian pathAdj)
+                (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i)
+            (![0, (Real.sqrt 2)⁻¹, 0] : Fin 3 → ℝ))
+      = (Real.sqrt 2)⁻¹ := by
+  have hin : (Real.sqrt 2 : ℝ) ≠ 0 := Real.sqrt_ne_zero'.mpr (by norm_num)
+  have hc : ∀ i : Fin 3,
+      Matrix.dotProduct
+          (eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i)
+          (degreeSqrt pathAdj *ᵥ (![0, 1, 0] : Fin 3 → ℝ))
+        = Real.sqrt 2 * eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1 := by
+    intro i
+    rw [path_degreeSqrt_mulVec_center]
+    simp only [Matrix.dotProduct, Fin.sum_univ_three,
+      Matrix.cons_val_zero, Matrix.head_cons, Matrix.cons_val_one,
+      Matrix.cons_val_two, Matrix.tail_cons, mul_zero, zero_add, add_zero,
+      mul_one]
+    ring
+  have hwapp : ∀ i : Fin 3,
+      (degreeInvSqrt pathAdj *ᵥ
+          eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i) 1
+        = (Real.sqrt 2)⁻¹ * eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1 := by
+    intro i
+    rw [degreeInvSqrt_mulVec_apply, pathAdj_deg_one]
+  have hw : ∀ i : Fin 3,
+      Matrix.dotProduct
+          (degreeInvSqrt pathAdj *ᵥ
+            eigvecOf (normalizedLaplacian pathAdj)
+              (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i)
+          (![0, (Real.sqrt 2)⁻¹, 0] : Fin 3 → ℝ)
+        = (Real.sqrt 2)⁻¹ * ((Real.sqrt 2)⁻¹
+            * eigvecOf (normalizedLaplacian pathAdj)
+                (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1) := by
+    intro i
+    simp only [Matrix.dotProduct, Fin.sum_univ_three, hwapp i,
+      Matrix.cons_val_zero, Matrix.head_cons, Matrix.cons_val_one,
+      Matrix.cons_val_two, Matrix.tail_cons, mul_zero, zero_add, add_zero]
+    ring
+  have hterm : ∀ i : Fin 3,
+      (Real.sqrt 2 * eigvecOf (normalizedLaplacian pathAdj)
+          (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1)
+        * ((Real.sqrt 2)⁻¹ * ((Real.sqrt 2)⁻¹
+            * eigvecOf (normalizedLaplacian pathAdj)
+                (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1))
+      = (Real.sqrt 2)⁻¹ * (eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1
+          * eigvecOf (normalizedLaplacian pathAdj)
+              (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1) := by
+    intro i
+    have key : (Real.sqrt 2 : ℝ) * (Real.sqrt 2)⁻¹ = 1 :=
+      mul_inv_cancel₀ hin
+    calc (Real.sqrt 2 * eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1)
+        * ((Real.sqrt 2)⁻¹ * ((Real.sqrt 2)⁻¹
+            * eigvecOf (normalizedLaplacian pathAdj)
+                (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1))
+        = ((Real.sqrt 2 : ℝ) * (Real.sqrt 2)⁻¹)
+            * ((Real.sqrt 2)⁻¹
+              * (eigvecOf (normalizedLaplacian pathAdj)
+                  (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1
+                * eigvecOf (normalizedLaplacian pathAdj)
+                    (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1)) := by
+          ring
+      _ = (Real.sqrt 2)⁻¹ * (eigvecOf (normalizedLaplacian pathAdj)
+              (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1
+            * eigvecOf (normalizedLaplacian pathAdj)
+                (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1) := by
+          rw [key, one_mul]
+  have hsum : (∑ i : Fin 3, (Real.sqrt 2)⁻¹
+      * (eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1
+          * eigvecOf (normalizedLaplacian pathAdj)
+              (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1))
+      = (Real.sqrt 2)⁻¹ := by
+    rw [← Finset.mul_sum, path_eigvecOf_column_norm, mul_one]
+  calc (∑ i : Fin 3, Matrix.dotProduct
+          (eigvecOf (normalizedLaplacian pathAdj)
+            (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i)
+          (degreeSqrt pathAdj *ᵥ (![0, 1, 0] : Fin 3 → ℝ))
+        * Matrix.dotProduct
+            (degreeInvSqrt pathAdj *ᵥ
+              eigvecOf (normalizedLaplacian pathAdj)
+                (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i)
+            (![0, (Real.sqrt 2)⁻¹, 0] : Fin 3 → ℝ))
+      = ∑ i : Fin 3, (Real.sqrt 2)⁻¹
+          * (eigvecOf (normalizedLaplacian pathAdj)
+                (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1
+              * eigvecOf (normalizedLaplacian pathAdj)
+                  (normalizedLaplacian_symmetric pathAdj pathAdj_isSymm) i 1) := by
+        refine Finset.sum_congr rfl fun i _ => ?_
+        rw [hc i, hw i]
+        exact hterm i
+    _ = (Real.sqrt 2)⁻¹ := hsum
+
 end SpectralGraphTheory.QA

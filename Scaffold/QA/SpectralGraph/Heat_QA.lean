@@ -3168,4 +3168,63 @@ theorem gsc_hnonneg_fence_QA :
 
 end HeatFencesD1
 
+/-! ## The heat pair's structural pins
+(`proposals/heat-irreducible-pairs-pins.md`)
+
+The consumption census (`wip/census_20260907_post10.txt`, inert set 25)
+leaves `heatKernel_decayFactor_le_one` and `normalizedHeatKernel_zero`
+never consumed — the decay-factor family's `ht` fences exist on file
+(the backward-time refutations below), but the positive `0 ≤ t`
+statement was never instantiated. This section pins both: the decay
+factor attained with equality at the constant mode (the undamped
+kernel — the bound sharp) and strictly below at the Fiedler mode; the
+`t = 0` identity acting on a nontrivial vector through the theorem.
+-/
+
+section StructuralPins
+
+/-- **The decay-factor bound at the constant mode — attained with
+equality**: at the pinned `evals ⟨0⟩ = 0` the factor is `e^{-t·0} = 1`
+exactly, so the `≤ 1` bound is the sharp statement that the kernel
+mode is undamped, never amplified. -/
+theorem hkp_decay_kernel_le_QA :
+    Real.exp (-((1 : ℝ) * evals (laplacian_symmetric heatEdgeAdj
+          heatEdgeAdj_isSymm) ⟨0, by simp⟩)) ≤ 1 :=
+  heatKernel_decayFactor_le_one heatEdgeAdj heatEdgeAdj_isSymm
+    heatEdgeAdj_nonneg (by norm_num) ⟨0, by simp⟩
+
+theorem hkp_decay_kernel_value_QA :
+    Real.exp (-((1 : ℝ) * evals (laplacian_symmetric heatEdgeAdj
+          heatEdgeAdj_isSymm) ⟨0, by simp⟩)) = 1 := by
+  rw [(edgeLaplacian_evals_QA).1, mul_zero, neg_zero, Real.exp_zero]
+
+/-- **The decay-factor bound at the Fiedler mode**: at the pinned
+`evals ⟨1⟩ = 2`, `t = 1`, the factor is `e^{-2} ≤ 1` — and strictly
+below, by the file's established `Real.exp_lt_exp` idiom. -/
+theorem hkp_decay_fiedler_le_QA :
+    Real.exp (-((1 : ℝ) * evals (laplacian_symmetric heatEdgeAdj
+          heatEdgeAdj_isSymm) ⟨1, by simp⟩)) ≤ 1 :=
+  heatKernel_decayFactor_le_one heatEdgeAdj heatEdgeAdj_isSymm
+    heatEdgeAdj_nonneg (by norm_num) ⟨1, by simp⟩
+
+theorem hkp_decay_fiedler_strict_QA :
+    Real.exp (-((1 : ℝ) * evals (laplacian_symmetric heatEdgeAdj
+          heatEdgeAdj_isSymm) ⟨1, by simp⟩)) < 1 := by
+  rw [(edgeLaplacian_evals_QA).2]
+  have h : Real.exp (-((1 : ℝ) * 2)) < Real.exp (0 : ℝ) :=
+    Real.exp_lt_exp.2 (by norm_num)
+  rw [Real.exp_zero] at h
+  exact h
+
+/-- **The `t = 0` identity acting on a nontrivial vector**: the
+normalized heat kernel at time zero is exactly `1`, so it fixes the
+antisymmetric vector — through the theorem, no matrix exponential
+computed. -/
+theorem nhk_zero_action_pin_QA :
+    normalizedHeatKernel heatEdgeAdj 0 *ᵥ (![1, -1] : Fin 2 → ℝ)
+      = ![1, -1] := by
+  rw [normalizedHeatKernel_zero, Matrix.one_mulVec]
+
+end StructuralPins
+
 end SpectralGraphTheory.QA

@@ -26,7 +26,7 @@ As of September 7, 2026:
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 4 |
 | Functional theorems/lemmas (`Scaffold/Mathlib` + `Scaffold/Derived`) | 1369 — the public, consumer-facing layer `Scaffold.lean` actually imports |
-| QA theorems/lemmas (`Scaffold/QA`) | 6661, with no `sorry` or `admit` under `Scaffold/` — testing infrastructure, not imported by `Scaffold.lean` |
+| QA theorems/lemmas (`Scaffold/QA`) | 6698, with no `sorry` or `admit` under `Scaffold/` — testing infrastructure, not imported by `Scaffold.lean` |
 
 Recent highlights (full per-run history in
 [`docs/AGENT_ACTIVITY.md`](docs/AGENT_ACTIVITY.md); per-result detail in each

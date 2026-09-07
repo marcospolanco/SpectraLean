@@ -2278,4 +2278,99 @@ theorem stationaryVec_smul_hirr_fence_QA :
 
 end AdversarialFences
 
+/-! ## The irreducible pair's structural pins
+(`proposals/heat-irreducible-pairs-pins.md`)
+
+The consumption census (`wip/census_20260907_post10.txt`, inert set 25)
+leaves `isIrreducible_transpose` and `pow_entry_le_one` never consumed.
+This section pins both on GENUINELY DIRECTED input — the walk
+transition matrix of the `A3` star, asymmetric even though `A3` itself
+is symmetric (the rows are scaled by different reciprocals).
+-/
+
+section StructuralPins
+
+theorem A3P_nonneg : ∀ i j, 0 ≤ walkTransitionMatrix A3 i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;>
+    simp [walkTransitionMatrix_apply, A3_01, A3_02, A3_10, A3_20,
+      A3_00, A3_11, A3_12, A3_21, A3_22, A3_deg_0, A3_deg_1, A3_deg_2]
+
+theorem A3PT_nonneg : ∀ i j, 0 ≤ (walkTransitionMatrix A3)ᵀ i j := by
+  intro i j
+  rw [Matrix.transpose_apply]
+  exact A3P_nonneg j i
+
+/-- **Route A — the transpose's irreducibility THROUGH the theorem
+chain**: `A3`'s irreducibility transfers to the walk matrix by the
+shelf lemma, then to the transpose by the never-consumed theorem. -/
+theorem isp_transpose_irreducible_pin_QA :
+    (walkTransitionMatrix A3)ᵀ.IsIrreducible :=
+  isIrreducible_transpose
+    (walkTransitionMatrix_isIrreducible A3 A3_irreducible_QA A3_deg_QA)
+
+/-- **Route B — the same fact raw**, by explicit paths in the
+arc-reversal digraph: every vertex reaches and is reached from the hub
+`0` (the transpose's arcs are `0→1`, `0→2` at weight `1` and
+`1→0`, `2→0` at weight `1/2` — the raw `A3P_*` entries read through
+`Matrix.transpose_apply`). Two routes, one fact. -/
+theorem isp_transpose_irreducible_raw_QA :
+    (walkTransitionMatrix A3)ᵀ.IsIrreducible := by
+  have hT01 : 0 < (walkTransitionMatrix A3)ᵀ (0 : Fin 3) 1 := by
+    rw [Matrix.transpose_apply, A3P_10]; norm_num
+  have hT02 : 0 < (walkTransitionMatrix A3)ᵀ (0 : Fin 3) 2 := by
+    rw [Matrix.transpose_apply, A3P_20]; norm_num
+  have hT10 : 0 < (walkTransitionMatrix A3)ᵀ (1 : Fin 3) 0 := by
+    rw [Matrix.transpose_apply, A3P_01]; norm_num
+  have hT20 : 0 < (walkTransitionMatrix A3)ᵀ (2 : Fin 3) 0 := by
+    rw [Matrix.transpose_apply, A3P_02]; norm_num
+  intro i j
+  fin_cases i
+  · fin_cases j
+    · exact Relation.ReflTransGen.refl
+    · exact Relation.ReflTransGen.head hT01 Relation.ReflTransGen.refl
+    · exact Relation.ReflTransGen.head hT02 Relation.ReflTransGen.refl
+  · fin_cases j
+    · exact Relation.ReflTransGen.head hT10 Relation.ReflTransGen.refl
+    · exact Relation.ReflTransGen.refl
+    · exact Relation.ReflTransGen.head hT10
+        (Relation.ReflTransGen.head hT02 Relation.ReflTransGen.refl)
+  · fin_cases j
+    · exact Relation.ReflTransGen.head hT20 Relation.ReflTransGen.refl
+    · exact Relation.ReflTransGen.head hT20
+        (Relation.ReflTransGen.head hT01 Relation.ReflTransGen.refl)
+    · exact Relation.ReflTransGen.refl
+
+/-- **The power-positivity corollary THROUGH the chain** (transpose →
+power positivity), on genuinely directed input — the transpose's
+irreducibility consumed onward, not left as an inert conclusion. -/
+theorem isp_transpose_pow_pos_pin_QA :
+    ∃ m : ℕ, 0 < ((walkTransitionMatrix A3)ᵀ ^ m) (0 : Fin 3) 1 :=
+  exists_pow_pos_of_isIrreducible A3PT_nonneg
+    isp_transpose_irreducible_pin_QA 0 1
+
+/-- The raw witness: the transpose's `(0, 1)` entry is exactly the
+walk's `(1, 0)` entry `1` — the existential satisfied at `m = 1`, so
+the chain's conclusion is non-vacuous at a pinned value. -/
+theorem isp_transpose_entry_one_QA :
+    ((walkTransitionMatrix A3)ᵀ ^ 1) (0 : Fin 3) 1 = 1 := by
+  rw [pow_one, Matrix.transpose_apply, A3P_10]
+
+/-- **The `[0, 1]` power-entry bound attained with equality**: the
+star's two-step return `(P²) 0 0 = 1 ≤ 1` THROUGH the theorem — the
+bound sharp at a stochastic power entry that genuinely reaches `1`. -/
+theorem isp_pow_entry_le_one_attained_QA :
+    (walkTransitionMatrix A3 ^ 2) (0 : Fin 3) 0 ≤ 1 :=
+  pow_entry_le_one (walkTransitionMatrix A3) A3P_nonneg
+    (fun i => walkTransitionMatrix_row_sum A3 A3_deg_QA i) 2 0 0
+
+theorem isp_P2_00_eq_one_QA :
+    (walkTransitionMatrix A3 ^ 2) (0 : Fin 3) 0 = 1 := by
+  rw [pow_two, Matrix.mul_apply]
+  simp only [A3P_00, A3P_10, A3P_20, A3P_01, A3P_02, A3P_11, A3P_12,
+    A3P_21, A3P_22, Fin.sum_univ_three]
+  norm_num
+
+end StructuralPins
+
 end Scaffold.QA.SpectralGraph

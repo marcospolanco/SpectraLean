@@ -6,8 +6,309 @@ holds the append-only narrative.
 ## Active milestone
 
 **None open.** The Active table stays all-Low (decision-gated); the
-census's remaining inert set (30) names the next clusters. See the
+census's remaining inert set (21) names the next clusters. See the
 delivered record below.
+
+------
+
+**The Heat + IrreducibleStationary pairs' positive pins — DELIVERED**
+(run `20260907T114557Z-run-1`, session
+`ses_f84763143ffeAVPDc1KGOxyMgM`; terminal entry appended to
+`AGENT_ACTIVITY.md`; the same-run proposal
+`proposals/heat-irreducible-pairs-pins.md` COMPLETE with delivery
+record).
+
+------
+
+**The Heat + IrreducibleStationary pairs' positive pins** — the prior
+handoff's "cheap batch of pairs" option: two of the census's four
+remaining 2-clusters (per `wip/census_20260907_post10.txt`, inert set
+25), with the Band and Normalized pairs' scope decisions recorded (the
+Band vanishing member's positive instance is degenerate — a fence-audit
+item; the Normalized pair is stated at opaque `eigvecOf` — sign not
+resolvable without unfolding; both priced as residue).
+
+**DELIVERED at the full designed scope** — 13 QA declarations (5 in
+`Heat_QA.lean`'s new `StructuralPins` section, 8 in
+`IrreducibleStationary_QA.lean`'s; QA 6685 → 6698), zero axiom contact
+(`#print axioms` via `wip/hipins_axcheck.lean` on all 13 — every one
+exactly `propext, Classical.choice, Quot.sound`). **The first genuine
+consumption of all four**: the decay factor attained with equality at
+the constant mode (`e^{-t·0} = 1 ≤ 1` — the undamped kernel, the bound
+sharp) and strict at the Fiedler mode (`e^{-2} < 1`, the file's
+`Real.exp_lt_exp` idiom); the `t = 0` normalized-heat identity acting
+on the antisymmetric vector through the theorem (no matrix exponential
+computed); **the transpose-irreducibility two-route join on GENUINELY
+DIRECTED input** (the `A3` star's walk matrix — asymmetric even at
+symmetric `A3`): route A through
+`isIrreducible_transpose`∘`walkTransitionMatrix_isIrreducible`, route
+B raw `ReflTransGen` paths in the arc-reversal digraph at the pinned
+`A3P_*` entries — two routes, one fact; the chain consumed onward
+(`exists_pow_pos_of_isIrreducible` at the transpose result, the raw
+witness `(Pᵀ) 0 1 = 1` pinning the existential non-vacuous); and the
+`[0, 1]` power-entry bound attained with equality at the star's
+two-step return `(P²) 0 0 = 1 ≤ 1` (raw companion: `1/2·1 + 1/2·1 =
+1`). **Consumption closure verified by the tool**: the census re-run
+(`wip/census_20260907_post11.txt`, diffed against `post10`) shows
+exactly the 4 targeted theorems leaving the inert set (1342 → 1346
+value-consumed, 25 → 21 never-touched, the Heat (2) and
+IrreducibleStationary (2) lines gone, no bonus, no collateral). The
+pins method's tenth application.
+
+**Verification:** spike-first (`wip/hipins_spike.lean` — green after
+three fix rounds; traps recorded: inline `by rw` inside `exact … head`
+terms leaving metavariable entry arguments — concrete `have` arc facts
+first; `any_goals exact` cascades reporting type-mismatch errors —
+explicit `fin_cases` bullets; multi-line `exact` continuations not
+parsing); both landed modules elaborate with zero errors/warnings (the
+2 `ring_nf` infos in `Heat_QA` verified pre-existing at HEAD); explicit
+builds ✔; **full `lake build` + `check_build_completeness.py` —
+135/135 fresh, 0 stale, 0 missing, exit 0** (two mtime stalenesses
+from the pre-existing-info check's stash round-trip, cured by the
+documented artifact-removal remediation); `lint_axioms` exit 0 (4
+axioms unchanged); `check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new `hkp_*` /
+`nhk_*` / `isp_*` / `A3P*` names collision-free);
+`check_backlog_freshness` clean; scoreboard regenerated (**1369 /
+6698 / 4 / 0**) with the verification row; map freshness exit 0 after
+the 6698 sync in both map data tables + SVG regeneration (49 stations,
+no status change — none owed). Records updated: the same-run proposal
+(COMPLETE + delivery record + the Band/Normalized scope decisions),
+`proposals/README.md` (new Delivered row), README (6698), the radar's
+QA row (6698, held 4.5), the scoreboard verification row, both map
+data tables + regenerated SVG, this plan, and the activity log. No
+backlog note owed. Nothing committed; prior runs' uncommitted
+deliveries preserved.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. Honest scope: decay pins at `t = 1` and
+the two sorted indices of one fixture; the `t = 0` identity at one
+vector; the transpose join at one 3-vertex asymmetric walk fixture;
+the power-entry pin at one entry of one power; the Band and Normalized
+pairs remain inert with their scope decisions recorded in the
+proposal.
+
+**Next handoff:** the Active table stays all-Low (decision-gated). The
+census's remaining inert set (21): AlonBoppana (3), Expander (3),
+Matrix.Azuma (3 — the `MatrixMDS` structure fields), the Band (2) and
+Normalized (2) pairs (with this delivery's scope decisions — Band's
+vanishing member wants a fence; Normalized wants an `eigvecOf`-sign
+resolution), and the singles (Electrical's `isEffectiveResistance_
+unique`, Multiway's `covers`, RandomWalk's
+`randomWalkLaplacian_symmetric`, Spectral's
+`degreeMatrix_diagonal_nonneg`, Core's `l_infty_norm` pair, the scalar
+`*_iid` twins, IIDProduct's `indepFun_indicator_coord`). The pins
+method applies unchanged; the named-weight singles (Electrical's
+uniqueness is the strategy doc's own example of load-bearing content)
+and the cheap structural singles (Spectral's `degreeMatrix_diagonal_
+nonneg`, RandomWalk's `randomWalkLaplacian_symmetric` — both
+entry-level pins) are the natural next batch. Operator-gated items
+unchanged (the companion's Steps 3–5 adoption; master-bound Step 2;
+the `perron_frobenius` deprecation; backlog items 5/6; log-Sobolev;
+the reverse TV → χ² consumer; plus the newer `weighted-matrix-tree`,
+`mutual-information`, and `erdos-renyi` Low rows).
+
+------
+
+**The Mixing trio's positive pins — DELIVERED** (run
+`20260907T112036Z-run-1`, session
+`ses_f84763143ffeAVPDc1KGOxyMgM`; terminal entry appended to
+`AGENT_ACTIVITY.md`; the same-run proposal
+`proposals/mixing-trio-pins.md` COMPLETE with delivery record).
+
+------
+
+**The Mixing trio's positive pins** — the prior handoff's natural size
+pick: the census's remaining inert set (28, per
+`wip/census_20260907_post9.txt`) had four 3-clusters (Mixing,
+AlonBoppana, Expander, Matrix.Azuma); Mixing won on content weight —
+`chiSquareDistance_eq_zero_iff` (the vanishing characterization, its
+`hd` fence on file but the iff never applied),
+`walkDistribution_tvDistance_le_max_rate` (the plain TV shadow at the
+computed spectral rate — its χ² and lazy TV twins both consumed, this
+one never), and `klDiv_lazyWalkDistribution_le` (the consumed KL
+headline's lazy twin).
+
+**DELIVERED at the full designed scope** — 15 QA declarations in
+`Mixing_QA.lean`'s new `StructuralPins` section (QA 6670 → 6685),
+zero axiom contact (`#print axioms` via `wip/mxpins_axcheck.lean` on
+all 15 — every one exactly `propext, Classical.choice, Quot.sound`).
+**The first genuine consumption of all three**: the K₂ top-eigenvalue
+card-form pin (`k2_evals_last_eq` — cheap because `secondEval` is
+literally `evals hM ⟨1, by omega⟩`, so on `Fin 2` the top index IS
+the secondEval index) + the certificate `max(1−λ₂, λ_max−1) = 1`
+exactly (both branches `2` — the periodic chain's honest no-decay
+corner); the TV shadow instances with the certificate COMPUTED from
+the pinned spectrum (K₂ **attained with equality** `1/2 =
+(1/2)·√1`; triangle both sides pinned `1/3` vs inner `1/2` — the
+computed-certificate twin of the hand-supplied `tri_tv_rate_one_QA`);
+**the lazy KL twin with both sides collapsing to `0`** (KL vanishes
+at the delivered exact lazy stationarity `k2_lazy_law_one_QA`; the
+lazy rate `1 − 2/2 = 0` collapses the bound — attained at `0 ≤ 0`);
+and **the iff's both directions at the delivered looped triangle**
+(`loopTriAdj` — the plain one-step law exactly uniform, the loops
+breaking the period-2 obstruction: χ² `= 0` THROUGH the ⇐ from raw
+stationarity, stationarity THROUGH the ⇒ from the raw zero χ² — two
+routes, one value) plus the periodic-K₂ contrapositive companion
+(the pinned χ² `= 1 ≠ 0` makes the iff a *non-mixing certificate*).
+**Consumption closure verified by the tool**: the census re-run
+(`wip/census_20260907_post10.txt`, diffed against `post9`) shows
+exactly the 3 targeted theorems leaving the inert set (1339 → 1342
+value-consumed, 28 → 25 never-touched, the `Mixing (3)` line gone,
+no bonus, no collateral). The pins method's ninth application.
+
+**Verification:** spike-first (`wip/mxpins_spike.lean` — green after
+three fix rounds; traps recorded in the proposal: `secondEval`'s
+literal `⟨1⟩` index vs the assumed `card − 2` — the first round's
+defeq ascription failed on a genuinely different index; the
+`fin_cases <;> rw` rename mis-binding, cured by the file's
+`fin_cases <;> simp` idiom; the `Fin 3` degree-sum goals needing a
+trailing `norm_num`); the landed module elaborates with zero
+errors/warnings (the 3 `ring_nf` infos verified pre-existing at HEAD
+via a stash round-trip — the round-trip itself caused the one mtime
+staleness below); explicit build ✔; **full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0**; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new `mxp_*` /
+`k2_evals_*` / `k2_spectral_rate_*` names collision-free);
+`check_backlog_freshness` clean; scoreboard regenerated (**1369 /
+6685 / 4 / 0**) with the verification row; map freshness exit 0 after
+the 6685 sync in both map data tables + SVG regeneration (49
+stations, no status change — none owed). Records updated: the
+same-run proposal (COMPLETE + delivery record), `proposals/README.md`
+(new Delivered row), README (6685), the radar's QA row (6685, held
+4.5), the scoreboard verification row, both map data tables +
+regenerated SVG, this plan, and the activity log. No backlog note
+owed (the Mixing pins are not a backlog item). Nothing committed;
+prior runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. Honest scope: the TV shadow pins at
+depth `1` on two fixtures; the KL twin at the single vanishing depth;
+the iff pins at one looped fixture and depth `1`; certificate
+computation at `λ₂ = λ_max` fixtures only (a fixture where the max's
+two branches select differently is a natural future pin, priced in
+the proposal, not owed).
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The census's remaining inert set (25): AlonBoppana (3), Expander (3),
+Matrix.Azuma (3 — the `MatrixMDS` structure fields), then the
+Band/Heat/IrreducibleStationary/Normalized pairs, and the singles
+(Electrical's `isEffectiveResistance_unique`, Multiway's `covers`,
+RandomWalk's `randomWalkLaplacian_symmetric`, Spectral's
+`degreeMatrix_diagonal_nonneg`, Core's `l_infty_norm` pair, the
+scalar `*_iid` twins, IIDProduct's `indepFun_indicator_coord`). The
+pins method applies unchanged; cluster size and name-weight remain
+the selection keys (the three remaining 3-clusters are helper-shaped —
+AlonBoppana's level-class machinery, Expander's degenerate-set edge
+lemmas, Azuma's structure fields — so a named-weight single like
+Electrical's `isEffectiveResistance_unique` or a cheap batch of pairs
+may outrank them). Operator-gated items unchanged (the companion's
+Steps 3–5 adoption; master-bound Step 2; the `perron_frobenius`
+deprecation; backlog items 5/6; log-Sobolev; the reverse TV → χ²
+consumer; plus the newer `weighted-matrix-tree`, `mutual-information`,
+and `erdos-renyi` Low rows).
+
+------
+
+**The Poincaré pair's connectivity-route positive pins — DELIVERED**
+(run `20260907T110729Z-run-1`, session
+`ses_f84763143ffeAVPDc1KGOxyMgM`; terminal entry appended to
+`AGENT_ACTIVITY.md`; the same-run proposal
+`proposals/poincare-connectivity-pins.md` COMPLETE with delivery
+record).
+
+------
+
+**The Poincaré pair's connectivity-route positive pins** — the
+census's name-weight pick from the remaining inert set (30, per
+`wip/census_20260907_post8.txt`): `poincare_inequality_of_connected`
+and `poincare_inequality_normalized_of_connected`, the family's two
+headline connected twins, never consumed — every existing QA pin in
+`Poincare_QA.lean` routed through the `hpos` (positivity) forms with
+the gap pinned separately, so the connectivity-transfer route inside
+the twins was unexercised.
+
+**DELIVERED at the full designed scope** — 9 QA theorems (the seven
+designed plus the `pcDisc_cross_zero` / `pcDisc_walk_stays` helpers of
+the scope witness; the intent block's "seven" undercounted by the two
+helpers, corrected here) in `Poincare_QA.lean`'s new `StructuralPins`
+section (QA 6661 → 6670), zero axiom contact (`#print axioms` via
+`wip/pcpins_axcheck.lean` on all 9 — every one exactly `propext,
+Classical.choice, Quot.sound`). **The first genuine consumption of
+both twins**: the support graphs of all three connected fixtures
+(K₂/P₃/K₃) proved connected by the established walk idiom — the
+`hconn` hypotheses' first discharge through the matrix→`SimpleGraph`
+adapter at these fixtures (`supportGraph_adj` consumed at three
+fixtures through the walk API); the twin instances at the Fiedler
+vectors with no spectral certificate in hand (the gap's positivity
+delivered *inside* the theorem from connectivity), each joined to the
+delivered raw attainment companions (both sides pinned `2`/`2`/`4` —
+the connectivity route delivers the sharp constants the
+wrong-constant refutation proves unimprovable; two routes, one
+value); and the not-connected scope witness (walk induction at the
+disconnected fixture: no positive cross-block entry, walks stay
+in-block — `hconn` is exactly the boundary the no-constant fence
+`pcDisc_no_poincare_constant_QA` prices). **Consumption closure
+verified by the tool**: the census re-run
+(`wip/census_20260907_post9.txt`, diffed against `post8`) shows
+exactly the 2 targeted theorems leaving the inert set (1337 → 1339
+value-consumed, 30 → 28 never-touched, the `Poincare (2)` line gone,
+no bonus, no collateral). The pins method's eighth application.
+
+**Verification:** spike-first (`wip/pcpins_spike.lean` — green after
+one fix round; the trap recorded: `norm_num` decides the `Fin 2`
+`if`-equality from `pcEdge_apply` but NOT the `Fin 3` one from
+`pcK3_apply` — `if_neg (by decide)` needed; everything else green
+first try); the landed module elaborates with zero errors/warnings;
+explicit build ✔; **full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0** (one self-inflicted mtime staleness from a diagnostic
+`touch`, cured by the documented artifact-removal remediation);
+`lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new `pc*`
+names collision-free); `check_backlog_freshness` clean; scoreboard
+regenerated (**1369 / 6670 / 4 / 0**) with the verification row; map
+freshness exit 0 after the 6670 sync in both map data tables + SVG
+regeneration (49 stations, no status change — none owed). Records
+updated: the same-run proposal (COMPLETE + delivery record),
+`proposals/README.md` (new Delivered row), README (6670), the radar's
+QA row (6670, held 4.5 — one mid-row splice with the old sync chain
+repaired to the established "previous sync" handoff format), the
+scoreboard verification row, both map data tables + regenerated SVG,
+this plan, and the activity log. No backlog note owed (Poincaré pins
+are not a backlog item; the module's 2026-08-31 delivery already
+closed the axis-3 named gap). Nothing committed; prior runs'
+uncommitted deliveries preserved.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. Honest scope: the pins are at the
+module's own three connected fixtures and the one disconnected
+fixture; the instances are at Fiedler vectors (attainment joins); the
+normalized twin's `hd` clause is discharged at the regular triangle
+only — no irregular connected fixture pin (priced in the proposal as
+a natural future pin, not owed).
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The census's remaining inert set (28): Mixing (3), AlonBoppana (3),
+Expander (3), Matrix.Azuma (3 — the `MatrixMDS` structure fields),
+then the Band/Heat/IrreducibleStationary/Normalized pairs, and the
+singles (Electrical's `isEffectiveResistance_unique`, Multiway's
+`covers`, RandomWalk's `randomWalkLaplacian_symmetric`, Spectral's
+`degreeMatrix_diagonal_nonneg`, Core's `l_infty_norm` pair, the
+scalar `*_iid` twins, IIDProduct's `indepFun_indicator_coord`). The
+pins method applies unchanged; cluster size and name-weight remain
+the selection keys (Mixing the natural size pick; the scalar `*_iid`
+twins the cheapest). Operator-gated items unchanged (the companion's
+Steps 3–5 adoption; master-bound Step 2; the `perron_frobenius`
+deprecation; backlog items 5/6; log-Sobolev; the reverse TV → χ²
+consumer; plus the newer `weighted-matrix-tree`, `mutual-information`,
+and `erdos-renyi` Low rows).
 
 ------
 

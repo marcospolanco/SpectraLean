@@ -36,6 +36,18 @@
      linear-in-gap bound is tight at these fixtures, and the instances
      consume `Multiway.lean`'s indicator energy identity.
 
+  4. **StructuralPins (2026-09-07)** — the connectivity-route twins'
+     first consumption: the support graphs of all three connected
+     fixtures proved connected (the walk idiom), the connected twins
+     `poincare_inequality_of_connected` /
+     `poincare_inequality_normalized_of_connected` instantiated at the
+     same Fiedler vectors (both sides pinned `2`/`2`/`4` by the raw
+     attainment companions above — the connectivity route delivers the
+     sharp constants), and the disconnected fixture's support graph
+     proved not connected (the `hconn` scope witness, the boundary the
+     no-constant fence prices). Per
+     `proposals/poincare-connectivity-pins.md`; all hard crust.
+
   Supporting spectrum pins (λ₂ of K₂/P₃/K₃ and the boundary values) are
   reconstructed locally by the repo's established idioms (energy
   identities through `laplacian_quadForm`, two-sided
@@ -658,6 +670,133 @@ theorem pcK3_edge_expansion_attained_QA :
     norm_num
   · rw [pcK3_secondEval_eq_three_QA]
     norm_num
+
+
+/-! ## StructuralPins: the connectivity-route twins -/
+
+/-- **The `K₂` support graph is connected** — the walk idiom at the
+module's own two-vertex fixture, the connectivity hypothesis the
+connected twins consume. -/
+theorem pcEdge_supportGraph_connected :
+    (supportGraph pcEdge pcEdge_isSymm).Connected := by
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  refine ⟨0, ?_⟩
+  intro v
+  fin_cases v
+  · exact ⟨SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 1)
+      ⟨by decide, by rw [pcEdge_apply]; norm_num⟩ SimpleGraph.Walk.nil⟩
+
+/-- **The `P₃` support graph is connected** — vertex `1` reaches both
+endpoints through the two path edges. -/
+theorem pcP3_supportGraph_connected :
+    (supportGraph pcP3 pcP3_isSymm).Connected := by
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  refine ⟨1, ?_⟩
+  intro v
+  fin_cases v
+  · exact ⟨SimpleGraph.Walk.cons (u := 1) (v := 0) (w := 0)
+      ⟨by decide, by simp [pcP3]⟩ SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 1) (v := 2) (w := 2)
+      ⟨by decide, by simp [pcP3]⟩ SimpleGraph.Walk.nil⟩
+
+/-- **The `K₃` support graph is connected** — vertex `0` reaches both
+other vertices through the two triangle edges. -/
+theorem pcK3_supportGraph_connected :
+    (supportGraph pcK3 pcK3_isSymm).Connected := by
+  rw [SimpleGraph.connected_iff_exists_forall_reachable]
+  refine ⟨0, ?_⟩
+  intro v
+  fin_cases v
+  · exact ⟨SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 1) (w := 1)
+      ⟨by decide, by rw [pcK3_apply]; norm_num⟩ SimpleGraph.Walk.nil⟩
+  · exact ⟨SimpleGraph.Walk.cons (u := 0) (v := 2) (w := 2)
+      ⟨by decide, by rw [pcK3_apply, if_neg (by decide)]; norm_num⟩
+        SimpleGraph.Walk.nil⟩
+
+/-- **The connectivity-route pin on `K₂`**: the combinatorial Poincaré
+inequality at the Fiedler vector `(1, −1)` derived THROUGH the connected
+twin — no spectral certificate in hand, the gap's positivity delivered
+by `hconn` inside the theorem. Both sides evaluate to exactly `2` per
+the raw attainment companion `pcEdge_poincare_attained_QA`, so the
+connectivity route delivers the sharp constant the wrong-constant
+refutation proves unimprovable. -/
+theorem pcEdge_poincare_of_connected_instance_QA :
+    (∑ i : Fin 2, ((![1, -1] : Fin 2 → ℝ) i
+        - (∑ j, (![1, -1] : Fin 2 → ℝ) j)
+          / (Fintype.card (Fin 2) : ℝ)) ^ 2)
+      ≤ quadForm (laplacian pcEdge) (![1, -1] : Fin 2 → ℝ)
+        / secondEval (laplacian pcEdge)
+            (laplacian_symmetric pcEdge pcEdge_isSymm) pcEdge_card :=
+  poincare_inequality_of_connected pcEdge pcEdge_isSymm pcEdge_nonneg
+    pcEdge_card pcEdge_supportGraph_connected ![1, -1]
+
+/-- **The connectivity-route pin on `P₃`**: same shape at the path's
+Fiedler vector `(1, 0, −1)`, both sides evaluating to exactly `2` per
+`pcP3_poincare_attained_QA`. -/
+theorem pcP3_poincare_of_connected_instance_QA :
+    (∑ i : Fin 3, ((![1, 0, -1] : Fin 3 → ℝ) i
+        - (∑ j, (![1, 0, -1] : Fin 3 → ℝ) j)
+          / (Fintype.card (Fin 3) : ℝ)) ^ 2)
+      ≤ quadForm (laplacian pcP3) (![1, 0, -1] : Fin 3 → ℝ)
+        / secondEval (laplacian pcP3)
+            (laplacian_symmetric pcP3 pcP3_isSymm) pcP3_card :=
+  poincare_inequality_of_connected pcP3 pcP3_isSymm pcP3_nonneg
+    pcP3_card pcP3_supportGraph_connected ![1, 0, -1]
+
+/-- **The normalized connectivity-route pin on `K₃`**: the
+degree-weighted Poincaré inequality at `(1, −1, 0)` derived THROUGH the
+normalized connected twin — the normalized gap's positivity delivered by
+`hconn` inside the theorem. Both sides evaluate to exactly `4` per
+`pcK3_normalized_poincare_attained_QA`. -/
+theorem pcK3_normalized_poincare_of_connected_instance_QA :
+    (∑ i : Fin 3, deg pcK3 i * ((![1, -1, 0] : Fin 3 → ℝ) i
+        - (∑ j, deg pcK3 j * (![1, -1, 0] : Fin 3 → ℝ) j)
+          / (∑ j, deg pcK3 j)) ^ 2)
+      ≤ quadForm (laplacian pcK3) (![1, -1, 0] : Fin 3 → ℝ)
+        / secondEval (normalizedLaplacian pcK3)
+            (normalizedLaplacian_symmetric pcK3 pcK3_isSymm) pcK3_card :=
+  poincare_inequality_normalized_of_connected pcK3 pcK3_isSymm
+    pcK3_nonneg pcK3_deg_pos pcK3_card pcK3_supportGraph_connected ![1, -1, 0]
+
+/-- The disconnected fixture's support graph has no positive cross-block
+entry: every walk out of the first block stays in it. -/
+theorem pcDisc_cross_zero : ∀ i j : Fin 4, i.val < 2 → 2 ≤ j.val →
+    pcDisc i j = 0 := by
+  intro i j hi hj
+  fin_cases i <;> fin_cases j <;> simp_all [pcDisc]
+
+/-- Walks from a first-block vertex never leave the block: adjacency out
+of the block has no positive entry to cross to. -/
+theorem pcDisc_walk_stays : ∀ {i j : Fin 4},
+    (supportGraph pcDisc pcDisc_isSymm).Walk i j → i.val < 2 → j.val < 2 := by
+  intro i j w
+  induction w with
+  | nil => intro hi; exact hi
+  | @cons u k v hadj rest ih =>
+    intro hi
+    have hk : k.val < 2 := by
+      obtain ⟨_, hpos⟩ := supportGraph_adj.1 hadj
+      by_contra hcon
+      have hk2 : 2 ≤ k.val := by omega
+      have h0 : pcDisc u k = 0 := pcDisc_cross_zero u k hi hk2
+      rw [h0] at hpos
+      norm_num at hpos
+    exact ih hk
+
+/-- **The scope witness**: the disconnected fixture's support graph is
+provably *not* connected — the connected twins' `hconn` hypothesis is
+exactly the boundary the no-constant fence
+`pcDisc_no_poincare_constant_QA` prices: it rules out precisely the
+fixtures where no Poincaré constant of any size exists. -/
+theorem pcDisc_supportGraph_not_connected :
+    ¬ (supportGraph pcDisc pcDisc_isSymm).Connected := by
+  intro hconn
+  obtain ⟨w⟩ := hconn.1 0 2
+  have := pcDisc_walk_stays w (by decide)
+  exact absurd this (by decide)
 
 
 end SpectralGraphTheory

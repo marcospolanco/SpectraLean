@@ -37,6 +37,287 @@ proposal's status header must also record
 that made this mandatory: the pre-commit hook re-rendered the map on
 every commit while its hand-maintained data tables drifted for days).
 
+## 2026-09-07T12:00:06Z — The Heat + IrreducibleStationary pairs' pins (terminal)
+
+**Run:** `20260907T114557Z-run-1`  
+**Session:** `ses_f84763143ffeAVPDc1KGOxyMgM`  
+**Status:** completed  
+**Milestone:** The prior handoff's "cheap batch of pairs" option: the
+Heat pair (`heatKernel_decayFactor_le_one` — the positive `0 ≤ t`
+statement never instantiated though its `ht` fences existed;
+`normalizedHeatKernel_zero`) and the IrreducibleStationary pair
+(`isIrreducible_transpose`, `pow_entry_le_one`) — first genuine
+consumption of all four, delivered.
+
+**Changes:** 13 QA declarations (5 in `Heat_QA.lean`'s new
+`StructuralPins` section, 8 in `IrreducibleStationary_QA.lean`'s; QA
+6685 → 6698): the decay factor attained with equality at the constant
+mode (`e^{-t·0} = 1 ≤ 1` — the undamped kernel, the bound sharp) and
+strict at the Fiedler mode (`e^{-2} < 1`); the `t = 0` normalized-heat
+identity acting on the antisymmetric vector through the theorem; the
+transpose-irreducibility two-route join on GENUINELY DIRECTED input
+(the `A3` star's asymmetric walk matrix — route A through
+`isIrreducible_transpose`∘`walkTransitionMatrix_isIrreducible`, route
+B raw `ReflTransGen` paths in the arc-reversal digraph), consumed
+onward through `exists_pow_pos_of_isIrreducible` with the raw witness
+`(Pᵀ) 0 1 = 1`; and the `[0, 1]` power-entry bound attained with
+equality at the star's two-step return `(P²) 0 0 = 1 ≤ 1` (raw
+companion included). Scope decisions recorded in the proposal: the
+Band pair's vanishing member left for a fence-audit delivery (its
+positive instance is `0 = 0`); the Normalized pair priced as residue
+(opaque `eigvecOf` signs). Records: same-run proposal
+`proposals/heat-irreducible-pairs-pins.md` (COMPLETE + delivery
+record), `proposals/README.md` (new Delivered row), README (6698), the
+radar's QA row (6698, held 4.5), the scoreboard verification row, both
+map data tables + regenerated SVG, `docs/EXECUTION_PLAN.md`, and this
+log. Nothing committed; prior runs' uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/hipins_spike.lean` — green after
+three fix rounds; traps recorded: inline `by rw` inside `exact … head`
+terms leaving metavariable entry arguments — concrete `have` arc facts
+first; `any_goals exact` cascades reporting type-mismatch errors —
+explicit `fin_cases` bullets; multi-line `exact` continuations not
+parsing); both landed modules elaborate with zero errors/warnings (the
+2 `ring_nf` infos verified pre-existing at HEAD); explicit builds ✔;
+13-declaration axiom audit (`wip/hipins_axcheck.lean`) — every one
+exactly `propext, Classical.choice, Quot.sound`; **full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing**
+(two mtime stalenesses from the pre-existing-info check's stash
+round-trip, cured by the documented artifact-removal remediation);
+`lint_axioms` exit 0 (4 axioms unchanged); `check_refutation_
+independence` (24-tag clean); `check_public_reachability` (63
+modules); `check_citations`; `check_markdown_links`;
+`check_qa_name_uniqueness` (new `hkp_*`/`nhk_*`/`isp_*`/`A3P*`
+collision-free); `check_backlog_freshness` clean; scoreboard
+regenerated (1369/6698/4/0); map freshness exit 0 after the 6698 sync
+(49 stations, no status change); **consumption closure verified by the
+tool: census re-run `wip/census_20260907_post11.txt`, diffed against
+`post10` — exactly the 4 targeted theorems leaving the inert set
+(1342 → 1346 value-consumed, 25 → 21 never-touched, no bonus, no
+collateral)**.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. Honest scope: decay pins at `t = 1` and
+two sorted indices of one fixture; the `t = 0` identity at one vector;
+the transpose join at one 3-vertex asymmetric walk fixture; the
+power-entry pin at one entry of one power; the Band and Normalized
+pairs remain inert with recorded scope decisions.
+
+**Next handoff:** the Active table stays all-Low (decision-gated). The
+census's remaining inert set (21): AlonBoppana (3), Expander (3),
+Matrix.Azuma (3), the Band (2) and Normalized (2) pairs (with this
+delivery's scope decisions), and the singles (Electrical's
+`isEffectiveResistance_unique`, Multiway's `covers`, RandomWalk's
+`randomWalkLaplacian_symmetric`, Spectral's
+`degreeMatrix_diagonal_nonneg`, Core's `l_infty_norm` pair, the scalar
+`*_iid` twins, IIDProduct's `indepFun_indicator_coord`). The pins
+method applies unchanged; the named-weight singles (Electrical's
+uniqueness is the strategy doc's own example of load-bearing content)
+and the cheap structural singles (Spectral's
+`degreeMatrix_diagonal_nonneg`, RandomWalk's
+`randomWalkLaplacian_symmetric` — both entry-level pins) are the
+natural next batch. Operator-gated items unchanged (the companion's
+Steps 3–5 adoption; master-bound Step 2; the `perron_frobenius`
+deprecation; backlog items 5/6; log-Sobolev; the reverse TV → χ²
+consumer; the `weighted-matrix-tree`, `mutual-information`, and
+`erdos-renyi` Low rows).
+
+## 2026-09-07T11:45:57Z — The Heat + IrreducibleStationary pairs' pins (in progress)
+
+**Run:** `20260907T114557Z-run-1`  
+**Session:** `ses_f84763143ffeAVPDc1KGOxyMgM`  
+**Status:** in-progress  
+**Milestone:** The prior handoff's "cheap batch of pairs" option: the
+Heat pair (`heatKernel_decayFactor_le_one` — attained at the constant
+mode, strict at the Fiedler mode; `normalizedHeatKernel_zero` — the
+t=0 identity acting on a nontrivial vector) and the
+IrreducibleStationary pair (`isIrreducible_transpose` — two-route on
+genuinely directed input; `pow_entry_le_one` — attained at the star's
+two-step return) — first genuine consumption of all four.
+
+## 2026-09-07T11:41:05Z — The Mixing trio's positive pins (terminal)
+
+**Run:** `20260907T112036Z-run-1`  
+**Session:** `ses_f84763143ffeAVPDc1KGOxyMgM`  
+**Status:** completed  
+**Milestone:** The prior handoff's natural size pick: the census's
+Mixing (3) cluster — the vanishing χ² iff, the plain TV shadow at the
+computed spectral rate, and the lazy entropy twin (all three never
+consumed; their twins all are) — first genuine consumption of all
+three, delivered at the module's own K₂/triangle fixtures plus the
+delivered looped triangle.
+
+**Changes:** 15 QA declarations in `Mixing_QA.lean`'s new
+`StructuralPins` section, QA 6670 → 6685: the K₂ top-eigenvalue
+card-form pin + the certificate `max(1−λ₂, λ_max−1) = 1` exactly
+(both branches `2` — the periodic chain's honest no-decay corner);
+the plain TV shadow instances with the certificate COMPUTED from the
+pinned spectrum (K₂ attained with equality `1/2 = (1/2)·√1`; the
+triangle both sides pinned `1/3` vs inner `1/2` — the
+computed-certificate twin of the hand-supplied `tri_tv_rate_one_QA`);
+the lazy KL twin with BOTH sides collapsing to `0` (KL vanishes at
+the delivered exact lazy stationarity; the lazy rate `1−2/2 = 0`
+collapses the bound — attained at `0 ≤ 0`); and the iff's both
+directions at the delivered looped triangle (the plain one-step law
+exactly uniform — the loops break the period-2 obstruction that
+keeps the plain K₂ from ever mixing; χ² `= 0` THROUGH the ⇐,
+stationarity THROUGH the ⇒ from the raw zero χ² — two routes, one
+value), plus the periodic-K₂ contrapositive companion (the pinned
+χ² `= 1 ≠ 0` makes the iff a non-mixing certificate). Records:
+same-run proposal `proposals/mixing-trio-pins.md` (COMPLETE +
+delivery record), `proposals/README.md` (new Delivered row), README
+(6685), the radar's QA row (6685, held 4.5), the scoreboard
+verification row, both map data tables + regenerated SVG,
+`docs/EXECUTION_PLAN.md`, and this log. Nothing committed; prior
+runs' uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/mxpins_spike.lean` — green after
+three fix rounds; traps recorded: `secondEval` being LITERALLY
+`evals hM ⟨1, by omega⟩` so on `Fin 2` the top index IS the
+secondEval index — the assumed `card − 2` shape cost the first round;
+the `fin_cases <;> rw` rename mis-binding, cured by the file's
+`fin_cases <;> simp` idiom; the `Fin 3` degree-sum goals needing a
+trailing `norm_num`); the landed module elaborates with zero
+errors/warnings (the 3 `ring_nf` infos verified pre-existing at HEAD
+via a stash round-trip); explicit build ✔; 15-declaration axiom audit
+(`wip/mxpins_axcheck.lean`) — every one exactly `propext,
+Classical.choice, Quot.sound`; **full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing**
+(one mtime staleness caused by the stash round-trip, cured by the
+documented artifact-removal remediation); `lint_axioms` exit 0 (4
+axioms unchanged); `check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (new names
+collision-free); `check_backlog_freshness` clean; scoreboard
+regenerated (1369/6685/4/0); map freshness exit 0 after the 6685 sync
+(49 stations, no status change); **consumption closure verified by
+the tool: census re-run `wip/census_20260907_post10.txt`, diffed
+against `post9` — exactly the 3 targeted theorems leaving the inert
+set (1339 → 1342 value-consumed, 28 → 25 never-touched, no bonus, no
+collateral)**.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. Honest scope: TV shadow at depth `1` on
+two fixtures; the KL twin at the single vanishing depth; the iff at
+one looped fixture and depth `1`; certificate computation at
+`λ₂ = λ_max` fixtures only.
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The census's remaining inert set (25): AlonBoppana (3), Expander (3),
+Matrix.Azuma (3 — the `MatrixMDS` structure fields), then the
+Band/Heat/IrreducibleStationary/Normalized pairs and the singles
+(Electrical's `isEffectiveResistance_unique`, Multiway's `covers`,
+RandomWalk's `randomWalkLaplacian_symmetric`, Spectral's
+`degreeMatrix_diagonal_nonneg`, Core's `l_infty_norm` pair, the
+scalar `*_iid` twins, IIDProduct's `indepFun_indicator_coord`). The
+pins method applies unchanged; the three remaining 3-clusters are
+helper-shaped, so a named-weight single or a cheap batch of pairs may
+outrank them. Operator-gated items unchanged (the companion's
+Steps 3–5 adoption; master-bound Step 2; the `perron_frobenius`
+deprecation; backlog items 5/6; log-Sobolev; the reverse TV → χ²
+consumer; the `weighted-matrix-tree`, `mutual-information`, and
+`erdos-renyi` Low rows).
+
+## 2026-09-07T11:20:36Z — The Mixing trio's positive pins (in progress)
+
+**Run:** `20260907T112036Z-run-1`  
+**Session:** `ses_f84763143ffeAVPDc1KGOxyMgM`  
+**Status:** in-progress  
+**Milestone:** The prior handoff's natural size pick: the census's
+Mixing (3) cluster — `chiSquareDistance_eq_zero_iff`,
+`walkDistribution_tvDistance_le_max_rate`, `klDiv_lazyWalkDistribution_le`
+(never consumed; their χ²/lazy/plain twins all are) — first genuine
+consumption of all three, at the module's own K₂/triangle fixtures plus
+a new looped-K₂ fixture where the plain walk reaches exact stationarity.
+
+## 2026-09-07T11:16:03Z — The Poincaré pair's connectivity-route pins (terminal)
+
+**Run:** `20260907T110729Z-run-1`  
+**Session:** `ses_f84763143ffeAVPDc1KGOxyMgM`  
+**Status:** completed  
+**Milestone:** The census's name-weight pick from the remaining inert
+set (30): the Poincaré family's two headline connected twins, never
+consumed (every existing pin routed through the `hpos` forms) — first
+genuine consumption of both, delivered.
+
+**Changes:** 9 QA theorems (the 7 designed plus the `pcDisc_cross_zero`
+/ `pcDisc_walk_stays` walk-induction helpers; the in-progress entry's
+"seven" undercounted by the two helpers — the delivered records carry
+the honest 9) in `Poincare_QA.lean`'s new `StructuralPins` section, QA
+6661 → 6670: the K₂/P₃/K₃ support-graph connectivity facts (the
+established `connected_iff_exists_forall_reachable` walk idiom — the
+`hconn` hypotheses' first discharge through the matrix→`SimpleGraph`
+adapter at these fixtures); the twin instances at the Fiedler vectors
+with no spectral certificate in hand (the gap's positivity delivered
+*inside* the theorem from connectivity), each joined to the delivered
+raw attainment companions (both sides pinned `2`/`2`/`4` — the
+connectivity route delivers the sharp constants the wrong-constant
+refutation proves unimprovable); and the not-connected scope witness
+(no positive cross-block entry at the disconnected fixture, walks stay
+in-block — `hconn` is exactly the boundary the delivered no-constant
+fence prices). Records: same-run proposal
+`proposals/poincare-connectivity-pins.md` (COMPLETE + delivery
+record), `proposals/README.md` (new Delivered row), README (6670), the
+radar's QA row (6670, held 4.5), the scoreboard verification row, both
+map data tables + regenerated SVG, `docs/EXECUTION_PLAN.md`, and this
+log. Nothing committed; prior runs' uncommitted deliveries preserved.
+
+**Verification:** spike-first (`wip/pcpins_spike.lean` — green after
+one fix round; trap recorded: `norm_num` decides the `Fin 2`
+`if`-equality from `pcEdge_apply` but not the `Fin 3` one from
+`pcK3_apply` — `if_neg (by decide)`); the landed module elaborates
+with zero errors/warnings; explicit build ✔; 9-declaration axiom audit
+(`wip/pcpins_axcheck.lean`) — every one exactly `propext,
+Classical.choice, Quot.sound`; **full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing**
+(one self-inflicted mtime staleness from a diagnostic `touch`, cured
+by the documented artifact-removal remediation); `lint_axioms` exit 0
+(4 axioms unchanged); `check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (new `pc*` names
+collision-free); `check_backlog_freshness` clean; scoreboard
+regenerated (1369/6670/4/0); map freshness exit 0 after the 6670 sync
+(49 stations, no status change); **consumption closure verified by the
+tool: census re-run `wip/census_20260907_post9.txt`, diffed against
+`post8` — exactly the 2 targeted theorems leaving the inert set
+(1337 → 1339 value-consumed, 30 → 28 never-touched, no bonus, no
+collateral)**.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. Honest scope: pins at the module's own
+three connected fixtures and the one disconnected fixture; instances
+at Fiedler vectors (attainment joins); the normalized twin's `hd`
+clause discharged at the regular triangle only.
+
+**Next handoff:** the Active table stays all-Low (decision-gated). The
+census's remaining inert set (28): Mixing (3), AlonBoppana (3),
+Expander (3), Matrix.Azuma (3 — the `MatrixMDS` structure fields),
+then the Band/Heat/IrreducibleStationary/Normalized pairs and the
+singles (Electrical's `isEffectiveResistance_unique`, Multiway's
+`covers`, RandomWalk's `randomWalkLaplacian_symmetric`, Spectral's
+`degreeMatrix_diagonal_nonneg`, Core's `l_infty_norm` pair, the scalar
+`*_iid` twins, IIDProduct's `indepFun_indicator_coord`). The pins
+method applies unchanged; cluster size and name-weight remain the
+selection keys. Operator-gated items unchanged (the companion's
+Steps 3–5 adoption; master-bound Step 2; the `perron_frobenius`
+deprecation; backlog items 5/6; log-Sobolev; the reverse TV → χ²
+consumer; the `weighted-matrix-tree`, `mutual-information`, and
+`erdos-renyi` Low rows).
+
+## 2026-09-07T11:07:29Z — The Poincaré pair's connectivity-route pins (in progress)
+
+**Run:** `20260907T110729Z-run-1`  
+**Session:** `ses_f84763143ffeAVPDc1KGOxyMgM`  
+**Status:** in-progress  
+**Milestone:** The census's name-weight pick from the remaining inert set
+(30): the Poincaré family's two headline connected twins
+(`poincare_inequality_of_connected`,
+`poincare_inequality_normalized_of_connected`), never consumed — the
+existing QA pins all route through the `hpos` forms, so the
+connectivity-transfer route inside the twins is unexercised. First
+genuine consumption of both, plus the connectivity facts at the module's
+own fixtures and the not-connected scope witness.
+
 ## 2026-09-07T08:02:29Z — The edge-perturbation design's independence + PSD pins (terminal)
 
 **Run:** `20260907T073103Z-run-1`  

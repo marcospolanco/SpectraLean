@@ -11601,4 +11601,233 @@ theorem mtip_walk_abs_rate_value_QA :
 
 end AbsRatePins
 
+/-! ## The Mixing trio's structural pins
+(`proposals/mixing-trio-pins.md`)
+
+The consumption census (`wip/census_20260907_post9.txt`, inert set 28)
+names Mixing as a remaining 3-cluster: the vanishing iff
+`chiSquareDistance_eq_zero_iff` (its `hd` fence exists on file, the iff
+itself never consumed), the plain TV shadow at the computed spectral
+rate `walkDistribution_tvDistance_le_max_rate` (its χ² twin and its
+lazy TV twin both consumed, this one never), and the lazy entropy
+twin `klDiv_lazyWalkDistribution_le` (the consumed headline's twin).
+This section consumes all three at the delivered `k2Adj`/`triAdj`
+fixtures plus the looped triangle — the fixture where the PLAIN walk
+reaches exact stationarity in one step (the plain `K₂` provably
+cannot, period 2).
+-/
+
+section StructuralPins
+
+/-- **The `K₂` top sorted eigenvalue pinned** in the card-form index
+the max-rate theorems carry: on `Fin 2` the top sorted index IS the
+`secondEval` index (both `1`), so the pinned `secondEval = 2` settles
+it — the case analysis (`k2_eigvalOf_cases_QA`) remaining only to
+confirm no other value is possible. -/
+theorem k2_evals_last_eq :
+    evals (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)
+      ⟨Fintype.card (Fin 2) - 1, by decide⟩ = 2 := by
+  have hmem := evals_mem_eigvalOf
+    (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)
+    ⟨Fintype.card (Fin 2) - 1, by decide⟩
+  obtain ⟨i, hi⟩ := hmem
+  rcases k2_eigvalOf_cases_QA i with h0 | h2
+  · exfalso
+    -- on `Fin 2` the top sorted index IS the secondEval index, so the
+    -- pinned `secondEval = 2` contradicts a vanishing top entry
+    have htop : evals (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)
+        ⟨Fintype.card (Fin 2) - 1, by decide⟩ = 2 := k2_secondEval_QA
+    rw [hi.trans h0] at htop
+    norm_num at htop
+  · rw [hi, h2]
+
+/-- **The `K₂` computed spectral rate certificate is exactly `1`** —
+`max(1 − λ₂, λ_max − 1) = max(−1, 1) = 1`, both branches pinned
+(`λ₂ = λ_max = 2`): the periodic chain's certificate saturates, the
+honest `r = 1` corner (no decay — which is exactly right: the plain
+walk on `K₂` provably never mixes). -/
+theorem k2_spectral_rate_QA :
+    max (1 - secondEval (normalizedLaplacian k2Adj)
+            (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) (by norm_num))
+        (evals (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)
+          ⟨Fintype.card (Fin 2) - 1, by decide⟩ - 1) = 1 := by
+  rw [k2_secondEval_QA, k2_evals_last_eq]
+  norm_num
+
+/-- **The plain TV shadow at the computed rate, `K₂` instance**: the
+never-consumed `walkDistribution_tvDistance_le_max_rate` instantiated
+at depth `1`, start `0` — no hand-supplied rate; the certificate is
+computed from the pinned spectrum inside the bound. -/
+theorem mxp_k2_tv_max_rate_le_QA :
+    tvDistance (walkDistribution k2Adj 1 0) (stationaryVec k2Adj)
+      ≤ (1/2) * Real.sqrt
+          ((max (1 - secondEval (normalizedLaplacian k2Adj)
+                  (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)
+                  (by norm_num))
+              (evals (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)
+                ⟨Fintype.card (Fin 2) - 1, by decide⟩ - 1)) ^ (2 * 1)
+            * ((stationaryVec k2Adj 0)⁻¹ - 1)) :=
+  walkDistribution_tvDistance_le_max_rate k2Adj k2Adj_isSymm k2Adj_nonneg
+    k2Adj_deg_pos (by norm_num) k2_connected 1 0
+
+/-- **The `K₂` max-rate TV bound attained exactly**: both sides are
+`1/2` — the TV side is the pinned `k2_tv_one_QA` value, the bound
+side collapses through the pinned certificate `1` and `π 0 = 1/2` to
+`(1/2)·√1 = 1/2`. The saturation certificate `r = 1` is not slack
+here: the chain's TV distance to stationarity is genuinely maximal at
+every odd depth. -/
+theorem mxp_k2_tv_max_rate_attained_QA :
+    tvDistance (walkDistribution k2Adj 1 0) (stationaryVec k2Adj)
+      = (1/2) * Real.sqrt
+          ((max (1 - secondEval (normalizedLaplacian k2Adj)
+                  (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)
+                  (by norm_num))
+              (evals (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)
+                ⟨Fintype.card (Fin 2) - 1, by decide⟩ - 1)) ^ (2 * 1)
+            * ((stationaryVec k2Adj 0)⁻¹ - 1)) := by
+  have hval : (max (1 - secondEval (normalizedLaplacian k2Adj)
+            (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm) (by norm_num))
+          (evals (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)
+            ⟨Fintype.card (Fin 2) - 1, by decide⟩ - 1)) ^ (2 * 1)
+        * ((stationaryVec k2Adj 0)⁻¹ - 1) = 1 := by
+    rw [k2_spectral_rate_QA, k2_pi_QA 0]
+    norm_num
+  rw [k2_tv_one_QA, hval, Real.sqrt_one]
+  norm_num
+
+/-- **The plain TV shadow at the computed rate, triangle instance**:
+depth `1`, start `0`, the certificate computed from the pinned
+spectrum (`λ₂ = λ_max = 3/2`) — the computed-certificate twin of
+`tri_tv_rate_one_QA`, which hand-supplied the rate `1/2`. -/
+theorem mxp_tri_tv_max_rate_le_QA :
+    tvDistance (walkDistribution triAdj 1 0) (stationaryVec triAdj)
+      ≤ (1/2) * Real.sqrt
+          ((max (1 - secondEval (normalizedLaplacian triAdj)
+                  (normalizedLaplacian_symmetric triAdj triAdj_isSymm)
+                  (by simp))
+              (evals (normalizedLaplacian_symmetric triAdj triAdj_isSymm)
+                ⟨Fintype.card (Fin 3) - 1, by decide⟩ - 1)) ^ (2 * 1)
+            * ((stationaryVec triAdj 0)⁻¹ - 1)) :=
+  walkDistribution_tvDistance_le_max_rate triAdj triAdj_isSymm triAdj_nonneg
+    triAdj_deg_pos (by simp) tri_connected 1 0
+
+/-- **The triangle's two sides pinned**: the TV is the exact `1/3`
+(`tri_tv_one_eq_QA`) and the bound-side inner product is exactly
+`1/2` (certificate `1/2` squared, times `(1/3)⁻¹ − 1 = 2`), so the
+instance reads `1/3 ≤ (1/2)·√(1/2)` — the honest Cauchy–Schwarz slack
+already proved at `tri_tv_rate_one_holds_QA`. -/
+theorem mxp_tri_tv_max_rate_value_QA :
+    tvDistance (walkDistribution triAdj 1 0) (stationaryVec triAdj) = 1/3
+      ∧ (max (1 - secondEval (normalizedLaplacian triAdj)
+              (normalizedLaplacian_symmetric triAdj triAdj_isSymm) (by simp))
+            (evals (normalizedLaplacian_symmetric triAdj triAdj_isSymm)
+              ⟨Fintype.card (Fin 3) - 1, by decide⟩ - 1)) ^ (2 * 1)
+          * ((stationaryVec triAdj 0)⁻¹ - 1) = 1/2 := by
+  refine ⟨tri_tv_one_eq_QA, ?_⟩
+  rw [show secondEval (normalizedLaplacian triAdj)
+        (normalizedLaplacian_symmetric triAdj triAdj_isSymm) (by simp)
+        = evals (normalizedLaplacian_symmetric triAdj triAdj_isSymm)
+          ⟨1, by decide⟩ from rfl,
+    tri_evals_one_eq, mtip_tri_top_eval_QA, tri_pi_QA 0]
+  norm_num
+
+/-- **The lazy entropy-decay twin, `K₂` instance**: the never-consumed
+`klDiv_lazyWalkDistribution_le` instantiated at depth `1`, start `0`. -/
+theorem mxp_k2_kl_lazy_le_QA :
+    klDiv (lazyWalkDistribution k2Adj 1 0) (stationaryVec k2Adj)
+      ≤ (1 - secondEval (normalizedLaplacian k2Adj)
+            (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)
+            (by norm_num) / 2) ^ (2 * 1)
+          * ((stationaryVec k2Adj 0)⁻¹ - 1) :=
+  klDiv_lazyWalkDistribution_le k2Adj k2Adj_isSymm k2Adj_nonneg
+    k2Adj_deg_pos (by norm_num) k2_connected 1 0
+
+/-- **The lazy KL bound attained exactly, both sides `0`**: the KL
+side vanishes because the lazy walk HAS reached stationarity at
+depth `1` (`k2_lazy_law_one_QA` — every KL summand is
+`(1/2)·log(1) = 0`); the bound side vanishes because the lazy rate
+`1 − λ₂/2 = 1 − 2/2 = 0` collapses the prefactor. The strongest QA
+shape a bound theorem can have, on the fixture designed for it. -/
+theorem mxp_k2_kl_lazy_attained_QA :
+    klDiv (lazyWalkDistribution k2Adj 1 0) (stationaryVec k2Adj) = 0
+      ∧ (1 - secondEval (normalizedLaplacian k2Adj)
+            (normalizedLaplacian_symmetric k2Adj k2Adj_isSymm)
+            (by norm_num) / 2) ^ (2 * 1)
+          * ((stationaryVec k2Adj 0)⁻¹ - 1) = 0 := by
+  refine ⟨?_, ?_⟩
+  · rw [klDiv, k2_lazy_law_one_QA]
+    have ht : ∀ i : Fin 2, klTerm (stationaryVec k2Adj i)
+        (stationaryVec k2Adj i) = 0 := by
+      intro i
+      rw [k2_pi_QA i]
+      simp [klTerm]
+    simp only [Fin.sum_univ_two]
+    rw [ht 0, ht 1]
+    norm_num
+  · rw [k2_secondEval_QA, k2_pi_QA 0]
+    norm_num
+
+/-- **The looped triangle's plain one-step law is exactly uniform**:
+every transition is `1/3`, so the walk from `0` lands on the
+stationary distribution in one step — the plain-walk analogue of
+`k2_lazy_law_one_QA`, on the fixture whose loops break the period-2
+obstruction that keeps the plain `K₂` from ever mixing. -/
+theorem mxp_loopTri_law_value :
+    walkDistribution loopTriAdj 1 0 = ![1/3, 1/3, 1/3] := by
+  rw [walkDistribution_succ, walkDistribution_zero]
+  funext i
+  fin_cases i
+  all_goals simp [walkTransitionMatrix, deg, loopTriAdj, Matrix.mulVec,
+    Matrix.dotProduct, Fin.sum_univ_three, Pi.single_apply]
+  all_goals norm_num
+
+theorem mxp_loopTri_pi_vec :
+    stationaryVec loopTriAdj = ![1/3, 1/3, 1/3] := by
+  funext i
+  fin_cases i <;> simp [loopTri_pi]
+
+theorem mxp_loopTri_law_eq_QA :
+    walkDistribution loopTriAdj 1 0 = stationaryVec loopTriAdj := by
+  rw [mxp_loopTri_law_value, mxp_loopTri_pi_vec]
+
+/-- **The vanishing iff consumed, ⇐ direction**: the χ² value `0`
+derived THROUGH `chiSquareDistance_eq_zero_iff` from the raw
+one-step stationarity — not by direct summation. -/
+theorem mxp_loopTri_chi2_via_iff_QA :
+    chiSquareDistance loopTriAdj 1 0 = 0 :=
+  (chiSquareDistance_eq_zero_iff loopTriAdj loopTriAdj_deg_pos 1 0).mpr
+    mxp_loopTri_law_eq_QA
+
+/-- The same vanishing by direct summation — the raw route (each
+summand `(1/3 − 1/3)²/(1/3) = 0`), independent of the iff. -/
+theorem mxp_loopTri_chi2_raw_QA :
+    chiSquareDistance loopTriAdj 1 0 = 0 := by
+  simp only [chiSquareDistance, mxp_loopTri_law_value, loopTri_pi,
+    Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.cons_val_two, Matrix.head_cons]
+  norm_num
+
+/-- **The vanishing iff consumed, ⇒ direction**: the one-step
+stationarity re-derived THROUGH `chiSquareDistance_eq_zero_iff` from
+the raw zero χ². Two routes, one value — they agree only if the raw
+computations AND the characterization are right. -/
+theorem mxp_loopTri_law_via_iff_QA :
+    walkDistribution loopTriAdj 1 0 = stationaryVec loopTriAdj :=
+  (chiSquareDistance_eq_zero_iff loopTriAdj loopTriAdj_deg_pos 1 0).mp
+    mxp_loopTri_chi2_raw_QA
+
+/-- **The contrapositive companion at the periodic chain**: on `K₂`
+the χ² is the pinned `1 ≠ 0` (`k2_chi2_one_QA`), so through the
+iff's ⇐ direction the plain law provably has NOT mixed — the
+vanishing characterization used as a non-mixing certificate, the
+content the looped fixture's vanishing makes non-accidental. -/
+theorem mxp_k2_not_mixed_via_iff_QA :
+    walkDistribution k2Adj 1 0 ≠ stationaryVec k2Adj := by
+  intro h
+  have h0 := (chiSquareDistance_eq_zero_iff k2Adj k2Adj_deg_pos 1 0).mpr h
+  rw [k2_chi2_one_QA] at h0
+  norm_num at h0
+
+end StructuralPins
+
 end SpectralGraphTheory.QA

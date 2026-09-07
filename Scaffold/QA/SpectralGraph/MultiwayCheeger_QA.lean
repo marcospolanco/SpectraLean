@@ -1892,20 +1892,52 @@ theorem bol_sum_boundary :
   rw [sum_laplacian_mulVec_partIndicator mwEdgeAdj bolEdgeS]
   exact mwEdgeAdj_boundary_single 0
 
-/-- **The Dirichlet-energy join, two routes**: the indicator's
-quadratic form at the K₂ Laplacian is `1` — through the new
-hypothesis-free theorem and through the delivered symmetric-`hA`
-identity, both composed with the delivered boundary pin. Two theorem
-routes, one value; they agree only if both proofs are right. -/
-theorem bol_quadForm_unsymm_route :
+/-- **The Dirichlet-energy pin at the K₂ fixture**: the indicator's
+quadratic form at the K₂ Laplacian is `1`, through the (now
+hypothesis-free) energy identity composed with the delivered boundary
+pin. The delivery's original two-route join (`bol_quadForm_unsymm_route`
+vs `bol_quadForm_symm_route` — the hypothesis-free twin beside the
+`hA`-gated original) collapsed in the 2026-09-07 corner audit when the
+gated original was strengthened into its own twin: both routes became
+the same theorem. The join's content survives in the two theorems
+below — the asymmetric instantiation the gated original could never
+reach, pinned two routes. -/
+theorem bol_quadForm_energy :
     quadForm (laplacian mwEdgeAdj) (partIndicator bolEdgeS) = 1 := by
-  rw [quadForm_laplacian_partIndicator_unsymm mwEdgeAdj bolEdgeS]
+  rw [quadForm_laplacian_partIndicator mwEdgeAdj bolEdgeS]
   exact mwEdgeAdj_boundary_single 0
 
-theorem bol_quadForm_symm_route :
-    quadForm (laplacian mwEdgeAdj) (partIndicator bolEdgeS) = 1 := by
-  rw [quadForm_laplacian_partIndicator mwEdgeAdj mwEdgeAdj_symmetric bolEdgeS]
-  exact mwEdgeAdj_boundary_single 0
+/-- **The energy identity on ASYMMETRIC weights** (route A, through the
+theorem): at the directed fixture `bolDirAdj` (arc weights `3`/`1` —
+no `IsSymm` instance available), the indicator's Dirichlet energy is
+`boundary = 3`. This is the instantiation the delivery's `hA`-gated
+original could never reach; it became available when the corner audit
+removed the truth-removable symmetry clause. -/
+theorem bol_quadForm_energy_asym :
+    quadForm (laplacian bolDirAdj) (partIndicator bolEdgeS) = 3 := by
+  have hcompl : (bolEdgeSᶜ : Finset (Fin 2)) = {1} := by
+    ext j
+    fin_cases j <;> simp [bolEdgeS]
+  rw [quadForm_laplacian_partIndicator bolDirAdj bolEdgeS]
+  simp only [boundary]
+  rw [hcompl]
+  simp only [bolEdgeS, bolDirAdj, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons, Matrix.of_apply, Finset.sum_singleton]
+
+/-- Route B (raw, no energy identity): the same value `3` from the
+delivered action pin `bol_dir_action` — `L · 1_S = ![3, −1]` — dotted
+with the indicator `![1, 0]` entrywise. Two routes, one value; they
+agree only if both the theorem and the raw action computation are
+right. -/
+theorem bol_quadForm_energy_asym_raw :
+    quadForm (laplacian bolDirAdj) (partIndicator bolEdgeS) = 3 := by
+  have hmem : (0 : Fin 2) ∈ bolEdgeS := by simp [bolEdgeS]
+  have hnotmem : (1 : Fin 2) ∉ bolEdgeS := by simp [bolEdgeS]
+  show Matrix.dotProduct (partIndicator bolEdgeS)
+      ((laplacian bolDirAdj).mulVec (partIndicator bolEdgeS)) = 3
+  rw [bol_dir_action, Matrix.dotProduct, Fin.sum_univ_two,
+    partIndicator_of_mem hmem, partIndicator_of_not_mem hnotmem]
+  norm_num
 
 
 /-! ### The QA pieces (destined for MultiwayCheeger_QA.lean) -/

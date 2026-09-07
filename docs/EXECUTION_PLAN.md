@@ -6,9 +6,301 @@ holds the append-only narrative.
 ## Active milestone
 
 **None open.** The Active table is all-Low (decision-gated); the
-compiler-derived census's inert set remains **zero** (no new or
-removed shelf declaration — one signature strengthened). See the
-delivered records below.
+compiler-derived census's inert set remains **zero** (no new shelf
+declaration — QA-only). See the delivered records below.
+
+------
+
+**The quantized-Cheeger range-bridges' clause audit — DELIVERED**
+(run `20260907T203339Z-run-1`, session
+`ses_f8284e858ffeNuh4Qtr9PWx412`; terminal entry appended to
+`AGENT_ACTIVITY.md`; the clause-audit record appended to
+`proposals/quantized-cheeger-bound.md`, its status header amended —
+**the numerical layer's public surface is now fully audited**).
+
+------
+
+**The quantized-Cheeger range-bridges' clause audit** — the standing
+"delivered-but-unfenced surfaces" agenda applied to the numerical
+layer's last unaudited public surface: the two range bridges
+(`secondEval_regularNormalizedLaplacian_nonneg` / `_le_two`) delivered
+beside the quantizer trio but never audited themselves.
+
+**DELIVERED at the full designed scope** — one finding (load-bearing
+`hnonneg` at both spellings) plus classifications, closed in one run:
+**the existing fence class provably cannot cover these bridges** —
+every `hnn` fence on file is 2-vertex, and a 2-vertex signed regular
+fixture has `secondEval = 0` exactly (both dropped statements true
+there). The refutations needed the **multiplicity-2 phenomenon**
+(≥ 3 vertices): +22 QA theorems in `QuantizedCheeger_QA.lean`'s new
+`BridgeFences` section (QA 6844 → 6866), zero axiom contact
+(8-declaration audit, all at the standard three). **The fences**: the
+floor refuted at `A₋ = 2I − (1/3)J` (`spec(A₋) = {1,2,2}` →
+`spec(L_sym) = {0,−1,−1}`, `secondEval = −1`, dropped statement
+`0 ≤ −1`) and the cap at `A₊ = J − 2I` (`{1,−2,−2}` → `{0,3,3}`,
+`secondEval = 3`, dropped statement `3 ≤ 2`) — each with every other
+hypothesis genuine (isolation companions), the spectra pinned by the
+**coordinate-sum eigen-equation trick** (`μ·(∑v) = 0` from the entry
+equation's collapsed constant; the two cases each pin `μ`) + trace
+count + sortedness, consumed through row-form action lemmas. **The
+classifications**: `hdpos` has no failing fixture with `hnonneg`
+genuine (deg-regular nonneg ⟹ `d ≥ 0`; `d = 0` forces `A = 0`, junk
+`0⁻¹ = 0` benign); `hcard`/`hA` structurally carried by the
+`secondEval` spelling; the sandwich carries no new clause (the fenced
+Cheeger pair's exact set).
+
+**Verification:** spike (`wip/qcbridge_spike.lean`) green after six
+fix rounds (traps recorded in the proposal: the Fin-3 index-2 entry
+needing full `simp` — `cons_val_succ'` is a default simp lemma; the
+`mul_sum` direction; the row-form action lemma as the eigen-pin
+route; the `Fintype.card` defeq cast; `inv_one`; Fin monotonicity by
+`decide`); the landed module elaborates with zero output and **built
+on the first round** after the spike; explicit build ✔; **full
+`lake build` + `check_build_completeness.py` — 138/138 fresh, 0
+stale, 0 missing, exit 0** (one documented artifact-removal
+remediation after `touch`-based diagnostics, plus one explicit-target
+rebuild — the umbrella target does not cover QA modules);
+**8-declaration axiom audit via `wip/qcbridge_axcheck.lean` — every
+one exactly `propext, Classical.choice, Quot.sound`**, zero axiom
+contact; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (64 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new
+`qcFloor*`/`qcCap*`/`qcF_*` names collision-free);
+`check_backlog_freshness` clean; scoreboard regenerated (**1380 /
+6866 / 4 / 0**) with the verification row; map freshness exit 0 after
+the 6866 sync in both map data tables + SVG regeneration (49
+stations, no status change — the proposal has no station; re-run
+green after the status-header amendment). No census re-run owed —
+QA-only, no new shelf declaration, the inert set's zero stands.
+Records updated: the proposal (status header amended + clause-audit
+record with the trap list), the scoreboard verification row, README
+(6866), the radar's QA row (6866 across 72 modules, held 4.5), both
+map data tables + regenerated SVG, this plan, and the activity log.
+No backlog note owed. Nothing committed; prior runs' uncommitted
+deliveries preserved.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition
+changed, no public statement changed. Honest scope: the two fences at
+one fixture each (the multiplicity-2 family has more extreme members,
+none needed); the eigenvalue-cases route pinned at the two `I`/`J`
+combinations (the general mixed-sign regular graph needs the
+char-poly route, priced not owed); the `hdpos` classification is an
+argument, not a Lean-certified impossibility.
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The delivered-but-unfenced surfaces agenda has now cleared every
+recent public delivery (numerical layer, rank-one norm layer,
+boundary-outflow Step-1/Part-2 — all audited); the remaining
+operator-gated items are unchanged (the companion's Steps 3–5
+adoption; master-bound Step 2; the `perron_frobenius` deprecation;
+backlog items 5/6; log-Sobolev; the reverse TV → χ² consumer; the
+Grönwall proposal; plus the `weighted-matrix-tree`,
+`mutual-information`, and `erdos-renyi` Low rows); the two untracked
+proposal drafts noted by the 15:37 run remain for operator triage.
+With the unfenced-surfaces queue clear, the natural next instruments
+are the census (new public theorems should land consumed) and the
+backlog's aging items — both operator-visible in the handoffs.
+
+------
+
+------
+
+**The boundary-outflow clause-surface audit — DELIVERED** (run
+`20260907T201900Z-run-1`, session `ses_f8284e858ffeNuh4Qtr9PWx412`;
+terminal entry appended to `AGENT_ACTIVITY.md`; the clause-audit
+record appended to `proposals/boundary-outflow-lemma.md`, its status
+header amended).
+
+------
+
+**The boundary-outflow clause-surface audit** — the standing
+"delivered-but-unfenced surfaces" agenda's named next candidate (the
+previous handoff): the boundary-outflow Step-1/Part-2 delivery's
+remaining clause surface, two findings both closed in one run.
+
+**DELIVERED at the full designed scope.** **(1) The truth-removable
+`hA` collapse**: the Step-1 delivery had found
+`quadForm_laplacian_partIndicator`'s `hA : A.IsSymm` removable,
+delivered the hypothesis-free twin `…_unsymm`, and left the gated
+original "with its hypothesis set superseded" — a truth-removable
+clause in the public surface beside its own removal plus two public
+theorems with the identical statement. Closed per the standing
+agenda's precedent (`quantize_mul_step`, the rank-one pair): the
+original STRENGTHENED in place (outflow route, no `hA`), the duplicate
+twin RETIRED (functional 1381 → 1380), both proof-level consumers
+migrated (`spectral_gap_edge_expansion`, `laplacian_quadForm_
+multiwayCombination_le`), and the collapsed two-route QA join
+reworked into its true superset pin — **the energy identity at the
+ASYMMETRIC `bolDirAdj` fixture (`= 3`), an object the gated original
+could never reach, pinned two routes** (`bol_quadForm_energy_asym`
+through the theorem beside `bol_quadForm_energy_asym_raw` via the
+delivered action pin). No Errata entry owed (the gated statement was
+implied by its twin at identical shape — no statement was ever false).
+**(2) The `ht` fence**: the Part-2 chain's `ht : 0 ≤ t` was the last
+unfenced clause (`hnonneg` fenced by the Part-2 delivery, the decay
+family's `ht` clauses by the 2026-09-05 audit). Fenced at the engine
+level exactly mirroring the `hnonneg` fence's level:
+**`gsc_ht_fence_QA`** — at `t = −1` on plain nonnegative K₂ (`hA` and
+`hnonneg` both GENUINE), the eigenvalue-2 mode satisfies
+`e^{−tL}m = e²•m`, so the global contraction's conclusion reads
+`2(e²−1)² ≤ 8` — false; the clause is inherited transitively by every
+downstream consumer including the Part-2 statement itself. Net QA +2
+(6842 → 6844; +4 new/reworked − 2 retired with the join's subject).
+
+**Verification:** spike (`wip/bofence_spike.lean`) green after three
+fix rounds (traps recorded in the proposal: the QA fixtures'
+namespaced constants not resolvable by bare name from the parent
+namespace — the auto-bound-implicit masquerade; the complement-sum
+`rw [hcompl]` route; a `show` missing its `= value` target); all four
+touched modules elaborate (three with zero output; Heat_QA's 2
+`ring_nf` infos pre-existing at HEAD); explicit builds ✔; **full
+`lake build` + `check_build_completeness.py` — 138/138 fresh, 0
+stale, 0 missing, exit 0**; **7-declaration axiom audit via
+`wip/bofence_axcheck.lean` — every one exactly `propext,
+Classical.choice, Quot.sound`** (the strengthened identity, its two
+migrated proof-level consumers, the four QA declarations), zero axiom
+contact; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (64 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new
+`bol_quadForm_energy*`/`gsc_ht_fence_QA` names collision-free);
+`check_backlog_freshness` clean; scoreboard regenerated (**1380 /
+6844 / 4 / 0**) with the verification row; map freshness exit 0 after
+the 1380/6844 sync in both map data tables + SVG regeneration (49
+stations, no status change — the proposal's status line stays
+COMPLETE, amended). Index row updated (`index/map/spectral_graph.md`:
+the `_unsymm` row retired, the base row's description updated to
+hypothesis-free). No census re-run owed — no NEW shelf declaration
+(one removed, one strengthened; a removal cannot create never-touched
+declarations, the inert set's zero stands trivially). Records
+updated: the proposal (status header amended + clause-audit record),
+the scoreboard verification row, README (1380/6844), the radar's QA
+row (6844 across 72 modules, held 4.5), both map data tables +
+regenerated SVG, this plan, and the activity log. No backlog note
+owed. Nothing committed; prior runs' uncommitted deliveries preserved
+(and the collapsed duplicate amended away — the point of auditing
+uncommitted work).
+
+**Remaining risk:** none owed — no axiom disposition changed, no
+public statement weakened (one strengthened, one duplicate retired —
+amendable because the delivery is uncommitted; a committed release
+line would have required a compatibility note). Honest scope: the
+`ht` fence at one negative depth (`t = −1`) and one mode; the
+asymmetric-`hA` residue for the Part-2 dissipation form remains
+priced-not-owed exactly as the Part-2 record states (a failing fixture
+needs ≥ 3 vertices or transient non-normal growth); the retired
+twin's name lives on in `wip/` files only (not in the build).
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The remaining agenda is unchanged: the operator-gated items (the
+companion's Steps 3–5 adoption; master-bound Step 2; the
+`perron_frobenius` deprecation; backlog items 5/6; log-Sobolev; the
+reverse TV → χ² consumer; the Grönwall proposal; plus the
+`weighted-matrix-tree`, `mutual-information`, and `erdos-renyi` Low
+rows) and the remaining delivered-but-unfenced surfaces (the numerical
+layer, the rank-one norm layer, and the boundary-outflow Step-1/Part-2
+clause surface now audited — the next candidates by recency: the
+quantized-Cheeger triangle section's QA surface and the
+census-closing `Norms_QA`/`Matrix_QA` modules); the two untracked
+proposal drafts noted by the 15:37 run remain for operator triage.
+
+------
+
+------
+
+**The rank-one norm equality's `v ≠ 0` corner audit — DELIVERED**
+(run `20260907T200815Z-run-1`, session
+`ses_f8284e858ffeNuh4Qtr9PWx412`; terminal entry appended to
+`AGENT_ACTIVITY.md`; the corner-audit record appended to
+`proposals/rank-one-edge-perturbation-norm.md`, its residue sentence
+corrected and status header amended).
+
+------
+
+**The rank-one norm equality's `v ≠ 0` corner audit** — the standing
+"delivered-but-unfenced surfaces" agenda's next candidate by recency
+(named by the 19:06 handoff): the rank-one norm delivery's `v ≠ 0`
+clause, recorded at delivery as "harmlessly false-but-vacuous" at the
+corner but neither fenced nor examined.
+
+**DELIVERED at the full designed scope** — one finding, closed in-run:
+**the clause was truth-removable, and the delivery's own residue
+sentence was a documentation defect.** At `v = 0` both sides of the
+weighted rank-one equality are provably zero (`rankOne 0 = 0`
+entrywise; `0 ⬝ᵥ 0 = 0`), so the statement reads `0 = 0` — TRUE, not
+"false-but-vacuous"; the clause was an artifact of the
+eigenvalue-witness proof route (which needs a nonzero eigenvector),
+not of the mathematics. No Errata entry owed (no Lean statement was
+ever false — the defect was prose, the quantizer audit's "away from
+zero" class). Closed: **both public theorems strengthened in place**
+(`abs_w_mul_dotProduct_self_le_l2OpNorm` gains a zero-corner case
+split; `l2OpNorm_smul_rankOne` now unconditional),
+`l2OpNorm_laplacian_edgeAdj`'s proof simplified (its `hvne` helper
+existed only to feed the removed clause — deleted; statement
+unchanged, its own `i ≠ j` still fenced by `epn_loop_fence`), and the
+corner PINNED in QA (+4 theorems in `EdgePerturbation_QA.lean`'s
+`NormPins` zero-corner section, 6838 → 6842): the equality at the
+degenerate vector through the now-unconditional theorem beside the raw
+zero-matrix route (two routes, one value), and the lower bound at
+value-carrying scale `w = 3` (the degenerate instance not
+vacuous-by-scale).
+
+**Verification:** spike (`wip/r1zero_spike.lean`) **green on the
+first round** (one in-run fix on landing: the inline
+`Matrix.dotProduct` def-unfold leaves the corner sum unsimplified
+before `mul_zero` — the standalone `simp [Matrix.dotProduct]` have is
+the robust spelling, recorded in the proposal); both touched modules
+elaborate with zero new output (the QA file's 3 `ring_nf` infos
+pre-existing at HEAD per the prior run's record; none in the new
+section); explicit builds ✔; **full `lake build` +
+`check_build_completeness.py` — 138/138 fresh, 0 stale, 0 missing,
+exit 0** (one documented artifact-removal remediation after
+`touch`-based elaboration experiments left the EdgePerturbation olean
+mtime-stale); **7-declaration axiom audit via `wip/r1zero_axcheck.lean`
+— every one exactly `propext, Classical.choice, Quot.sound`** (the 2
+strengthened public theorems, the simplified single-edge equality, the
+4 QA pins), zero axiom contact; `lint_axioms` exit 0 (4 axioms
+unchanged); `check_refutation_independence` (24-tag clean);
+`check_public_reachability` (64 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new
+`epnZero_*` names collision-free); `check_backlog_freshness` clean;
+scoreboard regenerated (**1381 / 6842 / 4 / 0**) with the verification
+row; map freshness exit 0 after the 6842 sync in both map data tables
++ SVG regeneration (49 stations, no status change — the
+EdgePerturbation station's line is a same-status enrichment; re-run
+green after the proposal status-header amendment). No census re-run
+owed — no new or removed shelf declaration; two signatures
+strengthened, their consumers unchanged in count, the inert set's zero
+stands. Records updated: the proposal (status header amended,
+residue sentence corrected, corner-audit record appended), the
+scoreboard verification row, README (6842), the radar's QA row (6842
+across 72 modules, held 4.5), both map data tables + regenerated SVG,
+this plan, and the activity log. No backlog note owed. Nothing
+committed; prior runs' uncommitted deliveries preserved (and amended
+where the audit found them wrong — the point of auditing uncommitted
+work).
+
+**Remaining risk:** none owed — no axiom disposition changed, no
+public statement weakened (two strengthened — amendable because the
+delivery is uncommitted; a committed release line would have required
+a compatibility note). Honest scope: the corner pins at the `Fin 2`
+fixture; the equality pins generic in `w` but at the one degenerate
+vector (there is only one); the removal covers the two named theorems
+only (the upper bound `l2OpNorm_smul_rankOne_le` was already
+unconditional).
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The remaining agenda is unchanged: the operator-gated items (the
+companion's Steps 3–5 adoption; master-bound Step 2; the
+`perron_frobenius` deprecation; backlog items 5/6; log-Sobolev; the
+reverse TV → χ² consumer; the Grönwall proposal; plus the
+`weighted-matrix-tree`, `mutual-information`, and `erdos-renyi` Low
+rows) and the remaining delivered-but-unfenced surfaces (the numerical
+layer and the rank-one norm layer now audited; the next candidate by
+recency: the boundary-outflow Step-1 theorems' clause surface — the
+`Multiway.lean` partIndicator block); the two untracked proposal
+drafts noted by the 15:37 run remain for operator triage.
 
 ------
 

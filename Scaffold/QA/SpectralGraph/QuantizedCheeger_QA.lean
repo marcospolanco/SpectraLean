@@ -622,4 +622,383 @@ theorem qcNegTie_bound_QA :
 
 end CornerAudit
 
+
+/-! ## The range bridges' clause audit (2026-09-07)
+
+`proposals/quantized-cheeger-bound.md`'s corner audit (the `CornerAudit`
+section above) covered the quantizer trio; THIS section closes the two
+range bridges delivered beside them — the floor
+`secondEval_regularNormalizedLaplacian_nonneg` and the cap
+`secondEval_regularNormalizedLaplacian_le_two`, the a priori `[0, 2]`
+interval the whole quantized-Cheeger program rests on.
+
+**The finding: `hnonneg` is load-bearing at both spellings, and the
+existing fences provably cannot cover them.** The PSD engine's fence
+(`rcF_psd_hnn_fence_QA` in `Cheeger_QA.lean`) and the regular-Cheeger
+family's `hnn` fences are all 2-vertex — and a 2-vertex signed
+d-regular fixture has `L_sym` spectrum `{2w/d, 0}` with `secondEval`
+exactly `0`, so the floor's dropped statement (`0 ≤ 0`) and the cap's
+(`0 ≤ 2`) are TRUE at every such fixture. The refutation needs the
+multiplicity-2 phenomenon: TWO Laplacian eigenvalues crossing to the
+same side, which needs ≥ 3 vertices. The two fixtures below are
+`A₋ = 2I − (1/3)J` (spectrum `{1, 2, 2}` — two A-eigenvalues above
+the degree, so `L_sym` has spectrum `{0, −1, −1}` and `secondEval =
+−1`) and `A₊ = J − 2I` (spectrum `{1, −2, −2}` — two below, so
+`spec(L_sym) = {0, 3, 3}` and `secondEval = 3`).
+
+Classifications, no fence owed: `hdpos` has NO failing fixture with
+`hnonneg` genuine (degree-regular nonneg forces `d ≥ 0`; at `d = 0`
+it forces `A = 0`, where the junk `0⁻¹ = 0` gives `L_sym = 1` and
+both bridge values hold benignly); `hcard` and `hA` are structurally
+carried by the `secondEval` spelling (unstatable without them); the
+sandwich `quantized_cheeger_le` carries no NEW clause — its
+hypothesis set is exactly the Cheeger pair's, already fenced by the
+regular-Cheeger fence audit (`rcF_upper/lower_{hnn,hd,hdpos}_fence_QA`),
+and `b` is a free parameter.
+-/
+
+section BridgeFences
+
+/-! ### The floor fixture -/
+
+noncomputable def qcFloorAdj : Matrix (Fin 3) (Fin 3) ℝ :=
+  !![5/3, -1/3, -1/3; -1/3, 5/3, -1/3; -1/3, -1/3, 5/3]
+
+theorem qcFloorAdj_isSymm : qcFloorAdj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;>
+    simp [qcFloorAdj, Matrix.vecHead, Matrix.vecTail]
+
+theorem qcFloorAdj_deg (i : Fin 3) : deg qcFloorAdj i = 1 := by
+  fin_cases i
+  all_goals simp only [deg, qcFloorAdj, Matrix.of_apply, Fin.sum_univ_three,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+    Matrix.vecHead, Matrix.vecTail]
+  all_goals norm_num
+
+theorem qcFloorAdj_not_nonneg : ¬ (∀ i j, 0 ≤ qcFloorAdj i j) := by
+  intro h
+  have h01 := h 0 1
+  simp [qcFloorAdj] at h01
+  norm_num at h01
+
+/-- The floor fixture's Laplacian `I − A₋` (at `d = 1`), as a literal
+matrix. -/
+noncomputable def qcFloorL : Matrix (Fin 3) (Fin 3) ℝ :=
+  !![-2/3, 1/3, 1/3; 1/3, -2/3, 1/3; 1/3, 1/3, -2/3]
+
+theorem qcFloorL_isSymm : qcFloorL.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;>
+    simp [qcFloorL, Matrix.vecHead, Matrix.vecTail]
+
+theorem qcFloorL_eq :
+    regularNormalizedLaplacian qcFloorAdj 1 = qcFloorL := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [regularNormalizedLaplacian, qcFloorAdj, qcFloorL,
+      Matrix.vecHead, Matrix.vecTail, one_div] <;> norm_num
+
+/-- The row-sum form of the fixture's adjacency: every row carries `5/3`
+on the diagonal and `−1/3` off, so the row action is `2·w j − (1/3)·s`
+with `s = ∑ w` (generic in `w` and `j` — no literal entry matching). -/
+theorem qcFloorAdj_rowsum (w : Fin 3 → ℝ) (j : Fin 3) :
+    ∑ k, qcFloorAdj j k * w k
+      = 2 * w j - (1/3) * (∑ k, w k) := by
+  fin_cases j <;> simp [qcFloorAdj, Fin.sum_univ_three] <;> ring
+
+/-- The fixture Laplacian's action, row form: `(I − A₋) *ᵥ w` at `j` is
+`w j − ∑_k A₋ j k w k` — operator-level, the route the eigen pins
+consume (the matrix is never unfolded inside the eigen equation). -/
+theorem qcFloorL_mulVec_apply (w : Fin 3 → ℝ) (j : Fin 3) :
+    (qcFloorL *ᵥ w) j = w j - (∑ k, qcFloorAdj j k * w k) := by
+  have h : qcFloorL *ᵥ w
+      = ((1 : Matrix (Fin 3) (Fin 3) ℝ) - (1:ℝ)⁻¹ • qcFloorAdj) *ᵥ w := by
+    rw [← qcFloorL_eq, regularNormalizedLaplacian]
+  rw [h, Matrix.sub_mulVec, Matrix.one_mulVec, Pi.sub_apply,
+    Matrix.smul_mulVec_assoc, Pi.smul_apply, smul_eq_mul, inv_one, one_mul,
+    Matrix.mulVec, Matrix.dotProduct]
+
+/-- **Every eigenvalue of the floor fixture's Laplacian is `0` or
+`−1`.** The coordinate-sum trick: the eigen equation entrywise reads
+`μ · v j = (1/3)·(∑ v) − v j`; summing over `j` collapses the right
+side to `0`, so `μ · (∑ v) = 0`, and the two cases each pin `μ`. -/
+theorem qcFloor_eigvalOf_cases (i : Fin 3) :
+    eigvalOf qcFloorL qcFloorL_isSymm i = 0
+      ∨ eigvalOf qcFloorL qcFloorL_isSymm i = -1 := by
+  have hev : qcFloorL *ᵥ eigvecOf qcFloorL qcFloorL_isSymm i
+      = eigvalOf qcFloorL qcFloorL_isSymm i • eigvecOf qcFloorL qcFloorL_isSymm i :=
+    (isHermitian_of_isSymm qcFloorL_isSymm).mulVec_eigenvectorBasis i
+  have hentry : ∀ j, eigvalOf qcFloorL qcFloorL_isSymm i
+        * eigvecOf qcFloorL qcFloorL_isSymm i j
+      = (1/3) * (∑ k, eigvecOf qcFloorL qcFloorL_isSymm i k)
+        - eigvecOf qcFloorL qcFloorL_isSymm i j := by
+    intro j
+    have hj := congrFun hev j
+    rw [qcFloorL_mulVec_apply, Pi.smul_apply, smul_eq_mul,
+      qcFloorAdj_rowsum] at hj
+    rw [mul_comm]
+    linarith
+  have hsum : eigvalOf qcFloorL qcFloorL_isSymm i
+      * (∑ k, eigvecOf qcFloorL qcFloorL_isSymm i k) = 0 := by
+    have h₁ : ∑ j : Fin 3, eigvalOf qcFloorL qcFloorL_isSymm i
+          * eigvecOf qcFloorL qcFloorL_isSymm i j
+        = ∑ j : Fin 3, ((1/3) * (∑ k, eigvecOf qcFloorL qcFloorL_isSymm i k)
+          - eigvecOf qcFloorL qcFloorL_isSymm i j) :=
+      Finset.sum_congr rfl fun j _ => hentry j
+    calc eigvalOf qcFloorL qcFloorL_isSymm i
+          * ∑ k, eigvecOf qcFloorL qcFloorL_isSymm i k
+        = ∑ j : Fin 3, eigvalOf qcFloorL qcFloorL_isSymm i
+            * eigvecOf qcFloorL qcFloorL_isSymm i j :=
+          Finset.mul_sum Finset.univ (fun k => eigvecOf qcFloorL qcFloorL_isSymm i k)
+            (eigvalOf qcFloorL qcFloorL_isSymm i)
+      _ = 0 := by
+          rw [h₁]
+          simp only [Fin.sum_univ_three]
+          ring
+  rcases mul_eq_zero.1 hsum with h | h
+  · exact Or.inl h
+  · refine Or.inr ?_
+    have hvne : eigvecOf qcFloorL qcFloorL_isSymm i ≠ 0 := by
+      intro h0
+      have hself : ∑ k, eigvecOf qcFloorL qcFloorL_isSymm i k
+          * eigvecOf qcFloorL qcFloorL_isSymm i k = 1 := by
+        simpa using eigvecOf_inner qcFloorL qcFloorL_isSymm i i
+      rw [h0] at hself
+      simp at hself
+    obtain ⟨j, hj⟩ : ∃ j, eigvecOf qcFloorL qcFloorL_isSymm i j ≠ 0 := by
+      by_contra hcon
+      push_neg at hcon
+      exact hvne (funext hcon)
+    have he := hentry j
+    rw [h, mul_zero, zero_sub] at he
+    have hz : (eigvalOf qcFloorL qcFloorL_isSymm i + 1)
+        * eigvecOf qcFloorL qcFloorL_isSymm i j = 0 := by
+      rw [add_mul, one_mul]
+      linarith [he]
+    rcases mul_eq_zero.1 hz with h' | h'
+    · linarith
+    · exact absurd h' hj
+
+/-- **The floor fixture's `secondEval` is exactly `−1`.** Spectrum
+`{0, −1, −1}`: every eigenvalue in `{0, −1}` (the cases lemma), the
+trace `−2 = 3·(−2/3)` forcing two `−1`s, and sortedness then forcing
+the middle entry. -/
+theorem qcFloor_secondEval :
+    secondEval qcFloorL qcFloorL_isSymm (by norm_num) = -1 := by
+  have hse : secondEval qcFloorL qcFloorL_isSymm (by norm_num)
+      = evals qcFloorL_isSymm (1 : Fin 3) := rfl
+  rw [hse]
+  have hcases : ∀ k : Fin 3, evals qcFloorL_isSymm k = 0
+      ∨ evals qcFloorL_isSymm k = -1 := by
+    intro k
+    obtain ⟨i, hi⟩ := evals_mem_eigvalOf qcFloorL_isSymm k
+    rw [hi]
+    exact qcFloor_eigvalOf_cases i
+  have hsum : ∑ k, evals qcFloorL_isSymm k = -2 := by
+    rw [evals_sum_eq_trace qcFloorL_isSymm]
+    simp [Matrix.trace, qcFloorL, Fin.sum_univ_three]
+    norm_num
+  have hsum3 : ∑ i : Fin 3, evals qcFloorL_isSymm i = -2 := hsum
+  rcases hcases (1 : Fin 3) with h1 | h1
+  · exfalso
+    have h2 : evals qcFloorL_isSymm (1 : Fin 3)
+        ≤ evals qcFloorL_isSymm (2 : Fin 3) :=
+      evals_sorted qcFloorL_isSymm (by decide)
+    rw [h1] at h2
+    rcases hcases (2 : Fin 3) with h2' | h2'
+    · rw [h2'] at h2
+      simp only [Fin.sum_univ_three, h1, h2'] at hsum3
+      rcases hcases (0 : Fin 3) with h0 | h0
+      · rw [h0] at hsum3; norm_num at hsum3
+      · rw [h0] at hsum3; norm_num at hsum3
+    · exact absurd h2' (by linarith)
+  · exact h1
+
+/-- **The floor fence**: at the floor fixture — symmetric, degree-1
+regular, positive degree, `3 ≥ 2` vertices, every hypothesis except
+`hnonneg` genuine — the floor's conclusion reads `0 ≤ −1`: false. -/
+theorem qcF_floor_hnn_fence_QA :
+    ¬ (0 ≤ secondEval (regularNormalizedLaplacian qcFloorAdj 1)
+          (regularNormalizedLaplacian_symmetric qcFloorAdj qcFloorAdj_isSymm 1)
+          (by norm_num)) := by
+  rw [secondEval_congr _ qcFloorL_isSymm qcFloorL_eq (by norm_num),
+    qcFloor_secondEval]
+  norm_num
+
+theorem qcF_floor_hnn_isolation_QA :
+    qcFloorAdj.IsSymm ∧ (∀ i, deg qcFloorAdj i = 1) ∧ (0 < (1:ℝ))
+      ∧ 2 ≤ Fintype.card (Fin 3) ∧ ¬ (∀ i j, 0 ≤ qcFloorAdj i j) :=
+  ⟨qcFloorAdj_isSymm, qcFloorAdj_deg, by norm_num, by norm_num,
+    qcFloorAdj_not_nonneg⟩
+
+/-! ### The cap fixture -/
+
+noncomputable def qcCapAdj : Matrix (Fin 3) (Fin 3) ℝ :=
+  !![-1, 1, 1; 1, -1, 1; 1, 1, -1]
+
+theorem qcCapAdj_isSymm : qcCapAdj.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;>
+    simp [qcCapAdj, Matrix.vecHead, Matrix.vecTail]
+
+theorem qcCapAdj_deg (i : Fin 3) : deg qcCapAdj i = 1 := by
+  fin_cases i
+  all_goals simp only [deg, qcCapAdj, Matrix.of_apply, Fin.sum_univ_three,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+    Matrix.vecHead, Matrix.vecTail]
+  all_goals norm_num
+
+theorem qcCapAdj_not_nonneg : ¬ (∀ i j, 0 ≤ qcCapAdj i j) := by
+  intro h
+  have h00 := h 0 0
+  simp [qcCapAdj] at h00
+  norm_num at h00
+
+/-- The cap fixture's Laplacian `I − A₊` (at `d = 1`), as a literal
+matrix. -/
+noncomputable def qcCapL : Matrix (Fin 3) (Fin 3) ℝ :=
+  !![2, -1, -1; -1, 2, -1; -1, -1, 2]
+
+theorem qcCapL_isSymm : qcCapL.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;>
+    simp [qcCapL, Matrix.vecHead, Matrix.vecTail]
+
+theorem qcCapL_eq :
+    regularNormalizedLaplacian qcCapAdj 1 = qcCapL := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [regularNormalizedLaplacian, qcCapAdj, qcCapL,
+      Matrix.vecHead, Matrix.vecTail, one_div] <;> norm_num
+
+/-- The row-sum form of the cap fixture's adjacency: every row carries
+`−1` on the diagonal and `+1` off, so the row action is `s − 2·w j`
+with `s = ∑ w`. -/
+theorem qcCapAdj_rowsum (w : Fin 3 → ℝ) (j : Fin 3) :
+    ∑ k, qcCapAdj j k * w k
+      = (∑ k, w k) - 2 * w j := by
+  fin_cases j <;> simp [qcCapAdj, Fin.sum_univ_three] <;> ring
+
+/-- The cap fixture Laplacian's action, row form. -/
+theorem qcCapL_mulVec_apply (w : Fin 3 → ℝ) (j : Fin 3) :
+    (qcCapL *ᵥ w) j = w j - (∑ k, qcCapAdj j k * w k) := by
+  have h : qcCapL *ᵥ w
+      = ((1 : Matrix (Fin 3) (Fin 3) ℝ) - (1:ℝ)⁻¹ • qcCapAdj) *ᵥ w := by
+    rw [← qcCapL_eq, regularNormalizedLaplacian]
+  rw [h, Matrix.sub_mulVec, Matrix.one_mulVec, Pi.sub_apply,
+    Matrix.smul_mulVec_assoc, Pi.smul_apply, smul_eq_mul, inv_one, one_mul,
+    Matrix.mulVec, Matrix.dotProduct]
+
+/-- **Every eigenvalue of the cap fixture's Laplacian is `0` or `3`.** -/
+theorem qcCap_eigvalOf_cases (i : Fin 3) :
+    eigvalOf qcCapL qcCapL_isSymm i = 0
+      ∨ eigvalOf qcCapL qcCapL_isSymm i = 3 := by
+  have hev : qcCapL *ᵥ eigvecOf qcCapL qcCapL_isSymm i
+      = eigvalOf qcCapL qcCapL_isSymm i • eigvecOf qcCapL qcCapL_isSymm i :=
+    (isHermitian_of_isSymm qcCapL_isSymm).mulVec_eigenvectorBasis i
+  have hentry : ∀ j, eigvalOf qcCapL qcCapL_isSymm i
+        * eigvecOf qcCapL qcCapL_isSymm i j
+      = 3 * eigvecOf qcCapL qcCapL_isSymm i j
+        - (∑ k, eigvecOf qcCapL qcCapL_isSymm i k) := by
+    intro j
+    have hj := congrFun hev j
+    rw [qcCapL_mulVec_apply, Pi.smul_apply, smul_eq_mul,
+      qcCapAdj_rowsum] at hj
+    rw [mul_comm]
+    linarith
+  have hsum : eigvalOf qcCapL qcCapL_isSymm i
+      * (∑ k, eigvecOf qcCapL qcCapL_isSymm i k) = 0 := by
+    have h₁ : ∑ j : Fin 3, eigvalOf qcCapL qcCapL_isSymm i
+          * eigvecOf qcCapL qcCapL_isSymm i j
+        = ∑ j : Fin 3, (3 * eigvecOf qcCapL qcCapL_isSymm i j
+          - (∑ k, eigvecOf qcCapL qcCapL_isSymm i k)) :=
+      Finset.sum_congr rfl fun j _ => hentry j
+    calc eigvalOf qcCapL qcCapL_isSymm i
+          * ∑ k, eigvecOf qcCapL qcCapL_isSymm i k
+        = ∑ j : Fin 3, eigvalOf qcCapL qcCapL_isSymm i
+            * eigvecOf qcCapL qcCapL_isSymm i j :=
+          Finset.mul_sum Finset.univ (fun k => eigvecOf qcCapL qcCapL_isSymm i k)
+            (eigvalOf qcCapL qcCapL_isSymm i)
+      _ = 0 := by
+          rw [h₁]
+          simp only [Fin.sum_univ_three]
+          ring
+  rcases mul_eq_zero.1 hsum with h | h
+  · exact Or.inl h
+  · refine Or.inr ?_
+    have hvne : eigvecOf qcCapL qcCapL_isSymm i ≠ 0 := by
+      intro h0
+      have hself : ∑ k, eigvecOf qcCapL qcCapL_isSymm i k
+          * eigvecOf qcCapL qcCapL_isSymm i k = 1 := by
+        simpa using eigvecOf_inner qcCapL qcCapL_isSymm i i
+      rw [h0] at hself
+      simp at hself
+    obtain ⟨j, hj⟩ : ∃ j, eigvecOf qcCapL qcCapL_isSymm i j ≠ 0 := by
+      by_contra hcon
+      push_neg at hcon
+      exact hvne (funext hcon)
+    have he := hentry j
+    rw [h, sub_zero] at he
+    have hz : (eigvalOf qcCapL qcCapL_isSymm i - 3)
+        * eigvecOf qcCapL qcCapL_isSymm i j = 0 := by
+      rw [sub_mul]
+      linarith [he]
+    rcases mul_eq_zero.1 hz with h' | h'
+    · linarith
+    · exact absurd h' hj
+
+/-- **The cap fixture's `secondEval` is exactly `3`.** Spectrum
+`{0, 3, 3}`: the cases lemma, the trace `6 = 3·2` forcing two `3`s,
+and sortedness forcing the middle entry. -/
+theorem qcCap_secondEval :
+    secondEval qcCapL qcCapL_isSymm (by norm_num) = 3 := by
+  have hse : secondEval qcCapL qcCapL_isSymm (by norm_num)
+      = evals qcCapL_isSymm (1 : Fin 3) := rfl
+  rw [hse]
+  have hcases : ∀ k : Fin 3, evals qcCapL_isSymm k = 0
+      ∨ evals qcCapL_isSymm k = 3 := by
+    intro k
+    obtain ⟨i, hi⟩ := evals_mem_eigvalOf qcCapL_isSymm k
+    rw [hi]
+    exact qcCap_eigvalOf_cases i
+  have hsum : ∑ k, evals qcCapL_isSymm k = 6 := by
+    rw [evals_sum_eq_trace qcCapL_isSymm]
+    simp [Matrix.trace, qcCapL, Fin.sum_univ_three]
+    norm_num
+  have hsum3 : ∑ i : Fin 3, evals qcCapL_isSymm i = 6 := hsum
+  rcases hcases (1 : Fin 3) with h1 | h1
+  · exfalso
+    have h0 : evals qcCapL_isSymm (0 : Fin 3)
+        ≤ evals qcCapL_isSymm (1 : Fin 3) :=
+      evals_sorted qcCapL_isSymm (by decide)
+    rw [h1] at h0
+    rcases hcases (0 : Fin 3) with h0' | h0'
+    · rw [h0'] at h0
+      simp only [Fin.sum_univ_three, h1, h0'] at hsum3
+      rcases hcases (2 : Fin 3) with h2 | h2
+      · rw [h2] at hsum3; norm_num at hsum3
+      · rw [h2] at hsum3; norm_num at hsum3
+    · exact absurd h0' (by linarith)
+  · exact h1
+
+/-- **The cap fence**: at the cap fixture — symmetric, degree-1
+regular, positive degree, `3 ≥ 2` vertices, every hypothesis except
+`hnonneg` genuine — the cap's conclusion reads `3 ≤ 2`: false. -/
+theorem qcF_cap_hnn_fence_QA :
+    ¬ (secondEval (regularNormalizedLaplacian qcCapAdj 1)
+          (regularNormalizedLaplacian_symmetric qcCapAdj qcCapAdj_isSymm 1)
+          (by norm_num) ≤ 2) := by
+  rw [secondEval_congr _ qcCapL_isSymm qcCapL_eq (by norm_num),
+    qcCap_secondEval]
+  norm_num
+
+theorem qcF_cap_hnn_isolation_QA :
+    qcCapAdj.IsSymm ∧ (∀ i, deg qcCapAdj i = 1) ∧ (0 < (1:ℝ))
+      ∧ 2 ≤ Fintype.card (Fin 3) ∧ ¬ (∀ i j, 0 ≤ qcCapAdj i j) :=
+  ⟨qcCapAdj_isSymm, qcCapAdj_deg, by norm_num, by norm_num,
+    qcCapAdj_not_nonneg⟩
+
+end BridgeFences
+
 end SpectralGraphTheory.QA

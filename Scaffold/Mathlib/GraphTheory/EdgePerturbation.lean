@@ -199,29 +199,41 @@ theorem l2OpNorm_smul_rankOne_le (w : ℝ) (v : V → ℝ) :
       _ ≤ |w| * (v ⬝ᵥ v) := hAT
 
 /-- **The weighted rank-one operator-norm lower bound** — the direction
-`l2OpNorm_rankOne_le` does not supply. The vector `v` is an eigenvector
-of `w • rankOne v` at `w * (v ⬝ᵥ v)` (by `rankOne_mulVec`), so the
-witness-eigenvalue existence lemma `exists_eigvalOf_eq_of_mulVec_eq_smul`
-exhibits that value in the `eigvalOf` listing, and
-`abs_eigvalOf_le_l2OpNorm` bounds it below the norm. -/
-theorem abs_w_mul_dotProduct_self_le_l2OpNorm (w : ℝ) (v : V → ℝ) (hv : v ≠ 0) :
+`l2OpNorm_rankOne_le` does not supply. On the nonzero corner the vector
+`v` is an eigenvector of `w • rankOne v` at `w * (v ⬝ᵥ v)` (by
+`rankOne_mulVec`), so the witness-eigenvalue existence lemma
+`exists_eigvalOf_eq_of_mulVec_eq_smul` exhibits that value in the
+`eigvalOf` listing, and `abs_eigvalOf_le_l2OpNorm` bounds it below the
+norm. The zero corner closes directly (`w • rankOne 0 = 0` and
+`0 ⬝ᵥ 0 = 0`, so the statement is `0 ≤ 0`) — the `v ≠ 0` clause the
+eigenvalue-witness route needs is truth-removable, and absent here. -/
+theorem abs_w_mul_dotProduct_self_le_l2OpNorm (w : ℝ) (v : V → ℝ) :
     |w| * (v ⬝ᵥ v) ≤ ‖w • rankOne v‖ := by
-  have hsymm : (w • rankOne v).IsSymm := smul_rankOne_isSymm w v
-  have hmul : (w • rankOne v) *ᵥ v = (w * (v ⬝ᵥ v)) • v := by
-    rw [Matrix.smul_mulVec_assoc, rankOne_mulVec, smul_smul]
-  obtain ⟨i, hi⟩ := exists_eigvalOf_eq_of_mulVec_eq_smul hsymm hv hmul
-  have habs := Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent.abs_eigvalOf_le_l2OpNorm
-    hsymm i
-  rw [hi, abs_mul, abs_of_nonneg (dotProduct_self_nonneg v)] at habs
-  exact habs
+  by_cases hv : v = 0
+  · subst hv
+    have hz : w • rankOne (0 : V → ℝ) = 0 := by
+      ext i j; simp [rankOne]
+    have hdot : (0 : V → ℝ) ⬝ᵥ 0 = 0 := by
+      simp [Matrix.dotProduct]
+    rw [hz, norm_zero, hdot, mul_zero]
+  · have hsymm : (w • rankOne v).IsSymm := smul_rankOne_isSymm w v
+    have hmul : (w • rankOne v) *ᵥ v = (w * (v ⬝ᵥ v)) • v := by
+      rw [Matrix.smul_mulVec_assoc, rankOne_mulVec, smul_smul]
+    obtain ⟨i, hi⟩ := exists_eigvalOf_eq_of_mulVec_eq_smul hsymm hv hmul
+    have habs := Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent.abs_eigvalOf_le_l2OpNorm
+      hsymm i
+    rw [hi, abs_mul, abs_of_nonneg (dotProduct_self_nonneg v)] at habs
+    exact habs
 
 /-- **The weighted rank-one norm equality**: `‖w • v vᵀ‖ = |w| * (v ⬝ᵥ v)`
-at every nonzero `v` — the exact operator norm of a scaled rank-one
-block. -/
-theorem l2OpNorm_smul_rankOne (w : ℝ) (v : V → ℝ) (hv : v ≠ 0) :
+at every `v` — the exact operator norm of a scaled rank-one block,
+unconditional: at `v = 0` both sides are zero (`rankOne 0 = 0`
+entrywise), so the equality holds at the degenerate corner too (the
+clause removal verified by QA at `epnZero_eq_QA`). -/
+theorem l2OpNorm_smul_rankOne (w : ℝ) (v : V → ℝ) :
     ‖w • rankOne v‖ = |w| * (v ⬝ᵥ v) :=
   le_antisymm (l2OpNorm_smul_rankOne_le w v)
-    (abs_w_mul_dotProduct_self_le_l2OpNorm w v hv)
+    (abs_w_mul_dotProduct_self_le_l2OpNorm w v)
 
 omit [Fintype V] in
 /-- The `Pi.single` edge-difference vector is `ssEdgeDiff`,
@@ -237,18 +249,13 @@ not a cut edge, `L(edgeAdj i i w) = 0` (by `laplacian_edgeAdj`, both
 sides zero), and the equality fails at every `w ≠ 0`. -/
 theorem l2OpNorm_laplacian_edgeAdj (i j : V) (hij : i ≠ j) (w : ℝ) :
     ‖laplacian (edgeAdj i j w)‖ = 2 * |w| := by
-  have hvne : (Pi.single i 1 - Pi.single j 1 : V → ℝ) ≠ 0 := by
-    intro h
-    have h0 : (Pi.single i 1 - Pi.single j 1 : V → ℝ) i = 0 := congrFun h i
-    rw [Pi.sub_apply, Pi.single_apply, Pi.single_apply, if_pos rfl, if_neg hij] at h0
-    norm_num at h0
   have hvv : (Pi.single i 1 - Pi.single j 1 : V → ℝ)
       ⬝ᵥ (Pi.single i 1 - Pi.single j 1) = 2 := by
     rw [edgeDiff_eq_ssEdgeDiff, dotProduct_ssEdgeDiff]
     have hji : j ≠ i := Ne.symm hij
     simp [ssEdgeDiff, hij, hji]
     norm_num
-  rw [laplacian_edgeAdj, l2OpNorm_smul_rankOne w _ hvne, hvv, mul_comm]
+  rw [laplacian_edgeAdj, l2OpNorm_smul_rankOne w _, hvv, mul_comm]
 
 /-- **The subadditive multi-edge bound**: the operator norm of a finite
 sum of single-edge Laplacian updates is at most the sum of their

@@ -7,6 +7,12 @@ the delivery record below); **Step 2 delivered 2026-09-07** (run
 the Part-2 delivery record at the file's end), via the companion's
 Steps 0(m=0)/1/2 delivered under the named-consumer scope (see the
 Part-2 record's gate note). Both parts hard crust, zero axioms.
+**Amended 2026-09-07 by the clause-surface audit (run
+`20260907T201900Z-run-1`): the Step-1 energy identity's provisional
+`hA` clause collapsed (the strengthened hypothesis-free original
+absorbing its own `…_unsymm` twin, functional 1381 → 1380) and the
+Part-2 chain's `ht` clause fenced (`gsc_ht_fence_QA` — see the
+clause-audit record at the file's end).**
 
 Restated in pure-mathematics form 2026-09-06 from
 an external request relayed by the operator (not tracked in this
@@ -387,3 +393,84 @@ every 2-vertex nonnegative asymmetric `D − A` has PSD spectrum
 transient non-normal growth — heavier than this delivery's scope).
 The `partIndicator` specialization is stated at `S` directly; a
 `Sᶜ`-flipped form would go through `boundary_compl` as before.
+
+## Clause-audit record (2026-09-07, run `20260907T201900Z-run-1`)
+
+The standing "delivered-but-unfenced surfaces" agenda applied to this
+proposal's delivery (uncommitted, amendable), its remaining clause
+surface named by the previous run's handoff. Two findings, both closed
+in-run.
+
+**(1) The truth-removable `hA` collapse.** The Step-1 delivery found
+`quadForm_laplacian_partIndicator`'s `hA : A.IsSymm` removable (the
+outflow route never flips the region, so `boundary_compl` — the only
+symmetry consumer — never enters), delivered the hypothesis-free twin
+`…_unsymm`, and deliberately left the gated original in place "with
+its hypothesis set superseded." That end-state left a truth-removable
+clause in the public surface beside its own removal, plus two public
+theorems with the identical statement. Closed exactly as the standing
+agenda's two precedents (`quantize_mul_step`'s `hR`, the rank-one
+pair's `v ≠ 0`): the original STRENGTHENED in place (`hA` dropped, the
+outflow route), the duplicate twin RETIRED (functional 1381 → 1380),
+both proof-level consumers migrated (`spectral_gap_edge_expansion` in
+`Poincare.lean`, `laplacian_quadForm_multiwayCombination_le` in
+`Multiway.lean` — the latter's own `hA` stays, consumed by
+`laplacian_quadForm` upstream in its proof), and the collapsed
+two-route QA join (`bol_quadForm_unsymm_route` vs
+`bol_quadForm_symm_route` — two routes that became the same theorem)
+reworked into its true superset pin: **the energy identity instantiated
+at the asymmetric `bolDirAdj` fixture (arc weights `3`/`1`, no `IsSymm`
+available) with value `boundary = 3` — an instantiation the gated
+original could never reach — pinned two routes** (through the theorem;
+beside the raw `bol_dir_action` dot-product computation). No Errata
+entry owed: no statement was ever false (the gated statement was
+implied by the twin at identical shape); the defect class was the
+left-in-place removable clause itself.
+
+**(2) The `ht` fence.** The Part-2 chain's `ht : 0 ≤ t`
+(`heatKernel_globalContraction_dotProduct_le` →
+`heatKernel_globalContraction_le` → `abs_dotProduct_heatFlow_le` →
+`abs_partIndicator_dotProduct_heatFlow_le`) was the one remaining
+unfenced clause: `hnonneg` was fenced by the Part-2 delivery
+(`gsc_hnonneg_fence_QA`) and the decay family's own `ht` clauses by
+the 2026-09-05 heat-family fence audit, but backward time on the
+global contraction was unpinned. Fenced at the engine level, mirroring
+the `hnonneg` fence's level exactly: **`gsc_ht_fence_QA`** — at
+`t = −1` on the plain nonnegative `K₂` fixture (`hA` and `hnonneg`
+both GENUINE, so every hypothesis except `0 ≤ t` holds), the
+eigenvalue-`2` mode satisfies `e^{−tL}m = e²•m` (the exponent matrix
+at `t = −1` IS the Laplacian), so the conclusion reads
+`2(e²−1)² ≤ (−1)²·8` — false since `(e²−1)² > 4` by
+`Real.add_one_lt_exp`. The clause is load-bearing, not decorative, and
+inherited transitively by every downstream consumer including the
+Part-2 statement itself.
+
+**Proof traps recorded** (spike `wip/bofence_spike.lean`, green after
+three fix rounds): QA fixtures live in namespaced constants
+(`SpectralGraphTheory.QA.*`, `…MultiwayQA.*`) that do NOT resolve by
+bare name from the parent namespace — the failure mode is an
+auto-bound implicit silently genericizing the fixture (the elaborator
+reports a `WAdj`-typed "constant" and only the concrete-lemma
+application exposes it); the `t = −1` exponent matrix
+`-((-1 : ℝ) • L)` reduces to `L` by `simp` (the fence's key step); a
+`show` without its `= value` target elaborates the displayed term as a
+bare `Sort`-synthesis problem (the `Mul (Sort ?u)` symptom).
+
+**Verification:** full ladder green — `lake build` + completeness
+138/138 fresh, 0 stale, 0 missing, exit 0; 7-declaration axiom audit
+(`wip/bofence_axcheck.lean`: the strengthened identity, its two
+migrated proof-level consumers, the four new/reworked QA declarations)
+— every one exactly `propext, Classical.choice, Quot.sound`;
+`lint_axioms` (4 unchanged), `check_refutation_independence` (24-tag),
+`check_public_reachability` (64 modules), `check_citations`,
+`check_markdown_links`, `check_qa_name_uniqueness`,
+`check_backlog_freshness`; scoreboard 1380 / 6844 / 4 / 0 with the
+verification row; map freshness exit 0 after the 1380/6844 sync; the
+index row updated (`index/map/spectral_graph.md`). No census re-run
+owed — no NEW shelf declaration (one removed, one strengthened; a
+removal cannot create never-touched declarations, the inert set's zero
+stands trivially).
+
+**Residue update:** the asymmetric-`hA` fence for the dissipation
+form remains priced-not-owed exactly as the Part-2 record states; the
+`ht` residue is now closed (this record's finding 2).

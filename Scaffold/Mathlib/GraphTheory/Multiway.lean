@@ -84,60 +84,11 @@ theorem partIndicator_of_not_mem {S : Finset V} {u : V} (h : u ∉ S) :
   unfold partIndicator
   rw [if_neg h]
 
-/-- **The indicator's Dirichlet energy is the boundary.** The quadratic
-form of the combinatorial Laplacian at the plain indicator of `S` is
-exactly `boundary A S`: within-part differences vanish, and each
-crossing pair contributes its weight once from each side, matching the
-boundary's double count. This is the multiway family's per-part energy
-identity — the `k = 2` family's `cutTestVector` energy identity at the
-indicator level, for arbitrary part counts. -/
-theorem quadForm_laplacian_partIndicator (A : WAdj (V := V)) (hA : A.IsSymm)
-    (S : Finset V) :
-    quadForm (laplacian A) (partIndicator S) = boundary A S := by
-  rw [laplacian_quadForm A hA]
-  have hrowS : ∀ u ∈ S, ∑ v, A u v * (partIndicator S u - partIndicator S v) ^ 2
-      = ∑ v in Sᶜ, A u v := by
-    intro u hu
-    rw [← Finset.sum_add_sum_compl S
-        (fun v => A u v * (partIndicator S u - partIndicator S v) ^ 2)]
-    have h1 : ∑ v in S, A u v * (partIndicator S u - partIndicator S v) ^ 2 = 0 := by
-      refine Finset.sum_eq_zero fun v hv => ?_
-      rw [partIndicator_of_mem hu, partIndicator_of_mem hv, sub_self, zero_pow two_ne_zero,
-        mul_zero]
-    rw [h1, zero_add]
-    refine Finset.sum_congr rfl fun v hv => ?_
-    rw [partIndicator_of_mem hu, partIndicator_of_not_mem (Finset.mem_compl.1 hv)]
-    simp
-  have hrowSc : ∀ u ∈ Sᶜ, ∑ v, A u v * (partIndicator S u - partIndicator S v) ^ 2
-      = ∑ v in S, A u v := by
-    intro u hu
-    rw [← Finset.sum_add_sum_compl S
-        (fun v => A u v * (partIndicator S u - partIndicator S v) ^ 2)]
-    have h1 : ∑ v in Sᶜ, A u v * (partIndicator S u - partIndicator S v) ^ 2 = 0 := by
-      refine Finset.sum_eq_zero fun v hv => ?_
-      rw [partIndicator_of_not_mem (Finset.mem_compl.1 hu),
-        partIndicator_of_not_mem (Finset.mem_compl.1 hv), sub_self,
-        zero_pow two_ne_zero, mul_zero]
-    rw [h1, add_zero]
-    refine Finset.sum_congr rfl fun v hv => ?_
-    rw [partIndicator_of_not_mem (Finset.mem_compl.1 hu), partIndicator_of_mem hv]
-    simp
-  have hbd1 : ∑ u ∈ S, ∑ v in Sᶜ, A u v = boundary A S := rfl
-  have hbd2 : ∑ u ∈ Sᶜ, ∑ v in S, A u v = boundary A Sᶜ := by
-    simp only [boundary, compl_compl]
-  rw [← Finset.sum_add_sum_compl S
-      (fun u => ∑ v, A u v * (partIndicator S u - partIndicator S v) ^ 2),
-    Finset.sum_congr rfl (fun u hu => hrowS u hu),
-    Finset.sum_congr rfl (fun u hu => hrowSc u hu), hbd1, hbd2,
-    boundary_compl A hA S]
-  ring
-
-/-!
-## The boundary outflow lemma (Step 1)
+/-! ## The boundary outflow lemma (Step 1)
 
 `proposals/boundary-outflow-lemma.md` (2026-09-07, the Active table's
 Medium row): the vector-level statement underneath the part-indicator
-energy identity above — `L · 1_S` is the *outflow vector*: on a region
+energy identity below — `L · 1_S` is the *outflow vector*: on a region
 member, the crossing outflow `∑_{j ∈ Sᶜ} A i j`; off the region, the
 negative inflow `-(∑_{j ∈ S} A i j)`. Hypothesis-free (any weights,
 asymmetric included): the whole content is
@@ -207,14 +158,23 @@ theorem sum_laplacian_mulVec_partIndicator (A : WAdj (V := V))
   refine Finset.sum_congr rfl fun i hi => ?_
   exact laplacian_mulVec_partIndicator_of_mem A hi
 
-/-- **The indicator's Dirichlet energy is the boundary — WITHOUT
-symmetry.** The delivered `quadForm_laplacian_partIndicator` carries
-`hA : A.IsSymm` because its route runs through the squared-difference
-quadratic form and `boundary_compl`; the vector-level outflow route
-never flips the region, so the same identity holds for ANY weights
-(asymmetric included). The hypothesis is thereby removable. -/
-theorem quadForm_laplacian_partIndicator_unsymm (A : WAdj (V := V))
-    (S : Finset V) :
+/-- **The indicator's Dirichlet energy is the boundary.** The quadratic
+form of the combinatorial Laplacian at the plain indicator of `S` is
+exactly `boundary A S`: within-part differences vanish, and each
+crossing pair contributes its weight once from each side, matching the
+boundary's double count. This is the multiway family's per-part energy
+identity — the `k = 2` family's `cutTestVector` energy identity at the
+indicator level, for arbitrary part counts.
+
+Hypothesis-free: ANY weights, asymmetric included. The 2026-09-07
+corner audit collapsed the delivery's provisional `hA`-gated form
+(whose route ran through `laplacian_quadForm` and `boundary_compl`,
+both symmetry consumers) into this outflow-route statement: summing
+the membership case of `laplacian_mulVec_partIndicator_of_mem` over
+the region reaches `boundary A S` definitionally, never flipping the
+region — so the symmetry hypothesis was truth-removable and is gone
+(the delivered `…_unsymm` twin, its own removal, is retired with it). -/
+theorem quadForm_laplacian_partIndicator (A : WAdj (V := V)) (S : Finset V) :
     quadForm (laplacian A) (partIndicator S) = boundary A S := by
   have hsplit :
       ∑ i, partIndicator S i * (laplacian A).mulVec (partIndicator S) i
@@ -467,7 +427,7 @@ theorem laplacian_quadForm_multiwayCombination_le (A : WAdj (V := V))
         = 2 * boundary A (S i) := by
     intro i
     have h := laplacian_quadForm A hA (partIndicator (S i))
-    rw [quadForm_laplacian_partIndicator A hA (S i)] at h
+    rw [quadForm_laplacian_partIndicator A (S i)] at h
     linarith
   have h1 : ∀ u v : V,
       A u v * (2 * ∑ i, (partIndicator (S i) u - partIndicator (S i) v) ^ 2 * c i ^ 2)

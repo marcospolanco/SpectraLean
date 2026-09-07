@@ -4605,6 +4605,46 @@ theorem epn_sum3_bound :
     (fun k _ => by fin_cases k <;> simp [epnSeq3]) epnW3
   rwa [epn_sum3_rhs] at h
 
+/-! ### The `v = 0` corner of the rank-one norm equality
+
+The 2026-09-07 corner audit's finding: the delivery's `v ≠ 0` clause
+on `abs_w_mul_dotProduct_self_le_l2OpNorm` and
+`l2OpNorm_smul_rankOne` was an artifact of the eigenvalue-witness
+proof route (which needs a nonzero eigenvector), not of the statement
+— at `v = 0` both sides are provably zero, so the clause was
+truth-removable and was REMOVED. These pins verify the removal: the
+now-unconditional theorems apply at the degenerate vector and return
+the correct value there, with raw companions. -/
+
+/-- Raw: the scaled zero block is the zero matrix, entrywise. -/
+theorem epnZero_block (w : ℝ) : w • rankOne (0 : Fin 2 → ℝ) = 0 := by
+  ext i j; simp [rankOne]
+
+/-- **The clause-removal pin**: the rank-one norm equality applies at
+the degenerate vector and returns the correct value there (the
+statement is TRUE at the corner — both sides zero — which is exactly
+why the clause was removable). Route A: through the now-unconditional
+theorem. -/
+theorem epnZero_eq_QA (w : ℝ) :
+    ‖w • rankOne (0 : Fin 2 → ℝ)‖ = |w| * ((0 : Fin 2 → ℝ) ⬝ᵥ 0) :=
+  l2OpNorm_smul_rankOne w 0
+
+/-- Route B: the same value raw — the zero matrix's norm beside the
+zero dot product, no norm machinery. Two routes, one value. -/
+theorem epnZero_eq_raw (w : ℝ) :
+    ‖w • rankOne (0 : Fin 2 → ℝ)‖ = |w| * ((0 : Fin 2 → ℝ) ⬝ᵥ 0) := by
+  rw [epnZero_block, norm_zero]
+  simp [Matrix.dotProduct]
+
+/-- **The lower bound at the corner at a value-carrying scale**: at
+`w = 3` the unconditional lower bound reads `3 * 0 = 0 ≤ ‖0‖ = 0`
+through the theorem — the degenerate instance is not vacuous-by-scale
+(the weight is nonzero; `v` is exactly the corner the old hypothesis
+excluded). -/
+theorem epnZero_lower_QA :
+    |(3 : ℝ)| * ((0 : Fin 2 → ℝ) ⬝ᵥ 0) ≤ ‖(3 : ℝ) • rankOne (0 : Fin 2 → ℝ)‖ :=
+  abs_w_mul_dotProduct_self_le_l2OpNorm 3 0
+
 end NormPins
 
 end Scaffold.QA.Derived.EdgePerturbation

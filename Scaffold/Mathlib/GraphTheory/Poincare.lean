@@ -351,7 +351,7 @@ theorem spectral_gap_edge_expansion (A : WAdj (V := V))
     field_simp
     ring
   have hmul := poincare_variance_mul_le A hA hnn hcard (partIndicator S)
-  rw [hvar, quadForm_laplacian_partIndicator A hA S] at hmul
+  rw [hvar, quadForm_laplacian_partIndicator A S] at hmul
   linear_combination hmul
 
 

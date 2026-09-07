@@ -3,7 +3,12 @@
 **Status:** COMPLETE (delivered 2026-09-07, run `20260907T130116Z-run-1`,
 session `ses_f840b32f9ffeQquR0Tn6QqpJwb`; Steps 1 and 2 landed together
 as the operating instructions priced; the `i = j` fence shipped in the
-same delivery as required — see the delivery record below). Restated in
+same delivery as required — see the delivery record below). **Amended
+2026-09-07 by the corner audit (run `20260907T200815Z-run-1`): the
+`v ≠ 0` clause on the weighted rank-one pair found truth-removable and
+removed — both public theorems strengthened to unconditional
+statements, the residue sentence corrected (see the corner-audit
+record below).** Restated in
 pure-mathematics form 2026-09-07 from
 an external request relayed by the operator (not tracked in this
 repository — see `.gitignore`); no operational, product, or patent
@@ -340,6 +345,82 @@ is unchanged, the delivery being a same-status enrichment).
 changed, no public statement changed. Honest scope: the equality needs
 `i ≠ j` (fenced, not stated at loops); the subadditive bound is the
 plain triangle inequality with no improvement at non-parallel sequences
-(the three-edge instance's slack is not quantified); the weighted
+(the three-edge instance's slack is not quantified); ~~the weighted
 rank-one equality needs `v ≠ 0` (the zero vector's block is the zero
-matrix and the statement is harmlessly false-but-vacuous there).
+matrix and the statement is harmlessly false-but-vacuous there)~~
+**(corrected 2026-09-07 by the corner audit below: that residue
+sentence was wrong — the statement is TRUE at `v = 0`, both sides
+provably zero, the clause truth-removable and removed.)**
+
+------
+
+## Corner-audit record (2026-09-07, run `20260907T200815Z-run-1`)
+
+The standing "delivered-but-unfenced surfaces" agenda applied to this
+delivery (uncommitted, amendable), its `v ≠ 0` clause having been
+named by the previous run's handoff as the next candidate by recency.
+
+**Finding: the clause was truth-removable, and the delivery's own
+residue sentence about it was a documentation defect.** The delivery
+recorded the weighted rank-one equality's hypothesis as covering a
+corner where "the statement is harmlessly false-but-vacuous" — but at
+`v = 0` both sides evaluate honestly to zero (`rankOne 0 = 0` entrywise
+since `rankOne v i j = v i * v j`; `w • 0 = 0`; `‖0‖ = 0`;
+`0 ⬝ᵥ 0 = ∑ i, 0 * 0 = 0`; `|w| * 0 = 0`), so the equality reads
+`0 = 0` and is TRUE. The statement was never false at the corner — the
+clause was an artifact of the eigenvalue-witness proof route for the
+lower bound (`exists_eigvalOf_eq_of_mulVec_eq_smul` needs a nonzero
+eigenvector), not of the mathematics. No Errata entry owed (no Lean
+statement was ever false; the defect was in the residue prose, exactly
+the quantizer audit's "away from zero" class).
+
+**Closed in-run:**
+
+1. **`abs_w_mul_dotProduct_self_le_l2OpNorm` strengthened in place**
+   — the `v ≠ 0` hypothesis dropped; the proof gains a zero-corner
+   case split (`w • rankOne 0 = 0` and `0 ⬝ᵥ 0 = 0` close the
+   degenerate case to `0 ≤ 0`), the nonzero case unchanged.
+2. **`l2OpNorm_smul_rankOne` strengthened in place** — the packaging
+   equality is now unconditional.
+3. **`l2OpNorm_laplacian_edgeAdj`'s proof simplified** — its `hvne`
+   helper (nonzeroness of the edge-difference vector) existed only to
+   feed the removed clause; deleted. The public statement is unchanged
+   (its own `i ≠ j` hypothesis remains load-bearing and fenced —
+   `epn_loop_fence`).
+4. **The corner pinned in QA** (`EdgePerturbation_QA.lean`'s `NormPins`
+   zero-corner section, +4 theorems): `epnZero_eq_QA` instantiates the
+   now-unconditional equality AT the degenerate vector (route A),
+   `epnZero_eq_raw` computes the same value raw (route B — the zero
+   matrix's norm beside the zero dot product, no norm machinery), and
+   `epnZero_lower_QA` consumes the unconditional lower bound at the
+   value-carrying scale `w = 3` — the degenerate instance is not
+   vacuous-by-scale; `epnZero_block` is the raw entrywise companion.
+
+**Proof-trap note for the record:** the spike
+(`wip/r1zero_spike.lean`) was green on the first round, but the first
+landing attempt inlined `rw […, Matrix.dotProduct, mul_zero]` — the
+def-eq unfold leaves the corner sum `∑ i, 0 i * 0 i` unsimplified, so
+`mul_zero` fires too early and fails. The robust spelling is the
+spike's standalone `have hdot : (0 : V → ℝ) ⬝ᵥ 0 = 0 := by simp
+[Matrix.dotProduct]` closed first.
+
+**Verification:** full ladder green — `lake build` + completeness
+138/138 fresh, 0 stale, 0 missing (one documented artifact-removal
+remediation after `touch`-based elaboration experiments left the
+EdgePerturbation olean mtime-stale); 7-declaration axiom audit
+(`wip/r1zero_axcheck.lean`: the two strengthened theorems, the
+simplified single-edge equality, the four QA pins) — every one exactly
+`propext, Classical.choice, Quot.sound`; `lint_axioms` (4 unchanged),
+`check_refutation_independence` (24-tag), `check_public_reachability`
+(64 modules), `check_citations`, `check_markdown_links`,
+`check_qa_name_uniqueness` (`epnZero_*` collision-free),
+`check_backlog_freshness`; scoreboard 1381 / 6842 / 4 / 0 with the
+verification row; map freshness exit 0 after the 6842 sync. No census
+re-run owed — no new or removed shelf declaration; two signatures
+strengthened, their consumers unchanged in count, the inert set's zero
+stands.
+
+**Residue:** the corner pins sit at the `Fin 2` fixture (the equality
+pins are generic in `w` but at the one degenerate vector — there is
+only one); the removal covers the two named theorems only (the upper
+bound `l2OpNorm_smul_rankOne_le` was already unconditional).

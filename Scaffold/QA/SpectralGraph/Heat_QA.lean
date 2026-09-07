@@ -3166,6 +3166,86 @@ theorem gsc_hnonneg_fence_QA :
         (by linarith : (0:ℝ) < Real.exp 2 - 1)]
   linarith
 
+/-- **The `ht` fence**: on the plain nonnegative `K₂` fixture — `hA`
+and `hnonneg` both GENUINE, so every hypothesis except `0 ≤ t` holds —
+the global order-0 bound's conclusion GENUINELY FAILS at `t = -1`
+(backward time): the mode's displacement factor is `1 − e^{2}` (the
+semigroup runs backward, `e^{-tL} m = e^{2} • m` on the eigenvalue-`2`
+mode, growth), so the LHS is `2(e² − 1)² > 2·4 = 8` while the RHS is
+`(-1)² · (Lm ⬝ᵥ Lm) = (2m ⬝ᵥ 2m) = 8`. The forward-time hypothesis is
+load-bearing, not decorative — and it is inherited transitively by
+`heatKernel_globalContraction_le`, `abs_dotProduct_heatFlow_le`, and
+the Boundary Outflow Part-2 statement itself. -/
+theorem gsc_ht_fence_QA :
+    heatEdgeAdj.IsSymm
+      ∧ (∀ i j, 0 ≤ heatEdgeAdj i j)
+      ∧ ¬ (Matrix.dotProduct
+          ((![1, -1] : Fin 2 → ℝ)
+            - heatKernel heatEdgeAdj (-1) *ᵥ (![1, -1] : Fin 2 → ℝ))
+          ((![1, -1] : Fin 2 → ℝ)
+            - heatKernel heatEdgeAdj (-1) *ᵥ (![1, -1] : Fin 2 → ℝ))
+        ≤ (-1 : ℝ) ^ 2 * Matrix.dotProduct
+            (laplacian heatEdgeAdj *ᵥ (![1, -1] : Fin 2 → ℝ))
+            (laplacian heatEdgeAdj *ᵥ (![1, -1] : Fin 2 → ℝ))) := by
+  have he2 : (3 : ℝ) < Real.exp 2 := by
+    have h := Real.add_one_lt_exp two_ne_zero
+    linarith
+  refine ⟨heatEdgeAdj_isSymm, heatEdgeAdj_nonneg, ?_⟩
+  -- backward time: the exponent matrix IS the Laplacian, and the mode
+  -- is its eigenvalue-2 eigenvector, so the kernel GROWS on the mode
+  have hM : (-(((-1 : ℝ) • laplacian heatEdgeAdj)) *ᵥ (![1, -1] : Fin 2 → ℝ))
+      = (2 : ℝ) • (![1, -1] : Fin 2 → ℝ) := by
+    have hn : (-(((-1 : ℝ) • laplacian heatEdgeAdj)))
+        = laplacian heatEdgeAdj := by simp
+    rw [hn]
+    exact edgeLaplacian_mulVec_mode
+  have hK : heatKernel heatEdgeAdj (-1) *ᵥ (![1, -1] : Fin 2 → ℝ)
+      = Real.exp 2 • (![1, -1] : Fin 2 → ℝ) := by
+    rw [heatKernel]
+    exact exp_mulVec_eq_smul_of_mulVec_eq_smul _ _ _ hM
+  have hdisp : (![1, -1] : Fin 2 → ℝ)
+        - Real.exp 2 • (![1, -1] : Fin 2 → ℝ)
+      = (1 - Real.exp 2) • (![1, -1] : Fin 2 → ℝ) := by
+    funext i
+    fin_cases i <;>
+      simp only [Pi.sub_apply, Pi.smul_apply, smul_eq_mul,
+        Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons] <;>
+      ring
+  have hLHS : Matrix.dotProduct
+      ((![1, -1] : Fin 2 → ℝ)
+        - heatKernel heatEdgeAdj (-1) *ᵥ (![1, -1] : Fin 2 → ℝ))
+      ((![1, -1] : Fin 2 → ℝ)
+        - heatKernel heatEdgeAdj (-1) *ᵥ (![1, -1] : Fin 2 → ℝ))
+      = 2 * (Real.exp 2 - 1) ^ 2 := by
+    have hdd : Matrix.dotProduct
+        ((1 - Real.exp 2) • (![1, -1] : Fin 2 → ℝ))
+        ((1 - Real.exp 2) • (![1, -1] : Fin 2 → ℝ))
+        = (1 - Real.exp 2) ^ 2 * 2 := by
+      simp only [Matrix.dotProduct, Fin.sum_univ_two,
+        Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+        Pi.smul_apply, smul_eq_mul]
+      ring
+    rw [hK, hdisp, hdd]
+    ring
+  have hRHS : (-1 : ℝ) ^ 2 * Matrix.dotProduct
+      (laplacian heatEdgeAdj *ᵥ (![1, -1] : Fin 2 → ℝ))
+      (laplacian heatEdgeAdj *ᵥ (![1, -1] : Fin 2 → ℝ)) = 8 := by
+    have hdd : Matrix.dotProduct ((2 : ℝ) • (![1, -1] : Fin 2 → ℝ))
+        ((2 : ℝ) • (![1, -1] : Fin 2 → ℝ)) = 8 := by
+      simp only [Matrix.dotProduct, Fin.sum_univ_two,
+        Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+        Pi.smul_apply, smul_eq_mul]
+      norm_num
+    rw [edgeLaplacian_mulVec_mode, hdd]
+    norm_num
+  rw [hLHS, hRHS]
+  have hgt : (4 : ℝ) < (Real.exp 2 - 1) ^ 2 := by
+    nlinarith [mul_pos (by linarith : (0 : ℝ) < Real.exp 2 - 3)
+      (by linarith : (0 : ℝ) < Real.exp 2 + 1),
+      mul_pos (by linarith : (0 : ℝ) < Real.exp 2 - 3)
+        (by linarith : (0 : ℝ) < Real.exp 2 - 1)]
+  linarith
+
 end HeatFencesD1
 
 /-! ## The heat pair's structural pins

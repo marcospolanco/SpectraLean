@@ -3,7 +3,12 @@
 **Status:** **COMPLETE** (delivered 2026-09-07, run
 `20260907T181653Z-run-1`, session
 `ses_f82ef3914ffezcZvjOFblSpnJ1` — see the delivery record at the
-end of this document). Originally restated in pure-mathematics form
+end of this document). **The module's public surface is now fully
+audited: the quantizer trio by the corner audit (run
+`20260907T190059Z-run-1`), the two range bridges by the clause audit
+(run `20260907T203339Z-run-1`, both records below) — `hnonneg` fenced
+at both bridge spellings; the sandwich carries no new clause.**
+Originally restated in pure-mathematics form
 2026-09-07 from an external request relayed by the operator (not
 tracked in this repository — see `.gitignore`); no operational,
 product, or patent framing survives into this document, only the
@@ -427,3 +432,91 @@ Spike (`wip/qcfence_spike.lean`) green on the first round. Remaining
 residue: negative-range (`R < 0`) behavior unpinned (outside the
 quantizer's contract — a known positive range); the relative-error
 quantizer still not asked for.
+
+## Range-bridges clause-audit record (2026-09-07, run `20260907T203339Z-run-1`)
+
+The standing "delivered-but-unfenced surfaces" agenda applied to this
+delivery's remaining public surface: the corner audit (the record
+above) covered the quantizer trio; the two range bridges delivered
+beside them were never audited. The numerical layer is now fully
+audited.
+
+**Finding: `hnonneg` is load-bearing at both bridge spellings, and
+every existing fence provably cannot cover them.** The PSD engine's
+fence (`rcF_psd_hnn_fence_QA`) and the regular-Cheeger family's `hnn`
+fences are all 2-vertex; a 2-vertex signed d-regular fixture has
+`L_sym` spectrum exactly `{2w/d, 0}` — `secondEval = 0` — so both
+bridges' dropped statements (`0 ≤ 0` and `0 ≤ 2`) are TRUE at every
+2-vertex witness the existing fence class can supply. The refutation
+needs the **multiplicity-2 phenomenon** (two Laplacian eigenvalues
+crossing the degree to the same side — requiring ≥ 3 vertices), a
+witness shape new to this audit family:
+
+- **The floor fence** (`qcF_floor_hnn_fence_QA`): `A₋ = 2I − (1/3)J`
+  — diag `5/3`, off-diag `−1/3`; symmetric, `deg ≡ 1`, `0 < 1`,
+  `3 ≥ 2` vertices, `hnonneg` failing at the off-diagonal (isolation
+  companion `qcF_floor_hnn_isolation_QA`). `spec(A₋) = {1, 2, 2}`
+  (two A-eigenvalues above the degree), so
+  `spec(L_sym) = {0, −1, −1}` and `secondEval = −1`: the dropped
+  statement reads `0 ≤ −1`.
+- **The cap fence** (`qcF_cap_hnn_fence_QA`): the mirror `A₊ = J − 2I`
+  — diag `−1`, off-diag `1`; same hypothesis profile. `spec(A₊) =
+  {1, −2, −2}` (two below), so `spec(L_sym) = {0, 3, 3}` and
+  `secondEval = 3`: the dropped statement reads `3 ≤ 2`.
+
+The spectra are pinned by the triangle's established idiom
+(`tri_secondEval_QA`'s eigenvalue-cases + trace count + sortedness)
+adapted to a sign-indefinite operator through the **coordinate-sum
+eigen-equation trick**: entrywise the eigen equation reads
+`μ·v j = (1/3)·(∑v) − v j` (floor) or `μ·v j = 3·v j − (∑v)` (cap);
+summing over `j` collapses the constant term, giving `μ·(∑v) = 0`,
+and the two cases each pin `μ` (`∑v = 0` forces the mode value by
+nonvanoneness of the eigenvector — `eigvecOf_inner`'s unit norm;
+`∑v ≠ 0` forces `μ = 0`). All consumed through row-form action
+lemmas (`qcFloorAdj_rowsum`/`qcCapAdj_rowsum` +
+`qcFloorL_mulVec_apply`/`qcCapL_mulVec_apply`) — the matrix is never
+unfolded inside the eigen equation (the named-def vs literal atom
+mismatch that defeats `ring`).
+
+**Classifications, no fence owed:** `hdpos` has no failing fixture
+with `hnonneg` genuine — degree-regular nonnegative forces `d ≥ 0`,
+and `d = 0` forces `A = 0`, where the junk `0⁻¹ = 0` gives
+`L_sym = 1` and both bridge values (`0 ≤ 1 ≤ 2`) hold benignly;
+`hcard` and `hA` are structurally carried by the `secondEval`
+spelling (unstatable without them); the sandwich `quantized_cheeger_le`
+carries no NEW clause — its hypothesis set is exactly the Cheeger
+pair's, already fenced by the regular-Cheeger fence audit
+(`rcF_upper/lower_{hnn,hd,hdpos}_fence_QA`), and `b` is a free
+parameter.
+
+**Proof traps recorded** (spike `wip/qcbridge_spike.lean`, green
+after six fix rounds; the landed section built first-round): the
+Fin-3 index-`2` entry needs FULL `simp` — `cons_val_succ'` is a
+default simp lemma, while a hand `simp only` list with the cons-val
+names leaves `![a, b, c] 2` unreduced (Fin-2 work never meets this);
+`Finset.mul_sum`'s direction in this snapshot is
+`a * ∑ f = ∑ a * f`; the row-form action lemma is load-bearing for
+the eigen pins; the `Fin (Fintype.card (Fin 3))` index type needs
+tri's `hsum3` defeq cast before `Fin.sum_univ_three`; `inv_one` (not
+`one_inv`); Fin monotonicity by `decide` (not `norm_num`).
+
+**Verification:** full ladder green — `lake build` + completeness
+138/138 fresh, 0 stale, 0 missing (one documented artifact-removal
+remediation after `touch`-based diagnostics, plus one explicit-target
+rebuild — the default umbrella target does not cover QA modules);
+8-declaration axiom audit (`wip/qcbridge_axcheck.lean`: both fences,
+both isolations, both cases lemmas, both secondEval pins) — every one
+exactly `propext, Classical.choice, Quot.sound`; `lint_axioms` (4
+unchanged), `check_refutation_independence` (24-tag),
+`check_public_reachability` (64 modules), `check_citations`,
+`check_markdown_links`, `check_qa_name_uniqueness`
+(`qcFloor*`/`qcCap*`/`qcF_*` collision-free), `check_backlog_
+freshness`; scoreboard 1380 / 6866 / 4 / 0 with the verification row;
+map freshness exit 0 after the 6866 sync. No census re-run owed —
+QA-only, no new shelf declaration, the inert set's zero stands.
+
+**Residue update:** the quantizer's own residue (negative-range
+behavior, the relative-error quantizer) is unchanged; the bridge
+residue is now closed at the `hnonneg` clause (this record), with the
+general mixed-sign regular-graph eigenvalue route (char-poly, beyond
+the `I`/`J` combinations) priced not owed.

@@ -1,11 +1,11 @@
-# Scaffold
+# SpectraLean
 
-Scaffold is a growing, machine-checked formalization of spectral graph theory
-in Lean 4. Every claim is exactly what it says: a proved theorem is proved by
-the kernel, and every remaining assumption is a small, explicit, cited
-placeholder for one specific unproven research result, never hidden behind
-`sorry`. The library's job is to keep proving those placeholders away: the
-explicit axiom count has already fallen from 10 to 4 as the hard crust has
+SpectraLean is a growing, machine-checked formalization of spectral graph
+theory in Lean 4. Every claim is exactly what it says: a proved theorem is
+proved by the kernel, and every remaining assumption is a small, explicit,
+cited placeholder for one specific unproven research result, never hidden
+behind `sorry`. The library's job is to keep proving those placeholders away:
+the explicit axiom count has already fallen from 10 to 4 as the hard crust has
 grown, and the trend is toward zero, not toward accumulation.
 
 The project’s center is **spectral graph theory (SGT)**. Its goal is a broad,
@@ -13,9 +13,16 @@ reusable formal neighborhood around SGT: graph and Laplacian theory,
 spectral and variational methods, matrix/operator tools, probability, and
 bridges that future research can compose.
 
-Scaffold is both a Lean library and a research substrate. It is **pre-release**:
-the default `lake build` currently passes, but consumers should pin a [verified
-revision](docs/5_QA_SCOREBOARD.md) rather than tracking `main`.
+SpectraLean is both a Lean library and a research substrate. It is
+**pre-release**: the default `lake build` currently passes, but consumers
+should pin a [verified revision](docs/5_QA_SCOREBOARD.md) rather than
+tracking `main`.
+
+The Lean sources still live under the `Scaffold/` directory and the
+`Scaffold.*` namespace — that name is retained internally, and separately as
+the name of the autonomous agentic framework (`AGENTS.md`,
+[`docs/arch/commit-steward-protocol.md`](docs/arch/commit-steward-protocol.md))
+that develops this library; it is not the library's own public identity.
 
 ## Status
 
@@ -182,9 +189,9 @@ changes; the same underlying data drives a clickable, hoverable version at
 [`docs/scaffold_map.html`](docs/scaffold_map.html) (open it locally — it's
 plain self-contained HTML/JS, no build step).
 
-<p align="center"><img src="docs/scaffold_map.svg" alt="Hub-and-spoke map of Scaffold's spectral graph theory core and its seven research axes, colored by proof status" width="820"></p>
+<p align="center"><img src="docs/scaffold_map.svg" alt="Hub-and-spoke map of SpectraLean's spectral graph theory core and its seven research axes, colored by proof status" width="820"></p>
 
-## Why Scaffold exists
+## Why SpectraLean exists
 
 Most of what makes spectral graph theory useful, both Cheeger directions, the
 Alon-Boppana bound, the Krylov/Kaniel-Paige program, the heat semigroup, the
@@ -196,7 +203,7 @@ reputation.
 
 A handful of research-frontier results (4 today, down from 10) are not yet
 proved anywhere in Lean, and Mathlib does not expose them either. Rather than
-block on every prerequisite or hide the gap behind `sorry`, Scaffold makes
+block on every prerequisite or hide the gap behind `sorry`, SpectraLean makes
 the boundary explicit and disciplined:
 
 - a not-yet-proved published result may enter through a narrow, cited axiom,
@@ -241,7 +248,7 @@ than one isolated result.
 
 ### The mushy center and hard crust
 
-Scaffold deliberately keeps two kinds of work separate:
+SpectraLean deliberately keeps two kinds of work separate:
 
 - The **mushy center** is the smallest possible set of research-frontier results
   that we need before their full proofs exist in Lean. Each such result must be
@@ -323,7 +330,7 @@ The near-term center is general SGT. Public modules currently cover:
 | Magnetic Laplacian | `GraphTheory.Magnetic` — the shelf's first complex Hermitian object; flux/gauge characterization |
 | Signed graphs | `GraphTheory.Signed` — the signed Laplacian; Harary's balance theorem in kernel form |
 | Alon–Boppana program | `GraphTheory.AlonBoppana` — complete end-to-end via Nilli's variational route; its first theorem consumer is the Ramanujan Expansion Ceiling |
-| Hermitian functional calculus | `GraphTheory.FunctionalCalculus` — the Scaffold–Mathlib bridge; recovers Tikhonov filtering, the heat semigroup, and the magnetic propagator as one calculus |
+| Hermitian functional calculus | `GraphTheory.FunctionalCalculus` — the SpectraLean–Mathlib bridge; recovers Tikhonov filtering, the heat semigroup, and the magnetic propagator as one calculus |
 | Cluster projector | `GraphTheory.ClusterProjector` — the spectral projector onto an arbitrary eigenvalue set; together with `GraphTheory.Band` its QA now carries the **band-projector family's adversarial fence audit** (`proposals/adversarial-fences-band-projector-family.md`, `Band_QA.lean`'s `BandFences` + `ClusterProjector_QA.lean`'s `ClusterFences`, the Step-0 consumption survey's pick — this neighborhood feeds the set-form Davis–Kahan bridge): 29 hypothesis-form negative witnesses closing every unfenced load-bearing clause, headline fences at the negated junk band `B(4,0] = −1` (non-idempotence `(−1)² ≠ −1`, annihilation `−v ≠ 0`, the Hilbert identification `x ≠ −x` through the surjective negation range, and the closest-point bound's `‖2x‖ ≤ ‖x‖` collapse) and at the band agreement's own docstring corner (`Ioc 6 (−1) = ∅` against `−diag(1,1,0) ≠ 0`), with the shared-mode theorem's `hab`/`hcd` recorded non-fenceable by the trivial-fixed-space mechanism (a negated band's fixed vectors are already zero — the dropped-guard statement is provable) |
 | Perturbation | `Analysis.OperatorTheory.Perturbation.{Weyl,DavisKahan,BandDavisKahan,ProjectionGap,Duhamel}` — Weyl's inequality, Davis–Kahan sin Θ, and the band/cluster projector-stability family; the core chain's QA (`Weyl_QA`/`DavisKahan_QA`/`ProjectionGap_QA`) now carries the **Davis–Kahan core family's adversarial fence audit** (`proposals/adversarial-fences-davis-kahan-core-family.md`, the fresh Step-0 consumption survey's pick — these four shelves are the library's four most-consumed unaudited surfaces at 4–7 non-QA consumers each): 20 hypothesis-form negative witnesses, headline fences at the Duhamel bound's inflated-window `hcl` (a new threshold-`1` projector pin, the witness squaring `‖(1−Q)P‖² ≥ 1/10 > (3/400)²`), the negative-`δ`/negative-denominator corners of the sin-Θ bound and `hab`, the zero-matrix tie refuting the rank pin's no-tie clause (`rank 2 ≠ 1` through `spectralProjector_eq_one`), and the two equal-rank identities' signature-free clause surfaces at trivial fixtures — with the Weyl additive pair's `hcard` recorded non-fenceable by a distinct proof-term-in-display mechanism (the conclusion's own `by omega` consumes it) |
 | Concentration | `Probability.Concentration.Scalar.*`, `Probability.Concentration.Matrix.*` |
@@ -429,11 +436,12 @@ should prefer a narrow import over that umbrella.
 ## Intended consumption
 
 Once the scoreboard reports a clean build for the required modules, a Lake
-project can pin Scaffold as follows:
+project can pin SpectraLean as follows (the Lake package name itself stays
+`scaffold`, unaffected by the library's own public name):
 
 ```lean
 require scaffold from git
-  "https://github.com/marcospolanco/scaffold.git" @ "<verified-revision>"
+  "https://github.com/marcospolanco/SpectraLean.git" @ "<verified-revision>"
 ```
 
 Representative narrow imports:
@@ -444,7 +452,7 @@ import Scaffold.Mathlib.Probability.Concentration.Matrix.Bernstein
 import Scaffold.Mathlib.Analysis.OperatorTheory.Perturbation.DavisKahan
 ```
 
-## Working on Scaffold
+## Working on SpectraLean
 
 Before adding a new domain or theorem family:
 
@@ -476,7 +484,7 @@ the safety boundary and invocation.
 - [SGT Backlog](docs/6_SGT_BACKLOG.md) — ranked, center-first work queue.
 - [SGT Radar](docs/7_SGT_RADAR.md) — evidence-scored coverage of the SGT neighborhood.
 - [Mathlib Coverage Map](docs/8_MATHLIB_COVERAGE_MAP.md) — dated survey of the
-  pinned Mathlib itself, distinct from Scaffold's own coverage.
+  pinned Mathlib itself, distinct from SpectraLean's own coverage.
 - [Errata](docs/9_ERRATA.md) — every admitted axiom or theorem statement
   found materially false or inconsistent after landing, and how it was
   repaired; the evidence trail behind the trust model above.

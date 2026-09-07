@@ -6,8 +6,110 @@ holds the append-only narrative.
 ## Active milestone
 
 **None open.** The Active table stays all-Low (decision-gated); the
-census's remaining inert set (35) names the next clusters. See the
+census's remaining inert set (30) names the next clusters. See the
 delivered record below.
+
+------
+
+**The edge-perturbation design's independence + PSD positive pins —
+DELIVERED** (run `20260907T073103Z-run-1`, session
+`ses_f85405c24ffeg5vIC4TGmEuXsP`; terminal entry appended to
+`AGENT_ACTIVITY.md`; the same-run proposal
+`proposals/edgeperturbation-design-pins.md` COMPLETE with delivery
+record).
+
+------
+
+**The edge-perturbation design's independence + PSD positive pins** —
+the census's largest remaining inert cluster (EdgePerturbation (4) per
+`wip/census_20260907_post7.txt`): `indepFun_perturbSummand` and
+`indepFun_degPerturbSummand` (the pairwise `h_indep` clause shapes of
+`matrix_hoeffding` and `hoeffding_inequality` at the design — their
+mutual twins consumed, these never) plus `perturbEdgeLap_posSemidef`
+and `rankOne_posSemidef` (the design's PSD floor), together with the
+adjacent never-consumed single `Scaffold.Derived.EdgePerturbationTail.
+matrix_hoeffding_quadForm` (the 2026-08-30 repair's generic
+passthrough, zero consumers).
+
+**DELIVERED at the full designed scope** — 16 QA declarations (14
+theorems + 2 fixtures) in `EdgePerturbation_QA.lean`'s new
+`StructuralPins` section (QA 6645 → 6661), the 15 hard-crust ones
+exactly the standard three via `wip/eppins_axcheck.lean` and the
+passthrough instance honestly carrying `matrix_hoeffding`.
+**The first genuine consumption of all five targets**: the rank-one
+PSD at a NON-eigenvector input (raw inner product `−1` — the sign flip
+the square kills — energy `1` raw, nonnegativity THROUGH the theorem);
+the edge-block energy `4` raw with nonnegativity through the theorem;
+the negative-weight scope witness (the dropped-`h` statement refuted at
+energy `−4 < 0`, pinning where the PSD clause needs its weight
+hypothesis that the design's squared domination clause does not);
+**the two joint-mass factorizations THROUGH the design's pairwise
+`IndepFun` theorems** (`1/2 · 1/2 = 1/4`, each preimage its coordinate
+cylinder via the pinned degree weights / edge blocks) with raw
+`sum_coord2_mul` companions — two routes, one value — the matrix side
+at entry-fiber level sets measurable through `measurable_pi_apply`
+over the shelf's product σ-algebra (`MeasurableSingletonClass` does
+not fire through the `Matrix` synonym; the fiber membership is itself
+an entry-level read of the random matrix); and **the passthrough
+instance** at the full `K₂` `Fintype.equivFin` family (every clause
+discharged by the design's own theorems, bound collapsed through the
+pinned variance norm `8` to `4 exp(−1/16)` — the generic-route twin of
+`epK2_quadForm_tail_QA`'s value). **Consumption closure verified by
+the tool**: the census re-run (`wip/census_20260907_post8.txt`) shows
+exactly the 5 targeted theorems leaving the inert set (1332 → 1337
+value-consumed, 35 → 30 never-touched, no bonus, no collateral;
+`matrix_hoeffding`'s consumer count 23 → 24 being the instance
+itself). The pins method's seventh application.
+
+**Verification:** spike-first (`wip/eppins_spike.lean` — green across
+four fix rounds; the traps recorded in the delivery record: the
+`PosSemidef.2` energy coming at `star x` with the type-ascription
+defeq bridge as the cure; `rw` rewriting only the first of two
+structurally-identical Bool sums — the per-sum helper; the scoped
+`ℝ≥0∞` notation; `open ... in` preceding the docstring;
+`Finset.sum_univ_bool` absent from the pinned Mathlib — the shelf's
+univ-split idiom); the landed module elaborates with zero
+errors/warnings; explicit build ✔; **full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0**; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new `epp*`
+names collision-free); `check_backlog_freshness` clean; scoreboard
+regenerated (**1369 / 6661 / 4 / 0**) with the verification row; map
+freshness exit 0 after the 6661 sync in both map data tables + SVG
+regeneration (49 stations, no status change — none owed). Records
+updated: the same-run proposal (COMPLETE + delivery record),
+`proposals/README.md` (new Delivered row), README (6661 + the
+highlights bullet), the radar's QA row (6661, held 4.5), the
+scoreboard verification row, both map data tables + regenerated SVG,
+this plan, and the activity log. No backlog note owed (the design's
+pins are not a backlog item). Nothing committed; prior runs'
+uncommitted deliveries preserved.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. Honest scope: the pins are at the `K₂`
+fixture and the fair coin `p ≡ ½` only; the PSD pins at one input
+each; the joint factorizations at one pair of level sets; the
+mutual-independence twins were already consumed and are not re-pinned.
+
+**Next handoff:** the Active table stays all-Low (decision-gated). The
+census's remaining inert set (30): Mixing (3), AlonBoppana (3),
+Expander (3), Matrix.Azuma (3 — the `MatrixMDS` structure fields),
+then the Poincaré pair (small count, high name weight — the family's
+two headline theorems), the Band/Heat/IrreducibleStationary/Normalized
+pairs, and the singles (Electrical's `isEffectiveResistance_unique`,
+Multiway's `covers`, RandomWalk's `randomWalkLaplacian_symmetric`,
+Spectral's `degreeMatrix_diagonal_nonneg`, Core's `l_infty_norm`
+pair, the scalar `*_iid` twins, IIDProduct's
+`indepFun_indicator_coord`). The pins method applies unchanged;
+cluster size and name-weight are the selection keys (the Poincaré
+pair is the natural name-weight pick; Mixing the natural size pick).
+Operator-gated items unchanged (the companion's Steps 3–5 adoption;
+master-bound Step 2; the `perron_frobenius` deprecation; backlog
+items 5/6; log-Sobolev; the reverse TV → χ² consumer; plus the newer
+`weighted-matrix-tree`, `mutual-information`, and `erdos-renyi` Low
+rows).
 
 ------
 

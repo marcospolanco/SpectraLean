@@ -26,12 +26,30 @@ As of September 7, 2026:
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 4 |
 | Functional theorems/lemmas (`Scaffold/Mathlib` + `Scaffold/Derived`) | 1369 — the public, consumer-facing layer `Scaffold.lean` actually imports |
-| QA theorems/lemmas (`Scaffold/QA`) | 6645, with no `sorry` or `admit` under `Scaffold/` — testing infrastructure, not imported by `Scaffold.lean` |
+| QA theorems/lemmas (`Scaffold/QA`) | 6661, with no `sorry` or `admit` under `Scaffold/` — testing infrastructure, not imported by `Scaffold.lean` |
 
 Recent highlights (full per-run history in
 [`docs/AGENT_ACTIVITY.md`](docs/AGENT_ACTIVITY.md); per-result detail in each
 linked proposal):
 
+- **The edge-perturbation design's independence + PSD positive pins** —
+  the compiler-derived consumption census's largest remaining inert
+  cluster, closed: the first genuine consumption of the design's four
+  never-consumed theorems (the pairwise `IndepFun` clause shapes of
+  `matrix_hoeffding` and `hoeffding_inequality` at the design, plus its
+  PSD floor) and of the 2026-08-30 repair's never-consumed generic
+  passthrough `matrix_hoeffding_quadForm` — the joint summand events
+  factorized THROUGH the design's own independence theorems
+  (`1/2 · 1/2 = 1/4` at the `K₂` fair coin, the matrix side at
+  measurable entry-fiber level sets over the shelf's product
+  σ-algebra), with raw `sum_coord2_mul` companions as two-route joins,
+  the PSD energy pins at value-carrying inputs (the rank-one pin at a
+  non-eigenvector whose inner product is negative — the sign flip the
+  square kills), the negative-weight scope witness, and the
+  passthrough's numeric twin of the existing `K₂` quadratic-form tail
+  instance ([proposal](proposals/edgeperturbation-design-pins.md);
+  census re-run: exactly 5 theorems leaving the inert set, no
+  collateral).
 - **The global (window-free) semigroup contraction + the regional
   dissipation bound** — the operator-requested cut↔heat bridge complete
   end-to-end: on nonnegative-weight networks the eigenvalue window of

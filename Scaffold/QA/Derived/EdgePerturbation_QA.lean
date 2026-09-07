@@ -110,6 +110,30 @@
     conditional tail instances. The hard-crust lemmas are standard
     three axioms only; the two instances honestly carry their
     respective axioms.
+  - the design's structural pins (the StructuralPins section,
+    2026-09-07): the first genuine consumption of the design's four
+    never-consumed theorems (the consumption census's
+    `wip/census_20260907_post7.txt` inert set) plus the repair's
+    never-consumed generic passthrough. The PSD layer: the rank-one
+    energy pinned at a NON-eigenvector input (`![1,2]`, whose inner
+    product with the edge vector is `−1` — the sign flip the square
+    kills, so a negative-definite `rankOne` breaks the pin), the edge
+    block's energy `4` raw with nonnegativity THROUGH the theorem, and
+    the negative-weight scope witness (the `h : 0 ≤ A e.1 e.2` clause
+    refuted in dropped form at energy `−4`). The independence layer:
+    the joint summand events factorized THROUGH the design's pairwise
+    `IndepFun` theorems (`1/2 · 1/2`), each preimage reduced to its
+    coordinate cylinder, with raw companions computing the SAME events
+    by direct `sum_coord2_mul` arithmetic (two routes, one value
+    `1/4`) — the matrix side at entry-fiber level sets (measurable
+    through `measurable_pi_apply` at the shelf's product σ-algebra;
+    `MeasurableSingletonClass` does not fire through the `Matrix`
+    synonym, so the entry route is the honest one). The generic
+    passthrough `matrix_hoeffding_quadForm` instantiated at the full
+    `K₂` family — the twin of `epK2_quadForm_tail_QA`'s value
+    (`4 exp(−1/16)`) on the generic route. All hard crust (standard
+    three axioms) except the passthrough instance, which honestly
+    carries `matrix_hoeffding`.
 -/
 
 import Scaffold.Derived.EdgePerturbationTail
@@ -3931,5 +3955,478 @@ theorem epStar4_encoding_drift'_QA :
     ring
   rw [hRHS] at h
   simpa using h
+
+/-! ## The design's structural pins (2026-09-07)
+
+The first genuine consumption of the design's four never-consumed
+theorems (the consumption census's exact inert set,
+`wip/census_20260907_post7.txt`): the pairwise `h_indep` clause shapes
+`indepFun_perturbSummand` / `indepFun_degPerturbSummand` (their mutual
+twins are consumed, these never were) and the PSD floor
+`perturbEdgeLap_posSemidef` / `rankOne_posSemidef` — plus the repair's
+never-consumed generic passthrough `matrix_hoeffding_quadForm`. The
+prior QA evaluated the design's arithmetic beside these theorems
+(`epK2_degree_event_measure` factors through the raw coordinate
+independence; the PSD clause QA through `perturbSummand_sq_le`); here
+each is applied, with the value on the other side of the application. -/
+
+section StructuralPins
+
+open scoped ENNReal
+
+/-- The `K₂` edge at weight `−1`: the scope-witness fixture for the PSD
+clause's `h : 0 ≤ A e.1 e.2` hypothesis (both orientations negative,
+zero elsewhere — symmetric, genuinely negative on the edge). -/
+def epNegEdge : Matrix (Fin 2) (Fin 2) ℝ :=
+  Matrix.of fun i j => if (i, j) = (0, 1) ∨ (i, j) = (1, 0) then (-1 : ℝ) else 0
+
+/-- **The rank-one PSD pin, at a non-eigenvector input**: at
+`x = ![1, 2]` (NOT a multiple of the edge vector), the raw inner
+product is `x ⬝ᵥ epVec = 2 − 2 = 0`-breaking `−1` — the sign flip —
+while the energy is `1 = (−1)²` raw at entry level AND nonnegative
+THROUGH `rankOne_posSemidef`. A sign error in `rankOne` (a
+negative-definite reading) breaks the third conjunct exactly where the
+first two pin the flip. -/
+theorem epp_rankOne_psd_pin_QA :
+    (![1, 2] : Fin 2 → ℝ) ⬝ᵥ epVec = -1
+      ∧ quadForm (rankOne epVec) ![1, 2] = 1
+      ∧ 0 ≤ quadForm (rankOne epVec) ![1, 2] := by
+  refine ⟨?_, ?_, (rankOne_posSemidef epVec).2 ![1, 2]⟩
+  · simp [Matrix.dotProduct, epVec]
+    norm_num
+  · rw [quadForm]
+    simp only [Matrix.mulVec, rankOne_apply, Matrix.dotProduct, epVec,
+      Fin.sum_univ_two, Matrix.of_apply]
+    norm_num
+
+/-- **The edge-block PSD pin at the `K₂` edge `(0,1)`** (weight `1`): the
+energy `v ⬝ᵥ (L_e *ᵥ v) = 4` computed raw (through the pinned edge block
+`perturbEdgeLap epK2 (0,1) = rankOne epVec` and the rank-one action), and
+`0 ≤ energy` THROUGH `perturbEdgeLap_posSemidef` — a wrong sign
+convention or block shape in `perturbEdgeLap` fails the second conjunct
+at this exact point. -/
+theorem epp_edgeLap_psd_pin_QA :
+    epVec ⬝ᵥ (perturbEdgeLap epK2 (0, 1) *ᵥ epVec) = 4
+      ∧ 0 ≤ epVec ⬝ᵥ (perturbEdgeLap epK2 (0, 1) *ᵥ epVec) := by
+  refine ⟨?_,
+    (perturbEdgeLap_posSemidef epK2 (0, 1) (by simp [epK2])).2 epVec⟩
+  have hR : perturbEdgeLap epK2 (0, 1) = rankOne epVec :=
+    perturbEdgeLap_epK2_facts.2.2.1
+  have hvv : epVec ⬝ᵥ epVec = 2 := by
+    simp [Matrix.dotProduct, epVec]
+    norm_num
+  rw [hR, rankOne_mulVec, Matrix.dotProduct_smul, hvv]
+  norm_num
+
+/-- **The negative-weight scope witness**: at the negative edge the
+dropped-hypothesis statement is REFUTED — the block is
+`−1 • rankOne epVec`, whose energy at `epVec` is `−4 < 0` — so the
+`h : 0 ≤ A e.1 e.2` clause of `perturbEdgeLap_posSemidef` is
+load-bearing, not decorative (the design's semidefinite bound clause
+itself is sign-free because it squares; the PSD clause is not). -/
+theorem epp_edgeLap_negWeight_notPSD_QA :
+    ¬ (perturbEdgeLap epNegEdge (0, 1)).PosSemidef := by
+  intro hpsd
+  have hv := hpsd.2 epVec
+  have hvv : epVec ⬝ᵥ epVec = 2 := by
+    simp [Matrix.dotProduct, epVec]
+    norm_num
+  have hv01 : (Pi.single 0 1 - Pi.single 1 1 : Fin 2 → ℝ) = epVec := by
+    funext i
+    fin_cases i <;> simp [epVec]
+  have hw : epNegEdge 0 1 = -1 := by simp [epNegEdge]
+  have hR : perturbEdgeLap epNegEdge (0, 1) = (-1 : ℝ) • rankOne epVec := by
+    simp only [perturbEdgeLap]
+    rw [hw, hv01]
+  rw [hR, Matrix.smul_mulVec_assoc, rankOne_mulVec, hvv, smul_smul,
+    Matrix.dotProduct_smul] at hv
+  have hv' : 0 ≤ ((-1 : ℝ) * 2) * (epVec ⬝ᵥ epVec) := hv
+  rw [hvv] at hv'
+  have hval : ((-1 : ℝ) * 2) * 2 = -4 := by ring
+  rw [hval] at hv'
+  linarith
+
+/-! ### The design's pairwise independence, consumed
+
+`IndepFun`'s defining factorization applied at level sets whose
+preimages reduce to coordinate cylinders, each mass evaluated by
+`epK2_cyl_mass` — the same numeric content as `epK2_degree_event_measure`
+but THROUGH the design's own theorems (which route through the design's
+summands, not the raw coordinates). -/
+
+theorem epp_degSummand_preimage_true :
+    (fun ω : (Fin 2 × Fin 2) → Bool =>
+        degPerturbSummand epK2 epHalf 0 (0, 1) ω) ⁻¹' {1/2}
+      = (fun ω : (Fin 2 × Fin 2) → Bool => ω (0, 1)) ⁻¹' {true} := by
+  ext ω
+  simp only [Set.mem_preimage, Set.mem_singleton_iff, degPerturbSummand,
+    epK2_degWeight_facts.2.1]
+  cases h : ω (0, 1) <;> simp [h, epHalf] <;> norm_num
+
+theorem epp_degSummand_preimage_true' :
+    (fun ω : (Fin 2 × Fin 2) → Bool =>
+        degPerturbSummand epK2 epHalf 0 (1, 0) ω) ⁻¹' {1/2}
+      = (fun ω : (Fin 2 × Fin 2) → Bool => ω (1, 0)) ⁻¹' {true} := by
+  ext ω
+  simp only [Set.mem_preimage, Set.mem_singleton_iff, degPerturbSummand,
+    epK2_degWeight_facts.2.2.1]
+  cases h : ω (1, 0) <;> simp [h, epHalf] <;> norm_num
+
+/-- **The joint degree-summand event, THEOREM route**: the measure of
+`{X_{01} = 1/2} ∩ {X_{10} = 1/2}` factorized THROUGH
+`indepFun_degPerturbSummand` as `1/2 · 1/2`, each preimage its
+coordinate cylinder (the incident weight `1` pinned by
+`epK2_degWeight_facts`, the centering `− ½` by `epHalf`). -/
+theorem epp_degPerturb_indep_pin_QA :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+        ((fun ω : (Fin 2 × Fin 2) → Bool =>
+            degPerturbSummand epK2 epHalf 0 (0, 1) ω) ⁻¹' {1/2}
+          ∩ (fun ω : (Fin 2 × Fin 2) → Bool =>
+            degPerturbSummand epK2 epHalf 0 (1, 0) ω) ⁻¹' {1/2})
+      = ENNReal.ofReal ((1 : ℝ) / 4) := by
+  have hnee : ((0, 1) : Fin 2 × Fin 2) ≠ (1, 0) := by decide
+  have hindep := indepFun_degPerturbSummand epK2 epHalf epHalf_nonneg
+    epHalf_le_one 0 hnee
+  rw [indepFun_iff_measure_inter_preimage_eq_mul] at hindep
+  have hfac := hindep {1/2} {1/2}
+    (measurableSet_singleton _) (measurableSet_singleton _)
+  rw [hfac, epp_degSummand_preimage_true, epp_degSummand_preimage_true',
+    epK2_cyl_mass, epK2_cyl_mass,
+    ← ENNReal.ofReal_mul (by norm_num)]
+  norm_num
+
+open scoped Classical in
+/-- **The joint degree-summand event, RAW route** (the two-route join's
+second leg): the SAME event's measure computed by direct PMF arithmetic
+— the cylinder event summed over the outcome space and factorized by
+the product structure's arithmetic core `sum_coord2_mul`, with NO
+`IndepFun` statement consumed. Two routes, one value. -/
+theorem epp_degPerturb_joint_raw_QA :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+        ((fun ω : (Fin 2 × Fin 2) → Bool =>
+            degPerturbSummand epK2 epHalf 0 (0, 1) ω) ⁻¹' {1/2}
+          ∩ (fun ω : (Fin 2 × Fin 2) → Bool =>
+            degPerturbSummand epK2 epHalf 0 (1, 0) ω) ⁻¹' {1/2})
+      = ENNReal.ofReal ((1 : ℝ) / 4) := by
+  have hnee : ((0, 1) : Fin 2 × Fin 2) ≠ (1, 0) := by decide
+  have hE : ((fun ω : (Fin 2 × Fin 2) → Bool =>
+        degPerturbSummand epK2 epHalf 0 (0, 1) ω) ⁻¹' {1/2}
+      ∩ (fun ω : (Fin 2 × Fin 2) → Bool =>
+        degPerturbSummand epK2 epHalf 0 (1, 0) ω) ⁻¹' {1/2})
+      = ((fun ω : (Fin 2 × Fin 2) → Bool => ω (0, 1)) ⁻¹' {true}
+        ∩ (fun ω : (Fin 2 × Fin 2) → Bool => ω (1, 0)) ⁻¹' {true}) := by
+    rw [epp_degSummand_preimage_true, epp_degSummand_preimage_true']
+  have hmeas : MeasurableSet
+      ((fun ω : (Fin 2 × Fin 2) → Bool => ω (0, 1)) ⁻¹' {true}
+        ∩ (fun ω : (Fin 2 × Fin 2) → Bool => ω (1, 0)) ⁻¹' {true}) :=
+    ((measurable_coord (0, 1)) (Set.toFinite ({true} : Set Bool)).measurableSet).inter
+      ((measurable_coord (1, 0)) (Set.toFinite ({true} : Set Bool)).measurableSet)
+  rw [hE]
+  have hstep1 : (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+      ((fun ω : (Fin 2 × Fin 2) → Bool => ω (0, 1)) ⁻¹' {true}
+        ∩ (fun ω : (Fin 2 × Fin 2) → Bool => ω (1, 0)) ⁻¹' {true})
+      = ∑ ω : (Fin 2 × Fin 2) → Bool,
+          (if ω (0, 1) = true ∧ ω (1, 0) = true
+            then bernPMF epHalf epHalf_nonneg epHalf_le_one ω else 0) := by
+    rw [PMF.toMeasure_apply (bernPMF epHalf epHalf_nonneg epHalf_le_one)
+      _ hmeas, tsum_fintype]
+    simp only [Set.indicator_apply, Set.mem_inter_iff, Set.mem_preimage,
+      Set.mem_singleton_iff]
+  have hstep2 : ∑ ω : (Fin 2 × Fin 2) → Bool,
+      (if ω (0, 1) = true ∧ ω (1, 0) = true
+        then bernPMF epHalf epHalf_nonneg epHalf_le_one ω else 0)
+      = ∑ ω : (Fin 2 × Fin 2) → Bool,
+          ((if ω (0, 1) = true then (1 : ℝ≥0∞) else 0)
+            * (if ω (1, 0) = true then (1 : ℝ≥0∞) else 0))
+          * jointMass epHalf ω := by
+    refine Finset.sum_congr rfl fun ω _ => ?_
+    rw [bernPMF_apply]
+    cases h1 : ω (0, 1) <;> cases h2 : ω (1, 0) <;> simp [h1, h2]
+  have hstep3 : ∑ ω : (Fin 2 × Fin 2) → Bool,
+      ((if ω (0, 1) = true then (1 : ℝ≥0∞) else 0)
+        * (if ω (1, 0) = true then (1 : ℝ≥0∞) else 0))
+      * jointMass epHalf ω
+      = (∑ b : Bool, (if b = true then (1 : ℝ≥0∞) else 0) * bern epHalf (0, 1) b)
+        * (∑ b : Bool, (if b = true then (1 : ℝ≥0∞) else 0) * bern epHalf (1, 0) b) :=
+    sum_coord2_mul epHalf epHalf_nonneg epHalf_le_one hnee
+      (fun b => if b = true then (1 : ℝ≥0∞) else 0)
+      (fun b => if b = true then (1 : ℝ≥0∞) else 0)
+  have hbernsum : ∀ (e : Fin 2 × Fin 2),
+      (∑ b : Bool, (if b = true then (1 : ℝ≥0∞) else 0) * bern epHalf e b)
+        = ENNReal.ofReal (1 / 2) := by
+    intro e
+    rw [show (Finset.univ : Finset Bool) = {false, true} from by
+        ext b
+        cases b <;> simp,
+      Finset.sum_insert (by simp), Finset.sum_singleton]
+    simp only [Bool.false_eq_true, if_false, if_true, zero_mul, zero_add, one_mul]
+    rfl
+  have hstep4 : (∑ b : Bool, (if b = true then (1 : ℝ≥0∞) else 0) * bern epHalf (0, 1) b)
+        * (∑ b : Bool, (if b = true then (1 : ℝ≥0∞) else 0) * bern epHalf (1, 0) b)
+      = ENNReal.ofReal ((1 : ℝ) / 4) := by
+    rw [hbernsum (0, 1), hbernsum (1, 0),
+      ← ENNReal.ofReal_mul (by norm_num)]
+    norm_num
+  rw [hstep1, hstep2, hstep3, hstep4]
+
+/-! ### The matrix codomain
+
+The matrix summands take the two values `±½ • rankOne epVec`; the level
+sets are the `(0,1)`-entry fibers (the rank-one block's `(0,1)` entry is
+`−1`, the same sign flip the PSD pin exploits). Entry evaluation is
+measurable at the shelf's product σ-algebra through the two
+`measurable_pi_apply`s — `MeasurableSingletonClass` does not fire
+through the `Matrix` synonym, so the entry-fiber route is the honest
+measurable level set. -/
+
+theorem epp_entry_measurable (i j : Fin 2) :
+    Measurable fun M : Matrix (Fin 2) (Fin 2) ℝ => M i j :=
+  (measurable_pi_apply j).comp (measurable_pi_apply i)
+
+/-- The `(0,1)`-entry fiber at level `c`: a measurable level set for the
+matrix summands. -/
+def eppEntryFiber (c : ℝ) : Set (Matrix (Fin 2) (Fin 2) ℝ) :=
+  (fun M : Matrix (Fin 2) (Fin 2) ℝ => M 0 1) ⁻¹' {c}
+
+theorem eppEntryFiber_measurable (c : ℝ) : MeasurableSet (eppEntryFiber c) :=
+  epp_entry_measurable 0 1 (measurableSet_singleton _)
+
+theorem epp_matSummand_value01 (ω : (Fin 2 × Fin 2) → Bool) :
+    perturbSummand epK2 epHalf (0, 1) ω
+      = ((if ω (0, 1) then (1 : ℝ) else 0) - 1 / 2) • rankOne epVec := by
+  simp only [perturbSummand, perturbEdgeLap_epK2_facts.2.2.1]
+  rfl
+
+theorem epp_matSummand_value10 (ω : (Fin 2 × Fin 2) → Bool) :
+    perturbSummand epK2 epHalf (1, 0) ω
+      = ((if ω (1, 0) then (1 : ℝ) else 0) - 1 / 2) • rankOne epVec := by
+  simp only [perturbSummand, perturbEdgeLap_epK2_facts.2.2.2]
+  rfl
+
+theorem epp_matSummand_preimage :
+    (fun ω : (Fin 2 × Fin 2) → Bool => perturbSummand epK2 epHalf (0, 1) ω) ⁻¹'
+        (eppEntryFiber (-1 / 2))
+      = (fun ω : (Fin 2 × Fin 2) → Bool => ω (0, 1)) ⁻¹' {true} := by
+  ext ω
+  simp only [Set.mem_preimage, Set.mem_singleton_iff, eppEntryFiber,
+    epp_matSummand_value01, Matrix.smul_apply, smul_eq_mul, rankOne_apply,
+    epVec]
+  cases h : ω (0, 1) <;> simp [h] <;> norm_num
+
+theorem epp_matSummand_preimage' :
+    (fun ω : (Fin 2 × Fin 2) → Bool => perturbSummand epK2 epHalf (1, 0) ω) ⁻¹'
+        (eppEntryFiber (1 / 2))
+      = (fun ω : (Fin 2 × Fin 2) → Bool => ω (1, 0)) ⁻¹' {false} := by
+  ext ω
+  simp only [Set.mem_preimage, Set.mem_singleton_iff, eppEntryFiber,
+    epp_matSummand_value10, Matrix.smul_apply, smul_eq_mul, rankOne_apply,
+    epVec]
+  cases h : ω (1, 0) <;> simp [h]
+
+/-- **The matrix-codomain joint event, THEOREM route**: the measure of
+`{X_{01} ∈ fiber(−½)} ∩ {X_{10} ∈ fiber(½)}` factorized THROUGH
+`indepFun_perturbSummand` as `1/2 · 1/2` — the `h_indep` clause shape of
+`matrix_hoeffding` at the design, consumed at the matrix codomain for
+the first time (the prior QA factorized only scalar events). The
+opposite-sign fibers make both preimages nontrivial (`X_{01} = +½ • R`
+is the true-branch; `X_{10} = −½ • R` the false-branch). -/
+theorem epp_perturbSummand_indep_pin_QA :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+        ((fun ω : (Fin 2 × Fin 2) → Bool =>
+            perturbSummand epK2 epHalf (0, 1) ω) ⁻¹' (eppEntryFiber (-1 / 2))
+          ∩ (fun ω : (Fin 2 × Fin 2) → Bool =>
+            perturbSummand epK2 epHalf (1, 0) ω) ⁻¹' (eppEntryFiber (1 / 2)))
+      = ENNReal.ofReal ((1 : ℝ) / 4) := by
+  have hnee : ((0, 1) : Fin 2 × Fin 2) ≠ (1, 0) := by decide
+  have hindep := indepFun_perturbSummand epK2 epHalf epHalf_nonneg
+    epHalf_le_one (0, 1) (1, 0) hnee
+  rw [indepFun_iff_measure_inter_preimage_eq_mul] at hindep
+  have hfac := hindep (eppEntryFiber (-1 / 2)) (eppEntryFiber (1 / 2))
+    (eppEntryFiber_measurable _) (eppEntryFiber_measurable _)
+  rw [hfac, epp_matSummand_preimage, epp_matSummand_preimage',
+    epK2_cyl_mass, epK2_cyl_mass,
+    ← ENNReal.ofReal_mul (by norm_num)]
+  norm_num
+
+open scoped Classical in
+/-- **The matrix-codomain joint event, RAW route** (the two-route join's
+second leg): the SAME event's measure by direct `sum_coord2_mul`
+arithmetic at the (true, false) cylinder, no `IndepFun` statement
+consumed. -/
+theorem epp_perturbSummand_joint_raw_QA :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+        ((fun ω : (Fin 2 × Fin 2) → Bool =>
+            perturbSummand epK2 epHalf (0, 1) ω) ⁻¹' (eppEntryFiber (-1 / 2))
+          ∩ (fun ω : (Fin 2 × Fin 2) → Bool =>
+            perturbSummand epK2 epHalf (1, 0) ω) ⁻¹' (eppEntryFiber (1 / 2)))
+      = ENNReal.ofReal ((1 : ℝ) / 4) := by
+  have hnee : ((0, 1) : Fin 2 × Fin 2) ≠ (1, 0) := by decide
+  have hmeas : MeasurableSet
+      ((fun ω : (Fin 2 × Fin 2) → Bool => ω (0, 1)) ⁻¹' {true}
+        ∩ (fun ω : (Fin 2 × Fin 2) → Bool => ω (1, 0)) ⁻¹' {false}) :=
+    ((measurable_coord (0, 1)) (Set.toFinite ({true} : Set Bool)).measurableSet).inter
+      ((measurable_coord (1, 0)) (Set.toFinite ({false} : Set Bool)).measurableSet)
+  rw [epp_matSummand_preimage, epp_matSummand_preimage']
+  have hstep1 : (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+      ((fun ω : (Fin 2 × Fin 2) → Bool => ω (0, 1)) ⁻¹' {true}
+        ∩ (fun ω : (Fin 2 × Fin 2) → Bool => ω (1, 0)) ⁻¹' {false})
+      = ∑ ω : (Fin 2 × Fin 2) → Bool,
+          (if ω (0, 1) = true ∧ ω (1, 0) = false
+            then bernPMF epHalf epHalf_nonneg epHalf_le_one ω else 0) := by
+    rw [PMF.toMeasure_apply (bernPMF epHalf epHalf_nonneg epHalf_le_one)
+      _ hmeas, tsum_fintype]
+    simp only [Set.indicator_apply, Set.mem_inter_iff, Set.mem_preimage,
+      Set.mem_singleton_iff]
+  have hstep2 : ∑ ω : (Fin 2 × Fin 2) → Bool,
+      (if ω (0, 1) = true ∧ ω (1, 0) = false
+        then bernPMF epHalf epHalf_nonneg epHalf_le_one ω else 0)
+      = ∑ ω : (Fin 2 × Fin 2) → Bool,
+          ((if ω (0, 1) = true then (1 : ℝ≥0∞) else 0)
+            * (if ω (1, 0) = false then (1 : ℝ≥0∞) else 0))
+          * jointMass epHalf ω := by
+    refine Finset.sum_congr rfl fun ω _ => ?_
+    rw [bernPMF_apply]
+    cases h1 : ω (0, 1) <;> cases h2 : ω (1, 0) <;> simp [h1, h2]
+  have hstep3 : ∑ ω : (Fin 2 × Fin 2) → Bool,
+      ((if ω (0, 1) = true then (1 : ℝ≥0∞) else 0)
+        * (if ω (1, 0) = false then (1 : ℝ≥0∞) else 0))
+      * jointMass epHalf ω
+      = (∑ b : Bool, (if b = true then (1 : ℝ≥0∞) else 0) * bern epHalf (0, 1) b)
+        * (∑ b : Bool, (if b = false then (1 : ℝ≥0∞) else 0) * bern epHalf (1, 0) b) :=
+    sum_coord2_mul epHalf epHalf_nonneg epHalf_le_one hnee
+      (fun b => if b = true then (1 : ℝ≥0∞) else 0)
+      (fun b => if b = false then (1 : ℝ≥0∞) else 0)
+  have hbernsum : ∀ (e : Fin 2 × Fin 2) (b₀ : Bool),
+      (∑ b : Bool, (if b = b₀ then (1 : ℝ≥0∞) else 0) * bern epHalf e b)
+        = ENNReal.ofReal (1 / 2) := by
+    intro e b₀
+    rw [show (Finset.univ : Finset Bool) = {false, true} from by
+        ext b
+        cases b <;> simp,
+      Finset.sum_insert (by simp), Finset.sum_singleton]
+    cases b₀
+    · simp only [Bool.false_eq_true, Bool.true_eq_false, if_true, if_false,
+        zero_mul, zero_add, one_mul, bern, epHalf]
+      norm_num
+    · simp only [Bool.false_eq_true, Bool.true_eq_false, if_true, if_false,
+        zero_mul, zero_add, one_mul, bern, epHalf]
+  have hstep4 : (∑ b : Bool, (if b = true then (1 : ℝ≥0∞) else 0) * bern epHalf (0, 1) b)
+        * (∑ b : Bool, (if b = false then (1 : ℝ≥0∞) else 0) * bern epHalf (1, 0) b)
+      = ENNReal.ofReal ((1 : ℝ) / 4) := by
+    rw [hbernsum (0, 1) true, hbernsum (1, 0) false,
+      ← ENNReal.ofReal_mul (by norm_num)]
+    norm_num
+  rw [hstep1, hstep2, hstep3, hstep4]
+
+/-! ### The generic passthrough, consumed
+
+The 2026-08-30 centering repair added `matrix_hoeffding_quadForm` as
+the generic quadratic-form corollary of the repaired axiom; the design's
+own `edgePerturbation_quadForm_tail` re-derives the norm→form domination
+instead of routing through it, so the passthrough had zero consumers.
+Here it is instantiated at the full `K₂` design family (the
+`Fintype.equivFin` transport mirroring `edgePerturbation_norm_tail`'s
+assembly), with every clause discharged by the design's own theorems and
+the bound collapsed through the pinned variance norm — the generic-route
+twin of `epK2_quadForm_tail_QA`'s value. -/
+
+/-- **The generic passthrough instance on `K₂`**: at `p ≡ ½`, `t = 1`,
+`x = e₀`, the full four-summand family, with the bound collapsed
+numerically to `4 exp(−1/16)` — the same value the design-specific
+`epK2_quadForm_tail_QA` derives through
+`edgePerturbation_quadForm_tail`. CONDITIONAL ON THE `matrix_hoeffding`
+AXIOM (instantiated via the passthrough, not re-proved). -/
+theorem epp_quadFormPassthrough_pin_QA :
+    (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure
+        {ω : (Fin 2 × Fin 2) → Bool |
+          (1 : ℝ) * (![1, 0] : Fin 2 → ℝ) ⬝ᵥ ![1, 0]
+            ≤ |quadForm (∑ e : Fin 2 × Fin 2, perturbSummand epK2 epHalf e ω)
+                ![1, 0]|}
+      ≤ ENNReal.ofReal (4 * Real.exp (-((1 : ℝ) ^ 2) / 16)) := by
+  haveI hprob : IsProbabilityMeasure
+      ((bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure) :=
+    PMF.toMeasure.isProbabilityMeasure _
+  have hmeas : ∀ i : Fin (Fintype.card (Fin 2 × Fin 2)),
+      StronglyMeasurable fun ω : (Fin 2 × Fin 2) → Bool =>
+        perturbSummand epK2 epHalf ((Fintype.equivFin (Fin 2 × Fin 2)).symm i) ω :=
+    fun i => stronglyMeasurable_perturbSummand epK2 epHalf _
+  have hindep : iIndepFun (fun _ : Fin (Fintype.card (Fin 2 × Fin 2)) =>
+      (inferInstance : MeasurableSpace (Matrix (Fin 2) (Fin 2) ℝ)))
+      (fun (i : Fin (Fintype.card (Fin 2 × Fin 2))) (ω : (Fin 2 × Fin 2) → Bool) =>
+        perturbSummand epK2 epHalf ((Fintype.equivFin (Fin 2 × Fin 2)).symm i) ω)
+      (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure :=
+    iIndepFun_perturbSummand epK2 epHalf epHalf_nonneg epHalf_le_one
+  have hherm : ∀ (i : Fin (Fintype.card (Fin 2 × Fin 2)))
+      (ω : (Fin 2 × Fin 2) → Bool),
+      (perturbSummand epK2 epHalf ((Fintype.equivFin (Fin 2 × Fin 2)).symm i) ω).IsHermitian :=
+    fun i ω => isHermitian_of_isSymm (perturbSummand_isSymm epK2 epHalf _ ω)
+  have hmean : ∀ (i : Fin (Fintype.card (Fin 2 × Fin 2))),
+      ∫ ω : (Fin 2 × Fin 2) → Bool,
+        perturbSummand epK2 epHalf ((Fintype.equivFin (Fin 2 × Fin 2)).symm i) ω
+        ∂(bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure = 0 :=
+    fun i => integral_perturbSummand_eq_zero epK2 epHalf epHalf_nonneg epHalf_le_one _
+  have hbound : ∀ (i : Fin (Fintype.card (Fin 2 × Fin 2)))
+      (ω : (Fin 2 × Fin 2) → Bool),
+      Matrix.PosSemidef
+        (perturbEdgeLap epK2 ((Fintype.equivFin (Fin 2 × Fin 2)).symm i)
+          * perturbEdgeLap epK2 ((Fintype.equivFin (Fin 2 × Fin 2)).symm i)
+          - perturbSummand epK2 epHalf ((Fintype.equivFin (Fin 2 × Fin 2)).symm i) ω
+            * perturbSummand epK2 epHalf
+                ((Fintype.equivFin (Fin 2 × Fin 2)).symm i) ω) :=
+    fun i ω => perturbSummand_sq_le epK2 epHalf epHalf_nonneg epHalf_le_one _ ω
+  have hmain := matrix_hoeffding_quadForm
+    (μ := (bernPMF epHalf epHalf_nonneg epHalf_le_one).toMeasure)
+    (X := fun (i : Fin (Fintype.card (Fin 2 × Fin 2)))
+        (ω : (Fin 2 × Fin 2) → Bool) =>
+      perturbSummand epK2 epHalf ((Fintype.equivFin (Fin 2 × Fin 2)).symm i) ω)
+    (A := fun i => perturbEdgeLap epK2 ((Fintype.equivFin (Fin 2 × Fin 2)).symm i))
+    hmeas hindep hherm hmean hbound 1 zero_le_one ![1, 0]
+    (by
+      intro h
+      have h0 := congrFun h 0
+      norm_num at h0)
+  have hsum : ∀ ω : (Fin 2 × Fin 2) → Bool,
+      ∑ i : Fin (Fintype.card (Fin 2 × Fin 2)),
+        (fun (i : Fin (Fintype.card (Fin 2 × Fin 2))) (ω : (Fin 2 × Fin 2) → Bool) =>
+          perturbSummand epK2 epHalf ((Fintype.equivFin (Fin 2 × Fin 2)).symm i) ω) i ω
+      = ∑ e : Fin 2 × Fin 2, perturbSummand epK2 epHalf e ω := fun ω =>
+    Equiv.sum_comp (Fintype.equivFin (Fin 2 × Fin 2)).symm
+      (fun e : Fin 2 × Fin 2 => perturbSummand epK2 epHalf e ω)
+  have hseteq : {ω : (Fin 2 × Fin 2) → Bool |
+      (1 : ℝ) * (![1, 0] : Fin 2 → ℝ) ⬝ᵥ ![1, 0]
+        ≤ |quadForm (∑ i : Fin (Fintype.card (Fin 2 × Fin 2)),
+            (fun (i : Fin (Fintype.card (Fin 2 × Fin 2)))
+                (ω : (Fin 2 × Fin 2) → Bool) =>
+              perturbSummand epK2 epHalf
+                ((Fintype.equivFin (Fin 2 × Fin 2)).symm i) ω) i ω) ![1, 0]|}
+      = {ω : (Fin 2 × Fin 2) → Bool |
+          (1 : ℝ) * (![1, 0] : Fin 2 → ℝ) ⬝ᵥ ![1, 0]
+            ≤ |quadForm (∑ e : Fin 2 × Fin 2, perturbSummand epK2 epHalf e ω)
+                ![1, 0]|} := by
+    ext ω
+    simp only [Set.mem_setOf_eq]
+    exact Iff.of_eq (congrArg (fun S : Matrix (Fin 2) (Fin 2) ℝ =>
+      (1 : ℝ) * (![1, 0] : Fin 2 → ℝ) ⬝ᵥ ![1, 0]
+        ≤ |quadForm S ![1, 0]|) (hsum ω))
+  rw [hseteq] at hmain
+  have hvar : ∑ i : Fin (Fintype.card (Fin 2 × Fin 2)),
+      (fun i => perturbEdgeLap epK2 ((Fintype.equivFin (Fin 2 × Fin 2)).symm i)) i
+        * (fun i => perturbEdgeLap epK2 ((Fintype.equivFin (Fin 2 × Fin 2)).symm i)) i
+      = ∑ e : Fin 2 × Fin 2,
+          perturbEdgeLap epK2 e * perturbEdgeLap epK2 e :=
+    Equiv.sum_comp (Fintype.equivFin (Fin 2 × Fin 2)).symm
+      (fun e : Fin 2 × Fin 2 => perturbEdgeLap epK2 e * perturbEdgeLap epK2 e)
+  rw [hvar, epK2_variance_norm] at hmain
+  have hcard : (Fintype.card (Fin 2) : ℝ) = 2 := by norm_num
+  rw [hcard] at hmain
+  have hRHS : (2 : ℝ) * 2 * Real.exp (-((1 : ℝ) ^ 2) / (2 * 8))
+      = 4 * Real.exp (-((1 : ℝ) ^ 2) / 16) := by
+    have h1 : -((1 : ℝ) ^ 2) / (2 * 8) = -((1 : ℝ) ^ 2) / 16 := by norm_num
+    rw [h1]
+    ring
+  rw [hRHS] at hmain
+  exact hmain
+
+end StructuralPins
 
 end Scaffold.QA.Derived.EdgePerturbation

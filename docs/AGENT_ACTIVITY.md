@@ -37,6 +37,119 @@ proposal's status header must also record
 that made this mandatory: the pre-commit hook re-rendered the map on
 every commit while its hand-maintained data tables drifted for days).
 
+## 2026-09-07T08:02:29Z — The edge-perturbation design's independence + PSD pins (terminal)
+
+**Run:** `20260907T073103Z-run-1`  
+**Session:** `ses_f85405c24ffeg5vIC4TGmEuXsP`  
+**Status:** completed  
+**Milestone:** The census's largest remaining inert cluster (per
+`wip/census_20260907_post7.txt`, inert set 35): the EdgePerturbation
+module's four never-consumed theorems plus the adjacent never-consumed
+`matrix_hoeffding_quadForm` passthrough — first genuine consumption of
+all five, delivered.
+
+**Changes:** 16 QA declarations (14 theorems + the `epNegEdge` /
+`eppEntryFiber` fixtures) in `EdgePerturbation_QA.lean`'s new
+`StructuralPins` section, QA 6645 → 6661: the rank-one PSD pin at a
+non-eigenvector input (raw inner product `−1`, energy `1`, nonnegativity
+THROUGH the theorem); the edge-block PSD pin (energy `4` raw,
+nonnegativity through the theorem); the negative-weight scope witness
+(the dropped-`h` statement refuted at energy `−4 < 0`); the degree and
+matrix joint-mass factorizations THROUGH `indepFun_degPerturbSummand` /
+`indepFun_perturbSummand` (`1/2 · 1/2 = 1/4`, preimages reduced to
+coordinate cylinders), each with a raw `sum_coord2_mul` companion (two
+routes, one value), the matrix side at entry-fiber level sets measurable
+via `measurable_pi_apply` over the shelf's product σ-algebra; and the
+generic passthrough `matrix_hoeffding_quadForm` instantiated at the full
+`K₂` `Fintype.equivFin` family (bound collapsed to `4 exp(−1/16)` — the
+twin of `epK2_quadForm_tail_QA`'s value; CONDITIONAL on
+`matrix_hoeffding`, the delivery's one axiom-carrying declaration).
+Records: same-run proposal `proposals/edgeperturbation-design-pins.md`
+(COMPLETE + delivery record), `proposals/README.md` (new Delivered row),
+README (6661 + highlights bullet), the radar's QA row (6661, held 4.5),
+the scoreboard verification row, both map data tables + regenerated
+SVG, `docs/EXECUTION_PLAN.md`, and this log. Nothing committed; prior
+runs' uncommitted deliveries preserved (the pre-existing
+`stash@{0}: On main: codex: stash current work` left untouched).
+
+**Verification:** spike-first (`wip/eppins_spike.lean` — green across
+four fix rounds; traps recorded in the delivery record: the
+`PosSemidef.2` energy at `star x` cured by the type-ascription defeq
+bridge; `rw` rewriting only the first of two identical Bool sums — the
+per-sum helper; the scoped `ℝ≥0∞` notation; `open ... in` preceding
+the docstring; `Finset.sum_univ_bool` absent — the shelf's univ-split
+idiom); the landed module elaborates with zero errors/warnings; explicit
+build ✔; **full `lake build` + `check_build_completeness.py` — 135/135
+fresh, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4 axioms
+unchanged); `check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new `epp*`
+names collision-free); `check_backlog_freshness` clean; scoreboard
+regenerated (**1369 / 6661 / 4 / 0**); map freshness exit 0 after the
+6661 sync in both map data tables + SVG regeneration (49 stations, no
+status change — none owed); **16-declaration axiom audit via
+`wip/eppins_axcheck.lean` — the 15 hard-crust ones exactly `propext,
+Classical.choice, Quot.sound`, the passthrough instance honestly
+carrying `matrix_hoeffding`**; **consumption closure verified by the
+tool: the census re-run (`wip/census_20260907_post8.txt`) shows exactly
+the 5 targeted theorems leaving the inert set — 1332 → 1337
+value-consumed, 35 → 30 never-touched, no bonus, no collateral** (the
+`matrix_hoeffding` consumer count's 23 → 24 being the passthrough
+instance itself).
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. QA proves consequences relative to the
+substrate; it does not prove the substrate (no axiom touched — the one
+axiom-conditional declaration is an instance, labeled). Honest scope:
+the pins are at the `K₂` fixture and the fair coin `p ≡ ½` only; the
+PSD pins at one input each; the joint factorizations at one pair of
+level sets; the mutual-independence twins were already consumed.
+
+**Next handoff:** the Active table stays all-Low (decision-gated). The
+census's remaining inert set (30): Mixing (3), AlonBoppana (3),
+Expander (3), Matrix.Azuma (3), then the Poincaré pair (small count,
+high name weight — the family's two headline theorems), the
+Band/Heat/IrreducibleStationary/Normalized pairs, and the singles. The
+pins method applies unchanged; cluster size and name-weight are the
+selection keys. Operator-gated items unchanged (the companion's
+Steps 3–5 adoption; master-bound Step 2; the `perron_frobenius`
+deprecation; backlog items 5/6; log-Sobolev; the reverse TV → χ²
+consumer; the newer `weighted-matrix-tree`/`mutual-information`/
+`erdos-renyi` Low rows).
+
+## 2026-09-07T07:31:19Z — The edge-perturbation design's independence + PSD pins (in progress)
+
+**Run:** `20260907T073103Z-run-1`  
+**Session:** `ses_f85405c24ffeg5vIC4TGmEuXsP`  
+**Status:** in-progress  
+**Milestone:** The census's largest remaining inert cluster (per
+`wip/census_20260907_post7.txt`, inert set 35): the EdgePerturbation
+module's four never-consumed theorems — `indepFun_perturbSummand`,
+`indepFun_degPerturbSummand` (the pairwise `h_indep` clause shapes of
+`matrix_hoeffding` and `hoeffding_inequality` at the design; their
+mutual twins are consumed, these never), `perturbEdgeLap_posSemidef`,
+and `rankOne_posSemidef` (the design's PSD floor) — plus the adjacent
+never-consumed single `Scaffold.Derived.EdgePerturbationTail.
+matrix_hoeffding_quadForm` (the 2026-08-30 repair's generic
+passthrough, zero consumers). First genuine consumption of all five.
+
+**Changes:** none yet — recording intent before editing. Planned: a
+`StructuralPins` section in `EdgePerturbation_QA.lean` at the `K₂`
+fixture: the PSD energy pins (value raw, nonnegativity THROUGH the
+theorem; a non-eigenvector input so the sign-flip content is pinned),
+the negative-weight scope witness (the `h : 0 ≤ A e.1 e.2` clause is
+load-bearing), the two joint-mass factorizations through the design's
+`IndepFun` theorems (`1/2 · 1/2 = 1/4`, matrix side at singleton level
+sets over the shelf's product σ-algebra) with raw `sum_coord2_mul`
+companions (two routes, one value), and the generic-passthrough
+instance CONDITIONAL on `matrix_hoeffding` (the twin of the existing
+`epK2_quadForm_tail_QA` value, `4 exp(−1/16)`). Then the standing
+ladder, the census closure re-run (expect exactly 5 leaving, 35 → 30),
+and records in the same-run proposal
+`proposals/edgeperturbation-design-pins.md`.
+
+**Verification:** pending — spike first.
+
 ## 2026-09-07T06:22:15Z — The Signed switching layer's positive pins (terminal)
 
 **Run:** `20260907T060831Z-run-3`  

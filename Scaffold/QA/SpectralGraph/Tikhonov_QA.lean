@@ -75,6 +75,12 @@
   prove the theorems; it checks their interfaces against independently
   computed values and falsifies nearby wrong statements.
 
+  The adversarial fence audit and first positive pins (2026-09-07) are
+  the `AdversarialFences` section below
+  (`proposals/adversarial-fences-tikhonov-family.md`): the first
+  genuine consumption of the census's 11 never-consumed family
+  theorems (`tkp_*`) plus the hypothesis-form clause fences (`tkf_*`).
+
   Scoreboard: ../docs/5_QA_SCOREBOARD.md
 -/
 
@@ -795,5 +801,456 @@ theorem lapK2_minimizer_tail_energy_pi_one :
   norm_num
 
 end HardFilterK2
+
+/-!
+## The adversarial fence audit and the first positive pins (2026-09-06)
+
+The compiler-derived consumption census
+(`proposals/compiler-derived-consumption-survey.md`) found this family
+the library's least-consumed: eleven theorems with zero QA value
+consumers — the existing QA *re-derives* minimality and uniqueness
+numerically beside the theorems (`minimality_K2` and `y_ne_min_K2`
+prove their instantiations without consuming
+`tikhonovObjective_minimizer_le` /
+`eq_of_tikhonovObjective_eq_minimizer`; the header's earlier
+"consumed contrapositively" claim was aspirational, not consumption).
+This section closes both halves of that finding: **positive pins**
+(`tkp_`) — the first genuine consumption of every previously-unconsumed
+theorem, most through the existing `K₂` fixture layer — and
+**hypothesis-form fences** (`tkf_`) for the family's load-bearing
+clause surface: the shrinkage-arithmetic five at junk-free signed
+fixtures, the matrix guards at the `π = 0` degeneration, the kernel
+mode killing `ne_apply_self`'s `hμ` *through the eigen theorem itself*,
+and the PSD hypothesis at a signed network.
+
+Priced deferrals (not delivered here): the pole-class fences for
+`tikhonovMinimizer_add_smul_one_mulVec`'s `hπ`/`hnonneg` — the normal
+equation provably HOLDS at every non-pole `π` (the per-mode identity
+`shrink(λ)·(λ+π) = π` needs only `λ + π ≠ 0`), so a kill needs a
+fixture with an eigenvalue at exactly `−π`, where the junk division
+makes the minimizer the kernel projector; both routes recorded in the
+proposal.
+-/
+
+section AdversarialFences
+
+/-! ### Positive pins: the shrinkage-arithmetic five, first consumption -/
+
+/-- Value pin: the kernel mode's factor is exactly `1`. -/
+theorem tkp_shrink_zero : tikhonovShrinkage 1 0 = 1 := by
+  norm_num [tikhonovShrinkage]
+
+/-- Value pin: the `K₂` positive mode's factor is exactly `1/3`. -/
+theorem tkp_shrink_two : tikhonovShrinkage 1 2 = 1 / 3 := by
+  norm_num [tikhonovShrinkage]
+
+/-- Pin: `tikhonovShrinkage_pos` at the kernel mode. -/
+theorem tkp_pos_zero : 0 < tikhonovShrinkage 1 0 :=
+  tikhonovShrinkage_pos (by norm_num) (by norm_num)
+
+/-- Pin: `tikhonovShrinkage_pos` at the positive mode. -/
+theorem tkp_pos_two : 0 < tikhonovShrinkage 1 2 :=
+  tikhonovShrinkage_pos (by norm_num) (by norm_num)
+
+/-- Pin: `tikhonovShrinkage_ne_zero` — no mode is annihilated. -/
+theorem tkp_ne_zero_two : tikhonovShrinkage 1 2 ≠ 0 :=
+  tikhonovShrinkage_ne_zero (by norm_num) (by norm_num)
+
+/-- Pin: `tikhonovShrinkage_le_one` at the kernel mode (equality). -/
+theorem tkp_le_one_zero : tikhonovShrinkage 1 0 ≤ 1 :=
+  tikhonovShrinkage_le_one (by norm_num) (by norm_num)
+
+/-- Pin: `tikhonovShrinkage_le_one` at the positive mode. -/
+theorem tkp_le_one_two : tikhonovShrinkage 1 2 ≤ 1 :=
+  tikhonovShrinkage_le_one (by norm_num) (by norm_num)
+
+/-- Pin: `tikhonovShrinkage_lt_one` — the positive mode strictly
+attenuated. -/
+theorem tkp_lt_one_two : tikhonovShrinkage 1 2 < 1 :=
+  tikhonovShrinkage_lt_one (by norm_num) (by norm_num)
+
+/-- Pin: the antitonicity theorem at the two pinned eigenvalues. -/
+theorem tkp_lt_lt : tikhonovShrinkage 1 2 < tikhonovShrinkage 1 0 :=
+  tikhonovShrinkage_lt_tikhonovShrinkage (by norm_num)
+    (by norm_num : (0 : ℝ) ≤ 0) (by norm_num : (0 : ℝ) < 2)
+
+/-- The antitonicity pin's numeric reading: `1/3 < 1`. -/
+theorem tkp_lt_lt_value : (1 / 3 : ℝ) < 1 := by
+  have h := tkp_lt_lt
+  rwa [tkp_shrink_two, tkp_shrink_zero] at h
+
+/-- Pin: `tikhonovShrinkage_eq_one_iff` consumed in the contrapositive
+direction — `λ = 2 ≠ 0` forces the factor off `1`. -/
+theorem tkp_shrink_two_ne_one : tikhonovShrinkage 1 2 ≠ 1 := by
+  intro h
+  have h2 : (2 : ℝ) = 0 :=
+    (tikhonovShrinkage_eq_one_iff (by norm_num : (1 : ℝ) ≠ 0)).1 h
+  norm_num at h2
+
+/-! ### Positive pins: the matrix six, first consumption -/
+
+/-- Pin: the **forward** normal equation, first consumption — the
+hand-solved system `normal_K2` re-derived FROM the theorem (the
+existing `tik_K2_eq` used only the converse characterization, so the
+forward direction had never been consumed). -/
+theorem tkp_normal :
+    (laplacian adjK2 + (1 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))
+      *ᵥ ![2 / 3, 1 / 3] = (1 : ℝ) • ![1, 0] := by
+  have h := tikhonovMinimizer_add_smul_one_mulVec adjK2 adjK2_symmetric
+    adjK2_nonneg (by norm_num : (0 : ℝ) < 1) ![1, 0]
+  rwa [tik_K2_eq] at h
+
+/-- Pin: minimality THROUGH the theorem (the existing `minimality_K2`
+re-derived the inequality numerically without consuming it). -/
+theorem tkp_minimality :
+    tikhonovObjective adjK2 1 ![1, 0]
+        (tikhonovMinimizer adjK2 adjK2_symmetric 1 ![1, 0])
+      ≤ tikhonovObjective adjK2 1 ![1, 0] ![1, 0] :=
+  tikhonovObjective_minimizer_le adjK2 adjK2_symmetric adjK2_nonneg
+    (by norm_num) ![1, 0] ![1, 0]
+
+/-- The minimality pin's numeric reading: `1/3 ≤ 1`. -/
+theorem tkp_minimality_value : (1 / 3 : ℝ) ≤ 1 := by
+  have h := tkp_minimality
+  rwa [tik_K2_eq, obj_min_K2, obj_y_K2] at h
+
+/-- Pin: uniqueness consumed FORWARD — the hand value `![2/3, 1/3]`
+recognized as *the* minimizer through the strict-convexity engine (a
+genuinely different route than `tik_K2_eq`'s normal equation). -/
+theorem tkp_uniqueness :
+    ![2 / 3, 1 / 3] = tikhonovMinimizer adjK2 adjK2_symmetric 1 ![1, 0] := by
+  refine eq_of_tikhonovObjective_eq_minimizer adjK2 adjK2_symmetric
+    adjK2_nonneg (by norm_num) ?_
+  rw [tik_K2_eq, obj_min_K2]
+
+/-- Pin: the eigenvector-input theorem at the positive mode — the
+filter of the eigenvalue-`2` eigenvector is exactly the `1/3`-shrunk
+copy. -/
+theorem tkp_eigvec_shrunk {i : Fin 2}
+    (hi : eigvalOf (laplacian adjK2) lapK2_symmetric i = 2) :
+    tikhonovMinimizer adjK2 adjK2_symmetric 1
+        (eigvecOf (laplacian adjK2) lapK2_symmetric i)
+      = (1 / 3 : ℝ) • eigvecOf (laplacian adjK2) lapK2_symmetric i := by
+  rw [tikhonovMinimizer_eigvecOf adjK2 adjK2_symmetric 1 i, hi, tkp_shrink_two]
+
+/-- Pin: the non-idempotence theorem at the positive mode (the
+existing `tik_K2_not_projection` pinned the same phenomenon
+numerically without consuming it). -/
+theorem tkp_ne_self :
+    ∃ i : Fin 2, tikhonovMinimizer adjK2 adjK2_symmetric 1
+        (tikhonovMinimizer adjK2 adjK2_symmetric 1
+          (eigvecOf (laplacian adjK2) lapK2_symmetric i))
+      ≠ tikhonovMinimizer adjK2 adjK2_symmetric 1
+          (eigvecOf (laplacian adjK2) lapK2_symmetric i) := by
+  obtain ⟨i, hi⟩ := lapK2_exists_nonzero
+  refine ⟨i, tikhonovMinimizer_ne_apply_self_of_eigvalOf_pos adjK2
+    adjK2_symmetric (by norm_num) ?_⟩
+  rw [hi]
+  norm_num
+
+/-! ### Fences: the shrinkage-arithmetic five (junk-free unless recorded) -/
+
+/-- Fence: `tikhonovShrinkage_pos`'s `hπ` — at `π = −2`, `λ = 3` the
+factor is genuinely `-2` (denominator `1`), not positive. -/
+theorem tkf_pos_hpi (h : 0 < tikhonovShrinkage (-2) 3) : False := by
+  rw [tikhonovShrinkage] at h
+  norm_num at h
+
+/-- Fence: `tikhonovShrinkage_pos`'s `hlam` — at `π = 1`, `λ = −2` the
+factor is `-1` (denominator `-1`), not positive. -/
+theorem tkf_pos_hlam (h : 0 < tikhonovShrinkage 1 (-2)) : False := by
+  rw [tikhonovShrinkage] at h
+  norm_num at h
+
+/-- Fence: `tikhonovShrinkage_ne_zero`'s `hπ` — at `π = 0`, `λ = 2`
+the factor is GENUINELY zero (`0/2`), annihilating the mode. -/
+theorem tkf_ne_zero_hpi (h : tikhonovShrinkage 0 2 ≠ 0) : False := by
+  rw [tikhonovShrinkage] at h
+  norm_num at h
+
+/-- Fence: `tikhonovShrinkage_ne_zero`'s `hlam` — the JUNK corner: at
+`π = 1`, `λ = −1` the denominator vanishes and `1/0 = 0` (Lean's
+division convention), so the dropped statement's factor is zero for a
+junk reason the hypothesis excludes. -/
+theorem tkf_ne_zero_hlam (h : tikhonovShrinkage 1 (-1) ≠ 0) : False := by
+  rw [tikhonovShrinkage] at h
+  norm_num at h
+
+/-- Fence: `tikhonovShrinkage_le_one`'s `hπ` — at `π = −1/2`,
+`λ = 1/4` the factor is `2` (denominator `-1/4`), strictly above
+one. -/
+theorem tkf_le_one_hpi (h : tikhonovShrinkage (-1 / 2) (1 / 4) ≤ 1) : False := by
+  rw [tikhonovShrinkage] at h
+  norm_num at h
+
+/-- Fence: `tikhonovShrinkage_le_one`'s `hlam` — at `π = 2`, `λ = −1`
+the factor is `2` (denominator `1`), strictly above one. -/
+theorem tkf_le_one_hlam (h : tikhonovShrinkage 2 (-1) ≤ 1) : False := by
+  rw [tikhonovShrinkage] at h
+  norm_num at h
+
+/-- Fence: `tikhonovShrinkage_lt_one`'s `hπ` — at `π = −2`, `λ = 1`
+the factor is `2` (denominator `-1`), not below one. -/
+theorem tkf_lt_one_hpi (h : tikhonovShrinkage (-2) 1 < 1) : False := by
+  rw [tikhonovShrinkage] at h
+  norm_num at h
+
+/-- Fence: `tikhonovShrinkage_lt_one`'s `hlam` — the BOUNDARY: at
+`λ = 0` the factor is exactly `1` (genuinely, no junk), so strict
+attenuation fails. The `0 < λ` hypothesis excludes exactly the kernel
+mode. -/
+theorem tkf_lt_one_hlam (h : tikhonovShrinkage 1 0 < 1) : False := by
+  rw [tikhonovShrinkage] at h
+  norm_num at h
+
+/-- Fence: `tikhonovShrinkage_lt_tikhonovShrinkage`'s `hπ` — at
+`π = −1` the factor is *increasing* (values `-1` at `λ = 2`, `-1/2`
+at `λ = 3`, both denominators nonzero), so the claimed strict
+inequality reverses. -/
+theorem tkf_ltlt_hpi
+    (h : tikhonovShrinkage (-1) 3 < tikhonovShrinkage (-1) 2) : False := by
+  rw [tikhonovShrinkage, tikhonovShrinkage] at h
+  norm_num at h
+
+/-- Fence: `tikhonovShrinkage_lt_tikhonovShrinkage`'s `h₁` — the
+STRADDLE kill: with `λ₁ = −3 < 0 < λ₂ = 0` the pair sits on opposite
+sides of the pole `λ = −π`, so the factors are `-1/2` and `1`
+(denominators `-2` and `1`) and the claimed inequality `1 < −1/2`
+fails. -/
+theorem tkf_ltlt_hlam1
+    (h : tikhonovShrinkage 1 0 < tikhonovShrinkage 1 (-3)) : False := by
+  rw [tikhonovShrinkage, tikhonovShrinkage] at h
+  norm_num at h
+
+/-- Fence: `tikhonovShrinkage_eq_one_iff`'s `hπ` — the JUNK corner: at
+`π = λ = 0` the factor is `0/0 = 0 ≠ 1` while `λ = 0` holds, so the
+`←` direction of the dropped iff is false. -/
+theorem tkf_eq_one_iff_hpi (h : tikhonovShrinkage 0 0 = 1) : False := by
+  rw [tikhonovShrinkage] at h
+  norm_num at h
+
+/-! ### Fences: the matrix level -/
+
+/-- The `π = 0` minimizer is the zero vector for EVERY signal (every
+junk factor is `0/λ = 0`) — the general form of `tik_K2_zero`. -/
+theorem tik_K2_zero_gen (y : Fin 2 → ℝ) :
+    tikhonovMinimizer adjK2 adjK2_symmetric 0 y = 0 := by
+  refine ext_of_dotProduct_eigvecOf_eq lapK2_symmetric fun k => ?_
+  rw [tikhonovMinimizer_dotProduct_eigvecOf, tikhonovShrinkage, zero_div,
+    zero_mul, Matrix.dotProduct_zero]
+
+/-- Fence: `sum_tikhonovMinimizer_eq_sum`'s `hπ : π ≠ 0` — at `π = 0`
+the filtered signal is the zero vector (sum `0`) against the signal's
+sum `1`. -/
+theorem tkf_sum_hpi
+    (h : ∑ a, tikhonovMinimizer adjK2 adjK2_symmetric 0 ![1, 0] a
+      = ∑ a, (![1, 0] : Fin 2 → ℝ) a) : False := by
+  rw [tik_K2_zero_gen] at h
+  norm_num at h
+
+/-- Fence: `eq_tikhonovMinimizer_of_add_smul_one_mulVec`'s `hπ` — at
+`π = 0` the constant vector solves the degenerate system (kept
+hypothesis `hz` genuine: the Laplacian kills it) yet is not the zero
+minimizer. -/
+theorem tkf_eq_min_hpi
+    (h : ![1, 1] = tikhonovMinimizer adjK2 adjK2_symmetric 0 ![1, 0]) : False := by
+  rw [tik_K2_zero_gen] at h
+  exact one_ne_zero (congrFun h 0)
+
+/-- Kept-genuine companion for `tkf_eq_min_hpi`: the premise `hz`
+holds at `π = 0`, `z = ![1, 1]`. -/
+theorem tkf_eq_min_hpi_hz :
+    (laplacian adjK2 + (0 : ℝ) • (1 : Matrix (Fin 2) (Fin 2) ℝ))
+      *ᵥ ![1, 1] = (0 : ℝ) • ![1, 0] := by
+  funext a
+  fin_cases a <;>
+    simp [Matrix.mulVec, Matrix.dotProduct, Matrix.add_apply,
+      Matrix.smul_apply, Matrix.one_apply, lapK2_apply, Fin.sum_univ_two,
+      Pi.smul_apply]
+
+/-- Fence: `tikhonovObjective_minimizer_le`'s `hπ` — the
+reconciliation twin of the file's 2026-08-20 free-form witness
+`not_minimality_pi0_K2`, now in the hypothesis-form discipline. -/
+theorem tkf_min_hpi (h : tikhonovObjective adjK2 0 ![1, 0]
+      (tikhonovMinimizer adjK2 adjK2_symmetric 0 ![1, 0])
+      ≤ tikhonovObjective adjK2 0 ![1, 0] ![1, 0]) : False :=
+  not_minimality_pi0_K2 h
+
+/-- The `π = 0` objective of the doubled signal is exactly `1` (the
+fidelity term alone; the regularizer coefficient is the junk `0`). -/
+theorem obj_two_pi0_K2 :
+    tikhonovObjective adjK2 0 ![1, 0] ![2, 0] = 1 := by
+  simp only [tikhonovObjective, Matrix.dotProduct, sub_apply,
+    Fin.sum_univ_two, div_zero]
+  norm_num
+
+/-- Fence: `eq_of_tikhonovObjective_eq_minimizer`'s `hπ` — at `π = 0`
+the tie hypothesis is GENUINE at `x = 2y` (both objectives evaluate
+to `1`: the objective degenerates to the fidelity term), yet `2y` is
+not the zero minimizer — so uniqueness fails without the guard. -/
+theorem tkf_uniq_hpi
+    (h : ![2, 0] = tikhonovMinimizer adjK2 adjK2_symmetric 0 ![1, 0]) : False := by
+  rw [tik_K2_zero_gen] at h
+  exact two_ne_zero (congrFun h 0)
+
+/-- Kept-genuine companion for `tkf_uniq_hpi`: the tie hypothesis
+holds at `π = 0`, `x = ![2, 0]`. -/
+theorem tkf_uniq_hpi_kept : tikhonovObjective adjK2 0 ![1, 0] ![2, 0]
+    = tikhonovObjective adjK2 0 ![1, 0]
+        (tikhonovMinimizer adjK2 adjK2_symmetric 0 ![1, 0]) := by
+  rw [obj_two_pi0_K2, tik_K2_zero_gen, obj_zero_pi0_K2]
+
+/-- Fence: `tikhonovObjective_sub_minimizer`'s `hπ` — at `π = 0`,
+`x = y` the two sides separate: the left is `0 − 1 = −1` (the
+minimizer is the zero vector, whose fidelity is `1`), while the right
+is Parseval's `∑ (v ⱼ ⬝ᵥ y)² = 1` (every weight `1 + λ/0` and factor
+`shrink(0, λ) = 0/λ` is the junk `0`). The identity is genuinely
+false at the degeneration. -/
+theorem tkf_sub_min_hpi (h : tikhonovObjective adjK2 0 ![1, 0] ![1, 0]
+      - tikhonovObjective adjK2 0 ![1, 0]
+          (tikhonovMinimizer adjK2 adjK2_symmetric 0 ![1, 0])
+      = ∑ i, (1 + eigvalOf (laplacian adjK2) lapK2_symmetric i / 0)
+          * (Matrix.dotProduct (eigvecOf (laplacian adjK2) lapK2_symmetric i)
+              ![1, 0]
+            - tikhonovShrinkage 0 (eigvalOf (laplacian adjK2) lapK2_symmetric i)
+              * Matrix.dotProduct (eigvecOf (laplacian adjK2) lapK2_symmetric i)
+                ![1, 0]) ^ 2) : False := by
+  rw [tik_K2_zero_gen, obj_zero_pi0_K2, obj_y_pi0_K2] at h
+  have hshrink : ∀ μ : ℝ, tikhonovShrinkage 0 μ = 0 := by
+    intro μ; simp [tikhonovShrinkage]
+  have hparse : Matrix.dotProduct (![1, 0] : Fin 2 → ℝ) ![1, 0]
+      = ∑ i, Matrix.dotProduct (eigvecOf (laplacian adjK2) lapK2_symmetric i)
+          ![1, 0]
+        * Matrix.dotProduct (eigvecOf (laplacian adjK2) lapK2_symmetric i)
+          ![1, 0] :=
+    dotProduct_eigvecOf lapK2_symmetric _ _
+  have hsum_eq : ∑ i, (1 + eigvalOf (laplacian adjK2) lapK2_symmetric i / 0)
+      * (Matrix.dotProduct (eigvecOf (laplacian adjK2) lapK2_symmetric i) ![1, 0]
+        - tikhonovShrinkage 0 (eigvalOf (laplacian adjK2) lapK2_symmetric i)
+          * Matrix.dotProduct (eigvecOf (laplacian adjK2) lapK2_symmetric i)
+            ![1, 0]) ^ 2
+      = 1 := by
+    have hterm : ∀ i : Fin 2,
+        (1 + eigvalOf (laplacian adjK2) lapK2_symmetric i / 0)
+          * (Matrix.dotProduct (eigvecOf (laplacian adjK2) lapK2_symmetric i)
+              ![1, 0]
+            - tikhonovShrinkage 0 (eigvalOf (laplacian adjK2)
+                lapK2_symmetric i)
+              * Matrix.dotProduct (eigvecOf (laplacian adjK2)
+                  lapK2_symmetric i) ![1, 0]) ^ 2
+        = Matrix.dotProduct (eigvecOf (laplacian adjK2) lapK2_symmetric i)
+            ![1, 0]
+          * Matrix.dotProduct (eigvecOf (laplacian adjK2) lapK2_symmetric i)
+            ![1, 0] := by
+      intro i
+      simp only [div_zero, hshrink, mul_zero, sub_zero, one_mul, add_zero]
+      ring
+    rw [Finset.sum_congr rfl fun i _ => hterm i, ← hparse]
+    norm_num
+  rw [hsum_eq] at h
+  norm_num at h
+
+/-- Fence: `tikhonovMinimizer_ne_apply_self_of_eigvalOf_pos`'s `hμ` —
+the KERNEL mode kill: at an eigenvalue-`0` index the filter fixes its
+input exactly (the eigen theorem itself gives `T v = 1 • v`), so the
+filter IS idempotent there and the claimed inequality is `v ≠ v`. The
+positivity hypothesis excludes exactly the kernel mode. -/
+theorem tkf_ne_self_hmu {i : Fin 2}
+    (hi : eigvalOf (laplacian adjK2) lapK2_symmetric i = 0)
+    (h : tikhonovMinimizer adjK2 adjK2_symmetric 1
+          (tikhonovMinimizer adjK2 adjK2_symmetric 1
+            (eigvecOf (laplacian adjK2) lapK2_symmetric i))
+        ≠ tikhonovMinimizer adjK2 adjK2_symmetric 1
+            (eigvecOf (laplacian adjK2) lapK2_symmetric i)) : False := by
+  have hfix : tikhonovMinimizer adjK2 adjK2_symmetric 1
+      (eigvecOf (laplacian adjK2) lapK2_symmetric i)
+      = eigvecOf (laplacian adjK2) lapK2_symmetric i := by
+    rw [tikhonovMinimizer_eigvecOf adjK2 adjK2_symmetric 1 i, hi,
+      tkp_shrink_zero, one_smul]
+  rw [hfix, hfix] at h
+  exact absurd rfl h
+
+/-- Fence: `tikhonovMinimizer_ne_apply_self_of_eigvalOf_pos`'s `hπ` —
+at `π = 0` the filter is the ZERO map on every input, trivially
+idempotent. -/
+theorem tkf_ne_self_hpi {i : Fin 2}
+    (h : tikhonovMinimizer adjK2 adjK2_symmetric 0
+          (tikhonovMinimizer adjK2 adjK2_symmetric 0
+            (eigvecOf (laplacian adjK2) lapK2_symmetric i))
+        ≠ tikhonovMinimizer adjK2 adjK2_symmetric 0
+            (eigvecOf (laplacian adjK2) lapK2_symmetric i)) : False := by
+  rw [tik_K2_zero_gen, tik_K2_zero_gen] at h
+  exact absurd rfl h
+
+/-- Kept-genuine companion for `tkf_ne_self_hpi`: `hμ` holds at the
+eigenvalue-`2` index. -/
+theorem tkf_ne_self_hpi_hmu :
+    ∃ i : Fin 2, 0 < eigvalOf (laplacian adjK2) lapK2_symmetric i := by
+  obtain ⟨i, hi⟩ := lapK2_exists_nonzero
+  exact ⟨i, by rw [hi]; norm_num⟩
+
+/-! ### Fence: the PSD hypothesis at a signed network -/
+
+/-- The signed two-vertex network: adjacency `!![0, −1; −1, 0]`
+(symmetry genuine, nonnegativity broken at both off-diagonal
+entries). -/
+def tkfSigned : Matrix (Fin 2) (Fin 2) ℝ := !![0, -1; -1, 0]
+
+theorem tkfSigned_symm : tkfSigned.IsSymm := by
+  refine Matrix.IsSymm.ext fun i j => ?_
+  fin_cases i <;> fin_cases j <;> simp [Matrix.transpose_apply, tkfSigned]
+
+theorem tkfSigned_lap_apply (i j : Fin 2) :
+    laplacian tkfSigned i j = if i = j then -1 else 1 := by
+  fin_cases i <;> fin_cases j
+    <;> simp [laplacian, degreeMatrix, deg, tkfSigned, Fin.sum_univ_two]
+
+theorem tkfSigned_lap_symm : (laplacian tkfSigned).IsSymm :=
+  laplacian_symmetric tkfSigned tkfSigned_symm
+
+theorem tkfSigned_trace : (laplacian tkfSigned).trace = -2 := by
+  simp [Matrix.trace, tkfSigned_lap_apply]
+
+theorem tkfSigned_det : (laplacian tkfSigned).det = 0 := by
+  have h00 : laplacian tkfSigned 0 0 = -1 := by simp [tkfSigned_lap_apply]
+  have h11 : laplacian tkfSigned 1 1 = -1 := by simp [tkfSigned_lap_apply]
+  have h01 : laplacian tkfSigned 0 1 = 1 := by simp [tkfSigned_lap_apply]
+  have h10 : laplacian tkfSigned 1 0 = 1 := by simp [tkfSigned_lap_apply]
+  rw [Matrix.det_fin_two, h00, h11, h01, h10]
+  norm_num
+
+theorem tkfSigned_eigvalOf_prod :
+    ∏ i, eigvalOf (laplacian tkfSigned) tkfSigned_lap_symm i = 0 := by
+  have h := (isHermitian_of_isSymm tkfSigned_lap_symm).det_eq_prod_eigenvalues
+  rw [tkfSigned_det] at h
+  simpa using h.symm
+
+/-- The signed network's Laplacian `!![−1, 1; 1, −1]` has spectrum
+`{0, −2}`: some index carries the genuinely negative eigenvalue. -/
+theorem tkfSigned_exists_neg :
+    ∃ i : Fin 2, eigvalOf (laplacian tkfSigned) tkfSigned_lap_symm i = -2 := by
+  have hprod := tkfSigned_eigvalOf_prod
+  have hsum := eigvalOf_sum_eq_trace (laplacian tkfSigned) tkfSigned_lap_symm
+  rw [tkfSigned_trace] at hsum
+  simp only [Fin.prod_univ_two, Fin.sum_univ_two] at hprod hsum
+  rcases mul_eq_zero.1 hprod with h0 | h1
+  · refine ⟨1, ?_⟩
+    rw [h0] at hsum
+    linarith
+  · refine ⟨0, ?_⟩
+    rw [h1] at hsum
+    linarith
+
+/-- Fence: `eigvalOf_laplacian_nonneg`'s `hnonneg` — at the signed
+network an eigenvalue is genuinely `-2`, so the dropped PSD
+conclusion fails while symmetry is kept genuine. -/
+theorem tkf_lap_nonneg_hnonneg
+    (h : ∀ i, 0 ≤ eigvalOf (laplacian tkfSigned) tkfSigned_lap_symm i) : False := by
+  obtain ⟨i, hi⟩ := tkfSigned_exists_neg
+  have hne := h i
+  rw [hi] at hne
+  exact absurd hne (by norm_num)
+
+end AdversarialFences
 
 end Scaffold.Mathlib.GraphTheory.Tikhonov.QA

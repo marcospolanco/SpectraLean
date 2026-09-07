@@ -486,6 +486,17 @@ proposal's "never exactly 1". **Phase 2 (the hard-filter limit,
 positive-eigenvalue limit of `tikhonovShrinkage` plus the finite
 tail-suppression corollary (suppression-stated per the external
 consumer's explicit non-overclaim instruction), still zero axioms.
+**Adversarial fence audit + first positive pins (2026-09-07,
+`proposals/adversarial-fences-tikhonov-family.md`):** the
+compiler-derived consumption census's top named target — every theorem
+above now has a genuine QA consumer (`tkp_*` pins in
+`Tikhonov_QA.lean`'s `AdversarialFences` section; the pre-audit QA
+re-derived minimality/uniqueness numerically beside the theorems), and
+every load-bearing hypothesis clause is fenced (`tkf_*`: the
+shrinkage-arithmetic five's `hπ`/`hlam`, the `π = 0` matrix guards,
+the kernel-mode non-idempotence kill through the eigen theorem, the
+signed-network PSD clause), with the pole-class deferrals priced in
+the proposal.
 
 | Declaration | Content |
 |-------------|---------|

@@ -11303,4 +11303,302 @@ theorem tri_submul_attained_engine_QA :
 
 end EngineJoin
 
+/-! ## The mixing-time interface layer's positive pins
+(`proposals/mixing-time-interface-pins.md`)
+
+The compiler-derived consumption census (2026-09-07) found six of the
+walk/lazy interface theorems among the library's
+designed-but-unconsumed. `lazyWalkMixingTimeFrom_le_of_connected`'s
+own docstring claimed QA consumption, but the cited pin
+(`path_lazy_center_ceiling_attained_QA`) evaluates the display and the
+object separately — the ≤ direction was never instantiated (the
+Tikhonov aspirational-claim pattern). This section consumes all six at
+the delivered `triAdj`/`pathAdj` fixtures: the uniform spec and the
+escalation display at the triangle (both re-deriving the pinned exact
+`t_mix(1/6) = 2` by new routes), the lazy antitonicity lower bound,
+the intrinsic-rate ceiling at the corner start (the honest `3` vs the
+pinned `2`), the depth-form TV ceiling, and the entrywise max-rate
+ceiling with its top-eigenvalue companion.
+-/
+
+section WalkInterfacePins
+
+/-- Pin 5: `walkMixingTime_spec` — the uniform certificate at EVERY
+depth past the object, derived through the spec from the pinned
+`walkMixingTime triAdj (1/6) = 2`. -/
+theorem mtip_walk_spec_QA :
+    ∀ s : ℕ, 2 ≤ s → ∀ x : Fin 3,
+      tvDistance (walkDistribution triAdj s x) (stationaryVec triAdj)
+        ≤ 1/6 := by
+  intro s hs x
+  have hspec := walkMixingTime_spec triAdj
+    (ε := 1/6) ⟨2, tri_unif_sixth_cert_QA⟩ s
+    (le_trans (by rw [tri_mix_uniform_eq_sixth_QA]) hs) x
+  exact hspec
+
+/-- Pin 6: `walkMixingTime_le_of_escalation` — the ⌈log⌉ display
+escalation consumed for the first time; at the certified evaluation
+`t₀ = 1` (`d̄(1) = 1/3`, `d(1) = 1/2`) the display reads
+`(⌈log 2/log 2⌉ + 1) · 1 = 2` — the pinned object value. -/
+theorem mtip_walk_escalation_le_QA :
+    walkMixingTime triAdj (1/6) ≤ 2 := by
+  have h := walkMixingTime_le_of_escalation triAdj triAdj_isSymm
+    triAdj_nonneg triAdj_deg_pos
+    (ε := 1/6) (ε₀ := 1/3) (ρ := 1/2)
+    (by norm_num : (0 : ℝ) < 1/3) (by norm_num : (0 : ℝ) < 1/6) 1
+    (by norm_num : (0 : ℝ) < 1/2) (by norm_num : (1/2 : ℝ) < 1)
+    (by rw [tri_unif_one_eq_QA]) (by rw [tri_pair_one_eq_QA])
+  have hlog2ne : Real.log 2 ≠ 0 :=
+    ne_of_gt (Real.log_pos (by norm_num : (1 : ℝ) < 2))
+  have hratio : Real.log ((1/3 : ℝ) / (1/6)) / Real.log (1 / (1/2 : ℝ))
+      = 1 := by
+    have ha : ((1/3 : ℝ) / (1/6)) = 2 := by norm_num
+    have hb : (1 : ℝ) / (1/2) = 2 := by norm_num
+    rw [ha, hb, div_self hlog2ne]
+  have hceil : Nat.ceil
+      (Real.log ((1/3 : ℝ) / (1/6)) / Real.log (1 / (1/2 : ℝ))) = 1 := by
+    rw [hratio]
+    norm_num
+  rw [hceil] at h
+  omega
+
+end WalkInterfacePins
+
+section LazyInterfacePins
+
+/-- The `1/16` lazy witness at the path's corner start:
+`TV_lazy(s) = (1/2)^(s+1) ≤ 1/16` at every `s ≥ 3`. -/
+theorem mtip_lazy_sixteenth_witness_QA :
+    ∀ s : ℕ, 3 ≤ s →
+      tvDistance (lazyWalkDistribution pathAdj s 0)
+        (stationaryVec pathAdj) ≤ 1/16 := by
+  intro s hs
+  obtain ⟨t, ht⟩ : ∃ t : ℕ, s = 1 + t := ⟨s - 1, by omega⟩
+  subst ht
+  rw [path_lazy_corner_tv_all_QA t]
+  obtain ⟨k, hk⟩ : ∃ k : ℕ, t + 2 = 4 + k := ⟨t - 2, by omega⟩
+  rw [hk, pow_add]
+  calc (1/2 : ℝ) ^ 4 * (1/2 : ℝ) ^ k ≤ (1/2 : ℝ) ^ 4 * 1 :=
+        mul_le_mul_of_nonneg_left
+          (pow_le_one₀ (by norm_num : (0 : ℝ) ≤ 1/2)
+            (by norm_num : (1/2 : ℝ) ≤ 1)) (by positivity)
+    _ = 1/16 := by norm_num
+
+/-- Pin 7: `lazyWalkMixingTimeFrom_anti` — the lower bound
+`2 ≤ t_mix_lazy(1/16)` THROUGH antitonicity (from the pinned
+`t_mix_lazy(1/8) = 2`). -/
+theorem mtip_lazy_anti_lb_QA :
+    (2 : ℕ) ≤ lazyWalkMixingTimeFrom pathAdj 0 (1/16) := by
+  have hanti := lazyWalkMixingTimeFrom_anti pathAdj 0
+    (ε := 1/16) (δ := 1/8) (by norm_num : (1/16 : ℝ) ≤ 1/8)
+    ⟨3, mtip_lazy_sixteenth_witness_QA⟩
+  rw [path_lazy_corner_mix_eq_eighth_QA] at hanti
+  exact hanti
+
+/-- Pin 7b: the object at the second threshold —
+`t_mix_lazy(1/16) = 3` (≤ by the witness certificate, ≥ by the
+attainment route; `mtip_lazy_anti_lb_QA` stands beside it as the anti
+consumption). -/
+theorem mtip_lazy_sixteenth_QA :
+    lazyWalkMixingTimeFrom pathAdj 0 (1/16) = 3 := by
+  refine le_antisymm
+    (lazyWalkMixingTimeFrom_le_of_cert pathAdj 0 3
+      mtip_lazy_sixteenth_witness_QA) ?_
+  by_contra h
+  push_neg at h
+  have hwit : ∃ T : ℕ, ∀ s : ℕ, T ≤ s →
+      tvDistance (lazyWalkDistribution pathAdj s 0)
+        (stationaryVec pathAdj) ≤ 1/16 :=
+    ⟨3, mtip_lazy_sixteenth_witness_QA⟩
+  have hspec := lazyWalkMixingTimeFrom_spec pathAdj 0 hwit
+  have h2 : lazyWalkMixingTimeFrom pathAdj 0 (1/16) ≤ 2 := by omega
+  have hcon := hspec 2 h2
+  have hlaw : tvDistance (lazyWalkDistribution pathAdj 2 0)
+      (stationaryVec pathAdj) = 1/8 := by
+    have h := path_lazy_corner_tv_all_QA 1
+    have hnum : (1/2 : ℝ) ^ (1 + 2) = 1/8 := by norm_num
+    rw [hnum] at h
+    exact h
+  rw [hlaw] at hcon
+  norm_num at hcon
+
+end LazyInterfacePins
+
+section LazyCeilingPins
+
+/-- The path fixture's threshold evaluation, lower half: the lazy
+ceiling's display reads `log(4√3)/log 2 > 2` (from `1 < √3`). -/
+theorem mtip_path_thr_lt_QA :
+    (2 : ℝ) < Real.log (Real.sqrt ((stationaryVec pathAdj 0)⁻¹ - 1)
+        / (2 * (1/8 : ℝ))) / Real.log (1 / (1 - 1/2 : ℝ)) := by
+  have hpi0 : stationaryVec pathAdj 0 = 1/4 := by
+    rw [path_pi_QA]; rfl
+  have hinv : ((1/4 : ℝ)⁻¹ - 1) = 3 := by norm_num
+  have hden : (2 * (1/8 : ℝ)) = 1/4 := by norm_num
+  have hden2 : (1 : ℝ) - 1/2 = 1/2 := by norm_num
+  have hinv2 : (1 : ℝ) / (1/2) = 2 := by norm_num
+  have hnum : Real.sqrt 3 / (1/4 : ℝ) = 4 * Real.sqrt 3 := by
+    field_simp
+    ring
+  have hlog2pos : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hlog4 : Real.log 4 = 2 * Real.log 2 := by
+    rw [show (4 : ℝ) = 2 ^ 2 from by norm_num, Real.log_pow (2 : ℝ) 2]
+    push_cast
+    ring
+  have hsqrt3sq : (Real.sqrt 3)^2 = 3 := Real.sq_sqrt (by norm_num)
+  have hs3nn : (0 : ℝ) ≤ Real.sqrt 3 := Real.sqrt_nonneg _
+  have hs3lt : (1 : ℝ) < Real.sqrt 3 := by nlinarith
+  rw [hpi0, hinv, hden, hden2, hinv2, hnum, lt_div_iff₀ hlog2pos, ← hlog4]
+  have h4 : (4 : ℝ) < 4 * Real.sqrt 3 := by
+    calc (4 : ℝ) = 4 * 1 := by ring
+      _ < 4 * Real.sqrt 3 :=
+          mul_lt_mul_of_pos_left hs3lt (by norm_num : (0 : ℝ) < 4)
+  exact Real.log_lt_log (by norm_num) h4
+
+/-- The path fixture's threshold evaluation, upper half: the lazy
+ceiling's display reads `log(4√3)/log 2 ≤ 3` (from `√3 ≤ 2`). -/
+theorem mtip_path_thr_le_QA :
+    Real.log (Real.sqrt ((stationaryVec pathAdj 0)⁻¹ - 1)
+        / (2 * (1/8 : ℝ))) / Real.log (1 / (1 - 1/2 : ℝ)) ≤ 3 := by
+  have hpi0 : stationaryVec pathAdj 0 = 1/4 := by
+    rw [path_pi_QA]; rfl
+  have hinv : ((1/4 : ℝ)⁻¹ - 1) = 3 := by norm_num
+  have hden : (2 * (1/8 : ℝ)) = 1/4 := by norm_num
+  have hden2 : (1 : ℝ) - 1/2 = 1/2 := by norm_num
+  have hinv2 : (1 : ℝ) / (1/2) = 2 := by norm_num
+  have hnum : Real.sqrt 3 / (1/4 : ℝ) = 4 * Real.sqrt 3 := by
+    field_simp
+    ring
+  have hlog2pos : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hlog8 : Real.log 8 = 3 * Real.log 2 := by
+    rw [show (8 : ℝ) = 2 ^ 3 from by norm_num, Real.log_pow (2 : ℝ) 3]
+    push_cast
+    ring
+  have hsqrt3sq : (Real.sqrt 3)^2 = 3 := Real.sq_sqrt (by norm_num)
+  have hs3nn : (0 : ℝ) ≤ Real.sqrt 3 := Real.sqrt_nonneg _
+  have hs3le : Real.sqrt 3 ≤ 2 := by nlinarith
+  rw [hpi0, hinv, hden, hden2, hinv2, hnum, div_le_iff₀ hlog2pos, ← hlog8]
+  have h48 : 4 * Real.sqrt 3 ≤ 8 := by
+    calc 4 * Real.sqrt 3 ≤ 4 * 2 :=
+          mul_le_mul_of_nonneg_left hs3le (by norm_num : (0 : ℝ) ≤ 4)
+      _ = 8 := by norm_num
+  exact Real.log_le_log (by positivity) h48
+
+/-- Pin 8: `lazyWalkMixingTimeFrom_le_of_connected` — the intrinsic-rate
+spectral ceiling consumed for the first time (the docstring's
+`path_lazy_center_ceiling_attained_QA` evaluates the display and the
+object separately; the ≤ direction was never instantiated). At the
+corner start: `t_mix_lazy(1/8) ≤ 3` against the pinned exact `2` —
+the honest slack. -/
+theorem mtip_lazy_ceiling_le_QA :
+    lazyWalkMixingTimeFrom pathAdj 0 (1/8) ≤ 3 := by
+  have h := lazyWalkMixingTimeFrom_le_of_connected pathAdj
+    pathAdj_isSymm pathAdj_nonneg pathAdj_deg_pos
+    (by norm_num : 2 ≤ Fintype.card (Fin 3)) path_connected
+    (by rw [path_secondEval_QA]; norm_num)
+    (by norm_num : (0 : ℝ) < 1/8) 0
+  have hceil : Nat.ceil (Real.log (Real.sqrt ((stationaryVec pathAdj 0)⁻¹ - 1)
+      / (2 * (1/8 : ℝ))) / Real.log (1 / (1 - 1/2 : ℝ))) = 3 := by
+    have hle : Nat.ceil (Real.log (Real.sqrt ((stationaryVec pathAdj 0)⁻¹ - 1)
+        / (2 * (1/8 : ℝ))) / Real.log (1 / (1 - 1/2 : ℝ))) ≤ 3 :=
+      Nat.ceil_le.mpr mtip_path_thr_le_QA
+    have hge : (3 : ℕ) ≤ Nat.ceil (Real.log (Real.sqrt
+          ((stationaryVec pathAdj 0)⁻¹ - 1)
+          / (2 * (1/8 : ℝ))) / Real.log (1 / (1 - 1/2 : ℝ))) := by
+      by_contra hcon
+      push_neg at hcon
+      have h2 : Nat.ceil (Real.log (Real.sqrt ((stationaryVec pathAdj 0)⁻¹ - 1)
+          / (2 * (1/8 : ℝ))) / Real.log (1 / (1 - 1/2 : ℝ))) ≤ 2 := by omega
+      have hx := Nat.ceil_le.mp h2
+      have hlt := mtip_path_thr_lt_QA
+      linarith
+    exact le_antisymm hle hge
+  rw [path_secondEval_QA] at h
+  rw [hceil] at h
+  exact h
+
+/-- Pin 9: `lazyWalkDistribution_tvDistance_le_of_depth` — the
+depth-form lazy TV ceiling consumed for the first time: at the corner
+start and depth `3` the threshold fires (`log(4√3)/log 2 ≤ 3`), giving
+`TV_lazy(3) ≤ 1/8` (the exact value is `(1/2)⁴ = 1/16` — honest
+slack). -/
+theorem mtip_lazy_depth_le_QA :
+    tvDistance (lazyWalkDistribution pathAdj 3 0)
+      (stationaryVec pathAdj) ≤ 1/8 := by
+  refine lazyWalkDistribution_tvDistance_le_of_depth pathAdj
+    pathAdj_isSymm pathAdj_nonneg pathAdj_deg_pos
+    (by norm_num : 2 ≤ Fintype.card (Fin 3)) path_connected
+    (by rw [path_secondEval_QA]; norm_num)
+    (by norm_num : (0 : ℝ) < 1/8) 3 0 ?_
+  rw [path_secondEval_QA]
+  exact mtip_path_thr_le_QA
+
+end LazyCeilingPins
+
+section AbsRatePins
+
+/-- The triangle's top normalized eigenvalue pin (needed by the
+entrywise ceiling): `evals ⟨2⟩ = 3/2` — every eigenvalue is `0` or
+`3/2`, and sorting plus `λ₂ = 3/2` forces the top up. -/
+theorem mtip_tri_top_eval_QA :
+    evals (normalizedLaplacian_symmetric triAdj triAdj_isSymm)
+      ⟨Fintype.card (Fin 3) - 1, by decide⟩ = 3/2 := by
+  have hmem := evals_mem_eigvalOf
+    (normalizedLaplacian_symmetric triAdj triAdj_isSymm)
+    ⟨Fintype.card (Fin 3) - 1, by decide⟩
+  obtain ⟨i, hi⟩ := hmem
+  rcases tri_eigvalOf_cases i with h0 | h32
+  · exfalso
+    have hle : (evals (normalizedLaplacian_symmetric triAdj triAdj_isSymm)
+          ⟨1, by decide⟩ : ℝ)
+        ≤ evals (normalizedLaplacian_symmetric triAdj triAdj_isSymm)
+          ⟨Fintype.card (Fin 3) - 1, by decide⟩ :=
+      evals_sorted _ (Fin.mk_le_mk.mpr (by decide))
+    rw [hi, h0] at hle
+    have hsec : (evals (normalizedLaplacian_symmetric triAdj triAdj_isSymm)
+        ⟨1, by decide⟩ : ℝ) = 3/2 := tri_secondEval_QA
+    rw [hsec] at hle
+    norm_num at hle
+  · rw [hi, h32]
+
+/-- Pin 10: `walkDistribution_sub_stationaryVec_abs_le_max_rate` — the
+entrywise max-rate ceiling consumed for the first time: at the
+triangle, depth `1`, start `0`, entry `1`, the bound evaluates to
+`(1/2) · √(2/3)` against the true deviation `1/6`. -/
+theorem mtip_walk_abs_rate_QA :
+    |walkDistribution triAdj 1 0 1 - stationaryVec triAdj 1|
+      ≤ (1/2 : ℝ) * Real.sqrt (2/3) := by
+  have h := walkDistribution_sub_stationaryVec_abs_le_max_rate triAdj
+    triAdj_isSymm triAdj_nonneg triAdj_deg_pos
+    (by norm_num : 2 ≤ Fintype.card (Fin 3)) tri_connected 1 0 1
+  have htop : evals (normalizedLaplacian_symmetric triAdj triAdj_isSymm)
+      ⟨Fintype.card (Fin 3) - 1, by decide⟩ = 3/2 := mtip_tri_top_eval_QA
+  rw [tri_secondEval_QA, htop, tri_pi_QA 1, tri_pi_QA 0] at h
+  norm_num at h
+  rw [tri_pi_QA 1]
+  rw [← Real.sqrt_div (by norm_num : (0 : ℝ) ≤ 2) 3] at h
+  exact h
+
+/-- Pin 10's numeric reading: `1/6 ≤ (1/2)·√(2/3)` (squared:
+`1/36 ≤ 1/6`), both sides nonnegative. -/
+theorem mtip_walk_abs_rate_value_QA :
+    (1/6 : ℝ) ≤ (1/2 : ℝ) * Real.sqrt (2/3) := by
+  have h2 : (0 : ℝ) ≤ 2/3 := by norm_num
+  have hsq : ((1/2 : ℝ) * Real.sqrt (2/3))^2 = 1/6 := by
+    rw [mul_pow, Real.sq_sqrt h2]
+    norm_num
+  have hnn2 : (0 : ℝ) ≤ (1/2 : ℝ) * Real.sqrt (2/3) := by positivity
+  have hkey : (1/6 : ℝ)^2 ≤ ((1/2 : ℝ) * Real.sqrt (2/3))^2 := by
+    rw [hsq]
+    norm_num
+  by_contra hcon
+  push_neg at hcon
+  have hnn : (0 : ℝ) ≤ 1/6 := by norm_num
+  have hlt := sq_lt_sq' (by linarith : (-(1/6 : ℝ)) < 1/2 * Real.sqrt (2/3))
+    hcon
+  rw [hsq] at hlt
+  norm_num at hlt
+
+end AbsRatePins
+
 end SpectralGraphTheory.QA

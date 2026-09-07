@@ -1233,4 +1233,178 @@ theorem spF_qf_laplacian_hq_fence_QA :
 
 end CoreFences
 
+section StructuralPins
+/-! ## The structural lemmas' positive pins (2026-09-07)
+
+The compiler-derived consumption census found all nine of this
+module's sampled-Laplacian structural lemmas among the library's
+never-consumed — the machinery under `matrix_bernstein`'s one real
+theorem consumer (`Derived.SparsificationTail`), pinned here for the
+first time at the `spK2` fixture, at the natural unsaturated budget
+`q = 1` (pair probability `1/2`, inverse-probability weights exactly
+`2`/`0`), with the sampled Laplacian's quadratic-form VALUE computed
+through the definitions (`8` at the alternating vector — the all-true
+outcome doubles the true Laplacian, the estimator's exact behavior at
+half-probability sampling; the diagonal pairs contribute zero through
+the vanishing voltage difference alone).
+-/
+
+/-- Pin 1: `imageProjector_isSymm` consumed at the fixture, with the
+off-diagonal entry equality derived THROUGH the symmetry theorem. -/
+theorem spp_proj_symm_QA :
+    (imageProjector spK2 spK2_isSymm).IsSymm
+      ∧ imageProjector spK2 spK2_isSymm 0 1
+          = imageProjector spK2 spK2_isSymm 1 0 := by
+  exact ⟨imageProjector_isSymm spK2 spK2_isSymm,
+    (imageProjector_isSymm spK2 spK2_isSymm).apply 0 1⟩
+
+/-- Pin 2: `imageProjector_mul_self` consumed — the diagonal entries'
+idempotence read THROUGH the theorem (each diagonal entry is `0` or
+`1`, eigen-index dependent; both square to themselves). -/
+theorem spp_proj_idem_QA :
+    (imageProjector spK2 spK2_isSymm * imageProjector spK2 spK2_isSymm) 0 0
+      = imageProjector spK2 spK2_isSymm 0 0
+    ∧ (imageProjector spK2 spK2_isSymm * imageProjector spK2 spK2_isSymm) 1 1
+      = imageProjector spK2 spK2_isSymm 1 1 := by
+  constructor <;> rw [imageProjector_mul_self spK2 spK2_isSymm]
+
+/-- Pin 3: `quadForm_imageProjector_nonneg` at the unit vector. -/
+theorem spp_proj_quad_nonneg_QA :
+    0 ≤ quadForm (imageProjector spK2 spK2_isSymm) ![1, 0] :=
+  quadForm_imageProjector_nonneg spK2 spK2_isSymm ![1, 0]
+
+/-- Pin 4: `l2OpNorm_imageProjector_le` at the fixture. -/
+theorem spp_proj_norm_QA :
+    ‖imageProjector spK2 spK2_isSymm‖ ≤ 1 :=
+  l2OpNorm_imageProjector_le spK2 spK2_isSymm
+
+/-- Pin 5: `ssSampled_isSymm` at the natural unsaturated budget
+`q = 1`, at every outcome (the hypothesis set discharged at the
+fixture). -/
+theorem spp_sampled_symm_QA (ω : (Fin 2 × Fin 2) → Bool) :
+    (ssSampled spK2 spK2_isSymm 1 ω).IsSymm :=
+  ssSampled_isSymm spK2 spK2_isSymm spK2_nonneg 1 ω
+
+/-- Pin 6: `indepFun_ssSummand` at the two distinct ordered pairs of
+`K₂`, budget `q = 1` — the matrix-concentration `h_indep` clause's
+design fact, consumed at the fixture's own measure. -/
+theorem spp_summand_indep_QA :
+    ProbabilityTheory.IndepFun
+      (fun ω : (Fin 2 × Fin 2) → Bool =>
+        ssSummand spK2 spK2_isSymm 1 ((0, 1) : Fin 2 × Fin 2) ω)
+      (fun ω : (Fin 2 × Fin 2) → Bool =>
+        ssSummand spK2 spK2_isSymm 1 ((1, 0) : Fin 2 × Fin 2) ω)
+      (ssMeasure spK2 spK2_isSymm 1 (by norm_num : (0 : ℝ) ≤ 1)) :=
+  indepFun_ssSummand spK2 spK2_isSymm 1 (by norm_num : (0 : ℝ) ≤ 1)
+    (by decide)
+
+/-- The unsaturated probability pin: `p = min 1 (1 · 1/2) = 1/2`. -/
+theorem spp_prob_half_QA :
+    ssProb spK2 spK2_isSymm 1 ((0, 1) : Fin 2 × Fin 2) = 1/2 := by
+  rw [ssProb, ssEdgeVec_dot_K2_QA]
+  norm_num
+
+/-- The sampled weight at the kept outcome: `δ/p = 1/(1/2) = 2` — the
+inverse-probability reweighting exact. -/
+theorem spp_weight_true_QA :
+    ssWeight spK2 spK2_isSymm 1 ((0, 1) : Fin 2 × Fin 2)
+      (fun _ => true) = 2 := by
+  rw [ssWeight, if_neg (by rw [spp_prob_half_QA]; norm_num),
+    spp_prob_half_QA]
+  simp [ssDelta]
+
+/-- The sampled weight at the missed outcome: `δ/p = 0/(1/2) = 0`. -/
+theorem spp_weight_false_QA :
+    ssWeight spK2 spK2_isSymm 1 ((0, 1) : Fin 2 × Fin 2)
+      (fun _ => false) = 0 := by
+  rw [ssWeight, if_neg (by rw [spp_prob_half_QA]; norm_num),
+    spp_prob_half_QA]
+  simp [ssDelta]
+
+/-- Pin 7: `ssWeight_nonneg` at both outcomes, THROUGH the theorem
+(the values `2`/`0` above make the nonnegativity nontrivial). -/
+theorem spp_weight_nonneg_QA :
+    0 ≤ ssWeight spK2 spK2_isSymm 1 ((0, 1) : Fin 2 × Fin 2)
+        (fun _ => true)
+      ∧ 0 ≤ ssWeight spK2 spK2_isSymm 1 ((0, 1) : Fin 2 × Fin 2)
+        (fun _ => false) :=
+  ⟨ssWeight_nonneg spK2 spK2_isSymm (by norm_num : (0 : ℝ) ≤ 1) _ _,
+    ssWeight_nonneg spK2 spK2_isSymm (by norm_num : (0 : ℝ) ≤ 1) _ _⟩
+
+/-- Pin 8: `ssLaplacian_isSymm` at `q = 1`, every outcome. -/
+theorem spp_lap_symm_QA (ω : (Fin 2 × Fin 2) → Bool) :
+    (ssLaplacian spK2 spK2_isSymm 1 ω).IsSymm :=
+  ssLaplacian_isSymm spK2 spK2_isSymm 1 ω
+
+/-- Pin 9: `quadForm_ssLaplacian_nonneg` at the kept outcome and the
+alternating vector — the sampled Laplacian's PSD through the theorem. -/
+theorem spp_lap_quad_nonneg_QA :
+    0 ≤ quadForm (ssLaplacian spK2 spK2_isSymm 1 (fun _ => true))
+        ![1, -1] :=
+  quadForm_ssLaplacian_nonneg spK2 spK2_isSymm spK2_nonneg
+    (by norm_num : (0 : ℝ) ≤ 1) _ _
+
+/-- The swapped pair's unsaturated probability (through the delivered
+swapped leverage pin). -/
+theorem spp_prob_half_swapped_QA :
+    ssProb spK2 spK2_isSymm 1 ((1, 0) : Fin 2 × Fin 2) = 1/2 := by
+  rw [ssProb, ssEdgeVec_dot_K2_swapped_QA]
+  norm_num
+
+/-- The swapped pair's weight at the kept outcome. -/
+theorem spp_weight_true_swapped_QA :
+    ssWeight spK2 spK2_isSymm 1 ((1, 0) : Fin 2 × Fin 2)
+      (fun _ => true) = 2 := by
+  rw [ssWeight, if_neg (by rw [spp_prob_half_swapped_QA]; norm_num),
+    spp_prob_half_swapped_QA]
+  simp [ssDelta]
+
+/-- Pin 9's numeric reading: at the all-true outcome and budget `q = 1`
+each off-diagonal pair contributes weight `2` halved by the ordered
+factor, so the sampled Laplacian is exactly TWICE the true one and the
+alternating vector's form is `2 · 4 = 8` (the diagonal pairs
+contribute zero through the vanishing voltage difference alone). The
+value exercises the weights, the `1/2` ordered-pair factor, and
+`rankOne` together — load-bearing on the sampled-Laplacian definition's
+exact shape. -/
+theorem spp_lap_quad_value_QA :
+    quadForm (ssLaplacian spK2 spK2_isSymm 1 (fun _ => true))
+        ![1, -1] = 8 := by
+  have hadd : ∀ M N : Matrix (Fin 2) (Fin 2) ℝ,
+      quadForm (M + N) ![1, -1]
+        = quadForm M ![1, -1] + quadForm N ![1, -1] := by
+    intro M N
+    simp [quadForm, Matrix.add_mulVec, Matrix.add_dotProduct]
+  have hterm : ∀ e : Fin 2 × Fin 2,
+      quadForm ((ssWeight spK2 spK2_isSymm 1 e (fun _ => true) / 2
+          * spK2 e.1 e.2) • rankOne (ssEdgeDiff e.1 e.2))
+          (![1, -1] : Fin 2 → ℝ)
+        = (ssWeight spK2 spK2_isSymm 1 e (fun _ => true) / 2
+            * spK2 e.1 e.2)
+          * ((![1, -1] : Fin 2 → ℝ) e.1
+              - (![1, -1] : Fin 2 → ℝ) e.2) ^ 2 := by
+    intro e
+    rw [quadForm_smul, rankOne_quadForm, dotProduct_ssEdgeDiff]
+  have hexpand : ssLaplacian spK2 spK2_isSymm 1 (fun _ => true)
+      = ((ssWeight spK2 spK2_isSymm 1 ((0, 0) : Fin 2 × Fin 2)
+            (fun _ => true) / 2 * spK2 0 0) • rankOne (ssEdgeDiff 0 0))
+        + ((ssWeight spK2 spK2_isSymm 1 ((0, 1) : Fin 2 × Fin 2)
+            (fun _ => true) / 2 * spK2 0 1) • rankOne (ssEdgeDiff 0 1))
+        + (((ssWeight spK2 spK2_isSymm 1 ((1, 0) : Fin 2 × Fin 2)
+            (fun _ => true) / 2 * spK2 1 0) • rankOne (ssEdgeDiff 1 0))
+          + ((ssWeight spK2 spK2_isSymm 1 ((1, 1) : Fin 2 × Fin 2)
+            (fun _ => true) / 2 * spK2 1 1) • rankOne (ssEdgeDiff 1 1))) := by
+    rw [ssLaplacian, Fintype.sum_prod_type]
+    simp [Fin.sum_univ_two]
+  have hA01 : spK2 0 1 = 1 := by simp [spK2]
+  have hA10 : spK2 1 0 = 1 := by simp [spK2]
+  rw [hexpand, hadd, hadd, hadd,
+    hterm ((0, 0) : Fin 2 × Fin 2), hterm ((0, 1) : Fin 2 × Fin 2),
+    hterm ((1, 0) : Fin 2 × Fin 2), hterm ((1, 1) : Fin 2 × Fin 2),
+    spp_weight_true_QA, spp_weight_true_swapped_QA]
+  simp [spK2]
+  norm_num
+
+end StructuralPins
+
 end SparsificationQA

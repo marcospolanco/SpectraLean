@@ -1974,4 +1974,146 @@ theorem dmxCyc_one_eq_QA :
 
 end DobrushinShadowQA
 
+/-! ## Section H: the mixing-time interface layer's positive pins
+(`proposals/mixing-time-interface-pins.md`)
+
+The compiler-derived consumption census (2026-09-07,
+`wip/census_20260907.txt`) found four of this module's interface
+theorems among the library's designed-but-unconsumed: the per-start
+and uniform rate ceilings and the antitonicity/escalation interfaces.
+The prior QA *evaluated their displays* beside the objects
+(`PR_tmix_ceiling_attained_QA`, `PRU_tmix_ceiling_attained_QA`,
+`PRU_escalation_attained_QA` consumed the `_mul_` sibling) without
+ever applying them — the consumption-census finding this section
+closes: each theorem below is consumed at the delivered `A2` fixture,
+deriving a concrete threshold THROUGH the interface (the rate ceilings
+and the escalation display re-derive the pinned exact object values by
+new routes; antitonicity delivers a lower bound the attainment route
+did not).
+-/
+
+section A2InterfacePins
+
+/-- Pin 1: `pageRankMixingTimeFrom_le_of_rate` — the per-start α-ceiling
+consumed for the first time; the display evaluates to `⌈log 4/log 2⌉ =
+2`, re-deriving the ≤ half of `PR_tmix_eighth_QA` by the rate route
+(where that pin used the witness certificate). -/
+theorem mtip_From_rate_le_QA :
+    pageRankMixingTimeFrom A2 (1/2) u2 0 (1/8) ≤ 2 := by
+  have h := pageRankMixingTimeFrom_le_of_rate A2 A2_nonneg_QA A2_deg_QA
+    (by norm_num : (0 : ℝ) < 1/2) (by norm_num : (1/2 : ℝ) < 1)
+    u2_sum u2_stationary_Gd (by norm_num : (0 : ℝ) < 1/8) 0
+  have htv : tvDistance (Pi.single (0 : Fin 2) (1 : ℝ) : Fin 2 → ℝ) u2 = 1/2 := by
+    rw [piSingle_zero_eq_e0]; exact tv_e0_u2
+  rw [htv] at h
+  have hceil := PR_ceiling_arith_QA
+  rwa [hceil] at h
+
+/-- The `1/16` witness: `TV(s) = (1/2)^(s+1) ≤ 1/16` at every `s ≥ 3`
+(the closed form at work). -/
+theorem mtip_From_sixteenth_witness_QA :
+    ∀ s : ℕ, 3 ≤ s →
+      tvDistance (pageRankDistribution A2 (1/2) s 0) u2 ≤ 1/16 := by
+  intro s hs
+  have h4 : (4 : ℕ) ≤ s + 1 := by omega
+  have hp := PR_pow_half_le_QA h4
+  rw [PR_tv_eq_QA]
+  calc (1/2 : ℝ) ^ (s + 1) ≤ (1/2 : ℝ) ^ 4 := hp
+    _ = 1/16 := by norm_num
+
+/-- Pin 2: `pageRankMixingTimeFrom_anti` — the lower bound
+`2 ≤ t_mix(1/16)` THROUGH antitonicity (from the pinned
+`t_mix(1/8) = 2`), a genuinely different route than the spec/attainment
+argument `PR_tmix_eighth_QA` used for its own lower bound. -/
+theorem mtip_From_anti_lb_QA :
+    (2 : ℕ) ≤ pageRankMixingTimeFrom A2 (1/2) u2 0 (1/16) := by
+  have hanti := pageRankMixingTimeFrom_anti A2 (1/2) u2 0
+    (ε := 1/16) (δ := 1/8) (by norm_num : (1/16 : ℝ) ≤ 1/8)
+    ⟨3, mtip_From_sixteenth_witness_QA⟩
+  rw [PR_tmix_eighth_QA] at hanti
+  exact hanti
+
+/-- Pin 2b: the object at the second threshold — `t_mix(1/16) = 3`
+(≤ by the witness certificate, ≥ by the attainment route; the
+antitonicity lower bound `mtip_From_anti_lb_QA` stands beside it as
+the anti consumption). -/
+theorem mtip_From_sixteenth_QA :
+    pageRankMixingTimeFrom A2 (1/2) u2 0 (1/16) = 3 := by
+  refine le_antisymm
+    (pageRankMixingTimeFrom_le_of_cert A2 (1/2) u2 0 3
+      mtip_From_sixteenth_witness_QA) ?_
+  by_contra h
+  push_neg at h
+  have hwit : ∃ T : ℕ, ∀ s : ℕ, T ≤ s →
+      tvDistance (pageRankDistribution A2 (1/2) s 0) u2 ≤ 1/16 :=
+    ⟨3, mtip_From_sixteenth_witness_QA⟩
+  have hspec := pageRankMixingTimeFrom_spec A2 (1/2) u2 0 hwit
+  have h2 : pageRankMixingTimeFrom A2 (1/2) u2 0 (1/16) ≤ 2 := by omega
+  have hcon := hspec 2 h2
+  rw [PR_tv_eq_QA] at hcon
+  have hev : (1/2 : ℝ) ^ (2 + 1) = 1/8 := by norm_num
+  rw [hev] at hcon
+  norm_num at hcon
+
+/-- Pin 3: `pageRankMixingTime_le_of_rate` — the uniform object's
+refined α-ceiling consumed for the first time (the delivered
+`PRU_tmix_ceiling_attained_QA` pinned attainment by evaluating both
+sides separately); `d̄(0) = 1/2` evaluates the display to `2`, the
+pinned object value. -/
+theorem mtip_unif_rate_le_QA :
+    pageRankMixingTime A2 (1/2) u2 (1/8) ≤ 2 := by
+  have h := pageRankMixingTime_le_of_rate A2 A2_nonneg_QA A2_deg_QA
+    (by norm_num : (0 : ℝ) < 1/2) (by norm_num : (1/2 : ℝ) < 1)
+    u2_sum u2_stationary_Gd (by norm_num : (0 : ℝ) < 1/8)
+  have hd0 : pageRankTVUniform A2 (1/2) u2 0 = 1/2 := by
+    have h2 := PRU_uniform_closed_QA 0
+    norm_num at h2
+    exact h2
+  rw [hd0] at h
+  have hceil := PR_ceiling_arith_QA
+  rwa [hceil] at h
+
+/-- Pin 4: `pageRankMixingTime_le_of_escalation` — the ⌈log⌉ display
+escalation consumed for the first time (the delivered
+`PRU_escalation_attained_QA` consumed the `_mul_` form); at the same
+certified evaluation `t₀ = 2` (`d̄(2) = 1/8`, `d(2) = 1/4`) the
+display reads `(⌈log 4/log 4⌉ + 1) · 2 = 4` — the pinned object value. -/
+theorem mtip_unif_escalation_le_QA :
+    pageRankMixingTime A2 (1/2) u2 (1/32) ≤ 4 := by
+  have hunif : pageRankTVUniform A2 (1/2) u2 2 ≤ 1/8 := by
+    have h := PRU_uniform_closed_QA 2
+    norm_num at h
+    exact le_of_eq h
+  have hpair : pageRankTVPair A2 (1/2) 2 ≤ 1/4 := by
+    have h := PRU_pair_closed_QA 2
+    norm_num at h
+    exact le_of_eq h
+  have h := pageRankMixingTime_le_of_escalation A2 A2_nonneg_QA A2_deg_QA
+    (by norm_num : (0 : ℝ) ≤ 1/2) (by norm_num : (1/2 : ℝ) < 1)
+    u2_sum u2_stationary_Gd
+    (ε := 1/32) (ε₀ := 1/8) (ρ := 1/4)
+    (by norm_num : (0 : ℝ) < 1/8) (by norm_num : (0 : ℝ) < 1/32) 2
+    (by norm_num : (0 : ℝ) < 1/4) (by norm_num : (1/4 : ℝ) < 1)
+    hunif hpair
+  have hlog4ne : Real.log 4 ≠ 0 := by
+    have h2 : Real.log 4 = 2 * Real.log 2 := by
+      rw [show (4 : ℝ) = 2 ^ 2 from by norm_num, Real.log_pow (2 : ℝ) 2]
+      push_cast
+      ring
+    rw [h2]
+    exact ne_of_gt (mul_pos (by norm_num : (0 : ℝ) < 2)
+      (Real.log_pos (by norm_num : (1 : ℝ) < 2)))
+  have hratio : Real.log ((1/8 : ℝ) / (1/32)) / Real.log (1 / (1/4 : ℝ)) = 1 := by
+    have ha : ((1/8 : ℝ) / (1/32)) = 4 := by norm_num
+    have hb : (1 : ℝ) / (1/4) = 4 := by norm_num
+    rw [ha, hb, div_self hlog4ne]
+  have hceil : Nat.ceil
+      (Real.log ((1/8 : ℝ) / (1/32)) / Real.log (1 / (1/4 : ℝ))) = 1 := by
+    rw [hratio]
+    norm_num
+  rw [hceil] at h
+  omega
+
+end A2InterfacePins
+
 end Scaffold.QA.SpectralGraph

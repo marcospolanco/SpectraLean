@@ -5,33 +5,318 @@ updated at milestone boundaries; [`AGENT_ACTIVITY.md`](AGENT_ACTIVITY.md)
 holds the append-only narrative.
 ## Active milestone
 
+**None open.** The queue is empty — check `proposals/README.md`'s
+Active priority table (all-Low, decision-gated) and the next-handoff
+below (the census's remaining inert set names the next clusters).
+
+------
+
+**The sparsification structural lemmas' positive pins — DELIVERED**
+(run `20260907T040424Z-run-1`, session `ses_f8684723effefqlJShDqrQZ0l1`;
+terminal entry appended to `AGENT_ACTIVITY.md`; the same-run proposal
+`proposals/sparsification-structural-pins.md` COMPLETE with delivery
+record). The Active priority table stays all-Low (decision-gated) —
+check the handoff below.
+
+------
+
+**The sparsification structural lemmas' positive pins** — the census's
+largest remaining inert cluster (9 theorems, the sampled-Laplacian
+machinery under `matrix_bernstein`'s one real theorem consumer).
+
+**DELIVERED at the full designed scope** — 15 QA theorems in
+`Sparsification_QA.lean`'s new `StructuralPins` section (QA 6579 →
+6594), QA-only, zero axiom contact (`#print axioms` via
+`wip/sppins_axcheck.lean` on all 15 — every one exactly
+`propext, Classical.choice, Quot.sound`). **The first genuine
+consumption of all nine structural lemmas** at the `spK2` fixture,
+unsaturated budget `q = 1` (probability `1/2`, weights exactly `2`/`0`):
+the projector four, the sampling-design four, and the
+sampled-Laplacian three — including the computed form VALUE `8`
+proving the all-true sampled Laplacian is exactly twice the true one,
+load-bearing on the weights, the `1/2` ordered-pair factor, and
+`rankOne` together. **Consumption closure verified by the tool**: the
+census re-run shows exactly the 9 targeted theorems leaving the inert
+set (1298 → 1307 value-consumed, 59 → 50 never-touched — no bonus, no
+collateral). The pins method's third application and its first
+matrix-level target.
+
+**Verification:** spike-first (`wip/sppins_spike.lean` — the nine
+consumptions green in one round, the value pin after two; the traps
+recorded in the proposal: `quadForm_finset_sum` PRIVATE to the shelf
+(route via `Fintype.sum_prod_type` + a quadForm-additivity helper on
+the public `Matrix.add_mulVec`/`add_dotProduct`), and the
+`add_mulVec`/`mulVec_add` name pair's side-dispatch); the landed
+module elaborates with zero errors/warnings; explicit build ✔; **full
+`lake build` + `check_build_completeness.py` — 135 source files, 135
+fresh artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0
+(4 axioms unchanged); `check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new `spp_*`
+names collision-free); `check_backlog_freshness` clean; scoreboard
+regenerated (**1359 functional / 6594 QA / 4 axioms / 0 sorries**)
+with the verification row; map freshness exit 0 after the stats sync
+in both map data tables + SVG regeneration (49 stations, no status
+change — none owed). Records updated: the proposal (COMPLETE +
+delivery record), `proposals/README.md` (new Delivered row), README
+(6594), the radar (QA row synced, held 4.5), the scoreboard
+verification row, both map data tables + regenerated SVG, this plan,
+and the activity log. Nothing committed; prior runs' uncommitted
+deliveries preserved.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. Honest scope: one fixture (`K₂`), one
+budget (`q = 1`); the projector pins at entry level (the diagonal
+VALUES are eigen-index dependent, pinned only through the trace
+elsewhere).
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The census's remaining inert set (50): the Magnetic structural facts
+(6) are the next cluster by size (the complex Hermitian layer);
+smaller: FunctionalCalculus (5), Signed (4), EdgePerturbation (4),
+AlonBoppana (3), Expander (3), Mixing (4), plus the Poincaré pair
+(the family's two headline theorems — small count, high name weight).
+The pins method applies unchanged; cluster size and name-weight are
+the selection keys. Operator-gated items unchanged (master-bound
+Step 2; `perron_frobenius` deprecation; backlog items 5/6;
+log-Sobolev; the reverse TV → χ² consumer).
+
+------
+
+**The mixing-time interface layer's positive pins — DELIVERED** (run
+`20260907T020912Z-run-1`, session `ses_f8684723effefqlJShDqrQZ0l1`;
+terminal entry appended to `AGENT_ACTIVITY.md`; the same-run proposal
+`proposals/mixing-time-interface-pins.md` COMPLETE with delivery
+record). The Active priority table stays all-Low (decision-gated) —
+check the handoff below.
+
+------
+
+**The mixing-time interface layer's positive pins** — the prior
+handoff's top census target, re-confirmed by a fresh census run at
+this run's opening (81 → 70 inert — the Tikhonov closure claim
+reproduced by the tool itself; report at `wip/census_20260907.txt`).
+
+**DELIVERED at the full designed scope** — 18 QA theorems
+(DirectedMixing_QA 186 → 192, Mixing_QA 763 → 775; QA 6561 → 6579),
+QA-only, zero axiom contact (`#print axioms` via
+`wip/mtifaces_axcheck.lean` on all 18 — every one exactly
+`propext, Classical.choice, Quot.sound`). **The first genuine
+consumption of all 10 designed-but-unconsumed `t_mix` interface
+theorems** — the prior QA had evaluated the interfaces' displays
+beside the objects without ever applying them: the per-start/uniform
+rate ceilings and both ⌈log⌉ escalation displays re-derive the pinned
+exact object values THROUGH the theorems; antitonicity delivers lower
+bounds the attainment route never did; the lazy intrinsic-rate
+ceiling's ≤ direction is consumed for the first time (its docstring's
+aspirational QA claim made true — the Tikhonov header pattern, second
+instance); the depth-form TV ceiling and the entrywise max-rate
+ceiling complete the set. **Consumption closure verified by the
+tool**: the post-delivery census re-run shows 11 theorems leaving the
+inert set (the 10 targeted plus `lazyWalkDistribution_tvDistance_
+le_of_connected` transitively); census 1287 → 1298 value-consumed,
+70 → 59 never-touched.
+
+**Verification:** spike-first (`wip/mtifaces_spike.lean` — green
+after ~8 fix rounds, the traps recorded in the proposal); both landed
+modules elaborate with zero errors; explicit builds ✔; **full `lake
+build` + `check_build_completeness.py` — 135 source files, 135 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+axioms unchanged); `check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new `mtip_*`
+names collision-free); `check_backlog_freshness` clean; scoreboard
+regenerated (**1359 functional / 6579 QA / 4 axioms / 0 sorries**)
+with the verification row; map freshness exit 0 after the stats sync
+in both map data tables + SVG regeneration (49 stations, no status
+change — none owed). Records updated: the proposal (COMPLETE +
+delivery record), `proposals/README.md` (new Delivered row), README
+(6579), the radar (QA row synced, held 4.5), the scoreboard
+verification row, both map data tables + regenerated SVG, this plan,
+and the activity log. Nothing committed; prior runs' uncommitted
+deliveries preserved.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition
+changed, no public statement changed. Honest scope: the pins are at
+three fixtures (A2 two-cycle, triangle, path) and one lazy corner
+start; the displays are EXACT at the two-cycle and triangle but
+honest-slack at the path.
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The census's remaining inert set (59 theorems) has no further cluster
+of this pattern's size — the next-largest are the Sparsification
+design's structural lemmas (9: `imageProjector_*`/`ssLaplacian_*`/
+`quadForm_*` — pins at the delivered fixtures) and the Magnetic
+structural facts (6); both are consumable by the same pins method but
+smaller. The iid-wrapper cheap pins remain available. Operator-gated
+items unchanged (master-bound Step 2; `perron_frobenius` deprecation;
+backlog items 5/6; log-Sobolev; the reverse TV → χ² consumer).
+
+------
+
+**The Tikhonov family's adversarial fence audit and first positive
+pins — DELIVERED** (across two runs: `20260906T160601Z-run-1` spiked
+and landed the QA before interruption; `20260907T013052Z-run-1`,
+session `ses_f8684723effefqlJShDqrQZ0l1`, verified the elaboration,
+ran the axiom audit and full ladder, and wrote the records; terminal
+entry appended to `AGENT_ACTIVITY.md`; the same-run proposal
+`proposals/adversarial-fences-tikhonov-family.md` COMPLETE with
+delivery record). The Active priority table stays all-Low
+(decision-gated) — check the handoff below.
+
+------
+
+**The Tikhonov family's adversarial fence audit and first positive
+pins** — the consumption census's top named target (its first
+application as a targeting tool): the least-consumed theorem family
+(11 of ~24 theorems with zero QA consumers, the existing QA
+re-deriving minimality/uniqueness numerically beside the theorems).
+
+**DELIVERED at the full designed scope** — 48 QA declarations in
+`Tikhonov_QA.lean`'s new `AdversarialFences` section (QA 6513 → 6561;
+the file 54 → 102 theorems), QA-only, zero axiom contact
+(`#print axioms` via `wip/tikfences_axcheck.lean` on all 48 — every
+one exactly `propext, Classical.choice, Quot.sound`). Both halves of
+the census finding closed: **the `tkp_` positive pins** — the first
+genuine consumption of all 11 inert theorems (the
+shrinkage-arithmetic six at both `K₂` eigenvalues, the FORWARD normal
+equation re-derived from the theorem, minimality and uniqueness
+THROUGH the theorems, the eigenvector-input theorem,
+non-idempotence); **the `tkf_` fences** — the shrinkage-arithmetic
+five's `hπ`/`hlam` clauses (junk corners recorded as junk; the
+genuine `λ = 0` boundary kill), the `π = 0` matrix guards on the
+general `tik_K2_zero_gen` lemma (the 2026-08-20 free-form witness
+`not_minimality_pi0_K2` reconciled into the per-clause discipline;
+kept-genuine companions where the remaining hypotheses hold at the
+breaker), the kernel-mode kill of the non-idempotence theorem's `hμ`
+through the eigen theorem itself, and the signed-network PSD clause
+(spectrum `{0, −2}` pinned, symmetry kept genuine). Pole-class
+deferrals priced with both routes in the proposal.
+
+**Verification:** spike-first (`wip/tikfences_spike.lean`, the
+interrupted run); `lake env lean` on the landed module — zero
+errors, zero warnings; explicit `lake build` ✔; **full `lake build` +
+`check_build_completeness.py` — 135 source files, 135 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+axioms unchanged); `check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new
+`tkp_*`/`tkf_*`/`tkfSigned*` names collision-free);
+`check_backlog_freshness` clean; scoreboard regenerated (**1359
+functional / 6561 QA / 4 axioms / 0 sorries**) with the verification
+row; map freshness exit 0 after the stats sync in both map data
+tables + SVG regeneration (49 stations, no status change — none
+owed). Records updated: the proposal (COMPLETE + delivery record),
+`proposals/README.md` (new Delivered row), README (6561), the radar
+(QA row synced, held 4.5), `index/map/spectral_graph.md` (the
+Tikhonov section's audit note), the scoreboard verification row, both
+map data tables + regenerated SVG, the QA file's header pointer, this
+plan, and the activity log. Nothing committed; prior runs' uncommitted
+deliveries preserved.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition
+changed, no public statement changed. QA proves consequences relative
+to the substrate; it does not prove the substrate (no axiom touched).
+Honest scope: the pins are at the `K₂` fixture and the scalar
+shrinkage level; the pole-class deferrals are priced.
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The census's remaining named targets, in leverage order: (b) the
+mixing-time interface layer (`DirectedMixing`/`Oversmoothing`
+`*_spec`/`*_anti`/`*_le_of_*`, 10 designed-but-unconsumed theorems —
+the same pins-plus-fences pattern, though note these are interface
+lemmas whose consumption wants a *consumer composition*, which may
+price differently than a pin); (c) cheap positive pins for the iid
+wrappers at the delivered biased-product fixtures. Operator-gated
+items unchanged (the master-bound Step 2 admission; the
+`perron_frobenius` deprecation; backlog items 5/6; log-Sobolev; the
+reverse TV → χ² consumer).
+
+------
+
+**Prior milestone (DELIVERED, no longer active):** the
+compiler-derived consumption survey — see the delivered record below.** The compiler-derived consumption survey — the exact
+QA→shelf dependence tooling three consecutive terminal handoffs named
+— was DELIVERED (run `20260906T152401Z-run-1`, session
+`ses_f88af72b3ffeyngW2jyIJuJLtE`; terminal entry appended to
+`AGENT_ACTIVITY.md`; the same-run proposal
+`proposals/compiler-derived-consumption-survey.md` COMPLETE with
+delivery record). The Active priority table in `proposals/README.md`
+stays all-Low (decision-gated) — check the handoff below.
+
+------
+
 **The compiler-derived consumption survey — exact QA→shelf dependence
-tooling** — the theorem-level survey's named honest residue (three
-consecutive terminal handoffs): the string-heuristic survey keys
-produced false inert-declarations (the sharp-layer survey's
-closure half, caught by hand-check), so audit targeting needs the
-exact answer only the elaborator can give. **Design:** a Lean
-metaprogram probe (importing every QA module) computing, for each QA
-declaration, the memoized transitive closure of constants its VALUE
-and TYPE reach, restricted to `Scaffold.Mathlib`/`Scaffold.Derived`
-names — value-dependence (proof consumption) and type-mention
-(interface exercise) reported SEPARATELY, which is exactly the
-distinction the string keys conflated. Wrapped by
-`scripts/consumption_survey.py` (generates the probe, runs `lake env
-lean`, parses, prints the census), report-only — not wired into the
-blocking ladder. **First application:** the exact never-QA-consumed
-functional-declaration census (the residue the string survey could
-not answer honestly). **Validation (Step 0):** the tool must
-reproduce known-true dependencies from recent deliveries
-(`prC4G_top_QA` → `googleMatrix_evals_top_eq_one`,
-`prCycG_second_QA` → `googleMatrix_evals_second_le`,
-`prCycG_bot_QA` → `evals_sum_eq_trace`). **Next action:** probe
-API feasibility (`wip/consumption_probe.lean`) → the full tool →
-census → the same-run proposal with delivery record → ladder →
-records. **Continued 2026-09-06T15:24Z** (run `20260906T152401Z-run-1`):
-the prior run wrote the wrapper but was interrupted before any probe
-elaboration — this run smoke-tests the probe, then delivers the census
-and records.
+tooling — DELIVERED** (2026-09-06; continuing and completing the
+interrupted 15:01Z run's recorded intent). The theorem-level survey's
+named honest residue: string-heuristic survey keys produced false
+inert-declarations, so audit targeting needs the elaborator's own
+answer.
+
+**DELIVERED at the full designed scope** — `scripts/consumption_survey.py`
+(generated Lean metaprogram probes; value-vs-type separated memoized
+transitive constant closure over the Scaffold-only universe;
+collision-partitioned QA groups with the bisection fallback that
+proved load-bearing — 4 bisects on the opening group, the
+name-collision guard's documented failure mode hit in practice);
+report-only by design (11 probe elaborations, ~8 min — a targeting
+tool, not a ladder check); in-script Step-0 validation (3 known-true
+dependencies from the last two deliveries reproduced) plus hand
+spot-checks of every inert-side string hit.
+
+**The first census:** 8,988 QA declarations with shelf contact;
+76,218 value-edges / 25,571 type-edges; **1,357 public shelf theorems
+(1,276 value-consumed, 81 never touched), 182 defs (3 never — the
+definition-only `Core` modules, compiler-confirming the hand survey),
+4 axioms with exact QA consumer counts (23/8/6/3)**. Headline
+findings: the hypothesis-form fences are consumption-free BY DESIGN
+(~17 of the 81 inert theorems are fenced-but-never-instantiated —
+exactly where every string key counted name mentions as coverage);
+Tikhonov is the least-consumed theorem family (11 untouched — the
+named next audit target); the mixing-time interfaces
+(`*_spec`/`*_anti`/`*_le_of_*`, 10 theorems) are designed-but-
+unconsumed; the iid wrappers and the 2026-08-30 repair's
+`matrix_hoeffding_quadForm` passthrough carry zero positive
+consumers; the load-bearing spine ranked (top:
+`isHermitian_of_isSymm` at 1,218 distinct QA consumers). Counting-
+metric reconciliation recorded (elaborated 1,357 vs scoreboard 1,359
+source-regex: Prop-field projections vs prose artifacts, both
+verified at name level on the `Spectral` module).
+
+**Verification:** no Lean source changed; the survey re-run
+deterministically on the recorded filter set; **full `lake build` +
+`check_build_completeness.py` — 135 source files, 135 fresh
+artifacts, 0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4
+axioms unchanged); `check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness`;
+`check_backlog_freshness` clean; scoreboard regeneration a no-op
+(counts unchanged — nothing owed). Records updated: the proposal
+(COMPLETE + delivery record with five Lean-4.14 metaprogram technique
+findings and the counting-metric honesty note),
+`proposals/README.md` (new Delivered row), this plan, and the
+activity log. This run committed nothing; mid-run the operator
+batch-committed the prior deliveries as `43c032e` (observed,
+untouched — see the run note in the activity log); this run's own
+5-file change set remains uncommitted on top, per the
+operator-commits pattern.
+
+**Remaining risk:** none owed — report-only tooling plus records; no
+Lean source, no axiom disposition, no public statement changed. The
+census is a snapshot (re-run after any QA/shelf delivery); its
+targeting conclusions name candidates, not obligations.
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The census's named targets, in leverage order: (a) the Tikhonov
+cluster (11 never-consumed theorems with an existing QA fixture
+layer — the standing audit pattern's natural next application);
+(b) the mixing-time interface layer (`DirectedMixing`/`Oversmoothing`
+`*_spec`/`*_anti`/`*_le_of_*`, 10 theorems); (c) cheap positive pins
+for the iid wrappers at the delivered biased-product fixtures. The
+operator-gated items are unchanged (the master-bound Step 2
+admission; the `perron_frobenius` deprecation — whose QA
+consumer count the census now fixes at 6; backlog items 5/6;
+log-Sobolev; the reverse TV → χ² consumer).
 
 ------
 

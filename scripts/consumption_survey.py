@@ -144,7 +144,7 @@ run_cmd do
     IO.FS.withFile outPath .write fun h => do
       for n in univ do
         if (← shelfMod.get).get? n |>.getD false then
-          h.putStr s!"D\\t{{n}}\\t{{(← modIdxMap.get).get? n |>.getD Name.anonymous}}\\t{{kindOf n}}"
+          h.putStr s!"D\\t{{n}}\\t{{(← modIdxMap.get).get? n |>.getD Name.anonymous}}\\t{{kindOf n}}\\n"
       for n in univ do
         if (← qaMod.get).get? n |>.getD false then
           match env.find? n with
@@ -161,8 +161,8 @@ run_cmd do
                 if let some t := (← reachRef.get).get? c then
                   for x in t do tset := tset.insert x
             let qmod := (← modIdxMap.get).get? n |>.getD Name.anonymous
-            for x in vset do h.putStr s!"V\\t{{n}}\\t{{qmod}}\\t{{x}}"
-            for x in tset do h.putStr s!"T\\t{{n}}\\t{{qmod}}\\t{{x}}"
+            for x in vset do h.putStr s!"V\\t{{n}}\\t{{qmod}}\\t{{x}}\\n"
+            for x in tset do h.putStr s!"T\\t{{n}}\\t{{qmod}}\\t{{x}}\\n"
           | none => pure ()
     IO.println s!"consumption survey group: {{univ.size}} Scaffold constants scanned"
 """
@@ -278,11 +278,27 @@ def main() -> int:
     decls: dict[str, tuple[str, str]] = {}
     value_edges: dict[str, set[str]] = {}
     type_edges: dict[str, set[str]] = {}
+    # generated/derived names must not pollute the census kinds: Lean's
+    # auto-generated components (`proof_N` auto-binders, `match_N`
+    # equation temps, `_spec_N` simp-congruence axioms) carry thm/def/
+    # axiom kinds; reclassify to "gen". Private declarations are kept
+    # (real declarations, audited transitively by the fence deliveries).
+    def kind_of(name: str, raw: str) -> str:
+        if (re.search(r"[.](proof_|match_|spec_|eq_)[0-9]+$", name)
+                or "._at." in name or name.startswith("_private.")
+                or re.search(r"[.]_auxLemma([.][0-9]+)?$", name)
+                or ".mk." in name
+                or re.search(r"._(cstage|rarg|lambda|closed|sizeOf_)", name)
+                or re.search(r"[.](casesOn|recOn|noConfusion|noConfusionType"
+                             r"|brecOn|below|ibelow|binductionOn"
+                             r"|imajor|majorIdx)$", name)):
+            return "gen"
+        return raw
     for f in edge_files:
         for line in f.read_text().splitlines():
             parts = line.split("\t")
             if parts[0] == "D":
-                decls[parts[1]] = (parts[2], parts[3])
+                decls[parts[1]] = (parts[2], kind_of(parts[1], parts[3]))
             elif parts[0] == "V":
                 value_edges.setdefault(parts[1], set()).add(parts[3])
             elif parts[0] == "T":
@@ -353,6 +369,16 @@ def main() -> int:
       f"({len(inert)} total — the exact inert census)")
     for m in sorted(by_mod):
         P(f"- {m} ({len(by_mod[m])}): " + ", ".join(sorted(by_mod[m])))
+    P()
+
+    inert_defs = defs - consumed_v - consumed_t
+    dmod: dict[str, list[str]] = collections.defaultdict(list)
+    for n in inert_defs:
+        dmod[decls[n][0]].append(n)
+    P("### Never-touched shelf defs by module "
+      f"({len(inert_defs)} total)")
+    for m in sorted(dmod):
+        P(f"- {m} ({len(dmod[m])}): " + ", ".join(sorted(dmod[m])))
     P()
 
     # top-consumed shelf theorems (the load-bearing ranking)

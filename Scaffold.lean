@@ -19,6 +19,7 @@ import Scaffold.Mathlib.GraphTheory.PageRank
 import Scaffold.Mathlib.GraphTheory.DirectedMixing
 import Scaffold.Mathlib.GraphTheory.Stationary
 import Scaffold.Mathlib.GraphTheory.Mixing
+import Scaffold.Mathlib.GraphTheory.QuantizedCheeger
 import Scaffold.Mathlib.GraphTheory.Oversmoothing
 import Scaffold.Mathlib.GraphTheory.Heat
 import Scaffold.Mathlib.GraphTheory.Directed
@@ -178,6 +179,13 @@ complex-spectrum domination, deliberately with **no** strict-dominance
 clause since imprimitive directed cycles have peripheral eigenvalues of
 equal modulus), the probability
 concentration bridge (`Probability.Concentration.*`), the
+quantized Cheeger inequality (`GraphTheory.QuantizedCheeger`: the
+repository's first numerical-robustness layer — a uniform `b`-bit
+quantizer for the spectral gap over the proved a priori range
+`[0, 2]`, its half-bucket error bound around Mathlib's `round`, and
+the two-sided sandwich bracketing the Cheeger constant purely in
+terms of the quantized `λ̃₂` with the explicit asymmetric envelope
+`±1/2^b`, all proved hard crust on the two Cheeger theorems), the
 finite-distribution entropy layer (`InformationTheory.Entropy`:
 relative entropy and Shannon entropy with Gibbs' inequality and the
 entropy maximum, all proved hard crust), the derived

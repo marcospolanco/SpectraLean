@@ -1,11 +1,13 @@
 # Proposal: A Quantized Cheeger Inequality
 
-**Status:** Proposed. Restated in pure-mathematics form 2026-09-07 from
-an external request relayed by the operator (not tracked in this
-repository — see `.gitignore`); no operational, product, or patent
-framing survives into this document, only the underlying mathematical
-ask. Authorizes no Lean changes, axiom admissions, document rewrites,
-or transit-map edits.
+**Status:** **COMPLETE** (delivered 2026-09-07, run
+`20260907T181653Z-run-1`, session
+`ses_f82ef3914ffezcZvjOFblSpnJ1` — see the delivery record at the
+end of this document). Originally restated in pure-mathematics form
+2026-09-07 from an external request relayed by the operator (not
+tracked in this repository — see `.gitignore`); no operational,
+product, or patent framing survives into this document, only the
+underlying mathematical ask.
 
 Companion to `Scaffold/Mathlib/GraphTheory/Cheeger.lean`
 (`cheeger_upper_bound`/`cheeger_lower_bound`, both complete, zero-
@@ -227,3 +229,201 @@ real-number algebra around an already-proved Mathlib lemma. Tracked as
 
 Ready to pick up immediately — no dependency on any other proposal's
 status.
+
+## Delivery record (2026-09-07)
+
+**Delivered at the full designed scope — Steps 1–3 plus the QA plan's
+fences, all in one run as the operating instructions priced.** The new
+public module `Scaffold/Mathlib/GraphTheory/QuantizedCheeger.lean`
+(registered in the umbrella, 64 public modules):
+
+- **Step 1** — `Quantization.quantize` (the rescale-round-rescale
+  definition, `noncomputable` through Mathlib's `round`),
+  `Quantization.quantize_mul_step` (the bucket-midpoint fixed points,
+  stated at every `k : ℤ` — stronger than the plan needed, since the
+  identity carries no `k ≤ 2^b` bound), and
+  `Quantization.abs_sub_quantize_le` (`|x − quantize b R x| ≤
+  R / 2^(b+1)`, the route exactly as designed: factor `R/2^b` out,
+  `abs_sub_round` at `x · 2^b/R`, fold `2^(b+1) = 2 · 2^b`).
+- **Step 2** — `secondEval_regularNormalizedLaplacian_nonneg` (the
+  floor, read off `evals` at the sorted second entry through
+  `evals_mem_eigvalOf` + `quadForm_eigvecOf_self` at PSD-ness — the
+  plan's "already on the shelf via its PSD-ness" was *derivable*, not
+  packaged; this is its first standalone statement) and
+  `secondEval_regularNormalizedLaplacian_le_two` (the cap
+  transported through
+  `normalizedLaplacian_eq_regularNormalizedLaplacian` +
+  `secondEval_congr`, with the `0 < deg` clause discharged from
+  `d`-regularity).
+- **Step 3** — `quantized_cheeger_le` exactly as stated in this
+  document, both conjuncts; pure `linarith`/`Real.le_sqrt` assembly
+  over the two Cheeger theorems and the error bound.
+
+**The Step-0 survey's one finding changed the file plan, not the
+math:** the sandwich needs `Mixing.lean`'s range cap, but
+`Mixing → Stationary → RandomWalk → Cheeger` is an import cycle, so
+`Cheeger.lean` cannot host Steps 2–3. The pre-authorized "minimal
+standalone file" branch applies; the graph-agnostic quantizer lives in
+the nested `Quantization` namespace so a future non-Cheeger consumer
+can find it without Cheeger's transitive weight.
+
+QA: the new `Scaffold/QA/SpectralGraph/QuantizedCheeger_QA.lean`
+(11 theorems), per this document's own QA plan: the tie pins
+(`qcTie_b0` at `b = 0`: `quantize 0 2 1 = 2`, rounding UP at the
+coarsest depth; `qcTie_b3` at `b = 3`: `quantize 3 2 (1/8) = 1/4`,
+the boundary between the `0`- and `1/4`-buckets — the `round 2⁻¹ = 1`
+tie-breaking made concrete at two depths), the **sharpness pin**
+(`qcTie_b3_error_eq`: the error at the `b = 3` tie is EXACTLY the
+bound `2/2⁴ = 1/8` — attained, not slack — with the theorem's own
+instance `qcTie_b3_bound_QA` beside it), the **boundary-count fence**
+(`qcBoundaryCount`: injectivity of the `Fin (2^b+1)` representative
+family through `quantize_mul_step`, plus `qcBoundaryCount_b2`, the
+`b = 2` card pin `5` on `[0, 4]`), and **the K₂ sandwich** at `b = 0`
+(`1/2 ≤ φ ≤ √6`) and `b = 3` (`15/16 ≤ φ ≤ √(2(2 + 1/8))`),
+numerically collapsed through the independently pinned
+`edge_normLap_secondEval_eq_two_QA` and `edge_cheegerConstant`, with
+`qcK2_quantize_eval` (the cap value exactly representable at every
+depth) isolating the envelope's own arithmetic, and the tightening
+witness `qcK2_tightening_QA` (`1/2 < 15/16 ≤ φ`), and **`qcK2_cap_via_bridge_QA` — the Step-2 cap bridge's own consumer, added when the delivery's first census pass caught the cap unconsumed** (the sandwich never proof-depends on its own range justification — the cap justifies the `R = 2` design choice): the transported bound instantiated at K₂, where the pinned spectrum shows it attained with equality, load-bearing on the transport itself. **Scope note
+against the plan:** the sandwich pins run at K₂ only — the plan named
+"path/cycle fixtures already carrying exact `secondEval` pins", but
+the only exact `λ₂` pin in QA is K₂'s; path/cycle pins would first
+need their own spectral pinning (priced below, not owed).
+
+**Verification:** spike-first (`wip/qcheb_spike.lean`, green after
+five fix rounds). Traps recorded: **`λ` is a reserved token** —
+`hλ2` as an identifier is a parse error whose cascade surfaced two
+theorems downstream; **a standalone numeric `have` defaults its
+literals to ℕ** — `2 / 2^(b+1) = 1/2^b` elaborated as a `Nat`
+statement (true there, but by truncation, not field algebra), making
+every field tactic report "no progress" — the `(2:ℝ)` ascription is
+load-bearing (a numerical-elaboration cousin of the §5 hazard-class
+discipline: check the elaborated shape, not the apparent one);
+`rw [h₁, h₂] at h₃ h₄` fails when each lemma matches only one
+hypothesis (single-instantiation per call); an implicit `{R}` before
+`hR : 0 < R` leaves `R` a metavariable at application time (the
+quantizer API takes `R` explicit); `secondEval_congr`'s equality
+direction (`.symm`); the `1/2^3` vs `1/8` display-normalization
+bridge (`congr 1; norm_num`). Full ladder: **17-declaration axiom
+audit via `wip/qcheb_axcheck.lean` — every one exactly `propext,
+Classical.choice, Quot.sound`** (the 5 public theorems, the quantizer
+def, all 11 QA theorems) — zero axiom contact; both landed modules
+elaborate with zero output; explicit builds ✔; full `lake build` +
+`check_build_completeness.py` — **138/138 fresh, 0 stale, 0 missing,
+exit 0** (both new modules in the default target); `lint_axioms`
+exit 0 (4 axioms unchanged); `check_refutation_independence`
+(24-tag clean); `check_public_reachability` (64 modules);
+`check_citations`; `check_markdown_links`; `check_qa_name_uniqueness`
+(the new `qc*` names collision-free); `check_backlog_freshness` clean;
+**consumption closure verified by the tool: the census re-run
+(`wip/census_20260907_post19.txt`) shows exactly the 5 new public
+theorems landing consumed — 1374 → 1379 value-consumed, never-touched
+0 → 0, the inert set held at the zero the previous run closed it to
+(the first pass caught the cap bridge `_le_two` inert;
+`qcK2_cap_via_bridge_QA` closed it before any record was written)**;
+scoreboard regenerated (**1376 → 1381 functional / 6803 → 6814 QA /
+4 axioms / 0 sorries**) with the verification row; map freshness
+exit 0 after the 1381/6814 sync in both map data tables + SVG
+regeneration (49 stations, no status change — this proposal has no
+map station); index coverage added (`index/map/spectral_graph.md`,
+three rows).
+
+**Honest scope and residue (priced, not owed):** `λ₂` alone, not
+top-`k` (the scope decision above); the K₂ sandwich at one fixture at
+two bit depths; the boundary-count fence at the representative family
+with the concrete card pinned at `b = 2` only; tie behavior pinned at
+positive inputs (the next run's corner audit CORRECTED this
+delivery's aside that negative ties are "symmetric by design" —
+Mathlib's `round` is half-up toward `+∞` (`round (−2⁻¹) = 0`), so
+negative ties round toward zero; the docstrings were corrected and
+the asymmetry pinned, see the follow-on audit below); a path/cycle
+sandwich pin blocked on those fixtures lacking exact spectral pins;
+a negative-input or floating-point-style relative-error quantizer not
+asked for and not built.
+
+### Follow-on delivered (2026-09-07, run `20260907T184945Z-run-1`)
+
+The priced residue above — "path/cycle sandwich pins blocked on
+exact spectral pins" — resolved by a better fixture than the priced
+one: **the triangle**, whose normalized spectrum `{0, 3/2, 3/2}` was
+already pinned by `Mixing_QA.lean`'s `tri_secondEval_QA` (eigenvalue
+classification + trace, no new spectral proof needed) and whose
+`λ₂ = 3/2` is **interior** — the first fixture where the quantizer
+genuinely errs (K₂ sits at the a priori cap `λ₂ = 2`, exactly
+representable at every depth, so its envelope slack never engaged).
++18 QA theorems in `QuantizedCheeger_QA.lean`'s new triangle section
+(QA 6814 → 6832), zero axiom contact (18-declaration audit, all at
+the standard three):
+
+- the triangle's `cheegerConstant = 1` — a generic card-based cut
+  enumeration (no literal-subset matching: card 1 or 2 by the
+  complement-count split, card-2 cuts reduced to singletons through
+  the shelf's `conductance_compl`), the conductance arithmetic
+  independent of the sandwich;
+- the spectrum bridge to the sandwich's operator spelling (the same
+  `secondEval_congr` route as the delivered cap bridge);
+- value pins `3/2 → 2 → 2 → 3/2` at `b = 0/1/2`;
+- the sandwich instantiations `1/2 ≤ φ ≤ √6`, `3/4 ≤ φ ≤ √5`,
+  `5/8 ≤ φ ≤ √(7/2)`;
+- **the `b = 1` envelope-center phenomenon** — the tie's up-rounding
+  cancels the budget exactly (`λ̃₂ − ε_Q = λ₂`), the quantized lower
+  bound attaining the un-quantized easy-direction `λ₂/2 = 3/4`;
+- the strictly tightening upper envelope `√6 > √5 > √(7/2)`;
+- **the honest non-monotonicity of the lower envelope** (`3/4 > 5/8`)
+  — a worst-case bound whose tightness oscillates with the
+  quantization residual; the asymmetric pair's error propagation made
+  concrete, pinned rather than smoothed.
+
+Full ladder green (build + completeness 138/138; `lint_axioms` 4
+unchanged; the 24-tag independence check; reachability 64; citations;
+links; QA-name uniqueness `qcTri*`; backlog freshness; scoreboard
+1381/6832/4/0 with the verification row; map freshness exit 0 after
+the sync). Spike traps recorded in the scoreboard row, headline: an
+unimported tactic (`interval_cases`) surfaces as a *parse* error
+("expected command"), and `Finset.card_eq_one.mp (by omega)` leaves
+the implicit set a metavariable. Remaining residue: path/cycle
+sandwich pins (their `λ₂ = 1` is bucket-representable at every depth
+— strictly less informative than the triangle); ~~negative-input ties
+(symmetry of `round`'s away-from-zero design)~~ — **corrected by the
+corner audit below: the design is half-up toward `+∞`, NOT symmetric
+about zero; the negative tie is now pinned.**
+
+### Corner audit delivered (2026-09-07, run `20260907T190059Z-run-1`)
+
+The standing "delivered-but-unfenced surfaces" agenda applied to this
+proposal's own module — the §5-style Step 0 the numerical layer
+never had. Three findings, all closed in the same run:
+
+1. **A real documentation defect, found and corrected.** This
+   proposal's records and the module's first-draft docstrings claimed
+   tie behavior "rounds away from zero". False: Mathlib's `round` is
+   `⌊x + 1/2⌋` (half-up, toward `+∞`) — `round 2⁻¹ = 1` but
+   `round (−2⁻¹) = 0` (`round_neg_two_inv`). Negative ties round
+   toward zero. The docstrings (quantize's tie paragraph,
+   `abs_sub_quantize_le`'s fence note), the QA header, the scoreboard
+   row's honest-scope sentence, and both residue sentences above are
+   corrected; the asymmetry is now PINNED (`qcTie_asymmetry_b3`:
+   `+1/8 → 1/4` beside `−1/8 → 0` at `b = 3`), with sharpness at the
+   negative tie (`qcNegTie_error_eq` — the bound attained at both
+   tie polarities) and the theorem instance beside it
+   (`qcNegTie_bound_QA`). No Lean statement was ever false — an
+   Errata entry is not owed (the disposition record for materially
+   false statements); the defect was prose mischaracterization.
+2. **The `0 < R` clause of `abs_sub_quantize_le` is load-bearing and
+   now fenced**: at the degenerate range the junk division
+   `x · 2^b / 0 = 0` collapses the quantizer to the constant `0`
+   (`qcZeroRange_quantize`), and the bound refutes at every `x ≠ 0` —
+   the hypothesis-form fence `qcZeroRange_fence_QA`, generic in `b`.
+3. **The `0 < R` clause of `quantize_mul_step` is truth-removable and
+   removed**: at `R = 0` both sides evaluate to the junk zero, so the
+   identity holds unconditionally — the public theorem is now stated
+   without the hypothesis (a strengthening of the same run's
+   uncommitted delivery; no consumer change beyond dropping the
+   argument at two QA call sites).
+
++6 QA theorems (QA 6832 → 6838), the public signature strengthened,
+zero axiom contact (6-declaration audit, all at the standard three).
+Spike (`wip/qcfence_spike.lean`) green on the first round. Remaining
+residue: negative-range (`R < 0`) behavior unpinned (outside the
+quantizer's contract — a known positive range); the relative-error
+quantizer still not asked for.

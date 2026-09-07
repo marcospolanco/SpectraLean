@@ -17357,3 +17357,340 @@ log-Sobolev; the reverse TV → χ² consumer; plus the newer
 `weighted-matrix-tree`, `mutual-information`, and `erdos-renyi` Low
 rows) and the delivered-but-unfenced surfaces; the two untracked
 proposal drafts noted by the 15:37 run remain for operator triage.
+
+## 2026-09-07T18:16:53Z — The Quantized Cheeger Inequality (in progress)
+
+**Run:** `20260907T181653Z-run-1`  
+**Session:** `ses_f82ef3914ffezcZvjOFblSpnJ1`  
+**Status:** in-progress  
+**Milestone:** The Active priority table's Medium row
+(`proposals/quantized-cheeger-bound.md`): a uniform `b`-bit quantizer
+over the a priori range `[0, 2]` plus its error bound, the
+`secondEval (regularNormalizedLaplacian A d)` range bridge, and the
+quantized two-sided Cheeger sandwich `quantized_cheeger_le` — the
+explicit `±ε_Q` envelope for how rounding `λ₂` into `b`-bit integer
+buckets propagates through the two already-proved Cheeger theorems.
+No new axioms; QA (tie pins, boundary-count fence, K₂ sandwich at
+concrete `b` with visible tightening) in the same delivery.
+
+**Changes:** none yet — recording intent before editing.
+
+**Next handoff:** spike (`wip/qcheb_spike.lean`) → land the new
+`QuantizedCheeger.lean` + `QuantizedCheeger_QA.lean` → axcheck →
+full ladder → records. Step-0 survey finding already recorded in the
+execution plan: the sandwich needs `Mixing.lean`'s range cap, but
+`Mixing → Stationary → RandomWalk → Cheeger` is an import cycle, so
+the delivery uses the proposal's pre-authorized standalone-file
+branch.
+
+## 2026-09-07T18:46:40Z — The Quantized Cheeger Inequality (terminal)
+
+**Run:** `20260907T181653Z-run-1`  
+**Session:** `ses_f82ef3914ffezcZvjOFblSpnJ1`  
+**Status:** completed  
+**Milestone:** The Active priority table's Medium row
+(`proposals/quantized-cheeger-bound.md`) — the repository's first
+numerical-robustness layer: the explicit `±ε_Q` envelope for how
+rounding `λ₂` into `b`-bit integer buckets propagates through
+Cheeger's inequality, `(λ̃₂ − 1/2^b)/2 ≤ φ(G) ≤ √(2(λ̃₂ + 1/2^b))`,
+with the error entering linearly below and inside the square root
+above (Cheeger's own pair is asymmetric, so is its quantized
+propagation).
+
+**Changes:** the new public module
+`Scaffold/Mathlib/GraphTheory/QuantizedCheeger.lean` (functional
+1376 → 1381; registered in the umbrella, 64 public modules) —
+`Quantization.quantize` (rescale-round-rescale around Mathlib's
+`round`), `quantize_mul_step` (bucket-midpoint fixed points, stated
+at every `k : ℤ`), `abs_sub_quantize_le` (`|x − quantize| ≤
+R/2^(b+1)`, pure rescaling of `abs_sub_round`), the two range bridges
+`secondEval_regularNormalizedLaplacian_nonneg`/`_le_two` (the proved
+`[0, 2]` interval at the Cheeger theorems' operator spelling — the
+floor's first standalone packaging), and `quantized_cheeger_le` (pure
+algebra over the two already-proved Cheeger theorems; the hypothesis
+set exactly the Cheeger pair's, **zero axioms touched**); plus 11 QA
+theorems in the new
+`Scaffold/QA/SpectralGraph/QuantizedCheeger_QA.lean` (QA 6803 →
+6814): tie pins at `b = 0`/`b = 3` (both rounding up, `round 2⁻¹ = 1`
+made concrete), the error bound's sharpness at a tie (equality
+attained, raw route beside the theorem's instance), the
+boundary-count fence (the closed-range `2^b + 1`-distinct-values
+off-by-one: generic injectivity through the fixed-point identity plus
+the `b = 2` card pin), the K₂ sandwich numerically collapsed at
+`b = 0`/`b = 3` through the independently pinned spectrum and
+constant with the tightening witness `1/2 < 15/16 ≤ φ`, and
+`qcK2_cap_via_bridge_QA` (the cap bridge consumed at the fixture, K₂
+attaining `λ₂ ≤ 2` with equality). **The Step-0 survey's finding
+changed the file plan, not the math**: the sandwich needs
+`Mixing.lean`'s cap but `Mixing → Stationary → RandomWalk → Cheeger`
+is an import cycle — the proposal's pre-authorized standalone-file
+branch applied. Records: the proposal (COMPLETE + delivery record),
+`proposals/README.md` (the Medium row moved to Delivered), README
+(1381/6814), the radar's QA row (6814 across 72 modules, held 4.5),
+the scoreboard verification row, both map data tables + regenerated
+SVG, the umbrella import + docstring, the execution plan, and this
+log. No backlog note owed.
+
+**Verification:** spike-first (`wip/qcheb_spike.lean` — green after
+five fix rounds; traps recorded in the proposal's delivery record,
+headline: a standalone numeric `have` defaults its literals to ℕ —
+the `2 / 2^(b+1) = 1/2^b` elaborated as a `Nat` statement, making
+every field tactic report "no progress"; the `(2:ℝ)` ascription is
+load-bearing — and `λ` is a reserved token in identifiers); both
+landed modules elaborate with zero output; explicit builds ✔; **full
+`lake build` + `check_build_completeness.py` — 138/138 fresh, 0
+stale, 0 missing, exit 0** (both new modules in the default target);
+**17-declaration axiom audit via `wip/qcheb_axcheck.lean` — every one
+exactly `propext, Classical.choice, Quot.sound`**, zero axiom
+contact; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (64 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new `qc*`
+names collision-free); `check_backlog_freshness` clean; scoreboard
+regenerated (**1381 / 6814 / 4 / 0**) with the verification row; map
+freshness exit 0 after the 1381/6814 sync in both map data tables +
+SVG regeneration (49 stations, no status change — none owed);
+**consumption closure verified by the tool: the census re-run
+(`wip/census_20260907_post19.txt`) shows exactly the 5 new public
+theorems landing consumed — 1374 → 1379 value-consumed,
+never-touched 0 → 0, the inert set held at the zero the previous run
+closed it to (the first pass caught the cap bridge inert — the
+sandwich never proof-depends on its own range justification — and
+`qcK2_cap_via_bridge_QA` closed it before any record was written)**.
+
+**Remaining risk:** none owed — hard crust only, no axiom disposition
+changed, no public statement changed. QA proves consequences relative
+to the substrate; it does not prove the substrate (no axiom touched).
+Honest scope: `λ₂` alone (the proposal's recorded scope decision — no
+top-`k` family); the K₂ sandwich at one fixture at two bit depths
+(path/cycle fixtures carry no exact `secondEval` pin in QA — a
+sandwich pin there is priced in the proposal's record, not owed); the
+boundary-count fence's concrete card at `b = 2` only; tie behavior
+pinned at positive inputs (negative ties symmetric by `round`'s
+away-from-zero design, not separately pinned).
+
+**Next handoff:** the Active table is all-Low (decision-gated). The
+census remains the standing targeting instrument — this run is the
+first test of the closed inert set against a new public delivery, and
+it held at zero. The remaining agenda is unchanged: the operator-gated
+items (the companion's Steps 3–5 adoption; master-bound Step 2; the
+`perron_frobenius` deprecation; backlog items 5/6; log-Sobolev; the
+reverse TV → χ² consumer; the Grönwall proposal; plus the
+`weighted-matrix-tree`, `mutual-information`, and `erdos-renyi` Low
+rows) and the delivered-but-unfenced surfaces; the two untracked
+proposal drafts noted by the 15:37 run remain for operator triage.
+
+## 2026-09-07T18:49:45Z — The quantized sandwich at the triangle (in progress)
+
+**Run:** `20260907T184945Z-run-1`  
+**Session:** `ses_f82ef3914ffezcZvjOFblSpnJ1`  
+**Status:** in-progress  
+**Milestone:** The priced follow-on of the delivered quantized-Cheeger
+run (the proposal record's "path/cycle pins blocked on exact spectral
+pins"): the triangle — whose normalized spectrum `{0, 3/2, 3/2}` is
+already pinned by `Mixing_QA.lean`'s `tri_secondEval_QA` — is the
+first interior-`λ₂` fixture, `3/2` NOT bucket-representable at small
+`b`, so the quantizer genuinely errs and the envelope's `±ε_Q` slack
+is exercised for the first time (K₂ sits at the cap where quantization
+is exact). Planned content: the triangle's `cheegerConstant = 1` cut
+enumeration, the `regularNormalizedLaplacian` bridge for the pinned
+spectrum, quantizer value pins at `b ∈ {0, 1, 2}`, the sandwich
+instantiations, the `b = 1` envelope-center phenomenon (the tie
+rounds `3/2 → 2`, cancelling `ε_Q` — the lower bound attains
+`λ₂/2 = 3/4`), the upper envelope's strict tightening
+`√6 > √5 > √(7/2)`, and the honest non-monotonicity of the lower
+envelope. QA-only, zero axiom risk.
+
+**Changes:** none yet — recording intent before editing.
+
+**Next handoff:** spike (`wip/qtri_spike.lean`) → land in
+`QuantizedCheeger_QA.lean`'s new triangle section → axcheck → full
+ladder → records.
+
+## 2026-09-07T19:00:25Z — The quantized sandwich at the triangle (terminal)
+
+**Run:** `20260907T184945Z-run-1`  
+**Session:** `ses_f82ef3914ffezcZvjOFblSpnJ1`  
+**Status:** completed  
+**Milestone:** The priced follow-on of the quantized-Cheeger delivery
+(the proposal record's "path/cycle pins blocked on exact spectral
+pins"), resolved by a better fixture than the priced one: the
+triangle — spectrum already pinned by `Mixing_QA.lean`'s
+`tri_secondEval_QA`, and `λ₂ = 3/2` **interior** — the first fixture
+where the quantizer genuinely errs and the `±ε_Q` envelope's slack is
+load-bearing (K₂ sits at the a priori cap, exactly representable at
+every depth).
+
+**Changes:** QA-only — 18 theorems in `QuantizedCheeger_QA.lean`'s
+new triangle section (QA 6814 → 6832): the triangle's
+`cheegerConstant = 1` by a generic card-based cut enumeration (card 1
+or 2 from the complement-count split; card-2 cuts reduced to
+singletons through the shelf's `conductance_compl` — no
+literal-subset matching, the conductance arithmetic independent of
+the sandwich); the spectrum bridge to the sandwich's
+`regularNormalizedLaplacian` spelling; quantizer value pins
+`3/2 → 2 → 2 → 3/2` at `b = 0/1/2`; the sandwich instantiations
+`1/2 ≤ φ ≤ √6`, `3/4 ≤ φ ≤ √5`, `5/8 ≤ φ ≤ √(7/2)`; the `b = 1`
+envelope-center phenomenon (the tie's up-rounding exactly cancels
+the budget — `λ̃₂ − ε_Q = λ₂`, the quantized lower bound attaining
+the un-quantized easy-direction `λ₂/2 = 3/4`); the strictly
+tightening upper envelope `√6 > √5 > √(7/2)`; and the honest
+non-monotonicity of the lower envelope (`3/4 > 5/8`). Records: the
+proposal's follow-on record, the scoreboard verification row, README
+(6832), the radar's QA row (6832 across 72 modules, held 4.5), both
+map data tables + regenerated SVG, the execution plan, and this log.
+No backlog note owed.
+
+**Verification:** spike-first (`wip/qtri_spike.lean` — green after
+four fix rounds; traps recorded: `interval_cases` not transitively
+imported — an unimported tactic surfaces as a PARSE error
+("unexpected token, expected command"), cured by `rcases hS :
+S.card with _ | _ | _ | _ | _` (five patterns for a concrete card-3
+case; the `hS :` binding supplies the equations omega needs);
+`fin_cases`'s mk-form subsets defeating literal `rw` (the generic
+card route avoids literals); `Finset.card_eq_one.mp (by omega)`
+leaving the implicit set a metavariable (the `show` ascription pins
+it); `Real.sqrt_lt_sqrt`'s `0 ≤ a`-first argument and `<`'s missing
+`.symm` field (the `show`-to-`lt` route); per-conjunct ℝ ascriptions
+against ℕ-defaulting). The landed module elaborates with zero
+output; explicit build ✔; **full `lake build` +
+`check_build_completeness.py` — 138/138 fresh, 0 stale, 0 missing,
+exit 0**; **18-declaration axiom audit via `wip/qcheb_axcheck.lean`
+— every one exactly `propext, Classical.choice, Quot.sound`**, zero
+axiom contact; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (64 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (`qcTri*`
+collision-free); `check_backlog_freshness` clean; scoreboard
+regenerated (**1381 / 6832 / 4 / 0**) with the verification row; map
+freshness exit 0 after the 6832 sync in both map data tables + SVG
+regeneration (49 stations, no status change — none owed). No census
+re-run owed — QA-only, no new shelf declaration, the inert set's
+zero stands.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition
+changed, no public statement changed. QA proves consequences relative
+to the substrate; it does not prove the substrate (no axiom touched).
+Honest scope: one fixture at three bit depths; the cut enumeration at
+`Fin 3` (the route generalizes, the singleton conductance facts are
+triangle-specific); the depth phenomena pinned between `b = 0` and
+`b = 2` only; path/cycle sandwich pins remain unpinned (their
+`λ₂ = 1` is bucket-representable at every depth — strictly less
+informative, priced in the proposal's record, not owed).
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The remaining agenda is unchanged: the operator-gated items (the
+companion's Steps 3–5 adoption; master-bound Step 2; the
+`perron_frobenius` deprecation; backlog items 5/6; log-Sobolev; the
+reverse TV → χ² consumer; the Grönwall proposal; plus the
+`weighted-matrix-tree`, `mutual-information`, and `erdos-renyi` Low
+rows) and the delivered-but-unfenced surfaces; the two untracked
+proposal drafts noted by the 15:37 run remain for operator triage.
+
+## 2026-09-07T19:02:00Z — The quantizer's adversarial corner audit (in progress)
+
+**Run:** `20260907T190059Z-run-1`  
+**Session:** `ses_f82ef3914ffezcZvjOFblSpnJ1`  
+**Status:** in-progress  
+**Milestone:** The standing "delivered-but-unfenced surfaces" agenda
+applied to the newest public surface — the quantized-Cheeger module
+(delivered uncommitted 2026-09-07, still amendable): its §5-style
+Step 0. The audit's findings to fence/fix: the `hR : 0 < R` clause
+of `abs_sub_quantize_le` is load-bearing and unfenced (at `R = 0`
+the junk division collapses the quantizer to the constant `0`,
+refuting the bound); `quantize_mul_step`'s `hR` is truth-removable
+(both sides junk-zero); and a REAL documentation defect — the
+delivered docstrings and records claim ties round "away from zero",
+but Mathlib's `round` is `⌊x + 1/2⌋` (half-up, toward `+∞`:
+`round 2⁻¹ = 1` while `round (−2⁻¹) = 0`), so negative ties round
+toward zero — an asymmetry to pin in QA, not mischaracterize.
+
+**Changes:** none yet — recording intent before editing.
+
+**Next handoff:** spike (`wip/qcfence_spike.lean`) → land the public
+strengthening + fence/asymmetry section → correct the four
+"away from zero" artifacts → axcheck → full ladder → records.
+
+## 2026-09-07T19:06:28Z — The quantizer's adversarial corner audit (terminal)
+
+**Run:** `20260907T190059Z-run-1`  
+**Session:** `ses_f82ef3914ffezcZvjOFblSpnJ1`  
+**Status:** completed  
+**Milestone:** The standing "delivered-but-unfenced surfaces" agenda
+applied to the newest public surface — the quantized-Cheeger module
+(delivered uncommitted 2026-09-07, amendable): the numerical layer's
+own §5-style Step 0, three findings all closed in-run.
+
+**Changes:** +6 QA theorems in `QuantizedCheeger_QA.lean`'s new
+`CornerAudit` section (QA 6832 → 6838) plus one public signature
+STRENGTHENED in place. **(1) A real documentation defect, found and
+corrected**: the first delivery's docstrings and records claimed
+ties round "away from zero" — false (Mathlib's `round` is `⌊x +
+1/2⌋`, half-up toward `+∞`: `round 2⁻¹ = 1` but `round (−2⁻¹) = 0`,
+`round_neg_two_inv`); negative ties round toward ZERO. Corrected in
+the `quantize` docstring, the QA header, the prior scoreboard row's
+honest-scope sentence, and both proposal residue sentences; the
+asymmetry now PINNED (`qcTie_asymmetry_b3`: `+1/8 → 1/4` beside
+`−1/8 → 0` at `b = 3`) with sharpness at the negative tie
+(`qcNegTie_error_eq`, raw route beside the theorem's instance
+`qcNegTie_bound_QA`). No Lean statement was ever false — no Errata
+entry owed (prose mischaracterization, not a materially false
+statement). **(2) The `0 < R` clause of `abs_sub_quantize_le` is
+load-bearing and now fenced** — at the degenerate range the junk
+division collapses the quantizer to the constant `0`
+(`qcZeroRange_quantize`), and the dropped-clause statement refutes
+at every `x ≠ 0` (`qcZeroRange_fence_QA`, generic in `b`). **(3)**
+The `0 < R` clause of `quantize_mul_step` is truth-removable and
+REMOVED — the public theorem now unconditional (both sides junk-zero
+at the corner; two QA call sites amended, no other consumer).
+Records: the proposal's corner-audit record, the prior scoreboard
+row correction, README (6838), the radar's QA row (6838 across 72
+modules, held 4.5), both map data tables + regenerated SVG, the
+execution plan, and this log. No backlog note owed.
+
+**Verification:** spike (`wip/qcfence_spike.lean`) **green on the
+first round** (the delivered machinery's exactness paying off:
+`div_zero`, `round_zero`, `round_neg_two_inv`, and the junk-collapse
+computation all close by `norm_num` after one rewrite); both touched
+modules elaborate with zero output; explicit builds ✔; **full
+`lake build` + `check_build_completeness.py` — 138/138 fresh, 0
+stale, 0 missing, exit 0**; **6-declaration axiom audit via
+`wip/qcheb_axcheck.lean` — every one exactly `propext,
+Classical.choice, Quot.sound`**, zero axiom contact (the fence is a
+hypothesis-necessity refutation of a PROVED theorem's clause,
+consuming nothing admitted); `lint_axioms` exit 0 (4 axioms
+unchanged); `check_refutation_independence` (24-tag clean);
+`check_public_reachability` (64 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new
+`qcZeroRange_*`/`qcNegTie_*`/`qcTie_asymmetry_*` names
+collision-free); `check_backlog_freshness` clean; scoreboard
+regenerated (**1381 / 6838 / 4 / 0**) with the verification row; map
+freshness exit 0 after the 6838 sync in both map data tables + SVG
+regeneration (49 stations, no status change — none owed). No census
+re-run owed — no new or removed shelf declaration (one signature
+strengthened; its consumers unchanged in count, the inert set's zero
+stands).
+
+**Remaining risk:** none owed — no axiom disposition changed, no
+public statement weakened (one strengthened — amendable because the
+delivery is uncommitted; a committed release line would have
+required a compatibility note). QA proves consequences relative to
+the substrate; it does not prove the substrate (no axiom touched).
+Honest scope: the fence at `R = 0` only (the `R < 0` half-line
+unpinned — outside the quantizer's stated positive-range contract);
+the asymmetry pinned at one depth (`b = 3`) and one magnitude; the
+corrected tie characterization pinned via Mathlib's own
+`round_neg_two_inv`, not re-derived.
+
+**Next handoff:** the Active table stays all-Low (decision-gated).
+The remaining agenda is unchanged: the operator-gated items (the
+companion's Steps 3–5 adoption; master-bound Step 2; the
+`perron_frobenius` deprecation; backlog items 5/6; log-Sobolev; the
+reverse TV → χ² consumer; the Grönwall proposal; plus the
+`weighted-matrix-tree`, `mutual-information`, and `erdos-renyi` Low
+rows) and the remaining delivered-but-unfenced surfaces (the
+numerical layer now audited; the next candidates by recency: the
+rank-one norm delivery's `v ≠ 0` clause — recorded as harmless, not
+fenced — and the boundary-outflow Step-1 theorems' clause surface);
+the two untracked proposal drafts noted by the 15:37 run remain for
+operator triage.

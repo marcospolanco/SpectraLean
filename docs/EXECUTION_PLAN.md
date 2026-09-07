@@ -6,8 +6,296 @@ holds the append-only narrative.
 ## Active milestone
 
 **None open.** The Active table stays all-Low (decision-gated); the
-census's remaining inert set (21) names the next clusters. See the
+census's remaining inert set (11) names the next clusters. See the
 delivered record below.
+
+------
+
+**The probability trio's positive pins — DELIVERED** (run
+`20260907T135907Z-run-1`, session
+`ses_f840b32f9ffeQquR0Tn6QqpJwb`; terminal entry appended to
+`AGENT_ACTIVITY.md`; the same-run proposal
+`proposals/probability-trio-pins.md` COMPLETE with delivery record).
+
+------
+
+**The probability trio's positive pins** — the prior handoff's named
+next batch: the census's three remaining probability singles
+(`indepFun_indicator_coord`, `hoeffding_iid`, `bernstein_iid`), one
+shared-fixture run on the iid product machinery.
+
+**DELIVERED at the full designed scope** — 15 QA theorems (+ the
+`prFair`/`prX` fixtures) in `IIDProduct_QA.lean`'s new `SinglesPins`
+section (QA 6727 → 6742), zero axiom contact (`#print axioms` via
+`wip/prpins_axcheck.lean` on all 15 — every one exactly `propext,
+Classical.choice, Quot.sound`). **The fixture**: the fair coin on
+`Fin 2 → Fin 2` with the ±1 family — centered at exactly the fair coin
+(the `∫ 1_{=0} − ∫ 1_{=1}` mean decomposition), bounded by `a = 1`,
+variance `σ² = 1`, mutually independent through
+`iIndepFun_coord_apply`, measurable through `measurable_coord` — the
+whole iid supplier layer exercised in one configuration. **The pins**:
+the pairwise theorem consumed with a two-route joint-mass join (the
+independence factorization vs raw `toMeasure_cyl_inter` arithmetic —
+both `1/4`); both iid twins instantiated at `t = 2` where the tail
+event is exactly the same-value pairs, **of raw mass `1/2`** (the
+non-vacuity witness), with `norm_num` display collapses; and **the
+honest extremal-variance contrast** — at `σ² = a²` (Rademacher) the
+Hoeffding bound is the strictly smaller one by pure monotonicity (the
+elaborator rejected the first draft's backwards "Bernstein sharper"
+inequality; the sharper direction needs `σ² < a²` at an asymmetric
+family — priced, not owed). **Consumption closure verified by the
+tool**: the census re-run (`wip/census_20260907_post14.txt`, diffed
+against `post13`) shows exactly the 3 targeted theorems leaving the
+inert set — 1360 → 1363 value-consumed, 14 → 11 never-touched, no
+bonus, no collateral. The pins method's twelfth application.
+
+**Verification:** spike-first (`wip/prpins_spike.lean` — green after
+TEN fix rounds; traps recorded in the proposal, headline: the
+`Decidable`-instance trichotomy on `if v ∈ S` sums — goal, helper, and
+singleton spellings all differ, cured by instance-agnostic
+`Finset.sum_ite_eq'`/`Set.mem_singleton_iff` normalization rather than
+fragile rewrites; `ofReal_mul`'s hypothesis pinning the implicit `p`
+so the provided bound must match the goal's `2⁻¹` spelling;
+`Disjoint`-for-sets unfolding through `≤`; the elaborator catching the
+author's backwards contrast inequality); the landed module elaborates
+with literally zero output; explicit build ✔; **full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0**; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new
+`prFair`/`prX`/`pri_*` names collision-free); `check_backlog_freshness`
+clean; scoreboard regenerated (**1376 / 6742 / 4 / 0**) with the
+verification row; map freshness exit 0 after the 6742 sync in both map
+data tables + SVG regeneration (49 stations, no status change — none
+owed). Records updated: the same-run proposal (COMPLETE + delivery
+record), `proposals/README.md` (new Delivered row), README (6742), the
+radar's QA row (6742, held 4.5), the scoreboard verification row, both
+map data tables + regenerated SVG, this plan, and the activity log. No
+backlog note owed. Nothing committed; prior runs' uncommitted
+deliveries preserved.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. Honest scope: one fixture family (the
+fair coin, `n = 2`, `t = 2`); the joint-mass join at one pair of level
+sets; the event mass at one threshold; the twins' bounds at their
+verbatim shapes. The Bernstein-sharper direction priced, not owed.
+
+**Next handoff:** the Active table stays all-Low (decision-gated). The
+census's remaining inert set (11): the Band (2) and Normalized (2)
+pairs (scope decisions recorded in `heat-irreducible-pairs-pins.md` —
+Band's vanishing member wants a fence; Normalized wants an
+`eigvecOf`-sign resolution), AlonBoppana (3, level-class machinery),
+Azuma (3, `MatrixMDS` structure fields — helper-shaped), and
+`l_infty_norm_nonneg` (needs its own Core-targeting QA module —
+priced). Beyond the census: the delivered-but-unfenced surfaces and
+the operator-gated items unchanged (the companion's Steps 3–5
+adoption; master-bound Step 2; the `perron_frobenius` deprecation;
+backlog items 5/6; log-Sobolev; the reverse TV → χ² consumer; plus the
+newer `weighted-matrix-tree`, `mutual-information`, and `erdos-renyi`
+Low rows).
+
+------
+
+------
+
+**The graph-layer singles' positive pins — DELIVERED** (run
+`20260907T134207Z-run-1`, session
+`ses_f840b32f9ffeQquR0Tn6QqpJwb`; terminal entry appended to
+`AGENT_ACTIVITY.md`; the same-run proposal
+`proposals/graph-layer-singles-pins.md` COMPLETE with delivery
+record).
+
+------
+
+**The graph-layer singles' positive pins** — the prior handoff's named
+next batch: seven of the census's ten never-touched singles (inert 21,
+per `wip/census_20260907_post12.txt`), all in the deterministic graph
+layer, first genuine QA consumption of each.
+
+**DELIVERED at the full designed scope** — 14 QA declarations across
+five files' new `SinglesPins` sections (QA 6713 → 6727), zero axiom
+contact (`#print axioms` via `wip/gspins_axcheck.lean` on all 14 —
+every one exactly `propext, Classical.choice, Quot.sound`). **The
+content**: the headline `eru_edge_uniqueness_twoRoute`
+(`isEffectiveResistance_unique` — the strategy doc's own load-bearing
+example — first-consumed: the kernel-shifted potential `![2,1]` proved
+to solve the same unit demand through `laplacian_ones_in_kernel`, both
+potentials certifying resistances, the theorem forcing their voltage
+differences EQUAL, raw arithmetic beside it); `IsMultiwayPartition.
+covers` at the K₂ singleton partition; `randomWalkLaplacian_symmetric`
+at off-degree `d = 2` (entries carrying the genuine `1/2` scaling,
+the `(1,0)` entry read from `(0,1)` through the theorem against the
+raw `−1/2`); `degreeMatrix_diagonal_nonneg`'s positive half at the
+weight-`2` edge fixture `sdpAdj` (raw diagonal `2`) completing the
+pair with the file's existing signed kill; and the `edgeWeight`
+degenerate-cut trio at `C₄` (empty source/target through the theorems,
+the value-carrying `edgeWeight_univ_right` = the degree `2` with the
+raw double-sum companion). **Consumption closure verified by the
+tool**: the census re-run (`wip/census_20260907_post13.txt`, diffed
+against `post12`, self-validation reproduced) shows exactly the 7
+targeted theorems leaving the inert set — 1353 → 1360 value-consumed,
+21 → 14 never-touched, no bonus, no collateral. The pins method's
+eleventh application.
+
+**Verification:** spike-first (`wip/gspins_spike.lean` — green after
+four fix rounds; traps recorded in the proposal: the uniqueness
+theorem's implicit `{r s}` unifying against the GOAL first so the
+hypothesis order swaps; `MultiwayCheeger_QA`'s `.MultiwayQA`
+namespace; per-branch bullets for one-branch-closing splits (the
+`<;> norm_num` continuation both errors and warns); the singleton-sum
+`1 + 1 = 2` residue needing the trailing `norm_num`); all five landed
+modules elaborate with literally zero output; explicit builds ✔;
+**full `lake build` + `check_build_completeness.py` — 135/135 fresh,
+0 stale, 0 missing, exit 0**; `lint_axioms` exit 0 (4 axioms
+unchanged); `check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new
+`eru_*`/`mwp_*`/`rwp_*`/`sdp*`/`exw_*` names collision-free);
+`check_backlog_freshness` clean; scoreboard regenerated (**1376 /
+6727 / 4 / 0**) with the verification row; map freshness exit 0 after
+the 6727 sync in both map data tables + SVG regeneration (49 stations,
+no status change — none owed). Records updated: the same-run proposal
+(COMPLETE + delivery record), `proposals/README.md` (new Delivered
+row), README (6727), the radar's QA row (6727, held 4.5), the
+scoreboard verification row, both map data tables + regenerated SVG,
+this plan, and the activity log. No backlog note owed. Nothing
+committed; prior runs' uncommitted deliveries preserved.
+
+**Remaining risk:** none owed — QA-only, no axiom disposition changed,
+no public statement changed. Honest scope: the uniqueness two-route at
+one edge fixture; the covers pins at the K₂ singleton partition; the
+symmetry entry read at one off-degree choice; the diagonal pin at one
+fixture; the degenerate-cut trio at `C₄` only.
+
+**Next handoff:** the Active table stays all-Low (decision-gated). The
+census's remaining inert set (14): **the probability trio
+(`indepFun_indicator_coord` + the `hoeffding_iid`/`bernstein_iid`
+twins) is the natural next batch — one shared-fixture run on the
+Bernoulli/iid machinery**, then the Band (2) and Normalized (2) pairs
+(with the recorded scope decisions), AlonBoppana (3, level-class
+machinery), Azuma (3, `MatrixMDS` structure fields — helper-shaped),
+and `l_infty_norm_nonneg` (needs its own Core-targeting QA module —
+priced). Operator-gated items unchanged (the companion's Steps 3–5
+adoption; master-bound Step 2; the `perron_frobenius` deprecation;
+backlog items 5/6; log-Sobolev; the reverse TV → χ² consumer; plus
+the newer `weighted-matrix-tree`, `mutual-information`, and
+`erdos-renyi` Low rows).
+
+------
+
+------
+
+**The Rank-One Edge Perturbation Norm Bound — DELIVERED** (run
+`20260907T130116Z-run-1`, session
+`ses_f840b32f9ffeQquR0Tn6QqpJwb`; terminal entry appended to
+`AGENT_ACTIVITY.md`; the proposal
+`proposals/rank-one-edge-perturbation-norm.md` COMPLETE with delivery
+record).
+
+------
+
+**The Rank-One Edge Perturbation Norm Bound** — the Active priority
+table's Medium row (added 2026-09-07, ungated): the exact operator norm
+of one edge-weight mutation plus the subadditive multi-edge bound —
+the deterministic perturbation-norm interface.
+
+**DELIVERED at the full designed scope** — 7 public theorems in
+`EdgePerturbation.lean`'s single-edge-algebra section (functional
+1369 → 1376) + 15 QA theorems in `EdgePerturbation_QA.lean`'s new
+`NormPins` section (QA 6698 → 6713), hard crust, zero axiom contact
+(`#print axioms` via `wip/epnorm_axcheck.lean` on all 22 — every one
+exactly `propext, Classical.choice, Quot.sound`). **The content**: the
+scalar-carried upper bound `l2OpNorm_smul_rankOne_le`
+(`l2OpNorm_rankOne_le`'s Cauchy–Schwarz technique through the public
+`quadForm_smul` — the proposal's named `quadForm_smul_var` is private,
+the public twin is the route), **the missing lower direction**
+`abs_w_mul_dotProduct_self_le_l2OpNorm` (the edge difference vector is
+an eigenvector of `w • v vᵀ` at `w ⬝ᵥ v`, so
+`exists_eigvalOf_eq_of_mulVec_eq_smul` — built for the
+bottom-eigenvalue identification — exhibits the value and
+`abs_eigvalOf_le_l2OpNorm` bounds it below the norm), the packaging
+equality `l2OpNorm_smul_rankOne : ‖w • rankOne v‖ = |w| * (v ⬝ᵥ v)`,
+the `Pi.single`↔`ssEdgeDiff` bridge, **Step 1**
+`l2OpNorm_laplacian_edgeAdj : ‖laplacian (edgeAdj i j w)‖ = 2 * |w|` at
+`i ≠ j` (the loop corner the proposal's own beyond-the-ask finding
+identified), and **Step 2** `l2OpNorm_sum_laplacian_edgeAdj_le`
+(`norm_sum_le` + Step 1 termwise — the scoped `NormedAddCommGroup`
+instance under `Matrix.L2OpNorm`). QA per the proposal's own plan, the
+`i = j` fence in the same delivery as required: the raw closed form at
+symbolic weight, value pins at positive/negative/zero `w` each joined
+to the old action-bound route (two routes, one value), the loop fence
+(raw-zero Laplacian against `2|3| = 6 ≠ 0`), the two-update parallel
+sequence with the subadditive bound **attained with equality**
+(`12 = 12`), and the three-edge `Fin 3` instance with the summed
+Laplacian computed raw (signed degrees — the elaborator rejected the
+first draft's unsigned-degree literal on the `(1,1)` diagonal, the QA
+catching its own author's arithmetic). **Consumption closure verified
+by the tool**: the census re-run (`wip/census_20260907_post12.txt`,
+diffed against `post11`) shows exactly the 7 new theorems landing
+consumed (1346 → 1353 value-consumed), inert set unchanged at 21 (no
+bonus, no collateral), self-validation reproduced.
+
+**Verification:** spike-first (`wip/epnorm_spike.lean` — green across
+fix rounds; traps recorded in the proposal's delivery record: the
+pinned `abs_le` being the `-b ≤ a ∧ a ≤ b` conjunction with the
+NEGATED conjunct first — the shelf-era `constructor` bullet order
+swaps; the eigenvalue-bound constant clause needing the product's
+nonnegativity; `rw` with a `by norm_num` hypothesis leaving `i j` as
+metavariables — explicit arguments required; the `Fin 3` literal-entry
+reduction going through `Matrix.vecHead`/`Matrix.vecTail`); both landed
+modules elaborate with zero errors/warnings (the 3 `ring_nf` infos
+verified pre-existing at HEAD by elaborating `git show HEAD:`'s copy);
+explicit builds ✔; **full `lake build` +
+`check_build_completeness.py` — 135/135 fresh, 0 stale, 0 missing,
+exit 0**; `lint_axioms` exit 0 (4 axioms unchanged);
+`check_refutation_independence` (24-tag clean);
+`check_public_reachability` (63 modules); `check_citations`;
+`check_markdown_links`; `check_qa_name_uniqueness` (the new `epn_*`
+names collision-free); `check_backlog_freshness` clean; scoreboard
+regenerated (**1376 / 6713 / 4 / 0**) with the verification row; map
+freshness exit 0 after the stats sync in both map data tables + SVG
+regeneration (49 stations, no status change — none owed). Records
+updated: the proposal (COMPLETE + delivery record),
+`proposals/README.md` (the Medium row moved to Delivered), README
+(counts + highlights bullet), the radar's QA row (6713, held 4.5), the
+scoreboard verification row, both map data tables + regenerated SVG,
+`index/map/spectral_graph.md` (three index-entry rows for the norm
+layer), this plan, and the activity log. No backlog note owed (the
+backlog names no edge-perturbation-norm item; the delivery is not a
+backlog gate). Nothing committed; prior runs' uncommitted deliveries
+preserved.
+
+**Remaining risk:** none owed — hard crust only, no axiom disposition
+changed, no public statement changed. Honest scope: the equality is
+stated at `i ≠ j` (the loop corner fenced in QA, not stated); the
+subadditive bound is the plain triangle inequality with no improvement
+at non-parallel sequences (the three-edge instance's slack
+unquantified); the value pins are at `K₂`/`Fin 3` fixtures; the
+weighted rank-one equality needs `v ≠ 0`. Every scope decision of the
+proposal honored: no `laplacian_edge_update` definition, no
+probabilistic content, the deferred general-smul-eigenvalue theorem
+untouched.
+
+**Next handoff:** the Active table is all-Low (decision-gated) — same
+shape as before the Medium row existed. The census's inert set (21)
+resumes as the targeting instrument: AlonBoppana (3), Expander (3),
+Matrix.Azuma (3 — the `MatrixMDS` structure fields), the Band (2) and
+Normalized (2) pairs (scope decisions recorded in
+`proposals/heat-irreducible-pairs-pins.md` — Band's vanishing member
+wants a fence; Normalized wants an `eigvecOf`-sign resolution), and the
+singles (Electrical's `isEffectiveResistance_unique` — the strategy
+doc's own example of load-bearing content, Multiway's `covers`,
+RandomWalk's `randomWalkLaplacian_symmetric`, Spectral's
+`degreeMatrix_diagonal_nonneg`, Core's `l_infty_norm` pair, the scalar
+`*_iid` twins, IIDProduct's `indepFun_indicator_coord`). The pins
+method applies unchanged; the named-weight singles and the cheap
+structural entry-level pins are the natural next batch. Operator-gated
+items unchanged (the companion's Steps 3–5 adoption; master-bound
+Step 2; the `perron_frobenius` deprecation; backlog items 5/6;
+log-Sobolev; the reverse TV → χ² consumer; plus the newer
+`weighted-matrix-tree`, `mutual-information`, and `erdos-renyi` Low
+rows).
 
 ------
 

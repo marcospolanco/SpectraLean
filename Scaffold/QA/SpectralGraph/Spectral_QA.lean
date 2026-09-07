@@ -2513,4 +2513,34 @@ theorem rayleigh_padVec_hy_free (M : Matrix V V ℝ) (S : Finset V)
 
 end AdversarialFencesStep4
 
+/-! ## Singles pins: the degree-matrix diagonal
+
+The positive half of the `degreeMatrix_diagonal_nonneg` pair,
+completing this file's existing signed-input kill at `sfNegEdge`: at a
+weight-`2` edge the diagonal is genuinely `2`, and nonnegativity is
+delivered by the theorem from the nonnegative weights alone.
+-/
+
+section SinglesPins
+
+/-- The weight-`2` edge fixture: symmetric nonnegative weights. -/
+def sdpAdj : Matrix (Fin 2) (Fin 2) ℝ := !![0, 2; 2, 0]
+
+theorem sdpAdj_nonneg : ∀ i j, 0 ≤ sdpAdj i j := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> simp [sdpAdj]
+
+/-- Raw: the diagonal entry is exactly `2` (the degree of the weight-`2`
+edge), by direct unfolding — no shelf theorem consumed. -/
+theorem sdp_degDiag_raw : degreeMatrix sdpAdj 0 0 = 2 := by
+  simp [degreeMatrix, deg, sdpAdj]
+
+/-- The positive pin, through the theorem — the value-carrying
+companion to the signed kill: the same statement fails at `sfNegEdge`
+(this file), and holds here with the diagonal genuinely positive. -/
+theorem sdp_diagonal_nonneg_pin : 0 ≤ degreeMatrix sdpAdj 0 0 :=
+  degreeMatrix_diagonal_nonneg sdpAdj sdpAdj_nonneg 0
+
+end SinglesPins
+
 end SpectralGraphTheory.QA

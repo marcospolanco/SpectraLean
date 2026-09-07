@@ -741,4 +741,57 @@ theorem discF_definiteness_hconn_fence_QA :
   have h0 := h.1 disc_fallback_zero_QA
   exact absurd h0 (by decide)
 
+/-! ## Singles pins: the connected uniqueness theorem
+
+The first genuine consumption of `isEffectiveResistance_unique`
+(the strategy document's own example of load-bearing content): two
+genuinely different potentials solve the same unit demand on the edge,
+and the theorem forces their voltage differences to agree — with the
+raw arithmetic beside it.
+-/
+
+section SinglesPins
+
+/-- The shifted potential `![2, 1]` also solves the unit demand on the
+edge: `![2, 1] = ![1, 0] + onesVec`, and the constant vector lives in
+the Laplacian kernel (`laplacian_ones_in_kernel`) — the mechanism the
+uniqueness theorem's proof identifies as the only freedom. -/
+theorem eru_edge_potential_shift_value :
+    (laplacian psEdgeAdj).mulVec ![2, 1]
+      = Pi.single 0 (1 : ℝ) - Pi.single 1 (1 : ℝ) := by
+  have hsplit : (![2, 1] : Fin 2 → ℝ) = ![1, 0] + (onesVec : Fin 2 → ℝ) := by
+    funext i
+    fin_cases i
+    · simp [onesVec]; norm_num
+    · simp [onesVec]
+  rw [hsplit, Matrix.mulVec_add, edge_potential_value_QA,
+    laplacian_ones_in_kernel psEdgeAdj, add_zero]
+
+/-- **The uniqueness theorem consumed, two routes**: the two potentials
+`![1, 0]` and `![2, 1]` both certify resistances (by the structure's
+`r = f u − f v` clause, at genuinely different-looking values), and the
+connected uniqueness theorem forces the two voltage differences to be
+EQUAL — derived through the theorem, not by arithmetic. A wrong
+conclusion or hypothesis set in the theorem breaks this lemma. -/
+theorem eru_edge_uniqueness_twoRoute :
+    ((![2, 1] : Fin 2 → ℝ) 0 - (![2, 1]) 1)
+      = ((![1, 0] : Fin 2 → ℝ) 0 - (![1, 0]) 1) := by
+  have h1 : IsEffectiveResistance psEdgeAdj 0 1
+      ((![1, 0] : Fin 2 → ℝ) 0 - (![1, 0]) 1) :=
+    ⟨![1, 0], edge_potential_value_QA, rfl⟩
+  have h2 : IsEffectiveResistance psEdgeAdj 0 1
+      ((![2, 1] : Fin 2 → ℝ) 0 - (![2, 1]) 1) :=
+    ⟨![2, 1], eru_edge_potential_shift_value, rfl⟩
+  exact isEffectiveResistance_unique psEdgeAdj psEdgeAdj_isSymm
+    psEdgeAdj_nonneg edge_supportGraph_connected h2 h1
+
+/-- The raw companion: both voltage differences are exactly `1` by
+arithmetic alone — two routes, one value. -/
+theorem eru_edge_uniqueness_raw :
+    ((![2, 1] : Fin 2 → ℝ) 0 - (![2, 1]) 1) = 1
+      ∧ ((![1, 0] : Fin 2 → ℝ) 0 - (![1, 0]) 1) = 1 := by
+  constructor <;> norm_num [Matrix.cons_val']
+
+end SinglesPins
+
 end SpectralGraphTheory.QA

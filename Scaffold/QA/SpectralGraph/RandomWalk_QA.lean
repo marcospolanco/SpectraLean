@@ -346,4 +346,37 @@ theorem randomWalkLaplacian_eq_smul_laplacian_of_ne_zero {V : Type}
 
 end AdversarialFences
 
+/-! ## Singles pins: the walk-Laplacian symmetry
+
+The first genuine consumption of `randomWalkLaplacian_symmetric`, at
+`d = 2` — a choice off the fixture's degree, so the entries carry the
+genuine `1/2` scaling and the symmetry statement is not degenerate.
+-/
+
+section SinglesPins
+
+/-- Symmetry through the theorem at `d = 2`. -/
+theorem rwp_walkLaplacian_sym :
+    (randomWalkLaplacian rwEdgeAdj 2).IsSymm :=
+  randomWalkLaplacian_symmetric rwEdgeAdj rwEdgeAdj_isSymm 2
+
+/-- The entry equality derived through the theorem (the transpose
+route), plus the raw value `−1/2` of the off-diagonal entries — the
+`(1, 0)` entry read from the `(0, 1)` entry through symmetry, exactly
+what a transposed convention would break. -/
+theorem rwp_walkLaplacian_entry :
+    (randomWalkLaplacian rwEdgeAdj 2) 0 1 = (randomWalkLaplacian rwEdgeAdj 2) 1 0
+      ∧ (randomWalkLaplacian rwEdgeAdj 2) 0 1 = -(1 / 2) := by
+  constructor
+  · have h := randomWalkLaplacian_symmetric rwEdgeAdj rwEdgeAdj_isSymm 2
+    calc (randomWalkLaplacian rwEdgeAdj 2) 0 1
+        = (randomWalkLaplacian rwEdgeAdj 2)ᵀ 1 0 :=
+          (Matrix.transpose_apply _ _ _).symm
+      _ = (randomWalkLaplacian rwEdgeAdj 2) 1 0 := by rw [h.eq]
+  · simp only [randomWalkLaplacian, Matrix.sub_apply, Matrix.one_apply,
+      Matrix.smul_apply, smul_eq_mul, transitionMatrix, rwEdgeAdj]
+    norm_num
+
+end SinglesPins
+
 end SpectralGraphTheory.QA

@@ -1933,4 +1933,30 @@ theorem bol_dissipation_K2 :
   rw [hout]
   exact h
 
+/-! ## Singles pins: the covering clause
+
+The first genuine consumption of `IsMultiwayPartition.covers` (the
+structure's covering field, never before applied to an instance): the
+covering witnesses produced from the partition instance, with the raw
+self-membership computation beside it.
+-/
+
+section SinglesPins
+
+/-- The covering clause consumed: from the K₂ singleton partition
+instance, every vertex lies in some part — the witnesses produced by
+the structure field, not by hand. -/
+theorem mwp_covers_consumed (v : Fin 2) :
+    ∃ i : Fin 2, v ∈ mwEdgeSingletons i :=
+  mwEdgeSingletons_isPartition.covers v
+
+/-- The raw companion: each vertex lies in its own singleton part, by
+direct membership computation. -/
+theorem mwp_covers_raw (v : Fin 2) : v ∈ mwEdgeSingletons v := by
+  have hv : mwEdgeSingletons v = ({v} : Finset (Fin 2)) := by
+    fin_cases v <;> rfl
+  rw [hv]; simp
+
+end SinglesPins
+
 end SpectralGraphTheory.MultiwayQA

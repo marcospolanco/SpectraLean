@@ -1,11 +1,14 @@
 # Proposal: The Rank-One Edge Perturbation Norm Bound
 
-**Status:** Proposed. Restated in pure-mathematics form 2026-09-07 from
+**Status:** COMPLETE (delivered 2026-09-07, run `20260907T130116Z-run-1`,
+session `ses_f840b32f9ffeQquR0Tn6QqpJwb`; Steps 1 and 2 landed together
+as the operating instructions priced; the `i = j` fence shipped in the
+same delivery as required — see the delivery record below). Restated in
+pure-mathematics form 2026-09-07 from
 an external request relayed by the operator (not tracked in this
 repository — see `.gitignore`); no operational, product, or patent
 framing survives into this document, only the underlying mathematical
-asks. Authorizes no Lean changes, axiom admissions, document rewrites,
-or transit-map edits.
+asks.
 
 Companion to `Scaffold/Mathlib/GraphTheory/EdgePerturbation.lean`
 (Section 1, "the single-edge algebra" — `edgeAdj`/`laplacian_edgeAdj`,
@@ -235,3 +238,108 @@ in `proposals/README.md`'s Active priority table.
 
 Ready to pick up immediately — no dependency on any other proposal's
 status.
+
+## Delivery record (2026-09-07)
+
+**Delivered at the full designed scope** — both steps plus every QA
+item of the QA plan, in one run as the operating instructions priced
+("both steps are small enough to plausibly combine in a single run";
+"ship the `i = j` fence in the same delivery as Step 1, not as a
+follow-on audit pass").
+
+**Step 1, exactly as proposed** (including the `i ≠ j` hypothesis the
+proposal's own beyond-the-ask finding requires):
+`l2OpNorm_laplacian_edgeAdj (i j : V) (hij : i ≠ j) (w : ℝ) :
+‖laplacian (edgeAdj i j w)‖ = 2 * |w|`, in `EdgePerturbation.lean`'s
+single-edge-algebra section immediately after `laplacian_edgeAdj`, with
+the route exactly as designed: the upper direction
+`l2OpNorm_smul_rankOne_le` cloning `l2OpNorm_rankOne_le`'s
+Cauchy–Schwarz technique with the scalar carried through the public
+`quadForm_smul` (the proposal named the *private*
+`Spectral.lean:quadForm_smul_var`; the identical public
+`Sparsification.lean:quadForm_smul` is what actually composes — same
+statement, no privacy obstacle); the lower direction
+`abs_w_mul_dotProduct_self_le_l2OpNorm` through
+`Matrix.smul_mulVec_assoc` + `rankOne_mulVec` +
+`exists_eigvalOf_eq_of_mulVec_eq_smul` +
+`abs_eigvalOf_le_l2OpNorm` — the two for-unrelated-purposes lemmas the
+proposal identified, now consumed on a third surface; the packaging
+equality `l2OpNorm_smul_rankOne : ‖w • rankOne v‖ = |w| * (v ⬝ᵥ v)` at
+`v ≠ 0`; the `Pi.single`↔`ssEdgeDiff` bridge `edgeDiff_eq_ssEdgeDiff`
+(via `dotProduct_ssEdgeDiff`, `v ⬝ᵥ v = 2` in one rewrite); and
+`smul_rankOne_isSymm`.
+
+**Step 2, exactly as proposed**:
+`l2OpNorm_sum_laplacian_edgeAdj_le {ι} (s : Finset ι) (e : ι → V × V)
+(he : ∀ k ∈ s, (e k).1 ≠ (e k).2) (dw : ι → ℝ) : ‖∑ k in s,
+laplacian (edgeAdj (e k).1 (e k).2 (dw k))‖ ≤ ∑ k in s, 2 * |dw k|` —
+`norm_sum_le` (the scoped `NormedAddCommGroup` instance the pinned
+Mathlib provides under `Matrix.L2OpNorm`) plus Step 1 termwise. Pure
+assembly, no new inequality.
+
+**QA (`EdgePerturbation_QA.lean`'s new `NormPins` section, +15)** —
+every item of the QA plan:
+- the raw closed form `laplacian (edgeAdj 0 1 w) = !![w, -w; -w, w]` at
+  symbolic weight (entrywise, the file's own fixture idiom);
+- the value pins through the theorem at **positive, negative, and zero
+  weight** (`6`, `10`, `0`), each with the old-machinery route B
+  (`epn_K2_norm_of_w`: `laplacian_edgeAdj` + the file's own
+  action-bound `epK2_rankOne_norm` — no new theorem consumed) — two
+  routes, one value;
+- **the `i = j` fence**: the loop Laplacian computed raw as the zero
+  matrix (entrywise, not through the identity), and `2 * |3| ≠ 0`
+  refuting the dropped-hypothesis statement — the omitted-hypothesis
+  finding fenced in the same delivery as required;
+- the two-update parallel sequence `(0,1)`, `(1,0)` at weight `3`:
+  the raw sum `= 2 • L(edge 0 1 3)` (through the ordered-pair spelling
+  symmetry `epn_edgeAdj_comm`) and **the subadditive bound attained
+  with equality** (`12 = 12`) — the triangle inequality tight when the
+  updates are parallel rank-one blocks on one difference vector;
+- the three-edge `Fin 3` sequence (`(0,1)` at `1`, `(1,2)` at `-2`,
+  `(0,2)` at `4`): the bound's RHS computed `14`, and the summed
+  Laplacian computed **raw entrywise** as `!![5, -1, -4; -1, -1, 2;
+  -4, 2, 2]` — note the honest signed degrees (vertex `1`'s row sum is
+  `1 + (-2) = -1`): the first draft of this fixture used unsigned
+  degrees (`3`) and the elaborator rejected it on the `(1,1)` diagonal
+  — the QA caught its own author's arithmetic, which is the point.
+
+**Scope decisions honored**: no `laplacian_edge_update` definition was
+introduced (the theorem is stated directly about
+`laplacian (edgeAdj i j w)`); no probabilistic content; the deferred
+items (the general `eigvalOf (c • M)` scaling theorem, any connection
+back into `EdgePerturbationDrift`) remain untouched as recorded.
+
+**Verification.** Spike-first (`wip/epnorm_spike.lean` — green across
+fix rounds; traps recorded for future runs: the pinned Mathlib's
+`abs_le` is the `¬`-first conjunction `-b ≤ a ∧ a ≤ b`, the opposite of
+the shelf-era assumption — the `constructor` bullets swap;
+`l2OpNorm_le_of_abs_eigvalOf_le`'s constant clause needs the product's
+nonnegativity, not `abs_nonneg` alone; `rw [l2OpNorm_laplacian_edgeAdj
+(by norm_num)]` leaves `i j` as metavariables — explicit arguments
+required; the `Fin 3` literal-entry reduction goes through
+`Matrix.vecHead`/`Matrix.vecTail`, absent from the `cons_val` trio).
+Both landed modules elaborate with zero errors/warnings (the 3
+`ring_nf` infos in the QA file verified pre-existing at HEAD by
+elaborating `git show HEAD:`'s copy). Explicit builds ✔. **22-declaration
+axiom audit via `wip/epnorm_axcheck.lean` (7 shelf + 15 QA): every one
+exactly `propext, Classical.choice, Quot.sound`** — zero axiom
+contact, no `-- @refutes` tags (nothing admitted is consumed). Full
+`lake build` + `check_build_completeness.py` — 135/135 fresh, 0 stale,
+0 missing, exit 0. `lint_axioms` exit 0 (4 axioms unchanged).
+`check_refutation_independence` (24-tag clean).
+`check_public_reachability` (63 modules). `check_citations`.
+`check_markdown_links`. `check_qa_name_uniqueness` (the new `epn_*`
+names collision-free). `check_backlog_freshness` clean. Scoreboard
+regenerated (**1369 → 1376 functional / 6698 → 6713 QA / 4 axioms / 0
+sorries**) with the verification row. Map freshness exit 0 after the
+stats sync in both map data tables + SVG regeneration (49 stations, no
+status change — none owed: the EdgePerturbation station's status line
+is unchanged, the delivery being a same-status enrichment).
+
+**Remaining risk:** none owed — hard crust only, no axiom disposition
+changed, no public statement changed. Honest scope: the equality needs
+`i ≠ j` (fenced, not stated at loops); the subadditive bound is the
+plain triangle inequality with no improvement at non-parallel sequences
+(the three-edge instance's slack is not quantified); the weighted
+rank-one equality needs `v ≠ 0` (the zero vector's block is the zero
+matrix and the statement is harmlessly false-but-vacuous there).

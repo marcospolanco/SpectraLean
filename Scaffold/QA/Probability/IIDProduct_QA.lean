@@ -35,6 +35,8 @@
 -/
 
 import Scaffold.Mathlib.Probability.IIDProduct
+import Scaffold.Mathlib.Probability.Concentration.Scalar.Hoeffding
+import Scaffold.Mathlib.Probability.Concentration.Scalar.Bernstein
 
 open MeasureTheory ProbabilityTheory
 open scoped ENNReal
@@ -42,6 +44,7 @@ open scoped ENNReal
 namespace Scaffold.Mathlib.Probability.IIDProduct.QA
 
 open Scaffold.Mathlib.Probability.IIDProduct
+open Scaffold.Mathlib.Probability.Concentration.Scalar
 
 /-!
 ## The `Fin 2` fixture and its raw-route machinery
@@ -613,5 +616,282 @@ theorem iIndepFun_coord_apply_strict {ι : Type*} [Fintype ι] [DecidableEq ι]
   iIndepFun_coord_apply q hq0 hq1 e he F (fun _ => measurable_of_finite _)
 
 end AdversarialFences
+
+
+/-! ## Singles pins: the probability trio — the iid twins and the
+pairwise indicator clause
+
+The first genuine consumption of the census's three remaining
+probability singles (`indepFun_indicator_coord`,
+`hoeffding_iid`, `bernstein_iid` — the scalar concentration stack's
+never-instantiated iid forms), all on ONE shared fixture: the fair coin
+`prFair` on `Fin 2 → Fin 2` with the ±1 family
+`prX k ω = if ω k = 0 then 1 else -1` — centered at exactly the fair
+coin, bounded by `a = 1`, variance `σ² = 1`, mutually independent
+through the shelf's `iIndepFun_coord_apply`. The pins: the pairwise
+theorem consumed with a two-route joint-mass join (the independence
+factorization vs raw cylinder arithmetic); both twins instantiated at
+`t = 2` where the tail event is exactly the same-value pairs, of raw
+mass `1/2` (non-vacuous); and the honest bound contrast — at this
+Rademacher fixture (`σ² = a²`, the extremal-variance case) the
+Hoeffding bound is the strictly smaller one.
+-/
+
+section SinglesPins
+
+/-- The fair coin distribution. -/
+noncomputable def prFair : Fin 2 → ℝ := ![1 / 2, 1 / 2]
+
+theorem prFair_nonneg : ∀ v, 0 ≤ prFair v := by
+  intro v; fin_cases v <;> simp [prFair]
+
+theorem prFair_sum : ∑ v, prFair v = 1 := by
+  simp [prFair, Fin.sum_univ_two]; norm_num
+
+/-- The ±1 family at the fair coin: centered, bounded by `1`. -/
+def prX : Fin 2 → (Fin 2 → Fin 2) → ℝ :=
+  fun k ω => if ω k = 0 then 1 else -1
+
+theorem prX_meas (k : Fin 2) : Measurable (prX k) :=
+  (measurable_of_finite (fun v : Fin 2 => if v = 0 then (1 : ℝ) else -1)).comp
+    (measurable_coord k)
+
+theorem prX_bound : ∀ k ω, |prX k ω| ≤ 1 := by
+  intro k ω
+  by_cases h : ω k = 0
+  · simp [prX, h]
+  · simp [prX, h]
+
+theorem prX_indep :
+    iIndepFun (fun _ : Fin 2 => (inferInstance : MeasurableSpace ℝ)) prX
+      (iidPMF prFair prFair_nonneg prFair_sum).toMeasure :=
+  iIndepFun_coord_apply prFair prFair_nonneg prFair_sum id Function.injective_id
+    (fun _ v => if v = 0 then (1 : ℝ) else -1) (fun _ => measurable_of_finite _)
+
+theorem prX_mean (k : Fin 2) :
+    ∫ ω : Fin 2 → Fin 2, prX k ω ∂(iidPMF prFair prFair_nonneg prFair_sum).toMeasure = 0 := by
+  have hptw : ∀ ω : Fin 2 → Fin 2,
+      prX k ω = (if ω k = 0 then (1 : ℝ) else 0) - (if ω k = 1 then (1 : ℝ) else 0) := by
+    intro ω
+    have hk : ω k = 0 ∨ ω k = 1 := by omega
+    rcases hk with h | h
+    · simp [prX, h]
+    · simp [prX, h]
+  have hmeasI : ∀ i : Fin 2, Measurable
+      (fun ω : Fin 2 → Fin 2 => if ω k = i then (1 : ℝ) else 0) :=
+    fun i => (measurable_of_finite
+      (fun v : Fin 2 => if v = i then (1 : ℝ) else 0)).comp (measurable_coord k)
+  have hintI : ∀ i : Fin 2, Integrable
+      (fun ω : Fin 2 → Fin 2 => if ω k = i then (1 : ℝ) else 0)
+      (iidPMF prFair prFair_nonneg prFair_sum).toMeasure :=
+    fun i => integrable_of_bounded_measurable (a := 1) (hmeasI i)
+      (fun ω => by
+        by_cases h : ω k = i
+        · simp [h]
+        · simp [h])
+  calc ∫ ω : Fin 2 → Fin 2, prX k ω ∂(iidPMF prFair prFair_nonneg prFair_sum).toMeasure
+      = ∫ ω : Fin 2 → Fin 2,
+          ((if ω k = 0 then (1 : ℝ) else 0) - (if ω k = 1 then (1 : ℝ) else 0))
+            ∂(iidPMF prFair prFair_nonneg prFair_sum).toMeasure :=
+        integral_congr_ae (ae_of_all _ hptw)
+    _ = (∫ ω : Fin 2 → Fin 2, (if ω k = 0 then (1 : ℝ) else 0)
+          ∂(iidPMF prFair prFair_nonneg prFair_sum).toMeasure)
+        - (∫ ω : Fin 2 → Fin 2, (if ω k = 1 then (1 : ℝ) else 0)
+          ∂(iidPMF prFair prFair_nonneg prFair_sum).toMeasure) :=
+        integral_sub (hintI 0) (hintI 1)
+    _ = prFair 0 - prFair 1 := by
+        rw [integral_indicator prFair prFair_nonneg prFair_sum k 0,
+          integral_indicator prFair prFair_nonneg prFair_sum k 1]
+    _ = 0 := by simp [prFair]
+
+/-- **The pairwise indicator-independence theorem consumed** (the
+census's `indepFun_indicator_coord`). -/
+theorem pri_indepFun_indicator_pin :
+    IndepFun (fun ω : Fin 2 → Fin 2 => (if ω 0 = 0 then (1 : ℝ) else 0))
+      (fun ω : Fin 2 → Fin 2 => (if ω 1 = 1 then (1 : ℝ) else 0))
+      (iidPMF prFair prFair_nonneg prFair_sum).toMeasure :=
+  indepFun_indicator_coord prFair prFair_nonneg prFair_sum (by decide) 0 1
+
+/-- Route A: the joint preimage mass through the consumed independence
+theorem (the inter-preimage factorization at the singleton level set
+`{1} : Set ℝ`). -/
+theorem pri_joint_mass_via_indep :
+    (iidPMF prFair prFair_nonneg prFair_sum).toMeasure
+        {ω : Fin 2 → Fin 2 | ω 0 = 0 ∧ ω 1 = 1}
+      = ENNReal.ofReal ((1 : ℝ) / 4) := by
+  have hind := pri_indepFun_indicator_pin
+  rw [indepFun_iff_measure_inter_preimage_eq_mul] at hind
+  have hset : MeasurableSet ({1} : Set ℝ) := by simp
+  have hsplit := hind {1} {1} hset hset
+  have heq1 : (fun ω : Fin 2 → Fin 2 => (if ω 0 = 0 then (1 : ℝ) else 0)) ⁻¹' ({1} : Set ℝ)
+      = {ω : Fin 2 → Fin 2 | ω 0 = 0} := by
+    ext ω; simp
+  have heq2 : (fun ω : Fin 2 → Fin 2 => (if ω 1 = 1 then (1 : ℝ) else 0)) ⁻¹' ({1} : Set ℝ)
+      = {ω : Fin 2 → Fin 2 | ω 1 = 1} := by
+    ext ω; simp
+  have hint2 : {ω : Fin 2 → Fin 2 | ω 0 = 0} ∩ {ω : Fin 2 → Fin 2 | ω 1 = 1}
+      = {ω : Fin 2 → Fin 2 | ω 0 = 0 ∧ ω 1 = 1} := by
+    ext ω; simp [Set.mem_inter_iff]
+  rw [heq1, heq2, hint2] at hsplit
+  have hcyl : ∀ (e : Fin 2) (v : Fin 2),
+      (iidPMF prFair prFair_nonneg prFair_sum).toMeasure
+        {ω : Fin 2 → Fin 2 | ω e = v}
+      = ENNReal.ofReal (prFair v) := by
+    intro e v
+    have hpre : {ω : Fin 2 → Fin 2 | ω e = v}
+        = (fun ω : Fin 2 → Fin 2 => ω e) ⁻¹' ({v} : Set (Fin 2)) := by
+      ext ω; simp
+    rw [hpre, toMeasure_cyl prFair prFair_nonneg prFair_sum e {v},
+      Finset.sum_eq_single v]
+    · simp [prFair]
+    · intro b _ hb; simp [hb]
+    · intro h; exact absurd (Finset.mem_univ v) h
+  rw [hcyl 0 0, hcyl 1 1] at hsplit
+  calc (iidPMF prFair prFair_nonneg prFair_sum).toMeasure
+          {ω : Fin 2 → Fin 2 | ω 0 = 0 ∧ ω 1 = 1}
+      = ENNReal.ofReal (prFair 0) * ENNReal.ofReal (prFair 1) := hsplit
+    _ = ENNReal.ofReal ((1 : ℝ) / 4) := by
+        rw [← ENNReal.ofReal_mul (prFair_nonneg 0)]
+        congr 1; simp [prFair]; norm_num
+
+/-- Route B: the same joint mass by raw cylinder arithmetic
+(`toMeasure_cyl_inter` — no independence consumed). Two routes, one
+value. -/
+theorem pri_joint_mass_raw :
+    (iidPMF prFair prFair_nonneg prFair_sum).toMeasure
+        {ω : Fin 2 → Fin 2 | ω 0 = 0 ∧ ω 1 = 1}
+      = ENNReal.ofReal ((1 : ℝ) / 4) := by
+  classical
+  have hset : {ω : Fin 2 → Fin 2 | ω 0 = 0 ∧ ω 1 = 1}
+      = ⋂ i ∈ (Finset.univ : Finset (Fin 2)),
+          (fun ω : Fin 2 → Fin 2 => ω i) ⁻¹'
+            (if i = 0 then ({0} : Set (Fin 2)) else {1}) := by
+    ext ω
+    simp only [Set.mem_setOf_eq, Set.mem_iInter, Finset.mem_univ,
+      Set.mem_preimage, Fin.forall_fin_two]
+    by_cases h0 : ω 0 = 0 <;> by_cases h1 : ω 1 = 0 <;>
+      simp [h0, h1]
+  rw [hset, toMeasure_cyl_inter prFair prFair_nonneg prFair_sum
+    (Finset.univ : Finset (Fin 2))
+    (fun i => if i = 0 then ({0} : Set (Fin 2)) else {1})]
+  simp [Fin.prod_univ_two, Finset.sum_ite_eq', Set.mem_singleton_iff,
+    mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, prFair, Fin.isValue]
+  rw [← ENNReal.ofReal_mul (by norm_num : (0 : ℝ) ≤ 2⁻¹)]
+  norm_num
+
+/-- **The raw event mass**: the Hoeffding/Bernstein tail event
+`{|∑ X| ≥ 2}` is exactly the same-value pairs, of raw mass `1/2` —
+the bound's non-vacuity witness. -/
+theorem pri_event_mass_raw :
+    (iidPMF prFair prFair_nonneg prFair_sum).toMeasure
+        {ω : Fin 2 → Fin 2 | |∑ i, prX i ω| ≥ 2}
+      = ENNReal.ofReal ((1 : ℝ) / 2) := by
+  classical
+  have hsplit : {ω : Fin 2 → Fin 2 | |∑ i, prX i ω| ≥ 2}
+      = {ω : Fin 2 → Fin 2 | ω 0 = 0 ∧ ω 1 = 0}
+        ∪ {ω : Fin 2 → Fin 2 | ω 0 = 1 ∧ ω 1 = 1} := by
+    ext ω
+    have ha : ω 0 = 0 ∨ ω 0 = 1 := by omega
+    have hb : ω 1 = 0 ∨ ω 1 = 1 := by omega
+    rcases ha with a | a <;> rcases hb with b | b <;>
+      simp [prX, a, b, Set.mem_union, Fin.sum_univ_two] <;> norm_num
+  have hpart : ∀ v : Fin 2,
+      (iidPMF prFair prFair_nonneg prFair_sum).toMeasure
+        {ω : Fin 2 → Fin 2 | ω 0 = v ∧ ω 1 = v}
+      = ENNReal.ofReal ((1 : ℝ) / 4) := by
+    intro v
+    have hset : {ω : Fin 2 → Fin 2 | ω 0 = v ∧ ω 1 = v}
+        = ⋂ i ∈ (Finset.univ : Finset (Fin 2)),
+            (fun ω : Fin 2 → Fin 2 => ω i) ⁻¹' ({v} : Set (Fin 2)) := by
+      ext ω
+      simp only [Set.mem_setOf_eq, Set.mem_iInter, Finset.mem_univ,
+        Set.mem_preimage, Fin.forall_fin_two, Set.mem_singleton_iff]
+      by_cases h0 : ω 0 = v <;> by_cases h1 : ω 1 = v <;>
+        simp [h0, h1]
+    rw [hset, toMeasure_cyl_inter prFair prFair_nonneg prFair_sum
+      (Finset.univ : Finset (Fin 2)) (fun _ => ({v} : Set (Fin 2)))]
+    simp [Fin.prod_univ_two, Finset.sum_ite_eq', Set.mem_singleton_iff,
+      mul_ite, mul_one, mul_zero, prFair, Fin.isValue]
+    fin_cases v <;> simp [prFair]
+    all_goals rw [sq, ← ENNReal.ofReal_mul (by norm_num : (0 : ℝ) ≤ 2⁻¹)]
+    all_goals norm_num
+  have hdis : Disjoint {ω : Fin 2 → Fin 2 | ω 0 = 0 ∧ ω 1 = 0}
+      {ω : Fin 2 → Fin 2 | ω 0 = 1 ∧ ω 1 = 1} := by
+    intro z h1 h2
+    have ha : ∀ ω : Fin 2 → Fin 2, ω ∈ z → ω 0 = 0 ∧ ω 1 = 0 :=
+      fun ω hω => h1 hω
+    have hb : ∀ ω : Fin 2 → Fin 2, ω ∈ z → ω 0 = 1 ∧ ω 1 = 1 :=
+      fun ω hω => h2 hω
+    exact fun ω hω => absurd ((ha ω hω).1.symm.trans (hb ω hω).1) (by decide)
+  have hmeasA : MeasurableSet {ω : Fin 2 → Fin 2 | ω 0 = 0 ∧ ω 1 = 0} :=
+    Set.Finite.measurableSet (Set.toFinite _)
+  have hmeasB : MeasurableSet {ω : Fin 2 → Fin 2 | ω 0 = 1 ∧ ω 1 = 1} :=
+    Set.Finite.measurableSet (Set.toFinite _)
+  rw [hsplit, measure_union hdis hmeasB, hpart 0, hpart 1]
+  rw [← ENNReal.ofReal_add (by norm_num) (by norm_num)]
+  norm_num
+
+/-- **The Hoeffding iid twin consumed**: the theorem instance at
+`t = 2`, `a = 1`, `n = 2`, stated at the theorem's verbatim bound. -/
+theorem pri_hoeffding_iid_pin :
+    (iidPMF prFair prFair_nonneg prFair_sum).toMeasure
+        {ω : Fin 2 → Fin 2 | |∑ i, prX i ω| ≥ 2}
+      ≤ ENNReal.ofReal (2 * Real.exp (-(2 : ℝ) ^ 2 / (2 * ((2 : ℝ) * 1 ^ 2)))) :=
+  hoeffding_iid (a := 1) (by norm_num) prX_meas prX_indep prX_bound prX_mean 2
+    (by norm_num)
+
+/-- The display collapse: the verbatim bound is `2 exp(−1)`. -/
+theorem pri_hoeffding_display :
+    2 * Real.exp (-(2 : ℝ) ^ 2 / (2 * ((2 : ℝ) * 1 ^ 2)))
+      = 2 * Real.exp (-(1 : ℝ)) := by norm_num
+
+/-- **The Bernstein iid twin consumed**: the same fixture at `σ² = 1`,
+stated at the theorem's verbatim bound. -/
+theorem pri_bernstein_iid_pin :
+    (iidPMF prFair prFair_nonneg prFair_sum).toMeasure
+        {ω : Fin 2 → Fin 2
+            | |∑ i, (prX i ω - ∫ ω', prX i ω' ∂(iidPMF prFair prFair_nonneg prFair_sum).toMeasure)| ≥ 2}
+      ≤ ENNReal.ofReal
+          (2 * Real.exp (-(2 : ℝ) ^ 2 / (2 * ((2 : ℝ) * 1) + (2 * 1 * 2) / 3))) := by
+  have hbound : ∀ i ω, |prX i ω - ∫ ω', prX i ω'
+      ∂(iidPMF prFair prFair_nonneg prFair_sum).toMeasure| ≤ 1 := by
+    intro i ω
+    rw [prX_mean i, sub_zero]
+    exact prX_bound i ω
+  have hvar : ∀ i, ∫ ω, (prX i ω
+      - ∫ ω', prX i ω' ∂(iidPMF prFair prFair_nonneg prFair_sum).toMeasure) ^ 2
+      ∂(iidPMF prFair prFair_nonneg prFair_sum).toMeasure = 1 := by
+    intro i
+    have hptw : ∀ ω : Fin 2 → Fin 2,
+        (prX i ω
+          - ∫ ω', prX i ω' ∂(iidPMF prFair prFair_nonneg prFair_sum).toMeasure) ^ 2
+          = 1 := by
+      intro ω
+      rw [prX_mean i]
+      by_cases h : ω i = 0 <;> simp [prX, h]
+    rw [integral_congr_ae (ae_of_all _ hptw)]
+    simp
+  exact bernstein_iid (a := 1) (σ_sq := 1) (by norm_num) (by norm_num)
+    prX_meas prX_indep hbound hvar 2 (by norm_num)
+
+/-- The display collapse: the verbatim Bernstein bound is `2 exp(−3/4)`. -/
+theorem pri_bernstein_display :
+    2 * Real.exp (-(2 : ℝ) ^ 2 / (2 * ((2 : ℝ) * 1) + (2 * 1 * 2) / 3))
+      = 2 * Real.exp (-(3 / 4 : ℝ)) := by norm_num
+
+/-- **The bound contrast, honestly stated**: at this Rademacher
+fixture (`σ² = a² = 1`, the extremal-variance case) the variance term
+cannot help and the Hoeffding bound is the strictly smaller one —
+`2 exp(−1) < 2 exp(−3/4)` by pure monotonicity (no numeric bound on
+`e`). The opposite direction — Bernstein strictly sharper — needs an
+asymmetric family with `σ² < a²` at a biased coin (a second fixture
+family, priced not owed). -/
+theorem pri_bound_contrast :
+    2 * Real.exp (-(1 : ℝ)) < 2 * Real.exp (-(3 / 4 : ℝ)) := by
+  have h : Real.exp (-(1 : ℝ)) < Real.exp (-(3 / 4 : ℝ)) :=
+    Real.exp_lt_exp.mpr (by norm_num)
+  exact mul_lt_mul_of_pos_left h (by norm_num)
+
+end SinglesPins
 
 end Scaffold.Mathlib.Probability.IIDProduct.QA

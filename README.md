@@ -25,13 +25,26 @@ As of September 7, 2026:
 | --- | --- |
 | Default `lake build` | Passes; the umbrella reaches every public module |
 | Explicit cited axioms | 4 |
-| Functional theorems/lemmas (`Scaffold/Mathlib` + `Scaffold/Derived`) | 1369 — the public, consumer-facing layer `Scaffold.lean` actually imports |
-| QA theorems/lemmas (`Scaffold/QA`) | 6698, with no `sorry` or `admit` under `Scaffold/` — testing infrastructure, not imported by `Scaffold.lean` |
+| Functional theorems/lemmas (`Scaffold/Mathlib` + `Scaffold/Derived`) | 1376 — the public, consumer-facing layer `Scaffold.lean` actually imports |
+| QA theorems/lemmas (`Scaffold/QA`) | 6742, with no `sorry` or `admit` under `Scaffold/` — testing infrastructure, not imported by `Scaffold.lean` |
 
 Recent highlights (full per-run history in
 [`docs/AGENT_ACTIVITY.md`](docs/AGENT_ACTIVITY.md); per-result detail in each
 linked proposal):
 
+- **The Rank-One Edge Perturbation Norm Bound** — the exact operator
+  norm of a single edge-weight mutation,
+  `‖laplacian (edgeAdj i j w)‖ = 2|w|` at `i ≠ j`, plus the subadditive
+  multi-edge bound `‖∑ₖ L(edge eₖ, wₖ)‖ ≤ ∑ₖ 2|wₖ|`: the deterministic
+  perturbation-norm interface assembled entirely from already-proved
+  shelf material — the missing lower direction consumes two lemmas
+  built for unrelated purposes (the bottom-eigenvalue witness bridge
+  and the eigenvalue-below-norm bound), the upper direction is the
+  rank-one Cauchy–Schwarz technique with the scalar carried — with the
+  reusable packaging `‖w • v vᵀ‖ = |w|·(v ⬝ᵥ v)` beside it, the `i = j`
+  loop fence in the same delivery, and QA where the elaborator
+  rejected the author's own unsigned-degree fixture arithmetic
+  ([proposal](proposals/rank-one-edge-perturbation-norm.md)).
 - **The edge-perturbation design's independence + PSD positive pins** —
   the compiler-derived consumption census's largest remaining inert
   cluster, closed: the first genuine consumption of the design's four

@@ -147,6 +147,125 @@ theorem laplacian_edgeAdj (i j : V) (w : ℝ) :
     by_cases h3 : b = i <;> by_cases h4 : b = j <;> by_cases hab : a = b <;>
     simp_all [Pi.single_apply, eq_comm]
 
+omit [Fintype V] [DecidableEq V] in
+/-- Symmetry of the weighted rank-one block. -/
+theorem smul_rankOne_isSymm (w : ℝ) (v : V → ℝ) : (w • rankOne v).IsSymm := by
+  apply Matrix.IsSymm.ext
+  intro a b
+  simp only [Matrix.transpose_apply, Matrix.smul_apply, smul_eq_mul, rankOne_apply]
+  ring
+
+/-- **The weighted rank-one operator-norm upper bound**:
+`‖w • v vᵀ‖ ≤ |w| * (v ⬝ᵥ v)` — `l2OpNorm_rankOne_le`'s own
+Cauchy–Schwarz technique at a unit eigenvector, with `quadForm_smul`
+carrying the scalar weight through the quadratic form. -/
+theorem l2OpNorm_smul_rankOne_le (w : ℝ) (v : V → ℝ) :
+    ‖w • rankOne v‖ ≤ |w| * (v ⬝ᵥ v) := by
+  have hsymm : (w • rankOne v).IsSymm := smul_rankOne_isSymm w v
+  have hw1 : w ≤ |w| := le_abs_self w
+  have hw2 : -|w| ≤ w := by
+    rcases le_or_lt 0 w with hw | hw
+    · rw [abs_of_nonneg hw]; linarith
+    · rw [abs_of_neg hw]; linarith
+  refine Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent.l2OpNorm_le_of_abs_eigvalOf_le
+    hsymm (mul_nonneg (abs_nonneg w) (dotProduct_self_nonneg v)) fun i => ?_
+  rw [abs_le, ← quadForm_eigvecOf_self hsymm i, quadForm_smul, rankOne_quadForm]
+  have hunit : (eigvecOf (w • rankOne v) hsymm i)
+      ⬝ᵥ (eigvecOf (w • rankOne v) hsymm i) = 1 := by
+    simpa [Matrix.dotProduct] using eigvecOf_inner (w • rankOne v) hsymm i i
+  have hcs := dotProduct_sq_le (eigvecOf (w • rankOne v) hsymm i) v
+  rw [hunit, one_mul] at hcs
+  have hsq : 0 ≤ (eigvecOf (w • rankOne v) hsymm i ⬝ᵥ v)
+      * (eigvecOf (w • rankOne v) hsymm i ⬝ᵥ v) :=
+    mul_self_nonneg _
+  have hAT : |w| * ((eigvecOf (w • rankOne v) hsymm i ⬝ᵥ v)
+      * (eigvecOf (w • rankOne v) hsymm i ⬝ᵥ v)) ≤ |w| * (v ⬝ᵥ v) :=
+    mul_le_mul_of_nonneg_left hcs (abs_nonneg w)
+  constructor
+  · rw [pow_two]
+    calc -(|w| * (v ⬝ᵥ v)) ≤ -(|w| * ((eigvecOf (w • rankOne v) hsymm i ⬝ᵥ v)
+            * (eigvecOf (w • rankOne v) hsymm i ⬝ᵥ v))) := neg_le_neg hAT
+      _ = -|w| * ((eigvecOf (w • rankOne v) hsymm i ⬝ᵥ v)
+            * (eigvecOf (w • rankOne v) hsymm i ⬝ᵥ v)) := by ring
+      _ ≤ w * ((eigvecOf (w • rankOne v) hsymm i ⬝ᵥ v)
+            * (eigvecOf (w • rankOne v) hsymm i ⬝ᵥ v)) :=
+          mul_le_mul_of_nonneg_right hw2 hsq
+  · rw [pow_two]
+    calc w * ((eigvecOf (w • rankOne v) hsymm i ⬝ᵥ v)
+          * (eigvecOf (w • rankOne v) hsymm i ⬝ᵥ v))
+        ≤ |w| * ((eigvecOf (w • rankOne v) hsymm i ⬝ᵥ v)
+            * (eigvecOf (w • rankOne v) hsymm i ⬝ᵥ v)) :=
+          mul_le_mul_of_nonneg_right hw1 hsq
+      _ ≤ |w| * (v ⬝ᵥ v) := hAT
+
+/-- **The weighted rank-one operator-norm lower bound** — the direction
+`l2OpNorm_rankOne_le` does not supply. The vector `v` is an eigenvector
+of `w • rankOne v` at `w * (v ⬝ᵥ v)` (by `rankOne_mulVec`), so the
+witness-eigenvalue existence lemma `exists_eigvalOf_eq_of_mulVec_eq_smul`
+exhibits that value in the `eigvalOf` listing, and
+`abs_eigvalOf_le_l2OpNorm` bounds it below the norm. -/
+theorem abs_w_mul_dotProduct_self_le_l2OpNorm (w : ℝ) (v : V → ℝ) (hv : v ≠ 0) :
+    |w| * (v ⬝ᵥ v) ≤ ‖w • rankOne v‖ := by
+  have hsymm : (w • rankOne v).IsSymm := smul_rankOne_isSymm w v
+  have hmul : (w • rankOne v) *ᵥ v = (w * (v ⬝ᵥ v)) • v := by
+    rw [Matrix.smul_mulVec_assoc, rankOne_mulVec, smul_smul]
+  obtain ⟨i, hi⟩ := exists_eigvalOf_eq_of_mulVec_eq_smul hsymm hv hmul
+  have habs := Scaffold.Mathlib.Analysis.OperatorTheory.Resolvent.abs_eigvalOf_le_l2OpNorm
+    hsymm i
+  rw [hi, abs_mul, abs_of_nonneg (dotProduct_self_nonneg v)] at habs
+  exact habs
+
+/-- **The weighted rank-one norm equality**: `‖w • v vᵀ‖ = |w| * (v ⬝ᵥ v)`
+at every nonzero `v` — the exact operator norm of a scaled rank-one
+block. -/
+theorem l2OpNorm_smul_rankOne (w : ℝ) (v : V → ℝ) (hv : v ≠ 0) :
+    ‖w • rankOne v‖ = |w| * (v ⬝ᵥ v) :=
+  le_antisymm (l2OpNorm_smul_rankOne_le w v)
+    (abs_w_mul_dotProduct_self_le_l2OpNorm w v hv)
+
+omit [Fintype V] in
+/-- The `Pi.single` edge-difference vector is `ssEdgeDiff`,
+`GraphTheory.Sparsification`'s own spelling of the same object. -/
+theorem edgeDiff_eq_ssEdgeDiff (i j : V) :
+    (Pi.single i 1 - Pi.single j 1 : V → ℝ) = ssEdgeDiff i j := by
+  funext k; simp [ssEdgeDiff, Pi.single_apply]
+
+/-- **The single-edge Laplacian norm equality**: `‖L(edge i j w)‖ = 2|w|`
+— the exact operator norm of one edge-weight mutation, at every
+`i ≠ j`. The hypothesis the naive formula omits: at `i = j` a loop is
+not a cut edge, `L(edgeAdj i i w) = 0` (by `laplacian_edgeAdj`, both
+sides zero), and the equality fails at every `w ≠ 0`. -/
+theorem l2OpNorm_laplacian_edgeAdj (i j : V) (hij : i ≠ j) (w : ℝ) :
+    ‖laplacian (edgeAdj i j w)‖ = 2 * |w| := by
+  have hvne : (Pi.single i 1 - Pi.single j 1 : V → ℝ) ≠ 0 := by
+    intro h
+    have h0 : (Pi.single i 1 - Pi.single j 1 : V → ℝ) i = 0 := congrFun h i
+    rw [Pi.sub_apply, Pi.single_apply, Pi.single_apply, if_pos rfl, if_neg hij] at h0
+    norm_num at h0
+  have hvv : (Pi.single i 1 - Pi.single j 1 : V → ℝ)
+      ⬝ᵥ (Pi.single i 1 - Pi.single j 1) = 2 := by
+    rw [edgeDiff_eq_ssEdgeDiff, dotProduct_ssEdgeDiff]
+    have hji : j ≠ i := Ne.symm hij
+    simp [ssEdgeDiff, hij, hji]
+    norm_num
+  rw [laplacian_edgeAdj, l2OpNorm_smul_rankOne w _ hvne, hvv, mul_comm]
+
+/-- **The subadditive multi-edge bound**: the operator norm of a finite
+sum of single-edge Laplacian updates is at most the sum of their
+individual norms `2|wₖ|` — the triangle inequality for the operator norm
+plus the single-edge equality, termwise. A deterministic statement about
+a fixed, known sequence of edge-weight changes; no probability space
+(compare `edgePerturbation_norm_tail`, the *random* design's tail). -/
+theorem l2OpNorm_sum_laplacian_edgeAdj_le {ι : Type} (s : Finset ι)
+    (e : ι → V × V) (he : ∀ k ∈ s, (e k).1 ≠ (e k).2) (dw : ι → ℝ) :
+    ‖∑ k in s, laplacian (edgeAdj (e k).1 (e k).2 (dw k))‖
+      ≤ ∑ k in s, 2 * |dw k| := by
+  calc ‖∑ k in s, laplacian (edgeAdj (e k).1 (e k).2 (dw k))‖
+      ≤ ∑ k in s, ‖laplacian (edgeAdj (e k).1 (e k).2 (dw k))‖ :=
+        norm_sum_le s (fun k => laplacian (edgeAdj (e k).1 (e k).2 (dw k)))
+    _ = ∑ k in s, 2 * |dw k| :=
+        Finset.sum_congr rfl fun k hk => l2OpNorm_laplacian_edgeAdj _ _ (he k hk) _
+
 /-! ## 2. Positive-semidefiniteness helpers the pin lacks -/
 
 /-- Nonnegative scaling preserves positive semidefiniteness. The pinned

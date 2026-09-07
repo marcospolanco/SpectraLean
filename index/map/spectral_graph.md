@@ -2139,6 +2139,8 @@ edge-perturbation design with every repaired-axiom clause proved
 | --- | --- | --- |
 | `edgeAdj` / `edgeAdj_isSymm` / `deg_edgeAdj` | Edge perturbation | The single-edge adjacency `w` on `{i, j}`, its symmetry and row sums |
 | `laplacian_edgeAdj` | Edge perturbation | `L(edge i j w) = w • (e_i − e_j)(e_i − e_j)ᵀ` — the join to the `rankOne` algebra, valid also at `i = j` |
+| `l2OpNorm_smul_rankOne` / `l2OpNorm_smul_rankOne_le` / `abs_w_mul_dotProduct_self_le_l2OpNorm` | Edge perturbation | **(2026-09-07, the rank-one-edge-perturbation-norm delivery) the weighted rank-one norm equality** `‖w • v vᵀ‖ = \|w\| * (v ⬝ᵥ v)` at `v ≠ 0` and both directions: the Cauchy–Schwarz upper side with the scalar carried (`quadForm_smul`), the lower side through the witness-eigenvalue bridge (`exists_eigvalOf_eq_of_mulVec_eq_smul` + `abs_eigvalOf_le_l2OpNorm`) |
+| `l2OpNorm_laplacian_edgeAdj` / `l2OpNorm_sum_laplacian_edgeAdj_le` | Edge perturbation | **The exact operator norm of one edge-weight mutation** `‖L(edge i j w)‖ = 2\|w\|` at `i ≠ j`, and the subadditive multi-edge bound `‖∑ₖ L(edge eₖ, wₖ)‖ ≤ ∑ₖ 2\|wₖ\|` (the deterministic sibling of the random-design tails) |
 | `posSemidef_smul_nonneg` / `rankOne_posSemidef` | PSD helpers | Nonnegative scaling and rank-one matrices are PSD (pin gaps) |
 | `posSemidef_mul_self_of_isSymm` | PSD helpers | **Squares of symmetric matrices are PSD** — no PSD hypothesis on `M`; through `dotProduct_mulVec_comm_of_isSymm`, its first consumer outside the projector-uniqueness layer |
 | `perturbEdgeLap` / `perturbEdgeLap_posSemidef` / `laplacian_edgeAdj_eq_perturbEdgeLap` | Edge perturbation | The single-edge Laplacian block and its PSD at nonnegative weights |

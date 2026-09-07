@@ -1454,4 +1454,40 @@ theorem expZeroAdj2_fence_isolation_QA :
     by decide, le_of_eq expZeroAdj2_mu_eq_zero_QA,
     expZeroAdj2_indep_univ, expZeroAdj2_conclusion_fails_QA⟩
 
+/-! ## Singles pins: the degenerate cut lemmas
+
+The first genuine consumption of the `edgeWeight` degenerate-set trio
+(`edgeWeight_empty_left`, `edgeWeight_empty_right`,
+`edgeWeight_univ_right`) at the `C₄` fixture, with the raw double-sum
+idiom beside the value-carrying member.
+-/
+
+section SinglesPins
+
+/-- The empty-source cut through the theorem. -/
+theorem exw_empty_left :
+    edgeWeight expCycleAdj4 (∅ : Finset (Fin 4)) Finset.univ = 0 :=
+  edgeWeight_empty_left _ _
+
+/-- The empty-target cut through the theorem. -/
+theorem exw_empty_right :
+    edgeWeight expCycleAdj4 (Finset.univ : Finset (Fin 4)) ∅ = 0 :=
+  edgeWeight_empty_right _ _
+
+/-- The whole-vertex-set cut through the theorem: the singleton's cut
+weight is its degree, exactly `2` on `C₄`. -/
+theorem exw_univ_right :
+    edgeWeight expCycleAdj4 ({0} : Finset (Fin 4)) Finset.univ = 2 := by
+  rw [edgeWeight_univ_right]
+  simp [expCycleAdj4_deg]
+
+/-- The raw companion: the same value by direct double-sum computation
+(the file's own idiom) — two routes, one value. -/
+theorem exw_univ_right_raw :
+    edgeWeight expCycleAdj4 ({0} : Finset (Fin 4)) Finset.univ = 2 := by
+  simp [edgeWeight, expCycleAdj4, Fin.sum_univ_four]
+  norm_num
+
+end SinglesPins
+
 end SpectralGraphTheory.QA

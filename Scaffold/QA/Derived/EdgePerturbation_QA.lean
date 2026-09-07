@@ -4429,4 +4429,182 @@ theorem epp_quadFormPassthrough_pin_QA :
 
 end StructuralPins
 
+/-! ## The single-edge norm equality and the subadditive multi-edge bound
+
+QA for `l2OpNorm_laplacian_edgeAdj` and
+`l2OpNorm_sum_laplacian_edgeAdj_le`
+(`proposals/rank-one-edge-perturbation-norm.md`): the raw closed form of
+the single-edge Laplacian on `K₂` at symbolic weight; the norm value
+pinned through the new theorem at positive, negative, and zero weights,
+each joined to the file's own action-bound rank-one norm route (two
+routes, one value); the `i = j` fence — the proposal's beyond-the-ask
+finding that the naive formula omits the loop-is-not-a-cut-edge
+hypothesis; and the subadditive bound instantiated at a two-update
+parallel sequence (attained with equality — the bound is tight when the
+updates are parallel) and at a three-edge sequence on `Fin 3` whose
+summed Laplacian is computed raw against the bound's RHS. All zero axiom
+contact: the new theorems are hard crust.
+-/
+
+section NormPins
+
+/-- The raw closed form of the single-edge Laplacian on `K₂` at
+symbolic weight: entrywise, no norm machinery. -/
+theorem epn_K2_laplacian_edgeAdj_entries (w : ℝ) :
+    laplacian (edgeAdj (0 : Fin 2) 1 w) = !![w, -w; -w, w] := by
+  ext a b
+  simp only [laplacian, degreeMatrix, Matrix.of_apply, dif_eq_if,
+    Matrix.sub_apply, edgeAdj_apply]
+  rw [deg_edgeAdj]
+  fin_cases a <;> fin_cases b <;>
+    simp [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+/-- Route B for the value pins (old machinery only): the single-edge
+Laplacian is `w •` the rank-one block at the file's own `epVec`, so its
+norm is `|w| * 2` through the delivered action-bound rank-one pin —
+computed without the new theorem. -/
+theorem epn_K2_norm_of_w (w : ℝ) :
+    ‖laplacian (edgeAdj (0 : Fin 2) 1 w)‖ = |w| * 2 := by
+  have hv01 : (Pi.single 0 1 - Pi.single 1 1 : Fin 2 → ℝ) = epVec := by
+    funext i; fin_cases i <;> simp [epVec]
+  rw [laplacian_edgeAdj, hv01, norm_smul, Real.norm_eq_abs, epK2_rankOne_norm]
+
+/-- Route A: the norm value at a positive weight through the new
+theorem. -/
+theorem epn_K2_norm_pos :
+    ‖laplacian (edgeAdj (0 : Fin 2) 1 3)‖ = 6 := by
+  rw [l2OpNorm_laplacian_edgeAdj (0 : Fin 2) 1 (by decide) 3]
+  norm_num
+
+/-- Route B at the same weight: the raw closed form
+(`epn_K2_laplacian_edgeAdj_entries` at `w = 3`) plus the old
+action-bound route. Two routes, one value — a wrong scalar or a missing
+`i ≠ j` corner in the new theorem breaks this pair. -/
+theorem epn_K2_norm_pos_raw :
+    ‖laplacian (edgeAdj (0 : Fin 2) 1 3)‖ = 6 := by
+  rw [epn_K2_norm_of_w]
+  norm_num
+
+/-- The negative-weight instance through the new theorem (the raw
+matrix is `!![-5, 5; 5, -5]` by the symbolic entries lemma). -/
+theorem epn_K2_norm_neg :
+    ‖laplacian (edgeAdj (0 : Fin 2) 1 (-5))‖ = 10 := by
+  rw [l2OpNorm_laplacian_edgeAdj (0 : Fin 2) 1 (by decide) (-5)]
+  norm_num
+
+/-- The zero-weight instance through the new theorem (the raw matrix is
+`0`). -/
+theorem epn_K2_norm_zero :
+    ‖laplacian (edgeAdj (0 : Fin 2) 1 0)‖ = 0 := by
+  rw [l2OpNorm_laplacian_edgeAdj (0 : Fin 2) 1 (by decide) 0]
+  norm_num
+
+/-- Raw: the loop Laplacian is the zero matrix — a loop is not a cut
+edge (entrywise, same computation shape as the symbolic entries
+lemma). -/
+theorem epn_loop_laplacian_zero :
+    laplacian (edgeAdj (0 : Fin 2) 0 3) = 0 := by
+  ext a b
+  simp only [laplacian, degreeMatrix, Matrix.of_apply, dif_eq_if,
+    Matrix.sub_apply, edgeAdj_apply]
+  rw [deg_edgeAdj]
+  fin_cases a <;> fin_cases b <;>
+    simp [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+/-- **The `i = j` fence**: the new theorem's formula genuinely fails at
+a loop with nonzero weight — the norm is `0` while `2 * |w|` is `6`. The
+dropped-hypothesis statement `‖L(edgeAdj i i w)‖ = 2 * |w|` is refuted
+at a specific fixture. -/
+theorem epn_loop_fence :
+    (2 : ℝ) * |3| ≠ ‖laplacian (edgeAdj (0 : Fin 2) 0 3)‖ := by
+  rw [epn_loop_laplacian_zero, norm_zero]
+  norm_num
+
+/-- The ordered-pair spelling symmetry of the single-edge adjacency
+(the same undirected edge read in both orders). -/
+theorem epn_edgeAdj_comm (i j : Fin 2) (w : ℝ) :
+    edgeAdj j i w = edgeAdj i j w := by
+  ext a b
+  rw [edgeAdj_apply, edgeAdj_apply]
+  by_cases h1 : a = i <;> by_cases h2 : b = i <;>
+    by_cases h3 : a = j <;> by_cases h4 : b = j <;>
+    simp [h1, h2, h3, h4]
+
+/-- The two-update parallel sequence on `K₂`: the edge `(0, 1)` then
+the same edge in its `(1, 0)` spelling, both at weight `3`. -/
+def epnSeq : Fin 2 → Fin 2 × Fin 2 := ![(0, 1), (1, 0)]
+
+/-- Raw: the two parallel updates sum to twice the single-edge
+Laplacian (the ordered-pair spellings agree by `epn_edgeAdj_comm`). -/
+theorem epn_sum_K2 :
+    ∑ k : Fin 2, laplacian (edgeAdj (epnSeq k).1 (epnSeq k).2 (3 : ℝ))
+      = (2 : ℝ) • laplacian (edgeAdj (0 : Fin 2) 1 3) := by
+  have h10 : edgeAdj (1 : Fin 2) 0 (3 : ℝ) = edgeAdj (0 : Fin 2) 1 3 :=
+    (epn_edgeAdj_comm 1 0 3).symm
+  simp only [Fin.sum_univ_two, epnSeq, Matrix.cons_val_zero,
+    Matrix.cons_val_one, Matrix.head_cons]
+  rw [h10, two_smul]
+
+/-- **The subadditive bound attained with equality** on the parallel
+two-update sequence: the norm is exactly the sum of the individual
+`2|wₖ|` bounds (the triangle inequality is tight when the updates are
+parallel rank-one blocks on the same difference vector). -/
+theorem epn_sum_K2_attained :
+    ‖∑ k : Fin 2, laplacian (edgeAdj (epnSeq k).1 (epnSeq k).2 (3 : ℝ))‖
+      = ∑ _k : Fin 2, 2 * |(3 : ℝ)| := by
+  refine le_antisymm ?_ ?_
+  · exact l2OpNorm_sum_laplacian_edgeAdj_le Finset.univ epnSeq
+      (fun k _ => by fin_cases k <;> simp [epnSeq]) _
+  · rw [epn_sum_K2, norm_smul, Real.norm_eq_abs, abs_of_nonneg (by norm_num),
+      epn_K2_norm_pos, Fin.sum_univ_two]
+    norm_num
+
+/-- The attained value: `12` on both sides. -/
+theorem epn_sum_K2_attained_val :
+    ‖∑ k : Fin 2, laplacian (edgeAdj (epnSeq k).1 (epnSeq k).2 (3 : ℝ))‖ = 12 := by
+  rw [epn_sum_K2, norm_smul, Real.norm_eq_abs, abs_of_nonneg (by norm_num),
+    epn_K2_norm_pos]
+  norm_num
+
+/-- The three-edge sequence on `Fin 3`: `(0, 1)` at weight `1`,
+`(1, 2)` at weight `-2`, `(0, 2)` at weight `4`. -/
+def epnSeq3 : Fin 3 → Fin 3 × Fin 3 := ![(0, 1), (1, 2), (0, 2)]
+
+def epnW3 : Fin 3 → ℝ := ![1, -2, 4]
+
+/-- The bound's right side, computed: `2|1| + 2|{-2}| + 2|4| = 14`. -/
+theorem epn_sum3_rhs : ∑ k : Fin 3, 2 * |epnW3 k| = 14 := by
+  rw [Fin.sum_univ_three]
+  simp only [epnW3, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+  norm_num
+
+/-- Raw: the summed three-edge Laplacian, computed entrywise — the
+direct sum computation the bound's LHS controls. Note the honest signed
+degrees: vertex `1`'s row sum is `1 + (-2) = -1`, so the diagonal
+carries `-1` (the single-edge algebra needs no nonnegativity, and so
+does the norm equality). -/
+theorem epn_sum3_entries :
+    ∑ k : Fin 3, laplacian (edgeAdj (epnSeq3 k).1 (epnSeq3 k).2 (epnW3 k))
+      = !![5, -1, -4; -1, -1, 2; -4, 2, 2] := by
+  rw [Fin.sum_univ_three]
+  ext a b
+  simp only [Matrix.add_apply, laplacian, degreeMatrix, Matrix.of_apply,
+    dif_eq_if, Matrix.sub_apply, edgeAdj_apply]
+  simp only [deg_edgeAdj]
+  fin_cases a <;> fin_cases b <;>
+    simp [epnSeq3, epnW3, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, Matrix.vecHead, Matrix.vecTail] <;>
+    norm_num
+
+/-- **The subadditive bound's three-edge instance**: the summed
+Laplacian from `epn_sum3_entries` is controlled by `14`, through the
+theorem (with the raw entrywise computation of both sides beside it). -/
+theorem epn_sum3_bound :
+    ‖∑ k : Fin 3, laplacian (edgeAdj (epnSeq3 k).1 (epnSeq3 k).2 (epnW3 k))‖ ≤ 14 := by
+  have h := l2OpNorm_sum_laplacian_edgeAdj_le Finset.univ epnSeq3
+    (fun k _ => by fin_cases k <;> simp [epnSeq3]) epnW3
+  rwa [epn_sum3_rhs] at h
+
+end NormPins
+
 end Scaffold.QA.Derived.EdgePerturbation
